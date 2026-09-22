@@ -14,8 +14,10 @@ semantics; this module only composes those existing pieces.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field, replace
+from pathlib import Path
 from typing import Any, Final
 
 from . import research_browser as rb
@@ -28,11 +30,17 @@ from .analytics_query import (
     compile_query,
     run_query,
 )
+from .hand_state import CLASSIFIED_GAMES
 from .hand_state_composition import DIMENSIONS as COMPOSITION_DIMENSIONS
 from .hand_state_composition import compose
 from .holdem_ranges import build_range
-from .player_situations import SITUATION_RULES
+from .player_situations import RESPONSES, SITUATION_RULES
+from .research_presets import RESULT_VIEWS
 
+STUDY_PACK_SCHEMA_VERSION: Final[int] = 1
+STUDY_PACK_FIELDS: Final[frozenset[str]] = frozenset(
+    {"schema_version", "pack", "label", "description", "studies"},
+)
 PANEL_KINDS: Final[tuple[str, ...]] = (
     "headline",
     "frequency",
@@ -82,6 +90,11 @@ def _tokens(value: Any) -> set[str]:
     return {str(value)}
 
 
+def _normalized_response_tokens(value: Any) -> set[str]:
+    """Compare raw action filters with the model's response vocabulary."""
+    return {RESPONSES.get(token, token) for token in _tokens(value)}
+
+
 def _outcome_responses(situation: str) -> set[str]:
     """Return the responses already encoded by a named situation rule."""
     return {
@@ -111,14 +124,17 @@ def _validate_opportunity_metric(query: Query) -> None:
         )
 
     for name in ("response", "action_taken"):
-        selected = _tokens(filters[name]) if name in filters else set()
+        selected = _normalized_response_tokens(filters[name]) if name in filters else set()
         if selected and responses and selected <= responses:
             raise StudyValidationError(
                 f"{query.metric} measures response {sorted(responses)!r} over a population "
                 f"already restricted to {name}={filters[name]!r}; use the opportunity spot instead",
             )
 
-    situations = _tokens(filters["primary_situation"]) if "primary_situation" in filters else set()
+    situations = set()
+    for name in ("primary_situation", "situation"):
+        if name in filters:
+            situations.update(_tokens(filters[name]))
     for situation in situations:
         encoded = _outcome_responses(situation)
         if encoded and responses and encoded <= responses:
@@ -154,6 +170,9 @@ class StudyPanelSpec:
     numerator: Mapping[str, Any] = field(default_factory=dict)
     dimension: str = "made_hand"
     holdem_only: bool = False
+    min_sample: int | None = None
+    recommended_view: str = "summary"
+    tags: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.id.strip():
@@ -169,6 +188,15 @@ class StudyPanelSpec:
             raise StudyValidationError(f"{self.id}.filters must be a mapping")
         if not isinstance(self.numerator, Mapping):
             raise StudyValidationError(f"{self.id}.numerator must be a mapping")
+        if self.min_sample is not None and (
+            not isinstance(self.min_sample, int) or isinstance(self.min_sample, bool) or self.min_sample < 0
+        ):
+            raise StudyValidationError(f"{self.id}.min_sample must be a non-negative integer")
+        if self.recommended_view not in RESULT_VIEWS:
+            raise StudyValidationError(
+                f"{self.id}: unknown recommended view {self.recommended_view!r}; known: {list(RESULT_VIEWS)}",
+            )
+        object.__setattr__(self, "tags", _as_tuple(self.tags, f"{self.id}.tags"))
 
     @classmethod
     def from_mapping(cls, payload: Mapping[str, Any]) -> StudyPanelSpec:
@@ -188,6 +216,9 @@ class StudyPanelSpec:
             numerator=payload.get("numerator", {}),
             dimension=str(payload.get("dimension", "made_hand")),
             holdem_only=bool(payload.get("holdem_only", False)),
+            min_sample=payload.get("min_sample"),
+            recommended_view=str(payload.get("recommended_view", "summary")),
+            tags=payload.get("tags", ()),
         )
 
     def as_dict(self) -> dict[str, Any]:
@@ -202,6 +233,9 @@ class StudyPanelSpec:
             "numerator": dict(self.numerator),
             "dimension": self.dimension,
             "holdem_only": self.holdem_only,
+            "min_sample": self.min_sample,
+            "recommended_view": self.recommended_view,
+            "tags": list(self.tags),
         }
 
 
@@ -216,6 +250,7 @@ class CompiledStudyPanel:
     base_filters: Mapping[str, Any]
     adapter: str
     dimension: str = "made_hand"
+    min_sample: int = 0
     unavailable_reason: str | None = None
 
     @property
@@ -235,8 +270,16 @@ class StudySpec:
     variables: tuple[str, ...]
     panels: tuple[StudyPanelSpec, ...]
     game: str | None = None
+    description: str = ""
+    table_size: int | None = 6
+    min_sample: int | None = None
+    tags: tuple[str, ...] = ()
+    aliases: tuple[str, ...] = ()
+    default_panel: str | None = None
+    default_comparison: bool = False
+    pack: str = ""
 
-    def __post_init__(self) -> None:
+    def __post_init__(self) -> None:  # noqa: C901 - declarative schema validation stays together.
         if not self.id.strip():
             raise StudyValidationError("study id must not be empty")
         if not self.title.strip():
@@ -253,7 +296,26 @@ class StudySpec:
         object.__setattr__(self, "panels", panels)
         if self.game is not None and not self.game.strip():
             raise StudyValidationError(f"{self.id}.game must not be empty")
+        if self.game is not None and self.base_filters.get("game") is not None:
+            declared = self.game.strip()
+            effective = _tokens(self.base_filters["game"])
+            if declared not in effective:
+                raise StudyValidationError(
+                    f"{self.id}.game={declared!r} conflicts with base_filters.game={self.base_filters['game']!r}",
+                )
+        if self.table_size is not None and (
+            not isinstance(self.table_size, int) or isinstance(self.table_size, bool) or self.table_size < 2
+        ):
+            raise StudyValidationError(f"{self.id}.table_size must be at least 2")
+        if self.min_sample is not None and (
+            not isinstance(self.min_sample, int) or isinstance(self.min_sample, bool) or self.min_sample < 0
+        ):
+            raise StudyValidationError(f"{self.id}.min_sample must be a non-negative integer")
+        object.__setattr__(self, "tags", _as_tuple(self.tags, f"{self.id}.tags"))
+        object.__setattr__(self, "aliases", _as_tuple(self.aliases, f"{self.id}.aliases"))
         self.validate()
+        if self.default_panel is not None and self.default_panel not in {panel.id for panel in panels}:
+            raise StudyValidationError(f"{self.id}: default panel {self.default_panel!r} is not present")
 
     @classmethod
     def from_mapping(cls, payload: Mapping[str, Any]) -> StudySpec:
@@ -274,6 +336,14 @@ class StudySpec:
             variables=payload.get("variables", ()),
             panels=tuple(StudyPanelSpec.from_mapping(panel) for panel in raw_panels),
             game=str(payload["game"]) if payload.get("game") is not None else None,
+            description=str(payload.get("description", "")),
+            table_size=payload.get("table_size", 6),
+            min_sample=payload.get("min_sample"),
+            tags=payload.get("tags", ()),
+            aliases=payload.get("aliases", ()),
+            default_panel=str(payload["default_panel"]) if payload.get("default_panel") is not None else None,
+            default_comparison=bool(payload.get("default_comparison", False)),
+            pack=str(payload.get("pack", "")),
         )
 
     def validate(self) -> StudySpec:
@@ -313,12 +383,6 @@ class StudySpec:
         except StopIteration:
             raise KeyError(f"Unknown panel {panel_id!r}; known: {[panel.id for panel in self.panels]}") from None
         query = self._panel_query(spec)
-        unavailable_reason = None
-        if (spec.holdem_only or spec.kind == "range_grid") and self.game is not None:
-            if "holdem" not in self.game.lower() or "omaha" in self.game.lower():
-                unavailable_reason = (
-                    f"{spec.title} is a Hold'em-only panel and is unavailable for game {self.game!r}"
-                )
         return CompiledStudyPanel(
             study_id=self.id,
             panel_id=spec.id,
@@ -327,7 +391,8 @@ class StudySpec:
             base_filters=dict(self.base_filters),
             adapter=_adapter_for(spec.kind),
             dimension=spec.dimension,
-            unavailable_reason=unavailable_reason,
+            min_sample=spec.min_sample if spec.min_sample is not None else (self.min_sample or 0),
+            unavailable_reason=panel_unavailable_reason(spec, self.game),
         )
 
     def panels_compiled(self) -> tuple[CompiledStudyPanel, ...]:
@@ -339,14 +404,39 @@ class StudySpec:
         out: dict[str, Any] = {
             "id": self.id,
             "title": self.title,
+            "description": self.description,
             "path": list(self.path),
             "base_filters": dict(self.base_filters),
             "variables": list(self.variables),
             "panels": [panel.as_dict() for panel in self.panels],
+            "table_size": self.table_size,
+            "min_sample": self.min_sample,
+            "tags": list(self.tags),
+            "aliases": list(self.aliases),
+            "default_panel": self.default_panel,
+            "default_comparison": self.default_comparison,
         }
         if self.game is not None:
             out["game"] = self.game
+        if self.pack:
+            out["pack"] = self.pack
         return out
+
+    @property
+    def tournament(self) -> bool | None:
+        """Whether this study is about tournament hands, cash hands or either.
+
+        Read off the population rather than declared twice: a study that pins
+        ``tournament`` in its base filters *is* a tournament study, and one
+        that does not applies to both (#369).
+        """
+        value = self.base_filters.get("tournament")
+        return None if value is None else bool(value)
+
+    @property
+    def search_terms(self) -> tuple[str, ...]:
+        """Searchable poker language for a future Study Explorer."""
+        return tuple(dict.fromkeys((self.title, *self.aliases, *self.tags, *self.path)))
 
     def _panel_query(self, panel: StudyPanelSpec) -> Query:
         return Query(
@@ -408,6 +498,40 @@ class StudySpec:
             raise StudyValidationError(f"{panel.id}: range_grid must declare holdem_only=true")
 
 
+def panel_unavailable_reason(spec: StudyPanelSpec, game: str | None) -> str | None:
+    """Why a valid panel cannot answer for a given game, or ``None``.
+
+    Two rules, both about not showing a Hold'em answer for a four-card hand:
+
+    * a 13x13 starting-hand grid describes two hole cards, so it has no
+      meaning for Omaha -- there is no 13x13 representation of a four-card
+      holding to fall back on (#368);
+    * a hand-state panel asks the classifier, and the classifier is explicit
+      about which games it reads. Rather than restate that rule here, the
+      check is membership of :data:`hand_state.CLASSIFIED_GAMES`, so a variant
+      the classifier learns later becomes available without a second edit.
+
+    An undeclared game (``None``) means the study did not claim one, and a
+    panel is not disabled on a guess.
+    """
+    if game is None:
+        return None
+    if spec.holdem_only or spec.kind == "range_grid":
+        lowered = game.lower()
+        if "holdem" not in lowered or "omaha" in lowered:
+            return (
+                f"{spec.title} reads two hole cards, so it is a Hold'em-only panel "
+                f"and is unavailable for game {game!r}"
+            )
+    if spec.kind == "hand_strength" and game not in CLASSIFIED_GAMES:
+        return (
+            f"{spec.title} needs the postflop hand-state classifier, which reads "
+            f"{sorted(CLASSIFIED_GAMES)} only: a {game!r} hand is never classified by "
+            "its best two cards"
+        )
+    return None
+
+
 def _adapter_for(kind: str) -> str:
     if kind in _QUERY_KINDS:
         return "query"
@@ -423,20 +547,21 @@ def execute_panel(
     db: Any,
     compiled: CompiledStudyPanel,
     *,
-    min_sample: int = 0,
+    min_sample: int | None = None,
     hand_limit: int = 200,
 ) -> Any:
     """Execute a compiled panel through its existing analytics owner."""
     if not compiled.available:
         raise StudyUnavailable(compiled.unavailable_reason or "panel unavailable")
+    sample = compiled.min_sample if min_sample is None else min_sample
     if compiled.adapter == "query":
         return run_query(db, compiled.query)
     if compiled.adapter == "range":
-        return build_range(db, compiled.query, min_sample=min_sample, require_holdem=True)
+        return build_range(db, compiled.query, min_sample=sample, require_holdem=True)
     if compiled.adapter == "composition":
-        return compose(db, compiled.query, dimension=compiled.dimension, min_sample=min_sample)
+        return compose(db, compiled.query, dimension=compiled.dimension, min_sample=sample)
     if compiled.adapter == "profit":
-        return profit_report(db, compiled.query, min_sample=min_sample, with_hand_ids=False)
+        return profit_report(db, compiled.query, min_sample=sample, with_hand_ids=False)
     if compiled.adapter == "hands":
         return rb.run_drill_down(db, compiled.query, limit=hand_limit)
     raise StudyValidationError(f"Unknown compiled adapter {compiled.adapter!r}")
@@ -467,13 +592,106 @@ class StudyRegistry:
             raise KeyError(f"Unknown study {study_id!r}; known: {[study.id for study in self.studies]}") from None
 
 
+@dataclass(frozen=True)
+class StudyPack:
+    """One declarative pack of hierarchical studies."""
+
+    id: str
+    label: str
+    description: str
+    studies: tuple[StudySpec, ...]
+
+    def registry(self) -> StudyRegistry:
+        """Expose the pack through the same catalogue API as other studies."""
+        return StudyRegistry(self.studies)
+
+
+def study_library_dir() -> Path:
+    """The directory containing shipped study packs."""
+    return Path(__file__).resolve().parent / "research_studies.d"
+
+
+def _load_pack(raw: Any, source: str) -> StudyPack:
+    if not isinstance(raw, Mapping):
+        raise ValueError(f"{source}: a study pack must be a mapping")
+    unknown = sorted(set(raw) - STUDY_PACK_FIELDS)
+    if unknown:
+        raise ValueError(f"{source}: unknown pack field(s) {unknown}")
+    if raw.get("schema_version") != STUDY_PACK_SCHEMA_VERSION:
+        raise ValueError(
+            f"{source}: schema_version must be {STUDY_PACK_SCHEMA_VERSION}, "
+            f"got {raw.get('schema_version')!r}",
+        )
+    pack_id = str(raw.get("pack") or "").strip()
+    if not pack_id:
+        raise ValueError(f"{source}: pack must be a non-empty id")
+    entries = raw.get("studies")
+    if not isinstance(entries, list) or not entries:
+        raise ValueError(f"{source}: studies must be a non-empty list")
+    studies: list[StudySpec] = []
+    for entry in entries:
+        if not isinstance(entry, Mapping):
+            raise ValueError(f"{source}[{pack_id}]: a study must be a mapping")
+        payload = dict(entry)
+        payload["pack"] = pack_id
+        try:
+            studies.append(StudySpec.from_mapping(payload))
+        except StudyValidationError as exc:
+            raise ValueError(f"{source}[{pack_id}]: {exc}") from exc
+    ids = [study.id for study in studies]
+    if len(set(ids)) != len(ids):
+        raise ValueError(f"{source}: duplicate study ids")
+    return StudyPack(
+        id=pack_id,
+        label=str(raw.get("label") or pack_id),
+        description=str(raw.get("description") or ""),
+        studies=tuple(studies),
+    )
+
+
+def load_study_packs(directory: str | Path | None = None) -> tuple[StudyPack, ...]:
+    """Load every JSON study pack and validate it before it reaches the UI."""
+    root = Path(directory) if directory is not None else study_library_dir()
+    if not root.is_dir():
+        return ()
+    packs = []
+    for path in sorted(root.glob("*.json")):
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"{path} is not valid JSON: {exc}") from exc
+        packs.append(_load_pack(raw, str(path)))
+    ids = [pack.id for pack in packs]
+    if len(set(ids)) != len(ids):
+        raise ValueError(f"duplicate study pack ids: {ids}")
+    return tuple(packs)
+
+
+def load_study_registry(directory: str | Path | None = None) -> StudyRegistry:
+    """Load all studies from all packs into one catalogue."""
+    studies = tuple(study for pack in load_study_packs(directory) for study in pack.studies)
+    return StudyRegistry(studies)
+
+
+def builtin_studies(directory: str | Path | None = None) -> StudyRegistry:
+    """The shipped Study Explorer catalogue."""
+    return load_study_registry(directory)
+
+
 __all__ = [
     "PANEL_KINDS",
+    "STUDY_PACK_SCHEMA_VERSION",
     "CompiledStudyPanel",
+    "StudyPack",
     "StudyPanelSpec",
     "StudyRegistry",
     "StudySpec",
     "StudyUnavailable",
     "StudyValidationError",
     "execute_panel",
+    "builtin_studies",
+    "load_study_packs",
+    "load_study_registry",
+    "panel_unavailable_reason",
+    "study_library_dir",
 ]

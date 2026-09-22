@@ -246,10 +246,12 @@ def test_dynamic_ships_a_panel_for_every_panel_the_resolver_selects() -> None:
     (profile,) = _profiles(root)
     assert profile.getAttribute("name") == PRIMARY[DYNAMIC]
     assert profile.parentNode is root
-    labels = {panel.getAttribute("label") for panel in _panels(profile)}
-    assert labels == _shipped_panels()
-    # Every panel is addressable by the name the resolver matches against.
-    assert all(panel.getAttribute("label") == panel.getAttribute("id") for panel in _panels(profile))
+    ids = {panel.getAttribute("id") for panel in _panels(profile)}
+    assert ids == _shipped_panels()
+    # The resolver matches a rule against the block's id, which is why the
+    # label is free to be a human title rather than a second copy of the id
+    # (#370). Keying the panels by their ids is what makes that possible.
+    assert all(panel.getAttribute("id") for panel in _panels(profile))
     section = root.getElementsByTagName("hud_panel_rules")[0]
     assert section.getAttribute("fallback") == "core"
 
@@ -263,7 +265,7 @@ def test_dynamic_panels_are_hidden_until_a_rule_names_them() -> None:
     """
     root = _root(DYNAMIC)
     (profile,) = _profiles(root)
-    panels = {panel.getAttribute("label"): panel for panel in _panels(profile)}
+    panels = {panel.getAttribute("id"): panel for panel in _panels(profile)}
     for label, panel in panels.items():
         position = panel.getAttribute("position")
         if label == "core":
@@ -301,7 +303,7 @@ def test_the_dynamic_section_scopes_the_library_to_the_package_profile() -> None
     context = hud_situation.HudSituationContext(
         street="flop", pot_type="single_raised", in_position=True, is_preflop_aggressor=True,
     )
-    mine = resolver.resolve(context, PRIMARY[DYNAMIC])
+    mine = resolver.resolve(context, PRIMARY[DYNAMIC], samples={"n": 100})
     others = resolver.resolve(context, "someone_elses_profile")
     assert "srp_cbet_ip" in mine.panels
     assert mine.panels and mine.enabled
@@ -317,12 +319,14 @@ def test_the_dynamic_rules_actually_change_panels_with_the_context() -> None:
     flop_cbet = resolver.resolve(
         hud_situation.HudSituationContext(street="flop", pot_type="single_raised", is_preflop_aggressor=True, in_position=True),
         profile,
+        samples={"n": 100},
     )
     facing_cbet = resolver.resolve(
         hud_situation.HudSituationContext(
             street="flop", pot_type="single_raised", facing_action="bets", in_position=False,
         ),
         profile,
+        samples={"n": 100},
     )
     unknown = resolver.resolve(hud_situation.HudSituationContext(), profile)
     assert "srp_cbet_ip" in flop_cbet.panels

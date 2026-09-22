@@ -37,6 +37,7 @@ from fpdb_3_legacy import holdem_ranges
 from fpdb_3_legacy.hand_state_composition import Composition
 from fpdb_3_legacy.holdem_classes import grid_labels
 from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 from fpdb_3_legacy.ring_stats.views.starting_hands_view import HoldemGridCell
 
 BP = 100
@@ -132,6 +133,15 @@ class RangeGridWidget(QWidget):
             self._view = view
         self._select_view_item(self._view)
         self._paint(matrix)
+
+    def set_matrix_clear(self) -> None:
+        """Clear the grid when its dashboard panel is waiting for a result."""
+        self._matrix = None
+        for cell in self._cells.values():
+            cell.setToolTip("")
+            cell.set_color(get_theme_palette().get("sidebar", "#1a202c"))
+        self.legend.setText("")
+        self.unknown.setText("")
 
     def _paint(self, matrix: holdem_ranges.RangeMatrix) -> None:
         spec = holdem_ranges.metric(self._view)

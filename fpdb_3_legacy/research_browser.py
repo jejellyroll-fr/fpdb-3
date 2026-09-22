@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import json
 import time
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Final
@@ -121,7 +121,7 @@ _GROUP_OF: Final = {
     "player": "who", "players": "who", "identity": "who", "hero": "who",
     "position": "seat", "opponent_position": "seat", "relative_position": "seat",
     "in_position": "seat", "effective_stack_bb": "seat", "effective_stack": "seat",
-    "stack_bucket": "seat", "spr": "seat", "players_in_hand": "seat",
+    "stack_bucket": "seat", "spr": "seat", "spr_bucket": "seat", "effective_stack_bucket": "seat", "players_in_hand": "seat",
     "multiway": "street", "street": "street", "street_index": "street",
     "pot_type": "street", "pot_before": "street", "to_call": "street",
     "pot_odds_bp": "street", "role": "street", "is_aggressor": "street",
@@ -952,6 +952,113 @@ def run_comparison(db: Any, preset: Mapping[str, Any]) -> Comparison:
     )
 
 
+#: The display columns a drill-down page carries, in the order a list shows
+#: them. The player columns are named for the *side* rather than for the hero,
+#: because a Hero-versus-Field drill shows a different player on each side
+#: (#366); ``run_drill_down`` renames them to its own hero columns.
+DRILL_ROW_KEYS: Final[tuple[str, ...]] = (
+    "handId",
+    "startTime",
+    "siteName",
+    "category",
+    "bigBlind",
+    "maxSeats",
+    "playerName",
+    "playerProfit",
+    "playerCards",
+    "board",
+    "finalPot",
+)
+
+
+def drill_display_rows(
+    db: Any,
+    query: Query,
+    page_ids: Sequence[int],
+    *,
+    actor: bool = False,
+    numerator_only: bool = False,
+) -> list[dict[str, Any]]:
+    """The columns a human scans, for one page of already-selected hand ids.
+
+    The page reuses the engine's compiled ``WHERE`` (the same filters, plus the
+    page's ids), so a row, its ids and the answer above it cannot disagree
+    about which hands belong to them.
+
+    ``actor`` says whose name, cards and profit the page shows. The default is
+    the hand's recorded hero seat, which is what a hero-filtered drill has
+    always shown. A Hero-versus-Field drill passes ``True`` to follow the
+    player who *made the decision the query counted* instead: on the field side
+    the hand's hero is not the player the row is about, and their cards are not
+    the ones that row is entitled to show (#366).
+    """
+    if not page_ids:
+        return []
+    placeholder = _placeholder(db)
+    filters = {**query.filters, "hand_id": list(page_ids)}
+    if numerator_only:
+        filters.update(query.numerator)
+    where, params, aliases = compile_filters(filters, placeholder, _backend_name(db))
+    sources = aliases | {"A", "H", "G", "S", "HP"}
+    if actor:
+        sources.add("P")
+    from_clause = _from_clause(_expand_sources(sources))
+    player_columns = (
+        [
+            "  P.name AS playerName,",
+            "  HP.totalProfit AS playerProfit,",
+            "  HP.card1 AS card1, HP.card2 AS card2,",
+        ]
+        if actor
+        else [
+            "  HERO.name AS playerName,",
+            "  HERO_HP.totalProfit AS playerProfit,",
+            "  HERO_HP.card1 AS card1, HERO_HP.card2 AS card2,",
+        ]
+    )
+    sql = "\n".join(
+        [
+            "SELECT DISTINCT A.handId AS handId,",
+            "  H.startTime AS startTime,",
+            "  S.name AS siteName,",
+            "  G.category AS category,",
+            "  G.bigBlind AS bigBlind,",
+            "  H.seats AS maxSeats,",
+            *player_columns,
+            "  H.boardcard1 AS boardcard1, H.boardcard2 AS boardcard2,",
+            "  H.boardcard3 AS boardcard3, H.boardcard4 AS boardcard4,",
+            "  H.boardcard5 AS boardcard5,",
+            "  H.finalPot AS finalPot",
+            from_clause,
+            *([] if actor else [_hero_join()]),
+            "WHERE " + " AND ".join(f"({condition})" for condition in where),
+            "ORDER BY A.handId",
+        ],
+    )
+    cursor = db.get_cursor()
+    # Assembled here rather than by compile_query, so it needs the escaping
+    # the compilers do: a drill-down filtered by starting hand -- which is
+    # every range-grid cell -- carries the class expression's modulo
+    # operators in its WHERE (#349).
+    cursor.execute(escape_literal_percent(sql, placeholder), tuple(params))
+    return [
+        {
+            "handId": int(row["handId"]),
+            "startTime": row["startTime"],
+            "siteName": row["siteName"],
+            "category": row["category"],
+            "bigBlind": row["bigBlind"],
+            "maxSeats": row["maxSeats"],
+            "playerName": row["playerName"],
+            "playerProfit": row["playerProfit"],
+            "playerCards": _cards_text(row["card1"], row["card2"]),
+            "board": _board_text(row),
+            "finalPot": row["finalPot"],
+        }
+        for row in rows_by_alias(cursor)
+    ]
+
+
 def run_drill_down(
     db: Any,
     row_query: Query,
@@ -973,57 +1080,24 @@ def run_drill_down(
     total_matches = len(hand_ids)
     page_ids = hand_ids[-limit:] if limit and len(hand_ids) > limit else hand_ids
     truncated = total_matches > len(page_ids)
-
-    rows: list[dict[str, Any]] = []
-    if page_ids:
-        placeholder = _placeholder(db)
-        where, params, aliases = compile_filters(
-            {**query.filters, "hand_id": page_ids}, placeholder, _backend_name(db),
-        )
-        from_clause = _from_clause(_expand_sources(aliases | {"A", "H", "G", "S", "HP"}))
-        sql = "\n".join(
-            [
-                "SELECT DISTINCT A.handId AS handId,",
-                "  H.startTime AS startTime,",
-                "  S.name AS siteName,",
-                "  G.category AS category,",
-                "  G.bigBlind AS bigBlind,",
-                "  H.seats AS maxSeats,",
-                "  HERO.name AS playerName,",
-                "  HERO_HP.totalProfit AS playerProfit,",
-                "  HERO_HP.card1 AS card1, HERO_HP.card2 AS card2,",
-                "  H.boardcard1 AS boardcard1, H.boardcard2 AS boardcard2,",
-                "  H.boardcard3 AS boardcard3, H.boardcard4 AS boardcard4,",
-                "  H.boardcard5 AS boardcard5,",
-                "  H.finalPot AS finalPot",
-                from_clause,
-                _hero_join(),
-                "WHERE " + " AND ".join(f"({condition})" for condition in where),
-                "ORDER BY A.handId",
-            ],
-        )
-        cursor = db.get_cursor()
-        # Assembled here rather than by compile_query, so it needs the escaping
-        # the compilers do: a drill-down filtered by starting hand -- which is
-        # every range-grid cell -- carries the class expression's modulo
-        # operators in its WHERE (#349).
-        cursor.execute(escape_literal_percent(sql, placeholder), tuple(params))
-        for row in rows_by_alias(cursor):
-            rows.append(
-                {
-                    "handId": int(row["handId"]),
-                    "startTime": row["startTime"],
-                    "siteName": row["siteName"],
-                    "category": row["category"],
-                    "bigBlind": row["bigBlind"],
-                    "maxSeats": row["maxSeats"],
-                    "heroName": row["playerName"],
-                    "heroProfit": row["playerProfit"],
-                    "heroCards": _cards_text(row["card1"], row["card2"]),
-                    "board": _board_text(row),
-                    "finalPot": row["finalPot"],
-                },
-            )
+    # This drill names the hand's hero, so its columns keep their hero names;
+    # the shared page speaks of "the player" because the field side has one.
+    rows = [
+        {
+            "handId": row["handId"],
+            "startTime": row["startTime"],
+            "siteName": row["siteName"],
+            "category": row["category"],
+            "bigBlind": row["bigBlind"],
+            "maxSeats": row["maxSeats"],
+            "heroName": row["playerName"],
+            "heroProfit": row["playerProfit"],
+            "heroCards": row["playerCards"],
+            "board": row["board"],
+            "finalPot": row["finalPot"],
+        }
+        for row in drill_display_rows(db, query, page_ids, numerator_only=numerator_only)
+    ]
     return DrillDown(
         hand_ids=hand_ids,
         rows=rows,
@@ -1036,6 +1110,7 @@ def run_drill_down(
 __all__ = [
     "DIMENSION_SPECS",
     "DRILL_COLUMNS",
+    "DRILL_ROW_KEYS",
     "EXAMPLES",
     "FILTER_GROUPS",
     "FILTER_SPECS",
@@ -1049,6 +1124,7 @@ __all__ = [
     "ResultColumn",
     "describe_preset",
     "dimension_spec",
+    "drill_display_rows",
     "drill_query",
     "example_questions",
     "execute_preset",

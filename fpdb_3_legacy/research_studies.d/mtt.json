@@ -1,0 +1,1405 @@
+{
+  "schema_version": 1,
+  "pack": "mtt",
+  "label": "Tournaments \u00b7 Multi-table",
+  "description": "Spot-first studies for multi-table tournaments, organised around effective stack depth rather than treating a tournament hand as a cash hand with one more filter. Nothing here knows the stage of a tournament or what a chip was worth: fpdb stores stacks, blinds and results, not payouts, so no study claims bubble, final-table or ICM context.",
+  "studies": [
+    {
+      "id": "mtt_preflop_rfi",
+      "title": "MTT \u00b7 Preflop \u00b7 First in, by stack depth",
+      "description": "Opening an unopened tournament pot, read by seat and by how deep the stacks actually were.",
+      "path": [
+        "preflop",
+        "rfi"
+      ],
+      "game": "holdem",
+      "table_size": null,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": true,
+        "street": "preflop",
+        "pot_type": "unopened"
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "max_seats",
+        "effective_stack_bucket",
+        "site",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 150,
+      "tags": [
+        "preflop",
+        "rfi",
+        "open",
+        "mtt",
+        "tournament",
+        "stack depth"
+      ],
+      "aliases": [
+        "MTT",
+        "tournament",
+        "multi-table tournament",
+        "open raise",
+        "raise first in",
+        "push fold"
+      ],
+      "default_panel": "stack",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Open frequency by position",
+          "kind": "frequency",
+          "metric": "raise_frequency",
+          "group_by": [
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "rfi",
+            "position"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "raise_frequency",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth",
+            "mtt"
+          ]
+        },
+        {
+          "id": "stack_position",
+          "title": "Stack depth \u00d7 position",
+          "kind": "position_matrix",
+          "metric": "raise_frequency",
+          "group_by": [
+            "effective_stack_bucket",
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "stack",
+            "position",
+            "mtt"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Opening sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": [
+              "raise",
+              "complete"
+            ]
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "range",
+          "title": "Opening range",
+          "kind": "range_grid",
+          "metric": "raise_frequency",
+          "recommended_view": "range",
+          "tags": [
+            "range"
+          ],
+          "holdem_only": true
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mtt_preflop_facing_open",
+      "title": "MTT \u00b7 Preflop \u00b7 Facing an open",
+      "description": "Fold, call and 3-bet against a tournament open, by seat, by opener and by stack depth.",
+      "path": [
+        "preflop",
+        "facing-open"
+      ],
+      "game": "holdem",
+      "table_size": null,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": true,
+        "street": "preflop",
+        "situation": "facing_open"
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "max_seats",
+        "effective_stack_bucket",
+        "site",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 120,
+      "tags": [
+        "preflop",
+        "defence",
+        "facing open",
+        "3bet",
+        "mtt",
+        "tournament"
+      ],
+      "aliases": [
+        "MTT",
+        "tournament",
+        "3bet",
+        "defend",
+        "resteal"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Response by position",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "response"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "raise_frequency",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth",
+            "mtt"
+          ]
+        },
+        {
+          "id": "position",
+          "title": "Opener \u00d7 defender",
+          "kind": "position_matrix",
+          "metric": "opportunities",
+          "group_by": [
+            "opponent_position",
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "position"
+          ]
+        },
+        {
+          "id": "stack_position",
+          "title": "Stack depth \u00d7 position",
+          "kind": "position_matrix",
+          "metric": "raise_frequency",
+          "group_by": [
+            "effective_stack_bucket",
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "stack",
+            "position",
+            "mtt"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "3-bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": [
+              "raise",
+              "complete"
+            ]
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing",
+            "3bet"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mtt_preflop_facing_3bet",
+      "title": "MTT \u00b7 Preflop \u00b7 Opener facing a 3-bet",
+      "description": "Fold, call and 4-bet after a tournament 3-bet, by stack depth and by the seats involved.",
+      "path": [
+        "preflop",
+        "facing-3bet"
+      ],
+      "game": "holdem",
+      "table_size": null,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": true,
+        "street": "preflop",
+        "situation": "opener_vs_3bet"
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "max_seats",
+        "effective_stack_bucket",
+        "site",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 80,
+      "tags": [
+        "preflop",
+        "3bet",
+        "facing 3bet",
+        "4bet",
+        "mtt",
+        "tournament"
+      ],
+      "aliases": [
+        "MTT",
+        "tournament",
+        "4bet",
+        "3bet pot",
+        "resteal defence"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Response",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "response"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "raise_frequency",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth",
+            "mtt"
+          ]
+        },
+        {
+          "id": "stack_position",
+          "title": "Stack depth \u00d7 position",
+          "kind": "position_matrix",
+          "metric": "raise_frequency",
+          "group_by": [
+            "effective_stack_bucket",
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "stack",
+            "position",
+            "mtt"
+          ]
+        },
+        {
+          "id": "position",
+          "title": "Seat matchup",
+          "kind": "position_matrix",
+          "metric": "opportunities",
+          "group_by": [
+            "position",
+            "opponent_position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "position"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mtt_preflop_blind_defence",
+      "title": "MTT \u00b7 Preflop \u00b7 Blind defence",
+      "description": "How the big blind answers a tournament open, by the seat that opened it and by stack depth.",
+      "path": [
+        "preflop",
+        "blind-defence"
+      ],
+      "game": "holdem",
+      "table_size": null,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": true,
+        "street": "preflop",
+        "situation": "facing_open",
+        "position": "bb"
+      },
+      "variables": [
+        "opponent_position",
+        "max_seats",
+        "effective_stack_bucket",
+        "site",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 100,
+      "tags": [
+        "preflop",
+        "blind defence",
+        "big blind",
+        "mtt",
+        "tournament"
+      ],
+      "aliases": [
+        "MTT",
+        "tournament",
+        "BB defend",
+        "blind defense",
+        "big blind defence"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Response",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "response"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "fold_frequency",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth",
+            "mtt"
+          ]
+        },
+        {
+          "id": "position",
+          "title": "By opening seat",
+          "kind": "position_matrix",
+          "metric": "opportunities",
+          "group_by": [
+            "opponent_position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "position"
+          ]
+        },
+        {
+          "id": "stack_position",
+          "title": "Stack depth \u00d7 position",
+          "kind": "position_matrix",
+          "metric": "fold_frequency",
+          "group_by": [
+            "effective_stack_bucket",
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "stack",
+            "position",
+            "mtt"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Fold by the size faced",
+          "kind": "sizing_distribution",
+          "metric": "fold_frequency",
+          "group_by": [
+            "facing_sizing_bucket"
+          ],
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mtt_facing_all_in",
+      "title": "MTT \u00b7 Facing an all-in",
+      "description": "What actually happened when a tournament decision faced a shove: the observed call and fold frequencies, the depth they were made at, and the result. This is a record, not a solve.",
+      "path": [
+        "preflop",
+        "all-in"
+      ],
+      "game": "holdem",
+      "table_size": null,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": true,
+        "facing_all_in": true
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "max_seats",
+        "effective_stack_bucket",
+        "site",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 60,
+      "tags": [
+        "all-in",
+        "shove",
+        "shallow",
+        "mtt",
+        "tournament",
+        "stack depth"
+      ],
+      "aliases": [
+        "MTT",
+        "tournament",
+        "all in",
+        "shove",
+        "jam",
+        "call a shove"
+      ],
+      "default_panel": "stack",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Response to the shove",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "response"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "call_frequency",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth",
+            "mtt"
+          ]
+        },
+        {
+          "id": "stack_position",
+          "title": "Stack depth \u00d7 position",
+          "kind": "position_matrix",
+          "metric": "call_frequency",
+          "group_by": [
+            "effective_stack_bucket",
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "stack",
+            "position",
+            "mtt"
+          ]
+        },
+        {
+          "id": "position",
+          "title": "By seat",
+          "kind": "position_matrix",
+          "metric": "call_frequency",
+          "group_by": [
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "position"
+          ]
+        },
+        {
+          "id": "ev",
+          "title": "All-in EV",
+          "kind": "profit",
+          "metric": "all_in_ev",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "ev",
+            "all-in"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mtt_shove_spots",
+      "title": "MTT \u00b7 Shoving, by stack depth",
+      "description": "How often a tournament decision went all-in, at each depth and from each seat.",
+      "path": [
+        "preflop",
+        "all-in"
+      ],
+      "game": "holdem",
+      "table_size": null,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": true,
+        "street": "preflop"
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "max_seats",
+        "effective_stack_bucket",
+        "site",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 100,
+      "tags": [
+        "all-in",
+        "shove",
+        "push fold",
+        "mtt",
+        "tournament",
+        "stack depth"
+      ],
+      "aliases": [
+        "MTT",
+        "tournament",
+        "shove",
+        "jam",
+        "push fold",
+        "open shove"
+      ],
+      "default_panel": "stack",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "All-in frequency by position",
+          "kind": "frequency",
+          "metric": "all_in_frequency",
+          "group_by": [
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "all-in",
+            "position"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "all_in_frequency",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth",
+            "mtt"
+          ]
+        },
+        {
+          "id": "stack_position",
+          "title": "Stack depth \u00d7 position",
+          "kind": "position_matrix",
+          "metric": "all_in_frequency",
+          "group_by": [
+            "effective_stack_bucket",
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "stack",
+            "position",
+            "mtt"
+          ]
+        },
+        {
+          "id": "ev",
+          "title": "All-in EV",
+          "kind": "profit",
+          "metric": "all_in_ev",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "ev",
+            "all-in"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mtt_srp_pfr_ip_flop",
+      "title": "MTT \u00b7 SRP \u00b7 PFR IP \u00b7 Flop",
+      "description": "A deeper tournament single-raised pot, read through SPR, stack depth and board texture.",
+      "path": [
+        "postflop",
+        "single-raised",
+        "pfr-ip",
+        "flop"
+      ],
+      "game": "holdem",
+      "table_size": null,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": true,
+        "pot_type": "single_raised",
+        "street": "flop",
+        "is_preflop_aggressor": true,
+        "situation": "cbet_spot",
+        "in_position": true
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "max_seats",
+        "effective_stack_bucket",
+        "site",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 80,
+      "tags": [
+        "srp",
+        "postflop",
+        "spr",
+        "board",
+        "mtt",
+        "tournament",
+        "stack depth"
+      ],
+      "aliases": [
+        "MTT",
+        "tournament",
+        "single raised pot",
+        "cbet",
+        "c-bet"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Bet frequency",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "recommended_view": "summary",
+          "tags": [
+            "frequency"
+          ]
+        },
+        {
+          "id": "spr",
+          "title": "By SPR band",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "spr_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "spr"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth",
+            "mtt"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "Board suit and pairing",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "texture"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": "bet"
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mtt_srp_pfr_oop_flop",
+      "title": "MTT \u00b7 SRP \u00b7 PFR OOP \u00b7 Flop",
+      "description": "A deeper tournament single-raised pot, read through SPR, stack depth and board texture.",
+      "path": [
+        "postflop",
+        "single-raised",
+        "pfr-oop",
+        "flop"
+      ],
+      "game": "holdem",
+      "table_size": null,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": true,
+        "pot_type": "single_raised",
+        "street": "flop",
+        "is_preflop_aggressor": true,
+        "situation": "cbet_spot",
+        "in_position": false
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "max_seats",
+        "effective_stack_bucket",
+        "site",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 80,
+      "tags": [
+        "srp",
+        "postflop",
+        "spr",
+        "board",
+        "mtt",
+        "tournament",
+        "stack depth"
+      ],
+      "aliases": [
+        "MTT",
+        "tournament",
+        "single raised pot",
+        "cbet",
+        "c-bet"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Bet frequency",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "recommended_view": "summary",
+          "tags": [
+            "frequency"
+          ]
+        },
+        {
+          "id": "spr",
+          "title": "By SPR band",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "spr_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "spr"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth",
+            "mtt"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "Board suit and pairing",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "texture"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": "bet"
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mtt_srp_defender_flop",
+      "title": "MTT \u00b7 SRP \u00b7 Defender \u00b7 Facing the flop bet",
+      "description": "A deeper tournament single-raised pot, read through SPR, stack depth and board texture.",
+      "path": [
+        "postflop",
+        "single-raised",
+        "defender",
+        "flop"
+      ],
+      "game": "holdem",
+      "table_size": null,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": true,
+        "pot_type": "single_raised",
+        "street": "flop",
+        "situation": "facing_cbet"
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "max_seats",
+        "effective_stack_bucket",
+        "site",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 80,
+      "tags": [
+        "srp",
+        "postflop",
+        "spr",
+        "board",
+        "mtt",
+        "tournament",
+        "stack depth"
+      ],
+      "aliases": [
+        "MTT",
+        "tournament",
+        "single raised pot",
+        "cbet",
+        "c-bet"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Response to the bet",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "response"
+          ]
+        },
+        {
+          "id": "spr",
+          "title": "By SPR band",
+          "kind": "frequency",
+          "metric": "fold_frequency",
+          "group_by": [
+            "spr_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "spr"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "fold_frequency",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth",
+            "mtt"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "Board suit and pairing",
+          "kind": "board_matrix",
+          "metric": "fold_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "texture"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Fold by bet size faced",
+          "kind": "sizing_distribution",
+          "metric": "fold_frequency",
+          "group_by": [
+            "facing_sizing_bucket"
+          ],
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mtt_srp_pfr_turn",
+      "title": "MTT \u00b7 SRP \u00b7 PFR \u00b7 Turn",
+      "description": "A deeper tournament single-raised pot, read through SPR, stack depth and board texture.",
+      "path": [
+        "postflop",
+        "single-raised",
+        "pfr",
+        "turn"
+      ],
+      "game": "holdem",
+      "table_size": null,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": true,
+        "pot_type": "single_raised",
+        "street": "turn",
+        "is_preflop_aggressor": true
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "max_seats",
+        "effective_stack_bucket",
+        "site",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 80,
+      "tags": [
+        "srp",
+        "postflop",
+        "spr",
+        "board",
+        "mtt",
+        "tournament",
+        "stack depth"
+      ],
+      "aliases": [
+        "MTT",
+        "tournament",
+        "single raised pot",
+        "cbet",
+        "c-bet"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Bet frequency",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "recommended_view": "summary",
+          "tags": [
+            "frequency"
+          ]
+        },
+        {
+          "id": "spr",
+          "title": "By SPR band",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "spr_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "spr"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth",
+            "mtt"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "Board suit and pairing",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "texture"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": "bet"
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "effective_stack_bucket"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    }
+  ]
+}

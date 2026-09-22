@@ -1,0 +1,1391 @@
+{
+  "schema_version": 1,
+  "pack": "nlhe-6max",
+  "label": "No-limit Hold'em \u00b7 6-max",
+  "description": "Spot-first studies for the recurring preflop, single-raised-pot, 3-bet-pot and 4-bet-pot decisions in six-max No-limit Hold'em.",
+  "studies": [
+    {
+      "id": "preflop_rfi",
+      "title": "Preflop \u00b7 First in",
+      "description": "How each seat enters an unopened pot, with the opening range and result behind the headline.",
+      "path": [
+        "preflop",
+        "rfi"
+      ],
+      "game": "holdem",
+      "table_size": 6,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "preflop",
+        "pot_type": "unopened"
+      },
+      "variables": [
+        "position",
+        "stake_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 200,
+      "tags": [
+        "preflop",
+        "rfi",
+        "open",
+        "opening range"
+      ],
+      "aliases": [
+        "open raise",
+        "raise first in",
+        "opening"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Open frequency by position",
+          "kind": "frequency",
+          "metric": "raise_frequency",
+          "group_by": [
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "rfi",
+            "position"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Opening sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": [
+              "raise",
+              "complete"
+            ]
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "position",
+          "title": "Seat breakdown",
+          "kind": "position_matrix",
+          "metric": "raise_frequency",
+          "group_by": [
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "position"
+          ]
+        },
+        {
+          "id": "range",
+          "title": "Opening range",
+          "kind": "range_grid",
+          "metric": "raise_frequency",
+          "holdem_only": true,
+          "recommended_view": "range",
+          "tags": [
+            "range"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Profit by seat",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "position"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "preflop_facing_open",
+      "title": "Preflop \u00b7 Facing an open",
+      "description": "The fold, call and 3-bet responses to a single open, with position, sizing, range and results.",
+      "path": [
+        "preflop",
+        "facing-open"
+      ],
+      "game": "holdem",
+      "table_size": 6,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "preflop",
+        "situation": "facing_open"
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "stake_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 150,
+      "tags": [
+        "preflop",
+        "defence",
+        "facing open",
+        "3bet"
+      ],
+      "aliases": [
+        "versus open",
+        "defend versus raise",
+        "cold call"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Response distribution",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "frequencies",
+          "tags": [
+            "fold",
+            "call",
+            "3bet"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "3-bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": [
+              "raise",
+              "complete"
+            ]
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing",
+            "3bet"
+          ]
+        },
+        {
+          "id": "position",
+          "title": "Opener versus defender",
+          "kind": "position_matrix",
+          "metric": "opportunities",
+          "group_by": [
+            "opponent_position",
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "position"
+          ]
+        },
+        {
+          "id": "range",
+          "title": "3-bet range",
+          "kind": "range_grid",
+          "metric": "raise_frequency",
+          "holdem_only": true,
+          "recommended_view": "range",
+          "tags": [
+            "range",
+            "3bet"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Profit by response",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "preflop_facing_3bet",
+      "title": "Preflop \u00b7 Opener facing a 3-bet",
+      "description": "What the original raiser does after a 3-bet: fold, call or 4-bet, with stack and range context.",
+      "path": [
+        "preflop",
+        "facing-3bet"
+      ],
+      "game": "holdem",
+      "table_size": 6,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "preflop",
+        "situation": "opener_vs_3bet"
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "effective_stack_bb",
+        "stake_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 100,
+      "tags": [
+        "preflop",
+        "3bet",
+        "4bet",
+        "defence"
+      ],
+      "aliases": [
+        "versus 3bet",
+        "3-bet response",
+        "4-bet defence"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Fold / call / 4-bet",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "frequencies",
+          "tags": [
+            "fold",
+            "call",
+            "4bet"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "4-bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": [
+              "raise",
+              "complete"
+            ]
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing",
+            "4bet"
+          ]
+        },
+        {
+          "id": "position",
+          "title": "Opener versus 3-bettor",
+          "kind": "position_matrix",
+          "metric": "opportunities",
+          "group_by": [
+            "position",
+            "opponent_position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "position"
+          ]
+        },
+        {
+          "id": "range",
+          "title": "4-bet range",
+          "kind": "range_grid",
+          "metric": "raise_frequency",
+          "holdem_only": true,
+          "recommended_view": "range",
+          "tags": [
+            "range",
+            "4bet"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Profit by position",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "position"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "preflop_squeeze",
+      "title": "Preflop \u00b7 Squeeze",
+      "description": "Squeeze opportunities after an open and a call, with the response range and profitability behind the decision.",
+      "path": [
+        "preflop",
+        "squeeze"
+      ],
+      "game": "holdem",
+      "table_size": 6,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "preflop",
+        "situation": "squeeze_spot"
+      },
+      "variables": [
+        "position",
+        "effective_stack_bb",
+        "stake_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 100,
+      "tags": [
+        "preflop",
+        "squeeze",
+        "aggression"
+      ],
+      "aliases": [
+        "cold squeeze",
+        "squeeze opportunity"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Squeeze frequency",
+          "kind": "frequency",
+          "metric": "raise_frequency",
+          "group_by": [
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "squeeze",
+            "position"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Squeeze sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": [
+              "raise",
+              "complete"
+            ]
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "position",
+          "title": "Squeeze position matrix",
+          "kind": "position_matrix",
+          "metric": "raise_frequency",
+          "group_by": [
+            "position",
+            "opponent_position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "position"
+          ]
+        },
+        {
+          "id": "range",
+          "title": "Squeeze range",
+          "kind": "range_grid",
+          "metric": "raise_frequency",
+          "holdem_only": true,
+          "recommended_view": "range",
+          "tags": [
+            "range"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Squeeze profit",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "position"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "preflop_blind_vs_blind",
+      "title": "Preflop \u00b7 Blind versus blind",
+      "description": "The big blind's response to a small blind open, where position and ranges differ from a normal steal defence.",
+      "path": [
+        "preflop",
+        "blind-vs-blind"
+      ],
+      "game": "holdem",
+      "table_size": 6,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "preflop",
+        "situation": "facing_open",
+        "position": "bb",
+        "opponent_position": "sb"
+      },
+      "variables": [
+        "effective_stack_bb",
+        "stake_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 100,
+      "tags": [
+        "preflop",
+        "blind defence",
+        "bvb"
+      ],
+      "aliases": [
+        "BB versus SB",
+        "BB defend",
+        "blind battle",
+        "BvB"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "BB response",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "frequencies",
+          "tags": [
+            "fold",
+            "call",
+            "3bet"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "BB 3-bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": [
+              "raise",
+              "complete"
+            ]
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "range",
+          "title": "BB response range",
+          "kind": "range_grid",
+          "metric": "raise_frequency",
+          "holdem_only": true,
+          "recommended_view": "range",
+          "tags": [
+            "range"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "BB profit",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "srp_pfr_ip_flop",
+      "title": "SRP \u00b7 PFR IP \u00b7 Flop",
+      "description": "The preflop raiser's flop decisions in position in a single-raised pot: c-bet, sizing, texture, range and hand strength.",
+      "path": [
+        "postflop",
+        "single-raised",
+        "pfr-ip",
+        "flop"
+      ],
+      "game": "holdem",
+      "table_size": 6,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "flop",
+        "pot_type": "single_raised",
+        "is_preflop_aggressor": true,
+        "situation": "cbet_spot",
+        "in_position": true
+      },
+      "variables": [
+        "position",
+        "effective_stack_bb",
+        "stake_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 150,
+      "tags": [
+        "postflop",
+        "srp",
+        "pfr",
+        "in position",
+        "cbet"
+      ],
+      "aliases": [
+        "single raised pot",
+        "flop c-bet IP",
+        "raiser in position"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "C-bet versus check",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "recommended_view": "summary",
+          "tags": [
+            "cbet"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "C-bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": "bet"
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "C-bet by board texture",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "texture",
+            "board"
+          ]
+        },
+        {
+          "id": "range",
+          "title": "C-bet range",
+          "kind": "range_grid",
+          "metric": "bet_frequency",
+          "holdem_only": true,
+          "recommended_view": "range",
+          "tags": [
+            "range"
+          ]
+        },
+        {
+          "id": "strength",
+          "title": "Hand strength",
+          "kind": "hand_strength",
+          "metric": "opportunities",
+          "dimension": "made_hand",
+          "recommended_view": "hand_strength",
+          "tags": [
+            "strength"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Realized and EV-adjusted result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit",
+            "ev"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "srp_pfr_oop_flop",
+      "title": "SRP \u00b7 PFR OOP \u00b7 Flop",
+      "description": "The preflop raiser's flop decisions out of position in a single-raised pot.",
+      "path": [
+        "postflop",
+        "single-raised",
+        "pfr-oop",
+        "flop"
+      ],
+      "game": "holdem",
+      "table_size": 6,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "flop",
+        "pot_type": "single_raised",
+        "is_preflop_aggressor": true,
+        "situation": "cbet_spot",
+        "in_position": false
+      },
+      "variables": [
+        "position",
+        "effective_stack_bb",
+        "stake_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 150,
+      "tags": [
+        "postflop",
+        "srp",
+        "pfr",
+        "out of position",
+        "cbet"
+      ],
+      "aliases": [
+        "flop c-bet OOP",
+        "raiser out of position"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "C-bet versus check",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "recommended_view": "summary",
+          "tags": [
+            "cbet"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "C-bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": "bet"
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "C-bet by board texture",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "texture",
+            "board"
+          ]
+        },
+        {
+          "id": "range",
+          "title": "C-bet range",
+          "kind": "range_grid",
+          "metric": "bet_frequency",
+          "holdem_only": true,
+          "recommended_view": "range",
+          "tags": [
+            "range"
+          ]
+        },
+        {
+          "id": "strength",
+          "title": "Hand strength",
+          "kind": "hand_strength",
+          "metric": "opportunities",
+          "dimension": "made_hand",
+          "recommended_view": "hand_strength",
+          "tags": [
+            "strength"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Realized and EV-adjusted result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit",
+            "ev"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "srp_defender_oop_flop",
+      "title": "SRP \u00b7 Defender OOP \u00b7 Facing flop c-bet",
+      "description": "The caller's out-of-position response to a flop continuation bet in a single-raised pot.",
+      "path": [
+        "postflop",
+        "single-raised",
+        "defender-oop",
+        "flop"
+      ],
+      "game": "holdem",
+      "table_size": 6,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "flop",
+        "pot_type": "single_raised",
+        "situation": "facing_cbet",
+        "in_position": false
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "effective_stack_bb",
+        "stake_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 150,
+      "tags": [
+        "postflop",
+        "srp",
+        "defence",
+        "out of position",
+        "cbet"
+      ],
+      "aliases": [
+        "defend versus flop c-bet",
+        "caller's response"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Fold / call / raise",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "frequencies",
+          "tags": [
+            "fold",
+            "call",
+            "raise"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Response by bet size",
+          "kind": "sizing_distribution",
+          "metric": "fold_frequency",
+          "group_by": [
+            "facing_sizing_bucket"
+          ],
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "Response by board texture",
+          "kind": "board_matrix",
+          "metric": "fold_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "texture",
+            "board"
+          ]
+        },
+        {
+          "id": "range",
+          "title": "Known-card defence range",
+          "kind": "range_grid",
+          "metric": "opportunities",
+          "filters": {
+            "hole_cards_known": true
+          },
+          "holdem_only": true,
+          "recommended_view": "range",
+          "tags": [
+            "range"
+          ]
+        },
+        {
+          "id": "strength",
+          "title": "Hand strength when facing the bet",
+          "kind": "hand_strength",
+          "metric": "opportunities",
+          "dimension": "made_hand",
+          "recommended_view": "hand_strength",
+          "tags": [
+            "strength"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Realized and EV-adjusted result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit",
+            "ev"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "three_bet_pot_aggressor_flop",
+      "title": "3-bet pot \u00b7 Aggressor \u00b7 Flop",
+      "description": "The 3-bettor's flop aggression split by position, sizing, board texture and range.",
+      "path": [
+        "postflop",
+        "three-bet-pot",
+        "aggressor",
+        "flop"
+      ],
+      "game": "holdem",
+      "table_size": 6,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "flop",
+        "pot_type": "three_bet",
+        "is_preflop_aggressor": true,
+        "situation": "cbet_spot"
+      },
+      "variables": [
+        "in_position",
+        "position",
+        "effective_stack_bb",
+        "stake_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 80,
+      "tags": [
+        "postflop",
+        "3bet pot",
+        "aggressor",
+        "cbet"
+      ],
+      "aliases": [
+        "3-bet pot c-bet",
+        "3bet pot flop"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "C-bet frequency",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "in_position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "cbet",
+            "IP/OOP"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "C-bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": "bet"
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "C-bet by board texture",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "texture",
+            "board"
+          ]
+        },
+        {
+          "id": "range",
+          "title": "C-bet range",
+          "kind": "range_grid",
+          "metric": "bet_frequency",
+          "holdem_only": true,
+          "recommended_view": "range",
+          "tags": [
+            "range"
+          ]
+        },
+        {
+          "id": "strength",
+          "title": "Hand strength",
+          "kind": "hand_strength",
+          "metric": "opportunities",
+          "dimension": "made_hand",
+          "recommended_view": "hand_strength",
+          "tags": [
+            "strength"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Realized and EV-adjusted result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit",
+            "ev"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "three_bet_pot_defender_flop",
+      "title": "3-bet pot \u00b7 Defender \u00b7 Facing flop c-bet",
+      "description": "The caller's response to a flop c-bet in a 3-bet pot, without pretending the sample supports every texture split.",
+      "path": [
+        "postflop",
+        "three-bet-pot",
+        "defender",
+        "flop"
+      ],
+      "game": "holdem",
+      "table_size": 6,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "flop",
+        "pot_type": "three_bet",
+        "situation": "facing_cbet"
+      },
+      "variables": [
+        "in_position",
+        "position",
+        "effective_stack_bb",
+        "stake_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 60,
+      "tags": [
+        "postflop",
+        "3bet pot",
+        "defence"
+      ],
+      "aliases": [
+        "3-bet pot defence",
+        "versus 3bet pot c-bet"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Fold / call / raise",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "frequencies",
+          "tags": [
+            "fold",
+            "call",
+            "raise"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Response by bet size",
+          "kind": "sizing_distribution",
+          "metric": "fold_frequency",
+          "group_by": [
+            "facing_sizing_bucket"
+          ],
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "range",
+          "title": "Known-card defence range",
+          "kind": "range_grid",
+          "metric": "opportunities",
+          "filters": {
+            "hole_cards_known": true
+          },
+          "holdem_only": true,
+          "recommended_view": "range",
+          "tags": [
+            "range"
+          ]
+        },
+        {
+          "id": "strength",
+          "title": "Hand strength",
+          "kind": "hand_strength",
+          "metric": "opportunities",
+          "dimension": "made_hand",
+          "recommended_view": "hand_strength",
+          "tags": [
+            "strength"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Realized and EV-adjusted result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit",
+            "ev"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "four_bet_pot_flop",
+      "title": "4-bet pot \u00b7 Flop",
+      "description": "A deliberately compact 4-bet-pot study: flop aggression, IP/OOP split, range, result and source hands.",
+      "path": [
+        "postflop",
+        "four-bet-pot",
+        "flop"
+      ],
+      "game": "holdem",
+      "table_size": 6,
+      "base_filters": {
+        "game": "holdem",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "flop",
+        "pot_type": "four_bet_plus",
+        "is_preflop_aggressor": true,
+        "situation": "cbet_spot"
+      },
+      "variables": [
+        "in_position",
+        "position",
+        "effective_stack_bb",
+        "stake_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 40,
+      "tags": [
+        "postflop",
+        "4bet pot",
+        "aggression",
+        "small sample"
+      ],
+      "aliases": [
+        "4-bet pot",
+        "4bet pot flop"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Flop aggression by IP/OOP",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "in_position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "aggression",
+            "IP/OOP"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Flop sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": "bet"
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "range",
+          "title": "Flop aggression range",
+          "kind": "range_grid",
+          "metric": "bet_frequency",
+          "holdem_only": true,
+          "recommended_view": "range",
+          "tags": [
+            "range"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Realized and EV-adjusted result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit",
+            "ev"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    }
+  ]
+}

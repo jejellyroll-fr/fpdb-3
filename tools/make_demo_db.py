@@ -178,6 +178,94 @@ ROSTER = (
     Style("SplashySteve", 0.61, 0.31, 0.120, 0.10, 0.72, 0.58, 0.48, 0.32, 0.18, 0.46, 0.58),
     Style("GrindGaston", 0.23, 0.18, 0.062, 0.075, 0.58, 0.50, 0.40, 0.50, 0.10, 0.33, 0.52),
 )
+
+@dataclass(frozen=True)
+class HeroDeviation:
+    """One way the demo hero is deliberately unlike the field (#371).
+
+    The Study Explorer's *Biggest Differences vs Field* page is only worth
+    demonstrating on a corpus where the hero actually differs -- and only worth
+    trusting as a demo if the differences are stated rather than stumbled on.
+    Each entry names the tendency, which way it points, and where in the
+    shipped studies a reader will meet it.
+
+    ``minimum`` is the gap the corpus guarantees between the hero's value and
+    the roster's mean, in the same units as :class:`Style`. It is a floor, not
+    a prediction: the observed frequency also moves with position, with who
+    was dealt in, and with the cards, which is exactly the lesson the
+    *Reading differences* guide is there to teach.
+    """
+
+    stat: str
+    """The :class:`Style` field the tendency lives in."""
+    direction: str
+    """``"above"`` or ``"below"`` the field's mean."""
+    minimum: float
+    """How far apart the hero and the roster mean are, at least."""
+    headline: str
+    """What a reader should see, in the words the page uses."""
+    study: str
+    """The shipped study where the difference shows up."""
+
+
+#: The deviations the demo corpus encodes on purpose. Changing a style without
+#: updating this table fails a test, so the demo cannot quietly stop
+#: demonstrating the thing it exists to demonstrate.
+HERO_DEVIATIONS: Final[tuple[HeroDeviation, ...]] = (
+    HeroDeviation(
+        stat="vpip",
+        direction="below",
+        minimum=0.08,
+        headline="The hero enters far fewer pots than the table does.",
+        study="preflop_facing_open",
+    ),
+    HeroDeviation(
+        stat="pfr",
+        direction="above",
+        minimum=0.02,
+        headline="What the hero does play, the hero raises.",
+        study="preflop_rfi",
+    ),
+    HeroDeviation(
+        stat="barrel_turn",
+        direction="above",
+        minimum=0.08,
+        headline="The hero keeps betting the turn when the field gives up.",
+        study="srp_pfr_ip_flop",
+    ),
+    HeroDeviation(
+        stat="barrel_river",
+        direction="above",
+        minimum=0.07,
+        headline="And keeps betting the river.",
+        study="srp_pfr_ip_flop",
+    ),
+    HeroDeviation(
+        stat="fold_to_cbet",
+        direction="above",
+        minimum=0.03,
+        headline="Facing a continuation bet, the hero folds more than the field.",
+        study="srp_defender_oop_flop",
+    ),
+)
+
+#: A tendency the hero and the field share, kept deliberately: a demo that
+#: only ever shows large gaps teaches that every row is a finding. This one is
+#: the counter-example the *Reading differences* guide points at.
+HERO_AGREEMENT: Final[str] = "three_bet"
+
+
+def field_mean(stat: str) -> float:
+    """The roster's mean value for one tendency."""
+    values = [getattr(style, stat) for style in ROSTER]
+    return sum(values) / len(values)
+
+
+def hero_gap(stat: str) -> float:
+    """How far the hero sits from the field on one tendency."""
+    return getattr(HERO_STYLE, stat) - field_mean(stat)
+
+
 TABLE_NAMES = ("Wezen", "Alderamin", "Bellatrix", "Cursa", "Denebola", "Elnath")
 
 HAND_CATEGORIES = (

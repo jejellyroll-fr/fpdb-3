@@ -1,0 +1,2188 @@
+{
+  "schema_version": 1,
+  "pack": "plo-6max",
+  "label": "Pot-Limit Omaha \u00b7 6-max",
+  "description": "Spot-first studies for six-max Pot-Limit Omaha, built on the dimensions a four-card game turns on: SPR, multiway state, board suit structure, pairing and connectivity, sizing and effective stack. No 13x13 range grid and no hand-state panels: neither has a correct four-card meaning here.",
+  "studies": [
+    {
+      "id": "plo_preflop_rfi",
+      "title": "PLO \u00b7 Preflop \u00b7 First in",
+      "description": "How each seat enters an unopened pot in Pot-Limit Omaha, with opening size, stack depth and result.",
+      "path": [
+        "preflop",
+        "rfi"
+      ],
+      "game": "omahahi",
+      "table_size": 6,
+      "base_filters": {
+        "game": "omahahi",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "preflop",
+        "pot_type": "unopened"
+      },
+      "variables": [
+        "position",
+        "stake_bb",
+        "effective_stack_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 200,
+      "tags": [
+        "preflop",
+        "rfi",
+        "open",
+        "plo",
+        "omaha"
+      ],
+      "aliases": [
+        "PLO",
+        "Omaha",
+        "pot-limit Omaha",
+        "open raise",
+        "raise first in"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Frequency by position",
+          "kind": "frequency",
+          "metric": "raise_frequency",
+          "group_by": [
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "position"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Raise sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": [
+              "raise",
+              "complete"
+            ]
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "position",
+          "title": "Seat breakdown",
+          "kind": "position_matrix",
+          "metric": "raise_frequency",
+          "group_by": [
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "position"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "raise_frequency",
+          "group_by": [
+            "stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "position"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plo_preflop_facing_open",
+      "title": "PLO \u00b7 Preflop \u00b7 Facing an open",
+      "description": "Fold, call and 3-bet against a single Omaha open, with 3-bet sizing and the seats it came from.",
+      "path": [
+        "preflop",
+        "facing-open"
+      ],
+      "game": "omahahi",
+      "table_size": 6,
+      "base_filters": {
+        "game": "omahahi",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "preflop",
+        "situation": "facing_open"
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "stake_bb",
+        "effective_stack_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 150,
+      "tags": [
+        "preflop",
+        "defence",
+        "facing open",
+        "3bet",
+        "plo",
+        "omaha"
+      ],
+      "aliases": [
+        "PLO",
+        "Omaha",
+        "pot-limit Omaha",
+        "3bet",
+        "3bet pot",
+        "defend"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Response",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "response"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Raise sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": [
+              "raise",
+              "complete"
+            ]
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "position",
+          "title": "Seat breakdown",
+          "kind": "position_matrix",
+          "metric": "raise_frequency",
+          "group_by": [
+            "opponent_position",
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "position"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "raise_frequency",
+          "group_by": [
+            "stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plo_preflop_facing_3bet",
+      "title": "PLO \u00b7 Preflop \u00b7 Opener facing a 3-bet",
+      "description": "What the Omaha opener does against a 3-bet, by seat, size faced and stack depth.",
+      "path": [
+        "preflop",
+        "facing-3bet"
+      ],
+      "game": "omahahi",
+      "table_size": 6,
+      "base_filters": {
+        "game": "omahahi",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "preflop",
+        "situation": "opener_vs_3bet"
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "stake_bb",
+        "effective_stack_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 100,
+      "tags": [
+        "preflop",
+        "3bet",
+        "facing 3bet",
+        "plo",
+        "omaha"
+      ],
+      "aliases": [
+        "PLO",
+        "Omaha",
+        "pot-limit Omaha",
+        "3bet pot",
+        "4bet"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Response",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "response"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Raise sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": [
+              "raise",
+              "complete"
+            ]
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "position",
+          "title": "Seat breakdown",
+          "kind": "position_matrix",
+          "metric": "raise_frequency",
+          "group_by": [
+            "position",
+            "opponent_position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "position"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "raise_frequency",
+          "group_by": [
+            "stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plo_preflop_squeeze",
+      "title": "PLO \u00b7 Preflop \u00b7 Squeeze",
+      "description": "Squeezing an Omaha open that already has callers, by seat, size and stack depth.",
+      "path": [
+        "preflop",
+        "squeeze"
+      ],
+      "game": "omahahi",
+      "table_size": 6,
+      "base_filters": {
+        "game": "omahahi",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "preflop",
+        "situation": "squeeze_spot"
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "stake_bb",
+        "effective_stack_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 80,
+      "tags": [
+        "preflop",
+        "squeeze",
+        "plo",
+        "omaha"
+      ],
+      "aliases": [
+        "PLO",
+        "Omaha",
+        "pot-limit Omaha",
+        "squeeze",
+        "3bet"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Frequency by position",
+          "kind": "frequency",
+          "metric": "raise_frequency",
+          "group_by": [
+            "position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "position"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Raise sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": [
+              "raise",
+              "complete"
+            ]
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "position",
+          "title": "Seat breakdown",
+          "kind": "position_matrix",
+          "metric": "raise_frequency",
+          "group_by": [
+            "position",
+            "opponent_position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "position"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "raise_frequency",
+          "group_by": [
+            "stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "position"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plo_preflop_blind_defence",
+      "title": "PLO \u00b7 Preflop \u00b7 Blind defence",
+      "description": "How the big blind defends an Omaha open: fold, call or 3-bet, against each opening seat.",
+      "path": [
+        "preflop",
+        "blind-defence"
+      ],
+      "game": "omahahi",
+      "table_size": 6,
+      "base_filters": {
+        "game": "omahahi",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "street": "preflop",
+        "situation": "facing_open",
+        "position": "bb"
+      },
+      "variables": [
+        "opponent_position",
+        "stake_bb",
+        "effective_stack_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 120,
+      "tags": [
+        "preflop",
+        "blind defence",
+        "big blind",
+        "plo",
+        "omaha"
+      ],
+      "aliases": [
+        "PLO",
+        "Omaha",
+        "pot-limit Omaha",
+        "BB defend",
+        "blind defense"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Response",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "response"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Raise sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": [
+              "raise",
+              "complete"
+            ]
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "position",
+          "title": "Seat breakdown",
+          "kind": "position_matrix",
+          "metric": "raise_frequency",
+          "group_by": [
+            "opponent_position"
+          ],
+          "recommended_view": "position",
+          "tags": [
+            "position"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "raise_frequency",
+          "group_by": [
+            "stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plo_srp_pfr_ip_flop",
+      "title": "PLO \u00b7 SRP \u00b7 PFR IP \u00b7 Flop",
+      "description": "One Omaha single-raised-pot decision, read through SPR, multiway state, board texture and sizing.",
+      "path": [
+        "postflop",
+        "single-raised",
+        "pfr-ip",
+        "flop"
+      ],
+      "game": "omahahi",
+      "table_size": 6,
+      "base_filters": {
+        "game": "omahahi",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "pot_type": "single_raised",
+        "street": "flop",
+        "is_preflop_aggressor": true,
+        "situation": "cbet_spot",
+        "in_position": true
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "stake_bb",
+        "effective_stack_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 100,
+      "tags": [
+        "srp",
+        "single raised",
+        "postflop",
+        "spr",
+        "board",
+        "plo",
+        "omaha"
+      ],
+      "aliases": [
+        "PLO",
+        "Omaha",
+        "pot-limit Omaha",
+        "single raised pot",
+        "cbet"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Bet frequency",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "recommended_view": "summary",
+          "tags": [
+            "frequency"
+          ]
+        },
+        {
+          "id": "spr",
+          "title": "By SPR band",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "spr_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "spr",
+            "commitment"
+          ]
+        },
+        {
+          "id": "multiway",
+          "title": "Heads-up versus multiway",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "multiway"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "multiway"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "Board suit and pairing",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "texture"
+          ]
+        },
+        {
+          "id": "connectivity",
+          "title": "Board connectivity",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_connectivity"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "connectivity"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": "bet"
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plo_srp_pfr_oop_flop",
+      "title": "PLO \u00b7 SRP \u00b7 PFR OOP \u00b7 Flop",
+      "description": "One Omaha single-raised-pot decision, read through SPR, multiway state, board texture and sizing.",
+      "path": [
+        "postflop",
+        "single-raised",
+        "pfr-oop",
+        "flop"
+      ],
+      "game": "omahahi",
+      "table_size": 6,
+      "base_filters": {
+        "game": "omahahi",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "pot_type": "single_raised",
+        "street": "flop",
+        "is_preflop_aggressor": true,
+        "situation": "cbet_spot",
+        "in_position": false
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "stake_bb",
+        "effective_stack_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 100,
+      "tags": [
+        "srp",
+        "single raised",
+        "postflop",
+        "spr",
+        "board",
+        "plo",
+        "omaha"
+      ],
+      "aliases": [
+        "PLO",
+        "Omaha",
+        "pot-limit Omaha",
+        "single raised pot",
+        "cbet"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Bet frequency",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "recommended_view": "summary",
+          "tags": [
+            "frequency"
+          ]
+        },
+        {
+          "id": "spr",
+          "title": "By SPR band",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "spr_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "spr",
+            "commitment"
+          ]
+        },
+        {
+          "id": "multiway",
+          "title": "Heads-up versus multiway",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "multiway"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "multiway"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "Board suit and pairing",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "texture"
+          ]
+        },
+        {
+          "id": "connectivity",
+          "title": "Board connectivity",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_connectivity"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "connectivity"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": "bet"
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plo_srp_caller_ip_flop",
+      "title": "PLO \u00b7 SRP \u00b7 Caller IP \u00b7 Facing the flop bet",
+      "description": "One Omaha single-raised-pot decision, read through SPR, multiway state, board texture and sizing.",
+      "path": [
+        "postflop",
+        "single-raised",
+        "caller-ip",
+        "flop"
+      ],
+      "game": "omahahi",
+      "table_size": 6,
+      "base_filters": {
+        "game": "omahahi",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "pot_type": "single_raised",
+        "street": "flop",
+        "situation": "facing_cbet",
+        "in_position": true
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "stake_bb",
+        "effective_stack_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 100,
+      "tags": [
+        "srp",
+        "single raised",
+        "postflop",
+        "spr",
+        "board",
+        "plo",
+        "omaha"
+      ],
+      "aliases": [
+        "PLO",
+        "Omaha",
+        "pot-limit Omaha",
+        "single raised pot",
+        "cbet"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Response to the bet",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "response"
+          ]
+        },
+        {
+          "id": "spr",
+          "title": "By SPR band",
+          "kind": "frequency",
+          "metric": "fold_frequency",
+          "group_by": [
+            "spr_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "spr",
+            "commitment"
+          ]
+        },
+        {
+          "id": "multiway",
+          "title": "Heads-up versus multiway",
+          "kind": "frequency",
+          "metric": "fold_frequency",
+          "group_by": [
+            "multiway"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "multiway"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "Board suit and pairing",
+          "kind": "board_matrix",
+          "metric": "fold_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "texture"
+          ]
+        },
+        {
+          "id": "connectivity",
+          "title": "Board connectivity",
+          "kind": "board_matrix",
+          "metric": "fold_frequency",
+          "group_by": [
+            "board_connectivity"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "connectivity"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Fold by bet size faced",
+          "kind": "sizing_distribution",
+          "metric": "fold_frequency",
+          "group_by": [
+            "facing_sizing_bucket"
+          ],
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "fold_frequency",
+          "group_by": [
+            "stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plo_srp_caller_oop_flop",
+      "title": "PLO \u00b7 SRP \u00b7 Caller OOP \u00b7 Facing the flop bet",
+      "description": "One Omaha single-raised-pot decision, read through SPR, multiway state, board texture and sizing.",
+      "path": [
+        "postflop",
+        "single-raised",
+        "caller-oop",
+        "flop"
+      ],
+      "game": "omahahi",
+      "table_size": 6,
+      "base_filters": {
+        "game": "omahahi",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "pot_type": "single_raised",
+        "street": "flop",
+        "situation": "facing_cbet",
+        "in_position": false
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "stake_bb",
+        "effective_stack_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 100,
+      "tags": [
+        "srp",
+        "single raised",
+        "postflop",
+        "spr",
+        "board",
+        "plo",
+        "omaha"
+      ],
+      "aliases": [
+        "PLO",
+        "Omaha",
+        "pot-limit Omaha",
+        "single raised pot",
+        "cbet"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Response to the bet",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "response"
+          ]
+        },
+        {
+          "id": "spr",
+          "title": "By SPR band",
+          "kind": "frequency",
+          "metric": "fold_frequency",
+          "group_by": [
+            "spr_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "spr",
+            "commitment"
+          ]
+        },
+        {
+          "id": "multiway",
+          "title": "Heads-up versus multiway",
+          "kind": "frequency",
+          "metric": "fold_frequency",
+          "group_by": [
+            "multiway"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "multiway"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "Board suit and pairing",
+          "kind": "board_matrix",
+          "metric": "fold_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "texture"
+          ]
+        },
+        {
+          "id": "connectivity",
+          "title": "Board connectivity",
+          "kind": "board_matrix",
+          "metric": "fold_frequency",
+          "group_by": [
+            "board_connectivity"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "connectivity"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Fold by bet size faced",
+          "kind": "sizing_distribution",
+          "metric": "fold_frequency",
+          "group_by": [
+            "facing_sizing_bucket"
+          ],
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "fold_frequency",
+          "group_by": [
+            "stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plo_srp_pfr_turn",
+      "title": "PLO \u00b7 SRP \u00b7 PFR \u00b7 Turn",
+      "description": "One Omaha single-raised-pot decision, read through SPR, multiway state, board texture and sizing.",
+      "path": [
+        "postflop",
+        "single-raised",
+        "pfr",
+        "turn"
+      ],
+      "game": "omahahi",
+      "table_size": 6,
+      "base_filters": {
+        "game": "omahahi",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "pot_type": "single_raised",
+        "street": "turn",
+        "is_preflop_aggressor": true
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "stake_bb",
+        "effective_stack_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 100,
+      "tags": [
+        "srp",
+        "single raised",
+        "postflop",
+        "spr",
+        "board",
+        "plo",
+        "omaha"
+      ],
+      "aliases": [
+        "PLO",
+        "Omaha",
+        "pot-limit Omaha",
+        "single raised pot",
+        "cbet"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Bet frequency",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "recommended_view": "summary",
+          "tags": [
+            "frequency"
+          ]
+        },
+        {
+          "id": "spr",
+          "title": "By SPR band",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "spr_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "spr",
+            "commitment"
+          ]
+        },
+        {
+          "id": "multiway",
+          "title": "Heads-up versus multiway",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "multiway"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "multiway"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "Board suit and pairing",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "texture"
+          ]
+        },
+        {
+          "id": "connectivity",
+          "title": "Board connectivity",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_connectivity"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "connectivity"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": "bet"
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plo_3bet_aggressor_ip_flop",
+      "title": "PLO \u00b7 3-bet pot \u00b7 Aggressor IP \u00b7 Flop",
+      "description": "An Omaha 3-bet pot, where SPR is low and the board and the sizing carry most of the decision.",
+      "path": [
+        "postflop",
+        "three-bet-pot",
+        "aggressor-ip",
+        "flop"
+      ],
+      "game": "omahahi",
+      "table_size": 6,
+      "base_filters": {
+        "game": "omahahi",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "pot_type": "three_bet",
+        "street": "flop",
+        "is_preflop_aggressor": true,
+        "situation": "cbet_spot",
+        "in_position": true
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "stake_bb",
+        "effective_stack_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 60,
+      "tags": [
+        "3bet pot",
+        "postflop",
+        "spr",
+        "board",
+        "plo",
+        "omaha"
+      ],
+      "aliases": [
+        "PLO",
+        "Omaha",
+        "pot-limit Omaha",
+        "3bet pot",
+        "three bet pot"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Bet frequency",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "recommended_view": "summary",
+          "tags": [
+            "frequency"
+          ]
+        },
+        {
+          "id": "spr",
+          "title": "By SPR band",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "spr_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "spr",
+            "commitment"
+          ]
+        },
+        {
+          "id": "multiway",
+          "title": "Heads-up versus multiway",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "multiway"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "multiway"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "Board suit and pairing",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "texture"
+          ]
+        },
+        {
+          "id": "connectivity",
+          "title": "Board connectivity",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_connectivity"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "connectivity"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": "bet"
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plo_3bet_aggressor_oop_flop",
+      "title": "PLO \u00b7 3-bet pot \u00b7 Aggressor OOP \u00b7 Flop",
+      "description": "An Omaha 3-bet pot, where SPR is low and the board and the sizing carry most of the decision.",
+      "path": [
+        "postflop",
+        "three-bet-pot",
+        "aggressor-oop",
+        "flop"
+      ],
+      "game": "omahahi",
+      "table_size": 6,
+      "base_filters": {
+        "game": "omahahi",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "pot_type": "three_bet",
+        "street": "flop",
+        "is_preflop_aggressor": true,
+        "situation": "cbet_spot",
+        "in_position": false
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "stake_bb",
+        "effective_stack_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 60,
+      "tags": [
+        "3bet pot",
+        "postflop",
+        "spr",
+        "board",
+        "plo",
+        "omaha"
+      ],
+      "aliases": [
+        "PLO",
+        "Omaha",
+        "pot-limit Omaha",
+        "3bet pot",
+        "three bet pot"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Bet frequency",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "recommended_view": "summary",
+          "tags": [
+            "frequency"
+          ]
+        },
+        {
+          "id": "spr",
+          "title": "By SPR band",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "spr_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "spr",
+            "commitment"
+          ]
+        },
+        {
+          "id": "multiway",
+          "title": "Heads-up versus multiway",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "multiway"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "multiway"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "Board suit and pairing",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "texture"
+          ]
+        },
+        {
+          "id": "connectivity",
+          "title": "Board connectivity",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_connectivity"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "connectivity"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": "bet"
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plo_3bet_defender_flop",
+      "title": "PLO \u00b7 3-bet pot \u00b7 Defender \u00b7 Facing the flop bet",
+      "description": "An Omaha 3-bet pot, where SPR is low and the board and the sizing carry most of the decision.",
+      "path": [
+        "postflop",
+        "three-bet-pot",
+        "defender",
+        "flop"
+      ],
+      "game": "omahahi",
+      "table_size": 6,
+      "base_filters": {
+        "game": "omahahi",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "pot_type": "three_bet",
+        "street": "flop",
+        "situation": "facing_cbet"
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "stake_bb",
+        "effective_stack_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 60,
+      "tags": [
+        "3bet pot",
+        "postflop",
+        "spr",
+        "board",
+        "plo",
+        "omaha"
+      ],
+      "aliases": [
+        "PLO",
+        "Omaha",
+        "pot-limit Omaha",
+        "3bet pot",
+        "three bet pot"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Response to the bet",
+          "kind": "response_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "response"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "response"
+          ]
+        },
+        {
+          "id": "spr",
+          "title": "By SPR band",
+          "kind": "frequency",
+          "metric": "fold_frequency",
+          "group_by": [
+            "spr_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "spr",
+            "commitment"
+          ]
+        },
+        {
+          "id": "multiway",
+          "title": "Heads-up versus multiway",
+          "kind": "frequency",
+          "metric": "fold_frequency",
+          "group_by": [
+            "multiway"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "multiway"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "Board suit and pairing",
+          "kind": "board_matrix",
+          "metric": "fold_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "texture"
+          ]
+        },
+        {
+          "id": "connectivity",
+          "title": "Board connectivity",
+          "kind": "board_matrix",
+          "metric": "fold_frequency",
+          "group_by": [
+            "board_connectivity"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "connectivity"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Fold by bet size faced",
+          "kind": "sizing_distribution",
+          "metric": "fold_frequency",
+          "group_by": [
+            "facing_sizing_bucket"
+          ],
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "fold_frequency",
+          "group_by": [
+            "stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plo_3bet_aggressor_turn",
+      "title": "PLO \u00b7 3-bet pot \u00b7 Aggressor \u00b7 Turn",
+      "description": "An Omaha 3-bet pot, where SPR is low and the board and the sizing carry most of the decision.",
+      "path": [
+        "postflop",
+        "three-bet-pot",
+        "aggressor",
+        "turn"
+      ],
+      "game": "omahahi",
+      "table_size": 6,
+      "base_filters": {
+        "game": "omahahi",
+        "tournament": false,
+        "max_seats": [
+          6,
+          6
+        ],
+        "pot_type": "three_bet",
+        "street": "turn",
+        "is_preflop_aggressor": true
+      },
+      "variables": [
+        "position",
+        "opponent_position",
+        "stake_bb",
+        "effective_stack_bb",
+        "date_from",
+        "date_to"
+      ],
+      "min_sample": 60,
+      "tags": [
+        "3bet pot",
+        "postflop",
+        "spr",
+        "board",
+        "plo",
+        "omaha"
+      ],
+      "aliases": [
+        "PLO",
+        "Omaha",
+        "pot-limit Omaha",
+        "3bet pot",
+        "three bet pot"
+      ],
+      "default_panel": "overview",
+      "default_comparison": true,
+      "panels": [
+        {
+          "id": "overview",
+          "title": "Bet frequency",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "recommended_view": "summary",
+          "tags": [
+            "frequency"
+          ]
+        },
+        {
+          "id": "spr",
+          "title": "By SPR band",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "spr_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "spr",
+            "commitment"
+          ]
+        },
+        {
+          "id": "multiway",
+          "title": "Heads-up versus multiway",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "multiway"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "multiway"
+          ]
+        },
+        {
+          "id": "board",
+          "title": "Board suit and pairing",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_suit",
+            "board_pairing"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "texture"
+          ]
+        },
+        {
+          "id": "connectivity",
+          "title": "Board connectivity",
+          "kind": "board_matrix",
+          "metric": "bet_frequency",
+          "group_by": [
+            "board_connectivity"
+          ],
+          "recommended_view": "board",
+          "tags": [
+            "board",
+            "connectivity"
+          ]
+        },
+        {
+          "id": "sizing",
+          "title": "Bet sizing",
+          "kind": "sizing_distribution",
+          "metric": "opportunities",
+          "group_by": [
+            "sizing_bucket"
+          ],
+          "filters": {
+            "response": "bet"
+          },
+          "recommended_view": "sizing",
+          "tags": [
+            "sizing"
+          ]
+        },
+        {
+          "id": "stack",
+          "title": "By effective stack",
+          "kind": "frequency",
+          "metric": "bet_frequency",
+          "group_by": [
+            "stack_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "stack",
+            "depth"
+          ]
+        },
+        {
+          "id": "profit",
+          "title": "Result",
+          "kind": "profit",
+          "metric": "total_profit",
+          "recommended_view": "profit",
+          "tags": [
+            "profit"
+          ]
+        },
+        {
+          "id": "hands",
+          "title": "Source hands",
+          "kind": "hands",
+          "metric": "opportunities",
+          "recommended_view": "hands",
+          "tags": [
+            "hands"
+          ]
+        }
+      ]
+    }
+  ]
+}

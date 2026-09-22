@@ -13,6 +13,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication
 
 from fpdb_3_legacy.Database import Database
@@ -101,7 +102,7 @@ def test_running_a_query_renders_rows_and_sample(browser, qtbot) -> None:
     assert "decisions" in headers and "numerator" in headers and "frequency" in headers
 
 
-def test_comparison_renders_both_samples_and_disables_ambiguous_drill(browser, qtbot) -> None:
+def test_comparison_renders_both_samples_and_offers_both_sides_of_the_drill(browser, qtbot) -> None:
     browser.metric_combo.setCurrentIndex(browser.metric_combo.findData("fold_frequency"))
     browser.group_edit.setText("street")
     browser.compare_check.setChecked(True)
@@ -112,8 +113,74 @@ def test_comparison_renders_both_samples_and_disables_ambiguous_drill(browser, q
     ]
     assert {"you", "your sample", "the field", "its sample", "gap"} <= set(headers)
     assert browser.result_table.rowCount() > 0
-    assert browser._current_query is None
-    assert "without comparison" in browser.drill_note.text()
+    # A comparison row has two populations, so it keeps its query and shows
+    # both rather than asking for a rerun without the comparison (#366).
+    assert browser._current_query is not None
+    assert browser.hands_stack.currentWidget() is browser.source_hands
+    assert "side by side" in browser.source_hands.note_label.text()
+
+
+def test_a_comparison_row_opens_hero_and_field_hands_separately(browser, qtbot) -> None:
+    browser.metric_combo.setCurrentIndex(browser.metric_combo.findData("fold_frequency"))
+    browser.group_edit.setText("street")
+    browser.compare_check.setChecked(True)
+    _run_and_wait(qtbot, browser)
+    row = next(
+        index
+        for index in range(browser.result_table.rowCount())
+        if browser._last_result.rows[index].hero_opportunities
+        and browser._last_result.rows[index].field_opportunities
+    )
+
+    browser._on_result_clicked(browser.result_table.item(row, 0))
+    pane = browser.source_hands
+    qtbot.waitUntil(lambda: pane.page is not None and pane.table.rowCount() > 0, timeout=15000)
+
+    comparison_row = browser._last_result.rows[row]
+    assert pane.page.side == "hero"
+    assert pane.page.total_matches == comparison_row.hero_opportunities
+    labels = [button.text() for button in pane._target_buttons.values()]
+    assert [label.split(" (")[0] for label in labels] == [
+        "Your population", "Your actions", "Field population", "Field actions",
+    ]
+
+    pane.select_target("field")
+    qtbot.waitUntil(lambda: pane.page is not None and pane.page.side == "field", timeout=15000)
+    assert pane.page.total_matches == comparison_row.field_opportunities
+
+
+def test_a_sorted_comparison_drills_the_row_that_was_clicked(browser, qtbot) -> None:
+    browser.metric_combo.setCurrentIndex(browser.metric_combo.findData("fold_frequency"))
+    browser.group_edit.setText("street")
+    browser.compare_check.setChecked(True)
+    _run_and_wait(qtbot, browser)
+    # Sorting reorders the view but not the model, so a row number stops
+    # naming the row it was drawn from.
+    browser.result_table.sortItems(0, Qt.SortOrder.DescendingOrder)
+    visual_row = 0
+    item = browser.result_table.item(visual_row, 0)
+    expected = item.data(Qt.ItemDataRole.UserRole + 1)
+
+    browser._on_result_clicked(item)
+    pane = browser.source_hands
+    qtbot.waitUntil(lambda: pane.page is not None, timeout=15000)
+
+    assert pane.page.total_matches == expected.hero_opportunities
+    assert item.text() in pane.context_label.text()
+
+
+def test_leaving_comparison_returns_the_single_population_hand_list(browser, qtbot) -> None:
+    browser.metric_combo.setCurrentIndex(browser.metric_combo.findData("fold_frequency"))
+    browser.group_edit.setText("street")
+    browser.compare_check.setChecked(True)
+    _run_and_wait(qtbot, browser)
+    assert browser.hands_stack.currentWidget() is browser.source_hands
+
+    browser.compare_check.setChecked(False)
+    _run_and_wait(qtbot, browser)
+    browser._on_result_clicked(browser.result_table.item(0, 0))
+
+    assert browser.hands_stack.currentIndex() == 0
 
 
 def test_comparison_is_offered_for_every_metric(browser) -> None:
@@ -213,6 +280,11 @@ def test_stale_result_does_not_replace_a_newer_query(browser, qtbot) -> None:
     browser._query_serial = 7
     browser._on_query_done(_FakeResult(), 5)
     assert browser.sample_label.text() == "0 decisions"
+
+
+def test_browser_exposes_tab_cleanup_hooks(browser) -> None:
+    assert callable(browser.shutdown_workers)
+    assert callable(browser.close_owned_database)
 
 
 def test_presets_round_trip_through_the_browser(browser, qtbot, tmp_path: Path) -> None:

@@ -23,9 +23,61 @@ The original FPDB-3 Python application: hand-history parsers, PySide6 GUI, stati
 
 ## 🔎 Advanced Poker Analytics
 
-Beyond the classic reports, fpdb-3 ships a **Research Browser**: one screen for
-asking a poker question, reading the answer and inspecting the hands behind it
-— without writing SQL.
+Beyond the classic reports, fpdb-3 answers poker questions about your own
+database — without writing SQL, and without having to know which statistic to
+ask for.
+
+### Start from the spot
+
+**Choose a spot → compare with the field → look at the picture → open the
+hands.**
+
+The **Study Explorer** names poker situations, not metrics. Pick the one you
+want to work on and fpdb runs the seven or eight readings of it that are worth
+having, all over the same population.
+
+![The Study Explorer landing page](docs/images/study-explorer-landing.png)
+
+**Don't know which spot?** *Biggest Differences vs Field* compares every
+curated study panel and ranks the spots where your frequencies differ most from
+the people you actually play. It is a review queue, not a verdict — see
+[Reading differences responsibly](docs/reading-differences.md).
+
+![Biggest Differences vs Field](docs/images/study-differences.png)
+
+**Compare.** Every study opens in Hero vs Field: each panel answers once over
+your decisions and once over everyone else's, from the same query with the
+population identity flipped, with the gap and both samples beside it.
+
+![A single-raised-pot study overview](docs/images/study-srp-overview.png)
+
+**Visualize.** Sizing distributions, position matrices, board-texture heatmaps,
+the 13×13 range grid, hand-strength composition, realized and EV-adjusted
+profit — each a tab of the same study. Clicking a bar, a cell or a texture adds
+a visible, removable cross-filter that narrows every panel and both sides at
+once.
+
+![A board texture heatmap](docs/images/study-board-heatmap.png)
+
+**Inspect the hands.** Under every panel, the hands behind the number, with
+your population, your actions, the field's population and the field's actions
+kept apart rather than merged into one ambiguous list. Double-click one to open
+the replayer.
+
+![The source hands pane](docs/images/study-source-hands.png)
+
+Shipped study packs: **No-limit Hold'em 6-max**, **Pot-Limit Omaha 6-max** and
+**tournaments** (organised around effective stack depth rather than treating a
+tournament hand as a cash hand with one more filter).
+
+→ [Study Explorer quick start](docs/study-explorer-quick-start.md) — the whole
+workflow in five minutes, on invented data.
+
+### Custom / Advanced Research
+
+When no study asks your question, the **Research Browser** is the power-user
+path: one screen for building a query in poker words, reading the answer and
+inspecting the hands behind it.
 
 ![The Research Browser answering a grouped question](docs/images/research-table.png)
 
@@ -77,10 +129,16 @@ them:
 
 | Guide | For |
 | --- | --- |
-| [Research Browser in five minutes](docs/research-quick-start.md) | A useful result in under five minutes |
+| [Study Explorer quick start](docs/study-explorer-quick-start.md) | spot → compare → visualize → hands, in five minutes |
+| [Reading differences responsibly](docs/reading-differences.md) | what a Hero-vs-Field gap is, and is not |
+| [Reading the visualizations](docs/study-visualizations.md) | sizing, matrices, heatmaps, range grid, strength, EV |
+| [Research for Omaha](docs/research-omaha.md) | the PLO study pack and what four cards change |
+| [Research for tournaments](docs/research-tournaments.md) | the MTT pack, stack-depth bands, what fpdb cannot know |
+| [Research Browser in five minutes](docs/research-quick-start.md) | the power-user path: building a query by hand |
 | [Analytics concepts](docs/analytics-concepts.md) | opportunity, sample, SPR, pot type, realized vs EV |
 | [Advanced HUD guide](docs/hud-advanced-guide.md) | the reference packages and popups |
 | [Dynamic HUD guide](docs/hud-dynamic-guide.md) | panels, thresholds, what is truly live |
+| [Reference HUD design system](docs/hud-design-system.md) | what each colour means, samples, panel titles |
 | [Screenshots](docs/screenshots.md) | what each picture shows and how to regenerate it |
 | [research-browser.md](docs/research-browser.md), [query-engine.md](docs/query-engine.md), [dynamic-panels.md](docs/dynamic-panels.md), [stat-definitions.md](docs/stat-definitions.md) | implementation reference |
 

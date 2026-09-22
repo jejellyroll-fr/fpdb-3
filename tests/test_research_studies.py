@@ -170,6 +170,24 @@ def test_opportunity_outcome_mistakes_are_refused() -> None:
             variables=(),
             panels=(studies.StudyPanelSpec("rate", "Rate", "frequency", "bet_frequency"),),
         )
+    with pytest.raises(studies.StudyValidationError, match="action_taken"):
+        studies.StudySpec(
+            id="raw-action-self-selecting",
+            title="Raw action self selecting",
+            path=("test",),
+            base_filters={"action_taken": "bets"},
+            variables=(),
+            panels=(studies.StudyPanelSpec("rate", "Rate", "frequency", "bet_frequency"),),
+        )
+    with pytest.raises(studies.StudyValidationError, match="outcome situation"):
+        studies.StudySpec(
+            id="label-self-selecting",
+            title="Label self selecting",
+            path=("test",),
+            base_filters={"situation": "cbet"},
+            variables=(),
+            panels=(studies.StudyPanelSpec("rate", "Rate", "frequency", "bet_frequency"),),
+        )
     with pytest.raises(studies.StudyValidationError, match="must declare a response"):
         studies.StudySpec(
             id="unanswered",
@@ -197,6 +215,19 @@ def test_holdem_only_panel_has_an_explicit_unavailable_state() -> None:
     assert panel.unavailable_reason and "Hold'em-only" in panel.unavailable_reason
 
 
+def test_declared_game_cannot_disagree_with_the_population() -> None:
+    with pytest.raises(studies.StudyValidationError, match="conflicts"):
+        studies.StudySpec(
+            id="wrong-game",
+            title="Wrong game",
+            path=("test",),
+            base_filters={"game": "omahahi"},
+            variables=(),
+            panels=(studies.StudyPanelSpec("rate", "Rate", "headline"),),
+            game="holdem",
+        )
+
+
 def test_every_panel_adapter_uses_existing_analytics_owners(browser_db: Database) -> None:
     study = _srp_study()
     results = {panel.panel_id: studies.execute_panel(browser_db, panel) for panel in study.panels_compiled()}
@@ -222,3 +253,53 @@ def test_registry_loads_mapping_definitions() -> None:
     registry = studies.StudyRegistry.from_mappings([_srp_study().as_dict()])
 
     assert registry.get("srp_pfr_ip_flop").title == "Single-Raised Pot — PFR IP — Flop"
+
+
+def test_builtin_nlhe_pack_has_a_searchable_hierarchy_and_guidance() -> None:
+    # The library ships more than one pack now (#368), so the Hold'em one is
+    # named rather than assumed to be the only one.
+    pack = next(pack for pack in studies.load_study_packs() if pack.id == "nlhe-6max")
+    registry = pack.registry()
+    expected = {
+        "preflop_rfi",
+        "preflop_facing_open",
+        "preflop_facing_3bet",
+        "preflop_squeeze",
+        "preflop_blind_vs_blind",
+        "srp_pfr_ip_flop",
+        "srp_pfr_oop_flop",
+        "srp_defender_oop_flop",
+        "three_bet_pot_aggressor_flop",
+        "three_bet_pot_defender_flop",
+        "four_bet_pot_flop",
+    }
+
+    assert {study.id for study in registry.studies} == expected
+    assert all(study.table_size == 6 and study.min_sample for study in registry.studies)
+    assert all(study.default_panel in {panel.id for panel in study.panels} for study in registry.studies)
+    assert all(study.search_terms for study in registry.studies)
+    assert any(any("c-bet" in term for term in study.search_terms) for study in registry.studies)
+
+
+def test_builtin_nlhe_pack_executes_every_shipped_panel_on_the_golden_corpus(browser_db: Database) -> None:
+    registry = studies.builtin_studies()
+    executed = 0
+
+    # The golden corpus is six-max Hold'em cash, so it answers the Hold'em
+    # cash pack. The PLO pack (#368) and the tournament pack (#369) each have
+    # a corpus of their own.
+    for study in registry.studies:
+        if study.game != "holdem" or study.tournament is not False:
+            continue
+        for panel in study.panels_compiled():
+            result = studies.execute_panel(browser_db, panel)
+            assert result is not None, f"{study.id}/{panel.panel_id} did not return a result"
+            executed += 1
+
+    assert executed == 68
+
+
+def test_existing_advanced_presets_remain_available() -> None:
+    from fpdb_3_legacy.research_presets import builtin_presets
+
+    assert builtin_presets()

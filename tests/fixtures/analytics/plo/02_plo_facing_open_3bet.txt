@@ -1,0 +1,29 @@
+PokerStars Hand #3200000002:  Omaha Pot Limit ($0.50/$1.00 USD) - 2026/09/18 12:02:00 ET
+Table 'PLO 02 3Bet' 6-max Seat #3 is the button
+Seat 1: Anna ($100.00 in chips)
+Seat 2: Boris ($100.00 in chips)
+Seat 3: Cara ($100.00 in chips)
+Seat 4: Dave ($100.00 in chips)
+Seat 5: Erin ($100.00 in chips)
+Seat 6: Frank ($100.00 in chips)
+Dave: posts small blind $0.50
+Erin: posts big blind $1.00
+*** HOLE CARDS ***
+Dealt to Boris [Ah Ac Td 9d]
+Frank: raises $2.50 to $3.50
+Anna: folds
+Boris: raises $8.50 to $12.00
+Cara: folds
+Dave: folds
+Erin: folds
+Frank: folds
+Uncalled bet ($8.50) returned to Boris
+Boris collected $8.50 from pot
+*** SUMMARY ***
+Total pot $8.50 | Rake $0.00
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($8.50)
+Seat 3: Cara (button) folded before Flop (didn't bet)
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop

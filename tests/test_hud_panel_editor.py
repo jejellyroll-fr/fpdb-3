@@ -188,9 +188,10 @@ def test_the_preview_agrees_with_the_resolver_on_a_spread_of_contexts() -> None:
         {"street": "preflop", "stack_bucket": "short"},
     )
     for conditions in contexts:
-        preview = editor.preview(conditions, rules, fallback="core")
+        preview = editor.preview(conditions, rules, fallback="core", samples={"n": 100})
         direct = hs.HudSituationResolver(rules, fallback="core").resolve(
-            hs.HudSituationContext.from_filters(conditions)
+            hs.HudSituationContext.from_filters(conditions),
+            samples={"n": 100},
         )
         assert preview.selection.panels == direct.panels, conditions
         assert preview.winner is not None and preview.winner.panel == preview.selection.panels[0], conditions
@@ -201,6 +202,7 @@ def test_the_preview_names_the_winning_rule_and_what_it_beat() -> None:
         {"street": "flop", "pot_type": "single_raised", "is_preflop_aggressor": True, "in_position": True},
         resolver().rules,
         fallback="core",
+        samples={"n": 100},
     )
     assert preview.winner is not None and preview.winner.panel == "srp_cbet_ip"
     outcome = next(outcome for outcome in preview.outcomes if outcome.panel == "srp_cbet_ip")
@@ -235,6 +237,7 @@ def test_the_preview_reports_a_panel_no_block_carries() -> None:
         resolver().rules,
         fallback="core",
         panels=("core",),
+        samples={"n": 100},
     )
     assert any("no block carries" in note for note in preview.notes)
 

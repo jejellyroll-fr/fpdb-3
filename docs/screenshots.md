@@ -38,6 +38,17 @@ tables in the images.
 | `research-profit.png` | Research, Profit view | Realized money beside the EV-adjusted result |
 | `research-hands.png` | Research, matching hands | The hands behind one row, ready for the replayer |
 | `hud-preferences-dynamic-panels.png` | HUD Preferences, Dynamic Panels | The rule editor and its preview |
+| `study-explorer-landing.png` | Study Explorer | The spot-first landing page and study hierarchy |
+| `study-differences.png` | Biggest Differences vs Field | A review queue of Hero-versus-Field gaps |
+| `study-preflop-overview.png` | Study Explorer, Preflop overview | Hero and Field on a preflop spot |
+| `study-srp-overview.png` | Study Explorer, SRP overview | Hero and Field on a single-raised pot |
+| `study-sizing.png` | Study Explorer, Sizing | Bet-size distributions for the same spot |
+| `study-position-matrix.png` | Study Explorer, Position | A two-seat comparison matrix |
+| `study-board-heatmap.png` | Study Explorer, Board | Board texture as a cross-filterable heatmap |
+| `study-range-grid.png` | Study Explorer, Range | The 13×13 starting-hand grid |
+| `study-hand-strength.png` | Study Explorer, Hand strength | Known-card strength composition |
+| `study-profit.png` | Study Explorer, Profit | Realized profit beside all-in EV |
+| `study-source-hands.png` | Study Explorer, Source hands | Hero and Field hands behind a comparison |
 | `hud-preferences.png` | HUD Preferences | The profile bar and the stat-set tabs |
 | `hand-viewer.png` | Hand Viewer | A stored hand, its actions and its cards |
 | `hand-replayer.png` | Replayer | The same hand, action by action |
@@ -52,6 +63,11 @@ The Research shots are driven through the real widgets — filling the builder a
 running the query is what clicking a preset does — and each view's example
 question is read from the workspace's own `demo_examples.json`, so a screenshot
 cannot show a question the workspace does not document.
+
+The Study Explorer shots follow the spot-first path: landing page, differences
+queue, study overview, visualizations and source hands. They use the same
+deterministic workspace, with its fictional Hero deliberately unlike the field
+in a few documented tendencies so the review queue has something to show.
 
 ## The two pictures that are taken by hand
 

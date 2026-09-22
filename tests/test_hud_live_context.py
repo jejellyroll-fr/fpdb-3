@@ -36,7 +36,7 @@ def _adapter(**overrides):
 
 
 def _panels(context, resolver, **seat):
-    return resolver.resolve(replace(context.to_situation(), **seat)).panels
+    return resolver.resolve(replace(context.to_situation(), **seat), samples={"n": 100}).panels
 
 
 # ---------------------------------------------------------------------------

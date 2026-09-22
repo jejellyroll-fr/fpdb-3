@@ -41,6 +41,8 @@ from .hand_state import BLOCKER_BITS, DRAW_BITS
 from .holdem_classes import class_ids as holdem_class_ids
 from .holdem_classes import holdem_class_expression
 from .sizing_buckets import bucket_case_expression
+from .spr_buckets import spr_bucket_expression
+from .stack_depth_buckets import stack_bucket_expression
 
 # ---------------------------------------------------------------------------
 # Sources: the tables a query can join, and how.
@@ -304,7 +306,14 @@ FILTERS: Final[dict[str, _Filter]] = {
     "effective_stack_bb": _Filter("A.effectiveStackBB", ("A",), "range"),
     "effective_stack": _Filter("A.effectiveStack", ("A",), "range"),
     "stack_bucket": _Filter("SI.stackBucket", ("SI",), "set"),
+    # The tournament bands over the same effective stack the range filter
+    # reads: a depth is a band in an MTT, and short/medium/deep is too
+    # coarse to tell 12 big blinds from 22 (#369).
+    "effective_stack_bucket": _Filter(stack_bucket_expression("A."), ("A",), "set"),
     "spr": _Filter("A.sprBefore", ("A",), "range"),
+    # The banded form of the same column: a panel groups by bands, a query
+    # narrows by them, and both read the one CASE expression (#368).
+    "spr_bucket": _Filter(spr_bucket_expression("A."), ("A",), "set"),
     "players_in_hand": _Filter("A.playersInHand", ("A",), "range"),
     "multiway": _Filter("SI.multiway", ("SI",), "bool"),
     # -- street / pot ------------------------------------------------------
@@ -526,6 +535,11 @@ def _compile_filter(
     # an explicit null predicate, so they use this structured value instead of
     # changing that public convention.
     if isinstance(value, Mapping) and set(value) == {"is_null"}:
+        if name == "pair_detail" and value["is_null"]:
+            # A NULL pair detail is a real "no pair" classification only when
+            # the hand-state join exists. Unknown cards have no HandStates row
+            # and must not be pulled into the no-pair bucket (#364).
+            return [f"{column} IS NULL", "HS.madeHand IS NOT NULL"], []
         return [f"{column} IS {'NULL' if value['is_null'] else 'NOT NULL'}"], []
     if spec.kind in ("scalar", "set"):
         values = _as_list(value)
@@ -618,7 +632,9 @@ DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
     "in_position": ("A.inPosition", ("A",)),
     "stack_bucket": ("SI.stackBucket", ("SI",)),
     "effective_stack_bb": ("A.effectiveStackBB", ("A",)),
+    "effective_stack_bucket": (stack_bucket_expression("A."), ("A",)),
     "spr": ("A.sprBefore", ("A",)),
+    "spr_bucket": (spr_bucket_expression("A."), ("A",)),
     "pot_type": ("SI.potType", ("SI",)),
     "role": ("SI.role", ("SI",)),
     "response": ("SI.response", ("SI",)),
@@ -758,6 +774,10 @@ IMPLIED_NUMERATORS: Final[dict[str, dict[str, Any]]] = {
     "raise_frequency": {"response": ["raise", "complete"]},
     "bet_frequency": {"response": "bet"},
     "check_frequency": {"response": "check"},
+    # How often a decision went all-in. The numerator is the act rather than a
+    # response token, because a shove can be a bet, a raise or a call and all
+    # three are the same event to a tournament player (#369).
+    "all_in_frequency": {"all_in": True},
 }
 
 KNOWN_METRICS: Final[tuple[str, ...]] = tuple(

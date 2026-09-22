@@ -1,0 +1,35 @@
+PokerStars Hand #3200000009:  Omaha Pot Limit ($0.50/$1.00 USD) - 2026/09/18 12:16:00 ET
+Table 'PLO 09 Multiway' 6-max Seat #3 is the button
+Seat 1: Anna ($100.00 in chips)
+Seat 2: Boris ($100.00 in chips)
+Seat 3: Cara ($100.00 in chips)
+Seat 4: Dave ($100.00 in chips)
+Seat 5: Erin ($100.00 in chips)
+Seat 6: Frank ($100.00 in chips)
+Dave: posts small blind $0.50
+Erin: posts big blind $1.00
+*** HOLE CARDS ***
+Dealt to Boris [Qs Jc 9h 8d]
+Frank: raises $2.50 to $3.50
+Anna: calls $3.50
+Boris: calls $3.50
+Cara: folds
+Dave: folds
+Erin: calls $2.50
+*** FLOP *** [Kd Qc 4h]
+Erin: checks
+Frank: bets $10.00
+Anna: folds
+Boris: folds
+Erin: folds
+Uncalled bet ($10.00) returned to Frank
+Frank collected $14.50 from pot
+*** SUMMARY ***
+Total pot $14.50 | Rake $0.00
+Board [Kd Qc 4h]
+Seat 1: Anna folded on the Flop
+Seat 2: Boris folded on the Flop
+Seat 3: Cara (button) folded before Flop (didn't bet)
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded on the Flop
+Seat 6: Frank collected ($14.50)

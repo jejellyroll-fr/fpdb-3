@@ -208,6 +208,23 @@ def test_a_connection_that_cannot_roll_back_is_dropped_not_pooled() -> None:
     assert host.pooled() == []
 
 
+def test_a_connection_returned_to_a_retired_pool_is_closed() -> None:
+    """A worker borrowed before tab close must not repopulate a dead pool."""
+    host = PoolHost()
+    conn = FakeConnection()
+    pool = host._worker_conn_pool
+    Database._worker_pools.add(pool)
+    Database._worker_retired_pools.add(pool)
+    try:
+        host._return_worker_connection(conn)
+    finally:
+        Database._worker_pools.discard(pool)
+        Database._worker_retired_pools.discard(pool)
+
+    assert conn.closed is True
+    assert host.pooled() == []
+
+
 def test_no_connection_is_not_an_error() -> None:
     """SQLite ``:memory:`` yields None and falls back to the shared connection."""
     host = PoolHost()

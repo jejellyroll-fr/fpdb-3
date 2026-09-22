@@ -15,8 +15,14 @@ from fpdb_3_legacy.modern_hud_preferences.preview_widgets import (
     HudPreviewWidget,
     PopupPreviewWidget,
 )
+from fpdb_3_legacy.modern_hud_preferences.reference_preview import (
+    PACKAGE_ORDER,
+    ReferenceHudPreview,
+)
 
 __all__ = [
+    "PACKAGE_ORDER",
+    "ReferenceHudPreview",
     "_PREVIEW_ALIGN",
     "ColorPreviewWidget",
     "HudPreviewWidget",

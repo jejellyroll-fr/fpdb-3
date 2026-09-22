@@ -29,6 +29,7 @@ import re
 import sys
 import threading
 import traceback
+import weakref
 from datetime import datetime, timedelta
 from decimal import Decimal
 from importlib import import_module
@@ -222,10 +223,21 @@ class Database(
     PGSQL = 3
     SQLITE = 4
 
-    # Global pool for worker connections shared across all Database instances
-    # to strictly bound the maximum concurrent DB connections from workers
-    _worker_conn_pool: queue.Queue[Any] = queue.Queue()
+    # The semaphore is global on purpose: it bounds how many worker
+    # connections this *process* holds open at once, which is a limit about
+    # the process rather than about any one database. Idle connections are
+    # counted separately and evicted before opening a connection for another
+    # database, so the active limit and the total open-connection limit agree.
     _worker_conn_semaphore = threading.Semaphore(4)
+    _worker_pool_lock = threading.Lock()
+    _worker_idle_connections = 0
+    _worker_idle_limit = 4
+    _worker_pools: weakref.WeakSet[Any] = weakref.WeakSet()
+    # A worker may still be inside ``worker_connection`` after its database
+    # tab has retired the idle pool.  Keep that identity briefly so its return
+    # path closes the borrowed connection instead of enqueueing it into an
+    # unreachable queue.
+    _worker_retired_pools: weakref.WeakSet[Any] = weakref.WeakSet()
 
     hero_hudstart_def = "1999-12-31"  # default for length of Hero's stats in HUD
     villain_hudstart_def = "1999-12-31"  # default for length of Villain's stats in HUD
@@ -284,6 +296,10 @@ class Database(
         # backend-defined runtime interface.
         self.connection: Any = None
         self.cursor: Any = None
+        self._worker_conn_pool: queue.Queue[Any] = queue.Queue()
+        with Database._worker_pool_lock:
+            Database._worker_pools.add(self._worker_conn_pool)
+            Database._worker_retired_pools.discard(self._worker_conn_pool)
         self.__connected = False
         self.wrongDbVersion = False
         self.settings = {}
@@ -824,18 +840,51 @@ class Database(
         failed, it hands the next borrower a connection whose transaction is
         already aborted, so every later query on it fails too.
         """
-        self._worker_conn_semaphore.acquire()
+        with Database._worker_pool_lock:
+            Database._worker_pools.add(self._worker_conn_pool)
+            Database._worker_retired_pools.discard(self._worker_conn_pool)
         conn = None
+        slot_acquired = False
         try:
+            # The global semaphore bounds checked-out connections, not just
+            # newly created ones. Reusing an idle connection must consume the
+            # same process-wide capacity or several database instances can
+            # exceed the intended four-worker connection bound.
+            self._worker_conn_semaphore.acquire()
+            slot_acquired = True
             try:
-                conn = self._worker_conn_pool.get_nowait()
+                with Database._worker_pool_lock:
+                    conn = self._worker_conn_pool.get_nowait()
+                    Database._worker_idle_connections -= 1
             except queue.Empty:
+                # An idle connection owned by another Database still occupies
+                # a process-wide slot. Evict stale idle pools before waiting
+                # for the active-worker slot, so a newly opened study cannot
+                # be starved by connections retained by another study.
+                self._evict_idle_worker_connections(exclude=self._worker_conn_pool)
                 conn = self._create_new_worker_connection()
 
             yield conn
         finally:
             self._return_worker_connection(conn)
-            self._worker_conn_semaphore.release()
+            if slot_acquired:
+                self._worker_conn_semaphore.release()
+
+    @classmethod
+    def _evict_idle_worker_connections(cls, exclude=None) -> None:
+        """Drop idle connections from other pools before opening a new one."""
+        with cls._worker_pool_lock:
+            for pool in tuple(cls._worker_pools):
+                if pool is exclude:
+                    continue
+                while True:
+                    try:
+                        conn = pool.get_nowait()
+                    except queue.Empty:
+                        break
+                    cls._worker_idle_connections -= 1
+                    with contextlib.suppress(Exception):
+                        conn.close()
 
     def _return_worker_connection(self, conn) -> None:
         """Put a worker connection back, with nothing left open on it.
@@ -852,7 +901,21 @@ class Database(
             with contextlib.suppress(Exception):
                 conn.close()
             return
-        self._worker_conn_pool.put(conn)
+        with Database._worker_pool_lock:
+            retired = self._worker_conn_pool in Database._worker_retired_pools
+            registered = self._worker_conn_pool in Database._worker_pools
+            if retired:
+                close_connection = True
+            elif registered and Database._worker_idle_connections >= Database._worker_idle_limit:
+                close_connection = True
+            else:
+                close_connection = False
+                self._worker_conn_pool.put(conn)
+                if registered:
+                    Database._worker_idle_connections += 1
+        if close_connection:
+            with contextlib.suppress(Exception):
+                conn.close()
 
     def _create_new_worker_connection(self):
         """Open a dedicated connection for a background worker thread.
@@ -957,16 +1020,35 @@ class Database(
             self.connection = None
         self.__connected = False
 
-    @classmethod
-    def close_worker_pool(cls) -> None:
-        """Close all connections currently idling in the global worker pool."""
-        while not cls._worker_conn_pool.empty():
+    def close_worker_pool(self) -> None:
+        """Close the connections idling in this database's worker pool.
+
+        An instance method since the pool became one: closing "the" pool from
+        the class would have had to pick a database, and there is more than
+        one only because they are different databases.
+        """
+        pool = getattr(self, "_worker_conn_pool", None)
+        if pool is None:
+            return
+        retired_connections = []
+        # Retire the identity before draining it, atomically with the queue
+        # transition. A worker that returns between the final empty check and
+        # the retirement marker must not put an untracked connection back.
+        with Database._worker_pool_lock:
+            Database._worker_pools.discard(pool)
+            Database._worker_retired_pools.add(pool)
+        while True:
             try:
-                conn = cls._worker_conn_pool.get_nowait()
-                if conn is not None:
-                    conn.close()
+                with Database._worker_pool_lock:
+                    conn = pool.get_nowait()
+                    Database._worker_idle_connections -= 1
             except queue.Empty:
                 break
+            if conn is not None:
+                retired_connections.append(conn)
+        for conn in retired_connections:
+            with contextlib.suppress(Exception):
+                conn.close()
 
     def _close_cursor_quietly(self) -> None:
         cursor = getattr(self, "cursor", None)
@@ -982,6 +1064,7 @@ class Database(
         # database closed once already has no connection to commit, and calling
         # disconnect twice -- which shutdown paths do -- should be a no-op
         # rather than an AttributeError on the way out.
+        self.close_worker_pool()
         if self.connection is not None:
             if due_to_error:
                 self.connection.rollback()
@@ -1013,6 +1096,7 @@ class Database(
         what a broken socket cannot do: the recovery path would raise inside its
         own cleanup and never get as far as reconnecting.
         """
+        self.close_worker_pool()
         self._close_cursor_quietly()
         with contextlib.suppress(Exception):
             if self.connection is not None:

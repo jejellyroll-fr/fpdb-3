@@ -157,6 +157,16 @@ DRAW_BITS: Final[dict[str, int]] = {name: 1 << index for index, name in enumerat
 BLOCKER_BITS: Final[dict[str, int]] = {name: 1 << index for index, name in enumerate(BLOCKER_CATEGORIES)}
 
 
+#: The games whose postflop hand state this module classifies, and the only
+#: honest answer to "can a study show hand strength for this variant". Hold'em
+#: only: an Omaha hand's best two cards are not a Hold'em hand, a short-deck
+#: board does not rank hands the same way, and a four-card holding read as two
+#: would produce a confident answer to a question nothing here can answer
+#: (#368). Anything that gates a hand-state panel asks this set rather than
+#: spelling the rule out a second time.
+CLASSIFIED_GAMES: Final[frozenset[str]] = frozenset({"holdem"})
+
+
 class HandStateError(ValueError):
     """A hand that cannot be classified, with the reason."""
 
@@ -728,8 +738,10 @@ def classify(hole_cards: Any, board: Any, *, game: str = "holdem") -> HandState:
     visible = _normalize(board)
     if len(hole) != 2:
         raise UnknownHoleCards(f"A Hold'em hand state needs exactly two hole cards, not {len(hole)}")
-    if game != "holdem":
-        raise HandStateError(f"Only 'holdem' hands are classified, not {game!r}")
+    if game not in CLASSIFIED_GAMES:
+        raise HandStateError(
+            f"Only {sorted(CLASSIFIED_GAMES)} hands are classified, not {game!r}",
+        )
     street = street_of(visible)
     cards = [*hole, *visible]
     if len(set(cards)) != len(cards):
@@ -790,6 +802,7 @@ __all__ = [
     "BLOCKER_BITS",
     "BLOCKER_CATEGORIES",
     "BOARD_CARDS_BY_STREET",
+    "CLASSIFIED_GAMES",
     "DRAW_BITS",
     "DRAW_CATEGORIES",
     "MADE_HANDS",

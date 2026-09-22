@@ -721,6 +721,7 @@ class ModernHudPreferences(QDialog):
         # context (room/game/format/seats/etc.).
         self._create_profile_select_tab()
         self._create_dynamic_panels_tab()
+        self._create_reference_hud_tab()
 
         # Tab 3: General Settings
         general_tab = QWidget()
@@ -3179,6 +3180,30 @@ class ModernHudPreferences(QDialog):
             help_links.open_help(topic)
         except Exception:  # intentional broad catch: Help must not break the dialog
             log.exception("Could not open the help topic %r", topic)
+
+    def _create_reference_hud_tab(self) -> None:
+        """The three shipped HUDs, inspectable without a poker table (#370).
+
+        Read-only on purpose: this tab answers "what do these look like, and
+        where does each number live" before a reader commits to one. Choosing
+        a profile is still the Profile Select tab's job.
+        """
+        from fpdb_3_legacy.modern_hud_preferences.reference_preview import ReferenceHudPreview
+
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        intro = QLabel(
+            _(
+                "The HUDs fpdb ships, as a seat would see them. Pick a context to watch the "
+                "Dynamic package change panel, and read the popup paths to find where a "
+                "number lives before you go looking for it at a table.",
+            ),
+        )
+        intro.setWordWrap(True)
+        layout.addWidget(intro)
+        self.reference_preview = ReferenceHudPreview()
+        layout.addWidget(self.reference_preview, 1)
+        self.tabs.addTab(tab, _("🃏 Reference HUDs"))
 
     def _create_dynamic_panels_tab(self) -> None:
         """The tab that writes the ``<hud_panel_rules>`` section of #298.

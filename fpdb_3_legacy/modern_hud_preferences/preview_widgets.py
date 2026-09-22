@@ -254,21 +254,42 @@ class HudPreviewWidget(QWidget):
         lab.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lab.setFont(QFont(self.hud_font, scaled))
         key = self._stat_key(stat_name)
-        fg = stat.get("hudcolor") or self.sample_colors.get(key) or stat.get("stat_hicolor") or self.hud_fgcolor
+        sample_value = self._sample_value_for(stat_name) if stat_name else "---"
+        fg = self._stat_color(stat, sample_value) or stat.get("hudcolor") or self.sample_colors.get(key) or self.hud_fgcolor
         bg = stat.get("hudbgcolor")
         bg_rule = f"background:{bg};" if bg else "background: transparent;"
         lab.setStyleSheet(
             f"QLabel{{font-family:{self.hud_font};font-size:{scaled}pt;font-weight:700;"
             f"color:{fg};{bg_rule}padding:0px 3px;border:none;}}",
         )
-        value = self._sample_value_for(stat_name) if stat_name else "---"
+        value = sample_value
         if stat_name:
             value = f"{stat.get('hudprefix', '')}{value}{stat.get('hudsuffix', '')}"
         lab.setText(value)
-        lab.setToolTip(stat_name)
+        # The package's own tip when it has one: a preview whose cells cannot
+        # be expanded answers "what does FC mean" no better than the table
+        # does (#370).
+        lab.setToolTip(stat.get("tip") or stat_name)
         lab.setMinimumWidth(max(38, scaled * 4))
         lab.setMinimumHeight(max(20, round(scaled * 1.5)))
         return lab
+
+    @staticmethod
+    def _stat_color(stat: dict, value: str) -> str:
+        """Use the package's own threshold colours in the preview."""
+        low = stat.get("stat_loth")
+        high = stat.get("stat_hith")
+        if not low or not high:
+            return ""
+        try:
+            numeric = float("".join(ch for ch in value if ch.isdigit() or ch in ".-"))
+            if numeric < float(low):
+                return stat.get("stat_locolor", "")
+            if numeric < float(high):
+                return stat.get("stat_midcolor", "")
+            return stat.get("stat_hicolor", "")
+        except (TypeError, ValueError):
+            return ""
 
     def _build_flat_grid(self) -> QWidget:
         host = QWidget()

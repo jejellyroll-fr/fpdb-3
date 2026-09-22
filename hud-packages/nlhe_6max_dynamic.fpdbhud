@@ -64,7 +64,7 @@
       until a rule names them. `core`, the fallback, has no position binding
       and is therefore always visible.
     -->
-    <block id="core" label="core" rows="2" cols="2">
+    <block id="core" label="Core" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="n" popup="nlhe6_dynamic_core"
           hudbgcolor="#0F172A" hudprefix="H " tip="Hands seen"
           stat_loth="25" stat_locolor="#FF6B6B" stat_midcolor="#F2F4E6" stat_hith="200" stat_hicolor="#4ADE80"/>
@@ -80,7 +80,7 @@
     </block>
 
   <!-- Preflop: opening. -->
-  <block id="preflop_open" label="preflop_open" position="dynamic" rows="2" cols="2">
+  <block id="preflop_open" label="Preflop · Unopened" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="steal" popup="nlhe6_dynamic_preflop" hudprefix="ST " tip="Steal attempt from the late seats" hudbgcolor="#1E1B4B" stat_loth="25" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="45" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="s_steal" popup="nlhe6_dynamic_preflop" hudprefix="SS " tip="Steal that took the blinds down" hudbgcolor="#1E1B4B" stat_loth="15" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="35" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(2,1)" _stat_name="open_limp" popup="nlhe6_dynamic_preflop" hudprefix="LP " tip="Open limp: entered the pot by calling" hudbgcolor="#312E81" stat_loth="3" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="15" stat_hicolor="#FFD166"/>
@@ -88,7 +88,7 @@
   </block>
 
   <!-- Preflop: facing an open. -->
-  <block id="preflop_facing_open" label="preflop_facing_open" position="dynamic" rows="2" cols="2">
+  <block id="preflop_facing_open" label="Preflop · Facing an open" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="three_B" popup="nlhe6_dynamic_preflop" hudprefix="3B " tip="Three-bet versus the open in front of them" hudbgcolor="#1E1B4B" stat_loth="4" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="12" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="cold_call" popup="nlhe6_dynamic_preflop" hudprefix="CC " tip="Cold call versus the open" hudbgcolor="#312E81" stat_loth="4" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="14" stat_hicolor="#FFD166"/>
     <stat _rowcol="(2,1)" _stat_name="vpip" popup="nlhe6_dynamic_preflop" hudprefix="VP " tip="How often they enter any pot" hudbgcolor="#0F172A" stat_loth="18" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="32" stat_hicolor="#FF6B6B"/>
@@ -96,7 +96,7 @@
   </block>
 
   <!-- Preflop: facing a 3-bet after opening. -->
-  <block id="preflop_facing_three_bet" label="preflop_facing_three_bet" position="dynamic" rows="2" cols="2">
+  <block id="preflop_facing_three_bet" label="Preflop · Facing a 3-bet" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="f_3bet" popup="nlhe6_dynamic_preflop" hudprefix="F3 " tip="Fold versus a three-bet" hudbgcolor="#1E1B4B" stat_loth="40" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="72" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="four_B" popup="nlhe6_dynamic_preflop" hudprefix="4B " tip="Four-bet: came back over the three-bet" hudbgcolor="#312E81" stat_loth="2" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="8" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(2,1)" _stat_name="f_4bet" popup="nlhe6_dynamic_preflop" hudprefix="F4 " tip="Fold versus a four-bet" hudbgcolor="#312E81" stat_loth="40" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="75" stat_hicolor="#FF6B6B"/>
@@ -104,7 +104,7 @@
   </block>
 
   <!-- Preflop: squeeze spots. -->
-  <block id="preflop_squeeze" label="preflop_squeeze" position="dynamic" rows="2" cols="2">
+  <block id="preflop_squeeze" label="Preflop · Squeeze spot" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="squeeze" popup="nlhe6_dynamic_preflop" hudprefix="SQ " tip="Squeeze: raised after a raise was called" hudbgcolor="#1E1B4B" stat_loth="3" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="10" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="fold_vs_preflop_squeeze" popup="nlhe6_dynamic_preflop" hudprefix="FS " tip="Fold when somebody squeezed behind" hudbgcolor="#1E1B4B" stat_loth="45" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="75" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(2,1)" _stat_name="call_vs_preflop_squeeze" popup="nlhe6_dynamic_preflop" hudprefix="CS " tip="Call versus a squeeze" hudbgcolor="#312E81" stat_loth="10" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="35" stat_hicolor="#FFD166"/>
@@ -112,7 +112,7 @@
   </block>
 
   <!-- Preflop: blind defence. -->
-  <block id="blinds_defence" label="blinds_defence" position="dynamic" rows="2" cols="2">
+  <block id="blinds_defence" label="Preflop · Blind defence" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="f_BB_steal" popup="nlhe6_dynamic_preflop" hudprefix="FB " tip="Big blind folds to a steal" hudbgcolor="#1E1B4B" stat_loth="45" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="75" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="f_SB_steal" popup="nlhe6_dynamic_preflop" hudprefix="FS " tip="Small blind folds to a steal" hudbgcolor="#1E1B4B" stat_loth="60" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="85" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(2,1)" _stat_name="three_bet_vs_steal" popup="nlhe6_dynamic_preflop" hudprefix="3S " tip="Three-bet versus a steal: the re-steal" hudbgcolor="#312E81" stat_loth="6" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="18" stat_hicolor="#FF6B6B"/>
@@ -120,7 +120,7 @@
   </block>
 
   <!-- Preflop: stealing from the late seats. -->
-  <block id="blinds_steal" label="blinds_steal" position="dynamic" rows="2" cols="2">
+  <block id="blinds_steal" label="Preflop · Stealing" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="steal" popup="nlhe6_dynamic_preflop" hudprefix="ST " tip="Steal attempt from the button, cutoff or small blind" hudbgcolor="#1E1B4B" stat_loth="25" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="45" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="s_steal" popup="nlhe6_dynamic_preflop" hudprefix="SS " tip="Steal that was not defended" hudbgcolor="#1E1B4B" stat_loth="15" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="35" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(2,1)" _stat_name="f_BB_steal" popup="nlhe6_dynamic_preflop" hudprefix="FB " tip="How often the big blind folds to a steal" hudbgcolor="#0F172A" stat_loth="45" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="75" stat_hicolor="#FF6B6B"/>
@@ -128,7 +128,7 @@
   </block>
 
   <!-- Preflop: deep stacks. -->
-  <block id="preflop_deep" label="preflop_deep" position="dynamic" rows="2" cols="2">
+  <block id="preflop_deep" label="Preflop · Deep stacks" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="steal" popup="nlhe6_dynamic_preflop" hudprefix="ST " tip="Steal attempt at a deep table" hudbgcolor="#1E1B4B" stat_loth="25" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="50" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="three_B" popup="nlhe6_dynamic_preflop" hudprefix="3B " tip="Three-bet at a deep table" hudbgcolor="#1E1B4B" stat_loth="4" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="12" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(2,1)" _stat_name="f_3bet" popup="nlhe6_dynamic_preflop" hudprefix="F3 " tip="Fold versus a three-bet at a deep table" hudbgcolor="#312E81" stat_loth="40" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="72" stat_hicolor="#FF6B6B"/>
@@ -136,7 +136,7 @@
   </block>
 
   <!-- Single-raised pots: the preflop aggressor in position. -->
-  <block id="srp_cbet_ip" label="srp_cbet_ip" position="dynamic" rows="2" cols="2">
+  <block id="srp_cbet_ip" label="SRP · PFR IP · Betting" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="cb1" popup="nlhe6_dynamic_postflop" hudprefix="CB " tip="Flop continuation bet" hudbgcolor="#0F172A" stat_loth="45" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="75" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="cb2" popup="nlhe6_dynamic_postflop" hudprefix="TB " tip="Turn barrel after betting the flop" hudbgcolor="#0F172A" stat_loth="30" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="65" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(2,1)" _stat_name="cb3" popup="nlhe6_dynamic_postflop" hudprefix="RB " tip="River barrel after betting flop and turn" hudbgcolor="#0F172A" stat_loth="20" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="60" stat_hicolor="#FF6B6B"/>
@@ -144,7 +144,7 @@
   </block>
 
   <!-- Single-raised pots: the preflop aggressor out of position. -->
-  <block id="srp_cbet_oop" label="srp_cbet_oop" position="dynamic" rows="2" cols="2">
+  <block id="srp_cbet_oop" label="SRP · PFR OOP · Betting" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="cb1" popup="nlhe6_dynamic_postflop" hudprefix="CB " tip="Flop continuation bet, out of position" hudbgcolor="#0F172A" stat_loth="40" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="70" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="cb2" popup="nlhe6_dynamic_postflop" hudprefix="TB " tip="Turn barrel, out of position" hudbgcolor="#0F172A" stat_loth="25" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="60" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(2,1)" _stat_name="cb3" popup="nlhe6_dynamic_postflop" hudprefix="RB " tip="River barrel, out of position" hudbgcolor="#0F172A" stat_loth="15" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="55" stat_hicolor="#FF6B6B"/>
@@ -152,7 +152,7 @@
   </block>
 
   <!-- Single-raised pots: defending the c-bet in position. -->
-  <block id="srp_face_cbet_ip" label="srp_face_cbet_ip" position="dynamic" rows="2" cols="2">
+  <block id="srp_face_cbet_ip" label="SRP · Caller IP · Facing the bet" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="fold_vs_flop_cbet" popup="nlhe6_dynamic_postflop" hudprefix="F " tip="Folded to the flop c-bet" hudbgcolor="#0F172A" stat_loth="35" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="70" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="call_vs_flop_cbet" popup="nlhe6_dynamic_postflop" hudprefix="C " tip="Called the flop c-bet" hudbgcolor="#0F172A" stat_loth="20" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="55" stat_hicolor="#FFD166"/>
     <stat _rowcol="(2,1)" _stat_name="raise_vs_flop_cbet" popup="nlhe6_dynamic_postflop" hudprefix="R " tip="Raised the flop c-bet" hudbgcolor="#312E81" stat_loth="5" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="20" stat_hicolor="#FF6B6B"/>
@@ -160,7 +160,7 @@
   </block>
 
   <!-- Single-raised pots: defending the c-bet out of position. -->
-  <block id="srp_face_cbet_oop" label="srp_face_cbet_oop" position="dynamic" rows="2" cols="2">
+  <block id="srp_face_cbet_oop" label="SRP · Caller OOP · Facing the bet" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="fold_vs_flop_cbet" popup="nlhe6_dynamic_postflop" hudprefix="F " tip="Folded to the flop c-bet, out of position" hudbgcolor="#0F172A" stat_loth="40" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="72" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="call_vs_flop_cbet" popup="nlhe6_dynamic_postflop" hudprefix="C " tip="Called the flop c-bet, out of position" hudbgcolor="#0F172A" stat_loth="20" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="55" stat_hicolor="#FFD166"/>
     <stat _rowcol="(2,1)" _stat_name="raise_vs_flop_cbet" popup="nlhe6_dynamic_postflop" hudprefix="R " tip="Raised the flop c-bet, out of position" hudbgcolor="#312E81" stat_loth="5" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="20" stat_hicolor="#FF6B6B"/>
@@ -168,7 +168,7 @@
   </block>
 
   <!-- Single-raised pots: probing after the aggressor checked. -->
-  <block id="srp_probe_ip" label="srp_probe_ip" position="dynamic" rows="2" cols="2">
+  <block id="srp_probe_ip" label="SRP · Checked to · Turn and river" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="probe_bet_turn" popup="nlhe6_dynamic_postflop" hudprefix="PT " tip="Probe bet on the turn after the flop checked through" hudbgcolor="#0F172A" stat_loth="25" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="60" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="probe_bet_river" popup="nlhe6_dynamic_postflop" hudprefix="PR " tip="Probe bet on the river" hudbgcolor="#0F172A" stat_loth="20" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="55" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(2,1)" _stat_name="f_cb1" popup="nlhe6_dynamic_postflop" hudprefix="FC " tip="How often they fold to a flop c-bet" hudbgcolor="#312E81" stat_loth="35" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="65" stat_hicolor="#FF6B6B"/>
@@ -176,7 +176,7 @@
   </block>
 
   <!-- 3-bet pots, in position. -->
-  <block id="threebet_pot_ip" label="threebet_pot_ip" position="dynamic" rows="2" cols="2">
+  <block id="threebet_pot_ip" label="3-bet pot · IP" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="three_B_flop" popup="nlhe6_dynamic_threebet" hudprefix="3F " tip="Three-bet on the flop in a 3-bet pot" hudbgcolor="#1E1B4B" stat_loth="3" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="12" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="cb1" popup="nlhe6_dynamic_threebet" hudprefix="CB " tip="Flop continuation bet in a 3-bet pot" hudbgcolor="#1E1B4B" stat_loth="40" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="70" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(2,1)" _stat_name="fold_to_three_B_flop" popup="nlhe6_dynamic_threebet" hudprefix="F3 " tip="Folded to the flop three-bet" hudbgcolor="#312E81" stat_loth="40" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="72" stat_hicolor="#FF6B6B"/>
@@ -184,7 +184,7 @@
   </block>
 
   <!-- 3-bet pots, out of position. -->
-  <block id="threebet_pot_oop" label="threebet_pot_oop" position="dynamic" rows="2" cols="2">
+  <block id="threebet_pot_oop" label="3-bet pot · OOP" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="three_B_flop" popup="nlhe6_dynamic_threebet" hudprefix="3F " tip="Three-bet on the flop, out of position" hudbgcolor="#1E1B4B" stat_loth="3" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="12" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="cb1" popup="nlhe6_dynamic_threebet" hudprefix="CB " tip="Flop c-bet, out of position" hudbgcolor="#1E1B4B" stat_loth="35" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="65" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(2,1)" _stat_name="check_raise_frequency" popup="nlhe6_dynamic_threebet" hudprefix="CR " tip="Check-raise in a 3-bet pot" hudbgcolor="#312E81" stat_loth="4" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="18" stat_hicolor="#FF6B6B"/>
@@ -192,7 +192,7 @@
   </block>
 
   <!-- 4-bet pots. -->
-  <block id="fourbet_pot" label="fourbet_pot" position="dynamic" rows="2" cols="2">
+  <block id="fourbet_pot" label="4-bet pot" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="four_B_flop" popup="nlhe6_dynamic_fourbet" hudprefix="4F " tip="Flop four-bet in an already 4-bet pot" hudbgcolor="#312E81" stat_loth="2" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="10" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="cb1" popup="nlhe6_dynamic_fourbet" hudprefix="CB " tip="Flop continuation bet in a 4-bet pot" hudbgcolor="#312E81" stat_loth="35" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="70" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(2,1)" _stat_name="fold_to_cbet_flop" popup="nlhe6_dynamic_fourbet" hudprefix="FC " tip="Folded to the flop c-bet" hudbgcolor="#0F172A" stat_loth="35" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="70" stat_hicolor="#FF6B6B"/>
@@ -200,7 +200,7 @@
   </block>
 
   <!-- Short stacks. -->
-  <block id="ssh_stack" label="ssh_stack" position="dynamic" rows="2" cols="2">
+  <block id="ssh_stack" label="Short stack" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="vpip" popup="nlhe6_dynamic_stacks" hudprefix="VP " tip="How often a short stack enters the pot" hudbgcolor="#1E1B4B" stat_loth="15" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="35" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="pfr" popup="nlhe6_dynamic_stacks" hudprefix="PR " tip="How often a short stack raises preflop" hudbgcolor="#1E1B4B" stat_loth="10" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="28" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(2,1)" _stat_name="three_B" popup="nlhe6_dynamic_stacks" hudprefix="3B " tip="Three-bet frequency at a short stack" hudbgcolor="#312E81" stat_loth="4" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="14" stat_hicolor="#FF6B6B"/>
@@ -208,7 +208,7 @@
   </block>
 
   <!-- River overbets. -->
-  <block id="overbet_river" label="overbet_river" position="dynamic" rows="2" cols="2">
+  <block id="overbet_river" label="River · Facing an overbet" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="cb3" popup="nlhe6_dynamic_sizing" hudprefix="RB " tip="River bet after betting the flop and turn" hudbgcolor="#1E1B4B" stat_loth="20" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="60" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="f_cb3" popup="nlhe6_dynamic_sizing" hudprefix="FR " tip="Folded to the river bet" hudbgcolor="#1E1B4B" stat_loth="35" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="70" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(2,1)" _stat_name="wtsd" popup="nlhe6_dynamic_sizing" hudprefix="WS " tip="Went to showdown: how often they look you up" hudbgcolor="#312E81" stat_loth="22" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="35" stat_hicolor="#FF6B6B"/>
@@ -216,7 +216,7 @@
   </block>
 
   <!-- Facing a small bet. -->
-  <block id="minbet_faced" label="minbet_faced" position="dynamic" rows="2" cols="2">
+  <block id="minbet_faced" label="Facing a small bet" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
     <stat _rowcol="(1,1)" _stat_name="f_cb1" popup="nlhe6_dynamic_sizing" hudprefix="FC " tip="Folded to a small flop bet" hudbgcolor="#1E1B4B" stat_loth="25" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="60" stat_hicolor="#FF6B6B"/>
     <stat _rowcol="(1,2)" _stat_name="call_vs_flop_cbet" popup="nlhe6_dynamic_sizing" hudprefix="C " tip="Called a small flop bet" hudbgcolor="#1E1B4B" stat_loth="25" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="60" stat_hicolor="#FFD166"/>
     <stat _rowcol="(2,1)" _stat_name="raise_vs_flop_cbet" popup="nlhe6_dynamic_sizing" hudprefix="R " tip="Raised a small flop bet" hudbgcolor="#312E81" stat_loth="5" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="22" stat_hicolor="#FF6B6B"/>
@@ -238,21 +238,26 @@
       <pu_stat pu_stat_name="Single-raised pot" pu_stat_submenu="nlhe6_dynamic_postflop"/>
       <pu_stat pu_stat_name="3-bet pot" pu_stat_submenu="nlhe6_dynamic_threebet"/>
       <pu_stat pu_stat_name="4-bet pot" pu_stat_submenu="nlhe6_dynamic_fourbet"/>
-      <pu_stat pu_stat_name="Stacks" pu_stat_submenu="nlhe6_dynamic_stacks"/>
       <pu_stat pu_stat_name="Sizing" pu_stat_submenu="nlhe6_dynamic_sizing"/>
+      <pu_stat pu_stat_name="Stacks" pu_stat_submenu="nlhe6_dynamic_stacks"/>
     </pu>
 
     <pu pu_name="nlhe6_dynamic_preflop" pu_class="ModernSubmenu" pu_title="{player}: preflop">
+      <!--
+        vpip, pfr and 3-bet are on the popup that opened this one, so they are
+        not repeated here: a page that costs a click has to be worth it (#370).
+      -->
       <pu_stat pu_stat_name="playername"/>
       <pu_stat pu_stat_name="n"/>
-      <pu_stat pu_stat_name="vpip"/>
-      <pu_stat pu_stat_name="pfr"/>
-      <pu_stat pu_stat_name="three_B"/>
       <pu_stat pu_stat_name="f_3bet"/>
       <pu_stat pu_stat_name="four_B"/>
       <pu_stat pu_stat_name="f_4bet"/>
       <pu_stat pu_stat_name="steal"/>
+      <pu_stat pu_stat_name="s_steal"/>
       <pu_stat pu_stat_name="f_BB_steal"/>
+      <pu_stat pu_stat_name="f_SB_steal"/>
+      <pu_stat pu_stat_name="cold_call"/>
+      <pu_stat pu_stat_name="open_limp"/>
       <pu_stat pu_stat_name="squeeze"/>
       <pu_stat pu_stat_name="totalprofit"/>
       <pu_stat pu_stat_name="Opening by position" pu_stat_submenu="preflop_rfi"/>
@@ -278,7 +283,6 @@
     </pu>
 
     <pu pu_name="nlhe6_dynamic_threebet" pu_class="ModernSubmenu" pu_title="{player}: 3-bet pot">
-      <pu_stat pu_stat_name="three_B"/>
       <pu_stat pu_stat_name="three_B_flop"/>
       <pu_stat pu_stat_name="three_B_turn"/>
       <pu_stat pu_stat_name="three_B_river"/>
@@ -301,10 +305,8 @@
 
     <pu pu_name="nlhe6_dynamic_stacks" pu_class="ModernSubmenu" pu_title="{player}: stack depth">
       <pu_stat pu_stat_name="n"/>
-      <pu_stat pu_stat_name="vpip"/>
-      <pu_stat pu_stat_name="pfr"/>
-      <pu_stat pu_stat_name="three_B"/>
       <pu_stat pu_stat_name="f_3bet"/>
+      <pu_stat pu_stat_name="f_4bet"/>
       <pu_stat pu_stat_name="totalprofit"/>
       <pu_stat pu_stat_name="bbper100"/>
       <pu_stat pu_stat_name="Stack depth pack" pu_stat_submenu="preflop_stacks"/>

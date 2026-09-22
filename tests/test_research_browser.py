@@ -19,7 +19,13 @@ from pathlib import Path
 import pytest
 
 from fpdb_3_legacy import research_browser as rb
-from fpdb_3_legacy.analytics_query import FILTERS, Query, run_hand_ids, run_query
+from fpdb_3_legacy.analytics_query import (
+    FILTERS,
+    Query,
+    compile_filters,
+    run_hand_ids,
+    run_query,
+)
 from fpdb_3_legacy.Database import Database
 from fpdb_3_legacy.Importer import Importer
 from tests.helpers import analytics_golden as golden
@@ -50,6 +56,50 @@ _MODULE_STATE: list[object] = []
 # ---------------------------------------------------------------------------
 
 
+#: One value per filter kind that the compiler should accept, so the sweep
+#: below can exercise every filter without a hand-written case for each.
+_PLAUSIBLE_BY_KIND: dict[str, object] = {
+    "scalar": "x",
+    "set": ["x"],
+    "range": [1, 2],
+    "range_pct": [10, 200],
+    "range_low": 1,
+    "range_high": 2,
+    "bool": True,
+    "hero": True,
+    "null_check": True,
+    "label": "facing_open",
+    "flagset": ["paired"],
+    "flagset_all": ["paired"],
+    "flagset_none": ["paired"],
+    "identity_set": [("PokerStars", "Hero")],
+}
+
+#: The filters whose values are not free text: a coerced domain needs a value
+#: from that domain rather than the generic token above.
+_PLAUSIBLE_VALUES: dict[str, object] = {
+    "position": ["btn"],
+    "opponent_position": ["btn"],
+    "made_hand": ["top_pair"],
+    "made_hand_rank": [1, 5],
+    "pair_detail": ["top_pair"],
+    "nutness": ["nuts"],
+    "draw": ["flush_draw"],
+    "draw_all": ["flush_draw"],
+    "draw_none": ["flush_draw"],
+    "blocker": ["nut_flush_blocker"],
+    "blocker_all": ["nut_flush_blocker"],
+    "blocker_none": ["nut_flush_blocker"],
+    "board_texture": ["paired"],
+    "board_texture_all": ["paired"],
+    "board_runout": ["runout_paired_board"],
+    "identity": [("PokerStars", "Hero")],
+    "starting_hand": ["AKs"],
+    "date_from": "2026-01-01",
+    "date_to": "2026-12-31",
+}
+
+
 def test_every_engine_filter_is_described() -> None:
     """The picker offers all of the engine's filters, none invented."""
     assert {spec.name for spec in rb.FILTER_SPECS} == set(FILTERS)
@@ -59,6 +109,33 @@ def test_every_filter_has_a_browser_group() -> None:
     """No filter falls into the catch-all group by accident."""
     ungrouped = [spec.name for spec in rb.FILTER_SPECS if spec.group == "other"]
     assert ungrouped == []
+
+
+def test_every_filter_coerces_with_a_callable_or_not_at_all() -> None:
+    """A vocabulary passed where the coercion goes is a filter that cannot run.
+
+    ``_Filter``'s fourth field is ``coerce``, a callable. Handing it the tuple
+    of legal values instead reads perfectly and blows up only when somebody
+    filters on it -- which a dimension-only test never does.
+    """
+    miscast = [
+        name for name, spec in FILTERS.items()
+        if spec.coerce is not None and not callable(spec.coerce)
+    ]
+    assert miscast == []
+
+
+@pytest.mark.parametrize("name", sorted(FILTERS))
+def test_every_filter_compiles_with_a_plausible_value(name: str) -> None:
+    """Every filter is exercised once, so none is only ever a dimension."""
+    spec = FILTERS[name]
+    value = _PLAUSIBLE_VALUES.get(name, _PLAUSIBLE_BY_KIND.get(spec.kind))
+    if value is None:
+        pytest.skip(f"no plausible value for the {spec.kind} filter {name!r}")
+    where, params, aliases = compile_filters({name: value}, "?", "sqlite")
+
+    assert where
+    assert aliases
 
 
 def test_value_kinds_come_from_engine_kinds() -> None:

@@ -280,6 +280,7 @@ fpdb_3_legacy = [
     "hud_situation.d/*.json",
     "popup_packs.d/*.json",
     "research_presets.d/*.json",
+    "research_studies.d/*.json",
     "stats.d/*.toml",
 ]
 
