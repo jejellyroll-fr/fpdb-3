@@ -46,6 +46,7 @@ from fpdb_3_legacy.hud_presentation import (
     preview_blocks,
     reference_packages,
 )
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.modern_hud_preferences.preview_widgets import HudPreviewWidget
 
 #: The order the packages are offered in: the one a new user should read
@@ -78,7 +79,7 @@ class ReferenceHudPreview(QWidget):
         layout = QVBoxLayout(self)
 
         chooser = QHBoxLayout()
-        chooser.addWidget(QLabel("Reference HUD"))
+        chooser.addWidget(QLabel(_("Reference HUD")))
         self.package_combo = QComboBox()
         for name, label in PACKAGE_ORDER:
             if name in self._packages:
@@ -86,7 +87,7 @@ class ReferenceHudPreview(QWidget):
         self.package_combo.currentIndexChanged.connect(self._package_changed)
         chooser.addWidget(self.package_combo, 1)
 
-        chooser.addWidget(QLabel("Context"))
+        chooser.addWidget(QLabel(_("Context")))
         self.context_combo = QComboBox()
         self.context_combo.currentIndexChanged.connect(self._context_changed)
         chooser.addWidget(self.context_combo, 1)
@@ -105,9 +106,11 @@ class ReferenceHudPreview(QWidget):
         paths_layout = QVBoxLayout(paths_box)
         self.paths_list = QListWidget()
         self.paths_list.setToolTip(
-            "Every popup a cell of this package opens, and everything those popups "
-            "navigate to. A row ending in an arrow leaves the package for the "
-            "shipped popup library.",
+            _(
+                "Every popup a cell of this package opens, and everything those popups "
+                "navigate to. A row ending in an arrow leaves the package for the "
+                "shipped popup library.",
+            ),
         )
         paths_layout.addWidget(self.paths_list)
         right.addWidget(paths_box, 2)
