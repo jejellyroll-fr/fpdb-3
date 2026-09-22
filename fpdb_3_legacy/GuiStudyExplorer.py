@@ -130,7 +130,6 @@ class GuiStudyExplorer(QWidget):
         upper_layout.addWidget(self._build_categories_box())
         upper_layout.addWidget(self._build_recent_box())
         self.upper_area = wrap_in_scroll(upper)
-        layout.addWidget(self.upper_area)
 
         self.splitter = self._build_studies_splitter(muted)
         self.splitter.set_narrow_below(STACK_BELOW_WIDTH)
@@ -150,7 +149,11 @@ class GuiStudyExplorer(QWidget):
             sizes=(360, 620),
         )
         self.pane_switcher.set_active(DEFAULT_ZONE)
+        # The bar comes first, above every zone it switches. Added after the
+        # block it would sit under the Filters zone and over the Studies one --
+        # a bar that moves down the window as the reader changes zone.
         layout.addWidget(self.pane_switcher.bar)
+        layout.addWidget(self.upper_area)
         layout.addWidget(self.splitter, 1)
 
         # The two alternative entry points are pinned to the bottom: they were

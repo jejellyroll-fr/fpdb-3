@@ -159,7 +159,6 @@ class GuiStudyDashboard(QWidget):
         header_layout = QVBoxLayout(header)
         header_layout.setContentsMargins(0, 0, 0, 0)
         self.header_area = wrap_in_scroll(header)
-        layout.addWidget(self.header_area)
 
         self.title_label = QLabel(self.model.study.title)
         self.title_label.setStyleSheet("font-size: 20px; font-weight: bold;")
@@ -356,7 +355,11 @@ class GuiStudyDashboard(QWidget):
             sizes=(520, 260),
         )
         self.pane_switcher.set_active(DEFAULT_ZONE)
+        # The bar comes first, above every zone it switches. Added after the
+        # block it would sit under the Filters zone and over the Panels one --
+        # a bar that moves down the window as the reader changes zone.
         layout.addWidget(self.pane_switcher.bar)
+        layout.addWidget(self.header_area)
         layout.addWidget(self.splitter, 1)
         self._render_cross_filters()
 

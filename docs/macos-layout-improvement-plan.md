@@ -169,8 +169,11 @@ Nouveau module `fpdb_3_legacy/responsive_layout.py` :
   qui est ce qui grandit — s’efface, donc la barre cache le splitter dès que la
   zone affichée n’est pas l’un de ses enfants. `sizes` est l’arrangement à
   retrouver : celui du splitter, une entrée par panneau qu’il contient, et non
-  une par zone. Les trois écrans qui empilent des panneaux s’en servent :
-  Research Browser, Study Explorer et Study Dashboard.
+  une par zone. `bar` se place au-dessus de toutes les zones qu’elle commute :
+  ajoutée après le bloc qu’elle commute, elle se retrouvait sous la zone Filters
+  et au-dessus de la zone Studies, donc descendait dans la fenêtre quand le
+  lecteur changeait de zone. Les trois écrans qui empilent des panneaux s’en
+  servent : Research Browser, Study Explorer et Study Dashboard.
 - `cap_context_block` plafonne un bloc de contexte qui défile à un quart de la
   fenêtre. Un `QVBoxLayout` donne à un élément sans étirement sa taille
   souhaitée avant que l’élément étiré ne reçoive quoi que ce soit, et un bloc

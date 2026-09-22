@@ -609,6 +609,7 @@ def test_the_study_explorer_gives_one_zone_the_height_at_a_time(qtbot, tmp_path)
     assert [pane.isVisibleTo(explorer) for pane in panes] == [True, False, False]
     assert explorer.upper_area.height() > 400, "the block above is a zone like the others"
     assert explorer.splitter.isVisibleTo(explorer) is False, "the splitter steps aside for a zone outside it"
+    assert switcher.bar.y() < explorer.upper_area.y(), "and the bar stays above the zone it switches"
 
     explorer.resize(1280, 720)
     process(app)
@@ -927,6 +928,7 @@ def test_the_study_dashboard_shows_one_zone_at_a_time_when_the_height_runs_out(q
     assert [zone.isVisibleTo(dashboard) for zone in zones] == [True, False, False]
     assert zones[0].height() > 500, "the context block is a zone like the others"
     assert dashboard.splitter.isVisibleTo(dashboard) is False, "the splitter steps aside for a zone outside it"
+    assert switcher.bar.y() < zones[0].y(), "and the bar stays above the zone it switches"
 
     switcher.set_active(2)
     process(app)
