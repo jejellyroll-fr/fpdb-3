@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
     QHBoxLayout,
+    QHeaderView,
     QLabel,
     QPushButton,
     QSpinBox,
@@ -143,6 +144,15 @@ class GuiStudyDifferences(QWidget):
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.table.verticalHeader().hide()
         self.table.itemDoubleClicked.connect(self._open_selected)
+        # The spot and the context are the two columns a reader picks a row
+        # by, and both were being truncated to "SRP · PFR …" while the empty
+        # space sat to the right of the last column (#371). They take the
+        # slack; the numbers keep the width their own contents need.
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        header.setStretchLastSection(False)
         layout.addWidget(self.table, 1)
 
         actions = QHBoxLayout()
@@ -176,23 +186,23 @@ class GuiStudyDifferences(QWidget):
         )
         worker.finished_ok.connect(self._report_done)
         worker.failed.connect(self._report_failed)
-        worker.finished.connect(lambda: self._retire_worker(worker))
+        # Qt's own slot rather than a lambda calling back into this widget: a
+        # queued signal that reaches a bound method after the widget has been
+        # destroyed does not raise, it takes the process down (#370).
+        worker.finished.connect(worker.deleteLater)
         self._worker = worker
         worker.start()
 
     def _report_done(self, report: DifferenceReport) -> None:
+        self._worker = None
         self._report = report
         self.run_button.setEnabled(True)
         self._render_report(report)
 
     def _report_failed(self, message: str) -> None:
+        self._worker = None
         self.run_button.setEnabled(True)
         self.status_label.setText(f"Comparison unavailable: {message}")
-
-    def _retire_worker(self, worker: _DifferencesWorker) -> None:
-        if self._worker is worker:
-            self._worker = None
-        worker.deleteLater()
 
     def _render_report(self, report: DifferenceReport) -> None:
         self.table.setSortingEnabled(False)

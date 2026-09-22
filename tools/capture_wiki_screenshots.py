@@ -82,6 +82,26 @@ RESEARCH_SHOTS: Final[tuple[tuple[str, str], ...]] = (
     ("research-profit.png", "profit"),
 )
 
+# One screenshot per Study Explorer surface (#371), each named by the study
+# and the panel behind it so a filename and the screen it shows cannot drift.
+# These are the spot-first path: the landing page, two study overviews, the
+# four visualisations, the range grid, and the hands behind a comparison.
+STUDY_SHOTS: Final[tuple[tuple[str, str, str], ...]] = (
+    ("study-preflop-overview.png", "preflop_rfi", "overview"),
+    ("study-srp-overview.png", "srp_pfr_ip_flop", "overview"),
+    ("study-sizing.png", "preflop_rfi", "sizing"),
+    ("study-position-matrix.png", "preflop_facing_open", "position"),
+    ("study-board-heatmap.png", "srp_pfr_ip_flop", "board"),
+    ("study-range-grid.png", "preflop_rfi", "range"),
+    ("study-hand-strength.png", "srp_pfr_ip_flop", "strength"),
+    ("study-profit.png", "preflop_rfi", "profit"),
+)
+
+#: The study whose source hands are worth a picture: a comparison panel, so
+#: the pane shows both sides rather than one population.
+STUDY_HANDS: Final[tuple[str, str]] = ("srp_pfr_ip_flop", "overview")
+
+
 # The view whose hands are worth showing beside it: a grouped result with a
 # readable row count, and a group every workspace has.
 DRILL_VIEW: Final = "table"
@@ -288,7 +308,11 @@ def build_views(config, sql, window, config_path: Path):  # noqa: C901 - each sm
         ("auto-notes-workbench.png", auto_notes),
         ("stats-guide.png", lambda: GuiStatsInfo.GuiStatsInfo(config, window)),
     ]
-    return views + build_research_views(config, sql, window, config_path)
+    return (
+        views
+        + build_research_views(config, sql, window, config_path)
+        + build_study_views(config, sql, window, config_path)
+    )
 
 
 def workspace_questions(config_path: Path) -> dict[str, dict[str, Any]]:
@@ -386,6 +410,88 @@ def build_research_views(config, sql, window, config_path: Path):  # noqa: C901 
         ("research-hands.png", partial(research_view, DRILL_VIEW, hands=True)),
         ("hud-preferences-dynamic-panels.png", hud_preferences_dynamic),
     ]
+    return views
+
+
+def build_study_views(config, sql, window, _config_path: Path):
+    """``(filename, factory)`` for the Study Explorer surfaces (#371).
+
+    The spot-first path is what the docs lead with, so it is what the pictures
+    have to show: the landing page a reader opens, a study read through each of
+    its panels, the differences page, and the hands behind a comparison. Every
+    one is built from the shipped studies and the demo database, so a picture
+    is the product rather than a mock-up of it.
+    """
+    from fpdb_3_legacy import Database
+    from fpdb_3_legacy.GuiStudyDashboard import GuiStudyDashboard
+    from fpdb_3_legacy.GuiStudyDifferences import GuiStudyDifferences
+    from fpdb_3_legacy.GuiStudyExplorer import GuiStudyExplorer
+    from fpdb_3_legacy.research_studies import builtin_studies
+    from fpdb_3_legacy.research_study_explorer import StudyExplorerModel
+
+    state: dict[str, Any] = {}
+
+    def study_db():
+        if "db" not in state:
+            state["db"] = Database.Database(config, sql=sql)
+        return state["db"]
+
+    def settle_dashboard(dashboard: Any) -> None:
+        """Wait for the panel and its source hands, then stop everything.
+
+        A dashboard left running holds worker threads, and the next capture
+        builds another one: closing each in turn is what keeps a run of ten
+        pictures to one dashboard at a time.
+        """
+        from PySide6.QtWidgets import QApplication
+
+        deadline = monotonic() + WORKER_TIMEOUT
+        while monotonic() < deadline:
+            QApplication.processEvents()
+            if dashboard._results and dashboard.source_hands.page is not None:
+                break
+            sleep(0.02)
+        QApplication.processEvents()
+
+    def dashboard_for(study_id: str, panel_id: str, *, history=None):
+        explorer = StudyExplorerModel(builtin_studies(), history)
+        selection = explorer.open_study(study_id, remember=False)
+        dashboard = GuiStudyDashboard(config, sql, window, db=study_db(), selection=selection)
+        # The demo corpus is a few thousand hands, so the shipped minimums --
+        # written for a database of real volume -- would hide every row. A
+        # screenshot of an empty panel teaches nothing.
+        dashboard.model.set_min_sample(0)
+        dashboard.model.set_active_panel(panel_id)
+        dashboard.refresh()
+        settle_dashboard(dashboard)
+        return dashboard
+
+    def explorer_landing():
+        return GuiStudyExplorer(config, sql, window, db=study_db())
+
+    def differences():
+        widget = GuiStudyDifferences(config, sql, window, db=study_db())
+        # The shipped minimums are written for a database of real volume; the
+        # demo is a few thousand hands, and a screenshot of "no rows above the
+        # threshold" would teach the wrong thing about the page.
+        widget.hero_sample_spin.setValue(20)
+        widget.field_sample_spin.setValue(40)
+        widget.run_report()
+        if not settle(widget, "_worker"):
+            raise RuntimeError("the differences report did not finish")
+        return widget
+
+    views = [
+        ("study-explorer-landing.png", explorer_landing),
+        ("study-differences.png", differences),
+    ]
+    views += [
+        (filename, partial(dashboard_for, study_id, panel_id))
+        for filename, study_id, panel_id in STUDY_SHOTS
+    ]
+    views.append(
+        ("study-source-hands.png", partial(dashboard_for, *STUDY_HANDS)),
+    )
     return views
 
 
