@@ -266,7 +266,12 @@ def test_the_design_system_shows_a_picture_that_exists() -> None:
     from pathlib import Path
 
     docs = Path(__file__).resolve().parents[1] / "docs"
-    referenced = set(re.findall(r"\(images/(reference-huds/[^)]+\.png)\)", (docs / "hud-design-system.md").read_text()))
+    referenced = set(
+        re.findall(
+            r"\(images/(reference-huds/[^)]+\.png)\)",
+            (docs / "hud-design-system.md").read_text(encoding="utf-8"),
+        )
+    )
 
     assert referenced, "the design system shows no pictures at all"
     missing = sorted(name for name in referenced if not (docs / "images" / name).exists())
@@ -276,7 +281,7 @@ def test_the_design_system_shows_a_picture_that_exists() -> None:
 def test_the_design_system_documents_every_role_and_the_sample_rule() -> None:
     from pathlib import Path
 
-    text = (Path(__file__).resolve().parents[1] / "docs" / "hud-design-system.md").read_text()
+    text = (Path(__file__).resolve().parents[1] / "docs" / "hud-design-system.md").read_text(encoding="utf-8")
 
     for role in ROLES:
         assert role in text, f"the design system does not explain the {role!r} role"
