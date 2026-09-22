@@ -1927,8 +1927,12 @@ texture*. The label already existed; nothing called it. Technical names
         hook directly; removed child widgets do not receive ``closeEvent``.
         """
         for worker in (self._worker, self._drill_worker):
-            if worker is not None and worker.isRunning():
-                worker.wait(SourceHandsPane.SHUTDOWN_WAIT_MS)
+            if (
+                worker is not None
+                and worker.isRunning()
+                and not worker.wait(SourceHandsPane.SHUTDOWN_WAIT_MS)
+            ):
+                worker.wait()
         self._worker = None
         self._drill_worker = None
         self.source_hands.stop()

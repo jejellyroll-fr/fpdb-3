@@ -203,8 +203,11 @@ def build_difference_report(
         hero_series = _series(hero, candidate)
         field_series = _series(field, candidate)
         for key in sorted(set(hero_series) | set(field_series), key=str):
-            hero_point = hero_series.get(key, _SeriesPoint(0, 0))
-            field_point = field_series.get(key, _SeriesPoint(0, 0))
+            missing_sample = candidate.panel_kind == "response_distribution"
+            hero_default = _SeriesPoint(0, hero.total_opportunities if missing_sample else 0)
+            field_default = _SeriesPoint(0, field.total_opportunities if missing_sample else 0)
+            hero_point = hero_series.get(key, hero_default)
+            field_point = field_series.get(key, field_default)
             if hero_point.sample <= 0 or field_point.sample <= 0:
                 low_sample_groups += 1
                 continue

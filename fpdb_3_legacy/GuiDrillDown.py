@@ -479,8 +479,8 @@ class SourceHandsPane(QWidget):
         self._serial += 1
         self._counts_serial += 1
         for worker in live_workers(self._workers):
-            if worker.isRunning():
-                worker.wait(self.SHUTDOWN_WAIT_MS)
+            if worker.isRunning() and not worker.wait(self.SHUTDOWN_WAIT_MS):
+                worker.wait()
         self._workers.clear()
 
 

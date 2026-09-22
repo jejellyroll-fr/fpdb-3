@@ -243,8 +243,8 @@ class GuiStudyDifferences(QWidget):
     def shutdown_workers(self) -> None:
         """Wait for report work before ``fpdb.close_tab`` destroys the page."""
         worker = self._worker
-        if worker is not None and worker.isRunning():
-            worker.wait(30_000)
+        if worker is not None and worker.isRunning() and not worker.wait(30_000):
+            worker.wait()
         self._worker = None
 
     def close_owned_database(self) -> None:

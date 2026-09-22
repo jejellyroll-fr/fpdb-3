@@ -285,8 +285,8 @@ class GuiStudyDashboard(QWidget):
         """
         self.source_hands.stop()
         for worker in live_workers(self._workers):
-            if worker.isRunning():
-                worker.wait(SourceHandsPane.SHUTDOWN_WAIT_MS)
+            if worker.isRunning() and not worker.wait(SourceHandsPane.SHUTDOWN_WAIT_MS):
+                worker.wait()
         self._workers.clear()
 
     def close_owned_database(self) -> None:
@@ -333,19 +333,24 @@ class GuiStudyDashboard(QWidget):
         self.refresh()
 
     @staticmethod
+    def _parse_numeric_range(text: str, converter: Any, multiplier: Any = 1) -> Any:
+        values = [converter(part.strip()) * multiplier for part in text.split(",") if part.strip()]
+        if len(values) == 1:
+            return [values[0], values[0]]
+        if not values:
+            return None
+        return [values[0], values[1]]
+
+    @staticmethod
     def _parse_variable(name: str, value: str) -> Any:
         text = value.strip()
         if not text:
             return None
         if name in {"effective_stack_bb", "stake_bb"}:
-            values = [float(part.strip()) for part in text.split(",") if part.strip()]
-            if name == "effective_stack_bb":
-                values = [value * 100 for value in values]
-            if len(values) == 1:
-                return [values[0], values[0]]
-            if not values:
-                return None
-            return [values[0], values[1]]
+            multiplier = 100 if name == "effective_stack_bb" else 1
+            return GuiStudyDashboard._parse_numeric_range(text, float, multiplier)
+        if name == "max_seats":
+            return GuiStudyDashboard._parse_numeric_range(text, int)
         if name == "in_position" and text.casefold() in {"true", "yes", "1"}:
             return True
         if name == "in_position" and text.casefold() in {"false", "no", "0"}:

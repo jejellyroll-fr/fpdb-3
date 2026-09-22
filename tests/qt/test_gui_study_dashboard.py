@@ -71,6 +71,8 @@ def test_stale_panel_result_cannot_render_into_a_different_active_panel(
 def test_effective_stack_variable_uses_stored_hundredths_of_bb() -> None:
     assert GuiStudyDashboard._parse_variable("effective_stack_bb", "80,120") == [8000.0, 12000.0]
     assert GuiStudyDashboard._parse_variable("stake_bb", "0.25,1") == [0.25, 1.0]
+    assert GuiStudyDashboard._parse_variable("max_seats", "6") == [6, 6]
+    assert GuiStudyDashboard._parse_variable("max_seats", "6,9") == [6, 9]
 
 
 def test_cross_filter_is_visible_reversible_and_shared(qtbot, dashboard_db: Database, tmp_path) -> None:
