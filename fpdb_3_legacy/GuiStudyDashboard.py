@@ -456,7 +456,9 @@ class GuiStudyDashboard(QWidget):
         self._load_active_panel()
 
     def _render_cross_filters(self) -> None:
-        while self.filter_row.count() > 1:
+        # Keep the label at index 0 and the stretch spacer at the end. Only
+        # buttons created by this method occupy the slots between them.
+        while self.filter_row.count() > 2:
             item = self.filter_row.takeAt(1)
             widget = item.widget()
             if widget is not None:

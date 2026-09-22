@@ -62,9 +62,20 @@ def test_cross_filter_is_visible_reversible_and_shared(qtbot, dashboard_db: Data
     assert any("Paired boards" in button.text() for button in dashboard.findChildren(type(dashboard.refresh_button)))
     assert dashboard.model.panel_query("hands").filters["board_pairing"] == "paired"
 
+    # Re-rendering with more than one filter must preserve both fixed controls:
+    # the label remains first and the spacer remains last (#393).
+    dashboard.add_cross_filter("response", "fold", "Response: fold")
+    assert dashboard.filter_row.itemAt(0).widget().text() == "Active cross-filters:"
+    assert {button.text() for button in dashboard.findChildren(type(dashboard.refresh_button))} >= {
+        "Paired boards ×",
+        "Response: fold ×",
+    }
+
     dashboard.remove_cross_filter("board_pairing")
-    assert dashboard.model.state.cross_filters == ()
+    assert tuple(item.name for item in dashboard.model.state.cross_filters) == ("response",)
     assert "board_pairing" not in dashboard.model.panel_query("hands").filters
+    dashboard.remove_cross_filter("response")
+    assert dashboard.model.state.cross_filters == ()
 
 
 def test_distribution_chart_is_real_comparative_and_clickable(qtbot) -> None:

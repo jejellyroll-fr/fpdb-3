@@ -29,6 +29,7 @@ import re
 import sys
 import threading
 import traceback
+import weakref
 from datetime import datetime, timedelta
 from decimal import Decimal
 from importlib import import_module
@@ -224,15 +225,14 @@ class Database(
 
     # The semaphore is global on purpose: it bounds how many worker
     # connections this *process* holds open at once, which is a limit about
-    # the process rather than about any one database. The pool is not, and
-    # used to be: a pooled connection is a connection to a particular
-    # database, so one shared queue could hand a worker a cursor on somebody
-    # else's data as soon as a process held two Database objects (#368). Each
-    # instance now keeps its own, created in ``__init__``.
+    # the process rather than about any one database. Idle connections are
+    # counted separately and evicted before opening a connection for another
+    # database, so the active limit and the total open-connection limit agree.
     _worker_conn_semaphore = threading.Semaphore(4)
     _worker_pool_lock = threading.Lock()
     _worker_idle_connections = 0
     _worker_idle_limit = 4
+    _worker_pools = weakref.WeakSet()
 
     hero_hudstart_def = "1999-12-31"  # default for length of Hero's stats in HUD
     villain_hudstart_def = "1999-12-31"  # default for length of Villain's stats in HUD
@@ -292,6 +292,7 @@ class Database(
         self.connection: Any = None
         self.cursor: Any = None
         self._worker_conn_pool: queue.Queue[Any] = queue.Queue()
+        Database._worker_pools.add(self._worker_conn_pool)
         self.__connected = False
         self.wrongDbVersion = False
         self.settings = {}
@@ -832,20 +833,50 @@ class Database(
         failed, it hands the next borrower a connection whose transaction is
         already aborted, so every later query on it fails too.
         """
-        self._worker_conn_semaphore.acquire()
+        Database._worker_pools.add(self._worker_conn_pool)
         conn = None
+        active_slot = False
         try:
             try:
                 with Database._worker_pool_lock:
                     conn = self._worker_conn_pool.get_nowait()
                     Database._worker_idle_connections -= 1
             except queue.Empty:
-                conn = self._create_new_worker_connection()
+                # An idle connection owned by another Database still occupies
+                # a process-wide slot. Evict stale idle pools before waiting
+                # for the active-worker slot, so a newly opened study cannot
+                # be starved by connections retained by another study.
+                self._evict_idle_worker_connections(exclude=self._worker_conn_pool)
+                self._worker_conn_semaphore.acquire()
+                active_slot = True
+                try:
+                    conn = self._create_new_worker_connection()
+                except Exception:
+                    self._worker_conn_semaphore.release()
+                    active_slot = False
+                    raise
 
             yield conn
         finally:
             self._return_worker_connection(conn)
-            self._worker_conn_semaphore.release()
+            if active_slot:
+                self._worker_conn_semaphore.release()
+
+    @classmethod
+    def _evict_idle_worker_connections(cls, exclude=None) -> None:
+        """Drop idle connections from other pools before opening a new one."""
+        with cls._worker_pool_lock:
+            for pool in tuple(cls._worker_pools):
+                if pool is exclude:
+                    continue
+                while True:
+                    try:
+                        conn = pool.get_nowait()
+                    except queue.Empty:
+                        break
+                    cls._worker_idle_connections -= 1
+                    with contextlib.suppress(Exception):
+                        conn.close()
 
     def _return_worker_connection(self, conn) -> None:
         """Put a worker connection back, with nothing left open on it.
@@ -863,12 +894,14 @@ class Database(
                 conn.close()
             return
         with Database._worker_pool_lock:
-            if Database._worker_idle_connections >= Database._worker_idle_limit:
+            registered = self._worker_conn_pool in Database._worker_pools
+            if registered and Database._worker_idle_connections >= Database._worker_idle_limit:
                 with contextlib.suppress(Exception):
                     conn.close()
                 return
             self._worker_conn_pool.put(conn)
-            Database._worker_idle_connections += 1
+            if registered:
+                Database._worker_idle_connections += 1
 
     def _create_new_worker_connection(self):
         """Open a dedicated connection for a background worker thread.
@@ -993,6 +1026,7 @@ class Database(
             if conn is not None:
                 with contextlib.suppress(Exception):
                     conn.close()
+        Database._worker_pools.discard(pool)
 
     def _close_cursor_quietly(self) -> None:
         cursor = getattr(self, "cursor", None)

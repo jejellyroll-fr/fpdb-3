@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from PySide6.QtCore import Qt
 
 from fpdb_3_legacy.GuiStudyDifferences import GuiStudyDifferences
 from fpdb_3_legacy.research_differences import DifferenceReport, DifferenceRow
@@ -63,3 +64,47 @@ def test_omaha_picker_uses_the_database_game_token(qtbot, tmp_path) -> None:
     widget.game_combo.setCurrentText("Omaha")
 
     assert widget.game_combo.currentData() == "omahahi"
+
+
+def test_gap_column_sorts_by_displayed_gap_not_review_score(qtbot, tmp_path) -> None:
+    widget = GuiStudyDifferences(registry=builtin_studies(), db=object(), state_path=tmp_path / "history.json")
+    qtbot.addWidget(widget)
+    rows = (
+        DifferenceRow(
+            candidate_id="preflop_rfi:overview",
+            study_id="preflop_rfi",
+            panel_id="overview",
+            spot="Preflop · First in",
+            context="Position: BTN",
+            hero_value_bp=5500,
+            field_value_bp=4200,
+            gap_bp=1300,
+            hero_sample=40,
+            field_sample=100,
+            score=52000,
+            unit="frequency",
+            context_filters={},
+            cross_filters={},
+        ),
+        DifferenceRow(
+            candidate_id="preflop_rfi:overview:co",
+            study_id="preflop_rfi",
+            panel_id="overview",
+            spot="Preflop · First in",
+            context="Position: CO",
+            hero_value_bp=5000,
+            field_value_bp=5100,
+            gap_bp=-100,
+            hero_sample=40,
+            field_sample=100,
+            score=4000,
+            unit="frequency",
+            context_filters={},
+            cross_filters={},
+        ),
+    )
+    widget._render_report(DifferenceReport(rows=rows, candidates_evaluated=2, panels_executed=2, low_sample_groups=0))
+
+    widget.table.sortItems(4, Qt.SortOrder.AscendingOrder)
+
+    assert widget.table.item(0, 4).text() == "-1.0 pp"

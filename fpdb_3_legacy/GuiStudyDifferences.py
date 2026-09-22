@@ -48,7 +48,10 @@ class _SortableItem(QTableWidgetItem):
         right = other.data(self._SORT_ROLE)
         if left is not None and right is not None:
             return left < right
-        return super().__lt__(other)
+        # Calling QTableWidgetItem.__lt__ through the Python wrapper can
+        # dispatch back into this override on some Qt builds. Compare the
+        # display values directly for the text-only columns instead.
+        return self.text() < other.text()
 
 
 class _DifferencesWorker(QThread):
@@ -154,10 +157,21 @@ class GuiStudyDifferences(QWidget):
         self.status_label.setStyleSheet(f"color: {muted};")
         layout.addWidget(self.status_label)
 
-        self.table = QTableWidget(0, 8)
+        self.table = QTableWidget(0, 9)
         self.table.setHorizontalHeaderLabels(
-            ["Spot", "Context", "You", "Field", "Gap", "Your sample", "Field sample", "Review"]
+            [
+                "Spot",
+                "Context",
+                "You",
+                "Field",
+                "Gap",
+                "Your sample",
+                "Field sample",
+                "Review",
+                "Review score",
+            ]
         )
+        self.table.hideColumn(8)
         self.table.setSortingEnabled(True)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
@@ -248,20 +262,22 @@ class GuiStudyDifferences(QWidget):
             numeric_sort_values = {
                 2: row.hero_value_bp,
                 3: row.field_value_bp,
-                4: row.score,
+                4: row.gap_bp,
                 5: row.hero_sample,
                 6: row.field_sample,
+                8: row.score,
             }
             for column, value in enumerate(values):
                 item = _SortableItem(value, numeric_sort_values.get(column))
                 if column == 0:
                     item.setData(Qt.ItemDataRole.UserRole, row)
                 self.table.setItem(row_index, column, item)
+            self.table.setItem(row_index, 8, _SortableItem(str(row.score), row.score))
         self.table.setSortingEnabled(True)
         # ``build_difference_report`` already sorted by review score. Make the
         # initial table order explicit after re-enabling Qt sorting; otherwise
         # QTableWidget applies its default Spot-column ordering (#365).
-        self.table.sortItems(4, Qt.SortOrder.DescendingOrder)
+        self.table.sortItems(8, Qt.SortOrder.DescendingOrder)
         self.status_label.setText(
             f"{len(report.rows)} differences from {report.panels_executed} grouped panels "
             f"({report.candidates_evaluated} curated candidates). {report.heuristic_description} "
