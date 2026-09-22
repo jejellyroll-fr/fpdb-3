@@ -180,19 +180,28 @@ class _DrillWorker(QThread):
 #: game and limit stop the first answer silently averaging two games (#355).
 _DEFAULT_FILTERS: Final[tuple[str, ...]] = ("hero", "game", "limit", "primary_situation")
 
-#: Width below which the three panes stop being usable side by side. Measured
-#: from the panes' own minimums with the production theme (the filter pane alone
-#: asks for ~530 px), plus room for the two splitter handles.
-STACK_BELOW_WIDTH = 1180
+#: The widths the three panes need to be *read* side by side, measured from
+#: their own content with the production theme: the filter rows want 624 px, the
+#: results table 402 and the hands list 260. The splitter used to hand each pane
+#: a third of whatever it had, so at 1600 px the filter pane still had 33 px of
+#: its rows out of sight -- "Add breakdown" and "Save / Delete" sat permanently
+#: half outside it, on a screen wide enough to show them.
+PANE_WIDTHS: Final[tuple[int, int, int]] = (624, 402, 260)
+
+#: Below this the panes are stacked and shown one at a time. Measured on the
+#: splitter itself, which is what carries the threshold, so it is the three
+#: widths above plus the two handles between them -- 1302 px. A window that can
+#: hold three readable panes gets three; a narrower one gets one at a time.
+STACK_BELOW_WIDTH = sum(PANE_WIDTHS) + 2 * 8
 
 
 class _ChoiceCombo(QComboBox):
     """A compact multi-select: one item per choice, toggled in place (#329).
 
-    A ``QComboBox`` rather than a list because the filter pane is 320 pixels
-    wide and most domains have fewer than a dozen values. The chosen tokens are
-    sent to the engine unchanged; only the item *text* carries the tick, so the
-    control can never invent a value the engine does not know.
+    A ``QComboBox`` rather than a list because the filter pane is narrow and
+    most domains have fewer than a dozen values. The chosen tokens are sent to
+    the engine unchanged; only the item *text* carries the tick, so the control
+    can never invent a value the engine does not know.
     """
 
     toggled = Signal()
@@ -604,10 +613,12 @@ class GuiResearchBrowser(QWidget):
         layout.addWidget(self.narrow_view_bar)
         # Three panes side by side need the width they were designed for, and
         # the filter pane is the first to suffer: squeezed, its rows are all
-        # scrollbar and the Run button sits below the fold. Below the measured
-        # width the panes are stacked, which gives each one the full width and
-        # keeps the rows readable. The results get the largest share of the
-        # height because they are what the reader came for.
+        # scrollbar and the Run button sits below the fold. Each pane is
+        # therefore given the width its own content measured at, and the panes
+        # only stack once the window is narrower than the three of them
+        # together -- below that, one at a time at full width is more readable
+        # than three columns of scrollbar. The results get the largest share of
+        # the height because they are what the reader came for.
         self.splitter = ResponsiveSplitter(Qt.Orientation.Horizontal, self)
         self.splitter.set_narrow_below(STACK_BELOW_WIDTH)
         self.splitter.set_narrow_sizes([210, 300, 190])
@@ -620,8 +631,8 @@ class GuiResearchBrowser(QWidget):
         # The filter list is pinned to the top of its pane; the results and the
         # hands fill theirs, because a table that does not fill its pane is a
         # table with a strip of dead space above it. Only the filter pane scrolls
-        # sideways: a filter row is wider than the narrowest pane, and a row that
-        # cannot scroll is a row whose controls are simply not there.
+        # sideways, and only as a safety net: given its measured width a filter
+        # row fits, and the scrollbar is there for a window dragged below it.
         self.filters_pane = wrap_in_scroll(self._build_filters_pane(muted), horizontal=True)
         self.filters_pane.setMinimumWidth(280)
         self.results_pane = wrap_in_scroll(self._build_results_pane(muted), top_aligned=False)
@@ -631,15 +642,19 @@ class GuiResearchBrowser(QWidget):
         self.splitter.addWidget(self.filters_pane)
         self.splitter.addWidget(self.results_pane)
         self.splitter.addWidget(self.hands_pane)
-        self.splitter.setSizes([320, 480, 420])
+        # The measured widths, not equal thirds: each pane opens at the width its
+        # content asked for. Extra room on a larger screen is shared between them.
+        self.splitter.setSizes(list(PANE_WIDTHS))
 
-        # The sizes to come back to once the panes are side by side again. The
-        # splitter remembers its own, but those are read while one pane is
-        # hidden, so the browser keeps the ones from before the panes were
-        # stacked.
-        self._wide_pane_sizes: list[int] = []
+        # The widths to come back to once the panes are side by side again. The
+        # splitter's own memory is read while the panes are still wide, but it is
+        # spent the first time it is used; the browser keeps its own so that the
+        # arrangement survives every later round trip. It starts at the measured
+        # widths, and a reader who moves a divider replaces them.
+        self._wide_pane_sizes: list[int] = list(PANE_WIDTHS)
         self._stacked = False
         self.splitter.stacked_changed.connect(self._on_stacked_changed)
+        self.splitter.splitterMoved.connect(self._remember_wide_sizes)
         self.narrow_view_bar.currentChanged.connect(self._on_narrow_view_changed)
         self._on_stacked_changed(self.splitter.is_stacked())
 
@@ -659,6 +674,16 @@ class GuiResearchBrowser(QWidget):
         # in force, and is a no-op when nothing changed.
         self._on_stacked_changed(self.splitter.is_stacked())
 
+    def _remember_wide_sizes(self) -> None:
+        """Keep the divider positions a reader chose, while the panes are wide.
+
+        ``splitterMoved`` only fires on a drag, so this never records the sizes
+        of the stacked arrangement -- which are heights, and would be handed back
+        as widths the next time the panes went side by side.
+        """
+        if not self.splitter.is_stacked():
+            self._wide_pane_sizes = self.splitter.sizes()
+
     def _on_stacked_changed(self, stacked: bool) -> None:
         """One pane at a time once the panes are stacked, all three when not.
 
@@ -673,12 +698,14 @@ class GuiResearchBrowser(QWidget):
                 self._stacked = False
                 for pane in self._panes():
                     pane.setVisible(True)
+                # Restored after the panes are back on screen: a width given to a
+                # hidden pane is a width the splitter lays out again the moment
+                # that pane reappears, and the arrangement would be lost.
                 if self._wide_pane_sizes:
                     self.splitter.setSizes(self._wide_pane_sizes)
             return
         if not self._stacked:
             self._stacked = True
-            self._wide_pane_sizes = self.splitter.sizes()
         self._apply_narrow_view()
 
     def _on_narrow_view_changed(self, _index: int) -> None:

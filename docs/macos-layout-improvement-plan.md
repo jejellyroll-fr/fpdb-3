@@ -162,7 +162,7 @@ Minimums mesurés hors écran, avec le thème de production, avant et après :
 | --- | --- | --- |
 | Préférences HUD | 1064 × 1133 ; minimum imposé 1200 × 800 | 890 × 506 ; aucun minimum imposé, et 735 × 504 sous 900 px de large |
 | Study Explorer | 667 × 898 | 410 × 430 |
-| Research Browser | 1097 × 497 | 336 × 288 empilé, ≈ 890 × 288 côte à côte |
+| Research Browser | 1097 × 497 | 296 × 141 empilé (904 × 141 côte à côte) ; trois colonnes seulement au-delà de 1302 px de large |
 | Study Dashboard | 454 × 1120 | 454 × 554 |
 
 Le seuil de 1024 × 640 est tenu par les quatre écrans. Les facteurs de hauteur
@@ -204,17 +204,29 @@ l’en-tête résume les filtres actifs ; les cartes de spots se replient en 3/2
 colonnes ; liste et détail s’empilent sous 900 px ; les deux points d’entrée
 secondaires restent épinglés en bas.
 
-**Research Browser** — les trois panneaux sont dans un `ResponsiveSplitter`
-qui les empile sous 1180 px, avec la part de hauteur la plus large pour les
-résultats ; chaque panneau défile, ce qui ramène son minimum à celui d’une
-fenêtre ; le conteneur de lignes de filtres ne prend plus l’étirement
-vertical — c’est ce qui étirait chaque ligne et poussait Exécuter hors du
-panneau. Empilés, les trois panneaux se partageaient la hauteur et chacun n’en
-recevait qu’un tiers : une barre Filtres / Résultats / Mains, visible seulement
-dans cet arrangement, donne au panneau choisi la hauteur complète. Le panneau
-des filtres défile aussi horizontalement : une ligne de filtre est plus large
-que le panneau le plus étroit, et sans ce défilement ses contrôles situés
-au-delà du bord n’existaient tout simplement pas.
+**Research Browser** — les trois panneaux sont dans un `ResponsiveSplitter` ;
+chaque panneau défile, ce qui ramène son minimum à celui d’une fenêtre ; le
+conteneur de lignes de filtres ne prend plus l’étirement vertical — c’est ce qui
+étirait chaque ligne et poussait Exécuter hors du panneau. Empilés, les trois
+panneaux se partageaient la hauteur et chacun n’en recevait qu’un tiers : une
+barre Filtres / Résultats / Mains, visible seulement dans cet arrangement, donne
+au panneau choisi la hauteur complète.
+
+La largeur des panneaux est mesurée sur leur contenu, et non plus divisée en
+tiers. Les lignes de filtres réclament 624 px, le tableau de résultats 402 et la
+liste de mains 260 : le splitter donnait auparavant à chacun le tiers de ce qu’il
+avait, si bien qu’à 1600 px le panneau des filtres était encore amputé de 33 px —
+« Add breakdown » et « Save / Delete » restaient à moitié hors du panneau sur un
+écran assez large pour les montrer. `PANE_WIDTHS = (624, 402, 260)` ouvre
+désormais chaque panneau à sa largeur naturelle, l’espace excédentaire d’un grand
+écran étant partagé. L’arrangement ne se replie qu’en dessous de 1302 px, la
+somme des trois largeurs et des deux poignées (`STACK_BELOW_WIDTH`) : trois
+colonnes ne sont proposées que lorsque les trois sont lisibles, et en dessous la
+barre prend le relais, un panneau à la fois en pleine largeur. Le défilement
+horizontal du panneau des filtres ne sert plus que de filet de sécurité pour une
+fenêtre plus étroite que ses propres lignes ; les largeurs mémorisées pour le
+retour à l’arrangement large sont bien des largeurs, et non les hauteurs de
+l’empilement.
 
 **Study Dashboard** — l’en-tête (titre, contexte, variables, comparaison,
 filtres croisés) défile ; les variables deviennent un bloc repliable dont
@@ -222,26 +234,47 @@ l’en-tête indique combien sont définies ; panneaux et mains partagent la
 hauteur par un splitter au lieu de deux étirements égaux, et le panneau des
 onglets défile pour que la grille 13 × 13 ne fixe plus la hauteur de l’onglet.
 
+Les neuf panneaux d’une étude PLO ne tiennent pas dans une barre d’onglets : leur
+libellé réclame 1121 px de bande, et à 1080 px de large la barre n’en a que 1030,
+si bien que « Source hands » disparaissait derrière la flèche `▶` de défilement.
+Le minimum du widget ne bougeait pas pour autant — Qt fait défiler la bande au
+lieu de la comprimer —, ce qui explique que les tests précédents ne l’aient pas
+vu. Les onglets sont remplacés par une liste verticale (`QListWidget` +
+`QStackedWidget`) posée à gauche du contenu, à l’extérieur de l’aire défilante :
+la largeur du rail est celle de son libellé le plus long (190 px pour neuf
+panneaux, bornée à 150–280 px), les neuf noms restent lisibles sans défilement
+horizontal ni vertical, et le contenu garde toute la largeur restante. Les
+panneaux indisponibles sont désactivés avec la raison en infobulle, comme
+l’étaient les onglets désactivés.
+
 ### Tests
 
-`tests/qt/test_responsive_layout.py` : 31 tests, tous verts. Ils couvrent les
+`tests/qt/test_responsive_layout.py` : 33 tests, tous verts. Ils couvrent les
 helpers (dimensionnement, défilement, reflow, bascule d’orientation et le signal
 qui l’annonce, repli avec résumé, légende au-dessus du champ) et les quatre
 écrans, en vérifiant pour chacun que le minimum tient dans 1024 × 640, que les
 commandes du bas restent atteignables, et que redimensionner ne change ni la
-recherche, ni la sélection, ni les filtres. Six d’entre eux portent sur les
+recherche, ni la sélection, ni les filtres. Huit d’entre eux portent sur les
 réorganisations de ce tour :
 
 - éditeur Dynamic Panels : repli des colonnes sans perte de sélecteur, absence
   de seconde aire défilante, champs « Then show » et case « Enabled »
   atteignables, catalogue replié avec son compte ;
 - Research Browser : un seul panneau à la fois en arrangement empilé, retour aux
-  trois panneaux et à leurs tailles en arrangement large, et défilement
-  horizontal du panneau des filtres ;
+  trois panneaux et à leurs tailles en arrangement large, largeurs mesurées sur
+  le contenu avec trois colonnes seulement au-dessus de 1302 px, largeurs larges
+  conservées à travers un aller-retour par l’empilement, et défilement horizontal
+  du panneau des filtres dans une fenêtre plus étroite que ses lignes ;
 - Préférences HUD : les cinq actions de profil passent derrière un menu sous
   900 px, ce qui abaisse le minimum du dialogue.
 
-Suites existantes vérifiées hors écran : `tests/qt` (187 tests),
+Les fenêtres sont rétrécies par paliers de 200 px, comme un glissement de bord :
+tant que les panneaux sont côte à côte, la somme de leurs largeurs minimales
+(904 px) borne la largeur de la fenêtre, et Qt applique cette borne avant que le
+layout n’ait empilé les panneaux. Un saut direct sous ce total laisse donc la
+fenêtre à l’ancien minimum ; un glissement réel ne saute jamais.
+
+Suites existantes vérifiées hors écran : `tests/qt` (186 tests),
 `tests/test_dynamic_panels_tab.py` et `tests/test_hud_panel_editor.py` (60),
 `test/test_aof_hud_package.py`, `test/test_modern_hud_preferences.py`,
 `test/test_plo4_hud_package.py`, `test/test_hud_profiles.py`,

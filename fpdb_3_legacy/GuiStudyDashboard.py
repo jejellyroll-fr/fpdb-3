@@ -12,11 +12,13 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QListWidget,
+    QListWidgetItem,
     QPushButton,
     QSplitter,
+    QStackedWidget,
     QTableWidget,
     QTableWidgetItem,
-    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -41,6 +43,12 @@ from fpdb_3_legacy.research_study_explorer import StudySelection
 from fpdb_3_legacy.research_worker_db import worker_database
 from fpdb_3_legacy.responsive_layout import CollapsibleSection, wrap_in_scroll
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
+
+#: Bounds on the panel rail's width. The rail is as wide as its longest panel
+#: name, so no title is elided, and no wider than the cap: a study whose panel
+#: names are short must not pay for the longest name another study has.
+RAIL_MIN_WIDTH = 150
+RAIL_MAX_WIDTH = 280
 
 
 class _DashboardWorker(QThread):
@@ -191,19 +199,28 @@ class GuiStudyDashboard(QWidget):
         self.stack_note_label.setStyleSheet("color: #e5c07b; font-weight: bold;")
         header_layout.addWidget(self.stack_note_label)
 
-        # Built before the tabs, because adding the first tab fires
-        # ``currentChanged`` and the panel that loads immediately re-points
-        # the hands pane.
+        # Built before the panel rail, because selecting the first panel loads
+        # it immediately and that load re-points the hands pane.
         self.source_hands = SourceHandsPane(self.db, self)
         self.source_hands.hand_activated.connect(self._open_in_replayer)
 
-        self.tabs = QTabWidget()
-        self.tabs.currentChanged.connect(self._panel_changed)
-        # Adding the first tab emits ``currentChanged``, and the slot writes
-        # the active panel back to the model -- so building the tab strip used
-        # to overwrite whichever panel the study declared as its default with
-        # whichever one happened to be built first (#369).
-        self.tabs.blockSignals(True)
+        # A rail rather than a tab strip. The nine panels of a PLO study need
+        # 1121 px of strip, which a 1080 px window does not have, so the last
+        # panels sat behind the bar's scroll arrows -- present, but invisible
+        # unless the reader thought to look. A vertical list shows every name in
+        # full at any width, and the room it takes comes out of a panel area
+        # that has height to spare.
+        self.panel_list = QListWidget()
+        self.panel_list.setUniformItemSizes(True)
+        self.panel_list.setSelectionMode(QListWidget.SelectionMode.SingleSelection)
+        self.panel_list.currentRowChanged.connect(self._panel_changed)
+
+        self.panel_stack = QStackedWidget()
+
+        # Filled without touching the selection: the study's default panel is
+        # chosen by ``_load_active_panel`` below, and an item selected here would
+        # overwrite it with whichever panel happened to be built first (#369).
+        self.panel_list.blockSignals(True)
         for panel in self.model.study.panels:
             page = QWidget()
             page.setProperty("panel_id", panel.id)
@@ -252,19 +269,20 @@ class GuiStudyDashboard(QWidget):
                 page_layout.addWidget(grid)
             page_layout.addWidget(table, 1)
             self._pages[panel.id] = (status, table)
-            index = self.tabs.addTab(page, panel.title)
+            item = QListWidgetItem(panel.title)
+            self.panel_list.addItem(item)
+            self.panel_stack.addWidget(page)
             try:
                 compiled = self.model.panel(panel.id)
             except (ValueError, KeyError) as exc:
-                self.tabs.setTabEnabled(index, False)
-                self.tabs.setTabToolTip(index, str(exc))
+                self._mark_panel_unavailable(item, str(exc))
                 status.setText(f"Unavailable: {exc}")
                 continue
             if not compiled.available:
-                self.tabs.setTabEnabled(index, False)
-                self.tabs.setTabToolTip(index, compiled.unavailable_reason or "Panel unavailable")
+                self._mark_panel_unavailable(item, compiled.unavailable_reason or "Panel unavailable")
                 status.setText(f"Unavailable: {compiled.unavailable_reason}")
-        self.tabs.blockSignals(False)
+        self.panel_list.blockSignals(False)
+        self.panel_list.setFixedWidth(self._panel_rail_width())
 
         # The hands live below every panel rather than inside one: a selection
         # made on a chart and a row picked from a table are the same question
@@ -273,11 +291,20 @@ class GuiStudyDashboard(QWidget):
         #
         # A splitter rather than two equal stretches: whether the panels or the
         # hands deserve more room depends on whether the reader is reading
-        # numbers or hands, and that is the reader's call. The panels scroll --
-        # a 13 x 13 range grid is taller than a laptop window and used to set
-        # the height of the whole tab.
-        panels = wrap_in_scroll(self.tabs, top_aligned=False)
-        panels.setMinimumHeight(200)
+        # numbers or hands, and that is the reader's call. The panel content
+        # scrolls -- a 13 x 13 range grid is taller than a laptop window and
+        # used to set the height of the whole tab -- but the rail does not: it is
+        # the way back to another panel, so scrolling it out of view would take
+        # that away.
+        panels = QWidget()
+        panels_layout = QHBoxLayout(panels)
+        panels_layout.setContentsMargins(0, 0, 0, 0)
+        panels_layout.setSpacing(8)
+        panels_layout.addWidget(self.panel_list)
+        content = wrap_in_scroll(self.panel_stack, top_aligned=False)
+        content.setMinimumHeight(200)
+        panels_layout.addWidget(content, 1)
+
         self.splitter = QSplitter(Qt.Orientation.Vertical)
         self.splitter.setChildrenCollapsible(False)
         self.splitter.addWidget(panels)
@@ -285,6 +312,21 @@ class GuiStudyDashboard(QWidget):
         self.splitter.setSizes([520, 260])
         layout.addWidget(self.splitter, 1)
         self._render_cross_filters()
+
+    def _panel_rail_width(self) -> int:
+        """As wide as the longest panel name, within the rail's bounds.
+
+        ``sizeHintForColumn`` measures the items themselves, so a theme with a
+        larger font gets a wider rail rather than elided titles.
+        """
+        needed = self.panel_list.sizeHintForColumn(0) + 28
+        return max(RAIL_MIN_WIDTH, min(RAIL_MAX_WIDTH, needed))
+
+    @staticmethod
+    def _mark_panel_unavailable(item: QListWidgetItem, reason: str) -> None:
+        """An unavailable panel stays listed, greyed, and says why on hover."""
+        item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEnabled)
+        item.setToolTip(reason)
 
     def _refresh_drill_context(self) -> None:
         """Point the hands pane at whatever the dashboard is currently showing.
@@ -398,10 +440,10 @@ class GuiStudyDashboard(QWidget):
             return False
         return text
 
-    def _panel_changed(self, index: int) -> None:
-        if index < 0:
+    def _panel_changed(self, row: int) -> None:
+        if row < 0:
             return
-        page = self.tabs.widget(index)
+        page = self.panel_stack.widget(row)
         if page is None:
             return
         panel_id = str(page.property("panel_id") or "")
@@ -411,13 +453,20 @@ class GuiStudyDashboard(QWidget):
 
     def _load_active_panel(self) -> None:
         panel_id = self.model.state.active_panel
-        index = self.tabs.indexOf(self._pages[panel_id][0].parentWidget())
-        if index >= 0 and self.tabs.currentIndex() != index:
-            self.tabs.blockSignals(True)
-            self.tabs.setCurrentIndex(index)
-            self.tabs.blockSignals(False)
-        # Every route into a panel comes through here -- opening a tab,
-        # applying a variable, adding or removing a cross-filter -- so the
+        index = self.panel_stack.indexOf(self._pages[panel_id][0].parentWidget())
+        if index >= 0:
+            # Two views of one choice: the rail says which panel, the stack
+            # shows it, and both have to agree. The rail's signals are blocked
+            # because this *is* the slot that reacting to the rail reaches, and
+            # re-entering it would run the same panel twice.
+            if self.panel_list.currentRow() != index:
+                self.panel_list.blockSignals(True)
+                self.panel_list.setCurrentRow(index)
+                self.panel_list.blockSignals(False)
+            if self.panel_stack.currentIndex() != index:
+                self.panel_stack.setCurrentIndex(index)
+        # Every route into a panel comes through here -- picking one in the
+        # rail, applying a variable, adding or removing a cross-filter -- so the
         # hands pane is re-pointed once, where the panel itself is.
         self._refresh_drill_context()
         self._run_panel(panel_id)

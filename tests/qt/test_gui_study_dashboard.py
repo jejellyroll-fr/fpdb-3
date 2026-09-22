@@ -33,14 +33,15 @@ def dashboard_db(tmp_path_factory) -> Database:
 _STATE: list[object] = []
 
 
-def test_dashboard_has_one_study_context_and_lazy_panel_tabs(qtbot, dashboard_db: Database, tmp_path) -> None:
+def test_dashboard_has_one_study_context_and_lazy_panels(qtbot, dashboard_db: Database, tmp_path) -> None:
     explorer = StudyExplorerModel(builtin_studies(), tmp_path / "history.json")
     selection = explorer.open_study("srp_pfr_ip_flop", remember=False)
     dashboard = GuiStudyDashboard(db=dashboard_db, selection=selection)
     qtbot.addWidget(dashboard)
 
     assert dashboard.title_label.text() == "SRP · PFR IP · Flop"
-    assert dashboard.tabs.count() == 7
+    assert dashboard.panel_list.count() == 7
+    assert dashboard.panel_stack.count() == 7
     assert dashboard.comparison_combo.currentData() == "hero_vs_field"
     assert "position" in dashboard._variable_edits
     dashboard._variable_edits["position"].setText("btn")

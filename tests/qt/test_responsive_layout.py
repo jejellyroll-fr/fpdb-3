@@ -68,6 +68,19 @@ def process(app: QApplication) -> None:
     app.processEvents()
 
 
+def shrink_to(widget: QWidget, width: int, app: QApplication, height: int | None = None) -> None:
+    """Narrow a window in steps, the way dragging its edge does.
+
+    While the panes are side by side their minimum widths add up, and Qt clamps
+    a single resize to that total *before* the layout that would stack them has
+    run -- so one jump to a small width leaves the window at the old minimum.
+    A drag never jumps, and neither does this.
+    """
+    while widget.width() > width:
+        widget.resize(max(width, widget.width() - 200), height or widget.height())
+        process(app)
+
+
 # --------------------------------------------------------------------------- #
 # The helpers
 # --------------------------------------------------------------------------- #
@@ -426,8 +439,7 @@ def test_research_browser_scrolls_its_panes_and_stacks_them_when_narrow(qtbot, e
     process(app)
     assert browser.splitter.is_stacked() is False
 
-    browser.resize(900, 700)
-    process(app)
+    shrink_to(browser, 900, app)
     assert browser.splitter.is_stacked() is True
 
     browser.shutdown_workers()
@@ -452,8 +464,7 @@ def test_the_research_browser_shows_one_pane_at_a_time_when_stacked(qtbot, examp
     assert not browser.narrow_view_bar.isVisibleTo(browser), "side by side, the splitter is the better tool"
     assert [pane.isVisibleTo(browser) for pane in browser._panes()] == [True, True, True]
 
-    browser.resize(900, 700)
-    process(app)
+    shrink_to(browser, 900, app)
     assert browser.splitter.is_stacked() is True
     assert browser.narrow_view_bar.isVisibleTo(browser)
     assert [pane.isVisibleTo(browser) for pane in browser._panes()] == [True, False, False]
@@ -471,13 +482,83 @@ def test_the_research_browser_shows_one_pane_at_a_time_when_stacked(qtbot, examp
     browser.shutdown_workers()
 
 
-def test_the_filter_pane_scrolls_sideways_rather_than_clipping(qtbot, example_config) -> None:
-    """A filter row is wider than the narrowest pane, so it must stay reachable.
+def test_the_research_browser_sizes_its_panes_from_their_content(qtbot, example_config) -> None:
+    """Side by side, each pane opens at the width its own content measured.
 
-    The row that carries a filter's name, its value and its remove control wants
-    more width than the pane has. Without a horizontal scrollbar the controls
-    past the edge are simply not there -- the report's "commands unreachable",
-    one pane over.
+    The splitter used to hand every pane a third of whatever it had, so even at
+    1600 px the filter pane still had 33 px of its rows out of sight: "Add
+    breakdown" and "Save / Delete" sat permanently half outside it, on a screen
+    wide enough to show them. The three panes are now opened at their measured
+    widths, and the arrangement folds into the one-pane bar only once the window
+    is narrower than the three of them together.
+    """
+    app = get_qapp()
+    from fpdb_3_legacy.GuiResearchBrowser import PANE_WIDTHS, STACK_BELOW_WIDTH, GuiResearchBrowser
+
+    assert STACK_BELOW_WIDTH == sum(PANE_WIDTHS) + 2 * 8, "the threshold is the three panes plus their handles"
+
+    browser = GuiResearchBrowser(example_config, None, None)
+    qtbot.addWidget(browser)
+    browser.show()
+
+    browser.resize(STACK_BELOW_WIDTH + 200, 800)
+    process(app)
+    assert browser.splitter.is_stacked() is False
+    for size, measured in zip(browser.splitter.sizes(), PANE_WIDTHS):
+        assert size >= measured, f"a pane was given {size} px where its content measured {measured}"
+    assert browser.filters_pane.horizontalScrollBar().maximum() == 0, (
+        "a screen that can hold the three panes shows the filter rows whole"
+    )
+
+    browser.resize(STACK_BELOW_WIDTH - 100, 700)
+    process(app)
+    assert browser.splitter.is_stacked() is True
+    assert browser.narrow_view_bar.isVisibleTo(browser)
+
+    browser.shutdown_workers()
+
+
+def test_the_research_browser_keeps_the_wide_widths_across_a_stacking_round_trip(qtbot, example_config) -> None:
+    """The widths to come back to are widths, not the heights of the stack.
+
+    Stacked, the panes are laid out vertically and the splitter's own sizes are
+    heights. A browser that remembered those would come back from a narrow window
+    with the filter pane 210 px wide -- all scrollbar, the very problem the
+    measured widths exist to solve.
+    """
+    app = get_qapp()
+    from fpdb_3_legacy.GuiResearchBrowser import PANE_WIDTHS, GuiResearchBrowser
+
+    browser = GuiResearchBrowser(example_config, None, None)
+    qtbot.addWidget(browser)
+    browser.show()
+    browser.resize(1500, 800)
+    process(app)
+
+    wide = browser.splitter.sizes()
+    assert browser.splitter.is_stacked() is False
+
+    shrink_to(browser, 700, app)
+    assert browser.splitter.is_stacked() is True
+
+    browser.resize(1500, 800)
+    process(app)
+    assert browser.splitter.is_stacked() is False
+    for after, before, measured in zip(browser.splitter.sizes(), wide, PANE_WIDTHS):
+        assert abs(after - before) <= 2, f"the wide arrangement came back as {after} px instead of {before}"
+        assert after >= measured - 2
+
+    browser.shutdown_workers()
+
+
+def test_the_filter_pane_scrolls_sideways_rather_than_clipping(qtbot, example_config) -> None:
+    """A filter row stays reachable even in a window narrower than itself.
+
+    Given its measured width the row fits, so the horizontal scrollbar is a
+    safety net rather than the everyday case -- but a window narrower than the
+    row itself must still reach every control on it. Without the scrollbar the
+    controls past the edge are simply not there: the report's "commands
+    unreachable", one pane over.
     """
     app = get_qapp()
     from fpdb_3_legacy.GuiResearchBrowser import GuiResearchBrowser
@@ -485,10 +566,12 @@ def test_the_filter_pane_scrolls_sideways_rather_than_clipping(qtbot, example_co
     browser = GuiResearchBrowser(example_config, None, None)
     qtbot.addWidget(browser)
     browser.show()
-    browser.resize(1400, 800)
+    browser.resize(1500, 800)
     process(app)
+    shrink_to(browser, 520, app)
 
     pane = browser.filters_pane
+    assert browser.splitter.is_stacked() is True
     assert pane.horizontalScrollBarPolicy() == Qt.ScrollBarPolicy.ScrollBarAsNeeded
     assert pane.horizontalScrollBar().maximum() > 0, "the controls past the pane edge must be reachable"
 

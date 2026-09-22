@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from PySide6.QtCore import Qt
 
 from fpdb_3_legacy.Database import Database
 from fpdb_3_legacy.GuiStudyDashboard import GuiStudyDashboard
@@ -44,7 +45,10 @@ def test_a_plo_dashboard_runs_on_omaha_and_never_offers_a_holdem_panel(qtbot, pl
     kinds = {panel.kind for panel in dashboard.model.study.panels}
     assert "range_grid" not in kinds
     assert "hand_strength" not in kinds
-    assert all(dashboard.tabs.isTabEnabled(index) for index in range(dashboard.tabs.count()))
+    assert all(
+        dashboard.panel_list.item(index).flags() & Qt.ItemFlag.ItemIsEnabled
+        for index in range(dashboard.panel_list.count())
+    )
     qtbot.waitUntil(lambda: "Hero:" in dashboard.sample_label.text(), timeout=15000)
 
     # SPR is the axis a four-card game turns on, so it is a panel of its own
