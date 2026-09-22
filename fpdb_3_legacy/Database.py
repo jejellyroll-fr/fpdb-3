@@ -232,7 +232,7 @@ class Database(
     _worker_pool_lock = threading.Lock()
     _worker_idle_connections = 0
     _worker_idle_limit = 4
-    _worker_pools = weakref.WeakSet()
+    _worker_pools: weakref.WeakSet[Any] = weakref.WeakSet()
 
     hero_hudstart_def = "1999-12-31"  # default for length of Hero's stats in HUD
     villain_hudstart_def = "1999-12-31"  # default for length of Villain's stats in HUD
