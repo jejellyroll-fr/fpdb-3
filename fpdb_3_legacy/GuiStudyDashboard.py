@@ -25,6 +25,7 @@ from fpdb_3_legacy.GuiDrillDown import SourceHandsPane, live_workers
 from fpdb_3_legacy.GuiResearchDistributions import DistributionChartWidget
 from fpdb_3_legacy.GuiResearchHandStrength import HandStrengthChartWidget
 from fpdb_3_legacy.GuiResearchMatrices import MatrixHeatmapWidget
+from fpdb_3_legacy.GuiResearchViews import RangeGridWidget
 from fpdb_3_legacy.research_distributions import build_distribution
 from fpdb_3_legacy.research_drilldown import SIDE_FIELD, SIDE_HERO
 from fpdb_3_legacy.research_matrices import POSITION_LABELS, build_matrix
@@ -98,6 +99,7 @@ class GuiStudyDashboard(QWidget):
         self._pages: dict[str, tuple[QLabel, QTableWidget]] = {}
         self._distribution_widgets: dict[str, DistributionChartWidget] = {}
         self._matrix_widgets: dict[str, MatrixHeatmapWidget] = {}
+        self._range_widgets: dict[str, RangeGridWidget] = {}
         self._hand_strength_widgets: dict[str, HandStrengthChartWidget] = {}
         self._variable_edits: dict[str, QLineEdit] = {}
         self._replayers: list[Any] = []
@@ -222,6 +224,13 @@ class GuiStudyDashboard(QWidget):
                 chart.category_clicked.connect(self._hand_strength_category_clicked)
                 self._hand_strength_widgets[panel.id] = chart
                 page_layout.addWidget(chart)
+            elif panel.kind == "range_grid":
+                grid = RangeGridWidget()
+                grid.cell_activated.connect(
+                    lambda value, panel_id=panel.id: self._range_cell_activated(panel_id, value),
+                )
+                self._range_widgets[panel.id] = grid
+                page_layout.addWidget(grid)
             page_layout.addWidget(table, 1)
             self._pages[panel.id] = (status, table)
             index = self.tabs.addTab(page, panel.title)
@@ -397,6 +406,8 @@ class GuiStudyDashboard(QWidget):
             self._matrix_widgets[panel_id].clear_matrix()
         if panel_id in self._hand_strength_widgets:
             self._hand_strength_widgets[panel_id].clear_distribution()
+        if panel_id in self._range_widgets:
+            self._range_widgets[panel_id].set_matrix_clear()
         self._serial += 1
         serial = self._serial
         worker = _DashboardWorker(
@@ -451,6 +462,8 @@ class GuiStudyDashboard(QWidget):
             self._matrix_widgets[panel_id].clear_matrix()
         if panel_id in self._hand_strength_widgets:
             self._hand_strength_widgets[panel_id].clear_distribution()
+        if panel_id in self._range_widgets:
+            self._range_widgets[panel_id].set_matrix_clear()
         self.stack_note_label.setVisible(False)
         status.setText(f"Panel unavailable: {message}")
 
@@ -497,6 +510,9 @@ class GuiStudyDashboard(QWidget):
             return
         if panel_id in self._hand_strength_widgets:
             self._render_hand_strength(panel_id, result, status, table)
+            return
+        if panel_id in self._range_widgets:
+            self._render_range(panel_id, result, status, table)
             return
         if panel_id in self._distribution_widgets:
             self._render_distribution(panel_id, result, status, table)
@@ -729,11 +745,45 @@ class GuiStudyDashboard(QWidget):
             f"Dimension: {dimension}. Bars use classified decisions only; click a category to filter."
         )
 
+    def _render_range(
+        self,
+        panel_id: str,
+        result: Any,
+        status: QLabel,
+        table: QTableWidget,
+    ) -> None:
+        """Render a starting-hand range with the shared 13x13 grid widget."""
+        matrix = result.hero if isinstance(result, DashboardComparison) else result
+        grid = self._range_widgets[panel_id]
+        grid.set_matrix(matrix)
+        rows = self._rows(result)
+        columns = sorted({key for row in rows for key in row})
+        table.setColumnCount(len(columns))
+        table.setHorizontalHeaderLabels(columns)
+        table.setRowCount(len(rows))
+        for row_index, row in enumerate(rows):
+            for column_index, column in enumerate(columns):
+                item = QTableWidgetItem(self._display(row.get(column)))
+                if column == "label":
+                    item.setData(Qt.ItemDataRole.UserRole, {"starting_hand": row.get(column)})
+                table.setItem(row_index, column_index, item)
+        table.resizeColumnsToContents()
+        sample = self._sample_text(result)
+        self.sample_label.setText(sample)
+        side_note = " Grid shows Hero; use Hero only or Field only to inspect one side." if isinstance(result, DashboardComparison) else ""
+        status.setText(f"{sample}.{side_note} Double-click a starting-hand row to add a filter.")
+
     def _hand_strength_category_clicked(self, name: str, value: Any, label: str) -> None:
         if not name:
             self.context_label.setText("This unclassified category has no safe query filter.")
             return
         self.add_cross_filter(name, value, f"{name.replace('_', ' ').title()}: {label}")
+
+    def _range_cell_activated(self, panel_id: str, value: str) -> None:
+        """Narrow the same study population as the range grid."""
+        if not value:
+            return
+        self.add_cross_filter("starting_hand", value, f"Starting hand: {value}")
 
     def _row_double_clicked(self, item: QTableWidgetItem) -> None:
         group = item.data(Qt.ItemDataRole.UserRole)
@@ -766,13 +816,13 @@ class GuiStudyDashboard(QWidget):
                 cell.as_dict(total_opportunities=result.total_opportunities)
                 for cell in result.every_cell()
             ]
-        if hasattr(result, "rows"):
-            rows = result.rows
-            return [row.as_dict() if hasattr(row, "as_dict") else dict(row) for row in rows]
         if hasattr(result, "total") and hasattr(result.total, "as_dict"):
             rows = [row.as_dict() if hasattr(row, "as_dict") else dict(row) for row in result.rows]
             rows.append({"row": "total", **result.total.as_dict()})
             return rows
+        if hasattr(result, "rows"):
+            rows = result.rows
+            return [row.as_dict() if hasattr(row, "as_dict") else dict(row) for row in rows]
         return []
 
     @staticmethod

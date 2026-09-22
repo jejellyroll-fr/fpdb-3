@@ -45,3 +45,21 @@ def test_heatmap_shows_numeric_samples_and_clicks_exact_matchup(qtbot) -> None:
 
     widget.click_cell(0, 1)
     assert clicked == [("position", 0, "opponent_position", 1, "BTN × CO")]
+
+
+def test_comparison_keeps_hero_only_cells_in_comparison_semantics(qtbot) -> None:
+    hero = build_matrix(
+        fake_result([QueryRow({"position": 0, "opponent_position": 1}, 12, 12, 12, "count")]),
+        ("position", "opponent_position"),
+    )
+    field = build_matrix(
+        fake_result([QueryRow({"position": 0, "opponent_position": 0}, 5, 5, 5, "count")]),
+        ("position", "opponent_position"),
+    )
+    widget = MatrixHeatmapWidget()
+    qtbot.addWidget(widget)
+
+    widget.set_comparison(hero, field)
+
+    text = widget.table.item(0, widget._column_values.index(1)).text()
+    assert "H " in text and "F —" in text and "Gap +12.0" in text

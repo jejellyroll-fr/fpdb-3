@@ -68,7 +68,7 @@ from fpdb_3_legacy import research_labels as rlabels
 from fpdb_3_legacy import research_presets as presets_lib
 from fpdb_3_legacy import research_views as rviews
 from fpdb_3_legacy.analytics_query import DIMENSIONS, KNOWN_METRICS
-from fpdb_3_legacy.GuiDrillDown import SourceHandsPane
+from fpdb_3_legacy.GuiDrillDown import SourceHandsPane, live_workers
 from fpdb_3_legacy.GuiResearchViews import CompositionWidget, MoneyWidget, RangeGridWidget
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -552,6 +552,10 @@ class GuiResearchBrowser(QWidget):
         self._drill_serial = 0
         self._worker: _QueryWorker | None = None
         self._drill_worker: _DrillWorker | None = None
+        # Cancelled QThreads still finish their database work. Keep a strong
+        # reference until they do, otherwise Qt can destroy a running child
+        # during fixture/tab teardown and abort the process (#393).
+        self._retired_workers: list[QThread] = []
         self._last_result: Any = None
         self._filter_rows: list[_FilterRow] = []
         self._current_query: Any = None
@@ -1214,6 +1218,7 @@ texture*. The label already existed; nothing called it. Technical names
         worker = _QueryWorker(self.db, self._with_scope(task), self._query_serial, self)
         worker.finished_ok.connect(self._on_query_done)
         worker.failed.connect(self._on_query_failed)
+        worker.finished.connect(worker.deleteLater)
         self._worker = worker
         worker.start()
 
@@ -1236,7 +1241,9 @@ texture*. The label already existed; nothing called it. Technical names
         self.cancel_button.setVisible(False)
         self.sample_label.setText("")
         self.result_note.setText(_("Query cancelled."))
-        self._worker = None
+        if self._worker is not None:
+            self._retired_workers.append(self._worker)
+            self._worker = None
 
     def _on_query_done(self, result: Any, serial: int) -> None:
         """A finished query: render it, unless a newer query superseded it.
@@ -1926,13 +1933,17 @@ texture*. The label already existed; nothing called it. Technical names
         ``fpdb.close_tab`` removes a page from the tab widget and calls this
         hook directly; removed child widgets do not receive ``closeEvent``.
         """
-        for worker in (self._worker, self._drill_worker):
+        workers = live_workers(
+            [*self._retired_workers, *([self._worker] if self._worker is not None else []),
+             *([self._drill_worker] if self._drill_worker is not None else [])],
+        )
+        for worker in workers:
             if (
-                worker is not None
-                and worker.isRunning()
+                worker.isRunning()
                 and not worker.wait(SourceHandsPane.SHUTDOWN_WAIT_MS)
             ):
                 worker.wait()
+        self._retired_workers.clear()
         self._worker = None
         self._drill_worker = None
         self.source_hands.stop()

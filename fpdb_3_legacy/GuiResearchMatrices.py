@@ -161,11 +161,11 @@ class MatrixHeatmapWidget(QWidget):
         return "Unknown / unclassified" if key is None else str(key)
 
     def _cell_text(self, hero: MatrixCell | None, field: MatrixCell | None, fallback: MatrixCell) -> str:
-        if field is None:
+        if self._field is None:
             return f"{fallback.metric_label}\n{fallback.sample_label}"
         hero_text = f"H {hero.metric_label if hero else '—'}\n{hero.sample_label if hero else 'n=0'}"
-        field_text = f"F {field.metric_label}\n{field.sample_label}"
-        gap = (hero.metric_value if hero else 0) - field.metric_value
+        field_text = f"F {field.metric_label if field else '—'}\n{field.sample_label if field else 'n=0'}"
+        gap = (hero.metric_value if hero else 0) - (field.metric_value if field else 0)
         suffix = "%" if fallback.percentage is not None else ""
         return f"{hero_text}\n{field_text}\nGap {gap:+.1f}{suffix}"
 
@@ -192,8 +192,8 @@ class MatrixHeatmapWidget(QWidget):
         field: MatrixCell | None,
         max_value: float,
     ) -> QColor:
-        if field is not None:
-            gap = (hero.metric_value if hero else 0) - field.metric_value
+        if self._field is not None:
+            gap = (hero.metric_value if hero else 0) - (field.metric_value if field else 0)
             strength = min(1.0, abs(gap) / max(max_value, 1.0))
             base = QColor("#2f855a" if gap >= 0 else "#c05640")
         else:
