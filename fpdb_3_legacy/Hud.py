@@ -446,11 +446,16 @@ class Hud:
 
     def _update_live_state_from_import(self, hand: int | str) -> None:
         """Use the assembled hand unless a newer Winamax round is already live."""
-        keep_live_round = self._has_newer_winamax_round(hand)
+        # ``hand`` is usually the database row id passed to Hud.update, while
+        # live Winamax events and ``Hand.handid`` use the normalized site id.
+        # Compare and route the import using one identifier domain whenever
+        # the assembled hand is available.
+        context_hand_id = getattr(self.hand_instance, "handid", None) or hand
+        keep_live_round = self._has_newer_winamax_round(context_hand_id)
         if not keep_live_round:
             self.live_state.clear()
         live_session = getattr(self, "_live_context_session", None)
-        if live_session is not None and live_session.adapter.hand_id != str(hand):
+        if live_session is not None and live_session.adapter.hand_id != str(context_hand_id):
             # One hand's live context must never leak into the next. A hand the
             # session is already following is left alone: an import that lands
             # after its own live events must not wipe the live context. Nor may
@@ -458,8 +463,8 @@ class Hud:
             # ahead of the import (actions are published before the hand is even
             # built), so a notification for a finished hand arriving while the
             # next one is being played would show a pot nobody is in.
-            if not live_session.adapter.has_left(str(hand)):
-                live_session.start_hand(str(hand))
+            if not live_session.adapter.has_left(str(context_hand_id)):
+                live_session.start_hand(str(context_hand_id))
         if not keep_live_round:
             try:
                 from fpdb_3_legacy import hud_situation

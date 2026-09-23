@@ -490,13 +490,15 @@ class WinamaxLiveLogReader:
     def _apply_action(table: WinamaxTableUpdate, parsed: dict[str, Any]) -> bool:
         login = parsed["login"]
         action_type = parsed["action_type"].lower()
+        changed = False
         if table.street == "preflop":
             if action_type == "raise":
                 table.preflop_raises += 1
                 table.preflop_aggressor = login
+                changed = True
             elif action_type == "call":
                 table.preflop_calls += 1
-        changed = False
+                changed = True
         if login not in table.ring:
             table.ring.append(login)
             changed = True
@@ -504,7 +506,9 @@ class WinamaxLiveLogReader:
             table.hero_left = True
             changed = True
         if "fold" in action_type:
-            table.folded_players.add(login)
+            if login not in table.folded_players:
+                table.folded_players.add(login)
+                changed = True
         return changed
 
     def start(self) -> None:

@@ -229,6 +229,29 @@ def test_an_import_of_the_hand_being_played_leaves_the_live_context_alone() -> N
     assert session.adapter.context.raise_level == 1  # the live pot survived its own import
 
 
+def test_winamax_import_compares_site_hand_id_not_database_row_id(monkeypatch) -> None:
+    from types import SimpleNamespace
+
+    from fpdb_3_legacy import hud_situation
+
+    site_hand_id = "91426500343"
+    hud, session = _hud_following(site_hand_id)
+    hud._winamax_live_hand_id = site_hand_id
+    hud.hand_instance = SimpleNamespace(handid=site_hand_id)
+    monkeypatch.setattr(
+        hud_situation,
+        "live_state_from_hand",
+        lambda hand: {"source": "assembled_import"},
+    )
+
+    # Hud.update receives a DB row id, not the site's hand id.
+    hud._update_live_state_from_import(771)
+
+    assert hud.live_state == {"source": "assembled_import"}
+    assert session.adapter.hand_id == site_hand_id
+    assert session.adapter.context.raise_level == 0
+
+
 def test_an_import_of_a_finished_hand_does_not_restart_it() -> None:
     """The live stream runs ahead of the import, so a late notification arrives.
 

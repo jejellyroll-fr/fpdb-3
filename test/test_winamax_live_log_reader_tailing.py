@@ -427,6 +427,35 @@ def test_a_player_acting_twice_joins_the_ring_once() -> None:
     assert reader.get_table("gf.cgmatchmaker.gf_1.t22754010.3").ring == ["villain"]
 
 
+def test_actions_by_known_players_publish_changed_live_state() -> None:
+    """Tracked players still change the live pot and postflop situation."""
+    seen: list = []
+    reader = WinamaxLiveLogReader(on_table_update=seen.append)
+    reader.process_line(HAND_START)
+    table = reader.get_table("gf.cgmatchmaker.gf_1.t22754010.3")
+    table.ring.extend(["blind", "opener", "caller"])
+    before = len(seen)
+
+    reader.process_line(
+        '1786488467000 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 action raise login="blind" amount="0.12"\n'
+    )
+    assert len(seen) == before + 1
+    assert table.preflop_raises == 1
+    assert table.preflop_aggressor == "blind"
+
+    reader.process_line(
+        '1786488467100 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 action call login="caller" amount="0.12"\n'
+    )
+    assert len(seen) == before + 2
+    assert table.preflop_calls == 1
+
+    reader.process_line(
+        '1786488467200 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 action fold login="opener"\n'
+    )
+    assert len(seen) == before + 3
+    assert "opener" in table.folded_players
+
+
 def test_the_hero_folding_ends_the_table_for_them() -> None:
     """Fast-Fold moves the hero on at once; the overlay must stop describing it."""
     reader = WinamaxLiveLogReader()
