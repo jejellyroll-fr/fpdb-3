@@ -1953,9 +1953,20 @@ class HudMain(QObject):
         street = getattr(update, "street", "preflop")
         if street not in ("preflop", "flop", "turn", "river"):
             return
-        seen: dict[Any, tuple[Any, str]] = getattr(self, "_winamax_regular_seen", {})
+        seen: dict[Any, tuple[Any, ...]] = getattr(self, "_winamax_regular_seen", {})
         self._winamax_regular_seen = seen
-        signature: tuple[Any, str] = (update.hand_id, str(street))
+        # A hand can publish several meaningful snapshots on the same street:
+        # the open, calls, and 3-bet all change the live pot context before the
+        # flop. Folds also change the multiway situation postflop. Deduplicate
+        # identical state, not merely repeated notifications for a street.
+        signature: tuple[Any, ...] = (
+            update.hand_id,
+            str(street),
+            int(getattr(update, "preflop_raises", 0) or 0),
+            int(getattr(update, "preflop_calls", 0) or 0),
+            str(getattr(update, "preflop_aggressor", "") or ""),
+            tuple(sorted(getattr(update, "folded_players", ()))),
+        )
         if seen.get(update.pool) == signature:
             return
 

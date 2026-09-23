@@ -3066,6 +3066,40 @@ def test_winamax_regular_round_repaints_only_the_matching_hud(hud_main) -> None:
         assert hud.refresh_dynamic_panels.call_count == 2
 
 
+def test_winamax_regular_preflop_action_changes_refresh_the_context(hud_main) -> None:
+    from fpdb_3_legacy.winamax_live_log_reader import WinamaxTableUpdate
+
+    hud = MagicMock()
+    hud.site = "Winamax"
+    hud.is_fast_fold = False
+    hud.table.title = "Winamax Casablanca 9"
+    hud.live_state = {}
+    hud.set_live_state.side_effect = lambda **state: hud.live_state.update(state)
+    hud_main.hud_dict = {"Casablanca 9": hud}
+    update = WinamaxTableUpdate(
+        pool="cg.tamgr.cg_4.t5228", table_no="9", hand_id="5228-42-1786129600", hero="Hero",
+    )
+
+    with patch.object(hud_main, "_live_hud_key_for_table_no", return_value="Casablanca 9"):
+        hud_main._on_winamax_table_update(update)
+        hud_main._on_winamax_table_update(update)
+        assert hud.refresh_dynamic_panels.call_count == 1
+
+        update.preflop_raises = 1
+        update.preflop_aggressor = "Opener"
+        hud_main._on_winamax_table_update(update)
+        assert hud.live_state["pot_type"] == "single_raised"
+        assert hud.live_state["preflop_aggressor"] == "Opener"
+        assert hud.refresh_dynamic_panels.call_count == 2
+
+        update.preflop_raises = 2
+        update.preflop_aggressor = "ThreeBettor"
+        hud_main._on_winamax_table_update(update)
+        assert hud.live_state["pot_type"] == "three_bet"
+        assert hud.live_state["preflop_aggressor"] == "ThreeBettor"
+        assert hud.refresh_dynamic_panels.call_count == 3
+
+
 def test_winamax_regular_round_finds_a_window_without_a_number_in_its_title(hud_main) -> None:
     from fpdb_3_legacy.winamax_live_log_reader import WinamaxTableUpdate
 
