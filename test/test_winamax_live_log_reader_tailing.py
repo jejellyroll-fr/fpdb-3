@@ -203,6 +203,23 @@ def test_priming_reads_only_the_end_of_a_long_log(tmp_path) -> None:
     assert reader.table_no_for_hand("22754010-17407-1786488466") == "4"
 
 
+def test_priming_discards_partial_route_line_after_seeking(tmp_path) -> None:
+    pool = "cg.tamgr.cg_5.t86426"
+    complete_route = f"1786129601015 [router] Navigate: wam://table?tblrk={pool}&label=Casablanca\n"
+    hand = "1786129602014 [table] 2 cg.tamgr.cg_5.t86426 hand 86426-43-1786129601\n"
+    reader = WinamaxLiveLogReader()
+    old_line = "1786129600000 [router] old irrelevant route\n"
+    reader.ROUTE_PRIME_BYTES = len(complete_route) + len(hand) + 4
+    reader.PRIME_BYTES = len(hand) + 1
+    log_file = tmp_path / "winamax.log"
+    log_file.write_text(old_line + complete_route + hand, encoding="utf-8")
+
+    with log_file.open(encoding="utf-8") as handle:
+        reader._prime_from_tail(handle)
+
+    assert reader.get_table(pool).table_label == "Casablanca"
+
+
 def test_a_priming_failure_leaves_the_reader_usable(tmp_path) -> None:
     """A truncated or locked file must not stop the reader from tailing."""
     reader = WinamaxLiveLogReader()

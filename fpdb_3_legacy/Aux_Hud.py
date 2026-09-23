@@ -1367,7 +1367,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
                 title = self.aw.aw_class_label(blk["label"])
                 title.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 title_font = QFont(self.aw.font)
-                title_scale = blk.get("title_font_scale") or self.aw.title_font_scale
+                title_scale = blk.get("title_font_scale") or getattr(self.aw, "title_font_scale", 1.0)
                 title_font.setPointSize(max(6, round(self.aw.font.pointSize() * title_scale)))
                 title.setFont(title_font)
                 title.setToolTip(blk["label"])
@@ -1388,7 +1388,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             # the per-stat tip-as-header mode.
             show_headers = multi and not btexts and any(tip for row in blk["tips"] for tip in row)
             header_font = QFont(self.aw.font)
-            heading_scale = blk.get("heading_font_scale") or self.aw.heading_font_scale
+            heading_scale = blk.get("heading_font_scale") or getattr(self.aw, "heading_font_scale", 1.0)
             header_font.setPointSize(max(5, round(self.aw.font.pointSize() * heading_scale)))
             for t in btexts:
                 tr, tc = t["rowcol"]

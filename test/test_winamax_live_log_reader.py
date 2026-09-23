@@ -5,6 +5,8 @@ from __future__ import annotations
 from io import StringIO
 from unittest.mock import MagicMock
 
+import pytest
+
 from fpdb_3_legacy.winamax_live_log_reader import WinamaxLiveLogReader
 
 POOL = "gf.cgmatchmaker.gf_1.t22754010.0"
@@ -50,9 +52,27 @@ def test_explicit_round_events_advance_the_live_street_and_pot_shape() -> None:
     assert table.preflop_aggressor == "Opener"
     reader.on_table_update.assert_called_once_with(table)
 
+    reader.process_line(f'1786129601017 inf [table] 9 {pool} round flop board="As,Kd,7c" pot="0.13"\n')
+    assert reader.on_table_update.call_count == 1
+
     reader.process_line(f'1786129601018 inf [table] 9 {pool} round turn board="As,Kd,7c,3h" pot="0.13"\n')
     assert table.street == "turn"
     assert reader.on_table_update.call_count == 2
+
+
+@pytest.mark.parametrize(
+    ("raises", "calls", "expected"),
+    [(2, 0, "three_bet"), (3, 0, "four_bet_plus")],
+)
+def test_pot_type_distinguishes_three_bet_and_four_bet_plus(raises, calls, expected) -> None:
+    from fpdb_3_legacy.winamax_live_log_reader import WinamaxTableUpdate
+
+    table = WinamaxTableUpdate(
+        pool="pool", table_no="1", hand_id="h1", hero=None,
+        preflop_raises=raises, preflop_calls=calls,
+    )
+
+    assert table.pot_type == expected
 
 
 def test_regular_table_route_carries_the_unnumbered_window_label_across_hands() -> None:
@@ -63,10 +83,33 @@ def test_regular_table_route_carries_the_unnumbered_window_label_across_hands() 
         f"1786129601015 inf [router] Navigate: wam://table?tblrk={pool}&label=Casablanca\n",
     )
     assert reader.get_table(pool).table_label == "Casablanca"
-
     reader.process_line(f"1786129602014 inf [table] 2 {pool} hand 86426-43-1786129601\n")
     assert reader.get_table(pool).table_label == "Casablanca"
 
+
+@pytest.mark.parametrize(
+    "route",
+    [
+        "wam://table?tblrk=cg.tamgr.cg_5.t86426",
+        "wam://table?label=Casablanca",
+    ],
+)
+def test_incomplete_table_routes_are_ignored(route: str) -> None:
+    reader = WinamaxLiveLogReader()
+
+    assert reader.parse_log_line(f"1786129601015 [router] Navigate: {route}\n") is None
+
+
+def test_repeated_table_labels_evict_the_oldest_when_history_is_full() -> None:
+    reader = WinamaxLiveLogReader()
+    reader.HAND_TABLE_HISTORY = 2
+
+    for index in range(3):
+        reader.process_line(
+            f"1786129601015 [router] Navigate: wam://table?tblrk=pool{index}&label=Table{index}\n",
+        )
+
+    assert list(reader._pool_labels) == ["pool1", "pool2"]
 
 def test_priming_recovers_table_label_older_than_the_recent_hand_tail() -> None:
     pool = "cg.tamgr.cg_5.t86426"
@@ -92,6 +135,18 @@ def test_new_hand_resets_the_street_and_preflop_raiser() -> None:
     assert table.street == "preflop"
     assert table.pot_type == "unopened"
     assert table.preflop_aggressor == ""
+
+
+def test_postflop_actions_do_not_change_preflop_pot_type() -> None:
+    pool = "cg.tamgr.cg_4.t5228"
+    reader = WinamaxLiveLogReader()
+    reader.process_line(f"1786129601014 inf [table] 9 {pool} hand 5228-42-1786129600\n")
+    reader.process_line(f"1786129601017 inf [table] 9 {pool} round flop board=\"As,Kd,7c\"\n")
+    reader.process_line(f'1786129601018 inf [table] 9 {pool} action raise login="Opener"\n')
+
+    table = reader.get_table(pool)
+    assert table.pot_type == "unopened"
+    assert table.preflop_raises == 0
 
 
 def test_parse_log_line_cards_identifies_hero() -> None:
