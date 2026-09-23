@@ -1332,6 +1332,10 @@ texture*. The label already existed; nothing called it. Technical names
             self._worker.deleteLater()
             self._worker = None
         self._query_serial += 1
+        # In stacked mode the filters pane is about to stop being useful: make
+        # the running state and eventual answer visible without requiring a
+        # second manual tab switch.
+        self.pane_switcher.set_active(1)
         self.cancel_button.setVisible(True)
         self._has_run = True
         self.empty_state.setVisible(False)
@@ -1436,6 +1440,7 @@ texture*. The label already existed; nothing called it. Technical names
         """A grid cell asked for its hands: the drill-down, narrowed by class."""
         if self._current_query is None:
             return
+        self.pane_switcher.set_active(2)
         self._load_drill({"starting_hand": label})
 
     # -- rendering -----------------------------------------------------------
@@ -1754,6 +1759,7 @@ texture*. The label already existed; nothing called it. Technical names
             self._load_comparison_drill(self.result_table.item(row, 0))
             return
         self.hands_stack.setCurrentIndex(0)
+        self.pane_switcher.set_active(2)
         self._load_drill(group=self._current_group)
 
     def _load_comparison_drill(self, item: QTableWidgetItem | None) -> None:
@@ -1768,6 +1774,7 @@ texture*. The label already existed; nothing called it. Technical names
         comparison_row = item.data(_COMPARISON_ROW_ROLE)
         if not isinstance(comparison_row, rb.ComparisonRow):
             return
+        self.pane_switcher.set_active(2)
         label = ", ".join(
             f"{rlabels.dimension_label(name)}={rb.value_label(name, value)}"
             for name, value in sorted(comparison_row.group.items())

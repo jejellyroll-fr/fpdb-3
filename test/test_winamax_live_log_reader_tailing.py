@@ -455,6 +455,12 @@ def test_actions_by_known_players_publish_changed_live_state() -> None:
     assert len(seen) == before + 3
     assert "opener" in table.folded_players
 
+    # The same fold notification cannot change the already-published state.
+    reader.process_line(
+        '1786488467200 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 action fold login="opener"\n'
+    )
+    assert len(seen) == before + 3
+
 
 def test_the_hero_folding_ends_the_table_for_them() -> None:
     """Fast-Fold moves the hero on at once; the overlay must stop describing it."""

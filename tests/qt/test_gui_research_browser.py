@@ -85,6 +85,33 @@ def test_three_panes_and_the_default_filters(browser) -> None:
     assert rb.DRILL_COLUMNS[0].key == "handId"
 
 
+def test_narrow_run_and_drill_switch_to_the_pane_with_the_result(browser, qtbot, monkeypatch) -> None:
+    from PySide6.QtWidgets import QTableWidgetItem
+
+    browser.resize(900, 700)
+    browser.show()
+    get_qapp().processEvents()
+    assert browser.pane_switcher.is_switching()
+
+    browser.run_query()
+    qtbot.waitUntil(lambda: browser._worker is None, timeout=15000)
+    assert browser.pane_switcher.active() == 1  # Results while the query runs.
+
+    browser._current_query = object()
+    browser.result_table.setRowCount(1)
+    browser.result_table.setColumnCount(1)
+    item = QTableWidgetItem("BTN")
+    item.setData(Qt.ItemDataRole.UserRole, {"position": "BTN"})
+    browser.result_table.setItem(0, 0, item)
+    monkeypatch.setattr(browser, "_load_drill", lambda **_kwargs: None)
+    browser._on_result_clicked(item)
+    assert browser.pane_switcher.active() == 2  # Hands after an explicit drill-down.
+
+    monkeypatch.setattr(browser, "_load_drill", lambda *_args, **_kwargs: None)
+    browser._load_cell_hands("AKs")
+    assert browser.pane_switcher.active() == 2
+
+
 def test_running_a_query_renders_rows_and_sample(browser, qtbot) -> None:
     from fpdb_3_legacy import research_browser as rb
 
