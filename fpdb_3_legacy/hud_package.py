@@ -194,6 +194,14 @@ def merge_package_panel_rules(
         return False
 
     existing = list(config_doc.getElementsByTagName("hud_panel_rules"))
+    # A user-created global section governs every profile. Adding a package's
+    # scoped rules beside it would silently change the global panel behavior.
+    # Preserve it; package-scoped sections may still coexist with each other.
+    if any(
+        not node.getAttribute("profile").strip() and not _is_panel_rule_placeholder(node)
+        for node in existing
+    ):
+        return False
     changed = False
     names = profile_names or {}
     for source in sources:

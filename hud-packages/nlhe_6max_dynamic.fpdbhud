@@ -332,9 +332,6 @@
 
   <!-- Bind normal-speed Winamax Hold'em to this profile. Keep fast-fold
        selection separate: it uses its dedicated fastfold_nlhe profile. -->
-  <hud_profile_rules>
-    <hud_profile_rule id="package-nlhe-dynamic-winamax" site="winamax" game="holdem" game_type="ring" limit="all" seats="all" players="all" speed="normal" profile="nlhe_6max_dynamic" priority="10"/>
-  </hud_profile_rules>
 
   <!--
     The rules that make the blocks above appear and disappear. `source="builtin"`

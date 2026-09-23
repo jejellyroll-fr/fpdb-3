@@ -732,7 +732,9 @@ def _winamax_position_order(row: Mapping[str, Any]) -> int | None:
     if raw in ("0", "BTN", "BU", "D", "BUTTON"):
         return 100
     if raw.isdigit():
-        return 1 + int(raw)
+        # Winamax numbers seats outwards from the button: a lower number acts
+        # later postflop. Keep the button above every numbered seat.
+        return 100 - int(raw)
     return {"EP": 2, "UTG": 2, "MP": 3, "HJ": 3, "CO": 4}.get(raw)
 
 
@@ -771,7 +773,7 @@ def winamax_live_state_for_player(
     if player == aggressor:
         other_orders = [_winamax_position_order(row) for name, row in by_name.items() if name != player]
         if other_orders and all(value is not None for value in other_orders):
-            state["in_position"] = own_order > max(other_orders)
+            state["in_position"] = own_order > max(value for value in other_orders if value is not None)
     elif aggressor in by_name and (aggressor_order := _winamax_position_order(by_name[aggressor])) is not None:
         state["in_position"] = own_order > aggressor_order
     return state

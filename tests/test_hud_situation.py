@@ -813,6 +813,23 @@ def test_the_aggregate_row_makes_a_postflop_panel_reachable() -> None:
     assert "srp_face_cbet_oop" in facing.panels
 
 
+def test_winamax_numbered_seats_follow_postflop_action_order() -> None:
+    live = {
+        "source": "street_live",
+        "street": "flop",
+        "preflop_aggressor": "utg",
+        "folded_players": (),
+    }
+    utg = {"screen_name": "utg", "live_position": "3"}
+    cutoff = {"screen_name": "cutoff", "live_position": "1"}
+
+    cutoff_state = hs.winamax_live_state_for_player(cutoff, [utg, cutoff], live)
+    utg_state = hs.winamax_live_state_for_player(utg, [utg, cutoff], live)
+
+    assert cutoff_state["in_position"] is True
+    assert utg_state["in_position"] is False
+
+
 # --------------------------------------------------------------------------- #
 # The wiring: the configuration section, and the HUD that reads it.
 # --------------------------------------------------------------------------- #

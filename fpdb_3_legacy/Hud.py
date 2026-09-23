@@ -84,6 +84,7 @@ class Hud:
         This method is intended to be called from the stdin thread,
         so it must not touch the GUI.
         """
+        self._winamax_live_hand_id: str | None = None
         self.parent = parent
         self.table = table
         self.config = config

@@ -1050,7 +1050,7 @@ def drill_display_rows(
             "maxSeats": row["maxSeats"],
             "playerName": row["playerName"],
             "playerProfit": row["playerProfit"],
-            "playerCards": _cards_text(*(row[f"card{i}"] for i in range(1, 5))),
+            "playerCards": _cards_text(*(row.get(f"card{i}") for i in range(1, 5))),
             "board": _board_text(row),
             "finalPot": row["finalPot"],
         }

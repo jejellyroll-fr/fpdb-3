@@ -777,6 +777,8 @@ class HudMain(QObject):
     def __init__(self, options: Values, db_name: str = "fpdb") -> None:
         """Initialize the main HUD application."""
         self.options = options
+        self._winamax_regular_seen: dict[Any, tuple[Any, str]] = {}
+        self._winamax_regular_unmatched: set[tuple[Any, str]] = set()
         QObject.__init__(self)
         self.db_name = db_name
         self._shutdown_started = False
@@ -1951,10 +1953,9 @@ class HudMain(QObject):
         street = getattr(update, "street", "preflop")
         if street not in ("preflop", "flop", "turn", "river"):
             return
-        seen = getattr(self, "_winamax_regular_seen", None)
-        if seen is None:
-            seen = self._winamax_regular_seen = {}
-        signature = (update.hand_id, street)
+        seen: dict[Any, tuple[Any, str]] = getattr(self, "_winamax_regular_seen", {})
+        self._winamax_regular_seen = seen
+        signature: tuple[Any, str] = (update.hand_id, str(street))
         if seen.get(update.pool) == signature:
             return
 
@@ -1966,9 +1967,8 @@ class HudMain(QObject):
                 and not getattr(item, "is_fast_fold", False)
                 for item in self.hud_dict.values()
             ):
-                missed = getattr(self, "_winamax_regular_unmatched", None)
-                if missed is None:
-                    missed = self._winamax_regular_unmatched = set()
+                missed: set[tuple[Any, str]] = getattr(self, "_winamax_regular_unmatched", set())
+                self._winamax_regular_unmatched = missed
                 if signature not in missed:
                     missed.add(signature)
                     if len(missed) > 256:
