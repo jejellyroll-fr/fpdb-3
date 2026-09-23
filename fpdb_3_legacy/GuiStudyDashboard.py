@@ -1039,7 +1039,12 @@ class GuiStudyDashboard(QWidget):
         group = item.data(Qt.ItemDataRole.UserRole)
         if not isinstance(group, dict) or not group:
             return
-        expected_names = self._group_by(self.model.state.active_panel)
+        panel_id = self.model.state.active_panel
+        expected_names = (
+            ("starting_hand",)
+            if self.model.panel(panel_id).kind == "range_grid"
+            else self._group_by(panel_id)
+        )
         self._apply_filter_group(group, expected_names=expected_names)
 
     def _group_by(self, panel_id: str) -> tuple[str, ...]:

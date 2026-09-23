@@ -317,6 +317,16 @@ def test_range_detail_table_hides_internal_fields_and_uses_named_units(
     assert not {"Class Id", "Kind", "Value", "Unit", "Shown"} & set(headers)
     assert "Realized (¢)" in headers and "EV-adjusted (¢)" in headers
 
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QTableWidgetItem
+
+    hand_item = QTableWidgetItem("AKs")
+    hand_item.setData(Qt.ItemDataRole.UserRole, {"starting_hand": "AKs"})
+    dashboard._row_double_clicked(hand_item)
+    assert [(item.name, item.value) for item in dashboard.model.state.cross_filters] == [
+        ("starting_hand", hand_item.text()),
+    ]
+
 
 def test_source_hands_open_both_sides_of_the_panel_population(
     qtbot,
