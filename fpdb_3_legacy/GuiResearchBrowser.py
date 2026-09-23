@@ -1383,6 +1383,7 @@ texture*. The label already existed; nothing called it. Technical names
             return  # A stale result never replaces a newer query.
         if self._worker is None or self._worker.serial != serial:
             return
+        self.pane_switcher.set_active(1)
         self.cancel_button.setVisible(False)
         self._worker.deleteLater()
         self._worker = None
@@ -1393,6 +1394,7 @@ texture*. The label already existed; nothing called it. Technical names
     def _on_query_failed(self, message: str, serial: int) -> None:
         if serial != self._query_serial:
             return
+        self.pane_switcher.set_active(1)
         self.cancel_button.setVisible(False)
         if self._worker is not None and self._worker.serial == serial:
             self._worker.deleteLater()
