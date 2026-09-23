@@ -106,6 +106,7 @@ class WinamaxTableUpdate:
 
     preflop_raises: int = 0
     preflop_calls: int = 0
+    preflop_calls_after_raise: int = 0
     preflop_aggressor: str = ""
     folded_players: set[str] = field(default_factory=set)
     table_label: str = ""
@@ -494,10 +495,13 @@ class WinamaxLiveLogReader:
         if table.street == "preflop":
             if action_type == "raise":
                 table.preflop_raises += 1
+                table.preflop_calls_after_raise = 0
                 table.preflop_aggressor = login
                 changed = True
             elif action_type == "call":
                 table.preflop_calls += 1
+                if table.preflop_raises:
+                    table.preflop_calls_after_raise += 1
                 changed = True
         if login not in table.ring:
             table.ring.append(login)

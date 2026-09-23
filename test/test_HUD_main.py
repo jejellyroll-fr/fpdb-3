@@ -3099,13 +3099,24 @@ def test_winamax_regular_preflop_action_changes_refresh_the_context(hud_main) ->
         )
         assert "preflop_facing_open" in facing_open.panels
 
+        update.preflop_calls = 1
+        update.preflop_calls_after_raise = 1
+        hud_main._on_winamax_table_update(update)
+        assert hud.live_state["labels"] == ("squeeze_defence",)
+        squeeze = hud_situation.load_default_resolver().resolve(
+            hud_situation.HudSituationContext.from_stat_dict({}, hud.live_state),
+            samples={"n": 10},
+        )
+        assert "preflop_squeeze" in squeeze.panels
+
         update.preflop_raises = 2
+        update.preflop_calls_after_raise = 0
         update.preflop_aggressor = "ThreeBettor"
         hud_main._on_winamax_table_update(update)
         assert hud.live_state["pot_type"] == "single_raised"
         assert hud.live_state["facing_action"] == "raises"
         assert hud.live_state["preflop_aggressor"] == "ThreeBettor"
-        assert hud.refresh_dynamic_panels.call_count == 3
+        assert hud.refresh_dynamic_panels.call_count == 4
         facing_three_bet = hud_situation.load_default_resolver().resolve(
             hud_situation.HudSituationContext.from_stat_dict({}, hud.live_state),
             samples={"n": 10},

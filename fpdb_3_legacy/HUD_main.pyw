@@ -1965,6 +1965,7 @@ class HudMain(QObject):
             str(street),
             int(getattr(update, "preflop_raises", 0) or 0),
             int(getattr(update, "preflop_calls", 0) or 0),
+            int(getattr(update, "preflop_calls_after_raise", 0) or 0),
             str(getattr(update, "preflop_aggressor", "") or ""),
             tuple(sorted(getattr(update, "folded_players", ()))),
         )
@@ -2000,8 +2001,10 @@ class HudMain(QObject):
             hud.live_state.clear()
             hud._winamax_live_hand_id = hand_id
         preflop_raises = int(getattr(update, "preflop_raises", 0) or 0)
+        calls_after_raise = int(getattr(update, "preflop_calls_after_raise", 0) or 0)
         pot_type = getattr(update, "pot_type", "") or ""
         facing_action = None
+        labels: tuple[str, ...] = ()
         if street == "preflop":
             # The resolver rules describe the pot before the action Hero faces:
             # one raise means an unopened pot facing a raise; two means a
@@ -2013,11 +2016,14 @@ class HudMain(QObject):
                 pot_type = "single_raised"
             if preflop_raises:
                 facing_action = "raises"
+            if preflop_raises == 1 and calls_after_raise:
+                labels = ("squeeze_defence",)
         hud.set_live_state(
             street=street,
             street_index=("preflop", "flop", "turn", "river").index(street),
             pot_type=pot_type,
             facing_action=facing_action,
+            labels=labels,
             preflop_aggressor=getattr(update, "preflop_aggressor", "") or None,
             folded_players=tuple(getattr(update, "folded_players", ())),
             source="street_live",

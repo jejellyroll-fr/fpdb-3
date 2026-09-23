@@ -50,6 +50,7 @@ def test_explicit_round_events_advance_the_live_street_and_pot_shape() -> None:
     assert table.street == "flop"
     assert table.pot_type == "single_raised"
     assert table.preflop_aggressor == "Opener"
+    assert table.preflop_calls_after_raise == 1
     reader.on_table_update.assert_called_once_with(table)
 
     reader.process_line(f'1786129601017 inf [table] 9 {pool} round flop board="As,Kd,7c" pot="0.13"\n')
@@ -58,6 +59,23 @@ def test_explicit_round_events_advance_the_live_street_and_pot_shape() -> None:
     reader.process_line(f'1786129601018 inf [table] 9 {pool} round turn board="As,Kd,7c,3h" pot="0.13"\n')
     assert table.street == "turn"
     assert reader.on_table_update.call_count == 2
+
+
+def test_preflop_call_count_tracks_calls_after_the_latest_raise() -> None:
+    from fpdb_3_legacy.winamax_live_log_reader import WinamaxTableUpdate
+
+    table = WinamaxTableUpdate(pool=POOL, table_no="1", hand_id="h1", hero="Hero")
+    action = WinamaxLiveLogReader._apply_action
+
+    action(table, {"login": "Limper", "action_type": "call"})
+    action(table, {"login": "Opener", "action_type": "raise"})
+    assert table.preflop_calls_after_raise == 0
+
+    action(table, {"login": "Caller", "action_type": "call"})
+    assert table.preflop_calls_after_raise == 1
+
+    action(table, {"login": "Squeezer", "action_type": "raise"})
+    assert table.preflop_calls_after_raise == 0
 
 
 @pytest.mark.parametrize(
