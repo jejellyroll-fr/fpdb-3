@@ -112,6 +112,22 @@ def test_recent_studies_restore_in_a_new_widget(explorer, qtbot, tmp_path) -> No
     assert restored.recent_list.item(0).text() == "Preflop · First in"
 
 
+def test_choosing_a_recent_study_reveals_detail_when_stacked(explorer, qtbot) -> None:
+    _select(explorer, "preflop_rfi")
+    explorer.open_button.click()
+    qtbot.waitUntil(lambda: explorer.recent_list.count() == 1)
+    explorer.show()
+    explorer.resize(700, 640)
+    qtbot.wait(20)
+    explorer.pane_switcher.set_active(0)
+    item = explorer.recent_list.item(0)
+    explorer.recent_list.setCurrentItem(item)
+
+    explorer.recent_list.itemClicked.emit(item)
+
+    assert explorer.pane_switcher.active() == 2
+
+
 def test_custom_advanced_research_remains_reachable(explorer, qtbot) -> None:
     called = []
     explorer.advanced_requested.connect(lambda: called.append(True))

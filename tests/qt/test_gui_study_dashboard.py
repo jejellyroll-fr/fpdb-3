@@ -227,6 +227,34 @@ def test_dashboard_renders_position_matrix_and_click_filters_both_axes(
     assert filters[populated.filter_names[0]] == populated.row_key
     assert filters[populated.filter_names[1]] == populated.column_key
 
+    table = dashboard._pages["position"][1]
+    for active_filter in tuple(dashboard.model.state.cross_filters):
+        dashboard.remove_cross_filter(active_filter.name)
+    group = {
+        populated.filter_names[0]: populated.row_key,
+        populated.filter_names[1]: populated.column_key,
+    }
+    dashboard._populate_result_table(
+        table,
+        [{**group, "opportunities": populated.opportunities}],
+        filter_columns=dashboard._group_by("position"),
+    )
+    group_item = next(
+        table.item(row, 0)
+        for row in range(table.rowCount())
+        if isinstance(table.item(row, 0).data(256), dict)
+        and table.item(row, 0).data(256) == group
+    )
+    dashboard._row_double_clicked(group_item)
+    assert {item.name: item.value for item in dashboard.model.state.cross_filters} == group
+
+    from PySide6.QtWidgets import QTableWidgetItem
+
+    unknown_item = QTableWidgetItem("unknown matchup")
+    unknown_item.setData(256, {populated.filter_names[0]: populated.row_key, populated.filter_names[1]: None})
+    dashboard._row_double_clicked(unknown_item)
+    assert {item.name: item.value for item in dashboard.model.state.cross_filters} == group
+
 
 def test_dashboard_switches_hand_state_dimension_and_cross_filters_category(
     qtbot,

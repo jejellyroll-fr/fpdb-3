@@ -919,6 +919,8 @@ def condition_matches(name: str, expected: Any, context: HudSituationContext) ->
     if kind == "null_check":
         return (actual is None) != bool(expected)
     wanted = {_text(value) for value in _list(expected)}
+    if actual is None and "" in wanted:
+        return True
     return actual is not None and _text(actual) in wanted
 
 

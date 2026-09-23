@@ -347,6 +347,8 @@ class GuiStudyExplorer(QWidget):
         self.recent_list = QListWidget()
         self.recent_list.setMaximumHeight(100)
         self.recent_list.currentItemChanged.connect(self._on_recent_changed)
+        self.recent_list.itemClicked.connect(self._reveal_detail)
+        self.recent_list.itemActivated.connect(self._reveal_detail)
         recent_layout.addWidget(self.recent_list)
         return recent_box
 

@@ -3067,6 +3067,7 @@ def test_winamax_regular_round_repaints_only_the_matching_hud(hud_main) -> None:
 
 
 def test_winamax_regular_preflop_action_changes_refresh_the_context(hud_main) -> None:
+    from fpdb_3_legacy import hud_situation
     from fpdb_3_legacy.winamax_live_log_reader import WinamaxTableUpdate
 
     hud = MagicMock()
@@ -3088,16 +3089,28 @@ def test_winamax_regular_preflop_action_changes_refresh_the_context(hud_main) ->
         update.preflop_raises = 1
         update.preflop_aggressor = "Opener"
         hud_main._on_winamax_table_update(update)
-        assert hud.live_state["pot_type"] == "single_raised"
+        assert hud.live_state["pot_type"] == "unopened"
+        assert hud.live_state["facing_action"] == "raises"
         assert hud.live_state["preflop_aggressor"] == "Opener"
         assert hud.refresh_dynamic_panels.call_count == 2
+        facing_open = hud_situation.load_default_resolver().resolve(
+            hud_situation.HudSituationContext.from_stat_dict({}, hud.live_state),
+            samples={"n": 10},
+        )
+        assert "preflop_facing_open" in facing_open.panels
 
         update.preflop_raises = 2
         update.preflop_aggressor = "ThreeBettor"
         hud_main._on_winamax_table_update(update)
-        assert hud.live_state["pot_type"] == "three_bet"
+        assert hud.live_state["pot_type"] == "single_raised"
+        assert hud.live_state["facing_action"] == "raises"
         assert hud.live_state["preflop_aggressor"] == "ThreeBettor"
         assert hud.refresh_dynamic_panels.call_count == 3
+        facing_three_bet = hud_situation.load_default_resolver().resolve(
+            hud_situation.HudSituationContext.from_stat_dict({}, hud.live_state),
+            samples={"n": 10},
+        )
+        assert "preflop_facing_three_bet" in facing_three_bet.panels
 
 
 def test_winamax_regular_hand_over_retires_only_its_own_live_state(hud_main) -> None:

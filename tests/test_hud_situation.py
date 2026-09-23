@@ -563,6 +563,7 @@ def test_preflop_open_context_supports_the_issue_examples() -> None:
         samples={"n": 100},
     )
     assert {"preflop_facing_open", "blinds_defence"} <= set(facing.panels)
+    assert "preflop_open" not in facing.panels
     squeezed = resolver.resolve(
         hs.HudSituationContext(street="preflop", pot_type="single_raised", labels=("squeeze_defence",), to_call=600),
         samples={"n": 100},

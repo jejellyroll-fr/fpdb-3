@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from fpdb_3_legacy.analytics_query import FILTERS
 from fpdb_3_legacy.GuiDrillDown import (
     SourceHandsPane,
     install_card_image_delegates,
@@ -864,23 +865,35 @@ class GuiStudyDashboard(QWidget):
         label: str,
     ) -> None:
         """Apply both axes in one refresh so the selected matchup stays atomic."""
-        if row_value is None or column_value is None:
+        self._apply_filter_group(
+            {row_name: row_value, column_name: column_value},
+            expected_names=(row_name, column_name),
+        )
+
+    def _apply_filter_group(self, values: Mapping[str, Any], *, expected_names: tuple[str, ...]) -> None:
+        """Apply all grouping dimensions together, or leave the study untouched."""
+        if (
+            not expected_names
+            or set(values) != set(expected_names)
+            or any(value is None for value in values.values())
+        ):
             self.context_label.setText(
-                "Unknown or unclassified cells stay visible, but cannot create a partial matchup filter."
+                "Unknown or unclassified values stay visible, but cannot create a partial filter."
             )
             return
-        try:
-            row_title = row_name.replace("_", " ").title()
-            column_title = column_name.replace("_", " ").title()
-            self.model.add_cross_filter(row_name, row_value, f"{row_title}: {value_label(row_name, row_value)}")
-            self.model.add_cross_filter(
-                column_name,
-                column_value,
-                f"{column_title}: {value_label(column_name, column_value)}",
-            )
-        except ValueError as exc:
-            self.context_label.setText(f"Cannot filter this cell: {exc}")
-            return
+
+        base_filters = self.model.state.base_filters
+        for name, value in values.items():
+            if name not in FILTERS:
+                self.context_label.setText(f"Cannot filter unknown study dimension: {name}")
+                return
+            if name in base_filters and base_filters[name] != value:
+                self.context_label.setText(f"Cannot filter {name}: it conflicts with the study population.")
+                return
+
+        for name, value in values.items():
+            title = name.replace("_", " ").title()
+            self.model.add_cross_filter(name, value, f"{title}: {value_label(name, value)}")
         self._results.clear()
         self._render_cross_filters()
         self._load_active_panel()
@@ -1026,8 +1039,8 @@ class GuiStudyDashboard(QWidget):
         group = item.data(Qt.ItemDataRole.UserRole)
         if not isinstance(group, dict) or not group:
             return
-        name, value = next(iter(group.items()))
-        self.add_cross_filter(name, value, f"{name.replace('_', ' ').title()}: {value_label(name, value)}")
+        expected_names = self._group_by(self.model.state.active_panel)
+        self._apply_filter_group(group, expected_names=expected_names)
 
     def _group_by(self, panel_id: str) -> tuple[str, ...]:
         return self.model.panel_query(panel_id).group_by

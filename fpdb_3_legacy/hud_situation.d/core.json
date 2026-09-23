@@ -13,7 +13,7 @@
     {
       "panel": "preflop_open",
       "id": "preflop-open",
-      "when": { "street": "preflop", "pot_type": "unopened" },
+      "when": { "street": "preflop", "pot_type": "unopened", "action_faced": "" },
       "priority": 10,
       "min_sample": 5,
       "section": "preflop",

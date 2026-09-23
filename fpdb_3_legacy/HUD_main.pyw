@@ -1999,10 +1999,25 @@ class HudMain(QObject):
         if getattr(hud, "_winamax_live_hand_id", None) != hand_id:
             hud.live_state.clear()
             hud._winamax_live_hand_id = hand_id
+        preflop_raises = int(getattr(update, "preflop_raises", 0) or 0)
+        pot_type = getattr(update, "pot_type", "") or ""
+        facing_action = None
+        if street == "preflop":
+            # The resolver rules describe the pot before the action Hero faces:
+            # one raise means an unopened pot facing a raise; two means a
+            # single-raised pot facing a 3-bet. Winamax's pot_type describes
+            # the resulting pot, so translate those first two counts here.
+            if preflop_raises == 1:
+                pot_type = "unopened"
+            elif preflop_raises == 2:
+                pot_type = "single_raised"
+            if preflop_raises:
+                facing_action = "raises"
         hud.set_live_state(
             street=street,
             street_index=("preflop", "flop", "turn", "river").index(street),
-            pot_type=getattr(update, "pot_type", "") or "",
+            pot_type=pot_type,
+            facing_action=facing_action,
             preflop_aggressor=getattr(update, "preflop_aggressor", "") or None,
             folded_players=tuple(getattr(update, "folded_players", ())),
             source="street_live",
