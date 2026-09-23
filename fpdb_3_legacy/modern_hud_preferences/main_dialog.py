@@ -2596,6 +2596,16 @@ class ModernHudPreferences(QDialog):
             self.config.save()
             self.config.reload()
 
+            # Importing a Dynamic package can replace the disabled placeholder
+            # with an enabled source. Keep the editor's draft in sync, or the
+            # next Save silently writes its old empty/disabled draft over the
+            # newly imported source.
+            if hasattr(self, "panel_rules_enabled"):
+                self.panel_rules = list(self.config.get_hud_panel_rules())
+                self.panel_rules_fallback = str(getattr(self.config, "hud_panel_fallback", "") or "")
+                self.panel_rules_enabled.setChecked(bool(self.config.hud_panel_rules_enabled))
+                self._refresh_panel_rules_table()
+
             # Reload HUD profiles and popups in the UI
             self.load_profiles()
             self.load_popup_windows()

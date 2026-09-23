@@ -224,11 +224,11 @@ def test_the_picker_and_the_rows_cannot_disagree_about_a_seat() -> None:
 
 def test_the_result_table_renders_its_dimensions_through_the_labels() -> None:
     tree = ast.parse((ROOT / "fpdb_3_legacy" / "GuiResearchBrowser.py").read_text())
-    render = next(
-        node for node in ast.walk(tree) if isinstance(node, ast.FunctionDef) and node.name == "_render_result"
+    render_cell = next(
+        node for node in ast.walk(tree) if isinstance(node, ast.FunctionDef) and node.name == "_result_cell_text"
     )
 
-    assert "value_label" in ast.dump(render), "the rows still print raw stored values"
+    assert "value_label" in ast.dump(render_cell), "the rows still print raw stored values"
 
 
 # --- a warning must not contradict the answer it annotates (#355, Codex) ----

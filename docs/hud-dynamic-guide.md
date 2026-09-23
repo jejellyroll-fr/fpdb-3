@@ -17,15 +17,21 @@ This is a *user* guide. The rules, the resolver and the file format are in
 
 Either:
 
-- import the reference package **`nlhe_6max_dynamic`** (**Preferences → HUD →
-  Import HUD**) and select it as a profile; it enables the shipped rules for
-  *that profile only*; or
+- import **`nlhe_6max_dynamic`** for Hold'em or **`plo_6max_dynamic`** for
+  Pot-Limit Omaha (**Preferences → HUD → Import HUD**) and select it as a
+  profile; it enables the shipped rules for *that profile only*; or
 - open **Preferences → HUD → Dynamic Panels** and turn the rules on for your own
   profile.
 
 A table running any other profile resolves **no rule** and keeps the static grid
 it always had. That is what makes turning dynamic panels off indistinguishable
 from never having had them.
+
+The PLO package uses Omaha-relevant preflop and postflop stats, while sharing
+the shipped situation rules and panel vocabulary. Assign it to the appropriate
+Omaha table shape in **Preferences → HUD → Profile Select** when you are ready
+to use it. As with NLHE, adjust the visible labels and heading scales in the
+profile/package for the space available when multi-tabling.
 
 ## What a panel is made of
 
@@ -58,13 +64,23 @@ fpdb is honest about this, and so should the panels be:
   panels follow the *current decision*. A c-bet panel can appear the moment the
   c-bet is made, not one hand later. Today this is fpdb's live seat/action feeds;
   the capture path that supports it is named in the guide for that source.
+- **Live street available** — on Winamax tables with the client log reader, the
+  HUD follows explicit flop, turn and river events during the hand. It also
+  knows the preflop pot type and raiser from logged actions. The log does not
+  say which bet a particular player currently faces, so those panels still
+  require richer seat context. Ordinary cash windows may have no numeric
+  suffix: the reader pairs the log's table route label or the last imported
+  site hand with the HUD before publishing a live street.
+  The PLO profile has a flop, turn and river overview for limped pots, where
+  no raised-pot aggressor panel applies.
 - **Hand-refresh context** — everywhere else, the resolver gets what the last
   *assembled* hand says. The panels are still right, they simply change when the
   hand is refreshed rather than mid-action.
 
 fpdb never claims action-by-action behaviour for a source that cannot provide it.
-If a live feed does not know a fact — the board, the effective stack — the panel
-falls back to what the imported hand says rather than inventing a value.
+If the Winamax round log does not establish a fact — such as a faced bet or
+exact effective stack — rules requiring that fact do not match. Historical
+aggregate stats must not be mistaken for facts of the current hand.
 
 ## Preview a rule
 

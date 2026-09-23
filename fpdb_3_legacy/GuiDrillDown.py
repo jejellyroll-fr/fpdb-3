@@ -14,20 +14,28 @@ host, which owns the replayer.
 
 from __future__ import annotations
 
+import re
+from pathlib import Path
 from typing import Any
 
 import shiboken6
 from PySide6.QtCore import Qt, QThread, Signal
+from PySide6.QtGui import QColor, QPainter, QPixmap
+from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QPushButton,
+    QStyle,
+    QStyledItemDelegate,
+    QStyleOptionViewItem,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
     QWidget,
 )
 
+from fpdb_3_legacy.Configuration import GRAPHICS_PATH
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.research_drilldown import (
@@ -45,6 +53,110 @@ from fpdb_3_legacy.research_worker_db import worker_database
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 log = get_logger("gui_drilldown")
+
+_CARD_CODE = re.compile(r"(10|[2-9tjqka])([shdc])", re.IGNORECASE)
+_CARD_PIXMAPS: dict[tuple[str, str], QPixmap] = {}
+_SCALED_CARD_PIXMAPS: dict[tuple[str, str, int, int], QPixmap] = {}
+
+_SIGNED_MEASURE_PARTS = (
+    "profit", "realized", "delta", "gap", "ev_", "expected_value", "luck", "bb_per_100", "edge", "_cents",
+)
+
+
+class _CardImagesDelegate(QStyledItemDelegate):
+    """Paint compact card-face SVGs while retaining text for access/export."""
+
+    def __init__(self, max_cards: int, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.max_cards = max_cards
+
+    def paint(self, painter: QPainter, option: QStyleOptionViewItem, index) -> None:  # noqa: ANN001 - Qt signature
+        style_option = QStyleOptionViewItem(option)
+        self.initStyleOption(style_option, index)
+        code = str(index.data(Qt.ItemDataRole.DisplayRole) or "")
+        style_option.text = ""
+        style = style_option.widget.style() if style_option.widget else None
+        if style is not None:
+            style.drawControl(QStyle.ControlElement.CE_ItemViewItem, style_option, painter, style_option.widget)
+        cards = _CARD_CODE.findall(code)[: self.max_cards]
+        if not cards:
+            return
+
+        card_width, card_height, gap = 24, 33, 3
+        total_width = len(cards) * card_width + (len(cards) - 1) * gap
+        x = option.rect.x() + max(3, (option.rect.width() - total_width) // 2)
+        y = option.rect.y() + max(0, (option.rect.height() - card_height) // 2)
+        for rank, suit in cards:
+            pixmap = _card_pixmap(rank, suit, card_width, card_height)
+            target = option.rect.__class__(x, y, card_width, card_height)
+            if pixmap is not None:
+                painter.drawPixmap(target, pixmap)
+            else:
+                painter.drawText(target, Qt.AlignmentFlag.AlignCenter, f"{rank.upper()}{suit.lower()}")
+            x += card_width + gap
+
+    def sizeHint(self, option: QStyleOptionViewItem, index) -> Any:  # noqa: ANN001 - Qt signature
+        hint = super().sizeHint(option, index)
+        count = min(self.max_cards, len(_CARD_CODE.findall(str(index.data(Qt.ItemDataRole.DisplayRole) or ""))))
+        return hint.expandedTo(type(hint)(max(54, count * 27 + 8), 36))
+
+
+def _card_pixmap(rank: str, suit: str, width: int, height: int) -> QPixmap | None:
+    rank_key = {"t": "10", "10": "10"}.get(rank.lower(), rank.lower())
+    suit_key = suit.lower()
+    scaled_key = (rank_key, suit_key, width, height)
+    scaled = _SCALED_CARD_PIXMAPS.get(scaled_key)
+    if scaled is not None:
+        return scaled
+    key = (rank_key, suit_key)
+    cached = _CARD_PIXMAPS.get(key)
+    if cached is None:
+        svg_path = Path(GRAPHICS_PATH) / "cards" / "simple_flat_4color" / f"{suit_key}_{rank_key}.svg"
+        renderer = QSvgRenderer(str(svg_path))
+        if not renderer.isValid():
+            return None
+        cached = QPixmap(48, 66)
+        cached.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(cached)
+        renderer.render(painter)
+        painter.end()
+        _CARD_PIXMAPS[key] = cached
+    scaled = cached.scaled(
+        width,
+        height,
+        Qt.AspectRatioMode.KeepAspectRatio,
+        Qt.TransformationMode.SmoothTransformation,
+    )
+    _SCALED_CARD_PIXMAPS[scaled_key] = scaled
+    return scaled
+
+
+def install_card_image_delegates(table: QTableWidget, columns: Any) -> None:
+    """Use the same accessible card-face renderer in every Study hand table."""
+    for index, column in enumerate(columns):
+        key = getattr(column, "key", str(column))
+        count = 4 if key in {"playerCards", "heroCards"} else 5 if key == "board" else 0
+        if count:
+            table.setItemDelegateForColumn(index, _CardImagesDelegate(count, table))
+
+
+def style_signed_measure(item: QTableWidgetItem, key: str, value: Any, *, unit: str | None = None) -> None:
+    """Color signed poker outcomes without implying counts or rates are good/bad."""
+    normalized = key.lower()
+    if unit != "cents" and not any(part in normalized for part in _SIGNED_MEASURE_PARTS):
+        return
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return
+    if number:
+        item.setForeground(QColor("#68d391" if number > 0 else "#fc8181"))
+
+
+def _card_description(code: str) -> str:
+    suit_names = {"s": "spades", "h": "hearts", "d": "diamonds", "c": "clubs"}
+    cards = _CARD_CODE.findall(code)
+    return "Cards: " + ", ".join(f"{rank.upper()} of {suit_names[suit.lower()]}" for rank, suit in cards)
 
 
 def live_workers(workers: list[QThread]) -> list[QThread]:
@@ -198,10 +310,19 @@ class SourceHandsPane(QWidget):
 
         self.table = QTableWidget()
         self.table.setSortingEnabled(True)
+        self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.table.setWordWrap(False)
         self.table.verticalHeader().hide()
         self.table.itemDoubleClicked.connect(self._emit_hand)
+        for index, column in enumerate(SIDE_DRILL_COLUMNS):
+            if column.key == "playerCards":
+                self.table.setItemDelegateForColumn(index, _CardImagesDelegate(4, self.table))
+                self.table.setColumnWidth(index, 120)
+            elif column.key == "board":
+                self.table.setItemDelegateForColumn(index, _CardImagesDelegate(5, self.table))
+                self.table.setColumnWidth(index, 145)
         layout.addWidget(self.table, 1)
 
         paging = QHBoxLayout()
@@ -423,16 +544,31 @@ class SourceHandsPane(QWidget):
         self.table.setSortingEnabled(False)
         self.table.setRowCount(len(page.rows))
         self.table.setColumnCount(len(SIDE_DRILL_COLUMNS))
-        self.table.setHorizontalHeaderLabels([_(column.heading) for column in SIDE_DRILL_COLUMNS])
+        self.table.setHorizontalHeaderLabels([
+            f"{_(column.heading)} (¢)" if column.unit == "cents" else _(column.heading)
+            for column in SIDE_DRILL_COLUMNS
+        ])
         for row_index, row in enumerate(page.rows):
             for column_index, column in enumerate(SIDE_DRILL_COLUMNS):
                 value = row.get(column.key)
-                item = QTableWidgetItem("" if value is None else str(value))
+                text = "" if value is None else f"{value} ¢" if column.unit == "cents" else str(value)
+                item = QTableWidgetItem(text)
+                if column.key in {"playerCards", "board"} and value:
+                    description = _card_description(str(value))
+                    item.setToolTip(description)
+                    item.setData(Qt.ItemDataRole.AccessibleTextRole, description)
                 if column.key == "handId":
                     item.setData(Qt.ItemDataRole.UserRole, int(row["handId"]))
+                if isinstance(value, (int, float)):
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                    style_signed_measure(item, column.key, value, unit=column.unit)
                 self.table.setItem(row_index, column_index, item)
         self.table.setSortingEnabled(True)
         self.table.resizeColumnsToContents()
+        self.table.setColumnWidth(8, max(120, self.table.columnWidth(8)))
+        self.table.setColumnWidth(9, max(145, self.table.columnWidth(9)))
+        for row_index in range(len(page.rows)):
+            self.table.setRowHeight(row_index, 38)
         self.note_label.setText(f"{self._target_text()} — {page.page_note}")
         self.coverage_label.setText(page.card_coverage_note)
         self._set_paging_enabled(previous=page.has_previous, next_page=page.has_more)

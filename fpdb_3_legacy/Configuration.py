@@ -729,6 +729,7 @@ class Stat:
         self.rowcol = tuple(int(s) - 1 for s in rowcol[1:-1].split(","))  # tuple (r-1,c-1)
         self.stat_name = node.getAttribute("_stat_name")
         self.tip = node.getAttribute("tip")
+        self.display_label = node.getAttribute("display_label")
         self.click = node.getAttribute("click")
         self.popup = node.getAttribute("popup")
         self.hudprefix = node.getAttribute("hudprefix")
@@ -806,6 +807,8 @@ class StatBlock:
             self.bordercolor = node.getAttribute("bordercolor")
             self.title_bgcolor = node.getAttribute("title_bgcolor")
             self.title_fgcolor = node.getAttribute("title_fgcolor")
+            self.title_font_scale = float(node.getAttribute("title_font_scale")) if node.getAttribute("title_font_scale") else 0
+            self.heading_font_scale = float(node.getAttribute("heading_font_scale")) if node.getAttribute("heading_font_scale") else 0
             self.cell_width = int(node.getAttribute("cell_width")) if node.getAttribute("cell_width") else 0
             self.x = int(node.getAttribute("x")) if node.getAttribute("x") else 0
             self.y = int(node.getAttribute("y")) if node.getAttribute("y") else 0
@@ -831,6 +834,8 @@ class StatBlock:
             self.bordercolor = style.get("bordercolor", "")
             self.title_bgcolor = style.get("title_bgcolor", "")
             self.title_fgcolor = style.get("title_fgcolor", "")
+            self.title_font_scale = float(style.get("title_font_scale", 0) or 0)
+            self.heading_font_scale = float(style.get("heading_font_scale", 0) or 0)
             self.cell_width = int(style.get("cell_width", 0) or 0)
             self.x = int(style.get("x", 0) or 0)
             self.y = int(style.get("y", 0) or 0)
@@ -923,6 +928,8 @@ class Stat_sets:
         # Optional profile-specific font size. An empty value keeps the global
         # HUD font setting, while a profile can opt into a larger compact grid.
         self.font_size = node.getAttribute("font_size")
+        self.title_font_scale = node.getAttribute("title_font_scale")
+        self.heading_font_scale = node.getAttribute("heading_font_scale")
         # How position-bound panels (SB/BB/BU) display in a multi-block HUD:
         #   "current" -> show only the panel matching the estimated live position
         #                (the positional HUD's expected behaviour and default);
@@ -1679,26 +1686,28 @@ def parse_hud_panel_rules(doc: Any) -> tuple[list[Any], str, bool]:
     sections = doc.getElementsByTagName("hud_panel_rules")
     if not sections:
         return [], "", False
-    section = sections[0]
-    enabled = str(section.getAttribute("enabled") or "true").strip().lower() not in ("false", "no", "0", "off")
-    if not enabled:
-        # Off means off: a disabled section is not read, so a source that has
-        # since moved cannot turn a configuration the user turned off into a
-        # configuration that fails to load.
-        return [], "", False
-    fallback = str(section.getAttribute("fallback") or "").strip()
-    source = str(section.getAttribute("source") or "").strip()
     rules: list[Any] = []
-    if source:
-        loaded, loaded_fallback = hud_situation.load_source(source)
-        rules.extend(loaded)
-        fallback = fallback or loaded_fallback
-    for node in section.getElementsByTagName("hud_panel_rule"):
-        values = {name: node.getAttribute(name) for name in node.attributes.keys()}
-        rules.append(hud_situation.panel_rule_from_attributes(values, len(rules)))
-    scope = str(section.getAttribute("profile") or "").strip()
-    if scope and scope.casefold() != "all":
-        rules = hud_situation.scope_rules(rules, scope)
+    fallback = ""
+    enabled = False
+    for section in sections:
+        section_enabled = str(section.getAttribute("enabled") or "true").strip().lower() not in ("false", "no", "0", "off")
+        if not section_enabled:
+            continue
+        enabled = True
+        fallback = fallback or str(section.getAttribute("fallback") or "").strip()
+        section_rules: list[Any] = []
+        source = str(section.getAttribute("source") or "").strip()
+        if source:
+            loaded, loaded_fallback = hud_situation.load_source(source)
+            section_rules.extend(loaded)
+            fallback = fallback or loaded_fallback
+        for node in section.getElementsByTagName("hud_panel_rule"):
+            values = {name: node.getAttribute(name) for name in node.attributes.keys()}
+            section_rules.append(hud_situation.panel_rule_from_attributes(values, len(rules) + len(section_rules)))
+        scope = str(section.getAttribute("profile") or "").strip()
+        if scope and scope.casefold() != "all":
+            section_rules = hud_situation.scope_rules(section_rules, scope)
+        rules.extend(section_rules)
     return hud_situation.number_rules(rules), fallback, enabled
 
 
@@ -4255,6 +4264,8 @@ class Config:
                 section.removeAttribute("source")
             while section.firstChild:
                 section.removeChild(section.firstChild)
+            for duplicate in list(sections)[1:]:
+                duplicate.parentNode.removeChild(duplicate)
         else:
             section = self.doc.createElement("hud_panel_rules")
             section.setAttribute("enabled", "true" if enabled else "false")

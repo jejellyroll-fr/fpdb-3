@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+from collections.abc import Mapping
 from typing import Any, Final
 
 from PySide6.QtCore import Qt, QThread, Signal
@@ -10,6 +11,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QFormLayout,
     QHBoxLayout,
+    QHeaderView,
     QLabel,
     QLineEdit,
     QListWidget,
@@ -23,13 +25,19 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from fpdb_3_legacy.GuiDrillDown import SourceHandsPane, live_workers
+from fpdb_3_legacy.GuiDrillDown import (
+    SourceHandsPane,
+    install_card_image_delegates,
+    live_workers,
+    style_signed_measure,
+)
 from fpdb_3_legacy.GuiResearchDistributions import DistributionChartWidget
 from fpdb_3_legacy.GuiResearchHandStrength import HandStrengthChartWidget
 from fpdb_3_legacy.GuiResearchMatrices import MatrixHeatmapWidget
 from fpdb_3_legacy.GuiResearchViews import RangeGridWidget
 from fpdb_3_legacy.research_distributions import build_distribution
 from fpdb_3_legacy.research_drilldown import SIDE_FIELD, SIDE_HERO
+from fpdb_3_legacy.research_labels import value_label
 from fpdb_3_legacy.research_matrices import POSITION_LABELS, build_matrix
 from fpdb_3_legacy.research_study_dashboard import (
     COMPARISON_FIELD,
@@ -133,6 +141,7 @@ class GuiStudyDashboard(QWidget):
         self._workers: list[_DashboardWorker] = []
         self._results: dict[str, Any] = {}
         self._pages: dict[str, tuple[QLabel, QTableWidget]] = {}
+        self._result_splitters: dict[str, QSplitter] = {}
         self._distribution_widgets: dict[str, DistributionChartWidget] = {}
         self._matrix_widgets: dict[str, MatrixHeatmapWidget] = {}
         self._range_widgets: dict[str, RangeGridWidget] = {}
@@ -143,7 +152,7 @@ class GuiStudyDashboard(QWidget):
         self._build_ui()
         self._load_active_panel()
 
-    def _build_ui(self) -> None:  # noqa: C901, PLR0915 - one cohesive dashboard widget tree
+    def _build_ui(self) -> None:  # noqa: C901, PLR0912, PLR0915 - one cohesive dashboard widget tree
         colors = get_theme_palette()
         muted = colors.get("muted_text", "#a0aec0")
         layout = QVBoxLayout(self)
@@ -258,27 +267,29 @@ class GuiStudyDashboard(QWidget):
             status.setWordWrap(True)
             table = QTableWidget()
             table.setSortingEnabled(True)
+            table.setAlternatingRowColors(True)
             table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
             table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
             table.verticalHeader().hide()
             table.itemDoubleClicked.connect(self._row_double_clicked)
             page_layout.addWidget(status)
+            visual: QWidget | None = None
             if panel.kind in {"sizing_distribution", "response_distribution"}:
                 chart = DistributionChartWidget()
                 chart.bin_clicked.connect(self._distribution_bin_clicked)
                 self._distribution_widgets[panel.id] = chart
-                page_layout.addWidget(chart)
+                visual = chart
             elif panel.kind in {"position_matrix", "board_matrix"}:
                 if len(panel.group_by) == 1:
                     chart = DistributionChartWidget()
                     chart.bin_clicked.connect(self._distribution_bin_clicked)
                     self._distribution_widgets[panel.id] = chart
-                    page_layout.addWidget(chart)
+                    visual = chart
                 elif len(panel.group_by) == 2:
                     matrix = MatrixHeatmapWidget()
                     matrix.cell_clicked.connect(self._matrix_cell_clicked)
                     self._matrix_widgets[panel.id] = matrix
-                    page_layout.addWidget(matrix)
+                    visual = matrix
             elif panel.kind == "hand_strength":
                 chart = HandStrengthChartWidget()
                 chart.dimension_changed.connect(
@@ -288,15 +299,26 @@ class GuiStudyDashboard(QWidget):
                 )
                 chart.category_clicked.connect(self._hand_strength_category_clicked)
                 self._hand_strength_widgets[panel.id] = chart
-                page_layout.addWidget(chart)
+                visual = chart
             elif panel.kind == "range_grid":
                 grid = RangeGridWidget()
                 grid.cell_activated.connect(
                     lambda value, panel_id=panel.id: self._range_cell_activated(panel_id, value),
                 )
                 self._range_widgets[panel.id] = grid
-                page_layout.addWidget(grid)
-            page_layout.addWidget(table, 1)
+                visual = grid
+            if visual is not None:
+                result_splitter = QSplitter(Qt.Orientation.Vertical)
+                result_splitter.setChildrenCollapsible(False)
+                result_splitter.addWidget(visual)
+                result_splitter.addWidget(table)
+                result_splitter.setStretchFactor(0, 0)
+                result_splitter.setStretchFactor(1, 1)
+                result_splitter.setSizes([300, 420])
+                page_layout.addWidget(result_splitter, 1)
+                self._result_splitters[panel.id] = result_splitter
+            else:
+                page_layout.addWidget(table, 1)
             self._pages[panel.id] = (status, table)
             item = QListWidgetItem(panel.title)
             self.panel_list.addItem(item)
@@ -670,17 +692,7 @@ class GuiStudyDashboard(QWidget):
             self._render_distribution(panel_id, result, status, table)
             return
         rows = self._rows(result)
-        columns = sorted({key for row in rows for key in row})
-        table.setColumnCount(len(columns))
-        table.setHorizontalHeaderLabels(columns)
-        table.setRowCount(len(rows))
-        for row_index, row in enumerate(rows):
-            for column_index, column in enumerate(columns):
-                item = QTableWidgetItem(self._display(row.get(column)))
-                if column in self._group_by(panel_id):
-                    item.setData(Qt.ItemDataRole.UserRole, {column: row.get(column)})
-                table.setItem(row_index, column_index, item)
-        table.resizeColumnsToContents()
+        self._populate_result_table(table, rows, filter_columns=self._group_by(panel_id))
         sample = self._sample_text(result)
         self.sample_label.setText(sample)
         note = " No matching hands for this context." if "0 decisions" in sample else ""
@@ -724,6 +736,7 @@ class GuiStudyDashboard(QWidget):
                 for row in field.as_rows()
             ]
             warnings = [warning for warning in (hero.low_sample_warning, field.low_sample_warning) if warning]
+            percentage_is_distinct = hero.is_rate or field.is_rate
         else:
             series = build_distribution(
                 result,
@@ -734,25 +747,37 @@ class GuiStudyDashboard(QWidget):
             chart.set_series(series)
             rows = series.as_rows()
             warnings = [series.low_sample_warning] if series.low_sample_warning else []
+            percentage_is_distinct = series.is_rate
 
-        columns = sorted({key for row in rows for key in row})
-        table.setColumnCount(len(columns))
-        table.setHorizontalHeaderLabels(columns)
-        table.setRowCount(len(rows))
-        for row_index, row in enumerate(rows):
-            for column_index, column in enumerate(columns):
-                item = QTableWidgetItem(self._display(row.get(column)))
-                if column == dimension:
-                    item.setData(Qt.ItemDataRole.UserRole, {dimension: row.get(column)})
-                table.setItem(row_index, column_index, item)
-        table.resizeColumnsToContents()
+        is_rate = percentage_is_distinct
+        measure_column = "percentage" if is_rate else "share"
+        display_columns = tuple(
+            key for key in (
+                "side", "label", "opportunities", "actions", measure_column,
+            )
+            if any(key in row for row in rows)
+        )
+        headers = {
+            "label": self._column_label(dimension),
+            "opportunities": "All decisions",
+            "actions": "Matching actions",
+            "percentage": "Action rate (%)",
+            "share": "Decision share (%)",
+        }
+        self._populate_result_table(
+            table,
+            rows,
+            filter_columns=(dimension,),
+            display_columns=display_columns,
+            header_labels=headers,
+        )
         sample = self._sample_text(result)
         self.sample_label.setText(sample)
         note = " No matching decisions for this context." if "0 decisions" in sample else ""
         warning_text = f" {' '.join(warnings)}" if warnings else ""
         status.setText(
-            f"{sample}.{warning_text}{note} "
-            "Bars show share of decisions or response rate; double-click a row to filter."
+            f"{warning_text}{note} Click a bar or double-click a data row to filter. "
+            "The table keeps the exact numerator and denominator."
         )
 
     def _render_matrix(
@@ -787,17 +812,39 @@ class GuiStudyDashboard(QWidget):
             rows = series.as_rows()
             low_sample = len(series.low_sample_cells)
 
-        columns = sorted({key for row in rows for key in row})
-        table.setColumnCount(len(columns))
-        table.setHorizontalHeaderLabels(columns)
-        table.setRowCount(len(rows))
-        for row_index, row in enumerate(rows):
-            for column_index, column in enumerate(columns):
-                item = QTableWidgetItem(self._display(row.get(column)))
-                if column in group_by:
-                    item.setData(Qt.ItemDataRole.UserRole, {column: row.get(column)})
-                table.setItem(row_index, column_index, item)
-        table.resizeColumnsToContents()
+        metric_field = "frequency_bp" if any(row.get("frequency_bp") is not None for row in rows) else "value"
+        units = {row.get("unit") for row in rows if row.get("unit") is not None}
+        uniform_unit = next(iter(units)) if len(units) == 1 else None
+        detail_fields = (
+            *group_by, "side", metric_field, "opportunities", "actions", "sample_sufficient", "unit",
+        )
+        rows = [{key: row.get(key) for key in detail_fields if key in row} for row in rows]
+        unit_labels = {"bp": "%", "cents": "¢", "count": "count", "bb": "BB", "bb/100": "BB/100"}
+        metric_label = (
+            "Frequency (%)" if metric_field == "frequency_bp"
+            else f"Metric value ({unit_labels.get(uniform_unit, uniform_unit)})" if uniform_unit is not None
+            else "Metric value"
+        )
+        display_columns = tuple(
+            key for key in (
+                *group_by, "side", metric_field, "opportunities", "actions", "sample_sufficient",
+                *( () if uniform_unit is not None else ("unit",) ),
+            )
+            if any(key in row for row in rows)
+        )
+        self._populate_result_table(
+            table,
+            rows,
+            filter_columns=group_by,
+            display_columns=display_columns,
+            header_labels={
+                metric_field: metric_label,
+                "opportunities": "Decisions",
+                "actions": "Actions",
+                "sample_sufficient": "Sample status",
+                "unit": "Unit",
+            },
+        )
         sample = self._sample_text(result)
         self.sample_label.setText(sample)
         warning = f" {low_sample} populated cells are below the minimum sample." if low_sample else ""
@@ -823,8 +870,14 @@ class GuiStudyDashboard(QWidget):
             )
             return
         try:
-            self.model.add_cross_filter(row_name, row_value, f"{row_name}: {label}")
-            self.model.add_cross_filter(column_name, column_value, f"{column_name}: {label}")
+            row_title = row_name.replace("_", " ").title()
+            column_title = column_name.replace("_", " ").title()
+            self.model.add_cross_filter(row_name, row_value, f"{row_title}: {value_label(row_name, row_value)}")
+            self.model.add_cross_filter(
+                column_name,
+                column_value,
+                f"{column_title}: {value_label(column_name, column_value)}",
+            )
         except ValueError as exc:
             self.context_label.setText(f"Cannot filter this cell: {exc}")
             return
@@ -872,24 +925,39 @@ class GuiStudyDashboard(QWidget):
             warnings = [distribution.known_sample_warning] if distribution.known_sample_warning else []
             overlapping = distribution.overlapping
 
-        columns = sorted({key for row in rows for key in row})
+        present = {key for row in rows for key in row}
+        columns = [
+            key for key in ("side", "category", "decisions", "share", "sample_sufficient")
+            if key in present
+        ]
         table.setColumnCount(len(columns))
-        table.setHorizontalHeaderLabels(columns)
+        table.setHorizontalHeaderLabels([
+            "Category share (%)" if column == "share" else self._column_label(column)
+            for column in columns
+        ])
         table.setRowCount(len(rows))
-        dimension = self.model.panel(panel_id).dimension
         for row_index, row in enumerate(rows):
+            filter_group = (
+                {row["filter_name"]: row.get("filter_value")}
+                if row.get("filter_name") and row.get("filter_value") is not None
+                else {}
+            )
             for column_index, column in enumerate(columns):
-                item = QTableWidgetItem(self._display(row.get(column)))
-                if column == "key":
-                    filter_name = row.get("filter_name")
-                    item.setData(
-                        Qt.ItemDataRole.UserRole,
-                        ({filter_name: row.get("filter_value")} if filter_name else {}),
-                    )
+                value = row.get(column)
+                if column == "sample_sufficient":
+                    text = "Meets threshold" if value else "Low sample"
+                else:
+                    text = self._display(value, column, row)
+                item = QTableWidgetItem(text)
+                item.setData(Qt.ItemDataRole.UserRole, filter_group)
+                if isinstance(value, (int, float)):
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                    style_signed_measure(item, column, value, unit=row.get("unit"))
                 table.setItem(row_index, column_index, item)
         table.resizeColumnsToContents()
         sample = self._sample_text(result)
         self.sample_label.setText(sample)
+        dimension = self.model.panel(panel_id).dimension
         overlap = " Categories overlap; shares do not sum to 100%." if overlapping else ""
         warning_text = f" {' '.join(warnings)}" if warnings else ""
         status.setText(
@@ -909,15 +977,32 @@ class GuiStudyDashboard(QWidget):
         grid = self._range_widgets[panel_id]
         grid.set_matrix(matrix)
         rows = self._rows(result)
-        columns = sorted({key for row in rows for key in row})
+        present = {key for row in rows for key in row}
+        columns = [
+            key for key in (
+                "side", "label", "opportunities", "hands", "actions", "frequency_bp",
+                "realized_cents", "ev_adjusted_cents", "all_in_luck_cents", "sample_sufficient",
+            )
+            if key in present
+        ]
         table.setColumnCount(len(columns))
-        table.setHorizontalHeaderLabels(columns)
+        table.setHorizontalHeaderLabels([
+            "Starting hand" if column == "label" else self._column_label(column) for column in columns
+        ])
         table.setRowCount(len(rows))
         for row_index, row in enumerate(rows):
+            filter_group = {"starting_hand": row.get("label")} if row.get("label") else {}
             for column_index, column in enumerate(columns):
-                item = QTableWidgetItem(self._display(row.get(column)))
-                if column == "label":
-                    item.setData(Qt.ItemDataRole.UserRole, {"starting_hand": row.get(column)})
+                value = row.get(column)
+                if column == "sample_sufficient":
+                    text = "Meets threshold" if value else "Low sample"
+                else:
+                    text = self._display(value, column, row)
+                item = QTableWidgetItem(text)
+                item.setData(Qt.ItemDataRole.UserRole, filter_group)
+                if isinstance(value, (int, float)):
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                    style_signed_measure(item, column, value, unit=row.get("unit"))
                 table.setItem(row_index, column_index, item)
         table.resizeColumnsToContents()
         sample = self._sample_text(result)
@@ -942,7 +1027,7 @@ class GuiStudyDashboard(QWidget):
         if not isinstance(group, dict) or not group:
             return
         name, value = next(iter(group.items()))
-        self.add_cross_filter(name, value, f"{name}: {value}")
+        self.add_cross_filter(name, value, f"{name.replace('_', ' ').title()}: {value_label(name, value)}")
 
     def _group_by(self, panel_id: str) -> tuple[str, ...]:
         return self.model.panel_query(panel_id).group_by
@@ -978,6 +1063,119 @@ class GuiStudyDashboard(QWidget):
         return []
 
     @staticmethod
+    def _flatten_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Turn structured measures (notably rake breakdowns) into columns."""
+        flattened = []
+        for row in rows:
+            flat = {}
+            for key, value in row.items():
+                if isinstance(value, Mapping):
+                    flat.update({f"{key}.{part}": part_value for part, part_value in value.items()})
+                else:
+                    flat[key] = value
+            flattened.append(flat)
+        return flattened
+
+    @classmethod
+    def _result_columns(
+        cls,
+        rows: list[dict[str, Any]],
+        *,
+        preferred: tuple[str, ...] = (),
+    ) -> list[str]:
+        rows = cls._flatten_rows(rows)
+        present = {key for row in rows for key in row}
+        priority = (*preferred, "side", "label", "response", "metric_label", "opportunities", "actions", "frequency_bp", "percentage", "share", "value", "unit")
+        ordered = list(dict.fromkeys(key for key in priority if key in present))
+        ordered.extend(sorted(present - set(ordered)))
+        return ordered
+
+    @classmethod
+    def _populate_result_table(
+        cls,
+        table: QTableWidget,
+        rows: list[dict[str, Any]],
+        *,
+        filter_columns: tuple[str, ...] = (),
+        display_columns: tuple[str, ...] | None = None,
+        header_labels: Mapping[str, str] | None = None,
+    ) -> None:
+        rows = cls._flatten_rows(rows)
+        columns = list(display_columns) if display_columns is not None else cls._result_columns(rows, preferred=filter_columns)
+        table.setSortingEnabled(False)
+        table.setColumnCount(len(columns))
+        labels = header_labels or {}
+        table.setHorizontalHeaderLabels([labels.get(column, cls._column_label(column)) for column in columns])
+        install_card_image_delegates(table, columns)
+        table.setRowCount(len(rows))
+        for row_index, row in enumerate(rows):
+            filter_values = {key: row.get(key) for key in filter_columns if key in row}
+            for column_index, column in enumerate(columns):
+                value = row.get(column)
+                item = QTableWidgetItem(cls._display(value, column, row))
+                if filter_values:
+                    item.setData(Qt.ItemDataRole.UserRole, filter_values)
+                if value is not None:
+                    item.setToolTip(f"{cls._column_label(column)}: {cls._display(value, column, row, exact=True)}")
+                if isinstance(value, (int, float)):
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                    style_signed_measure(item, column, value, unit=row.get("unit"))
+                table.setItem(row_index, column_index, item)
+        table.resizeColumnsToContents()
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+        for column_index, column in enumerate(columns):
+            header = table.horizontalHeaderItem(column_index)
+            if header is not None:
+                header.setToolTip(labels.get(column, cls._column_label(column)))
+            if table.columnWidth(column_index) > 240:
+                table.setColumnWidth(column_index, 240)
+        table.setSortingEnabled(True)
+
+    @staticmethod
+    def _column_label(column: str) -> str:
+        labels = {
+            "side": "Population",
+            "opportunities": "Decisions",
+            "actions": "Actions",
+            "frequency_bp": "Frequency (%)",
+            "percentage": "Response rate (%)",
+            "share": "Decision share (%)",
+            "metric_label": "Measure",
+            "value": "Metric value",
+            "coverage_bp": "Coverage (%)",
+            "category": "Category",
+            "decisions": "Decisions",
+            "hands": "Hands",
+            "sample_sufficient": "Sample status",
+            "realized_cents": "Realized (¢)",
+            "ev_adjusted_cents": "EV-adjusted (¢)",
+            "all_in_luck_cents": "All-in luck (¢)",
+            "bb_per_100": "Win rate (BB/100)",
+            "ev_bb_per_100": "EV win rate (BB/100)",
+            "starting_hand": "Starting hand",
+            "hero_profit": "Hero profit (¢)",
+            "playerProfit": "Player profit (¢)",
+            "finalPot": "Final pot (¢)",
+            "bigBlind": "Big blind (¢)",
+        }
+        if column in labels:
+            return labels[column]
+        if column in {"heroProfit", "playerProfit", "finalPot", "bigBlind"}:
+            title = {
+                "heroProfit": "Hero profit",
+                "playerProfit": "Player profit",
+                "finalPot": "Final pot",
+                "bigBlind": "Big blind",
+            }[column]
+            return f"{title} (¢)"
+        if column.startswith("rake."):
+            detail = column.split(".", 1)[1].replace("_", " ").title()
+            return f"Rake · {detail} (¢)"
+        if column.endswith("_cents"):
+            return f"{column.removesuffix('_cents').replace('_', ' ').title()} (¢)"
+        return column.replace("_", " ").replace(".", " · ").title()
+
+    @staticmethod
     def _sample_text(result: Any) -> str:
         if isinstance(result, DashboardComparison):
             return f"Hero: {GuiStudyDashboard._sample_text(result.hero)} · Field: {GuiStudyDashboard._sample_text(result.field)}"
@@ -995,12 +1193,40 @@ class GuiStudyDashboard(QWidget):
         return "Result loaded"
 
     @staticmethod
-    def _display(value: Any) -> str:
+    def _display(value: Any, column: str = "", row: Mapping[str, Any] | None = None, *, exact: bool = False) -> str:
         if value is None:
             return "—"
-        if isinstance(value, float):
-            return f"{value:g}"
+        if isinstance(value, Mapping):
+            return ", ".join(f"{key}: {item}" for key, item in value.items())
+        if isinstance(value, bool):
+            if column == "in_position":
+                return "In position" if value else "Out of position"
+            return "Yes" if value else "No"
+        if isinstance(value, (int, float)):
+            return GuiStudyDashboard._display_number(value, column, row or {}, exact=exact)
         return str(value)
+
+    @staticmethod
+    def _display_number(value: int | float, column: str, row: Mapping[str, Any], *, exact: bool) -> str:
+        number = float(value)
+        unit = row.get("unit")
+        if column in {"position", "opponent_position", "opener_position", "defender_position", "in_position"}:
+            return value_label(column, value)
+        if column in {"frequency_bp", "coverage_bp"} or (column in {"value", "metric_value"} and unit == "bp"):
+            return f"{number / 100:.2f}%" if exact else f"{number / 100:.1f}%"
+        if column in {"percentage", "share"}:
+            return f"{number:.2f}%" if exact else f"{number:.1f}%"
+        if column in {"value", "metric_value"} and unit == "centi":
+            return f"{number / 100:.2f}"
+        is_cents = column.endswith("_cents") or column.startswith("rake.") or (
+            column in {"value", "total", "average", "profit", "heroProfit", "playerProfit", "finalPot", "bigBlind"}
+            and (unit == "cents" or column in {"heroProfit", "playerProfit", "finalPot", "bigBlind"})
+        )
+        if exact:
+            formatted = f"{number:,.15g}" if isinstance(value, float) else f"{value:,}"
+        else:
+            formatted = f"{number:,.2f}".rstrip("0").rstrip(".") if isinstance(value, float) else f"{value:,}"
+        return f"{formatted} ¢" if is_cents else formatted
 
 
 __all__ = ["GuiStudyDashboard"]

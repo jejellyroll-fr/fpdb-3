@@ -20,7 +20,7 @@ def preview(qtbot) -> ReferenceHudPreview:
     return widget
 
 
-def test_all_three_reference_packages_are_offered(preview) -> None:
+def test_all_reference_packages_are_offered(preview) -> None:
     offered = [preview.package_combo.itemData(index) for index in range(preview.package_combo.count())]
 
     assert offered == [name for name, _label in PACKAGE_ORDER]
@@ -45,6 +45,21 @@ def test_the_dynamic_package_offers_every_context_by_its_title(preview) -> None:
     assert contexts == [panel.id for panel in package.dynamic_panels]
     labels = [preview.context_combo.itemText(index) for index in range(1, preview.context_combo.count())]
     assert labels == [PANEL_TITLES[panel_id] for panel_id in contexts]
+
+
+def test_the_plo_dynamic_package_previews_omaha_panels(preview) -> None:
+    preview.select_package("plo_dynamic")
+    package = describe_package(reference_packages()["plo_dynamic"])
+
+    assert package.name == "plo_6max_dynamic"
+    hold_em = {panel.id for panel in describe_package(reference_packages()["dynamic"]).dynamic_panels}
+    assert {panel.id for panel in package.dynamic_panels} == hold_em | {
+        "postflop_flop", "postflop_turn", "postflop_river",
+    }
+    assert {stat.name for stat in package.stats} >= {"limp", "cold_call", "a_freq1", "wwsf"}
+
+    preview.select_context("postflop_flop")
+    assert [block["label"] for block in preview.preview.blocks] == ["Core", "Flop · Overview"]
 
 
 def test_choosing_a_context_shows_that_panel_and_says_why(preview) -> None:

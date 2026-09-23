@@ -16,7 +16,9 @@ import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication
 
+from fpdb_3_legacy import research_browser as browser_module
 from fpdb_3_legacy.Database import Database
+from fpdb_3_legacy.GuiDrillDown import _CardImagesDelegate
 from fpdb_3_legacy.Importer import Importer
 from tests.helpers import analytics_golden as golden
 
@@ -99,7 +101,7 @@ def test_running_a_query_renders_rows_and_sample(browser, qtbot) -> None:
         browser.result_table.horizontalHeaderItem(c).text()
         for c in range(browser.result_table.columnCount())
     ]
-    assert "decisions" in headers and "numerator" in headers and "frequency" in headers
+    assert {"Decisions", "Actions", "Frequency (%)"} <= set(headers)
 
 
 def test_comparison_renders_both_samples_and_offers_both_sides_of_the_drill(browser, qtbot) -> None:
@@ -111,7 +113,10 @@ def test_comparison_renders_both_samples_and_offers_both_sides_of_the_drill(brow
         browser.result_table.horizontalHeaderItem(c).text()
         for c in range(browser.result_table.columnCount())
     ]
-    assert {"you", "your sample", "the field", "its sample", "gap"} <= set(headers)
+    assert {
+        "You (%)", "Your sample (actions / decisions)", "Field (%)",
+        "Field sample (actions / decisions)", "Gap (pp)",
+    } <= set(headers)
     assert browser.result_table.rowCount() > 0
     # A comparison row has two populations, so it keeps its query and shows
     # both rather than asking for a rerun without the comparison (#366).
@@ -198,7 +203,7 @@ def test_non_frequency_comparison_shows_sample_counts_without_a_fake_ratio(brows
     sample_column = [
         browser.result_table.horizontalHeaderItem(c).text()
         for c in range(browser.result_table.columnCount())
-    ].index("your sample")
+    ].index("Your sample (decisions)")
     assert "/" not in browser.result_table.item(0, sample_column).text()
 
 
@@ -657,8 +662,13 @@ def test_choosing_the_profit_view_shows_realized_and_ev_adjusted(browser, qtbot)
         browser.money_view.table.horizontalHeaderItem(c).text()
         for c in range(browser.money_view.table.columnCount())
     ]
-    assert "Realized" in headings and "EV-adjusted" in headings and "Luck" in headings
+    assert "Realized (¢)" in headings and "EV-adjusted (¢)" in headings and "Luck (¢)" in headings
     assert browser.money_view.table.rowCount() > 0
+    realized_column = next(index for index, heading in enumerate(headings) if heading == "Realized (¢)")
+    assert all(
+        "¢" in browser.money_view.table.item(row, realized_column).text()
+        for row in range(browser.money_view.table.rowCount())
+    )
     assert browser.money_view.notes.text()
 
 
@@ -667,6 +677,8 @@ def test_choosing_the_hands_view_loads_the_populations_hands(browser, qtbot) -> 
     qtbot.waitUntil(lambda: browser.drill_table.rowCount() > 0, timeout=30000)
     assert browser.drill_table.rowCount() > 0
     assert browser.result_stack.currentIndex() == 0
+    card_column = next(index for index, column in enumerate(browser_module.DRILL_COLUMNS) if column.key == "heroCards")
+    assert isinstance(browser.drill_table.itemDelegateForColumn(card_column), _CardImagesDelegate)
 
 
 def test_returning_to_your_own_question_leaves_the_builder_alone(browser, qtbot) -> None:

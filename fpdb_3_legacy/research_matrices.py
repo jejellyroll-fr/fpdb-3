@@ -65,6 +65,13 @@ class MatrixCell:
         return f"{self.metric_value:.0f}"
 
     @property
+    def exact_metric_label(self) -> str:
+        """Tooltip value at the precision carried by the query result."""
+        if self.percentage is not None:
+            return f"{self.percentage:.2f}%"
+        return f"{self.metric_value:g}"
+
+    @property
     def sample_sufficient(self) -> bool:
         return self.opportunities > 0 and (
             not self.min_sample or self.opportunities >= self.min_sample

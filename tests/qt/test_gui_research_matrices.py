@@ -40,7 +40,7 @@ def test_heatmap_shows_numeric_samples_and_clicks_exact_matchup(qtbot) -> None:
 
     assert widget.table.rowCount() == 1
     assert widget.table.columnCount() == 2
-    assert "Gap" in widget.table.item(0, 1).text()
+    assert "Δ" in widget.table.item(0, 1).text()
     assert "opportunities=12" in widget.table.item(0, 1).toolTip()
 
     widget.click_cell(0, 1)
@@ -62,4 +62,24 @@ def test_comparison_keeps_hero_only_cells_in_comparison_semantics(qtbot) -> None
     widget.set_comparison(hero, field)
 
     text = widget.table.item(0, widget._column_values.index(1)).text()
-    assert "H " in text and "F —" in text and "Gap +12.0" in text
+    assert "H 12 · F —" in text and "Δ +12.0" in text
+
+
+def test_comparison_cell_keeps_percent_units_and_uses_percentage_points(qtbot) -> None:
+    hero = build_matrix(
+        fake_result([QueryRow({"position": 0, "opponent_position": 1}, 100, 84, 84, "bp", 8421)]),
+        ("position", "opponent_position"),
+    )
+    field = build_matrix(
+        fake_result([QueryRow({"position": 0, "opponent_position": 1}, 100, 65, 65, "bp", 6587)]),
+        ("position", "opponent_position"),
+    )
+    widget = MatrixHeatmapWidget()
+    qtbot.addWidget(widget)
+
+    widget.set_comparison(hero, field)
+
+    text = widget.table.item(0, 0).text()
+    assert "H 84.2% · F 65.9%" in text
+    assert "Δ +18.3 pp" in text
+    assert "Hero: 84.21%" in widget.table.item(0, 0).toolTip()

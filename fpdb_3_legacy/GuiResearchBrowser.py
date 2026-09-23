@@ -67,7 +67,12 @@ from fpdb_3_legacy import research_labels as rlabels
 from fpdb_3_legacy import research_presets as presets_lib
 from fpdb_3_legacy import research_views as rviews
 from fpdb_3_legacy.analytics_query import DIMENSIONS, KNOWN_METRICS
-from fpdb_3_legacy.GuiDrillDown import SourceHandsPane, live_workers
+from fpdb_3_legacy.GuiDrillDown import (
+    SourceHandsPane,
+    install_card_image_delegates,
+    live_workers,
+    style_signed_measure,
+)
 from fpdb_3_legacy.GuiResearchViews import CompositionWidget, MoneyWidget, RangeGridWidget
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -95,7 +100,7 @@ def _comparison_measure_text(value: float | None, unit: str, frequency: bool) ->
     if frequency:
         return f"{value * 100:.1f}%"
     if unit == "cents":
-        return f"{value:.2f}¢"
+        return f"{value:,.2f} ¢"
     if unit == "bp":
         return f"{value / 100:.1f}%"
     if unit == "centi":
@@ -103,6 +108,36 @@ def _comparison_measure_text(value: float | None, unit: str, frequency: bool) ->
     if float(value).is_integer():
         return str(int(value))
     return f"{value:g}"
+
+
+def _comparison_gap_text(value: float | None, unit: str, frequency: bool) -> str:
+    if value is None:
+        return ""
+    if frequency:
+        return f"{value * 100:+.1f} pp"
+    if unit == "bp":
+        return f"{value / 100:+.1f} pp"
+    if unit == "cents":
+        return f"{value:+,.2f} ¢"
+    return _comparison_measure_text(value, unit, frequency)
+
+
+def _result_header_label(column: Any) -> str:
+    if column.source == "dimension":
+        return rlabels.dimension_label(column.key)
+    if column.source == "denominator":
+        return _("Decisions")
+    if column.source == "numerator":
+        return _("Actions")
+    if column.key == "frequency_bp" or column.unit == "bp":
+        return _("Frequency (%)")
+    if column.unit == "cents":
+        return _(column.heading.title()) + " (¢)"
+    if column.unit == "count":
+        return _("Count")
+    if column.unit == "bb/100":
+        return _(column.heading.title()) + " (BB/100)"
+    return _(column.heading.title())
 
 
 #: Kept under its old name so the panes that already import it from here keep
@@ -894,6 +929,7 @@ class GuiResearchBrowser(QWidget):
         results_layout.addWidget(self.view_note)
         self.result_table = QTableWidget()
         self.result_table.setSortingEnabled(True)
+        self.result_table.setAlternatingRowColors(True)
         self.result_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.result_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.result_table.verticalHeader().hide()
@@ -989,6 +1025,7 @@ class GuiResearchBrowser(QWidget):
         single_layout.addWidget(self.drill_mode_combo)
         self.drill_table = QTableWidget()
         self.drill_table.setSortingEnabled(True)
+        self.drill_table.setAlternatingRowColors(True)
         self.drill_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.drill_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.drill_table.verticalHeader().hide()
@@ -1444,10 +1481,23 @@ texture*. The label already existed; nothing called it. Technical names
             _("Double-click a row to see your hands and the field's, side by side."),
         )
         headings = [rlabels.dimension_label(name) for name in comparison.group_by]
-        headings += [_("you"), _("your sample"), _("the field"), _("its sample"), _("gap")]
+        measure_unit = " (%)" if comparison.frequency or comparison.unit == "bp" else " (¢)" if comparison.unit == "cents" else ""
+        gap_unit = " (pp)" if comparison.frequency or comparison.unit == "bp" else " (¢)" if comparison.unit == "cents" else ""
+        sample_unit = "actions / decisions" if comparison.frequency else "decisions"
+        headings += [
+            _("You") + measure_unit,
+            _("Your sample") + f" ({sample_unit})",
+            _("Field") + measure_unit,
+            _("Field sample") + f" ({sample_unit})",
+            _("Gap") + gap_unit,
+        ]
         self.result_table.setRowCount(len(comparison.rows))
         self.result_table.setColumnCount(len(headings))
         self.result_table.setHorizontalHeaderLabels(headings)
+        for column, heading in enumerate(headings):
+            header_item = self.result_table.horizontalHeaderItem(column)
+            if header_item is not None:
+                header_item.setToolTip(heading)
 
         for r, row in enumerate(comparison.rows):
             cells = [rb.value_label(name, row.group.get(name)) for name in comparison.group_by]
@@ -1464,16 +1514,18 @@ texture*. The label already existed; nothing called it. Technical names
                     if comparison.frequency
                     else str(row.field_opportunities)
                 ),
-                "" if row.gap is None else (
-                    f"{row.gap * 100:+.1f} pt"
-                    if comparison.frequency
-                    else _comparison_measure_text(row.gap, comparison.unit, comparison.frequency)
-                ),
+                _comparison_gap_text(row.gap, comparison.unit, comparison.frequency),
             ]
             for c, text in enumerate(cells):
                 item = QTableWidgetItem(text)
                 if c >= len(comparison.group_by):
                     item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                    if c == len(comparison.group_by):
+                        style_signed_measure(item, "comparison_value", row.hero_measure, unit=comparison.unit)
+                    elif c == len(comparison.group_by) + 2:
+                        style_signed_measure(item, "comparison_value", row.field_measure, unit=comparison.unit)
+                    elif c == len(comparison.group_by) + 4:
+                        style_signed_measure(item, "gap", row.gap)
                 else:
                     item.setData(Qt.ItemDataRole.UserRole, dict(row.group))
                 if c == 0:
@@ -1627,24 +1679,18 @@ texture*. The label already existed; nothing called it. Technical names
         self.result_table.setRowCount(len(rows))
         self.result_table.setColumnCount(len(columns))
         self._set_result_headers(columns)
+        install_card_image_delegates(self.result_table, columns)
         for r, row in enumerate(rows):
             group = {col.key: row.get(col.key) for col in columns if col.source == "dimension"}
             for c, col in enumerate(columns):
                 value = row.get(col.key)
-                text = "" if value is None else str(value)
-                if col.source == "dimension" and value is not None:
-                    # A seat reads -1 here while this pane's own filter offers
-                    # SB for the same value: the table was asking the reader to
-                    # translate (#355). The raw value still travels in UserRole,
-                    # so the drill-down keeps filtering on what was stored.
-                    text = rb.value_label(col.key, value)
-                elif col.key == "frequency_bp" and value is not None:
-                    text = f"{value / 100:.1f}%"
+                text = self._result_cell_text(value, col, row)
                 item = QTableWidgetItem(text)
                 if col.source == "dimension":
                     item.setData(Qt.ItemDataRole.UserRole, group)
                 else:
                     item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                    style_signed_measure(item, col.key, value, unit=row.get("unit"))
                 self.result_table.setItem(r, c, item)
         self.result_table.resizeColumnsToContents()
         self.result_note.setText(
@@ -1658,6 +1704,24 @@ texture*. The label already existed; nothing called it. Technical names
         if rows:
             self._load_drill(group={})
 
+    @staticmethod
+    def _result_cell_text(value: Any, column: Any, row: dict[str, Any]) -> str:
+        if value is None:
+            return ""
+        if column.source == "dimension":
+            # Keep the stored filter value in UserRole; render the poker label.
+            return rb.value_label(column.key, value)
+        if column.key == "frequency_bp" or (column.source == "value" and row.get("unit") == "bp"):
+            return f"{value / 100:.1f}%"
+        if column.source == "value":
+            unit = row.get("unit")
+            if unit == "centi":
+                return f"{value / 100:.2f}"
+            if unit == "cents":
+                formatted = f"{float(value):,.2f}".rstrip("0").rstrip(".")
+                return f"{formatted} ¢"
+        return str(value)
+
     def _set_result_headers(self, columns) -> None:
         """Write the result headings, and explain the honest ones.
 
@@ -1665,12 +1729,12 @@ texture*. The label already existed; nothing called it. Technical names
         the analytics epic refuses to hide -- but poker labels say what they
         mean in the tooltip rather than leaving a user to guess.
         """
-        self.result_table.setHorizontalHeaderLabels([col.heading for col in columns])
         explanations = {
             "denominator": _("Every decision the question applies to: the sample size."),
             "numerator": _("How many of those decisions the metric counted."),
             "value": _("The measurement itself, over the sample above."),
         }
+        self.result_table.setHorizontalHeaderLabels([_result_header_label(col) for col in columns])
         for index, col in enumerate(columns):
             item = self.result_table.horizontalHeaderItem(index)
             if item is None:
@@ -1725,7 +1789,8 @@ texture*. The label already existed; nothing called it. Technical names
         group: dict[str, Any] = group_item.data(Qt.ItemDataRole.UserRole) if group_item else {}
         if group:
             rendered = ", ".join(
-                f"{rlabels.dimension_label(key)}={value}" for key, value in sorted(group.items())
+                f"{rlabels.dimension_label(key)}={rb.value_label(key, value)}"
+                for key, value in sorted(group.items())
             )
             self.result_note.setText(rendered)
 
@@ -1757,12 +1822,22 @@ texture*. The label already existed; nothing called it. Technical names
         columns = rb.DRILL_COLUMNS
         self.drill_table.setRowCount(len(drill.rows))
         self.drill_table.setColumnCount(len(columns))
-        self.drill_table.setHorizontalHeaderLabels([col.heading for col in columns])
+        self.drill_table.setHorizontalHeaderLabels([
+            f"{col.heading} (¢)" if col.unit == "cents" else col.heading for col in columns
+        ])
+        install_card_image_delegates(self.drill_table, columns)
         for r, row in enumerate(drill.rows):
             for c, col in enumerate(columns):
                 value = row.get(col.key)
-                text = "" if value is None else str(value)
-                self.drill_table.setItem(r, c, QTableWidgetItem(text))
+                text = "" if value is None else f"{value} ¢" if col.unit == "cents" else str(value)
+                item = QTableWidgetItem(text)
+                if col.key in {"heroCards", "board"} and value:
+                    item.setToolTip(str(value))
+                    item.setData(Qt.ItemDataRole.AccessibleTextRole, str(value))
+                if isinstance(value, (int, float)):
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                    style_signed_measure(item, col.key, value, unit=col.unit)
+                self.drill_table.setItem(r, c, item)
         self.drill_table.resizeColumnsToContents()
         note = f"{drill.total_matches} hands"
         if drill.truncated:

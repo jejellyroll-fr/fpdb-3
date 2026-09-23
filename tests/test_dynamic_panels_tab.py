@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import os
 import shutil
+from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -67,6 +69,24 @@ def test_the_tab_exists_and_starts_from_the_configuration(dialog) -> None:
     assert dialog.panel_rules == [], "the shipped section is inert"
     assert dialog.panel_rules_table.rowCount() == 0
     assert not dialog.panel_rules_enabled.isChecked()
+
+
+def test_importing_plo_dynamic_keeps_its_rules_on_the_next_save(dialog) -> None:
+    package = Path(ROOT) / "hud-packages" / "plo_6max_dynamic.fpdbhud"
+    with (
+        patch("PySide6.QtWidgets.QFileDialog.getOpenFileName", return_value=(str(package), "")),
+        patch("PySide6.QtWidgets.QMessageBox.information"),
+        patch("PySide6.QtWidgets.QMessageBox.critical") as error,
+    ):
+        dialog.import_profile()
+
+    error.assert_not_called()
+    assert dialog.panel_rules_enabled.isChecked()
+    assert dialog.panel_rules
+    dialog._persist_panel_rules()
+    dialog.config.reload()
+    assert dialog.config.hud_panel_rules_enabled
+    assert {rule.profile for rule in dialog.config.get_hud_panel_rules()} == {"plo_6max_dynamic"}
 
 
 def test_a_rule_built_from_the_selectors_lists_its_conditions(dialog) -> None:

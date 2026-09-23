@@ -4,12 +4,12 @@ A HUD package is only a product if it imports cleanly, points at things that
 exist, and does what its name says. These tests hold the issue's acceptance
 criteria against the real shipped files:
 
-* the three packages ship and are importable through the existing workflow;
+* every reference package ships and is importable through the existing workflow;
 * every stat name and every popup reference resolves, with no hand-editing of
   XML -- a broken reference is a permanently empty cell, which is the failure
   mode this exists to prevent;
 * the Advanced package opens the shipped hierarchical popup library;
-* the Dynamic package carries a block for *every* panel the shipped resolver
+* the Dynamic packages carry a block for *every* panel the shipped resolver
   can select, and enables the rules for its own profile only, so importing it
   does not turn dynamic panels on for anybody else's HUD;
 * no package binds itself to a game: importing one never silently replaces the
@@ -34,13 +34,15 @@ PACKAGE_DIR = Path(__file__).parent.parent / "hud-packages"
 BASIC = PACKAGE_DIR / "nlhe_6max_basic.fpdbhud"
 ADVANCED = PACKAGE_DIR / "nlhe_6max_advanced.fpdbhud"
 DYNAMIC = PACKAGE_DIR / "nlhe_6max_dynamic.fpdbhud"
-PACKAGES = (BASIC, ADVANCED, DYNAMIC)
+PLO_DYNAMIC = PACKAGE_DIR / "plo_6max_dynamic.fpdbhud"
+PACKAGES = (BASIC, ADVANCED, DYNAMIC, PLO_DYNAMIC)
 
 # The profile each package installs as its primary block.
 PRIMARY = {
     BASIC: "nlhe_6max_basic",
     ADVANCED: "nlhe_6max_advanced",
     DYNAMIC: "nlhe_6max_dynamic",
+    PLO_DYNAMIC: "plo_6max_dynamic",
 }
 
 _VALID_STATS = frozenset(Stats.get_valid_stats().keys())
@@ -92,11 +94,12 @@ def _library_popup_names() -> set[str]:
 # ---------------------------------------------------------------------------
 
 
-def test_the_three_reference_packages_ship() -> None:
+def test_the_reference_packages_ship() -> None:
     assert {path.name for path in PACKAGES if path.exists()} == {
         "nlhe_6max_basic.fpdbhud",
         "nlhe_6max_advanced.fpdbhud",
         "nlhe_6max_dynamic.fpdbhud",
+        "plo_6max_dynamic.fpdbhud",
     }
 
 
@@ -283,6 +286,44 @@ def test_dynamic_enables_the_shipped_rules_for_its_own_profile_only() -> None:
     assert section.getAttribute("enabled") == "true"
     assert section.getAttribute("source") == hud_situation.BUILTIN_SOURCE
     assert section.getAttribute("profile") == PRIMARY[DYNAMIC]
+
+
+def test_plo_dynamic_uses_omaha_stats_and_scopes_rules_to_its_own_profile() -> None:
+    root = _root(PLO_DYNAMIC)
+    section = root.getElementsByTagName("hud_panel_rules")[0]
+    assert section.getAttribute("profile") == PRIMARY[PLO_DYNAMIC]
+    names = {cell.getAttribute("_stat_name") for cell in root.getElementsByTagName("stat")}
+    assert {"limp", "cold_call", "a_freq1", "a_freq2", "a_freq3", "wwsf"} <= names
+    assert PRIMARY[PLO_DYNAMIC] != PRIMARY[DYNAMIC]
+
+
+def test_plo_dynamic_rules_select_omaha_profile_without_affecting_holdem() -> None:
+    doc = _config_with_panel_section(PLO_DYNAMIC)
+    rules, fallback, enabled = parse_hud_panel_rules(doc)
+    resolver = hud_situation.HudSituationResolver(rules, fallback=fallback, enabled=enabled)
+    context = hud_situation.HudSituationContext(
+        street="flop", pot_type="single_raised", in_position=True, is_preflop_aggressor=True,
+    )
+
+    omaha = resolver.resolve(context, PRIMARY[PLO_DYNAMIC], samples={"n": 100})
+    holdem = resolver.resolve(context, PRIMARY[DYNAMIC], samples={"n": 100})
+
+    assert "srp_cbet_ip" in omaha.panels
+    assert omaha.enabled
+    assert holdem.panels == ()
+    assert holdem.enabled is False
+
+
+def test_plo_dynamic_panel_is_visible_with_a_small_sample() -> None:
+    rules, fallback, enabled = parse_hud_panel_rules(_config_with_panel_section(PLO_DYNAMIC))
+    resolver = hud_situation.HudSituationResolver(rules, fallback=fallback, enabled=enabled)
+    context = hud_situation.HudSituationContext(
+        street="flop", pot_type="single_raised", in_position=True, is_preflop_aggressor=True,
+    )
+
+    selection = resolver.resolve(context, PRIMARY[PLO_DYNAMIC], samples={"n": 5})
+    assert "srp_cbet_ip" in selection.panels
+    assert "srp_cbet_ip" not in selection.suppressed
 
 
 def _config_with_panel_section(package: Path):

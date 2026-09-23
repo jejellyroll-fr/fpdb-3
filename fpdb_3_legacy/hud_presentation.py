@@ -140,6 +140,9 @@ PANEL_TITLES: Final[dict[str, str]] = {
     "ssh_stack": "Short stack",
     "overbet_river": "River · Facing an overbet",
     "minbet_faced": "Facing a small bet",
+    "postflop_flop": "Flop · Overview",
+    "postflop_turn": "Turn · Overview",
+    "postflop_river": "River · Overview",
 }
 
 PANEL_TITLE_BG: Final = "#312E81"
@@ -224,6 +227,7 @@ class PresentationStat:
     name: str
     prefix: str = ""
     tip: str = ""
+    display_label: str = ""
     popup: str = ""
     background: str = ""
     low_threshold: str = ""
@@ -264,6 +268,8 @@ class PresentationPanel:
     stats: tuple[PresentationStat, ...] = ()
     title_bgcolor: str = ""
     title_fgcolor: str = ""
+    title_font_scale: float = 0.0
+    heading_font_scale: float = 0.0
 
     @property
     def is_dynamic(self) -> bool:
@@ -344,6 +350,7 @@ def _stat_from(node: Any) -> PresentationStat:
         name=node.getAttribute("_stat_name"),
         prefix=node.getAttribute("hudprefix"),
         tip=node.getAttribute("tip"),
+        display_label=node.getAttribute("display_label"),
         popup=node.getAttribute("popup"),
         background=node.getAttribute("hudbgcolor"),
         low_threshold=node.getAttribute("stat_loth"),
@@ -355,6 +362,8 @@ def _stat_from(node: Any) -> PresentationStat:
 
 
 def _panels_from(stat_set: Any) -> tuple[PresentationPanel, ...]:
+    title_font_scale = float(stat_set.getAttribute("title_font_scale") or 0)
+    heading_font_scale = float(stat_set.getAttribute("heading_font_scale") or 0)
     blocks = [
         child for child in stat_set.childNodes
         if child.nodeType == child.ELEMENT_NODE and child.tagName == "block"
@@ -369,6 +378,8 @@ def _panels_from(stat_set: Any) -> tuple[PresentationPanel, ...]:
                 rows=int(stat_set.getAttribute("rows") or 0),
                 cols=int(stat_set.getAttribute("cols") or 0),
                 stats=tuple(_stat_from(node) for node in stat_set.getElementsByTagName("stat")),
+                title_font_scale=title_font_scale,
+                heading_font_scale=heading_font_scale,
             ),
         )
     return tuple(
@@ -381,6 +392,8 @@ def _panels_from(stat_set: Any) -> tuple[PresentationPanel, ...]:
             stats=tuple(_stat_from(node) for node in block.getElementsByTagName("stat")),
             title_bgcolor=block.getAttribute("title_bgcolor"),
             title_fgcolor=block.getAttribute("title_fgcolor"),
+            title_font_scale=float(block.getAttribute("title_font_scale") or title_font_scale),
+            heading_font_scale=float(block.getAttribute("heading_font_scale") or heading_font_scale),
         )
         for block in blocks
     )
@@ -516,6 +529,8 @@ def preview_blocks(
                 "bordercolor": panel.title_bgcolor or PANEL_TITLE_BG,
                 "title_bgcolor": panel.title_bgcolor or PANEL_TITLE_BG,
                 "title_fgcolor": panel.title_fgcolor or PANEL_TITLE_FG,
+                "title_font_scale": panel.title_font_scale,
+                "heading_font_scale": panel.heading_font_scale,
                 "texts": [],
                 "hlines": [],
                 "stats": [
@@ -526,6 +541,7 @@ def preview_blocks(
                         "hudprefix": stat.prefix,
                         "hudbgcolor": stat.background,
                         "tip": stat.tip,
+                        "display_label": stat.display_label,
                         "popup": stat.popup,
                         "stat_loth": stat.low_threshold,
                         "stat_locolor": stat.low_color,
@@ -577,12 +593,13 @@ def reference_packages_dir() -> Path:
 
 
 def reference_packages() -> dict[str, Path]:
-    """The three reference packages, by the short name a reader uses."""
+    """The shipped reference packages, by the short name a reader uses."""
     directory = reference_packages_dir()
     return {
         "basic": directory / "nlhe_6max_basic.fpdbhud",
         "advanced": directory / "nlhe_6max_advanced.fpdbhud",
         "dynamic": directory / "nlhe_6max_dynamic.fpdbhud",
+        "plo_dynamic": directory / "plo_6max_dynamic.fpdbhud",
     }
 
 

@@ -32,8 +32,8 @@ testée uniquement avec le style Qt par défaut ne couvre pas ces contraintes.
 - Distinguer un import enregistré d’un échec de rafraîchissement du parent.
   Dans ce dernier cas, indiquer de redémarrer fpdb et éviter de demander de
   réimporter le même package.
-- Exécuter le test avec le vrai dialogue, sans remplacer son callback : sans
-  parent, avec parent et avec échec du parent. Vérifier profil sélectionné,
+- Exécuter le chemin réel d’import sans remplacer son callback : sans parent,
+  avec parent et avec échec du parent. Vérifier profil sélectionné,
   profils secondaires, popups, affectation au jeu et contenu enregistré.
 
 Statut : correctif implémenté avec tests dans la branche de travail.
@@ -397,3 +397,86 @@ Suites existantes vérifiées hors écran : `tests/qt` (195 tests, tous marqués
   écran, et parcours complet import HUD → sélection → édition → enregistrement.
 - Traitement des retours Codex/Codacy et CI verte avant fusion.
 
+## Revue des vues Study — captures du 22 septembre 2026 au soir
+
+Les sept captures montrent des défauts de représentation distincts de la mise
+en page responsive déjà traitée ci-dessus. Les pixels affichés ne prouvent pas
+à eux seuls une erreur de calcul : il faut conserver la valeur exacte et
+améliorer simultanément son unité, son contexte et sa lisibilité.
+
+| Priorité | Vue / preuve visible | Amélioration proposée |
+| --- | --- | --- |
+| P0 | **Response** : 84.21 et 15.78 dans les colonnes `PERCENTAGE` et `SHARE`, sans unité visible ; les deux colonnes semblent redondantes. Le résumé du panneau, celui du graphique et celui du graphique encodent trois fois le contexte. | Présenter un libellé métier (« Fréquence », « Part des décisions ») avec `%` et une précision cohérente ; n’afficher les deux mesures que si leur dénominateur diffère, et l’expliquer. Garder un résumé de sample/fiabilité unique, une légende Hero/Field claire, et réserver les valeurs exactes à l’étiquette ou à l’infobulle du point. |
+| P0 | **Result / rake** : une cellule contient le dictionnaire brut `{'dealt': ..., 'contributed': ..., 'weighted': ...}` ; les colonnes monétaires sont techniques, nombreuses, et certaines sont coupées horizontalement. | Table métier typée : Rake payé / contribué / pondéré en colonnes numériques séparées, puis EV, profit et métriques par main regroupés et formatés avec l’unité. Renommer les en-têtes ; masquer les champs internes et objets imbriqués du tableau principal, tout en les gardant accessibles dans un panneau de détails ou un export. |
+| P0 | **Seat breakdown** : cellules telles que `H 0...` et `H 0.0%...` coupent précisément la fréquence/sample utiles ; la comparaison Hero / Field / Gap surcharge une petite cellule. Le tableau numérique en dessous répète la matrice sous forme de lignes techniques. | Cellule heatmap courte : valeur dominante + `n`, éventuellement petit delta coloré ; au clic/survol, fiche de cellule complète (Hero, Field, gap, numérateur, opportunités, fiabilité). Réserver les dimensions aux en-têtes fixes ; remplacer le tableau redondant par un détail sélectionné ou une liste exportable repliée. Si les minima de largeur ne tiennent pas, basculer en tableau accessible plutôt que tronquer. |
+| P1 | **Source hands** : `Qh9h`, `TcTd3dKh2d` restent des codes alphanumériques peu scannables, alors que ce sont les cartes centrales de la ligne ; le plateau et les cartes ne sont pas visuellement distingués. | Réutiliser le deck d’images existant de l’application pour rendre chaque carte en vignette compacte, avec rang/symbole accessible et texte de remplacement. Pour PLO, prendre en charge quatre cartes privatives sans élargir toute la table. Afficher board et main dans une cellule « Cartes » dédiée, puis ouvrir une ligne détaillée/replayer au double-clic. |
+| P1 | **Response / Raise sizing** : le graphique occupe presque toute la hauteur, même avec seulement trois catégories ; le tableau est poussé sous le pli ou n’apparaît qu’en partie. Sur une capture, les messages de sample/conseil sont dupliqués au-dessus du graphique. | Plafonner la hauteur initiale du graphique (environ 260–320 px, à confirmer en points logiques) et mettre un splitter vertical graphique/données avec tailles mémorisées. Éviter le graphique géant pour peu de catégories ; garder table et chart visibles ensemble quand la hauteur le permet. Retirer les résumés redondants. |
+| P1 | **Source hands / result tables** : en-têtes SQL en majuscules (`HEROPROFIT`, `REALIZED_CENTS`), défilement horizontal important et colonnes d’identifiants/mesures à faible valeur côte à côte. | Définir un ordre de colonnes et des libellés par panneau : identité/contexte à gauche, décision, résultat et échantillon ensuite. Garder l’identifiant technique masqué ou secondaire ; épingler les premières colonnes, activer tri/filtre pertinent, unités explicites, alignement numérique et copié/export tabulaire fidèle. |
+
+### Séquence recommandée
+
+1. **Lisibilité et intégrité des valeurs** : formateurs de pourcentage/argent/cartes par type de donnée ; supprimer doublons et objets Python sérialisés tels quels. Aucun arrondi ne doit modifier les valeurs utilisées pour le filtre ou le détail.
+2. **Composants de résultat dédiés** : rendu de matrice par cellule avec détail exact ; vue de cartes compacte dans Source hands ; colonnes utiles et en-têtes métier par panneau au lieu du schéma SQL brut.
+3. **Équilibre chart/données** : hauteur préférée plafonnée et redimensionnable, résumés/échantillons non dupliqués, légende et infobulles explicites, état « données manquantes » distinct d’une valeur nulle.
+
+### Critères de validation visuelle
+
+- Aucun pourcentage visible sans `%` ni définition (« fréquence » ou « part ») ; la valeur exacte, numérateur et dénominateur restent accessibles.
+- Sur la matrice 6 × 6, aucune cellule ne se termine par des points de suspension ; la fiche au clic expose Hero, Field, gap, `n`, numérateur et seuil de sample.
+- Les cartes sont reconnaissables sans lire une chaîne de codes ; couleurs des couleurs (suits), contraste, lecture vocale et fallback texte sont vérifiés ; les mains PLO de quatre cartes restent compactes.
+- Pour 3 catégories, le graphique garde une hauteur modérée et le tableau ou détail reste directement accessible sans défilement vertical de toute la page ; chart et tableau ne se recouvrent jamais.
+- Les tableaux Result ne montrent pas de représentation Python de dictionnaire, emploient des unités compréhensibles et conservent les valeurs complètes dans détail/export.
+- Captures de référence à 1024 × 640, 1280 × 720 et 1440 × 900 points logiques sous macOS Retina ; thème clair/sombre, échelle de police accrue, souris et clavier.
+
+### Mise en œuvre
+
+- Le dashboard a des colonnes et unités lisibles ; les mesures imbriquées
+  (comme le détail du rake) deviennent des colonnes distinctes. Les pourcentages
+  ont leur unité, un arrondi d’affichage stable et une infobulle plus précise.
+  Une colonne `percentage` redondante avec `share` est omise pour les
+  distributions qui ne sont pas des taux.
+- La table de détail de la matrice est réduite aux axes, population, mesure,
+  échantillon, numérateur et seuil. Les cellules comparatives tiennent sur deux
+  lignes (Hero / Field puis delta en points de pourcentage) ; les valeurs et
+  échantillons exacts restent dans l’infobulle accessible.
+- Les graphes de distribution et de force de main sont plafonnés à 340 px.
+  Un splitter vertical, ajustable, répartit la place entre visuel et données ;
+  la légende Hero / Field identifie les couleurs sans répéter les tailles
+  d’échantillon déjà visibles dans l’en-tête.
+- Source hands rend les codes `As`, `9h`, etc. en faces SVG du jeu existant,
+  sur deux ou quatre cartes, tout en conservant le texte brut dans la cellule,
+  l’infobulle et le nom accessible.
+- Vérification : `tests/qt` (198 tests) et les tests Research ciblés (64) passent
+  en Qt offscreen ; Ruff passe. Lancement Qt natif sur macOS a interrompu le
+  processus dans l'initialisation des widgets, d'où le mode offscreen pour la
+  suite complète. La vérification visuelle Retina reste à faire avec la fenêtre
+  réelle et plusieurs tailles d’écran.
+
+### Revue de rendu Study complémentaire
+
+- Le rang `T` des historiques est résolu vers l’asset `10.svg` du jeu de cartes ;
+  le même délégué de faces SVG est appliqué aux tableaux de mains du dashboard,
+  de Research et de Source hands.
+- Le drill-down sélectionne maintenant `card1` à `card4` et les affiche toutes :
+  le délégué savait dessiner quatre cartes, mais la requête n’en fournissait que
+  deux, ce qui tronquait les mains Omaha.
+- Les sièges sont affichés avec leurs noms (`BB`, `SB`, `BTN`, …), tout en
+  gardant les codes bruts pour les filtres. Les montants explicitement en cents
+  portent `¢` et leurs en-têtes le précisent, y compris dans la vue Profit.
+- Les pertes sont rouges et les valeurs positives vertes pour les mesures
+  signées (profit, EV, luck, delta/gap), sans appliquer cette règle aux volumes
+  ou pourcentages.
+- Les tables Response affichent population, libellé métier, décisions, actions
+  et taux/part clairement distingués. Les vues Force de main et Range masquent
+  les champs internes, nomment la fiabilité de l’échantillon et affichent les
+  mesures de profit avec leur unité. Les valeurs de rake structurées sont
+  aplaties en colonnes nommées plutôt qu’imprimées comme dictionnaires Python.
+- Les tables Research emploient maintenant des en-têtes explicites (« Decisions »,
+  « Actions », « Frequency (%) »), et les comparaisons montrent leur unité ainsi
+  que l’écart en points de pourcentage ou cents. Les positions et groupes sont
+  rendus avec leurs noms métier sans changer les valeurs de filtre sous-jacentes.
+- Vérification : 355 tests métier Research passent ; la suite Qt complète du
+  lot visuel a passé 200 tests, puis les 55 tests Qt Research/Drill-down ont
+  repassé après la correction Omaha. Ruff et `git diff --check` passent. Le
+  contrôle visuel dans la fenêtre macOS reste
+  nécessaire pour confirmer les proportions à l’échelle Retina.

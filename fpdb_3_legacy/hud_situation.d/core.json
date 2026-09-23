@@ -15,7 +15,7 @@
       "id": "preflop-open",
       "when": { "street": "preflop", "pot_type": "unopened" },
       "priority": 10,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "preflop",
       "label": "Opening",
       "description": "Nobody has entered: RFI by position, open-limp, iso-raise."
@@ -25,7 +25,7 @@
       "id": "preflop-facing-open",
       "when": { "street": "preflop", "action_faced": "raises", "pot_type": "unopened" },
       "priority": 20,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "preflop",
       "label": "Facing an open",
       "description": "One raise in front: fold/call/3-bet versus that position."
@@ -35,7 +35,7 @@
       "id": "preflop-facing-3bet",
       "when": { "street": "preflop", "pot_type": "single_raised", "action_faced": "raises" },
       "priority": 30,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "preflop",
       "label": "Facing a 3-bet",
       "description": "You opened and got 3-bet: fold/call/4-bet and the sizing."
@@ -45,7 +45,7 @@
       "id": "preflop-squeeze",
       "when": { "street": "preflop", "situation": ["squeeze", "squeeze_defence"] },
       "priority": 25,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "preflop",
       "label": "Squeeze",
       "description": "A raise with callers behind it: squeeze and fold/call/raise versus one."
@@ -61,7 +61,7 @@
         "to_call": [null, 0]
       },
       "priority": 20,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "postflop",
       "label": "Probe, in position",
       "description": "The preflop raiser checked: probe turns and rivers in position."
@@ -76,7 +76,7 @@
         "to_call": [null, 0]
       },
       "priority": 30,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "postflop",
       "label": "c-bet, in position",
       "description": "You raised preflop and are in position: c-bet, delayed c-bet, barrels."
@@ -91,7 +91,7 @@
         "to_call": [null, 0]
       },
       "priority": 30,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "postflop",
       "label": "c-bet, out of position",
       "description": "You raised preflop and are out of position: c-bet, check-raise faced, barrels."
@@ -106,7 +106,7 @@
         "in_position": true
       },
       "priority": 40,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "postflop",
       "label": "Facing a c-bet, in position",
       "description": "Facing the c-bet with position: fold/call/raise, float, sizing faced."
@@ -121,7 +121,7 @@
         "in_position": false
       },
       "priority": 40,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "postflop",
       "label": "Facing a c-bet, out of position",
       "description": "Facing the c-bet out of position: check-raise, fold/call versus the sizing."
@@ -131,7 +131,7 @@
       "id": "3bet-pot-ip",
       "when": { "pot_type": "three_bet", "in_position": true },
       "priority": 30,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "threebet",
       "label": "3-bet pot, in position",
       "description": "A 3-bet pot with position: aggression and defence by street."
@@ -141,7 +141,7 @@
       "id": "3bet-pot-oop",
       "when": { "pot_type": "three_bet", "in_position": false },
       "priority": 30,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "threebet",
       "label": "3-bet pot, out of position",
       "description": "A 3-bet pot out of position: aggression and defence by street."
@@ -151,7 +151,7 @@
       "id": "4bet-pot",
       "when": { "pot_type": "four_bet_plus" },
       "priority": 30,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "fourbet",
       "label": "4-bet pot",
       "description": "A 4-bet pot: aggressor and caller, street by street."
@@ -161,7 +161,7 @@
       "id": "short-stack",
       "when": { "stack_bucket": "short" },
       "priority": 15,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "stacks",
       "label": "Short stack",
       "description": "Under 20bb: open-shove, resteal and all-in frequencies instead of raise sizes."
@@ -171,7 +171,7 @@
       "id": "overbet-river",
       "when": { "street": "river", "facing_sizing_pct": [100, null] },
       "priority": 35,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "sizing",
       "label": "Facing an overbet",
       "description": "Faced with more than the pot on the river: overbet, fold-to-overbet, blockers."
@@ -181,7 +181,7 @@
       "id": "minbet-faced",
       "when": { "facing_sizing_pct": [null, 30] },
       "priority": 12,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "sizing",
       "label": "Facing a small bet",
       "description": "A bet under 30% of the pot: min-bet, raise-frequency versus a small sizing."
@@ -202,7 +202,7 @@
       "id": "blind-defence",
       "when": { "street": "preflop", "position": ["SB", "BB"], "action_faced": "raises" },
       "priority": 32,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "preflop",
       "label": "Blind defence",
       "description": "A raise while in the blinds: fold/call/3-bet by the opener's position."
@@ -212,7 +212,7 @@
       "id": "blind-steal",
       "when": { "street": "preflop", "position": ["BTN", "CO", "SB"], "pot_type": "unopened", "players_in_hand": [null, 4] },
       "priority": 14,
-      "min_sample": 40,
+      "min_sample": 5,
       "section": "preflop",
       "label": "Steal spot",
       "description": "Unopened from a steal seat short-handed: steal, fold-to-steal, resteal faced."

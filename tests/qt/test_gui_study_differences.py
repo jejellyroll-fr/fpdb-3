@@ -45,6 +45,10 @@ def test_report_renders_reviewable_rows_and_opens_a_study(qtbot, tmp_path) -> No
     assert widget.table.rowCount() == 1
     assert widget.table.item(0, 0).text() == "Preflop · First in"
     assert widget.table.item(0, 4).text() == "+13.0 pp"
+    assert [widget.table.horizontalHeaderItem(column).text() for column in range(5)] == [
+        "Spot", "Context", "You (%)", "Field (%)", "Gap (pp)",
+    ]
+    assert widget.table.item(0, 4).foreground().color().name() == "#68d391"
     assert widget.open_button.isEnabled()
 
     opened = []

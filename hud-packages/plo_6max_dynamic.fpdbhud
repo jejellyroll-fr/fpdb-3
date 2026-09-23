@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Who it is for: Pot-Limit Omaha players who want contextual, spot-specific HUD stats.
+  Import this package, then choose
+  plo_6max_dynamic for the Omaha game in HUD Preferences. It installs a new
+  profile and scopes the shipped spot rules to that profile only; it does not
+  replace the user's existing Omaha profile or game binding.
+
+  The blocks deliberately use native PLO-relevant stats. The resolver chooses
+  contextual blocks from the same spot vocabulary as the Hold'em package,
+  with a street overview for limped pots.
+  The PLO rule source shows the matching panel at any hand count; the core
+  still displays that count so a small sample is clear.
+  On Winamax, client-log round events refresh the panel at flop, turn and
+  river. Exact faced-bet context still requires a richer live action feed.
+
+  Known limitations: this package reuses fpdb's shared situation rules; it does
+  not claim PLO-only spot detection, solver ranges, or Omaha-specific equity.
+  Stats appear only where the imported database has the underlying sample.
+-->
+<fpdb_hud_package version="1.1">
+  <ss name="plo_6max_dynamic" rows="2" cols="2" xpad="1" ypad="0" rich_text="True" font_size="10" title_font_scale="0.82" heading_font_scale="0.68">
+    <block id="core" label="Core" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="n" popup="plo_dynamic_core" hudprefix="H " tip="Hands seen" hudbgcolor="#0F172A" stat_loth="25" stat_locolor="#FF6B6B" stat_midcolor="#F2F4E6" stat_hith="200" stat_hicolor="#4ADE80"/>
+      <stat _rowcol="(1,2)" _stat_name="vpip" popup="plo_dynamic_core" hudprefix="VP " tip="Voluntarily put money in pot" display_label="VPIP" hudbgcolor="#1E1B4B" stat_loth="28" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="45" stat_hicolor="#FF6B6B"/>
+      <stat _rowcol="(2,1)" _stat_name="pfr" popup="plo_dynamic_core" hudprefix="PR " tip="Preflop raise" hudbgcolor="#1E1B4B" stat_loth="16" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="28" stat_hicolor="#FF6B6B"/>
+      <stat _rowcol="(2,2)" _stat_name="three_B" popup="plo_dynamic_core" hudprefix="3B " tip="Three-bet" hudbgcolor="#1E1B4B" stat_loth="4" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="9" stat_hicolor="#FF6B6B"/>
+    </block>
+    <block id="preflop_open" label="Preflop · Unopened" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="steal" popup="plo_dynamic_preflop" hudprefix="ST " tip="Steal attempt" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="s_steal" popup="plo_dynamic_preflop" hudprefix="SS " tip="Successful steal" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="limp" popup="plo_dynamic_preflop" hudprefix="LP " tip="Limped into the pot" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="cold_call" popup="plo_dynamic_preflop" hudprefix="CC " tip="Cold call" hudbgcolor="#312E81"/>
+    </block>
+    <block id="preflop_facing_open" label="Preflop · Facing an open" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="three_B" popup="plo_dynamic_preflop" hudprefix="3B " tip="Three-bet versus an open" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="cold_call" popup="plo_dynamic_preflop" hudprefix="CC " tip="Cold call versus an open" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="f_3bet" popup="plo_dynamic_preflop" hudprefix="F3 " tip="Fold to a three-bet" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="squeeze" popup="plo_dynamic_preflop" hudprefix="SQ " tip="Squeeze raise" hudbgcolor="#312E81"/>
+    </block>
+    <block id="preflop_facing_three_bet" label="Preflop · Facing a 3-bet" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="f_3bet" popup="plo_dynamic_preflop" hudprefix="F3 " tip="Fold versus a three-bet" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="four_B" popup="plo_dynamic_preflop" hudprefix="4B " tip="Four-bet" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="f_4bet" popup="plo_dynamic_preflop" hudprefix="F4 " tip="Fold to a four-bet" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="cold_call" popup="plo_dynamic_preflop" hudprefix="CC " tip="Call a three-bet" hudbgcolor="#312E81"/>
+    </block>
+    <block id="preflop_squeeze" label="Preflop · Squeeze spot" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="squeeze" popup="plo_dynamic_preflop" hudprefix="SQ " tip="Squeeze after a raise and caller" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="f_3bet" popup="plo_dynamic_preflop" hudprefix="F3 " tip="Fold to a three-bet" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="cold_call" popup="plo_dynamic_preflop" hudprefix="CC " tip="Cold call" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="three_B" popup="plo_dynamic_preflop" hudprefix="3B " tip="Three-bet" hudbgcolor="#312E81"/>
+    </block>
+    <block id="blinds_defence" label="Preflop · Blind defence" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="f_BB_steal" popup="plo_dynamic_preflop" hudprefix="FBB " tip="Big blind folds to a steal" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="f_SB_steal" popup="plo_dynamic_preflop" hudprefix="FSB " tip="Small blind folds to a steal" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="three_B" popup="plo_dynamic_preflop" hudprefix="3B " tip="Three-bet from the blinds" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="cold_call" popup="plo_dynamic_preflop" hudprefix="CC " tip="Defend by calling" hudbgcolor="#312E81"/>
+    </block>
+    <block id="blinds_steal" label="Preflop · Stealing" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="steal" popup="plo_dynamic_preflop" hudprefix="ST " tip="Steal attempt" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="s_steal" popup="plo_dynamic_preflop" hudprefix="SS " tip="Successful steal" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="f_BB_steal" popup="plo_dynamic_preflop" hudprefix="FBB " tip="Big blind fold to steal" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="f_SB_steal" popup="plo_dynamic_preflop" hudprefix="FSB " tip="Small blind fold to steal" hudbgcolor="#312E81"/>
+    </block>
+    <block id="preflop_deep" label="Preflop · Deep stacks" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="pfr" popup="plo_dynamic_preflop" hudprefix="PR " tip="Preflop raise at depth" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="three_B" popup="plo_dynamic_preflop" hudprefix="3B " tip="Three-bet at depth" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="cold_call" popup="plo_dynamic_preflop" hudprefix="CC " tip="Cold call at depth" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="totalprofit" popup="plo_dynamic_preflop" hudprefix="P " tip="Realized profit" hudbgcolor="#0F172A"/>
+    </block>
+    <block id="srp_cbet_ip" label="SRP · PFR IP · Betting" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="cb1" popup="plo_dynamic_postflop" hudprefix="CB " tip="Flop continuation bet" display_label="Flop c-bet" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="cb2" popup="plo_dynamic_postflop" hudprefix="TB " tip="Turn barrel" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="cb3" popup="plo_dynamic_postflop" hudprefix="RB " tip="River barrel" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="a_freq_123" popup="plo_dynamic_postflop" hudprefix="AG " tip="Aggression across streets" hudbgcolor="#312E81"/>
+    </block>
+    <block id="srp_cbet_oop" label="SRP · PFR OOP · Betting" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="cb1" popup="plo_dynamic_postflop" hudprefix="CB " tip="Flop continuation bet out of position" display_label="Flop c-bet (OOP)" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="cb2" popup="plo_dynamic_postflop" hudprefix="TB " tip="Turn barrel out of position" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="check_raise_frequency" popup="plo_dynamic_postflop" hudprefix="CR " tip="Check-raise frequency" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="a_freq1" popup="plo_dynamic_postflop" hudprefix="AF " tip="Flop aggression frequency" hudbgcolor="#312E81"/>
+    </block>
+    <block id="srp_face_cbet_ip" label="SRP · Caller IP · Facing the bet" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="f_cb1" popup="plo_dynamic_postflop" hudprefix="FC " tip="Fold to flop continuation bet" display_label="Fold to flop c-bet" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="cb1" popup="plo_dynamic_postflop" hudprefix="CB " tip="Flop continuation bet" display_label="Flop c-bet" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="wwsf" popup="plo_dynamic_postflop" hudprefix="WW " tip="Won when saw flop" display_label="Won after flop" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="wtsd" popup="plo_dynamic_postflop" hudprefix="SD " tip="Went to showdown" display_label="Went to showdown" hudbgcolor="#312E81"/>
+    </block>
+    <block id="srp_face_cbet_oop" label="SRP · Caller OOP · Facing the bet" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="f_cb1" popup="plo_dynamic_postflop" hudprefix="FC " tip="Fold to flop continuation bet" display_label="Fold to flop c-bet" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="cb1" popup="plo_dynamic_postflop" hudprefix="CB " tip="Flop continuation bet" display_label="Flop c-bet" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="check_raise_frequency" popup="plo_dynamic_postflop" hudprefix="CR " tip="Check-raise frequency" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="a_freq1" popup="plo_dynamic_postflop" hudprefix="AF " tip="Flop aggression frequency" hudbgcolor="#312E81"/>
+    </block>
+    <block id="srp_probe_ip" label="SRP · Checked to · Turn and river" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="a_freq2" popup="plo_dynamic_postflop" hudprefix="TA " tip="Turn aggression frequency" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="a_freq3" popup="plo_dynamic_postflop" hudprefix="RA " tip="River aggression frequency" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="cb2" popup="plo_dynamic_postflop" hudprefix="TB " tip="Turn barrel" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="cb3" popup="plo_dynamic_postflop" hudprefix="RB " tip="River barrel" hudbgcolor="#312E81"/>
+    </block>
+    <block id="threebet_pot_ip" label="3-bet pot · IP" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="three_B_flop" popup="plo_dynamic_postflop" hudprefix="3F " tip="Flop aggression in three-bet pots" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="three_B_turn" popup="plo_dynamic_postflop" hudprefix="3T " tip="Turn aggression in three-bet pots" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="three_B_river" popup="plo_dynamic_postflop" hudprefix="3R " tip="River aggression in three-bet pots" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="f_cb1" popup="plo_dynamic_postflop" hudprefix="FC " tip="Fold to flop continuation bet" hudbgcolor="#312E81"/>
+    </block>
+    <block id="threebet_pot_oop" label="3-bet pot · OOP" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="three_B_flop" popup="plo_dynamic_postflop" hudprefix="3F " tip="Flop aggression in three-bet pots" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="three_B_turn" popup="plo_dynamic_postflop" hudprefix="3T " tip="Turn aggression in three-bet pots" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="check_raise_frequency" popup="plo_dynamic_postflop" hudprefix="CR " tip="Check-raise frequency" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="f_cb1" popup="plo_dynamic_postflop" hudprefix="FC " tip="Fold to flop continuation bet" hudbgcolor="#312E81"/>
+    </block>
+    <block id="fourbet_pot" label="4-bet pot" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="four_B" popup="plo_dynamic_preflop" hudprefix="4B " tip="Four-bet frequency" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="four_B_flop" popup="plo_dynamic_postflop" hudprefix="4F " tip="Flop aggression in four-bet pots" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="four_B_turn" popup="plo_dynamic_postflop" hudprefix="4T " tip="Turn aggression in four-bet pots" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="totalprofit" popup="plo_dynamic_core" hudprefix="P " tip="Realized profit" hudbgcolor="#0F172A"/>
+    </block>
+    <block id="ssh_stack" label="Short stack" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="vpip" popup="plo_dynamic_core" hudprefix="VP " tip="Voluntarily put money in pot" display_label="VPIP" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="pfr" popup="plo_dynamic_core" hudprefix="PR " tip="Preflop raise" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="three_B" popup="plo_dynamic_preflop" hudprefix="3B " tip="Three-bet frequency" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="bbper100" popup="plo_dynamic_core" hudprefix="BB " tip="Big blinds won per 100 hands" hudbgcolor="#0F172A"/>
+    </block>
+    <block id="overbet_river" label="River · Facing an overbet" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="cb3" popup="plo_dynamic_postflop" hudprefix="RB " tip="River barrel" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="f_cb3" popup="plo_dynamic_postflop" hudprefix="FR " tip="Fold to river barrel" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="wtsd" popup="plo_dynamic_postflop" hudprefix="SD " tip="Went to showdown" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="totalprofit" popup="plo_dynamic_core" hudprefix="P " tip="Realized profit" hudbgcolor="#0F172A"/>
+    </block>
+    <block id="minbet_faced" label="Facing a small bet" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="f_cb1" popup="plo_dynamic_postflop" hudprefix="FC " tip="Fold to flop continuation bet" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="cb1" popup="plo_dynamic_postflop" hudprefix="CB " tip="Flop continuation bet" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="check_raise_frequency" popup="plo_dynamic_postflop" hudprefix="CR " tip="Check-raise frequency" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="wtsd" popup="plo_dynamic_postflop" hudprefix="SD " tip="Went to showdown" hudbgcolor="#312E81"/>
+    </block>
+    <block id="postflop_flop" label="Flop · Overview" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="a_freq1" popup="plo_dynamic_postflop" hudprefix="FA " tip="Flop aggression frequency" display_label="Flop aggression" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="check_raise_frequency" popup="plo_dynamic_postflop" hudprefix="CR " tip="Check-raise frequency across postflop streets" display_label="Check-raise" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="wwsf" popup="plo_dynamic_postflop" hudprefix="WF " tip="Won when saw flop" display_label="Won after flop" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="wtsd" popup="plo_dynamic_postflop" hudprefix="SD " tip="Went to showdown" display_label="Went to showdown" hudbgcolor="#312E81"/>
+    </block>
+    <block id="postflop_turn" label="Turn · Overview" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="a_freq2" popup="plo_dynamic_postflop" hudprefix="TA " tip="Turn aggression frequency" display_label="Turn aggression" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="check_raise_frequency" popup="plo_dynamic_postflop" hudprefix="CR " tip="Check-raise frequency across postflop streets" display_label="Check-raise" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="wwsf" popup="plo_dynamic_postflop" hudprefix="WF " tip="Won when saw flop" display_label="Won after flop" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="wtsd" popup="plo_dynamic_postflop" hudprefix="SD " tip="Went to showdown" display_label="Went to showdown" hudbgcolor="#312E81"/>
+    </block>
+    <block id="postflop_river" label="River · Overview" position="dynamic" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
+      <stat _rowcol="(1,1)" _stat_name="a_freq3" popup="plo_dynamic_postflop" hudprefix="RA " tip="River aggression frequency" display_label="River aggression" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(1,2)" _stat_name="wtsd" popup="plo_dynamic_postflop" hudprefix="SD " tip="Went to showdown" display_label="Went to showdown" hudbgcolor="#1E1B4B"/>
+      <stat _rowcol="(2,1)" _stat_name="wmsd" popup="plo_dynamic_postflop" hudprefix="WS " tip="Won money at showdown" hudbgcolor="#312E81"/>
+      <stat _rowcol="(2,2)" _stat_name="wwsf" popup="plo_dynamic_postflop" hudprefix="WF " tip="Won when saw flop" display_label="Won after flop" hudbgcolor="#312E81"/>
+    </block>
+  </ss>
+
+  <popup_windows>
+    <pu pu_name="plo_dynamic_core" pu_class="default">
+      <pu_stat pu_stat_name="playername"/><pu_stat pu_stat_name="n"/>
+      <pu_stat pu_stat_name="vpip"/><pu_stat pu_stat_name="pfr"/>
+      <pu_stat pu_stat_name="totalprofit"/><pu_stat pu_stat_name="bbper100"/>
+    </pu>
+    <pu pu_name="plo_dynamic_preflop" pu_class="default">
+      <pu_stat pu_stat_name="playername"/><pu_stat pu_stat_name="n"/>
+      <pu_stat pu_stat_name="vpip"/><pu_stat pu_stat_name="pfr"/>
+      <pu_stat pu_stat_name="limp"/><pu_stat pu_stat_name="cold_call"/>
+      <pu_stat pu_stat_name="three_B"/><pu_stat pu_stat_name="f_3bet"/>
+      <pu_stat pu_stat_name="four_B"/><pu_stat pu_stat_name="f_4bet"/>
+      <pu_stat pu_stat_name="steal"/><pu_stat pu_stat_name="f_BB_steal"/>
+      <pu_stat pu_stat_name="f_SB_steal"/><pu_stat pu_stat_name="squeeze"/>
+    </pu>
+    <pu pu_name="plo_dynamic_postflop" pu_class="default">
+      <pu_stat pu_stat_name="playername"/><pu_stat pu_stat_name="n"/>
+      <pu_stat pu_stat_name="cb1"/><pu_stat pu_stat_name="cb2"/>
+      <pu_stat pu_stat_name="cb3"/><pu_stat pu_stat_name="f_cb1"/>
+      <pu_stat pu_stat_name="f_cb2"/><pu_stat pu_stat_name="f_cb3"/>
+      <pu_stat pu_stat_name="a_freq1"/><pu_stat pu_stat_name="a_freq2"/>
+      <pu_stat pu_stat_name="a_freq3"/><pu_stat pu_stat_name="a_freq_123"/>
+      <pu_stat pu_stat_name="check_raise_frequency"/><pu_stat pu_stat_name="wwsf"/>
+      <pu_stat pu_stat_name="wtsd"/><pu_stat pu_stat_name="wmsd"/>
+    </pu>
+  </popup_windows>
+
+  <hud_panel_rules enabled="true" source="builtin_plo" fallback="core" profile="plo_6max_dynamic"/>
+</fpdb_hud_package>

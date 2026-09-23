@@ -117,8 +117,17 @@ Three `.fpdbhud` packages ship ready to import (**Preferences → HUD → Import
 - **Advanced** — the same small grid over fpdb's hierarchical popups: preflop,
   single-raised pot, 3-bet pot, 4-bet pot, one click deep.
 - **Dynamic** — context-aware panels that change with the situation: preflop,
-  facing a c-bet, 3-bet pots, short stacks, sizing thresholds. Importing it does
-  not turn dynamic panels on for the HUD you already use.
+  facing a c-bet, 3-bet pots, short stacks, sizing thresholds. Its rules are
+  scoped to the Dynamic profile, so other profiles keep their current layout.
+  Panel titles and compact stat headings are editable in the `.fpdbhud` package.
+
+![A compact dynamic HUD panel for a single-raised pot](docs/images/reference-huds/dynamic-srp-cbet-ip.png)
+
+For multi-tabling, set `display_label` on a `<stat>` to use a short visible
+heading while retaining the longer `tip` as its explanation. The profile's
+`title_font_scale` and `heading_font_scale` control title and heading sizes. See
+the [Advanced HUD guide](docs/hud-advanced-guide.md#tune-dynamic-panel-labels-in-a-package)
+for the XML example and editing notes.
 
 ![The dynamic panel rule editor and its preview](docs/images/hud-preferences-dynamic-panels.png)
 

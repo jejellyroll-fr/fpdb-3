@@ -112,7 +112,10 @@ def merge_package_profile_rules(
         return False
 
     section = _container(config_doc, "hud_profile_rules")
-    selectors = ("site", "game", "game_type", "limit_type", "seats", "players", "speed")
+    # HUD profile rules serialize the betting limit as `limit`; accept the
+    # in-memory spelling too, so re-importing a package replaces its selector
+    # instead of accumulating duplicate rules.
+    selectors = ("site", "game", "game_type", "limit", "seats", "players", "speed")
 
     for source_rule in source_rules:
         profile = source_rule.getAttribute("profile")
@@ -123,7 +126,10 @@ def merge_package_profile_rules(
             (
                 node
                 for node in config_doc.getElementsByTagName("hud_profile_rule")
-                if all(node.getAttribute(name) == value for name, value in wanted.items())
+                if all(
+                    (node.getAttribute(name) or (node.getAttribute("limit_type") if name == "limit" else "")) == value
+                    for name, value in wanted.items()
+                )
             ),
             None,
         )
@@ -169,10 +175,9 @@ def merge_package_panel_rules(
     Dynamic reference HUD (#332) must not silently turn dynamic panels on for
     every other profile. Three rules keep that honest.
 
-    * Only one section ever exists. A configuration that already has one -- the
-      user's own rules, or an earlier import -- is left alone unless it is only
-      the shipped disabled placeholder, or the caller explicitly asks to
-      overwrite it, which is what makes the reference package additive.
+    * Profile-scoped sections from different packages coexist. Reimporting a
+      package only replaces the section for the same profile when overwrite is
+      requested; unrelated profiles and user rules remain intact.
     * The section may scope the shipped library to one profile with a
       ``profile`` attribute, so enabling the reference blocks enables them for
       the packaging profile only.
@@ -188,18 +193,35 @@ def merge_package_panel_rules(
     if not sources:
         return False
 
-    existing = config_doc.getElementsByTagName("hud_panel_rules")
-    if existing and not overwrite and not all(_is_panel_rule_placeholder(node) for node in existing):
-        return False
-    for node in existing:
-        node.parentNode.removeChild(node)
-
-    imported = config_doc.importNode(sources[0], True)
-    _repoint_panel_rule_profile(imported, profile_names or {})
-    config_doc.documentElement.appendChild(config_doc.createTextNode("\n    "))
-    config_doc.documentElement.appendChild(imported)
-    config_doc.documentElement.appendChild(config_doc.createTextNode("\n"))
-    return True
+    existing = list(config_doc.getElementsByTagName("hud_panel_rules"))
+    changed = False
+    names = profile_names or {}
+    for source in sources:
+        imported = config_doc.importNode(source, True)
+        _repoint_panel_rule_profile(imported, names)
+        imported_scope = imported.getAttribute("profile").strip().casefold()
+        matching = [
+            node for node in existing
+            if node.getAttribute("profile").strip().casefold() == imported_scope
+            and not _is_panel_rule_placeholder(node)
+        ]
+        if matching and not overwrite:
+            continue
+        for old in matching:
+            old.parentNode.removeChild(old)
+            existing.remove(old)
+        # The stock disabled/empty section is a placeholder, not user state.
+        for old in list(existing):
+            if _is_panel_rule_placeholder(old):
+                old.parentNode.removeChild(old)
+                existing.remove(old)
+        config_doc.documentElement.appendChild(config_doc.createTextNode("\n    "))
+        config_doc.documentElement.appendChild(imported)
+        existing.append(imported)
+        changed = True
+    if changed:
+        config_doc.documentElement.appendChild(config_doc.createTextNode("\n"))
+    return changed
 
 
 def _repoint_panel_rule_profile(section: Any, names: Mapping[str, str]) -> None:

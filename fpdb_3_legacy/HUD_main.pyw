@@ -1937,12 +1937,113 @@ class HudMain(QObject):
         self._ff_request_sequence = request_id
         return request_id
 
+    def _on_winamax_regular_table_update(self, update: Any) -> None:
+        """Publish an observed Winamax street to the matching ordinary HUD.
+
+        The application log contains explicit ``round flop/turn/river`` events.
+        Imported histories arrive after the hand, so they cannot drive the HUD
+        at the live decision. Pair the client's table index with its window;
+        never send a street from one table to another merely because one HUD is
+        open. Repeated action notifications within a street need no redraw.
+        """
+        if update.hand_over:
+            return
+        street = getattr(update, "street", "preflop")
+        if street not in ("preflop", "flop", "turn", "river"):
+            return
+        seen = getattr(self, "_winamax_regular_seen", None)
+        if seen is None:
+            seen = self._winamax_regular_seen = {}
+        signature = (update.hand_id, street)
+        if seen.get(update.pool) == signature:
+            return
+
+        key = self._winamax_regular_hud_key(update)
+        hud = self.hud_dict.get(key) if key is not None else None
+        if hud is None or str(getattr(hud, "site", "")).casefold() != "winamax":
+            if street != "preflop" and any(
+                str(getattr(item, "site", "")).casefold() == "winamax"
+                and not getattr(item, "is_fast_fold", False)
+                for item in self.hud_dict.values()
+            ):
+                missed = getattr(self, "_winamax_regular_unmatched", None)
+                if missed is None:
+                    missed = self._winamax_regular_unmatched = set()
+                if signature not in missed:
+                    missed.add(signature)
+                    if len(missed) > 256:
+                        missed.clear()
+                    log.warning(
+                        "Winamax live %s could not be attached to a HUD: table index=%s label=%r",
+                        street, update.table_no, getattr(update, "table_label", ""),
+                    )
+            return
+        if getattr(hud, "is_fast_fold", False):
+            return
+
+        from fpdb_3_legacy.winamax_live_log_reader import fpdb_hand_id
+
+        hand_id = fpdb_hand_id(update.hand_id) or str(update.hand_id)
+        if getattr(hud, "_winamax_live_hand_id", None) != hand_id:
+            hud.live_state.clear()
+            hud._winamax_live_hand_id = hand_id
+        hud.set_live_state(
+            street=street,
+            street_index=("preflop", "flop", "turn", "river").index(street),
+            pot_type=getattr(update, "pot_type", "") or "",
+            preflop_aggressor=getattr(update, "preflop_aggressor", "") or None,
+            folded_players=tuple(getattr(update, "folded_players", ())),
+            source="street_live",
+        )
+        hud.refresh_dynamic_panels()
+        seen[update.pool] = signature
+        if len(seen) > 256:
+            seen.clear()
+        log.debug("Winamax HUD street update: table=%s street=%s pot=%s", key, street, getattr(update, "pot_type", ""))
+
+    def _winamax_regular_hud_key(self, update: Any) -> str | None:
+        """Find a classic Winamax window even when its title has no log index.
+
+        Fast-Fold windows carry ``[table] N`` in their title, but ordinary
+        cash windows such as ``Winamax Casablanca`` do not. Match the last
+        imported hand through the log's site-hand map first, then the client's
+        explicit table label. Never guess when more than one HUD matches.
+        """
+        key = self._live_hud_key_for_table_no(str(update.table_no))
+        if key is not None:
+            return key
+
+        ordinary = {
+            name: hud for name, hud in self.hud_dict.items()
+            if str(getattr(hud, "site", "")).casefold() == "winamax"
+            and not getattr(hud, "is_fast_fold", False)
+        }
+        reader = getattr(self, "winamax_log_reader", None)
+        if reader is not None:
+            by_hand = [
+                name for name, hud in ordinary.items()
+                if isinstance((site_hand := getattr(getattr(hud, "hand_instance", None), "handid", None)), (str, int))
+                and reader.table_no_for_hand(str(site_hand)) == str(update.table_no)
+            ]
+            if len(by_hand) == 1:
+                return by_hand[0]
+            if len(by_hand) > 1:
+                return None
+
+        label = str(getattr(update, "table_label", "") or "").strip().casefold()
+        if not label:
+            return None
+        by_label = [
+            name for name, hud in ordinary.items()
+            if str(getattr(hud.table, "key", "") or "").strip().casefold() == label
+            or str(getattr(hud.table, "title", "") or "").strip().casefold() == f"winamax {label}"
+        ]
+        return by_label[0] if len(by_label) == 1 else None
+
     def _on_winamax_table_update(self, update: Any) -> None:
         """Apply a live Winamax log update. Runs on the GUI thread."""
         if not update.pool.startswith(FAST_FOLD_POOL_PREFIX):
-            # An ordinary cash or tournament table. It has a HUD of its own,
-            # driven by imports; tracing it and scheduling window rechecks for
-            # it would be work with nothing at the end of it.
+            self._on_winamax_regular_table_update(update)
             return
 
         if update.hand_id not in self._ff_started:
@@ -3163,7 +3264,7 @@ class HudMain(QObject):
         self.idle_create(args)
         self._publish_analytics(self.hud_dict[args.temp_key], args.new_hand_id)
         created = self.hud_dict[args.temp_key]
-        log.warning(
+        log.info(
             "HUD created: session=%s pid=%s generation=%s table=%r window_id=%s hand=%s "
             "profile=%r aux=%s overlays=%s",
             session_id(),
@@ -4032,16 +4133,15 @@ class HudMain(QObject):
             )
             return
 
-        # One WARNING per HUD creation so the log always records WHICH window
-        # was matched: user reports of "table not detected" are impossible to
-        # diagnose without the matched hwnd/title (or their absence).
+        # Record the matched window for diagnostics without treating normal
+        # table discovery as a warning.
         self._tables_attached.add(temp_key)
         # Baseline for _handle_tour_table_switch, taken from the title this HUD
         # was built on rather than from the first poll up to 800 ms later: a
         # Twister window handed to the next match in between would otherwise
         # become the baseline, and the stale HUD would sit there unnoticed.
         tablewindow.seed_title_table_no()
-        log.warning(
+        log.info(
             "HUD attach: table=%r site=%s hwnd=%s title=%r geometry=(%s,%s %sx%s)",
             temp_key,
             hud_site_name,
@@ -4391,7 +4491,7 @@ class HudMain(QObject):
                 del self.hud_dict[table]
                 self._forget_window_seat_state(table, retiring_hwnd)
                 released = self._window_registry.release(table)
-                log.warning(
+                log.debug(
                     "HUD destroyed: session=%s pid=%s generation=%s table=%r window_id=%s overlays=%s",
                     session_id(),
                     os.getpid(),
