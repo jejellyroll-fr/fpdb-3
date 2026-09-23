@@ -459,6 +459,7 @@ def test_the_declarative_binding_survives_a_save_and_a_reload(dialog) -> None:
     dialog._add_panel_stat_to_block()
     _name, profile = dialog._current_profile()
     item = dialog._item_container(profile, dialog.panel_stat_block_combo.currentData())["stats"][-1]
+    item["display_label"] = "Fold to c-bet"
 
     dialog._append_stat_node(dialog.config.doc.documentElement, item, int(item["row"]), int(item["col"]))
     dialog.config.save()
@@ -472,9 +473,11 @@ def test_the_declarative_binding_survives_a_save_and_a_reload(dialog) -> None:
     assert stat.data_source == "analytics"
     assert stat.data_definition == "fold_to_cbet_flop"
     assert stat.data_min_sample == str(_analytics_choice(dialog, "fold_to_cbet_flop").min_sample)
+    assert stat.display_label == "Fold to c-bet"
     carried = dialog._stat_to_dict(stat, 0, 0)
     assert carried["data_source"] == "analytics"
     assert carried["data_definition"] == "fold_to_cbet_flop"
+    assert carried["display_label"] == "Fold to c-bet"
 
 
 def test_the_stat_picker_does_not_disturb_the_profile_editor(dialog) -> None:

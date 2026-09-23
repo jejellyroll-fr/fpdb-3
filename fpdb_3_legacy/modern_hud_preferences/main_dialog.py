@@ -966,6 +966,7 @@ class ModernHudPreferences(QDialog):
             "hudbgcolor",
             "hudprefix",
             "hudsuffix",
+            "display_label",
             "tip",
             # The declarative binding of an analytics-backed stat (#309). Empty
             # for a column-backed stat, written back only when it is set.
@@ -2911,6 +2912,8 @@ class ModernHudPreferences(QDialog):
         stat_node.setAttribute("click", stat.get("click", ""))
         stat_node.setAttribute("popup", stat.get("popup", "default"))
         stat_node.setAttribute("tip", stat.get("tip", ""))
+        if stat.get("display_label"):
+            stat_node.setAttribute("display_label", stat["display_label"])
         stat_node.setAttribute("hudprefix", stat.get("hudprefix", ""))
         stat_node.setAttribute("hudsuffix", stat.get("hudsuffix", ""))
         stat_node.setAttribute("hudcolor", stat.get("hudcolor", ""))
