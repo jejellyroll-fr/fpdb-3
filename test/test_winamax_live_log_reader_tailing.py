@@ -212,9 +212,9 @@ def test_priming_discards_partial_route_line_after_seeking(tmp_path) -> None:
     reader.ROUTE_PRIME_BYTES = len(complete_route) + len(hand) + 4
     reader.PRIME_BYTES = len(hand) + 1
     log_file = tmp_path / "winamax.log"
-    log_file.write_text(old_line + complete_route + hand, encoding="utf-8")
+    log_file.write_bytes((old_line + complete_route + hand).encode("utf-8"))
 
-    with log_file.open(encoding="utf-8") as handle:
+    with log_file.open(encoding="utf-8", newline="") as handle:
         reader._prime_from_tail(handle)
 
     assert reader.get_table(pool).table_label == "Casablanca"
