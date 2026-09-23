@@ -1949,6 +1949,7 @@ class HudMain(QObject):
         open. Repeated action notifications within a street need no redraw.
         """
         if update.hand_over:
+            self._retire_winamax_regular_hand(update)
             return
         street = getattr(update, "street", "preflop")
         if street not in ("preflop", "flop", "turn", "river"):
@@ -2011,6 +2012,31 @@ class HudMain(QObject):
         if len(seen) > 256:
             seen.clear()
         log.debug("Winamax HUD street update: table=%s street=%s pot=%s", key, street, getattr(update, "pot_type", ""))
+
+    def _retire_winamax_regular_hand(self, update: Any) -> None:
+        """Forget this hand's live street when its matching table reports completion.
+
+        A delayed hand-over event from a previous hand must not clear the new
+        hand's live state, so retire only an exact normalized-ID match.
+        """
+        key = self._winamax_regular_hud_key(update)
+        hud = self.hud_dict.get(key) if key is not None else None
+        if hud is None or str(getattr(hud, "site", "")).casefold() != "winamax":
+            return
+
+        from fpdb_3_legacy.winamax_live_log_reader import fpdb_hand_id
+
+        hand_id = fpdb_hand_id(update.hand_id) or str(update.hand_id)
+        if getattr(hud, "_winamax_live_hand_id", None) != hand_id:
+            return
+
+        hud.live_state.clear()
+        hud._winamax_live_hand_id = None
+        for aux in getattr(hud, "aux_windows", ()):
+            forget = getattr(aux, "forget_dynamic_panels", None)
+            if callable(forget):
+                forget()
+        hud.refresh_dynamic_panels()
 
     def _winamax_regular_hud_key(self, update: Any) -> str | None:
         """Find a classic Winamax window even when its title has no log index.

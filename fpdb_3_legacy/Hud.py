@@ -453,6 +453,10 @@ class Hud:
         context_hand_id = getattr(self.hand_instance, "handid", None) or hand
         keep_live_round = self._has_newer_winamax_round(context_hand_id)
         if not keep_live_round:
+            # The assembled hand now owns the HUD again. Retire any stale
+            # reader marker as well as its state so a later reader restart
+            # cannot make this old hand look newer than another import.
+            self._winamax_live_hand_id = None
             self.live_state.clear()
         live_session = getattr(self, "_live_context_session", None)
         if live_session is not None and live_session.adapter.hand_id != str(context_hand_id):
@@ -493,7 +497,20 @@ class Hud:
 
     def _has_newer_winamax_round(self, imported_hand: int | str) -> bool:
         live_hand = getattr(self, "_winamax_live_hand_id", None)
-        return bool(live_hand and str(imported_hand) != live_hand)
+        if not live_hand or str(imported_hand) == live_hand:
+            return False
+
+        # A retained ID is only evidence of a newer hand while its reader is
+        # still following a log. Reader startup, shutdown, or a failed tail
+        # must not let the last observed street mask a subsequently imported
+        # hand indefinitely. Bare HUDs (and non-Winamax callers) have no reader
+        # owner, so retain the historical behavior for those cases.
+        parent = getattr(self, "parent", None)
+        if parent is not None and hasattr(parent, "winamax_log_reader"):
+            reader = getattr(parent, "winamax_log_reader", None)
+            if reader is None or not getattr(reader, "is_tailing", False):
+                return False
+        return True
 
     def refresh_dynamic_panels(self) -> None:
         """Redraw active panel windows after a live event changes the context."""

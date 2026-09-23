@@ -252,6 +252,45 @@ def test_winamax_import_compares_site_hand_id_not_database_row_id(monkeypatch) -
     assert session.adapter.context.raise_level == 0
 
 
+def test_winamax_live_round_is_not_kept_after_its_log_reader_stops() -> None:
+    from types import SimpleNamespace
+
+    hud, _session = _hud_following("91426500343")
+    hud._winamax_live_hand_id = "91426500343"
+    hud.parent = SimpleNamespace(winamax_log_reader=SimpleNamespace(is_tailing=False))
+
+    assert not hud._has_newer_winamax_round("91426500344")
+
+
+def test_import_retires_the_stale_live_id_after_reader_loss(monkeypatch) -> None:
+    from types import SimpleNamespace
+
+    from fpdb_3_legacy import hud_situation
+
+    hud, session = _hud_following("91426500343")
+    hud._winamax_live_hand_id = "91426500343"
+    hud.parent = SimpleNamespace(winamax_log_reader=SimpleNamespace(is_tailing=False))
+    hud.hand_instance = SimpleNamespace(handid="91426500344")
+    hud.live_state.update(street="river", source="street_live")
+    monkeypatch.setattr(hud_situation, "live_state_from_hand", lambda _hand: {"source": "assembled_import"})
+
+    hud._update_live_state_from_import(771)
+
+    assert hud.live_state == {"source": "assembled_import"}
+    assert hud._winamax_live_hand_id is None
+    assert session.adapter.hand_id == "91426500344"
+
+
+def test_winamax_live_round_is_kept_while_its_log_reader_is_tailing() -> None:
+    from types import SimpleNamespace
+
+    hud, _session = _hud_following("91426500343")
+    hud._winamax_live_hand_id = "91426500343"
+    hud.parent = SimpleNamespace(winamax_log_reader=SimpleNamespace(is_tailing=True))
+
+    assert hud._has_newer_winamax_round("91426500344")
+
+
 def test_an_import_of_a_finished_hand_does_not_restart_it() -> None:
     """The live stream runs ahead of the import, so a late notification arrives.
 

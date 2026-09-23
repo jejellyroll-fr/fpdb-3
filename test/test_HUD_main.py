@@ -3100,6 +3100,56 @@ def test_winamax_regular_preflop_action_changes_refresh_the_context(hud_main) ->
         assert hud.refresh_dynamic_panels.call_count == 3
 
 
+def test_winamax_regular_hand_over_retires_only_its_own_live_state(hud_main) -> None:
+    from fpdb_3_legacy.winamax_live_log_reader import fpdb_hand_id
+
+    hud = MagicMock()
+    hud.site = "Winamax"
+    hud.is_fast_fold = False
+    hud.table.title = "Winamax Casablanca 9"
+    hud.live_state = {"street": "river", "source": "street_live"}
+    hud._winamax_live_hand_id = fpdb_hand_id("5228-42-1786129600")
+    hud_main.hud_dict = {"Casablanca 9": hud}
+    completed = _live_update(
+        pool="cg.tamgr.cg_4.t5228",
+        table_no="9",
+        hand_id="5228-42-1786129600",
+        hand_over=True,
+    )
+
+    with patch.object(hud_main, "_live_hud_key_for_table_no", return_value="Casablanca 9"):
+        hud_main._on_winamax_table_update(completed)
+
+    assert hud.live_state == {}
+    assert hud._winamax_live_hand_id is None
+    hud.refresh_dynamic_panels.assert_called_once()
+
+
+def test_late_winamax_hand_over_does_not_retire_the_next_hand(hud_main) -> None:
+    from fpdb_3_legacy.winamax_live_log_reader import fpdb_hand_id
+
+    hud = MagicMock()
+    hud.site = "Winamax"
+    hud.is_fast_fold = False
+    hud.table.title = "Winamax Casablanca 9"
+    hud.live_state = {"street": "preflop", "source": "street_live"}
+    hud._winamax_live_hand_id = fpdb_hand_id("5228-43-1786129601")
+    hud_main.hud_dict = {"Casablanca 9": hud}
+    completed = _live_update(
+        pool="cg.tamgr.cg_4.t5228",
+        table_no="9",
+        hand_id="5228-42-1786129600",
+        hand_over=True,
+    )
+
+    with patch.object(hud_main, "_live_hud_key_for_table_no", return_value="Casablanca 9"):
+        hud_main._on_winamax_table_update(completed)
+
+    assert hud.live_state == {"street": "preflop", "source": "street_live"}
+    assert hud._winamax_live_hand_id == fpdb_hand_id("5228-43-1786129601")
+    hud.refresh_dynamic_panels.assert_not_called()
+
+
 def test_winamax_regular_round_finds_a_window_without_a_number_in_its_title(hud_main) -> None:
     from fpdb_3_legacy.winamax_live_log_reader import WinamaxTableUpdate
 
