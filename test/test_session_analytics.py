@@ -40,6 +40,38 @@ def test_session_duration_hourly_rates_and_drawdown() -> None:
     assert session.currency_per_hour == -0.5 / (500 / 3600)
 
 
+def test_fixed_limit_sessions_show_bb_metrics_as_unavailable() -> None:
+    session = build_sessions([(1, 1_000, 250, 300, -1, "USD")])[0]
+
+    assert session.profit_minor == 250
+    assert session.bb_hands == 0
+    assert session.profit_bb is None
+    assert session.bb_per_100 is None
+    assert session.all_in_ev_bb is None
+    assert session.ev_bb_per_100 is None
+    assert session.bb_per_hour is None
+
+
+def test_mixed_known_and_unknown_blinds_use_only_valid_hands_for_rates() -> None:
+    sessions = build_sessions(
+        [
+            (1, 1_000, 200, 100, 100, "USD"),
+            (2, 1_100, -500, -250, -1, "USD"),
+        ]
+    )
+
+    session = sessions[0]
+    assert session.hands == 2
+    assert session.bb_hands == 1
+    assert session.profit_bb == 2
+    assert session.bb_per_100 == 200
+    assert session.bb_per_hour is None
+    summary = summarize_sessions(sessions)
+    assert summary["bb_hands"] == 1
+    assert summary["bb_per_100"] == 200
+    assert summary["bb_per_hour"] is None
+
+
 def test_sessions_split_after_gap_and_currency_change() -> None:
     sessions = build_sessions(
         [

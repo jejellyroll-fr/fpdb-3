@@ -107,6 +107,7 @@ class GuiSessionViewer(QSplitter):
         self.columns = [
             (1.0, "Session"),
             (1.0, "Hands"),
+            (1.0, "BB hands"),
             (0.5, "Start"),
             (0.5, "End"),
             (1.0, "Duration"),
@@ -132,6 +133,7 @@ class GuiSessionViewer(QSplitter):
         self.stats_frame.setLayout(QVBoxLayout())
         self.view: Any = None
         self.plot_widget: Any = None
+        self.times: list[tuple[int, ...]] = []
         heading = QLabel(self.filterText["handhead"])
         heading.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.stats_frame.layout().addWidget(heading)
@@ -362,14 +364,15 @@ class GuiSessionViewer(QSplitter):
         summary = summarize_sessions(self.session_metrics)
         duration = self._format_duration(summary["duration_seconds"])
         summary_text = _(
-            "Sessions: {sessions} · Hands: {hands} · Playing time: {duration} · Profit: {profit_bb} BB · bb/100: {bb100} · BB/hour: {bb_hour}"
+            "Sessions: {sessions} · Hands: {hands} · Playing time: {duration} · Profit: {profit_bb} BB · bb/100: {bb100} · BB/hour: {bb_hour} · BB hands: {bb_hands}/{hands}"
         ).format(
             sessions=format_number(summary["sessions"], 0),
             hands=format_number(summary["hands"], 0),
             duration=duration,
-            profit_bb=format_number(summary["profit_bb"], show_plus=True),
-            bb100=format_number(summary["bb_per_100"], show_plus=True),
-            bb_hour=format_number(summary["bb_per_hour"], show_plus=True),
+            profit_bb=self._format_optional_number(summary["profit_bb"]),
+            bb100=self._format_optional_number(summary["bb_per_100"]),
+            bb_hour=self._format_optional_number(summary["bb_per_hour"]),
+            bb_hands=format_number(summary["bb_hands"], 0),
         )
         if summary["currency"] is not None:
             summary_text += " · " + _("Profit: {profit} · Currency/hour: {hour}").format(
@@ -390,31 +393,33 @@ class GuiSessionViewer(QSplitter):
                 [
                     str(session.number),
                     format_number(session.hands, 0),
+                    format_number(session.bb_hands, 0),
                     start,
                     end,
                     self._format_duration(session.duration_seconds),
                     format_number(session.hands * 3600 / session.duration_seconds, 0),
                     format_currency(session.profit_minor / 100, currency, show_plus=True),
-                    format_number(session.profit_bb, show_plus=True),
-                    format_number(session.bb_per_100, show_plus=True),
+                    self._format_optional_number(session.profit_bb),
+                    self._format_optional_number(session.bb_per_100),
                     format_currency(session.all_in_ev_minor / 100, currency, show_plus=True),
-                    format_number(session.all_in_ev_bb, show_plus=True),
-                    format_number(session.ev_bb_per_100, show_plus=True),
+                    self._format_optional_number(session.all_in_ev_bb),
+                    self._format_optional_number(session.ev_bb_per_100),
                     format_currency(session.ev_difference_minor / 100, currency, show_plus=True),
                     format_currency(session.peak_minor / 100, currency, show_plus=True),
                     format_currency(session.low_minor / 100, currency, show_plus=True),
                     format_currency(session.max_drawdown_minor / 100, currency),
-                    format_number(session.bb_per_hour, show_plus=True),
+                    self._format_optional_number(session.bb_per_hour),
                     format_currency(session.currency_per_hour or 0, currency, show_plus=True),
                 ]
             )
+            bb_result = session.profit_bb if session.bb_hands == session.hands else None
             quotes.append(
                 (
                     session.number,
-                    session.graph_open_bb,
-                    session.graph_close_bb,
-                    session.graph_high_bb,
-                    session.graph_low_bb,
+                    0.0,
+                    bb_result if bb_result is not None else float("nan"),
+                    max(0.0, bb_result) if bb_result is not None else float("nan"),
+                    min(0.0, bb_result) if bb_result is not None else float("nan"),
                 )
             )
         return (results, quotes)
@@ -426,6 +431,10 @@ class GuiSessionViewer(QSplitter):
         if hours:
             return _("{hours}h {minutes}m").format(hours=hours, minutes=minutes)
         return _("{minutes}m").format(minutes=minutes)
+
+    @staticmethod
+    def _format_optional_number(value: float | None) -> str:
+        return format_number(value, show_plus=True) if value is not None else "—"
 
     def clearGraphData(self) -> None:
         with contextlib.suppress(Exception):
@@ -495,7 +504,6 @@ class GuiSessionViewer(QSplitter):
         bg = self.colors["background"]
         fg = self.colors["foreground"]
         grid = self.colors["grid"]
-        line = self.colors.get("line_hands", "#22c55e")
         gain = self.colors.get("line_up", "#22c55e")
         loss = self.colors.get("line_down", "#ef4444")
 
@@ -505,18 +513,21 @@ class GuiSessionViewer(QSplitter):
         highs = np.array([float(q[3]) for q in quotes])
         lows = np.array([float(q[4]) for q in quotes])
         profits = closes - opens
-        session_colors = [gain if value >= 0 else loss for value in profits]
+        session_colors = [gain if value >= 0 else loss if np.isfinite(value) else grid for value in profits]
 
         self.plot_widget = pg.PlotWidget()
         self.plot_widget.setBackground(bg)
         self.plot_widget.showGrid(x=True, y=True, alpha=0.3)
 
-        total = closes[-1] if len(closes) else 0
+        valid_profits = profits[np.isfinite(profits)]
+        total = float(valid_profits.sum()) if len(valid_profits) else 0.0
+        excluded_sessions = sum(session.bb_hands < session.hands for session in self.session_metrics)
+        excluded_note = f" · {excluded_sessions} sessions with incomplete BB data omitted" if excluded_sessions else ""
         self.plot_widget.setTitle(
-            f"<span style='color:{fg}; font-size:11pt; font-weight:bold;'>Cumulative session result: {format_number(total, show_plus=True)} BB{names}</span>"
+            f"<span style='color:{fg}; font-size:11pt; font-weight:bold;'>Session results: {format_number(total, show_plus=True)} BB{excluded_note}{names}</span>"
         )
         self.plot_widget.setLabel("bottom", _("Session"), **{"color": fg, "font-size": "9pt"})
-        self.plot_widget.setLabel("left", _("Cumulative BB"), **{"color": fg, "font-size": "9pt"})
+        self.plot_widget.setLabel("left", _("Session result (BB)"), **{"color": fg, "font-size": "9pt"})
 
         axis_pen = pg.mkPen(color=grid, width=1)
         self.plot_widget.getAxis("left").setPen(axis_pen)
@@ -529,16 +540,19 @@ class GuiSessionViewer(QSplitter):
         for sid, start, end, low, high, color in zip(
             session_ids, opens, closes, lows, highs, session_colors, strict=False
         ):
+            if not np.isfinite(end):
+                continue
             self.plot_widget.plot([sid, sid], [low, high], pen=pg.mkPen(color=color, width=1.5))
             self.plot_widget.plot([sid, sid], [start, end], pen=pg.mkPen(color=color, width=4.0))
 
+        valid = np.isfinite(closes)
         self.plot_widget.plot(
-            session_ids,
-            closes,
-            pen=pg.mkPen(color=line, width=2.8),
+            session_ids[valid],
+            closes[valid],
+            pen=None,
             symbol="o",
             symbolSize=6,
-            symbolBrush=pg.mkBrush(color=line),
+            symbolBrush=pg.mkBrush(color=gain),
         )
 
         ticks = [(sid, str(int(sid))) for sid in session_ids]
@@ -559,21 +573,22 @@ class GuiSessionViewer(QSplitter):
                 [
                     session.number,
                     session.hands,
+                    session.bb_hands,
                     session.start_timestamp,
                     session.end_timestamp,
                     session.duration_seconds,
                     session.hands * 3600 / session.duration_seconds,
                     session.profit_minor,
-                    session.profit_bb,
-                    session.bb_per_100,
+                    session.profit_bb if session.profit_bb is not None else float("-inf"),
+                    session.bb_per_100 if session.bb_per_100 is not None else float("-inf"),
                     session.all_in_ev_minor,
-                    session.all_in_ev_bb,
-                    session.ev_bb_per_100,
+                    session.all_in_ev_bb if session.all_in_ev_bb is not None else float("-inf"),
+                    session.ev_bb_per_100 if session.ev_bb_per_100 is not None else float("-inf"),
                     session.ev_difference_minor,
                     session.peak_minor,
                     session.low_minor,
                     session.max_drawdown_minor,
-                    session.bb_per_hour,
+                    session.bb_per_hour if session.bb_per_hour is not None else float("-inf"),
                     session.currency_per_hour if session.currency_per_hour is not None else float("-inf"),
                 ]
             )
