@@ -22,7 +22,6 @@ ADVANCED_PROFILE_NAME = "aof_advanced"
 POPUP_NAME = "aof_profile"
 GAME_NAME = "aof_omaha"
 
-
 def _normalized_element(element: ET.Element) -> tuple:
     return (
         element.tag,
@@ -314,7 +313,6 @@ def test_startup_migrates_an_existing_user_file_once(tmp_path: Path, monkeypatch
     assert config_path.with_suffix(".xml.backup").read_bytes() == backup_once
 
 
-@pytest.mark.qt
 def _package_popup_names() -> list[str]:
     """The popups this package installs, read from the package itself."""
     import defusedxml.minidom as minidom
@@ -323,12 +321,12 @@ def _package_popup_names() -> list[str]:
     return [pu.getAttribute("pu_name") for pu in document.getElementsByTagName("pu")]
 
 
-def test_preferences_imports_the_profile_and_its_game_binding(tmp_path: Path, monkeypatch) -> None:
-    from PySide6.QtWidgets import QApplication, QComboBox, QFileDialog, QMessageBox
+@pytest.mark.qt
+def test_preferences_imports_the_profile_and_its_game_binding(tmp_path: Path, monkeypatch, qtbot) -> None:
+    from PySide6.QtWidgets import QFileDialog, QMessageBox
 
     from fpdb_3_legacy.ModernHudPreferences import ModernHudPreferences
 
-    QApplication.instance() or QApplication([])
     config_path = tmp_path / "HUD_config.xml"
     shutil.copy(EXAMPLE_CONFIG, config_path)
     config = Config(file=str(config_path))
@@ -349,29 +347,107 @@ def test_preferences_imports_the_profile_and_its_game_binding(tmp_path: Path, mo
         config.popup_windows.pop(popup_name, None)
 
     errors = []
+    notices = []
+    warnings = []
     monkeypatch.setattr(
         QFileDialog,
         "getOpenFileName",
         staticmethod(lambda *args, **kwargs: (str(PACKAGE), "FPDB HUD Files (*.fpdbhud)")),
     )
-    monkeypatch.setattr(QMessageBox, "information", staticmethod(lambda *args, **kwargs: None))
+    monkeypatch.setattr(QMessageBox, "information", staticmethod(lambda *args, **kwargs: notices.append(args)))
     monkeypatch.setattr(QMessageBox, "critical", staticmethod(lambda *args, **kwargs: errors.append(args)))
+    monkeypatch.setattr(QMessageBox, "warning", staticmethod(lambda *args, **kwargs: warnings.append(args)))
+    # A successful import changes the editor's working copy, so closing the real
+    # dialog asks whether to save before closing. Nothing can answer a modal
+    # prompt during teardown, and the import has already written the file, so
+    # Discard is the honest answer: the assertions below read the file on disk,
+    # not the dialog's opinion of it.
+    monkeypatch.setattr(
+        QMessageBox,
+        "question",
+        staticmethod(lambda *args, **kwargs: QMessageBox.StandardButton.Discard),
+    )
 
+    # Keep this test focused on the import path: constructing every editor tab
+    # is unnecessary here and some platform Qt styles crash while laying out the
+    # large HUD designer. Crucially, do not stub reload_parent_config: the
+    # missing method that caused the reported import error must be exercised.
     dialog = ModernHudPreferences.__new__(ModernHudPreferences)
+    dialog.parent = lambda: None
     dialog.config = config
-    dialog.hud_profiles = dict(config.stat_sets)
-    dialog.profile_combo = QComboBox()
-    dialog.load_profiles = lambda: None
-    dialog.load_popup_windows = lambda: None
+    dialog.hud_profiles = {}
+    dialog.popup_windows = {}
+    dialog.profile_combo = _ComboBoxStub()
+    dialog.load_profiles = lambda: dialog.hud_profiles.update(config.stat_sets)
+    dialog.load_popup_windows = lambda: dialog.popup_windows.update(config.popup_windows)
     dialog.on_profile_selected = lambda _index: None
-    dialog.reload_parent_config = lambda: None
 
     dialog.import_profile()
 
     assert errors == []
+    assert len(notices) == 1
+    assert notices[0][1] == "Import Successful"
+    assert warnings == []
+    assert dialog.profile_combo.currentText() == PROFILE_NAME
+    assert PROFILE_NAME in dialog.hud_profiles
+    assert ADVANCED_PROFILE_NAME in dialog.hud_profiles
+    assert POPUP_NAME in dialog.popup_windows
     saved = ET.parse(config_path).getroot()
     _named_element(saved, "./stat_sets/ss", "name", PROFILE_NAME)
     _named_element(saved, "./stat_sets/ss", "name", ADVANCED_PROFILE_NAME)
     _named_element(saved, "./popup_windows/pu", "pu_name", POPUP_NAME)
     game = _named_element(saved, "./supported_games/game", "game_name", GAME_NAME)
     assert game.find("./game_stat_set[@game_type='all']").get("stat_set") == ADVANCED_PROFILE_NAME
+
+
+def test_reload_parent_config_is_optional_and_does_not_mask_import_success(monkeypatch) -> None:
+    from PySide6.QtWidgets import QMessageBox
+
+    from fpdb_3_legacy.ModernHudPreferences import ModernHudPreferences
+
+    class Host:
+        def reload_config(self):
+            raise RuntimeError("host refresh unavailable")
+
+    dialog = ModernHudPreferences.__new__(ModernHudPreferences)
+    dialog.parent = lambda: Host()
+    warnings = []
+    monkeypatch.setattr(QMessageBox, "warning", staticmethod(lambda *args: warnings.append(args)))
+
+    ModernHudPreferences.reload_parent_config(dialog)
+
+    assert len(warnings) == 1
+    assert "imported and saved" in warnings[0][2]
+    assert "do not need to import" in warnings[0][2]
+
+
+def test_reload_parent_config_calls_host_when_available() -> None:
+    from fpdb_3_legacy.ModernHudPreferences import ModernHudPreferences
+
+    class Host:
+        reloads = 0
+
+        def reload_config(self):
+            self.reloads += 1
+
+    host = Host()
+    dialog = ModernHudPreferences.__new__(ModernHudPreferences)
+    dialog.parent = lambda: host
+
+    ModernHudPreferences.reload_parent_config(dialog)
+
+    assert host.reloads == 1
+
+
+class _ComboBoxStub:
+    def __init__(self) -> None:
+        self.current_text = ""
+
+    def setCurrentText(self, value: str) -> None:
+        self.current_text = value
+
+    def currentText(self) -> str:
+        return self.current_text
+
+    def currentIndex(self) -> int:
+        return 0

@@ -43,6 +43,63 @@ def test_context_from_stat_dict_prefers_live_over_imported_position() -> None:
     assert hs.HudSituationContext.from_stat_dict({"position": "B"}).position == "BB"
 
 
+def test_winamax_round_uses_current_raiser_and_position_not_aggregate_flags() -> None:
+    opener = {"screen_name": "Opener", "live_position": "0", "n": 5, "pfr": 0}
+    caller = {"screen_name": "Caller", "live_position": "B", "n": 7, "pfr": 100}
+    live = {
+        "source": "street_live", "street": "flop", "pot_type": "single_raised",
+        "preflop_aggressor": "Opener",
+    }
+
+    opener_context = hs.HudSituationContext.from_stat_dict(
+        opener, hs.winamax_live_state_for_player(opener, (opener, caller), live),
+    )
+    caller_context = hs.HudSituationContext.from_stat_dict(
+        caller, hs.winamax_live_state_for_player(caller, (opener, caller), live),
+    )
+    assert opener_context.is_preflop_aggressor is True
+    assert opener_context.in_position is True
+    assert caller_context.is_preflop_aggressor is False
+    assert caller_context.in_position is False
+
+    rules, fallback = hs.load_source(hs.PLO_BUILTIN_SOURCE)
+    selection = hs.HudSituationResolver(rules, fallback=fallback).resolve(opener_context, samples=opener)
+    assert "srp_cbet_ip" in selection.panels
+
+
+def test_winamax_round_without_known_raiser_does_not_invent_a_cbet_role() -> None:
+    row = {"screen_name": "Caller", "live_position": "B", "n": 7, "pfr": 100}
+    live = {"source": "street_live", "street": "flop", "pot_type": "single_raised"}
+    context = hs.HudSituationContext.from_stat_dict(
+        row, hs.winamax_live_state_for_player(row, (row,), live),
+    )
+    assert context.is_preflop_aggressor is False
+    assert context.in_position is None
+
+
+@pytest.mark.parametrize("street", ["flop", "turn", "river"])
+def test_plo_limped_pots_have_a_street_specific_fallback(street: str) -> None:
+    rules, fallback = hs.load_source(hs.PLO_BUILTIN_SOURCE)
+    context = hs.HudSituationContext(street=street, pot_type="limped")
+
+    selection = hs.HudSituationResolver(rules, fallback=fallback).resolve(context, samples={"n": 5})
+
+    assert f"postflop_{street}" in selection.panels
+
+
+def test_plo_specific_spot_beats_the_street_fallback() -> None:
+    rules, fallback = hs.load_source(hs.PLO_BUILTIN_SOURCE)
+    context = hs.HudSituationContext(
+        street="flop", pot_type="single_raised", is_preflop_aggressor=True,
+        in_position=True, to_call=0,
+    )
+
+    selection = hs.HudSituationResolver(rules, fallback=fallback).resolve(context, samples={"n": 5})
+
+    assert "srp_cbet_ip" in selection.panels
+    assert "postflop_flop" not in selection.panels
+
+
 def test_context_key_is_stable_across_equivalent_spellings() -> None:
     left = hs.HudSituationContext(street="Flop", position="bu", pot_type="SINGLE_RAISED")
     right = hs.HudSituationContext(street="flop", position="BTN", pot_type="single_raised")
@@ -506,6 +563,7 @@ def test_preflop_open_context_supports_the_issue_examples() -> None:
         samples={"n": 100},
     )
     assert {"preflop_facing_open", "blinds_defence"} <= set(facing.panels)
+    assert "preflop_open" not in facing.panels
     squeezed = resolver.resolve(
         hs.HudSituationContext(street="preflop", pot_type="single_raised", labels=("squeeze_defence",), to_call=600),
         samples={"n": 100},
@@ -756,6 +814,23 @@ def test_the_aggregate_row_makes_a_postflop_panel_reachable() -> None:
     assert "srp_face_cbet_oop" in facing.panels
 
 
+def test_winamax_numbered_seats_follow_postflop_action_order() -> None:
+    live = {
+        "source": "street_live",
+        "street": "flop",
+        "preflop_aggressor": "utg",
+        "folded_players": (),
+    }
+    utg = {"screen_name": "utg", "live_position": "3"}
+    cutoff = {"screen_name": "cutoff", "live_position": "1"}
+
+    cutoff_state = hs.winamax_live_state_for_player(cutoff, [utg, cutoff], live)
+    utg_state = hs.winamax_live_state_for_player(utg, [utg, cutoff], live)
+
+    assert cutoff_state["in_position"] is True
+    assert utg_state["in_position"] is False
+
+
 # --------------------------------------------------------------------------- #
 # The wiring: the configuration section, and the HUD that reads it.
 # --------------------------------------------------------------------------- #
@@ -938,3 +1013,30 @@ def test_a_configured_profile_answers_with_the_seat_panels() -> None:
     # A seat with no data at all is a seat with no live state, not a crash.
     aux.hud.stat_dict = {}
     assert aux.dynamic_panel_selection(3, 99) is not None
+
+
+def test_plo_live_flop_replaces_preflop_panel_with_small_sample() -> None:
+    from dataclasses import replace
+    from types import SimpleNamespace
+
+    from fpdb_3_legacy import Aux_Hud
+
+    rules, fallback = hs.load_source(hs.PLO_BUILTIN_SOURCE)
+    scoped = [replace(rule, profile="plo_6max_dynamic") for rule in rules]
+    opener = {"screen_name": "Opener", "live_position": "0", "n": 5}
+    caller = {"screen_name": "Caller", "live_position": "B", "n": 7}
+    aux = Aux_Hud.SimpleHUD.__new__(Aux_Hud.SimpleHUD)
+    aux.config = SimpleNamespace(get_hud_panel_rules=lambda: scoped, hud_panel_fallback=fallback)
+    aux.game_params = SimpleNamespace(name="plo_6max_dynamic")
+    aux.hud = SimpleNamespace(
+        stat_dict={1: opener, 2: caller},
+        live_state={"source": "street_live", "street": "preflop", "pot_type": "unopened"},
+    )
+
+    assert "preflop_open" in aux.dynamic_panel_selection(1, 1).panels
+    aux.hud.live_state = {
+        "source": "street_live", "street": "flop", "pot_type": "single_raised",
+        "preflop_aggressor": "Opener",
+    }
+    aux.forget_dynamic_panels()
+    assert "srp_cbet_ip" in aux.dynamic_panel_selection(1, 1).panels

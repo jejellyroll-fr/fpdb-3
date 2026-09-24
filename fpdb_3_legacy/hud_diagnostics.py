@@ -126,9 +126,8 @@ def log_process_identity(
 ) -> dict[str, Any]:
     """Write the launch banner and return the identity it reported.
 
-    At WARNING because the HUD's diagnostics are pinned to that level (see
-    ``DIAGNOSTIC_LEVEL_CAP``): a banner that a user's log does not contain is
-    a banner that cannot answer anything.
+    Keep the process banner at warning level so it survives the HUD's default
+    logger threshold and is available in the persisted diagnostic log.
     """
     identity = process_identity(role, command)
     log.warning("FPDB launch identity: %s", format_identity(identity))

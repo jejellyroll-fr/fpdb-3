@@ -42,10 +42,12 @@ class MatrixHeatmapWidget(QWidget):
         layout.addWidget(self.summary_label)
         self.table = QTableWidget()
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.table.setAlternatingRowColors(True)
         self.table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectItems)
         self.table.verticalHeader().setVisible(True)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.table.verticalHeader().setDefaultSectionSize(54)
         self.table.cellClicked.connect(self._cell_clicked)
         layout.addWidget(self.table)
 
@@ -106,15 +108,23 @@ class MatrixHeatmapWidget(QWidget):
                 item = QTableWidgetItem(self._cell_text(hero, field, cell))
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 item.setToolTip(self._tooltip(hero, field, cell))
+                item.setData(Qt.ItemDataRole.AccessibleTextRole, self._tooltip(hero, field, cell))
                 item.setBackground(self._background(hero, field, max_value))
+                if self._field is not None:
+                    gap = (hero.metric_value if hero else 0) - (field.metric_value if field else 0)
+                    sample_cell = hero or field
+                    if gap and sample_cell is not None and sample_cell.sample_sufficient:
+                        item.setForeground(QColor("#68d391" if gap > 0 else "#fc8181"))
                 self.table.setItem(row_index, column_index, item)
 
         warnings = len(self._low_sample_cells())
         comparison = "Hero / Field / Gap" if self._field is not None else "one population"
+        cell_guide = "Cells show H / F then gap." if self._field is not None else "Cells show measure and sample size."
         unknown = " Unknown cells are shown separately." if self._has_unknown() else ""
         warning_text = f" {warnings} low-sample cells." if warnings else ""
         self.summary_label.setText(
-            f"{comparison}; click a cell to filter the exact matchup.{warning_text}{unknown}"
+            f"{comparison}; {cell_guide} Hover for exact values and sample; "
+            f"click to filter the matchup.{warning_text}{unknown}"
         )
 
     def _cell_clicked(self, row_index: int, column_index: int) -> None:
@@ -162,12 +172,12 @@ class MatrixHeatmapWidget(QWidget):
 
     def _cell_text(self, hero: MatrixCell | None, field: MatrixCell | None, fallback: MatrixCell) -> str:
         if self._field is None:
-            return f"{fallback.metric_label}\n{fallback.sample_label}"
-        hero_text = f"H {hero.metric_label if hero else '—'}\n{hero.sample_label if hero else 'n=0'}"
-        field_text = f"F {field.metric_label if field else '—'}\n{field.sample_label if field else 'n=0'}"
+            return f"{fallback.metric_label}\nn={fallback.opportunities}"
+        hero_text = hero.metric_label if hero else "—"
+        field_text = field.metric_label if field else "—"
         gap = (hero.metric_value if hero else 0) - (field.metric_value if field else 0)
-        suffix = "%" if fallback.percentage is not None else ""
-        return f"{hero_text}\n{field_text}\nGap {gap:+.1f}{suffix}"
+        gap_unit = " pp" if fallback.percentage is not None else ""
+        return f"H {hero_text} · F {field_text}\nΔ {gap:+.1f}{gap_unit}"
 
     def _tooltip(self, hero: MatrixCell | None, field: MatrixCell | None, cell: MatrixCell) -> str:
         lines = [f"{cell.row_label} × {cell.column_label}"]
@@ -176,7 +186,7 @@ class MatrixHeatmapWidget(QWidget):
                 continue
             low = " — low sample" if not side.sample_sufficient and side.opportunities else ""
             lines.append(
-                f"{label}: {side.metric_label}; opportunities={side.opportunities}; "
+                f"{label}: {side.exact_metric_label}; opportunities={side.opportunities}; "
                 f"numerator={side.actions}{low}",
             )
         lines.append("Click to add both axis values as Study cross-filters.")

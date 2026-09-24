@@ -454,6 +454,12 @@ def test_drill_rows_carry_the_columns_a_human_scans(browser_db: Database) -> Non
     assert row["heroCards"] in ("",) or len(row["heroCards"]) >= 4
 
 
+def test_private_card_text_includes_all_four_omaha_cards() -> None:
+    cards = (rb.Card.encodeCard(code) for code in ("As", "Kh", "Qd", "Jc"))
+
+    assert rb._cards_text(*cards) == "AsKhQdJc"
+
+
 def test_drill_group_is_a_filter_not_a_recalculation(browser_db: Database) -> None:
     """A row's drill-down must equal the same query with the row as a filter."""
     query = _fold_query()

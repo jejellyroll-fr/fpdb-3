@@ -3,12 +3,20 @@
 from __future__ import annotations
 
 import pytest
+from PySide6.QtWidgets import QTableWidgetItem
 
 from fpdb_3_legacy.analytics_query import Query
 from fpdb_3_legacy.Database import Database
-from fpdb_3_legacy.GuiDrillDown import SourceHandsPane
+from fpdb_3_legacy.GuiDrillDown import (
+    SourceHandsPane,
+    _card_description,
+    _card_pixmap,
+    _CardImagesDelegate,
+    style_signed_measure,
+)
 from fpdb_3_legacy.Importer import Importer
 from fpdb_3_legacy.research_drilldown import (
+    SIDE_DRILL_COLUMNS,
     SIDE_FIELD,
     SIDE_HERO,
     DrillContext,
@@ -130,6 +138,29 @@ def test_unknown_cards_are_left_blank_and_the_coverage_is_stated(qtbot, drill_db
     cards = [pane.table.item(row, 8).text() for row in range(pane.table.rowCount())]
     assert all(text == "" or len(text) == 4 for text in cards)
     assert "Cards known for" in pane.coverage_label.text()
+
+
+def test_source_hand_card_cells_use_card_faces_and_remain_accessible(qtbot) -> None:
+    pane = SourceHandsPane(object())
+    qtbot.addWidget(pane)
+
+    player_cards_column = next(index for index, col in enumerate(SIDE_DRILL_COLUMNS) if col.key == "playerCards")
+    board_column = next(index for index, col in enumerate(SIDE_DRILL_COLUMNS) if col.key == "board")
+    assert isinstance(pane.table.itemDelegateForColumn(player_cards_column), _CardImagesDelegate)
+    assert isinstance(pane.table.itemDelegateForColumn(board_column), _CardImagesDelegate)
+    assert _card_pixmap("A", "s", 24, 33) is not None
+    assert _card_pixmap("T", "h", 24, 33) is not None
+    assert _card_description("As9h") == "Cards: A of spades, 9 of hearts"
+
+
+def test_signed_financial_values_use_semantic_colors() -> None:
+    loss = QTableWidgetItem("-7 ¢")
+    gain = QTableWidgetItem("70 ¢")
+    style_signed_measure(loss, "playerProfit", -7)
+    style_signed_measure(gain, "hero_profit", 70)
+
+    assert loss.foreground().color().name() == "#fc8181"
+    assert gain.foreground().color().name() == "#68d391"
 
 
 def test_a_double_click_hands_the_hand_id_to_the_replayer(qtbot, drill_db: Database) -> None:

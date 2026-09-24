@@ -49,17 +49,18 @@ from fpdb_3_legacy.hud_presentation import (
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.modern_hud_preferences.preview_widgets import HudPreviewWidget
 
-#: The order the packages are offered in: the one a new user should read
-#: first, then the two that ask something of them.
+#: The order the packages are offered in: the starter first, then the
+#: specialized packages, grouped by game where possible.
 PACKAGE_ORDER: tuple[tuple[str, str], ...] = (
     ("basic", "Basic — eight numbers, no setup"),
     ("advanced", "Advanced — compact surface, popups behind it"),
-    ("dynamic", "Dynamic — panels that follow the spot"),
+    ("dynamic", "Dynamic Hold'em — panels that follow the spot"),
+    ("plo_dynamic", "Dynamic PLO — Omaha stats by spot"),
 )
 
 
 class ReferenceHudPreview(QWidget):
-    """A read-only tour of the three shipped reference HUD packages."""
+    """A read-only tour of the shipped reference HUD packages."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)

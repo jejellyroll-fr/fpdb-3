@@ -656,11 +656,9 @@ def _hero_join() -> str:
     )
 
 
-def _cards_text(card1: Any, card2: Any) -> str:
-    """The hero's two cards as the short text a list shows, '' when unknown."""
-    if not card1 or not card2:
-        return ""
-    return Card.valueSuitFromCard(int(card1)) + Card.valueSuitFromCard(int(card2))
+def _cards_text(*cards: Any) -> str:
+    """Render every known private card, supporting Hold'em and Omaha alike."""
+    return "".join(Card.valueSuitFromCard(int(card)) for card in cards if card)
 
 
 def _board_text(raw: Mapping[str, Any]) -> str:
@@ -1007,13 +1005,14 @@ def drill_display_rows(
         [
             "  P.name AS playerName,",
             "  HP.totalProfit AS playerProfit,",
-            "  HP.card1 AS card1, HP.card2 AS card2,",
+            "  HP.card1 AS card1, HP.card2 AS card2, HP.card3 AS card3, HP.card4 AS card4,",
         ]
         if actor
         else [
             "  HERO.name AS playerName,",
             "  HERO_HP.totalProfit AS playerProfit,",
-            "  HERO_HP.card1 AS card1, HERO_HP.card2 AS card2,",
+            "  HERO_HP.card1 AS card1, HERO_HP.card2 AS card2, "
+            "HERO_HP.card3 AS card3, HERO_HP.card4 AS card4,",
         ]
     )
     sql = "\n".join(
@@ -1051,7 +1050,7 @@ def drill_display_rows(
             "maxSeats": row["maxSeats"],
             "playerName": row["playerName"],
             "playerProfit": row["playerProfit"],
-            "playerCards": _cards_text(row["card1"], row["card2"]),
+            "playerCards": _cards_text(*(row.get(f"card{i}") for i in range(1, 5))),
             "board": _board_text(row),
             "finalPot": row["finalPot"],
         }

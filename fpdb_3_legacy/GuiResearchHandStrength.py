@@ -50,6 +50,7 @@ class HandStrengthChartWidget(QWidget):
         self.coverage_label.setStyleSheet(f"color: {palette.get('muted_text', '#a0aec0')};")
         layout.addWidget(self.coverage_label)
         self.plot.setMinimumHeight(220)
+        self.plot.setMaximumHeight(340)
         self.plot.setBackground(palette.get("sidebar", "#1a202c"))
         self.plot.setLabel("bottom", "Share of classified decisions (%)")
         self.plot.showGrid(x=True, y=False, alpha=0.2)

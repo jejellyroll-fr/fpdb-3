@@ -67,6 +67,21 @@ def test_build_block_layouts_propagates_scope():
     assert [b["cell_width"] for b in aw.block_layouts] == [44, 0]
 
 
+def test_unpositioned_dynamic_block_does_not_cover_the_static_core():
+    aw = Aux_Hud.SimpleHUD.__new__(Aux_Hud.SimpleHUD)
+    aw.block_layouts = [{"position": ""}, {"position": "dynamic"}]
+    aw._seat_anchor_ref = {1: (100, 100), 2: (100, 400)}
+    aw._positional_mode = lambda: "current"
+    aw.hud = types.SimpleNamespace(ref_layout_height=546)
+
+    assert aw._default_canonical((1, 0)) == (100, 100)
+    assert aw._default_canonical((1, 1)) == (100, 196)
+    assert aw._default_canonical((2, 1)) == (100, 304)
+
+    aw.block_layouts[1]["y"] = 32
+    assert aw._default_canonical((1, 1)) == (100, 132), "explicit offsets take precedence"
+
+
 def test_multiblock_stat_set_parses_panels():
     ss = _ss('<ss name="t" rows="2" cols="2">'
              '<block label="SB 3h" rows="1" cols="2">'

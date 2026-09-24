@@ -203,6 +203,23 @@ def test_priming_reads_only_the_end_of_a_long_log(tmp_path) -> None:
     assert reader.table_no_for_hand("22754010-17407-1786488466") == "4"
 
 
+def test_priming_discards_partial_route_line_after_seeking(tmp_path) -> None:
+    pool = "cg.tamgr.cg_5.t86426"
+    complete_route = f"1786129601015 [router] Navigate: wam://table?tblrk={pool}&label=Casablanca\n"
+    hand = "1786129602014 [table] 2 cg.tamgr.cg_5.t86426 hand 86426-43-1786129601\n"
+    reader = WinamaxLiveLogReader()
+    old_line = "1786129600000 [router] old irrelevant route\n"
+    reader.ROUTE_PRIME_BYTES = len(complete_route) + len(hand) + 4
+    reader.PRIME_BYTES = len(hand) + 1
+    log_file = tmp_path / "winamax.log"
+    log_file.write_bytes((old_line + complete_route + hand).encode("utf-8"))
+
+    with log_file.open(encoding="utf-8", newline="") as handle:
+        reader._prime_from_tail(handle)
+
+    assert reader.get_table(pool).table_label == "Casablanca"
+
+
 def test_a_priming_failure_leaves_the_reader_usable(tmp_path) -> None:
     """A truncated or locked file must not stop the reader from tailing."""
     reader = WinamaxLiveLogReader()
@@ -408,6 +425,41 @@ def test_a_player_acting_twice_joins_the_ring_once() -> None:
     reader.process_line(action)
 
     assert reader.get_table("gf.cgmatchmaker.gf_1.t22754010.3").ring == ["villain"]
+
+
+def test_actions_by_known_players_publish_changed_live_state() -> None:
+    """Tracked players still change the live pot and postflop situation."""
+    seen: list = []
+    reader = WinamaxLiveLogReader(on_table_update=seen.append)
+    reader.process_line(HAND_START)
+    table = reader.get_table("gf.cgmatchmaker.gf_1.t22754010.3")
+    table.ring.extend(["blind", "opener", "caller"])
+    before = len(seen)
+
+    reader.process_line(
+        '1786488467000 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 action raise login="blind" amount="0.12"\n'
+    )
+    assert len(seen) == before + 1
+    assert table.preflop_raises == 1
+    assert table.preflop_aggressor == "blind"
+
+    reader.process_line(
+        '1786488467100 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 action call login="caller" amount="0.12"\n'
+    )
+    assert len(seen) == before + 2
+    assert table.preflop_calls == 1
+
+    reader.process_line(
+        '1786488467200 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 action fold login="opener"\n'
+    )
+    assert len(seen) == before + 3
+    assert "opener" in table.folded_players
+
+    # The same fold notification cannot change the already-published state.
+    reader.process_line(
+        '1786488467200 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 action fold login="opener"\n'
+    )
+    assert len(seen) == before + 3
 
 
 def test_the_hero_folding_ends_the_table_for_them() -> None:

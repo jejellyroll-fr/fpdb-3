@@ -166,8 +166,11 @@ configuration gains it (with its documentation) on first run:
 * `enabled="false"` (the shipped default) or a missing section: the section is
   **not read at all**, so a source that has since moved cannot turn a
   configuration the user turned off into one that fails to load.
-* `source="builtin"` prepends the shipped library; any other value is a path to
-  a `.json` file or a directory of them.
+* `source="builtin"` prepends the shipped library;
+  `source="builtin_plo"` uses the same spot rules while keeping contextual
+  panels visible at any sample; the Hold'em library starts contextual panels
+  at five hands (the deep-stack panel keeps its 200-hand threshold). Any other
+  value is a path to a `.json` file or a directory of them.
 * `fallback="core"` is the panel shown when the profile has rules and none of
   them matches. A profile with *no* rules is the static HUD — which is why
   `Config.get_hud_panel_rules()` returns `[]` for both the disabled and the

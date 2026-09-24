@@ -1328,10 +1328,8 @@ class GuiAutoImport(QWidget):
 
         log.info("opening pipe to HUD")
         log.debug(f"Running {command!r} with bs={bs}")
-        # WARNING, not DEBUG: which argv actually started the HUD is the first
-        # thing a duplicate-overlay report needs, and DEBUG is not on in the
-        # logs users send.
-        log.warning(
+        # Process startup is routine lifecycle information, not a warning.
+        log.info(
             "HUD launch: session=%s parent_pid=%s install_method=%s command=%r",
             session_id(),
             os.getpid(),
@@ -1615,12 +1613,16 @@ class GuiAutoImport(QWidget):
             if hh_path and os.path.isdir(hh_path):
                 directories[(site, "hh")] = hh_path
             elif hh_path:
-                log.warning("Ignoring invalid hand-history path for %s: %s", site, hh_path)
+                message = "Ignoring invalid hand-history path for %s: %s"
+                if "ERROR DEFAULT PATH" in str(hh_path):
+                    log.info(message, site, hh_path)
+                else:
+                    log.warning(message, site, hh_path)
 
             ts_path = paths.get("hud-defaultTSPath")
             if ts_path and os.path.isdir(ts_path):
                 directories[(site, "ts")] = ts_path
-            elif ts_path:
+            elif ts_path and str(ts_path).strip() != "0":
                 log.warning("Ignoring invalid tournament-summary path for %s: %s", site, ts_path)
 
         return directories

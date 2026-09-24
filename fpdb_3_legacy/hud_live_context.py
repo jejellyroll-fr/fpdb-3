@@ -59,6 +59,9 @@ log = get_logger("hud_live_context")
 SOURCE_ACTION_STREAM: Final = "action_stream"
 #: The panels are based on the latest assembled/imported hand.
 SOURCE_HAND_REFRESH: Final = "hand_refresh"
+# Winamax's application log reports the street and actions, but does not carry
+# a reliable per-seat decision snapshot (bet faced, current actor, stack).
+SOURCE_STREET_LIVE: Final = "street_live"
 
 #: The streets, in the order a hand walks them (``hud_situation.STREETS``).
 STREETS: Final[tuple[str, ...]] = ("preflop", "flop", "turn", "river")
@@ -87,6 +90,8 @@ def describe_source(source: str) -> str:
     """The product-facing sentence for how fresh a source's context is."""
     if source == SOURCE_ACTION_STREAM:
         return "Live context available: panels follow the current decision."
+    if source == SOURCE_STREET_LIVE:
+        return "Live street available: panels follow Winamax round changes."
     return "Hand-refresh context: panels follow the latest assembled hand."
 
 

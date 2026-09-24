@@ -48,6 +48,7 @@ from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("hud_main")
 
+
 BlockKey = tuple[int | str, int]
 WindowKey = str | BlockKey
 
@@ -254,6 +255,8 @@ class SimpleHUD(Aux_Base.AuxSeats):
         except (TypeError, ValueError):
             self.font_size = int(self.aux_params["font_size"])
         self.font = QFont(self.aux_params["font"], self.font_size)
+        self.title_font_scale = self._hud_font_scale(getattr(self.game_params, "title_font_scale", ""), 1.0)
+        self.heading_font_scale = self._hud_font_scale(getattr(self.game_params, "heading_font_scale", ""), 1.0)
 
         # store these class definitions for use elsewhere
         # this is needed to guarantee that the classes in _this_ module
@@ -270,6 +273,13 @@ class SimpleHUD(Aux_Base.AuxSeats):
 
         self._build_legacy_grid_arrays()
         self._build_block_layouts()
+
+    @staticmethod
+    def _hud_font_scale(value: Any, default: float) -> float:
+        try:
+            return min(2.0, max(0.5, float(value))) if value not in (None, "") else default
+        except (TypeError, ValueError):
+            return default
 
     def _positional_mode(self) -> str:
         """'all' (show every position panel, stacked) or 'current' (only the
@@ -353,11 +363,21 @@ class SimpleHUD(Aux_Base.AuxSeats):
         try:
             from fpdb_3_legacy import hud_situation
 
-            context = hud_situation.HudSituationContext.from_stat_dict(
+            live = hud_situation.winamax_live_state_for_player(
                 pdata,
-                getattr(self.hud, "live_state", None),
+                self.hud.stat_dict.values() if self.hud.stat_dict else (),
+                getattr(self.hud, "live_state", None) or {},
             )
+            context = hud_situation.HudSituationContext.from_stat_dict(pdata, live)
             selection, _change = state.update((seat, 0), context, samples=pdata)
+            log.debug(
+                "Dynamic HUD seat=%s profile=%s context={%s} panels=%s suppressed=%s",
+                seat,
+                getattr(self.game_params, "name", "default"),
+                context.describe(),
+                selection.panels,
+                selection.suppressed,
+            )
             return selection
         except Exception:  # intentional broad catch: a bad rule must not blank a seat
             log.exception("Dynamic panel selection failed for seat %s; using the static grid", seat)
@@ -481,6 +501,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
             stats = [[None] * nc for _ in range(nr)]
             popups = [[None] * nc for _ in range(nr)]
             tips = [[None] * nc for _ in range(nr)]
+            display_labels = [[""] * nc for _ in range(nr)]
             hudcolors = [[""] * nc for _ in range(nr)]
             hudbgcolors = [[""] * nc for _ in range(nr)]
             colorranges = [[None] * nc for _ in range(nr)]
@@ -491,6 +512,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
                     stats[r][c] = st.stat_name
                     popups[r][c] = st.popup
                     tips[r][c] = st.tip
+                    display_labels[r][c] = getattr(st, "display_label", "")
                     hudcolors[r][c] = getattr(st, "hudcolor", "")
                     hudbgcolors[r][c] = getattr(st, "hudbgcolor", "")
                     colspans[r][c] = getattr(st, "colspan", 1) or 1
@@ -518,6 +540,8 @@ class SimpleHUD(Aux_Base.AuxSeats):
                     "bordercolor": getattr(blk, "bordercolor", ""),
                     "title_bgcolor": getattr(blk, "title_bgcolor", ""),
                     "title_fgcolor": getattr(blk, "title_fgcolor", ""),
+                    "title_font_scale": getattr(blk, "title_font_scale", 0),
+                    "heading_font_scale": getattr(blk, "heading_font_scale", 0),
                     "cell_width": getattr(blk, "cell_width", 0),
                     "x": getattr(blk, "x", 0),
                     "y": getattr(blk, "y", 0),
@@ -526,6 +550,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
                     "stats": stats,
                     "popups": popups,
                     "tips": tips,
+                    "display_labels": display_labels,
                     "hudcolors": hudcolors,
                     "hudbgcolors": hudbgcolors,
                     "colorranges": colorranges,
@@ -685,7 +710,10 @@ class SimpleHUD(Aux_Base.AuxSeats):
             f"block={block_index} label={block.get('label', '')!r} block_pos={block.get('position', '')!r} "
             f"rel={rel_pos} abs={abs_pos} visible={visible}"
         )
-        log.warning(msg)
+        # This is per-window placement telemetry, emitted for every seat and
+        # every block on each redraw. Keep it available for diagnostics without
+        # flooding the WARNING log or hiding actionable warnings.
+        log.debug(msg)
 
         # Log to the dedicated trace log if active
         trace_logger = logging.getLogger("hud_trace")
@@ -760,6 +788,15 @@ class SimpleHUD(Aux_Base.AuxSeats):
             # stack instead (a starting layout; the user can drag to fine-tune,
             # and drags persist and override this).
             return (anchor_x, anchor_y + self._stack_offset(block_index))
+        if self.block_layouts[block_index].get("position") == "dynamic" and not (offset_x or offset_y):
+            # Only one contextual block is visible at a time, but the static
+            # core stays visible. An unpositioned dynamic block used to land
+            # exactly on top of the core, making a working selection look
+            # permanently static. Keep the two panels apart by default while
+            # preserving explicit offsets and user-dragged positions.
+            reference_height = getattr(self.hud, "ref_layout_height", None) or 546
+            gap = -96 if anchor_y > reference_height * 0.55 else 96
+            return (anchor_x, anchor_y + gap)
         return (anchor_x + offset_x, anchor_y + offset_y)
 
     def _stack_offset(self, block_index: int) -> int:
@@ -1329,10 +1366,15 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             if multi and blk["label"]:
                 title = self.aw.aw_class_label(blk["label"])
                 title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                title_font = QFont(self.aw.font)
+                title_scale = blk.get("title_font_scale") or getattr(self.aw, "title_font_scale", 1.0)
+                title_font.setPointSize(max(6, round(self.aw.font.pointSize() * title_scale)))
+                title.setFont(title_font)
+                title.setToolTip(blk["label"])
                 title_bg = blk.get("title_bgcolor") or blk.get("bordercolor") or panel_fg
                 title_fg = blk.get("title_fgcolor") or self.aw.bgcolor
                 title.setStyleSheet(
-                    f"background: {title_bg};color: {title_fg};font-weight: 700;padding: 1px 4px;border: 0;"
+                    f"background: {title_bg};color: {title_fg};font-weight: 700;padding: 0px 3px;border: 0;"
                 )
                 cl.addWidget(title)
             grid = QGridLayout()
@@ -1345,13 +1387,19 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             # captions) render them at their grid positions; otherwise fall back to
             # the per-stat tip-as-header mode.
             show_headers = multi and not btexts and any(tip for row in blk["tips"] for tip in row)
+            header_font = QFont(self.aw.font)
+            heading_scale = blk.get("heading_font_scale") or getattr(self.aw, "heading_font_scale", 1.0)
+            header_font.setPointSize(max(5, round(self.aw.font.pointSize() * heading_scale)))
             for t in btexts:
                 tr, tc = t["rowcol"]
                 if not (0 <= tr < blk["nrows"] and 0 <= tc < blk["ncols"]):
                     continue
                 tlabel = self.aw.aw_class_label(t.get("label", ""))
                 tlabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                tlabel.setFont(self.aw.font)
+                tlabel.setFont(header_font if multi else self.aw.font)
+                if multi:
+                    tlabel.setWordWrap(True)
+                    tlabel.setToolTip(t.get("label", ""))
                 t_fg = t.get("fgcolor") or ""
                 t_bg = t.get("bgcolor") or ""
                 tlabel.setStyleSheet(
@@ -1364,9 +1412,14 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
                 for c in range(blk["ncols"]):
                     grid_row = r * 2 if show_headers else r
                     if show_headers:
-                        label = self.aw.aw_class_label(blk["tips"][r][c] or "")
+                        full_tip = blk["tips"][r][c] or ""
+                        display_labels = blk.get("display_labels") or []
+                        display_label = display_labels[r][c] if r < len(display_labels) and c < len(display_labels[r]) else ""
+                        label = self.aw.aw_class_label(display_label or full_tip)
                         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                        label.setFont(self.aw.font)
+                        label.setFont(header_font)
+                        label.setWordWrap(True)
+                        label.setToolTip(full_tip)
                         label.setStyleSheet("font-weight: 700; padding: 0px 2px;")
                         grid.addWidget(label, grid_row, c)
                     stat_name = blk["stats"][r][c]

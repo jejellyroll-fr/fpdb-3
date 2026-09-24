@@ -4,7 +4,7 @@
 > colour means, and how to preview it without a table — are in
 > [the reference HUD design system](hud-design-system.md).
 
-fpdb ships three reference HUDs you can import and play with immediately. They
+fpdb ships reference HUDs you can import and play with immediately. They
 are starting points, not a replacement for the HUD you already have: importing
 one never binds itself to a game, so your tables keep the profile they had until
 you choose another.
@@ -14,6 +14,7 @@ you choose another.
 | `nlhe_6max_basic` | Your first hands | Eight numbers, two popups |
 | `nlhe_6max_advanced` | Everyday play | The Basic numbers plus 4-bet, popups one click deep |
 | `nlhe_6max_dynamic` | Context-aware play | Blocks that change with the situation |
+| `plo_6max_dynamic` | Pot-Limit Omaha | Omaha stats in context-aware blocks |
 
 ## Import one
 
@@ -23,7 +24,8 @@ you choose another.
    **not** change which profile your tables use.
 
 The filename is the profile name: after import, the **Active Profile** list has
-`nlhe_6max_basic`, `nlhe_6max_advanced` or `nlhe_6max_dynamic` in it.
+`nlhe_6max_basic`, `nlhe_6max_advanced`, `nlhe_6max_dynamic` or
+`plo_6max_dynamic` in it.
 
 ## Choose which profile applies to a game
 
@@ -69,6 +71,29 @@ position. So:
 
 When in doubt, duplicate the profile first (📋 **Duplicate**) and edit the copy.
 
+### Tune dynamic-panel labels in a package
+
+Panel typography and visible stat headings belong in the `.fpdbhud` package,
+not in renderer-specific code. Set `title_font_scale` and
+`heading_font_scale` on `<ss>` to scale panel titles and stat headings relative
+to the profile font size (for example, `0.82` and `0.60`). A `<block>` can
+override either scale. Values are clamped to the supported range `0.5`–`2.0`.
+
+For a compact visible heading, add `display_label` to a `<stat>` while keeping
+`tip` as the full explanation:
+
+```xml
+<stat _rowcol="(1,1)" _stat_name="a_freq2"
+      tip="Turn aggression frequency" display_label="Turn aggression" />
+```
+
+The compact heading is shown in the panel; hovering it still reveals the full
+`tip`. If `display_label` is omitted, the renderer uses `tip` unchanged. The
+shipped Dynamic NLHE package supplies compact labels across its contextual
+panels. Existing profiles are preserved when a package is imported; customize
+the active profile in HUD Preferences (or import into a clean profile) if it
+was created from an older package version.
+
 ## Restore the package behaviour
 
 Re-importing a package a second time does not duplicate its stats: the importer
@@ -82,6 +107,11 @@ re-import — or **Export HUD** the package, keep the file as your reference, an
 `nlhe_6max_dynamic` is the reference package for context-aware panels. It has its
 own guide, because what is live and what is derived needs saying carefully:
 [Dynamic HUD guide](hud-dynamic-guide.md).
+
+For Pot-Limit Omaha, import `plo_6max_dynamic` and add it to the Omaha table
+shape in **Profile Select**. Importing it does not change the existing Omaha
+profile binding. The package reuses the shipped spot rules but supplies
+Omaha-oriented stats; it does not convert Hold'em stats or change hand parsing.
 
 ## Where to go next
 

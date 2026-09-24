@@ -9,9 +9,12 @@ events, hand boundaries and the room-specific adapter are covered too.
 from __future__ import annotations
 
 from dataclasses import replace
+from types import SimpleNamespace
+from unittest.mock import Mock
 
 from fpdb_3_legacy import hud_live_context as live
 from fpdb_3_legacy import hud_situation as hs
+from fpdb_3_legacy.Hud import Hud
 
 
 def _action(actor, action, *, street="preflop", amount=0, to=None, all_in=False, seq=0, hand="h1"):
@@ -426,6 +429,31 @@ class TestSession:
         session = live.LiveContextSession()
         session.start_hand("h1")
         assert session.update(_action("P1", "raises", to=600, seq=1)) is not None
+
+
+def test_an_import_of_the_previous_hand_keeps_the_live_winamax_flop() -> None:
+    hud = Hud.__new__(Hud)
+    hud.db_hud_connection = None
+    hud.aux_windows = []
+    hud.live_state = {"street": "flop", "pot_type": "single_raised", "source": "street_live"}
+    hud._winamax_live_hand_id = "2"
+
+    hud.update(1, None, prepared=True, hand_instance=SimpleNamespace(actions={"PREFLOP": []}))
+
+    assert hud.live_state["street"] == "flop"
+    assert hud.live_state["source"] == "street_live"
+
+
+def test_live_context_repaints_enabled_dynamic_windows() -> None:
+    hud = Hud.__new__(Hud)
+    dynamic = SimpleNamespace(_panel_resolver=lambda: SimpleNamespace(is_enabled=lambda: True), update_gui=Mock())
+    static = SimpleNamespace(_panel_resolver=lambda: None, update_gui=Mock())
+    hud.aux_windows = [dynamic, static]
+
+    hud.refresh_dynamic_panels()
+
+    dynamic.update_gui.assert_called_once_with("live")
+    static.update_gui.assert_not_called()
 
 
 # ---------------------------------------------------------------------------

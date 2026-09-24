@@ -22,6 +22,7 @@ from __future__ import annotations
 from typing import Any
 
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QComboBox,
     QGridLayout,
@@ -51,7 +52,10 @@ def _percent(bp: Any) -> str:
 
 
 def _money(cents: Any) -> str:
-    return "n/a" if cents is None else f"{float(cents) / 100:.2f}"
+    if cents is None:
+        return "n/a"
+    amount = f"{float(cents):,.2f}".rstrip("0").rstrip(".")
+    return f"{amount} ¢"
 
 
 class RangeGridWidget(QWidget):
@@ -184,6 +188,7 @@ class CompositionWidget(QWidget):
         layout.addWidget(self.headline)
         self.table = QTableWidget()
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.table.setAlternatingRowColors(True)
         self.table.setColumnCount(3)
         self.table.setHorizontalHeaderLabels([_("Category"), _("Decisions"), _("Share")])
         self.table.verticalHeader().hide()
@@ -228,9 +233,9 @@ class MoneyWidget(QWidget):
         ("group", "Seat"),
         ("opportunities", "Decisions"),
         ("hands", "Hands"),
-        ("realized", "Realized"),
-        ("ev_adjusted", "EV-adjusted"),
-        ("luck", "Luck"),
+        ("realized", "Realized (¢)"),
+        ("ev_adjusted", "EV-adjusted (¢)"),
+        ("luck", "Luck (¢)"),
         ("bb_per_100", "bb/100"),
         ("ev_bb_per_100", "EV bb/100"),
     )
@@ -244,6 +249,7 @@ class MoneyWidget(QWidget):
         layout.addWidget(self.headline)
         self.table = QTableWidget()
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.table.setAlternatingRowColors(True)
         self.table.setColumnCount(len(self.COLUMNS))
         self.table.setHorizontalHeaderLabels([_(heading) for _key, heading in self.COLUMNS])
         self.table.verticalHeader().hide()
@@ -268,7 +274,8 @@ class MoneyWidget(QWidget):
         for row, entry in enumerate(report.rows):
             values = {
                 "group": ", ".join(
-                    f"{rlabels.dimension_label(name)}={value}" for name, value in sorted(entry.group.items())
+                    f"{rlabels.dimension_label(name)}={rlabels.value_label(name, value)}"
+                    for name, value in sorted(entry.group.items())
                 ),
                 "opportunities": str(entry.opportunities),
                 "hands": str(entry.hands),
@@ -282,6 +289,14 @@ class MoneyWidget(QWidget):
                 item = QTableWidgetItem(values[key])
                 if column:
                     item.setTextAlignment(RIGHT)
+                if key in {"realized", "ev_adjusted", "luck"}:
+                    amount = {
+                        "realized": entry.realized_cents,
+                        "ev_adjusted": entry.ev_adjusted_cents,
+                        "luck": entry.all_in_luck_cents,
+                    }[key]
+                    if amount:
+                        item.setForeground(QColor("#68d391" if amount > 0 else "#fc8181"))
                 self.table.setItem(row, column, item)
         self.table.resizeColumnsToContents()
         self.notes.setText("\n".join(report.notes))

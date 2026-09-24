@@ -3037,6 +3037,233 @@ def test_ordinary_pools_do_not_enter_the_fast_fold_path(hud_main) -> None:
     scheduled.assert_not_called()
 
 
+def test_winamax_regular_round_repaints_only_the_matching_hud(hud_main) -> None:
+    from fpdb_3_legacy.winamax_live_log_reader import WinamaxTableUpdate
+
+    hud = MagicMock()
+    hud.site = "Winamax"
+    hud.is_fast_fold = False
+    hud.table.title = "Winamax Casablanca 9"
+    hud.live_state = {}
+    hud.set_live_state.side_effect = lambda **state: hud.live_state.update(state)
+    hud_main.hud_dict = {"Casablanca 9": hud}
+    update = WinamaxTableUpdate(pool="cg.tamgr.cg_4.t5228", table_no="9", hand_id="5228-42-1786129600", hero="Hero")
+    update.street = "flop"
+    update.preflop_raises = 1
+    update.preflop_aggressor = "Opener"
+
+    with patch.object(hud_main, "_live_hud_key_for_table_no", return_value="Casablanca 9"):
+        hud_main._on_winamax_table_update(update)
+        hud_main._on_winamax_table_update(update)
+        assert hud.live_state["street"] == "flop"
+        assert hud.live_state["pot_type"] == "single_raised"
+        assert hud.live_state["preflop_aggressor"] == "Opener"
+        hud.refresh_dynamic_panels.assert_called_once()
+
+        update.street = "turn"
+        hud_main._on_winamax_table_update(update)
+        assert hud.live_state["street"] == "turn"
+        assert hud.refresh_dynamic_panels.call_count == 2
+
+
+def test_winamax_regular_preflop_action_changes_refresh_the_context(hud_main) -> None:
+    from fpdb_3_legacy import hud_situation
+    from fpdb_3_legacy.winamax_live_log_reader import WinamaxTableUpdate
+
+    hud = MagicMock()
+    hud.site = "Winamax"
+    hud.is_fast_fold = False
+    hud.table.title = "Winamax Casablanca 9"
+    hud.live_state = {}
+    hud.set_live_state.side_effect = lambda **state: hud.live_state.update(state)
+    hud_main.hud_dict = {"Casablanca 9": hud}
+    update = WinamaxTableUpdate(
+        pool="cg.tamgr.cg_4.t5228", table_no="9", hand_id="5228-42-1786129600", hero="Hero",
+    )
+
+    with patch.object(hud_main, "_live_hud_key_for_table_no", return_value="Casablanca 9"):
+        hud_main._on_winamax_table_update(update)
+        hud_main._on_winamax_table_update(update)
+        assert hud.refresh_dynamic_panels.call_count == 1
+
+        update.preflop_raises = 1
+        update.preflop_aggressor = "Opener"
+        hud_main._on_winamax_table_update(update)
+        assert hud.live_state["pot_type"] == "unopened"
+        assert hud.live_state["facing_action"] == "raises"
+        assert hud.live_state["preflop_aggressor"] == "Opener"
+        assert hud.refresh_dynamic_panels.call_count == 2
+        facing_open = hud_situation.load_default_resolver().resolve(
+            hud_situation.HudSituationContext.from_stat_dict({}, hud.live_state),
+            samples={"n": 10},
+        )
+        assert "preflop_facing_open" in facing_open.panels
+
+        update.preflop_calls = 1
+        update.preflop_calls_after_raise = 1
+        hud_main._on_winamax_table_update(update)
+        assert hud.live_state["labels"] == ("squeeze_defence",)
+        squeeze = hud_situation.load_default_resolver().resolve(
+            hud_situation.HudSituationContext.from_stat_dict({}, hud.live_state),
+            samples={"n": 10},
+        )
+        assert "preflop_squeeze" in squeeze.panels
+
+        update.preflop_raises = 2
+        update.preflop_calls_after_raise = 0
+        update.preflop_aggressor = "ThreeBettor"
+        hud_main._on_winamax_table_update(update)
+        assert hud.live_state["pot_type"] == "single_raised"
+        assert hud.live_state["facing_action"] == "raises"
+        assert hud.live_state["preflop_aggressor"] == "ThreeBettor"
+        assert hud.refresh_dynamic_panels.call_count == 4
+        facing_three_bet = hud_situation.load_default_resolver().resolve(
+            hud_situation.HudSituationContext.from_stat_dict({}, hud.live_state),
+            samples={"n": 10},
+        )
+        assert "preflop_facing_three_bet" in facing_three_bet.panels
+
+
+def test_winamax_regular_hand_over_retires_only_its_own_live_state(hud_main) -> None:
+    from fpdb_3_legacy.winamax_live_log_reader import fpdb_hand_id
+
+    hud = MagicMock()
+    hud.site = "Winamax"
+    hud.is_fast_fold = False
+    hud.table.title = "Winamax Casablanca 9"
+    hud.live_state = {"street": "river", "source": "street_live"}
+    hud._winamax_live_hand_id = fpdb_hand_id("5228-42-1786129600")
+    hud_main.hud_dict = {"Casablanca 9": hud}
+    completed = _live_update(
+        pool="cg.tamgr.cg_4.t5228",
+        table_no="9",
+        hand_id="5228-42-1786129600",
+        hand_over=True,
+    )
+
+    with patch.object(hud_main, "_live_hud_key_for_table_no", return_value="Casablanca 9"):
+        hud_main._on_winamax_table_update(completed)
+
+    assert hud.live_state == {}
+    assert hud._winamax_live_hand_id is None
+    hud.refresh_dynamic_panels.assert_called_once()
+
+
+def test_late_winamax_hand_over_does_not_retire_the_next_hand(hud_main) -> None:
+    from fpdb_3_legacy.winamax_live_log_reader import fpdb_hand_id
+
+    hud = MagicMock()
+    hud.site = "Winamax"
+    hud.is_fast_fold = False
+    hud.table.title = "Winamax Casablanca 9"
+    hud.live_state = {"street": "preflop", "source": "street_live"}
+    hud._winamax_live_hand_id = fpdb_hand_id("5228-43-1786129601")
+    hud_main.hud_dict = {"Casablanca 9": hud}
+    completed = _live_update(
+        pool="cg.tamgr.cg_4.t5228",
+        table_no="9",
+        hand_id="5228-42-1786129600",
+        hand_over=True,
+    )
+
+    with patch.object(hud_main, "_live_hud_key_for_table_no", return_value="Casablanca 9"):
+        hud_main._on_winamax_table_update(completed)
+
+    assert hud.live_state == {"street": "preflop", "source": "street_live"}
+    assert hud._winamax_live_hand_id == fpdb_hand_id("5228-43-1786129601")
+    hud.refresh_dynamic_panels.assert_not_called()
+
+
+def test_winamax_regular_round_finds_a_window_without_a_number_in_its_title(hud_main) -> None:
+    from fpdb_3_legacy.winamax_live_log_reader import WinamaxTableUpdate
+
+    hud = MagicMock()
+    hud.site = "Winamax"
+    hud.is_fast_fold = False
+    hud.table.key = "Casablanca"
+    hud.table.title = "Winamax Casablanca"
+    hud.live_state = {}
+    hud.set_live_state.side_effect = lambda **state: hud.live_state.update(state)
+    hud_main.hud_dict = {"Casablanca": hud}
+    hud_main.winamax_log_reader = None
+    update = WinamaxTableUpdate(
+        pool="cg.tamgr.cg_5.t86426", table_no="2", hand_id="86426-42-1786129600",
+        hero="Hero", street="flop", preflop_raises=1, table_label="Casablanca",
+    )
+
+    with patch.object(hud_main, "_live_hud_key_for_table_no", return_value=None):
+        hud_main._on_winamax_table_update(update)
+
+    assert hud.live_state["street"] == "flop"
+    hud.refresh_dynamic_panels.assert_called_once()
+
+
+def test_winamax_regular_round_uses_last_imported_site_hand_when_label_is_missing(hud_main) -> None:
+    from fpdb_3_legacy.winamax_live_log_reader import WinamaxTableUpdate
+
+    hud = MagicMock()
+    hud.site = "Winamax"
+    hud.is_fast_fold = False
+    hud.table.title = "Winamax Casablanca"
+    hud.hand_instance.handid = "8642642"
+    hud.live_state = {}
+    hud.set_live_state.side_effect = lambda **state: hud.live_state.update(state)
+    hud_main.hud_dict = {"Casablanca": hud}
+    hud_main.winamax_log_reader = MagicMock()
+    hud_main.winamax_log_reader.table_no_for_hand.return_value = "2"
+    update = WinamaxTableUpdate(
+        pool="cg.tamgr.cg_5.t86426", table_no="2", hand_id="86426-43-1786129601",
+        hero="Hero", street="flop",
+    )
+
+    with patch.object(hud_main, "_live_hud_key_for_table_no", return_value=None):
+        hud_main._on_winamax_table_update(update)
+
+    hud_main.winamax_log_reader.table_no_for_hand.assert_called_with("8642642")
+    hud.refresh_dynamic_panels.assert_called_once()
+
+
+def test_winamax_regular_round_does_not_guess_between_duplicate_labels(hud_main) -> None:
+    from fpdb_3_legacy.winamax_live_log_reader import WinamaxTableUpdate
+
+    huds = {}
+    for key in ("Casablanca A", "Casablanca B"):
+        hud = MagicMock()
+        hud.site = "Winamax"
+        hud.is_fast_fold = False
+        hud.table.title = "Winamax Casablanca"
+        huds[key] = hud
+    hud_main.hud_dict = huds
+    hud_main.winamax_log_reader = None
+    update = WinamaxTableUpdate(
+        pool="cg.tamgr.cg_5.t86426", table_no="2", hand_id="86426-42-1786129600",
+        hero="Hero", street="flop", table_label="Casablanca",
+    )
+
+    with patch.object(hud_main, "_live_hud_key_for_table_no", return_value=None):
+        hud_main._on_winamax_table_update(update)
+
+    for hud in huds.values():
+        hud.set_live_state.assert_not_called()
+
+
+def test_winamax_round_never_uses_a_different_table_hud(hud_main) -> None:
+    from fpdb_3_legacy.winamax_live_log_reader import WinamaxTableUpdate
+
+    hud = MagicMock()
+    hud.site = "Winamax"
+    hud.is_fast_fold = False
+    hud.table.title = "Winamax Casablanca 6"
+    hud_main.hud_dict = {"Casablanca 6": hud}
+    update = WinamaxTableUpdate(pool="cg.tamgr.cg_4.t5228", table_no="9", hand_id="5228-42-1786129600", hero="Hero")
+    update.street = "flop"
+
+    with patch.object(hud_main, "_live_hud_key_for_table_no", return_value=None):
+        hud_main._on_winamax_table_update(update)
+
+    hud.set_live_state.assert_not_called()
+
+
 def test_hud_is_fast_fold_matches_base_name_and_sets_flag(hud_main) -> None:
     """_hud_is_fast_fold matches base table names and sets is_fast_fold = True on the HUD."""
     hud = SimpleNamespace(table_name="Winamax - Bucarest 1", is_fast_fold=False)

@@ -95,6 +95,9 @@ ROLES: Final[tuple[str, ...]] = ("aggressor", "defender", "passive")
 # The name a configuration writes to mean "the rules that ship with fpdb", so
 # enabling dynamic panels is one attribute rather than a copy of the library.
 BUILTIN_SOURCE: Final = "builtin"
+# The Omaha reference HUD shows the relevant panel even for a new opponent;
+# its visible hand count still communicates how little evidence backs the stats.
+PLO_BUILTIN_SOURCE: Final = "builtin_plo"
 
 # The ``position`` binding a block whose panel the rules select carries.
 #
@@ -549,7 +552,9 @@ class HudSituationContext:
         # per-street columns answer the per-seat half of the question -- did
         # *this* seat raise, act last, face a raise -- whenever the feed has not
         # pushed an answer. The feed wins where it has one.
-        facts = entry_facts(entry, street)
+        # HudCache rows are aggregates over many *finished* hands. Their
+        # aggressor/position flags cannot describe the current Winamax round.
+        facts = {} if live.get("source") == "street_live" else entry_facts(entry, street)
         context = cls(
             site=live.get("site", "all"),
             game=live.get("game", "all"),
@@ -718,6 +723,62 @@ def entry_facts(entry: Mapping[str, Any], street: str) -> dict[str, Any]:
     return facts
 
 
+def _winamax_position_order(row: Mapping[str, Any]) -> int | None:
+    raw = str(row.get("live_position") or row.get("position") or "").strip().upper()
+    if raw in ("S", "SB"):
+        return 0
+    if raw in ("B", "BB"):
+        return 1
+    if raw in ("0", "BTN", "BU", "D", "BUTTON"):
+        return 100
+    if raw.isdigit():
+        # Winamax numbers seats outwards from the button: a lower number acts
+        # later postflop. Keep the button above every numbered seat.
+        return 100 - int(raw)
+    return {"EP": 2, "UTG": 2, "MP": 3, "HJ": 3, "CO": 4}.get(raw)
+
+
+def winamax_live_state_for_player(
+    entry: Mapping[str, Any],
+    entries: Iterable[Mapping[str, Any]],
+    live: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Add seat facts that the Winamax round log and HUD positions establish.
+
+    The log names the actual preflop raiser but no seat number. Imported HUD
+    rows supply each player's current estimated position. Only publish an IP
+    answer when every remaining opponent has a usable position; aggregate
+    HudCache flags must never be mistaken for facts of the live hand.
+    """
+    state = dict(live)
+    if state.get("source") != "street_live":
+        return state
+    player = str(entry.get("screen_name") or "").casefold()
+    aggressor = str(state.get("preflop_aggressor") or "").casefold()
+    if not player or not aggressor:
+        return state
+    state["is_preflop_aggressor"] = player == aggressor
+
+    own_order = _winamax_position_order(entry)
+    if own_order is None:
+        return state
+    folded = {str(name).casefold() for name in state.get("folded_players", ())}
+    active = [
+        row for row in entries
+        if isinstance(row, Mapping)
+        and str(row.get("screen_name") or "").casefold()
+        not in folded
+    ]
+    by_name = {str(row.get("screen_name") or "").casefold(): row for row in active}
+    if player == aggressor:
+        other_orders = [_winamax_position_order(row) for name, row in by_name.items() if name != player]
+        if other_orders and all(value is not None for value in other_orders):
+            state["in_position"] = own_order > max(value for value in other_orders if value is not None)
+    elif aggressor in by_name and (aggressor_order := _winamax_position_order(by_name[aggressor])) is not None:
+        state["in_position"] = own_order > aggressor_order
+    return state
+
+
 def live_state_from_hand(hand: Any) -> dict[str, Any]:
     """What one assembled hand says about the table, for ``Hud.live_state``.
 
@@ -858,6 +919,8 @@ def condition_matches(name: str, expected: Any, context: HudSituationContext) ->
     if kind == "null_check":
         return (actual is None) != bool(expected)
     wanted = {_text(value) for value in _list(expected)}
+    if actual is None and "" in wanted:
+        return True
     return actual is not None and _text(actual) in wanted
 
 
@@ -1541,6 +1604,22 @@ def load_source(source: str | Path) -> tuple[list[PanelRule], str]:
     text = str(source).strip()
     if text.casefold() == BUILTIN_SOURCE:
         return load_directory(default_rules_dir())
+    if text.casefold() == PLO_BUILTIN_SOURCE:
+        rules, fallback = load_directory(default_rules_dir())
+        plo_rules = [replace(rule, min_sample=0) for rule in rules]
+        # Limped Omaha pots have no raised-pot role to select a specific
+        # panel. Give each street a useful overview without also drawing it
+        # over a specific raised-pot panel (the resolver can show many panels).
+        for street in ("flop", "turn", "river"):
+            plo_rules.append(PanelRule.from_mapping({
+                "panel": f"postflop_{street}",
+                "id": f"plo-general-{street}",
+                "when": {"street": street, "pot_type": "limped"},
+                "priority": -100,
+                "section": "postflop",
+                "label": f"{street.title()} overview",
+            }, order=len(plo_rules)))
+        return plo_rules, fallback
     if not text:
         return [], ""
     return load_directory(text) if Path(text).is_dir() else load_rules(text)

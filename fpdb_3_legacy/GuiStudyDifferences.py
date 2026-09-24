@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from fpdb_3_legacy.GuiDrillDown import style_signed_measure
 from fpdb_3_legacy.GuiResearchBrowser import _worker_database
 from fpdb_3_legacy.research_differences import (
     DifferenceFilters,
@@ -165,9 +166,9 @@ class GuiStudyDifferences(QWidget):
             [
                 "Spot",
                 "Context",
-                "You",
-                "Field",
-                "Gap",
+                "You (%)",
+                "Field (%)",
+                "Gap (pp)",
                 "Your sample",
                 "Field sample",
                 "Review",
@@ -176,6 +177,7 @@ class GuiStudyDifferences(QWidget):
         )
         self.table.hideColumn(8)
         self.table.setSortingEnabled(True)
+        self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.table.verticalHeader().hide()
@@ -286,6 +288,10 @@ class GuiStudyDifferences(QWidget):
                 item = _SortableItem(value, numeric_sort_values.get(column))
                 if column == 0:
                     item.setData(Qt.ItemDataRole.UserRole, row)
+                if column == 4:
+                    style_signed_measure(item, "gap", row.gap_bp)
+                if column in numeric_sort_values:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 self.table.setItem(row_index, column, item)
             self.table.setItem(row_index, 8, _SortableItem(str(row.score), row.score))
         self.table.setSortingEnabled(True)

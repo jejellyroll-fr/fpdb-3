@@ -12,12 +12,17 @@ python tools/make_demo_workspace.py                 # ~/fpdb-demo (hands, DB, HU
 python tools/capture_wiki_screenshots.py \
     --config ~/fpdb-demo/HUD_config.xml \
     --out docs/images
+QT_QPA_PLATFORM=offscreen .venv/bin/python tools/render_reference_huds.py
 ```
 
 The first command is deterministic: the same corpus, the same database, the same
 example question per Research view every run. The second renders each screen
 with Qt into a PNG — no desktop, no cursor, no window chrome — so a screenshot is
 reproducible rather than retaken by hand.
+
+The last command regenerates the reference HUD package previews, including the
+featured dynamic contexts under `docs/images/reference-huds/`. These use the
+fictional preview values and do not need a poker client or database.
 
 `tools/make_demo_workspace.py --hands 8000` grows the corpus if you want denser
 tables in the images.
@@ -38,6 +43,18 @@ tables in the images.
 | `research-profit.png` | Research, Profit view | Realized money beside the EV-adjusted result |
 | `research-hands.png` | Research, matching hands | The hands behind one row, ready for the replayer |
 | `hud-preferences-dynamic-panels.png` | HUD Preferences, Dynamic Panels | The rule editor and its preview |
+| `reference-huds/basic.png` | Basic reference HUD | The compact default stats grid |
+| `reference-huds/advanced.png` | Advanced reference HUD | The expanded stats grid |
+| `reference-huds/dynamic.png` | Dynamic HUD preview | Core panel and compact profile typography |
+| `reference-huds/plo_dynamic.png` | PLO Dynamic HUD preview | Omaha-specific contextual stats |
+| `reference-huds/dynamic-srp-cbet-ip.png` | Dynamic HUD, SRP aggressor in position | Short, configurable stat headings |
+| `reference-huds/dynamic-preflop-facing-open.png` | Dynamic HUD, facing an open | Compact labels in a two-column panel |
+| `reference-huds/dynamic-preflop-facing-three-bet.png` | Dynamic HUD, facing a 3-bet | Compact fold/4-bet labels |
+| `reference-huds/dynamic-blinds-defence.png` | Dynamic HUD, blind defence | Blind-specific fold and re-steal stats |
+| `reference-huds/dynamic-srp-face-cbet-oop.png` | Dynamic HUD, facing a c-bet out of position | SRP defence stats |
+| `reference-huds/dynamic-threebet-pot-oop.png` | Dynamic HUD, 3-bet pot out of position | 3-bet-pot stats |
+| `reference-huds/dynamic-fourbet-pot.png` | Dynamic HUD, 4-bet pot | 4-bet-pot stats |
+| `reference-huds/dynamic-ssh-stack.png` | Dynamic HUD, short stack | Stack-specific stats |
 | `study-explorer-landing.png` | Study Explorer | The spot-first landing page and study hierarchy |
 | `study-differences.png` | Biggest Differences vs Field | A review queue of Hero-versus-Field gaps |
 | `study-preflop-overview.png` | Study Explorer, Preflop overview | Hero and Field on a preflop spot |
@@ -79,8 +96,10 @@ they are taken against the same workspace and committed beside the others:
 | a live HUD | Launch fpdb on the demo database, sit at a table, let the HUD draw |
 | a HUD popup | Click a HUD cell to open its popup |
 
-If you change what a HUD looks like, retake these by hand following the same
-instructions the top-level `README.md` gives, so the set stays consistent.
+The reference package previews above are generated with
+`tools/render_reference_huds.py`. A live table HUD and its popup still need a
+poker client, so retake those by hand against the demo workspace if their
+appearance changes.
 
 ## Where the files go
 

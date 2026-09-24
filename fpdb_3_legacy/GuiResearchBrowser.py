@@ -54,7 +54,6 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMessageBox,
-    QSplitter,
     QStackedWidget,
     QTableWidget,
     QTableWidgetItem,
@@ -68,11 +67,17 @@ from fpdb_3_legacy import research_labels as rlabels
 from fpdb_3_legacy import research_presets as presets_lib
 from fpdb_3_legacy import research_views as rviews
 from fpdb_3_legacy.analytics_query import DIMENSIONS, KNOWN_METRICS
-from fpdb_3_legacy.GuiDrillDown import SourceHandsPane, live_workers
+from fpdb_3_legacy.GuiDrillDown import (
+    SourceHandsPane,
+    install_card_image_delegates,
+    live_workers,
+    style_signed_measure,
+)
 from fpdb_3_legacy.GuiResearchViews import CompositionWidget, MoneyWidget, RangeGridWidget
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.research_worker_db import WorkerDatabase, worker_database
+from fpdb_3_legacy.responsive_layout import PaneSwitcher, ResponsiveSplitter, wrap_in_scroll
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 log = get_logger("gui_research_browser")
@@ -95,7 +100,7 @@ def _comparison_measure_text(value: float | None, unit: str, frequency: bool) ->
     if frequency:
         return f"{value * 100:.1f}%"
     if unit == "cents":
-        return f"{value:.2f}¢"
+        return f"{value:,.2f} ¢"
     if unit == "bp":
         return f"{value / 100:.1f}%"
     if unit == "centi":
@@ -103,6 +108,36 @@ def _comparison_measure_text(value: float | None, unit: str, frequency: bool) ->
     if float(value).is_integer():
         return str(int(value))
     return f"{value:g}"
+
+
+def _comparison_gap_text(value: float | None, unit: str, frequency: bool) -> str:
+    if value is None:
+        return ""
+    if frequency:
+        return f"{value * 100:+.1f} pp"
+    if unit == "bp":
+        return f"{value / 100:+.1f} pp"
+    if unit == "cents":
+        return f"{value:+,.2f} ¢"
+    return _comparison_measure_text(value, unit, frequency)
+
+
+def _result_header_label(column: Any) -> str:
+    if column.source == "dimension":
+        return rlabels.dimension_label(column.key)
+    if column.source == "denominator":
+        return _("Decisions")
+    if column.source == "numerator":
+        return _("Actions")
+    if column.key == "frequency_bp" or column.unit == "bp":
+        return _("Frequency (%)")
+    if column.unit == "cents":
+        return _(column.heading.title()) + " (¢)"
+    if column.unit == "count":
+        return _("Count")
+    if column.unit == "bb/100":
+        return _(column.heading.title()) + " (BB/100)"
+    return _(column.heading.title())
 
 
 #: Kept under its old name so the panes that already import it from here keep
@@ -179,14 +214,28 @@ class _DrillWorker(QThread):
 #: game and limit stop the first answer silently averaging two games (#355).
 _DEFAULT_FILTERS: Final[tuple[str, ...]] = ("hero", "game", "limit", "primary_situation")
 
+#: The widths the three panes need to be *read* side by side, measured from
+#: their own content with the production theme: the filter rows want 624 px, the
+#: results table 402 and the hands list 260. The splitter used to hand each pane
+#: a third of whatever it had, so at 1600 px the filter pane still had 33 px of
+#: its rows out of sight -- "Add breakdown" and "Save / Delete" sat permanently
+#: half outside it, on a screen wide enough to show them.
+PANE_WIDTHS: Final[tuple[int, int, int]] = (624, 402, 260)
+
+#: Below this the panes are stacked and shown one at a time. Measured on the
+#: splitter itself, which is what carries the threshold, so it is the three
+#: widths above plus the two handles between them -- 1302 px. A window that can
+#: hold three readable panes gets three; a narrower one gets one at a time.
+STACK_BELOW_WIDTH = sum(PANE_WIDTHS) + 2 * 8
+
 
 class _ChoiceCombo(QComboBox):
     """A compact multi-select: one item per choice, toggled in place (#329).
 
-    A ``QComboBox`` rather than a list because the filter pane is 320 pixels
-    wide and most domains have fewer than a dozen values. The chosen tokens are
-    sent to the engine unchanged; only the item *text* carries the tick, so the
-    control can never invent a value the engine does not know.
+    A ``QComboBox`` rather than a list because the filter pane is narrow and
+    most domains have fewer than a dozen values. The chosen tokens are sent to
+    the engine unchanged; only the item *text* carries the tick, so the control
+    can never invent a value the engine does not know.
     """
 
     toggled = Signal()
@@ -582,14 +631,79 @@ class GuiResearchBrowser(QWidget):
         c = get_theme_palette()
         muted = c.get("muted_text", "#a0aec0")
 
-        splitter = QSplitter(Qt.Orientation.Horizontal, self)
-        layout = QHBoxLayout(self)
+        layout = QVBoxLayout(self)
         layout.setContentsMargins(8, 8, 8, 8)
-        layout.addWidget(splitter)
-        splitter.addWidget(self._build_filters_pane(muted))
-        splitter.addWidget(self._build_results_pane(muted))
-        splitter.addWidget(self._build_hands_pane(muted))
-        splitter.setSizes([320, 480, 420])
+        # Three panes side by side need the width they were designed for, and
+        # the filter pane is the first to suffer: squeezed, its rows are all
+        # scrollbar and the Run button sits below the fold. Each pane is
+        # therefore given the width its own content measured at, and the panes
+        # only stack once the window is narrower than the three of them
+        # together -- below that, one at a time at full width is more readable
+        # than three columns of scrollbar. The results get the largest share of
+        # the height because they are what the reader came for.
+        self.splitter = ResponsiveSplitter(Qt.Orientation.Horizontal, self)
+        self.splitter.set_narrow_below(STACK_BELOW_WIDTH)
+        self.splitter.set_narrow_sizes([210, 300, 190])
+        # Each pane scrolls. Stacked, three panes add their minimum heights up,
+        # and the tall children -- the 13 x 13 range grid, the tables -- made the
+        # stack taller than the window it was meant to fit. A scroll area reports
+        # the small minimum of a viewport instead of the tall minimum of its
+        # content, so the stack fits any height and each pane scrolls internally.
+        # The filter list is pinned to the top of its pane; the results and the
+        # hands fill theirs, because a table that does not fill its pane is a
+        # table with a strip of dead space above it. Only the filter pane scrolls
+        # sideways, and only as a safety net: given its measured width a filter
+        # row fits, and the scrollbar is there for a window dragged below it.
+        self.filters_pane = wrap_in_scroll(self._build_filters_pane(muted), horizontal=True)
+        self.filters_pane.setMinimumWidth(280)
+        self.results_pane = wrap_in_scroll(self._build_results_pane(muted), top_aligned=False)
+        self.results_pane.setMinimumWidth(320)
+        self.hands_pane = wrap_in_scroll(self._build_hands_pane(muted), top_aligned=False)
+        self.hands_pane.setMinimumWidth(280)
+        self.splitter.addWidget(self.filters_pane)
+        self.splitter.addWidget(self.results_pane)
+        self.splitter.addWidget(self.hands_pane)
+        # The measured widths, not equal thirds: each pane opens at the width its
+        # content asked for. Extra room on a larger screen is shared between them.
+        self.splitter.setSizes(list(PANE_WIDTHS))
+
+        # Stacked, the three panes share the height and each gets a third of it:
+        # the results table shows a handful of rows and the reader scrolls three
+        # times as much to see the same thing. The bar shows one pane at a time
+        # so the chosen pane takes the whole height; it is hidden again as soon
+        # as the panes fit side by side, where the splitter is the better tool.
+        self.pane_switcher = PaneSwitcher(
+            self,
+            self.splitter,
+            self._panes(),
+            (_("Filters"), _("Results"), _("Hands")),
+            sizes=PANE_WIDTHS,
+        )
+        self.narrow_view_bar = self.pane_switcher.bar
+        layout.addWidget(self.narrow_view_bar)
+        layout.addWidget(self.splitter)
+        self.splitter.stacked_changed.connect(self._on_stacked_changed)
+        self._on_stacked_changed(self.splitter.is_stacked())
+
+    def _panes(self) -> list[QWidget]:
+        return [self.filters_pane, self.results_pane, self.hands_pane]
+
+    def showEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
+        super().showEvent(event)
+        # A window that opens narrow is stacked from the first layout pass and
+        # so never emits a change; syncing here is what puts the bar on screen.
+        self._on_stacked_changed(self.splitter.is_stacked())
+
+    def resizeEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
+        super().resizeEvent(event)
+        # The splitter decides on its own width, which the layout updates before
+        # this handler runs. Re-syncing covers the arrangement that was already
+        # in force, and is a no-op when nothing changed.
+        self._on_stacked_changed(self.splitter.is_stacked())
+
+    def _on_stacked_changed(self, stacked: bool) -> None:
+        """One pane at a time once the panes are stacked, all three when not."""
+        self.pane_switcher.set_switching(stacked)
 
     def _build_view_row(self, filters_layout: QVBoxLayout, muted: str) -> None:
         """Which question the workbench is answering (#331).
@@ -635,7 +749,12 @@ class GuiResearchBrowser(QWidget):
         self.filter_rows_widget = QWidget()
         self.filter_rows_layout = QVBoxLayout(self.filter_rows_widget)
         self.filter_rows_layout.setContentsMargins(0, 4, 0, 0)
-        filters_layout.addWidget(self.filter_rows_widget, 1)
+        # No stretch on the rows container: giving it the leftover height made
+        # every filter row a tall band with its controls floating in the middle,
+        # which is what pushed Run and the presets off the bottom of the pane.
+        # The stretch below absorbs the leftover room instead, so the rows keep
+        # their natural height and the pane reads top to bottom.
+        filters_layout.addWidget(self.filter_rows_widget)
 
         self._build_breakdown_controls(filters_layout)
 
@@ -667,6 +786,7 @@ class GuiResearchBrowser(QWidget):
         self.preset_note.setWordWrap(True)
         self.preset_note.setStyleSheet(f"color: {muted}; font-size: 11px;")
         filters_layout.addWidget(self.preset_note)
+        filters_layout.addStretch(1)
         return filters_pane
 
     def _build_vocabulary_row(self, filters_layout: QVBoxLayout) -> None:
@@ -809,6 +929,7 @@ class GuiResearchBrowser(QWidget):
         results_layout.addWidget(self.view_note)
         self.result_table = QTableWidget()
         self.result_table.setSortingEnabled(True)
+        self.result_table.setAlternatingRowColors(True)
         self.result_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.result_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.result_table.verticalHeader().hide()
@@ -904,6 +1025,7 @@ class GuiResearchBrowser(QWidget):
         single_layout.addWidget(self.drill_mode_combo)
         self.drill_table = QTableWidget()
         self.drill_table.setSortingEnabled(True)
+        self.drill_table.setAlternatingRowColors(True)
         self.drill_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.drill_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.drill_table.verticalHeader().hide()
@@ -1210,6 +1332,10 @@ texture*. The label already existed; nothing called it. Technical names
             self._worker.deleteLater()
             self._worker = None
         self._query_serial += 1
+        # In stacked mode the filters pane is about to stop being useful: make
+        # the running state and eventual answer visible without requiring a
+        # second manual tab switch.
+        self.pane_switcher.set_active(1)
         self.cancel_button.setVisible(True)
         self._has_run = True
         self.empty_state.setVisible(False)
@@ -1257,6 +1383,7 @@ texture*. The label already existed; nothing called it. Technical names
             return  # A stale result never replaces a newer query.
         if self._worker is None or self._worker.serial != serial:
             return
+        self.pane_switcher.set_active(1)
         self.cancel_button.setVisible(False)
         self._worker.deleteLater()
         self._worker = None
@@ -1267,6 +1394,7 @@ texture*. The label already existed; nothing called it. Technical names
     def _on_query_failed(self, message: str, serial: int) -> None:
         if serial != self._query_serial:
             return
+        self.pane_switcher.set_active(1)
         self.cancel_button.setVisible(False)
         if self._worker is not None and self._worker.serial == serial:
             self._worker.deleteLater()
@@ -1314,6 +1442,7 @@ texture*. The label already existed; nothing called it. Technical names
         """A grid cell asked for its hands: the drill-down, narrowed by class."""
         if self._current_query is None:
             return
+        self.pane_switcher.set_active(2)
         self._load_drill({"starting_hand": label})
 
     # -- rendering -----------------------------------------------------------
@@ -1359,10 +1488,23 @@ texture*. The label already existed; nothing called it. Technical names
             _("Double-click a row to see your hands and the field's, side by side."),
         )
         headings = [rlabels.dimension_label(name) for name in comparison.group_by]
-        headings += [_("you"), _("your sample"), _("the field"), _("its sample"), _("gap")]
+        measure_unit = " (%)" if comparison.frequency or comparison.unit == "bp" else " (¢)" if comparison.unit == "cents" else ""
+        gap_unit = " (pp)" if comparison.frequency or comparison.unit == "bp" else " (¢)" if comparison.unit == "cents" else ""
+        sample_unit = "actions / decisions" if comparison.frequency else "decisions"
+        headings += [
+            _("You") + measure_unit,
+            _("Your sample") + f" ({sample_unit})",
+            _("Field") + measure_unit,
+            _("Field sample") + f" ({sample_unit})",
+            _("Gap") + gap_unit,
+        ]
         self.result_table.setRowCount(len(comparison.rows))
         self.result_table.setColumnCount(len(headings))
         self.result_table.setHorizontalHeaderLabels(headings)
+        for column, heading in enumerate(headings):
+            header_item = self.result_table.horizontalHeaderItem(column)
+            if header_item is not None:
+                header_item.setToolTip(heading)
 
         for r, row in enumerate(comparison.rows):
             cells = [rb.value_label(name, row.group.get(name)) for name in comparison.group_by]
@@ -1379,16 +1521,18 @@ texture*. The label already existed; nothing called it. Technical names
                     if comparison.frequency
                     else str(row.field_opportunities)
                 ),
-                "" if row.gap is None else (
-                    f"{row.gap * 100:+.1f} pt"
-                    if comparison.frequency
-                    else _comparison_measure_text(row.gap, comparison.unit, comparison.frequency)
-                ),
+                _comparison_gap_text(row.gap, comparison.unit, comparison.frequency),
             ]
             for c, text in enumerate(cells):
                 item = QTableWidgetItem(text)
                 if c >= len(comparison.group_by):
                     item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                    if c == len(comparison.group_by):
+                        style_signed_measure(item, "comparison_value", row.hero_measure, unit=comparison.unit)
+                    elif c == len(comparison.group_by) + 2:
+                        style_signed_measure(item, "comparison_value", row.field_measure, unit=comparison.unit)
+                    elif c == len(comparison.group_by) + 4:
+                        style_signed_measure(item, "gap", row.gap)
                 else:
                     item.setData(Qt.ItemDataRole.UserRole, dict(row.group))
                 if c == 0:
@@ -1542,24 +1686,18 @@ texture*. The label already existed; nothing called it. Technical names
         self.result_table.setRowCount(len(rows))
         self.result_table.setColumnCount(len(columns))
         self._set_result_headers(columns)
+        install_card_image_delegates(self.result_table, columns)
         for r, row in enumerate(rows):
             group = {col.key: row.get(col.key) for col in columns if col.source == "dimension"}
             for c, col in enumerate(columns):
                 value = row.get(col.key)
-                text = "" if value is None else str(value)
-                if col.source == "dimension" and value is not None:
-                    # A seat reads -1 here while this pane's own filter offers
-                    # SB for the same value: the table was asking the reader to
-                    # translate (#355). The raw value still travels in UserRole,
-                    # so the drill-down keeps filtering on what was stored.
-                    text = rb.value_label(col.key, value)
-                elif col.key == "frequency_bp" and value is not None:
-                    text = f"{value / 100:.1f}%"
+                text = self._result_cell_text(value, col, row)
                 item = QTableWidgetItem(text)
                 if col.source == "dimension":
                     item.setData(Qt.ItemDataRole.UserRole, group)
                 else:
                     item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                    style_signed_measure(item, col.key, value, unit=row.get("unit"))
                 self.result_table.setItem(r, c, item)
         self.result_table.resizeColumnsToContents()
         self.result_note.setText(
@@ -1573,6 +1711,24 @@ texture*. The label already existed; nothing called it. Technical names
         if rows:
             self._load_drill(group={})
 
+    @staticmethod
+    def _result_cell_text(value: Any, column: Any, row: dict[str, Any]) -> str:
+        if value is None:
+            return ""
+        if column.source == "dimension":
+            # Keep the stored filter value in UserRole; render the poker label.
+            return rb.value_label(column.key, value)
+        if column.key == "frequency_bp" or (column.source == "value" and row.get("unit") == "bp"):
+            return f"{value / 100:.1f}%"
+        if column.source == "value":
+            unit = row.get("unit")
+            if unit == "centi":
+                return f"{value / 100:.2f}"
+            if unit == "cents":
+                formatted = f"{float(value):,.2f}".rstrip("0").rstrip(".")
+                return f"{formatted} ¢"
+        return str(value)
+
     def _set_result_headers(self, columns) -> None:
         """Write the result headings, and explain the honest ones.
 
@@ -1580,12 +1736,12 @@ texture*. The label already existed; nothing called it. Technical names
         the analytics epic refuses to hide -- but poker labels say what they
         mean in the tooltip rather than leaving a user to guess.
         """
-        self.result_table.setHorizontalHeaderLabels([col.heading for col in columns])
         explanations = {
             "denominator": _("Every decision the question applies to: the sample size."),
             "numerator": _("How many of those decisions the metric counted."),
             "value": _("The measurement itself, over the sample above."),
         }
+        self.result_table.setHorizontalHeaderLabels([_result_header_label(col) for col in columns])
         for index, col in enumerate(columns):
             item = self.result_table.horizontalHeaderItem(index)
             if item is None:
@@ -1605,6 +1761,7 @@ texture*. The label already existed; nothing called it. Technical names
             self._load_comparison_drill(self.result_table.item(row, 0))
             return
         self.hands_stack.setCurrentIndex(0)
+        self.pane_switcher.set_active(2)
         self._load_drill(group=self._current_group)
 
     def _load_comparison_drill(self, item: QTableWidgetItem | None) -> None:
@@ -1619,6 +1776,7 @@ texture*. The label already existed; nothing called it. Technical names
         comparison_row = item.data(_COMPARISON_ROW_ROLE)
         if not isinstance(comparison_row, rb.ComparisonRow):
             return
+        self.pane_switcher.set_active(2)
         label = ", ".join(
             f"{rlabels.dimension_label(name)}={rb.value_label(name, value)}"
             for name, value in sorted(comparison_row.group.items())
@@ -1640,7 +1798,8 @@ texture*. The label already existed; nothing called it. Technical names
         group: dict[str, Any] = group_item.data(Qt.ItemDataRole.UserRole) if group_item else {}
         if group:
             rendered = ", ".join(
-                f"{rlabels.dimension_label(key)}={value}" for key, value in sorted(group.items())
+                f"{rlabels.dimension_label(key)}={rb.value_label(key, value)}"
+                for key, value in sorted(group.items())
             )
             self.result_note.setText(rendered)
 
@@ -1672,12 +1831,22 @@ texture*. The label already existed; nothing called it. Technical names
         columns = rb.DRILL_COLUMNS
         self.drill_table.setRowCount(len(drill.rows))
         self.drill_table.setColumnCount(len(columns))
-        self.drill_table.setHorizontalHeaderLabels([col.heading for col in columns])
+        self.drill_table.setHorizontalHeaderLabels([
+            f"{col.heading} (¢)" if col.unit == "cents" else col.heading for col in columns
+        ])
+        install_card_image_delegates(self.drill_table, columns)
         for r, row in enumerate(drill.rows):
             for c, col in enumerate(columns):
                 value = row.get(col.key)
-                text = "" if value is None else str(value)
-                self.drill_table.setItem(r, c, QTableWidgetItem(text))
+                text = "" if value is None else f"{value} ¢" if col.unit == "cents" else str(value)
+                item = QTableWidgetItem(text)
+                if col.key in {"heroCards", "board"} and value:
+                    item.setToolTip(str(value))
+                    item.setData(Qt.ItemDataRole.AccessibleTextRole, str(value))
+                if isinstance(value, (int, float)):
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                    style_signed_measure(item, col.key, value, unit=col.unit)
+                self.drill_table.setItem(r, c, item)
         self.drill_table.resizeColumnsToContents()
         note = f"{drill.total_matches} hands"
         if drill.truncated:

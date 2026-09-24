@@ -84,6 +84,7 @@ class Hud:
         This method is intended to be called from the stdin thread,
         so it must not touch the GUI.
         """
+        self._winamax_live_hand_id: str | None = None
         self.parent = parent
         self.table = table
         self.config = config
@@ -432,28 +433,7 @@ class Hud:
         if not prepared:
             self.cards = self.get_cards(hand)
 
-        # Publish what this hand says about the table, for the context-aware
-        # dynamic panels (#298): the deepest street it reached, the shape of the
-        # preflop round and how many players are still in. Best-effort -- a
-        # panel rule set must never be able to cost a HUD its hand.
-        self.live_state.clear()
-        live_session = getattr(self, "_live_context_session", None)
-        if live_session is not None and live_session.adapter.hand_id != str(hand):
-            # One hand's live context must never leak into the next. A hand the
-            # session is already following is left alone: an import that lands
-            # after its own live events must not wipe the live context. Nor may
-            # a hand it has already left be started again: the live stream runs
-            # ahead of the import (actions are published before the hand is even
-            # built), so a notification for a finished hand arriving while the
-            # next one is being played would show a pot nobody is in.
-            if not live_session.adapter.has_left(str(hand)):
-                live_session.start_hand(str(hand))
-        try:
-            from fpdb_3_legacy import hud_situation
-
-            self.set_live_state(**hud_situation.live_state_from_hand(self.hand_instance))
-        except Exception:  # intentional broad catch: the hand cycle must survive
-            log.exception("Could not publish the live state for hand %s", hand)
+        self._update_live_state_from_import(hand)
 
         # Refresh every aux window with the new hand so the displayed stats
         # update. This is the only place they are refreshed for a new hand, so
@@ -463,6 +443,39 @@ class Hud:
                 aux.update_gui(hand)
             except Exception:  # intentional broad catch: aux window callback boundary.
                 log.exception("Error updating aux window %s for hand %s", type(aux).__name__, hand)
+
+    def _update_live_state_from_import(self, hand: int | str) -> None:
+        """Use the assembled hand unless a newer Winamax round is already live."""
+        # ``hand`` is usually the database row id passed to Hud.update, while
+        # live Winamax events and ``Hand.handid`` use the normalized site id.
+        # Compare and route the import using one identifier domain whenever
+        # the assembled hand is available.
+        context_hand_id = getattr(self.hand_instance, "handid", None) or hand
+        keep_live_round = self._has_newer_winamax_round(context_hand_id)
+        if not keep_live_round:
+            # The assembled hand now owns the HUD again. Retire any stale
+            # reader marker as well as its state so a later reader restart
+            # cannot make this old hand look newer than another import.
+            self._winamax_live_hand_id = None
+            self.live_state.clear()
+        live_session = getattr(self, "_live_context_session", None)
+        if live_session is not None and live_session.adapter.hand_id != str(context_hand_id):
+            # One hand's live context must never leak into the next. A hand the
+            # session is already following is left alone: an import that lands
+            # after its own live events must not wipe the live context. Nor may
+            # a hand it has already left be started again: the live stream runs
+            # ahead of the import (actions are published before the hand is even
+            # built), so a notification for a finished hand arriving while the
+            # next one is being played would show a pot nobody is in.
+            if not live_session.adapter.has_left(str(context_hand_id)):
+                live_session.start_hand(str(context_hand_id))
+        if not keep_live_round:
+            try:
+                from fpdb_3_legacy import hud_situation
+
+                self.set_live_state(**hud_situation.live_state_from_hand(self.hand_instance))
+            except Exception:  # intentional broad catch: the hand cycle must survive
+                log.exception("Could not publish the live state for hand %s", hand)
 
     def set_live_state(self, **state: Any) -> None:
         """Publish what the table feed knows about the hand in progress (#298).
@@ -481,6 +494,36 @@ class Hud:
             forget = getattr(aux, "forget_dynamic_panels", None)
             if forget is not None:
                 forget()
+
+    def _has_newer_winamax_round(self, imported_hand: int | str) -> bool:
+        live_hand = getattr(self, "_winamax_live_hand_id", None)
+        if not live_hand or str(imported_hand) == live_hand:
+            return False
+
+        # A retained ID is only evidence of a newer hand while its reader is
+        # still following a log. Reader startup, shutdown, or a failed tail
+        # must not let the last observed street mask a subsequently imported
+        # hand indefinitely. Bare HUDs (and non-Winamax callers) have no reader
+        # owner, so retain the historical behavior for those cases.
+        parent = getattr(self, "parent", None)
+        if parent is not None and hasattr(parent, "winamax_log_reader"):
+            reader = getattr(parent, "winamax_log_reader", None)
+            if reader is None or not getattr(reader, "is_tailing", False):
+                return False
+        return True
+
+    def refresh_dynamic_panels(self) -> None:
+        """Redraw active panel windows after a live event changes the context."""
+        for aux in self.aux_windows:
+            resolver_for_profile = getattr(aux, "_panel_resolver", None)
+            if resolver_for_profile is None:
+                continue
+            try:
+                resolver = resolver_for_profile()
+                if resolver is not None and resolver.is_enabled():
+                    aux.update_gui(getattr(self, "_winamax_live_hand_id", "live"))
+            except Exception:  # one broken overlay must not stop the others
+                log.exception("Could not redraw dynamic HUD panels after a live update")
 
     def live_context_session(self) -> Any:
         """This table's action-by-action live context session (#336).
@@ -514,13 +557,17 @@ class Hud:
         session = self.live_context_session()
         if hand_id and not getattr(action, "hand_id", ""):
             action = replace(action, hand_id=str(hand_id))
-        return session.update(action)
+        trace = session.update(action)
+        if trace is not None:
+            self.refresh_dynamic_panels()
+        return trace
 
     def accept_live_context(self, context: Any) -> None:
         """Publish an already-folded :class:`LiveContext` to the panels (#336)."""
         from fpdb_3_legacy import hud_live_context
 
         self.set_live_state(**hud_live_context.context_to_live_state(context))
+        self.refresh_dynamic_panels()
 
     def end_live_context(self) -> None:
         """The table closed or the stream stopped: clear what it published."""

@@ -33,6 +33,7 @@ class DistributionChartWidget(QWidget):
         layout.addWidget(self.summary_label)
         self.plot = pg.PlotWidget()
         self.plot.setMinimumHeight(220)
+        self.plot.setMaximumHeight(340)
         self.plot.setBackground(palette.get("sidebar", "#1a202c"))
         self.plot.setLabel("left", "Percent")
         self.plot.showGrid(x=False, y=True, alpha=0.2)
@@ -91,7 +92,6 @@ class DistributionChartWidget(QWidget):
             self.plot.addItem(bars)
             self._bar_items.append(bars)
             max_value = max(values, default=0.0)
-            summary = self._series_summary(self._hero, "Value")
         else:
             hero_by_label = {item.label: item for item in self._hero.bins} if self._hero else {}
             field_by_label = {item.label: item for item in self._field.bins}
@@ -118,25 +118,22 @@ class DistributionChartWidget(QWidget):
             self.plot.addItem(field_bars)
             self._bar_items.extend((hero_bars, field_bars))
             max_value = max([*hero_values, *field_values], default=0.0)
-            summary = " · ".join(
-                part
-                for part in (
-                    self._series_summary(self._hero, "Hero"),
-                    self._series_summary(self._field, "Field"),
-                )
-                if part
-            )
-
         self.plot.getAxis("bottom").setTicks([list(enumerate(labels))])
         self.plot.setYRange(0, max(100.0, max_value * 1.15), padding=0)
-        self.summary_label.setText(summary + " · Click a bar to filter the study.")
-
-    @staticmethod
-    def _series_summary(series: DistributionSeries | None, label: str) -> str:
-        if series is None:
-            return ""
-        warning = f" — {series.low_sample_warning}" if series.low_sample_warning else ""
-        return f"{label}: {series.total_opportunities} decisions, {series.chart_unit}{warning}"
+        if self._field is None:
+            series = self._hero
+            unit = series.chart_unit if series is not None else ""
+            warning = f" — {series.low_sample_warning}" if series and series.low_sample_warning else ""
+            self.summary_label.setText(f"{unit.capitalize()}{warning}")
+        else:
+            hero_warning = f" — {self._hero.low_sample_warning}" if self._hero and self._hero.low_sample_warning else ""
+            field_warning = f" — {self._field.low_sample_warning}" if self._field and self._field.low_sample_warning else ""
+            self.summary_label.setText(
+                f"<span style='color:{hero_color}'>● Hero</span> &nbsp; "
+                f"<span style='color:{field_color}'>● Field</span>"
+                f"<br>{self._hero.chart_unit.capitalize() if self._hero else 'Distribution'}"
+                f"{hero_warning}{field_warning}"
+            )
 
     @staticmethod
     def _comparison_bins(hero: DistributionSeries, field: DistributionSeries) -> tuple[DistributionBin, ...]:
