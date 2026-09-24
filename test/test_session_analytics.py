@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from fpdb_3_legacy.session_analytics import build_sessions, summarize_sessions
+import math
+
+from fpdb_3_legacy.session_analytics import build_session_graph_quotes, build_sessions, summarize_sessions
 
 
 def test_session_metrics_normalize_each_hand_by_its_own_blind() -> None:
@@ -107,3 +109,22 @@ def test_homogeneous_currency_summary_includes_native_totals() -> None:
 def test_empty_rows_have_no_sessions() -> None:
     assert build_sessions([]) == []
     assert summarize_sessions([])["hands"] == 0
+
+
+def test_session_graph_quotes_are_cumulative_and_skip_incomplete_blinds() -> None:
+    sessions = build_sessions(
+        [
+            (1, 1_000, 500, 500, 100, "USD"),
+            (2, 3_000, -200, -200, 100, "USD"),
+            (3, 5_000, 250, 250, -1, "USD"),
+            (4, 7_000, 100, 100, 100, "USD"),
+        ]
+    )
+
+    quotes = build_session_graph_quotes(sessions)
+
+    assert quotes[0] == (1, 0, 5, 5, 0)
+    assert quotes[1] == (2, 5, 3, 5, 3)
+    assert quotes[2][0:2] == (3, 3)
+    assert all(math.isnan(value) for value in quotes[2][2:])
+    assert quotes[3] == (4, 3, 4, 4, 3)

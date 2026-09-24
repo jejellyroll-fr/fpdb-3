@@ -163,3 +163,29 @@ def summarize_sessions(sessions: list[SessionMetrics]) -> dict[str, Any]:
         summary["profit_minor"] = profit_minor
         summary["currency_per_hour"] = (profit_minor / 100) / (duration / 3600) if duration else 0.0
     return summary
+
+
+def build_session_graph_quotes(
+    sessions: list[SessionMetrics],
+) -> list[tuple[int, float, float, float, float]]:
+    """Build cumulative BB OHLC points, omitting sessions with incomplete BB data."""
+    quotes: list[tuple[int, float, float, float, float]] = []
+    cumulative_bb = 0.0
+    for session in sessions:
+        if session.bb_hands != session.hands or session.profit_bb is None:
+            missing = float("nan")
+            quotes.append((session.number, cumulative_bb, missing, missing, missing))
+            continue
+
+        opening_bb = cumulative_bb
+        cumulative_bb += session.profit_bb
+        quotes.append(
+            (
+                session.number,
+                opening_bb,
+                cumulative_bb,
+                max(opening_bb, cumulative_bb),
+                min(opening_bb, cumulative_bb),
+            )
+        )
+    return quotes

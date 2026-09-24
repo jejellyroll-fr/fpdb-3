@@ -38,7 +38,12 @@ from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency, format_datetime, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.ring_stats.base import DbWorker
-from fpdb_3_legacy.session_analytics import SessionMetrics, build_sessions, summarize_sessions
+from fpdb_3_legacy.session_analytics import (
+    SessionMetrics,
+    build_session_graph_quotes,
+    build_sessions,
+    summarize_sessions,
+)
 from fpdb_3_legacy.table_export import install_table_export
 
 log = get_logger("gui_session_viewer")
@@ -384,7 +389,6 @@ class GuiSessionViewer(QSplitter):
         self.summary_label.setText(summary_text)
 
         results = []
-        quotes = []
         for session in self.session_metrics:
             start = format_datetime(datetime.fromtimestamp(session.start_timestamp))
             end = format_datetime(datetime.fromtimestamp(session.end_timestamp))
@@ -412,16 +416,7 @@ class GuiSessionViewer(QSplitter):
                     format_currency(session.currency_per_hour or 0, currency, show_plus=True),
                 ]
             )
-            bb_result = session.profit_bb if session.bb_hands == session.hands else None
-            quotes.append(
-                (
-                    session.number,
-                    0.0,
-                    bb_result if bb_result is not None else float("nan"),
-                    max(0.0, bb_result) if bb_result is not None else float("nan"),
-                    min(0.0, bb_result) if bb_result is not None else float("nan"),
-                )
-            )
+        quotes = build_session_graph_quotes(self.session_metrics)
         return (results, quotes)
 
     @staticmethod
@@ -527,7 +522,7 @@ class GuiSessionViewer(QSplitter):
             f"<span style='color:{fg}; font-size:11pt; font-weight:bold;'>Session results: {format_number(total, show_plus=True)} BB{excluded_note}{names}</span>"
         )
         self.plot_widget.setLabel("bottom", _("Session"), **{"color": fg, "font-size": "9pt"})
-        self.plot_widget.setLabel("left", _("Session result (BB)"), **{"color": fg, "font-size": "9pt"})
+        self.plot_widget.setLabel("left", _("Cumulative result (BB)"), **{"color": fg, "font-size": "9pt"})
 
         axis_pen = pg.mkPen(color=grid, width=1)
         self.plot_widget.getAxis("left").setPen(axis_pen)
