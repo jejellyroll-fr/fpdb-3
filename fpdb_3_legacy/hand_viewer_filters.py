@@ -3,6 +3,10 @@
 The viewer applies these predicates to hand ids before it reconstructs a Hand.
 Action predicates use the canonical HandsActions/HandsSituations rows; the
 starting-hand expression is shared with Research's 13x13 range model.
+
+The targeted B608 suppressions below cover only SQL templates assembled from
+fixed aliases, allowlisted columns/operators, and validated driver markers;
+filter values are always passed separately as DB parameters.
 """
 
 from __future__ import annotations
@@ -74,7 +78,7 @@ def _action_exists(
         conditions.append(f"SF.response = {placeholder}")
         params.append(response)
     return (
-        "EXISTS (SELECT 1 FROM HandsActions AF JOIN HandsSituations SF "
+        "EXISTS (SELECT 1 FROM HandsActions AF JOIN HandsSituations SF "  # nosec B608
         "ON SF.handId = AF.handId AND SF.playerId = AF.playerId AND SF.actionNo = AF.actionNo "
         "WHERE " + " AND ".join(conditions) + ")",
         params,
@@ -89,7 +93,7 @@ def _starting_hand_clause(filters: Mapping[str, Any], placeholder: str) -> tuple
     marks = ", ".join(placeholder for _ in ids)
     class_expression = holdem_class_expression("HPF.")
     clause = (
-        "EXISTS (SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id "
+        "EXISTS (SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id "  # nosec B608
         "AND HPF.playerId = hp.playerId AND gt.category IN ('holdem', '6_holdem') "
         f"AND ({class_expression}) IN ({marks}))"
     )
@@ -106,12 +110,12 @@ def _exact_cards_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[l
     if len(encoded) == 1:
         cards = ", ".join(f"HPX.card{index}" for index in range(1, 21))
         return [
-            "EXISTS (SELECT 1 FROM HandsPlayers HPX WHERE HPX.handId = h.id AND HPX.playerId = hp.playerId "
+            "EXISTS (SELECT 1 FROM HandsPlayers HPX WHERE HPX.handId = h.id AND HPX.playerId = hp.playerId "  # nosec B608
             f"AND {placeholder} IN ({cards}))"
         ], [encoded[0]]
     cards = ", ".join(f"HPX.card{index}" for index in range(1, 21))
     clause = (
-        "EXISTS (SELECT 1 FROM HandsPlayers HPX WHERE HPX.handId = h.id AND HPX.playerId = hp.playerId AND "
+        "EXISTS (SELECT 1 FROM HandsPlayers HPX WHERE HPX.handId = h.id AND HPX.playerId = hp.playerId AND "  # nosec B608
         f"{placeholder} IN ({cards}) AND {placeholder} IN ({cards}))"
     )
     return [clause], [encoded[0], encoded[1]]
@@ -146,7 +150,7 @@ def _postflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list
     if postflop in {"saw_flop", "saw_turn", "saw_river"}:
         street = {"saw_flop": 1, "saw_turn": 2, "saw_river": 3}[postflop]
         return [
-            f"EXISTS (SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id "
+            f"EXISTS (SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id "  # nosec B608
             f"AND HPF.playerId = hp.playerId AND HPF.street{street}Seen IS TRUE)"
         ], []
     if postflop == "showdown":
@@ -156,7 +160,7 @@ def _postflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list
         ], []
     if postflop in {"bet", "call", "raise", "check", "fold"}:
         return [
-            "EXISTS (SELECT 1 FROM HandsActions AF WHERE AF.handId = h.id AND AF.playerId = hp.playerId "
+            "EXISTS (SELECT 1 FROM HandsActions AF WHERE AF.handId = h.id AND AF.playerId = hp.playerId "  # nosec B608
             f"AND AF.street BETWEEN 1 AND 3 AND AF.actionType = {placeholder})"
         ], [POSTFLOP_ACTION_TYPES[postflop]]
     if postflop in POSTFLOP_FILTERS:
@@ -193,7 +197,7 @@ def _player_count_clauses(filters: Mapping[str, Any], placeholder: str) -> tuple
         value = filters.get(key)
         if value not in (None, ""):
             clauses.append(
-                f"(SELECT COUNT(*) FROM HandsPlayers HPP WHERE HPP.handId = h.id) {comparator} {placeholder}"
+                f"(SELECT COUNT(*) FROM HandsPlayers HPP WHERE HPP.handId = h.id) {comparator} {placeholder}"  # nosec B608
             )
             params.append(int(value))
 
@@ -213,7 +217,7 @@ def _stack_clauses(filters: Mapping[str, Any], placeholder: str) -> tuple[list[s
         if stack_high not in (None, ""):
             conditions.append(f"ASB.effectiveStackBB <= {placeholder}")
             params.append(float(stack_high) * 100)
-        clauses.append("EXISTS (SELECT 1 FROM HandsActions ASB WHERE " + " AND ".join(conditions) + ")")
+        clauses.append("EXISTS (SELECT 1 FROM HandsActions ASB WHERE " + " AND ".join(conditions) + ")")  # nosec B608
 
     return clauses, params
 
@@ -231,7 +235,7 @@ def _sizing_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list[s
         if upper is not None:
             conditions.append(f"ASZ.sizingBp < {placeholder}")
             params.append(upper)
-        clauses.append("EXISTS (SELECT 1 FROM HandsActions ASZ WHERE " + " AND ".join(conditions) + ")")
+        clauses.append("EXISTS (SELECT 1 FROM HandsActions ASZ WHERE " + " AND ".join(conditions) + ")")  # nosec B608
 
     return clauses, params
 
@@ -255,6 +259,8 @@ def build_filter_clauses(
     Categories are separate correlated predicates, so an RFI and faced c-bet
     can refer to different actions by the selected player in the same hand.
     """
+    if placeholder not in {"?", "%s"}:
+        raise ValueError("Unsupported SQL parameter placeholder")
     clauses: list[str] = []
     params: list[Any] = []
     for builder in (_starting_hand_clause, _exact_cards_clause, _preflop_clause, _postflop_clause, _numeric_clauses):

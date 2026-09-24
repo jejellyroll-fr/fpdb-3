@@ -148,6 +148,11 @@ def test_empty_advanced_filters_do_not_add_sql_or_parameters():
     assert build_filter_clauses({}, "?") == ([], ())
 
 
+def test_sql_placeholder_must_be_a_supported_driver_marker():
+    with pytest.raises(ValueError, match="Unsupported SQL parameter placeholder"):
+        build_filter_clauses({"preflop": "vpip"}, "? OR 1=1 --")
+
+
 def test_starting_hand_modulo_is_escaped_for_format_style_drivers():
     clauses, _params = build_filter_clauses({"starting_hands": ["AKs"]}, "%s")
     query = escape_literal_percent(" AND ".join(clauses), "%s")
