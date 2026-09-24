@@ -4,7 +4,8 @@ import sqlite3
 
 import pytest
 
-from fpdb_3_legacy.hand_viewer_filters import build_filter_clauses
+from fpdb_3_legacy.analytics_query import escape_literal_percent
+from fpdb_3_legacy.hand_viewer_filters import POSTFLOP_ACTION_TYPES, build_filter_clauses
 from fpdb_3_legacy.holdem_classes import class_id_of_label
 
 
@@ -40,7 +41,7 @@ def _database():
         );
         CREATE TABLE HandsActions (
             handId INTEGER, playerId INTEGER, actionNo INTEGER, street INTEGER,
-            actionType TEXT, effectiveStackBB INTEGER, sizingBp INTEGER
+            actionType TEXT, effectiveStackBB INTEGER, sizingBp INTEGER, allIn INTEGER
         );
         CREATE TABLE HandsSituations (
             handId INTEGER, playerId INTEGER, actionNo INTEGER,
@@ -57,8 +58,8 @@ def _database():
             (2, 22, 13, 12, 0, 0, 1, 0, 0, 1, 0, 0, 1, -100),
             (3, 33, 7, 8, 13, 12, 1, 1, 0, 1, 0, 0, 0, 20);
         INSERT INTO HandsActions VALUES
-            (1, 11, 1, 0, 'raise', 10000, 0), (1, 11, 2, 1, 'call', 9000, 5000),
-            (2, 22, 1, 0, 'fold', 2000, 0), (2, 22, 2, 1, 'bet', 1800, 2500);
+            (1, 11, 1, 0, 'raises', 10000, 0, 0), (1, 11, 2, 1, 'calls', 9000, 5000, 0),
+            (2, 22, 1, 0, 'folds', 2000, 0, 0), (2, 22, 2, 1, 'bets', 1800, 2500, 1);
         INSERT INTO HandsSituations VALUES
             (1, 11, 1, 'open_raise', '["open_raise"]', 'raise'),
             (1, 11, 2, 'facing_cbet', '["facing_cbet"]', 'call'),
@@ -124,6 +125,37 @@ def test_action_and_numeric_filters(filters, expected):
 
 def test_empty_advanced_filters_do_not_add_sql_or_parameters():
     assert build_filter_clauses({}, "?") == ([], ())
+
+
+def test_starting_hand_modulo_is_escaped_for_format_style_drivers():
+    clauses, _params = build_filter_clauses({"starting_hands": ["AKs"]}, "%s")
+    query = escape_literal_percent(" AND ".join(clauses), "%s")
+
+    assert "%%" in query
+    assert "%s" in query
+
+
+@pytest.mark.parametrize(
+    ("action", "stored_action"),
+    [("bet", "bets"), ("call", "calls"), ("raise", "raises"), ("check", "checks"), ("fold", "folds")],
+)
+def test_postflop_action_filter_uses_the_persisted_action_verb(action, stored_action):
+    clauses, params = build_filter_clauses({"postflop": action}, "?")
+
+    assert clauses
+    assert params == (stored_action,)
+    assert POSTFLOP_ACTION_TYPES[action] == stored_action
+
+
+def test_preflop_all_in_does_not_match_an_all_in_on_the_flop():
+    connection = _database()
+    try:
+        connection.execute("UPDATE HandsPlayers SET wentAllIn = 1 WHERE handId = 2")
+        assert _run_filters(connection, {"preflop": "all_in"}) == []
+        connection.execute("UPDATE HandsActions SET allIn = 1 WHERE handId = 1 AND street = 0")
+        assert _run_filters(connection, {"preflop": "all_in"}) == [1]
+    finally:
+        connection.close()
 
 
 def test_starting_hand_labels_are_validated_before_querying():

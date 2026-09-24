@@ -59,6 +59,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Filters, GuiReplayer, Hand, gui_empty_state
+from fpdb_3_legacy.analytics_query import escape_literal_percent
 from fpdb_3_legacy.hand_viewer_filters import build_filter_clauses
 from fpdb_3_legacy.holdem_classes import RANKS, grid_labels
 from fpdb_3_legacy.i18n import gettext as _
@@ -560,6 +561,7 @@ class GuiHandViewer(QSplitter):
         extra.extend(advanced)
         if extra:
             q = q + " AND " + " AND ".join(extra)
+        q = escape_literal_percent(q, placeholder)
 
         # Diagnostic: log the fully-assembled query and the active filter state so
         # missing-hands issues (e.g. a category excluded by date/game/limit/position)

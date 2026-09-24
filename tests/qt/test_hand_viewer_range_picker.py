@@ -1,6 +1,10 @@
 """Offscreen interaction checks for the Hand Viewer starting-hand picker."""
 
+import pytest
+
 from fpdb_3_legacy.GuiHandViewer import StartingHandPickerDialog
+
+pytestmark = pytest.mark.qt
 
 
 def test_starting_hand_picker_exposes_all_169_classes_and_shortcuts(qtbot):

@@ -30,6 +30,14 @@ POSTFLOP_FILTERS: dict[str, tuple[str, str | None]] = {
     "check_raise": ("check_raise", None),
 }
 
+POSTFLOP_ACTION_TYPES = {
+    "bet": "bets",
+    "call": "calls",
+    "raise": "raises",
+    "check": "checks",
+    "fold": "folds",
+}
+
 SIZING_BUCKETS: dict[str, tuple[int | None, int | None]] = {
     "under_25": (None, 2500),
     "25_50": (2500, 5000),
@@ -118,8 +126,8 @@ def _preflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list[
         ], []
     if preflop == "all_in":
         return [
-            "EXISTS (SELECT 1 FROM HandsPlayers HPV WHERE HPV.handId = h.id "
-            "AND HPV.playerId = hp.playerId AND HPV.wentAllIn = 1)"
+            "EXISTS (SELECT 1 FROM HandsActions AAI WHERE AAI.handId = h.id "
+            "AND AAI.playerId = hp.playerId AND AAI.street = 0 AND AAI.allIn = 1)"
         ], []
     if preflop in PREFLOP_FILTERS:
         label, response = PREFLOP_FILTERS[preflop]
@@ -145,7 +153,7 @@ def _postflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list
         return [
             "EXISTS (SELECT 1 FROM HandsActions AF WHERE AF.handId = h.id AND AF.playerId = hp.playerId "
             f"AND AF.street BETWEEN 1 AND 3 AND AF.actionType = {placeholder})"
-        ], [postflop]
+        ], [POSTFLOP_ACTION_TYPES[postflop]]
     if postflop in POSTFLOP_FILTERS:
         label, response = POSTFLOP_FILTERS[postflop]
         clause, params = _action_exists("h", label, response, "AF.street BETWEEN 1 AND 3", placeholder)
