@@ -73,15 +73,20 @@ def _database():
     return connection
 
 
-def test_starting_hand_filter_uses_canonical_class_and_excludes_omaha():
+def test_starting_hand_filter_includes_two_card_games_and_excludes_omaha():
     connection = _database()
     try:
         connection.execute("INSERT INTO Gametypes VALUES (3, 'aof_holdem', 10)")
+        connection.execute("INSERT INTO Gametypes VALUES (4, 'fusion', 10)")
         connection.execute("INSERT INTO Hands VALUES (5, 3, 100)")
+        connection.execute("INSERT INTO Hands VALUES (6, 4, 100)")
         connection.execute(
             "INSERT INTO HandsPlayers (handId, playerId, card1, card2) VALUES (5, 55, 13, 12)"
         )
-        assert _run_filters(connection, {"starting_hands": ["AKs"]}) == [1, 2, 5]
+        connection.execute(
+            "INSERT INTO HandsPlayers (handId, playerId, card1, card2) VALUES (6, 66, 13, 12)"
+        )
+        assert _run_filters(connection, {"starting_hands": ["AKs"]}) == [1, 2, 5, 6]
         assert class_id_of_label("AKs") in range(1, 170)
     finally:
         connection.close()

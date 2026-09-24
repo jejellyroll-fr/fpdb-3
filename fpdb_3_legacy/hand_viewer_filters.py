@@ -116,7 +116,7 @@ def _starting_hand_clause(filters: Mapping[str, Any], placeholder: str) -> tuple
     class_expression = holdem_class_expression("HPF.")
     clause = (
         "EXISTS (SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id "  # nosec B608
-        "AND HPF.playerId = hp.playerId AND gt.category IN ('holdem', '6_holdem', 'aof_holdem') "
+        "AND HPF.playerId = hp.playerId AND gt.category IN ('holdem', '6_holdem', 'aof_holdem', 'fusion') "
         f"AND ({class_expression}) IN ({marks}))"
     )
     return [clause], ids
