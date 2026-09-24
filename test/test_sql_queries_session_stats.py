@@ -20,7 +20,12 @@ def test_session_stats_keeps_backend_time_and_dynamic_filters() -> None:
     assert "EXTRACT(epoch from h.startTime)" in postgresql
     assert "STRFTIME('<ampersand_s>', h.startTime)" in sqlite
     for query in (mysql, postgresql, sqlite):
+        assert "h.id" in query
         assert "hp.totalProfit" in query
+        assert "hp.allInEV" in query
+        assert "gt.bigBlind" in query
+        assert "gt.currency" in query
+        assert "ORDER by time, h.id" in query
         assert "<player_test>" in query
         assert "<datestest>" in query
         assert "<limit_test>" in query

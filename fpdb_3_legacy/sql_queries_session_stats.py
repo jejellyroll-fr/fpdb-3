@@ -8,7 +8,8 @@ def session_stats_queries(db_server: str) -> dict[str, str]:
     query: dict[str, str] = {}
     if db_server == "mysql":
         query["sessionStats"] = """
-            SELECT UNIX_TIMESTAMP(h.startTime) as time, hp.totalProfit
+            SELECT h.id, UNIX_TIMESTAMP(h.startTime) as time, hp.totalProfit,
+                   hp.allInEV, gt.bigBlind, gt.currency
             FROM HandsPlayers hp
              INNER JOIN Hands h       on  (h.id = hp.handId)
              INNER JOIN Gametypes gt  on  (gt.Id = h.gametypeId)
@@ -21,10 +22,11 @@ def session_stats_queries(db_server: str) -> dict[str, str]:
              <game_test>
              <seats_test>
              <currency_test>
-            ORDER by time"""
+            ORDER by time, h.id"""
     elif db_server == "postgresql":
         query["sessionStats"] = """
-            SELECT EXTRACT(epoch from h.startTime) as time, hp.totalProfit
+            SELECT h.id, EXTRACT(epoch from h.startTime) as time, hp.totalProfit,
+                   hp.allInEV, gt.bigBlind, gt.currency
             FROM HandsPlayers hp
              INNER JOIN Hands h       on  (h.id = hp.handId)
              INNER JOIN Gametypes gt  on  (gt.Id = h.gametypeId)
@@ -37,10 +39,11 @@ def session_stats_queries(db_server: str) -> dict[str, str]:
              <game_test>
              <seats_test>
              <currency_test>
-            ORDER by time"""
+            ORDER by time, h.id"""
     elif db_server == "sqlite":
         query["sessionStats"] = """
-            SELECT STRFTIME('<ampersand_s>', h.startTime) as time, hp.totalProfit
+            SELECT h.id, STRFTIME('<ampersand_s>', h.startTime) as time, hp.totalProfit,
+                   hp.allInEV, gt.bigBlind, gt.currency
             FROM HandsPlayers hp
              INNER JOIN Hands h       on  (h.id = hp.handId)
              INNER JOIN Gametypes gt  on  (gt.Id = h.gametypeId)
@@ -53,7 +56,6 @@ def session_stats_queries(db_server: str) -> dict[str, str]:
              <game_test>
              <seats_test>
              <currency_test>
-            ORDER by time"""
+            ORDER by time, h.id"""
 
     return query
-

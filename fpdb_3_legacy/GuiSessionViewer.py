@@ -17,12 +17,12 @@ from __future__ import annotations
 import contextlib
 import sys
 from datetime import datetime
-from time import gmtime, strftime, time
+from time import time
 from typing import Any
 
 import numpy as np
 import pyqtgraph as pg
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QSortFilterProxyModel, Qt
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
     QFrame,
@@ -35,9 +35,15 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import Database, Filters, GuiHandViewer, gui_empty_state
 from fpdb_3_legacy.i18n import gettext as _
-from fpdb_3_legacy.localized_formats import currency_symbol, format_currency, format_datetime, format_number
+from fpdb_3_legacy.localized_formats import format_currency, format_datetime, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.ring_stats.base import DbWorker
+from fpdb_3_legacy.session_analytics import (
+    SessionMetrics,
+    build_session_graph_quotes,
+    build_sessions,
+    summarize_sessions,
+)
 from fpdb_3_legacy.table_export import install_table_export
 
 log = get_logger("gui_session_viewer")
@@ -63,6 +69,8 @@ class GuiSessionViewer(QSplitter):
         self.canvas: Any = None
         self.graphBox: Any = None
         self._db_worker: DbWorker | None = None
+        self._db_worker_generation = 0
+        self.session_metrics: list[SessionMetrics] = []
 
         # create new db connection to avoid conflicts with other threads
         self.db = Database.Database(self.conf, sql=self.sql)
@@ -103,17 +111,25 @@ class GuiSessionViewer(QSplitter):
         scroll.setWidget(self.filters)
 
         self.columns = [
-            (1.0, "SID"),
+            (1.0, "Session"),
             (1.0, "Hands"),
+            (1.0, "BB hands"),
             (0.5, "Start"),
             (0.5, "End"),
-            (1.0, "Rate"),
-            (1.0, "Open"),
-            (1.0, "Close"),
-            (1.0, "Low"),
-            (1.0, "High"),
-            (1.0, "Range"),
+            (1.0, "Duration"),
+            (1.0, "Hands/hour"),
             (1.0, "Profit"),
+            (1.0, "Profit (BB)"),
+            (1.0, "bb/100"),
+            (1.0, "All-in EV"),
+            (1.0, "All-in EV (BB)"),
+            (1.0, "EV bb/100"),
+            (1.0, "EV difference"),
+            (1.0, "Peak"),
+            (1.0, "Low"),
+            (1.0, "Max drawdown"),
+            (1.0, "BB/hour"),
+            (1.0, "Currency/hour"),
         ]
 
         self.detailFilters: list[Any] = []
@@ -123,9 +139,13 @@ class GuiSessionViewer(QSplitter):
         self.stats_frame.setLayout(QVBoxLayout())
         self.view: Any = None
         self.plot_widget: Any = None
+        self.times: list[tuple[int, ...]] = []
         heading = QLabel(self.filterText["handhead"])
         heading.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.stats_frame.layout().addWidget(heading)
+        self.summary_label = QLabel()
+        self.summary_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.stats_frame.layout().addWidget(self.summary_label)
 
         self.main_vbox = QSplitter(Qt.Orientation.Vertical)
 
@@ -164,7 +184,9 @@ class GuiSessionViewer(QSplitter):
         sitenos = []
         playerids = []
 
-        log.warning(f"GuiSessionViewer.fillStatsFrame called. sites: {sites}, heroes: {heroes}, siteids: {siteids}, games: {games}, currencies: {currencies}, limits: {limits}, seats: {seats}")
+        log.warning(
+            f"GuiSessionViewer.fillStatsFrame called. sites: {sites}, heroes: {heroes}, siteids: {siteids}, games: {games}, currencies: {currencies}, limits: {limits}, seats: {seats}"
+        )
 
         for site in sites:
             _hname = heroes.get(site, "")
@@ -182,7 +204,9 @@ class GuiSessionViewer(QSplitter):
                     actual_site_id = self.db.get_player_site_id(pid)
                     if actual_site_id is not None:
                         sitenos.append(actual_site_id)
-                        log.warning(f"GuiSessionViewer.fillStatsFrame: Using resolved actual siteId {actual_site_id} for hero playerId {pid}")
+                        log.warning(
+                            f"GuiSessionViewer.fillStatsFrame: Using resolved actual siteId {actual_site_id} for hero playerId {pid}"
+                        )
                     else:
                         sitenos.append(siteids[site])
 
@@ -196,6 +220,11 @@ class GuiSessionViewer(QSplitter):
             currencies=currencies,
         )
         if missing is not None:
+            self._invalidate_session_worker()
+            self.session_metrics = []
+            self.times = []
+            self.summary_label.clear()
+            self.clearGraphData()
             gui_empty_state.show_no_data(self, missing, context="Session viewer", db=self.db)
             self.db.rollback()
             return
@@ -223,17 +252,21 @@ class GuiSessionViewer(QSplitter):
         starttime = time()
         q = self.build_session_query(playerids, sitenos, games, currencies, limits, seats)
 
-        # Disconnect any previously running worker for this tab
-        if self._db_worker is not None:
-            with contextlib.suppress(Exception):
-                self._db_worker.finished.disconnect()
+        self._invalidate_session_worker()
+        worker_generation = self._db_worker_generation
 
-        self._db_worker = DbWorker(self.db, "sessionStats", q)
+        worker = DbWorker(self.db, "sessionStats", q)
+        self._db_worker = worker
 
         def _on_query_finished(name, results_rows, colnames):
+            if self._db_worker is not worker or self._db_worker_generation != worker_generation:
+                return
             hands = list(results_rows) if results_rows else []
             log.warning(f"GuiSessionViewer DbWorker finished: returned {len(hands)} hands.")
             if not hands:
+                self.session_metrics = []
+                self.times = []
+                self.summary_label.setText("")
                 self.clearGraphData()
                 if self.canvas:
                     self.canvas.setParent(None)
@@ -265,12 +298,28 @@ class GuiSessionViewer(QSplitter):
             log.warning(f"[PERF] GuiSessionViewer Stats page displayed in {time() - starttime:4.2f} seconds")
 
         def _on_query_error(err_msg):
+            if self._db_worker is not worker or self._db_worker_generation != worker_generation:
+                return
             log.error(f"GuiSessionViewer DbWorker error: {err_msg}")
+            self.session_metrics = []
+            self.times = []
+            self.summary_label.clear()
+            self.clearGraphData()
             gui_empty_state.show_no_data(self, context="Session viewer", db=self.db)
 
-        self._db_worker.finished.connect(_on_query_finished)
-        self._db_worker.error.connect(_on_query_error)
-        self._db_worker.start()
+        worker.finished.connect(_on_query_finished)
+        worker.error.connect(_on_query_error)
+        worker.start()
+
+    def _invalidate_session_worker(self) -> None:
+        """Prevent an obsolete async query from mutating the current view."""
+        self._db_worker_generation += 1
+        worker = self._db_worker
+        if worker is not None:
+            with contextlib.suppress(Exception):
+                worker.finished.disconnect()
+            with contextlib.suppress(Exception):
+                worker.error.disconnect()
 
     def build_session_query(self, playerids, sitenos, games, currencies, limits, seats) -> str:
         q = self.sql.query["sessionStats"]
@@ -326,108 +375,76 @@ class GuiSessionViewer(QSplitter):
         return self.process_session_hands(hands)
 
     def process_session_hands(self, hands: list):
-        THRESHOLD = 1800  # Min # of secs between consecutive hands before being considered a new session
-        PADDING = 5  # Additional time in minutes to add to a session, session startup, shutdown etc
-
-        hands = list(hands)
-        if not hands:
+        self.session_metrics = build_sessions(list(hands))
+        self.times = [session.hand_ids for session in self.session_metrics]
+        if not self.session_metrics:
+            self.summary_label.setText("")
             return ([], [])
 
-        hands.insert(0, (hands[0][0], 0))
-
-        times = np.array([int(x[0]) for x in hands])
-        profits = np.array([float(x[1]) for x in hands])
-        # NumPy 2.x: use array methods instead of numpy functions
-        diffs = np.diff(times)
-        diffs2: np.ndarray = np.append(diffs, THRESHOLD + 1)
-        nonzero_tuple = np.nonzero(diffs2 > THRESHOLD)
-        index_arr: np.ndarray = nonzero_tuple[0] if len(nonzero_tuple[0]) > 0 else np.array([0])
-
-        first_idx = 1
-        quotes = []
-        results = []
-        # NumPy 2.x: use array method instead of numpy.cumsum()
-        cum_sum = (profits.cumsum()) // (100)
-        sid = 1
-
-        total_hands = 0
-        total_time = 0
-        global_open: Any = None
-        global_lwm: Any = None
-        global_hwm: Any = None
-
-        self.times = []
-        for i in range(len(index_arr)):
-            last_idx = int(index_arr[i])
-            hds: int = last_idx - first_idx + 1
-            if hds > 0:
-                stime = format_datetime(datetime.fromtimestamp(times[first_idx]))
-                etime = format_datetime(datetime.fromtimestamp(times[last_idx]))
-                self.times.append(
-                    (times[first_idx] - PADDING * 60, times[last_idx] + PADDING * 60),
-                )
-                minutesplayed = (times[last_idx] - times[first_idx]) // (60)
-                minutesplayed = minutesplayed + PADDING
-                if minutesplayed == 0:
-                    minutesplayed = 1
-                hph = hds * 60 / minutesplayed
-                end_idx: int = last_idx + 1
-                won = (sum(profits[first_idx:end_idx])) // (100.0)
-                hwm = cum_sum[first_idx - 1 : end_idx].max()  # NumPy 2.x: use array method
-                lwm = cum_sum[first_idx - 1 : end_idx].min()  # NumPy 2.x: use array method
-                open_val = int((sum(profits[:first_idx])) // (100))
-                close_val = int((sum(profits[:end_idx])) // (100))
-
-                total_hands = total_hands + hds
-                total_time = total_time + minutesplayed
-                if global_lwm is None or global_lwm > lwm:
-                    global_lwm = lwm
-                if global_hwm is None or global_hwm < hwm:
-                    global_hwm = hwm
-                if global_open is None:
-                    global_open = open_val
-                    global_stime = stime
-
-                results.append(
-                    [
-                        format_number(sid, 0),
-                        format_number(hds, 0),
-                        stime,
-                        etime,
-                        format_number(hph, 0),
-                        format_number(open_val),
-                        format_number(close_val),
-                        format_number(lwm),
-                        format_number(hwm),
-                        format_number(hwm - lwm),
-                        format_number(won),
-                    ],
-                )
-                quotes.append((sid, open_val, close_val, hwm, lwm))
-                first_idx = end_idx
-                sid = sid + 1
-            else:
-                log.debug("hds <= 0")
-        global_close = close_val
-        global_etime = etime
-        results.append([""] * 11)
-        results.append(
-            [
-                ("all"),
-                format_number(total_hands, 0),
-                global_stime,
-                global_etime,
-                format_number(total_hands * 60 // total_time, 0),
-                format_number(global_open),
-                format_number(global_close),
-                format_number(global_lwm),
-                format_number(global_hwm),
-                format_number(global_hwm - global_lwm),
-                format_number(global_close - global_open),
-            ],
+        summary = summarize_sessions(self.session_metrics)
+        duration = self._format_duration(summary["duration_seconds"])
+        summary_text = _(
+            "Sessions: {sessions} · Hands: {hands} · Playing time: {duration} · Profit: {profit_bb} BB · bb/100: {bb100} · BB/hour: {bb_hour} · BB hands: {bb_hands}/{hands}"
+        ).format(
+            sessions=format_number(summary["sessions"], 0),
+            hands=format_number(summary["hands"], 0),
+            duration=duration,
+            profit_bb=self._format_optional_number(summary["profit_bb"]),
+            bb100=self._format_optional_number(summary["bb_per_100"]),
+            bb_hour=self._format_optional_number(summary["bb_per_hour"]),
+            bb_hands=format_number(summary["bb_hands"], 0),
         )
+        if summary["currency"] is not None:
+            summary_text += " · " + _("Profit: {profit} · Currency/hour: {hour}").format(
+                profit=format_currency(summary["profit_minor"] / 100, summary["currency"], show_plus=True),
+                hour=format_currency(summary["currency_per_hour"], summary["currency"], show_plus=True),
+            )
+        else:
+            summary_text += " · " + _("Native-currency totals omitted (multiple currencies)")
+        self.summary_label.setText(summary_text)
 
+        results = []
+        for session in self.session_metrics:
+            start = format_datetime(datetime.fromtimestamp(session.start_timestamp))
+            end = format_datetime(datetime.fromtimestamp(session.end_timestamp))
+            currency = session.currency
+            results.append(
+                [
+                    str(session.number),
+                    format_number(session.hands, 0),
+                    format_number(session.bb_hands, 0),
+                    start,
+                    end,
+                    self._format_duration(session.duration_seconds),
+                    format_number(session.hands * 3600 / session.duration_seconds, 0),
+                    format_currency(session.profit_minor / 100, currency, show_plus=True),
+                    self._format_optional_number(session.profit_bb),
+                    self._format_optional_number(session.bb_per_100),
+                    format_currency(session.all_in_ev_minor / 100, currency, show_plus=True),
+                    self._format_optional_number(session.all_in_ev_bb),
+                    self._format_optional_number(session.ev_bb_per_100),
+                    format_currency(session.ev_difference_minor / 100, currency, show_plus=True),
+                    format_currency(session.peak_minor / 100, currency, show_plus=True),
+                    format_currency(session.low_minor / 100, currency, show_plus=True),
+                    format_currency(session.max_drawdown_minor / 100, currency),
+                    self._format_optional_number(session.bb_per_hour),
+                    format_currency(session.currency_per_hour or 0, currency, show_plus=True),
+                ]
+            )
+        quotes = build_session_graph_quotes(self.session_metrics)
         return (results, quotes)
+
+    @staticmethod
+    def _format_duration(seconds: int) -> str:
+        minutes = max(1, seconds // 60)
+        hours, minutes = divmod(minutes, 60)
+        if hours:
+            return _("{hours}h {minutes}m").format(hours=hours, minutes=minutes)
+        return _("{minutes}m").format(minutes=minutes)
+
+    @staticmethod
+    def _format_optional_number(value: float | None) -> str:
+        return format_number(value, show_plus=True) if value is not None else "—"
 
     def clearGraphData(self) -> None:
         with contextlib.suppress(Exception):
@@ -436,7 +453,7 @@ class GuiSessionViewer(QSplitter):
                 self.plot_widget.setParent(None)
                 self.plot_widget = None
 
-    def generateGraph(self, quotes, currencies: list[str] | None = None) -> None:
+    def generateGraph(self, quotes, _currencies: list[str] | None = None) -> None:
         self.clearGraphData()
         sitenos = []
         playerids = []
@@ -446,7 +463,9 @@ class GuiSessionViewer(QSplitter):
         siteids = self.filters.getSiteIds()
         limits = self.filters.getLimits()
 
-        log.warning(f"GuiSessionViewer.generateGraph called. quotes count: {len(quotes)}, sites: {sites}, heroes: {heroes}")
+        log.warning(
+            f"GuiSessionViewer.generateGraph called. quotes count: {len(quotes)}, sites: {sites}, heroes: {heroes}"
+        )
 
         names = ""
 
@@ -469,7 +488,9 @@ class GuiSessionViewer(QSplitter):
                     actual_site_id = self.db.get_player_site_id(pid)
                     if actual_site_id is not None:
                         sitenos.append(actual_site_id)
-                        log.warning(f"GuiSessionViewer.generateGraph: Using resolved actual siteId {actual_site_id} for hero '{pname}'")
+                        log.warning(
+                            f"GuiSessionViewer.generateGraph: Using resolved actual siteId {actual_site_id} for hero '{pname}'"
+                        )
                     else:
                         sitenos.append(siteids[site])
 
@@ -493,7 +514,6 @@ class GuiSessionViewer(QSplitter):
         bg = self.colors["background"]
         fg = self.colors["foreground"]
         grid = self.colors["grid"]
-        line = self.colors.get("line_hands", "#22c55e")
         gain = self.colors.get("line_up", "#22c55e")
         loss = self.colors.get("line_down", "#ef4444")
 
@@ -503,18 +523,21 @@ class GuiSessionViewer(QSplitter):
         highs = np.array([float(q[3]) for q in quotes])
         lows = np.array([float(q[4]) for q in quotes])
         profits = closes - opens
-        display_currency = currencies[0] if currencies else "USD"
-
-        session_colors = [gain if value >= 0 else loss for value in profits]
+        session_colors = [gain if value >= 0 else loss if np.isfinite(value) else grid for value in profits]
 
         self.plot_widget = pg.PlotWidget()
         self.plot_widget.setBackground(bg)
         self.plot_widget.showGrid(x=True, y=True, alpha=0.3)
 
-        total = closes[-1] if len(closes) else 0
-        self.plot_widget.setTitle(f"<span style='color:{fg}; font-size:11pt; font-weight:bold;'>Session profit: {format_currency(total, display_currency)}{names}</span>")
+        valid_profits = profits[np.isfinite(profits)]
+        total = float(valid_profits.sum()) if len(valid_profits) else 0.0
+        excluded_sessions = sum(session.bb_hands < session.hands for session in self.session_metrics)
+        excluded_note = f" · {excluded_sessions} sessions with incomplete BB data omitted" if excluded_sessions else ""
+        self.plot_widget.setTitle(
+            f"<span style='color:{fg}; font-size:11pt; font-weight:bold;'>Session results: {format_number(total, show_plus=True)} BB{excluded_note}{names}</span>"
+        )
         self.plot_widget.setLabel("bottom", _("Session"), **{"color": fg, "font-size": "9pt"})
-        self.plot_widget.setLabel("left", currency_symbol(display_currency), **{"color": fg, "font-size": "9pt"})
+        self.plot_widget.setLabel("left", _("Cumulative result (BB)"), **{"color": fg, "font-size": "9pt"})
 
         axis_pen = pg.mkPen(color=grid, width=1)
         self.plot_widget.getAxis("left").setPen(axis_pen)
@@ -524,11 +547,23 @@ class GuiSessionViewer(QSplitter):
 
         self.plot_widget.addLine(y=0, pen=pg.mkPen(color=grid, width=1, style=Qt.PenStyle.DashLine))
 
-        for sid, start, end, low, high, color in zip(session_ids, opens, closes, lows, highs, session_colors, strict=False):
+        for sid, start, end, low, high, color in zip(
+            session_ids, opens, closes, lows, highs, session_colors, strict=False
+        ):
+            if not np.isfinite(end):
+                continue
             self.plot_widget.plot([sid, sid], [low, high], pen=pg.mkPen(color=color, width=1.5))
             self.plot_widget.plot([sid, sid], [start, end], pen=pg.mkPen(color=color, width=4.0))
 
-        self.plot_widget.plot(session_ids, closes, pen=pg.mkPen(color=line, width=2.8), symbol="o", symbolSize=6, symbolBrush=pg.mkBrush(color=line))
+        valid = np.isfinite(closes)
+        self.plot_widget.plot(
+            session_ids[valid],
+            closes[valid],
+            pen=None,
+            symbol="o",
+            symbolSize=6,
+            symbolBrush=pg.mkBrush(color=gain),
+        )
 
         ticks = [(sid, str(int(sid))) for sid in session_ids]
         self.plot_widget.getAxis("bottom").setTicks([ticks])
@@ -542,14 +577,46 @@ class GuiSessionViewer(QSplitter):
         self.liststore.setHorizontalHeaderLabels(
             [column[colheading] for column in self.columns],
         )
-        for row in results:
+        numeric_values = []
+        for session in self.session_metrics:
+            numeric_values.append(
+                [
+                    session.number,
+                    session.hands,
+                    session.bb_hands,
+                    session.start_timestamp,
+                    session.end_timestamp,
+                    session.duration_seconds,
+                    session.hands * 3600 / session.duration_seconds,
+                    session.profit_minor,
+                    session.profit_bb if session.profit_bb is not None else float("-inf"),
+                    session.bb_per_100 if session.bb_per_100 is not None else float("-inf"),
+                    session.all_in_ev_minor,
+                    session.all_in_ev_bb if session.all_in_ev_bb is not None else float("-inf"),
+                    session.ev_bb_per_100 if session.ev_bb_per_100 is not None else float("-inf"),
+                    session.ev_difference_minor,
+                    session.peak_minor,
+                    session.low_minor,
+                    session.max_drawdown_minor,
+                    session.bb_per_hour if session.bb_per_hour is not None else float("-inf"),
+                    session.currency_per_hour if session.currency_per_hour is not None else float("-inf"),
+                ]
+            )
+        for row_index, row in enumerate(results):
             listrow = [QStandardItem(str(r)) for r in row]
             for item in listrow:
                 item.setEditable(False)
+            for item, value in zip(listrow, numeric_values[row_index], strict=True):
+                item.setData(value, Qt.ItemDataRole.UserRole)
             self.liststore.appendRow(listrow)
 
         self.view = QTableView()
-        self.view.setModel(self.liststore)
+        proxy = QSortFilterProxyModel(self.view)
+        proxy.setSourceModel(self.liststore)
+        proxy.setSortRole(Qt.ItemDataRole.UserRole)
+        self.view.setModel(proxy)
+        self.view.setSortingEnabled(True)
+        self.view.sortByColumn(0, Qt.SortOrder.AscendingOrder)
         install_table_export(self.view)
         self.view.verticalHeader().hide()
         self.view.setSelectionBehavior(QTableView.SelectRows)
@@ -557,7 +624,10 @@ class GuiSessionViewer(QSplitter):
         self.view.doubleClicked.connect(self.row_activated)
 
     def row_activated(self, index) -> None:
-        if index.row() < len(self.times):
+        model = self.view.model() if self.view is not None else None
+        source_index = model.mapToSource(index) if isinstance(model, QSortFilterProxyModel) else index
+        row = source_index.row()
+        if 0 <= row < len(self.times):
             replayer = None
             for tabobject in self.owner.threads:
                 if isinstance(tabobject, GuiHandViewer.GuiHandViewer):
@@ -572,11 +642,7 @@ class GuiSessionViewer(QSplitter):
                         break
             if replayer is None:
                 return
-            reformat = lambda t: strftime("%Y-%m-%d %H:%M:%S+00:00", gmtime(t))
-            handids = replayer.get_hand_ids_from_date_range(
-                reformat(self.times[index.row()][0]),
-                reformat(self.times[index.row()][1]),
-            )
+            handids = list(self.times[row])
             log.debug(f"handids: {handids}")
 
             replayer.reload_hands(handids)
