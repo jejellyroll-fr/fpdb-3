@@ -34,6 +34,9 @@ POSTFLOP_FILTERS: dict[str, tuple[str, str | None]] = {
     "check_raise": ("check_raise", None),
 }
 
+_ACTION_FILTERS = frozenset({"bet", "call", "raise", "check", "fold"})
+_ANALYTICS_SUBSYSTEM_ORDER = ("action_events", "situations")
+
 POSTFLOP_ACTION_TYPES = {
     "bet": "bets",
     "call": "calls",
@@ -50,6 +53,26 @@ SIZING_BUCKETS: dict[str, tuple[int | None, int | None]] = {
     "100_150": (10000, 15000),
     "over_150": (15000, None),
 }
+
+
+def required_analytics_subsystems(filters: Mapping[str, Any]) -> tuple[str, ...]:
+    """Return derived-data layers required by the selected filters, in stable order."""
+    required: set[str] = set()
+    preflop = filters.get("preflop")
+    postflop = filters.get("postflop")
+    if preflop in PREFLOP_FILTERS or preflop == "all_in":
+        required.add("action_events")
+        if preflop in PREFLOP_FILTERS:
+            required.add("situations")
+    if postflop in _ACTION_FILTERS:
+        required.add("action_events")
+    elif postflop in POSTFLOP_FILTERS:
+        required.update(("action_events", "situations"))
+    if filters.get("sizing_bucket") in SIZING_BUCKETS or any(
+        filters.get(key) not in (None, "") for key in ("stack_min_bb", "stack_max_bb")
+    ):
+        required.add("action_events")
+    return tuple(name for name in _ANALYTICS_SUBSYSTEM_ORDER if name in required)
 
 
 def _action_exists(
@@ -94,7 +117,7 @@ def _starting_hand_clause(filters: Mapping[str, Any], placeholder: str) -> tuple
     class_expression = holdem_class_expression("HPF.")
     clause = (
         "EXISTS (SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id "  # nosec B608
-        "AND HPF.playerId = hp.playerId AND gt.category IN ('holdem', '6_holdem') "
+        "AND HPF.playerId = hp.playerId AND gt.category IN ('holdem', '6_holdem', 'aof_holdem') "
         f"AND ({class_expression}) IN ({marks}))"
     )
     return [clause], ids
@@ -158,7 +181,7 @@ def _postflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list
             "EXISTS (SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id "
             "AND HPF.playerId = hp.playerId AND HPF.sawShowdown IS TRUE)"
         ], []
-    if postflop in {"bet", "call", "raise", "check", "fold"}:
+    if postflop in _ACTION_FILTERS:
         return [
             "EXISTS (SELECT 1 FROM HandsActions AF WHERE AF.handId = h.id AND AF.playerId = hp.playerId "  # nosec B608
             f"AND AF.street BETWEEN 1 AND 3 AND AF.actionType = {placeholder})"
@@ -270,4 +293,10 @@ def build_filter_clauses(
     return clauses, tuple(params)
 
 
-__all__ = ["PREFLOP_FILTERS", "POSTFLOP_FILTERS", "SIZING_BUCKETS", "build_filter_clauses"]
+__all__ = [
+    "PREFLOP_FILTERS",
+    "POSTFLOP_FILTERS",
+    "SIZING_BUCKETS",
+    "build_filter_clauses",
+    "required_analytics_subsystems",
+]

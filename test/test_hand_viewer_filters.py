@@ -5,7 +5,11 @@ import sqlite3
 import pytest
 
 from fpdb_3_legacy.analytics_query import escape_literal_percent
-from fpdb_3_legacy.hand_viewer_filters import POSTFLOP_ACTION_TYPES, build_filter_clauses
+from fpdb_3_legacy.hand_viewer_filters import (
+    POSTFLOP_ACTION_TYPES,
+    build_filter_clauses,
+    required_analytics_subsystems,
+)
 from fpdb_3_legacy.holdem_classes import class_id_of_label
 
 
@@ -72,7 +76,12 @@ def _database():
 def test_starting_hand_filter_uses_canonical_class_and_excludes_omaha():
     connection = _database()
     try:
-        assert _run_filters(connection, {"starting_hands": ["AKs"]}) == [1, 2]
+        connection.execute("INSERT INTO Gametypes VALUES (3, 'aof_holdem', 10)")
+        connection.execute("INSERT INTO Hands VALUES (5, 3, 100)")
+        connection.execute(
+            "INSERT INTO HandsPlayers (handId, playerId, card1, card2) VALUES (5, 55, 13, 12)"
+        )
+        assert _run_filters(connection, {"starting_hands": ["AKs"]}) == [1, 2, 5]
         assert class_id_of_label("AKs") in range(1, 170)
     finally:
         connection.close()
@@ -151,6 +160,22 @@ def test_empty_advanced_filters_do_not_add_sql_or_parameters():
 def test_sql_placeholder_must_be_a_supported_driver_marker():
     with pytest.raises(ValueError, match="Unsupported SQL parameter placeholder"):
         build_filter_clauses({"preflop": "vpip"}, "? OR 1=1 --")
+
+
+@pytest.mark.parametrize(
+    ("filters", "expected"),
+    [
+        ({"preflop": "vpip"}, ()),
+        ({"preflop": "all_in"}, ("action_events",)),
+        ({"preflop": "rfi"}, ("action_events", "situations")),
+        ({"postflop": "bet"}, ("action_events",)),
+        ({"postflop": "check_raise"}, ("action_events", "situations")),
+        ({"sizing_bucket": "25_50"}, ("action_events",)),
+        ({"stack_min_bb": 30}, ("action_events",)),
+    ],
+)
+def test_advanced_filters_declare_the_analytics_subsystems_they_need(filters, expected):
+    assert required_analytics_subsystems(filters) == expected
 
 
 def test_starting_hand_modulo_is_escaped_for_format_style_drivers():

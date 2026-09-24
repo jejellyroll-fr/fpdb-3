@@ -60,7 +60,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Filters, GuiReplayer, Hand, gui_empty_state
 from fpdb_3_legacy.analytics_query import escape_literal_percent
-from fpdb_3_legacy.hand_viewer_filters import build_filter_clauses
+from fpdb_3_legacy.hand_viewer_filters import build_filter_clauses, required_analytics_subsystems
 from fpdb_3_legacy.holdem_classes import RANKS, grid_labels
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency, format_datetime, format_number
@@ -491,6 +491,45 @@ class GuiHandViewer(QSplitter):
                 raise ValueError(_("The minimum cannot exceed the maximum for {}.").format(label))
         return values
 
+    def _analytics_filter_warning(self, filters: dict[str, Any]) -> str:
+        """Explain when selected filters depend on analytics rows that are not readable."""
+        required = required_analytics_subsystems(filters)
+        if not required:
+            return ""
+        try:
+            from fpdb_3_legacy.analytics_lifecycle import subsystem_statuses
+
+            statuses = subsystem_statuses(self.db)
+        except Exception:  # noqa: BLE001 - do not silently return a misleading empty result
+            log.warning("Could not verify analytics status for Hand Viewer filters", exc_info=True)
+            return _(
+                "The analytics status needed by these filters could not be verified. "
+                "No results were queried; check the database and rebuild analytics data before retrying.",
+            )
+
+        stale = [statuses[name] for name in required if statuses[name].is_stale]
+        if not stale:
+            return ""
+        older = [status.name for status in stale if status.recorded_version < status.code_version]
+        newer = [status.name for status in stale if status.recorded_version > status.code_version]
+        messages = []
+        if older:
+            messages.append(
+                _("These filters need missing or outdated analytics data: {names}.").format(
+                    names=", ".join(older),
+                )
+            )
+            messages.append(_("Use Database → Rebuild Analytics Data, then retry the filter."))
+        if newer:
+            messages.append(
+                _("These analytics rows were created by a newer fpdb version: {names}.").format(
+                    names=", ".join(newer),
+                )
+            )
+            messages.append(_("Upgrade fpdb before using these filters."))
+        messages.append(_("No hands were queried, to avoid presenting an incomplete result as empty."))
+        return "\n\n".join(messages)
+
     def close_owned_database(self) -> None:
         """Release the connection created for this tab."""
         with contextlib.suppress(Exception):
@@ -556,6 +595,10 @@ class GuiHandViewer(QSplitter):
             advanced_values = self._advanced_filter_values() if hasattr(self, "_advanced_filter_values") else {}
         except ValueError as exc:
             QMessageBox.warning(self, _("Invalid review filter"), str(exc))
+            return []
+        analytics_warning = self._analytics_filter_warning(advanced_values)
+        if analytics_warning:
+            QMessageBox.warning(self, _("Analytics data unavailable"), analytics_warning)
             return []
         advanced, advanced_params = build_filter_clauses(advanced_values, placeholder)
         extra.extend(advanced)
