@@ -126,11 +126,11 @@ def log_process_identity(
 ) -> dict[str, Any]:
     """Write the launch banner and return the identity it reported.
 
-    The process banner is informational; actionable launch failures (such as
-    App Translocation below) remain warnings.
+    Keep the process banner at warning level so it survives the HUD's default
+    logger threshold and is available in the persisted diagnostic log.
     """
     identity = process_identity(role, command)
-    log.info("FPDB launch identity: %s", format_identity(identity))
+    log.warning("FPDB launch identity: %s", format_identity(identity))
     if identity["translocated"]:
         log.warning(
             "This build is running under macOS App Translocation from %s. macOS gives a "

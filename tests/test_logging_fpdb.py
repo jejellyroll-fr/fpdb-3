@@ -18,6 +18,7 @@ from typing import Any
 
 import pytest
 
+import fpdb_3_legacy.hud_diagnostics as hud_diagnostics
 import fpdb_3_legacy.loggingFpdb as logging_fpdb
 
 
@@ -65,6 +66,34 @@ def preserve_global_logging():
 # --------------------------------------------------------------------------
 # Levels
 # --------------------------------------------------------------------------
+
+
+def test_hud_launch_identity_survives_the_default_warning_threshold(caplog, monkeypatch) -> None:
+    identity = {
+        "session": "abc123",
+        "role": "hud",
+        "version": "test",
+        "pid": 42,
+        "ppid": 1,
+        "executable": "/usr/bin/python",
+        "frozen": "False",
+        "bundle": None,
+        "translocated": False,
+        "command": ["hud"],
+    }
+    monkeypatch.setattr(hud_diagnostics, "process_identity", lambda role, command: identity)
+    logger = logging.getLogger("fpdb.test.hud_identity")
+    logger.setLevel(logging.WARNING)
+
+    with caplog.at_level(logging.WARNING, logger=logger.name):
+        hud_diagnostics.log_process_identity(logger, hud_diagnostics.ROLE_HUD)
+
+    assert any(
+        record.levelno == logging.WARNING
+        and "FPDB launch identity" in record.message
+        and "session='abc123'" in record.message
+        for record in caplog.records
+    )
 
 
 @pytest.mark.parametrize(
