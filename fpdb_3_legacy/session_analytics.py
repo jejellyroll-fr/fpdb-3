@@ -39,6 +39,8 @@ class SessionMetrics:
     bb_hands: int
     profit_minor: float
     profit_bb: float | None
+    peak_bb: float | None
+    low_bb: float | None
     bb_per_100: float | None
     all_in_ev_minor: float
     all_in_ev_bb: float | None
@@ -61,6 +63,15 @@ def _make_session(number: int, hands: list[HandResult]) -> SessionMetrics:
     bb_hands = [hand for hand in hands if hand.big_blind_minor > 0]
     profit_bb = sum(hand.profit_minor / hand.big_blind_minor for hand in bb_hands) if bb_hands else None
     ev_bb = sum(hand.all_in_ev_minor / hand.big_blind_minor for hand in bb_hands) if bb_hands else None
+    peak_bb: float | None = None
+    low_bb: float | None = None
+    if len(bb_hands) == len(hands):
+        cumulative_bb = 0.0
+        peak_bb = low_bb = 0.0
+        for hand in hands:
+            cumulative_bb += hand.profit_minor / hand.big_blind_minor
+            peak_bb = max(peak_bb, cumulative_bb)
+            low_bb = min(low_bb, cumulative_bb)
     duration = max(60, hands[-1].timestamp - hands[0].timestamp) + SESSION_PADDING_SECONDS
     hours = duration / 3600
     cumulative_minor = 0.0
@@ -82,6 +93,8 @@ def _make_session(number: int, hands: list[HandResult]) -> SessionMetrics:
         bb_hands=len(bb_hands),
         profit_minor=profit_minor,
         profit_bb=profit_bb,
+        peak_bb=peak_bb,
+        low_bb=low_bb,
         bb_per_100=profit_bb / len(bb_hands) * 100 if profit_bb is not None else None,
         all_in_ev_minor=ev_minor,
         all_in_ev_bb=ev_bb,
@@ -172,7 +185,12 @@ def build_session_graph_quotes(
     quotes: list[tuple[int, float, float, float, float]] = []
     cumulative_bb = 0.0
     for session in sessions:
-        if session.bb_hands != session.hands or session.profit_bb is None:
+        if (
+            session.bb_hands != session.hands
+            or session.profit_bb is None
+            or session.peak_bb is None
+            or session.low_bb is None
+        ):
             missing = float("nan")
             quotes.append((session.number, cumulative_bb, missing, missing, missing))
             continue
@@ -184,8 +202,8 @@ def build_session_graph_quotes(
                 session.number,
                 opening_bb,
                 cumulative_bb,
-                max(opening_bb, cumulative_bb),
-                min(opening_bb, cumulative_bb),
+                max(opening_bb, cumulative_bb, opening_bb + session.peak_bb),
+                min(opening_bb, cumulative_bb, opening_bb + session.low_bb),
             )
         )
     return quotes

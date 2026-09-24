@@ -254,10 +254,15 @@ class GuiSessionViewer(QSplitter):
         if self._db_worker is not None:
             with contextlib.suppress(Exception):
                 self._db_worker.finished.disconnect()
+            with contextlib.suppress(Exception):
+                self._db_worker.error.disconnect()
 
-        self._db_worker = DbWorker(self.db, "sessionStats", q)
+        worker = DbWorker(self.db, "sessionStats", q)
+        self._db_worker = worker
 
         def _on_query_finished(name, results_rows, colnames):
+            if self._db_worker is not worker:
+                return
             hands = list(results_rows) if results_rows else []
             log.warning(f"GuiSessionViewer DbWorker finished: returned {len(hands)} hands.")
             if not hands:
@@ -295,6 +300,8 @@ class GuiSessionViewer(QSplitter):
             log.warning(f"[PERF] GuiSessionViewer Stats page displayed in {time() - starttime:4.2f} seconds")
 
         def _on_query_error(err_msg):
+            if self._db_worker is not worker:
+                return
             log.error(f"GuiSessionViewer DbWorker error: {err_msg}")
             self.session_metrics = []
             self.times = []
@@ -302,9 +309,9 @@ class GuiSessionViewer(QSplitter):
             self.clearGraphData()
             gui_empty_state.show_no_data(self, context="Session viewer", db=self.db)
 
-        self._db_worker.finished.connect(_on_query_finished)
-        self._db_worker.error.connect(_on_query_error)
-        self._db_worker.start()
+        worker.finished.connect(_on_query_finished)
+        worker.error.connect(_on_query_error)
+        worker.start()
 
     def build_session_query(self, playerids, sitenos, games, currencies, limits, seats) -> str:
         q = self.sql.query["sessionStats"]

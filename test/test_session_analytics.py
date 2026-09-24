@@ -115,16 +115,19 @@ def test_session_graph_quotes_are_cumulative_and_skip_incomplete_blinds() -> Non
     sessions = build_sessions(
         [
             (1, 1_000, 500, 500, 100, "USD"),
-            (2, 3_000, -200, -200, 100, "USD"),
-            (3, 5_000, 250, 250, -1, "USD"),
-            (4, 7_000, 100, 100, 100, "USD"),
+            (2, 3_000, 1_000, 1_000, 100, "USD"),
+            (3, 3_100, -1_000, -1_000, 100, "USD"),
+            (4, 5_000, -200, -200, 100, "USD"),
+            (5, 7_000, 250, 250, -1, "USD"),
+            (6, 9_000, 100, 100, 100, "USD"),
         ]
     )
 
     quotes = build_session_graph_quotes(sessions)
 
     assert quotes[0] == (1, 0, 5, 5, 0)
-    assert quotes[1] == (2, 5, 3, 5, 3)
-    assert quotes[2][0:2] == (3, 3)
-    assert all(math.isnan(value) for value in quotes[2][2:])
-    assert quotes[3] == (4, 3, 4, 4, 3)
+    assert quotes[1] == (2, 5, 5, 15, 5)
+    assert quotes[2] == (3, 5, 3, 5, 3)
+    assert quotes[3][0:2] == (4, 3)
+    assert all(math.isnan(value) for value in quotes[3][2:])
+    assert quotes[4] == (5, 3, 4, 4, 3)
