@@ -69,6 +69,7 @@ class GuiSessionViewer(QSplitter):
         self.canvas: Any = None
         self.graphBox: Any = None
         self._db_worker: DbWorker | None = None
+        self._db_worker_generation = 0
         self.session_metrics: list[SessionMetrics] = []
 
         # create new db connection to avoid conflicts with other threads
@@ -219,6 +220,7 @@ class GuiSessionViewer(QSplitter):
             currencies=currencies,
         )
         if missing is not None:
+            self._invalidate_session_worker()
             self.session_metrics = []
             self.times = []
             self.summary_label.clear()
@@ -250,18 +252,14 @@ class GuiSessionViewer(QSplitter):
         starttime = time()
         q = self.build_session_query(playerids, sitenos, games, currencies, limits, seats)
 
-        # Disconnect any previously running worker for this tab
-        if self._db_worker is not None:
-            with contextlib.suppress(Exception):
-                self._db_worker.finished.disconnect()
-            with contextlib.suppress(Exception):
-                self._db_worker.error.disconnect()
+        self._invalidate_session_worker()
+        worker_generation = self._db_worker_generation
 
         worker = DbWorker(self.db, "sessionStats", q)
         self._db_worker = worker
 
         def _on_query_finished(name, results_rows, colnames):
-            if self._db_worker is not worker:
+            if self._db_worker is not worker or self._db_worker_generation != worker_generation:
                 return
             hands = list(results_rows) if results_rows else []
             log.warning(f"GuiSessionViewer DbWorker finished: returned {len(hands)} hands.")
@@ -300,7 +298,7 @@ class GuiSessionViewer(QSplitter):
             log.warning(f"[PERF] GuiSessionViewer Stats page displayed in {time() - starttime:4.2f} seconds")
 
         def _on_query_error(err_msg):
-            if self._db_worker is not worker:
+            if self._db_worker is not worker or self._db_worker_generation != worker_generation:
                 return
             log.error(f"GuiSessionViewer DbWorker error: {err_msg}")
             self.session_metrics = []
@@ -312,6 +310,16 @@ class GuiSessionViewer(QSplitter):
         worker.finished.connect(_on_query_finished)
         worker.error.connect(_on_query_error)
         worker.start()
+
+    def _invalidate_session_worker(self) -> None:
+        """Prevent an obsolete async query from mutating the current view."""
+        self._db_worker_generation += 1
+        worker = self._db_worker
+        if worker is not None:
+            with contextlib.suppress(Exception):
+                worker.finished.disconnect()
+            with contextlib.suppress(Exception):
+                worker.error.disconnect()
 
     def build_session_query(self, playerids, sitenos, games, currencies, limits, seats) -> str:
         q = self.sql.query["sessionStats"]
