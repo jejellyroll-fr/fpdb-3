@@ -158,7 +158,7 @@ def _preflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list[
     if preflop == "all_in":
         return [
             "EXISTS (SELECT 1 FROM HandsActions AAI WHERE AAI.handId = h.id "
-            "AND AAI.playerId = hp.playerId AND AAI.street = 0 AND AAI.allIn IS TRUE)"
+            "AND AAI.playerId = hp.playerId AND AAI.street IN (-1, 0) AND AAI.allIn IS TRUE)"
         ], []
     if preflop in PREFLOP_FILTERS:
         label, response = PREFLOP_FILTERS[preflop]
@@ -183,11 +183,11 @@ def _postflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list
     if postflop in _ACTION_FILTERS:
         return [
             "EXISTS (SELECT 1 FROM HandsActions AF WHERE AF.handId = h.id AND AF.playerId = hp.playerId "  # nosec B608
-            f"AND AF.street BETWEEN 1 AND 3 AND AF.actionType = {placeholder})"
+            f"AND AF.street >= 1 AND AF.actionType = {placeholder})"
         ], [POSTFLOP_ACTION_TYPES[postflop]]
     if postflop in POSTFLOP_FILTERS:
         label, response = POSTFLOP_FILTERS[postflop]
-        clause, params = _action_exists("h", label, response, "AF.street BETWEEN 1 AND 3", placeholder)
+        clause, params = _action_exists("h", label, response, "AF.street >= 1", placeholder)
         return [clause], params
     return [], []
 

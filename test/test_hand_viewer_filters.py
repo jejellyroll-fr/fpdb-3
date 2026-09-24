@@ -214,6 +214,24 @@ def test_preflop_all_in_does_not_match_an_all_in_on_the_flop():
         connection.close()
 
 
+def test_preflop_all_in_includes_a_forced_all_in_on_the_blinds_round():
+    connection = _database()
+    try:
+        connection.execute("INSERT INTO HandsActions VALUES (2, 22, 0, -1, 'big blind', 0, 0, 1)")
+        assert _run_filters(connection, {"preflop": "all_in"}) == [2]
+    finally:
+        connection.close()
+
+
+def test_postflop_action_filter_includes_stud_seventh_street():
+    connection = _database()
+    try:
+        connection.execute("INSERT INTO HandsActions VALUES (3, 33, 5, 4, 'checks', 0, 0, 0)")
+        assert _run_filters(connection, {"postflop": "check"}) == [3]
+    finally:
+        connection.close()
+
+
 def test_starting_hand_labels_are_validated_before_querying():
     with pytest.raises(ValueError):
         build_filter_clauses({"starting_hands": ["not a range"]}, "?")
