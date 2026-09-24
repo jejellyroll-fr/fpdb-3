@@ -87,6 +87,27 @@ def test_preflop_and_postflop_filters_match_different_decisions_in_one_hand():
         connection.close()
 
 
+def test_generic_limp_filter_includes_over_limps():
+    connection = _database()
+    try:
+        connection.execute("INSERT INTO Hands VALUES (4, 1, 100)")
+        connection.execute(
+            "INSERT INTO HandsPlayers (handId, playerId, street0VPIChance, street0VPI, wentAllIn, "
+            "street1Seen, street2Seen, street3Seen, sawShowdown, totalProfit) "
+            "VALUES (4, 44, 1, 1, 0, 0, 0, 0, 0, 20)"
+        )
+        connection.execute(
+            "INSERT INTO HandsActions VALUES (4, 44, 1, 0, 'calls', 10000, 0, 0)"
+        )
+        connection.execute(
+            "INSERT INTO HandsSituations VALUES "
+            "(4, 44, 1, 'over_limp', '[\"over_limp\", \"facing_limpers\"]', 'call')"
+        )
+        assert _run_filters(connection, {"preflop": "limp"}) == [4]
+    finally:
+        connection.close()
+
+
 def test_exact_cards_match_known_cards_without_becoming_a_range_class():
     connection = _database()
     try:

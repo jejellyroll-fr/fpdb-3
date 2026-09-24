@@ -13,9 +13,9 @@ from typing import Any
 from . import Card
 from .holdem_classes import class_ids, holdem_class_expression
 
-PREFLOP_FILTERS: dict[str, tuple[str, str | None]] = {
+PREFLOP_FILTERS: dict[str, tuple[str | tuple[str, ...], str | None]] = {
     "rfi": ("open_raise", None),
-    "limp": ("open_limp", None),
+    "limp": (("open_limp", "over_limp"), None),
     "call_open": ("facing_open", "call"),
     "three_bet": ("three_bet", None),
     "four_bet": ("four_bet", None),
@@ -50,21 +50,26 @@ SIZING_BUCKETS: dict[str, tuple[int | None, int | None]] = {
 
 def _action_exists(
     hand_alias: str,
-    label: str,
+    label: str | tuple[str, ...],
     response: str | None,
     street_condition: str,
     placeholder: str,
 ) -> tuple[str, list[Any]]:
     """Match a semantic action label on any decision in a hand."""
+    labels = (label,) if isinstance(label, str) else label
+    label_conditions = [
+        f"SF.primaryLabel IN ({', '.join(placeholder for _ in labels)})",
+        "(" + " OR ".join("SF.labels LIKE " + placeholder for _ in labels) + ")",
+    ]
     conditions = [
         "AF.handId = " + hand_alias + ".id",
         "AF.playerId = hp.playerId",
         "AF.playerId = SF.playerId",
         "AF.actionNo = SF.actionNo",
         street_condition,
-        f"(SF.primaryLabel = {placeholder} OR SF.labels LIKE {placeholder})",
+        "(" + " OR ".join(label_conditions) + ")",
     ]
-    params: list[Any] = [label, f'%"{label}"%']
+    params: list[Any] = [*labels, *(f'%"{value}"%' for value in labels)]
     if response:
         conditions.append(f"SF.response = {placeholder}")
         params.append(response)
@@ -117,17 +122,17 @@ def _preflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list[
     if preflop == "vpip":
         return [
             "EXISTS (SELECT 1 FROM HandsPlayers HPV WHERE HPV.handId = h.id AND HPV.playerId = hp.playerId "
-            "AND HPV.street0VPIChance > 0 AND HPV.street0VPI > 0)"
+            "AND HPV.street0VPIChance IS TRUE AND HPV.street0VPI IS TRUE)"
         ], []
     if preflop == "not_vpip":
         return [
             "EXISTS (SELECT 1 FROM HandsPlayers HPV WHERE HPV.handId = h.id AND HPV.playerId = hp.playerId "
-            "AND HPV.street0VPIChance > 0 AND HPV.street0VPI = 0)"
+            "AND HPV.street0VPIChance IS TRUE AND HPV.street0VPI IS FALSE)"
         ], []
     if preflop == "all_in":
         return [
             "EXISTS (SELECT 1 FROM HandsActions AAI WHERE AAI.handId = h.id "
-            "AND AAI.playerId = hp.playerId AND AAI.street = 0 AND AAI.allIn = 1)"
+            "AND AAI.playerId = hp.playerId AND AAI.street = 0 AND AAI.allIn IS TRUE)"
         ], []
     if preflop in PREFLOP_FILTERS:
         label, response = PREFLOP_FILTERS[preflop]
@@ -142,12 +147,12 @@ def _postflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list
         street = {"saw_flop": 1, "saw_turn": 2, "saw_river": 3}[postflop]
         return [
             f"EXISTS (SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id "
-            f"AND HPF.playerId = hp.playerId AND HPF.street{street}Seen > 0)"
+            f"AND HPF.playerId = hp.playerId AND HPF.street{street}Seen IS TRUE)"
         ], []
     if postflop == "showdown":
         return [
             "EXISTS (SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id "
-            "AND HPF.playerId = hp.playerId AND HPF.sawShowdown = 1)"
+            "AND HPF.playerId = hp.playerId AND HPF.sawShowdown IS TRUE)"
         ], []
     if postflop in {"bet", "call", "raise", "check", "fold"}:
         return [
