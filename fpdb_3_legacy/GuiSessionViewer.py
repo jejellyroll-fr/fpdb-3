@@ -212,6 +212,10 @@ class GuiSessionViewer(QSplitter):
             currencies=currencies,
         )
         if missing is not None:
+            self.session_metrics = []
+            self.times = []
+            self.summary_label.clear()
+            self.clearGraphData()
             gui_empty_state.show_no_data(self, missing, context="Session viewer", db=self.db)
             self.db.rollback()
             return
@@ -285,6 +289,10 @@ class GuiSessionViewer(QSplitter):
 
         def _on_query_error(err_msg):
             log.error(f"GuiSessionViewer DbWorker error: {err_msg}")
+            self.session_metrics = []
+            self.times = []
+            self.summary_label.clear()
+            self.clearGraphData()
             gui_empty_state.show_no_data(self, context="Session viewer", db=self.db)
 
         self._db_worker.finished.connect(_on_query_finished)
