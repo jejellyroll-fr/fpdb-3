@@ -57,6 +57,7 @@ from fpdb_3_legacy.responsive_layout import (
     wrap_in_scroll,
 )
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
+from fpdb_3_legacy.table_export import install_table_export
 
 #: Bounds on the panel rail's width. The rail is as wide as its longest panel
 #: name, so no title is elided, and no wider than the cap: a study whose panel
@@ -267,6 +268,7 @@ class GuiStudyDashboard(QWidget):
             status = QLabel("Not loaded yet — this panel is loaded when opened.")
             status.setWordWrap(True)
             table = QTableWidget()
+            install_table_export(table)
             table.setSortingEnabled(True)
             table.setAlternatingRowColors(True)
             table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)

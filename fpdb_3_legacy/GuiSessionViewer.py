@@ -38,6 +38,7 @@ from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import currency_symbol, format_currency, format_datetime, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.ring_stats.base import DbWorker
+from fpdb_3_legacy.table_export import install_table_export
 
 log = get_logger("gui_session_viewer")
 DEBUG = False
@@ -549,6 +550,7 @@ class GuiSessionViewer(QSplitter):
 
         self.view = QTableView()
         self.view.setModel(self.liststore)
+        install_table_export(self.view)
         self.view.verticalHeader().hide()
         self.view.setSelectionBehavior(QTableView.SelectRows)
         frame.layout().addWidget(self.view)

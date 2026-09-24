@@ -11,6 +11,7 @@ from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QSplitter, QTableV
 
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
+from fpdb_3_legacy.table_export import install_table_export
 
 
 class StatsTableView(QWidget):
@@ -51,6 +52,7 @@ class StatsTableView(QWidget):
 
         # 1. Tableau du haut (Niveaux / Limites de jeu)
         self.summary_table = QTableView()
+        install_table_export(self.summary_table)
         self.summary_table.setSortingEnabled(True)
         self.summary_table.verticalHeader().hide()
         self.splitter.addWidget(self.summary_table)
@@ -67,6 +69,7 @@ class StatsTableView(QWidget):
 
         # 3. Tableau du bas (Détail par main de départ)
         self.hand_table = QTableView()
+        install_table_export(self.hand_table)
         self.hand_table.setSortingEnabled(True)
         self.hand_table.verticalHeader().hide()
         self.splitter.addWidget(self.hand_table)

@@ -25,6 +25,7 @@ from fpdb_3_legacy import Filters, GuiTourHandViewer, gui_empty_state
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency, format_datetime, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.table_export import install_table_export
 
 log = get_logger("gui_tourney_player_stats")
 
@@ -178,6 +179,7 @@ class GuiTourneyPlayerStats(QSplitter):
         model = QStandardItemModel(0, len(self.columns))
         model.setSortRole(Qt.ItemDataRole.UserRole)
         view.setModel(model)
+        install_table_export(view)
         view.verticalHeader().hide()
         vbox.addWidget(view)
         self.liststore.append(model)
