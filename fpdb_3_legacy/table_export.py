@@ -43,6 +43,7 @@ def table_text(
     model = view.model()
     if model is None:
         return ""
+    include_row_headers = bool(view.property("fpdb_export_vertical_headers"))
 
     visible = visible_column_order(view)
     selection = view.selectionModel()
@@ -64,10 +65,17 @@ def table_text(
 
     rows: list[list[str]] = []
     if include_headers:
-        rows.append([str(model.headerData(column, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole) or "") for column in columns])
+        horizontal_headers = [
+            str(model.headerData(column, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole) or "")
+            for column in columns
+        ]
+        rows.append(([""] if include_row_headers else []) + horizontal_headers)
 
     for row in row_numbers:
         values: list[str] = []
+        if include_row_headers:
+            row_header = model.headerData(row, Qt.Orientation.Vertical, Qt.ItemDataRole.DisplayRole)
+            values.append("" if row_header is None else str(row_header))
         for column in columns:
             index = model.index(row, column)
             if not whole_table and index not in selected:

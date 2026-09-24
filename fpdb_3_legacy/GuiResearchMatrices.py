@@ -43,6 +43,8 @@ class MatrixHeatmapWidget(QWidget):
         self.summary_label.setStyleSheet(f"color: {palette.get('muted_text', '#a0aec0')};")
         layout.addWidget(self.summary_label)
         self.table = QTableWidget()
+        # Matrix categories are rendered in the vertical header, not as cells.
+        self.table.setProperty("fpdb_export_vertical_headers", True)
         install_table_export(self.table)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.table.setAlternatingRowColors(True)

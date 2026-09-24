@@ -2,13 +2,22 @@ from __future__ import annotations
 
 import csv
 import io
+import os
 
+import pytest
 from PySide6.QtCore import QItemSelectionModel, QSortFilterProxyModel, Qt
 from PySide6.QtGui import QKeySequence, QStandardItem, QStandardItemModel
-from PySide6.QtWidgets import QTableView
+from PySide6.QtWidgets import QApplication, QTableView
 
 from fpdb_3_legacy import table_export
 from fpdb_3_legacy.table_export import install_table_export, serialize_rows, table_text, write_table
+
+
+@pytest.fixture(scope="module")
+def qapp():
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    app = QApplication.instance() or QApplication([])
+    yield app
 
 
 def _view(qapp) -> tuple[QTableView, QStandardItemModel]:
@@ -121,3 +130,35 @@ def test_installed_copy_shortcut_uses_shared_export(qapp, monkeypatch) -> None:
     copy_action.trigger()
 
     assert copied_text == ["Élodie\tcall\t1,25 €\n"]
+
+
+def test_matrix_export_includes_vertical_row_headers(qapp) -> None:
+    view, model = _view(qapp)
+    model.setVerticalHeaderLabels(["BTN", "BB"])
+    view.setProperty("fpdb_export_vertical_headers", True)
+
+    assert table_text(view, whole_table=True, include_headers=True) == (
+        "\tPlayer\tNote\tProfit\n"
+        "BTN\tÉlodie\tcall\t1,25 €\n"
+        "BB\tAlice\traise\t-2,00 €\n"
+    )
+
+
+def test_matrix_selection_includes_vertical_header_for_selected_rows(qapp) -> None:
+    view, model = _view(qapp)
+    model.setVerticalHeaderLabels(["BTN", "BB"])
+    view.setProperty("fpdb_export_vertical_headers", True)
+    selection = view.selectionModel()
+    selection.select(model.index(1, 2), QItemSelectionModel.SelectionFlag.Select)
+
+    assert table_text(view, include_headers=True) == (
+        "\tProfit\n"
+        "BB\t-2,00 €\n"
+    )
+
+
+def test_regular_table_export_does_not_include_vertical_headers(qapp) -> None:
+    view, model = _view(qapp)
+    model.setVerticalHeaderLabels(["row one", "row two"])
+
+    assert table_text(view, whole_table=True, include_headers=True).startswith("Player\tNote\tProfit\n")
