@@ -1,0 +1,131 @@
+"""Hand-level advanced filter semantics for the Hand Viewer (#396)."""
+
+import sqlite3
+
+import pytest
+
+from fpdb_3_legacy.hand_viewer_filters import build_filter_clauses
+from fpdb_3_legacy.holdem_classes import class_id_of_label
+
+
+def _run_filters(connection, filters):
+    clauses, params = build_filter_clauses(filters, "?")
+    where = " AND ".join(clauses) if clauses else "1=1"
+    return [
+        row[0]
+        for row in connection.execute(
+            "SELECT DISTINCT h.id FROM Hands h JOIN Gametypes gt ON gt.id = h.gametypeId "
+            f"JOIN HandsPlayers hp ON hp.handId = h.id WHERE {where} ORDER BY h.id",
+            params,
+        )
+    ]
+
+
+def _database():
+    connection = sqlite3.connect(":memory:")
+    connection.executescript(
+        """
+        CREATE TABLE Hands (id INTEGER PRIMARY KEY, gametypeId INTEGER, finalPot INTEGER);
+        CREATE TABLE Gametypes (id INTEGER PRIMARY KEY, category TEXT, bigBlind INTEGER);
+        CREATE TABLE HandsPlayers (
+            handId INTEGER, playerId INTEGER, card1 INTEGER, card2 INTEGER,
+            card3 INTEGER, card4 INTEGER, card5 INTEGER, card6 INTEGER,
+            card7 INTEGER, card8 INTEGER, card9 INTEGER, card10 INTEGER,
+            card11 INTEGER, card12 INTEGER, card13 INTEGER, card14 INTEGER,
+            card15 INTEGER, card16 INTEGER, card17 INTEGER, card18 INTEGER,
+            card19 INTEGER, card20 INTEGER,
+            street0VPIChance INTEGER, street0VPI INTEGER, wentAllIn INTEGER,
+            street1Seen INTEGER, street2Seen INTEGER, street3Seen INTEGER,
+            sawShowdown INTEGER, totalProfit INTEGER
+        );
+        CREATE TABLE HandsActions (
+            handId INTEGER, playerId INTEGER, actionNo INTEGER, street INTEGER,
+            actionType TEXT, effectiveStackBB INTEGER, sizingBp INTEGER
+        );
+        CREATE TABLE HandsSituations (
+            handId INTEGER, playerId INTEGER, actionNo INTEGER,
+            primaryLabel TEXT, labels TEXT, response TEXT
+        );
+        INSERT INTO Gametypes VALUES (1, 'holdem', 10), (2, 'omahahi', 10);
+        INSERT INTO Hands VALUES (1, 1, 100), (2, 1, 600), (3, 2, 100);
+        INSERT INTO HandsPlayers (
+            handId, playerId, card1, card2, card3, card4,
+            street0VPIChance, street0VPI, wentAllIn,
+            street1Seen, street2Seen, street3Seen, sawShowdown, totalProfit
+        ) VALUES
+            (1, 11, 13, 12, 0, 0, 1, 1, 0, 1, 1, 0, 0, 50),
+            (2, 22, 13, 12, 0, 0, 1, 0, 0, 1, 0, 0, 1, -100),
+            (3, 33, 7, 8, 13, 12, 1, 1, 0, 1, 0, 0, 0, 20);
+        INSERT INTO HandsActions VALUES
+            (1, 11, 1, 0, 'raise', 10000, 0), (1, 11, 2, 1, 'call', 9000, 5000),
+            (2, 22, 1, 0, 'fold', 2000, 0), (2, 22, 2, 1, 'bet', 1800, 2500);
+        INSERT INTO HandsSituations VALUES
+            (1, 11, 1, 'open_raise', '["open_raise"]', 'raise'),
+            (1, 11, 2, 'facing_cbet', '["facing_cbet"]', 'call'),
+            (2, 22, 1, 'facing_open', '["facing_open"]', 'fold');
+        """
+    )
+    return connection
+
+
+def test_starting_hand_filter_uses_canonical_class_and_excludes_omaha():
+    connection = _database()
+    try:
+        assert _run_filters(connection, {"starting_hands": ["AKs"]}) == [1, 2]
+        assert class_id_of_label("AKs") in range(1, 170)
+    finally:
+        connection.close()
+
+
+def test_preflop_and_postflop_filters_match_different_decisions_in_one_hand():
+    connection = _database()
+    try:
+        filters = {"preflop": "rfi", "postflop": "faced_cbet"}
+        assert _run_filters(connection, filters) == [1]
+    finally:
+        connection.close()
+
+
+def test_exact_cards_match_known_cards_without_becoming_a_range_class():
+    connection = _database()
+    try:
+        assert _run_filters(connection, {"exact_card_1": "Ah", "exact_card_2": "Kh"}) == [1, 2, 3]
+        assert _run_filters(connection, {"exact_card_1": "Ah"}) == [1, 2, 3]
+        assert _run_filters(connection, {"exact_card_1": "Ah", "exact_card_2": "Ah"}) == []
+    finally:
+        connection.close()
+
+
+@pytest.mark.parametrize(
+    ("filters", "expected"),
+    [
+        ({"starting_hands": ["AKs"], "exact_card_1": "Ah", "exact_card_2": "Kh"}, [1, 2]),
+        ({"preflop": "vpip"}, [1, 3]),
+        ({"preflop": "not_vpip"}, [2]),
+        ({"postflop": "saw_turn"}, [1]),
+        ({"postflop": "showdown"}, [2]),
+        ({"postflop": "bet"}, [2]),
+        ({"pot_min_bb": 20}, [2]),
+        ({"net_max_bb": -5}, [2]),
+        ({"stack_min_bb": 50, "stack_max_bb": 120}, [1]),
+        ({"stack_min_bb": 95}, [1]),
+        ({"sizing_bucket": "50_75"}, [1]),
+        ({"sizing_bucket": "25_50"}, [2]),
+        ({"players_min": 1, "players_max": 1}, [1, 2, 3]),
+    ],
+)
+def test_action_and_numeric_filters(filters, expected):
+    connection = _database()
+    try:
+        assert _run_filters(connection, filters) == expected
+    finally:
+        connection.close()
+
+
+def test_empty_advanced_filters_do_not_add_sql_or_parameters():
+    assert build_filter_clauses({}, "?") == ([], ())
+
+
+def test_starting_hand_labels_are_validated_before_querying():
+    with pytest.raises(ValueError):
+        build_filter_clauses({"starting_hands": ["not a range"]}, "?")
