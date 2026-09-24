@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import io
+import re
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 
@@ -13,12 +14,32 @@ from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QTableView
 
 from fpdb_3_legacy.i18n import gettext as _
 
+_NUMERIC_CELL = re.compile(
+    r"^[+-]?(?:\d+(?:[.,]\d+)?|\d{1,3}(?:[ ,.'’]\d{3})+(?:[.,]\d+)?)(?:\s*(?:[%€$£¥¢]|BB|bb))?$"
+)
+
+
+def spreadsheet_safe_value(value: str) -> str:
+    """Prevent spreadsheet formula evaluation without changing formatted numbers."""
+    stripped = value.lstrip()
+    if not stripped or stripped[0] not in "=+-@":
+        return value
+    if stripped[0] in "+-" and _NUMERIC_CELL.fullmatch(stripped):
+        return value
+    return "'" + value
+
+
+def append_extension(path: str | Path, extension: str) -> str:
+    """Ensure the selected export path has the requested suffix."""
+    result = str(path)
+    return result if result.lower().endswith(f".{extension.lower()}") else f"{result}.{extension}"
+
 
 def serialize_rows(rows: Iterable[Sequence[str]], *, delimiter: str) -> str:
     """Serialize rows with CSV escaping, including for clipboard TSV."""
     stream = io.StringIO(newline="")
     writer = csv.writer(stream, delimiter=delimiter, lineterminator="\n")
-    writer.writerows(rows)
+    writer.writerows([spreadsheet_safe_value(value) for value in row] for row in rows)
     return stream.getvalue()
 
 
@@ -107,6 +128,20 @@ def write_table(view: QTableView, path: str | Path, *, delimiter: str, include_h
     Path(path).write_text(text, encoding="utf-8", newline="")
 
 
+def confirm_overwrite(view: QTableView, path: str | Path) -> bool:
+    """Ask before replacing the final export path, including an appended suffix."""
+    if not Path(path).exists():
+        return True
+    answer = QMessageBox.question(
+        view,
+        _("Confirm overwrite"),
+        _("The file already exists:\n%s\nDo you want to replace it?") % path,
+        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        QMessageBox.StandardButton.No,
+    )
+    return answer == QMessageBox.StandardButton.Yes
+
+
 def install_table_export(view: QTableView) -> None:
     """Install copy shortcuts and an export context menu on a table view.
 
@@ -130,11 +165,13 @@ def install_table_export(view: QTableView) -> None:
             _("Export displayed values"),
             f"{label.lower()}-export.{extension}",
             f"{label} (*.{extension})",
+            options=QFileDialog.Option.DontConfirmOverwrite,
         )
         if not path:
             return
-        if not path.lower().endswith(f".{extension}"):
-            path += f".{extension}"
+        path = append_extension(path, extension)
+        if not confirm_overwrite(view, path):
+            return
         try:
             write_table(view, path, delimiter=delimiter)
         except OSError as exc:

@@ -10,7 +10,14 @@ from PySide6.QtGui import QKeySequence, QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import QApplication, QTableView
 
 from fpdb_3_legacy import table_export
-from fpdb_3_legacy.table_export import install_table_export, serialize_rows, table_text, write_table
+from fpdb_3_legacy.table_export import (
+    append_extension,
+    confirm_overwrite,
+    install_table_export,
+    serialize_rows,
+    table_text,
+    write_table,
+)
 
 
 @pytest.fixture(scope="module")
@@ -74,6 +81,45 @@ def test_delimited_writer_escapes_quotes_newlines_and_unicode() -> None:
         ["Player", "Note"],
         ["Zoë", 'said "call, then fold"\nnext line'],
     ]
+
+
+def test_delimited_writer_neutralizes_formula_text_and_preserves_negative_amounts() -> None:
+    text = serialize_rows(
+        [["=1+1", "+SUM(A1:A2)", "@name", "  -not a number", "-2,00 €", "-1+cmd"]],
+        delimiter=",",
+    )
+
+    assert next(csv.reader(io.StringIO(text, newline=""))) == [
+        "'=1+1",
+        "'+SUM(A1:A2)",
+        "'@name",
+        "'  -not a number",
+        "-2,00 €",
+        "'-1+cmd",
+    ]
+
+
+def test_append_extension_handles_unsuffixed_and_case_insensitive_paths() -> None:
+    assert append_extension("report", "csv") == "report.csv"
+    assert append_extension("report.CSV", "csv") == "report.CSV"
+
+
+def test_confirm_overwrite_checks_the_final_path(tmp_path, qapp, monkeypatch) -> None:
+    view, _model = _view(qapp)
+    target = tmp_path / "report.csv"
+    target.write_text("existing", encoding="utf-8")
+    prompts = []
+
+    def question(parent, title, message, buttons, default):
+        prompts.append((parent, title, message, buttons, default))
+        return QMessageBox.StandardButton.No
+
+    from PySide6.QtWidgets import QMessageBox
+
+    monkeypatch.setattr(table_export.QMessageBox, "question", question)
+
+    assert not confirm_overwrite(view, target)
+    assert prompts and str(target) in prompts[0][2]
 
 
 def test_csv_export_writes_visible_data_with_headers(tmp_path, qapp) -> None:
