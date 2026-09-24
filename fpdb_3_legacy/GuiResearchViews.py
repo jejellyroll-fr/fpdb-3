@@ -40,6 +40,7 @@ from fpdb_3_legacy.holdem_classes import grid_labels
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 from fpdb_3_legacy.ring_stats.views.starting_hands_view import HoldemGridCell
+from fpdb_3_legacy.table_export import install_table_export
 
 BP = 100
 """Frequencies arrive in basis points; a screen shows per cent."""
@@ -187,6 +188,7 @@ class CompositionWidget(QWidget):
         self.headline.setWordWrap(True)
         layout.addWidget(self.headline)
         self.table = QTableWidget()
+        install_table_export(self.table)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.table.setAlternatingRowColors(True)
         self.table.setColumnCount(3)
@@ -248,6 +250,7 @@ class MoneyWidget(QWidget):
         self.headline.setWordWrap(True)
         layout.addWidget(self.headline)
         self.table = QTableWidget()
+        install_table_export(self.table)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.table.setAlternatingRowColors(True)
         self.table.setColumnCount(len(self.COLUMNS))

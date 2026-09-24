@@ -79,6 +79,7 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.research_worker_db import WorkerDatabase, worker_database
 from fpdb_3_legacy.responsive_layout import PaneSwitcher, ResponsiveSplitter, wrap_in_scroll
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
+from fpdb_3_legacy.table_export import install_table_export
 
 log = get_logger("gui_research_browser")
 
@@ -928,6 +929,7 @@ class GuiResearchBrowser(QWidget):
         self.view_note.setVisible(False)
         results_layout.addWidget(self.view_note)
         self.result_table = QTableWidget()
+        install_table_export(self.result_table)
         self.result_table.setSortingEnabled(True)
         self.result_table.setAlternatingRowColors(True)
         self.result_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)

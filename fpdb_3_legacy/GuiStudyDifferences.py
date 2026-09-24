@@ -33,6 +33,7 @@ from fpdb_3_legacy.research_differences import (
 from fpdb_3_legacy.research_studies import StudyRegistry, builtin_studies
 from fpdb_3_legacy.research_study_explorer import StudyExplorerModel
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
+from fpdb_3_legacy.table_export import install_table_export
 
 
 class _SortableItem(QTableWidgetItem):
@@ -162,6 +163,7 @@ class GuiStudyDifferences(QWidget):
         layout.addWidget(self.status_label)
 
         self.table = QTableWidget(0, 9)
+        install_table_export(self.table)
         self.table.setHorizontalHeaderLabels(
             [
                 "Spot",

@@ -15,6 +15,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from fpdb_3_legacy.table_export import install_table_export
+
 from .research_matrices import MatrixCell, MatrixSeries
 from .ring_stats.styles import get_theme_palette
 
@@ -41,6 +43,7 @@ class MatrixHeatmapWidget(QWidget):
         self.summary_label.setStyleSheet(f"color: {palette.get('muted_text', '#a0aec0')};")
         layout.addWidget(self.summary_label)
         self.table = QTableWidget()
+        install_table_export(self.table)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.table.setAlternatingRowColors(True)
         self.table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
