@@ -60,10 +60,9 @@ def required_analytics_subsystems(filters: Mapping[str, Any]) -> tuple[str, ...]
     required: set[str] = set()
     preflop = filters.get("preflop")
     postflop = filters.get("postflop")
-    if preflop in PREFLOP_FILTERS or preflop == "all_in":
+    if preflop in PREFLOP_FILTERS:
         required.add("action_events")
-        if preflop in PREFLOP_FILTERS:
-            required.add("situations")
+        required.add("situations")
     if postflop in _ACTION_FILTERS:
         required.add("action_events")
     elif postflop in POSTFLOP_FILTERS:

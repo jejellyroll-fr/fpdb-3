@@ -120,6 +120,20 @@ def test_analytics_filter_warns_and_does_not_query_when_subsystem_is_stale(monke
     assert "No hands were queried" in warnings[0]
 
 
+def test_preflop_all_in_does_not_require_derived_analytics(monkeypatch) -> None:
+    viewer, cursor = _query_viewer()
+    viewer._advanced_filter_values = lambda: {"preflop": "all_in"}
+    viewer._analytics_filter_warning = lambda filters: GuiHandViewer._analytics_filter_warning(viewer, filters)
+
+    def unexpected_status_read(_db):
+        raise AssertionError("historical all-in columns must not require analytics lifecycle data")
+
+    monkeypatch.setattr(analytics_lifecycle, "subsystem_statuses", unexpected_status_read)
+
+    assert GuiHandViewer.get_hand_ids_from_date_range(viewer, "start", "end") == [101]
+    assert "AAI.street = 0 AND AAI.allIn IS TRUE" in cursor.query
+
+
 def test_hand_flags_do_not_call_bomb_pots_run_it_twice() -> None:
     bomb = SimpleNamespace(runItTimes=2, bombPot=1, actions={}, shown=False)
     rit = SimpleNamespace(runItTimes=2, bombPot=0, actions={}, shown=False)

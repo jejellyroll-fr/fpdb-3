@@ -166,7 +166,7 @@ def test_sql_placeholder_must_be_a_supported_driver_marker():
     ("filters", "expected"),
     [
         ({"preflop": "vpip"}, ()),
-        ({"preflop": "all_in"}, ("action_events",)),
+        ({"preflop": "all_in"}, ()),
         ({"preflop": "rfi"}, ("action_events", "situations")),
         ({"postflop": "bet"}, ("action_events",)),
         ({"postflop": "check_raise"}, ("action_events", "situations")),
