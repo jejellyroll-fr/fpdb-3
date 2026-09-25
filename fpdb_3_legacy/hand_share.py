@@ -31,6 +31,17 @@ AMOUNT_MODES: Final = ("native", "bb")
 
 _GAME_NAMES: Final = {
     "holdem": "Hold'em",
+    "6_holdem": "Short Deck Hold'em",
+    "2_holdem": "Double Hold'em",
+    "irish": "Irish",
+    "cour_hi": "Courchevel",
+    "cour_hilo": "Courchevel Hi/Lo",
+    "6_omaha8": "6 Card Omaha Hi/Lo",
+    "27_razz": "2-7 Razz",
+    "a5_1draw": "A-5 Single Draw",
+    "badacey": "Badacey",
+    "badeucey": "Badeucey",
+    "drawmaha": "2-7 Drawmaha",
     "omahahi": "Omaha",
     "omahahilo": "Omaha Hi/Lo",
     "5_omahahi": "5 Card Omaha",
@@ -137,6 +148,17 @@ class _Document:
     summary: list[str]
 
 
+def _is_fixed_limit_tournament(hand: Any) -> bool:
+    # Fixed-limit tournaments store their bets (300/600) where ring games
+    # store their blinds (0.05/0.10 for a 0.10/0.20 game).
+    return hand.gametype.get("limitType") == "fl" and hand.gametype.get("type") == "tour"
+
+
+def big_blind(hand: Any) -> Decimal:
+    """The big blind actually posted, which BB amounts are counted in."""
+    return Decimal(str(hand.sb if _is_fixed_limit_tournament(hand) else hand.bb))
+
+
 def supports_bb_amounts(hand: Any) -> bool:
     """Whether amounts can be expressed in big blinds for this hand.
 
@@ -146,7 +168,7 @@ def supports_bb_amounts(hand: Any) -> bool:
     if hand.gametype.get("base") == "stud":
         return False
     try:
-        return Decimal(str(hand.bb)) > 0
+        return big_blind(hand) > 0
     except (InvalidOperation, TypeError, ValueError):
         return False
 
@@ -172,7 +194,7 @@ class _Builder:
         self.players = [p for p in hand.players if p[1] not in getattr(hand, "sitout", set())]
         self.positions = self._positions()
         self.names = self._names()
-        self.bb = Decimal(str(hand.bb)) if options.amounts == "bb" else None
+        self.bb = big_blind(hand) if options.amounts == "bb" else None
         self.chips = self._plays_for_chips()
 
     # -- identity -------------------------------------------------------------
@@ -248,6 +270,8 @@ class _Builder:
         """
         saved, self.bb = self.bb, None
         try:
+            if _is_fixed_limit_tournament(self.hand):
+                return f"{self.money(self.hand.sb)}/{self.money(self.hand.bb)}"
             if self.hand.gametype.get("limitType") == "fl":
                 small = Decimal(str(self.hand.bb))
                 return f"{self.money(small)}/{self.money(small * 2)}"
@@ -320,8 +344,10 @@ class _Builder:
         streets = list(getattr(self.hand, "holeStreets", []) or [])
         if not streets:
             return []
-        if base == "hold":
+        if base == "hold" and self.hand.gametype.get("category") != "fusion":
             return list(self.hand.join_holecards(player, asList=True))
+        # Fusion deals its third and fourth hole cards on the flop and turn;
+        # they are shown there, not before the preflop action.
         held = self.hand.holecards.get(streets[0], {}).get(player)
         if not held:
             return []
@@ -353,7 +379,7 @@ class _Builder:
             if first:
                 section.lines.extend(blinds)
             section.lines.extend(dealt)
-            section.lines.extend(self._draw_cards(street))
+            section.lines.extend(self._hero_new_cards(street))
             section.lines.extend(self._compress_folds([(a, self._action_line(a, street)) for a in actions]))
             for action in actions:
                 pot += self._paid(action)
@@ -408,16 +434,26 @@ class _Builder:
                 lines.append(f"{self.name(player[1])} [{' '.join(cards)}]")
         return lines
 
-    def _draw_cards(self, street: str) -> list[str]:
-        """The hero's hand after a draw, when the history recorded it."""
+    def _hero_new_cards(self, street: str) -> list[str]:
+        """The hero's cards that change on a later street.
+
+        A draw game shows the hand after the draw; Fusion shows the hole card
+        dealt on the flop or the turn.
+        """
         hand = self.hand
-        if hand.gametype.get("base") != "draw" or not hand.hero:
+        base = hand.gametype.get("base")
+        if base not in ("draw", "hold") or not hand.hero:
             return []
         streets = list(getattr(hand, "holeStreets", []) or [])
-        if not streets or street == streets[0]:
+        if street not in streets[1:]:
             return []
         held = hand.holecards.get(street, {}).get(hand.hero)
-        if not held or not self._known(list(held[1])):
+        if not held:
+            return []
+        if base == "hold":
+            dealt = list(held[0])
+            return [f"{self.name(hand.hero)} is dealt [{' '.join(dealt)}]"] if self._known(dealt) else []
+        if not self._known(list(held[1])):
             return []
         return [f"{self.name(hand.hero)} [{' '.join(held[1])}]"]
 

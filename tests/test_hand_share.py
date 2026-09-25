@@ -16,8 +16,9 @@ from typing import Any
 
 import pytest
 
+from fpdb_3_legacy import Card
 from fpdb_3_legacy.Hand import hand_factory
-from fpdb_3_legacy.hand_share import ShareOptions, render_hand, supports_bb_amounts
+from fpdb_3_legacy.hand_share import _GAME_NAMES, ShareOptions, render_hand, supports_bb_amounts
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures" / "hands" / "pokerstars"
@@ -331,3 +332,41 @@ def test_a_cash_out_is_not_reported_as_pot_winnings(legacy_config) -> None:
     text = render_hand(hand, cashout=True)
     assert "Hero cashes out $18.80 (fee $0.20)" in text
     assert "wins" not in text
+
+
+def test_a_fixed_limit_tournament_keeps_its_bets_and_counts_the_posted_blind(legacy_config) -> None:
+    hand = parse(legacy_config, "draw/badugi.txt")
+
+    # A tournament stores 300/600 as its bets, not as blinds to double.
+    assert render_hand(hand).startswith("FL Badugi 8-max tournament - 300/600\n")
+
+    text = render_hand(hand, amounts="bb")
+    assert "posts BB 1 BB" in text
+    assert "posts SB 0.5 BB" in text
+
+
+def test_every_supported_game_has_a_readable_name() -> None:
+    assert set(Card.games) <= set(_GAME_NAMES)
+
+
+def test_fusion_hole_cards_arrive_on_their_own_streets() -> None:
+    hand = fake_hand(2)
+    hand.hero = "P1"
+    hand.gametype["category"] = "fusion"
+    hand.allStreets = ["BLINDSANTES", "PREFLOP", "FLOP", "TURN"]
+    hand.holeStreets = ["PREFLOP", "FLOP", "TURN"]
+    hand.board = {"FLOP": ["2c", "7d", "9h"], "TURN": ["Ks"]}
+    hand.actions = {"BLINDSANTES": [], "PREFLOP": [("P1", "checks")], "FLOP": [("P1", "checks")], "TURN": []}
+    hand.holecards = {
+        "PREFLOP": {"P1": [[], ["Ah", "Kh"]]},
+        "FLOP": {"P1": [["Qh"], ["Ah", "Kh"]]},
+        "TURN": {"P1": [["Jh"], ["Ah", "Kh", "Qh"]]},
+    }
+
+    lines = render_hand(hand).splitlines()
+
+    assert "Hero [Ah Kh]" in lines
+    flop = next(i for i, line in enumerate(lines) if line.startswith("Flop [2c 7d 9h]"))
+    turn = next(i for i, line in enumerate(lines) if line.startswith("Turn [2c 7d 9h] [Ks]"))
+    assert lines[flop + 1] == "Hero is dealt [Qh]"
+    assert lines[turn + 1] == "Hero is dealt [Jh]"
