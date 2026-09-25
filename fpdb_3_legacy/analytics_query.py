@@ -319,6 +319,21 @@ FILTERS: Final[dict[str, _Filter]] = {
     # -- street / pot ------------------------------------------------------
     "street": _Filter("SI.streetName", ("SI",), "set"),
     "street_index": _Filter("A.street", ("A",), "range"),
+    # A draw opportunity exists only when the player reached the draw and the
+    # action stream records an explicit discard or stand-pat decision. Keeping
+    # the CASE here excludes folds/other actions on the same street.
+    "draw_number": _Filter(
+        "CASE WHEN A.actionType IN ('discards', 'stands pat') THEN A.street ELSE NULL END",
+        ("A",), "range",
+    ),
+    # A stored zero is a known stand-pat; an absent/invalid discard count is
+    # unknown (not zero). Do not impose a game-wide maximum discard count.
+    "cards_drawn": _Filter(
+        "CASE WHEN A.actionType = 'stands pat' THEN 0 "
+        "WHEN A.actionType = 'discards' AND A.numDiscarded > 0 THEN A.numDiscarded "
+        "ELSE NULL END",
+        ("A",), "range",
+    ),
     "pot_type": _Filter("SI.potType", ("SI",), "set"),
     "pot_before": _Filter("A.potBefore", ("A",), "range"),
     "to_call": _Filter("A.toCall", ("A",), "range"),
@@ -626,6 +641,16 @@ def filter_sources(filters: Mapping[str, Any]) -> set[str]:
 # from the database group by exactly the same boundaries.
 DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
     "street": ("SI.streetName", ("SI",)),
+    "draw_number": (
+        "CASE WHEN A.actionType IN ('discards', 'stands pat') THEN A.street ELSE NULL END",
+        ("A",),
+    ),
+    "cards_drawn": (
+        "CASE WHEN A.actionType = 'stands pat' THEN 0 "
+        "WHEN A.actionType = 'discards' AND A.numDiscarded > 0 THEN A.numDiscarded "
+        "ELSE NULL END",
+        ("A",),
+    ),
     "position": ("A.position", ("A",)),
     "opponent_position": ("SI.facingPosition", ("SI",)),
     "relative_position": ("A.relativePosition", ("A",)),

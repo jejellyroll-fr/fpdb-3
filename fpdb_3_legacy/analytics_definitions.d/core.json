@@ -2,6 +2,25 @@
   "schema_version": 1,
   "stats": [
     {
+      "name": "draw_decision_distribution",
+      "metric": "opportunities",
+      "filters": {
+        "action_taken": ["discards", "stands pat"]
+      },
+      "group_by": ["draw_number", "cards_drawn"],
+      "label": {
+        "en": "Draw decisions by round and cards drawn",
+        "fr": "Décisions de tirage par round et cartes échangées"
+      },
+      "description": {
+        "en": "Counts explicit stand-pat and discard decisions for every draw round present in the hand history. Zero means stand pat; unknown discard counts remain in an unknown group.",
+        "fr": "Compte les décisions explicites de rester et d'échanger pour chaque round de tirage présent dans l'historique. Zéro signifie rester; les nombres de cartes inconnus restent dans un groupe inconnu."
+      },
+      "format": "count",
+      "min_sample": 1,
+      "category": "Draw decisions"
+    },
+    {
       "name": "fold_to_3bet_preflop",
       "metric": "fold_frequency",
       "fragments": ["preflop", "facing_3bet"],
