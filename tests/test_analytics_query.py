@@ -138,7 +138,8 @@ class TestFilters:
         assert params == [1, 3, 0, 5]
         sql = " AND ".join(fragments)
         assert "G.base = 'draw'" in sql
-        assert "G.category = 'drawmaha' THEN 1 ELSE A.street" in sql
+        assert "SELECT COUNT(*) + 1 FROM HandsActions AS prior_draw" in sql
+        assert "prior_draw.actionNo < A.actionNo" in sql
         assert "A.actionType IN ('discards', 'stands pat')" in sql
         assert "A.actionType = 'stands pat' THEN 0" in sql
         assert "A.numDiscarded >= 0" in sql

@@ -224,7 +224,10 @@ def _to_bp(values: Any) -> list[int]:
 
 _DRAW_NUMBER_CASE: Final = (
     "CASE WHEN G.base = 'draw' AND A.actionType IN ('discards', 'stands pat') "
-    "THEN CASE WHEN G.category = 'drawmaha' THEN 1 ELSE A.street END ELSE NULL END"
+    "THEN (SELECT COUNT(*) + 1 FROM HandsActions AS prior_draw "
+    "WHERE prior_draw.handId = A.handId AND prior_draw.playerId = A.playerId "
+    "AND prior_draw.actionNo < A.actionNo "
+    "AND prior_draw.actionType IN ('discards', 'stands pat')) ELSE NULL END"
 )
 
 

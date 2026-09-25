@@ -58,6 +58,33 @@ def test_draw_counts_only_players_who_reached_each_decision(importer, fresh_db) 
     assert distribution(2) == {0: 1, 1: 1}
     assert distribution(3) == {0: 2}
 
+    # Some parsers map several draw phases to the same stored street (as the
+    # KingsClub Drawmaha parser does). The ordinal comes from each player's
+    # prior draw decisions, not from that street value.
+    cursor = fresh_db.get_cursor()
+    cursor.execute(
+        "UPDATE HandsActions SET street = 2 "
+        "WHERE actionType IN ('discards', 'stands pat')",
+    )
+    result = run_query(
+        fresh_db,
+        Query(
+            metric="opportunities",
+            filters={"action_taken": ["discards", "stands pat"]},
+            group_by=("draw_number", "cards_drawn"),
+        ),
+    )
+    assert {
+        (row.group["draw_number"], row.group["cards_drawn"]): row.opportunities
+        for row in result.rows
+    } == {
+        (1, 1): 1,
+        (1, 2): 2,
+        (2, 0): 1,
+        (2, 1): 1,
+        (3, 0): 2,
+    }
+
 
 def test_builtin_draw_definitions_run_on_the_imported_draw_hand(importer, fresh_db) -> None:
     importer.addImportFile(str(FIXTURE), "PokerStars")
