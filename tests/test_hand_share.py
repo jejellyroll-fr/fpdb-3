@@ -17,6 +17,7 @@ from typing import Any
 import pytest
 
 from fpdb_3_legacy import Card
+from fpdb_3_legacy.CakeToFpdb import Cake
 from fpdb_3_legacy.Hand import hand_factory
 from fpdb_3_legacy.hand_share import _GAME_NAMES, ShareOptions, render_hand, supports_bb_amounts
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
@@ -370,3 +371,27 @@ def test_fusion_hole_cards_arrive_on_their_own_streets() -> None:
     turn = next(i for i, line in enumerate(lines) if line.startswith("Turn [2c 7d 9h] [Ks]"))
     assert lines[flop + 1] == "Hero is dealt [Qh]"
     assert lines[turn + 1] == "Hero is dealt [Jh]"
+
+
+def test_a_draw_shows_the_cards_drawn_and_the_hand_they_make(legacy_config) -> None:
+    lines = render_hand(parse(legacy_config, "draw/badugi.txt")).splitlines()
+
+    # The history only records the card drawn; it follows the discard.
+    discard = lines.index("Hero discards 1 card")
+    assert lines[discard + 1] == "Hero draws [5s]"
+    # The complete hand, once known, replaces the dealt one -- never 4d again.
+    assert "Hero [As 2c 3h 5s]" in lines
+    assert "Hero shows [As 2c 3h 5s] (a Badugi: 5,3,2,A)" in lines
+    assert not any("4d" in line for line in lines[lines.index("Summary") :])
+
+
+def test_a_muck_recorded_by_the_room_stays_a_muck(legacy_config) -> None:
+    source = Path(__file__).resolve().parent / "fixtures" / "hands" / "cake" / "cash_nlhe.txt"
+    hands = Cake(config=legacy_config, in_path=str(source), autostart=True).getProcessedHands()
+    hand = next(h for h in hands if str(h.handid) == "2701011985001698")
+
+    text = render_hand(hand, anonymize="none")
+
+    assert "Hams***10 mucks [Td Qd]" in text
+    assert "Hams***10 shows" not in text
+    assert "1UIG***8 shows [6h Th]" in text

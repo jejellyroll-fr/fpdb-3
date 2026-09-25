@@ -379,8 +379,11 @@ class _Builder:
             if first:
                 section.lines.extend(blinds)
             section.lines.extend(dealt)
-            section.lines.extend(self._hero_new_cards(street))
-            section.lines.extend(self._compress_folds([(a, self._action_line(a, street)) for a in actions]))
+            new_cards = self._hero_new_cards(street)
+            split = self._after_hero_draw(actions) if new_cards else 0
+            section.lines.extend(self._compress_folds([(a, self._action_line(a, street)) for a in actions[:split]]))
+            section.lines.extend(new_cards)
+            section.lines.extend(self._compress_folds([(a, self._action_line(a, street)) for a in actions[split:]]))
             for action in actions:
                 pot += self._paid(action)
             streets.append(section)
@@ -453,9 +456,75 @@ class _Builder:
         if base == "hold":
             dealt = list(held[0])
             return [f"{self.name(hand.hero)} is dealt [{' '.join(dealt)}]"] if self._known(dealt) else []
-        if not self._known(list(held[1])):
-            return []
-        return [f"{self.name(hand.hero)} [{' '.join(held[1])}]"]
+        holdings = self._draw_holdings(hand.hero)
+        holding = holdings.get(street)
+        if holding and holding == holdings.get(streets[streets.index(street) - 1]):
+            return []  # stood pat on a hand already shown
+        if holding:
+            return [f"{self.name(hand.hero)} [{' '.join(holding)}]"]
+        drawn = list(held[0])
+        return [f"{self.name(hand.hero)} draws [{' '.join(drawn)}]"] if self._known(drawn) else []
+
+    def _after_hero_draw(self, actions: list[tuple]) -> int:
+        """Index just past the hero's discard or stand pat on this street."""
+        for index, action in enumerate(actions):
+            if action[0] == self.hand.hero and action[1] in ("discards", "stands pat"):
+                return index + 1
+        return 0
+
+    def _draw_holdings(self, player: str) -> dict[str, list[str] | None]:
+        """The complete hand *player* holds after each draw, when it is known.
+
+        A history records a draw as the cards kept (closed) and the cards
+        drawn (open), and often only the drawn ones. The complete hand is
+        either both together, or the previous hand without the recorded
+        discards plus the drawn cards; anything else is unknown rather than
+        guessed, so an old holding is never reported after a draw.
+        """
+        hand = self.hand
+        streets = list(getattr(hand, "holeStreets", []) or [])
+        holdings: dict[str, list[str] | None] = {}
+        current: list[str] | None = None
+        size = 0
+        for index, street in enumerate(streets):
+            held = hand.holecards.get(street, {}).get(player)
+            full = [*held[1], *held[0]] if held else []
+            if index == 0:
+                current = full if self._known(full) else None
+                size = len(full)
+            elif held and len(full) == size and self._known(full):
+                current = full
+            elif self._draw_count(player, street) == 0:
+                pass  # stood pat, or did not draw: the hand is unchanged
+            elif current is not None and held and self._known(list(held[0])):
+                discarded = self._discarded(player, street)
+                kept = [card for card in current if card not in discarded]
+                current = [*kept, *held[0]] if len(kept) + len(held[0]) == size else None
+            else:
+                current = None
+            holdings[street] = current
+        return holdings
+
+    def _draw_count(self, player: str, street: str) -> int | None:
+        """How many cards *player* drew on *street*; None when not recorded."""
+        for action in self.hand.actions.get(street, []):
+            if action[0] != player:
+                continue
+            if action[1] == "stands pat":
+                return 0
+            if action[1] == "discards":
+                return int(action[2])
+        return None
+
+    def _discarded(self, player: str, street: str) -> set[str]:
+        cards: set[str] = set()
+        for action in self.hand.actions.get(street, []):
+            if action[0] == player and action[1] == "discards" and len(action) > 3 and action[3]:
+                recorded = action[3]
+                cards.update(recorded.split() if isinstance(recorded, str) else recorded)
+        for recorded in self.hand.discards.get(street, {}).get(player, ()):
+            cards.update(str(recorded).split())
+        return cards
 
     @staticmethod
     def _paid(action: tuple) -> Decimal:
@@ -565,6 +634,12 @@ class _Builder:
                 continue
             description = hand.showdownStrings.get(name)
             suffix = f" ({description})" if description else ""
+            # A parsed history says who mucked; a hand read back from the
+            # database marks every known opponent hand as mucked, so there
+            # the cards being known is all that can be said.
+            if name in hand.mucked and name not in hand.shown and getattr(hand, "handText", None):
+                lines.append(f"{self.name(name)} mucks [{' '.join(cards)}]")
+                continue
             lines.append(f"{self.name(name)} shows [{' '.join(cards)}]{suffix}")
         return lines
 
@@ -575,11 +650,10 @@ class _Builder:
             return list(hand.join_holecards(player, asList=True))
         if base == "stud":
             return [card for card in hand.join_holecards(player, asList=True) if card]
-        for street in reversed(list(getattr(hand, "holeStreets", []) or [])):
-            held = hand.holecards.get(street, {}).get(player)
-            if held and held[1]:
-                return list(held[1])
-        return []
+        streets = list(getattr(hand, "holeStreets", []) or [])
+        if not streets:
+            return []
+        return self._draw_holdings(player).get(streets[-1]) or []
 
     def _winnings(self) -> dict[str, Decimal]:
         """What each player won from the pot.
