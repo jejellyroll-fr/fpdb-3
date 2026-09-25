@@ -131,7 +131,8 @@ def test_preflop_all_in_does_not_require_derived_analytics(monkeypatch) -> None:
     monkeypatch.setattr(analytics_lifecycle, "subsystem_statuses", unexpected_status_read)
 
     assert GuiHandViewer.get_hand_ids_from_date_range(viewer, "start", "end") == [101]
-    assert "AAI.street IN (-1, 0) AND AAI.allIn IS TRUE" in cursor.query
+    assert "AAI.street = -1 OR (AAI.street = 0 AND gt.category <> 'aof_omaha')" in cursor.query
+    assert "AAI.allIn IS TRUE" in cursor.query
 
 
 def test_hand_flags_do_not_call_bomb_pots_run_it_twice() -> None:

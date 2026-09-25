@@ -219,6 +219,10 @@ def test_preflop_all_in_includes_a_forced_all_in_on_the_blinds_round():
     connection = _database()
     try:
         connection.execute("INSERT INTO HandsActions VALUES (2, 22, 0, -1, 'big blind', 0, 0, 1)")
+        connection.execute("INSERT INTO Hands VALUES (8, 6, 100)")
+        connection.execute("INSERT INTO HandsPlayers (handId, playerId) VALUES (8, 88)")
+        connection.execute("INSERT INTO HandsActions VALUES (8, 88, 1, 0, 'bets', 0, 0, 1)")
+        # Street zero is a flop decision in AoF Omaha, not a preflop all-in.
         assert _run_filters(connection, {"preflop": "all_in"}) == [2]
     finally:
         connection.close()

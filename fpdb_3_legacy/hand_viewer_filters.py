@@ -156,7 +156,8 @@ def _preflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list[
     if preflop == "all_in":
         return [
             "EXISTS (SELECT 1 FROM HandsActions AAI WHERE AAI.handId = h.id "
-            "AND AAI.playerId = hp.playerId AND AAI.street IN (-1, 0) AND AAI.allIn IS TRUE)"
+            "AND AAI.playerId = hp.playerId AND (AAI.street = -1 OR "
+            "(AAI.street = 0 AND gt.category <> 'aof_omaha')) AND AAI.allIn IS TRUE)"
         ], []
     if preflop in PREFLOP_FILTERS:
         label, response = PREFLOP_FILTERS[preflop]
