@@ -401,10 +401,7 @@ jobs:
           # The hosted image may include third-party feeds (for example
           # packages.microsoft.com) that can return 403 and fail the whole
           # update even though these dependencies come from Ubuntu itself.
-          sudo apt-get update \
-            -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" \
-            -o Dir::Etc::sourceparts="-" \
-            -o APT::Get::List-Cleanup="0"
+          sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
           sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
       - name: Install dependencies
         run: |
@@ -488,10 +485,7 @@ jobs:
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update \
-            -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" \
-            -o Dir::Etc::sourceparts="-" \
-            -o APT::Get::List-Cleanup="0"
+          sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
           sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
       - name: Install fpdb dependencies
         run: |
@@ -550,10 +544,7 @@ jobs:
           version: "0.12.7"
       - name: Install system dependencies
         run: |
-          sudo apt-get update \
-            -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" \
-            -o Dir::Etc::sourceparts="-" \
-            -o APT::Get::List-Cleanup="0"
+          sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
           sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
       - name: Install dependencies
         run: |
@@ -628,10 +619,7 @@ jobs:
           version: "0.12.7"
       - name: Install system dependencies
         run: |
-          sudo apt-get update \
-            -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" \
-            -o Dir::Etc::sourceparts="-" \
-            -o APT::Get::List-Cleanup="0"
+          sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
           sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
       - name: Install database test dependencies
         run: uv pip install --system -e ".[test-no-gui]"
@@ -668,10 +656,7 @@ jobs:
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update \
-            -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" \
-            -o Dir::Etc::sourceparts="-" \
-            -o APT::Get::List-Cleanup="0"
+          sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
           sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
       - name: Install dependencies
         run: |
