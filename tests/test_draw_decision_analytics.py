@@ -23,6 +23,14 @@ MERGE_FIXTURE = (
     / "Draw"
     / "3-Draw-Limit-USD-1-2-201104.Sample.with.showdown.txt"
 )
+DRAWMAHA_FIXTURE = (
+    Path(__file__).resolve().parents[1]
+    / "regression-test-files"
+    / "cash"
+    / "KingsClub"
+    / "Draw"
+    / "2-7 Drawmaha-FL-USD-60-120-202108.showdown.txt"
+)
 
 
 def test_draw_counts_only_players_who_reached_each_decision(importer, fresh_db) -> None:
@@ -99,6 +107,25 @@ def test_draw_definition_excludes_non_draw_discard_actions(importer, fresh_db) -
         (row.group["draw_number"], row.group["cards_drawn"]): row.opportunities
         for row in unscoped.rows
     } == {(None, None): 7}
+
+
+def test_drawmaha_exchange_is_numbered_as_its_first_draw(importer, fresh_db) -> None:
+    importer.addImportFile(str(DRAWMAHA_FIXTURE), "KingsClub")
+    stored, *_ = importer.runImport()
+    assert stored == 1
+
+    result = run_query(
+        fresh_db,
+        Query(
+            metric="opportunities",
+            filters={"draw_number": [1, 1]},
+            group_by=("draw_number", "cards_drawn"),
+        ),
+    )
+    assert {
+        (row.group["draw_number"], row.group["cards_drawn"]): row.opportunities
+        for row in result.rows
+    } == {(1, 1): 1, (1, 2): 1}
 
 
 def test_merge_zero_discard_events_are_stand_pat_decisions(importer, fresh_db) -> None:

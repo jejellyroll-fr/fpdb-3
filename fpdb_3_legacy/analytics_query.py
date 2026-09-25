@@ -222,6 +222,12 @@ def _to_bp(values: Any) -> list[int]:
     return out
 
 
+_DRAW_NUMBER_CASE: Final = (
+    "CASE WHEN G.base = 'draw' AND A.actionType IN ('discards', 'stands pat') "
+    "THEN CASE WHEN G.category = 'drawmaha' THEN 1 ELSE A.street END ELSE NULL END"
+)
+
+
 # ---------------------------------------------------------------------------
 # Filters.
 # ---------------------------------------------------------------------------
@@ -325,8 +331,7 @@ FILTERS: Final[dict[str, _Filter]] = {
     # decision. Irish Poker, for example, records a mandatory discard on the
     # Hold'em turn and must not be counted as draw round two.
     "draw_number": _Filter(
-        "CASE WHEN G.base = 'draw' AND A.actionType IN ('discards', 'stands pat') "
-        "THEN A.street ELSE NULL END",
+        _DRAW_NUMBER_CASE,
         ("A", "G"), "range",
     ),
     # A stored zero is a known stand-pat; an absent/invalid discard count is
@@ -645,8 +650,7 @@ def filter_sources(filters: Mapping[str, Any]) -> set[str]:
 DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
     "street": ("SI.streetName", ("SI",)),
     "draw_number": (
-        "CASE WHEN G.base = 'draw' AND A.actionType IN ('discards', 'stands pat') "
-        "THEN A.street ELSE NULL END",
+        _DRAW_NUMBER_CASE,
         ("A", "G"),
     ),
     "cards_drawn": (
