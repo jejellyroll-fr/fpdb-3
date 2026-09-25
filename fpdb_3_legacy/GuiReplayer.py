@@ -41,6 +41,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Hand
 from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity
+from fpdb_3_legacy.hand_share_dialog import HandShareDialog
 from fpdb_3_legacy.http_capture_ofc import OFCHand, build_ofc_hand, load_ofc_hand
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency, format_number
@@ -795,6 +796,15 @@ class GuiReplayer(QWidget):
         self.deckPreview.setFixedSize(72, 38)
         self.deckPreview.setToolTip(_("Current card deck preview"))
         self.buttonBox2.addWidget(self.deckPreview)
+
+        # The hand being replayed, for sharing; an OFC replay has none.
+        self.shared_hand: Any = None
+        self.shareButton = QPushButton(_("Share..."))
+        self.shareButton.setToolTip(_("Copy or save this hand as text, Markdown or forum code"))
+        self.shareButton.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.shareButton.setEnabled(False)
+        self.shareButton.clicked.connect(self.share_clicked)
+        self.buttonBox2.addWidget(self.shareButton)
 
         self.stateSlider = QSlider(Qt.Orientation.Horizontal)
         self.stateSlider.valueChanged.connect(self.slider_changed)
@@ -2505,6 +2515,7 @@ class GuiReplayer(QWidget):
         self.replay_mode = "ofc" if is_ofc else "hand"
         if is_ofc:
             ofc_hand = self._load_ofc_replay_entry(entry)
+            self.shared_hand = None
             self.currency = ""
             self.currency_code = "play"
             self.Heroes = ""
@@ -2514,12 +2525,14 @@ class GuiReplayer(QWidget):
             if hand is None:
                 log.error("Could not load hand ID %s for replayer", entry)
                 return
+            self.shared_hand = hand
             self.currency = hand.sym
             self.currency_code = str(hand.gametype.get("currency", "USD"))
             self.Heroes = hand.hero or self._resolve_hero(hand.sitename)
             self.replay_model = self._build_replay_model(hand)
         self.info = self.replay_model.info
         self.states = self.replay_model.states
+        self.shareButton.setEnabled(self.shared_hand is not None)
 
         for idx in reversed(list(range(self.buttonBox.count()))):
             item = self.buttonBox.takeAt(idx)
@@ -2554,6 +2567,10 @@ class GuiReplayer(QWidget):
         self.stateSlider.setValue(0)
         self._sync_replayer_controls()
         self.update()
+
+    def share_clicked(self) -> None:
+        if self.shared_hand is not None:
+            HandShareDialog(self.shared_hand, self).exec()
 
     def increment_state(self) -> None:  # noqa: F811
         if self.stateSlider.value() >= self.stateSlider.maximum():
