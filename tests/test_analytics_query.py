@@ -134,9 +134,10 @@ class TestFilters:
         fragments, params, aliases = compile_filters(
             {"draw_number": [1, 3], "cards_drawn": [0, 5]}, "?", "sqlite",
         )
-        assert aliases == {"A"}
+        assert aliases == {"A", "G"}
         assert params == [1, 3, 0, 5]
         sql = " AND ".join(fragments)
+        assert "G.base = 'draw'" in sql
         assert "A.actionType IN ('discards', 'stands pat')" in sql
         assert "A.actionType = 'stands pat' THEN 0" in sql
         assert "A.numDiscarded >= 0" in sql

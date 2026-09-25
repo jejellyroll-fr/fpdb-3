@@ -5,6 +5,7 @@
       "name": "draw_decision_distribution",
       "metric": "opportunities",
       "filters": {
+        "game_base": ["draw"],
         "action_taken": ["discards", "stands pat"]
       },
       "group_by": ["draw_number", "cards_drawn"],

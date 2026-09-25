@@ -273,6 +273,7 @@ FILTERS: Final[dict[str, _Filter]] = {
     # -- hand / game identity ----------------------------------------------
     "site": _Filter("S.name", ("S",), "set"),
     "game": _Filter("G.category", ("G",), "set"),
+    "game_base": _Filter("G.base", ("G",), "set"),
     "limit": _Filter("G.limitType", ("G",), "set"),
     "currency": _Filter("G.currency", ("G",), "set"),
     "tournament": _Filter("H.tourneyId", ("H",), "null_check"),
@@ -319,20 +320,22 @@ FILTERS: Final[dict[str, _Filter]] = {
     # -- street / pot ------------------------------------------------------
     "street": _Filter("SI.streetName", ("SI",), "set"),
     "street_index": _Filter("A.street", ("A",), "range"),
-    # A draw opportunity exists only when the player reached the draw and the
-    # action stream records an explicit discard or stand-pat decision. Keeping
-    # the CASE here excludes folds/other actions on the same street.
+    # A draw opportunity exists only in draw games when the player reached the
+    # draw and the action stream records an explicit discard or stand-pat
+    # decision. Irish Poker, for example, records a mandatory discard on the
+    # Hold'em turn and must not be counted as draw round two.
     "draw_number": _Filter(
-        "CASE WHEN A.actionType IN ('discards', 'stands pat') THEN A.street ELSE NULL END",
-        ("A",), "range",
+        "CASE WHEN G.base = 'draw' AND A.actionType IN ('discards', 'stands pat') "
+        "THEN A.street ELSE NULL END",
+        ("A", "G"), "range",
     ),
     # A stored zero is a known stand-pat; an absent/invalid discard count is
     # unknown (not zero). Do not impose a game-wide maximum discard count.
     "cards_drawn": _Filter(
-        "CASE WHEN A.actionType = 'stands pat' THEN 0 "
-        "WHEN A.actionType = 'discards' AND A.numDiscarded >= 0 THEN A.numDiscarded "
-        "ELSE NULL END",
-        ("A",), "range",
+        "CASE WHEN G.base = 'draw' AND A.actionType = 'stands pat' THEN 0 "
+        "WHEN G.base = 'draw' AND A.actionType = 'discards' AND A.numDiscarded >= 0 "
+        "THEN A.numDiscarded ELSE NULL END",
+        ("A", "G"), "range",
     ),
     "pot_type": _Filter("SI.potType", ("SI",), "set"),
     "pot_before": _Filter("A.potBefore", ("A",), "range"),
@@ -642,14 +645,15 @@ def filter_sources(filters: Mapping[str, Any]) -> set[str]:
 DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
     "street": ("SI.streetName", ("SI",)),
     "draw_number": (
-        "CASE WHEN A.actionType IN ('discards', 'stands pat') THEN A.street ELSE NULL END",
-        ("A",),
+        "CASE WHEN G.base = 'draw' AND A.actionType IN ('discards', 'stands pat') "
+        "THEN A.street ELSE NULL END",
+        ("A", "G"),
     ),
     "cards_drawn": (
-        "CASE WHEN A.actionType = 'stands pat' THEN 0 "
-        "WHEN A.actionType = 'discards' AND A.numDiscarded >= 0 THEN A.numDiscarded "
-        "ELSE NULL END",
-        ("A",),
+        "CASE WHEN G.base = 'draw' AND A.actionType = 'stands pat' THEN 0 "
+        "WHEN G.base = 'draw' AND A.actionType = 'discards' AND A.numDiscarded >= 0 "
+        "THEN A.numDiscarded ELSE NULL END",
+        ("A", "G"),
     ),
     "position": ("A.position", ("A",)),
     "opponent_position": ("SI.facingPosition", ("SI",)),
@@ -670,6 +674,7 @@ DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
     "player": ("P.name", ("P",)),
     "site": ("S.name", ("S",)),
     "game": ("G.category", ("G",)),
+    "game_base": ("G.base", ("G",)),
     "limit": ("G.limitType", ("G",)),
     "tournament": ("H.tourneyId", ("H",)),
     "session": ("H.sessionId", ("H",)),

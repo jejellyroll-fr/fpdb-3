@@ -71,6 +71,36 @@ def test_builtin_draw_definitions_run_on_the_imported_draw_hand(importer, fresh_
     }
 
 
+def test_draw_definition_excludes_non_draw_discard_actions(importer, fresh_db) -> None:
+    importer.addImportFile(str(FIXTURE), "PokerStars")
+    stored, *_ = importer.runImport()
+    assert stored == 1
+
+    # Irish Poker is stored as base="hold" even though its mandatory turn
+    # discard is represented by the same action type as a draw decision.
+    cursor = fresh_db.get_cursor()
+    cursor.execute("UPDATE Gametypes SET base = 'hold'")
+
+    definition = analytics_definitions.load_default_registry().resolve("draw_decision_distribution")
+    result = analytics_definitions.run_definition(fresh_db, definition)
+    assert result.rows == []
+
+    # The reusable dimensions also refuse to label non-draw actions with a
+    # draw number or card count when a caller omits the built-in definition.
+    unscoped = run_query(
+        fresh_db,
+        Query(
+            metric="opportunities",
+            filters={"action_taken": ["discards", "stands pat"]},
+            group_by=("draw_number", "cards_drawn"),
+        ),
+    )
+    assert {
+        (row.group["draw_number"], row.group["cards_drawn"]): row.opportunities
+        for row in unscoped.rows
+    } == {(None, None): 7}
+
+
 def test_merge_zero_discard_events_are_stand_pat_decisions(importer, fresh_db) -> None:
     importer.addImportFile(str(MERGE_FIXTURE), "Merge")
     stored, *_ = importer.runImport()
