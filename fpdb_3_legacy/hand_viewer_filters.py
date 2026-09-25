@@ -63,9 +63,7 @@ def required_analytics_subsystems(filters: Mapping[str, Any]) -> tuple[str, ...]
     if preflop in PREFLOP_FILTERS:
         required.add("action_events")
         required.add("situations")
-    if postflop in _ACTION_FILTERS:
-        required.add("action_events")
-    elif postflop in POSTFLOP_FILTERS:
+    if postflop in POSTFLOP_FILTERS:
         required.update(("action_events", "situations"))
     if filters.get("sizing_bucket") in SIZING_BUCKETS or any(
         filters.get(key) not in (None, "") for key in ("stack_min_bb", "stack_max_bb")
@@ -170,12 +168,17 @@ def _preflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list[
 def _postflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list[str], list[Any]]:
     postflop = filters.get("postflop")
     if postflop in {"saw_flop", "saw_turn", "saw_river"}:
-        street = {"saw_flop": 1, "saw_turn": 2, "saw_river": 3}[postflop]
+        regular_street, aof_omaha_street = {
+            "saw_flop": (1, 0),
+            "saw_turn": (2, 1),
+            "saw_river": (3, 2),
+        }[postflop]
         return [
-            f"EXISTS (SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id "  # nosec B608
-            f"AND HPF.playerId = hp.playerId AND HPF.street{street}Seen IS TRUE)",
-            # Stud and draw reuse street1-3Seen for later streets or draws, not a board.
-            "gt.base = 'hold'",
+            "((gt.base = 'hold' AND gt.category <> 'aof_omaha' AND EXISTS ("
+            "SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id AND HPF.playerId = hp.playerId "
+            f"AND HPF.street{regular_street}Seen IS TRUE)) OR (gt.category = 'aof_omaha' AND EXISTS ("
+            "SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id AND HPF.playerId = hp.playerId "
+            f"AND HPF.street{aof_omaha_street}Seen IS TRUE)))",
         ], []
     if postflop == "showdown":
         return [
@@ -185,7 +188,8 @@ def _postflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list
     if postflop in _ACTION_FILTERS:
         return [
             "EXISTS (SELECT 1 FROM HandsActions AF WHERE AF.handId = h.id AND AF.playerId = hp.playerId "  # nosec B608
-            f"AND AF.street >= 1 AND AF.actionType = {placeholder})"
+            f"AND (AF.street >= 1 OR (gt.category = 'aof_omaha' AND AF.street = 0)) "
+            f"AND AF.actionType = {placeholder})"
         ], [POSTFLOP_ACTION_TYPES[postflop]]
     if postflop in POSTFLOP_FILTERS:
         label, response = POSTFLOP_FILTERS[postflop]

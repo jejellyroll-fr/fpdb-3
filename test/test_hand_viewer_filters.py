@@ -40,7 +40,7 @@ def _database():
             card15 INTEGER, card16 INTEGER, card17 INTEGER, card18 INTEGER,
             card19 INTEGER, card20 INTEGER,
             street0VPIChance INTEGER, street0VPI INTEGER, wentAllIn INTEGER,
-            street1Seen INTEGER, street2Seen INTEGER, street3Seen INTEGER,
+            street0Seen INTEGER, street1Seen INTEGER, street2Seen INTEGER, street3Seen INTEGER,
             sawShowdown INTEGER, totalProfit INTEGER
         );
         CREATE TABLE HandsActions (
@@ -51,16 +51,17 @@ def _database():
             handId INTEGER, playerId INTEGER, actionNo INTEGER,
             primaryLabel TEXT, labels TEXT, response TEXT
         );
-        INSERT INTO Gametypes (id, category, bigBlind) VALUES (1, 'holdem', 10), (2, 'omahahi', 10);
+        INSERT INTO Gametypes (id, category, bigBlind) VALUES
+            (1, 'holdem', 10), (2, 'omahahi', 10), (6, 'aof_omaha', 10);
         INSERT INTO Hands VALUES (1, 1, 100), (2, 1, 600), (3, 2, 100);
         INSERT INTO HandsPlayers (
             handId, playerId, card1, card2, card3, card4,
             street0VPIChance, street0VPI, wentAllIn,
-            street1Seen, street2Seen, street3Seen, sawShowdown, totalProfit
+            street0Seen, street1Seen, street2Seen, street3Seen, sawShowdown, totalProfit
         ) VALUES
-            (1, 11, 13, 12, 0, 0, 1, 1, 0, 1, 1, 0, 0, 50),
-            (2, 22, 13, 12, 0, 0, 1, 0, 0, 1, 0, 0, 1, -100),
-            (3, 33, 7, 8, 13, 12, 1, 1, 0, 1, 0, 0, 0, 20);
+            (1, 11, 13, 12, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 50),
+            (2, 22, 13, 12, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, -100),
+            (3, 33, 7, 8, 13, 12, 1, 1, 0, 0, 1, 0, 0, 0, 20);
         INSERT INTO HandsActions VALUES
             (1, 11, 1, 0, 'raises', 10000, 0, 0), (1, 11, 2, 1, 'calls', 9000, 5000, 0),
             (2, 22, 1, 0, 'folds', 2000, 0, 0), (2, 22, 2, 1, 'bets', 1800, 2500, 1);
@@ -173,7 +174,7 @@ def test_sql_placeholder_must_be_a_supported_driver_marker():
         ({"preflop": "vpip"}, ()),
         ({"preflop": "all_in"}, ()),
         ({"preflop": "rfi"}, ("action_events", "situations")),
-        ({"postflop": "bet"}, ("action_events",)),
+        ({"postflop": "bet"}, ()),
         ({"postflop": "check_raise"}, ("action_events", "situations")),
         ({"sizing_bucket": "25_50"}, ("action_events",)),
         ({"stack_min_bb": 30}, ("action_events",)),
@@ -232,6 +233,19 @@ def test_postflop_action_filter_includes_stud_seventh_street():
         connection.close()
 
 
+def test_aof_omaha_flop_actions_are_postflop_but_holdem_preflop_is_not():
+    connection = _database()
+    try:
+        connection.execute("INSERT INTO Hands VALUES (8, 6, 100)")
+        connection.execute("INSERT INTO HandsPlayers (handId, playerId) VALUES (8, 88)")
+        connection.execute("INSERT INTO HandsActions VALUES (8, 88, 1, 0, 'bets', 0, 0, 0)")
+        # Street zero is preflop for Hold'em, but the flop for AoF Omaha.
+        connection.execute("INSERT INTO HandsActions VALUES (1, 11, 3, 0, 'bets', 0, 0, 0)")
+        assert _run_filters(connection, {"postflop": "bet"}) == [2, 8]
+    finally:
+        connection.close()
+
+
 def test_starting_hand_labels_are_validated_before_querying():
     with pytest.raises(ValueError):
         build_filter_clauses({"starting_hands": ["not a range"]}, "?")
@@ -248,5 +262,20 @@ def test_named_board_street_filters_exclude_stud_and_draw():
         )
         assert _run_filters(connection, {"postflop": "saw_flop"}) == [1, 2, 3]
         assert _run_filters(connection, {"postflop": "saw_river"}) == []
+    finally:
+        connection.close()
+
+
+def test_named_board_street_filters_map_aof_omaha_streets():
+    connection = _database()
+    try:
+        connection.execute("INSERT INTO Hands VALUES (8, 6, 100)")
+        connection.execute(
+            "INSERT INTO HandsPlayers (handId, playerId, street0Seen, street1Seen, street2Seen) "
+            "VALUES (8, 88, 1, 1, 1)"
+        )
+        assert _run_filters(connection, {"postflop": "saw_flop"}) == [1, 2, 3, 8]
+        assert _run_filters(connection, {"postflop": "saw_turn"}) == [1, 8]
+        assert _run_filters(connection, {"postflop": "saw_river"}) == [8]
     finally:
         connection.close()
