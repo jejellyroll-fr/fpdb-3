@@ -395,3 +395,36 @@ def test_a_muck_recorded_by_the_room_stays_a_muck(legacy_config) -> None:
     assert "Hams***10 mucks [Td Qd]" in text
     assert "Hams***10 shows" not in text
     assert "1UIG***8 shows [6h Th]" in text
+
+
+def test_a_hero_who_did_not_show_in_a_parsed_history_is_not_said_to(cash_hand) -> None:
+    # The opponent's cards were recorded as mucked; the hero never showed.
+    cash_hand.shown = set()
+    cash_hand.mucked = {"Player2"}
+
+    text = render_hand(cash_hand)
+
+    assert "Villain 1 mucks [2s 2c]" in text
+    assert "Hero shows" not in text
+
+
+def test_a_double_board_bomb_pot_deals_both_boards_before_the_betting() -> None:
+    hand = fake_hand(2)
+    hand.bombPot = 100
+    hand.allStreets = ["BLINDSANTES", "PREFLOP", "FLOP1", "TURN1", "FLOP2", "TURN2"]
+    hand.board = {"FLOP1": ["2c", "7d", "9h"], "TURN1": ["3c"], "FLOP2": ["Ks", "Qs", "Js"], "TURN2": ["Ts"]}
+    hand.actions = {
+        "BLINDSANTES": [],
+        "PREFLOP": [],
+        "FLOP1": [("P1", "checks"), ("P2", "bets", Decimal(1), False)],
+        "TURN1": [],
+        "FLOP2": [],
+        "TURN2": [("P1", "checks")],
+    }
+
+    lines = render_hand(hand, anonymize="none").splitlines()
+
+    flop = lines.index("Flop Board 1 [2c 7d 9h] | Board 2 [Ks Qs Js]")
+    assert lines[flop + 1 : flop + 3] == ["P1 checks", "P2 bets $1.00"]
+    turn = lines.index("Turn Board 1 [2c 7d 9h] [3c] | Board 2 [Ks Qs Js] [Ts] - Pot $1.00")
+    assert lines[turn + 1] == "P1 checks"

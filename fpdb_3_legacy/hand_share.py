@@ -134,6 +134,8 @@ class ShareOptions:
 class _Street:
     title: str
     board: list[list[str]] = field(default_factory=list)
+    # Parallel boards dealt together (a double-board bomb pot), by label.
+    boards: list[tuple[str, list[list[str]]]] = field(default_factory=list)
     pot: str | None = None
     lines: list[str] = field(default_factory=list)
 
@@ -363,17 +365,27 @@ class _Builder:
             pot += self._paid(action)
         blinds = [self._action_line(action) for action in hand.actions.get("BLINDSANTES", [])]
         first = True
-        for street in hand.allStreets:
+        for group in self._street_groups():
+            street = group[0]
             if street == "BLINDSANTES":
                 continue
-            actions = hand.actions.get(street, [])
-            board = list(hand.board.get(street, []) or [])
+            actions = [action for member in group for action in hand.actions.get(member, [])]
+            boards = {member: list(hand.board.get(member, []) or []) for member in group}
             dealt = self._stud_upcards(street)
-            if not actions and not board and not dealt and not (first and blinds):
+            if not actions and not any(boards.values()) and not dealt and not (first and blinds):
                 continue
-            section = _Street(title=self._street_title(street))
-            if board:
-                section.board = [cards for cards in (self._board_before(street), board) if cards]
+            if len(group) == 1:
+                section = _Street(title=self._street_title(street))
+                if boards[street]:
+                    section.board = [cards for cards in (self._board_before(street), boards[street]) if cards]
+            else:
+                section = _Street(title=self._street_title(street.rstrip("0123456789")))
+                section.boards = [
+                    (f"Board {member[len(member.rstrip('0123456789')) :]}",
+                     [cards for cards in (self._board_before(member), boards[member]) if cards])
+                    for member in group
+                    if boards[member]
+                ]
             if not first:
                 section.pot = self.money(self._pot_at(pot))
             if first:
@@ -389,6 +401,27 @@ class _Builder:
             streets.append(section)
             first = False
         return streets
+
+    def _street_groups(self) -> list[tuple[str, ...]]:
+        """The hand's streets in the order they were played.
+
+        A run-it-twice board is dealt after the betting, one run after the
+        other. A double-board bomb pot deals its flops, turns and rivers side
+        by side before one betting round each, so those numbered streets are
+        grouped by phase, as the replayer does.
+        """
+        streets = list(self.hand.allStreets)
+        numbered = [street for street in streets if street[-1:].isdigit()]
+        if not getattr(self.hand, "bombPot", 0) or not numbered:
+            return [(street,) for street in streets]
+        first = min(streets.index(street) for street in numbered)
+        before = [(street,) for street in streets[:first] if street not in numbered]
+        phases = [
+            tuple(street for street in numbered if street.rstrip("0123456789") == phase)
+            for phase in ("FLOP", "TURN", "RIVER")
+        ]
+        after = [(street,) for street in streets[first:] if street not in numbered]
+        return before + [phase for phase in phases if phase] + after
 
     def _pot_at(self, running: Decimal) -> Decimal:
         """The pot as a street starts.
@@ -620,14 +653,15 @@ class _Builder:
         # showed; when an opponent's cards were revealed at a showdown the
         # hero still in the hand was part of it.
         showdown = bool(revealed - {hand.hero})
-        if hand.hero and hand.hero not in hand.folded and showdown:
+        from_database = not getattr(hand, "handText", None)
+        if from_database and hand.hero and hand.hero not in hand.folded and showdown:
             revealed.add(hand.hero)
         lines = []
         for player in self._action_order():
             name = player[1]
             if name not in revealed:
                 continue
-            if name == hand.hero and name not in hand.shown and not showdown:
+            if name == hand.hero and name not in hand.shown and not (showdown and from_database):
                 continue
             cards = self._final_cards(name)
             if not self._known(cards):
@@ -684,6 +718,8 @@ def _street_heading(street: _Street) -> str:
     heading = street.title
     if street.board:
         heading += f" {_board_text(street.board)}"
+    if street.boards:
+        heading += " " + " | ".join(f"{label} {_board_text(board)}" for label, board in street.boards)
     if street.pot is not None:
         heading += f" - Pot {street.pot}"
     return heading

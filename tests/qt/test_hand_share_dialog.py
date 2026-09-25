@@ -104,3 +104,27 @@ def test_the_replayer_shares_the_hand_it_plays(qtbot, importer, fresh_db, legacy
 
     assert replayer.shareButton.isEnabled()
     assert str(replayer.shared_hand.handid) == "1234567890"
+
+
+def test_the_replayer_shares_from_the_hero_it_resolved(
+    qtbot, importer, fresh_db, legacy_config, tmp_path, monkeypatch
+) -> None:
+    source = FIXTURES / "holdem" / "cash_nl_6max.txt"
+    copy = tmp_path / source.name
+    copy.write_bytes(source.read_bytes())
+    importer.addImportFile(str(copy), "PokerStars")
+    assert importer.runImport()[0] == 1
+    cursor = fresh_db.get_cursor()
+    # A legacy import that never recorded the hero's seat.
+    cursor.execute("UPDATE Hands SET heroSeat = 0")
+    cursor.execute("SELECT id FROM Hands")
+    (hand_id,) = cursor.fetchone()
+    monkeypatch.setattr(GuiReplayer, "_resolve_hero", lambda self, site: "Player1")
+
+    replayer = GuiReplayer(legacy_config, fresh_db.sql, MagicMock(), [hand_id], db=fresh_db)
+    qtbot.addWidget(replayer)
+    replayer.play_hand(0)
+
+    dialog = HandShareDialog(replayer.shared_hand)
+    qtbot.addWidget(dialog)
+    assert "Hero: BTN" in dialog.preview.toPlainText()

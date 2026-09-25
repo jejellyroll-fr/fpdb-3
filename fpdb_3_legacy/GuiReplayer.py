@@ -2530,6 +2530,10 @@ class GuiReplayer(QWidget):
             self.currency_code = str(hand.gametype.get("currency", "USD"))
             self.Heroes = hand.hero or self._resolve_hero(hand.sitename)
             self.replay_model = self._build_replay_model(hand)
+            # Legacy hands without a hero seat: share them from the same point
+            # of view the replayer shows.
+            if not hand.hero and self.Heroes in {player[1] for player in hand.players}:
+                hand.hero = self.Heroes
         self.info = self.replay_model.info
         self.states = self.replay_model.states
         self.shareButton.setEnabled(self.shared_hand is not None)
