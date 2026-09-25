@@ -45,6 +45,30 @@ POSTFLOP_ACTION_TYPES = {
     "fold": "folds",
 }
 
+_BOARD_STREET_FILTERS = {
+    "saw_flop": (
+        "((gt.base = 'hold' AND gt.category <> 'aof_omaha' AND EXISTS ("
+        "SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id AND HPF.playerId = hp.playerId "
+        "AND HPF.street1Seen IS TRUE)) OR (gt.category = 'aof_omaha' AND EXISTS ("
+        "SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id AND HPF.playerId = hp.playerId "
+        "AND HPF.street0Seen IS TRUE)))"
+    ),
+    "saw_turn": (
+        "((gt.base = 'hold' AND gt.category <> 'aof_omaha' AND EXISTS ("
+        "SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id AND HPF.playerId = hp.playerId "
+        "AND HPF.street2Seen IS TRUE)) OR (gt.category = 'aof_omaha' AND EXISTS ("
+        "SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id AND HPF.playerId = hp.playerId "
+        "AND HPF.street1Seen IS TRUE)))"
+    ),
+    "saw_river": (
+        "((gt.base = 'hold' AND gt.category <> 'aof_omaha' AND EXISTS ("
+        "SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id AND HPF.playerId = hp.playerId "
+        "AND HPF.street3Seen IS TRUE)) OR (gt.category = 'aof_omaha' AND EXISTS ("
+        "SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id AND HPF.playerId = hp.playerId "
+        "AND HPF.street2Seen IS TRUE)))"
+    ),
+}
+
 SIZING_BUCKETS: dict[str, tuple[int | None, int | None]] = {
     "under_25": (None, 2500),
     "25_50": (2500, 5000),
@@ -168,19 +192,8 @@ def _preflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list[
 
 def _postflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list[str], list[Any]]:
     postflop = filters.get("postflop")
-    if postflop in {"saw_flop", "saw_turn", "saw_river"}:
-        regular_street, aof_omaha_street = {
-            "saw_flop": (1, 0),
-            "saw_turn": (2, 1),
-            "saw_river": (3, 2),
-        }[postflop]
-        return [
-            "((gt.base = 'hold' AND gt.category <> 'aof_omaha' AND EXISTS ("
-            "SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id AND HPF.playerId = hp.playerId "
-            f"AND HPF.street{regular_street}Seen IS TRUE)) OR (gt.category = 'aof_omaha' AND EXISTS ("
-            "SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id AND HPF.playerId = hp.playerId "
-            f"AND HPF.street{aof_omaha_street}Seen IS TRUE)))",
-        ], []
+    if postflop in _BOARD_STREET_FILTERS:
+        return [_BOARD_STREET_FILTERS[postflop]], []
     if postflop == "showdown":
         return [
             "EXISTS (SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id "
