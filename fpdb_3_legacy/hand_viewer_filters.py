@@ -173,7 +173,9 @@ def _postflop_clause(filters: Mapping[str, Any], placeholder: str) -> tuple[list
         street = {"saw_flop": 1, "saw_turn": 2, "saw_river": 3}[postflop]
         return [
             f"EXISTS (SELECT 1 FROM HandsPlayers HPF WHERE HPF.handId = h.id "  # nosec B608
-            f"AND HPF.playerId = hp.playerId AND HPF.street{street}Seen IS TRUE)"
+            f"AND HPF.playerId = hp.playerId AND HPF.street{street}Seen IS TRUE)",
+            # Stud and draw reuse street1-3Seen for later streets or draws, not a board.
+            "gt.base = 'hold'",
         ], []
     if postflop == "showdown":
         return [

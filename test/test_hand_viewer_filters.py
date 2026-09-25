@@ -31,7 +31,7 @@ def _database():
     connection.executescript(
         """
         CREATE TABLE Hands (id INTEGER PRIMARY KEY, gametypeId INTEGER, finalPot INTEGER);
-        CREATE TABLE Gametypes (id INTEGER PRIMARY KEY, category TEXT, bigBlind INTEGER);
+        CREATE TABLE Gametypes (id INTEGER PRIMARY KEY, category TEXT, bigBlind INTEGER, base TEXT DEFAULT 'hold');
         CREATE TABLE HandsPlayers (
             handId INTEGER, playerId INTEGER, card1 INTEGER, card2 INTEGER,
             card3 INTEGER, card4 INTEGER, card5 INTEGER, card6 INTEGER,
@@ -51,7 +51,7 @@ def _database():
             handId INTEGER, playerId INTEGER, actionNo INTEGER,
             primaryLabel TEXT, labels TEXT, response TEXT
         );
-        INSERT INTO Gametypes VALUES (1, 'holdem', 10), (2, 'omahahi', 10);
+        INSERT INTO Gametypes (id, category, bigBlind) VALUES (1, 'holdem', 10), (2, 'omahahi', 10);
         INSERT INTO Hands VALUES (1, 1, 100), (2, 1, 600), (3, 2, 100);
         INSERT INTO HandsPlayers (
             handId, playerId, card1, card2, card3, card4,
@@ -76,8 +76,8 @@ def _database():
 def test_starting_hand_filter_includes_two_card_games_and_excludes_omaha():
     connection = _database()
     try:
-        connection.execute("INSERT INTO Gametypes VALUES (3, 'aof_holdem', 10)")
-        connection.execute("INSERT INTO Gametypes VALUES (4, 'fusion', 10)")
+        connection.execute("INSERT INTO Gametypes (id, category, bigBlind) VALUES (3, 'aof_holdem', 10)")
+        connection.execute("INSERT INTO Gametypes (id, category, bigBlind) VALUES (4, 'fusion', 10)")
         connection.execute("INSERT INTO Hands VALUES (5, 3, 100)")
         connection.execute("INSERT INTO Hands VALUES (6, 4, 100)")
         connection.execute(
@@ -235,3 +235,18 @@ def test_postflop_action_filter_includes_stud_seventh_street():
 def test_starting_hand_labels_are_validated_before_querying():
     with pytest.raises(ValueError):
         build_filter_clauses({"starting_hands": ["not a range"]}, "?")
+
+
+def test_named_board_street_filters_exclude_stud_and_draw():
+    connection = _database()
+    try:
+        connection.execute("INSERT INTO Gametypes VALUES (5, 'studhi', 10, 'stud')")
+        connection.execute("INSERT INTO Hands VALUES (7, 5, 100)")
+        connection.execute(
+            "INSERT INTO HandsPlayers (handId, playerId, street1Seen, street2Seen, street3Seen) "
+            "VALUES (7, 77, 1, 1, 1)"
+        )
+        assert _run_filters(connection, {"postflop": "saw_flop"}) == [1, 2, 3]
+        assert _run_filters(connection, {"postflop": "saw_river"}) == []
+    finally:
+        connection.close()
