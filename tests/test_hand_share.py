@@ -208,7 +208,8 @@ def test_omaha_renders_every_hole_card(legacy_config) -> None:
 def test_draw_shows_discards_and_later_draws(legacy_config) -> None:
     text = render_hand(parse(legacy_config, "draw/triple_draw.txt"), amounts="bb")
 
-    assert "FL 2-7 Triple Draw" in text
+    # Fixed limit is sold by its bets, not by its $0.05/$0.10 blinds.
+    assert text.startswith("FL 2-7 Triple Draw 6-max - $0.10/$0.20 (amounts in BB)\n")
     assert "Hero [8s Ts 8h 2s 3s]" in text
     assert "First draw - Pot 13.5 BB" in text
     assert "Villain 2 discards 2 cards" in text
@@ -221,6 +222,7 @@ def test_stud_shows_up_cards_and_is_gated_out_of_big_blinds(legacy_config) -> No
     hand = parse(legacy_config, "stud/7stud.txt")
     text = render_hand(hand)
 
+    assert text.startswith("FL 7 Card Stud 8-max - $1.00/$2.00\n")
     assert "3rd street" in text
     assert "Villain 2 [5d]" in text  # an up card dealt on 4th street
     assert ": SB" not in text  # stud has no button positions
@@ -277,7 +279,11 @@ def fake_hand(seats: int) -> Any:
     [
         (2, ["BB", "BTN"]),
         (3, ["SB", "BB", "BTN"]),
+        (4, ["SB", "BB", "CO", "BTN"]),
+        (5, ["SB", "BB", "HJ", "CO", "BTN"]),
         (6, ["SB", "BB", "LJ", "HJ", "CO", "BTN"]),
+        (7, ["SB", "BB", "UTG", "LJ", "HJ", "CO", "BTN"]),
+        (8, ["SB", "BB", "UTG", "UTG+1", "LJ", "HJ", "CO", "BTN"]),
         (9, ["SB", "BB", "UTG", "UTG+1", "UTG+2", "LJ", "HJ", "CO", "BTN"]),
         (10, ["SB", "BB", "UTG", "UTG+1", "UTG+2", "MP1", "LJ", "HJ", "CO", "BTN"]),
     ],
@@ -313,3 +319,15 @@ def test_a_returned_bet_leaves_the_pot_before_the_next_street(
     assert "Uncalled 10 returned to Hero" in text
     assert "Flop [Kd Qd Jd] - Pot 3,020" in text
     assert "Total pot 3,020" in text
+
+
+def test_a_cash_out_is_not_reported_as_pot_winnings(legacy_config) -> None:
+    hand = parse(legacy_config, "holdem/cashed_out.txt")
+
+    text = render_hand(hand)
+    assert "wins" not in text
+    assert "cashes out" not in text
+
+    text = render_hand(hand, cashout=True)
+    assert "Hero cashes out $18.80 (fee $0.20)" in text
+    assert "wins" not in text

@@ -73,7 +73,10 @@ _STREET_NAMES: Final = {
     "SEVENTH": "7th street",
 }
 # Seats between the big blind and the button, named from the button backwards.
-_MIDDLE_POSITIONS: Final = ("UTG", "UTG+1", "UTG+2", "LJ", "HJ", "CO")
+# Seats between the big blind and the button: the three latest are named from
+# the button backwards, the rest from UTG forwards.
+_LATE_POSITIONS: Final = ("LJ", "HJ", "CO")
+_EARLY_POSITIONS: Final = ("UTG", "UTG+1", "UTG+2")
 _BLIND_VERBS: Final = {
     "small blind": "posts SB",
     "secondsb": "posts SB",
@@ -193,12 +196,10 @@ class _Builder:
             # Heads-up the button posts the small blind and acts first preflop.
             return {order[-1][1]: "BTN", order[0][1]: "BB"}
         middle_count = count - 3
-        extra = max(0, middle_count - len(_MIDDLE_POSITIONS))
-        middle = [
-            *_MIDDLE_POSITIONS[:3],
-            *(f"MP{i}" for i in range(1, extra + 1)),
-            *_MIDDLE_POSITIONS[3:],
-        ][-middle_count:] if middle_count else []
+        late = list(_LATE_POSITIONS[len(_LATE_POSITIONS) - min(middle_count, len(_LATE_POSITIONS)) :])
+        early_count = middle_count - len(late)
+        early = [*_EARLY_POSITIONS, *(f"MP{i}" for i in range(1, early_count))][:early_count]
+        middle = [*early, *late]
         labels = ["SB", "BB", *middle, "BTN"]
         return {player[1]: label for player, label in zip(order, labels, strict=True)}
 
@@ -238,13 +239,18 @@ class _Builder:
         return f"{self.hand.sym}{value:,.2f}"
 
     def stakes(self) -> str:
-        return f"{self.money(self.hand.sb)}/{self.money(self.hand.bb)}" if self.bb is None else self._native_stakes()
+        """The stakes as the room advertises them, always in the hand's money.
 
-    def _native_stakes(self) -> str:
-        # The stakes line is what BB amounts are measured against, so it stays
-        # in the hand's own money even when the rest is in big blinds.
+        They are what BB amounts are measured against, so they stay in money
+        even when the rest is in big blinds. Fixed-limit games are sold by
+        their bet sizes, not their blinds: the small bet is the big blind (for
+        stud the stored blinds both hold it) and the big bet doubles it.
+        """
         saved, self.bb = self.bb, None
         try:
+            if self.hand.gametype.get("limitType") == "fl":
+                small = Decimal(str(self.hand.bb))
+                return f"{self.money(small)}/{self.money(small * 2)}"
             return f"{self.money(self.hand.sb)}/{self.money(self.hand.bb)}"
         finally:
             self.bb = saved
@@ -540,12 +546,23 @@ class _Builder:
         return []
 
     def _winnings(self) -> dict[str, Decimal]:
-        if self.hand.collectees:
-            return {p: Decimal(str(a)) for p, a in self.hand.collectees.items()}
+        """What each player won from the pot.
+
+        A cash-out is recorded among the collections too, but it is the room's
+        insurance payout, not pot winnings: it is taken back out here and only
+        shown by the cash-out option.
+        """
         totals: dict[str, Decimal] = {}
-        for player, amount in self.hand.collected:
-            totals[player] = totals.get(player, Decimal(0)) + Decimal(str(amount))
-        return totals
+        if self.hand.collectees:
+            for player, amount in self.hand.collectees.items():
+                totals[player] = Decimal(str(amount))
+        else:
+            for player, amount in self.hand.collected:
+                totals[player] = totals.get(player, Decimal(0)) + Decimal(str(amount))
+        for player, amount in getattr(self.hand, "cashOutAmounts", {}).items():
+            if player in totals:
+                totals[player] -= Decimal(str(amount))
+        return {player: amount for player, amount in totals.items() if amount > 0}
 
 
 # -- formatters ---------------------------------------------------------------
