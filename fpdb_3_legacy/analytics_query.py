@@ -222,6 +222,15 @@ def _to_bp(values: Any) -> list[int]:
     return out
 
 
+_DRAW_NUMBER_CASE: Final = (
+    "CASE WHEN G.base = 'draw' AND A.actionType IN ('discards', 'stands pat') "
+    "THEN (SELECT COUNT(*) + 1 FROM HandsActions AS prior_draw "
+    "WHERE prior_draw.handId = A.handId AND prior_draw.playerId = A.playerId "
+    "AND prior_draw.actionNo < A.actionNo "
+    "AND prior_draw.actionType IN ('discards', 'stands pat')) ELSE NULL END"
+)
+
+
 # ---------------------------------------------------------------------------
 # Filters.
 # ---------------------------------------------------------------------------
@@ -273,6 +282,7 @@ FILTERS: Final[dict[str, _Filter]] = {
     # -- hand / game identity ----------------------------------------------
     "site": _Filter("S.name", ("S",), "set"),
     "game": _Filter("G.category", ("G",), "set"),
+    "game_base": _Filter("G.base", ("G",), "set"),
     "limit": _Filter("G.limitType", ("G",), "set"),
     "currency": _Filter("G.currency", ("G",), "set"),
     "tournament": _Filter("H.tourneyId", ("H",), "null_check"),
@@ -319,6 +329,22 @@ FILTERS: Final[dict[str, _Filter]] = {
     # -- street / pot ------------------------------------------------------
     "street": _Filter("SI.streetName", ("SI",), "set"),
     "street_index": _Filter("A.street", ("A",), "range"),
+    # A draw opportunity exists only in draw games when the player reached the
+    # draw and the action stream records an explicit discard or stand-pat
+    # decision. Irish Poker, for example, records a mandatory discard on the
+    # Hold'em turn and must not be counted as draw round two.
+    "draw_number": _Filter(
+        _DRAW_NUMBER_CASE,
+        ("A", "G"), "range",
+    ),
+    # A stored zero is a known stand-pat; an absent/invalid discard count is
+    # unknown (not zero). Do not impose a game-wide maximum discard count.
+    "cards_drawn": _Filter(
+        "CASE WHEN G.base = 'draw' AND A.actionType = 'stands pat' THEN 0 "
+        "WHEN G.base = 'draw' AND A.actionType = 'discards' AND A.numDiscarded >= 0 "
+        "THEN A.numDiscarded ELSE NULL END",
+        ("A", "G"), "range",
+    ),
     "pot_type": _Filter("SI.potType", ("SI",), "set"),
     "pot_before": _Filter("A.potBefore", ("A",), "range"),
     "to_call": _Filter("A.toCall", ("A",), "range"),
@@ -626,6 +652,16 @@ def filter_sources(filters: Mapping[str, Any]) -> set[str]:
 # from the database group by exactly the same boundaries.
 DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
     "street": ("SI.streetName", ("SI",)),
+    "draw_number": (
+        _DRAW_NUMBER_CASE,
+        ("A", "G"),
+    ),
+    "cards_drawn": (
+        "CASE WHEN G.base = 'draw' AND A.actionType = 'stands pat' THEN 0 "
+        "WHEN G.base = 'draw' AND A.actionType = 'discards' AND A.numDiscarded >= 0 "
+        "THEN A.numDiscarded ELSE NULL END",
+        ("A", "G"),
+    ),
     "position": ("A.position", ("A",)),
     "opponent_position": ("SI.facingPosition", ("SI",)),
     "relative_position": ("A.relativePosition", ("A",)),
@@ -645,6 +681,7 @@ DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
     "player": ("P.name", ("P",)),
     "site": ("S.name", ("S",)),
     "game": ("G.category", ("G",)),
+    "game_base": ("G.base", ("G",)),
     "limit": ("G.limitType", ("G",)),
     "tournament": ("H.tourneyId", ("H",)),
     "session": ("H.sessionId", ("H",)),

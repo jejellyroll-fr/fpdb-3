@@ -113,7 +113,7 @@ class FilterSpec:
 
 
 _GROUP_OF: Final = {
-    "site": "game", "game": "game", "limit": "game", "currency": "game",
+    "site": "game", "game": "game", "game_base": "game", "limit": "game", "currency": "game",
     "tournament": "game", "big_blind": "game", "stake_bb": "game",
     "seats": "game", "max_seats": "game", "session": "game",
     "hand_id": "game", "hand_id_from": "game", "hand_id_to": "game", "tournament_id": "game",
@@ -123,6 +123,7 @@ _GROUP_OF: Final = {
     "in_position": "seat", "effective_stack_bb": "seat", "effective_stack": "seat",
     "stack_bucket": "seat", "spr": "seat", "spr_bucket": "seat", "effective_stack_bucket": "seat", "players_in_hand": "seat",
     "multiway": "street", "street": "street", "street_index": "street",
+    "draw_number": "street",
     "pot_type": "street", "pot_before": "street", "to_call": "street",
     "pot_odds_bp": "street", "role": "street", "is_aggressor": "street",
     "is_preflop_aggressor": "street", "is_previous_aggressor": "street",
@@ -132,7 +133,7 @@ _GROUP_OF: Final = {
     "all_in": "action", "situation": "action", "primary_situation": "action",
     "situation_group": "action", "enum_key": "action", "enum_response": "action",
     "raisers_before": "action",
-    "starting_hand": "cards", "hole_cards_known": "cards",
+    "starting_hand": "cards", "hole_cards_known": "cards", "cards_drawn": "cards",
     "sizing_bp": "sizing", "facing_sizing_bp": "sizing",
     "sizing_bucket": "sizing", "facing_sizing_bucket": "sizing",
     "bet_sizing_pct": "sizing", "facing_sizing_pct": "sizing",

@@ -140,6 +140,19 @@ class TestAssembleHandsActions:
         assert self.derived_stats.handsactions[4]["cardsDiscarded"] == ["2c"]
         assert self.derived_stats.handsplayers["Player2"]["street1Discards"] == 1
 
+    def test_unknown_discard_count_stays_distinct_from_stand_pat(self) -> None:
+        self.mock_hand.handid = "12349"
+        self.mock_hand.actionStreets = ["BLINDS", "DEAL", "DRAWONE"]
+        self.mock_hand.actions = {
+            "BLINDS": [],
+            "DEAL": [],
+            "DRAWONE": [("Player1", "discards", None)],
+        }
+
+        self.derived_stats.assembleHandsActions(self.mock_hand)
+
+        assert self.derived_stats.handsactions[1]["numDiscarded"] == -1
+
     def test_empty_streets(self) -> None:
         """Test handling of streets with no actions."""
         # Setup

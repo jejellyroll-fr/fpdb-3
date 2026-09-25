@@ -88,6 +88,7 @@ FILTER_LABELS: Final[dict[str, str]] = {
     # -- game ---------------------------------------------------------------
     "site": N_("Poker room"),
     "game": N_("Game"),
+    "game_base": N_("Game family"),
     "limit": N_("Limit"),
     "currency": N_("Currency"),
     "tournament": N_("Tournament or cash"),
@@ -123,6 +124,8 @@ FILTER_LABELS: Final[dict[str, str]] = {
     # -- street / pot -------------------------------------------------------
     "street": N_("Street"),
     "street_index": N_("Street number"),
+    "draw_number": N_("Draw number"),
+    "cards_drawn": N_("Cards drawn"),
     "pot_type": N_("Pot type"),
     "pot_before": N_("Pot before the action"),
     "to_call": N_("Amount to call"),
@@ -187,6 +190,7 @@ FILTER_LABELS: Final[dict[str, str]] = {
 FILTER_DESCRIPTIONS: Final[dict[str, str]] = {
     "site": N_("Which poker room the hands were played on."),
     "game": N_("The game variant, such as Hold'em or Omaha."),
+    "game_base": N_("The game family: hold'em/omaha, stud or draw."),
     "limit": N_("Fixed limit, no limit and the other betting structures."),
     "currency": N_("The currency the game was played in."),
     "tournament": N_("Yes for tournament hands, No for cash game hands."),
@@ -219,6 +223,8 @@ FILTER_DESCRIPTIONS: Final[dict[str, str]] = {
     "multiway": N_("Three or more players saw the decision."),
     "street": N_("Preflop, flop, turn or river."),
     "street_index": N_("The street as a number, preflop being zero."),
+    "draw_number": N_("Which draw round the player reached; only recorded discard or stand-pat actions count."),
+    "cards_drawn": N_("Cards discarded at the draw; zero means stand pat and unknown discard counts stay unclassified."),
     "pot_type": N_("The shape of the pot: unopened, limped, single-raised, 3-bet, 4-bet."),
     "pot_before": N_("The pot size before the action, in chips."),
     "to_call": N_("How much the actor had to call."),
@@ -230,7 +236,7 @@ FILTER_DESCRIPTIONS: Final[dict[str, str]] = {
     "in_position_vs_previous_aggressor": N_("Whether the actor has position on the previous aggressor."),
     "in_position_vs_facing": N_("Whether the actor has position on the bettor."),
     "facing_all_in": N_("Whether the action in front of the actor was an all-in."),
-    "action_taken": N_("What the actor did: folded, checked, called, bet or raised."),
+    "action_taken": N_("What the actor did, including draw-game discards and stand-pat decisions."),
     "action_faced": N_("What the actor was facing."),
     "response": N_("The decision, normalized: fold, check, call, bet or raise."),
     "all_in": N_("Whether the action put the player all-in."),
@@ -455,7 +461,10 @@ def _action_choices() -> tuple[Choice, ...]:
     """The raw action words the event rows store (parser spelling)."""
     return tuple(
         Choice(word, N_(word))
-        for word in ("folds", "checks", "calls", "bets", "raises", "completes")
+        for word in (
+            "folds", "checks", "calls", "bets", "raises", "completes",
+            "discards", "stands pat",
+        )
     )
 
 
@@ -565,6 +574,8 @@ def is_expert_only(name: str) -> bool:
 
 DIMENSION_LABELS: Final[dict[str, str]] = {
     "street": N_("Street"),
+    "draw_number": N_("Draw number"),
+    "cards_drawn": N_("Cards drawn (0 = stand pat)"),
     "position": N_("Position"),
     "opponent_position": N_("Opponent position"),
     "relative_position": N_("Relative position"),
@@ -584,6 +595,7 @@ DIMENSION_LABELS: Final[dict[str, str]] = {
     "player": N_("Player"),
     "site": N_("Poker room"),
     "game": N_("Game"),
+    "game_base": N_("Game family"),
     "limit": N_("Limit"),
     "tournament": N_("Tournament"),
     "session": N_("Session"),
@@ -607,6 +619,8 @@ DIMENSION_LABELS: Final[dict[str, str]] = {
 # Grouping by a raw player id or a session is an expert move.
 BEGINNER_DIMENSIONS: Final[tuple[str, ...]] = (
     "street",
+    "draw_number",
+    "cards_drawn",
     "position",
     "opponent_position",
     "pot_type",

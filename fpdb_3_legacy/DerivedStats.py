@@ -1114,6 +1114,11 @@ class DerivedStats:
                     # Insert values from hand.actions
                     player_name = act[0]
                     action_type = act[1]
+                    # Preserve a missing/unparseable discard count separately
+                    # from an explicit zero (stand pat). -1 is outside the
+                    # valid count domain and fits the existing SMALLINT column.
+                    if action_type == "discards":
+                        self.handsactions[k]["numDiscarded"] = -1
                     self.handsactions[k]["player"] = player_name
                     self.handsactions[k]["street"] = i - 1
                     self.handsactions[k]["actionNo"] = k
