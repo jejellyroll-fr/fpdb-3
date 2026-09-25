@@ -88,6 +88,7 @@ FILTER_LABELS: Final[dict[str, str]] = {
     # -- game ---------------------------------------------------------------
     "site": N_("Poker room"),
     "game": N_("Game"),
+    "game_base": N_("Game family"),
     "limit": N_("Limit"),
     "currency": N_("Currency"),
     "tournament": N_("Tournament or cash"),
@@ -189,6 +190,7 @@ FILTER_LABELS: Final[dict[str, str]] = {
 FILTER_DESCRIPTIONS: Final[dict[str, str]] = {
     "site": N_("Which poker room the hands were played on."),
     "game": N_("The game variant, such as Hold'em or Omaha."),
+    "game_base": N_("The game family: hold'em/omaha, stud or draw."),
     "limit": N_("Fixed limit, no limit and the other betting structures."),
     "currency": N_("The currency the game was played in."),
     "tournament": N_("Yes for tournament hands, No for cash game hands."),
@@ -593,6 +595,7 @@ DIMENSION_LABELS: Final[dict[str, str]] = {
     "player": N_("Player"),
     "site": N_("Poker room"),
     "game": N_("Game"),
+    "game_base": N_("Game family"),
     "limit": N_("Limit"),
     "tournament": N_("Tournament"),
     "session": N_("Session"),
