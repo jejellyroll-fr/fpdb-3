@@ -15,6 +15,14 @@ FIXTURE = (
     / "draw"
     / "triple_draw.txt"
 )
+MERGE_FIXTURE = (
+    Path(__file__).resolve().parents[1]
+    / "regression-test-files"
+    / "cash"
+    / "Merge"
+    / "Draw"
+    / "3-Draw-Limit-USD-1-2-201104.Sample.with.showdown.txt"
+)
 
 
 def test_draw_counts_only_players_who_reached_each_decision(importer, fresh_db) -> None:
@@ -57,6 +65,61 @@ def test_builtin_draw_definitions_run_on_the_imported_draw_hand(importer, fresh_
     assert grouped == {
         (1, 1): 1,
         (1, 2): 2,
+        (2, 0): 1,
+        (2, 1): 1,
+        (3, 0): 2,
+    }
+
+
+def test_merge_zero_discard_events_are_stand_pat_decisions(importer, fresh_db) -> None:
+    importer.addImportFile(str(MERGE_FIXTURE), "Merge")
+    stored, *_ = importer.runImport()
+    assert stored == 1
+
+    result = run_query(
+        fresh_db,
+        Query(
+            metric="opportunities",
+            filters={"action_taken": ["discards", "stands pat"]},
+            group_by=("draw_number", "cards_drawn"),
+        ),
+    )
+    grouped = {
+        (row.group["draw_number"], row.group["cards_drawn"]): row.opportunities
+        for row in result.rows
+    }
+    assert grouped == {
+        (1, 1): 1,
+        (1, 2): 1,
+        (2, 0): 1,
+        (2, 1): 1,
+        (3, 0): 2,
+    }
+
+    cursor = fresh_db.get_cursor()
+    cursor.execute(
+        "SELECT handId, actionNo FROM HandsActions "
+        "WHERE actionType = 'discards' AND numDiscarded = 1 LIMIT 1",
+    )
+    hand_id, action_no = cursor.fetchone()
+    cursor.execute(
+        "UPDATE HandsActions SET numDiscarded = -1 WHERE handId = ? AND actionNo = ?",
+        (hand_id, action_no),
+    )
+    unknown = run_query(
+        fresh_db,
+        Query(
+            metric="opportunities",
+            filters={"action_taken": ["discards", "stands pat"]},
+            group_by=("draw_number", "cards_drawn"),
+        ),
+    )
+    assert {
+        (row.group["draw_number"], row.group["cards_drawn"]): row.opportunities
+        for row in unknown.rows
+    } == {
+        (1, 2): 1,
+        (1, None): 1,
         (2, 0): 1,
         (2, 1): 1,
         (3, 0): 2,

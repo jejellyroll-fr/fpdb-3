@@ -330,7 +330,7 @@ FILTERS: Final[dict[str, _Filter]] = {
     # unknown (not zero). Do not impose a game-wide maximum discard count.
     "cards_drawn": _Filter(
         "CASE WHEN A.actionType = 'stands pat' THEN 0 "
-        "WHEN A.actionType = 'discards' AND A.numDiscarded > 0 THEN A.numDiscarded "
+        "WHEN A.actionType = 'discards' AND A.numDiscarded >= 0 THEN A.numDiscarded "
         "ELSE NULL END",
         ("A",), "range",
     ),
@@ -647,7 +647,7 @@ DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
     ),
     "cards_drawn": (
         "CASE WHEN A.actionType = 'stands pat' THEN 0 "
-        "WHEN A.actionType = 'discards' AND A.numDiscarded > 0 THEN A.numDiscarded "
+        "WHEN A.actionType = 'discards' AND A.numDiscarded >= 0 THEN A.numDiscarded "
         "ELSE NULL END",
         ("A",),
     ),

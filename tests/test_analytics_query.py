@@ -139,7 +139,7 @@ class TestFilters:
         sql = " AND ".join(fragments)
         assert "A.actionType IN ('discards', 'stands pat')" in sql
         assert "A.actionType = 'stands pat' THEN 0" in sql
-        assert "A.numDiscarded > 0" in sql
+        assert "A.numDiscarded >= 0" in sql
 
     def test_draw_dimensions_are_available_for_grouping(self) -> None:
         compiled = compile_query(
@@ -148,7 +148,7 @@ class TestFilters:
         )
         assert "AS draw_number" in compiled.sql
         assert "AS cards_drawn" in compiled.sql
-        assert "A.numDiscarded > 0" in compiled.sql
+        assert "A.numDiscarded >= 0" in compiled.sql
 
     def test_range_is_open_ended(self, query_db: Database) -> None:
         lower_only = run_query(
