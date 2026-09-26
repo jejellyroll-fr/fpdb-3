@@ -339,3 +339,94 @@ def test_a_broken_installed_pack_is_reported_and_skipped(source: Path, packs_dir
     assert "not valid JSON" in rows[PACK_ID].errors[0]
     assert "example.preflop.btn_open" not in registry
     assert "example.other.x" in registry  # the healthy pack still loads
+
+
+# -- review hardening (PR #411) ----------------------------------------------
+
+
+def test_text_that_is_not_utf8_is_a_pack_error(source: Path, packs_dir: Path) -> None:
+    (source / "stats" / "steals.json").write_bytes(b"\xff\xfe{}")
+
+    assert "is not UTF-8 text" in refused(source, packs_dir)
+
+
+def test_malformed_yaml_is_a_pack_error(source: Path, packs_dir: Path) -> None:
+    pytest.importorskip("yaml")
+    (source / "stats" / "broken.yaml").write_text("stats: [unclosed", encoding="utf-8")
+    edit_manifest(source, definitions=["stats/steals.json", "stats/broken.yaml"])
+
+    assert "stats/broken.yaml is not valid YAML" in refused(source, packs_dir)
+
+
+def test_a_nested_fragment_list_must_be_names(source: Path, packs_dir: Path) -> None:
+    edit_manifest(source, fragments={"example.preflop.unopened": {"street": "preflop", "fragments": 5}})
+
+    assert "fragments must be a list of fragment names" in refused(source, packs_dir)
+
+
+def test_a_preset_of_the_wrong_shape_is_reported_not_raised(source: Path, packs_dir: Path) -> None:
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["group_by"] = 7
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+
+    assert "presets/steals.json" in refused(source, packs_dir)
+
+
+def test_a_failed_replacement_keeps_the_previous_install(
+    source: Path, packs_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    stat_packs.install_pack(source, packs_dir)
+    edit_manifest(source, pack_version="2.0.0")
+    real_rename = Path.rename
+
+    def failing_rename(self: Path, target: Any) -> Any:
+        # Moving the old install aside works; moving the new one in does not.
+        if self.name.startswith(f".{PACK_ID}.") and not self.name.endswith(".previous"):
+            raise OSError("disk full")
+        return real_rename(self, target)
+
+    monkeypatch.setattr(Path, "rename", failing_rename)
+    with pytest.raises(OSError, match="disk full"):
+        stat_packs.install_pack(source, packs_dir, replace=True)
+    monkeypatch.undo()
+
+    assert stat_packs.read_pack(packs_dir / PACK_ID).pack_version == "1.0.0"
+    assert not any(path.name.startswith(".") for path in packs_dir.iterdir() if path.is_dir())
+
+
+def test_a_folder_holding_another_pack_is_invalid_and_removable(source: Path, packs_dir: Path) -> None:
+    stat_packs.install_pack(source, packs_dir)
+    shutil.copytree(packs_dir / PACK_ID, packs_dir / "renamed-by-hand")
+
+    rows = {row.id: row for row in stat_packs.list_packs(packs_dir)}
+    assert rows["renamed-by-hand"].status == stat_packs.INVALID
+
+    stat_packs.uninstall_pack("renamed-by-hand", packs_dir)
+
+    assert not (packs_dir / "renamed-by-hand").exists()
+    assert (packs_dir / PACK_ID).is_dir()  # the real pack is untouched
+
+
+@pytest.mark.parametrize("folder", ["..", "../elsewhere", ".hidden", "a/b", ""])
+def test_uninstall_only_reaches_pack_folders(packs_dir: Path, folder: str) -> None:
+    packs_dir.mkdir(parents=True)
+    with pytest.raises(stat_packs.PackError):
+        stat_packs.uninstall_pack(folder, packs_dir)
+
+
+def test_a_failed_state_write_keeps_the_previous_state(
+    source: Path, packs_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    stat_packs.install_pack(source, packs_dir)
+    stat_packs.set_enabled(PACK_ID, False, packs_dir)
+
+    def failing_replace(*_args: Any) -> None:
+        raise OSError("interrupted")
+
+    monkeypatch.setattr(stat_packs.os, "replace", failing_replace)
+    with pytest.raises(OSError, match="interrupted"):
+        stat_packs.set_enabled(PACK_ID, True, packs_dir)
+    monkeypatch.undo()
+
+    assert {row.id: row.status for row in stat_packs.list_packs(packs_dir)}[PACK_ID] == stat_packs.DISABLED
+    assert [path.name for path in packs_dir.iterdir() if path.name.startswith(".state")] == []

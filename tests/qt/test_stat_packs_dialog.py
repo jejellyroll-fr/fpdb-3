@@ -81,3 +81,21 @@ def test_an_invalid_installed_pack_shows_its_errors(dialog: StatPacksDialog) -> 
     assert "This pack is not loaded" in dialog.details.toPlainText()
     assert not dialog.toggle_button.isEnabled()
     assert dialog.uninstall_button.isEnabled()
+
+
+def test_an_io_error_while_replacing_is_reported(dialog: StatPacksDialog, monkeypatch) -> None:
+    assert dialog.import_pack(str(EXAMPLE))
+    real_install = stat_packs.install_pack
+
+    def install(path, packs_dir=None, *, replace=False, **kwargs):
+        if replace:
+            raise OSError("permission denied")
+        return real_install(path, packs_dir, replace=replace, **kwargs)
+
+    shown: list[str] = []
+    monkeypatch.setattr(stat_packs, "install_pack", install)
+    monkeypatch.setattr(QMessageBox, "question", lambda *args, **kwargs: QMessageBox.StandardButton.Yes)
+    monkeypatch.setattr(QMessageBox, "warning", lambda *args, **kwargs: shown.append(args[2]))
+
+    assert not dialog.import_pack(str(EXAMPLE))
+    assert "permission denied" in shown[0]

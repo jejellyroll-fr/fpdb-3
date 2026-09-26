@@ -196,6 +196,9 @@ class StatPacksDialog(QDialog):
             except stat_packs.PackError as replace_exc:
                 self._refuse(replace_exc)
                 return False
+            except OSError as replace_exc:
+                QMessageBox.warning(self, _("Import stat pack"), _("Could not read the pack:\n%s") % replace_exc)
+                return False
         except OSError as exc:
             QMessageBox.warning(self, _("Import stat pack"), _("Could not read the pack:\n%s") % exc)
             return False

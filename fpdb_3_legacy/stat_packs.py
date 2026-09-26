@@ -50,6 +50,7 @@ the manager asks for a restart rather than refreshing half the app.
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import tempfile
@@ -177,8 +178,21 @@ def _read_state(root: Path) -> dict[str, Any]:
 
 
 def _write_state(root: Path, state: Mapping[str, Any]) -> None:
+    """Replace ``state.json`` atomically.
+
+    An unreadable state reads as "everything enabled", so a write cut short
+    must never leave a truncated file: the new state goes to a temporary file
+    that replaces the old one in a single step.
+    """
     root.mkdir(parents=True, exist_ok=True)
-    (root / STATE_NAME).write_text(_canonical_json(state), encoding="utf-8")
+    handle, temporary = tempfile.mkstemp(prefix=f".{STATE_NAME}.", dir=root)
+    try:
+        with os.fdopen(handle, "w", encoding="utf-8") as out:
+            out.write(_canonical_json(state))
+        os.replace(temporary, root / STATE_NAME)
+    except OSError:
+        Path(temporary).unlink(missing_ok=True)
+        raise
 
 
 def _canonical_json(data: Any) -> str:
@@ -251,7 +265,11 @@ def _read_archive(source: Path) -> dict[str, bytes]:
 
 
 def _parse_data(name: str, data: bytes, source: str) -> Any:
-    text = data.decode("utf-8")
+    """A data file's content, with every way it can be unreadable as a PackError."""
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise PackError([f"{name} is not UTF-8 text: {exc}"], source) from exc
     if name.endswith(".json"):
         try:
             return json.loads(text)
@@ -261,7 +279,10 @@ def _parse_data(name: str, data: bytes, source: str) -> Any:
         import yaml  # noqa: PLC0415 -- optional dependency, imported on use
     except ModuleNotFoundError as exc:  # pragma: no cover - env-dependent
         raise PackError([f"{name}: YAML needs PyYAML; write it as JSON"], source) from exc
-    return yaml.safe_load(text)
+    try:
+        return yaml.safe_load(text)
+    except yaml.YAMLError as exc:
+        raise PackError([f"{name} is not valid YAML: {exc}"], source) from exc
 
 
 def _version_tuple(version: str) -> tuple[int, ...]:
@@ -381,8 +402,12 @@ def _read_fragments(raw: Any, prefix: str, errors: list[str]) -> dict[str, dict[
         except ValueError as exc:
             errors.append(f"fragment {name!r}: {exc}")
             continue
-        if "fragments" in filters:
-            resolved["fragments"] = list(filters["fragments"])
+        nested = filters.get("fragments", [])
+        if not isinstance(nested, list) or not all(isinstance(item, str) for item in nested):
+            errors.append(f"fragment {name!r}: fragments must be a list of fragment names")
+            continue
+        if nested:
+            resolved["fragments"] = list(nested)
         fragments[str(name)] = resolved
     return fragments
 
@@ -476,8 +501,10 @@ def _read_presets(listed: Any, files: Mapping[str, bytes], prefix: str, label: s
     for name, raw in _listed_documents(listed, files, "presets", label, errors):
         try:
             pack = research_presets._validate_pack(raw, name)  # noqa: SLF001 - the shipped presets' validator
-        except ValueError as exc:
-            errors.append(str(exc))
+        except (AttributeError, TypeError, ValueError) as exc:
+            # The shipped validator trusts shipped data's shapes; a pack's data
+            # is not shipped, so a wrong shape is its error, not a crash.
+            errors.append(f"{name}: {exc}")
             continue
         for preset in pack.presets:
             if not preset.id.startswith(prefix):
@@ -540,24 +567,39 @@ def install_pack(
     # Written beside the target, then swapped in: a failure half-way leaves the
     # previous install (or nothing), never a pack with half its files.
     staging = Path(tempfile.mkdtemp(prefix=f".{pack.id}.", dir=root))
+    backup: Path | None = None
     try:
         for name, data in pack.files.items():
             path = staging / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(data)
+        # The previous install is moved aside, not deleted, until the new one
+        # is in place: a failure restores it instead of losing both.
         if target.exists():
-            shutil.rmtree(target)
+            backup = root / f".{pack.id}.previous"
+            if backup.exists():
+                shutil.rmtree(backup)
+            target.rename(backup)
         staging.rename(target)
     except OSError:
         shutil.rmtree(staging, ignore_errors=True)
+        if backup is not None and backup.exists() and not target.exists():
+            backup.rename(target)
         raise
+    if backup is not None:
+        shutil.rmtree(backup, ignore_errors=True)
     return pack
 
 
 def uninstall_pack(pack_id: str, packs_dir: str | Path | None = None) -> None:
-    """Remove an installed pack and forget its enabled state."""
+    """Remove an installed pack -- valid or not -- and forget its enabled state.
+
+    ``pack_id`` is the pack's folder name, which is what the manager lists for
+    an invalid pack too: a hand-edited folder whose manifest names another pack
+    must still be removable, and only that folder may be removed.
+    """
     root = _root(packs_dir)
-    target = _pack_dir(root, pack_id)
+    target = _installed_folder(root, pack_id)
     shutil.rmtree(target)
     state = _read_state(root)
     state["disabled"] = [name for name in state.get("disabled", []) if name != pack_id]
@@ -574,6 +616,16 @@ def set_enabled(pack_id: str, enabled: bool, packs_dir: str | Path | None = None
         disabled.append(pack_id)
     state["disabled"] = sorted(disabled)
     _write_state(root, state)
+
+
+def _installed_folder(root: Path, folder: str) -> Path:
+    """A direct, non-hidden folder of the pack directory, whatever it holds."""
+    if not isinstance(folder, str) or not folder or folder.startswith(".") or folder != Path(folder).name:
+        raise PackError([f"{folder!r} is not an installed pack folder"])
+    target = root / folder
+    if not target.is_dir() or target.is_symlink():
+        raise PackError([f"pack {folder!r} is not installed"])
+    return target
 
 
 def _pack_dir(root: Path, pack_id: str) -> Path:
@@ -620,7 +672,7 @@ def list_packs(packs_dir: str | Path | None = None, *, include_builtin: bool = T
     for directory in sorted(path for path in root.iterdir() if path.is_dir() and not path.name.startswith(".")):
         try:
             pack = read_pack(directory)
-        except (PackError, OSError, UnicodeDecodeError) as exc:
+        except (PackError, OSError, ValueError, TypeError) as exc:
             messages = exc.messages if isinstance(exc, PackError) else [str(exc)]
             rows.append(PackStatus(id=directory.name, name=directory.name, status=INVALID, errors=tuple(messages), path=str(directory)))
             continue
@@ -630,7 +682,8 @@ def list_packs(packs_dir: str | Path | None = None, *, include_builtin: bool = T
             status, errors = INVALID, (f"folder {directory.name!r} holds pack {pack.id!r}",)
         rows.append(
             PackStatus(
-                id=pack.id,
+                # The folder, not the manifest's claim: it is what a row acts on.
+                id=directory.name,
                 name=pack.name,
                 status=status,
                 definitions=tuple(definition.name for definition in pack.definitions),
