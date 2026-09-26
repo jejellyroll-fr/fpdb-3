@@ -450,7 +450,7 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          python -m pytest -m qt --tb=short
+          python -m pytest -m "qt and not perf" --tb=short
       # The perf tests assert wall-clock budgets, some as tight as 5 ms for a
       # loop of pure-Python work. Hosted runners are shared and noisy -- the
       # Windows ones especially -- so as a required check on all three they
@@ -560,7 +560,7 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          python -m pytest -m qt --cov --cov-append --cov-report= --tb=short
+          python -m pytest -m "qt and not perf" --cov --cov-append --cov-report= --tb=short
       - name: Render coverage reports
         run: |
           python -m coverage json -o coverage.json

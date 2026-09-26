@@ -596,6 +596,9 @@ class TestHUDIntegrationScenarios:
         assert stats["a_freq1"].lab.text() == "40.0"  # 6/15
 
 
+# Wall-clock budgets: shared CI runners miss them on scheduling alone, so they
+# run with the advisory perf tests rather than gate every Qt run.
+@pytest.mark.perf
 class TestHUDUpdatePerformance:
     """Test suite for HUD update performance with no data feature."""
 

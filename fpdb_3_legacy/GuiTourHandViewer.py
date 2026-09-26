@@ -38,6 +38,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Filters, GuiReplayer, Hand, gui_empty_state
+from fpdb_3_legacy.hand_share_dialog import add_share_actions
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -437,9 +438,11 @@ class TourHandViewer(QSplitter):
             return
         hand = self.hands[int(index.sibling(index.row(), self.colnum["HandId"]).data())]
         m = QMenu()
-        copyAction = m.addAction(_("Copy to clipboard"))
+        copyAction = m.addAction(_("Copy hand history"))
         if copyAction is not None:
             copyAction.triggered.connect(partial(self.copyHandToClipboard, hand=hand))
+        m.addSeparator()
+        add_share_actions(m, hand, self)
         m.move(event.globalPosition().toPoint())
         m.exec()
 

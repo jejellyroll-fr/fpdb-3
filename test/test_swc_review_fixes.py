@@ -799,12 +799,15 @@ def test_a_transient_refusal_keeps_its_place_past_the_budget(tmp_path, monkeypat
     thread, _raw = _tailer(tmp_path, monkeypatch, [hand])
     thread.poll_once()
     key = thread._hand_key(hand)
+    # A fixed clock: on Windows two reads can share one ~15 ms tick, and then
+    # "now + cap - now" comes back a hair above the cap in floating point.
+    monkeypatch.setattr(time, "monotonic", lambda: 1000.0)
 
     for _ in range(thread.MAX_RETRY_OFFERS + 5):
         thread.retry_hand(hand, transient=True)
 
     assert key in thread._retry_after, "a transient refusal never gives up on the hand"
-    assert thread._retry_after[key] - time.monotonic() <= thread.RETRY_BACKOFF_CAP_SECONDS
+    assert thread._retry_after[key] - 1000.0 <= thread.RETRY_BACKOFF_CAP_SECONDS
 
 
 def test_a_hand_the_importer_judged_unusable_still_stops(tmp_path, monkeypatch) -> None:

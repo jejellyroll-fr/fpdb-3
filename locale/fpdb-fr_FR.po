@@ -5061,3 +5061,96 @@ msgstr "Aucune main ne correspond aux filtres sélectionnés."
 
 msgid "The database holds hands, but none of them match this selection.\n\nWiden the filters (dates, limits, games, seats) and refresh."
 msgstr "La base contient des mains, mais aucune ne correspond à cette sélection.\n\nÉlargissez les filtres (dates, limites, jeux, sièges) puis rafraîchissez."
+
+msgid "Copy hand history"
+msgstr "Copier l'historique de la main"
+
+msgid "Copy as text"
+msgstr "Copier en texte"
+
+msgid "Copy as Markdown"
+msgstr "Copier en Markdown"
+
+msgid "Copy as Markdown in BB"
+msgstr "Copier en Markdown (en BB)"
+
+msgid "Share..."
+msgstr "Partager..."
+
+msgid "Share hand"
+msgstr "Partager la main"
+
+msgid "Copy or save this hand as text, Markdown or forum code"
+msgstr "Copier ou enregistrer cette main en texte, Markdown ou code forum"
+
+msgid "This hand could not be rendered:\n%s"
+msgstr "Impossible de mettre en forme cette main :\n%s"
+
+msgid "This game has no big blind to count in."
+msgstr "Ce jeu n'a pas de grosse blinde pour compter en BB."
+
+msgid "Names"
+msgstr "Noms"
+
+msgid "Amounts"
+msgstr "Montants"
+
+msgid "Include"
+msgstr "Inclure"
+
+msgid "Copy"
+msgstr "Copier"
+
+msgid "Save..."
+msgstr "Enregistrer..."
+
+msgid "Save hand"
+msgstr "Enregistrer la main"
+
+msgid "Could not save the hand:\n%s"
+msgstr "Impossible d'enregistrer la main :\n%s"
+
+msgid "Plain text"
+msgstr "Texte brut"
+
+msgid "Markdown"
+msgstr "Markdown"
+
+msgid "Forum (BBCode)"
+msgstr "Forum (BBCode)"
+
+msgid "Hide every name (Hero, Villain 1 ...)"
+msgstr "Masquer tous les noms (Hero, Villain 1 ...)"
+
+msgid "Keep my name, hide opponents"
+msgstr "Garder mon nom, masquer les adversaires"
+
+msgid "Keep every name"
+msgstr "Garder tous les noms"
+
+msgid "Money / chips"
+msgstr "Argent / jetons"
+
+msgid "Big blinds"
+msgstr "Grosses blindes"
+
+msgid "Table name"
+msgstr "Nom de la table"
+
+msgid "Hand number"
+msgstr "Numéro de la main"
+
+msgid "Date and time"
+msgstr "Date et heure"
+
+msgid "Stacks"
+msgstr "Tapis"
+
+msgid "Showdown and results"
+msgstr "Abattage et résultats"
+
+msgid "Rake"
+msgstr "Rake"
+
+msgid "EV cashout"
+msgstr "Cashout EV"
