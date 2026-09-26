@@ -121,6 +121,9 @@ class ShareOptions:
     results: bool = True
     rake: bool = False
     cashout: bool = False
+    # Whose point of view to share from, when the hand itself does not say
+    # (a legacy import without a hero seat); the hand is never modified.
+    hero: str | None = None
 
     def __post_init__(self) -> None:
         for name, value, allowed in (
@@ -218,6 +221,7 @@ class _Builder:
     def __init__(self, hand: Any, options: ShareOptions) -> None:
         self.hand = hand
         self.options = options
+        self.hero = options.hero or hand.hero or ""
         self.players = [p for p in hand.players if p[1] not in getattr(hand, "sitout", set())]
         self.positions = self._positions()
         self.names = self._names()
@@ -253,7 +257,7 @@ class _Builder:
         return {player[1]: label for player, label in zip(order, labels, strict=True)}
 
     def _names(self) -> dict[str, str]:
-        hero = self.hand.hero or ""
+        hero = self.hero or ""
         mode = self.options.anonymize
         names: dict[str, str] = {}
         villain = 0
@@ -366,7 +370,7 @@ class _Builder:
         return bool(cards) and all(card and card != "0x" for card in cards)
 
     def _hero_cards(self) -> str | None:
-        hero = self.hand.hero
+        hero = self.hero
         if not hero or hero not in self.names:
             return None
         cards = self._starting_cards(hero)
@@ -515,7 +519,7 @@ class _Builder:
             held = self.hand.holecards.get(street, {}).get(player[1])
             if not held:
                 continue
-            if player[1] == self.hand.hero and street == self.hand.holeStreets[0]:
+            if player[1] == self.hero and street == self.hand.holeStreets[0]:
                 cards = [*held[1], *held[0]]
             else:
                 cards = list(held[0])
@@ -531,30 +535,30 @@ class _Builder:
         """
         hand = self.hand
         base = hand.gametype.get("base")
-        if base not in ("draw", "hold") or not hand.hero:
+        if base not in ("draw", "hold") or not self.hero:
             return []
         streets = list(getattr(hand, "holeStreets", []) or [])
         if street not in streets[1:]:
             return []
-        held = hand.holecards.get(street, {}).get(hand.hero)
+        held = hand.holecards.get(street, {}).get(self.hero)
         if not held:
             return []
         if base == "hold":
             dealt = list(held[0])
-            return [f"{self.name(hand.hero)} is dealt [{' '.join(dealt)}]"] if self._known(dealt) else []
-        holdings = self._draw_holdings(hand.hero)
+            return [f"{self.name(self.hero)} is dealt [{' '.join(dealt)}]"] if self._known(dealt) else []
+        holdings = self._draw_holdings(self.hero)
         holding = holdings.get(street)
         if holding and holding == holdings.get(streets[streets.index(street) - 1]):
             return []  # stood pat on a hand already shown
         if holding:
-            return [f"{self.name(hand.hero)} [{' '.join(holding)}]"]
+            return [f"{self.name(self.hero)} [{' '.join(holding)}]"]
         drawn = list(held[0])
-        return [f"{self.name(hand.hero)} draws [{' '.join(drawn)}]"] if self._known(drawn) else []
+        return [f"{self.name(self.hero)} draws [{' '.join(drawn)}]"] if self._known(drawn) else []
 
     def _after_hero_draw(self, actions: list[tuple]) -> int:
         """Index just past the hero's discard or stand pat on this street."""
         for index, action in enumerate(actions):
-            if action[0] == self.hand.hero and action[1] in ("discards", "stands pat"):
+            if action[0] == self.hero and action[1] in ("discards", "stands pat"):
                 return index + 1
         return 0
 
@@ -655,7 +659,7 @@ class _Builder:
             count = int(action[2])
             text = f"{who} discards {count} {'card' if count == 1 else 'cards'}"
             cards = action[3] if len(action) > 3 else None
-            if cards and action[0] == self.hand.hero:
+            if cards and action[0] == self.hero:
                 shown = cards if isinstance(cards, str) else " ".join(cards)
                 text += f" [{shown}]"
             return text
@@ -709,16 +713,16 @@ class _Builder:
         # A hand read back from the database does not record what the hero
         # showed; when an opponent's cards were revealed at a showdown the
         # hero still in the hand was part of it.
-        showdown = bool(revealed - {hand.hero})
+        showdown = bool(revealed - {self.hero})
         from_database = not getattr(hand, "handText", None)
-        if from_database and hand.hero and hand.hero not in hand.folded and showdown:
-            revealed.add(hand.hero)
+        if from_database and self.hero and self.hero not in hand.folded and showdown:
+            revealed.add(self.hero)
         lines = []
         for player in self._action_order():
             name = player[1]
             if name not in revealed:
                 continue
-            if name == hand.hero and name not in hand.shown and not (showdown and from_database):
+            if name == self.hero and name not in hand.shown and not (showdown and from_database):
                 continue
             cards = self._final_cards(name)
             if not self._known(cards):

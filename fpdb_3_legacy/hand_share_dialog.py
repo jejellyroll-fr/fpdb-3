@@ -87,9 +87,10 @@ def add_share_actions(menu: QMenu, hand: Any, parent: QWidget | None = None) -> 
 class HandShareDialog(QDialog):
     """Pick a format, what to hide, and copy or save the result."""
 
-    def __init__(self, hand: Any, parent: QWidget | None = None) -> None:
+    def __init__(self, hand: Any, parent: QWidget | None = None, hero: str | None = None) -> None:
         super().__init__(parent)
         self.hand = hand
+        self.hero = hero
         self.setWindowTitle(_("Share hand"))
         self.resize(720, 640)
 
@@ -151,6 +152,7 @@ class HandShareDialog(QDialog):
             format=self.format_combo.currentData(),
             anonymize=self.anonymize_combo.currentData(),
             amounts=self.amounts_combo.currentData(),
+            hero=self.hero,
             **{key: check.isChecked() for key, check in self.checks.items()},
         )
 

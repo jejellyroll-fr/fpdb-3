@@ -799,6 +799,7 @@ class GuiReplayer(QWidget):
 
         # The hand being replayed, for sharing; an OFC replay has none.
         self.shared_hand: Any = None
+        self.shared_hero: str | None = None
         self.shareButton = QPushButton(_("Share..."))
         self.shareButton.setToolTip(_("Copy or save this hand as text, Markdown or forum code"))
         self.shareButton.setFocusPolicy(Qt.FocusPolicy.NoFocus)
@@ -2514,6 +2515,7 @@ class GuiReplayer(QWidget):
         # Forget the previous hand first, so a hand that fails to load can
         # never be shared under the one shown before it.
         self.shared_hand = None
+        self.shared_hero = None
         self.shareButton.setEnabled(False)
         is_ofc = self._is_ofc_replay_entry(entry)
         self.replay_mode = "ofc" if is_ofc else "hand"
@@ -2534,9 +2536,9 @@ class GuiReplayer(QWidget):
             self.Heroes = hand.hero or self._resolve_hero(hand.sitename)
             self.replay_model = self._build_replay_model(hand)
             # Legacy hands without a hero seat: share them from the same point
-            # of view the replayer shows.
+            # of view the replayer shows, without writing it into the hand.
             if not hand.hero and self.Heroes in {player[1] for player in hand.players}:
-                hand.hero = self.Heroes
+                self.shared_hero = self.Heroes
         self.info = self.replay_model.info
         self.states = self.replay_model.states
         self.shareButton.setEnabled(self.shared_hand is not None)
@@ -2577,7 +2579,7 @@ class GuiReplayer(QWidget):
 
     def share_clicked(self) -> None:
         if self.shared_hand is not None:
-            HandShareDialog(self.shared_hand, self).exec()
+            HandShareDialog(self.shared_hand, self, hero=self.shared_hero).exec()
 
     def increment_state(self) -> None:  # noqa: F811
         if self.stateSlider.value() >= self.stateSlider.maximum():

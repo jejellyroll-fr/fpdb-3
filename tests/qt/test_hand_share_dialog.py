@@ -125,7 +125,9 @@ def test_the_replayer_shares_from_the_hero_it_resolved(
     qtbot.addWidget(replayer)
     replayer.play_hand(0)
 
-    dialog = HandShareDialog(replayer.shared_hand)
+    # The hand itself is left as loaded; the hero is passed to the renderer.
+    assert replayer.shared_hand.hero == ""
+    dialog = HandShareDialog(replayer.shared_hand, hero=replayer.shared_hero)
     qtbot.addWidget(dialog)
     assert "Hero: BTN" in dialog.preview.toPlainText()
 

@@ -546,3 +546,13 @@ def test_courchevel_shows_the_flopet_before_the_preflop_betting(legacy_config) -
     preflop = lines.index("Preflop [8h]")
     assert lines.index("Hero raises to 90") > preflop
     assert any(line.startswith("Flop [8h 9h Th]") for line in lines)
+
+
+def test_a_hero_can_be_named_without_changing_the_hand(cash_hand) -> None:
+    cash_hand.hero = ""
+
+    text = render_hand(cash_hand, hero="Player1")
+
+    assert "Hero: BTN" in text
+    assert "Hero [Ah Kh]" in text
+    assert cash_hand.hero == ""
