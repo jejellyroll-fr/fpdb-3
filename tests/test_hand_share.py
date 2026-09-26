@@ -469,3 +469,12 @@ def test_several_cash_outs_by_one_player_are_all_kept_out_of_the_winnings(cash_h
     assert "Hero wins" not in text
     assert "Hero cashes out $22.77" in text
     assert "Villain 1 wins $95.00" in text
+
+
+def test_a_returning_player_posting_both_blinds_does_not_set_the_big_blind(legacy_config) -> None:
+    hand = parse(legacy_config, "draw/triple_draw.txt")
+    # A returning player posts SB + BB together: $0.15 is not the big blind.
+    hand.actions["BLINDSANTES"].append(("Eisenherz73", "both", Decimal("0.15"), False))
+
+    assert render_hand(hand).startswith("FL 2-7 Triple Draw 6-max - $0.10/$0.20\n")
+    assert "Hero posts BB 1 BB" in render_hand(hand, amounts="bb")

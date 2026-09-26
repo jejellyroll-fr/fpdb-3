@@ -155,7 +155,9 @@ def _posted_big_blind(hand: Any) -> Decimal | None:
     posts = [
         Decimal(str(action[2]))
         for action in hand.actions.get("BLINDSANTES", [])
-        if action[1] in ("big blind", "both") and not (len(action) > 3 and action[3] is True)
+        # "both" records the dead small blind plus the big one, so only a
+        # plain big-blind post says what the big blind is.
+        if action[1] == "big blind" and not (len(action) > 3 and action[3] is True)
     ]
     return max(posts) if posts else None
 
