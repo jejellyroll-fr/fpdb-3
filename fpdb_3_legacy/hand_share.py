@@ -66,6 +66,8 @@ _LIMIT_NAMES: Final = {
     "fl": "FL",
     "cn": "Cap NL",
     "cp": "Cap PL",
+    "pn": "PL/NL",  # pot limit preflop, no limit after the flop
+    "hp": "Half PL",
 }
 _STREET_NAMES: Final = {
     "PREFLOP": "Preflop",
@@ -93,6 +95,7 @@ _BLIND_VERBS: Final = {
     "secondsb": "posts SB",
     "big blind": "posts BB",
     "both": "posts SB + BB",
+    "small & big blinds": "posts SB + BB",  # OnGame and Betfair spell it out
     "straddle": "posts straddle",
     "button blind": "posts button blind",
     "ante": "posts ante",

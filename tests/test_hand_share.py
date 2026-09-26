@@ -504,3 +504,20 @@ def test_a_splash_paid_apart_from_the_pot_is_reported(cash_hand) -> None:
     cash_hand.splashWinnings = {"Player1": Decimal("1.50")}
 
     assert "Hero wins $1.50 from the splash" in render_hand(cash_hand)
+
+
+def test_every_parsed_betting_structure_is_named(cash_hand) -> None:
+    cash_hand.gametype["limitType"] = "pn"
+    assert render_hand(cash_hand).startswith("PL/NL Hold'em")
+    cash_hand.gametype["limitType"] = "hp"
+    assert render_hand(cash_hand).startswith("Half PL Hold'em")
+
+
+def test_a_spelled_out_combined_blind_is_posted_and_counted(cash_hand) -> None:
+    # OnGame and Betfair record a returning player's post under this name.
+    cash_hand.actions["BLINDSANTES"].append(("Player4", "small & big blinds", Decimal("1.50"), False))
+
+    text = render_hand(cash_hand)
+
+    assert "Villain 3 posts SB + BB $1.50" in text
+    assert "Flop [As Ks 2d] - Pot $8.50" in text
