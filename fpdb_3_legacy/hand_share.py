@@ -156,8 +156,9 @@ def _posted_big_blind(hand: Any) -> Decimal | None:
         Decimal(str(action[2]))
         for action in hand.actions.get("BLINDSANTES", [])
         # "both" records the dead small blind plus the big one, so only a
-        # plain big-blind post says what the big blind is.
-        if action[1] == "big blind" and not (len(action) > 3 and action[3] is True)
+        # plain big-blind post says what the big blind is. An all-in post
+        # still counts: a short one is smaller than any full post beside it.
+        if action[1] == "big blind"
     ]
     return max(posts) if posts else None
 
@@ -379,7 +380,8 @@ class _Builder:
     def _streets(self) -> list[_Street]:
         hand = self.hand
         streets = []
-        pot = Decimal(0)
+        # Money the room put in (a Winamax bomb or splash pot) has no action.
+        pot = Decimal(str(getattr(hand.pot, "stp", 0) or 0))
         for action in hand.actions.get("BLINDSANTES", []):
             pot += self._paid(action)
         blinds = [self._action_line(action) for action in hand.actions.get("BLINDSANTES", [])]
@@ -657,6 +659,10 @@ class _Builder:
         lines.extend(self._showdown())
         for player, amount in self._winnings().items():
             lines.append(f"{self.name(player)} wins {self.money(amount)}")
+        # A room-funded splash is paid apart from the pot, as the replayer shows it.
+        for player, amount in getattr(hand, "splashWinnings", {}).items():
+            if amount:
+                lines.append(f"{self.name(player)} wins {self.money(amount)} from the splash")
         if self.options.cashout:
             for player, amount in getattr(hand, "cashOutAmounts", {}).items():
                 fee = getattr(hand, "cashOutFees", {}).get(player)

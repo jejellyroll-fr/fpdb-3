@@ -478,3 +478,29 @@ def test_a_returning_player_posting_both_blinds_does_not_set_the_big_blind(legac
 
     assert render_hand(hand).startswith("FL 2-7 Triple Draw 6-max - $0.10/$0.20\n")
     assert "Hero posts BB 1 BB" in render_hand(hand, amounts="bb")
+
+
+def test_a_full_big_blind_posted_all_in_still_sets_the_big_blind(legacy_config) -> None:
+    hand = parse(legacy_config, "draw/triple_draw.txt")
+    hand.actions["BLINDSANTES"] = [
+        ("TheLabman", "small blind", Decimal("0.05"), False),
+        ("Hero", "big blind", Decimal("0.10"), True),  # exactly the blind, all-in
+    ]
+    hand.gametype.update(type="tour", sb="0.05", bb="0.10")  # stored as blinds
+
+    assert "- 0.10/0.20" in render_hand(hand).splitlines()[0]
+
+
+def test_money_the_room_added_is_in_every_street_pot(cash_hand) -> None:
+    cash_hand.pot.stp = Decimal("5.00")
+    cash_hand.totalpot = Decimal("100.00")
+
+    text = render_hand(cash_hand)
+
+    assert "Flop [As Ks 2d] - Pot $12.00" in text
+
+
+def test_a_splash_paid_apart_from_the_pot_is_reported(cash_hand) -> None:
+    cash_hand.splashWinnings = {"Player1": Decimal("1.50")}
+
+    assert "Hero wins $1.50 from the splash" in render_hand(cash_hand)
