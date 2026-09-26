@@ -369,7 +369,12 @@ class _Builder:
             street = group[0]
             if street == "BLINDSANTES":
                 continue
-            actions = [action for member in group for action in hand.actions.get(member, [])]
+            actions = [
+                action
+                for member in group
+                for action in hand.actions.get(member, [])
+                if self.options.cashout or action[1] != "cashout"
+            ]
             boards = {member: list(hand.board.get(member, []) or []) for member in group}
             dealt = self._stud_upcards(street)
             if not actions and not any(boards.values()) and not dealt and not (first and blinds):
@@ -692,9 +697,12 @@ class _Builder:
     def _winnings(self) -> dict[str, Decimal]:
         """What each player won from the pot.
 
-        A cash-out is recorded among the collections too, but it is the room's
-        insurance payout, not pot winnings: it is taken back out here and only
-        shown by the cash-out option.
+        A cash-out is the room's insurance payout, not pot winnings, and is
+        only shown by the cash-out option. Some parsers (PokerStars, and hands
+        read back from the database) also record it as a collection; others
+        (GGPoker, HTTP capture) keep it apart. So it is taken back out only
+        where a collection of exactly that amount stands for it, leaving a pot
+        the same player really won elsewhere in the hand untouched.
         """
         totals: dict[str, Decimal] = {}
         if self.hand.collectees:
@@ -704,8 +712,12 @@ class _Builder:
             for player, amount in self.hand.collected:
                 totals[player] = totals.get(player, Decimal(0)) + Decimal(str(amount))
         for player, amount in getattr(self.hand, "cashOutAmounts", {}).items():
-            if player in totals:
-                totals[player] -= Decimal(str(amount))
+            cashed = Decimal(str(amount))
+            recorded = any(
+                who == player and Decimal(str(collected)) == cashed for who, collected in self.hand.collected
+            )
+            if recorded and player in totals:
+                totals[player] -= cashed
         return {player: amount for player, amount in totals.items() if amount > 0}
 
 

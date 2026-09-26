@@ -428,3 +428,21 @@ def test_a_double_board_bomb_pot_deals_both_boards_before_the_betting() -> None:
     assert lines[flop + 1 : flop + 3] == ["P1 checks", "P2 bets $1.00"]
     turn = lines.index("Turn Board 1 [2c 7d 9h] [3c] | Board 2 [Ks Qs Js] [Ts] - Pot $1.00")
     assert lines[turn + 1] == "P1 checks"
+
+
+def test_a_cash_out_kept_apart_leaves_a_real_win_alone(cash_hand) -> None:
+    # GGPoker and HTTP capture store the cash-out apart from the collections:
+    # the pot the player really won must still be reported in full.
+    cash_hand.cashOutAmounts = {"Player2": Decimal("12.00")}
+
+    text = render_hand(cash_hand, cashout=True)
+
+    assert "Villain 1 wins $95.00" in text
+    assert "Villain 1 cashes out $12.00" in text
+
+
+def test_a_cash_out_action_follows_the_cash_out_option(cash_hand) -> None:
+    cash_hand.actions["RIVER"].append(("Player1", "cashout"))
+
+    assert "Hero cashes out" not in render_hand(cash_hand)
+    assert "Hero cashes out" in render_hand(cash_hand, cashout=True)
