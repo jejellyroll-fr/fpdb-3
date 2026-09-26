@@ -104,3 +104,36 @@ def test_without_a_big_blind_the_combined_form_keeps_the_amount() -> None:
 
     assert stat("stack_bb", table)[1] == "-"
     assert stat("stack_native_bb", table)[1] == "€45.00"
+
+
+def test_fractional_tournament_chips_are_kept() -> None:
+    # BetOnline tournament histories carry stacks such as 5365.01.
+    table = hand(start="5385.01", bets=["20"], bb="40", currency="T$", kind="tour")
+
+    assert stat("stack_amount", table)[1] == "5,365.01"
+    assert stat("stack_native_bb", table)[1] == "5,365.01 / 134.1bb"
+
+
+def test_a_splash_paid_beside_the_pot_is_in_the_stack() -> None:
+    # Live capture pays the splash outside the collections.
+    table = hand(start="45.00", bets=["2.25"], bb="1.00", currency="EUR")
+    table.pot.stp = 0
+    table.splashWinnings = {"Hero": "1.50"}
+
+    assert stat("stack_amount", table)[1] == "€44.25"
+    assert int(stat("bbstack", table)[1]) == 44  # the same stack bbstack reads
+
+
+def test_a_splash_seeded_into_the_pot_is_not_counted_twice() -> None:
+    # Hand-history converters seed it into the pot; it comes back collected.
+    table = hand(start="45.00", bets=["2.25"], won="1.50", bb="1.00", currency="EUR")
+    table.pot.stp = "1.50"
+    table.splashWinnings = {"Hero": "1.50"}
+
+    assert stat("stack_amount", table)[1] == "€44.25"
+
+
+def test_the_popup_label_is_extracted_for_translation() -> None:
+    from fpdb_3_legacy.i18n import POPUP_PACK_LABELS
+
+    assert "Stack" in POPUP_PACK_LABELS

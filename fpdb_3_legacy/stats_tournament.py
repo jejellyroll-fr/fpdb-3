@@ -12,6 +12,8 @@ from fpdb_3_legacy.stats_formatting import StatTuple, format_no_data_stat
 # Currencies that are chips rather than money: no symbol, no cents.
 _CHIP_CURRENCIES = frozenset({"T$", "PLAY"})
 _COMPACT_CHIPS_FROM = 10_000
+# Float noise left by summing bets, below any real fraction of a chip.
+_FRACTION_NOISE = 0.005
 
 
 def calculate_end_stack(stat_dict: Mapping[int, Mapping[str, Any]], player: int, hand: Any) -> float:
@@ -32,6 +34,12 @@ def calculate_end_stack(stat_dict: Mapping[int, Mapping[str, Any]], player: int,
     for actor in hand.collectees:
         if actor == name:
             stack += float(hand.collectees[actor])
+    # A room-funded splash reaches the stack too. Hand-history converters seed
+    # it into the pot (pot.stp) and it comes back through the collections;
+    # live-capture builders pay it beside the pot, in splashWinnings only.
+    # Same rule as DerivedStats' stored profit, so it is never counted twice.
+    if not float(getattr(hand.pot, "stp", 0) or 0):
+        stack += float((getattr(hand, "splashWinnings", None) or {}).get(name, 0))
     return stack
 
 
@@ -101,7 +109,9 @@ def _stack_amount_text(stack: float, hand: Any, *, compact: bool = False) -> str
         return format_currency(stack, str(hand.gametype.get("currency", "USD")))
     if compact and abs(stack) >= _COMPACT_CHIPS_FROM:
         return f"{format_number(stack / 1000, 1, grouping=False)}k"
-    return format_number(stack, 0)
+    # Chips are usually whole, but some rooms (BetOnline) keep fractions.
+    whole = abs(stack - round(stack)) < _FRACTION_NOISE
+    return format_number(stack, 0 if whole else 2)
 
 
 def _stack_bb_text(stack: float, bigblind: float) -> str:
