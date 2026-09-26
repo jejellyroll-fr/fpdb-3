@@ -521,3 +521,28 @@ def test_a_spelled_out_combined_blind_is_posted_and_counted(cash_hand) -> None:
 
     assert "Villain 3 posts SB + BB $1.50" in text
     assert "Flop [As Ks 2d] - Pot $8.50" in text
+
+
+def test_a_name_cannot_paste_as_a_link(cash_hand) -> None:
+    for player in cash_hand.players:
+        if player[1] == "Player2":
+            player[1] = "[click](https://example.invalid)"
+    cash_hand.actions = {
+        street: [(("[click](https://example.invalid)",) + tuple(a[1:])) if a[0] == "Player2" else a for a in acts]
+        for street, acts in cash_hand.actions.items()
+    }
+
+    markdown = render_hand(cash_hand, format="markdown", anonymize="none")
+    assert "\\[click\\](https://example.invalid)" in markdown
+    assert "**Flop [As Ks 2d] - Pot $7.00**" in markdown  # cards are left alone
+
+    bbcode = render_hand(cash_hand, format="bbcode", anonymize="none")
+    assert "&#91;click&#93;(https://example.invalid)" in bbcode
+
+
+def test_courchevel_shows_the_flopet_before_the_preflop_betting(legacy_config) -> None:
+    lines = render_hand(parse(legacy_config, "holdem/courchevel.txt")).splitlines()
+
+    preflop = lines.index("Preflop [8h]")
+    assert lines.index("Hero raises to 90") > preflop
+    assert any(line.startswith("Flop [8h 9h Th]") for line in lines)

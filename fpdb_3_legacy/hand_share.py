@@ -269,7 +269,15 @@ class _Builder:
         return names
 
     def name(self, player: str) -> str:
-        return self.names.get(player, player if self.options.anonymize == "none" else "Unknown")
+        return self.free_text(self.names.get(player, player if self.options.anonymize == "none" else "Unknown"))
+
+    def free_text(self, text: str) -> str:
+        """Escape text that came from the room (names, table, site) for the format.
+
+        Only this text is escaped: the rest is generated, and escaping it
+        would bury card brackets and the like under backslashes.
+        """
+        return _ESCAPES[self.options.format](str(text))
 
     # -- amounts --------------------------------------------------------------
     def _plays_for_chips(self) -> bool:
@@ -334,9 +342,9 @@ class _Builder:
     def _meta(self) -> list[str]:
         meta = []
         if self.options.site and self.hand.sitename:
-            meta.append(str(self.hand.sitename))
+            meta.append(self.free_text(self.hand.sitename))
         if self.options.table and self.hand.tablename:
-            meta.append(f"Table {self.hand.tablename}")
+            meta.append(f"Table {self.free_text(self.hand.tablename)}")
         if self.options.hand_id and self.hand.handid:
             meta.append(f"Hand #{self.hand.handid}")
         if self.options.timestamp and hasattr(self.hand.startTime, "strftime"):
@@ -403,18 +411,7 @@ class _Builder:
             dealt = self._stud_upcards(street)
             if not actions and not any(boards.values()) and not dealt and not (first and blinds):
                 continue
-            if len(group) == 1:
-                section = _Street(title=self._street_title(street))
-                if boards[street]:
-                    section.board = [cards for cards in (self._board_before(street), boards[street]) if cards]
-            else:
-                section = _Street(title=self._street_title(street.rstrip("0123456789")))
-                section.boards = [
-                    (f"Board {member[len(member.rstrip('0123456789')) :]}",
-                     [cards for cards in (self._board_before(member), boards[member]) if cards])
-                    for member in group
-                    if boards[member]
-                ]
+            section = self._section(group, boards)
             if not first:
                 section.pot = self.money(self._pot_at(pot))
             if first:
@@ -430,6 +427,33 @@ class _Builder:
             streets.append(section)
             first = False
         return streets
+
+    def _section(self, group: tuple[str, ...], boards: dict[str, list[str]]) -> _Street:
+        """A street's heading: its name and the board cards it deals."""
+        street = group[0]
+        if len(group) == 1:
+            section = _Street(title=self._street_title(street))
+            if boards[street]:
+                section.board = [cards for cards in (self._board_before(street), boards[street]) if cards]
+            elif street == "PREFLOP" and self._flopet():
+                section.board = [self._flopet()]
+            return section
+        section = _Street(title=self._street_title(street.rstrip("0123456789")))
+        section.boards = [
+            (
+                f"Board {member[len(member.rstrip('0123456789')) :]}",
+                [cards for cards in (self._board_before(member), boards[member]) if cards],
+            )
+            for member in group
+            if boards[member]
+        ]
+        return section
+
+    def _flopet(self) -> list[str]:
+        """Courchevel's first flop card, dealt face up before the preflop betting."""
+        if not str(self.hand.gametype.get("category", "")).startswith("cour"):
+            return []
+        return list(self.hand.board.get("FLOP", []) or [])[:1]
 
     def _street_groups(self) -> list[tuple[str, ...]]:
         """The hand's streets in the order they were played.
@@ -700,7 +724,7 @@ class _Builder:
             if not self._known(cards):
                 continue
             description = hand.showdownStrings.get(name)
-            suffix = f" ({description})" if description else ""
+            suffix = f" ({self.free_text(description)})" if description else ""
             # A parsed history says who mucked; a hand read back from the
             # database marks every known opponent hand as mucked, so there
             # the cards being known is all that can be said.
@@ -787,47 +811,56 @@ def _format_text(doc: _Document) -> str:
 
 
 def _md_escape(text: str) -> str:
-    # Player names are the only free text; keep them from turning into markup.
-    for char in ("\\", "*", "_", "`", "~", "|", ">", "#"):
+    # Brackets and "<" too: a name like "[click](https://...)" or "<https://...>"
+    # would otherwise paste as a live link.
+    for char in ("\\", "*", "_", "`", "~", "|", ">", "#", "[", "]", "<"):
         text = text.replace(char, f"\\{char}")
     return text
 
 
+def _bb_escape(text: str) -> str:
+    # Forum tags are [tag]...[/tag]; entities keep a name from opening one.
+    return text.replace("[", "&#91;").replace("]", "&#93;")
+
+
+_ESCAPES: Final = {
+    "text": lambda text: text,
+    "markdown": _md_escape,
+    "bbcode": _bb_escape,
+}
+
+
 def _format_markdown(doc: _Document) -> str:
-    out = [f"**{_md_escape(doc.title)}**"]
+    out = [f"**{doc.title}**"]
     if doc.meta:
-        out.append(f"*{_md_escape(' | '.join(doc.meta))}*")
+        out.append(f"*{' | '.join(doc.meta)}*")
     out.append("")
-    out.extend(f"- {_md_escape(seat)}" for seat in doc.seats)
+    out.extend(f"- {seat}" for seat in doc.seats)
     if doc.hero_cards:
-        out += ["", f"**{_md_escape(doc.hero_cards)}**"]
+        out += ["", f"**{doc.hero_cards}**"]
     for street in doc.streets:
-        out += ["", f"**{_md_escape(_street_heading(street))}**"]
-        out.extend(f"- {_md_escape(line)}" for line in street.lines)
+        out += ["", f"**{_street_heading(street)}**"]
+        out.extend(f"- {line}" for line in street.lines)
     if doc.summary:
         out += ["", "**Summary**"]
-        out.extend(f"- {_md_escape(line)}" for line in doc.summary)
+        out.extend(f"- {line}" for line in doc.summary)
     return "\n".join(out) + "\n"
 
 
-def _bb_escape(text: str) -> str:
-    return text.replace("[", "&#91;").replace("]", "&#93;") if "[/" in text else text
-
-
 def _format_bbcode(doc: _Document) -> str:
-    out = [f"[b]{_bb_escape(doc.title)}[/b]"]
+    out = [f"[b]{doc.title}[/b]"]
     if doc.meta:
-        out.append(f"[i]{_bb_escape(' | '.join(doc.meta))}[/i]")
+        out.append(f"[i]{' | '.join(doc.meta)}[/i]")
     out.append("")
-    out.extend(_bb_escape(seat) for seat in doc.seats)
+    out.extend(doc.seats)
     if doc.hero_cards:
-        out += ["", f"[b]{_bb_escape(doc.hero_cards)}[/b]"]
+        out += ["", f"[b]{doc.hero_cards}[/b]"]
     for street in doc.streets:
-        out += ["", f"[b]{_bb_escape(_street_heading(street))}[/b]"]
-        out.extend(_bb_escape(line) for line in street.lines)
+        out += ["", f"[b]{_street_heading(street)}[/b]"]
+        out.extend(street.lines)
     if doc.summary:
         out += ["", "[b]Summary[/b]"]
-        out.extend(_bb_escape(line) for line in doc.summary)
+        out.extend(doc.summary)
     return "\n".join(out) + "\n"
 
 
