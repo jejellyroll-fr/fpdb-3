@@ -20,6 +20,7 @@ from fpdb_3_legacy import Card
 from fpdb_3_legacy.CakeToFpdb import Cake
 from fpdb_3_legacy.Hand import hand_factory
 from fpdb_3_legacy.hand_share import _GAME_NAMES, ShareOptions, render_hand, supports_bb_amounts
+from fpdb_3_legacy.PartyPokerToFpdb import PartyPoker
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures" / "hands" / "pokerstars"
@@ -446,3 +447,25 @@ def test_a_cash_out_action_follows_the_cash_out_option(cash_hand) -> None:
 
     assert "Hero cashes out" not in render_hand(cash_hand)
     assert "Hero cashes out" in render_hand(cash_hand, cashout=True)
+
+
+def test_a_fixed_limit_tournament_stored_as_blinds_is_titled_by_its_bets(legacy_config) -> None:
+    source = Path(__file__).resolve().parents[1] / "regression-test-files" / "tour" / "PartyPoker" / "Flop"
+    hand = PartyPoker(
+        config=legacy_config, in_path=str(source / "LHE-Freeroll-MTT-201207.txt"), autostart=True
+    ).getProcessedHands()[0]
+
+    # PartyPoker stores this 200/400 tournament as 100/200 blinds.
+    assert render_hand(hand).startswith("FL Hold'em 10-max tournament - 200/400\n")
+    assert "posts BB 1 BB" in render_hand(hand, amounts="bb")
+
+
+def test_several_cash_outs_by_one_player_are_all_kept_out_of_the_winnings(cash_hand) -> None:
+    cash_hand.addCashOutPot("Player1", "10.00")
+    cash_hand.addCashOutPot("Player1", "12.77")
+
+    text = render_hand(cash_hand, cashout=True)
+
+    assert "Hero wins" not in text
+    assert "Hero cashes out $22.77" in text
+    assert "Villain 1 wins $95.00" in text

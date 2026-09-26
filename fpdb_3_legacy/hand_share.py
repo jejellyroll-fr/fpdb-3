@@ -150,15 +150,34 @@ class _Document:
     summary: list[str]
 
 
-def _is_fixed_limit_tournament(hand: Any) -> bool:
-    # Fixed-limit tournaments store their bets (300/600) where ring games
-    # store their blinds (0.05/0.10 for a 0.10/0.20 game).
-    return hand.gametype.get("limitType") == "fl" and hand.gametype.get("type") == "tour"
+def _posted_big_blind(hand: Any) -> Decimal | None:
+    """The full big blind someone posted in this hand, if anyone did."""
+    posts = [
+        Decimal(str(action[2]))
+        for action in hand.actions.get("BLINDSANTES", [])
+        if action[1] in ("big blind", "both") and not (len(action) > 3 and action[3] is True)
+    ]
+    return max(posts) if posts else None
+
+
+def _stored_fixed_limit_big_blind(hand: Any) -> Decimal:
+    # Without a posted blind to go by, fall back on how the stakes are
+    # usually stored: PokerStars keeps a fixed-limit tournament's bets
+    # (300/600), ring games keep their blinds (0.05/0.10 for 0.10/0.20).
+    tournament = hand.gametype.get("type") == "tour"
+    return Decimal(str(hand.sb if tournament else hand.bb))
 
 
 def big_blind(hand: Any) -> Decimal:
-    """The big blind actually posted, which BB amounts are counted in."""
-    return Decimal(str(hand.sb if _is_fixed_limit_tournament(hand) else hand.bb))
+    """The big blind actually posted, which BB amounts are counted in.
+
+    Fixed-limit stakes are stored differently from one parser to the next
+    (PartyPoker turns a 200/400 tournament into 100/200 blinds, PokerStars
+    keeps 300/600 bets), so the blind posted in the hand is what decides.
+    """
+    if hand.gametype.get("limitType") != "fl":
+        return Decimal(str(hand.bb))
+    return _posted_big_blind(hand) or _stored_fixed_limit_big_blind(hand)
 
 
 def supports_bb_amounts(hand: Any) -> bool:
@@ -272,10 +291,8 @@ class _Builder:
         """
         saved, self.bb = self.bb, None
         try:
-            if _is_fixed_limit_tournament(self.hand):
-                return f"{self.money(self.hand.sb)}/{self.money(self.hand.bb)}"
             if self.hand.gametype.get("limitType") == "fl":
-                small = Decimal(str(self.hand.bb))
+                small = big_blind(self.hand) if self.hand.gametype.get("base") != "stud" else Decimal(str(self.hand.bb))
                 return f"{self.money(small)}/{self.money(small * 2)}"
             return f"{self.money(self.hand.sb)}/{self.money(self.hand.bb)}"
         finally:
@@ -700,9 +717,10 @@ class _Builder:
         A cash-out is the room's insurance payout, not pot winnings, and is
         only shown by the cash-out option. Some parsers (PokerStars, and hands
         read back from the database) also record it as a collection; others
-        (GGPoker, HTTP capture) keep it apart. So it is taken back out only
-        where a collection of exactly that amount stands for it, leaving a pot
-        the same player really won elsewhere in the hand untouched.
+        (GGPoker, HTTP capture) keep it apart. ``totalcollected`` never counts
+        a cash-out, so the collections exceed it by exactly the cash-outs when
+        they were recorded there -- however many there were per player -- and
+        only then are they taken back out.
         """
         totals: dict[str, Decimal] = {}
         if self.hand.collectees:
@@ -711,14 +729,19 @@ class _Builder:
         else:
             for player, amount in self.hand.collected:
                 totals[player] = totals.get(player, Decimal(0)) + Decimal(str(amount))
-        for player, amount in getattr(self.hand, "cashOutAmounts", {}).items():
-            cashed = Decimal(str(amount))
-            recorded = any(
-                who == player and Decimal(str(collected)) == cashed for who, collected in self.hand.collected
-            )
-            if recorded and player in totals:
-                totals[player] -= cashed
+        cash_outs = {p: Decimal(str(a)) for p, a in getattr(self.hand, "cashOutAmounts", {}).items()}
+        if cash_outs and self._cash_outs_are_collections(totals, cash_outs):
+            for player, cashed in cash_outs.items():
+                if player in totals:
+                    totals[player] -= cashed
         return {player: amount for player, amount in totals.items() if amount > 0}
+
+    def _cash_outs_are_collections(self, totals: dict[str, Decimal], cash_outs: dict[str, Decimal]) -> bool:
+        try:
+            pot_winnings = Decimal(str(self.hand.totalcollected))
+        except (InvalidOperation, TypeError, ValueError):
+            return False
+        return sum(totals.values(), Decimal(0)) - pot_winnings == sum(cash_outs.values(), Decimal(0))
 
 
 # -- formatters ---------------------------------------------------------------

@@ -128,3 +128,26 @@ def test_the_replayer_shares_from_the_hero_it_resolved(
     dialog = HandShareDialog(replayer.shared_hand)
     qtbot.addWidget(dialog)
     assert "Hero: BTN" in dialog.preview.toPlainText()
+
+
+def test_a_hand_that_fails_to_load_cannot_be_shared_as_the_previous_one(
+    qtbot, importer, fresh_db, legacy_config, tmp_path, monkeypatch
+) -> None:
+    source = FIXTURES / "holdem" / "cash_nl_6max.txt"
+    copy = tmp_path / source.name
+    copy.write_bytes(source.read_bytes())
+    importer.addImportFile(str(copy), "PokerStars")
+    assert importer.runImport()[0] == 1
+    cursor = fresh_db.get_cursor()
+    cursor.execute("SELECT id FROM Hands")
+    (hand_id,) = cursor.fetchone()
+
+    replayer = GuiReplayer(legacy_config, fresh_db.sql, MagicMock(), [hand_id, hand_id + 1], db=fresh_db)
+    qtbot.addWidget(replayer)
+    replayer.play_hand(0)
+    assert replayer.shareButton.isEnabled()
+
+    replayer.play_hand(1)  # no such hand in the database
+
+    assert replayer.shared_hand is None
+    assert not replayer.shareButton.isEnabled()

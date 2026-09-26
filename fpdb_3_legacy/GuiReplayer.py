@@ -2511,11 +2511,14 @@ class GuiReplayer(QWidget):
         self._apply_replayer_style()
         self.handidx = handidx
         entry = self.handlist[handidx]
+        # Forget the previous hand first, so a hand that fails to load can
+        # never be shared under the one shown before it.
+        self.shared_hand = None
+        self.shareButton.setEnabled(False)
         is_ofc = self._is_ofc_replay_entry(entry)
         self.replay_mode = "ofc" if is_ofc else "hand"
         if is_ofc:
             ofc_hand = self._load_ofc_replay_entry(entry)
-            self.shared_hand = None
             self.currency = ""
             self.currency_code = "play"
             self.Heroes = ""
