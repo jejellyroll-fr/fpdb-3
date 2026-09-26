@@ -5154,3 +5154,9 @@ msgstr "Rake"
 
 msgid "EV cashout"
 msgstr "Cashout EV"
+
+msgid "Stack"
+msgstr "Tapis"
+
+msgid "Stack (bb)"
+msgstr "Tapis (bb)"
