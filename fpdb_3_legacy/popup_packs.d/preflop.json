@@ -199,6 +199,7 @@
           "class": "ModernSubmenu",
           "title": "{player}: stack depth",
           "entries": [
+            { "stat": "stack_amount", "label": "Stack" },
             { "stat": "bbstack", "label": "Stack (bb)" },
             { "stat": "m_ratio", "label": "M-ratio" },
             { "stat": "f_spr", "label": "SPR flop" },

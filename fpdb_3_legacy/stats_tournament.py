@@ -5,8 +5,13 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
+from fpdb_3_legacy.localized_formats import format_currency, format_number
 from fpdb_3_legacy.stats_context import get_hand_instance
-from fpdb_3_legacy.stats_formatting import StatTuple
+from fpdb_3_legacy.stats_formatting import StatTuple, format_no_data_stat
+
+# Currencies that are chips rather than money: no symbol, no cents.
+_CHIP_CURRENCIES = frozenset({"T$", "PLAY"})
+_COMPACT_CHIPS_FROM = 10_000
 
 
 def calculate_end_stack(stat_dict: Mapping[int, Mapping[str, Any]], player: int, hand: Any) -> float:
@@ -60,3 +65,78 @@ def bbstack(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTupl
     stat = stack / bigblind if bigblind != 0 else 0
     value = int(stat)
     return stat / 100.0, f"{value}", f"bb's={value}", f"#bb's={value}", f"({value})", "bb stack"
+
+
+# -- stack in the hand's own unit (#402) ----------------------------------------
+#
+# Every form below reads the one reconstructed stack ``bbstack`` reads: the
+# player's stack at the end of the last imported hand, rebuilt from that hand's
+# starting stacks, bets, returned bets and collections. None of them is a live
+# table stack, and none recomputes it another way.
+
+
+def _reconstructed_stack(stat_dict: Mapping[int, Mapping[str, Any]], player: int, hand: Any) -> float | None:
+    """The end-of-hand stack ``bbstack`` uses, or None when it cannot be known."""
+    name = stat_dict.get(player, {}).get("screen_name")
+    if not name or not any(item[1] == name for item in hand.players):
+        return None
+    return calculate_end_stack(stat_dict, player, hand)
+
+
+def _plays_for_chips(hand: Any) -> bool:
+    gametype = hand.gametype
+    return gametype.get("type") == "tour" or str(gametype.get("currency", "")).upper() in _CHIP_CURRENCIES
+
+
+def _big_blind(hand: Any) -> float:
+    try:
+        return float(hand.gametype.get("bb", 0) or 0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _stack_amount_text(stack: float, hand: Any, *, compact: bool = False) -> str:
+    """The stack in the hand's unit: localized money, or plain chips."""
+    if not _plays_for_chips(hand):
+        return format_currency(stack, str(hand.gametype.get("currency", "USD")))
+    if compact and abs(stack) >= _COMPACT_CHIPS_FROM:
+        return f"{format_number(stack / 1000, 1, grouping=False)}k"
+    return format_number(stack, 0)
+
+
+def _stack_bb_text(stack: float, bigblind: float) -> str:
+    return f"{format_number(stack / bigblind, 1, grouping=False)}bb"
+
+
+def stack_amount(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the reconstructed stack in money or chips, as the table shows it."""
+    hand = get_hand_instance()
+    stack = _reconstructed_stack(stat_dict, player, hand) if hand else None
+    if stack is None:
+        return format_no_data_stat("stack", "stack (last hand)")
+    text = _stack_amount_text(stack, hand)
+    return stack, text, f"stack={text}", f"stack={text}", f"({text})", "stack (last hand)"
+
+
+def stack_bb(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the reconstructed stack in big blinds, to one decimal."""
+    hand = get_hand_instance()
+    stack = _reconstructed_stack(stat_dict, player, hand) if hand else None
+    bigblind = _big_blind(hand) if hand else 0.0
+    if stack is None or bigblind <= 0:
+        return format_no_data_stat("stack_bb", "stack in bb (last hand)")
+    text = _stack_bb_text(stack, bigblind)
+    return stack / bigblind, text, f"stack={text}", f"stack={text}", f"({text})", "stack in bb (last hand)"
+
+
+def stack_native_bb(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the stack in its own unit and in big blinds, e.g. ``€42.75 / 42.8bb``."""
+    hand = get_hand_instance()
+    stack = _reconstructed_stack(stat_dict, player, hand) if hand else None
+    bigblind = _big_blind(hand) if hand else 0.0
+    if stack is None:
+        return format_no_data_stat("stack", "stack and bb stack (last hand)")
+    text = _stack_amount_text(stack, hand, compact=True)
+    if bigblind > 0:
+        text = f"{text} / {_stack_bb_text(stack, bigblind)}"
+    return stack, text, f"stack={text}", f"stack={text}", f"({text})", "stack and bb stack (last hand)"
