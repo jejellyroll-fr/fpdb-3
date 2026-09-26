@@ -1,0 +1,16 @@
+{
+  "schema": "fpdb_stat_pack",
+  "version": 1,
+  "id": "example.preflop",
+  "name": "Example Preflop Pack",
+  "author": "fpdb",
+  "description": "Button and small-blind steal stats, as a starting point for your own pack.",
+  "pack_version": "1.0.0",
+  "definition_schema_version": 1,
+  "min_fpdb_version": "3.9",
+  "fragments": {
+    "example.preflop.unopened": { "street": "preflop", "pot_type": "unopened" }
+  },
+  "definitions": ["stats/steals.json"],
+  "presets": ["presets/steals.json"]
+}

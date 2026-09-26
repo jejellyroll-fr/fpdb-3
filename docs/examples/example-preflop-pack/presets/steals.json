@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "pack": "example.preflop",
+  "label": "Example steals",
+  "presets": [
+    {
+      "id": "example.preflop.steal_by_position",
+      "name": "Steal attempts by position",
+      "description": "Raise-first-in frequency from the late seats, grouped by position.",
+      "category": "preflop",
+      "metric": "raise_frequency",
+      "filters": { "pot_type": "unopened", "position": ["CO", "BTN", "SB"] },
+      "group_by": ["position"],
+      "recommended_view": "position",
+      "min_sample": 100,
+      "tags": ["steal", "example"]
+    }
+  ]
+}

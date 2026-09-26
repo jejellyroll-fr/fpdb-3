@@ -159,6 +159,12 @@ postflop definitions run end to end on the golden corpus, the report renders
 localized grouped rows, a popup context narrows to one player, and a definition
 added at runtime runs with no Python change.
 
+## Sharing definitions
+
+User-written definitions are installed and shared as [stat packs](stat-packs.md)
+(#403): namespaced, validated with the same code as the bundled library, and
+kept in the user's data directory.
+
 ## Where this goes
 
 The definition layer is what the advanced HUD needs next:

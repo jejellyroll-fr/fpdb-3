@@ -3912,7 +3912,7 @@ class ModernHudPreferences(QDialog):
             # The source is part of the key: a registry stat and a declarative one
             # can share a name, and a picker that cannot tell them apart would
             # silently add the wrong one.
-            self.panel_stat_combo.addItem(f"{choice.label} [{choice.source}]", editor.choice_key(choice))
+            self.panel_stat_combo.addItem(f"{choice.label} [{choice.origin()}]", editor.choice_key(choice))
         section = getattr(self, "panel_stat_section", None)
         if section is not None:
             section.set_summary(f"{len(self.panel_stat_choices)} available")

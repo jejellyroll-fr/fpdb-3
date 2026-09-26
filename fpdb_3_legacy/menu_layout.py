@@ -107,6 +107,12 @@ def menu_layout() -> tuple[Menu, ...]:
                     "dia_import_pt4stat",
                     tip=N_("Import PokerTracker 4 custom statistics as declarative stat descriptors"),
                 ),
+                MenuItem(
+                    N_("Stat Packs"),
+                    "dia_stat_packs",
+                    tip=N_("Import, enable, disable, uninstall and export declarative stat packs"),
+                    separator_before=True,
+                ),
             ),
         ),
         Menu(

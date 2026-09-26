@@ -477,6 +477,12 @@ class fpdb(QMainWindow):
         lines.append("\nAssign the new stat-set / popup to a game in HUD Preferences.")
         QMessageBox.information(self, _("PT4 HUD imported"), "\n".join(lines))
 
+    def dia_stat_packs(self, widget=None, data=None) -> None:
+        """Manage user-installed declarative stat packs (#403)."""
+        from fpdb_3_legacy.stat_packs_dialog import open_stat_packs
+
+        open_stat_packs(self)
+
     def dia_import_pt4stat(self, widget, data=None) -> None:
         """Import PokerTracker 4 .pt4stat custom-statistic definitions.
 

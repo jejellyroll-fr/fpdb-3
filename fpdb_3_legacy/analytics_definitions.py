@@ -675,12 +675,38 @@ def default_definitions_dir() -> Path:
     return Path(__file__).resolve().parent / "analytics_definitions.d"
 
 
-def load_default_registry(extra_dirs: Iterable[str | Path] = ()) -> DefinitionRegistry:
-    """Build a registry from the bundled library plus any extra directories."""
+def load_default_registry(
+    extra_dirs: Iterable[str | Path] = (),
+    *,
+    include_packs: bool = True,
+    packs_dir: str | Path | None = None,
+) -> DefinitionRegistry:
+    """Build a registry from the bundled library, extra directories and packs.
+
+    Enabled user stat packs (#403) are added last. Their names are namespaced
+    and checked against the built-ins, so a pack adds stats and never replaces
+    one; a pack that cannot be read is skipped rather than failing the registry.
+    """
     registry = DefinitionRegistry()
     registry.load_directory(default_definitions_dir())
     for extra in extra_dirs:
         registry.load_directory(extra)
+    if include_packs:
+        from . import stat_packs  # noqa: PLC0415 - the pack layer builds on this module
+
+        try:
+            stats, fragments = stat_packs.installed_definitions(packs_dir)
+        except (OSError, ValueError) as exc:
+            import logging  # noqa: PLC0415
+
+            logging.getLogger(__name__).warning("User stat packs not loaded: %s", exc)
+            return registry
+        for name, filters in fragments.items():
+            if name not in registry.fragments:
+                registry.add_fragment(name, filters)
+        for definition in stats:
+            if definition.name not in registry:
+                registry.add(definition)
     return registry
 
 
