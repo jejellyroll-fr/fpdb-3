@@ -595,6 +595,26 @@ def _check_document_version(document: Any, path: Path) -> None:
         )
 
 
+def validate_filters(filters: Any, where: str, source: str = "") -> dict[str, Any]:
+    """Resolve a filter table against the engine vocabulary, or raise ``ValueError``.
+
+    Public so a fragment written outside a definition (a stat pack's, #403)
+    is checked by exactly the code that checks a definition's own filters.
+    """
+    return _validate_filters(filters, where, source)
+
+
+def definition_entries(document: Any, path: str | Path) -> list[Mapping[str, Any]]:
+    """The raw definitions of one parsed file, after its schema-version check.
+
+    ``load_definitions`` parses them all at once; a caller that reports every
+    bad definition separately (the stat pack loader) parses them one by one.
+    """
+    path = Path(path)
+    _check_document_version(document, path)
+    return _documents(document, path)
+
+
 def load_definitions(path: str | Path) -> list[StatDefinition]:
     """Read and validate every definition in one file."""
     path = Path(path)
@@ -696,7 +716,7 @@ def load_default_registry(
 
         try:
             stats, fragments = stat_packs.installed_definitions(packs_dir)
-        except (OSError, ValueError) as exc:
+        except (OSError, stat_packs.PackError) as exc:
             import logging  # noqa: PLC0415
 
             logging.getLogger(__name__).warning("User stat packs not loaded: %s", exc)
@@ -844,6 +864,7 @@ __all__ = [
     "build_report",
     "compile_definition",
     "default_definitions_dir",
+    "definition_entries",
     "expand_fragments",
     "format_row",
     "get_registry",
@@ -855,4 +876,5 @@ __all__ = [
     "resolve_metric",
     "resolve_query",
     "run_definition",
+    "validate_filters",
 ]

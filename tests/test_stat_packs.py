@@ -430,3 +430,53 @@ def test_a_failed_state_write_keeps_the_previous_state(
 
     assert {row.id: row.status for row in stat_packs.list_packs(packs_dir)}[PACK_ID] == stat_packs.DISABLED
     assert [path.name for path in packs_dir.iterdir() if path.name.startswith(".state")] == []
+
+
+# -- second review round (PR #411) ---------------------------------------------
+
+
+@pytest.mark.parametrize("spelling", ["./stats/steals.json", "stats//steals.json"])
+def test_a_listed_path_must_be_spelled_canonically(source: Path, packs_dir: Path, spelling: str) -> None:
+    edit_manifest(source, definitions=[spelling])
+
+    assert "must be written 'stats/steals.json'" in refused(source, packs_dir)
+
+
+def test_a_zip_bomb_is_stopped(packs_dir: Path, tmp_path: Path) -> None:
+    archive = tmp_path / "bomb.fpdbstats"
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as out:
+        out.writestr("manifest.json", (EXAMPLE / "manifest.json").read_text(encoding="utf-8"))
+        out.writestr("stats/steals.json", b" " * (stat_packs.MAX_ARCHIVE_BYTES + 1))
+
+    with pytest.raises(stat_packs.PackError, match="compressed suspiciously well|larger than"):
+        stat_packs.install_pack(archive, packs_dir)
+
+
+def test_an_interrupted_replacement_is_recovered(source: Path, packs_dir: Path) -> None:
+    stat_packs.install_pack(source, packs_dir)
+    # fpdb stopped after moving the old install aside, before the new one moved in.
+    (packs_dir / PACK_ID).rename(packs_dir / f".{PACK_ID}.previous")
+
+    rows = {row.id: row.status for row in stat_packs.list_packs(packs_dir)}
+
+    assert rows[PACK_ID] == stat_packs.ENABLED
+    assert not (packs_dir / f".{PACK_ID}.previous").exists()
+
+
+def test_two_enabled_packs_cannot_both_load_a_preset_id(source: Path, packs_dir: Path) -> None:
+    stat_packs.install_pack(source, packs_dir)
+    # Folders edited by hand, bypassing the install-time checks: a deeper
+    # namespace reaches the same preset id as the first pack.
+    duplicate = "example.preflop.x.dup"
+    first = packs_dir / PACK_ID / "presets" / "steals.json"
+    presets = json.loads(first.read_text(encoding="utf-8"))
+    presets["presets"][0]["id"] = duplicate
+    first.write_text(json.dumps(presets), encoding="utf-8")
+    clone = packs_dir / "example.preflop.x"
+    shutil.copytree(packs_dir / PACK_ID, clone)
+    edit_manifest(clone, id="example.preflop.x", fragments={}, definitions=[])
+
+    assert {row.id: row.status for row in stat_packs.list_packs(packs_dir)}["example.preflop.x"] == stat_packs.ENABLED
+    presets_loaded = [preset.id for preset in stat_packs.installed_presets(packs_dir)]
+
+    assert presets_loaded.count(duplicate) == 1

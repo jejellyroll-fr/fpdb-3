@@ -103,6 +103,8 @@ _RESERVED_NAMESPACES: Final = frozenset({"fpdb", "builtin", "core"})
 # Generous for data, small enough that an archive cannot fill the disk.
 MAX_ARCHIVE_FILES: Final = 200
 MAX_ARCHIVE_BYTES: Final = 5 * 1024 * 1024
+# JSON compresses well, but not a thousandfold: beyond this it is a zip bomb.
+MAX_COMPRESSION_RATIO: Final = 200
 
 
 class PackError(ValueError):
@@ -218,7 +220,12 @@ def _safe_member(name: str, source: str) -> str:
             [f"file {name!r} is not a data file; allowed suffixes: {list(_DATA_SUFFIXES)}"],
             source,
         )
-    return path.as_posix()
+    canonical = path.as_posix()
+    if canonical != name:
+        # "./a.json" and "a//b.json" read the same file under another name; the
+        # manifest must spell it the one way the pack stores it.
+        raise PackError([f"file path {name!r} must be written {canonical!r}"], source)
+    return canonical
 
 
 def _read_files(source: Path) -> dict[str, bytes]:
@@ -238,6 +245,26 @@ def _read_files(source: Path) -> dict[str, bytes]:
     raise PackError(["expected a pack folder, its manifest.json, or a .fpdbstats archive"], str(source))
 
 
+def _read_entry(archive: zipfile.ZipFile, info: zipfile.ZipInfo, budget: int, source: str) -> bytes:
+    """One archive entry, decompressed in chunks and never past ``budget`` bytes.
+
+    The sizes in a zip header are the archive's own claim; reading in bounded
+    chunks means a crafted entry (a zip bomb) is stopped at the budget instead
+    of being inflated in memory first.
+    """
+    if info.compress_size and info.file_size / info.compress_size > MAX_COMPRESSION_RATIO:
+        raise PackError([f"archive entry {info.filename!r} is compressed suspiciously well"], source)
+    chunks: list[bytes] = []
+    size = 0
+    with archive.open(info) as entry:
+        while chunk := entry.read(64 * 1024):
+            size += len(chunk)
+            if size > budget:
+                raise PackError([f"archive is larger than {MAX_ARCHIVE_BYTES} bytes uncompressed"], source)
+            chunks.append(chunk)
+    return b"".join(chunks)
+
+
 def _read_archive(source: Path) -> dict[str, bytes]:
     files: dict[str, bytes] = {}
     total = 0
@@ -251,10 +278,9 @@ def _read_archive(source: Path) -> dict[str, bytes]:
             # to every entry: an archive cannot smuggle a path out of the pack.
             if name.startswith("/") or "\\" in name or ".." in PurePosixPath(name).parts:
                 raise PackError([f"archive entry {name!r} escapes the pack"], str(source))
-            total += info.file_size
-            if total > MAX_ARCHIVE_BYTES:
-                raise PackError([f"archive is larger than {MAX_ARCHIVE_BYTES} bytes uncompressed"], str(source))
-            files[PurePosixPath(name).as_posix()] = archive.read(info)
+            data = _read_entry(archive, info, MAX_ARCHIVE_BYTES - total, str(source))
+            total += len(data)
+            files[PurePosixPath(name).as_posix()] = data
     # An archive made by zipping the pack folder has one top-level directory.
     if MANIFEST_NAME not in files:
         tops = {name.split("/", 1)[0] for name in files}
@@ -398,7 +424,7 @@ def _read_fragments(raw: Any, prefix: str, errors: list[str]) -> dict[str, dict[
             continue
         own = {key: value for key, value in filters.items() if key != "fragments"}
         try:
-            resolved = definitions._validate_filters(own, f"fragment {name}", "")  # noqa: SLF001 - same validator
+            resolved = definitions.validate_filters(own, f"fragment {name}")
         except ValueError as exc:
             errors.append(f"fragment {name!r}: {exc}")
             continue
@@ -489,9 +515,7 @@ def _checked_definition(
 
 def _entries_in(document: Any, name: str) -> list[Mapping[str, Any]]:
     """The raw definitions of one file, after the shipped library's file checks."""
-    path = Path(name)
-    definitions._check_document_version(document, path)  # noqa: SLF001 - same validator as built-ins
-    return definitions._documents(document, path)  # noqa: SLF001
+    return definitions.definition_entries(document, name)
 
 
 def _read_presets(listed: Any, files: Mapping[str, bytes], prefix: str, label: str, errors: list[str]) -> list[Any]:
@@ -500,7 +524,7 @@ def _read_presets(listed: Any, files: Mapping[str, bytes], prefix: str, label: s
     presets: list[Any] = []
     for name, raw in _listed_documents(listed, files, "presets", label, errors):
         try:
-            pack = research_presets._validate_pack(raw, name)  # noqa: SLF001 - the shipped presets' validator
+            pack = research_presets.validate_preset_pack(raw, name)
         except (AttributeError, TypeError, ValueError) as exc:
             # The shipped validator trusts shipped data's shapes; a pack's data
             # is not shipped, so a wrong shape is its error, not a crash.
@@ -650,6 +674,28 @@ def _installed(root: Path) -> list[StatPack]:
     return packs
 
 
+def _recover_interrupted_replacements(root: Path) -> None:
+    """Put back a pack whose replacement stopped half-way.
+
+    A replacement moves the old install to ``.<id>.previous`` before moving the
+    new one in. If fpdb stopped between the two steps the pack folder is gone
+    and only the backup is left: restore it. A backup beside a live pack is the
+    leftover of a finished replacement and is removed.
+    """
+    for backup in root.glob(".*.previous"):
+        if not backup.is_dir() or backup.is_symlink():
+            continue
+        target = root / backup.name[1 : -len(".previous")]
+        try:
+            if target.exists():
+                shutil.rmtree(backup)
+            else:
+                backup.rename(target)
+                log.warning("Restored stat pack %s after an interrupted replacement", target.name)
+        except OSError as exc:
+            log.warning("Could not recover %s: %s", backup, exc)
+
+
 def list_packs(packs_dir: str | Path | None = None, *, include_builtin: bool = True) -> list[PackStatus]:
     """The manager's rows: the built-in library, then each installed pack."""
     root = _root(packs_dir)
@@ -668,6 +714,7 @@ def list_packs(packs_dir: str | Path | None = None, *, include_builtin: bool = T
         )
     if not root.is_dir():
         return rows
+    _recover_interrupted_replacements(root)
     disabled = set(_read_state(root).get("disabled", []))
     for directory in sorted(path for path in root.iterdir() if path.is_dir() and not path.name.startswith(".")):
         try:
@@ -720,6 +767,7 @@ def enabled_packs(packs_dir: str | Path | None = None) -> list[StatPack]:
             log.warning("Stat pack %s not loaded: %s", status.id, exc)
             continue
         names = {definition.name for definition in pack.definitions} | set(pack.fragments)
+        names |= {preset.id for preset in pack.presets}
         clash = names & taken
         if clash:
             # Installs refuse this; a folder copied in by hand could still try it.

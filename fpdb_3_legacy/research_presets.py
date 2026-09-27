@@ -207,6 +207,15 @@ def _validate_pack(raw: Any, source: str) -> PresetPack:
     )
 
 
+def validate_preset_pack(raw: Any, source: str) -> PresetPack:
+    """Validate one preset pack document, as the shipped library is validated.
+
+    Public so presets arriving in a user stat pack (#403) go through the same
+    checks as the shipped ones.
+    """
+    return _validate_pack(raw, source)
+
+
 def _duplicates(values: Iterable[str]) -> list[str]:
     seen: set[str] = set()
     out: list[str] = []
@@ -332,4 +341,5 @@ __all__ = [
     "library_dir",
     "load_library",
     "load_packs",
+    "validate_preset_pack",
 ]

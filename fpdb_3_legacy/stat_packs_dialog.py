@@ -258,6 +258,6 @@ class StatPacksDialog(QDialog):
         return target
 
 
-def open_stat_packs(parent: Any = None) -> None:
-    """Show the manager modally."""
-    StatPacksDialog(parent).exec()
+def open_stat_packs(parent: Any = None, packs_dir: str | Path | None = None) -> None:
+    """Show the manager modally (``packs_dir`` defaults to the user's data)."""
+    StatPacksDialog(parent, packs_dir=packs_dir).exec()

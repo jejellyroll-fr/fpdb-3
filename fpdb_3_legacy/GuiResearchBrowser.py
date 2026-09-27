@@ -1982,11 +1982,11 @@ texture*. The label already existed; nothing called it. Technical names
                 self._builtins = ()
             # Presets from enabled user stat packs (#403) are offered with the
             # shipped ones: read-only, namespaced, so a save cannot overwrite them.
-            try:
-                from fpdb_3_legacy import stat_packs  # noqa: PLC0415
+            from fpdb_3_legacy import stat_packs  # noqa: PLC0415
 
+            try:
                 self._builtins = (*self._builtins, *stat_packs.installed_presets())
-            except (OSError, ValueError) as exc:
+            except (OSError, stat_packs.PackError) as exc:
                 log.warning("Stat pack presets not loaded: %s", exc)
         return self._builtins
 
