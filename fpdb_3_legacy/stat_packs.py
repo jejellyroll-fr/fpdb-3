@@ -28,8 +28,9 @@ What keeps a pack safe is what it *cannot* say:
 * every definition goes through :func:`analytics_definitions.parse_definition`,
   the validator the shipped library uses, so a pack can only name registered
   metrics, filters, dimensions, fragments and formats -- no SQL, no Python;
-* the manifest and every file it lists are read as JSON (or YAML through
-  ``safe_load``), never imported or executed;
+* the manifest and every file it lists are read as JSON, never imported or
+  executed -- JSON only, because a pack is made to be shared and must install
+  on every fpdb, while YAML needs PyYAML, which fpdb does not ship;
 * the listed paths must be plain relative paths inside the pack with a data
   suffix, so a pack cannot point at ``/etc/passwd`` or ``../../somewhere``;
 * nothing is fetched from the network, at install or at evaluation.
@@ -96,7 +97,7 @@ _MANIFEST_FIELDS: Final = frozenset(
         "presets",
     },
 )
-_DATA_SUFFIXES: Final = (".json", ".yaml", ".yml")
+_DATA_SUFFIXES: Final = (".json",)
 # ``author.topic`` or deeper: lower-case segments, at least two of them, so a
 # pack id reads as a namespace and cannot be mistaken for a built-in stat name.
 _PACK_ID: Final = re.compile(r"^[a-z0-9][a-z0-9_-]*(\.[a-z0-9][a-z0-9_-]*)+$")
@@ -313,19 +314,10 @@ def _parse_data(name: str, data: bytes, source: str) -> Any:
         text = data.decode("utf-8")
     except UnicodeDecodeError as exc:
         raise PackError([f"{name} is not UTF-8 text: {exc}"], source) from exc
-    if name.endswith(".json"):
-        try:
-            return json.loads(text)
-        except json.JSONDecodeError as exc:
-            raise PackError([f"{name} is not valid JSON: {exc}"], source) from exc
     try:
-        import yaml  # noqa: PLC0415 -- optional dependency, imported on use
-    except ModuleNotFoundError as exc:  # pragma: no cover - env-dependent
-        raise PackError([f"{name}: YAML needs PyYAML; write it as JSON"], source) from exc
-    try:
-        return yaml.safe_load(text)
-    except yaml.YAMLError as exc:
-        raise PackError([f"{name} is not valid YAML: {exc}"], source) from exc
+        return json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise PackError([f"{name} is not valid JSON: {exc}"], source) from exc
 
 
 def _version_tuple(version: str) -> tuple[int, ...]:

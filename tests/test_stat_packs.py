@@ -350,12 +350,12 @@ def test_text_that_is_not_utf8_is_a_pack_error(source: Path, packs_dir: Path) ->
     assert "is not UTF-8 text" in refused(source, packs_dir)
 
 
-def test_malformed_yaml_is_a_pack_error(source: Path, packs_dir: Path) -> None:
-    pytest.importorskip("yaml")
-    (source / "stats" / "broken.yaml").write_text("stats: [unclosed", encoding="utf-8")
-    edit_manifest(source, definitions=["stats/steals.json", "stats/broken.yaml"])
+def test_yaml_files_are_refused_in_a_pack(source: Path, packs_dir: Path) -> None:
+    # A shared pack must install on every fpdb, and fpdb does not ship PyYAML.
+    (source / "stats" / "more.yaml").write_text("stats: []", encoding="utf-8")
+    edit_manifest(source, definitions=["stats/steals.json", "stats/more.yaml"])
 
-    assert "stats/broken.yaml is not valid YAML" in refused(source, packs_dir)
+    assert "'stats/more.yaml' is not a data file; allowed suffixes: ['.json']" in refused(source, packs_dir)
 
 
 def test_a_nested_fragment_list_must_be_names(source: Path, packs_dir: Path) -> None:

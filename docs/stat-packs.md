@@ -98,12 +98,16 @@ clashing names listed.
   refused, and every definition is compiled at install exactly as the engine
   will run it, so a bad filter value is caught there too.
 * **No filesystem reach.** Listed files must be relative paths inside the pack
-  with a `.json`, `.yaml` or `.yml` suffix; absolute paths, `..`, symbolic
+  with a `.json` suffix; absolute paths, `..`, symbolic
   links and archive entries that escape the pack are refused. Files the
   manifest does not list are neither installed nor re-exported.
 * **No network.** Nothing is fetched, at install or at evaluation.
 
 Every problem found is reported at once, so an author fixes a pack in one pass.
+
+Packs are **JSON only**. A pack is made to be shared, so it must install on any
+fpdb; YAML would need PyYAML, which fpdb does not ship. (Definitions kept in a
+local definitions folder may still be YAML when PyYAML is installed.)
 
 ## Where packs live
 
