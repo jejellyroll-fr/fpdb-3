@@ -749,6 +749,10 @@ def install_pack(
     root = _root(packs_dir)
     pack = read_pack(source, fpdb_version=fpdb_version)
     target = root / pack.id
+    # A pack whose earlier replacement was interrupted is put back first, so
+    # the "already installed" check sees it and replace=False still protects it.
+    if root.is_dir():
+        _recover_interrupted_replacements(root)
     if target.exists() and not replace:
         raise PackError([f"pack {pack.id!r} is already installed; uninstall it or replace it"], pack.id)
     problems = _collisions(pack, root)

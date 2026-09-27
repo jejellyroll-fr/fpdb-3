@@ -697,3 +697,16 @@ def test_an_uninstall_that_cannot_update_the_state_still_succeeds(
 
     assert not (packs_dir / PACK_ID).exists()
     assert [row.id for row in stat_packs.list_packs(packs_dir)] == ["builtin"]
+
+
+def test_a_pack_recovered_from_an_interrupted_replacement_is_not_silently_replaced(
+    source: Path, packs_dir: Path
+) -> None:
+    stat_packs.install_pack(source, packs_dir)
+    (packs_dir / PACK_ID).rename(packs_dir / f".{PACK_ID}.previous")
+    edit_manifest(source, pack_version="2.0.0")
+
+    with pytest.raises(stat_packs.PackError, match="already installed"):
+        stat_packs.install_pack(source, packs_dir)
+
+    assert stat_packs.read_pack(packs_dir / PACK_ID).pack_version == "1.0.0"
