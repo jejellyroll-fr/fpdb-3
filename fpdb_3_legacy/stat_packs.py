@@ -102,6 +102,8 @@ _DATA_SUFFIXES: Final = (".json",)
 # pack id reads as a namespace and cannot be mistaken for a built-in stat name.
 _PACK_ID: Final = re.compile(r"^[a-z0-9][a-z0-9_-]*(\.[a-z0-9][a-z0-9_-]*)+$")
 _RESERVED_NAMESPACES: Final = frozenset({"fpdb", "builtin", "core"})
+# What a stat, fragment or preset a pack adds may be called: an identifier.
+_NAME: Final = re.compile(r"^[A-Za-z0-9_.-]+$")
 _WINDOWS_FORBIDDEN: Final = re.compile(r'[<>:"|?*\x00-\x1f]')
 _WINDOWS_RESERVED: Final = frozenset(
     {"CON", "PRN", "AUX", "NUL", *(f"COM{n}" for n in range(1, 10)), *(f"LPT{n}" for n in range(1, 10))},
@@ -507,14 +509,29 @@ def read_pack(source: str | Path, *, fpdb_version: str | None = None) -> StatPac
     )
 
 
+def _name_problem(name: str, prefix: str) -> str:
+    """Why a name a pack adds is not acceptable, or ``""``.
+
+    Beyond the namespace, the name is an identifier: it is written into
+    HUD_config.xml when a stat is placed on a HUD, so a control character
+    there would leave a configuration fpdb cannot read back.
+    """
+    if not name.startswith(prefix):
+        return f"must be namespaced under {prefix!r}"
+    if not _NAME.match(name):
+        return "may only use letters, digits, '_', '.' and '-'"
+    return ""
+
+
 def _read_fragments(raw: Any, prefix: str, errors: list[str]) -> dict[str, dict[str, Any]]:
     if not isinstance(raw, Mapping):
         errors.append("fragments must be an object of name -> filters")
         return {}
     fragments: dict[str, dict[str, Any]] = {}
     for name, filters in raw.items():
-        if not str(name).startswith(prefix):
-            errors.append(f"fragment {name!r} must be namespaced under {prefix!r}")
+        problem = _name_problem(str(name), prefix)
+        if problem:
+            errors.append(f"fragment {name!r} {problem}")
             continue
         if not isinstance(filters, Mapping):
             errors.append(f"fragment {name!r} must be an object of filter -> value")
@@ -597,8 +614,9 @@ def _checked_definition(
 ) -> StatDefinition:
     """One definition through the shipped validator, the namespace and the compiler."""
     definition = definitions.parse_definition(entry, f"pack:{pack_id}/{name}")
-    if not definition.name.startswith(prefix):
-        raise ValueError(f"{name}: stat {definition.name!r} must be namespaced under {prefix!r}")
+    problem = _name_problem(definition.name, prefix)
+    if problem:
+        raise ValueError(f"{name}: stat {definition.name!r} {problem}")
     if definition.name in seen:
         raise ValueError(f"{name}: stat {definition.name!r} is defined twice in the pack")
     try:
@@ -629,8 +647,9 @@ def _read_presets(listed: Any, files: Mapping[str, bytes], prefix: str, label: s
             errors.append(f"{name}: {exc}")
             continue
         for preset in pack.presets:
-            if not preset.id.startswith(prefix):
-                errors.append(f"{name}: preset {preset.id!r} must be namespaced under {prefix!r}")
+            problem = _name_problem(preset.id, prefix)
+            if problem:
+                errors.append(f"{name}: preset {preset.id!r} {problem}")
                 continue
             # The preset validator checks one file; the picker resolves a preset
             # by id, so an id repeated in another file of the pack is ambiguous.

@@ -642,3 +642,22 @@ def test_paths_that_alias_or_fail_on_windows_are_refused(
     edit_manifest(source, definitions=[path])
 
     assert reason in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize("name", ["example.preflop.bad\x00name", "example.preflop.two words", "example.preflop.a<b>"])
+def test_a_name_that_is_not_an_identifier_is_refused(source: Path, packs_dir: Path, name: str) -> None:
+    # Such a name ends up in HUD_config.xml once the stat is put on a HUD.
+    write_stats(source, [{"name": name, "metric": "fold_frequency"}])
+
+    assert "may only use letters, digits" in refused(source, packs_dir)
+
+
+def test_fragment_and_preset_names_are_identifiers_too(source: Path, packs_dir: Path) -> None:
+    edit_manifest(source, fragments={"example.preflop.un opened": {"street": "preflop"}})
+    assert "fragment 'example.preflop.un opened' may only use" in refused(source, packs_dir)
+
+    edit_manifest(source, fragments={"example.preflop.unopened": {"street": "preflop", "pot_type": "unopened"}})
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["id"] = "example.preflop.steal\tby"
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+    assert "may only use letters, digits" in refused(source, packs_dir)
