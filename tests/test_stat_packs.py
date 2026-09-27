@@ -605,3 +605,40 @@ def test_a_preset_with_a_value_the_engine_cannot_run_is_refused(
 
     assert "preset 'example.preflop.steal_by_position'" in message
     assert reason in message
+
+
+# -- fifth review round (PR #411) ----------------------------------------------
+
+
+def test_an_oversized_archive_is_refused_before_it_is_opened(
+    packs_dir: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    archive = tmp_path / "huge.fpdbstats"
+    with zipfile.ZipFile(archive, "w") as out:
+        out.writestr("manifest.json", (EXAMPLE / "manifest.json").read_text(encoding="utf-8"))
+    monkeypatch.setattr(stat_packs, "MAX_ARCHIVE_BYTES", 10)
+    opened: list[Any] = []
+    monkeypatch.setattr(stat_packs.zipfile, "ZipFile", lambda *args, **kwargs: opened.append(args))
+
+    with pytest.raises(stat_packs.PackError, match="the archive is larger than 10 bytes"):
+        stat_packs.install_pack(archive, packs_dir)
+    assert opened == []
+
+
+@pytest.mark.parametrize(
+    ("path", "reason"),
+    [
+        ("stats./steals.json", "ending in a dot or a space"),
+        ("stats /steals.json", "ending in a dot or a space"),
+        ("stats/con.json", "reserved Windows name 'con'"),
+        ("stats/NUL.json", "reserved Windows name 'NUL'"),
+        ("stats/what?.json", "character Windows does not allow"),
+        ("stats/a:b.json", "character Windows does not allow"),
+    ],
+)
+def test_paths_that_alias_or_fail_on_windows_are_refused(
+    source: Path, packs_dir: Path, path: str, reason: str
+) -> None:
+    edit_manifest(source, definitions=[path])
+
+    assert reason in refused(source, packs_dir)

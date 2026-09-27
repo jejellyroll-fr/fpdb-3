@@ -102,6 +102,10 @@ _DATA_SUFFIXES: Final = (".json",)
 # pack id reads as a namespace and cannot be mistaken for a built-in stat name.
 _PACK_ID: Final = re.compile(r"^[a-z0-9][a-z0-9_-]*(\.[a-z0-9][a-z0-9_-]*)+$")
 _RESERVED_NAMESPACES: Final = frozenset({"fpdb", "builtin", "core"})
+_WINDOWS_FORBIDDEN: Final = re.compile(r'[<>:"|?*\x00-\x1f]')
+_WINDOWS_RESERVED: Final = frozenset(
+    {"CON", "PRN", "AUX", "NUL", *(f"COM{n}" for n in range(1, 10)), *(f"LPT{n}" for n in range(1, 10))},
+)
 # Generous for data, small enough that an archive cannot fill the disk.
 MAX_ARCHIVE_FILES: Final = 200
 MAX_ARCHIVE_BYTES: Final = 5 * 1024 * 1024
@@ -228,12 +232,32 @@ def _safe_member(name: str, source: str) -> str:
             [f"file {name!r} is not a data file; allowed suffixes: {list(_DATA_SUFFIXES)}"],
             source,
         )
+    problem = _portable_name_problem(path)
+    if problem:
+        raise PackError([f"file path {name!r} {problem}"], source)
     canonical = path.as_posix()
     if canonical != name:
         # "./a.json" and "a//b.json" read the same file under another name; the
         # manifest must spell it the one way the pack stores it.
         raise PackError([f"file path {name!r} must be written {canonical!r}"], source)
     return canonical
+
+
+def _portable_name_problem(path: PurePosixPath) -> str:
+    """Why a path would not name one distinct file on every system, or ``""``.
+
+    Windows drops a trailing dot or space from a name ("stats." is "stats"),
+    reserves device names (CON, NUL, COM1...) and forbids a few characters;
+    a pack installs everywhere, so its paths must mean the same file everywhere.
+    """
+    for part in path.parts:
+        if part != part.rstrip(". "):
+            return "has a name ending in a dot or a space"
+        if _WINDOWS_FORBIDDEN.search(part):
+            return 'uses a character Windows does not allow (<>:"|?* or a control character)'
+        if part.split(".", 1)[0].upper() in _WINDOWS_RESERVED:
+            return f"uses the reserved Windows name {part.split('.', 1)[0]!r}"
+    return ""
 
 
 def _read_files(source: Path) -> dict[str, bytes]:
@@ -324,6 +348,11 @@ def _read_entry(archive: zipfile.ZipFile, info: zipfile.ZipInfo, budget: int, so
 
 
 def _read_archive(source: Path) -> dict[str, bytes]:
+    # Opening a zip parses its whole central directory into memory, before any
+    # entry count can be checked; an archive file larger than a pack may hold
+    # uncompressed is refused before it is opened.
+    if source.stat().st_size > MAX_ARCHIVE_BYTES:
+        raise PackError([f"the archive is larger than {MAX_ARCHIVE_BYTES} bytes"], str(source))
     try:
         files = _read_archive_entries(source)
     except (zipfile.BadZipFile, zlib.error, EOFError, RuntimeError, NotImplementedError) as exc:
