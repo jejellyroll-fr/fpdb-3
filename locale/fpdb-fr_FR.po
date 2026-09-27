@@ -5265,3 +5265,6 @@ msgstr "Exporter le pack de stats"
 
 msgid "Exported to %s."
 msgstr "Exporté vers %s."
+
+msgid "The pack state was not changed:\n%s"
+msgstr "L'état du pack n'a pas été modifié :\n%s"

@@ -55,6 +55,7 @@ import re
 import shutil
 import tempfile
 import zipfile
+import zlib
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
@@ -266,6 +267,22 @@ def _read_entry(archive: zipfile.ZipFile, info: zipfile.ZipInfo, budget: int, so
 
 
 def _read_archive(source: Path) -> dict[str, bytes]:
+    try:
+        files = _read_archive_entries(source)
+    except (zipfile.BadZipFile, zlib.error, EOFError, RuntimeError, NotImplementedError) as exc:
+        # A damaged entry (bad CRC, truncated data), encryption or an
+        # unsupported compression method: the archive is refused, not raised.
+        raise PackError([f"the archive cannot be read: {exc}"], str(source)) from exc
+    # An archive made by zipping the pack folder has one top-level directory.
+    if MANIFEST_NAME not in files:
+        tops = {name.split("/", 1)[0] for name in files}
+        if len(tops) == 1:
+            prefix = f"{tops.pop()}/"
+            files = {name[len(prefix) :]: data for name, data in files.items() if name.startswith(prefix)}
+    return files
+
+
+def _read_archive_entries(source: Path) -> dict[str, bytes]:
     files: dict[str, bytes] = {}
     total = 0
     with zipfile.ZipFile(source) as archive:
@@ -281,12 +298,6 @@ def _read_archive(source: Path) -> dict[str, bytes]:
             data = _read_entry(archive, info, MAX_ARCHIVE_BYTES - total, str(source))
             total += len(data)
             files[PurePosixPath(name).as_posix()] = data
-    # An archive made by zipping the pack folder has one top-level directory.
-    if MANIFEST_NAME not in files:
-        tops = {name.split("/", 1)[0] for name in files}
-        if len(tops) == 1:
-            prefix = f"{tops.pop()}/"
-            files = {name[len(prefix) :]: data for name, data in files.items() if name.startswith(prefix)}
     return files
 
 
@@ -522,6 +533,7 @@ def _read_presets(listed: Any, files: Mapping[str, bytes], prefix: str, label: s
     from . import research_presets  # noqa: PLC0415 - Research is optional for a stats-only pack
 
     presets: list[Any] = []
+    seen: set[str] = set()
     for name, raw in _listed_documents(listed, files, "presets", label, errors):
         try:
             pack = research_presets.validate_preset_pack(raw, name)
@@ -534,6 +546,12 @@ def _read_presets(listed: Any, files: Mapping[str, bytes], prefix: str, label: s
             if not preset.id.startswith(prefix):
                 errors.append(f"{name}: preset {preset.id!r} must be namespaced under {prefix!r}")
                 continue
+            # The preset validator checks one file; the picker resolves a preset
+            # by id, so an id repeated in another file of the pack is ambiguous.
+            if preset.id in seen:
+                errors.append(f"{name}: preset {preset.id!r} is defined twice in the pack")
+                continue
+            seen.add(preset.id)
             presets.append(preset)
     return presets
 

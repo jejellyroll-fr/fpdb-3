@@ -480,3 +480,29 @@ def test_two_enabled_packs_cannot_both_load_a_preset_id(source: Path, packs_dir:
     presets_loaded = [preset.id for preset in stat_packs.installed_presets(packs_dir)]
 
     assert presets_loaded.count(duplicate) == 1
+
+
+# -- third review round (PR #411) ----------------------------------------------
+
+
+def test_a_corrupt_archive_entry_is_a_pack_error(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    archive = tmp_path / "corrupt.fpdbstats"
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_STORED) as out:
+        for path in sorted(source.rglob("*")):
+            if path.is_file():
+                out.write(path, path.relative_to(source).as_posix())
+    # Flip a byte inside the stored manifest: its CRC no longer matches.
+    data = bytearray(archive.read_bytes())
+    offset = data.index(b'"schema"')
+    data[offset + 1] ^= 0x20
+    archive.write_bytes(bytes(data))
+
+    with pytest.raises(stat_packs.PackError, match="the archive cannot be read"):
+        stat_packs.install_pack(archive, packs_dir)
+
+
+def test_a_preset_id_repeated_in_another_file_is_refused(source: Path, packs_dir: Path) -> None:
+    shutil.copy(source / "presets" / "steals.json", source / "presets" / "again.json")
+    edit_manifest(source, presets=["presets/steals.json", "presets/again.json"])
+
+    assert "preset 'example.preflop.steal_by_position' is defined twice" in refused(source, packs_dir)

@@ -99,3 +99,19 @@ def test_an_io_error_while_replacing_is_reported(dialog: StatPacksDialog, monkey
 
     assert not dialog.import_pack(str(EXAMPLE))
     assert "permission denied" in shown[0]
+
+
+def test_a_state_that_cannot_be_saved_is_reported(dialog: StatPacksDialog, monkeypatch) -> None:
+    assert dialog.import_pack(str(EXAMPLE))
+
+    def refuse(*_args, **_kwargs):
+        raise OSError("read-only file system")
+
+    shown: list[str] = []
+    monkeypatch.setattr(stat_packs, "set_enabled", refuse)
+    monkeypatch.setattr(QMessageBox, "warning", lambda *args, **kwargs: shown.append(args[2]))
+
+    dialog.toggle_selected()
+
+    assert "read-only file system" in shown[0]
+    assert statuses(dialog)[PACK_ID] == stat_packs.ENABLED

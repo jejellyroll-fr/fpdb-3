@@ -218,7 +218,11 @@ class StatPacksDialog(QDialog):
         if row is None or row.status in (stat_packs.BUILTIN, stat_packs.INVALID):
             return
         enable = row.status == stat_packs.DISABLED
-        stat_packs.set_enabled(row.id, enable, self.packs_dir)
+        try:
+            stat_packs.set_enabled(row.id, enable, self.packs_dir)
+        except (stat_packs.PackError, OSError) as exc:
+            QMessageBox.warning(self, _("Stat packs"), _("The pack state was not changed:\n%s") % exc)
+            return
         self._changed((_("Enabled %s.") if enable else _("Disabled %s.")) % row.name, row.id)
 
     def uninstall_selected(self, *, confirm: bool = True) -> None:
