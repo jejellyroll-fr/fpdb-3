@@ -710,3 +710,39 @@ def test_a_pack_recovered_from_an_interrupted_replacement_is_not_silently_replac
         stat_packs.install_pack(source, packs_dir)
 
     assert stat_packs.read_pack(packs_dir / PACK_ID).pack_version == "1.0.0"
+
+
+# -- seventh review round (PR #411) --------------------------------------------
+
+
+def test_a_fresh_install_does_not_inherit_a_stale_disabled_flag(source: Path, packs_dir: Path) -> None:
+    stat_packs.install_pack(source, packs_dir)
+    stat_packs.set_enabled(PACK_ID, False, packs_dir)
+    # An uninstall whose state update failed leaves the flag behind.
+    shutil.rmtree(packs_dir / PACK_ID)
+
+    stat_packs.install_pack(source, packs_dir)
+
+    assert {row.id: row.status for row in stat_packs.list_packs(packs_dir)}[PACK_ID] == stat_packs.ENABLED
+
+
+def test_a_replacement_keeps_the_disabled_choice(source: Path, packs_dir: Path) -> None:
+    stat_packs.install_pack(source, packs_dir)
+    stat_packs.set_enabled(PACK_ID, False, packs_dir)
+
+    stat_packs.install_pack(source, packs_dir, replace=True)
+
+    assert {row.id: row.status for row in stat_packs.list_packs(packs_dir)}[PACK_ID] == stat_packs.DISABLED
+
+
+def test_a_number_too_large_for_a_float_is_a_pack_error(source: Path, packs_dir: Path) -> None:
+    huge = int("9" * 400)
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["filters"] = {"bet_sizing_pct": [1, huge]}
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"bet_sizing_pct": [1, huge]}}])
+
+    message = refused(source, packs_dir)
+
+    assert "preset 'example.preflop.steal_by_position'" in message
+    assert "stat 'example.preflop.x'" in message

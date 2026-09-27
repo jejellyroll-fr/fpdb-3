@@ -549,7 +549,7 @@ def _read_fragments(raw: Any, prefix: str, errors: list[str]) -> dict[str, dict[
         own = {key: value for key, value in filters.items() if key != "fragments"}
         try:
             resolved = definitions.validate_filters(own, f"fragment {name}")
-        except (AttributeError, TypeError, ValueError) as exc:
+        except (ArithmeticError, AttributeError, TypeError, ValueError) as exc:
             errors.append(f"fragment {name!r}: {exc}")
             continue
         nested = filters.get("fragments", [])
@@ -625,7 +625,7 @@ def _checked_definition(
     """One definition through the shipped validator, the namespace and the compiler."""
     try:
         definition = definitions.parse_definition(entry, f"pack:{pack_id}/{name}")
-    except (AttributeError, TypeError) as exc:
+    except (ArithmeticError, AttributeError, TypeError) as exc:
         # The shared parser trusts shipped shapes; from a pack, a wrong shape
         # is the pack's error to report, not an exception to leak.
         raise ValueError(f"{name}: {exc}") from exc
@@ -638,7 +638,7 @@ def _checked_definition(
         # Compiled exactly as the engine will run it: this is where a bad
         # filter *value* ("position": ["dealer-ish"]) is caught.
         definitions.compile_definition(definition, fragments=library)
-    except (AttributeError, TypeError, ValueError) as exc:
+    except (ArithmeticError, AttributeError, TypeError, ValueError) as exc:
         # A malformed value ({"bet_sizing_pct": [{}, 50]}) fails as a TypeError
         # deep in the compiler; it is still just a bad value in the pack.
         raise ValueError(f"{name}: stat {definition.name!r}: {exc}") from exc
@@ -658,7 +658,7 @@ def _read_presets(listed: Any, files: Mapping[str, bytes], prefix: str, label: s
     for name, raw in _listed_documents(listed, files, "presets", label, errors):
         try:
             pack = research_presets.validate_preset_pack(raw, name)
-        except (AttributeError, TypeError, ValueError) as exc:
+        except (ArithmeticError, AttributeError, TypeError, ValueError) as exc:
             # The shipped validator trusts shipped data's shapes; a pack's data
             # is not shipped, so a wrong shape is its error, not a crash.
             errors.append(f"{name}: {exc}")
@@ -700,7 +700,8 @@ def _preset_compile_error(preset: Any) -> str:
                 group_by=tuple(preset.group_by),
             ),
         )
-    except (TypeError, ValueError) as exc:
+    except (ArithmeticError, TypeError, ValueError) as exc:
+        # A 400-digit bound overflows float(): still just a bad value.
         return str(exc)
     return ""
 
@@ -755,12 +756,24 @@ def install_pack(
         _recover_interrupted_replacements(root)
     if target.exists() and not replace:
         raise PackError([f"pack {pack.id!r} is already installed; uninstall it or replace it"], pack.id)
+    fresh = not target.exists()
     problems = _collisions(pack, root)
     if problems:
         raise PackError(problems, pack.id)
+    _write_pack(pack, root, target)
+    if fresh:
+        _forget_disabled(root, pack.id)
+    return pack
+
+
+def _write_pack(pack: StatPack, root: Path, target: Path) -> None:
+    """Write ``pack`` beside ``target``, then swap it in.
+
+    A failure half-way leaves the previous install (or nothing), never a pack
+    with half its files; the previous install is moved aside, not deleted,
+    until the new one is in place, and restored if the swap fails.
+    """
     root.mkdir(parents=True, exist_ok=True)
-    # Written beside the target, then swapped in: a failure half-way leaves the
-    # previous install (or nothing), never a pack with half its files.
     staging = Path(tempfile.mkdtemp(prefix=f".{pack.id}.", dir=root))
     backup: Path | None = None
     try:
@@ -768,8 +781,6 @@ def install_pack(
             path = staging / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(data)
-        # The previous install is moved aside, not deleted, until the new one
-        # is in place: a failure restores it instead of losing both.
         if target.exists():
             backup = root / f".{pack.id}.previous"
             if backup.exists():
@@ -783,7 +794,22 @@ def install_pack(
         raise
     if backup is not None:
         shutil.rmtree(backup, ignore_errors=True)
-    return pack
+
+
+def _forget_disabled(root: Path, pack_id: str) -> None:
+    """Drop a stale disabled flag left by an uninstall that could not save it.
+
+    A replacement keeps the user's choice; a fresh install of the same id must
+    not inherit the flag of a pack that was removed.
+    """
+    state = _read_state(root)
+    if pack_id not in state.get("disabled", []):
+        return
+    state["disabled"] = [name for name in state["disabled"] if name != pack_id]
+    try:
+        _write_state(root, state)
+    except OSError as exc:
+        log.warning("Installed %s but could not clear its stale disabled flag: %s", pack_id, exc)
 
 
 def uninstall_pack(pack_id: str, packs_dir: str | Path | None = None) -> None:
