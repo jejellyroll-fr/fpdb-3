@@ -506,3 +506,21 @@ def test_a_preset_id_repeated_in_another_file_is_refused(source: Path, packs_dir
     edit_manifest(source, presets=["presets/steals.json", "presets/again.json"])
 
     assert "preset 'example.preflop.steal_by_position' is defined twice" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize("disabled", [[{}], [["x"]], [3, None], "example.preflop"])
+def test_a_malformed_state_file_leaves_packs_enabled(source: Path, packs_dir: Path, disabled: Any) -> None:
+    stat_packs.install_pack(source, packs_dir)
+    (packs_dir / "state.json").write_text(json.dumps({"disabled": disabled}), encoding="utf-8")
+
+    rows = {row.id: row.status for row in stat_packs.list_packs(packs_dir)}
+
+    assert rows[PACK_ID] == stat_packs.ENABLED
+    assert "example.preflop.btn_open" in analytics_definitions.load_default_registry(packs_dir=packs_dir)
+
+
+def test_a_malformed_state_entry_does_not_hide_a_valid_one(source: Path, packs_dir: Path) -> None:
+    stat_packs.install_pack(source, packs_dir)
+    (packs_dir / "state.json").write_text(json.dumps({"disabled": [{}, PACK_ID]}), encoding="utf-8")
+
+    assert {row.id: row.status for row in stat_packs.list_packs(packs_dir)}[PACK_ID] == stat_packs.DISABLED

@@ -172,12 +172,18 @@ def _read_state(root: Path) -> dict[str, Any]:
         return {"disabled": []}
     try:
         state = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
         log.warning("Unreadable %s; treating every pack as enabled", path)
         return {"disabled": []}
     if not isinstance(state, dict) or not isinstance(state.get("disabled", []), list):
+        log.warning("Malformed %s; treating every pack as enabled", path)
         return {"disabled": []}
-    return state
+    # Only pack ids are kept: anything else (an object, a number) would break
+    # every reader of the state, and cannot name a pack anyway.
+    disabled = [entry for entry in state.get("disabled", []) if isinstance(entry, str) and _PACK_ID.match(entry)]
+    if len(disabled) != len(state.get("disabled", [])):
+        log.warning("Ignored malformed entries in %s", path)
+    return {**state, "disabled": disabled}
 
 
 def _write_state(root: Path, state: Mapping[str, Any]) -> None:
