@@ -100,10 +100,11 @@ _MANIFEST_FIELDS: Final = frozenset(
 _DATA_SUFFIXES: Final = (".json",)
 # ``author.topic`` or deeper: lower-case segments, at least two of them, so a
 # pack id reads as a namespace and cannot be mistaken for a built-in stat name.
-_PACK_ID: Final = re.compile(r"^[a-z0-9][a-z0-9_-]*(\.[a-z0-9][a-z0-9_-]*)+$")
+# Used with fullmatch: "$" alone also matches before a final newline.
+_PACK_ID: Final = re.compile(r"[a-z0-9][a-z0-9_-]*(\.[a-z0-9][a-z0-9_-]*)+")
 _RESERVED_NAMESPACES: Final = frozenset({"fpdb", "builtin", "core"})
 # What a stat, fragment or preset a pack adds may be called: an identifier.
-_NAME: Final = re.compile(r"^[A-Za-z0-9_.-]+$")
+_NAME: Final = re.compile(r"[A-Za-z0-9_.-]+")
 _WINDOWS_FORBIDDEN: Final = re.compile(r'[<>:"|?*\x00-\x1f]')
 _WINDOWS_RESERVED: Final = frozenset(
     {"CON", "PRN", "AUX", "NUL", *(f"COM{n}" for n in range(1, 10)), *(f"LPT{n}" for n in range(1, 10))},
@@ -187,7 +188,7 @@ def _read_state(root: Path) -> dict[str, Any]:
         return {"disabled": []}
     # Only pack ids are kept: anything else (an object, a number) would break
     # every reader of the state, and cannot name a pack anyway.
-    disabled = [entry for entry in state.get("disabled", []) if isinstance(entry, str) and _PACK_ID.match(entry)]
+    disabled = [entry for entry in state.get("disabled", []) if isinstance(entry, str) and _PACK_ID.fullmatch(entry)]
     if len(disabled) != len(state.get("disabled", [])):
         log.warning("Ignored malformed entries in %s", path)
     return {**state, "disabled": disabled}
@@ -423,7 +424,7 @@ def _version_error(value: Any, field_name: str, what: str, supported: int) -> st
 
 def _pack_id_problem(pack_id: Any) -> str:
     """Why a manifest id cannot name a pack, or ``""``."""
-    if not isinstance(pack_id, str) or not _PACK_ID.match(pack_id):
+    if not isinstance(pack_id, str) or not _PACK_ID.fullmatch(pack_id):
         return "must be a dotted lower-case namespace such as 'author.topic'"
     if pack_id.split(".", 1)[0] in _RESERVED_NAMESPACES:
         return f"uses a reserved namespace ({sorted(_RESERVED_NAMESPACES)})"
@@ -454,7 +455,7 @@ def _manifest_errors(manifest: Mapping[str, Any], running: str) -> tuple[list[st
     problem = _pack_id_problem(pack_id)
     if problem:
         errors.append(f"id {pack_id!r} {problem}")
-        if not isinstance(pack_id, str) or not _PACK_ID.match(pack_id):
+        if not isinstance(pack_id, str) or not _PACK_ID.fullmatch(pack_id):
             pack_id = ""
     for text_field in ("name", "author", "description", "pack_version", "min_fpdb_version"):
         if text_field in manifest and not isinstance(manifest[text_field], str):
@@ -528,7 +529,7 @@ def _name_problem(name: str, prefix: str) -> str:
     """
     if not name.startswith(prefix):
         return f"must be namespaced under {prefix!r}"
-    if not _NAME.match(name):
+    if not _NAME.fullmatch(name):
         return "may only use letters, digits, '_', '.' and '-'"
     return ""
 
@@ -857,7 +858,7 @@ def _installed_folder(root: Path, folder: str) -> Path:
 
 
 def _pack_dir(root: Path, pack_id: str) -> Path:
-    if not isinstance(pack_id, str) or not _PACK_ID.match(pack_id):
+    if not isinstance(pack_id, str) or not _PACK_ID.fullmatch(pack_id):
         raise PackError([f"{pack_id!r} is not a pack id"])
     target = root / pack_id
     if not (target / MANIFEST_NAME).is_file():

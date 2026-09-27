@@ -746,3 +746,20 @@ def test_a_number_too_large_for_a_float_is_a_pack_error(source: Path, packs_dir:
 
     assert "preset 'example.preflop.steal_by_position'" in message
     assert "stat 'example.preflop.x'" in message
+
+
+# -- eighth review round (PR #411) ---------------------------------------------
+
+
+def test_a_name_ending_in_a_newline_is_refused(source: Path, packs_dir: Path) -> None:
+    # "$" matches before a final newline; the XML attribute would turn it into
+    # a space and the stat on the HUD would no longer resolve.
+    write_stats(source, [{"name": "example.preflop.bad\n", "metric": "fold_frequency"}])
+
+    assert "may only use letters, digits" in refused(source, packs_dir)
+
+
+def test_a_pack_id_ending_in_a_newline_is_refused(source: Path, packs_dir: Path) -> None:
+    edit_manifest(source, id="example.preflop\n")
+
+    assert "dotted lower-case namespace" in refused(source, packs_dir)
