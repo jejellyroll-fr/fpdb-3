@@ -582,7 +582,7 @@ def test_names_differing_only_by_case_are_refused(packs_dir: Path, tmp_path: Pat
         out.writestr("stats/Steals.json", stats.replace("btn_open", "btn_open2").replace("sb_open", "sb_open2"))
         out.writestr("stats/steals.json", stats)
 
-    with pytest.raises(stat_packs.PackError, match="differ only by letter case"):
+    with pytest.raises(stat_packs.PackError, match="name the same file on some systems"):
         stat_packs.install_pack(archive, packs_dir)
 
 
@@ -763,3 +763,51 @@ def test_a_pack_id_ending_in_a_newline_is_refused(source: Path, packs_dir: Path)
     edit_manifest(source, id="example.preflop\n")
 
     assert "dotted lower-case namespace" in refused(source, packs_dir)
+
+
+# -- ninth review round (PR #411) ----------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "bounds",
+    [["low", "high"], [10, "20"], {"min": "a"}, [True, 5], [float("inf"), 5]],
+)
+def test_range_bounds_must_be_numbers(source: Path, packs_dir: Path, bounds: Any) -> None:
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["filters"] = {"effective_stack_bb": bounds}
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"effective_stack_bb": bounds}}])
+
+    message = refused(source, packs_dir)
+
+    assert "preset 'example.preflop.steal_by_position'" in message
+    assert "stat 'example.preflop.x'" in message
+    assert "needs numbers for its bounds" in message
+
+
+def test_an_open_range_bound_is_accepted(source: Path, packs_dir: Path) -> None:
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"effective_stack_bb": [None, 40]}}])
+
+    assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
+
+
+def test_json_nested_too_deeply_is_a_pack_error(source: Path, packs_dir: Path) -> None:
+    (source / "stats" / "steals.json").write_text("[" * 100_000 + "]" * 100_000, encoding="utf-8")
+
+    assert "nested too deeply to read" in refused(source, packs_dir)
+
+
+def test_names_equal_after_unicode_normalization_are_refused(packs_dir: Path, tmp_path: Path) -> None:
+    composed, decomposed = "stats/é.json", "stats/é.json"  # the same "é", two spellings
+    archive = tmp_path / "unicode.fpdbstats"
+    manifest = json.loads((EXAMPLE / "manifest.json").read_text(encoding="utf-8"))
+    manifest["definitions"] = [composed, decomposed]
+    manifest["presets"] = []
+    stats = (EXAMPLE / "stats" / "steals.json").read_text(encoding="utf-8")
+    with zipfile.ZipFile(archive, "w") as out:
+        out.writestr("manifest.json", json.dumps(manifest))
+        out.writestr(composed, stats)
+        out.writestr(decomposed, stats.replace("btn_open", "btn_open2").replace("sb_open", "sb_open2"))
+
+    with pytest.raises(stat_packs.PackError, match="name the same file on some systems"):
+        stat_packs.install_pack(archive, packs_dir)

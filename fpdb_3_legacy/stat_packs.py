@@ -55,6 +55,7 @@ import os
 import re
 import shutil
 import tempfile
+import unicodedata
 import zipfile
 import zlib
 from collections.abc import Iterable, Mapping
@@ -180,7 +181,7 @@ def _read_state(root: Path) -> dict[str, Any]:
         return {"disabled": []}
     try:
         state = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, RecursionError):
         log.warning("Unreadable %s; treating every pack as enabled", path)
         return {"disabled": []}
     if not isinstance(state, dict) or not isinstance(state.get("disabled", []), list):
@@ -289,7 +290,7 @@ def _read_folder(source: Path) -> dict[str, bytes]:
     files = {MANIFEST_NAME: _read_bounded(manifest_path, MAX_ARCHIVE_BYTES, str(source))}
     try:
         manifest = json.loads(files[MANIFEST_NAME].decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError):
+    except (UnicodeDecodeError, json.JSONDecodeError, RecursionError):
         return files
     if not isinstance(manifest, Mapping):
         return files
@@ -400,6 +401,9 @@ def _parse_data(name: str, data: bytes, source: str) -> Any:
         return json.loads(text)
     except json.JSONDecodeError as exc:
         raise PackError([f"{name} is not valid JSON: {exc}"], source) from exc
+    except RecursionError as exc:
+        # Valid JSON nested deeper than the parser can follow: still refused.
+        raise PackError([f"{name} is nested too deeply to read"], source) from exc
 
 
 def _version_tuple(version: str) -> tuple[int, ...]:
@@ -496,11 +500,13 @@ def read_pack(source: str | Path, *, fpdb_version: str | None = None) -> StatPac
     listed = {MANIFEST_NAME, *manifest.get("definitions", []), *manifest.get("presets", [])}
     folded: dict[str, str] = {}
     for name in sorted(listed):
-        # Windows and macOS file systems ignore case: two names differing only
-        # by it would be written to one file, and the install would lose one.
-        if name.casefold() in folded:
-            errors.append(f"files {folded[name.casefold()]!r} and {name!r} differ only by letter case")
-        folded[name.casefold()] = name
+        # Windows and macOS file systems ignore case, and macOS also Unicode
+        # normalization ("é" as one code point or two): names that differ only
+        # that way would be written to one file, and the install would lose one.
+        key = unicodedata.normalize("NFC", name).casefold()
+        if key in folded:
+            errors.append(f"files {folded[key]!r} and {name!r} name the same file on some systems")
+        folded[key] = name
     if errors:
         raise PackError(errors, label)
     return StatPack(
@@ -639,6 +645,10 @@ def _checked_definition(
         # Compiled exactly as the engine will run it: this is where a bad
         # filter *value* ("position": ["dealer-ish"]) is caught.
         definitions.compile_definition(definition, fragments=library)
+        query = definitions.resolve_query(definition, fragments=library)
+        problem = _range_bound_problem({**query.filters, **query.numerator})
+        if problem:
+            raise ValueError(problem)
     except (ArithmeticError, AttributeError, TypeError, ValueError) as exc:
         # A malformed value ({"bet_sizing_pct": [{}, 50]}) fails as a TypeError
         # deep in the compiler; it is still just a bad value in the pack.
@@ -683,6 +693,32 @@ def _read_presets(listed: Any, files: Mapping[str, bytes], prefix: str, label: s
     return presets
 
 
+def _range_bound_problem(filters: Mapping[str, Any]) -> str:
+    """Why a range filter's bounds are not numbers, or ``""``.
+
+    The engine checks a range has two bounds but binds them as they are; the
+    Research filter row reads them with float(). A bound must be a finite
+    number, or empty (None) for an open end.
+    """
+    import math  # noqa: PLC0415
+
+    from .analytics_query import FILTERS  # noqa: PLC0415
+
+    for name, value in filters.items():
+        spec = FILTERS.get(name)
+        if spec is None or spec.kind != "range":
+            continue
+        bounds = (value.get("min"), value.get("max")) if isinstance(value, Mapping) else value
+        if not isinstance(bounds, (list, tuple)):
+            continue  # the compiler reports the shape
+        for bound in bounds:
+            if bound is None:
+                continue
+            if isinstance(bound, bool) or not isinstance(bound, (int, float)) or not math.isfinite(bound):
+                return f"range filter {name!r} needs numbers for its bounds, not {bound!r}"
+    return ""
+
+
 def _preset_compile_error(preset: Any) -> str:
     """Why the engine cannot run a preset's query, or ``""``.
 
@@ -693,6 +729,9 @@ def _preset_compile_error(preset: Any) -> str:
     from .analytics_query import Query, compile_query  # noqa: PLC0415
 
     try:
+        problem = _range_bound_problem({**preset.filters, **preset.numerator})
+        if problem:
+            return problem
         compile_query(
             Query(
                 metric=preset.metric,
