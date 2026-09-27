@@ -421,6 +421,16 @@ def _version_error(value: Any, field_name: str, what: str, supported: int) -> st
     return ""
 
 
+def _pack_id_problem(pack_id: Any) -> str:
+    """Why a manifest id cannot name a pack, or ``""``."""
+    if not isinstance(pack_id, str) or not _PACK_ID.match(pack_id):
+        return "must be a dotted lower-case namespace such as 'author.topic'"
+    if pack_id.split(".", 1)[0] in _RESERVED_NAMESPACES:
+        return f"uses a reserved namespace ({sorted(_RESERVED_NAMESPACES)})"
+    # The id is the install folder's name: "con.stats" cannot be one on Windows.
+    return _portable_name_problem(PurePosixPath(pack_id))
+
+
 def _manifest_errors(manifest: Mapping[str, Any], running: str) -> tuple[list[str], str, str]:
     """The manifest's own problems, its pack id and its minimum fpdb version."""
     errors: list[str] = []
@@ -441,11 +451,11 @@ def _manifest_errors(manifest: Mapping[str, Any], running: str) -> tuple[list[st
         errors.append(f"needs fpdb {minimum} or newer (this is {running})")
 
     pack_id = manifest.get("id")
-    if not isinstance(pack_id, str) or not _PACK_ID.match(pack_id):
-        errors.append(f"id {pack_id!r} must be a dotted lower-case namespace such as 'author.topic'")
-        pack_id = ""
-    elif pack_id.split(".", 1)[0] in _RESERVED_NAMESPACES:
-        errors.append(f"id {pack_id!r} uses a reserved namespace ({sorted(_RESERVED_NAMESPACES)})")
+    problem = _pack_id_problem(pack_id)
+    if problem:
+        errors.append(f"id {pack_id!r} {problem}")
+        if not isinstance(pack_id, str) or not _PACK_ID.match(pack_id):
+            pack_id = ""
     for text_field in ("name", "author", "description", "pack_version", "min_fpdb_version"):
         if text_field in manifest and not isinstance(manifest[text_field], str):
             errors.append(f"{text_field} must be a string")
@@ -539,7 +549,7 @@ def _read_fragments(raw: Any, prefix: str, errors: list[str]) -> dict[str, dict[
         own = {key: value for key, value in filters.items() if key != "fragments"}
         try:
             resolved = definitions.validate_filters(own, f"fragment {name}")
-        except ValueError as exc:
+        except (AttributeError, TypeError, ValueError) as exc:
             errors.append(f"fragment {name!r}: {exc}")
             continue
         nested = filters.get("fragments", [])
@@ -613,7 +623,12 @@ def _checked_definition(
     seen: set[str],
 ) -> StatDefinition:
     """One definition through the shipped validator, the namespace and the compiler."""
-    definition = definitions.parse_definition(entry, f"pack:{pack_id}/{name}")
+    try:
+        definition = definitions.parse_definition(entry, f"pack:{pack_id}/{name}")
+    except (AttributeError, TypeError) as exc:
+        # The shared parser trusts shipped shapes; from a pack, a wrong shape
+        # is the pack's error to report, not an exception to leak.
+        raise ValueError(f"{name}: {exc}") from exc
     problem = _name_problem(definition.name, prefix)
     if problem:
         raise ValueError(f"{name}: stat {definition.name!r} {problem}")
@@ -623,7 +638,9 @@ def _checked_definition(
         # Compiled exactly as the engine will run it: this is where a bad
         # filter *value* ("position": ["dealer-ish"]) is caught.
         definitions.compile_definition(definition, fragments=library)
-    except ValueError as exc:
+    except (AttributeError, TypeError, ValueError) as exc:
+        # A malformed value ({"bet_sizing_pct": [{}, 50]}) fails as a TypeError
+        # deep in the compiler; it is still just a bad value in the pack.
         raise ValueError(f"{name}: stat {definition.name!r}: {exc}") from exc
     return definition
 
@@ -775,9 +792,16 @@ def uninstall_pack(pack_id: str, packs_dir: str | Path | None = None) -> None:
     root = _root(packs_dir)
     target = _installed_folder(root, pack_id)
     shutil.rmtree(target)
+    # The pack is gone; forgetting its disabled flag is housekeeping. Done the
+    # other way round, a removal that then failed would re-enable the pack, and
+    # a state file that cannot be written must not report a done uninstall as
+    # failed. A leftover entry names no installed pack and is harmless.
     state = _read_state(root)
     state["disabled"] = [name for name in state.get("disabled", []) if name != pack_id]
-    _write_state(root, state)
+    try:
+        _write_state(root, state)
+    except OSError as exc:
+        log.warning("Uninstalled %s but could not update %s: %s", pack_id, STATE_NAME, exc)
 
 
 def set_enabled(pack_id: str, enabled: bool, packs_dir: str | Path | None = None) -> None:

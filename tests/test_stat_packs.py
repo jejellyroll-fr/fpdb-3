@@ -661,3 +661,39 @@ def test_fragment_and_preset_names_are_identifiers_too(source: Path, packs_dir: 
     presets["presets"][0]["id"] = "example.preflop.steal\tby"
     (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
     assert "may only use letters, digits" in refused(source, packs_dir)
+
+
+# -- sixth review round (PR #411) ----------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "filters",
+    [{"bet_sizing_pct": [{}, 50]}, {"bet_sizing_pct": [None, "x"]}],
+)
+def test_a_malformed_filter_value_is_a_pack_error(source: Path, packs_dir: Path, filters: dict[str, Any]) -> None:
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": filters}])
+
+    assert "stat 'example.preflop.x'" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize("pack_id", ["con.stats", "aux.pack", "nul.x", "lpt1.x"])
+def test_a_pack_id_windows_cannot_use_as_a_folder_is_refused(source: Path, packs_dir: Path, pack_id: str) -> None:
+    edit_manifest(source, id=pack_id)
+
+    assert "reserved Windows name" in refused(source, packs_dir)
+
+
+def test_an_uninstall_that_cannot_update_the_state_still_succeeds(
+    source: Path, packs_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    stat_packs.install_pack(source, packs_dir)
+    stat_packs.set_enabled(PACK_ID, False, packs_dir)
+
+    def locked(*_args: Any) -> None:
+        raise OSError("state.json is locked")
+
+    monkeypatch.setattr(stat_packs.os, "replace", locked)
+    stat_packs.uninstall_pack(PACK_ID, packs_dir)  # no exception: the pack is gone
+
+    assert not (packs_dir / PACK_ID).exists()
+    assert [row.id for row in stat_packs.list_packs(packs_dir)] == ["builtin"]
