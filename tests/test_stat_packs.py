@@ -307,6 +307,20 @@ def test_a_symbolic_link_in_a_pack_folder_is_refused(source: Path, packs_dir: Pa
         (source / "stats" / "linked.json").symlink_to(secret)
     except OSError:
         pytest.skip("symbolic links are not available here")
+    edit_manifest(source, definitions=["stats/steals.json", "stats/linked.json"])
+
+    assert "symbolic links are not allowed" in refused(source, packs_dir)
+
+
+def test_a_linked_folder_in_a_pack_is_refused(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    shutil.copy(source / "stats" / "steals.json", outside / "steals.json")
+    try:
+        (source / "linked").symlink_to(outside, target_is_directory=True)
+    except OSError:
+        pytest.skip("symbolic links are not available here")
+    edit_manifest(source, definitions=["linked/steals.json"])
 
     assert "symbolic links are not allowed" in refused(source, packs_dir)
 
@@ -524,3 +538,49 @@ def test_a_malformed_state_entry_does_not_hide_a_valid_one(source: Path, packs_d
     (packs_dir / "state.json").write_text(json.dumps({"disabled": [{}, PACK_ID]}), encoding="utf-8")
 
     assert {row.id: row.status for row in stat_packs.list_packs(packs_dir)}[PACK_ID] == stat_packs.DISABLED
+
+
+
+# -- fourth review round (PR #411) ---------------------------------------------
+
+
+def test_a_folder_import_reads_only_what_the_manifest_lists(
+    source: Path, packs_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A pack unpacked beside something large and unrelated.
+    (source / "movie.bin").write_bytes(b"x" * 64)
+    read: list[str] = []
+    real_read_bytes = Path.read_bytes
+
+    def tracking_read_bytes(self: Path) -> bytes:
+        read.append(self.name)
+        return real_read_bytes(self)
+
+    monkeypatch.setattr(Path, "read_bytes", tracking_read_bytes)
+    stat_packs.install_pack(source, packs_dir)
+
+    assert "movie.bin" not in read
+    assert not (packs_dir / PACK_ID / "movie.bin").exists()
+
+
+def test_a_listed_file_over_the_size_limit_is_refused(
+    source: Path, packs_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(stat_packs, "MAX_ARCHIVE_BYTES", 100)
+
+    assert "larger than 100 bytes" in refused(source, packs_dir)
+
+
+def test_names_differing_only_by_case_are_refused(packs_dir: Path, tmp_path: Path) -> None:
+    archive = tmp_path / "case.fpdbstats"
+    stats = (EXAMPLE / "stats" / "steals.json").read_text(encoding="utf-8")
+    manifest = json.loads((EXAMPLE / "manifest.json").read_text(encoding="utf-8"))
+    manifest["definitions"] = ["stats/Steals.json", "stats/steals.json"]
+    manifest["presets"] = []
+    with zipfile.ZipFile(archive, "w") as out:
+        out.writestr("manifest.json", json.dumps(manifest))
+        out.writestr("stats/Steals.json", stats.replace("btn_open", "btn_open2").replace("sb_open", "sb_open2"))
+        out.writestr("stats/steals.json", stats)
+
+    with pytest.raises(stat_packs.PackError, match="differ only by letter case"):
+        stat_packs.install_pack(archive, packs_dir)

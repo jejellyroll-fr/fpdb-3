@@ -239,18 +239,68 @@ def _safe_member(name: str, source: str) -> str:
 def _read_files(source: Path) -> dict[str, bytes]:
     """Every file of a pack folder or ``.fpdbstats`` archive, by relative path."""
     if source.is_dir():
-        files: dict[str, bytes] = {}
-        for path in sorted(source.rglob("*")):
-            if path.is_symlink():
-                raise PackError([f"{path.name}: symbolic links are not allowed in a pack"], str(source))
-            if path.is_file():
-                files[path.relative_to(source).as_posix()] = path.read_bytes()
-        return files
+        return _read_folder(source)
     if source.is_file() and source.name == MANIFEST_NAME:
         return _read_files(source.parent)
     if source.is_file() and zipfile.is_zipfile(source):
         return _read_archive(source)
     raise PackError(["expected a pack folder, its manifest.json, or a .fpdbstats archive"], str(source))
+
+
+def _read_folder(source: Path) -> dict[str, bytes]:
+    """The manifest of a pack folder and the files it lists, nothing else.
+
+    A folder is often where a pack was downloaded or unpacked, beside anything
+    else; reading only what the manifest names -- under the same count and
+    size limits as an archive -- keeps an unrelated large file from being
+    loaded. Anything the manifest gets wrong is left for :func:`read_pack` to
+    report with the rest.
+    """
+    manifest_path = source / MANIFEST_NAME
+    if not manifest_path.is_file() or manifest_path.is_symlink():
+        return {}
+    files = {MANIFEST_NAME: _read_bounded(manifest_path, MAX_ARCHIVE_BYTES, str(source))}
+    try:
+        manifest = json.loads(files[MANIFEST_NAME].decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return files
+    if not isinstance(manifest, Mapping):
+        return files
+    listed = [
+        entry
+        for key in ("definitions", "presets")
+        if isinstance(manifest.get(key), list)
+        for entry in manifest[key]
+        if isinstance(entry, str)
+    ]
+    if len(listed) > MAX_ARCHIVE_FILES:
+        raise PackError([f"the manifest lists {len(listed)} files; at most {MAX_ARCHIVE_FILES}"], str(source))
+    total = len(files[MANIFEST_NAME])
+    for entry in listed:
+        try:
+            name = _safe_member(entry, str(source))
+        except PackError:
+            continue
+        # No component of the path may be a link: a linked file, or a linked
+        # folder above it, would read something outside the pack.
+        path = source
+        for part in PurePosixPath(name).parts:
+            path = path / part
+            if path.is_symlink():
+                raise PackError([f"{name}: symbolic links are not allowed in a pack"], str(source))
+        if not path.is_file():
+            continue
+        data = _read_bounded(path, MAX_ARCHIVE_BYTES - total, str(source))
+        total += len(data)
+        files[name] = data
+    return files
+
+
+def _read_bounded(path: Path, budget: int, source: str) -> bytes:
+    """A file's bytes, refused past ``budget`` without reading it whole."""
+    if path.stat().st_size > budget:
+        raise PackError([f"the pack is larger than {MAX_ARCHIVE_BYTES} bytes"], source)
+    return path.read_bytes()
 
 
 def _read_entry(archive: zipfile.ZipFile, info: zipfile.ZipInfo, budget: int, source: str) -> bytes:
@@ -402,6 +452,15 @@ def read_pack(source: str | Path, *, fpdb_version: str | None = None) -> StatPac
     if errors:
         raise PackError(errors, label)
     listed = {MANIFEST_NAME, *manifest.get("definitions", []), *manifest.get("presets", [])}
+    folded: dict[str, str] = {}
+    for name in sorted(listed):
+        # Windows and macOS file systems ignore case: two names differing only
+        # by it would be written to one file, and the install would lose one.
+        if name.casefold() in folded:
+            errors.append(f"files {folded[name.casefold()]!r} and {name!r} differ only by letter case")
+        folded[name.casefold()] = name
+    if errors:
+        raise PackError(errors, label)
     return StatPack(
         id=pack_id,
         name=str(manifest.get("name") or pack_id),
