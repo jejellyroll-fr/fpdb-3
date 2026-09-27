@@ -608,9 +608,36 @@ def _read_presets(listed: Any, files: Mapping[str, bytes], prefix: str, label: s
             if preset.id in seen:
                 errors.append(f"{name}: preset {preset.id!r} is defined twice in the pack")
                 continue
+            problem = _preset_compile_error(preset)
+            if problem:
+                errors.append(f"{name}: preset {preset.id!r}: {problem}")
+                continue
             seen.add(preset.id)
             presets.append(preset)
     return presets
+
+
+def _preset_compile_error(preset: Any) -> str:
+    """Why the engine cannot run a preset's query, or ``""``.
+
+    The preset validator checks names; compiling checks the values too (a
+    range with three bounds, an unknown position), which is what would
+    otherwise break the Research Browser only when the preset is chosen.
+    """
+    from .analytics_query import Query, compile_query  # noqa: PLC0415
+
+    try:
+        compile_query(
+            Query(
+                metric=preset.metric,
+                filters=dict(preset.filters),
+                numerator=dict(preset.numerator),
+                group_by=tuple(preset.group_by),
+            ),
+        )
+    except (TypeError, ValueError) as exc:
+        return str(exc)
+    return ""
 
 
 # ---------------------------------------------------------------------------

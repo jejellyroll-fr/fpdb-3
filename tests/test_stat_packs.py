@@ -584,3 +584,24 @@ def test_names_differing_only_by_case_are_refused(packs_dir: Path, tmp_path: Pat
 
     with pytest.raises(stat_packs.PackError, match="differ only by letter case"):
         stat_packs.install_pack(archive, packs_dir)
+
+
+@pytest.mark.parametrize(
+    ("filters", "reason"),
+    [
+        ({"effective_stack_bb": [10, 20, 30]}, "A range filter needs [low, high]"),
+        ({"effective_stack_bb": 15}, "A range filter needs [low, high]"),
+        ({"position": ["dealer-ish"]}, "Unknown position 'dealer-ish'"),
+    ],
+)
+def test_a_preset_with_a_value_the_engine_cannot_run_is_refused(
+    source: Path, packs_dir: Path, filters: dict[str, Any], reason: str
+) -> None:
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["filters"] = filters
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+
+    message = refused(source, packs_dir)
+
+    assert "preset 'example.preflop.steal_by_position'" in message
+    assert reason in message
