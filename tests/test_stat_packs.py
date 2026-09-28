@@ -1003,3 +1003,31 @@ def test_a_fragment_chain_too_deep_to_expand_is_a_pack_error(source: Path, packs
     write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "fragments": ["example.preflop.f0"]}])
 
     assert "its fragments are nested too deeply" in refused(source, packs_dir)
+
+
+# -- seventeenth review round (PR #411) ----------------------------------------
+
+
+def test_a_bad_denominator_value_is_not_hidden_by_the_numerator(source: Path, packs_dir: Path) -> None:
+    write_stats(
+        source,
+        [
+            {
+                "name": "example.preflop.x",
+                "metric": "action_frequency",
+                "filters": {"in_position": "false"},
+                "numerator": {"in_position": True},
+            },
+        ],
+    )
+
+    assert "filter 'in_position' needs true or false, not 'false'" in refused(source, packs_dir)
+
+
+def test_a_bad_preset_denominator_is_not_hidden_by_the_numerator(source: Path, packs_dir: Path) -> None:
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["filters"] = {**presets["presets"][0]["filters"], "in_position": "false"}
+    presets["presets"][0]["numerator"] = {"in_position": True}
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+
+    assert "filter 'in_position' needs true or false, not 'false'" in refused(source, packs_dir)

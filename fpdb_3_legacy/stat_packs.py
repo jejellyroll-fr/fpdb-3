@@ -655,7 +655,9 @@ def _checked_definition(
         # filter *value* ("position": ["dealer-ish"]) is caught.
         definitions.compile_definition(definition, fragments=library)
         query = definitions.resolve_query(definition, fragments=library)
-        problem = _filter_value_problem({**query.filters, **query.numerator})
+        # Checked apart: a merged dict would hide the denominator's value
+        # wherever the numerator names the same filter.
+        problem = _filter_value_problem(query.filters) or _filter_value_problem(query.numerator)
         if problem:
             raise ValueError(problem)
     except (ArithmeticError, AttributeError, TypeError, ValueError) as exc:
@@ -823,7 +825,9 @@ def _preset_compile_error(preset: Any) -> str:
     from .analytics_query import Query, compile_query  # noqa: PLC0415
 
     try:
-        problem = _filter_value_problem({**preset.filters, **preset.numerator}, preset=True)
+        problem = _filter_value_problem(preset.filters, preset=True) or _filter_value_problem(
+            preset.numerator, preset=True
+        )
         if problem:
             return problem
         compile_query(
