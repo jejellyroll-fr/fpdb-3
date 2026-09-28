@@ -727,6 +727,8 @@ def _filter_value_problem(filters: Mapping[str, Any], *, preset: bool = False) -
     return ""
 
 
+# Filter kinds whose value is a plain value or a list of them.
+_VALUE_KINDS: Final = frozenset({"set", "scalar", "label", "flagset", "flagset_all", "flagset_none"})
 # Filter kinds the Research browser edits as comma-separated text.
 _TEXT_KINDS: Final = frozenset({"set", "scalar", "label", "flagset", "flagset_all", "flagset_none", "identity_set"})
 
@@ -765,9 +767,10 @@ def _one_filter_problem(name: str, value: Any, kind: str, *, preset: bool) -> st
         return ""
     if kind in ("bool", "hero", "null_check") and not isinstance(value, bool):
         return f"filter {name!r} needs true or false, not {value!r}"
-    if kind in ("set", "scalar"):
+    if kind in _VALUE_KINDS:
         # A mapping (other than is_null) compiles as one bound parameter the
-        # database cannot compare: only values, or a list of them.
+        # database cannot compare -- or, for a label, is stringified into its
+        # LIKE pattern and matches nothing: only values, or a list of them.
         values = value if isinstance(value, (list, tuple)) else [value]
         if any(isinstance(item, (Mapping, list, tuple)) or item is None for item in values):
             return f"filter {name!r} takes a value or a list of values, not {value!r}"

@@ -963,3 +963,27 @@ def test_a_preset_identity_in_site_alias_form_is_accepted(source: Path, packs_di
     _preset_with(source, identity=["PokerStars:Hero"], effective_stack_bb=[10, 20])
 
     assert [p.id for p in stat_packs.install_pack(source, packs_dir).presets] == ["example.preflop.steal_by_position"]
+
+
+# -- fifteenth review round (PR #411) ------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "filters",
+    # Flag filters (draw, board_texture) are already refused by the compiler.
+    [{"situation": {"unexpected": "value"}}, {"situation": [["facing_3bet"]]}],
+)
+def test_label_and_flag_filters_take_values_not_structures(
+    source: Path, packs_dir: Path, filters: dict[str, Any]
+) -> None:
+    # A label mapping is stringified into its LIKE pattern and matches nothing.
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": filters}])
+
+    name = next(iter(filters))
+    assert f"filter {name!r} takes a value or a list of values" in refused(source, packs_dir)
+
+
+def test_a_label_value_is_accepted(source: Path, packs_dir: Path) -> None:
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"situation": "facing_3bet"}}])
+
+    assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
