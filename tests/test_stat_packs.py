@@ -811,3 +811,32 @@ def test_names_equal_after_unicode_normalization_are_refused(packs_dir: Path, tm
 
     with pytest.raises(stat_packs.PackError, match="name the same file on some systems"):
         stat_packs.install_pack(archive, packs_dir)
+
+
+# -- tenth review round (PR #411) ----------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("name", "value"),
+    [("in_position", "false"), ("multiway", 0), ("tournament", "yes"), ("hero", None)],
+)
+def test_boolean_filters_need_true_or_false(source: Path, packs_dir: Path, name: str, value: Any) -> None:
+    # bool("false") is True: the stat would measure the opposite of its label.
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {name: value}}])
+
+    assert f"filter {name!r} needs true or false" in refused(source, packs_dir)
+
+
+def test_a_boolean_from_a_fragment_is_checked_too(source: Path, packs_dir: Path) -> None:
+    edit_manifest(source, fragments={"example.preflop.unopened": {"street": "preflop", "in_position": "no"}})
+
+    assert "filter 'in_position' needs true or false" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize("filters", [{"date_from": "2026-01-01"}, {"hand_id_to": 10}])
+def test_a_preset_cannot_store_a_one_sided_window(source: Path, packs_dir: Path, filters: dict[str, Any]) -> None:
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["filters"] = {**presets["presets"][0]["filters"], **filters}
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+
+    assert "is chosen in Research, not stored in a preset" in refused(source, packs_dir)

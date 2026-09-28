@@ -646,7 +646,7 @@ def _checked_definition(
         # filter *value* ("position": ["dealer-ish"]) is caught.
         definitions.compile_definition(definition, fragments=library)
         query = definitions.resolve_query(definition, fragments=library)
-        problem = _range_bound_problem({**query.filters, **query.numerator})
+        problem = _filter_value_problem({**query.filters, **query.numerator})
         if problem:
             raise ValueError(problem)
     except (ArithmeticError, AttributeError, TypeError, ValueError) as exc:
@@ -693,12 +693,14 @@ def _read_presets(listed: Any, files: Mapping[str, bytes], prefix: str, label: s
     return presets
 
 
-def _range_bound_problem(filters: Mapping[str, Any]) -> str:
-    """Why a range filter's bounds are not numbers, or ``""``.
+def _filter_value_problem(filters: Mapping[str, Any], *, preset: bool = False) -> str:
+    """Why a filter value would not mean what it says, or ``""``.
 
-    The engine checks a range has two bounds but binds them as they are; the
-    Research filter row reads them with float(). A bound must be a finite
-    number, or empty (None) for an open end.
+    The compiler is lenient where a pack must not be: it binds range bounds as
+    they come (the Research filter row later reads them with float()), and it
+    turns any non-empty string into True, so ``"in_position": "false"`` would
+    measure the opposite of its label. For a preset, a one-sided date or hand
+    range cannot be shown by Research's two-ended range control either.
     """
     import math  # noqa: PLC0415
 
@@ -706,7 +708,13 @@ def _range_bound_problem(filters: Mapping[str, Any]) -> str:
 
     for name, value in filters.items():
         spec = FILTERS.get(name)
-        if spec is None or spec.kind != "range":
+        if spec is None:
+            continue
+        if spec.kind in ("bool", "hero", "null_check") and not isinstance(value, bool):
+            return f"filter {name!r} needs true or false, not {value!r}"
+        if preset and spec.kind in ("range_low", "range_high"):
+            return f"filter {name!r} is chosen in Research, not stored in a preset; list it under variables"
+        if spec.kind != "range":
             continue
         bounds = (value.get("min"), value.get("max")) if isinstance(value, Mapping) else value
         if not isinstance(bounds, (list, tuple)):
@@ -729,7 +737,7 @@ def _preset_compile_error(preset: Any) -> str:
     from .analytics_query import Query, compile_query  # noqa: PLC0415
 
     try:
-        problem = _range_bound_problem({**preset.filters, **preset.numerator})
+        problem = _filter_value_problem({**preset.filters, **preset.numerator}, preset=True)
         if problem:
             return problem
         compile_query(
