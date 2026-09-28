@@ -1148,3 +1148,51 @@ def test_a_listed_path_too_deep_or_too_long_is_refused(source: Path, packs_dir: 
     edit_manifest(source, definitions=[path])
 
     assert "is too deep or too long" in refused(source, packs_dir)
+
+
+# -- review of 69b83549 (PR #411) ------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "filters",
+    [{"hand_id": 10**100}, {"hand_id": [1, 10**100]}, {"effective_stack_bb": [1, 10**100]}, {"hand_id_from": 10**100}],
+)
+def test_a_number_too_large_for_the_database_is_refused(source: Path, packs_dir: Path, filters: dict[str, Any]) -> None:
+    # Binding it fails only when the stat runs: "Python int too large to convert to SQLite INTEGER".
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": filters}])
+
+    assert "too large for the database" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize(
+    ("bounds", "reason"),
+    [
+        ([10.001, 20], "more than 2 decimals"),
+        ([10, 20_000_000], "outside what Research can show"),
+        ([-10_000_000, 20], "outside what Research can show"),  # the minimum reads as "no bound"
+    ],
+)
+def test_a_preset_range_must_fit_its_control(source: Path, packs_dir: Path, bounds: list[Any], reason: str) -> None:
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["filters"] = {**presets["presets"][0]["filters"], "effective_stack_bb": bounds}
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+
+    assert reason in refused(source, packs_dir)
+
+
+def test_a_preset_range_the_control_holds_is_accepted(source: Path, packs_dir: Path) -> None:
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["filters"] = {**presets["presets"][0]["filters"], "effective_stack_bb": [10.5, 40]}
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+
+    assert [p.id for p in stat_packs.install_pack(source, packs_dir).presets] == ["example.preflop.steal_by_position"]
+
+
+def test_the_path_limit_counts_bytes_not_characters(source: Path, packs_dir: Path) -> None:
+    # Eight components of 60 emoji: under 512 characters, about 1.9 KB of UTF-8.
+    component = "\U0001F600" * 60
+    path = "/".join([component] * 7) + "/x.json"
+    assert len(path) < stat_packs.MAX_PATH_LENGTH < len(path.encode("utf-8"))
+    edit_manifest(source, definitions=[path])
+
+    assert "is too deep or too long" in refused(source, packs_dir)

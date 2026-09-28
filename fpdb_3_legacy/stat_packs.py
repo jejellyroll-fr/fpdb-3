@@ -125,7 +125,11 @@ MAX_NAME_BYTES: Final = 255
 # that a longest-allowed name in a folder still fits well within macOS's
 # 1,024-byte path limit once under the install folder.
 MAX_PATH_DEPTH: Final = 8
-MAX_PATH_LENGTH: Final = 512
+MAX_PATH_LENGTH: Final = 512  # bytes of UTF-8, what the file system counts
+# The largest number a filter may hold. SQLite binds integers as 64 bits, and a
+# sizing range in per cent is multiplied by 100 before it is bound; 2**53 keeps
+# both exact and inside that, far past any real hand id, stake or stack.
+MAX_FILTER_NUMBER: Final = 2**53
 # What fpdb wraps a pack id in inside the pack directory: the staging folder is
 # ".<id>." plus mkdtemp's eight random characters, and the install a
 # replacement moves aside is ".<id>.previous". Both add ten characters.
@@ -251,12 +255,12 @@ def _safe_member(name: str, source: str) -> str:
             [f"file {name!r} is not a data file; allowed suffixes: {list(_DATA_SUFFIXES)}"],
             source,
         )
-    if len(path.parts) > MAX_PATH_DEPTH or len(name) > MAX_PATH_LENGTH:
+    if len(path.parts) > MAX_PATH_DEPTH or len(name.encode("utf-8", "surrogatepass")) > MAX_PATH_LENGTH:
         # Each part may be short and portable while the whole is not: creating
         # 1,800 nested folders recurses past Python's limit, and a very long
         # path under the install folder exceeds what the system accepts.
         raise PackError(
-            [f"file path {name!r} is too deep or too long (at most {MAX_PATH_DEPTH} levels, {MAX_PATH_LENGTH} characters)"],
+            [f"file path {name!r} is too deep or too long (at most {MAX_PATH_DEPTH} levels, {MAX_PATH_LENGTH} bytes)"],
             source,
         )
     problem = _portable_name_problem(path)
@@ -794,13 +798,33 @@ def _research_round_trip_problem(name: str, value: Any, kind: str) -> str:
             # Neither bound is not a filter: the control reads it back as an
             # empty row and the preset runs wider than it says it does.
             return f"filter {name!r} needs at least one bound in a preset, not {value!r}"
-        return ""
+        return _range_control_problem(name, value)
     if kind not in _TEXT_KINDS:
         return ""
     items = value if isinstance(value, (list, tuple)) else [value]
     for item in items:
         if isinstance(item, bool) or not isinstance(item, (str, int)) or "," in str(item):
             return f"filter {name!r} in a preset takes words or whole numbers without commas, not {item!r}"
+    return ""
+
+
+def _range_control_problem(name: str, bounds: Iterable[Any]) -> str:
+    """Why a preset range would be rounded or clamped by its control, or ``""``.
+
+    The spin boxes span RANGE_CONTROL_MIN..MAX to RANGE_CONTROL_DECIMALS places,
+    the minimum reading back as "no bound": [10.001, 20] would come back as
+    [10.0, 20] and 20,000,000 as 10,000,000, running another query than the
+    pack declares.
+    """
+    from .research_browser import RANGE_CONTROL_DECIMALS, RANGE_CONTROL_MAX, RANGE_CONTROL_MIN  # noqa: PLC0415
+
+    for bound in bounds:
+        if bound is None or isinstance(bound, bool) or not isinstance(bound, (int, float)):
+            continue  # an open end, or a value the other checks refuse
+        if not RANGE_CONTROL_MIN < bound <= RANGE_CONTROL_MAX:
+            return f"filter {name!r} bound {bound!r} is outside what Research can show ({RANGE_CONTROL_MIN}, {RANGE_CONTROL_MAX}]"
+        if round(bound, RANGE_CONTROL_DECIMALS) != bound:
+            return f"filter {name!r} bound {bound!r} has more than {RANGE_CONTROL_DECIMALS} decimals, which Research rounds"
     return ""
 
 
@@ -814,6 +838,10 @@ def _non_finite_problem(name: str, value: Any) -> str:
     """
     if isinstance(value, float) and not math.isfinite(value):
         return f"filter {name!r} needs a finite number, not {value!r}"
+    # 10**100 is a valid JSON number, and binding it fails in the database
+    # ("Python int too large to convert to SQLite INTEGER") only when it runs.
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and abs(value) > MAX_FILTER_NUMBER:
+        return f"filter {name!r} holds a number too large for the database, {value!r}"
     return ""
 
 
@@ -876,8 +904,13 @@ def _bounds_problem(name: str, bounds: Iterable[Any]) -> str:
     for bound in bounds:
         if bound is None:
             continue
-        if isinstance(bound, bool) or not isinstance(bound, (int, float)) or not math.isfinite(bound):
+        if isinstance(bound, bool) or not isinstance(bound, (int, float)):
             return f"range filter {name!r} needs numbers for its bounds, not {bound!r}"
+        if isinstance(bound, float) and not math.isfinite(bound):
+            return f"range filter {name!r} needs numbers for its bounds, not {bound!r}"
+        problem = _non_finite_problem(name, bound)
+        if problem:
+            return problem
     return ""
 
 

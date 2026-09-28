@@ -353,12 +353,12 @@ class _FilterRow(QWidget):
     def _build_range_widget(self, layout: QHBoxLayout) -> None:
         unit = self.spec.unit
         low = QDoubleSpinBox()
-        low.setRange(-10_000_000, 10_000_000)
-        low.setDecimals(2)
+        low.setRange(rb.RANGE_CONTROL_MIN, rb.RANGE_CONTROL_MAX)
+        low.setDecimals(rb.RANGE_CONTROL_DECIMALS)
         low.setSpecialValueText(" ")
         high = QDoubleSpinBox()
-        high.setRange(-10_000_000, 10_000_000)
-        high.setDecimals(2)
+        high.setRange(rb.RANGE_CONTROL_MIN, rb.RANGE_CONTROL_MAX)
+        high.setDecimals(rb.RANGE_CONTROL_DECIMALS)
         high.setSpecialValueText(" ")
         for spin in (low, high):
             if unit:

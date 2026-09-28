@@ -147,6 +147,13 @@ _GROUP_OF: Final = {
     "hand_state_street": "strength", "hand_state_known": "strength",
 }
 
+# What a range filter row can hold: two spin boxes over this span, to this many
+# decimals, with the minimum itself meaning "no bound". A preset's bounds must
+# fit it to come back unchanged (checked where stat packs are read).
+RANGE_CONTROL_MIN: Final = -10_000_000
+RANGE_CONTROL_MAX: Final = 10_000_000
+RANGE_CONTROL_DECIMALS: Final = 2
+
 _KIND_OF_ENGINE_KIND: Final = {
     "scalar": "scalar",
     "set": "set",
