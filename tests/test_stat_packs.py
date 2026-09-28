@@ -589,8 +589,9 @@ def test_names_differing_only_by_case_are_refused(packs_dir: Path, tmp_path: Pat
 @pytest.mark.parametrize(
     ("filters", "reason"),
     [
-        ({"effective_stack_bb": [10, 20, 30]}, "A range filter needs [low, high]"),
-        ({"effective_stack_bb": 15}, "A range filter needs [low, high]"),
+        # Refused first as a shape Research cannot hold, then by the compiler.
+        ({"effective_stack_bb": [10, 20, 30]}, "[low, high]"),
+        ({"effective_stack_bb": 15}, "[low, high]"),
         ({"position": ["dealer-ish"]}, "Unknown position 'dealer-ish'"),
     ],
 )
@@ -928,3 +929,37 @@ def test_a_one_sided_range_in_a_definition_is_accepted(source: Path, packs_dir: 
     write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {name: value}}])
 
     assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
+
+
+# -- fourteenth review round (PR #411) -----------------------------------------
+
+
+def _preset_with(source: Path, **filters: Any) -> None:
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["filters"] = {**presets["presets"][0]["filters"], **filters}
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+
+
+def test_a_preset_range_is_written_as_low_and_high(source: Path, packs_dir: Path) -> None:
+    # Research's range control only reads [low, high]; a mapping leaves it at defaults.
+    _preset_with(source, effective_stack_bb={"min": 10, "max": 20})
+
+    assert "must be written [low, high] in a preset" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize(
+    "filters",
+    [{"identity": [["PokerStars", "Hero"]]}, {"site": ["Poker, Stars"]}, {"site": [1.5]}],
+)
+def test_a_preset_text_filter_must_survive_the_research_control(
+    source: Path, packs_dir: Path, filters: dict[str, Any]
+) -> None:
+    _preset_with(source, **filters)
+
+    assert "takes words or whole numbers without commas" in refused(source, packs_dir)
+
+
+def test_a_preset_identity_in_site_alias_form_is_accepted(source: Path, packs_dir: Path) -> None:
+    _preset_with(source, identity=["PokerStars:Hero"], effective_stack_bb=[10, 20])
+
+    assert [p.id for p in stat_packs.install_pack(source, packs_dir).presets] == ["example.preflop.steal_by_position"]

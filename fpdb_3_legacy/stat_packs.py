@@ -720,8 +720,36 @@ def _filter_value_problem(filters: Mapping[str, Any], *, preset: bool = False) -
         if spec is None:
             continue
         problem = _one_filter_problem(name, value, spec.kind, preset=preset)
+        if not problem and preset:
+            problem = _research_round_trip_problem(name, value, spec.kind)
         if problem:
             return problem
+    return ""
+
+
+# Filter kinds the Research browser edits as comma-separated text.
+_TEXT_KINDS: Final = frozenset({"set", "scalar", "label", "flagset", "flagset_all", "flagset_none", "identity_set"})
+
+
+def _research_round_trip_problem(name: str, value: Any, kind: str) -> str:
+    """Why a preset value would not survive Research's filter controls, or ``""``.
+
+    A preset is loaded into those controls and read back before it runs. A
+    range control takes ``[low, high]`` (a {min, max} mapping leaves it at its
+    defaults); a text control joins values with commas and splits them again,
+    so only plain words and whole numbers come back as they went in -- a pair
+    such as ["PokerStars", "Hero"] must be written "PokerStars:Hero".
+    """
+    if kind in ("range", "range_pct"):
+        if not (isinstance(value, (list, tuple)) and len(value) == 2):
+            return f"filter {name!r} must be written [low, high] in a preset, not {value!r}"
+        return ""
+    if kind not in _TEXT_KINDS:
+        return ""
+    items = value if isinstance(value, (list, tuple)) else [value]
+    for item in items:
+        if isinstance(item, bool) or not isinstance(item, (str, int)) or "," in str(item):
+            return f"filter {name!r} in a preset takes words or whole numbers without commas, not {item!r}"
     return ""
 
 
