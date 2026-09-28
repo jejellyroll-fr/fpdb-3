@@ -697,33 +697,57 @@ def _filter_value_problem(filters: Mapping[str, Any], *, preset: bool = False) -
     """Why a filter value would not mean what it says, or ``""``.
 
     The compiler is lenient where a pack must not be: it binds range bounds as
-    they come (the Research filter row later reads them with float()), and it
-    turns any non-empty string into True, so ``"in_position": "false"`` would
-    measure the opposite of its label. For a preset, a one-sided date or hand
-    range cannot be shown by Research's two-ended range control either.
+    they come (the Research filter row later reads them with float()), reads
+    a range mapping with misspelled keys as "unbounded", and turns any
+    non-empty string into True, so ``"in_position": "false"`` or
+    ``{"is_null": "false"}`` would measure the opposite of what they say. For
+    a preset, a one-sided date or hand range cannot be shown by Research's
+    two-ended range control either.
     """
-    import math  # noqa: PLC0415
-
     from .analytics_query import FILTERS  # noqa: PLC0415
 
     for name, value in filters.items():
         spec = FILTERS.get(name)
         if spec is None:
             continue
-        if spec.kind in ("bool", "hero", "null_check") and not isinstance(value, bool):
-            return f"filter {name!r} needs true or false, not {value!r}"
-        if preset and spec.kind in ("range_low", "range_high"):
-            return f"filter {name!r} is chosen in Research, not stored in a preset; list it under variables"
-        if spec.kind != "range":
+        problem = _one_filter_problem(name, value, spec.kind, preset=preset)
+        if problem:
+            return problem
+    return ""
+
+
+def _one_filter_problem(name: str, value: Any, kind: str, *, preset: bool) -> str:
+    if isinstance(value, Mapping) and set(value) == {"is_null"}:
+        # The compiler takes this structured form for any filter, first.
+        if not isinstance(value["is_null"], bool):
+            return f"filter {name!r} needs is_null to be true or false, not {value['is_null']!r}"
+        return ""
+    if kind in ("bool", "hero", "null_check") and not isinstance(value, bool):
+        return f"filter {name!r} needs true or false, not {value!r}"
+    if preset and kind in ("range_low", "range_high"):
+        return f"filter {name!r} is chosen in Research, not stored in a preset; list it under variables"
+    if kind != "range":
+        return ""
+    if isinstance(value, Mapping):
+        unknown = sorted(set(value) - {"min", "max"})
+        if unknown or value.get("min") is None and value.get("max") is None:
+            return f"range filter {name!r} takes min and/or max, not {dict(value)!r}"
+        bounds: Any = (value.get("min"), value.get("max"))
+    else:
+        bounds = value
+    if not isinstance(bounds, (list, tuple)):
+        return ""  # the compiler reports the shape
+    return _bounds_problem(name, bounds)
+
+
+def _bounds_problem(name: str, bounds: Iterable[Any]) -> str:
+    import math  # noqa: PLC0415
+
+    for bound in bounds:
+        if bound is None:
             continue
-        bounds = (value.get("min"), value.get("max")) if isinstance(value, Mapping) else value
-        if not isinstance(bounds, (list, tuple)):
-            continue  # the compiler reports the shape
-        for bound in bounds:
-            if bound is None:
-                continue
-            if isinstance(bound, bool) or not isinstance(bound, (int, float)) or not math.isfinite(bound):
-                return f"range filter {name!r} needs numbers for its bounds, not {bound!r}"
+        if isinstance(bound, bool) or not isinstance(bound, (int, float)) or not math.isfinite(bound):
+            return f"range filter {name!r} needs numbers for its bounds, not {bound!r}"
     return ""
 
 

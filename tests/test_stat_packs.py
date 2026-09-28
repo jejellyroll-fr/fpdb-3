@@ -840,3 +840,34 @@ def test_a_preset_cannot_store_a_one_sided_window(source: Path, packs_dir: Path,
     (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
 
     assert "is chosen in Research, not stored in a preset" in refused(source, packs_dir)
+
+
+# -- eleventh review round (PR #411) -------------------------------------------
+
+
+@pytest.mark.parametrize("flag", ["false", 0, None])
+def test_an_is_null_flag_needs_true_or_false(source: Path, packs_dir: Path, flag: Any) -> None:
+    # {"is_null": "false"} compiles to IS NULL: the opposite of what it says.
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"position": {"is_null": flag}}}])
+
+    assert "needs is_null to be true or false" in refused(source, packs_dir)
+
+
+def test_a_boolean_is_null_flag_is_accepted(source: Path, packs_dir: Path) -> None:
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"position": {"is_null": False}}}])
+
+    assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
+
+
+@pytest.mark.parametrize("bounds", [{"minimum": 10, "maximum": 20}, {"min": 10, "high": 20}, {}, {"min": None}])
+def test_a_range_mapping_takes_only_min_and_max(source: Path, packs_dir: Path, bounds: dict[str, Any]) -> None:
+    # Misspelled keys read as an unbounded range: the constraint would vanish.
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"effective_stack_bb": bounds}}])
+
+    assert "takes min and/or max" in refused(source, packs_dir)
+
+
+def test_a_range_mapping_with_one_bound_is_accepted(source: Path, packs_dir: Path) -> None:
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"effective_stack_bb": {"max": 40}}}])
+
+    assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
