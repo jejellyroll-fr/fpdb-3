@@ -1134,3 +1134,17 @@ def test_a_preset_range_with_one_bound_is_accepted(source: Path, packs_dir: Path
     _preset_with(source, effective_stack_bb=bounds)
 
     assert [p.id for p in stat_packs.install_pack(source, packs_dir).presets] == ["example.preflop.steal_by_position"]
+
+
+# -- review of 17ac9c03 (PR #411) ------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "path",
+    ["/".join(["d"] * 1800) + "/x.json", "/".join(["d"] * 9) + "/x.json", "/".join(["a" * 200] * 3) + ".json"],
+)
+def test_a_listed_path_too_deep_or_too_long_is_refused(source: Path, packs_dir: Path, path: str) -> None:
+    # 1,800 nested folders made mkdir(parents=True) recurse past Python's limit.
+    edit_manifest(source, definitions=[path])
+
+    assert "is too deep or too long" in refused(source, packs_dir)

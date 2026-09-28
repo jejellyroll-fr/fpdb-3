@@ -121,6 +121,11 @@ MAX_COMPRESSION_RATIO: Final = 200
 # The common limit on one path component (ext4, APFS, NTFS): a longer name
 # cannot be created on every system a pack may be installed on.
 MAX_NAME_BYTES: Final = 255
+# A listed path as a whole: deep enough for any pack's layout, and short enough
+# that a longest-allowed name in a folder still fits well within macOS's
+# 1,024-byte path limit once under the install folder.
+MAX_PATH_DEPTH: Final = 8
+MAX_PATH_LENGTH: Final = 512
 # What fpdb wraps a pack id in inside the pack directory: the staging folder is
 # ".<id>." plus mkdtemp's eight random characters, and the install a
 # replacement moves aside is ".<id>.previous". Both add ten characters.
@@ -244,6 +249,14 @@ def _safe_member(name: str, source: str) -> str:
     if path.suffix.lower() not in _DATA_SUFFIXES:
         raise PackError(
             [f"file {name!r} is not a data file; allowed suffixes: {list(_DATA_SUFFIXES)}"],
+            source,
+        )
+    if len(path.parts) > MAX_PATH_DEPTH or len(name) > MAX_PATH_LENGTH:
+        # Each part may be short and portable while the whole is not: creating
+        # 1,800 nested folders recurses past Python's limit, and a very long
+        # path under the install folder exceeds what the system accepts.
+        raise PackError(
+            [f"file path {name!r} is too deep or too long (at most {MAX_PATH_DEPTH} levels, {MAX_PATH_LENGTH} characters)"],
             source,
         )
     problem = _portable_name_problem(path)
