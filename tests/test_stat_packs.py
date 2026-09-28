@@ -1031,3 +1031,106 @@ def test_a_bad_preset_denominator_is_not_hidden_by_the_numerator(source: Path, p
     (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
 
     assert "filter 'in_position' needs true or false, not 'false'" in refused(source, packs_dir)
+
+
+# -- eighteenth review round (PR #411) -----------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("name", "value", "written"),
+    [
+        ("hand_id", float("nan"), "NaN"),
+        ("pot_type", float("inf"), "Infinity"),
+        ("site", [float("-inf")], "-Infinity"),
+        ("hand_id_from", float("nan"), "NaN"),
+        ("date_to", float("inf"), "Infinity"),
+    ],
+)
+def test_a_filter_value_must_be_a_finite_number(
+    source: Path, packs_dir: Path, name: str, value: Any, written: str
+) -> None:
+    # json.dumps writes NaN and Infinity as those bare constants and Python's
+    # parser reads them back, so a hand-written pack can carry one. Bound as a
+    # parameter it matches nothing on SQLite: the stat reports an empty
+    # population instead of failing where anyone can see it.
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {name: value}}])
+    assert written in (source / "stats" / "steals.json").read_text(encoding="utf-8")
+
+    assert f"filter {name!r} needs a finite number" in refused(source, packs_dir)
+
+
+def test_a_finite_number_is_still_a_filter_value(source: Path, packs_dir: Path) -> None:
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"hand_id": 7}}])
+
+    assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
+
+
+def _pack_named(pack: Path, pack_id: str) -> None:
+    """The example pack, with every name it adds re-spelled under ``pack_id``."""
+    edit_manifest(pack, id=pack_id, fragments={}, presets=[])
+    write_stats(pack, [{"name": f"{pack_id}.x", "metric": "fold_frequency"}])
+
+
+def test_a_pack_id_at_the_length_limit_is_accepted(packs_dir: Path, tmp_path: Path) -> None:
+    pack = tmp_path / "long-id-pack"
+    shutil.copytree(EXAMPLE, pack)
+    longest = "a." + "b" * (stat_packs.MAX_ID_LENGTH - 2)
+    _pack_named(pack, longest)
+
+    assert stat_packs.install_pack(pack, packs_dir).id == longest
+
+
+def test_a_pack_id_past_the_length_limit_is_refused(packs_dir: Path, tmp_path: Path) -> None:
+    # The id names the install folder, and fpdb writes a staging folder and a
+    # backup beside it, each ten characters longer. Past that the id validated
+    # and the install failed with ENAMETOOLONG -- which the dialog reported as
+    # a read failure.
+    pack = tmp_path / "long-id-pack"
+    shutil.copytree(EXAMPLE, pack)
+    _pack_named(pack, "a." + "b" * (stat_packs.MAX_ID_LENGTH - 1))
+
+    with pytest.raises(stat_packs.PackError, match=f"longer than {stat_packs.MAX_ID_LENGTH} characters"):
+        stat_packs.install_pack(pack, packs_dir)
+
+
+def _archive_naming(tmp_path: Path, listed: str) -> Path:
+    """A one-stat archive whose definition file is called ``listed``."""
+    manifest = json.loads((EXAMPLE / "manifest.json").read_text(encoding="utf-8"))
+    manifest["definitions"] = [listed]
+    manifest["presets"] = []
+    archive = tmp_path / "long-name.fpdbstats"
+    with zipfile.ZipFile(archive, "w") as out:
+        out.writestr("manifest.json", json.dumps(manifest))
+        out.writestr(listed, (EXAMPLE / "stats" / "steals.json").read_text(encoding="utf-8"))
+    return archive
+
+
+def test_a_file_name_at_the_length_limit_is_accepted(packs_dir: Path, tmp_path: Path) -> None:
+    listed = f"stats/{'a' * (stat_packs.MAX_NAME_BYTES - len('.json'))}.json"
+
+    assert stat_packs.install_pack(_archive_naming(tmp_path, listed), packs_dir).definitions
+
+
+def test_a_file_name_past_the_length_limit_is_refused(packs_dir: Path, tmp_path: Path) -> None:
+    # An archive can carry a name no file system accepts, so the install would
+    # have failed on it after the pack had been accepted.
+    listed = f"stats/{'a' * stat_packs.MAX_NAME_BYTES}.json"
+
+    with pytest.raises(stat_packs.PackError, match=f"longer than {stat_packs.MAX_NAME_BYTES} bytes"):
+        stat_packs.install_pack(_archive_naming(tmp_path, listed), packs_dir)
+
+
+def test_a_preset_range_needs_at_least_one_bound(source: Path, packs_dir: Path) -> None:
+    # Neither bound is not a filter: the control reads it back as an empty row.
+    _preset_with(source, effective_stack_bb=[None, None])
+
+    assert "needs at least one bound in a preset" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize("bounds", [[None, 40], [10, None]])
+def test_a_preset_range_with_one_bound_is_accepted(source: Path, packs_dir: Path, bounds: list[Any]) -> None:
+    # The range control reads a blank bound back as null, so an open bound
+    # means "up to 40" and not "0 to 40" (the Qt test drives the control).
+    _preset_with(source, effective_stack_bb=bounds)
+
+    assert [p.id for p in stat_packs.install_pack(source, packs_dir).presets] == ["example.preflop.steal_by_position"]

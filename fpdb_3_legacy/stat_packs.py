@@ -51,6 +51,7 @@ the manager asks for a restart rather than refreshing half the app.
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import shutil
@@ -117,6 +118,13 @@ MAX_ARCHIVE_BYTES: Final = 5 * 1024 * 1024
 MAX_PRECISION: Final = 10
 # JSON compresses well, but not a thousandfold: beyond this it is a zip bomb.
 MAX_COMPRESSION_RATIO: Final = 200
+# The common limit on one path component (ext4, APFS, NTFS): a longer name
+# cannot be created on every system a pack may be installed on.
+MAX_NAME_BYTES: Final = 255
+# What fpdb wraps a pack id in inside the pack directory: the staging folder is
+# ".<id>." plus mkdtemp's eight random characters, and the install a
+# replacement moves aside is ".<id>.previous". Both add ten characters.
+MAX_ID_LENGTH: Final = MAX_NAME_BYTES - len("..previous")
 
 
 class PackError(ValueError):
@@ -255,6 +263,9 @@ def _portable_name_problem(path: PurePosixPath) -> str:
     Windows drops a trailing dot or space from a name ("stats." is "stats"),
     reserves device names (CON, NUL, COM1...) and forbids a few characters;
     a pack installs everywhere, so its paths must mean the same file everywhere.
+    A name that no file system can hold at all -- one past the common component
+    limit, or one JSON can carry but UTF-8 cannot encode -- is refused here,
+    where the pack is read, rather than by the write that follows it.
     """
     for part in path.parts:
         if part != part.rstrip(". "):
@@ -263,6 +274,12 @@ def _portable_name_problem(path: PurePosixPath) -> str:
             return 'uses a character Windows does not allow (<>:"|?* or a control character)'
         if part.split(".", 1)[0].upper() in _WINDOWS_RESERVED:
             return f"uses the reserved Windows name {part.split('.', 1)[0]!r}"
+        try:
+            encoded = part.encode("utf-8")
+        except UnicodeEncodeError:
+            return "is not valid UTF-8 text"
+        if len(encoded) > MAX_NAME_BYTES:
+            return f"has a name longer than {MAX_NAME_BYTES} bytes"
     return ""
 
 
@@ -437,7 +454,15 @@ def _pack_id_problem(pack_id: Any) -> str:
     if pack_id.split(".", 1)[0] in _RESERVED_NAMESPACES:
         return f"uses a reserved namespace ({sorted(_RESERVED_NAMESPACES)})"
     # The id is the install folder's name: "con.stats" cannot be one on Windows.
-    return _portable_name_problem(PurePosixPath(pack_id))
+    problem = _portable_name_problem(PurePosixPath(pack_id))
+    if problem:
+        return problem
+    if len(pack_id) > MAX_ID_LENGTH:
+        # fpdb writes a staging folder and a backup beside the install, each the
+        # id plus ten characters: past the component limit the id validates here
+        # and the install then fails with ENAMETOOLONG, reported as a read error.
+        return f"is longer than {MAX_ID_LENGTH} characters; it names the install folder"
+    return ""
 
 
 def _manifest_errors(manifest: Mapping[str, Any], running: str) -> tuple[list[str], str, str]:
@@ -744,13 +769,18 @@ def _research_round_trip_problem(name: str, value: Any, kind: str) -> str:
 
     A preset is loaded into those controls and read back before it runs. A
     range control takes ``[low, high]`` (a {min, max} mapping leaves it at its
-    defaults); a text control joins values with commas and splits them again,
-    so only plain words and whole numbers come back as they went in -- a pair
-    such as ["PokerStars", "Hero"] must be written "PokerStars:Hero".
+    defaults, and a pair with neither bound is read back as no filter at all);
+    a text control joins values with commas and splits them again, so only
+    plain words and whole numbers come back as they went in -- a pair such as
+    ["PokerStars", "Hero"] must be written "PokerStars:Hero".
     """
     if kind in ("range", "range_pct"):
         if not (isinstance(value, (list, tuple)) and len(value) == 2):
             return f"filter {name!r} must be written [low, high] in a preset, not {value!r}"
+        if all(bound is None for bound in value):
+            # Neither bound is not a filter: the control reads it back as an
+            # empty row and the preset runs wider than it says it does.
+            return f"filter {name!r} needs at least one bound in a preset, not {value!r}"
         return ""
     if kind not in _TEXT_KINDS:
         return ""
@@ -758,6 +788,37 @@ def _research_round_trip_problem(name: str, value: Any, kind: str) -> str:
     for item in items:
         if isinstance(item, bool) or not isinstance(item, (str, int)) or "," in str(item):
             return f"filter {name!r} in a preset takes words or whole numbers without commas, not {item!r}"
+    return ""
+
+
+def _non_finite_problem(name: str, value: Any) -> str:
+    """Why a numeric filter value is not a number a query can compare, or ``""``.
+
+    JSON has no NaN or Infinity, but Python's parser reads both constants as
+    floats, so a hand-written file can carry one. Bound as a parameter it
+    matches nothing at all on SQLite -- the stat then reports an empty
+    population -- and a stricter backend refuses the query outright.
+    """
+    if isinstance(value, float) and not math.isfinite(value):
+        return f"filter {name!r} needs a finite number, not {value!r}"
+    return ""
+
+
+def _value_filter_problem(name: str, value: Any) -> str:
+    """Why a set-valued filter's value is not one the query can compare, or ``""``.
+
+    A mapping (other than is_null) compiles as one bound parameter the database
+    cannot compare -- or, for a label, is stringified into its LIKE pattern and
+    matches nothing -- so only values, or a list of them, are taken, and each of
+    those has to be a number the query can actually use.
+    """
+    values = value if isinstance(value, (list, tuple)) else [value]
+    if any(isinstance(item, (Mapping, list, tuple)) or item is None for item in values):
+        return f"filter {name!r} takes a value or a list of values, not {value!r}"
+    for item in values:
+        problem = _non_finite_problem(name, item)
+        if problem:
+            return problem
     return ""
 
 
@@ -774,20 +835,14 @@ def _one_filter_problem(name: str, value: Any, kind: str, *, preset: bool) -> st
     if kind in ("bool", "hero", "null_check") and not isinstance(value, bool):
         return f"filter {name!r} needs true or false, not {value!r}"
     if kind in _VALUE_KINDS:
-        # A mapping (other than is_null) compiles as one bound parameter the
-        # database cannot compare -- or, for a label, is stringified into its
-        # LIKE pattern and matches nothing: only values, or a list of them.
-        values = value if isinstance(value, (list, tuple)) else [value]
-        if any(isinstance(item, (Mapping, list, tuple)) or item is None for item in values):
-            return f"filter {name!r} takes a value or a list of values, not {value!r}"
-        return ""
+        return _value_filter_problem(name, value)
     if kind in ("range_low", "range_high"):
         if preset:
             return f"filter {name!r} is chosen in Research, not stored in a preset; list it under variables"
         # One bound, bound as it comes: a list would reach the database driver.
         if isinstance(value, bool) or not isinstance(value, (str, int, float)):
             return f"filter {name!r} takes a single date or number, not {value!r}"
-        return ""
+        return _non_finite_problem(name, value)
     return _range_problem(name, value) if kind == "range" else ""
 
 
@@ -805,8 +860,6 @@ def _range_problem(name: str, value: Any) -> str:
 
 
 def _bounds_problem(name: str, bounds: Iterable[Any]) -> str:
-    import math  # noqa: PLC0415
-
     for bound in bounds:
         if bound is None:
             continue

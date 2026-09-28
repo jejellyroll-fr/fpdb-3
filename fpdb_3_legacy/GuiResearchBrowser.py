@@ -363,6 +363,11 @@ class _FilterRow(QWidget):
         for spin in (low, high):
             if unit:
                 spin.setSuffix(f" {unit}")
+            # ``value()`` reads a spin sitting at its minimum as "no bound",
+            # and ``setSpecialValueText`` is what shows that state blank. Qt
+            # starts a spin at 0, not at its minimum, so an untouched range row
+            # read back as [0, 0] -- a filter on the stack nobody asked for.
+            spin.setValue(spin.minimum())
             spin.valueChanged.connect(lambda _: self.changed.emit())
         self.low_spin = low
         self.high_spin = high
@@ -449,11 +454,12 @@ class _FilterRow(QWidget):
             combo.setCurrentIndex(max(index, 0))
             return
         if kind == "range":
-            low, high = (value if isinstance(value, (list, tuple)) else (None, None))
-            if low is not None:
-                self.low_spin.setValue(float(low))
-            if high is not None:
-                self.high_spin.setValue(float(high))
+            bounds = list(value) if isinstance(value, (list, tuple)) else []
+            for spin, bound in zip((self.low_spin, self.high_spin), bounds):
+                # A missing bound is the control's blank sentinel, never
+                # whatever the spin happens to hold: a preset's [null, 40] has
+                # to load as "up to 40" and not as "0 to 40" (#411).
+                spin.setValue(spin.minimum() if bound is None else float(bound))
             return
         edit = self.value_edit
         if not isinstance(edit, QLineEdit):
