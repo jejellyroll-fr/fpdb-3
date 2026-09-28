@@ -109,6 +109,49 @@ Packs are **JSON only**. A pack is made to be shared, so it must install on any
 fpdb; YAML would need PyYAML, which fpdb does not ship. (Definitions kept in a
 local definitions folder may still be YAML when PyYAML is installed.)
 
+## Validation rules
+
+A pack is checked as a whole when it is imported, and every problem is listed
+at once. Beyond the definition schema itself, these are the rules a pack
+author is most likely to meet.
+
+**Names.** The pack id is a dotted lower-case namespace (`author.topic`) that
+also names its install folder: at most 245 characters, not a Windows device
+name (`con.x`, `nul.x`, …). Every stat, fragment and preset id starts with
+`<pack id>.` and uses only letters, digits, `_`, `.` and `-` — the name is
+written into `HUD_config.xml` when the stat is put on a HUD.
+
+**Files.** Only `.json` files the manifest lists are read, each written the one
+way it is stored (`stats/a.json`, not `./stats/a.json`). A path has at most 8
+levels and 512 bytes, each name at most 255 bytes, without a trailing dot or
+space, a character Windows forbids (`<>:"|?*`), or a name that differs from
+another only by letter case or Unicode normalization. A pack holds at most 200
+files and 5 MB.
+
+**Filter values.** Each definition is compiled exactly as the engine runs it,
+then its values are checked where the engine is lenient:
+
+| Filter kind | Takes |
+| --- | --- |
+| yes/no (`in_position`, `multiway`, `tournament`, …) | JSON `true` or `false` — never `"false"` |
+| list (`site`, `position`, `situation`, …) | a value or a list of values |
+| range (`effective_stack_bb`, `bet_sizing_pct`, …) | `[low, high]` or `{"min": …, "max": …}`, at least one bound, numbers only |
+| one-sided (`date_from`, `hand_id_to`, …) | a single date or number |
+| any | `{"is_null": true}` / `{"is_null": false}` |
+
+Numbers must be finite and at most 2⁵³ in size; `precision` is at most 10.
+`filters` and `numerator` are checked separately.
+
+**Presets.** A preset is loaded into the Research filter controls and read back
+before it runs, so it may only hold what those controls keep:
+
+* ranges as `[low, high]`, with at least one bound, above −10,000,000 and up to
+  10,000,000, to two decimals;
+* list values as words or whole numbers without commas; a player identity is
+  written `Site:alias`;
+* no `{"is_null": …}` and no `date_from`/`date_to`/`hand_id_from`/`hand_id_to`
+  — list those under the preset's `variables` for the user to fill in.
+
 ## Where packs live
 
 Installed packs are copied to `<fpdb data directory>/stat-definitions.d/<pack

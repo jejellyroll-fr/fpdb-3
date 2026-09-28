@@ -1137,8 +1137,19 @@ def _recover_interrupted_replacements(root: Path) -> None:
             log.warning("Could not recover %s: %s", backup, exc)
 
 
-def list_packs(packs_dir: str | Path | None = None, *, include_builtin: bool = True) -> list[PackStatus]:
-    """The manager's rows: the built-in library, then each installed pack."""
+def list_packs(
+    packs_dir: str | Path | None = None,
+    *,
+    include_builtin: bool = True,
+    recover: bool = True,
+) -> list[PackStatus]:
+    """The manager's rows: the built-in library, then each installed pack.
+
+    ``recover`` puts back a pack whose replacement was interrupted; only the
+    manager and installation ask for it. The registries read packs in every
+    process -- the HUD's included -- and a read that renamed folders could
+    undo a replacement another process is in the middle of.
+    """
     root = _root(packs_dir)
     rows: list[PackStatus] = []
     if include_builtin:
@@ -1155,7 +1166,8 @@ def list_packs(packs_dir: str | Path | None = None, *, include_builtin: bool = T
         )
     if not root.is_dir():
         return rows
-    _recover_interrupted_replacements(root)
+    if recover:
+        _recover_interrupted_replacements(root)
     disabled = set(_read_state(root).get("disabled", []))
     for directory in sorted(path for path in root.iterdir() if path.is_dir() and not path.name.startswith(".")):
         try:
@@ -1197,7 +1209,7 @@ def enabled_packs(packs_dir: str | Path | None = None) -> list[StatPack]:
     builtin = _builtin_names()
     packs: list[StatPack] = []
     taken: set[str] = set(builtin)
-    for status in list_packs(root, include_builtin=False):
+    for status in list_packs(root, include_builtin=False, recover=False):
         if status.status != ENABLED:
             if status.status == INVALID:
                 log.warning("Stat pack %s not loaded: %s", status.id, "; ".join(status.errors))

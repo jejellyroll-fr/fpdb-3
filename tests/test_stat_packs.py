@@ -1196,3 +1196,21 @@ def test_the_path_limit_counts_bytes_not_characters(source: Path, packs_dir: Pat
     edit_manifest(source, definitions=[path])
 
     assert "is too deep or too long" in refused(source, packs_dir)
+
+
+# -- pre-merge review (PR #411) --------------------------------------------------
+
+
+def test_loading_the_registry_never_moves_pack_folders(source: Path, packs_dir: Path) -> None:
+    # The HUD process builds the registry too: a read that restored a backup
+    # could undo a replacement the GUI process is half-way through.
+    stat_packs.install_pack(source, packs_dir)
+    (packs_dir / PACK_ID).rename(packs_dir / f".{PACK_ID}.previous")
+
+    analytics_definitions.load_default_registry(packs_dir=packs_dir)
+    stat_packs.installed_presets(packs_dir)
+
+    assert (packs_dir / f".{PACK_ID}.previous").is_dir()
+    assert not (packs_dir / PACK_ID).exists()
+    # The manager, opened in the GUI, is where it is put back.
+    assert {row.id: row.status for row in stat_packs.list_packs(packs_dir)}[PACK_ID] == stat_packs.ENABLED
