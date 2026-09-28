@@ -900,3 +900,31 @@ def test_a_set_filter_keeps_its_is_null_form(source: Path, packs_dir: Path) -> N
     write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"site": {"is_null": False}}}])
 
     assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
+
+
+# -- thirteenth review round (PR #411) -----------------------------------------
+
+
+def test_a_preset_cannot_use_the_is_null_form(source: Path, packs_dir: Path) -> None:
+    # A Research filter row would turn it into the text "{'is_null': False}".
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["filters"] = {**presets["presets"][0]["filters"], "site": {"is_null": False}}
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+
+    assert "cannot use is_null in a preset" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize(("name", "value"), [("hand_id_from", [10, 20]), ("date_to", {"max": "2026-01-01"}), ("date_from", None), ("hand_id_to", True)])
+def test_a_one_sided_range_in_a_definition_takes_one_value(
+    source: Path, packs_dir: Path, name: str, value: Any
+) -> None:
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {name: value}}])
+
+    assert f"filter {name!r} takes a single date or number" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize(("name", "value"), [("hand_id_from", 10), ("date_from", "2026-01-01")])
+def test_a_one_sided_range_in_a_definition_is_accepted(source: Path, packs_dir: Path, name: str, value: Any) -> None:
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {name: value}}])
+
+    assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"

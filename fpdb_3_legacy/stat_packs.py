@@ -727,7 +727,11 @@ def _filter_value_problem(filters: Mapping[str, Any], *, preset: bool = False) -
 
 def _one_filter_problem(name: str, value: Any, kind: str, *, preset: bool) -> str:
     if isinstance(value, Mapping) and set(value) == {"is_null"}:
-        # The compiler takes this structured form for any filter, first.
+        # The compiler takes this structured form for any filter, first. A
+        # Research filter row cannot hold it, so a preset would turn it into
+        # the text "{'is_null': False}" and compare against that.
+        if preset:
+            return f"filter {name!r} cannot use is_null in a preset; Research cannot show it"
         if not isinstance(value["is_null"], bool):
             return f"filter {name!r} needs is_null to be true or false, not {value['is_null']!r}"
         return ""
@@ -740,8 +744,13 @@ def _one_filter_problem(name: str, value: Any, kind: str, *, preset: bool) -> st
         if any(isinstance(item, (Mapping, list, tuple)) or item is None for item in values):
             return f"filter {name!r} takes a value or a list of values, not {value!r}"
         return ""
-    if preset and kind in ("range_low", "range_high"):
-        return f"filter {name!r} is chosen in Research, not stored in a preset; list it under variables"
+    if kind in ("range_low", "range_high"):
+        if preset:
+            return f"filter {name!r} is chosen in Research, not stored in a preset; list it under variables"
+        # One bound, bound as it comes: a list would reach the database driver.
+        if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+            return f"filter {name!r} takes a single date or number, not {value!r}"
+        return ""
     return _range_problem(name, value) if kind == "range" else ""
 
 
