@@ -871,3 +871,32 @@ def test_a_range_mapping_with_one_bound_is_accepted(source: Path, packs_dir: Pat
     write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"effective_stack_bb": {"max": 40}}}])
 
     assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
+
+
+# -- twelfth review round (PR #411) --------------------------------------------
+
+
+def test_an_integer_past_pythons_digit_limit_is_a_pack_error(source: Path, packs_dir: Path) -> None:
+    # json.loads raises a plain ValueError here, not JSONDecodeError.
+    (source / "stats" / "steals.json").write_text('{"schema_version": ' + "9" * 5000 + "}", encoding="utf-8")
+
+    assert "stats/steals.json is not valid JSON" in refused(source, packs_dir)
+
+
+def test_display_precision_is_bounded(source: Path, packs_dir: Path) -> None:
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "precision": 100_000_000}])
+
+    assert f"precision must be at most {stat_packs.MAX_PRECISION}" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize("value", [{"unexpected": "value"}, [["PokerStars"]], [None], None])
+def test_a_set_filter_takes_values_not_structures(source: Path, packs_dir: Path, value: Any) -> None:
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"site": value}}])
+
+    assert "filter 'site' takes a value or a list of values" in refused(source, packs_dir)
+
+
+def test_a_set_filter_keeps_its_is_null_form(source: Path, packs_dir: Path) -> None:
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"site": {"is_null": False}}}])
+
+    assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"

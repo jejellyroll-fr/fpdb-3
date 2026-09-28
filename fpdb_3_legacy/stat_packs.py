@@ -113,6 +113,8 @@ _WINDOWS_RESERVED: Final = frozenset(
 # Generous for data, small enough that an archive cannot fill the disk.
 MAX_ARCHIVE_FILES: Final = 200
 MAX_ARCHIVE_BYTES: Final = 5 * 1024 * 1024
+# More decimal places than any stat can mean; a pack cannot ask for more.
+MAX_PRECISION: Final = 10
 # JSON compresses well, but not a thousandfold: beyond this it is a zip bomb.
 MAX_COMPRESSION_RATIO: Final = 200
 
@@ -181,7 +183,7 @@ def _read_state(root: Path) -> dict[str, Any]:
         return {"disabled": []}
     try:
         state = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError, RecursionError):
+    except (OSError, UnicodeDecodeError, ValueError, RecursionError):
         log.warning("Unreadable %s; treating every pack as enabled", path)
         return {"disabled": []}
     if not isinstance(state, dict) or not isinstance(state.get("disabled", []), list):
@@ -290,7 +292,7 @@ def _read_folder(source: Path) -> dict[str, bytes]:
     files = {MANIFEST_NAME: _read_bounded(manifest_path, MAX_ARCHIVE_BYTES, str(source))}
     try:
         manifest = json.loads(files[MANIFEST_NAME].decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError, RecursionError):
+    except (UnicodeDecodeError, ValueError, RecursionError):
         return files
     if not isinstance(manifest, Mapping):
         return files
@@ -399,7 +401,9 @@ def _parse_data(name: str, data: bytes, source: str) -> Any:
         raise PackError([f"{name} is not UTF-8 text: {exc}"], source) from exc
     try:
         return json.loads(text)
-    except json.JSONDecodeError as exc:
+    except ValueError as exc:
+        # JSONDecodeError, and the plain ValueError of an integer longer than
+        # Python's int-string limit: either way the file cannot be read.
         raise PackError([f"{name} is not valid JSON: {exc}"], source) from exc
     except RecursionError as exc:
         # Valid JSON nested deeper than the parser can follow: still refused.
@@ -639,6 +643,11 @@ def _checked_definition(
     problem = _name_problem(definition.name, prefix)
     if problem:
         raise ValueError(f"{name}: stat {definition.name!r} {problem}")
+    precision = definition.display.precision
+    if precision is not None and precision > MAX_PRECISION:
+        # Rendered as f"{value:.{precision}f}": a huge precision would build
+        # an enormous string every time the stat is drawn.
+        raise ValueError(f"{name}: stat {definition.name!r} precision must be at most {MAX_PRECISION}")
     if definition.name in seen:
         raise ValueError(f"{name}: stat {definition.name!r} is defined twice in the pack")
     try:
@@ -724,10 +733,19 @@ def _one_filter_problem(name: str, value: Any, kind: str, *, preset: bool) -> st
         return ""
     if kind in ("bool", "hero", "null_check") and not isinstance(value, bool):
         return f"filter {name!r} needs true or false, not {value!r}"
+    if kind in ("set", "scalar"):
+        # A mapping (other than is_null) compiles as one bound parameter the
+        # database cannot compare: only values, or a list of them.
+        values = value if isinstance(value, (list, tuple)) else [value]
+        if any(isinstance(item, (Mapping, list, tuple)) or item is None for item in values):
+            return f"filter {name!r} takes a value or a list of values, not {value!r}"
+        return ""
     if preset and kind in ("range_low", "range_high"):
         return f"filter {name!r} is chosen in Research, not stored in a preset; list it under variables"
-    if kind != "range":
-        return ""
+    return _range_problem(name, value) if kind == "range" else ""
+
+
+def _range_problem(name: str, value: Any) -> str:
     if isinstance(value, Mapping):
         unknown = sorted(set(value) - {"min", "max"})
         if unknown or value.get("min") is None and value.get("max") is None:
