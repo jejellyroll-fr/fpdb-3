@@ -987,3 +987,19 @@ def test_a_label_value_is_accepted(source: Path, packs_dir: Path) -> None:
     write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"situation": "facing_3bet"}}])
 
     assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
+
+
+# -- sixteenth review round (PR #411) ------------------------------------------
+
+
+def test_a_fragment_chain_too_deep_to_expand_is_a_pack_error(source: Path, packs_dir: Path) -> None:
+    depth = 3000
+    fragments = {
+        f"example.preflop.f{i}": {"street": "preflop", "fragments": [f"example.preflop.f{i + 1}"]}
+        for i in range(depth)
+    }
+    fragments[f"example.preflop.f{depth}"] = {"street": "preflop"}
+    edit_manifest(source, fragments=fragments, presets=[])
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "fragments": ["example.preflop.f0"]}])
+
+    assert "its fragments are nested too deeply" in refused(source, packs_dir)

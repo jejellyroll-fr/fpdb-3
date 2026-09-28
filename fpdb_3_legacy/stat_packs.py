@@ -662,6 +662,10 @@ def _checked_definition(
         # A malformed value ({"bet_sizing_pct": [{}, 50]}) fails as a TypeError
         # deep in the compiler; it is still just a bad value in the pack.
         raise ValueError(f"{name}: stat {definition.name!r}: {exc}") from exc
+    except RecursionError as exc:
+        # Fragments are expanded recursively: a chain of a thousand fragments,
+        # each naming the next, exhausts the stack. Refused, not raised.
+        raise ValueError(f"{name}: stat {definition.name!r}: its fragments are nested too deeply") from exc
     return definition
 
 
