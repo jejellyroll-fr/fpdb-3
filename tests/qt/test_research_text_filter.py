@@ -69,3 +69,14 @@ def test_the_preset_check_refuses_exactly_what_the_row_changes(row, written) -> 
     kept = row.value() == written
 
     assert (_research_round_trip_problem("site", written, FILTERS["site"].kind) == "") is kept
+
+
+@pytest.mark.parametrize("name", ["draw_none", "blocker_none"])
+def test_no_flag_at_all_survives_the_row_and_the_preset_check(qapp, name) -> None:
+    # True is the engine's own "no flag at all" for these filters: the row
+    # writes "True" and reads True back, so a preset may hold it.
+    row = _FilterRow(rb.filter_spec(name))
+    row.set_value(True)
+
+    assert row.value() is True
+    assert _research_round_trip_problem(name, True, FILTERS[name].kind) == ""

@@ -161,6 +161,7 @@ and read back before it runs, so they may only hold what those controls keep
   as the number 1, `"true"` as a condition, and an empty or space-padded one as
   no filter at all — so a number is written as a number; a player identity is
   written `Site:alias`;
+* `true` for `draw_none` and `blocker_none`, their "no flag at all";
 * no `{"is_null": …}` and no `date_from`/`date_to`/`hand_id_from`/`hand_id_to`
   — list those under the preset's `variables` for the user to fill in.
 

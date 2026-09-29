@@ -1604,3 +1604,21 @@ def test_reported_problems_are_capped(source: Path, packs_dir: Path) -> None:
     messages = caught.value.messages
     assert len(messages) == stat_packs.MAX_REPORTED_ERRORS + 1
     assert messages[-1] == f"stopped after {stat_packs.MAX_REPORTED_ERRORS} problems; fix these first"
+
+
+# -- review of 789e4108 (PR #411) -----------------------------------------------
+
+
+@pytest.mark.parametrize("name", ["draw_none", "blocker_none"])
+def test_a_preset_may_ask_for_no_flag_at_all(source: Path, packs_dir: Path, name: str) -> None:
+    # The engine and the filter row both keep True for these filters.
+    _preset_with(source, **{name: True})
+
+    assert [p.id for p in stat_packs.install_pack(source, packs_dir).presets] == ["example.preflop.steal_by_position"]
+
+
+@pytest.mark.parametrize(("name", "value"), [("draw_none", False), ("draw_none", [True]), ("draw", True)])
+def test_other_booleans_in_a_flag_preset_are_still_refused(source: Path, packs_dir: Path, name: str, value: Any) -> None:
+    _preset_with(source, **{name: value})
+
+    refused(source, packs_dir)

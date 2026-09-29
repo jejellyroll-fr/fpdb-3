@@ -946,6 +946,10 @@ def _research_round_trip_problem(name: str, value: Any, kind: str) -> str:
         return _range_control_problem(name, value)
     if kind not in _TEXT_KINDS:
         return ""
+    if kind == "flagset_none" and value is True:
+        # The engine's own form for "no flag at all": the row writes "True"
+        # and reads it back as True, so it survives the round trip.
+        return ""
     items = value if isinstance(value, (list, tuple)) else [value]
     if not items:
         # The engine reads [] as "none of these" and matches no row, but the
