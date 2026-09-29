@@ -889,7 +889,33 @@ def _one_filter_problem(name: str, value: Any, kind: str, *, preset: bool) -> st
         if isinstance(value, bool) or not isinstance(value, (str, int, float)):
             return f"filter {name!r} takes a single date or number, not {value!r}"
         return _non_finite_problem(name, value)
+    if kind == "identity_set":
+        return _identity_problem(name, value)
     return _range_problem(name, value) if kind in ("range", "range_pct") else ""
+
+
+def _identity_problem(name: str, value: Any) -> str:
+    """Why an identity filter would not name real players, or ``""``.
+
+    The compiler takes {site: alias}, "Site:alias" or [site, alias] and turns
+    every part into text, so a list or an object where a name belongs would
+    be compared as "['Hero', 'Villain']" and match nobody.
+    """
+    if isinstance(value, Mapping):
+        pairs: list[Any] = list(value.items())
+    else:
+        entries = value if isinstance(value, (list, tuple)) else [value]
+        pairs = []
+        for entry in entries:
+            if isinstance(entry, str):
+                continue  # "Site:alias": the compiler checks its shape
+            if not isinstance(entry, (list, tuple)) or len(entry) != 2:
+                return f"filter {name!r} takes 'Site:alias' or [site, alias] identities, not {entry!r}"
+            pairs.append(tuple(entry))
+    for site, alias in pairs:
+        if not all(isinstance(part, str) and part.strip() for part in (site, alias)):
+            return f"filter {name!r} needs a site and an alias as plain text, not {site!r}: {alias!r}"
+    return ""
 
 
 def _range_problem(name: str, value: Any) -> str:

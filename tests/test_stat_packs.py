@@ -1249,3 +1249,24 @@ def test_a_percentage_range_is_checked_like_any_range(source: Path, packs_dir: P
     write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"bet_sizing_pct": bounds}}])
 
     assert "stat 'example.preflop.x'" in refused(source, packs_dir)
+
+
+# -- review of 8ec9720a (PR #411) ------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "identity",
+    [{"PokerStars": ["Hero", "Villain"]}, [["PokerStars", {"alias": "Hero"}]], [["PokerStars", ""]], {"PokerStars": 7}],
+)
+def test_an_identity_names_a_site_and_an_alias_as_text(source: Path, packs_dir: Path, identity: Any) -> None:
+    # The compiler stringifies each part: a list would match "['Hero', 'Villain']".
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"identity": identity}}])
+
+    assert "filter 'identity'" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize("identity", [{"PokerStars": "Hero"}, ["PokerStars:Hero"], [["PokerStars", "Hero"]]])
+def test_every_supported_identity_form_is_accepted(source: Path, packs_dir: Path, identity: Any) -> None:
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"identity": identity}}])
+
+    assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
