@@ -116,8 +116,6 @@ MAX_ARCHIVE_FILES: Final = 200
 MAX_ARCHIVE_BYTES: Final = 5 * 1024 * 1024
 # More decimal places than any stat can mean; a pack cannot ask for more.
 MAX_PRECISION: Final = 10
-# JSON compresses well, but not a thousandfold: beyond this it is a zip bomb.
-MAX_COMPRESSION_RATIO: Final = 200
 # The common limit on one path component (ext4, APFS, NTFS): a longer name
 # cannot be created on every system a pack may be installed on.
 MAX_NAME_BYTES: Final = 255
@@ -374,8 +372,9 @@ def _read_entry(archive: zipfile.ZipFile, info: zipfile.ZipInfo, budget: int, so
     chunks means a crafted entry (a zip bomb) is stopped at the budget instead
     of being inflated in memory first.
     """
-    if info.compress_size and info.file_size / info.compress_size > MAX_COMPRESSION_RATIO:
-        raise PackError([f"archive entry {info.filename!r} is compressed suspiciously well"], source)
+    # No compression-ratio test: repetitive JSON compresses far past any fixed
+    # ratio, and fpdb's own exports would be refused on re-import. The bounded
+    # read below is what stops a bomb, whatever its ratio.
     chunks: list[bytes] = []
     size = 0
     with archive.open(info) as entry:
@@ -421,9 +420,15 @@ def _read_archive_entries(source: Path) -> dict[str, bytes]:
             # to every entry: an archive cannot smuggle a path out of the pack.
             if name.startswith("/") or "\\" in name or ".." in PurePosixPath(name).parts:
                 raise PackError([f"archive entry {name!r} escapes the pack"], str(source))
+            # "stats//a.json" or "./manifest.json" name the same file as the
+            # canonical spelling: stored under one key, the later one would
+            # silently replace the member the manifest actually lists.
+            canonical = PurePosixPath(name).as_posix()
+            if canonical != name or canonical in files:
+                raise PackError([f"archive entry {name!r} repeats or re-spells another entry"], str(source))
             data = _read_entry(archive, info, MAX_ARCHIVE_BYTES - total, str(source))
             total += len(data)
-            files[PurePosixPath(name).as_posix()] = data
+            files[canonical] = data
     return files
 
 
@@ -884,7 +889,7 @@ def _one_filter_problem(name: str, value: Any, kind: str, *, preset: bool) -> st
         if isinstance(value, bool) or not isinstance(value, (str, int, float)):
             return f"filter {name!r} takes a single date or number, not {value!r}"
         return _non_finite_problem(name, value)
-    return _range_problem(name, value) if kind == "range" else ""
+    return _range_problem(name, value) if kind in ("range", "range_pct") else ""
 
 
 def _range_problem(name: str, value: Any) -> str:

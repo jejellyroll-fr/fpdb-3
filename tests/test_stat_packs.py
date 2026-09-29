@@ -1214,3 +1214,38 @@ def test_loading_the_registry_never_moves_pack_folders(source: Path, packs_dir: 
     assert not (packs_dir / PACK_ID).exists()
     # The manager, opened in the GUI, is where it is put back.
     assert {row.id: row.status for row in stat_packs.list_packs(packs_dir)}[PACK_ID] == stat_packs.ENABLED
+
+
+# -- review of 03191eb8 (PR #411) ------------------------------------------------
+
+
+def test_a_highly_compressible_pack_survives_export_and_re_import(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    # 100 KB of leading whitespace compresses far past any fixed ratio.
+    stats = (source / "stats" / "steals.json").read_text(encoding="utf-8")
+    (source / "stats" / "steals.json").write_text(" " * 100_000 + stats, encoding="utf-8")
+    stat_packs.install_pack(source, packs_dir)
+
+    archive = stat_packs.export_pack(PACK_ID, tmp_path, packs_dir)
+
+    assert stat_packs.install_pack(archive, tmp_path / "other").id == PACK_ID
+
+
+@pytest.mark.parametrize(("listed", "alias"), [("stats/steals.json", "stats//steals.json"), ("manifest.json", "./manifest.json")])
+def test_an_archive_entry_cannot_replace_a_listed_one(packs_dir: Path, tmp_path: Path, listed: str, alias: str) -> None:
+    archive = tmp_path / "alias.fpdbstats"
+    with zipfile.ZipFile(archive, "w") as out:
+        for path in sorted(EXAMPLE.rglob("*")):
+            if path.is_file():
+                out.write(path, path.relative_to(EXAMPLE).as_posix())
+        out.writestr(alias, "{}")
+
+    with pytest.raises(stat_packs.PackError, match="repeats or re-spells another entry"):
+        stat_packs.install_pack(archive, packs_dir)
+
+
+@pytest.mark.parametrize("bounds", [[True, 50], ["10", 50], [None, 10**100]])
+def test_a_percentage_range_is_checked_like_any_range(source: Path, packs_dir: Path, bounds: list[Any]) -> None:
+    # _to_bp turns True into 100 basis points: [true, 50] would mean "from 1%".
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"bet_sizing_pct": bounds}}])
+
+    assert "stat 'example.preflop.x'" in refused(source, packs_dir)
