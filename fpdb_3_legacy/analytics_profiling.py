@@ -21,7 +21,7 @@ from __future__ import annotations
 import logging
 import re
 import time
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Final
 
@@ -194,11 +194,22 @@ def profile_analytics_query(db: Any, query: Query, name: str = "") -> QueryProfi
     )
 
 
-def profile_definitions(db: Any, definitions: Iterable[Any]) -> list[QueryProfile]:
-    """Profile every definition's query, for the plan report."""
+def profile_definitions(
+    db: Any,
+    definitions: Iterable[Any],
+    fragments: Mapping[str, Mapping[str, Any]] | None = None,
+) -> list[QueryProfile]:
+    """Profile every definition's query, for the plan report.
+
+    ``fragments`` is the registry's library: a stat pack's definitions name
+    fragments the built-in library does not have (#403).
+    """
     from .analytics_definitions import resolve_query  # noqa: PLC0415 - avoid a cycle at import time
 
-    return [profile_analytics_query(db, resolve_query(definition), name=definition.name) for definition in definitions]
+    return [
+        profile_analytics_query(db, resolve_query(definition, fragments=fragments), name=definition.name)
+        for definition in definitions
+    ]
 
 
 def format_profiles(profiles: Sequence[QueryProfile], plans: bool = False) -> str:

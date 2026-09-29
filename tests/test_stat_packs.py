@@ -1290,19 +1290,20 @@ def test_every_supported_identity_form_is_accepted(source: Path, packs_dir: Path
 
 @pytest.mark.parametrize(
     "version",
-    ["9" * 5000, "3.9." + "1" * 4400, "0." + "0" * 5000, "00000000099", "3.9.1.1234567890"],
-    ids=["all digits", "third component", "zeros", "padded 99", "fourth component"],
+    ["9" * 5000, "3.9." + "1" * 4400, "0." + "0" * 5000, "00000000099", "3.9.1.1", "banana", "3.9-beta", " 3.9"],
+    ids=["all digits", "third component", "zeros", "padded 99", "fourth component", "word", "suffix", "space"],
 )
-def test_a_version_component_longer_than_nine_digits_is_refused(
+def test_a_minimum_version_outside_the_compared_grammar_is_refused(
     source: Path, packs_dir: Path, version: str
 ) -> None:
     # Past Python's integer-string limit (4300 digits) int() raises a bare
     # ValueError the manager would not catch; reading only the leading digits
-    # instead compared "00000000099" as 0 and installed a pack asking for fpdb
-    # 99. Going through refused() is itself the assertion that it is a PackError.
+    # compared "00000000099" as 0; a fourth part or a word was dropped by the
+    # comparison, so "3.9.1.1" and "banana" passed on 3.9.1. Going through
+    # refused() is itself the assertion that each is a PackError.
     edit_manifest(source, min_fpdb_version=version)
 
-    assert "min_fpdb_version has a component longer than 9 digits" in refused(source, packs_dir)
+    assert "must be written like '3.9' or '3.9.1', each part at most 9 digits" in refused(source, packs_dir)
 
 
 def test_a_version_with_nine_digit_components_still_compares(source: Path, packs_dir: Path) -> None:
@@ -1458,3 +1459,35 @@ def test_a_huge_coerced_value_in_a_preset_is_refused(source: Path, packs_dir: Pa
     _preset_numerator(source, {"position": "100000000000000000000"})
 
     assert "filter 'position' holds a number too large for the database" in refused(source, packs_dir)
+
+
+# -- review of b8c92c37 (PR #411) -----------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("name", "value", "reason"),
+    [
+        ("hand_id_from", "oops", "takes a whole hand id"),
+        ("hand_id_to", "10", "takes a whole hand id"),
+        ("hand_id_from", 10.5, "takes a whole hand id"),
+        ("date_from", "not-a-date", "takes a date written"),
+        ("date_to", "2026-13-45", "takes a date written"),
+        ("date_from", "2026-01-01T12:00", "takes a date written"),
+        ("date_to", 20260101, "takes a date written"),
+    ],
+)
+def test_a_one_sided_bound_is_the_kind_its_column_holds(
+    source: Path, packs_dir: Path, name: str, value: Any, reason: str
+) -> None:
+    # Bound as it comes, "oops" or "not-a-date" matches nothing on SQLite and
+    # the stat reports an empty population instead of failing.
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {name: value}}])
+
+    assert f"filter {name!r} {reason}" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize("value", ["2026-01-01", "2026-01-01 12:30", "2026-01-01 12:30:59"])
+def test_a_date_bound_as_the_hands_store_it_is_accepted(source: Path, packs_dir: Path, value: str) -> None:
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"date_to": value}}])
+
+    assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"

@@ -77,7 +77,7 @@ a deterministic archive: the same pack always gives the same bytes.
 | `id` | yes | a dotted lower-case namespace, e.g. `author.topic`; `fpdb.*`, `builtin.*` and `core.*` are reserved |
 | `name`, `author`, `description`, `pack_version` | no | shown in the manager |
 | `definition_schema_version` | no | the definition schema the pack was written for (default 1) |
-| `min_fpdb_version` | no | the oldest fpdb that can load the pack; each part at most 9 digits |
+| `min_fpdb_version` | no | the oldest fpdb that can load the pack: `"3.9"` or `"3.9.1"`, each part at most 9 digits |
 | `fragments` | no | reusable filter bundles, `name → filters` |
 | `definitions` | no* | definition files, relative to the manifest |
 | `presets` | no* | Research preset files, in the shipped preset format |
@@ -137,7 +137,8 @@ then its values are checked where the engine is lenient:
 | yes/no (`in_position`, `multiway`, `tournament`, …) | JSON `true` or `false` — never `"false"` |
 | list (`site`, `position`, `situation`, …) | a value or a list of values |
 | range (`effective_stack_bb`, `bet_sizing_pct`, …) | `[low, high]` or `{"min": …, "max": …}`, at least one bound, numbers only |
-| one-sided (`date_from`, `hand_id_to`, …) | a single date or number |
+| one-sided dates (`date_from`, `date_to`) | one date, `"YYYY-MM-DD"` or `"YYYY-MM-DD HH:MM[:SS]"` |
+| one-sided hand ids (`hand_id_from`, `hand_id_to`) | one whole number |
 | any | `{"is_null": true}` / `{"is_null": false}` |
 
 Numbers must be finite and at most 2⁵³ in size, including a number the

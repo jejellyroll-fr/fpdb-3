@@ -61,6 +61,7 @@ import zipfile
 import zlib
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import Any, Final
 
@@ -107,6 +108,14 @@ _PACK_ID: Final = re.compile(r"[a-z0-9][a-z0-9_-]*(\.[a-z0-9][a-z0-9_-]*)+")
 _RESERVED_NAMESPACES: Final = frozenset({"fpdb", "builtin", "core"})
 # What a stat, fragment or preset a pack adds may be called: an identifier.
 _NAME: Final = re.compile(r"[A-Za-z0-9_.-]+")
+# A minimum fpdb version: up to three numeric parts, the ones compared. A fourth
+# part, a suffix or a word would be dropped by the comparison and let a pack
+# past the gate it declares. Used with fullmatch.
+_MIN_VERSION: Final = re.compile(r"[0-9]{1,9}(?:\.[0-9]{1,9}){0,2}")
+# A date bound as H.startTime stores it and compares it as text: a date, or a
+# date and a time separated by a space ("T" sorts after " " and would shift it).
+_DATE_BOUND: Final = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}(?: [0-9]{2}:[0-9]{2}(?::[0-9]{2})?)?")
+_DATE_FILTERS: Final = frozenset({"date_from", "date_to"})
 _WINDOWS_FORBIDDEN: Final = re.compile(r'[<>:"|?*\x00-\x1f]')
 _WINDOWS_RESERVED: Final = frozenset(
     {"CON", "PRN", "AUX", "NUL", *(f"COM{n}" for n in range(1, 10)), *(f"LPT{n}" for n in range(1, 10))},
@@ -521,6 +530,8 @@ def _minimum_version_problem(minimum: str, running: str) -> str:
     """Why this fpdb cannot load a pack asking for ``minimum``, or ``""``."""
     if not minimum:
         return ""
+    if not _MIN_VERSION.fullmatch(minimum):
+        return f"min_fpdb_version {minimum!r} must be written like '3.9' or '3.9.1', each part at most {MAX_VERSION_DIGITS} digits"
     try:
         if _version_tuple(minimum) > _version_tuple(running):
             return f"needs fpdb {minimum} or newer (this is {running})"
@@ -985,10 +996,32 @@ def _one_filter_problem(name: str, value: Any, kind: str, *, preset: bool) -> st
         # One bound, bound as it comes: a list would reach the database driver.
         if isinstance(value, bool) or not isinstance(value, (str, int, float)):
             return f"filter {name!r} takes a single date or number, not {value!r}"
-        return _non_finite_problem(name, value)
+        return _non_finite_problem(name, value) or _one_sided_problem(name, value)
     if kind == "identity_set":
         return _identity_problem(name, value)
     return _range_problem(name, value) if kind in ("range", "range_pct") else ""
+
+
+def _one_sided_problem(name: str, value: Any) -> str:
+    """Why a one-sided bound is not the kind its column holds, or ``""``.
+
+    The bound is compared as it comes: "oops" against a hand id, or
+    "not-a-date" against a start time, matches nothing on SQLite -- an empty
+    population rather than an error -- and a stricter backend refuses the
+    comparison when the stat first runs.
+    """
+    if name in _DATE_FILTERS:
+        if isinstance(value, str) and _DATE_BOUND.fullmatch(value):
+            try:
+                datetime.fromisoformat(value)
+            except ValueError:
+                pass  # the right shape, not a real date (2026-13-45)
+            else:
+                return ""
+        return f"filter {name!r} takes a date written 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM[:SS]', not {value!r}"
+    if not isinstance(value, int):
+        return f"filter {name!r} takes a whole hand id, not {value!r}"
+    return ""
 
 
 def _identity_problem(name: str, value: Any) -> str:

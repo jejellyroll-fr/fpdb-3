@@ -66,7 +66,7 @@ def main() -> int:
         if args.all or args.definition:
             registry = definitions.get_registry()
             chosen = registry.all() if args.all else [registry.resolve(name) for name in args.definition]
-            profiles.extend(profiling.profile_definitions(db, chosen))
+            profiles.extend(profiling.profile_definitions(db, chosen, registry.fragments))
         if args.metric:
             from fpdb_3_legacy.analytics_query import Query
 
