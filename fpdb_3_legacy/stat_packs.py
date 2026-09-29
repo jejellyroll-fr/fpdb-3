@@ -349,8 +349,14 @@ def _read_folder(source: Path) -> dict[str, bytes]:
         for entry in manifest[key]
         if isinstance(entry, str)
     ]
-    if len(listed) > MAX_ARCHIVE_FILES:
-        raise PackError([f"the manifest lists {len(listed)} files; at most {MAX_ARCHIVE_FILES}"], str(source))
+    # The manifest is one of the pack's files: an archive counts it, and the
+    # export of a folder writes it, so a folder counts it too -- otherwise
+    # fpdb could export a pack it then refuses to import.
+    if len(listed) + 1 > MAX_ARCHIVE_FILES:
+        raise PackError(
+            [f"the manifest lists {len(listed)} files; a pack holds at most {MAX_ARCHIVE_FILES}, the manifest included"],
+            str(source),
+        )
     total = len(files[MANIFEST_NAME])
     for entry in listed:
         try:

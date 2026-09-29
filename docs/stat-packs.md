@@ -127,7 +127,7 @@ way it is stored (`stats/a.json`, not `./stats/a.json`). A path has at most 8
 levels and 512 bytes, each name at most 255 bytes, without a trailing dot or
 space, a character Windows forbids (`<>:"|?*`), or a name that differs from
 another only by letter case or Unicode normalization. A pack holds at most 200
-files and 5 MB.
+files, `manifest.json` included, and 5 MB.
 
 **Filter values.** Each definition is compiled exactly as the engine runs it,
 then its values are checked where the engine is lenient:

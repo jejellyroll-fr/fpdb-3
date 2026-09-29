@@ -289,6 +289,25 @@ class TestComputing:
         entry = provider.report_entry(query_db, binding, scope)
         assert hud.rendered == entry["value"]
 
+    def test_the_report_resolves_the_registry_fragments(self, query_db: Database) -> None:
+        # A stat pack's definition names a fragment only its registry holds
+        # (#403): the report path resolves it as compute() does.
+        registry = dsl.load_default_registry(include_packs=False)
+        registry.add_fragment("example.flop.facing_cbet", {"street": "flop", "situation": "facing_cbet"})
+        registry.add(
+            dsl.parse_definition(
+                {"name": "example.flop.fold_to_cbet", "metric": "fold_frequency", "fragments": ["example.flop.facing_cbet"]},
+                "pack:example.flop/stats.json",
+            )
+        )
+        provider = _provider(registry=registry)
+        binding = _binding("example.flop.fold_to_cbet")
+        scope = stats.PlayerScope(alias="Cara")
+
+        entry = provider.report_entry(query_db, binding, scope)
+
+        assert entry["value"] == provider.compute(query_db, binding, scope).rendered
+
     def test_a_cell_below_its_sample_shows_no_data(self, query_db: Database) -> None:
         binding = _binding("fold_to_cbet_flop", min_sample=10_000)
         value = _provider().compute(query_db, binding, stats.PlayerScope(alias="Cara"))

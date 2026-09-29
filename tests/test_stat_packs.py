@@ -1524,3 +1524,32 @@ def test_a_range_with_ordered_or_one_bound_is_accepted(source: Path, packs_dir: 
     write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"effective_stack_bb": value}}])
 
     assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
+
+
+# -- review of 1b729027 (PR #411) -----------------------------------------------
+
+
+def _pack_listing(source: Path, count: int) -> None:
+    """The example pack, listing ``count`` definition files."""
+    names = [f"stats/s{index}.json" for index in range(count)]
+    for index, name in enumerate(names):
+        write_stats(source, [{"name": f"example.preflop.s{index}", "metric": "fold_frequency"}], name=name)
+    edit_manifest(source, definitions=names, presets=None)
+
+
+def test_a_folder_counts_its_manifest_in_the_file_limit(source: Path, packs_dir: Path) -> None:
+    # 200 listed files and the manifest are 201: the archive fpdb would export
+    # from this folder is refused, so the folder is refused first.
+    _pack_listing(source, stat_packs.MAX_ARCHIVE_FILES)
+
+    assert "a pack holds at most 200, the manifest included" in refused(source, packs_dir)
+
+
+def test_a_pack_at_the_file_limit_exports_and_imports_again(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    _pack_listing(source, stat_packs.MAX_ARCHIVE_FILES - 1)
+    stat_packs.install_pack(source, packs_dir)
+    archive = stat_packs.export_pack(PACK_ID, tmp_path / "out.fpdbstats", packs_dir)
+
+    reread = stat_packs.read_pack(archive)
+
+    assert len(reread.definitions) == stat_packs.MAX_ARCHIVE_FILES - 1
