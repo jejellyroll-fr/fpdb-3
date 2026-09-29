@@ -948,15 +948,28 @@ def test_a_preset_range_is_written_as_low_and_high(source: Path, packs_dir: Path
 
 
 @pytest.mark.parametrize(
-    "filters",
-    [{"identity": [["PokerStars", "Hero"]]}, {"site": ["Poker, Stars"]}, {"site": [1.5]}],
+    ("filters", "reason"),
+    [
+        ({"identity": [["PokerStars", "Hero"]]}, "takes words or whole numbers, not"),
+        ({"site": [1.5]}, "takes words or whole numbers, not"),
+        ({"site": ["Poker, Stars"]}, "takes a word the filter row reads back as written"),
+        ({"site": ["001"]}, "takes a word the filter row reads back as written"),
+        ({"site": ["7"]}, "takes a word the filter row reads back as written"),
+        ({"site": ["true"]}, "takes a word the filter row reads back as written"),
+        ({"site": [" Hero "]}, "takes a word the filter row reads back as written"),
+        ({"site": [""]}, "needs a word: the filter row reads an empty one as no filter"),
+        ({"site": ["   "]}, "needs a word: the filter row reads an empty one as no filter"),
+    ],
 )
 def test_a_preset_text_filter_must_survive_the_research_control(
-    source: Path, packs_dir: Path, filters: dict[str, Any]
+    source: Path, packs_dir: Path, filters: dict[str, Any], reason: str
 ) -> None:
+    # The row strips its field, reads an empty one as no filter, true/false as a
+    # condition and digits as a number: "001" would filter on 1 and "" would
+    # drop the constraint and widen the query.
     _preset_with(source, **filters)
 
-    assert "takes words or whole numbers without commas" in refused(source, packs_dir)
+    assert reason in refused(source, packs_dir)
 
 
 def test_a_preset_identity_in_site_alias_form_is_accepted(source: Path, packs_dir: Path) -> None:
@@ -1336,3 +1349,25 @@ def test_a_boolean_still_means_no_flag_for_flagset_none(source: Path, packs_dir:
     write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"draw_none": True}}])
 
     assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
+
+
+# -- review of 15617d73 (PR #411) -----------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "site",
+    ["PokerStars", "0x10", "001.5", "1e3", "a b", "PokerStars:Hero", ["PokerStars", "Full Tilt"]],
+)
+def test_a_preset_text_value_the_row_keeps_is_accepted(source: Path, packs_dir: Path, site: Any) -> None:
+    # The other half of the rule above: a word, or a whole number written as a
+    # number, comes back from the filter row as it went in. "001.5" and "1e3"
+    # are not digits-only, so the row leaves them alone too.
+    _preset_with(source, site=site)
+
+    assert [p.id for p in stat_packs.install_pack(source, packs_dir).presets] == ["example.preflop.steal_by_position"]
+
+
+def test_a_preset_number_written_as_a_number_is_accepted(source: Path, packs_dir: Path) -> None:
+    _preset_with(source, hand_id=7)
+
+    assert [p.id for p in stat_packs.install_pack(source, packs_dir).presets] == ["example.preflop.steal_by_position"]

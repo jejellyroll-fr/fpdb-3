@@ -799,6 +799,24 @@ _VALUE_KINDS: Final = frozenset({"set", "scalar", "label", "flagset", "flagset_a
 _TEXT_KINDS: Final = frozenset({"set", "scalar", "label", "flagset", "flagset_all", "flagset_none", "identity_set"})
 
 
+def _row_text_problem(name: str, item: str) -> str:
+    """Why the Research filter row would not read this word back as written.
+
+    The row is the one control a preset's text value goes through, and it does
+    more than trim: an empty field is read as *no filter at all*, ``true`` and
+    ``false`` as a condition, and digits as a number. A word it would change is
+    a constraint the preset cannot mean -- ``"001"`` would filter on the number
+    1, and ``""`` would drop the constraint and widen the query.
+    """
+    from .research_browser import text_value  # noqa: PLC0415 - Research is optional for a stats-only pack
+
+    if text_value(item) == item:
+        return ""
+    if not item.strip():
+        return f"filter {name!r} in a preset needs a word: the filter row reads an empty one as no filter"
+    return f"filter {name!r} in a preset takes a word the filter row reads back as written, not {item!r}"
+
+
 def _research_round_trip_problem(name: str, value: Any, kind: str) -> str:
     """Why a preset value would not survive Research's filter controls, or ``""``.
 
@@ -806,7 +824,7 @@ def _research_round_trip_problem(name: str, value: Any, kind: str) -> str:
     range control takes ``[low, high]`` (a {min, max} mapping leaves it at its
     defaults, and a pair with neither bound is read back as no filter at all);
     a text control joins values with commas and splits them again, so only
-    plain words and whole numbers come back as they went in -- a pair such as
+    words and whole numbers come back as they went in -- a pair such as
     ["PokerStars", "Hero"] must be written "PokerStars:Hero".
     """
     if kind in ("range", "range_pct"):
@@ -821,8 +839,12 @@ def _research_round_trip_problem(name: str, value: Any, kind: str) -> str:
         return ""
     items = value if isinstance(value, (list, tuple)) else [value]
     for item in items:
-        if isinstance(item, bool) or not isinstance(item, (str, int)) or "," in str(item):
-            return f"filter {name!r} in a preset takes words or whole numbers without commas, not {item!r}"
+        if isinstance(item, bool) or not isinstance(item, (str, int)):
+            return f"filter {name!r} in a preset takes words or whole numbers, not {item!r}"
+        if isinstance(item, str):
+            problem = _row_text_problem(name, item)
+            if problem:
+                return problem
     return ""
 
 

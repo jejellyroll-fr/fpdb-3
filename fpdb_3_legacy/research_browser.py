@@ -212,6 +212,26 @@ def filter_spec(name: str) -> FilterSpec:
     return next(item for item in FILTER_SPECS if item.name == name)
 
 
+def text_value(raw: str) -> Any:
+    """The engine value a filter row reads from its text field.
+
+    Named once, so a preset can be checked against the control it will be loaded
+    into: an empty field is *no filter*, ``true`` and ``false`` are a condition,
+    a comma-separated field is a list, and digits are a number. Everything else
+    is the word itself, and ``None`` means *no filter*.
+    """
+    text = raw.strip()
+    if not text:
+        return None
+    if text.lower() in ("true", "false"):
+        return text.lower() == "true"
+    if "," in text:
+        return [part.strip() for part in text.split(",") if part.strip()]
+    if text.lstrip("-").isdigit():
+        return int(text)
+    return text
+
+
 @dataclass(frozen=True)
 class DimensionSpec:
     """One group-by dimension as the breakdown picker offers it (issue #329).

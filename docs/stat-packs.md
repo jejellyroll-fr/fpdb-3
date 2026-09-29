@@ -147,7 +147,10 @@ before it runs, so it may only hold what those controls keep:
 
 * ranges as `[low, high]`, with at least one bound, above −10,000,000 and up to
   10,000,000, to two decimals;
-* list values as words or whole numbers without commas; a player identity is
+* list values as words or whole numbers, without commas, and only where the
+  filter row reads them back unchanged: a digit-only word (`"001"`) comes back
+  as the number 1, `"true"` as a condition, and an empty or space-padded one as
+  no filter at all — so a number is written as a number; a player identity is
   written `Site:alias`;
 * no `{"is_null": …}` and no `date_from`/`date_to`/`hand_id_from`/`hand_id_to`
   — list those under the preset's `variables` for the user to fill in.

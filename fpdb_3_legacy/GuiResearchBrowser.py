@@ -409,7 +409,9 @@ class _FilterRow(QWidget):
         """The filter value as the engine vocabulary, or None to skip.
 
         ``None`` means *no filter*: the engine's ``compile_filters`` skips it,
-        and that is exactly what an untouched control must produce.
+        and that is exactly what an untouched control must produce. A text
+        field is read by ``research_browser.text_value``, the same rule a
+        preset's own values are checked against (#411).
         """
         kind = self.spec.value_kind
         if kind == "bool":
@@ -428,16 +430,7 @@ class _FilterRow(QWidget):
         edit = self.value_edit
         if not isinstance(edit, QLineEdit):
             raise TypeError("a text filter must use a line edit")
-        raw = edit.text().strip()
-        if not raw:
-            return None
-        if raw.lower() in ("true", "false"):
-            return raw.lower() == "true"
-        if "," in raw:
-            return [part.strip() for part in raw.split(",") if part.strip()]
-        if raw.lstrip("-").isdigit():
-            return int(raw)
-        return raw
+        return rb.text_value(edit.text())
 
     def set_value(self, value: Any) -> None:
         """Write one engine value back into the control (preset load, mode switch)."""
