@@ -132,10 +132,10 @@ MAX_FILTER_NUMBER: Final = 2**53
 # ".<id>." plus mkdtemp's eight random characters, and the install a
 # replacement moves aside is ".<id>.previous". Both add ten characters.
 MAX_ID_LENGTH: Final = MAX_NAME_BYTES - len("..previous")
-# Digits read from one component of a version. A real version has a handful;
+# Digits allowed in one component of a version. A real version has a handful;
 # Python refuses to read an integer literal of more than 4300 digits, and a
-# *quoted* component of that length reaches int() as a bare ValueError no pack
-# handler catches, so only the leading digits are read.
+# *quoted* component of that length would reach int() as a bare ValueError no
+# pack handler catches, so a longer one is refused.
 MAX_VERSION_DIGITS: Final = 9
 
 
@@ -444,27 +444,44 @@ def _parse_data(name: str, data: bytes, source: str) -> Any:
     except UnicodeDecodeError as exc:
         raise PackError([f"{name} is not UTF-8 text: {exc}"], source) from exc
     try:
-        return json.loads(text)
+        return json.loads(text, object_pairs_hook=_unique_keys)
     except ValueError as exc:
-        # JSONDecodeError, and the plain ValueError of an integer longer than
-        # Python's int-string limit: either way the file cannot be read.
+        # JSONDecodeError, a repeated key, and the plain ValueError of an
+        # integer longer than Python's int-string limit: either way the file
+        # cannot be read as written.
         raise PackError([f"{name} is not valid JSON: {exc}"], source) from exc
     except RecursionError as exc:
         # Valid JSON nested deeper than the parser can follow: still refused.
         raise PackError([f"{name} is nested too deeply to read"], source) from exc
 
 
+def _unique_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """A JSON object, refused if it names a key twice.
+
+    json.loads keeps the last of two equal keys, so the first is never seen by
+    any check: ``"in_position": "false", "in_position": true`` would install
+    as the second alone, a stat meaning something other than its file says.
+    """
+    document: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in document:
+            raise ValueError(f"key {key!r} appears twice in one object")
+        document[key] = value
+    return document
+
+
 def _version_tuple(version: str) -> tuple[int, ...]:
     """The first three components of a version, as numbers.
 
-    Each component is read up to ``MAX_VERSION_DIGITS`` digits: a quoted
-    component can be longer than Python's integer-string limit, where ``int()``
-    raises instead of comparing, and that ValueError would escape as a bare one
-    no pack handler catches. No version anyone can mean is that long, so the
-    tail is dropped and the comparison still happens.
+    A component longer than ``MAX_VERSION_DIGITS`` digits raises ValueError:
+    past Python's integer-string limit ``int()`` cannot read it at all, and
+    reading only its leading digits would compare "00000000099" as 0 and let
+    a pack that needs fpdb 99 install here.
     """
     numbers = re.findall(r"\d+", version)
-    return tuple(int(number[:MAX_VERSION_DIGITS]) for number in numbers[:3])
+    if any(len(number) > MAX_VERSION_DIGITS for number in numbers):
+        raise ValueError(f"has a component longer than {MAX_VERSION_DIGITS} digits")
+    return tuple(int(number) for number in numbers[:3])
 
 
 def _fpdb_version() -> str:
@@ -500,6 +517,18 @@ def _pack_id_problem(pack_id: Any) -> str:
     return ""
 
 
+def _minimum_version_problem(minimum: str, running: str) -> str:
+    """Why this fpdb cannot load a pack asking for ``minimum``, or ``""``."""
+    if not minimum:
+        return ""
+    try:
+        if _version_tuple(minimum) > _version_tuple(running):
+            return f"needs fpdb {minimum} or newer (this is {running})"
+    except ValueError as exc:
+        return f"min_fpdb_version {exc}"
+    return ""
+
+
 def _manifest_errors(manifest: Mapping[str, Any], running: str) -> tuple[list[str], str, str]:
     """The manifest's own problems, its pack id and its minimum fpdb version."""
     errors: list[str] = []
@@ -516,8 +545,9 @@ def _manifest_errors(manifest: Mapping[str, Any], running: str) -> tuple[list[st
         if problem:
             errors.append(problem)
     minimum = str(manifest.get("min_fpdb_version") or "")
-    if minimum and _version_tuple(minimum) > _version_tuple(running):
-        errors.append(f"needs fpdb {minimum} or newer (this is {running})")
+    problem = _minimum_version_problem(minimum, running)
+    if problem:
+        errors.append(problem)
 
     pack_id = manifest.get("id")
     problem = _pack_id_problem(pack_id)
@@ -788,6 +818,27 @@ def _filter_value_problem(filters: Mapping[str, Any], *, preset: bool = False) -
         problem = _one_filter_problem(name, value, spec.kind, preset=preset)
         if not problem and preset:
             problem = _research_round_trip_problem(name, value, spec.kind)
+        if not problem:
+            problem = _bound_parameter_problem(name, value)
+        if problem:
+            return problem
+    return ""
+
+
+def _bound_parameter_problem(name: str, value: Any) -> str:
+    """Why a filter's *compiled* parameters cannot be bound, or ``""``.
+
+    The compiler converts some values before binding them -- a position
+    written "100000000000000000000" becomes that integer, a sizing per cent is
+    multiplied into basis points -- so the value as written can pass every
+    check and the number the database receives still overflow it when the
+    stat first runs.
+    """
+    from .analytics_query import _compile_filter  # noqa: PLC0415
+
+    _fragments, params = _compile_filter(name, value, "%s", "sqlite")
+    for param in params:
+        problem = _non_finite_problem(name, param)
         if problem:
             return problem
     return ""

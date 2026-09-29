@@ -77,7 +77,7 @@ a deterministic archive: the same pack always gives the same bytes.
 | `id` | yes | a dotted lower-case namespace, e.g. `author.topic`; `fpdb.*`, `builtin.*` and `core.*` are reserved |
 | `name`, `author`, `description`, `pack_version` | no | shown in the manager |
 | `definition_schema_version` | no | the definition schema the pack was written for (default 1) |
-| `min_fpdb_version` | no | the oldest fpdb that can load the pack |
+| `min_fpdb_version` | no | the oldest fpdb that can load the pack; each part at most 9 digits |
 | `fragments` | no | reusable filter bundles, `name → filters` |
 | `definitions` | no* | definition files, relative to the manifest |
 | `presets` | no* | Research preset files, in the shipped preset format |
@@ -108,6 +108,7 @@ Every problem found is reported at once, so an author fixes a pack in one pass.
 Packs are **JSON only**. A pack is made to be shared, so it must install on any
 fpdb; YAML would need PyYAML, which fpdb does not ship. (Definitions kept in a
 local definitions folder may still be YAML when PyYAML is installed.)
+An object may not name the same key twice.
 
 ## Validation rules
 
@@ -139,7 +140,9 @@ then its values are checked where the engine is lenient:
 | one-sided (`date_from`, `hand_id_to`, …) | a single date or number |
 | any | `{"is_null": true}` / `{"is_null": false}` |
 
-Numbers must be finite and at most 2⁵³ in size; `precision` is at most 10.
+Numbers must be finite and at most 2⁵³ in size, including a number the
+filter turns its value into (a position written `"100000000000000000000"`);
+`precision` is at most 10.
 `filters` and `numerator` are checked separately.
 
 **Presets.** A preset's `filters` are loaded into the Research filter controls

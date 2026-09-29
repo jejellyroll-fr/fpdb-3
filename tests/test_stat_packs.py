@@ -1288,24 +1288,25 @@ def test_every_supported_identity_form_is_accepted(source: Path, packs_dir: Path
 # -- review of c25a627f9 (PR #411) ----------------------------------------------
 
 
-@pytest.mark.parametrize("version", ["9" * 5000, "3.9." + "1" * 4400], ids=["all digits", "third component"])
-def test_a_version_component_longer_than_python_can_read_is_a_pack_error(
+@pytest.mark.parametrize(
+    "version",
+    ["9" * 5000, "3.9." + "1" * 4400, "0." + "0" * 5000, "00000000099", "3.9.1.1234567890"],
+    ids=["all digits", "third component", "zeros", "padded 99", "fourth component"],
+)
+def test_a_version_component_longer_than_nine_digits_is_refused(
     source: Path, packs_dir: Path, version: str
 ) -> None:
-    # A quoted component can outrun Python's integer-string limit (4300 digits),
-    # where int() raises a bare ValueError: not a PackError, so the import would
-    # escape the manager's own error reporting instead of being refused. Going
-    # through refused() is itself the assertion that it stays a PackError.
+    # Past Python's integer-string limit (4300 digits) int() raises a bare
+    # ValueError the manager would not catch; reading only the leading digits
+    # instead compared "00000000099" as 0 and installed a pack asking for fpdb
+    # 99. Going through refused() is itself the assertion that it is a PackError.
     edit_manifest(source, min_fpdb_version=version)
 
-    assert "needs fpdb" in refused(source, packs_dir)
+    assert "min_fpdb_version has a component longer than 9 digits" in refused(source, packs_dir)
 
 
-def test_an_over_long_zero_component_is_read_as_zero(source: Path, packs_dir: Path) -> None:
-    # Past the digits read the tail is dropped rather than the version being
-    # unreadable, so a component that only *looks* absurd still compares: this
-    # pack asks for 0.0, which the running fpdb satisfies.
-    edit_manifest(source, min_fpdb_version="0." + "0" * 5000)
+def test_a_version_with_nine_digit_components_still_compares(source: Path, packs_dir: Path) -> None:
+    edit_manifest(source, min_fpdb_version="000000003.000000009")
 
     assert stat_packs.install_pack(source, packs_dir).id == PACK_ID
 
@@ -1415,3 +1416,45 @@ def test_a_preset_numerator_value_is_still_checked(source: Path, packs_dir: Path
     _preset_numerator(source, {"in_position": "false"})
 
     assert "filter 'in_position' needs true or false, not 'false'" in refused(source, packs_dir)
+
+
+# -- second review of 6861eaff (PR #411) -----------------------------------------
+
+
+def test_a_key_repeated_in_a_definition_is_refused(source: Path, packs_dir: Path) -> None:
+    # json.loads keeps the last of two equal keys: the invalid "false" would
+    # never be checked and the stat would install as "in_position": true.
+    stat = (
+        '{"definitions": [{"name": "example.preflop.x", "metric": "fold_frequency",'
+        ' "filters": {"in_position": "false", "in_position": true}}]}'
+    )
+    (source / "stats" / "steals.json").write_text(stat, encoding="utf-8")
+
+    assert "key 'in_position' appears twice in one object" in refused(source, packs_dir)
+
+
+def test_a_key_repeated_in_the_manifest_is_refused(source: Path, packs_dir: Path) -> None:
+    manifest = (source / "manifest.json").read_text(encoding="utf-8")
+    (source / "manifest.json").write_text(manifest.replace("{", '{"id": "other.pack", ', 1), encoding="utf-8")
+
+    assert "key 'id' appears twice in one object" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize(
+    "filters",
+    [{"position": "100000000000000000000"}, {"position": ["btn", "100000000000000000000"]}],
+)
+def test_a_value_the_compiler_turns_into_a_huge_number_is_refused(
+    source: Path, packs_dir: Path, filters: dict[str, Any]
+) -> None:
+    # Written as text, the position passes the number checks; the compiler
+    # makes it an integer SQLite cannot bind, which failed only when it ran.
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": filters}])
+
+    assert "filter 'position' holds a number too large for the database" in refused(source, packs_dir)
+
+
+def test_a_huge_coerced_value_in_a_preset_is_refused(source: Path, packs_dir: Path) -> None:
+    _preset_numerator(source, {"position": "100000000000000000000"})
+
+    assert "filter 'position' holds a number too large for the database" in refused(source, packs_dir)
