@@ -1371,3 +1371,47 @@ def test_a_preset_number_written_as_a_number_is_accepted(source: Path, packs_dir
     _preset_with(source, hand_id=7)
 
     assert [p.id for p in stat_packs.install_pack(source, packs_dir).presets] == ["example.preflop.steal_by_position"]
+
+
+# -- review of 6861eaff (PR #411) -----------------------------------------------
+
+
+@pytest.mark.parametrize("name", ["site", "identity", "position"])
+def test_a_preset_text_filter_needs_at_least_one_value(source: Path, packs_dir: Path, name: str) -> None:
+    # The engine reads [] as "none of these"; the filter row reads it back as
+    # no filter, so the preset would run over every hand instead of none.
+    _preset_with(source, **{name: []})
+
+    assert f"filter {name!r} in a preset needs at least one value" in refused(source, packs_dir)
+
+
+def _preset_numerator(source: Path, numerator: dict[str, Any]) -> None:
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["numerator"] = numerator
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    "numerator",
+    [
+        {"effective_stack_bb": {"min": 10, "max": 20}},
+        {"date_from": "2026-01-01"},
+        {"hand_id_from": 10},
+        {"site": {"is_null": False}},
+        {"hand_id": 10.001},
+    ],
+)
+def test_a_preset_numerator_takes_any_shape_the_engine_runs(
+    source: Path, packs_dir: Path, numerator: dict[str, Any]
+) -> None:
+    # No control holds a preset's numerator: Research keeps it and runs it as
+    # written, so only the filters are held to what the controls can show.
+    _preset_numerator(source, numerator)
+
+    assert [p.id for p in stat_packs.install_pack(source, packs_dir).presets] == ["example.preflop.steal_by_position"]
+
+
+def test_a_preset_numerator_value_is_still_checked(source: Path, packs_dir: Path) -> None:
+    _preset_numerator(source, {"in_position": "false"})
+
+    assert "filter 'in_position' needs true or false, not 'false'" in refused(source, packs_dir)

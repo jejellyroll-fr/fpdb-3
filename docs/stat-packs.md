@@ -142,11 +142,14 @@ then its values are checked where the engine is lenient:
 Numbers must be finite and at most 2⁵³ in size; `precision` is at most 10.
 `filters` and `numerator` are checked separately.
 
-**Presets.** A preset is loaded into the Research filter controls and read back
-before it runs, so it may only hold what those controls keep:
+**Presets.** A preset's `filters` are loaded into the Research filter controls
+and read back before it runs, so they may only hold what those controls keep
+(its `numerator` is kept as written and follows the definition rules above):
 
 * ranges as `[low, high]`, with at least one bound, above −10,000,000 and up to
   10,000,000, to two decimals;
+* at least one value in a list — the row reads `[]` back as no filter, where
+  the engine reads it as "none of these";
 * list values as words or whole numbers, without commas, and only where the
   filter row reads them back unchanged: a digit-only word (`"001"`) comes back
   as the number 1, `"true"` as a condition, and an empty or space-padded one as

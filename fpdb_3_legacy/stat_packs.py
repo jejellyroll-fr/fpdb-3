@@ -838,6 +838,11 @@ def _research_round_trip_problem(name: str, value: Any, kind: str) -> str:
     if kind not in _TEXT_KINDS:
         return ""
     items = value if isinstance(value, (list, tuple)) else [value]
+    if not items:
+        # The engine reads [] as "none of these" and matches no row, but the
+        # row writes it as an empty field and reads that back as no filter:
+        # the preset would run over everything instead of nothing.
+        return f"filter {name!r} in a preset needs at least one value; the filter row reads [] as no filter"
     for item in items:
         if isinstance(item, bool) or not isinstance(item, (str, int)):
             return f"filter {name!r} in a preset takes words or whole numbers, not {item!r}"
@@ -996,9 +1001,9 @@ def _preset_compile_error(preset: Any) -> str:
     from .analytics_query import Query, compile_query  # noqa: PLC0415
 
     try:
-        problem = _filter_value_problem(preset.filters, preset=True) or _filter_value_problem(
-            preset.numerator, preset=True
-        )
+        # Only the filters go through Research's controls; the numerator is
+        # held as it is and run as it is, so it takes any shape the engine does.
+        problem = _filter_value_problem(preset.filters, preset=True) or _filter_value_problem(preset.numerator)
         if problem:
             return problem
         compile_query(
