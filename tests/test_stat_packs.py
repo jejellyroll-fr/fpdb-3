@@ -1553,3 +1553,17 @@ def test_a_pack_at_the_file_limit_exports_and_imports_again(source: Path, packs_
     reread = stat_packs.read_pack(archive)
 
     assert len(reread.definitions) == stat_packs.MAX_ARCHIVE_FILES - 1
+
+
+# -- review of e0d5ee9f (PR #411) -----------------------------------------------
+
+
+def test_a_pack_definition_cannot_declare_its_grouping_twice(source: Path, packs_dir: Path) -> None:
+    # group_by won and dimensions was never read: a stat grouped otherwise
+    # than one of its declarations says.
+    write_stats(
+        source,
+        [{"name": "example.preflop.x", "metric": "fold_frequency", "group_by": ["position"], "dimensions": ["street"]}],
+    )
+
+    assert "group_by and dimensions are the same field" in refused(source, packs_dir)

@@ -467,7 +467,7 @@ def parse_definition(data: Mapping[str, Any], source: str = "") -> StatDefinitio
 
     filters = _validate_filters(data.get("filters", {}), "filters", source)
     numerator = _validate_filters(data.get("numerator", {}), "numerator", source)
-    group_by = _validate_group_by(data.get("group_by", data.get("dimensions")), source)
+    group_by = _group_by_of(data, source)
 
     fragments = data.get("fragments", ())
     if isinstance(fragments, str):
@@ -476,14 +476,7 @@ def parse_definition(data: Mapping[str, Any], source: str = "") -> StatDefinitio
         _fail("fragments must be a list of names", source)
     fragments = tuple(fragments)
 
-    display_block = data.get("display", {})
-    if display_block is None:
-        display_block = {}
-    if not isinstance(display_block, Mapping):
-        _fail("display must be a table/object", source)
-    _reject_unknown(display_block, _DISPLAY_FIELDS, "display", source)
-    merged = {**display_block, **_display_overrides(data)}
-    display = _build_display(name, merged, source)
+    display = _display_of(name, data, source)
 
     return StatDefinition(
         name=name,
@@ -496,6 +489,34 @@ def parse_definition(data: Mapping[str, Any], source: str = "") -> StatDefinitio
         schema_version=schema_version,
         source=source,
     )
+
+
+def _group_by_of(data: Mapping[str, Any], source: str) -> tuple[str, ...]:
+    """The definition's grouping, under either of its two names."""
+    if "group_by" in data and "dimensions" in data:
+        # Two names for one field: the parser would read group_by and never
+        # look at dimensions, so a stat could be grouped otherwise than one of
+        # the declarations it carries says.
+        _fail("group_by and dimensions are the same field; write it once", source)
+    return _validate_group_by(data.get("group_by", data.get("dimensions")), source)
+
+
+def _display_of(name: str, data: Mapping[str, Any], source: str) -> DisplaySpec:
+    """The display block and the display fields written at the top level."""
+    display_block = data.get("display", {})
+    if display_block is None:
+        display_block = {}
+    if not isinstance(display_block, Mapping):
+        _fail("display must be a table/object", source)
+    _reject_unknown(display_block, [key for key in _DISPLAY_FIELDS if key != "display"], "display", source)
+    overrides = _display_overrides(data)
+    twice = sorted(set(display_block) & set(overrides))
+    if twice:
+        # The top-level value would win and the display block's never be
+        # read: {"display": {"format": "percentage"}, "format": "bb"} is a
+        # stat shown otherwise than one of its own declarations says.
+        _fail(f"{twice} set both in display and at the top level; write each once", source)
+    return _build_display(name, {**display_block, **overrides}, source)
 
 
 def _display_overrides(data: Mapping[str, Any]) -> dict[str, Any]:
