@@ -103,7 +103,8 @@ clashing names listed.
   manifest does not list are neither installed nor re-exported.
 * **No network.** Nothing is fetched, at install or at evaluation.
 
-Every problem found is reported at once, so an author fixes a pack in one pass.
+Every problem found is reported at once, so an author fixes a pack in one pass —
+up to 50: past that, reading stops and the report says so.
 
 Packs are **JSON only**. A pack is made to be shared, so it must install on any
 fpdb; YAML would need PyYAML, which fpdb does not ship. (Definitions kept in a
@@ -127,7 +128,8 @@ way it is stored (`stats/a.json`, not `./stats/a.json`). A path has at most 8
 levels and 512 bytes, each name at most 255 bytes, without a trailing dot or
 space, a character Windows forbids (`<>:"|?*`), or a name that differs from
 another only by letter case or Unicode normalization. A pack holds at most 200
-files, `manifest.json` included, and 5 MB.
+files, `manifest.json` included, and 5 MB; the manifest's `definitions` and
+`presets` lists together hold at most 199 entries.
 
 **Filter values.** Each definition is compiled exactly as the engine runs it,
 then its values are checked where the engine is lenient:

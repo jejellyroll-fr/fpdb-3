@@ -1567,3 +1567,40 @@ def test_a_pack_definition_cannot_declare_its_grouping_twice(source: Path, packs
     )
 
     assert "group_by and dimensions are the same field" in refused(source, packs_dir)
+
+
+# -- review of d49fdfc4 (PR #411) -----------------------------------------------
+
+
+@pytest.mark.parametrize("key", ["definitions", "presets"])
+def test_a_manifest_list_is_bounded_before_it_is_walked(source: Path, packs_dir: Path, key: str) -> None:
+    # A million numbers fit in 5 MB and none is a path, so no file count saw
+    # them; each became an error message of its own.
+    edit_manifest(source, **{key: list(range(100_000))})
+
+    assert refused(source, packs_dir).endswith("files; a pack holds at most 200, the manifest included")
+
+
+def test_an_archive_manifest_list_is_bounded_too(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    edit_manifest(source, definitions=[0] * 100_000, presets=None)
+    archive = tmp_path / "big.fpdbstats"
+    with zipfile.ZipFile(archive, "w") as bundle:
+        for path in sorted(source.rglob("*")):
+            if path.is_file():
+                bundle.write(path, path.relative_to(source).as_posix())
+
+    with pytest.raises(stat_packs.PackError, match="the manifest lists 100000 files"):
+        stat_packs.read_pack(archive)
+
+
+def test_reported_problems_are_capped(source: Path, packs_dir: Path) -> None:
+    # Thousands of tiny bad definitions in one file: reading stops at the cap
+    # instead of building a message for each.
+    write_stats(source, [{"name": f"bad {index}", "metric": "fold_frequency"} for index in range(5_000)])
+
+    with pytest.raises(stat_packs.PackError) as caught:
+        stat_packs.install_pack(source, packs_dir)
+
+    messages = caught.value.messages
+    assert len(messages) == stat_packs.MAX_REPORTED_ERRORS + 1
+    assert messages[-1] == f"stopped after {stat_packs.MAX_REPORTED_ERRORS} problems; fix these first"

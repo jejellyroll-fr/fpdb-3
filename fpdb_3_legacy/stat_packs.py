@@ -123,6 +123,10 @@ _WINDOWS_RESERVED: Final = frozenset(
 # Generous for data, small enough that an archive cannot fill the disk.
 MAX_ARCHIVE_FILES: Final = 200
 MAX_ARCHIVE_BYTES: Final = 5 * 1024 * 1024
+# Problems reported for one pack. Past this, reading stops: a few bytes per bad
+# entry would otherwise become a message each -- a crafted 5 MB file holds a
+# million -- and the import would build hundreds of megabytes of them.
+MAX_REPORTED_ERRORS: Final = 50
 # More decimal places than any stat can mean; a pack cannot ask for more.
 MAX_PRECISION: Final = 10
 # The common limit on one path component (ext4, APFS, NTFS): a longer name
@@ -352,11 +356,9 @@ def _read_folder(source: Path) -> dict[str, bytes]:
     # The manifest is one of the pack's files: an archive counts it, and the
     # export of a folder writes it, so a folder counts it too -- otherwise
     # fpdb could export a pack it then refuses to import.
-    if len(listed) + 1 > MAX_ARCHIVE_FILES:
-        raise PackError(
-            [f"the manifest lists {len(listed)} files; a pack holds at most {MAX_ARCHIVE_FILES}, the manifest included"],
-            str(source),
-        )
+    problem = _listing_size_problem(manifest)
+    if problem:
+        raise PackError([problem], str(source))
     total = len(files[MANIFEST_NAME])
     for entry in listed:
         try:
@@ -598,6 +600,11 @@ def read_pack(source: str | Path, *, fpdb_version: str | None = None) -> StatPac
         # The version and identity checks come first: a pack for a newer schema
         # is refused before any of its files is interpreted.
         raise PackError(errors, label)
+    # Before any list is walked: an archive counts its members, not the
+    # entries of a list in its manifest.
+    problem = _listing_size_problem(manifest)
+    if problem:
+        raise PackError([problem], label)
 
     prefix = f"{pack_id}."
     fragments = _read_fragments(manifest.get("fragments", {}), prefix, errors)
@@ -606,18 +613,12 @@ def read_pack(source: str | Path, *, fpdb_version: str | None = None) -> StatPac
     presets = _read_presets(manifest.get("presets", []), files, prefix, label, errors)
     if not stats and not presets and not errors:
         errors.append("a pack must add at least one definition or preset")
+    if _full(errors):
+        errors = [*errors[:MAX_REPORTED_ERRORS], f"stopped after {MAX_REPORTED_ERRORS} problems; fix these first"]
     if errors:
         raise PackError(errors, label)
     listed = {MANIFEST_NAME, *manifest.get("definitions", []), *manifest.get("presets", [])}
-    folded: dict[str, str] = {}
-    for name in sorted(listed):
-        # Windows and macOS file systems ignore case, and macOS also Unicode
-        # normalization ("é" as one code point or two): names that differ only
-        # that way would be written to one file, and the install would lose one.
-        key = unicodedata.normalize("NFC", name).casefold()
-        if key in folded:
-            errors.append(f"files {folded[key]!r} and {name!r} name the same file on some systems")
-        folded[key] = name
+    errors = _folded_collisions(listed)
     if errors:
         raise PackError(errors, label)
     return StatPack(
@@ -657,6 +658,8 @@ def _read_fragments(raw: Any, prefix: str, errors: list[str]) -> dict[str, dict[
         return {}
     fragments: dict[str, dict[str, Any]] = {}
     for name, filters in raw.items():
+        if _full(errors):
+            break
         problem = _name_problem(str(name), prefix)
         if problem:
             errors.append(f"fragment {name!r} {problem}")
@@ -678,6 +681,40 @@ def _read_fragments(raw: Any, prefix: str, errors: list[str]) -> dict[str, dict[
             resolved["fragments"] = list(nested)
         fragments[str(name)] = resolved
     return fragments
+
+
+def _folded_collisions(listed: Iterable[str]) -> list[str]:
+    """Listed files that would land on one file on some systems."""
+    problems: list[str] = []
+    folded: dict[str, str] = {}
+    for name in sorted(listed):
+        # Windows and macOS file systems ignore case, and macOS also Unicode
+        # normalization ("é" as one code point or two): names that differ only
+        # that way would be written to one file, and the install would lose one.
+        key = unicodedata.normalize("NFC", name).casefold()
+        if key in folded:
+            problems.append(f"files {folded[key]!r} and {name!r} name the same file on some systems")
+        folded[key] = name
+    return problems
+
+
+def _listing_size_problem(manifest: Mapping[str, Any]) -> str:
+    """Why the manifest lists more entries than a pack can hold, or ``""``.
+
+    Every entry counts, not only the paths: a list of a million numbers is
+    as long to walk, and each would be reported as a problem of its own. The
+    manifest is one of the pack's files too -- an archive counts it, and the
+    export of a folder writes it.
+    """
+    count = sum(len(manifest[key]) for key in ("definitions", "presets") if isinstance(manifest.get(key), list))
+    if count + 1 > MAX_ARCHIVE_FILES:
+        return f"the manifest lists {count} files; a pack holds at most {MAX_ARCHIVE_FILES}, the manifest included"
+    return ""
+
+
+def _full(errors: list[str]) -> bool:
+    """Whether enough problems are recorded to stop reading (MAX_REPORTED_ERRORS)."""
+    return len(errors) >= MAX_REPORTED_ERRORS
 
 
 def _listed_documents(
@@ -715,12 +752,16 @@ def _read_definitions(
     stats: list[StatDefinition] = []
     seen: set[str] = set()
     for name, document in _listed_documents(listed, files, "definitions", label, errors):
+        if _full(errors):
+            break
         try:
             entries = _entries_in(document, name)
         except ValueError as exc:
             errors.append(str(exc))
             continue
         for entry in entries:
+            if _full(errors):
+                break
             # One definition at a time, so every bad one in the file is reported.
             try:
                 definition = _checked_definition(entry, name, prefix, library, pack_id, seen)
@@ -789,6 +830,8 @@ def _read_presets(listed: Any, files: Mapping[str, bytes], prefix: str, label: s
     presets: list[Any] = []
     seen: set[str] = set()
     for name, raw in _listed_documents(listed, files, "presets", label, errors):
+        if _full(errors):
+            break
         try:
             pack = research_presets.validate_preset_pack(raw, name)
         except (ArithmeticError, AttributeError, TypeError, ValueError) as exc:
@@ -797,6 +840,8 @@ def _read_presets(listed: Any, files: Mapping[str, bytes], prefix: str, label: s
             errors.append(f"{name}: {exc}")
             continue
         for preset in pack.presets:
+            if _full(errors):
+                break
             problem = _name_problem(preset.id, prefix)
             if problem:
                 errors.append(f"{name}: preset {preset.id!r} {problem}")
