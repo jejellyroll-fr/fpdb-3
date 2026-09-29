@@ -136,7 +136,7 @@ then its values are checked where the engine is lenient:
 | --- | --- |
 | yes/no (`in_position`, `multiway`, `tournament`, …) | JSON `true` or `false` — never `"false"` |
 | list (`site`, `position`, `situation`, …) | a value or a list of values |
-| range (`effective_stack_bb`, `bet_sizing_pct`, …) | `[low, high]` or `{"min": …, "max": …}`, at least one bound, numbers only |
+| range (`effective_stack_bb`, `bet_sizing_pct`, …) | `[low, high]` or `{"min": …, "max": …}`, at least one bound, numbers only, low not above high |
 | one-sided dates (`date_from`, `date_to`) | one date, `"YYYY-MM-DD"` or `"YYYY-MM-DD HH:MM[:SS]"` |
 | one-sided hand ids (`hand_id_from`, `hand_id_to`) | one whole number |
 | any | `{"is_null": true}` / `{"is_null": false}` |

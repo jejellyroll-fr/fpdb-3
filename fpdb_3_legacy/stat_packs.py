@@ -892,10 +892,6 @@ def _research_round_trip_problem(name: str, value: Any, kind: str) -> str:
     if kind in ("range", "range_pct"):
         if not (isinstance(value, (list, tuple)) and len(value) == 2):
             return f"filter {name!r} must be written [low, high] in a preset, not {value!r}"
-        if all(bound is None for bound in value):
-            # Neither bound is not a filter: the control reads it back as an
-            # empty row and the preset runs wider than it says it does.
-            return f"filter {name!r} needs at least one bound in a preset, not {value!r}"
         return _range_control_problem(name, value)
     if kind not in _TEXT_KINDS:
         return ""
@@ -1062,6 +1058,7 @@ def _range_problem(name: str, value: Any) -> str:
 
 
 def _bounds_problem(name: str, bounds: Iterable[Any]) -> str:
+    bounds = list(bounds)
     for bound in bounds:
         if bound is None:
             continue
@@ -1072,6 +1069,15 @@ def _bounds_problem(name: str, bounds: Iterable[Any]) -> str:
         problem = _non_finite_problem(name, bound)
         if problem:
             return problem
+    if len(bounds) != 2:
+        return ""  # the compiler reports the shape
+    low, high = bounds
+    # [null, null] compiles to no predicate at all -- the stat measures every
+    # hand -- and [20, 10] to two that exclude each other, so it never has data.
+    if low is None and high is None:
+        return f"range filter {name!r} needs at least one bound, not {bounds!r}"
+    if low is not None and high is not None and low > high:
+        return f"range filter {name!r} has its low bound above its high one, {bounds!r}"
     return ""
 
 

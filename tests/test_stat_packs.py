@@ -1134,10 +1134,11 @@ def test_a_file_name_past_the_length_limit_is_refused(packs_dir: Path, tmp_path:
 
 
 def test_a_preset_range_needs_at_least_one_bound(source: Path, packs_dir: Path) -> None:
-    # Neither bound is not a filter: the control reads it back as an empty row.
+    # Neither bound is not a filter: the control reads it back as an empty row,
+    # as the engine compiles it to no predicate -- refused for every range.
     _preset_with(source, effective_stack_bb=[None, None])
 
-    assert "needs at least one bound in a preset" in refused(source, packs_dir)
+    assert "range filter 'effective_stack_bb' needs at least one bound" in refused(source, packs_dir)
 
 
 @pytest.mark.parametrize("bounds", [[None, 40], [10, None]])
@@ -1489,5 +1490,37 @@ def test_a_one_sided_bound_is_the_kind_its_column_holds(
 @pytest.mark.parametrize("value", ["2026-01-01", "2026-01-01 12:30", "2026-01-01 12:30:59"])
 def test_a_date_bound_as_the_hands_store_it_is_accepted(source: Path, packs_dir: Path, value: str) -> None:
     write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"date_to": value}}])
+
+    assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
+
+
+# -- review of 6c1080d0 (PR #411) -----------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("value", "reason"),
+    [
+        ([None, None], "needs at least one bound"),
+        ([20, 10], "has its low bound above its high one"),
+        ({"min": 20, "max": 10}, "has its low bound above its high one"),
+    ],
+)
+def test_a_range_needs_a_bound_in_order(source: Path, packs_dir: Path, value: Any, reason: str) -> None:
+    # [null, null] compiles to no predicate (every hand) and [20, 10] to two
+    # that exclude each other (never any data): neither means what it says.
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"effective_stack_bb": value}}])
+
+    assert f"range filter 'effective_stack_bb' {reason}" in refused(source, packs_dir)
+
+
+def test_an_inverted_range_in_a_preset_numerator_is_refused(source: Path, packs_dir: Path) -> None:
+    _preset_numerator(source, {"bet_sizing_pct": [75, 25]})
+
+    assert "range filter 'bet_sizing_pct' has its low bound above its high one" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize("value", [[10, 10], [None, 10], [10, None], {"max": 10}])
+def test_a_range_with_ordered_or_one_bound_is_accepted(source: Path, packs_dir: Path, value: Any) -> None:
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"effective_stack_bb": value}}])
 
     assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
