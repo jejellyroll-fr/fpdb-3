@@ -132,6 +132,11 @@ MAX_FILTER_NUMBER: Final = 2**53
 # ".<id>." plus mkdtemp's eight random characters, and the install a
 # replacement moves aside is ".<id>.previous". Both add ten characters.
 MAX_ID_LENGTH: Final = MAX_NAME_BYTES - len("..previous")
+# Digits read from one component of a version. A real version has a handful;
+# Python refuses to read an integer literal of more than 4300 digits, and a
+# *quoted* component of that length reaches int() as a bare ValueError no pack
+# handler catches, so only the leading digits are read.
+MAX_VERSION_DIGITS: Final = 9
 
 
 class PackError(ValueError):
@@ -450,8 +455,16 @@ def _parse_data(name: str, data: bytes, source: str) -> Any:
 
 
 def _version_tuple(version: str) -> tuple[int, ...]:
+    """The first three components of a version, as numbers.
+
+    Each component is read up to ``MAX_VERSION_DIGITS`` digits: a quoted
+    component can be longer than Python's integer-string limit, where ``int()``
+    raises instead of comparing, and that ValueError would escape as a bare one
+    no pack handler catches. No version anyone can mean is that long, so the
+    tail is dropped and the comparison still happens.
+    """
     numbers = re.findall(r"\d+", version)
-    return tuple(int(number) for number in numbers[:3])
+    return tuple(int(number[:MAX_VERSION_DIGITS]) for number in numbers[:3])
 
 
 def _fpdb_version() -> str:
@@ -850,18 +863,24 @@ def _non_finite_problem(name: str, value: Any) -> str:
     return ""
 
 
-def _value_filter_problem(name: str, value: Any) -> str:
+def _value_filter_problem(name: str, value: Any, *, kind: str) -> str:
     """Why a set-valued filter's value is not one the query can compare, or ``""``.
 
     A mapping (other than is_null) compiles as one bound parameter the database
     cannot compare -- or, for a label, is stringified into its LIKE pattern and
     matches nothing -- so only values, or a list of them, are taken, and each of
-    those has to be a number the query can actually use.
+    those has to be a number the query can actually use. A boolean is not one:
+    the driver binds True as the integer 1, so ``{"hand_id": true}`` would
+    quietly select hand 1 instead of refusing a filter the author mis-typed.
+    ``flagset_none`` is the exception, because ``True`` is its own form there --
+    the compiler reads it as "no flag at all".
     """
     values = value if isinstance(value, (list, tuple)) else [value]
     if any(isinstance(item, (Mapping, list, tuple)) or item is None for item in values):
         return f"filter {name!r} takes a value or a list of values, not {value!r}"
     for item in values:
+        if isinstance(item, bool) and not (kind == "flagset_none" and value is True):
+            return f"filter {name!r} takes a word or a number, not the boolean {item!r}"
         problem = _non_finite_problem(name, item)
         if problem:
             return problem
@@ -881,7 +900,7 @@ def _one_filter_problem(name: str, value: Any, kind: str, *, preset: bool) -> st
     if kind in ("bool", "hero", "null_check") and not isinstance(value, bool):
         return f"filter {name!r} needs true or false, not {value!r}"
     if kind in _VALUE_KINDS:
-        return _value_filter_problem(name, value)
+        return _value_filter_problem(name, value, kind=kind)
     if kind in ("range_low", "range_high"):
         if preset:
             return f"filter {name!r} is chosen in Research, not stored in a preset; list it under variables"

@@ -1270,3 +1270,69 @@ def test_every_supported_identity_form_is_accepted(source: Path, packs_dir: Path
     write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"identity": identity}}])
 
     assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
+
+
+# -- review of c25a627f9 (PR #411) ----------------------------------------------
+
+
+@pytest.mark.parametrize("version", ["9" * 5000, "3.9." + "1" * 4400], ids=["all digits", "third component"])
+def test_a_version_component_longer_than_python_can_read_is_a_pack_error(
+    source: Path, packs_dir: Path, version: str
+) -> None:
+    # A quoted component can outrun Python's integer-string limit (4300 digits),
+    # where int() raises a bare ValueError: not a PackError, so the import would
+    # escape the manager's own error reporting instead of being refused. Going
+    # through refused() is itself the assertion that it stays a PackError.
+    edit_manifest(source, min_fpdb_version=version)
+
+    assert "needs fpdb" in refused(source, packs_dir)
+
+
+def test_an_over_long_zero_component_is_read_as_zero(source: Path, packs_dir: Path) -> None:
+    # Past the digits read the tail is dropped rather than the version being
+    # unreadable, so a component that only *looks* absurd still compares: this
+    # pack asks for 0.0, which the running fpdb satisfies.
+    edit_manifest(source, min_fpdb_version="0." + "0" * 5000)
+
+    assert stat_packs.install_pack(source, packs_dir).id == PACK_ID
+
+
+@pytest.mark.parametrize(
+    "filters",
+    [{"stake": [10, 20], "big_blind": [100, 200]}, {"big_blind": [100, 200], "stake": [10, 20]}],
+)
+def test_two_names_for_one_filter_are_refused(source: Path, packs_dir: Path, filters: dict[str, Any]) -> None:
+    # Both keys resolve to big_blind and only the later value survives, so the
+    # stat would run over a population matching just one of the constraints it
+    # declares.
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": filters}])
+
+    assert "are both the 'big_blind' filter" in refused(source, packs_dir)
+
+
+def test_a_fragment_naming_one_filter_twice_is_refused(source: Path, packs_dir: Path) -> None:
+    manifest = json.loads((source / "manifest.json").read_text(encoding="utf-8"))
+    manifest["fragments"]["example.preflop.dup"] = {"stake": [10, 20], "big_blind": [100, 200]}
+    (source / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+
+    assert "are both the 'big_blind' filter" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize(
+    ("name", "value"),
+    [("hand_id", True), ("hand_id", [True]), ("site", True), ("pot_type", True), ("situation", True)],
+)
+def test_a_boolean_is_not_a_filter_value(source: Path, packs_dir: Path, name: str, value: Any) -> None:
+    # The driver binds True as the integer 1: {"hand_id": true} would quietly
+    # select hand 1 instead of refusing a filter the author mis-typed.
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {name: value}}])
+
+    assert f"filter {name!r} takes a word or a number" in refused(source, packs_dir)
+
+
+def test_a_boolean_still_means_no_flag_for_flagset_none(source: Path, packs_dir: Path) -> None:
+    # True is the compiler's own form for "no draw at all", which is a real
+    # population: refusing it would refuse a valid stat.
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"draw_none": True}}])
+
+    assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"

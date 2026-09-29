@@ -254,6 +254,17 @@ class TestFragmentsAndAliases:
         definition = _definition(group_by=["bet_size_bucket"])
         assert definition.group_by == ("sizing_bucket",)
 
+    def test_two_names_for_one_filter_are_refused(self) -> None:
+        # "stake" is the alias of "big_blind": keeping both would silently drop
+        # one of the constraints instead of refusing an ambiguous definition.
+        with pytest.raises(ValueError, match="are both the 'big_blind' filter"):
+            _definition(filters={"stake": [10, 20], "big_blind": [100, 200]})
+
+    def test_a_filter_and_its_alias_in_separate_blocks_are_not_a_duplicate(self) -> None:
+        definition = _definition(filters={"stake": [10, 20]}, numerator={"big_blind": [100, 200]})
+        assert definition.filters == {"big_blind": [10, 20]}
+        assert definition.numerator == {"big_blind": [100, 200]}
+
     def test_registry_can_add_a_fragment(self) -> None:
         registry = dsl.DefinitionRegistry()
         registry.add_fragment("my_spot", {"street": "turn"})

@@ -362,8 +362,20 @@ def _validate_filters(filters: Any, where: str, source: str) -> dict[str, Any]:
     if not isinstance(filters, Mapping):
         _fail(f"{where} must be a table/object of filter -> value, got {type(filters).__name__}", source)
     resolved: dict[str, Any] = {}
+    declared_as: dict[str, str] = {}
     for name, value in filters.items():
         engine_name = _resolve_filter_name(str(name), source)
+        if engine_name in resolved:
+            # An alias and the engine name are two keys for one filter:
+            # {"stake": ..., "big_blind": ...} keeps only the later value, so
+            # the stat would run over a population matching just one of the
+            # constraints it declares.
+            _fail(
+                f"{where}: {name!r} and {declared_as[engine_name]!r} are both the {engine_name!r} filter;"
+                " write it once",
+                source,
+            )
+        declared_as[engine_name] = str(name)
         resolved[engine_name] = _resolve_filter_value(engine_name, value, source)
     return resolved
 
