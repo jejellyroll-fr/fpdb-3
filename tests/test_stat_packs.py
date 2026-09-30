@@ -1717,3 +1717,14 @@ def test_a_long_value_quoted_by_many_problems_is_clipped(source: Path, packs_dir
     # Cut in the middle: the stat it names and the reason both survive.
     assert messages[0].startswith("stats/steals.json: stat 'example.preflop.s0'")
     assert "Unknown position" in messages[0]
+
+
+# -- review of d18bbf34 (PR #411) -----------------------------------------------
+
+
+def test_a_pack_preset_variable_names_a_filter(source: Path, packs_dir: Path) -> None:
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["variables"] = ["player", "plaeyr"]
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+
+    assert "unknown variable(s) ['plaeyr']" in refused(source, packs_dir)

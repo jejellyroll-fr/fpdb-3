@@ -237,6 +237,9 @@ def test_a_localized_name_falls_back_to_anything(tmp_path: Path) -> None:
         ({**_VALID_PRESET, "tags": ["steal", 3]}, "tags must be a list of non-empty strings"),
         ({**_VALID_PRESET, "variables": [""]}, "variables must be a list of non-empty strings"),
         ({**_VALID_PRESET, "variables": {"player": True}}, "variables must be a list of non-empty strings"),
+        # "Adjust plaeyr" named a filter no row can add.
+        ({**_VALID_PRESET, "variables": ["plaeyr"]}, r"unknown variable\(s\) \['plaeyr'\]"),
+        ({**_VALID_PRESET, "variables": ["player", "stake"]}, r"unknown variable\(s\) \['stake'\]"),
     ],
 )
 def test_a_bad_preset_is_refused_with_its_reason(tmp_path: Path, broken, message) -> None:

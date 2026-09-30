@@ -42,6 +42,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Final, NoReturn
 
+from .analytics_query import FILTERS
 from .research_browser import validate_preset
 
 # The pack schema this module understands. A pack written for a newer schema is
@@ -269,9 +270,22 @@ def _validate_preset(raw: Any, source: str) -> LibraryPreset:
         group_by=query["group_by"],
         recommended_view=view,
         min_sample=min_sample,
-        variables=_string_list(raw.get("variables"), "variables", source),
+        variables=_variables(raw.get("variables"), source),
         tags=_string_list(raw.get("tags"), "tags", source),
     )
+
+
+def _variables(value: Any, source: str) -> tuple[str, ...]:
+    """The filters a preset asks its user to adjust, each one a real filter.
+
+    Research shows them as "Adjust player, site for your own game": a typo
+    ("plaeyr") would ask the user to adjust a filter no row can add.
+    """
+    variables = _string_list(value, "variables", source)
+    unknown = sorted(name for name in variables if name not in FILTERS)
+    if unknown:
+        _fail(f"unknown variable(s) {unknown}; a variable names a filter: {sorted(FILTERS)}", source)
+    return variables
 
 
 def _string_list(value: Any, field: str, source: str) -> tuple[str, ...]:
