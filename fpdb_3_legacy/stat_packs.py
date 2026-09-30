@@ -144,6 +144,11 @@ MAX_QUERY_PARAMETERS: Final = 999
 # The root Finder writes its metadata under: never part of a pack.
 _FINDER_METADATA: Final = "__MACOSX/"
 MAX_ARCHIVE_BYTES: Final = 5 * 1024 * 1024
+# What a zip adds around its content: a local header and a central-directory
+# entry per member (each with its name, at most 512 bytes), and a comment of at
+# most 64 KiB. An uncompressed archive of a pack at the byte limit is this much
+# larger than the pack, and must still be read so its content can be counted.
+MAX_ARCHIVE_OVERHEAD: Final = 1024 * 1024
 # Problems reported for one pack. Past this, reading stops: a few bytes per bad
 # entry would otherwise become a message each -- a crafted 5 MB file holds a
 # million -- and the import would build hundreds of megabytes of them.
@@ -463,9 +468,12 @@ def _read_entry(archive: zipfile.ZipFile, info: zipfile.ZipInfo, budget: int, so
 def _read_archive(source: Path) -> dict[str, bytes]:
     # Opening a zip parses its whole central directory into memory, before any
     # entry count can be checked; an archive file larger than a pack may hold
-    # uncompressed is refused before it is opened.
-    if source.stat().st_size > MAX_ARCHIVE_BYTES:
-        raise PackError([f"the archive is larger than {MAX_ARCHIVE_BYTES} bytes"], str(source))
+    # uncompressed, with its container's own overhead, is refused before it is
+    # opened; the content itself is held to MAX_ARCHIVE_BYTES as it is read.
+    if source.stat().st_size > MAX_ARCHIVE_BYTES + MAX_ARCHIVE_OVERHEAD:
+        raise PackError(
+            [f"the archive is larger than {MAX_ARCHIVE_BYTES + MAX_ARCHIVE_OVERHEAD} bytes"], str(source)
+        )
     try:
         files = _read_archive_entries(source)
     except (zipfile.BadZipFile, zlib.error, EOFError, RuntimeError, NotImplementedError) as exc:

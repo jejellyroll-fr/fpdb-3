@@ -134,7 +134,8 @@ levels and 512 bytes, each name at most 255 bytes, without a trailing dot or
 space, a character Windows forbids (`<>:"|?*`), or a name that differs from
 another only by letter case or Unicode normalization, or that is also the
 folder of another listed file (`stats/a.json` and `stats/a.json/b.json`). A pack holds at most 200
-files, `manifest.json` included, and 5 MB; the manifest's `definitions` and
+files, `manifest.json` included, and 5 MB of content (an archive may be up to
+1 MB larger for the zip format's own headers); the manifest's `definitions` and
 `presets` lists together hold at most 199 entries, and a pack declares at most
 500 fragments, 500 stats and 500 presets; its fragments name other fragments
 at most 2000 times in all.

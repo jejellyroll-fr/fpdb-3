@@ -619,6 +619,7 @@ def test_an_oversized_archive_is_refused_before_it_is_opened(
     with zipfile.ZipFile(archive, "w") as out:
         out.writestr("manifest.json", (EXAMPLE / "manifest.json").read_text(encoding="utf-8"))
     monkeypatch.setattr(stat_packs, "MAX_ARCHIVE_BYTES", 10)
+    monkeypatch.setattr(stat_packs, "MAX_ARCHIVE_OVERHEAD", 0)
     opened: list[Any] = []
     monkeypatch.setattr(stat_packs.zipfile, "ZipFile", lambda *args, **kwargs: opened.append(args))
 
@@ -2012,3 +2013,42 @@ def test_a_stat_naming_one_fragment_many_times_is_refused(source: Path, packs_di
     )
 
     assert "fragments names 'example.preflop.unopened' twice" in refused(source, packs_dir)
+
+
+# -- review of 98a8e8f2 (PR #411) -----------------------------------------------
+
+
+def _pad_to(source: Path, total: int) -> None:
+    """Pad the stats file with JSON whitespace until the pack's files add up to ``total`` bytes."""
+    size = sum(path.stat().st_size for path in source.rglob("*") if path.is_file())
+    stats = source / "stats" / "steals.json"
+    stats.write_bytes(stats.read_bytes() + b" " * (total - size))
+
+
+def test_an_uncompressed_zip_of_a_pack_at_the_byte_limit_installs(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    # The folder is 100 bytes under 5 MB and reads as a folder; stored without
+    # compression, its zip is larger than 5 MB by the headers alone.
+    _pad_to(source, stat_packs.MAX_ARCHIVE_BYTES - 100)
+    stat_packs.read_pack(source)
+    archive = tmp_path / "stored.fpdbstats"
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_STORED) as out:
+        for path in sorted(source.rglob("*")):
+            if path.is_file():
+                out.write(path, f"my-pack/{path.relative_to(source).as_posix()}")
+    assert archive.stat().st_size > stat_packs.MAX_ARCHIVE_BYTES
+
+    assert stat_packs.install_pack(archive, packs_dir).id == PACK_ID
+
+
+def test_an_uncompressed_zip_over_the_byte_limit_is_still_refused(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    # The overhead allowance is for the container: the content is still held
+    # to the limit as it is read.
+    _pad_to(source, stat_packs.MAX_ARCHIVE_BYTES + 1024)
+    archive = tmp_path / "stored.fpdbstats"
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_STORED) as out:
+        for path in sorted(source.rglob("*")):
+            if path.is_file():
+                out.write(path, path.relative_to(source).as_posix())
+
+    with pytest.raises(stat_packs.PackError, match="larger than"):
+        stat_packs.install_pack(archive, packs_dir)
