@@ -2169,3 +2169,66 @@ def test_a_preset_grouping_is_a_name_or_a_list_of_them(source: Path, packs_dir: 
 
     expected = (group_by,) if isinstance(group_by, str) else tuple(group_by)
     assert stat_packs.install_pack(source, packs_dir).presets[0].group_by == expected
+
+
+# -- self-review of the pack surface (PR #411) ---------------------------------
+
+
+@pytest.mark.parametrize("kind", ["file", "link", "folder"])
+def test_a_stray_path_at_the_backup_name_does_not_block_a_replacement(
+    source: Path, packs_dir: Path, kind: str
+) -> None:
+    # A replacement moves the previous install to ".<id>.previous" before it
+    # swaps the new one in, and removes whatever was already there.
+    # shutil.rmtree refuses anything that is not a folder, so a stray file or
+    # link under that name made every later replacement of the pack fail with
+    # NotADirectoryError, and recovery skipped it too, so it never cleared.
+    stat_packs.install_pack(source, packs_dir)
+    stray = packs_dir / f".{PACK_ID}.previous"
+    if kind == "file":
+        stray.write_text("stray", encoding="utf-8")
+    elif kind == "link":
+        stray.symlink_to(packs_dir)
+    else:
+        stray.mkdir()
+
+    assert stat_packs.install_pack(source, packs_dir, replace=True).id == PACK_ID
+    assert not stray.exists() and not stray.is_symlink()
+    assert (packs_dir / PACK_ID / "manifest.json").is_file()
+
+
+def test_a_pack_id_may_not_be_the_state_file_name(source: Path, packs_dir: Path) -> None:
+    # The id names the install folder, and the pack directory keeps its own
+    # state file beside the packs. A pack called "state.json" took that name
+    # with a folder, and every later write of the state then failed with
+    # EISDIR -- disabling any pack at all stopped working. Every other name in
+    # the pack is renamed with the id, so this pack is valid but for its id.
+    for path in sorted(source.rglob("*.json")):
+        path.write_text(path.read_text(encoding="utf-8").replace(PACK_ID, "state.json"), encoding="utf-8")
+
+    with pytest.raises(stat_packs.PackError) as caught:
+        stat_packs.install_pack(source, packs_dir)
+
+    assert "is the name fpdb keeps its own state under" in str(caught.value)
+    assert not (packs_dir / "state.json").exists()
+
+
+@pytest.mark.parametrize("name", ["stray", "state.json"])
+def test_recovery_leaves_a_stray_path_under_a_reserved_shape_alone(
+    source: Path, packs_dir: Path, name: str
+) -> None:
+    # Recovery put back any folder named ".<something>.previous", including one
+    # fpdb never writes: renaming it invented a pack folder. Named after the
+    # state file it became a folder at that name, after which disabling a pack
+    # failed with EISDIR; any other became a phantom invalid pack in the
+    # manager. Only a name fpdb moves an install aside under is acted on.
+    stat_packs.install_pack(source, packs_dir)
+    stray = packs_dir / f".{name}.previous"
+    stray.mkdir()
+
+    assert [row.id for row in stat_packs.list_packs(packs_dir)] == ["builtin", PACK_ID]
+
+    assert stray.is_dir()
+    assert not (packs_dir / name).is_dir()
+    stat_packs.set_enabled(PACK_ID, False, packs_dir)
+    assert (packs_dir / "state.json").is_file()

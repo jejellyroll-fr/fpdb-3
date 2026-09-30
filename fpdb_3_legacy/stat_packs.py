@@ -640,6 +640,11 @@ def _pack_id_problem(pack_id: Any) -> str:
         return "must be a dotted lower-case namespace such as 'author.topic'"
     if pack_id.split(".", 1)[0] in _RESERVED_NAMESPACES:
         return f"uses a reserved namespace ({sorted(_RESERVED_NAMESPACES)})"
+    if pack_id == STATE_NAME:
+        # The id is the install folder's name, and the pack directory keeps its
+        # own state file beside the packs: a folder of that name would make
+        # every later write of that state fail with EISDIR.
+        return f"is the name fpdb keeps its own state under ({STATE_NAME})"
     # The id is the install folder's name: "con.stats" cannot be one on Windows.
     problem = _portable_name_problem(PurePosixPath(pack_id))
     if problem:
@@ -1416,6 +1421,21 @@ def install_pack(
     return pack
 
 
+def _remove(path: Path) -> None:
+    """Remove a file, a symbolic link or a folder at ``path``.
+
+    ``shutil.rmtree`` refuses anything that is not a folder, so a stray file or
+    link under a name fpdb reserves for its own bookkeeping (``.<id>.previous``)
+    would make every later replacement of that pack fail with
+    NotADirectoryError -- and never clear itself, since recovery skips it too.
+    A link is unlinked, never followed.
+    """
+    if path.is_symlink() or not path.is_dir():
+        path.unlink()
+    else:
+        shutil.rmtree(path)
+
+
 def _write_pack(pack: StatPack, root: Path, target: Path) -> None:
     """Write ``pack`` beside ``target``, then swap it in.
 
@@ -1433,8 +1453,8 @@ def _write_pack(pack: StatPack, root: Path, target: Path) -> None:
             path.write_bytes(data)
         if target.exists():
             backup = root / f".{pack.id}.previous"
-            if backup.exists():
-                shutil.rmtree(backup)
+            if backup.exists() or backup.is_symlink():
+                _remove(backup)
             target.rename(backup)
         staging.rename(target)
     except OSError:
@@ -1443,7 +1463,12 @@ def _write_pack(pack: StatPack, root: Path, target: Path) -> None:
             backup.rename(target)
         raise
     if backup is not None:
-        shutil.rmtree(backup, ignore_errors=True)
+        # Housekeeping after a successful swap: a backup that cannot be removed
+        # is left for the next recovery, never reported as a failed install.
+        try:
+            _remove(backup)
+        except OSError as exc:
+            log.warning("Installed %s but could not remove %s: %s", pack.id, backup, exc)
 
 
 def _forget_disabled(root: Path, pack_id: str) -> None:
@@ -1535,11 +1560,19 @@ def _recover_interrupted_replacements(root: Path) -> None:
     new one in. If fpdb stopped between the two steps the pack folder is gone
     and only the backup is left: restore it. A backup beside a live pack is the
     leftover of a finished replacement and is removed.
+
+    Only a name fpdb moves an install aside under is acted on. Anything else
+    under that reserved shape is not ours: renaming it would invent a pack
+    folder out of a stray folder, and one named after the state file would then
+    break every later write of that state.
     """
     for backup in root.glob(".*.previous"):
         if not backup.is_dir() or backup.is_symlink():
             continue
-        target = root / backup.name[1 : -len(".previous")]
+        name = backup.name[1 : -len(".previous")]
+        if _pack_id_problem(name):
+            continue
+        target = root / name
         try:
             if target.exists():
                 shutil.rmtree(backup)

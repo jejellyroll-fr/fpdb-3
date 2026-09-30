@@ -125,7 +125,8 @@ author is most likely to meet.
 
 **Names.** The pack id is a dotted lower-case namespace (`author.topic`) that
 also names its install folder: at most 245 characters, not a Windows device
-name (`con.x`, `nul.x`, …). Every stat, fragment and preset id starts with
+name (`con.x`, `nul.x`, …), and not `state.json`, which is where fpdb keeps
+which packs are enabled. Every stat, fragment and preset id starts with
 `<pack id>.` and uses only letters, digits, `_`, `.` and `-` — the name is
 written into `HUD_config.xml` when the stat is put on a HUD.
 

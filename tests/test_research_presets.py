@@ -240,12 +240,44 @@ def test_a_localized_name_falls_back_to_anything(tmp_path: Path) -> None:
         # "Adjust plaeyr" named a filter no row can add.
         ({**_VALID_PRESET, "variables": ["plaeyr"]}, r"unknown variable\(s\) \['plaeyr'\]"),
         ({**_VALID_PRESET, "variables": ["player", "stake"]}, r"unknown variable\(s\) \['stake'\]"),
+        # str() made an object into its repr: a preset was keyed by "{'a': 1}".
+        ({**_VALID_PRESET, "id": {"a": 1}}, "id must be a string, got dict"),
+        ({**_VALID_PRESET, "id": 7}, "id must be a string, got int"),
+        ({**_VALID_PRESET, "id": ["ok"]}, "id must be a string, got list"),
     ],
 )
 def test_a_bad_preset_is_refused_with_its_reason(tmp_path: Path, broken, message) -> None:
     _write_pack(tmp_path, [broken])
     with pytest.raises(ValueError, match=message):
         rp.load_packs(tmp_path)
+
+
+@pytest.mark.parametrize(
+    ("overrides", "message"),
+    [
+        # str() turned an object into its repr: the pack installed named
+        # "{'a': 1}", and every preset in it reported that as its source.
+        ({"pack": {"a": 1}}, "pack must be a string, got dict"),
+        ({"pack": 7}, "pack must be a string, got int"),
+        ({"pack": ["x"]}, "pack must be a string, got list"),
+        ({"label": {"en": "Test pack"}}, "label must be a string, got dict"),
+        ({"label": 7}, "label must be a string, got int"),
+        ({"description": {"a": 1}}, "description must be a string, got dict"),
+        ({"description": ["x"]}, "description must be a string, got list"),
+    ],
+)
+def test_a_pack_field_that_is_not_text_is_refused(tmp_path: Path, overrides, message) -> None:
+    _write_pack(tmp_path, [_VALID_PRESET], **overrides)
+    with pytest.raises(ValueError, match=message):
+        rp.load_packs(tmp_path)
+
+
+def test_an_absent_label_and_description_keep_their_defaults(tmp_path: Path) -> None:
+    """The other half: a missing or empty label is the pack id, not a refusal."""
+    _write_pack(tmp_path, [_VALID_PRESET], label="", description=None)
+    (pack,) = rp.load_packs(tmp_path)
+    assert pack.label == "test-pack"
+    assert pack.description == ""
 
 
 def test_variables_and_tags_are_kept_as_listed(tmp_path: Path) -> None:

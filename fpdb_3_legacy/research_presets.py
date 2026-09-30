@@ -106,6 +106,21 @@ def _fail(message: str, source: str) -> NoReturn:
     raise ValueError(f"{source}: {message}")
 
 
+def _text(value: Any, field: str, source: str) -> str:
+    """A field the format declares as plain text, or ``""`` when it is absent.
+
+    ``str()`` would turn an object into its Python repr: a pack declaring
+    ``"pack": {"a": 1}`` would install a pack named ``"{'a': 1}"`` and show that
+    to the user as the source of every preset in it, and a preset id would stop
+    being a key. A value that is not text is refused by name instead.
+    """
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        _fail(f"{field} must be a string, got {type(value).__name__}", source)
+    return value
+
+
 def _localized(value: Any, locale: str, field: str, source: str) -> Any:
     """A name/description as text: either one string or a locale table."""
     if isinstance(value, str):
@@ -188,7 +203,7 @@ def _validate_pack(raw: Any, source: str) -> PresetPack:
             f"got {raw.get('schema_version')!r}",
             source,
         )
-    pack_id = str(raw.get("pack") or "").strip()
+    pack_id = _text(raw.get("pack"), "pack", source).strip()
     if not pack_id:
         _fail("pack must be a non-empty id", source)
     entries = raw.get("presets")
@@ -202,8 +217,8 @@ def _validate_pack(raw: Any, source: str) -> PresetPack:
         _fail(f"duplicate preset id(s): {duplicate}", source)
     return PresetPack(
         id=pack_id,
-        label=str(raw.get("label") or pack_id),
-        description=str(raw.get("description") or ""),
+        label=_text(raw.get("label"), "label", source) or pack_id,
+        description=_text(raw.get("description"), "description", source),
         presets=presets,
     )
 
@@ -233,11 +248,11 @@ def _validate_preset(raw: Any, source: str) -> LibraryPreset:
     unknown = sorted(set(raw) - _PRESET_FIELDS)
     if unknown:
         _fail(f"unknown preset field(s) {unknown}; known: {sorted(_PRESET_FIELDS)}", source)
-    preset_id = str(raw.get("id") or "").strip()
+    preset_id = _text(raw.get("id"), "id", source).strip()
     if not preset_id:
         _fail("id must be a non-empty string", source)
     source = f"{source}#{preset_id}"
-    category = str(raw.get("category") or "").strip().lower()
+    category = _text(raw.get("category"), "category", source).strip().lower()
     if category not in CATEGORIES:
         _fail(f"unknown category {category!r}; known: {list(CATEGORIES)}", source)
     # The engine vocabulary is checked by the browser's own validator, which is
@@ -253,7 +268,8 @@ def _validate_preset(raw: Any, source: str) -> LibraryPreset:
         )
     except ValueError as exc:
         _fail(str(exc), source)
-    view = str(raw.get("recommended_view") or "summary").strip().lower()
+    view = _text(raw.get("recommended_view"), "recommended_view", source) or "summary"
+    view = view.strip().lower()
     if view not in RESULT_VIEWS:
         _fail(f"unknown recommended_view {view!r}; known: {list(RESULT_VIEWS)}", source)
     min_sample = raw.get("min_sample")
