@@ -127,6 +127,10 @@ MAX_ARCHIVE_BYTES: Final = 5 * 1024 * 1024
 # entry would otherwise become a message each -- a crafted 5 MB file holds a
 # million -- and the import would build hundreds of megabytes of them.
 MAX_REPORTED_ERRORS: Final = 50
+# Characters kept of one problem. A message quotes the value it refuses, and a
+# pack can make one value megabytes long and have fifty definitions name it:
+# fifty whole copies would be hundreds of megabytes in the report.
+MAX_ERROR_CHARS: Final = 500
 # More decimal places than any stat can mean; a pack cannot ask for more.
 MAX_PRECISION: Final = 10
 # The common limit on one path component (ext4, APFS, NTFS): a longer name
@@ -152,11 +156,38 @@ MAX_ID_LENGTH: Final = MAX_NAME_BYTES - len("..previous")
 MAX_VERSION_DIGITS: Final = 9
 
 
+def _clip(message: str) -> str:
+    """One problem, cut to about MAX_ERROR_CHARS characters.
+
+    Cut in the middle: a message names what it refuses first and why last, and
+    what runs long is the value quoted between them.
+    """
+    if len(message) <= MAX_ERROR_CHARS:
+        return message
+    half = MAX_ERROR_CHARS // 2
+    return f"{message[:half]} … {message[-half:]}"
+
+
+class _ErrorLog(list[str]):
+    """The problems found in one pack, each cut as it is recorded.
+
+    Cut when recorded rather than when reported, so a long message is never
+    held whole: fifty copies of a quoted 4 MB value never exist together.
+    """
+
+    def append(self, message: str) -> None:
+        super().append(_clip(message))
+
+    def extend(self, messages: Iterable[str]) -> None:
+        for message in messages:
+            self.append(message)
+
+
 class PackError(ValueError):
     """A pack that cannot be installed or loaded, with every reason found."""
 
     def __init__(self, messages: Iterable[str], source: str = "") -> None:
-        self.messages = list(messages) or ["invalid pack"]
+        self.messages = [_clip(message) for message in messages] or ["invalid pack"]
         self.source = source
         prefix = f"{source}: " if source else ""
         super().__init__(prefix + "; ".join(self.messages))
@@ -461,7 +492,14 @@ def _parse_data(name: str, data: bytes, source: str) -> Any:
     except UnicodeDecodeError as exc:
         raise PackError([f"{name} is not UTF-8 text: {exc}"], source) from exc
     try:
-        return json.loads(text, object_pairs_hook=_unique_keys)
+        document = json.loads(text, object_pairs_hook=_unique_keys)
+        # UTF-8 bytes can still spell a lone surrogate as an escape ("\ud800"):
+        # json.loads keeps it, and the database driver cannot encode it when a
+        # filter binds it, so the stat would fail every time it runs. A string
+        # anywhere in the file has to be text that can be written back out.
+        json.dumps(document, ensure_ascii=False).encode("utf-8")
+    except UnicodeEncodeError as exc:
+        raise PackError([f"{name} holds text that is not valid Unicode (a lone surrogate escape)"], source) from exc
     except ValueError as exc:
         # JSONDecodeError, a repeated key, and the plain ValueError of an
         # integer longer than Python's int-string limit: either way the file
@@ -470,6 +508,7 @@ def _parse_data(name: str, data: bytes, source: str) -> Any:
     except RecursionError as exc:
         # Valid JSON nested deeper than the parser can follow: still refused.
         raise PackError([f"{name} is nested too deeply to read"], source) from exc
+    return document
 
 
 def _unique_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -605,6 +644,7 @@ def read_pack(source: str | Path, *, fpdb_version: str | None = None) -> StatPac
     problem = _listing_size_problem(manifest)
     if problem:
         raise PackError([problem], label)
+    errors = _ErrorLog()
 
     prefix = f"{pack_id}."
     fragments = _read_fragments(manifest.get("fragments", {}), prefix, errors)

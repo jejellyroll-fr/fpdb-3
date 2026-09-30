@@ -104,12 +104,14 @@ clashing names listed.
 * **No network.** Nothing is fetched, at install or at evaluation.
 
 Every problem found is reported at once, so an author fixes a pack in one pass —
-up to 50: past that, reading stops and the report says so.
+up to 50: past that, reading stops and the report says so. A long problem is
+shortened in the middle, where it quotes the value it refuses.
 
 Packs are **JSON only**. A pack is made to be shared, so it must install on any
 fpdb; YAML would need PyYAML, which fpdb does not ship. (Definitions kept in a
 local definitions folder may still be YAML when PyYAML is installed.)
-An object may not name the same key twice.
+An object may not name the same key twice, and every string must be valid
+Unicode — an escaped lone surrogate such as `"\ud800"` is refused.
 
 ## Validation rules
 

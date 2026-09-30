@@ -1427,7 +1427,7 @@ def test_a_key_repeated_in_a_definition_is_refused(source: Path, packs_dir: Path
     # json.loads keeps the last of two equal keys: the invalid "false" would
     # never be checked and the stat would install as "in_position": true.
     stat = (
-        '{"definitions": [{"name": "example.preflop.x", "metric": "fold_frequency",'
+        '{"schema_version": 1, "stats": [{"name": "example.preflop.x", "metric": "fold_frequency",'
         ' "filters": {"in_position": "false", "in_position": true}}]}'
     )
     (source / "stats" / "steals.json").write_text(stat, encoding="utf-8")
@@ -1662,3 +1662,58 @@ def test_a_pack_preset_lists_its_variables_and_tags(source: Path, packs_dir: Pat
     (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
 
     assert f"{field} must be a list of non-empty strings" in refused(source, packs_dir)
+
+
+# -- review of 1dd07453 (PR #411) -----------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "filters",
+    ['{"site": "\\ud800"}', '{"site": ["PokerStars", "\\udfff"]}', '{"player": "Hero\\ud83d"}'],
+    ids=["value", "list item", "unpaired high"],
+)
+def test_a_lone_surrogate_escape_is_refused(source: Path, packs_dir: Path, filters: str) -> None:
+    # Valid UTF-8 bytes, but the escape decodes to a lone surrogate the
+    # database driver cannot encode: the stat failed every time it ran.
+    stat = '{"schema_version": 1, "stats": [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": ' + filters + "}]}"
+    (source / "stats" / "steals.json").write_text(stat, encoding="utf-8")
+
+    assert "holds text that is not valid Unicode" in refused(source, packs_dir)
+
+
+def test_a_lone_surrogate_in_a_label_is_refused_too(source: Path, packs_dir: Path) -> None:
+    stat = '{"schema_version": 1, "stats": [{"name": "example.preflop.x", "metric": "fold_frequency", "label": "\\udc00"}]}'
+    (source / "stats" / "steals.json").write_text(stat, encoding="utf-8")
+
+    assert "holds text that is not valid Unicode" in refused(source, packs_dir)
+
+
+def test_an_escaped_surrogate_pair_is_ordinary_text(source: Path, packs_dir: Path) -> None:
+    # "🃏" is one character (a playing card), written as an escape.
+    stat = '{"schema_version": 1, "stats": [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"player": "Hero\\ud83c\\udccf"}}]}'
+    (source / "stats" / "steals.json").write_text(stat, encoding="utf-8")
+
+    assert stat_packs.install_pack(source, packs_dir).definitions[0].filters == {"player": "Hero\U0001f0cf"}
+
+
+def test_a_long_value_quoted_by_many_problems_is_clipped(source: Path, packs_dir: Path) -> None:
+    # One 1 MB bad position in a fragment, named by fifty definitions: each
+    # compile error quotes it, and fifty whole copies would be 50 MB of report.
+    edit_manifest(source, fragments={"example.preflop.huge": {"position": "x" * 1_000_000}})
+    write_stats(
+        source,
+        [
+            {"name": f"example.preflop.s{index}", "metric": "fold_frequency", "fragments": ["example.preflop.huge"]}
+            for index in range(60)
+        ],
+    )
+
+    with pytest.raises(stat_packs.PackError) as caught:
+        stat_packs.install_pack(source, packs_dir)
+
+    messages = caught.value.messages
+    assert len(messages) == stat_packs.MAX_REPORTED_ERRORS + 1
+    assert all(len(message) <= stat_packs.MAX_ERROR_CHARS + 3 for message in messages)
+    # Cut in the middle: the stat it names and the reason both survive.
+    assert messages[0].startswith("stats/steals.json: stat 'example.preflop.s0'")
+    assert "Unknown position" in messages[0]
