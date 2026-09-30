@@ -151,7 +151,8 @@ then its values are checked where the engine is lenient:
 | one-sided hand ids (`hand_id_from`, `hand_id_to`) | one whole number |
 | any | `{"is_null": true}` / `{"is_null": false}` |
 
-Numbers must be finite and at most 2⁵³ in size, including a number the
+A list-valued filter holds at most 200 values, and a stat's or preset's query
+binds at most 999 values in all. Numbers must be finite and at most 2⁵³ in size, including a number the
 filter turns its value into (a position written `"100000000000000000000"`);
 `precision` is at most 10.
 `filters` and `numerator` are checked separately.

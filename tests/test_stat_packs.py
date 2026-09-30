@@ -7,6 +7,7 @@ documentation is the fixture, so the documented example is proven installable.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import zipfile
 from pathlib import Path
@@ -1957,3 +1958,43 @@ def test_a_preset_repeating_a_dimension_is_refused(source: Path, packs_dir: Path
     (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
 
     assert "names a dimension twice" in refused(source, packs_dir)
+
+
+# -- review of dd28ab33 (PR #411) -----------------------------------------------
+
+
+def test_a_huge_list_in_a_shared_fragment_is_refused_before_compiling(source: Path, packs_dir: Path) -> None:
+    # One placeholder per value: 100,000 of them, named by every stat that
+    # uses the fragment, would be compiled again and again at import.
+    edit_manifest(source, fragments={"example.preflop.everywhere": {"site": [0] * 100_000}})
+    write_stats(
+        source,
+        [{"name": "example.preflop.x", "metric": "fold_frequency", "fragments": ["example.preflop.everywhere"]}],
+    )
+
+    assert "filter 'site' holds 100000 values; at most 200" in refused(source, packs_dir)
+
+
+def test_a_list_filter_at_the_value_limit_installs(source: Path, packs_dir: Path) -> None:
+    write_stats(
+        source,
+        [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": {"hand_id": list(range(1, 201))}}],
+    )
+
+    assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
+
+
+def test_a_query_binding_too_many_values_is_refused(source: Path, packs_dir: Path) -> None:
+    # Each list within its limit, but together past what SQLite before 3.32
+    # binds in one statement.
+    filters = {name: [f"v{index}" for index in range(200)] for name in ("site", "player", "session", "currency", "game")}
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "filters": filters}])
+
+    # 1000 filter values, and whatever the metric binds of its own.
+    assert re.search(r"its query binds 10\d\d values; at most 999", refused(source, packs_dir))
+
+
+def test_a_preset_list_over_the_value_limit_is_refused(source: Path, packs_dir: Path) -> None:
+    _preset_with(source, hand_id=list(range(1, 202)))
+
+    assert "filter 'hand_id' holds 201 values; at most 200" in refused(source, packs_dir)

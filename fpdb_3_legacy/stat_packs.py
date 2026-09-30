@@ -136,6 +136,11 @@ MAX_PACK_ENTRIES: Final = 500
 # naming a fragment expands them again when it is compiled -- at install and
 # at each run -- so their number is what that costs.
 MAX_FRAGMENT_REFERENCES: Final = 2000
+# Values in one list-valued filter, and parameters in one compiled query. The
+# compiler writes a placeholder per value; 999 is the smallest limit a
+# supported backend has had (SQLite before 3.32), far past any real stat.
+MAX_FILTER_VALUES: Final = 200
+MAX_QUERY_PARAMETERS: Final = 999
 # The root Finder writes its metadata under: never part of a pack.
 _FINDER_METADATA: Final = "__MACOSX/"
 MAX_ARCHIVE_BYTES: Final = 5 * 1024 * 1024
@@ -906,10 +911,18 @@ def _checked_definition(
     if definition.name in seen:
         raise ValueError(f"{name}: stat {definition.name!r} is defined twice in the pack")
     try:
+        query = definitions.resolve_query(definition, fragments=library)
+        # Before compiling: a list of a hundred thousand values would be
+        # written out as that many placeholders first.
+        problem = _values_count_problem(query.filters) or _values_count_problem(query.numerator)
+        if problem:
+            raise ValueError(problem)
         # Compiled exactly as the engine will run it: this is where a bad
         # filter *value* ("position": ["dealer-ish"]) is caught.
-        definitions.compile_definition(definition, fragments=library)
-        query = definitions.resolve_query(definition, fragments=library)
+        compiled = definitions.compile_definition(definition, fragments=library)
+        problem = _parameters_problem(compiled)
+        if problem:
+            raise ValueError(problem)
         # Checked apart: a merged dict would hide the denominator's value
         # wherever the numerator names the same filter.
         problem = _filter_value_problem(query.filters) or _filter_value_problem(query.numerator)
@@ -985,6 +998,10 @@ def _filter_value_problem(filters: Mapping[str, Any], *, preset: bool = False) -
     """
     from .analytics_query import FILTERS  # noqa: PLC0415
 
+    # First: every later check, and the per-filter compile, walks each list.
+    problem = _values_count_problem(filters)
+    if problem:
+        return problem
     for name, value in filters.items():
         spec = FILTERS.get(name)
         if spec is None:
@@ -1140,6 +1157,22 @@ def _value_filter_problem(name: str, value: Any, *, kind: str) -> str:
     return ""
 
 
+def _values_count_problem(filters: Mapping[str, Any]) -> str:
+    """The first filter holding more values than MAX_FILTER_VALUES, or ``""``."""
+    for name, value in filters.items():
+        if isinstance(value, (list, tuple, Mapping)) and len(value) > MAX_FILTER_VALUES:
+            return f"filter {name!r} holds {len(value)} values; at most {MAX_FILTER_VALUES}"
+    return ""
+
+
+def _parameters_problem(compiled: Any) -> str:
+    """Why a compiled query binds more parameters than a backend takes, or ``""``."""
+    count = len(compiled.params) + len(compiled.player_params)
+    if count > MAX_QUERY_PARAMETERS:
+        return f"its query binds {count} values; at most {MAX_QUERY_PARAMETERS}"
+    return ""
+
+
 def _one_filter_problem(name: str, value: Any, kind: str, *, preset: bool) -> str:
     if isinstance(value, Mapping) and set(value) == {"is_null"}:
         # The compiler takes this structured form for any filter, first. A
@@ -1264,7 +1297,7 @@ def _preset_compile_error(preset: Any) -> str:
         problem = _filter_value_problem(preset.filters, preset=True) or _filter_value_problem(preset.numerator)
         if problem:
             return problem
-        compile_query(
+        compiled = compile_query(
             Query(
                 metric=preset.metric,
                 filters=dict(preset.filters),
@@ -1272,6 +1305,9 @@ def _preset_compile_error(preset: Any) -> str:
                 group_by=tuple(preset.group_by),
             ),
         )
+        problem = _parameters_problem(compiled)
+        if problem:
+            return problem
     except (ArithmeticError, TypeError, ValueError) as exc:
         # A 400-digit bound overflows float(): still just a bad value.
         return str(exc)
