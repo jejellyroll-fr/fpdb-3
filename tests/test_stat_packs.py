@@ -2232,3 +2232,84 @@ def test_recovery_leaves_a_stray_path_under_a_reserved_shape_alone(
     assert not (packs_dir / name).is_dir()
     stat_packs.set_enabled(PACK_ID, False, packs_dir)
     assert (packs_dir / "state.json").is_file()
+
+
+# -- review of 80701b98 (PR #411) -----------------------------------------------
+
+
+def _archive_at_the_path_limits(tmp_path: Path, *, widths: list[int], fill: int = 0) -> Path:
+    """An archive of a pack listing MAX_ARCHIVE_FILES - 1 files, each 8 levels deep.
+
+    Every file gets parents of its own and every folder is recorded, which is
+    what a zip tool does: 199 files at eight levels is 1,593 records, not 199.
+    The members go straight into the archive, so the shape costs nothing to
+    build. ``widths`` pads that many leading path components; ``fill`` pads each
+    stat's description.
+    """
+    pack_id = "limit.pack"
+    listed: list[str] = []
+    bodies: dict[str, bytes] = {}
+    for index in range(stat_packs.MAX_ARCHIVE_FILES - 1):
+        parts = [f"{index}-{level}".ljust(width, "x")[:width] for level, width in enumerate(widths)]
+        parts += [f"n{index}{level}" for level in range(len(widths), stat_packs.MAX_PATH_DEPTH - 1)]
+        name = "/".join(parts) + f"/s{index}.json"
+        listed.append(name)
+        bodies[name] = json.dumps(
+            {
+                "schema_version": 1,
+                "stats": [
+                    {
+                        "name": f"{pack_id}.s{index}",
+                        "metric": "raise_frequency",
+                        "filters": {"position": ["BTN"]},
+                        "format": "percentage",
+                        "min_sample": 20,
+                        "category": "Probe",
+                        "description": "x" * fill,
+                    }
+                ],
+            }
+        ).encode("utf-8")
+    manifest = json.dumps(
+        {
+            "schema": "fpdb_stat_pack",
+            "version": 1,
+            "id": pack_id,
+            "name": "At the path limits",
+            "definition_schema_version": 1,
+            "definitions": listed,
+        }
+    ).encode("utf-8")
+
+    archive = tmp_path / "limits.fpdbstats"
+    with zipfile.ZipFile(archive, "w", zipfile.ZIP_STORED) as out:
+        folders = {"/".join(Path(name).parts[:level]) for name in listed for level in range(1, len(Path(name).parts))}
+        for folder in sorted(folders):
+            out.writestr(f"{pack_id}/{folder}/", b"")
+        for name in listed:
+            out.writestr(f"{pack_id}/{name}", bodies[name])
+        out.writestr(f"{pack_id}/manifest.json", manifest)
+    return archive
+
+
+def test_an_archive_recording_the_folders_a_pack_implies_is_accepted(tmp_path: Path) -> None:
+    # A zip tool stores a record for every folder a listed path implies, so a
+    # pack the folder reader accepts came in an archive of 1,593 records while
+    # the bound was twice the file count plus 64: the documented zip-the-folder
+    # workflow refused a pack that was within every stated limit.
+    archive = _archive_at_the_path_limits(tmp_path, widths=[24] * (stat_packs.MAX_PATH_DEPTH - 2))
+    with zipfile.ZipFile(archive) as handle:
+        assert len(handle.infolist()) > 2 * stat_packs.MAX_ARCHIVE_FILES + 64
+
+    assert stat_packs.read_pack(archive).id == "limit.pack"
+
+
+def test_the_archive_byte_budget_covers_the_names_it_records(tmp_path: Path) -> None:
+    # The byte budget has to cover those records' names too: at the path length
+    # limit they alone pass the megabyte the container was allowed, so a pack at
+    # the content limit came in an archive the size guard refused before it was
+    # opened, though every file in it was within the stated limits.
+    archive = _archive_at_the_path_limits(tmp_path, widths=[255, 200], fill=25_000)
+
+    assert archive.stat().st_size > stat_packs.MAX_ARCHIVE_BYTES + 1024 * 1024
+    assert stat_packs.read_pack(archive).id == "limit.pack"

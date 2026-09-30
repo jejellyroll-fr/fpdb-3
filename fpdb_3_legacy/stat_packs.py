@@ -120,13 +120,6 @@ _WINDOWS_FORBIDDEN: Final = re.compile(r'[<>:"|?*\x00-\x1f]')
 _WINDOWS_RESERVED: Final = frozenset(
     {"CON", "PRN", "AUX", "NUL", *(f"COM{n}" for n in range(1, 10)), *(f"LPT{n}" for n in range(1, 10))},
 )
-# Generous for data, small enough that an archive cannot fill the disk.
-MAX_ARCHIVE_FILES: Final = 200
-# Members an archive may hold around its pack. Finder adds an AppleDouble
-# sidecar under __MACOSX/ for each file it zips, so a pack at the file limit
-# comes in an archive of twice as many members; the byte budget still covers
-# every one of them.
-MAX_ARCHIVE_MEMBERS: Final = 2 * MAX_ARCHIVE_FILES + 64  # and the folder entries a zip tool adds
 # Fragments, stats or presets one pack may declare, of each. fpdb ships five
 # stats and twenty fragments; the file limit cannot bound these, since a 5 MB
 # manifest holds a few hundred thousand empty fragments, each validated,
@@ -143,12 +136,6 @@ MAX_FILTER_VALUES: Final = 200
 MAX_QUERY_PARAMETERS: Final = 999
 # The root Finder writes its metadata under: never part of a pack.
 _FINDER_METADATA: Final = "__MACOSX/"
-MAX_ARCHIVE_BYTES: Final = 5 * 1024 * 1024
-# What a zip adds around its content: a local header and a central-directory
-# entry per member (each with its name, at most 512 bytes), and a comment of at
-# most 64 KiB. An uncompressed archive of a pack at the byte limit is this much
-# larger than the pack, and must still be read so its content can be counted.
-MAX_ARCHIVE_OVERHEAD: Final = 1024 * 1024
 # Problems reported for one pack. Past this, reading stops: a few bytes per bad
 # entry would otherwise become a message each -- a crafted 5 MB file holds a
 # million -- and the import would build hundreds of megabytes of them.
@@ -175,6 +162,24 @@ MAX_FILTER_NUMBER: Final = 2**53
 # ".<id>." plus mkdtemp's eight random characters, and the install a
 # replacement moves aside is ".<id>.previous". Both add ten characters.
 MAX_ID_LENGTH: Final = MAX_NAME_BYTES - len("..previous")
+# An archive is read whole before it is judged, so its own limits are derived
+# from what a valid pack may hold rather than guessed: an archive of a pack
+# within the stated limits has to be accepted, and one beyond them refused.
+# Generous for data, small enough that an archive cannot fill the disk.
+MAX_ARCHIVE_FILES: Final = 200
+MAX_ARCHIVE_BYTES: Final = 5 * 1024 * 1024
+# Members an archive may hold. A zip tool records the folders a listed path
+# implies, not only the file, so a pack at the file limit whose paths are all at
+# the depth limit comes in an archive of MAX_ARCHIVE_FILES * MAX_PATH_DEPTH
+# members: 199 files at eight levels is 1,593 records, not 199. Finder adds an
+# AppleDouble sidecar under __MACOSX/ for each of those, doubling the count, and
+# a little is kept for the container's own entries.
+MAX_ARCHIVE_MEMBERS: Final = 2 * MAX_ARCHIVE_FILES * MAX_PATH_DEPTH + 64
+# What the container adds around that content: a local header and a
+# central-directory record for every member, each carrying the member's name --
+# a listed path under the pack folder, so at most MAX_PATH_LENGTH + MAX_ID_LENGTH
+# bytes, plus the prefix Finder's sidecars add.
+MAX_ARCHIVE_OVERHEAD: Final = 2 * MAX_ARCHIVE_MEMBERS * (MAX_PATH_LENGTH + MAX_ID_LENGTH + 64)
 # Digits allowed in one component of a version. A real version has a handful;
 # Python refuses to read an integer literal of more than 4300 digits, and a
 # *quoted* component of that length would reach int() as a bare ValueError no
