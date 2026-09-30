@@ -952,11 +952,11 @@ def test_a_preset_range_is_written_as_low_and_high(source: Path, packs_dir: Path
     [
         ({"identity": [["PokerStars", "Hero"]]}, "takes words or whole numbers, not"),
         ({"site": [1.5]}, "takes words or whole numbers, not"),
-        ({"site": ["Poker, Stars"]}, "takes a word the filter row reads back as written"),
-        ({"site": ["001"]}, "takes a word the filter row reads back as written"),
-        ({"site": ["7"]}, "takes a word the filter row reads back as written"),
-        ({"site": ["true"]}, "takes a word the filter row reads back as written"),
-        ({"site": [" Hero "]}, "takes a word the filter row reads back as written"),
+        ({"site": ["Poker, Stars"]}, "takes values the filter row reads back as written"),
+        ({"site": ["001"]}, "takes values the filter row reads back as written"),
+        ({"site": ["7"]}, "takes values the filter row reads back as written"),
+        ({"site": ["true"]}, "takes values the filter row reads back as written"),
+        ({"site": [" Hero "]}, "takes values the filter row reads back as written"),
         ({"site": [""]}, "needs a word: the filter row reads an empty one as no filter"),
         ({"site": ["   "]}, "needs a word: the filter row reads an empty one as no filter"),
     ],
@@ -1622,3 +1622,30 @@ def test_other_booleans_in_a_flag_preset_are_still_refused(source: Path, packs_d
     _preset_with(source, **{name: value})
 
     refused(source, packs_dir)
+
+
+# -- review of 51a39b54 (PR #411) -----------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "players", [["007", "Hero"], ["true", "Hero"], ["Hero", "Villain"], ["Hero"], "Hero", 7, [7]]
+)
+def test_a_preset_list_is_checked_as_the_joined_field(source: Path, packs_dir: Path, players: Any) -> None:
+    # The row writes "007, Hero" and reads both words back as written: the
+    # comma branch keeps them, so "007" is not read alone as the number 7.
+    _preset_with(source, player=players)
+
+    assert [p.id for p in stat_packs.install_pack(source, packs_dir).presets] == ["example.preflop.steal_by_position"]
+
+
+@pytest.mark.parametrize(
+    ("players", "read_back"),
+    [([1, 2], "['1', '2']"), (["Hero", 7], "['Hero', '7']"), (["Hero", ""], "['Hero']"), (["Hero", " Villain"], "['Hero', 'Villain']")],
+)
+def test_a_preset_list_the_joined_field_changes_is_refused(
+    source: Path, packs_dir: Path, players: list[Any], read_back: str
+) -> None:
+    # "1, 2" comes back as the words "1" and "2", not the numbers.
+    _preset_with(source, player=players)
+
+    assert f"reads back as written, not {players!r} (read back as {read_back})" in refused(source, packs_dir)

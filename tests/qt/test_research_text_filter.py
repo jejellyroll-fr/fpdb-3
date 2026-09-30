@@ -80,3 +80,17 @@ def test_no_flag_at_all_survives_the_row_and_the_preset_check(qapp, name) -> Non
 
     assert row.value() is True
     assert _research_round_trip_problem(name, True, FILTERS[name].kind) == ""
+
+
+@pytest.mark.parametrize(
+    "written",
+    [["007", "Hero"], ["true", "Hero"], ["Hero", "Villain"], ["Hero"], [1, 2], ["Hero", 7], ["Hero", ""], ["a", " b"], [7]],
+)
+def test_the_preset_check_reads_a_list_as_the_row_does(row, written) -> None:
+    # The row joins a list into one field and reads the field back whole, so
+    # the pack check must judge the joined field, not each word alone.
+    row.set_value(written)
+    back = row.value()
+    kept = (back if isinstance(back, list) else [back]) == written
+
+    assert (_research_round_trip_problem("site", written, FILTERS["site"].kind) == "") is kept

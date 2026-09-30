@@ -912,22 +912,27 @@ _VALUE_KINDS: Final = frozenset({"set", "scalar", "label", "flagset", "flagset_a
 _TEXT_KINDS: Final = frozenset({"set", "scalar", "label", "flagset", "flagset_all", "flagset_none", "identity_set"})
 
 
-def _row_text_problem(name: str, item: str) -> str:
-    """Why the Research filter row would not read this word back as written.
+def _row_text_problem(name: str, value: Any) -> str:
+    """Why the Research filter row would not read this value back as written.
 
-    The row is the one control a preset's text value goes through, and it does
-    more than trim: an empty field is read as *no filter at all*, ``true`` and
-    ``false`` as a condition, and digits as a number. A word it would change is
-    a constraint the preset cannot mean -- ``"001"`` would filter on the number
-    1, and ``""`` would drop the constraint and widen the query.
+    The row is the one control a preset's text value goes through. It writes
+    the value as one field -- a list joined with ", " -- and reads the whole
+    field back: an empty field is *no filter at all*, ``true`` and ``false`` a
+    condition, a field with a comma a list of words, and digits alone a
+    number. So the field is checked whole, as the row reads it: ``"001"``
+    alone comes back as the number 1, but ``["007", "Hero"]`` comes back as it
+    went in, while ``[1, 2]`` comes back as the words ``["1", "2"]``.
     """
     from .research_browser import text_value  # noqa: PLC0415 - Research is optional for a stats-only pack
 
-    if text_value(item) == item:
-        return ""
-    if not item.strip():
+    items = list(value) if isinstance(value, (list, tuple)) else [value]
+    # Exactly what _FilterRow.set_value writes into the field.
+    back = text_value(", ".join(str(item) for item in items))
+    if (back if isinstance(back, list) else [back]) == items:
+        return ""  # a one-item list and its item are the same filter to the engine
+    if back is None:
         return f"filter {name!r} in a preset needs a word: the filter row reads an empty one as no filter"
-    return f"filter {name!r} in a preset takes a word the filter row reads back as written, not {item!r}"
+    return f"filter {name!r} in a preset takes values the filter row reads back as written, not {value!r} (read back as {back!r})"
 
 
 def _research_round_trip_problem(name: str, value: Any, kind: str) -> str:
@@ -959,11 +964,7 @@ def _research_round_trip_problem(name: str, value: Any, kind: str) -> str:
     for item in items:
         if isinstance(item, bool) or not isinstance(item, (str, int)):
             return f"filter {name!r} in a preset takes words or whole numbers, not {item!r}"
-        if isinstance(item, str):
-            problem = _row_text_problem(name, item)
-            if problem:
-                return problem
-    return ""
+    return _row_text_problem(name, value)
 
 
 def _range_control_problem(name: str, bounds: Iterable[Any]) -> str:

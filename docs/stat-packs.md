@@ -156,11 +156,13 @@ and read back before it runs, so they may only hold what those controls keep
   10,000,000, to two decimals;
 * at least one value in a list — the row reads `[]` back as no filter, where
   the engine reads it as "none of these";
-* list values as words or whole numbers, without commas, and only where the
-  filter row reads them back unchanged: a digit-only word (`"001"`) comes back
-  as the number 1, `"true"` as a condition, and an empty or space-padded one as
-  no filter at all — so a number is written as a number; a player identity is
-  written `Site:alias`;
+* text values the filter row reads back unchanged. The row writes a list as
+  one field joined with `, ` and reads the whole field back: a field with a
+  comma is a list of words, so `["007", "Hero"]` is kept but `[1, 2]` comes
+  back as the words `"1"` and `"2"`; a field without one is a single value,
+  where a digit-only word (`"001"`) comes back as the number 1, `"true"` as a
+  condition, and an empty or space-padded word as no filter at all. A single
+  number is written as a number; a player identity is written `Site:alias`;
 * `true` for `draw_none` and `blocker_none`, their "no flag at all";
 * no `{"is_null": …}` and no `date_from`/`date_to`/`hand_id_from`/`hand_id_to`
   — list those under the preset's `variables` for the user to fill in.
