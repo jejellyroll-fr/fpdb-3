@@ -2142,3 +2142,30 @@ def test_folder_entries_count_against_the_archive_bound(source: Path, packs_dir:
 
     with pytest.raises(stat_packs.PackError, match=r"archive holds \d+ entries"):
         stat_packs.install_pack(archive, packs_dir)
+
+
+# -- review of 9243a0fa (PR #411) -----------------------------------------------
+
+
+def test_an_object_valued_preset_grouping_is_refused(source: Path, packs_dir: Path) -> None:
+    # The preset validator iterated the mapping, so {"position": "street"}
+    # passed as ("position",) whenever its keys were dimensions: the pack
+    # installed a query grouped otherwise than the document declares, with the
+    # value silently dropped. A user preset file reaches the same validator.
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["group_by"] = {"position": "street"}
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+
+    assert "group_by must be a dimension name or a list of them" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize("group_by", ["position", ["position"], ["position", "street"], []])
+def test_a_preset_grouping_is_a_name_or_a_list_of_them(source: Path, packs_dir: Path, group_by: Any) -> None:
+    # The other half of the rule: a name, or a list of names, is what the
+    # breakdown picker writes, and the shipped packs are written that way.
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["group_by"] = group_by
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+
+    expected = (group_by,) if isinstance(group_by, str) else tuple(group_by)
+    assert stat_packs.install_pack(source, packs_dir).presets[0].group_by == expected

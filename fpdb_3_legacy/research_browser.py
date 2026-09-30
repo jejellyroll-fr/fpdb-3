@@ -305,9 +305,29 @@ def validate_preset(payload: Mapping[str, Any]) -> dict[str, Any]:
     unknown = [name for name in numerator if name not in FILTERS]
     if unknown:
         raise ValueError(f"Unknown numerator filters {sorted(unknown)}; known: {sorted(FILTERS)}")
-    group_by = payload.get("group_by", ())
-    if isinstance(group_by, str):
-        group_by = (group_by,)
+    group_by = _group_by_dimensions(payload.get("group_by", ()))
+    return {
+        "metric": metric,
+        "filters": dict(filters),
+        "numerator": dict(numerator),
+        "group_by": group_by,
+        "description": str(payload.get("description", "")).strip(),
+    }
+
+
+def _group_by_dimensions(raw: Any) -> tuple[str, ...]:
+    """A preset's ``group_by`` as the dimensions it groups by.
+
+    A dimension name, or a list of them. A mapping is iterable, so
+    ``{"position": "street"}`` used to read as ``("position",)``: the query
+    installed was grouped otherwise than the preset declares and the value it
+    names was dropped without a word. A user preset file and a pack both reach
+    ``validate_preset``, so the rule lives here rather than in either loader
+    (#411 review).
+    """
+    group_by = (raw,) if isinstance(raw, str) else raw
+    if not isinstance(group_by, (list, tuple)) or not all(isinstance(name, str) for name in group_by):
+        raise ValueError(f"group_by must be a dimension name or a list of them, not {raw!r}")
     unknown = [name for name in group_by if name not in DIMENSIONS]
     if unknown:
         raise ValueError(f"Unknown dimensions {sorted(unknown)}; known: {sorted(DIMENSIONS)}")
@@ -315,13 +335,7 @@ def validate_preset(payload: Mapping[str, Any]) -> dict[str, Any]:
         # The breakdown picker holds each dimension once; a repeat splits
         # nothing further and multiplies the compiled query (#411).
         raise ValueError(f"group_by names a dimension twice: {list(group_by)[:10]}")
-    return {
-        "metric": metric,
-        "filters": dict(filters),
-        "numerator": dict(numerator),
-        "group_by": tuple(group_by),
-        "description": str(payload.get("description", "")).strip(),
-    }
+    return tuple(group_by)
 
 
 def describe_preset(preset: Mapping[str, Any]) -> str:

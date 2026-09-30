@@ -180,6 +180,10 @@ and read back before it runs, so they may only hold what those controls keep
   `variables` and `tags` are lists of strings, and each variable is a filter
   name (`player`, `date_from`, …).
 
+`group_by` is a dimension name or a list of them, never an object: a mapping is
+iterable, so `{"position": "street"}` would install a breakdown on `position`
+and drop the value it names.
+
 ## Where packs live
 
 Installed packs are copied to `<fpdb data directory>/stat-definitions.d/<pack

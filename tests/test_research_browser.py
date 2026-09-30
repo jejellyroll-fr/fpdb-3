@@ -227,6 +227,7 @@ def test_preset_validation_accepts_and_canonicalises() -> None:
         {"metric": "frequency", "filters": {"nope": 1}},
         {"metric": "frequency", "numerator": {"nope": 1}},
         {"metric": "frequency", "group_by": ["nope"]},
+        {"metric": "frequency", "group_by": 5},
         {"metric": "frequency", "filters": "not-a-mapping"},
         "not-a-mapping",
     ],
@@ -234,6 +235,20 @@ def test_preset_validation_accepts_and_canonicalises() -> None:
 def test_preset_validation_refuses_with_reason(payload) -> None:
     with pytest.raises(ValueError):
         rb.validate_preset(payload)
+
+
+def test_a_preset_grouping_is_a_name_or_a_list_of_them() -> None:
+    # A mapping is iterable: {"position": "street"} passed as ("position",), so
+    # a hand-edited research_presets.json installed a breakdown it never
+    # declared and dropped the value without a word. The pack loader reaches
+    # this validator too, but the rule is the validator's, not the loader's.
+    with pytest.raises(ValueError, match="group_by must be a dimension name or a list of them"):
+        rb.validate_preset({"metric": "frequency", "group_by": {"position": "street"}})
+    assert rb.validate_preset({"metric": "frequency", "group_by": "position"})["group_by"] == ("position",)
+    assert rb.validate_preset({"metric": "frequency", "group_by": ["position", "street"]})["group_by"] == (
+        "position",
+        "street",
+    )
 
 
 def test_preset_round_trip_keeps_vocabulary_only(tmp_path: Path) -> None:
