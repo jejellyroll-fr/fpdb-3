@@ -311,6 +311,10 @@ def validate_preset(payload: Mapping[str, Any]) -> dict[str, Any]:
     unknown = [name for name in group_by if name not in DIMENSIONS]
     if unknown:
         raise ValueError(f"Unknown dimensions {sorted(unknown)}; known: {sorted(DIMENSIONS)}")
+    if len(set(group_by)) != len(group_by):
+        # The breakdown picker holds each dimension once; a repeat splits
+        # nothing further and multiplies the compiled query (#411).
+        raise ValueError(f"group_by names a dimension twice: {list(group_by)[:10]}")
     return {
         "metric": metric,
         "filters": dict(filters),

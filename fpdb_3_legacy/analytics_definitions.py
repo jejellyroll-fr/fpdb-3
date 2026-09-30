@@ -387,7 +387,17 @@ def _validate_group_by(raw: Any, source: str) -> tuple[str, ...]:
         raw = [raw]
     if not isinstance(raw, (list, tuple)):
         _fail("group_by must be a list of dimension names", source)
-    return tuple(_resolve_dimension(str(name), source) for name in raw)
+    resolved: list[str] = []
+    for name in raw:
+        dimension = _resolve_dimension(str(name), source)
+        if dimension in resolved:
+            # Grouping twice by one dimension splits nothing further, and each
+            # occurrence is compiled into SELECT, GROUP BY and ORDER BY: a list
+            # repeating one long expression is only a way to build a huge query.
+            # Without repeats the list is at most as long as the vocabulary.
+            _fail(f"group_by names the {dimension!r} dimension twice", source)
+        resolved.append(dimension)
+    return tuple(resolved)
 
 
 def _validate_display(value: str | Mapping[str, Any] | None, where: str, source: str) -> DisplaySpec:

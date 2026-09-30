@@ -1935,3 +1935,25 @@ def test_a_listed_file_cannot_also_be_a_folder(tmp_path: Path, packs_dir: Path, 
 
     with pytest.raises(stat_packs.PackError, match=f"file {folder!r} is also a folder of"):
         stat_packs.install_pack(archive, packs_dir)
+
+
+# -- review of 0154fe30 (PR #411) -----------------------------------------------
+
+
+def test_a_repeated_dimension_is_refused_before_compiling(source: Path, packs_dir: Path) -> None:
+    # 100,000 repeats of a long dimension would compile into a query of
+    # hundreds of megabytes; the first repeat is refused instead.
+    write_stats(
+        source,
+        [{"name": "example.preflop.x", "metric": "fold_frequency", "group_by": ["starting_hand_id"] * 100_000}],
+    )
+
+    assert "group_by names the 'starting_hand_id' dimension twice" in refused(source, packs_dir)
+
+
+def test_a_preset_repeating_a_dimension_is_refused(source: Path, packs_dir: Path) -> None:
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0]["group_by"] = ["position", "position"]
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+
+    assert "names a dimension twice" in refused(source, packs_dir)

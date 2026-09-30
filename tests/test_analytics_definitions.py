@@ -254,6 +254,13 @@ class TestFragmentsAndAliases:
         definition = _definition(group_by=["bet_size_bucket"])
         assert definition.group_by == ("sizing_bucket",)
 
+    @pytest.mark.parametrize("group_by", [["position", "position"], ["bet_size_bucket", "sizing_bucket"]])
+    def test_a_dimension_named_twice_is_refused(self, group_by: list[str]) -> None:
+        # Each occurrence is compiled into SELECT, GROUP BY and ORDER BY and
+        # splits nothing further: a repeat only builds a larger query.
+        with pytest.raises(ValueError, match="dimension twice"):
+            _definition(group_by=group_by)
+
     def test_two_names_for_one_filter_are_refused(self) -> None:
         # "stake" is the alias of "big_blind": keeping both would silently drop
         # one of the constraints instead of refusing an ambiguous definition.

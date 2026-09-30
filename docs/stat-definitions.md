@@ -147,6 +147,7 @@ A definition names things that already exist; it cannot compute or execute.
 * A field written twice under two names is refused rather than one being
   dropped: a filter and its alias (`stake` and `big_blind`), `group_by` and
   `dimensions`, or a display field set both in `display` and at the top level.
+* A dimension named twice in `group_by` (directly or through an alias) is refused.
 * Every filter value becomes a bound parameter in the compiled SQL; a value
   containing quotes or `--` is data, never syntax.
 

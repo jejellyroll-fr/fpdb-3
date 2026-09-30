@@ -176,6 +176,16 @@ def test_tri_state_is_expressible_without_a_false_default() -> None:
     assert explicit["filters"]["hero"] is False
 
 
+def test_a_preset_cannot_name_a_dimension_twice() -> None:
+    # The breakdown picker holds each dimension once.
+    with pytest.raises(ValueError, match="names a dimension twice"):
+        rb.validate_preset({"metric": "frequency", "filters": {}, "group_by": ["position", "street", "position"]})
+    assert rb.validate_preset({"metric": "frequency", "group_by": ["position", "street"]})["group_by"] == (
+        "position",
+        "street",
+    )
+
+
 def test_example_questions_are_valid_presets() -> None:
     """The first-run screen can only offer questions the engine accepts."""
     questions = rb.example_questions()
