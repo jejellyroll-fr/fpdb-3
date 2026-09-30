@@ -231,12 +231,25 @@ def test_a_localized_name_falls_back_to_anything(tmp_path: Path) -> None:
         ({**_VALID_PRESET, "recommended_view": "nope"}, "unknown recommended_view"),
         ({**_VALID_PRESET, "min_sample": -1}, "min_sample"),
         ({**_VALID_PRESET, "sql": "SELECT 1"}, "unknown preset field"),
+        # A bare string was iterated letter by letter: "Adjust: p, l, a, y, e, r".
+        ({**_VALID_PRESET, "variables": "player"}, "variables must be a list of non-empty strings"),
+        ({**_VALID_PRESET, "tags": "steal"}, "tags must be a list of non-empty strings"),
+        ({**_VALID_PRESET, "tags": ["steal", 3]}, "tags must be a list of non-empty strings"),
+        ({**_VALID_PRESET, "variables": [""]}, "variables must be a list of non-empty strings"),
+        ({**_VALID_PRESET, "variables": {"player": True}}, "variables must be a list of non-empty strings"),
     ],
 )
 def test_a_bad_preset_is_refused_with_its_reason(tmp_path: Path, broken, message) -> None:
     _write_pack(tmp_path, [broken])
     with pytest.raises(ValueError, match=message):
         rp.load_packs(tmp_path)
+
+
+def test_variables_and_tags_are_kept_as_listed(tmp_path: Path) -> None:
+    _write_pack(tmp_path, [{**_VALID_PRESET, "variables": ["player", "date_from"], "tags": ["steal"]}])
+    (preset,) = rp.load_library(tmp_path)
+    assert preset.variables == ("player", "date_from")
+    assert preset.tags == ("steal",)
 
 
 def test_a_duplicate_preset_id_is_refused(tmp_path: Path) -> None:

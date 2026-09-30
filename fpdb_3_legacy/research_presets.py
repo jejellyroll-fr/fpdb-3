@@ -269,9 +269,22 @@ def _validate_preset(raw: Any, source: str) -> LibraryPreset:
         group_by=query["group_by"],
         recommended_view=view,
         min_sample=min_sample,
-        variables=tuple(str(name) for name in raw.get("variables", ()) or ()),
-        tags=tuple(str(tag) for tag in raw.get("tags", ()) or ()),
+        variables=_string_list(raw.get("variables"), "variables", source),
+        tags=_string_list(raw.get("tags"), "tags", source),
     )
+
+
+def _string_list(value: Any, field: str, source: str) -> tuple[str, ...]:
+    """A list of non-empty strings, or ``()`` when the field is absent.
+
+    Iterating a bare string would split it: "variables": "player" became the
+    filters p, l, a, y, e, r and the preset offered to adjust each letter.
+    """
+    if value is None:
+        return ()
+    if not isinstance(value, list) or not all(isinstance(item, str) and item.strip() for item in value):
+        _fail(f"{field} must be a list of non-empty strings, not {value!r}", source)
+    return tuple(value)
 
 
 def load_packs(directory: str | Path | None = None) -> tuple[PresetPack, ...]:

@@ -1649,3 +1649,16 @@ def test_a_preset_list_the_joined_field_changes_is_refused(
     _preset_with(source, player=players)
 
     assert f"reads back as written, not {players!r} (read back as {read_back})" in refused(source, packs_dir)
+
+
+# -- review of 464aed73 (PR #411) -----------------------------------------------
+
+
+@pytest.mark.parametrize("field", ["variables", "tags"])
+def test_a_pack_preset_lists_its_variables_and_tags(source: Path, packs_dir: Path, field: str) -> None:
+    # "variables": "player" became the filters p, l, a, y, e, r in the picker.
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    presets["presets"][0][field] = "player"
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+
+    assert f"{field} must be a list of non-empty strings" in refused(source, packs_dir)
