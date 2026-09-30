@@ -1831,19 +1831,22 @@ def test_finder_sidecars_beside_a_root_manifest_are_dropped(source: Path, packs_
     assert not any(name.startswith("__MACOSX") for name in pack.files)
 
 
-def test_a_pack_folder_over_the_file_limit_is_refused(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+def test_unlisted_files_in_the_pack_folder_are_not_counted(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    # The pack is its manifest and what that lists; the 200-file limit is on
+    # the listing, which the manifest check bounds before anything is read.
     strays = {f"my-pack/stray/{index}.txt": b"" for index in range(stat_packs.MAX_ARCHIVE_FILES)}
     archive = _zip_folder(source, tmp_path / "strays.fpdbstats", strays)
 
-    with pytest.raises(stat_packs.PackError, match=r"the pack holds \d+ files; at most 200"):
-        stat_packs.install_pack(archive, packs_dir)
+    pack = stat_packs.install_pack(archive, packs_dir)
+
+    assert not any(name.startswith("stray/") for name in pack.files)
 
 
 def test_an_archive_over_the_member_bound_is_refused(source: Path, packs_dir: Path, tmp_path: Path) -> None:
     extra = {f"elsewhere/{index}.txt": b"" for index in range(stat_packs.MAX_ARCHIVE_MEMBERS)}
     archive = _zip_folder(source, tmp_path / "many.fpdbstats", extra)
 
-    with pytest.raises(stat_packs.PackError, match=rf"archive holds \d+ files; at most {stat_packs.MAX_ARCHIVE_MEMBERS}"):
+    with pytest.raises(stat_packs.PackError, match=rf"archive holds \d+ entries; at most {stat_packs.MAX_ARCHIVE_MEMBERS}"):
         stat_packs.install_pack(archive, packs_dir)
 
 
@@ -2090,12 +2093,52 @@ def test_a_large_finder_sidecar_beside_a_root_manifest_is_never_read(source: Pat
 
 
 def test_the_pack_itself_is_still_held_to_the_byte_limit(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    # A listed file padded past 5 MB with JSON whitespace: it compresses to
+    # almost nothing, and is still refused as it is read.
+    stats = source / "stats" / "steals.json"
+    stats.write_bytes(stats.read_bytes() + b" " * (6 * 1024 * 1024))
     archive = tmp_path / "big.fpdbstats"
     with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as out:
         for path in sorted(source.rglob("*")):
             if path.is_file():
                 out.write(path, f"my-pack/{path.relative_to(source).as_posix()}")
-        out.writestr("my-pack/stray.txt", b"0" * (6 * 1024 * 1024))
 
     with pytest.raises(stat_packs.PackError, match="larger than"):
+        stat_packs.install_pack(archive, packs_dir)
+
+
+# -- review of a8b10467 (PR #411) -----------------------------------------------
+
+
+def test_a_large_unlisted_file_beside_a_root_manifest_is_never_read(
+    source: Path, packs_dir: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The manifest at the zip's root: only it and what it lists are read.
+    archive = tmp_path / "root.fpdbstats"
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as out:
+        for path in sorted(source.rglob("*")):
+            if path.is_file():
+                out.write(path, path.relative_to(source).as_posix())
+        out.writestr("README.txt", b"0" * (6 * 1024 * 1024))
+    read: list[str] = []
+    real_read_entry = stat_packs._read_entry
+    monkeypatch.setattr(
+        stat_packs, "_read_entry", lambda archive, info, *rest: read.append(info.filename) or real_read_entry(archive, info, *rest)
+    )
+
+    assert stat_packs.install_pack(archive, packs_dir).id == PACK_ID
+    assert sorted(read) == ["manifest.json", "presets/steals.json", "stats/steals.json"]
+
+
+def test_folder_entries_count_against_the_archive_bound(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    # Each record is an object in memory once the zip is opened, folder or not.
+    archive = tmp_path / "folders.fpdbstats"
+    with zipfile.ZipFile(archive, "w") as out:
+        for path in sorted(source.rglob("*")):
+            if path.is_file():
+                out.write(path, path.relative_to(source).as_posix())
+        for index in range(stat_packs.MAX_ARCHIVE_MEMBERS):
+            out.writestr(f"empty/{index}/", b"")
+
+    with pytest.raises(stat_packs.PackError, match=r"archive holds \d+ entries"):
         stat_packs.install_pack(archive, packs_dir)

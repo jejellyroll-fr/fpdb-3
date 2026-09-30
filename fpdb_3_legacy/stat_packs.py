@@ -126,7 +126,7 @@ MAX_ARCHIVE_FILES: Final = 200
 # sidecar under __MACOSX/ for each file it zips, so a pack at the file limit
 # comes in an archive of twice as many members; the byte budget still covers
 # every one of them.
-MAX_ARCHIVE_MEMBERS: Final = 2 * MAX_ARCHIVE_FILES + 2
+MAX_ARCHIVE_MEMBERS: Final = 2 * MAX_ARCHIVE_FILES + 64  # and the folder entries a zip tool adds
 # Fragments, stats or presets one pack may declare, of each. fpdb ships five
 # stats and twenty fragments; the file limit cannot bound these, since a 5 MB
 # manifest holds a few hundred thousand empty fragments, each validated,
@@ -384,6 +384,41 @@ def _read_files(source: Path) -> dict[str, bytes]:
     raise PackError(["expected a pack folder, its manifest.json, or a .fpdbstats archive"], str(source))
 
 
+def _listed_members(manifest_bytes: bytes, source: str) -> list[str]:
+    """The files a manifest lists, as safe member names, before anything else is read.
+
+    A manifest that cannot be parsed, or a path that cannot name a member, is
+    skipped here and left for :func:`read_pack` to report with the rest.
+    """
+    try:
+        manifest = json.loads(manifest_bytes.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError, RecursionError):
+        return []
+    if not isinstance(manifest, Mapping):
+        return []
+    # The manifest is one of the pack's files: an archive counts it, and the
+    # export of a folder writes it, so a folder counts it too -- otherwise
+    # fpdb could export a pack it then refuses to import.
+    problem = _listing_size_problem(manifest)
+    if problem:
+        raise PackError([problem], source)
+    names: list[str] = []
+    for key in ("definitions", "presets"):
+        entries = manifest.get(key)
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            if not isinstance(entry, str):
+                continue
+            try:
+                name = _safe_member(entry, source)
+            except PackError:
+                continue
+            if name not in names:
+                names.append(name)
+    return names
+
+
 def _read_folder(source: Path) -> dict[str, bytes]:
     """The manifest of a pack folder and the files it lists, nothing else.
 
@@ -397,31 +432,8 @@ def _read_folder(source: Path) -> dict[str, bytes]:
     if not manifest_path.is_file() or manifest_path.is_symlink():
         return {}
     files = {MANIFEST_NAME: _read_bounded(manifest_path, MAX_ARCHIVE_BYTES, str(source))}
-    try:
-        manifest = json.loads(files[MANIFEST_NAME].decode("utf-8"))
-    except (UnicodeDecodeError, ValueError, RecursionError):
-        return files
-    if not isinstance(manifest, Mapping):
-        return files
-    listed = [
-        entry
-        for key in ("definitions", "presets")
-        if isinstance(manifest.get(key), list)
-        for entry in manifest[key]
-        if isinstance(entry, str)
-    ]
-    # The manifest is one of the pack's files: an archive counts it, and the
-    # export of a folder writes it, so a folder counts it too -- otherwise
-    # fpdb could export a pack it then refuses to import.
-    problem = _listing_size_problem(manifest)
-    if problem:
-        raise PackError([problem], str(source))
     total = len(files[MANIFEST_NAME])
-    for entry in listed:
-        try:
-            name = _safe_member(entry, str(source))
-        except PackError:
-            continue
+    for name in _listed_members(files[MANIFEST_NAME], str(source)):
         # No component of the path may be a link: a linked file, or a linked
         # folder above it, would read something outside the pack.
         path = source
@@ -483,19 +495,22 @@ def _read_archive(source: Path) -> dict[str, bytes]:
 
 
 def _read_archive_entries(source: Path) -> dict[str, bytes]:
-    """The pack's own members, found by name before any content is read.
+    """The pack's manifest and the files it lists, found by name before any is read.
 
-    Only the members of the pack are decompressed and counted against its
-    limits: what an archive holds beside it -- Finder's __MACOSX/ sidecars, a
-    README next to the folder -- is never read, so it cannot use up the pack's
-    budget. The archive as a whole is bounded by its file size and member count.
+    Only those are decompressed and counted against the pack's limits: what an
+    archive holds beside them -- Finder's __MACOSX/ sidecars, a README next to
+    the folder or the manifest -- is never read, so it cannot use up the pack's
+    budget. The archive as a whole is bounded by its file size and entry count.
     """
     files: dict[str, bytes] = {}
     total = 0
     with zipfile.ZipFile(source) as archive:
-        entries = [info for info in archive.infolist() if not info.is_dir()]
-        if len(entries) > MAX_ARCHIVE_MEMBERS:
-            raise PackError([f"archive holds {len(entries)} files; at most {MAX_ARCHIVE_MEMBERS}"], str(source))
+        records = archive.infolist()
+        # Every central-directory record counts, folders included: each one
+        # is already an object in memory, whatever it names.
+        if len(records) > MAX_ARCHIVE_MEMBERS:
+            raise PackError([f"archive holds {len(records)} entries; at most {MAX_ARCHIVE_MEMBERS}"], str(source))
+        entries = [info for info in records if not info.is_dir()]
         names: set[str] = set()
         for info in entries:
             name = info.filename
@@ -511,17 +526,21 @@ def _read_archive_entries(source: Path) -> dict[str, bytes]:
                 raise PackError([f"archive entry {name!r} repeats or re-spells another entry"], str(source))
             names.add(name)
         prefix = _pack_root(names, str(source))
-        members = [
-            info
-            for info in entries
-            if info.filename.startswith(prefix) and not info.filename.startswith(_FINDER_METADATA)
-        ]
-        if len(members) > MAX_ARCHIVE_FILES:
-            raise PackError([f"the pack holds {len(members)} files; at most {MAX_ARCHIVE_FILES}"], str(source))
-        for info in members:
-            data = _read_entry(archive, info, MAX_ARCHIVE_BYTES - total, str(source))
+        by_name = {info.filename: info for info in entries}
+        manifest = by_name.get(prefix + MANIFEST_NAME)
+        if manifest is None:
+            return {}  # read_pack reports the missing manifest
+        # The manifest first, then only the files it lists, as for a folder:
+        # nothing else in the archive is decompressed or counted.
+        files[MANIFEST_NAME] = _read_entry(archive, manifest, MAX_ARCHIVE_BYTES, str(source))
+        total = len(files[MANIFEST_NAME])
+        for name in _listed_members(files[MANIFEST_NAME], str(source)):
+            member = by_name.get(prefix + name)
+            if member is None:
+                continue  # read_pack reports the missing file
+            data = _read_entry(archive, member, MAX_ARCHIVE_BYTES - total, str(source))
             total += len(data)
-            files[info.filename[len(prefix) :]] = data
+            files[name] = data
     return files
 
 
