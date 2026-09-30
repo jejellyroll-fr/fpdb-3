@@ -1005,17 +1005,30 @@ def test_a_label_value_is_accepted(source: Path, packs_dir: Path) -> None:
 # -- sixteenth review round (PR #411) ------------------------------------------
 
 
-def test_a_fragment_chain_too_deep_to_expand_is_a_pack_error(source: Path, packs_dir: Path) -> None:
-    depth = 3000
-    fragments = {
+def _fragment_chain(depth: int) -> dict[str, Any]:
+    """``depth`` + 1 fragments, each naming the next."""
+    fragments: dict[str, Any] = {
         f"example.preflop.f{i}": {"street": "preflop", "fragments": [f"example.preflop.f{i + 1}"]}
         for i in range(depth)
     }
     fragments[f"example.preflop.f{depth}"] = {"street": "preflop"}
-    edit_manifest(source, fragments=fragments, presets=[])
+    return fragments
+
+
+def test_a_fragment_chain_too_deep_to_expand_is_a_pack_error(source: Path, packs_dir: Path) -> None:
+    # A chain of 3000 would exhaust the stack when expanded; the fragment
+    # count refuses it first (the RecursionError guard stays as a backstop).
+    edit_manifest(source, fragments=_fragment_chain(3000), presets=[])
     write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "fragments": ["example.preflop.f0"]}])
 
-    assert "its fragments are nested too deeply" in refused(source, packs_dir)
+    assert "declares 3001 fragments; a pack holds at most 500" in refused(source, packs_dir)
+
+
+def test_the_longest_fragment_chain_a_pack_can_hold_expands(source: Path, packs_dir: Path) -> None:
+    edit_manifest(source, fragments=_fragment_chain(stat_packs.MAX_PACK_ENTRIES - 1), presets=None)
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "fragments": ["example.preflop.f0"]}])
+
+    assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
 
 
 # -- seventeenth review round (PR #411) ----------------------------------------
@@ -1596,7 +1609,7 @@ def test_an_archive_manifest_list_is_bounded_too(source: Path, packs_dir: Path, 
 def test_reported_problems_are_capped(source: Path, packs_dir: Path) -> None:
     # Thousands of tiny bad definitions in one file: reading stops at the cap
     # instead of building a message for each.
-    write_stats(source, [{"name": f"bad {index}", "metric": "fold_frequency"} for index in range(5_000)])
+    write_stats(source, [{"name": f"bad {index}", "metric": "fold_frequency"} for index in range(400)])
 
     with pytest.raises(stat_packs.PackError) as caught:
         stat_packs.install_pack(source, packs_dir)
@@ -1830,3 +1843,45 @@ def test_an_archive_over_the_member_bound_is_refused(source: Path, packs_dir: Pa
 
     with pytest.raises(stat_packs.PackError, match=rf"archive holds \d+ files; at most {stat_packs.MAX_ARCHIVE_MEMBERS}"):
         stat_packs.install_pack(archive, packs_dir)
+
+
+# -- review of 3e1785c6 (PR #411) -----------------------------------------------
+
+
+def test_a_pack_declares_a_bounded_number_of_fragments(source: Path, packs_dir: Path) -> None:
+    # Empty, well-named fragments are each valid: only a count bounds them.
+    fragments = {f"example.preflop.f{index}": {} for index in range(stat_packs.MAX_PACK_ENTRIES + 1)}
+    edit_manifest(source, fragments=fragments)
+
+    assert f"declares {stat_packs.MAX_PACK_ENTRIES + 1} fragments; a pack holds at most 500" in refused(source, packs_dir)
+
+
+def test_a_pack_defines_a_bounded_number_of_stats(source: Path, packs_dir: Path) -> None:
+    write_stats(
+        source,
+        [{"name": f"example.preflop.s{index}", "metric": "fold_frequency"} for index in range(stat_packs.MAX_PACK_ENTRIES + 1)],
+    )
+
+    assert "stats/steals.json: the pack defines more than 500 stats" in refused(source, packs_dir)
+
+
+def test_a_pack_defines_a_bounded_number_of_presets(source: Path, packs_dir: Path) -> None:
+    presets = json.loads((source / "presets" / "steals.json").read_text(encoding="utf-8"))
+    template = presets["presets"][0]
+    presets["presets"] = [{**template, "id": f"example.preflop.p{index}"} for index in range(stat_packs.MAX_PACK_ENTRIES + 1)]
+    (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
+
+    assert "presets/steals.json: the pack defines more than 500 presets" in refused(source, packs_dir)
+
+
+def test_a_pack_at_the_entry_limit_installs(source: Path, packs_dir: Path) -> None:
+    fragments = {f"example.preflop.f{index}": {"street": "preflop"} for index in range(stat_packs.MAX_PACK_ENTRIES)}
+    edit_manifest(source, fragments=fragments, presets=None)
+    write_stats(
+        source,
+        [{"name": f"example.preflop.s{index}", "metric": "fold_frequency"} for index in range(stat_packs.MAX_PACK_ENTRIES)],
+    )
+
+    pack = stat_packs.install_pack(source, packs_dir)
+
+    assert (len(pack.fragments), len(pack.definitions)) == (stat_packs.MAX_PACK_ENTRIES, stat_packs.MAX_PACK_ENTRIES)

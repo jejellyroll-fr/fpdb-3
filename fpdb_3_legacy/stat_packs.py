@@ -127,6 +127,11 @@ MAX_ARCHIVE_FILES: Final = 200
 # comes in an archive of twice as many members; the byte budget still covers
 # every one of them.
 MAX_ARCHIVE_MEMBERS: Final = 2 * MAX_ARCHIVE_FILES + 2
+# Fragments, stats or presets one pack may declare, of each. fpdb ships five
+# stats and twenty fragments; the file limit cannot bound these, since a 5 MB
+# manifest holds a few hundred thousand empty fragments, each validated,
+# kept and merged into every registry built afterwards.
+MAX_PACK_ENTRIES: Final = 500
 # The root Finder writes its metadata under: never part of a pack.
 _FINDER_METADATA: Final = "__MACOSX/"
 MAX_ARCHIVE_BYTES: Final = 5 * 1024 * 1024
@@ -719,6 +724,10 @@ def _read_fragments(raw: Any, prefix: str, errors: list[str]) -> dict[str, dict[
     if not isinstance(raw, Mapping):
         errors.append("fragments must be an object of name -> filters")
         return {}
+    if len(raw) > MAX_PACK_ENTRIES:
+        # Refused before any is looked at: walking them is the cost.
+        errors.append(f"the manifest declares {len(raw)} fragments; a pack holds at most {MAX_PACK_ENTRIES}")
+        return {}
     fragments: dict[str, dict[str, Any]] = {}
     for name, filters in raw.items():
         if _full(errors):
@@ -822,6 +831,9 @@ def _read_definitions(
         except ValueError as exc:
             errors.append(str(exc))
             continue
+        if len(stats) + len(entries) > MAX_PACK_ENTRIES:
+            errors.append(f"{name}: the pack defines more than {MAX_PACK_ENTRIES} stats")
+            break
         for entry in entries:
             if _full(errors):
                 break
@@ -896,6 +908,11 @@ def _read_presets(listed: Any, files: Mapping[str, bytes], prefix: str, label: s
         if _full(errors):
             break
         try:
+            listed_presets = raw.get("presets") if isinstance(raw, Mapping) else None
+            if isinstance(listed_presets, list) and len(presets) + len(listed_presets) > MAX_PACK_ENTRIES:
+                # Before the shipped validator, which compiles every one.
+                errors.append(f"{name}: the pack defines more than {MAX_PACK_ENTRIES} presets")
+                break
             pack = research_presets.validate_preset_pack(raw, name)
         except (ArithmeticError, AttributeError, TypeError, ValueError) as exc:
             # The shipped validator trusts shipped data's shapes; a pack's data

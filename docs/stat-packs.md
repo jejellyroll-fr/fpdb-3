@@ -134,7 +134,8 @@ levels and 512 bytes, each name at most 255 bytes, without a trailing dot or
 space, a character Windows forbids (`<>:"|?*`), or a name that differs from
 another only by letter case or Unicode normalization. A pack holds at most 200
 files, `manifest.json` included, and 5 MB; the manifest's `definitions` and
-`presets` lists together hold at most 199 entries.
+`presets` lists together hold at most 199 entries, and a pack declares at most
+500 fragments, 500 stats and 500 presets.
 
 **Filter values.** Each definition is compiled exactly as the engine runs it,
 then its values are checked where the engine is lenient:
