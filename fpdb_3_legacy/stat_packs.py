@@ -132,6 +132,10 @@ MAX_ARCHIVE_MEMBERS: Final = 2 * MAX_ARCHIVE_FILES + 2
 # manifest holds a few hundred thousand empty fragments, each validated,
 # kept and merged into every registry built afterwards.
 MAX_PACK_ENTRIES: Final = 500
+# References from one fragment to others, over the whole pack. Every stat
+# naming a fragment expands them again when it is compiled -- at install and
+# at each run -- so their number is what that costs.
+MAX_FRAGMENT_REFERENCES: Final = 2000
 # The root Finder writes its metadata under: never part of a pack.
 _FINDER_METADATA: Final = "__MACOSX/"
 MAX_ARCHIVE_BYTES: Final = 5 * 1024 * 1024
@@ -720,13 +724,30 @@ def _name_problem(name: str, prefix: str) -> str:
     return ""
 
 
+def _fragment_table_problem(raw: Mapping[str, Any]) -> str:
+    """Why the fragment table is too large to walk, or ``""``.
+
+    Refused before any fragment is looked at: walking them is the cost.
+    """
+    if len(raw) > MAX_PACK_ENTRIES:
+        return f"the manifest declares {len(raw)} fragments; a pack holds at most {MAX_PACK_ENTRIES}"
+    references = sum(
+        len(filters["fragments"])
+        for filters in raw.values()
+        if isinstance(filters, Mapping) and isinstance(filters.get("fragments"), list)
+    )
+    if references > MAX_FRAGMENT_REFERENCES:
+        return f"the fragments name other fragments {references} times; a pack holds at most {MAX_FRAGMENT_REFERENCES}"
+    return ""
+
+
 def _read_fragments(raw: Any, prefix: str, errors: list[str]) -> dict[str, dict[str, Any]]:
     if not isinstance(raw, Mapping):
         errors.append("fragments must be an object of name -> filters")
         return {}
-    if len(raw) > MAX_PACK_ENTRIES:
-        # Refused before any is looked at: walking them is the cost.
-        errors.append(f"the manifest declares {len(raw)} fragments; a pack holds at most {MAX_PACK_ENTRIES}")
+    problem = _fragment_table_problem(raw)
+    if problem:
+        errors.append(problem)
         return {}
     fragments: dict[str, dict[str, Any]] = {}
     for name, filters in raw.items():
@@ -763,11 +784,22 @@ def _folded_collisions(listed: Iterable[str]) -> list[str]:
         # Windows and macOS file systems ignore case, and macOS also Unicode
         # normalization ("é" as one code point or two): names that differ only
         # that way would be written to one file, and the install would lose one.
-        key = unicodedata.normalize("NFC", name).casefold()
+        key = _fold(name)
         if key in folded:
             problems.append(f"files {folded[key]!r} and {name!r} name the same file on some systems")
         folded[key] = name
+    for name in sorted(listed):
+        # "stats/a.json" and "stats/a.json/b.json": the first has to be a file
+        # and a folder at once, and the install fails writing whichever is second.
+        for parent in PurePosixPath(name).parents:
+            if str(parent) != "." and _fold(str(parent)) in folded:
+                problems.append(f"file {folded[_fold(str(parent))]!r} is also a folder of {name!r}")
     return problems
+
+
+def _fold(name: str) -> str:
+    """A path as a case- and normalization-insensitive file system sees it."""
+    return unicodedata.normalize("NFC", name).casefold()
 
 
 def _listing_size_problem(manifest: Mapping[str, Any]) -> str:

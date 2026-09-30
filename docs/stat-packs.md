@@ -132,10 +132,12 @@ written into `HUD_config.xml` when the stat is put on a HUD.
 way it is stored (`stats/a.json`, not `./stats/a.json`). A path has at most 8
 levels and 512 bytes, each name at most 255 bytes, without a trailing dot or
 space, a character Windows forbids (`<>:"|?*`), or a name that differs from
-another only by letter case or Unicode normalization. A pack holds at most 200
+another only by letter case or Unicode normalization, or that is also the
+folder of another listed file (`stats/a.json` and `stats/a.json/b.json`). A pack holds at most 200
 files, `manifest.json` included, and 5 MB; the manifest's `definitions` and
 `presets` lists together hold at most 199 entries, and a pack declares at most
-500 fragments, 500 stats and 500 presets.
+500 fragments, 500 stats and 500 presets; its fragments name other fragments
+at most 2000 times in all.
 
 **Filter values.** Each definition is compiled exactly as the engine runs it,
 then its values are checked where the engine is lenient:

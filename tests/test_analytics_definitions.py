@@ -278,6 +278,20 @@ class TestFragmentsAndAliases:
     def test_dimensions_alone_still_groups(self) -> None:
         assert _definition(dimensions=["position"]).group_by == ("position",)
 
+    def test_a_fragment_named_twice_at_every_link_expands_once(self) -> None:
+        # Each fragment names the previous one twice: without memoizing, the
+        # expansion doubles at every link -- 2**60 steps for sixty fragments.
+        library: dict[str, dict] = {"f0": {"street": "flop"}}
+        for index in range(1, 61):
+            library[f"f{index}"] = {"fragments": [f"f{index - 1}", f"f{index - 1}"]}
+
+        assert dsl.expand_fragments(["f60"], library) == {"street": "flop"}
+
+    def test_a_cycle_is_still_refused_with_memoized_expansion(self) -> None:
+        library = {"a": {"fragments": ["b"]}, "b": {"fragments": ["c", "a"]}, "c": {"street": "flop"}}
+        with pytest.raises(ValueError, match="fragment cycle: a -> b -> a"):
+            dsl.expand_fragments(["a"], library)
+
     def test_registry_can_add_a_fragment(self) -> None:
         registry = dsl.DefinitionRegistry()
         registry.add_fragment("my_spot", {"street": "turn"})

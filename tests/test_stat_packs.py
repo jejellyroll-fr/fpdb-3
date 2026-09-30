@@ -1885,3 +1885,53 @@ def test_a_pack_at_the_entry_limit_installs(source: Path, packs_dir: Path) -> No
     pack = stat_packs.install_pack(source, packs_dir)
 
     assert (len(pack.fragments), len(pack.definitions)) == (stat_packs.MAX_PACK_ENTRIES, stat_packs.MAX_PACK_ENTRIES)
+
+
+# -- review of 21506944 (PR #411) -----------------------------------------------
+
+
+def test_a_doubling_fragment_chain_installs_without_exponential_work(source: Path, packs_dir: Path) -> None:
+    # Forty fragments, each naming the previous one twice: 2**40 expansions
+    # without memoizing, which froze the import dialog.
+    fragments: dict[str, Any] = {"example.preflop.f0": {"street": "preflop"}}
+    for index in range(1, 41):
+        fragments[f"example.preflop.f{index}"] = {"fragments": [f"example.preflop.f{index - 1}"] * 2}
+    edit_manifest(source, fragments=fragments, presets=None)
+    write_stats(source, [{"name": "example.preflop.x", "metric": "fold_frequency", "fragments": ["example.preflop.f40"]}])
+
+    assert stat_packs.install_pack(source, packs_dir).definitions[0].name == "example.preflop.x"
+
+
+def test_a_pack_names_other_fragments_a_bounded_number_of_times(source: Path, packs_dir: Path) -> None:
+    # Each stat expands these again when it compiles: their count is the cost.
+    fragments = {
+        "example.preflop.base": {"street": "preflop"},
+        "example.preflop.wide": {"fragments": ["example.preflop.base"] * (stat_packs.MAX_FRAGMENT_REFERENCES + 1)},
+    }
+    edit_manifest(source, fragments=fragments)
+
+    assert "name other fragments 2001 times; a pack holds at most 2000" in refused(source, packs_dir)
+
+
+@pytest.mark.parametrize(
+    ("listed", "folder"),
+    [
+        (["stats/a.json", "stats/a.json/b.json"], "stats/a.json"),
+        (["stats/A.json", "stats/a.json/b.json"], "stats/A.json"),
+        (["stats/a.json/b/c.json", "stats/a.json"], "stats/a.json"),
+    ],
+)
+def test_a_listed_file_cannot_also_be_a_folder(tmp_path: Path, packs_dir: Path, listed: list[str], folder: str) -> None:
+    # One path cannot be a file and a folder: the install failed writing
+    # whichever came second, with FileExistsError or IsADirectoryError.
+    manifest = json.loads((EXAMPLE / "manifest.json").read_text(encoding="utf-8"))
+    manifest.update(definitions=listed, presets=[])
+    archive = tmp_path / "clash.fpdbstats"
+    with zipfile.ZipFile(archive, "w") as out:
+        out.writestr("manifest.json", json.dumps(manifest))
+        for index, name in enumerate(listed):
+            stat = {"name": f"example.preflop.s{index}", "metric": "fold_frequency"}
+            out.writestr(name, json.dumps({"schema_version": 1, "stats": [stat]}))
+
+    with pytest.raises(stat_packs.PackError, match=f"file {folder!r} is also a folder of"):
+        stat_packs.install_pack(archive, packs_dir)

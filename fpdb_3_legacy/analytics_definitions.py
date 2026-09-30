@@ -553,18 +553,39 @@ def expand_fragments(
     key; a cycle is refused instead of recursing forever.
     """
     sources = FILTER_FRAGMENTS if library is None else library
+    memo: dict[str, dict[str, Any]] = {}
     merged: dict[str, Any] = {}
     for name in names:
-        if name in _seen:
-            _fail(f"fragment cycle: {' -> '.join((*_seen, name))}")
-        fragment = sources.get(name)
-        if fragment is None:
-            _fail(f"unknown fragment {name!r}; allowed: {sorted(sources)}")
-        nested = fragment.get("fragments", ())
-        if nested:
-            merged.update(expand_fragments(tuple(nested), sources, (*_seen, name)))
-        merged.update({key: value for key, value in fragment.items() if key != "fragments"})
+        merged.update(_expand_one(name, sources, _seen, memo))
     return merged
+
+
+def _expand_one(
+    name: str,
+    sources: Mapping[str, Mapping[str, Any]],
+    seen: tuple[str, ...],
+    memo: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """One fragment with its nested ones merged in, each expanded only once.
+
+    A fragment's expansion does not depend on how it was reached, so it is
+    kept: a chain in which every fragment names the previous one twice would
+    otherwise double the work at each link (#411). One stack frame per level,
+    so a chain is as deep as it was before.
+    """
+    if name in seen:
+        _fail(f"fragment cycle: {' -> '.join((*seen, name))}")
+    if name in memo:
+        return memo[name]
+    fragment = sources.get(name)
+    if fragment is None:
+        _fail(f"unknown fragment {name!r}; allowed: {sorted(sources)}")
+    expanded: dict[str, Any] = {}
+    for nested in fragment.get("fragments", ()):
+        expanded.update(_expand_one(nested, sources, (*seen, name), memo))
+    expanded.update({key: value for key, value in fragment.items() if key != "fragments"})
+    memo[name] = expanded
+    return expanded
 
 
 def merge_fragments(
