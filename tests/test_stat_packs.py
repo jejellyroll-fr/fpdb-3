@@ -2052,3 +2052,50 @@ def test_an_uncompressed_zip_over_the_byte_limit_is_still_refused(source: Path, 
 
     with pytest.raises(stat_packs.PackError, match="larger than"):
         stat_packs.install_pack(archive, packs_dir)
+
+
+# -- review of 949efd19 (PR #411) -----------------------------------------------
+
+
+def test_a_large_file_beside_the_pack_folder_is_never_read(
+    source: Path, packs_dir: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A 6 MB README compresses to a few KB: the archive is small, but reading
+    # it would use up the pack's 5 MB budget before the pack is found.
+    archive = tmp_path / "readme.fpdbstats"
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as out:
+        for path in sorted(source.rglob("*")):
+            if path.is_file():
+                out.write(path, f"my-pack/{path.relative_to(source).as_posix()}")
+        out.writestr("README.txt", b"0" * (6 * 1024 * 1024))
+    read: list[str] = []
+    real_read_entry = stat_packs._read_entry
+    monkeypatch.setattr(
+        stat_packs, "_read_entry", lambda archive, info, *rest: read.append(info.filename) or real_read_entry(archive, info, *rest)
+    )
+
+    assert stat_packs.install_pack(archive, packs_dir).id == PACK_ID
+    assert "README.txt" not in read
+
+
+def test_a_large_finder_sidecar_beside_a_root_manifest_is_never_read(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    archive = tmp_path / "sidecar.fpdbstats"
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as out:
+        for path in sorted(source.rglob("*")):
+            if path.is_file():
+                out.write(path, path.relative_to(source).as_posix())
+        out.writestr("__MACOSX/._manifest.json", b"0" * (6 * 1024 * 1024))
+
+    assert stat_packs.install_pack(archive, packs_dir).id == PACK_ID
+
+
+def test_the_pack_itself_is_still_held_to_the_byte_limit(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    archive = tmp_path / "big.fpdbstats"
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as out:
+        for path in sorted(source.rglob("*")):
+            if path.is_file():
+                out.write(path, f"my-pack/{path.relative_to(source).as_posix()}")
+        out.writestr("my-pack/stray.txt", b"0" * (6 * 1024 * 1024))
+
+    with pytest.raises(stat_packs.PackError, match="larger than"):
+        stat_packs.install_pack(archive, packs_dir)

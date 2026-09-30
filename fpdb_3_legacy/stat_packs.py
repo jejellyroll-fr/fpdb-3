@@ -475,43 +475,28 @@ def _read_archive(source: Path) -> dict[str, bytes]:
             [f"the archive is larger than {MAX_ARCHIVE_BYTES + MAX_ARCHIVE_OVERHEAD} bytes"], str(source)
         )
     try:
-        files = _read_archive_entries(source)
+        return _read_archive_entries(source)
     except (zipfile.BadZipFile, zlib.error, EOFError, RuntimeError, NotImplementedError) as exc:
         # A damaged entry (bad CRC, truncated data), encryption or an
         # unsupported compression method: the archive is refused, not raised.
         raise PackError([f"the archive cannot be read: {exc}"], str(source)) from exc
-    files = {name: data for name, data in files.items() if not name.startswith(_FINDER_METADATA)}
-    # An archive made by zipping the pack folder has the pack in one top-level
-    # directory -- possibly beside others it does not list, such as the
-    # __MACOSX/ metadata Finder adds -- so the pack is the one directory that
-    # holds a manifest.
-    if MANIFEST_NAME not in files:
-        roots = sorted(
-            name[: -len(MANIFEST_NAME) - 1]
-            for name in files
-            if name.count("/") == 1 and name.endswith(f"/{MANIFEST_NAME}")
-        )
-        if len(roots) > 1:
-            raise PackError(
-                [f"the archive holds several packs ({', '.join(roots)}); share one per archive"], str(source)
-            )
-        if roots:
-            prefix = f"{roots[0]}/"
-            files = {name[len(prefix) :]: data for name, data in files.items() if name.startswith(prefix)}
-    # The pack's own limit, counted once its root is known: what surrounds it
-    # (Finder's sidecars, a README beside the folder) is not part of it.
-    if len(files) > MAX_ARCHIVE_FILES:
-        raise PackError([f"the pack holds {len(files)} files; at most {MAX_ARCHIVE_FILES}"], str(source))
-    return files
 
 
 def _read_archive_entries(source: Path) -> dict[str, bytes]:
+    """The pack's own members, found by name before any content is read.
+
+    Only the members of the pack are decompressed and counted against its
+    limits: what an archive holds beside it -- Finder's __MACOSX/ sidecars, a
+    README next to the folder -- is never read, so it cannot use up the pack's
+    budget. The archive as a whole is bounded by its file size and member count.
+    """
     files: dict[str, bytes] = {}
     total = 0
     with zipfile.ZipFile(source) as archive:
         entries = [info for info in archive.infolist() if not info.is_dir()]
         if len(entries) > MAX_ARCHIVE_MEMBERS:
             raise PackError([f"archive holds {len(entries)} files; at most {MAX_ARCHIVE_MEMBERS}"], str(source))
+        names: set[str] = set()
         for info in entries:
             name = info.filename
             # The same containment rule as the manifest's listed paths, applied
@@ -522,12 +507,42 @@ def _read_archive_entries(source: Path) -> dict[str, bytes]:
             # canonical spelling: stored under one key, the later one would
             # silently replace the member the manifest actually lists.
             canonical = PurePosixPath(name).as_posix()
-            if canonical != name or canonical in files:
+            if canonical != name or canonical in names:
                 raise PackError([f"archive entry {name!r} repeats or re-spells another entry"], str(source))
+            names.add(name)
+        prefix = _pack_root(names, str(source))
+        members = [
+            info
+            for info in entries
+            if info.filename.startswith(prefix) and not info.filename.startswith(_FINDER_METADATA)
+        ]
+        if len(members) > MAX_ARCHIVE_FILES:
+            raise PackError([f"the pack holds {len(members)} files; at most {MAX_ARCHIVE_FILES}"], str(source))
+        for info in members:
             data = _read_entry(archive, info, MAX_ARCHIVE_BYTES - total, str(source))
             total += len(data)
-            files[canonical] = data
+            files[info.filename[len(prefix) :]] = data
     return files
+
+
+def _pack_root(names: set[str], source: str) -> str:
+    """The folder of an archive that holds the pack, as a prefix ("" at the root).
+
+    An archive made by zipping the pack folder has the pack in one top-level
+    directory -- possibly beside others it does not list, such as the
+    __MACOSX/ metadata Finder adds -- so the pack is the one directory that
+    holds a manifest.
+    """
+    if MANIFEST_NAME in names:
+        return ""
+    roots = sorted(
+        name[: -len(MANIFEST_NAME) - 1]
+        for name in names
+        if name.count("/") == 1 and name.endswith(f"/{MANIFEST_NAME}") and not name.startswith(_FINDER_METADATA)
+    )
+    if len(roots) > 1:
+        raise PackError([f"the archive holds several packs ({', '.join(roots)}); share one per archive"], source)
+    return f"{roots[0]}/" if roots else ""
 
 
 def _parse_data(name: str, data: bytes, source: str) -> Any:
