@@ -122,6 +122,13 @@ _WINDOWS_RESERVED: Final = frozenset(
 )
 # Generous for data, small enough that an archive cannot fill the disk.
 MAX_ARCHIVE_FILES: Final = 200
+# Members an archive may hold around its pack. Finder adds an AppleDouble
+# sidecar under __MACOSX/ for each file it zips, so a pack at the file limit
+# comes in an archive of twice as many members; the byte budget still covers
+# every one of them.
+MAX_ARCHIVE_MEMBERS: Final = 2 * MAX_ARCHIVE_FILES + 2
+# The root Finder writes its metadata under: never part of a pack.
+_FINDER_METADATA: Final = "__MACOSX/"
 MAX_ARCHIVE_BYTES: Final = 5 * 1024 * 1024
 # Problems reported for one pack. Past this, reading stops: a few bytes per bad
 # entry would otherwise become a message each -- a crafted 5 MB file holds a
@@ -451,6 +458,7 @@ def _read_archive(source: Path) -> dict[str, bytes]:
         # A damaged entry (bad CRC, truncated data), encryption or an
         # unsupported compression method: the archive is refused, not raised.
         raise PackError([f"the archive cannot be read: {exc}"], str(source)) from exc
+    files = {name: data for name, data in files.items() if not name.startswith(_FINDER_METADATA)}
     # An archive made by zipping the pack folder has the pack in one top-level
     # directory -- possibly beside others it does not list, such as the
     # __MACOSX/ metadata Finder adds -- so the pack is the one directory that
@@ -468,6 +476,10 @@ def _read_archive(source: Path) -> dict[str, bytes]:
         if roots:
             prefix = f"{roots[0]}/"
             files = {name[len(prefix) :]: data for name, data in files.items() if name.startswith(prefix)}
+    # The pack's own limit, counted once its root is known: what surrounds it
+    # (Finder's sidecars, a README beside the folder) is not part of it.
+    if len(files) > MAX_ARCHIVE_FILES:
+        raise PackError([f"the pack holds {len(files)} files; at most {MAX_ARCHIVE_FILES}"], str(source))
     return files
 
 
@@ -476,8 +488,8 @@ def _read_archive_entries(source: Path) -> dict[str, bytes]:
     total = 0
     with zipfile.ZipFile(source) as archive:
         entries = [info for info in archive.infolist() if not info.is_dir()]
-        if len(entries) > MAX_ARCHIVE_FILES:
-            raise PackError([f"archive holds {len(entries)} files; at most {MAX_ARCHIVE_FILES}"], str(source))
+        if len(entries) > MAX_ARCHIVE_MEMBERS:
+            raise PackError([f"archive holds {len(entries)} files; at most {MAX_ARCHIVE_MEMBERS}"], str(source))
         for info in entries:
             name = info.filename
             # The same containment rule as the manifest's listed paths, applied

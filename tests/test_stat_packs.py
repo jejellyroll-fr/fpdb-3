@@ -1770,3 +1770,63 @@ def test_an_archive_of_two_packs_is_refused(source: Path, packs_dir: Path, tmp_p
 
     with pytest.raises(stat_packs.PackError, match=r"several packs \(my-pack, other-pack\)"):
         stat_packs.install_pack(archive, packs_dir)
+
+
+# -- review of afb23db5 (PR #411) -----------------------------------------------
+
+
+def _finder_sidecars(source: Path, root: str = "my-pack") -> dict[str, bytes]:
+    """One AppleDouble sidecar per file, as Finder writes them."""
+    sidecars = {}
+    for path in source.rglob("*"):
+        if path.is_file():
+            relative = path.relative_to(source)
+            sidecars[f"__MACOSX/{root}/{relative.parent.as_posix()}/._{relative.name}".replace("/./", "/")] = b"\x00\x05"
+    return sidecars
+
+
+def test_finder_sidecars_do_not_count_against_the_pack_limit(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    # 199 listed files and the manifest are a full pack; Finder's sidecars
+    # double the archive's members, and the pack must still install.
+    _pack_listing(source, stat_packs.MAX_ARCHIVE_FILES - 1)
+    # Only the files the manifest lists: the example's own two are unlisted now.
+    (source / "stats" / "steals.json").unlink()
+    shutil.rmtree(source / "presets")
+    archive = _zip_folder(source, tmp_path / "finder.fpdbstats", _finder_sidecars(source))
+    with zipfile.ZipFile(archive) as bundle:
+        assert len(bundle.infolist()) > stat_packs.MAX_ARCHIVE_FILES
+
+    pack = stat_packs.install_pack(archive, packs_dir)
+
+    assert len(pack.definitions) == stat_packs.MAX_ARCHIVE_FILES - 1
+
+
+def test_finder_sidecars_beside_a_root_manifest_are_dropped(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    # Compressing the pack's files rather than its folder: the manifest is at
+    # the root and the sidecars sit under __MACOSX/ beside it.
+    archive = tmp_path / "files.fpdbstats"
+    with zipfile.ZipFile(archive, "w") as out:
+        for path in sorted(source.rglob("*")):
+            if path.is_file():
+                out.write(path, path.relative_to(source).as_posix())
+        out.writestr("__MACOSX/._manifest.json", b"\x00")
+
+    pack = stat_packs.install_pack(archive, packs_dir)
+
+    assert not any(name.startswith("__MACOSX") for name in pack.files)
+
+
+def test_a_pack_folder_over_the_file_limit_is_refused(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    strays = {f"my-pack/stray/{index}.txt": b"" for index in range(stat_packs.MAX_ARCHIVE_FILES)}
+    archive = _zip_folder(source, tmp_path / "strays.fpdbstats", strays)
+
+    with pytest.raises(stat_packs.PackError, match=r"the pack holds \d+ files; at most 200"):
+        stat_packs.install_pack(archive, packs_dir)
+
+
+def test_an_archive_over_the_member_bound_is_refused(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    extra = {f"elsewhere/{index}.txt": b"" for index in range(stat_packs.MAX_ARCHIVE_MEMBERS)}
+    archive = _zip_folder(source, tmp_path / "many.fpdbstats", extra)
+
+    with pytest.raises(stat_packs.PackError, match=rf"archive holds \d+ files; at most {stat_packs.MAX_ARCHIVE_MEMBERS}"):
+        stat_packs.install_pack(archive, packs_dir)
