@@ -66,7 +66,10 @@ example-preflop-pack/
 
 To share it, zip the folder (with or without the top-level directory) and
 rename the archive to `.fpdbstats`, or export it from the manager, which writes
-a deterministic archive: the same pack always gives the same bytes.
+a deterministic archive: the same pack always gives the same bytes. In a zipped
+folder the pack is the one top-level directory holding `manifest.json`; other
+entries beside it, such as the `__MACOSX/` folder Finder adds, are ignored. One
+archive holds one pack.
 
 ## Manifest fields
 

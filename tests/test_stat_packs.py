@@ -1728,3 +1728,45 @@ def test_a_pack_preset_variable_names_a_filter(source: Path, packs_dir: Path) ->
     (source / "presets" / "steals.json").write_text(json.dumps(presets), encoding="utf-8")
 
     assert "unknown variable(s) ['plaeyr']" in refused(source, packs_dir)
+
+
+# -- review of 928ce94d (PR #411) -----------------------------------------------
+
+
+def _zip_folder(source: Path, archive: Path, extra: dict[str, bytes], root: str = "my-pack") -> Path:
+    """The pack zipped under ``root``, with ``extra`` entries beside it."""
+    with zipfile.ZipFile(archive, "w") as out:
+        for path in sorted(source.rglob("*")):
+            if path.is_file():
+                out.write(path, f"{root}/{path.relative_to(source).as_posix()}")
+        for name, data in extra.items():
+            out.writestr(name, data)
+    return archive
+
+
+def test_a_folder_zipped_by_finder_installs(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    # Finder puts AppleDouble metadata in a __MACOSX/ root beside the folder,
+    # so the archive has two top-level directories and one of them is the pack.
+    archive = _zip_folder(
+        source,
+        tmp_path / "finder.fpdbstats",
+        {"__MACOSX/my-pack/._manifest.json": b"\x00\x05\x16\x07", "__MACOSX/my-pack/stats/._steals.json": b"\x00"},
+    )
+
+    pack = stat_packs.install_pack(archive, packs_dir)
+
+    assert pack.id == PACK_ID
+    assert not any(name.startswith("__MACOSX") for name in pack.files)
+
+
+def test_an_unlisted_file_at_the_archive_root_does_not_hide_the_pack(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    archive = _zip_folder(source, tmp_path / "readme.fpdbstats", {"README.txt": b"see my-pack/"})
+
+    assert stat_packs.install_pack(archive, packs_dir).id == PACK_ID
+
+
+def test_an_archive_of_two_packs_is_refused(source: Path, packs_dir: Path, tmp_path: Path) -> None:
+    archive = _zip_folder(source, tmp_path / "two.fpdbstats", {"other-pack/manifest.json": b"{}"})
+
+    with pytest.raises(stat_packs.PackError, match=r"several packs \(my-pack, other-pack\)"):
+        stat_packs.install_pack(archive, packs_dir)

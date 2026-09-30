@@ -451,11 +451,22 @@ def _read_archive(source: Path) -> dict[str, bytes]:
         # A damaged entry (bad CRC, truncated data), encryption or an
         # unsupported compression method: the archive is refused, not raised.
         raise PackError([f"the archive cannot be read: {exc}"], str(source)) from exc
-    # An archive made by zipping the pack folder has one top-level directory.
+    # An archive made by zipping the pack folder has the pack in one top-level
+    # directory -- possibly beside others it does not list, such as the
+    # __MACOSX/ metadata Finder adds -- so the pack is the one directory that
+    # holds a manifest.
     if MANIFEST_NAME not in files:
-        tops = {name.split("/", 1)[0] for name in files}
-        if len(tops) == 1:
-            prefix = f"{tops.pop()}/"
+        roots = sorted(
+            name[: -len(MANIFEST_NAME) - 1]
+            for name in files
+            if name.count("/") == 1 and name.endswith(f"/{MANIFEST_NAME}")
+        )
+        if len(roots) > 1:
+            raise PackError(
+                [f"the archive holds several packs ({', '.join(roots)}); share one per archive"], str(source)
+            )
+        if roots:
+            prefix = f"{roots[0]}/"
             files = {name[len(prefix) :]: data for name, data in files.items() if name.startswith(prefix)}
     return files
 
