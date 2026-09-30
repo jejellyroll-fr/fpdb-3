@@ -1998,3 +1998,17 @@ def test_a_preset_list_over_the_value_limit_is_refused(source: Path, packs_dir: 
     _preset_with(source, hand_id=list(range(1, 202)))
 
     assert "filter 'hand_id' holds 201 values; at most 200" in refused(source, packs_dir)
+
+
+# -- review of 532db961 (PR #411) -----------------------------------------------
+
+
+def test_a_stat_naming_one_fragment_many_times_is_refused(source: Path, packs_dir: Path) -> None:
+    # Each mention was merged again on every HUD refresh, and the whole list
+    # stayed on the installed definition.
+    write_stats(
+        source,
+        [{"name": "example.preflop.x", "metric": "fold_frequency", "fragments": ["example.preflop.unopened"] * 100_000}],
+    )
+
+    assert "fragments names 'example.preflop.unopened' twice" in refused(source, packs_dir)

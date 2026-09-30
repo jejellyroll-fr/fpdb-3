@@ -299,6 +299,11 @@ class TestFragmentsAndAliases:
         with pytest.raises(ValueError, match="fragment cycle: a -> b -> a"):
             dsl.expand_fragments(["a"], library)
 
+    def test_a_definition_naming_a_fragment_twice_is_refused(self) -> None:
+        # Merged again on every resolve, and it changes nothing.
+        with pytest.raises(ValueError, match="fragments names 'flop' twice"):
+            _definition(fragments=["flop", "facing_cbet", "flop"])
+
     def test_registry_can_add_a_fragment(self) -> None:
         registry = dsl.DefinitionRegistry()
         registry.add_fragment("my_spot", {"street": "turn"})

@@ -479,13 +479,7 @@ def parse_definition(data: Mapping[str, Any], source: str = "") -> StatDefinitio
     numerator = _validate_filters(data.get("numerator", {}), "numerator", source)
     group_by = _group_by_of(data, source)
 
-    fragments = data.get("fragments", ())
-    if isinstance(fragments, str):
-        fragments = [fragments]
-    if not isinstance(fragments, (list, tuple)) or not all(isinstance(f, str) for f in fragments):
-        _fail("fragments must be a list of names", source)
-    fragments = tuple(fragments)
-
+    fragments = _fragments_of(data, source)
     display = _display_of(name, data, source)
 
     return StatDefinition(
@@ -499,6 +493,25 @@ def parse_definition(data: Mapping[str, Any], source: str = "") -> StatDefinitio
         schema_version=schema_version,
         source=source,
     )
+
+
+def _fragments_of(data: Mapping[str, Any], source: str) -> tuple[str, ...]:
+    """The fragments a definition names, each once."""
+    fragments = data.get("fragments", ())
+    if isinstance(fragments, str):
+        fragments = [fragments]
+    if not isinstance(fragments, (list, tuple)) or not all(isinstance(f, str) for f in fragments):
+        _fail("fragments must be a list of names", source)
+    seen: set[str] = set()
+    for fragment in fragments:
+        if fragment in seen:
+            # A second mention changes nothing -- the fragment is merged in
+            # already -- but each one is merged again whenever the stat is
+            # resolved, on every HUD refresh. Without repeats the list is at
+            # most as long as the fragment library.
+            _fail(f"fragments names {fragment!r} twice", source)
+        seen.add(fragment)
+    return tuple(fragments)
 
 
 def _group_by_of(data: Mapping[str, Any], source: str) -> tuple[str, ...]:
