@@ -638,10 +638,16 @@ class StatChoice(NamedTuple):
     category: str
     popup_packs: tuple[str, ...] = ()
     blocks: tuple[str, ...] = ()
+    # The user stat pack (#403) an analytics stat came from; "" for built-ins.
+    pack: str = ""
+
+    def origin(self) -> str:
+        """Where the stat comes from, as the picker labels it."""
+        return f"{self.source}: {self.pack}" if self.pack else self.source
 
     def describe(self) -> str:
         """The choice in one line, the way the picker's list shows it."""
-        parts = [f"{self.label} [{self.source}]"]
+        parts = [f"{self.label} [{self.origin()}]"]
         if self.filters:
             parts.append("filters: " + " ".join(f"{name}={readable(value)}" for name, value in sorted(self.filters.items())))
         if self.fmt:
@@ -688,7 +694,7 @@ def registry_choices(registry: Any = None) -> tuple[StatChoice, ...]:
 
 def analytics_choices(registry: Any = None) -> tuple[StatChoice, ...]:
     """The declarative stats of #306, with the query each one applies."""
-    from fpdb_3_legacy import analytics_definitions  # noqa: PLC0415
+    from fpdb_3_legacy import analytics_definitions, stat_packs  # noqa: PLC0415
 
     registry = registry if registry is not None else analytics_definitions.get_registry()
     choices = []
@@ -704,6 +710,7 @@ def analytics_choices(registry: Any = None) -> tuple[StatChoice, ...]:
                 filters=_definition_filters(definition, registry),
                 min_sample=display.min_sample,
                 category=display.category,
+                pack=stat_packs.pack_of(definition),
             )
         )
     return tuple(choices)

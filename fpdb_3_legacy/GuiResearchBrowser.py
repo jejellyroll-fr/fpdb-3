@@ -353,16 +353,21 @@ class _FilterRow(QWidget):
     def _build_range_widget(self, layout: QHBoxLayout) -> None:
         unit = self.spec.unit
         low = QDoubleSpinBox()
-        low.setRange(-10_000_000, 10_000_000)
-        low.setDecimals(2)
+        low.setRange(rb.RANGE_CONTROL_MIN, rb.RANGE_CONTROL_MAX)
+        low.setDecimals(rb.RANGE_CONTROL_DECIMALS)
         low.setSpecialValueText(" ")
         high = QDoubleSpinBox()
-        high.setRange(-10_000_000, 10_000_000)
-        high.setDecimals(2)
+        high.setRange(rb.RANGE_CONTROL_MIN, rb.RANGE_CONTROL_MAX)
+        high.setDecimals(rb.RANGE_CONTROL_DECIMALS)
         high.setSpecialValueText(" ")
         for spin in (low, high):
             if unit:
                 spin.setSuffix(f" {unit}")
+            # ``value()`` reads a spin sitting at its minimum as "no bound",
+            # and ``setSpecialValueText`` is what shows that state blank. Qt
+            # starts a spin at 0, not at its minimum, so an untouched range row
+            # read back as [0, 0] -- a filter on the stack nobody asked for.
+            spin.setValue(spin.minimum())
             spin.valueChanged.connect(lambda _: self.changed.emit())
         self.low_spin = low
         self.high_spin = high
@@ -404,7 +409,9 @@ class _FilterRow(QWidget):
         """The filter value as the engine vocabulary, or None to skip.
 
         ``None`` means *no filter*: the engine's ``compile_filters`` skips it,
-        and that is exactly what an untouched control must produce.
+        and that is exactly what an untouched control must produce. A text
+        field is read by ``research_browser.text_value``, the same rule a
+        preset's own values are checked against (#411).
         """
         kind = self.spec.value_kind
         if kind == "bool":
@@ -423,16 +430,7 @@ class _FilterRow(QWidget):
         edit = self.value_edit
         if not isinstance(edit, QLineEdit):
             raise TypeError("a text filter must use a line edit")
-        raw = edit.text().strip()
-        if not raw:
-            return None
-        if raw.lower() in ("true", "false"):
-            return raw.lower() == "true"
-        if "," in raw:
-            return [part.strip() for part in raw.split(",") if part.strip()]
-        if raw.lstrip("-").isdigit():
-            return int(raw)
-        return raw
+        return rb.text_value(edit.text())
 
     def set_value(self, value: Any) -> None:
         """Write one engine value back into the control (preset load, mode switch)."""
@@ -449,11 +447,12 @@ class _FilterRow(QWidget):
             combo.setCurrentIndex(max(index, 0))
             return
         if kind == "range":
-            low, high = (value if isinstance(value, (list, tuple)) else (None, None))
-            if low is not None:
-                self.low_spin.setValue(float(low))
-            if high is not None:
-                self.high_spin.setValue(float(high))
+            bounds = list(value) if isinstance(value, (list, tuple)) else []
+            for spin, bound in zip((self.low_spin, self.high_spin), bounds):
+                # A missing bound is the control's blank sentinel, never
+                # whatever the spin happens to hold: a preset's [null, 40] has
+                # to load as "up to 40" and not as "0 to 40" (#411).
+                spin.setValue(spin.minimum() if bound is None else float(bound))
             return
         edit = self.value_edit
         if not isinstance(edit, QLineEdit):
@@ -1980,6 +1979,14 @@ texture*. The label already existed; nothing called it. Technical names
             except ValueError as exc:
                 log.warning("Shipped presets not loaded: %s", exc)
                 self._builtins = ()
+            # Presets from enabled user stat packs (#403) are offered with the
+            # shipped ones: read-only, namespaced, so a save cannot overwrite them.
+            from fpdb_3_legacy import stat_packs  # noqa: PLC0415
+
+            try:
+                self._builtins = (*self._builtins, *stat_packs.installed_presets())
+            except (OSError, stat_packs.PackError) as exc:
+                log.warning("Stat pack presets not loaded: %s", exc)
         return self._builtins
 
     @staticmethod

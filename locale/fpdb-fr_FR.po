@@ -5160,3 +5160,111 @@ msgstr "Tapis"
 
 msgid "Stack (bb)"
 msgstr "Tapis (bb)"
+
+msgid "Stat Packs"
+msgstr "Packs de stats"
+
+msgid "Import, enable, disable, uninstall and export declarative stat packs"
+msgstr "Importer, activer, désactiver, désinstaller et exporter des packs de stats déclaratives"
+
+msgid "Stat packs"
+msgstr "Packs de stats"
+
+msgid "Stat pack"
+msgstr "Pack de stats"
+
+msgid "Built-in"
+msgstr "Intégré"
+
+msgid "User installed"
+msgstr "Installé par l'utilisateur"
+
+msgid "Disabled"
+msgstr "Désactivé"
+
+msgid "Invalid"
+msgstr "Invalide"
+
+msgid "Pack"
+msgstr "Pack"
+
+msgid "Stats"
+msgstr "Stats"
+
+msgid "Version"
+msgstr "Version"
+
+msgid "Author"
+msgstr "Auteur"
+
+msgid "Restart fpdb and the HUD to use the change everywhere."
+msgstr "Redémarrez fpdb et le HUD pour appliquer le changement partout."
+
+msgid "A stat pack adds declarative stats, and optionally Research presets, without changing fpdb. Packs are data only: no Python, no SQL."
+msgstr "Un pack de stats ajoute des stats déclaratives, et éventuellement des presets de Research, sans modifier fpdb. Les packs ne contiennent que des données : ni Python, ni SQL."
+
+msgid "Import pack..."
+msgstr "Importer un pack..."
+
+msgid "Enable"
+msgstr "Activer"
+
+msgid "Disable"
+msgstr "Désactiver"
+
+msgid "Uninstall"
+msgstr "Désinstaller"
+
+msgid "Export..."
+msgstr "Exporter..."
+
+msgid "This pack is not loaded:"
+msgstr "Ce pack n'est pas chargé :"
+
+msgid "Stats:"
+msgstr "Stats :"
+
+msgid "Location:"
+msgstr "Emplacement :"
+
+msgid "Import stat pack"
+msgstr "Importer un pack de stats"
+
+msgid "All files"
+msgstr "Tous les fichiers"
+
+msgid "This pack is already installed. Replace it with this version?"
+msgstr "Ce pack est déjà installé. Le remplacer par cette version ?"
+
+msgid "Could not read the pack:\n%s"
+msgstr "Impossible de lire le pack :\n%s"
+
+msgid "Installed %s."
+msgstr "%s installé."
+
+msgid "This pack cannot be installed:"
+msgstr "Ce pack ne peut pas être installé :"
+
+msgid "Enabled %s."
+msgstr "%s activé."
+
+msgid "Disabled %s."
+msgstr "%s désactivé."
+
+msgid "Uninstall stat pack"
+msgstr "Désinstaller le pack de stats"
+
+msgid "Uninstall %s?"
+msgstr "Désinstaller %s ?"
+
+msgid "Uninstalled %s."
+msgstr "%s désinstallé."
+
+msgid "Export stat pack"
+msgstr "Exporter le pack de stats"
+
+msgid "Exported to %s."
+msgstr "Exporté vers %s."
+
+msgid "The pack state was not changed:\n%s"
+msgstr "L'état du pack n'a pas été modifié :\n%s"

@@ -254,6 +254,56 @@ class TestFragmentsAndAliases:
         definition = _definition(group_by=["bet_size_bucket"])
         assert definition.group_by == ("sizing_bucket",)
 
+    @pytest.mark.parametrize("group_by", [["position", "position"], ["bet_size_bucket", "sizing_bucket"]])
+    def test_a_dimension_named_twice_is_refused(self, group_by: list[str]) -> None:
+        # Each occurrence is compiled into SELECT, GROUP BY and ORDER BY and
+        # splits nothing further: a repeat only builds a larger query.
+        with pytest.raises(ValueError, match="dimension twice"):
+            _definition(group_by=group_by)
+
+    def test_two_names_for_one_filter_are_refused(self) -> None:
+        # "stake" is the alias of "big_blind": keeping both would silently drop
+        # one of the constraints instead of refusing an ambiguous definition.
+        with pytest.raises(ValueError, match="are both the 'big_blind' filter"):
+            _definition(filters={"stake": [10, 20], "big_blind": [100, 200]})
+
+    def test_a_filter_and_its_alias_in_separate_blocks_are_not_a_duplicate(self) -> None:
+        definition = _definition(filters={"stake": [10, 20]}, numerator={"big_blind": [100, 200]})
+        assert definition.filters == {"big_blind": [10, 20]}
+        assert definition.numerator == {"big_blind": [100, 200]}
+
+    @pytest.mark.parametrize(
+        "grouping",
+        [{"group_by": ["position"], "dimensions": ["street"]}, {"group_by": ["position"], "dimensions": ["position"]}],
+    )
+    def test_group_by_and_its_alias_together_are_refused(self, grouping: dict) -> None:
+        # The parser reads group_by and never looks at dimensions: one of two
+        # declared groupings would be silently ignored.
+        with pytest.raises(ValueError, match="group_by and dimensions are the same field"):
+            _definition(**grouping)
+
+    def test_dimensions_alone_still_groups(self) -> None:
+        assert _definition(dimensions=["position"]).group_by == ("position",)
+
+    def test_a_fragment_named_twice_at_every_link_expands_once(self) -> None:
+        # Each fragment names the previous one twice: without memoizing, the
+        # expansion doubles at every link -- 2**60 steps for sixty fragments.
+        library: dict[str, dict] = {"f0": {"street": "flop"}}
+        for index in range(1, 61):
+            library[f"f{index}"] = {"fragments": [f"f{index - 1}", f"f{index - 1}"]}
+
+        assert dsl.expand_fragments(["f60"], library) == {"street": "flop"}
+
+    def test_a_cycle_is_still_refused_with_memoized_expansion(self) -> None:
+        library = {"a": {"fragments": ["b"]}, "b": {"fragments": ["c", "a"]}, "c": {"street": "flop"}}
+        with pytest.raises(ValueError, match="fragment cycle: a -> b -> a"):
+            dsl.expand_fragments(["a"], library)
+
+    def test_a_definition_naming_a_fragment_twice_is_refused(self) -> None:
+        # Merged again on every resolve, and it changes nothing.
+        with pytest.raises(ValueError, match="fragments names 'flop' twice"):
+            _definition(fragments=["flop", "facing_cbet", "flop"])
+
     def test_registry_can_add_a_fragment(self) -> None:
         registry = dsl.DefinitionRegistry()
         registry.add_fragment("my_spot", {"street": "turn"})
@@ -339,6 +389,28 @@ class TestDisplay:
         assert definition.display.label_for("fr") == "Fold FR"
         assert definition.display.label_for("de") == "Fold"
         assert _definition(label="Plain").display.label_for("fr") == "Plain"
+
+    @pytest.mark.parametrize(
+        "fields",
+        [
+            {"display": {"format": "percentage"}, "format": "count"},
+            {"display": {"precision": 1}, "precision": 1},
+            {"display": {"label": "A"}, "label": "B"},
+        ],
+    )
+    def test_a_display_field_set_twice_is_refused(self, fields: dict) -> None:
+        # The top-level value won and the display block's was never read.
+        with pytest.raises(ValueError, match="set both in display and at the top level"):
+            _definition(**fields)
+
+    def test_a_display_block_cannot_nest_another(self) -> None:
+        # A display inside display was accepted and silently ignored.
+        with pytest.raises(ValueError, match="display"):
+            _definition(display={"display": {"format": "count"}})
+
+    def test_display_fields_split_between_block_and_top_level_merge(self) -> None:
+        definition = _definition(display={"format": "count"}, precision=1)
+        assert definition.display.render(2.25) == dsl.DisplaySpec(fmt="count", precision=1).render(2.25)
 
     def test_precision_defaults_per_format(self) -> None:
         assert dsl.DisplaySpec(fmt="percentage").precision_for() == 0

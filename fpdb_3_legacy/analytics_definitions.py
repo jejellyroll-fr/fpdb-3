@@ -362,8 +362,20 @@ def _validate_filters(filters: Any, where: str, source: str) -> dict[str, Any]:
     if not isinstance(filters, Mapping):
         _fail(f"{where} must be a table/object of filter -> value, got {type(filters).__name__}", source)
     resolved: dict[str, Any] = {}
+    declared_as: dict[str, str] = {}
     for name, value in filters.items():
         engine_name = _resolve_filter_name(str(name), source)
+        if engine_name in resolved:
+            # An alias and the engine name are two keys for one filter:
+            # {"stake": ..., "big_blind": ...} keeps only the later value, so
+            # the stat would run over a population matching just one of the
+            # constraints it declares.
+            _fail(
+                f"{where}: {name!r} and {declared_as[engine_name]!r} are both the {engine_name!r} filter;"
+                " write it once",
+                source,
+            )
+        declared_as[engine_name] = str(name)
         resolved[engine_name] = _resolve_filter_value(engine_name, value, source)
     return resolved
 
@@ -375,7 +387,17 @@ def _validate_group_by(raw: Any, source: str) -> tuple[str, ...]:
         raw = [raw]
     if not isinstance(raw, (list, tuple)):
         _fail("group_by must be a list of dimension names", source)
-    return tuple(_resolve_dimension(str(name), source) for name in raw)
+    resolved: list[str] = []
+    for name in raw:
+        dimension = _resolve_dimension(str(name), source)
+        if dimension in resolved:
+            # Grouping twice by one dimension splits nothing further, and each
+            # occurrence is compiled into SELECT, GROUP BY and ORDER BY: a list
+            # repeating one long expression is only a way to build a huge query.
+            # Without repeats the list is at most as long as the vocabulary.
+            _fail(f"group_by names the {dimension!r} dimension twice", source)
+        resolved.append(dimension)
+    return tuple(resolved)
 
 
 def _validate_display(value: str | Mapping[str, Any] | None, where: str, source: str) -> DisplaySpec:
@@ -455,23 +477,10 @@ def parse_definition(data: Mapping[str, Any], source: str = "") -> StatDefinitio
 
     filters = _validate_filters(data.get("filters", {}), "filters", source)
     numerator = _validate_filters(data.get("numerator", {}), "numerator", source)
-    group_by = _validate_group_by(data.get("group_by", data.get("dimensions")), source)
+    group_by = _group_by_of(data, source)
 
-    fragments = data.get("fragments", ())
-    if isinstance(fragments, str):
-        fragments = [fragments]
-    if not isinstance(fragments, (list, tuple)) or not all(isinstance(f, str) for f in fragments):
-        _fail("fragments must be a list of names", source)
-    fragments = tuple(fragments)
-
-    display_block = data.get("display", {})
-    if display_block is None:
-        display_block = {}
-    if not isinstance(display_block, Mapping):
-        _fail("display must be a table/object", source)
-    _reject_unknown(display_block, _DISPLAY_FIELDS, "display", source)
-    merged = {**display_block, **_display_overrides(data)}
-    display = _build_display(name, merged, source)
+    fragments = _fragments_of(data, source)
+    display = _display_of(name, data, source)
 
     return StatDefinition(
         name=name,
@@ -484,6 +493,53 @@ def parse_definition(data: Mapping[str, Any], source: str = "") -> StatDefinitio
         schema_version=schema_version,
         source=source,
     )
+
+
+def _fragments_of(data: Mapping[str, Any], source: str) -> tuple[str, ...]:
+    """The fragments a definition names, each once."""
+    fragments = data.get("fragments", ())
+    if isinstance(fragments, str):
+        fragments = [fragments]
+    if not isinstance(fragments, (list, tuple)) or not all(isinstance(f, str) for f in fragments):
+        _fail("fragments must be a list of names", source)
+    seen: set[str] = set()
+    for fragment in fragments:
+        if fragment in seen:
+            # A second mention changes nothing -- the fragment is merged in
+            # already -- but each one is merged again whenever the stat is
+            # resolved, on every HUD refresh. Without repeats the list is at
+            # most as long as the fragment library.
+            _fail(f"fragments names {fragment!r} twice", source)
+        seen.add(fragment)
+    return tuple(fragments)
+
+
+def _group_by_of(data: Mapping[str, Any], source: str) -> tuple[str, ...]:
+    """The definition's grouping, under either of its two names."""
+    if "group_by" in data and "dimensions" in data:
+        # Two names for one field: the parser would read group_by and never
+        # look at dimensions, so a stat could be grouped otherwise than one of
+        # the declarations it carries says.
+        _fail("group_by and dimensions are the same field; write it once", source)
+    return _validate_group_by(data.get("group_by", data.get("dimensions")), source)
+
+
+def _display_of(name: str, data: Mapping[str, Any], source: str) -> DisplaySpec:
+    """The display block and the display fields written at the top level."""
+    display_block = data.get("display", {})
+    if display_block is None:
+        display_block = {}
+    if not isinstance(display_block, Mapping):
+        _fail("display must be a table/object", source)
+    _reject_unknown(display_block, [key for key in _DISPLAY_FIELDS if key != "display"], "display", source)
+    overrides = _display_overrides(data)
+    twice = sorted(set(display_block) & set(overrides))
+    if twice:
+        # The top-level value would win and the display block's never be
+        # read: {"display": {"format": "percentage"}, "format": "bb"} is a
+        # stat shown otherwise than one of its own declarations says.
+        _fail(f"{twice} set both in display and at the top level; write each once", source)
+    return _build_display(name, {**display_block, **overrides}, source)
 
 
 def _display_overrides(data: Mapping[str, Any]) -> dict[str, Any]:
@@ -520,18 +576,39 @@ def expand_fragments(
     key; a cycle is refused instead of recursing forever.
     """
     sources = FILTER_FRAGMENTS if library is None else library
+    memo: dict[str, dict[str, Any]] = {}
     merged: dict[str, Any] = {}
     for name in names:
-        if name in _seen:
-            _fail(f"fragment cycle: {' -> '.join((*_seen, name))}")
-        fragment = sources.get(name)
-        if fragment is None:
-            _fail(f"unknown fragment {name!r}; allowed: {sorted(sources)}")
-        nested = fragment.get("fragments", ())
-        if nested:
-            merged.update(expand_fragments(tuple(nested), sources, (*_seen, name)))
-        merged.update({key: value for key, value in fragment.items() if key != "fragments"})
+        merged.update(_expand_one(name, sources, _seen, memo))
     return merged
+
+
+def _expand_one(
+    name: str,
+    sources: Mapping[str, Mapping[str, Any]],
+    seen: tuple[str, ...],
+    memo: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """One fragment with its nested ones merged in, each expanded only once.
+
+    A fragment's expansion does not depend on how it was reached, so it is
+    kept: a chain in which every fragment names the previous one twice would
+    otherwise double the work at each link (#411). One stack frame per level,
+    so a chain is as deep as it was before.
+    """
+    if name in seen:
+        _fail(f"fragment cycle: {' -> '.join((*seen, name))}")
+    if name in memo:
+        return memo[name]
+    fragment = sources.get(name)
+    if fragment is None:
+        _fail(f"unknown fragment {name!r}; allowed: {sorted(sources)}")
+    expanded: dict[str, Any] = {}
+    for nested in fragment.get("fragments", ()):
+        expanded.update(_expand_one(nested, sources, (*seen, name), memo))
+    expanded.update({key: value for key, value in fragment.items() if key != "fragments"})
+    memo[name] = expanded
+    return expanded
 
 
 def merge_fragments(
@@ -593,6 +670,26 @@ def _check_document_version(document: Any, path: Path) -> None:
             f"definition schema version {version} is newer than supported ({DEFINITION_SCHEMA_VERSION}); upgrade fpdb",
             path.name,
         )
+
+
+def validate_filters(filters: Any, where: str, source: str = "") -> dict[str, Any]:
+    """Resolve a filter table against the engine vocabulary, or raise ``ValueError``.
+
+    Public so a fragment written outside a definition (a stat pack's, #403)
+    is checked by exactly the code that checks a definition's own filters.
+    """
+    return _validate_filters(filters, where, source)
+
+
+def definition_entries(document: Any, path: str | Path) -> list[Mapping[str, Any]]:
+    """The raw definitions of one parsed file, after its schema-version check.
+
+    ``load_definitions`` parses them all at once; a caller that reports every
+    bad definition separately (the stat pack loader) parses them one by one.
+    """
+    path = Path(path)
+    _check_document_version(document, path)
+    return _documents(document, path)
 
 
 def load_definitions(path: str | Path) -> list[StatDefinition]:
@@ -675,12 +772,38 @@ def default_definitions_dir() -> Path:
     return Path(__file__).resolve().parent / "analytics_definitions.d"
 
 
-def load_default_registry(extra_dirs: Iterable[str | Path] = ()) -> DefinitionRegistry:
-    """Build a registry from the bundled library plus any extra directories."""
+def load_default_registry(
+    extra_dirs: Iterable[str | Path] = (),
+    *,
+    include_packs: bool = True,
+    packs_dir: str | Path | None = None,
+) -> DefinitionRegistry:
+    """Build a registry from the bundled library, extra directories and packs.
+
+    Enabled user stat packs (#403) are added last. Their names are namespaced
+    and checked against the built-ins, so a pack adds stats and never replaces
+    one; a pack that cannot be read is skipped rather than failing the registry.
+    """
     registry = DefinitionRegistry()
     registry.load_directory(default_definitions_dir())
     for extra in extra_dirs:
         registry.load_directory(extra)
+    if include_packs:
+        from . import stat_packs  # noqa: PLC0415 - the pack layer builds on this module
+
+        try:
+            stats, fragments = stat_packs.installed_definitions(packs_dir)
+        except (OSError, stat_packs.PackError) as exc:
+            import logging  # noqa: PLC0415
+
+            logging.getLogger(__name__).warning("User stat packs not loaded: %s", exc)
+            return registry
+        for name, filters in fragments.items():
+            if name not in registry.fragments:
+                registry.add_fragment(name, filters)
+        for definition in stats:
+            if definition.name not in registry:
+                registry.add(definition)
     return registry
 
 
@@ -818,6 +941,7 @@ __all__ = [
     "build_report",
     "compile_definition",
     "default_definitions_dir",
+    "definition_entries",
     "expand_fragments",
     "format_row",
     "get_registry",
@@ -829,4 +953,5 @@ __all__ = [
     "resolve_metric",
     "resolve_query",
     "run_definition",
+    "validate_filters",
 ]

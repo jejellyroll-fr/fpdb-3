@@ -113,6 +113,21 @@ class TestProfiling:
         assert len(profiles) == len(definitions.get_registry())
         assert all(profile.name for profile in profiles)
 
+    def test_profiles_a_definition_through_its_registry_fragments(self, corpus_db: Database) -> None:
+        # A stat pack's definition names a fragment only its registry holds
+        # (#403): without that library, resolving it is an unknown fragment.
+        registry = definitions.load_default_registry(include_packs=False)
+        registry.add_fragment("example.preflop.steal_spot", {"street": "preflop"})
+        stat = definitions.parse_definition(
+            {"name": "example.preflop.x", "metric": "fold_frequency", "fragments": ["example.preflop.steal_spot"]},
+            "pack:example.preflop/stats.json",
+        )
+
+        with pytest.raises(ValueError, match="fragment"):
+            profiling.profile_definitions(corpus_db, [stat])
+        (profile,) = profiling.profile_definitions(corpus_db, [stat], registry.fragments)
+        assert profile.name == "example.preflop.x"
+
     def test_as_dict_is_json_friendly(self, corpus_db: Database) -> None:
         profile = profiling.profile_analytics_query(corpus_db, Query(metric="opportunities", filters={"street": "flop"}))
         payload = profile.as_dict()

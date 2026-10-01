@@ -717,6 +717,9 @@ class AnalyticsStatProvider:
             db,
             [self.effective_definition(binding, definition)],
             context=scope.filters(),
+            # The registry's library, as compute() resolves with: a stat
+            # pack's definition names fragments only its pack supplies (#403).
+            fragments=self.registry.fragments,
             big_blind_cents=self.big_blind_cents,
             locale=self.locale,
         )

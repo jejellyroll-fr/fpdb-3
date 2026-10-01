@@ -42,6 +42,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Final, NoReturn
 
+from .analytics_query import FILTERS
 from .research_browser import validate_preset
 
 # The pack schema this module understands. A pack written for a newer schema is
@@ -103,6 +104,21 @@ _PRESET_FIELDS: Final[frozenset[str]] = frozenset(
 
 def _fail(message: str, source: str) -> NoReturn:
     raise ValueError(f"{source}: {message}")
+
+
+def _text(value: Any, field: str, source: str) -> str:
+    """A field the format declares as plain text, or ``""`` when it is absent.
+
+    ``str()`` would turn an object into its Python repr: a pack declaring
+    ``"pack": {"a": 1}`` would install a pack named ``"{'a': 1}"`` and show that
+    to the user as the source of every preset in it, and a preset id would stop
+    being a key. A value that is not text is refused by name instead.
+    """
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        _fail(f"{field} must be a string, got {type(value).__name__}", source)
+    return value
 
 
 def _localized(value: Any, locale: str, field: str, source: str) -> Any:
@@ -187,7 +203,7 @@ def _validate_pack(raw: Any, source: str) -> PresetPack:
             f"got {raw.get('schema_version')!r}",
             source,
         )
-    pack_id = str(raw.get("pack") or "").strip()
+    pack_id = _text(raw.get("pack"), "pack", source).strip()
     if not pack_id:
         _fail("pack must be a non-empty id", source)
     entries = raw.get("presets")
@@ -201,10 +217,19 @@ def _validate_pack(raw: Any, source: str) -> PresetPack:
         _fail(f"duplicate preset id(s): {duplicate}", source)
     return PresetPack(
         id=pack_id,
-        label=str(raw.get("label") or pack_id),
-        description=str(raw.get("description") or ""),
+        label=_text(raw.get("label"), "label", source) or pack_id,
+        description=_text(raw.get("description"), "description", source),
         presets=presets,
     )
+
+
+def validate_preset_pack(raw: Any, source: str) -> PresetPack:
+    """Validate one preset pack document, as the shipped library is validated.
+
+    Public so presets arriving in a user stat pack (#403) go through the same
+    checks as the shipped ones.
+    """
+    return _validate_pack(raw, source)
 
 
 def _duplicates(values: Iterable[str]) -> list[str]:
@@ -223,11 +248,11 @@ def _validate_preset(raw: Any, source: str) -> LibraryPreset:
     unknown = sorted(set(raw) - _PRESET_FIELDS)
     if unknown:
         _fail(f"unknown preset field(s) {unknown}; known: {sorted(_PRESET_FIELDS)}", source)
-    preset_id = str(raw.get("id") or "").strip()
+    preset_id = _text(raw.get("id"), "id", source).strip()
     if not preset_id:
         _fail("id must be a non-empty string", source)
     source = f"{source}#{preset_id}"
-    category = str(raw.get("category") or "").strip().lower()
+    category = _text(raw.get("category"), "category", source).strip().lower()
     if category not in CATEGORIES:
         _fail(f"unknown category {category!r}; known: {list(CATEGORIES)}", source)
     # The engine vocabulary is checked by the browser's own validator, which is
@@ -243,7 +268,8 @@ def _validate_preset(raw: Any, source: str) -> LibraryPreset:
         )
     except ValueError as exc:
         _fail(str(exc), source)
-    view = str(raw.get("recommended_view") or "summary").strip().lower()
+    view = _text(raw.get("recommended_view"), "recommended_view", source) or "summary"
+    view = view.strip().lower()
     if view not in RESULT_VIEWS:
         _fail(f"unknown recommended_view {view!r}; known: {list(RESULT_VIEWS)}", source)
     min_sample = raw.get("min_sample")
@@ -260,9 +286,35 @@ def _validate_preset(raw: Any, source: str) -> LibraryPreset:
         group_by=query["group_by"],
         recommended_view=view,
         min_sample=min_sample,
-        variables=tuple(str(name) for name in raw.get("variables", ()) or ()),
-        tags=tuple(str(tag) for tag in raw.get("tags", ()) or ()),
+        variables=_variables(raw.get("variables"), source),
+        tags=_string_list(raw.get("tags"), "tags", source),
     )
+
+
+def _variables(value: Any, source: str) -> tuple[str, ...]:
+    """The filters a preset asks its user to adjust, each one a real filter.
+
+    Research shows them as "Adjust player, site for your own game": a typo
+    ("plaeyr") would ask the user to adjust a filter no row can add.
+    """
+    variables = _string_list(value, "variables", source)
+    unknown = sorted(name for name in variables if name not in FILTERS)
+    if unknown:
+        _fail(f"unknown variable(s) {unknown}; a variable names a filter: {sorted(FILTERS)}", source)
+    return variables
+
+
+def _string_list(value: Any, field: str, source: str) -> tuple[str, ...]:
+    """A list of non-empty strings, or ``()`` when the field is absent.
+
+    Iterating a bare string would split it: "variables": "player" became the
+    filters p, l, a, y, e, r and the preset offered to adjust each letter.
+    """
+    if value is None:
+        return ()
+    if not isinstance(value, list) or not all(isinstance(item, str) and item.strip() for item in value):
+        _fail(f"{field} must be a list of non-empty strings, not {value!r}", source)
+    return tuple(value)
 
 
 def load_packs(directory: str | Path | None = None) -> tuple[PresetPack, ...]:
@@ -332,4 +384,5 @@ __all__ = [
     "library_dir",
     "load_library",
     "load_packs",
+    "validate_preset_pack",
 ]

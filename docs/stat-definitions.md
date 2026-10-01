@@ -144,6 +144,11 @@ A definition names things that already exist; it cannot compute or execute.
   unsupported field.
 * Unsupported fields, filters, metrics, dimensions, formats and fragments are
   refused with a message that lists the allowed values.
+* A field written twice under two names is refused rather than one being
+  dropped: a filter and its alias (`stake` and `big_blind`), `group_by` and
+  `dimensions`, or a display field set both in `display` and at the top level.
+* A dimension named twice in `group_by` (directly or through an alias) is refused.
+* A fragment named twice in a definition's `fragments` is refused.
 * Every filter value becomes a bound parameter in the compiled SQL; a value
   containing quotes or `--` is data, never syntax.
 
@@ -158,6 +163,12 @@ formatting, minimum sample), and the consumers: the bundled preflop and
 postflop definitions run end to end on the golden corpus, the report renders
 localized grouped rows, a popup context narrows to one player, and a definition
 added at runtime runs with no Python change.
+
+## Sharing definitions
+
+User-written definitions are installed and shared as [stat packs](stat-packs.md)
+(#403): namespaced, validated with the same code as the bundled library, and
+kept in the user's data directory.
 
 ## Where this goes
 

@@ -147,6 +147,13 @@ _GROUP_OF: Final = {
     "hand_state_street": "strength", "hand_state_known": "strength",
 }
 
+# What a range filter row can hold: two spin boxes over this span, to this many
+# decimals, with the minimum itself meaning "no bound". A preset's bounds must
+# fit it to come back unchanged (checked where stat packs are read).
+RANGE_CONTROL_MIN: Final = -10_000_000
+RANGE_CONTROL_MAX: Final = 10_000_000
+RANGE_CONTROL_DECIMALS: Final = 2
+
 _KIND_OF_ENGINE_KIND: Final = {
     "scalar": "scalar",
     "set": "set",
@@ -203,6 +210,26 @@ def filter_spec(name: str) -> FilterSpec:
     if name not in FILTERS:
         raise ValueError(f"Unknown filter {name!r}; known: {sorted(FILTERS)}")
     return next(item for item in FILTER_SPECS if item.name == name)
+
+
+def text_value(raw: str) -> Any:
+    """The engine value a filter row reads from its text field.
+
+    Named once, so a preset can be checked against the control it will be loaded
+    into: an empty field is *no filter*, ``true`` and ``false`` are a condition,
+    a comma-separated field is a list, and digits are a number. Everything else
+    is the word itself, and ``None`` means *no filter*.
+    """
+    text = raw.strip()
+    if not text:
+        return None
+    if text.lower() in ("true", "false"):
+        return text.lower() == "true"
+    if "," in text:
+        return [part.strip() for part in text.split(",") if part.strip()]
+    if text.lstrip("-").isdigit():
+        return int(text)
+    return text
 
 
 @dataclass(frozen=True)
@@ -278,19 +305,37 @@ def validate_preset(payload: Mapping[str, Any]) -> dict[str, Any]:
     unknown = [name for name in numerator if name not in FILTERS]
     if unknown:
         raise ValueError(f"Unknown numerator filters {sorted(unknown)}; known: {sorted(FILTERS)}")
-    group_by = payload.get("group_by", ())
-    if isinstance(group_by, str):
-        group_by = (group_by,)
-    unknown = [name for name in group_by if name not in DIMENSIONS]
-    if unknown:
-        raise ValueError(f"Unknown dimensions {sorted(unknown)}; known: {sorted(DIMENSIONS)}")
+    group_by = _group_by_dimensions(payload.get("group_by", ()))
     return {
         "metric": metric,
         "filters": dict(filters),
         "numerator": dict(numerator),
-        "group_by": tuple(group_by),
+        "group_by": group_by,
         "description": str(payload.get("description", "")).strip(),
     }
+
+
+def _group_by_dimensions(raw: Any) -> tuple[str, ...]:
+    """A preset's ``group_by`` as the dimensions it groups by.
+
+    A dimension name, or a list of them. A mapping is iterable, so
+    ``{"position": "street"}`` used to read as ``("position",)``: the query
+    installed was grouped otherwise than the preset declares and the value it
+    names was dropped without a word. A user preset file and a pack both reach
+    ``validate_preset``, so the rule lives here rather than in either loader
+    (#411 review).
+    """
+    group_by = (raw,) if isinstance(raw, str) else raw
+    if not isinstance(group_by, (list, tuple)) or not all(isinstance(name, str) for name in group_by):
+        raise ValueError(f"group_by must be a dimension name or a list of them, not {raw!r}")
+    unknown = [name for name in group_by if name not in DIMENSIONS]
+    if unknown:
+        raise ValueError(f"Unknown dimensions {sorted(unknown)}; known: {sorted(DIMENSIONS)}")
+    if len(set(group_by)) != len(group_by):
+        # The breakdown picker holds each dimension once; a repeat splits
+        # nothing further and multiplies the compiled query (#411).
+        raise ValueError(f"group_by names a dimension twice: {list(group_by)[:10]}")
+    return tuple(group_by)
 
 
 def describe_preset(preset: Mapping[str, Any]) -> str:

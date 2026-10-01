@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "stats": [
+    {
+      "name": "example.preflop.btn_open",
+      "metric": "raise_frequency",
+      "fragments": ["example.preflop.unopened"],
+      "filters": { "position": ["BTN"] },
+      "label": { "en": "Button open", "fr": "Ouverture au bouton" },
+      "description": {
+        "en": "How often the button raised first in when the pot was unopened.",
+        "fr": "Fréquence à laquelle le bouton relance en premier dans un pot non ouvert."
+      },
+      "format": "percentage",
+      "min_sample": 20,
+      "category": "Example steals"
+    },
+    {
+      "name": "example.preflop.sb_open",
+      "metric": "raise_frequency",
+      "fragments": ["example.preflop.unopened"],
+      "filters": { "position": ["SB"] },
+      "label": { "en": "Small blind open", "fr": "Ouverture en petite blinde" },
+      "format": "percentage",
+      "min_sample": 20,
+      "category": "Example steals"
+    }
+  ]
+}
