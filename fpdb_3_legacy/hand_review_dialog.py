@@ -227,11 +227,15 @@ class HandReviewDialog(QDialog):
     def open_in_preflop_advisor(self) -> None:
         """Start PreflopAdvisor on this review, asking where it is when it cannot be found.
 
-        A program the user picks is remembered only once it has started: one that does not
-        start would otherwise be retried, and asked about, on every review that follows.
+        A program the user picks is remembered only once it has started, and a remembered
+        one that no longer starts is forgotten: either would otherwise be retried, and asked
+        about, on every review that follows. Forgotten, the next review looks on the PATH.
         """
         located: str | None = None
-        command = preflop_advisor_command(self.configured_path())
+        configured = self.configured_path()
+        command = preflop_advisor_command(configured)
+        # Whether *command* is the remembered program, rather than one found on the PATH.
+        remembered = bool(configured) and command == preflop_advisor_command(configured, which=lambda _name: None)
         if command is None:
             located, command = self.locate_preflop_advisor()
         while command is not None:
@@ -239,6 +243,9 @@ class HandReviewDialog(QDialog):
                 PreflopAdvisorTransport(command, self.review_path(), self.start).send(self.document())
             except LaunchError as exc:
                 log.warning("Could not start PreflopAdvisor: %s", exc)
+                if remembered:
+                    self.remember_preflop_advisor(None)
+                    remembered = False
                 answer = QMessageBox.question(
                     self,
                     _("Solver review"),
@@ -269,11 +276,12 @@ class HandReviewDialog(QDialog):
             return None, None
         return path, command
 
-    def remember_preflop_advisor(self, path: str) -> None:
+    def remember_preflop_advisor(self, path: str | None) -> None:
+        """Save where PreflopAdvisor is, or forget it (``None``)."""
         if self.config is None or not hasattr(self.config, "set_preflop_advisor_path"):
             return
         try:
             self.config.set_preflop_advisor_path(path)
         except OSError as exc:
-            # PreflopAdvisor did start; only remembering where it is failed.
+            # Only the configuration could not be written; the review itself is unaffected.
             log.warning("Could not save where PreflopAdvisor is: %s", exc)

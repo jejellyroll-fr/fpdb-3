@@ -293,7 +293,8 @@ def test_a_launch_that_fails_offers_to_locate_preflop_advisor_again(
 
     assert "could not be started" in asked[0]
     assert [started for started, _arguments in starts.calls] == [str(program), str(other)]
-    assert config.saved == [str(other)]
+    # The broken remembered program is forgotten, then the one that started is remembered.
+    assert config.saved == [None, str(other)]
     assert dialog.result() == HandReviewDialog.DialogCode.Accepted
 
 
@@ -343,3 +344,33 @@ def test_a_review_that_cannot_be_written_does_not_ask_for_another_program(
     assert asked == []
     assert starts.calls == []
     assert "Could not save the hand review" in warned[0]
+
+
+def test_a_remembered_program_that_no_longer_starts_is_forgotten(qtbot, legacy_config, program, monkeypatch) -> None:
+    config = RememberedPath(str(program))
+    monkeypatch.setattr(
+        "fpdb_3_legacy.hand_review_dialog.QMessageBox.question",
+        lambda *_args: QMessageBox.StandardButton.No,
+    )
+    dialog = review_dialog(qtbot, legacy_config, config=config, start=Starts(False))
+
+    dialog.open_button.click()
+
+    # Declined: the next review looks on the PATH rather than retrying the broken one.
+    assert config.saved == [None]
+
+
+def test_a_program_on_the_path_that_does_not_start_leaves_the_configuration_alone(
+    qtbot, legacy_config, program, monkeypatch
+) -> None:
+    config = RememberedPath()
+    monkeypatch.setattr("fpdb_3_legacy.hand_review_payload.shutil.which", lambda _name: str(program))
+    monkeypatch.setattr(
+        "fpdb_3_legacy.hand_review_dialog.QMessageBox.question",
+        lambda *_args: QMessageBox.StandardButton.No,
+    )
+    dialog = review_dialog(qtbot, legacy_config, config=config, start=Starts(False))
+
+    dialog.open_button.click()
+
+    assert config.saved == []

@@ -42,8 +42,9 @@ fpdb-3 starts, in this order:
 
 A file counts as a program only if it may be executed (Windows has no such
 bit). When neither can be found, or the program does not start, the dialog
-asks where PreflopAdvisor is; the answer is remembered once it has started, so
-a program that does not start is never retried on later reviews. A review that
+asks where PreflopAdvisor is; the answer is remembered once it has started, and
+a remembered program that no longer starts is forgotten, so a broken one is
+never retried on later reviews (the next one looks on the PATH again). A review that
 cannot be written (a full or missing temporary folder) is reported as such,
 without asking for another program. On macOS a `PreflopAdvisor.app` bundle can
 be chosen; it is started through `open -n -a … --args`.
