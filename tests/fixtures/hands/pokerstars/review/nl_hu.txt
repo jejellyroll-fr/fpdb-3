@@ -1,0 +1,25 @@
+PokerStars Hand #2810000003:  Hold'em No Limit ($1/$2 USD) - 2026/09/01 20:10:00 ET
+Table 'Review HU' 2-max Seat #1 is the button
+Seat 1: Player1 ($200 in chips)
+Seat 2: Hero ($150 in chips)
+Player1: posts small blind $1
+Hero: posts big blind $2
+*** HOLE CARDS ***
+Dealt to Hero [Kd Kc]
+Player1: raises $4 to $6
+Hero: raises $12 to $18
+Player1: calls $12
+*** FLOP *** [8h 5c 2d]
+Hero: bets $20
+Player1: folds
+Uncalled bet ($20) returned to Hero
+Hero collected $36 from pot
+Hero: doesn't show hand
+*** SUMMARY ***
+Total pot $36 | Rake $0
+Board [8h 5c 2d]
+Seat 1: Player1 (button) (small blind) folded on the Flop
+Seat 2: Hero (big blind) collected ($36)
+
+
+

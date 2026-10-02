@@ -1723,7 +1723,7 @@ class EmptyStat:
         self.widget.stat_dict = None
         self.widget.aw_popup = None
 
-    def update(self, _player_id: str, _stat_dict: dict) -> None:
+    def update(self, _player_id: int | str | None, _stat_dict: dict) -> None:
         return
 
 

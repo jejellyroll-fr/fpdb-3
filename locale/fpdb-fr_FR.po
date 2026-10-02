@@ -5268,3 +5268,45 @@ msgstr "Exporté vers %s."
 
 msgid "The pack state was not changed:\n%s"
 msgstr "L'état du pack n'a pas été modifié :\n%s"
+
+msgid "Solver review (PreflopAdvisor)..."
+msgstr "Revue solver (PreflopAdvisor)..."
+
+msgid "Solver review"
+msgstr "Revue solver"
+
+msgid "Solver review..."
+msgstr "Revue solver..."
+
+msgid "Send this hand's preflop decisions to PreflopAdvisor"
+msgstr "Envoyer les décisions préflop de cette main à PreflopAdvisor"
+
+msgid "This decision"
+msgstr "Cette décision"
+
+msgid "Every hero decision of the hand"
+msgstr "Toutes les décisions du héros dans la main"
+
+msgid "Review:"
+msgstr "Revoir :"
+
+msgid "Save the file, then open it in PreflopAdvisor with Hand review > Load a hand review."
+msgstr "Enregistrez le fichier, puis ouvrez-le dans PreflopAdvisor avec Hand review > Load a hand review."
+
+msgid "This hand cannot be sent to PreflopAdvisor."
+msgstr "Cette main ne peut pas être envoyée à PreflopAdvisor."
+
+msgid "Save for PreflopAdvisor..."
+msgstr "Enregistrer pour PreflopAdvisor..."
+
+msgid "Copy JSON"
+msgstr "Copier le JSON"
+
+msgid "Save hand review"
+msgstr "Enregistrer la revue de main"
+
+msgid "Hand review (*.json)"
+msgstr "Revue de main (*.json)"
+
+msgid "Could not save the hand review:\n%s"
+msgstr "Impossible d'enregistrer la revue de main :\n%s"
