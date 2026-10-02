@@ -381,10 +381,14 @@ def test_a_batch_lists_the_hands_it_refuses(legacy_config) -> None:
     assert "skipped" not in review_document(reviews)
 
 
-def test_an_unreadable_amount_is_a_refusal() -> None:
+@pytest.mark.parametrize("value", [None, "", "NaN", "Infinity", "-inf"])
+def test_an_unreadable_amount_is_a_refusal(value: Any) -> None:
     hand = stub_hand(6)
-    hand.bb = None
+    hand.bb = value
     assert refusal(hand) == INVALID_AMOUNT
+
+
+def test_an_unreadable_raise_is_a_refusal() -> None:
     hand = stub_hand(6)
     raises = next(action for action in hand.actions["PREFLOP"] if action[1] == "raises")
     broken = (raises[0], "raises", raises[2], "three", raises[4], False)

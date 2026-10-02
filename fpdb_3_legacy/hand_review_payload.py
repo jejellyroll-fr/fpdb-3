@@ -271,11 +271,15 @@ class HandReview:
 
 def _decimal(value: Any) -> Decimal:
     try:
-        return Decimal(str(value))
+        amount = Decimal(str(value))
     except (InvalidOperation, TypeError, ValueError):
-        # A refusal like any other, so the dialog shows it and a batch skips
-        # the hand instead of stopping on it.
-        raise HandReviewError(INVALID_AMOUNT, f"{value!r} is not an amount") from None
+        amount = None
+    # "NaN" and "Infinity" read as Decimals but are no amount either. Either
+    # way it is a refusal like any other, so the dialog shows it and a batch
+    # skips the hand instead of stopping on it.
+    if amount is None or not amount.is_finite():
+        raise HandReviewError(INVALID_AMOUNT, f"{value!r} is not an amount")
+    return amount
 
 
 def _number(value: Decimal) -> float | int:
