@@ -4007,6 +4007,24 @@ class Config:
             if lang:
                 general_node.setAttribute("ui_language", lang)
 
+    def set_preflop_advisor_path(self, path: str | None) -> None:
+        """Remember where PreflopAdvisor is, for the solver review (#413); empty forgets it.
+
+        An optional ``preflop_advisor`` attribute on ``<general>``: the shipped templates do
+        not carry it, so files without it keep looking for PreflopAdvisor on the PATH.
+        """
+        value = str(path or "")
+        if value:
+            self.general["preflop_advisor"] = value
+        else:
+            self.general.pop("preflop_advisor", None)
+        for general_node in self.doc.getElementsByTagName("general"):
+            if value:
+                general_node.setAttribute("preflop_advisor", value)
+            elif general_node.hasAttribute("preflop_advisor"):
+                general_node.removeAttribute("preflop_advisor")
+        self.save()
+
     def set_site_ids(self, sites) -> None:
         self.site_ids = dict(sites)
 

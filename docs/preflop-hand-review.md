@@ -17,9 +17,37 @@ is PreflopAdvisor's side ([PreflopAdvisor#22](https://github.com/jejellyroll-fr/
 - **Hand Viewer** and **tournament hand viewer**: right-click a hand,
   *Solver review (PreflopAdvisor)...*.
 
-The dialog shows the preflop line with the hero's decisions marked, then saves
-the document as JSON (or copies it). In PreflopAdvisor, open it with
-*Hand review > Load a hand review*.
+The dialog shows the preflop line with the hero's decisions marked. Then:
+
+- **Open in PreflopAdvisor** writes the document to a temporary folder
+  private to the user and made once per session (`fpdb-hand-reviews-<random>/`,
+  by `tempfile.mkdtemp`: never a fixed name in the shared temporary directory),
+  as a new `fpdb-hand-review-<id>-<random>.json` for every launch, so a
+  PreflopAdvisor still starting never finds its document rewritten by a second
+  click. It then starts PreflopAdvisor on it with
+  `--review <file>` (PreflopAdvisor's own option), which opens *Review Hands*
+  with the document loaded. Each click starts a new PreflopAdvisor window.
+- **Save for PreflopAdvisor...** saves the JSON (or **Copy JSON** copies it), to
+  load in PreflopAdvisor with *Review Hands > Load a hand review*.
+
+### Where PreflopAdvisor is
+
+fpdb-3 starts, in this order:
+
+1. the program the user located, remembered as the optional `preflop_advisor`
+   attribute of `<general>` in `HUD_config.xml` (the shipped templates do not
+   carry it), as long as it is still there;
+2. the `preflop_advisor` console script on the PATH (`uv tool install`,
+   `pip install`).
+
+A file counts as a program only if it may be executed (Windows has no such
+bit). When neither can be found, or the program does not start, the dialog
+asks where PreflopAdvisor is; the answer is remembered once it has started, and
+a remembered program that no longer starts is forgotten, so a broken one is
+never retried on later reviews (the next one looks on the PATH again). A review that
+cannot be written (a full or missing temporary folder) is reported as such,
+without asking for another program. On macOS a `PreflopAdvisor.app` bundle can
+be chosen; it is started through `open -n -a … --args`.
 
 ## The document
 
@@ -131,7 +159,13 @@ sent with invented values (`HandReviewError.code`):
 
 ## Transport
 
-The document goes through a `HandReviewTransport` (`send(document) -> str`).
-The first one, `JsonFileTransport`, writes the file PreflopAdvisor loads. A
-local API or a deep link would be another transport; the normalization does
-not change.
+The document goes through a `HandReviewTransport` (`send(document) -> str`):
+
+- `JsonFileTransport` writes the file PreflopAdvisor loads;
+- `PreflopAdvisorTransport` writes it, then starts PreflopAdvisor on it with
+  `--review`, detached and without a shell. A write failure raises the
+  write's `OSError`; a program that does not start raises `LaunchError`. The launcher is injected
+  (`QProcess.startDetached` in the dialog), so the module stays free of Qt.
+
+A local API, or handing the document to a PreflopAdvisor already running,
+would be another transport; the normalization does not change.
