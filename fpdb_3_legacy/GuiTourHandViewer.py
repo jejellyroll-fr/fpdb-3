@@ -446,7 +446,7 @@ class TourHandViewer(QSplitter):
         m.addSeparator()
         add_share_actions(m, hand, self)
         m.addSeparator()
-        add_review_action(m, hand, self, fpdb_hand_id=hand_id)
+        add_review_action(m, hand, self, fpdb_hand_id=hand_id, config=self.config)
         m.move(event.globalPosition().toPoint())
         m.exec()
 

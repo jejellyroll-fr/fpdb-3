@@ -20,7 +20,9 @@ The format is documented in ``docs/preflop-hand-review.md``.
 from __future__ import annotations
 
 import json
-from collections.abc import Iterable, Sequence
+import shutil
+import sys
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field, replace
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -735,4 +737,58 @@ class JsonFileTransport:
 
     def send(self, document: dict[str, Any]) -> str:
         Path(self.path).write_text(dumps(document), encoding="utf-8")
+        return str(self.path)
+
+
+#: The console script PreflopAdvisor installs (``uv tool install``, ``pip install``).
+PREFLOP_ADVISOR_SCRIPT: Final = "preflop_advisor"
+#: The option that starts PreflopAdvisor on a document (PreflopAdvisor#47).
+REVIEW_OPTION: Final = "--review"
+
+
+def preflop_advisor_command(
+    configured: str | None = None,
+    *,
+    which: Callable[[str], str | None] | None = None,
+    platform: str | None = None,
+) -> list[str] | None:
+    """How to start PreflopAdvisor, up to its ``--review`` argument; ``None`` when unknown.
+
+    The path the user configured comes first, but only while it is still there: a program
+    that was moved is looked for again rather than launched into an error. Then the console
+    script on the PATH. A macOS application bundle is a folder, which ``open`` starts, a new
+    instance each time (``-n``) so the document always reaches a window that reads it.
+    """
+    # Looked up when called, not when defined, so a test can stand in for either.
+    which = which or shutil.which
+    platform = platform or sys.platform
+    if configured:
+        path = Path(configured).expanduser()
+        if platform == "darwin" and path.suffix == ".app" and path.is_dir():
+            return ["/usr/bin/open", "-n", "-a", str(path), "--args"]
+        if path.is_file():
+            return [str(path)]
+    found = which(PREFLOP_ADVISOR_SCRIPT)
+    return [found] if found else None
+
+
+@dataclass(frozen=True)
+class PreflopAdvisorTransport:
+    """Write the document, then start PreflopAdvisor on it with ``--review``.
+
+    *start* launches a program with its arguments, detached and without a shell, and says
+    whether it did; it is injected so this module needs no toolkit (the dialog passes
+    ``QProcess.startDetached``).
+    """
+
+    command: Sequence[str]
+    path: Path
+    start: Callable[[str, list[str]], bool]
+
+    def send(self, document: dict[str, Any]) -> str:
+        JsonFileTransport(self.path).send(document)
+        program, *arguments = self.command
+        if not self.start(program, [*arguments, REVIEW_OPTION, str(self.path)]):
+            msg = f"{program} could not be started"
+            raise OSError(msg)
         return str(self.path)

@@ -2622,6 +2622,7 @@ class GuiReplayer(QWidget):
                 hero=self.shared_hero,
                 fpdb_hand_id=self.shared_hand_id,
                 applied_preflop=self.preflop_actions_shown(),
+                config=self.conf,
             ).exec()
 
     def increment_state(self) -> None:  # noqa: F811

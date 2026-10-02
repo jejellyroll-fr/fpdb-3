@@ -5290,8 +5290,8 @@ msgstr "Toutes les décisions du héros dans la main"
 msgid "Review:"
 msgstr "Revoir :"
 
-msgid "Save the file, then open it in PreflopAdvisor with Hand review > Load a hand review."
-msgstr "Enregistrez le fichier, puis ouvrez-le dans PreflopAdvisor avec Hand review > Load a hand review."
+msgid "Open it in PreflopAdvisor, or save the file and load it there with Review Hands > Load a hand review."
+msgstr "Ouvrez-la dans PreflopAdvisor, ou enregistrez le fichier et chargez-le avec Review Hands > Load a hand review."
 
 msgid "This hand cannot be sent to PreflopAdvisor."
 msgstr "Cette main ne peut pas être envoyée à PreflopAdvisor."
@@ -5310,3 +5310,15 @@ msgstr "Revue de main (*.json)"
 
 msgid "Could not save the hand review:\n%s"
 msgstr "Impossible d'enregistrer la revue de main :\n%s"
+
+msgid "Open in PreflopAdvisor"
+msgstr "Ouvrir dans PreflopAdvisor"
+
+msgid "PreflopAdvisor could not be started:\n%s\n\nLocate it?"
+msgstr "Impossible de démarrer PreflopAdvisor :\n%s\n\nIndiquer où il se trouve ?"
+
+msgid "Locate PreflopAdvisor"
+msgstr "Localiser PreflopAdvisor"
+
+msgid "%s is not a program that can be started."
+msgstr "%s n'est pas un programme qui peut être démarré."

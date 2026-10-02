@@ -17,9 +17,29 @@ is PreflopAdvisor's side ([PreflopAdvisor#22](https://github.com/jejellyroll-fr/
 - **Hand Viewer** and **tournament hand viewer**: right-click a hand,
   *Solver review (PreflopAdvisor)...*.
 
-The dialog shows the preflop line with the hero's decisions marked, then saves
-the document as JSON (or copies it). In PreflopAdvisor, open it with
-*Hand review > Load a hand review*.
+The dialog shows the preflop line with the hero's decisions marked. Then:
+
+- **Open in PreflopAdvisor** writes the document to a temporary folder
+  (`fpdb-hand-reviews/fpdb-hand-review-<id>.json`, rewritten when the same hand
+  is opened again) and starts PreflopAdvisor on it with
+  `--review <file>` (PreflopAdvisor's own option), which opens *Review Hands*
+  with the document loaded. Each click starts a new PreflopAdvisor window.
+- **Save for PreflopAdvisor...** saves the JSON (or **Copy JSON** copies it), to
+  load in PreflopAdvisor with *Review Hands > Load a hand review*.
+
+### Where PreflopAdvisor is
+
+fpdb-3 starts, in this order:
+
+1. the program the user located, remembered as the optional `preflop_advisor`
+   attribute of `<general>` in `HUD_config.xml` (the shipped templates do not
+   carry it), as long as it is still there;
+2. the `preflop_advisor` console script on the PATH (`uv tool install`,
+   `pip install`).
+
+When neither can be found, or the launch fails, the dialog asks where
+PreflopAdvisor is and remembers the answer. On macOS a `PreflopAdvisor.app`
+bundle can be chosen; it is started through `open -n -a … --args`.
 
 ## The document
 
@@ -131,7 +151,12 @@ sent with invented values (`HandReviewError.code`):
 
 ## Transport
 
-The document goes through a `HandReviewTransport` (`send(document) -> str`).
-The first one, `JsonFileTransport`, writes the file PreflopAdvisor loads. A
-local API or a deep link would be another transport; the normalization does
-not change.
+The document goes through a `HandReviewTransport` (`send(document) -> str`):
+
+- `JsonFileTransport` writes the file PreflopAdvisor loads;
+- `PreflopAdvisorTransport` writes it, then starts PreflopAdvisor on it with
+  `--review`, detached and without a shell. The launcher is injected
+  (`QProcess.startDetached` in the dialog), so the module stays free of Qt.
+
+A local API, or handing the document to a PreflopAdvisor already running,
+would be another transport; the normalization does not change.

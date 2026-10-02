@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-from PySide6.QtWidgets import QApplication, QMenu
+from PySide6.QtWidgets import QApplication, QMenu, QMessageBox
 
 from fpdb_3_legacy.GuiReplayer import GuiReplayer
 from fpdb_3_legacy.hand_review_dialog import HandReviewDialog, add_review_action
@@ -159,3 +159,117 @@ def test_a_hand_that_fails_to_load_cannot_be_reviewed_as_the_previous_one(
 
     assert replayer.shared_hand_id is None
     assert not replayer.reviewButton.isEnabled()
+
+
+# -- opening in PreflopAdvisor (#413) ---------------------------------------------
+
+
+class RememberedPath:
+    """Stands in for the configuration: never the real HUD_config.xml."""
+
+    def __init__(self, path: str | None = None) -> None:
+        self.general = {"preflop_advisor": path} if path else {}
+        self.saved: list[str | None] = []
+
+    def set_preflop_advisor_path(self, path: str | None) -> None:
+        self.saved.append(path)
+        self.general["preflop_advisor"] = path
+
+
+class Starts:
+    """Records what would have been started, and answers whether it started."""
+
+    def __init__(self, *answers: bool) -> None:
+        self.answers = list(answers) or [True]
+        self.calls: list[tuple[str, list[str]]] = []
+
+    def __call__(self, program: str, arguments: list[str]) -> bool:
+        self.calls.append((program, arguments))
+        return self.answers.pop(0) if len(self.answers) > 1 else self.answers[0]
+
+
+@pytest.fixture
+def program(tmp_path, monkeypatch) -> Path:
+    """A PreflopAdvisor executable, and no other one on the PATH; documents go to tmp_path."""
+    path = tmp_path / "preflop_advisor"
+    path.write_bytes(b"")
+    monkeypatch.setattr("fpdb_3_legacy.hand_review_payload.shutil.which", lambda _name: None)
+    monkeypatch.setattr("fpdb_3_legacy.hand_review_dialog.tempfile.gettempdir", lambda: str(tmp_path))
+    return path
+
+
+def review_dialog(qtbot, legacy_config, **kwargs) -> HandReviewDialog:
+    dialog = HandReviewDialog(parse(legacy_config, "review/nl_3bet_6max.txt"), fpdb_hand_id=7, **kwargs)
+    qtbot.addWidget(dialog)
+    return dialog
+
+
+def test_open_starts_preflop_advisor_on_the_written_document(qtbot, legacy_config, program, tmp_path) -> None:
+    starts = Starts()
+    dialog = review_dialog(qtbot, legacy_config, config=RememberedPath(str(program)), start=starts)
+
+    dialog.open_button.click()
+
+    written = tmp_path / "fpdb-hand-reviews" / "fpdb-hand-review-7.json"
+    assert starts.calls == [(str(program), ["--review", str(written)])]
+    assert json.loads(written.read_text(encoding="utf-8"))["hands"][0]["fpdb_hand_id"] == 7
+    assert dialog.result() == HandReviewDialog.DialogCode.Accepted
+
+
+def test_open_asks_where_preflop_advisor_is_and_remembers_it(qtbot, legacy_config, program, monkeypatch) -> None:
+    config = RememberedPath()
+    starts = Starts()
+    monkeypatch.setattr(
+        "fpdb_3_legacy.hand_review_dialog.QFileDialog.getOpenFileName", lambda *args, **kwargs: (str(program), "")
+    )
+    dialog = review_dialog(qtbot, legacy_config, config=config, start=starts)
+
+    dialog.open_button.click()
+
+    assert config.saved == [str(program)]
+    assert [program_started for program_started, _arguments in starts.calls] == [str(program)]
+
+
+def test_open_without_preflop_advisor_does_nothing_when_not_located(qtbot, legacy_config, program, monkeypatch) -> None:
+    starts = Starts()
+    monkeypatch.setattr(
+        "fpdb_3_legacy.hand_review_dialog.QFileDialog.getOpenFileName", lambda *args, **kwargs: ("", "")
+    )
+    dialog = review_dialog(qtbot, legacy_config, config=RememberedPath(), start=starts)
+
+    dialog.open_button.click()
+
+    assert starts.calls == []
+    assert dialog.result() != HandReviewDialog.DialogCode.Accepted
+
+
+def test_a_launch_that_fails_offers_to_locate_preflop_advisor_again(
+    qtbot, legacy_config, program, tmp_path, monkeypatch
+) -> None:
+    other = tmp_path / "PreflopAdvisor-2"
+    other.write_bytes(b"")
+    config = RememberedPath(str(program))
+    starts = Starts(False, True)
+    asked: list[str] = []
+    monkeypatch.setattr(
+        "fpdb_3_legacy.hand_review_dialog.QMessageBox.question",
+        lambda _parent, _title, text: asked.append(text) or QMessageBox.StandardButton.Yes,
+    )
+    monkeypatch.setattr(
+        "fpdb_3_legacy.hand_review_dialog.QFileDialog.getOpenFileName", lambda *args, **kwargs: (str(other), "")
+    )
+    dialog = review_dialog(qtbot, legacy_config, config=config, start=starts)
+
+    dialog.open_button.click()
+
+    assert "could not be started" in asked[0]
+    assert [started for started, _arguments in starts.calls] == [str(program), str(other)]
+    assert config.saved == [str(other)]
+    assert dialog.result() == HandReviewDialog.DialogCode.Accepted
+
+
+def test_an_unsupported_hand_cannot_be_opened(qtbot, legacy_config) -> None:
+    dialog = HandReviewDialog(parse(legacy_config, "holdem/straddle.txt"), start=Starts())
+    qtbot.addWidget(dialog)
+
+    assert not dialog.open_button.isEnabled()

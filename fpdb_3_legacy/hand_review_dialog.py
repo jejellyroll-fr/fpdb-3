@@ -3,14 +3,21 @@
 The Replayer and the Hand Viewer offer the same review; this module holds the
 dialog so the two cannot drift apart. What the hand is turned into lives in
 :mod:`fpdb_3_legacy.hand_review_payload` and has no Qt dependency.
+
+The dialog saves or copies the document, or opens it straight in PreflopAdvisor
+(#413): the document is written to a temporary folder and PreflopAdvisor is
+started on it with ``--review``.
 """
 
 from __future__ import annotations
 
 import datetime
+import tempfile
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from PySide6.QtCore import QProcess
 from PySide6.QtWidgets import (
     QApplication,
     QButtonGroup,
@@ -31,9 +38,11 @@ from fpdb_3_legacy.hand_review_payload import (
     HandReview,
     HandReviewError,
     JsonFileTransport,
+    PreflopAdvisorTransport,
     build_hand_review,
     decision_at,
     dumps,
+    preflop_advisor_command,
     review_document,
     summary_lines,
 )
@@ -42,13 +51,29 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("hand_review_dialog")
 
+#: Where documents opened in PreflopAdvisor are written: one file per hand, rewritten
+#: when the same hand is opened again, so the folder does not grow with every click.
+REVIEW_FOLDER = "fpdb-hand-reviews"
+
+
+def start_detached(program: str, arguments: list[str]) -> bool:
+    """Start *program* on its own, without a shell; whether it started."""
+    started = QProcess.startDetached(program, arguments)
+    # PySide6 returns (started, pid); older bindings returned the flag alone.
+    return bool(started[0] if isinstance(started, tuple) else started)
+
 
 def add_review_action(
-    menu: QMenu, hand: Any, parent: QWidget | None = None, *, fpdb_hand_id: int | None = None
+    menu: QMenu,
+    hand: Any,
+    parent: QWidget | None = None,
+    *,
+    fpdb_hand_id: int | None = None,
+    config: Any = None,
 ) -> None:
     """Append the solver review entry to *menu*."""
     menu.addAction(_("Solver review (PreflopAdvisor)...")).triggered.connect(
-        lambda: HandReviewDialog(hand, parent, fpdb_hand_id=fpdb_hand_id).exec()
+        lambda: HandReviewDialog(hand, parent, fpdb_hand_id=fpdb_hand_id, config=config).exec()
     )
 
 
@@ -63,8 +88,13 @@ class HandReviewDialog(QDialog):
         hero: str | None = None,
         fpdb_hand_id: int | None = None,
         applied_preflop: int | None = None,
+        config: Any = None,
+        start: Callable[[str, list[str]], bool] = start_detached,
     ) -> None:
         super().__init__(parent)
+        #: Where PreflopAdvisor's location is remembered (``<general preflop_advisor>``).
+        self.config = config
+        self.start = start
         self.setWindowTitle(_("Solver review"))
         self.resize(640, 520)
         self.review: HandReview | None = None
@@ -99,20 +129,13 @@ class HandReviewDialog(QDialog):
         self.preview.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
 
         hint = QLabel(
-            _("Save the file, then open it in PreflopAdvisor with Hand review > Load a hand review.")
+            _("Open it in PreflopAdvisor, or save the file and load it there with Review Hands > Load a hand review.")
             if self.error is None
             else _("This hand cannot be sent to PreflopAdvisor.")
         )
         hint.setWordWrap(True)
 
-        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
-        self.save_button = buttons.addButton(_("Save for PreflopAdvisor..."), QDialogButtonBox.ButtonRole.ActionRole)
-        self.copy_button = buttons.addButton(_("Copy JSON"), QDialogButtonBox.ButtonRole.ActionRole)
-        self.save_button.clicked.connect(self.save)
-        self.copy_button.clicked.connect(self.copy)
-        buttons.rejected.connect(self.reject)
-        for button in (self.save_button, self.copy_button):
-            button.setEnabled(self.error is None)
+        buttons = self._buttons()
 
         layout = QVBoxLayout(self)
         layout.addLayout(scope_row)
@@ -120,6 +143,19 @@ class HandReviewDialog(QDialog):
         layout.addWidget(hint)
         layout.addWidget(buttons)
         self.refresh()
+
+    def _buttons(self) -> QDialogButtonBox:
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        self.open_button = buttons.addButton(_("Open in PreflopAdvisor"), QDialogButtonBox.ButtonRole.ActionRole)
+        self.open_button.clicked.connect(self.open_in_preflop_advisor)
+        self.save_button = buttons.addButton(_("Save for PreflopAdvisor..."), QDialogButtonBox.ButtonRole.ActionRole)
+        self.copy_button = buttons.addButton(_("Copy JSON"), QDialogButtonBox.ButtonRole.ActionRole)
+        self.save_button.clicked.connect(self.save)
+        self.copy_button.clicked.connect(self.copy)
+        buttons.rejected.connect(self.reject)
+        for button in (self.open_button, self.save_button, self.copy_button):
+            button.setEnabled(self.error is None)
+        return buttons
 
     def current_review(self) -> HandReview | None:
         if self.review is None:
@@ -159,3 +195,54 @@ class HandReviewDialog(QDialog):
             JsonFileTransport(Path(path)).send(self.document())
         except OSError as exc:
             QMessageBox.warning(self, _("Solver review"), _("Could not save the hand review:\n%s") % exc)
+
+    # -- opening in PreflopAdvisor ----------------------------------------------
+    def configured_path(self) -> str | None:
+        general = getattr(self.config, "general", None) or {}
+        return general.get("preflop_advisor") or None
+
+    def review_path(self) -> Path:
+        folder = Path(tempfile.gettempdir()) / REVIEW_FOLDER
+        folder.mkdir(parents=True, exist_ok=True)
+        return folder / self.default_name()
+
+    def open_in_preflop_advisor(self) -> None:
+        """Start PreflopAdvisor on this review, asking where it is when it cannot be found."""
+        command = preflop_advisor_command(self.configured_path()) or self.locate_preflop_advisor()
+        while command is not None:
+            error = self.launch(command)
+            if error is None:
+                self.accept()
+                return
+            answer = QMessageBox.question(
+                self,
+                _("Solver review"),
+                _("PreflopAdvisor could not be started:\n%s\n\nLocate it?") % error,
+            )
+            command = self.locate_preflop_advisor() if answer == QMessageBox.StandardButton.Yes else None
+
+    def launch(self, command: list[str]) -> OSError | None:
+        """Write the document and start *command* on it; the failure, if any."""
+        try:
+            PreflopAdvisorTransport(command, self.review_path(), self.start).send(self.document())
+        except OSError as exc:
+            log.warning("Could not open the hand review in PreflopAdvisor: %s", exc)
+            return exc
+        return None
+
+    def locate_preflop_advisor(self) -> list[str] | None:
+        """Ask where PreflopAdvisor is, and remember it when it can be started."""
+        path, _selected = QFileDialog.getOpenFileName(self, _("Locate PreflopAdvisor"))
+        if not path:
+            return None
+        command = preflop_advisor_command(path, which=lambda _name: None)
+        if command is None:
+            QMessageBox.warning(self, _("Solver review"), _("%s is not a program that can be started.") % path)
+            return None
+        if self.config is not None and hasattr(self.config, "set_preflop_advisor_path"):
+            try:
+                self.config.set_preflop_advisor_path(path)
+            except OSError as exc:
+                # The launch still works this once; only remembering it failed.
+                log.warning("Could not save where PreflopAdvisor is: %s", exc)
+        return command
