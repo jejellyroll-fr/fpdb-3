@@ -1,0 +1,50 @@
+PokerStars Hand #2810000005: Tournament #3100000001, $10+$1 USD Hold'em No Limit - Level V (50/100) - 2026/09/01 20:20:00 ET
+Table '3100000001 1' 9-max Seat #9 is the button
+Seat 1: Player1 (5000 in chips)
+Seat 2: Player2 (5000 in chips)
+Seat 3: Player3 (5000 in chips)
+Seat 4: Hero (4000 in chips)
+Seat 5: Player5 (5000 in chips)
+Seat 6: Player6 (5000 in chips)
+Seat 7: Player7 (5000 in chips)
+Seat 8: Player8 (5000 in chips)
+Seat 9: Player9 (5000 in chips)
+Player1: posts the ante 10
+Player2: posts the ante 10
+Player3: posts the ante 10
+Hero: posts the ante 10
+Player5: posts the ante 10
+Player6: posts the ante 10
+Player7: posts the ante 10
+Player8: posts the ante 10
+Player9: posts the ante 10
+Player1: posts small blind 50
+Player2: posts big blind 100
+*** HOLE CARDS ***
+Dealt to Hero [Ac Kc]
+Player3: folds
+Hero: raises 125 to 225
+Player5: folds
+Player6: folds
+Player7: folds
+Player8: folds
+Player9: folds
+Player1: folds
+Player2: folds
+Uncalled bet (125) returned to Hero
+Hero collected 340 from pot
+Hero: doesn't show hand
+*** SUMMARY ***
+Total pot 340 | Rake 0
+Seat 1: Player1 (small blind) folded before Flop
+Seat 2: Player2 (big blind) folded before Flop
+Seat 3: Player3 folded before Flop (didn't bet)
+Seat 4: Hero collected (340)
+Seat 5: Player5 folded before Flop (didn't bet)
+Seat 6: Player6 folded before Flop (didn't bet)
+Seat 7: Player7 folded before Flop (didn't bet)
+Seat 8: Player8 folded before Flop (didn't bet)
+Seat 9: Player9 (button) folded before Flop (didn't bet)
+
+
+

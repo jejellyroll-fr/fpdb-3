@@ -115,6 +115,26 @@
     "hand_count": 1,
     "sha256": "9b95ab93bd533347d833f87dc285c1fd8b742ee8918e00bb10e32192348e76d7"
   },
+  "pokerstars/review/nl_3bet_6max.txt": {
+    "hand_count": 1,
+    "sha256": "5771a395611feb12d162a2bebf114baa09f45d0053579b8fc09f22500dfbe457"
+  },
+  "pokerstars/review/nl_9handed_antes_mtt.txt": {
+    "hand_count": 1,
+    "sha256": "ca20d6b0ba18a3d28d7e39cae7bb5a1c730d66945874b65b89e9153ad3080fb8"
+  },
+  "pokerstars/review/nl_9max_short_sitout.txt": {
+    "hand_count": 1,
+    "sha256": "ce3c461a48a7fe8bc45f9feadf69095ee83a4ce192df8ae9568c2e940fcafd09"
+  },
+  "pokerstars/review/nl_hu.txt": {
+    "hand_count": 1,
+    "sha256": "c3d9a0468191b2bad23467f61e087249bccb534627f1f56ece1b605822377947"
+  },
+  "pokerstars/review/plo_3bet_6max.txt": {
+    "hand_count": 1,
+    "sha256": "55f629def7131aaa361b0b642e5f78ed0a1dae3bb52752ad7ab4ae9dd7a69da7"
+  },
   "pokerstars/stud/7stud.txt": {
     "hand_count": 1,
     "sha256": "7489b9e59b3e3a5a70668fcb52709ee21b9e793e719b67f1a2934c8018263010"

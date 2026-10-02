@@ -41,6 +41,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Hand
 from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity
+from fpdb_3_legacy.hand_review_dialog import HandReviewDialog
 from fpdb_3_legacy.hand_share_dialog import HandShareDialog
 from fpdb_3_legacy.http_capture_ofc import OFCHand, build_ofc_hand, load_ofc_hand
 from fpdb_3_legacy.i18n import gettext as _
@@ -806,6 +807,16 @@ class GuiReplayer(QWidget):
         self.shareButton.setEnabled(False)
         self.shareButton.clicked.connect(self.share_clicked)
         self.buttonBox2.addWidget(self.shareButton)
+
+        # Solver review of the hand's preflop in PreflopAdvisor (#328); the
+        # database id is kept because the loaded hand does not carry it.
+        self.shared_hand_id: int | None = None
+        self.reviewButton = QPushButton(_("Solver review..."))
+        self.reviewButton.setToolTip(_("Send this hand's preflop decisions to PreflopAdvisor"))
+        self.reviewButton.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.reviewButton.setEnabled(False)
+        self.reviewButton.clicked.connect(self.review_clicked)
+        self.buttonBox2.addWidget(self.reviewButton)
 
         self.stateSlider = QSlider(Qt.Orientation.Horizontal)
         self.stateSlider.valueChanged.connect(self.slider_changed)
@@ -2516,7 +2527,9 @@ class GuiReplayer(QWidget):
         # never be shared under the one shown before it.
         self.shared_hand = None
         self.shared_hero = None
+        self.shared_hand_id = None
         self.shareButton.setEnabled(False)
+        self.reviewButton.setEnabled(False)
         is_ofc = self._is_ofc_replay_entry(entry)
         self.replay_mode = "ofc" if is_ofc else "hand"
         if is_ofc:
@@ -2531,6 +2544,7 @@ class GuiReplayer(QWidget):
                 log.error("Could not load hand ID %s for replayer", entry)
                 return
             self.shared_hand = hand
+            self.shared_hand_id = int(entry) if str(entry).isdigit() else None
             self.currency = hand.sym
             self.currency_code = str(hand.gametype.get("currency", "USD"))
             self.Heroes = hand.hero or self._resolve_hero(hand.sitename)
@@ -2542,6 +2556,7 @@ class GuiReplayer(QWidget):
         self.info = self.replay_model.info
         self.states = self.replay_model.states
         self.shareButton.setEnabled(self.shared_hand is not None)
+        self.reviewButton.setEnabled(self.shared_hand is not None)
 
         for idx in reversed(list(range(self.buttonBox.count()))):
             item = self.buttonBox.takeAt(idx)
@@ -2580,6 +2595,34 @@ class GuiReplayer(QWidget):
     def share_clicked(self) -> None:
         if self.shared_hand is not None:
             HandShareDialog(self.shared_hand, self, hero=self.shared_hero).exec()
+
+    def preflop_actions_shown(self) -> int:
+        """How many of the hand's preflop actions the displayed state has played.
+
+        Past preflop that is all of them, so a review opened on the river still
+        points at the hero's last preflop decision.
+        """
+        hand = self.shared_hand
+        total = len((hand.actions.get("PREFLOP") if hand is not None else None) or [])
+        if not self.states:
+            return 0
+        current = self.stateSlider.value()
+        start = next((index for index, state in enumerate(self.states) if state.street == "PREFLOP"), None)
+        if start is None or current < start:
+            return 0
+        if self.states[current].street == "PREFLOP" and not getattr(self.states[current], "ended", False):
+            return min(current - start, total)
+        return total
+
+    def review_clicked(self) -> None:
+        if self.shared_hand is not None:
+            HandReviewDialog(
+                self.shared_hand,
+                self,
+                hero=self.shared_hero,
+                fpdb_hand_id=self.shared_hand_id,
+                applied_preflop=self.preflop_actions_shown(),
+            ).exec()
 
     def increment_state(self) -> None:  # noqa: F811
         if self.stateSlider.value() >= self.stateSlider.maximum():

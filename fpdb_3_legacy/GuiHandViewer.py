@@ -60,6 +60,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Filters, GuiReplayer, Hand, gui_empty_state
 from fpdb_3_legacy.analytics_query import escape_literal_percent
+from fpdb_3_legacy.hand_review_dialog import add_review_action
 from fpdb_3_legacy.hand_share_dialog import add_share_actions
 from fpdb_3_legacy.hand_viewer_filters import build_filter_clauses, required_analytics_subsystems
 from fpdb_3_legacy.holdem_classes import RANKS, grid_labels
@@ -1019,13 +1020,16 @@ class GuiHandViewer(QSplitter):
         index = self.view.currentIndex()
         if index.row() < 0:
             return
-        hand = self.hands[int(index.sibling(index.row(), self.colnum["HandId"]).data())]
+        hand_id = int(index.sibling(index.row(), self.colnum["HandId"]).data())
+        hand = self.hands[hand_id]
         m = QMenu()
         copyAction = m.addAction(_("Copy hand history"))
         if copyAction is not None:
             copyAction.triggered.connect(partial(self.copyHandToClipboard, hand=hand))
         m.addSeparator()
         add_share_actions(m, hand, self)
+        m.addSeparator()
+        add_review_action(m, hand, self, fpdb_hand_id=hand_id)
         m.move(event.globalPosition().toPoint())
         m.exec()
 
