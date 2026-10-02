@@ -9,6 +9,7 @@ here starts a real process, and the configuration is a throwaway copy.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -16,6 +17,7 @@ import pytest
 from fpdb_3_legacy.hand_review_payload import (
     PREFLOP_ADVISOR_SCRIPT,
     REVIEW_OPTION,
+    LaunchError,
     PreflopAdvisorTransport,
     preflop_advisor_command,
 )
@@ -30,8 +32,20 @@ def nowhere(_name: str) -> None:
 def test_a_configured_program_is_started_as_it_is(tmp_path) -> None:
     program = tmp_path / "PreflopAdvisor.exe"
     program.write_bytes(b"")
+    program.chmod(0o755)
 
     assert preflop_advisor_command(str(program), which=nowhere) == [str(program)]
+
+
+@pytest.mark.skipif(os.name != "posix", reason="Windows has no execute bit")
+def test_a_file_that_may_not_be_executed_is_no_program(tmp_path) -> None:
+    document = tmp_path / "notes.json"
+    document.write_text("{}", encoding="utf-8")
+    document.chmod(0o644)
+
+    assert preflop_advisor_command(str(document), which=nowhere, platform="linux") is None
+    # Windows decides by the file alone.
+    assert preflop_advisor_command(str(document), which=nowhere, platform="win32") == [str(document)]
 
 
 def test_a_configured_macos_bundle_is_started_through_open(tmp_path) -> None:
@@ -81,11 +95,24 @@ def test_the_transport_writes_the_document_then_starts_preflop_advisor_on_it(tmp
     ]
 
 
-def test_a_launch_that_fails_is_an_error(tmp_path) -> None:
+def test_a_launch_that_fails_is_a_launch_error(tmp_path) -> None:
     transport = PreflopAdvisorTransport(["preflop_advisor"], tmp_path / "review.json", lambda *_args: False)
 
-    with pytest.raises(OSError, match="preflop_advisor could not be started"):
+    with pytest.raises(LaunchError, match="preflop_advisor could not be started"):
         transport.send({"version": 1, "hands": []})
+
+
+def test_a_document_that_cannot_be_written_is_not_a_launch_error(tmp_path) -> None:
+    started: list[str] = []
+    transport = PreflopAdvisorTransport(
+        ["preflop_advisor"], tmp_path / "missing" / "review.json", lambda program, _arguments: started.append(program)
+    )
+
+    with pytest.raises(OSError) as caught:
+        transport.send({"version": 1, "hands": []})
+
+    assert not isinstance(caught.value, LaunchError)
+    assert started == [], "nothing is started on a document that was never written"
 
 
 def test_the_configuration_remembers_and_forgets_where_preflop_advisor_is(tmp_path, monkeypatch) -> None:

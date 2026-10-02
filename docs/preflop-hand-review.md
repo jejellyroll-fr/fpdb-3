@@ -22,8 +22,9 @@ The dialog shows the preflop line with the hero's decisions marked. Then:
 - **Open in PreflopAdvisor** writes the document to a temporary folder
   private to the user and made once per session (`fpdb-hand-reviews-<random>/`,
   by `tempfile.mkdtemp`: never a fixed name in the shared temporary directory),
-  as `fpdb-hand-review-<id>.json`, rewritten when the same hand is opened
-  again. It then starts PreflopAdvisor on it with
+  as a new `fpdb-hand-review-<id>-<random>.json` for every launch, so a
+  PreflopAdvisor still starting never finds its document rewritten by a second
+  click. It then starts PreflopAdvisor on it with
   `--review <file>` (PreflopAdvisor's own option), which opens *Review Hands*
   with the document loaded. Each click starts a new PreflopAdvisor window.
 - **Save for PreflopAdvisor...** saves the JSON (or **Copy JSON** copies it), to
@@ -39,9 +40,13 @@ fpdb-3 starts, in this order:
 2. the `preflop_advisor` console script on the PATH (`uv tool install`,
    `pip install`).
 
-When neither can be found, or the launch fails, the dialog asks where
-PreflopAdvisor is and remembers the answer. On macOS a `PreflopAdvisor.app`
-bundle can be chosen; it is started through `open -n -a … --args`.
+A file counts as a program only if it may be executed (Windows has no such
+bit). When neither can be found, or the program does not start, the dialog
+asks where PreflopAdvisor is; the answer is remembered once it has started, so
+a program that does not start is never retried on later reviews. A review that
+cannot be written (a full or missing temporary folder) is reported as such,
+without asking for another program. On macOS a `PreflopAdvisor.app` bundle can
+be chosen; it is started through `open -n -a … --args`.
 
 ## The document
 
@@ -157,7 +162,8 @@ The document goes through a `HandReviewTransport` (`send(document) -> str`):
 
 - `JsonFileTransport` writes the file PreflopAdvisor loads;
 - `PreflopAdvisorTransport` writes it, then starts PreflopAdvisor on it with
-  `--review`, detached and without a shell. The launcher is injected
+  `--review`, detached and without a shell. A write failure raises the
+  write's `OSError`; a program that does not start raises `LaunchError`. The launcher is injected
   (`QProcess.startDetached` in the dialog), so the module stays free of Qt.
 
 A local API, or handing the document to a PreflopAdvisor already running,

@@ -12,6 +12,7 @@ started on it with ``--review``.
 from __future__ import annotations
 
 import datetime
+import os
 import tempfile
 from collections.abc import Callable
 from pathlib import Path
@@ -38,6 +39,7 @@ from fpdb_3_legacy.hand_review_payload import (
     HandReview,
     HandReviewError,
     JsonFileTransport,
+    LaunchError,
     PreflopAdvisorTransport,
     build_hand_review,
     decision_at,
@@ -205,55 +207,73 @@ class HandReviewDialog(QDialog):
         return general.get("preflop_advisor") or None
 
     def review_path(self) -> Path:
-        """Where this review is written before PreflopAdvisor is started on it.
+        """A new file for this review, which PreflopAdvisor is then started on.
 
-        A folder ``mkdtemp`` makes -- an unpredictable name, readable and writable by this
-        user only -- rather than a fixed name in the shared temporary directory, where
-        another user could have made it first and left links in it to files of ours.
+        In a folder ``mkdtemp`` makes once per session -- an unpredictable name, readable and
+        writable by this user only -- rather than a fixed name in the shared temporary
+        directory, where another user could have made it first and left links in it. Each
+        launch gets its own file (``mkstemp``): a PreflopAdvisor still starting on the first
+        one must not find it rewritten by a second click on the same hand.
         """
         folder = HandReviewDialog._review_folder
         if folder is None or not folder.is_dir():
             folder = Path(tempfile.mkdtemp(prefix=REVIEW_FOLDER_PREFIX))
             HandReviewDialog._review_folder = folder
-        return folder / self.default_name()
+        stem = Path(self.default_name()).stem
+        handle, name = tempfile.mkstemp(prefix=f"{stem}-", suffix=".json", dir=folder)
+        os.close(handle)
+        return Path(name)
 
     def open_in_preflop_advisor(self) -> None:
-        """Start PreflopAdvisor on this review, asking where it is when it cannot be found."""
-        command = preflop_advisor_command(self.configured_path()) or self.locate_preflop_advisor()
+        """Start PreflopAdvisor on this review, asking where it is when it cannot be found.
+
+        A program the user picks is remembered only once it has started: one that does not
+        start would otherwise be retried, and asked about, on every review that follows.
+        """
+        located: str | None = None
+        command = preflop_advisor_command(self.configured_path())
+        if command is None:
+            located, command = self.locate_preflop_advisor()
         while command is not None:
-            error = self.launch(command)
-            if error is None:
-                self.accept()
+            try:
+                PreflopAdvisorTransport(command, self.review_path(), self.start).send(self.document())
+            except LaunchError as exc:
+                log.warning("Could not start PreflopAdvisor: %s", exc)
+                answer = QMessageBox.question(
+                    self,
+                    _("Solver review"),
+                    _("PreflopAdvisor could not be started:\n%s\n\nLocate it?") % exc,
+                )
+                located, command = (
+                    self.locate_preflop_advisor() if answer == QMessageBox.StandardButton.Yes else (None, None)
+                )
+                continue
+            except OSError as exc:
+                # Another program would not help: the review itself could not be written.
+                log.warning("Could not write the hand review for PreflopAdvisor: %s", exc)
+                QMessageBox.warning(self, _("Solver review"), _("Could not save the hand review:\n%s") % exc)
                 return
-            answer = QMessageBox.question(
-                self,
-                _("Solver review"),
-                _("PreflopAdvisor could not be started:\n%s\n\nLocate it?") % error,
-            )
-            command = self.locate_preflop_advisor() if answer == QMessageBox.StandardButton.Yes else None
+            if located:
+                self.remember_preflop_advisor(located)
+            self.accept()
+            return
 
-    def launch(self, command: list[str]) -> OSError | None:
-        """Write the document and start *command* on it; the failure, if any."""
-        try:
-            PreflopAdvisorTransport(command, self.review_path(), self.start).send(self.document())
-        except OSError as exc:
-            log.warning("Could not open the hand review in PreflopAdvisor: %s", exc)
-            return exc
-        return None
-
-    def locate_preflop_advisor(self) -> list[str] | None:
-        """Ask where PreflopAdvisor is, and remember it when it can be started."""
+    def locate_preflop_advisor(self) -> tuple[str | None, list[str] | None]:
+        """Ask where PreflopAdvisor is: the path picked and how to start it, or nothing."""
         path, _selected = QFileDialog.getOpenFileName(self, _("Locate PreflopAdvisor"))
         if not path:
-            return None
+            return None, None
         command = preflop_advisor_command(path, which=lambda _name: None)
         if command is None:
             QMessageBox.warning(self, _("Solver review"), _("%s is not a program that can be started.") % path)
-            return None
-        if self.config is not None and hasattr(self.config, "set_preflop_advisor_path"):
-            try:
-                self.config.set_preflop_advisor_path(path)
-            except OSError as exc:
-                # The launch still works this once; only remembering it failed.
-                log.warning("Could not save where PreflopAdvisor is: %s", exc)
-        return command
+            return None, None
+        return path, command
+
+    def remember_preflop_advisor(self, path: str) -> None:
+        if self.config is None or not hasattr(self.config, "set_preflop_advisor_path"):
+            return
+        try:
+            self.config.set_preflop_advisor_path(path)
+        except OSError as exc:
+            # PreflopAdvisor did start; only remembering where it is failed.
+            log.warning("Could not save where PreflopAdvisor is: %s", exc)

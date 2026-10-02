@@ -20,6 +20,7 @@ The format is documented in ``docs/preflop-hand-review.md``.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import sys
 from collections.abc import Callable, Iterable, Sequence
@@ -757,7 +758,8 @@ def preflop_advisor_command(
     The path the user configured comes first, but only while it is still there: a program
     that was moved is looked for again rather than launched into an error. Then the console
     script on the PATH. A macOS application bundle is a folder, which ``open`` starts, a new
-    instance each time (``-n``) so the document always reaches a window that reads it.
+    instance each time (``-n``) so the document always reaches a window that reads it. A
+    file is a program only if it may be executed (Windows has no such bit to check).
     """
     # Looked up when called, not when defined, so a test can stand in for either.
     which = which or shutil.which
@@ -766,10 +768,14 @@ def preflop_advisor_command(
         path = Path(configured).expanduser()
         if platform == "darwin" and path.suffix == ".app" and path.is_dir():
             return ["/usr/bin/open", "-n", "-a", str(path), "--args"]
-        if path.is_file():
+        if path.is_file() and (platform == "win32" or os.access(path, os.X_OK)):
             return [str(path)]
     found = which(PREFLOP_ADVISOR_SCRIPT)
     return [found] if found else None
+
+
+class LaunchError(OSError):
+    """PreflopAdvisor did not start; the document itself was written."""
 
 
 @dataclass(frozen=True)
@@ -778,7 +784,9 @@ class PreflopAdvisorTransport:
 
     *start* launches a program with its arguments, detached and without a shell, and says
     whether it did; it is injected so this module needs no toolkit (the dialog passes
-    ``QProcess.startDetached``).
+    ``QProcess.startDetached``). A document that cannot be written raises the plain
+    :class:`OSError` of the write; a program that does not start raises :class:`LaunchError`,
+    so a caller can ask for another program only when another program could help.
     """
 
     command: Sequence[str]
@@ -790,5 +798,5 @@ class PreflopAdvisorTransport:
         program, *arguments = self.command
         if not self.start(program, [*arguments, REVIEW_OPTION, str(self.path)]):
             msg = f"{program} could not be started"
-            raise OSError(msg)
+            raise LaunchError(msg)
         return str(self.path)
