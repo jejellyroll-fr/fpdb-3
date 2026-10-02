@@ -74,6 +74,9 @@ class HandReviewDialog(QDialog):
             self.review = build_hand_review(hand, hero=hero, fpdb_hand_id=fpdb_hand_id)
         except HandReviewError as exc:
             self.error = str(exc)
+        except Exception as exc:  # noqa: BLE001 - shown, never swallowed by the Qt slot that opened the dialog.
+            log.exception("Could not describe the hand for a solver review")
+            self.error = str(exc) or type(exc).__name__
         if self.review is not None and applied_preflop is not None:
             self.selected = decision_at(self.review, applied_preflop)
 

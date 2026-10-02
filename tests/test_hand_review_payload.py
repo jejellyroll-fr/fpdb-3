@@ -23,6 +23,7 @@ from fpdb_3_legacy.hand_review_payload import (
     AMBIGUOUS_POSITION,
     HERO_CARDS,
     HERO_NOT_DEALT,
+    INVALID_AMOUNT,
     MISSING_PREFLOP,
     NO_HERO,
     NO_HERO_DECISION,
@@ -378,3 +379,80 @@ def test_a_batch_lists_the_hands_it_refuses(legacy_config) -> None:
     assert (refused["hand"], refused["code"]) == ("PokerStars.COM#9999999999", UNSUPPORTED_POSTS)
     assert "straddle" in refused["message"]
     assert "skipped" not in review_document(reviews)
+
+
+def test_an_unreadable_amount_is_a_refusal() -> None:
+    hand = stub_hand(6)
+    hand.bb = None
+    assert refusal(hand) == INVALID_AMOUNT
+    hand = stub_hand(6)
+    raises = next(action for action in hand.actions["PREFLOP"] if action[1] == "raises")
+    broken = (raises[0], "raises", raises[2], "three", raises[4], False)
+    hand.actions = {
+        **hand.actions,
+        "PREFLOP": [broken if action == raises else action for action in hand.actions["PREFLOP"]],
+    }
+    assert refusal(hand) == INVALID_AMOUNT
+
+
+def test_a_batch_skips_a_malformed_hand_and_reviews_the_next(legacy_config) -> None:
+    broken = stub_hand(6)
+    broken.sb = "half a blind"
+
+    reviews, skipped = review_hands([broken, parse(legacy_config, "review/nl_3bet_6max.txt")])
+
+    assert [review.game for review in reviews] == ["NL"]
+    assert [entry["code"] for entry in skipped] == [INVALID_AMOUNT]
+
+
+@pytest.mark.parametrize("blind", ["small blind", "big blind"])
+def test_a_blind_posted_short_is_refused(blind: str) -> None:
+    hand = stub_hand(6)
+    posts = [
+        (post[0], post[1], post[2] / 2, True) if post[1] == blind else post for post in hand.actions["BLINDSANTES"]
+    ]
+    hand.actions = {**hand.actions, "BLINDSANTES": posts}
+    assert refusal(hand) == UNSUPPORTED_POSTS
+
+
+def test_antes_of_different_sizes_are_refused() -> None:
+    hand = stub_hand(6)
+    antes = [(f"P{seat}", "ante", Decimal("0.1"), False) for seat in range(1, 7)]
+    antes[3] = ("P4", "ante", Decimal("0.05"), True)
+    hand.actions = {**hand.actions, "BLINDSANTES": [*antes, *hand.actions["BLINDSANTES"]]}
+    assert refusal(hand) == UNSUPPORTED_POSTS
+
+    # The same ante for everyone is one number per seat.
+    antes[3] = ("P4", "ante", Decimal("0.1"), False)
+    hand.actions = {**hand.actions, "BLINDSANTES": [*antes, *hand.actions["BLINDSANTES"][6:]]}
+    assert build_hand_review(hand).to_payload()["ante_bb"] == pytest.approx(0.1)
+
+
+def test_a_sitting_out_player_who_antes_is_refused() -> None:
+    hand = stub_hand(6)
+    hand.players = [*hand.players, [7, "Away", "100", None, None]]
+    hand.sitout = {"Away"}
+    antes = [(f"P{seat}", "ante", Decimal("0.1"), False) for seat in range(1, 7)]
+    hand.actions = {
+        **hand.actions,
+        "BLINDSANTES": [*antes, ("Away", "ante", Decimal("0.1"), False), *hand.actions["BLINDSANTES"]],
+    }
+    assert refusal(hand) == AMBIGUOUS_POSITION
+
+
+def test_heads_up_read_back_from_the_database_is_reviewed(importer, fresh_db, legacy_config, tmp_path) -> None:
+    # The database puts the heads-up button on the big blind's seat; the
+    # positions come from the blinds, so the hand still reads as parsed.
+    source = FIXTURES / "review" / "nl_hu.txt"
+    copy = tmp_path / source.name
+    shutil.copy(source, copy)
+    importer.addImportFile(str(copy), "PokerStars")
+    assert importer.runImport()[0] == 1
+    cursor = fresh_db.get_cursor()
+    cursor.execute("SELECT id FROM Hands")
+    (hand_id,) = cursor.fetchone()
+
+    stored = build_hand_review(hand_factory(hand_id, legacy_config, fresh_db)).to_payload()
+
+    assert stored["seats"] == ["SB", "BB"]
+    assert line(stored) == line(payload(legacy_config, "review/nl_hu.txt"))

@@ -121,10 +121,11 @@ sent with invented values (`HandReviewError.code`):
 | `unsupported_game` | Not no-limit hold'em or pot-limit Omaha (PLO, PLO8, PLO5). |
 | `no_hero`, `hero_not_dealt` | The hand names no hero, or the hero was not dealt in. |
 | `hero_cards` | The hero's hole cards are not all known. |
-| `unsupported_posts` | A straddle, a dead small blind posted with the big one, a button blind: PreflopAdvisor's model has the two blinds and antes only. |
-| `ambiguous_position` | Not exactly one small and one big blind, blinds out of order, a button that contradicts them, or a listed player who never acts preflop (not dealt in?). |
+| `unsupported_posts` | A straddle, a dead small blind posted with the big one, a button blind: PreflopAdvisor's model has the two blinds and antes only. Also a blind posted short of the declared stakes (all in for less) and antes of different sizes, which one number per table cannot describe. |
+| `ambiguous_position` | Not exactly one small and one big blind, blinds out of order, a button that contradicts them, a listed player who never acts preflop (not dealt in?), or a player sitting out who posts. Heads-up the button is not checked: the seats are named after the blinds, and parsers record the heads-up button inconsistently. |
 | `unsupported_table_size` | Fewer than 2 or more than 9 players dealt in. |
 | `missing_stacks` | A starting stack or the blinds are missing, or an action puts in more than the stack. |
+| `invalid_amount` | An amount in the hand cannot be read as a number. |
 | `missing_preflop`, `unsupported_action` | No preflop action recorded, or one a review cannot describe. |
 | `no_hero_decision` | The hero never acted preflop (a walk). |
 

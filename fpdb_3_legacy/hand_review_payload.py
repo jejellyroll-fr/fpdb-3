@@ -77,6 +77,7 @@ UNSUPPORTED_GAME: Final = "unsupported_game"
 UNSUPPORTED_TABLE: Final = "unsupported_table_size"
 UNSUPPORTED_POSTS: Final = "unsupported_posts"
 MISSING_STACKS: Final = "missing_stacks"
+INVALID_AMOUNT: Final = "invalid_amount"
 AMBIGUOUS_POSITION: Final = "ambiguous_position"
 MISSING_PREFLOP: Final = "missing_preflop"
 UNSUPPORTED_ACTION: Final = "unsupported_action"
@@ -272,8 +273,9 @@ def _decimal(value: Any) -> Decimal:
     try:
         return Decimal(str(value))
     except (InvalidOperation, TypeError, ValueError):
-        msg = f"{value!r} is not an amount"
-        raise ValueError(msg) from None
+        # A refusal like any other, so the dialog shows it and a batch skips
+        # the hand instead of stopping on it.
+        raise HandReviewError(INVALID_AMOUNT, f"{value!r} is not an amount") from None
 
 
 def _number(value: Decimal) -> float | int:
@@ -322,6 +324,7 @@ def build_hand_review(
 
     posts = list(hand.actions.get("BLINDSANTES", []) or [])
     small_blind_player, big_blind_player = _blind_posters(posts)
+    _check_post_amounts(posts, small_blind, big_blind)
     order = _acting_order(hand, dealt, small_blind_player, big_blind_player)
     names = SEAT_NAMES.get(len(order))
     if names is None:
@@ -414,6 +417,30 @@ def _blind_posters(posts: Sequence[tuple]) -> tuple[str, str]:
     return small_blinds[0], big_blinds[0]
 
 
+def _check_post_amounts(posts: Sequence[tuple], small_blind: Decimal, big_blind: Decimal) -> None:
+    """The blinds are the declared ones and the antes one amount for everyone.
+
+    The document says the stakes and the ante once, as numbers every seat
+    shares. A blind posted short (all in for less) or antes of different sizes
+    would make those numbers describe a table nobody played at, so the hand is
+    refused rather than averaged.
+    """
+    declared = {"small blind": small_blind, "big blind": big_blind}
+    antes = set()
+    for post in posts:
+        amount = _decimal(post[2])
+        if post[1] in declared and amount != declared[post[1]]:
+            raise HandReviewError(
+                UNSUPPORTED_POSTS,
+                f"{post[0]} posts a {post[1]} of {_plain(amount)}, not the declared {_plain(declared[post[1]])}",
+            )
+        if post[1] == "ante":
+            antes.add(amount)
+    if len(antes) > 1:
+        amounts = ", ".join(_plain(amount) for amount in sorted(antes))
+        raise HandReviewError(UNSUPPORTED_POSTS, f"The antes differ ({amounts}); one ante per seat cannot say that")
+
+
 def _acting_order(hand: Any, dealt: list[Any], small_blind: str, big_blind: str) -> list[Any]:
     """The players dealt in, in preflop acting order: big blind last.
 
@@ -432,6 +459,10 @@ def _acting_order(hand: Any, dealt: list[Any], small_blind: str, big_blind: str)
             f"{small_blind} posts the small blind but is not the seat before the big blind {big_blind}",
         )
     button = getattr(hand, "buttonpos", None)
+    # Heads-up the seats are named SB and BB after the blinds alone, so the
+    # button is not checked there: parsers record it inconsistently heads-up
+    # (Merge renumbers seats but not the dealer; the database puts it on the
+    # big blind's seat), and it changes no name the document gives.
     if len(order) > 2 and button:
         seat_numbers = [int(player[0]) for player in order]
         if int(button) in seat_numbers and int(order[-3][0]) != int(button):
@@ -456,6 +487,10 @@ def _review_actions(
     folded: set[str] = set()
     pot = Decimal(0)
     for post in posts:
+        if post[0] not in position:
+            # A tournament player sitting out still antes; counting them as
+            # dealt in or not would shift every position, so neither is done.
+            raise HandReviewError(AMBIGUOUS_POSITION, f"{post[0]} posts a {post[1]} but was not dealt in")
         amount = _decimal(post[2])
         pot += amount
         behind[post[0]] -= amount

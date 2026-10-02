@@ -96,6 +96,18 @@ def test_an_unsupported_hand_says_why_and_sends_nothing(qtbot, legacy_config) ->
     assert not dialog.copy_button.isEnabled()
 
 
+def test_an_unexpected_failure_is_shown_not_swallowed(qtbot, legacy_config, monkeypatch) -> None:
+    def broken(*args, **kwargs):
+        raise IndexError("tuple index out of range")
+
+    monkeypatch.setattr("fpdb_3_legacy.hand_review_dialog.build_hand_review", broken)
+    dialog = HandReviewDialog(parse(legacy_config, "review/nl_3bet_6max.txt"))
+    qtbot.addWidget(dialog)
+
+    assert dialog.preview.toPlainText() == "tuple index out of range"
+    assert not dialog.save_button.isEnabled()
+
+
 def test_the_hand_viewer_menu_offers_the_review(qtbot, legacy_config) -> None:
     menu = QMenu()
     add_review_action(menu, parse(legacy_config, "review/nl_3bet_6max.txt"), fpdb_hand_id=7)
