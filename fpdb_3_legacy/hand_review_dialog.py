@@ -15,7 +15,7 @@ import datetime
 import tempfile
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from PySide6.QtCore import QProcess
 from PySide6.QtWidgets import (
@@ -51,9 +51,8 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("hand_review_dialog")
 
-#: Where documents opened in PreflopAdvisor are written: one file per hand, rewritten
-#: when the same hand is opened again, so the folder does not grow with every click.
-REVIEW_FOLDER = "fpdb-hand-reviews"
+#: The prefix of the folder documents opened in PreflopAdvisor are written to.
+REVIEW_FOLDER_PREFIX = "fpdb-hand-reviews-"
 
 
 def start_detached(program: str, arguments: list[str]) -> bool:
@@ -79,6 +78,10 @@ def add_review_action(
 
 class HandReviewDialog(QDialog):
     """Show what PreflopAdvisor will be sent, and save or copy it."""
+
+    #: This session's folder for documents opened in PreflopAdvisor, made once and reused,
+    #: so a hand opened again rewrites its own file instead of adding another.
+    _review_folder: ClassVar[Path | None] = None
 
     def __init__(
         self,
@@ -202,8 +205,16 @@ class HandReviewDialog(QDialog):
         return general.get("preflop_advisor") or None
 
     def review_path(self) -> Path:
-        folder = Path(tempfile.gettempdir()) / REVIEW_FOLDER
-        folder.mkdir(parents=True, exist_ok=True)
+        """Where this review is written before PreflopAdvisor is started on it.
+
+        A folder ``mkdtemp`` makes -- an unpredictable name, readable and writable by this
+        user only -- rather than a fixed name in the shared temporary directory, where
+        another user could have made it first and left links in it to files of ours.
+        """
+        folder = HandReviewDialog._review_folder
+        if folder is None or not folder.is_dir():
+            folder = Path(tempfile.mkdtemp(prefix=REVIEW_FOLDER_PREFIX))
+            HandReviewDialog._review_folder = folder
         return folder / self.default_name()
 
     def open_in_preflop_advisor(self) -> None:

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import stat
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -194,7 +196,8 @@ def program(tmp_path, monkeypatch) -> Path:
     path = tmp_path / "preflop_advisor"
     path.write_bytes(b"")
     monkeypatch.setattr("fpdb_3_legacy.hand_review_payload.shutil.which", lambda _name: None)
-    monkeypatch.setattr("fpdb_3_legacy.hand_review_dialog.tempfile.gettempdir", lambda: str(tmp_path))
+    monkeypatch.setattr("fpdb_3_legacy.hand_review_dialog.tempfile.tempdir", str(tmp_path))
+    monkeypatch.setattr(HandReviewDialog, "_review_folder", None)
     return path
 
 
@@ -210,10 +213,30 @@ def test_open_starts_preflop_advisor_on_the_written_document(qtbot, legacy_confi
 
     dialog.open_button.click()
 
-    written = tmp_path / "fpdb-hand-reviews" / "fpdb-hand-review-7.json"
-    assert starts.calls == [(str(program), ["--review", str(written)])]
+    [(started, [option, written])] = starts.calls
+    assert (started, option) == (str(program), "--review")
+    written = Path(written)
+    assert written.name == "fpdb-hand-review-7.json"
     assert json.loads(written.read_text(encoding="utf-8"))["hands"][0]["fpdb_hand_id"] == 7
     assert dialog.result() == HandReviewDialog.DialogCode.Accepted
+
+
+def test_reviews_go_to_a_private_folder_of_this_session(qtbot, legacy_config, program, tmp_path) -> None:
+    first = review_dialog(qtbot, legacy_config, start=Starts()).review_path()
+    again = review_dialog(qtbot, legacy_config, start=Starts()).review_path()
+
+    folder = first.parent
+    # Not a fixed name in the shared temporary directory: mkdtemp's, private to this user.
+    assert folder.parent == tmp_path
+    assert folder.name.startswith("fpdb-hand-reviews-") and folder.name != "fpdb-hand-reviews-"
+    if os.name == "posix":
+        assert stat.S_IMODE(folder.stat().st_mode) == 0o700
+    # The same hand opened again rewrites its file.
+    assert again == first
+
+    # A folder removed by a temporary-file cleaner is made again.
+    folder.rmdir()
+    assert review_dialog(qtbot, legacy_config, start=Starts()).review_path().parent.is_dir()
 
 
 def test_open_asks_where_preflop_advisor_is_and_remembers_it(qtbot, legacy_config, program, monkeypatch) -> None:

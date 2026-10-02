@@ -20,8 +20,10 @@ is PreflopAdvisor's side ([PreflopAdvisor#22](https://github.com/jejellyroll-fr/
 The dialog shows the preflop line with the hero's decisions marked. Then:
 
 - **Open in PreflopAdvisor** writes the document to a temporary folder
-  (`fpdb-hand-reviews/fpdb-hand-review-<id>.json`, rewritten when the same hand
-  is opened again) and starts PreflopAdvisor on it with
+  private to the user and made once per session (`fpdb-hand-reviews-<random>/`,
+  by `tempfile.mkdtemp`: never a fixed name in the shared temporary directory),
+  as `fpdb-hand-review-<id>.json`, rewritten when the same hand is opened
+  again. It then starts PreflopAdvisor on it with
   `--review <file>` (PreflopAdvisor's own option), which opens *Review Hands*
   with the document loaded. Each click starts a new PreflopAdvisor window.
 - **Save for PreflopAdvisor...** saves the JSON (or **Copy JSON** copies it), to
