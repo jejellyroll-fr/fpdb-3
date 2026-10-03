@@ -458,6 +458,8 @@ class _Builder:
 
         self._post(antes, blinds)
         if self.base != "stud":
+            # The largest live blind or straddle is the first raise to beat preflop.
+            self.raise_size = self.level
             posted = [index for index, blind in enumerate(blinds) if blind > 0]
             self.last_actor = 0 if len(seats) == 2 else (posted[-1] if posted else len(seats) - 1)
         actions = self.data["actions"]
@@ -485,6 +487,9 @@ class _Builder:
         self.drew_this_street: set[str] = set()
         self.acted_this_street = False
         self.acted_players: set[str] = set()
+        # Who has acted since the last full bet or raise: an all-in for less than a full
+        # raise does not let them raise again (no and pot limit).
+        self.closed_to_raise: set[str] = set()
         self.completed = False
         # The smallest a raise may add on this street (no-limit, pot-limit), and the bets a
         # street ended with that nobody matched, kept when the street is left behind.
@@ -513,6 +518,10 @@ class _Builder:
             raise self.fail(f"{self.street.lower()} begins its next street before its betting is over")
         if any(self.awaiting.values()):
             raise self.fail("a discard is not replaced before the next street")
+        if self.base == "stud":
+            missing = [seat.name for seat in self.seats if not seat.folded and seat.name not in self.dealt_this_street]
+            if missing:
+                raise self.fail(f"{', '.join(missing)} gets no card on {self.street.lower()} street")
         # A bet nobody could match (everyone else all in or folded) is returned even when the
         # board is dealt on: remembered here, before the street's bets are forgotten.
         for name, amount in self._street_surplus().items():
@@ -525,6 +534,7 @@ class _Builder:
         self.drew_this_street = set()
         self.acted_this_street = False
         self.acted_players = set()
+        self.closed_to_raise = set()
         # After the deal, the first live player after the button acts and draws first.
         self.last_actor = len(self.seats) - 1
         self.last_drawer = len(self.seats) - 1
@@ -615,6 +625,8 @@ class _Builder:
             self.hand.addFold(self.street, seat.name)
         else:
             {"cc": self._check_or_call, "pb": self._bring_in}.get(move, lambda s: self._bet(s, arg))(seat)
+        # Counted once the move is made: a full raise first reopens the betting for everyone.
+        self.closed_to_raise.add(seat.name)
 
     def _next_in_turn(self, start: int, eligible: Any) -> int | None:
         """The first player after index *start*, round the table, that *eligible* accepts."""
@@ -686,9 +698,13 @@ class _Builder:
                     f"a fixed-limit bet or raise goes to {' or '.join(map(str, sorted(allowed)))}, not {total}"
                 )
             return
+        if self.level > 0 and seat.name in self.closed_to_raise:
+            raise self.fail(f"{seat.name} may only call or fold: an all-in for less did not reopen the betting")
         minimum = self.level + max(self.raise_size, _amount(self.data.get("min_bet", 0), "min_bet", self.fail))
         if total < minimum and not all_in:
             raise self.fail(f"a bet or raise to {total} is below the minimum of {minimum}")
+        if total >= minimum:
+            self.closed_to_raise = set()  # a full bet or raise reopens the betting for everyone
         if limit == "pl":
             pot = sum((other.contributed for other in self.seats), Decimal(0))
             maximum = self.level + pot + (self.level - self.street_bets[seat.name])
@@ -859,9 +875,9 @@ class _Builder:
         if clash:
             raise self.fail(f"{seat.name} shows {' '.join(clash)}, which is dealt elsewhere")
         self.seen.update(card for card in cards if card != "0x")
-        if _known(cards):
+        if _any_known(cards):
+            # A partly shown hand ("??Kd") keeps its known cards; the others stay blank.
             self.hand.addShownCards(cards, seat.name, shown=True)
-        # A partly shown hand ("??Kd") names no complete holding to store.
 
     # -- results --------------------------------------------------------------------
     def _street_surplus(self) -> dict[str, Decimal]:
@@ -923,6 +939,13 @@ class _Builder:
             if amount > eligible[seat.name]:
                 where = "a folded player" if seat.folded else "the pots they are in"
                 raise self.fail(f"{seat.name} collects {amount}, more than {where} can win ({eligible[seat.name]})")
+        # Together, too: the players capped at a pot can share it, not each take it whole.
+        # Eligibility is nested (who put in more is in every pot of who put in less), so
+        # checking each cap against all the players held to it is enough.
+        for cap in sorted(set(eligible.values())):
+            held = [amount for seat, amount in zip(self.seats, collected, strict=True) if eligible[seat.name] <= cap]
+            if sum(held, Decimal(0)) > cap:
+                raise self.fail(f"{sum(held, Decimal(0))} is collected from pots of {cap}")
         for seat, amount in zip(self.seats, collected, strict=True):
             if amount > 0:
                 self.hand.addCollectPot(seat.name, str(amount))

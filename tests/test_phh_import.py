@@ -852,3 +852,71 @@ def test_a_partly_known_holding_keeps_its_known_cards(importer, fresh_db, tmp_pa
 )
 def test_a_starting_hand_of_the_wrong_size_is_refused(text: str, reason: str) -> None:
     assert reason in str(refusal(text))
+
+
+# -- eighth review --------------------------------------------------------------------
+
+TWO_SHORT_STACKS = """
+variant = "NT"
+antes = [0, 0, 0, 0]
+blinds_or_straddles = [1, 2, 0, 0]
+min_bet = 2
+starting_stacks = [1, 1, 100, 100]
+actions = [
+  "d dh p1 ????",
+  "d dh p2 ????",
+  "d dh p3 ????",
+  "d dh p4 ????",
+  "p3 cbr 100",
+  "p4 cc",
+  "d db 2c3d4h",
+  "d db 9s",
+  "d db Jc",
+]
+"""
+
+
+def test_short_stacks_share_the_main_pot_rather_than_each_take_it() -> None:
+    # 1 + 1 + 100 + 100: the main pot is 4, and both short stacks are held to it together.
+    error = refusal(TWO_SHORT_STACKS + "winnings = [4, 4, 194, 0]\n")
+    assert "8 is collected from pots of 4" in str(error)
+    assert build_hand(document(TWO_SHORT_STACKS + "winnings = [2, 2, 198, 0]\n")) is not None
+
+
+def test_every_live_stud_player_is_dealt_each_street() -> None:
+    stud = (FIXTURES / "stud_hi.phh").read_text(encoding="utf-8").replace('  "d dh p3 Ks",\n', "", 1)
+    assert "p3 gets no card on fourth street" in str(refusal(stud))
+
+
+SHORT_ALL_IN = """
+variant = "NT"
+antes = [0, 0, 0]
+blinds_or_straddles = [1, 2, 0]
+min_bet = 2
+starting_stacks = [7, 100, 100]
+actions = ["d dh p1 ????", "d dh p2 ????", "d dh p3 ????", "p3 cbr 6", "p1 cbr 7", {rest}]
+"""
+
+
+def test_an_all_in_for_less_does_not_reopen_the_betting() -> None:
+    error = refusal(SHORT_ALL_IN.format(rest='"p2 cc", "p3 cbr 11"'))
+    assert "p3 may only call or fold" in str(error)
+    # p2 has not acted since the full raise: the short all-in leaves p2 free to raise.
+    assert refusal(SHORT_ALL_IN.format(rest='"p2 cbr 20"')).kind == PARTIAL
+
+
+def test_a_straddle_sets_the_minimum_raise() -> None:
+    straddled = (
+        NT_HAND.replace("antes = [0, 0, 0]", "antes = [0, 0, 0, 0]")
+        .replace("blinds_or_straddles = [1, 2, 0]", "blinds_or_straddles = [1, 2, 4, 0]")
+        .replace("[100, 100, 100]", "[100, 100, 100, 100]")
+        .replace('"d dh p3 ????",\n  "p3 cbr 6",', '"d dh p3 ????",\n  "d dh p4 ????",\n  "p4 cbr 6",')
+    )
+    assert "below the minimum of 8" in str(refusal(straddled))
+    assert refusal(straddled.replace('"p4 cbr 6"', '"p4 cbr 8"')).kind == PARTIAL
+
+
+def test_a_partial_show_keeps_its_known_card() -> None:
+    hand = build_hand(document(SHOWDOWN.replace('"d dh p2 QhQd"', '"d dh p2 ????"').replace('"p2 sm"', '"p2 sm ??Qd"')))
+    assert "p2" in hand.shown
+    assert "Qd" in hand.holecards["PREFLOP"]["p2"][1]
