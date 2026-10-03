@@ -17,7 +17,7 @@ import time
 from collections.abc import Callable
 from typing import Any
 
-from PySide6.QtCore import QObject, QTime, QTimer, Signal
+from PySide6.QtCore import QObject, QTimer, Signal
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -26,11 +26,11 @@ from PySide6.QtWidgets import (
     QDoubleSpinBox,
     QGridLayout,
     QGroupBox,
+    QHBoxLayout,
     QLabel,
     QMessageBox,
     QPushButton,
     QSpinBox,
-    QTimeEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -109,6 +109,35 @@ def describe(status: GuardStatus, currency: str | None) -> str:
     return f"{label}: {format_value(status.guard, max(status.value, 0.0), currency)} / {threshold}"
 
 
+class DurationEdit(QWidget):
+    """An elapsed time in hours and minutes -- not a time of day, so a limit can pass 24 h."""
+
+    MAX_HOURS = 999
+
+    def __init__(self, seconds: int = 2 * 3600, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.hours = QSpinBox()
+        self.hours.setRange(0, self.MAX_HOURS)
+        self.hours.setSuffix(" h")
+        self.minutes = QSpinBox()
+        self.minutes.setRange(0, 59)
+        self.minutes.setSuffix(" min")
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.hours)
+        layout.addWidget(self.minutes)
+        self.set_seconds(seconds)
+
+    def seconds(self) -> int:
+        # A limit of 0 means nothing; the shortest one is a minute.
+        return max(60, self.hours.value() * 3600 + self.minutes.value() * 60)
+
+    def set_seconds(self, seconds: int) -> None:
+        minutes = min(int(seconds) // 60, self.MAX_HOURS * 60 + 59)
+        self.hours.setValue(minutes // 60)
+        self.minutes.setValue(minutes % 60)
+
+
 class SessionGuardMonitor(QObject):
     """Reads the current session on a timer and reports the guards that fire."""
 
@@ -178,8 +207,28 @@ class SessionGuardMonitor(QObject):
         if db is None:
             return None
         now = self.clock()
-        session = load_current_session(fetch_since(db, self.hero_ids(db)), now)
+        try:
+            session = load_current_session(fetch_since(db, self.hero_ids(db)), now)
+        finally:
+            self.end_read(db)
         return None if session is None else snapshot_of(session, now)
+
+    @staticmethod
+    def end_read(db: Any) -> None:
+        """End the read's transaction on the shared connection.
+
+        PostgreSQL and MySQL open one with the first SELECT; left open between polls, the
+        connection would sit idle in a transaction for as long as the guard runs, and
+        PostgreSQL maintenance that switches it to autocommit would fail. ``commit`` defers
+        to a transaction block someone else has open, so it never ends theirs.
+        """
+        commit = getattr(db, "commit", None)
+        if not callable(commit):
+            return
+        try:
+            commit()
+        except Exception:  # noqa: BLE001 - the reading itself succeeded or was already reported.
+            log.exception("Session Guard could not end its read transaction")
 
     def poll(self) -> None:
         """Read the current session and report what fired; a failure is logged, never raised."""
@@ -250,14 +299,29 @@ class SessionGuardAlert(QMessageBox):
         self.acknowledge_button = self.addButton(_("Acknowledge"), QMessageBox.ButtonRole.AcceptRole)
         self.addButton(_("Later"), QMessageBox.ButtonRole.RejectRole)
         self.acknowledge_button.clicked.connect(monitor.acknowledge)
+        # Kept in step with the guard: a limit acknowledged in the dialog, switched off, or a
+        # guard stopped closes the alert; one still pending updates its text.
+        monitor.changed.connect(self.follow)
 
-    def show_pending(self) -> None:
+    def fill(self) -> bool:
+        """Put the pending limits in the text; whether there is any."""
         guard = self.monitor.guard
         if guard is None or not guard.pending():
-            return
+            return False
         currency = self.monitor.snapshot.currency if self.monitor.snapshot is not None else None
         self.setText(_("A Session Guard limit has been reached."))
         self.setInformativeText("\n".join(describe(status, currency) for status in guard.pending()))
+        return True
+
+    def follow(self) -> None:
+        if not self.isVisible():
+            return
+        if not self.fill():
+            self.hide()
+
+    def show_pending(self) -> None:
+        if not self.fill():
+            return
         self.show()
         self.raise_()
         # Flash the taskbar entry rather than steal the focus from a poker table.
@@ -273,7 +337,7 @@ class SessionGuardDialog(QDialog):
         self.config = config
         self.setWindowTitle(_("Session Guard"))
         self.checks: dict[str, QCheckBox] = {}
-        self.inputs: dict[str, QDoubleSpinBox | QSpinBox | QTimeEdit] = {}
+        self.inputs: dict[str, QDoubleSpinBox | QSpinBox | DurationEdit] = {}
 
         limits_box = QGroupBox(_("Limits for this session"))
         grid = QGridLayout(limits_box)
@@ -324,13 +388,10 @@ class SessionGuardDialog(QDialog):
         self.refresh()
 
     @staticmethod
-    def _editor(guard: str) -> QDoubleSpinBox | QSpinBox | QTimeEdit:
+    def _editor(guard: str) -> QDoubleSpinBox | QSpinBox | DurationEdit:
         unit = UNITS[guard]
         if unit == SECONDS:
-            editor = QTimeEdit(QTime(2, 0))
-            editor.setDisplayFormat("HH:mm")
-            editor.setMinimumTime(QTime(0, 1))
-            return editor
+            return DurationEdit()
         if unit == MONEY:
             money = QDoubleSpinBox()
             money.setRange(0.01, 1_000_000)
@@ -356,8 +417,8 @@ class SessionGuardDialog(QDialog):
                 continue
             editor = self.inputs[guard]
             unit = UNITS[guard]
-            if isinstance(editor, QTimeEdit):
-                values[guard] = QTime(0, 0).secsTo(editor.time())
+            if isinstance(editor, DurationEdit):
+                values[guard] = editor.seconds()
             elif unit == MONEY:
                 values[guard] = round(editor.value() * 100)
             else:
@@ -371,8 +432,8 @@ class SessionGuardDialog(QDialog):
             if value is None:
                 continue
             editor = self.inputs[guard]
-            if isinstance(editor, QTimeEdit):
-                editor.setTime(QTime(0, 0).addSecs(int(value)))
+            if isinstance(editor, DurationEdit):
+                editor.set_seconds(int(value))
             elif UNITS[guard] == MONEY:
                 editor.setValue(value / 100)
             else:

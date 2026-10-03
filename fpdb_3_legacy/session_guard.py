@@ -60,10 +60,9 @@ ARMED: Final = "armed"
 FIRED: Final = "fired"  # reached, not yet acknowledged
 ACKNOWLEDGED: Final = "acknowledged"  # quiet until the value goes back under the threshold
 
-#: How far back hands are read to find the current session, and the most it is widened to
-#: when the session started before that (a long grind has no 30-minute gap to stop at).
+#: How far back hands are read to find the current session; doubled for as long as the
+#: session may have started before it (a long grind has no 30-minute gap to stop at).
 LOOKBACK_SECONDS: Final = 24 * 3600
-MAX_LOOKBACK_SECONDS: Final = 7 * 24 * 3600
 
 
 @dataclass(frozen=True)
@@ -192,20 +191,20 @@ def load_current_session(
     now: float,
     *,
     lookback: int = LOOKBACK_SECONDS,
-    max_lookback: int = MAX_LOOKBACK_SECONDS,
 ) -> SessionMetrics | None:
     """Read the hands since a cut-off and find the current session in them.
 
     *fetch(since)* returns the Session Viewer's rows for hands played since the epoch time
     *since*. A session that may have begun before the cut-off -- its first hand within a gap
-    of it -- is read again further back, so a long session is never measured from halfway.
+    of it -- is read again twice as far back, until its first hand is known: a long session
+    is never measured from halfway. Hands run out eventually, so this ends.
     """
     while True:
         since = now - lookback
         session = current_session(list(fetch(since)), now)
-        if session is None or session.start_timestamp - since > SESSION_GAP_SECONDS or lookback >= max_lookback:
+        if session is None or session.start_timestamp - since > SESSION_GAP_SECONDS:
             return session
-        lookback = min(lookback * 2, max_lookback)
+        lookback *= 2
 
 
 @dataclass(frozen=True)

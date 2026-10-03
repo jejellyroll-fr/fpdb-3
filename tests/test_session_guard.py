@@ -298,3 +298,16 @@ def test_the_main_window_keeps_one_monitor_and_shows_it_in_the_status_bar() -> N
     assert "addPermanentWidget" in dumped
     # The monitor outlives the dialog: it is created once and kept on the window.
     assert "session_guard" in dumped
+
+
+def test_a_session_longer_than_a_week_is_read_whole() -> None:
+    rows = hands(*([0.5] * (8 * 72)), step=20 * 60)  # eight days, a hand every 20 minutes
+    now = rows[-1][1] + 60
+
+    def fetch(since: float) -> list[tuple]:
+        return [row for row in rows if row[1] >= since]
+
+    session = load_current_session(fetch, now)
+
+    assert session is not None
+    assert session.hands == len(rows), "never a total measured from halfway"

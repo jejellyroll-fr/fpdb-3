@@ -67,8 +67,12 @@ new session.
 - Duration runs on the clock from the first hand, not only when hands arrive.
 
 The guard reads the database every 30 seconds through the main window's
-connection; the query covers the last day of hands and is widened (up to a
-week) when the current session started before that.
+connection, and ends its read transaction each time (never one left idle open
+on PostgreSQL or MySQL). The query covers the last day of hands and is
+widened, twice as far back each time, until the current session's first hand
+is found: a long session is never measured from halfway. Hand times are read
+as UTC on every backend (on MySQL whatever the connection's time zone), since
+they are compared with the clock.
 
 ## Code
 

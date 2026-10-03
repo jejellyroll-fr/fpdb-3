@@ -7,8 +7,7 @@ import sqlite3
 from pathlib import Path
 
 import pytest
-from PySide6.QtCore import QTime
-from PySide6.QtWidgets import QMessageBox, QTimeEdit
+from PySide6.QtWidgets import QMessageBox
 
 from fpdb_3_legacy.session_guard import (
     DURATION,
@@ -21,6 +20,7 @@ from fpdb_3_legacy.session_guard import (
     GuardLimits,
 )
 from fpdb_3_legacy.session_guard_dialog import (
+    DurationEdit,
     SessionGuardAlert,
     SessionGuardDialog,
     SessionGuardIndicator,
@@ -109,8 +109,9 @@ def test_money_is_entered_in_currency_and_kept_in_cents(qtbot) -> None:
     dialog.inputs[LOSS_MONEY].setValue(250.5)
     dialog.checks[DURATION].setChecked(True)
     duration = dialog.inputs[DURATION]
-    assert isinstance(duration, QTimeEdit)
-    duration.setTime(QTime(2, 30))
+    assert isinstance(duration, DurationEdit)
+    duration.hours.setValue(2)
+    duration.minutes.setValue(30)
 
     assert dialog.limits() == GuardLimits(loss_money=25_050, duration=9000)
 
@@ -251,4 +252,46 @@ def test_the_hero_is_found_the_way_the_viewers_find_it(qtbot, imported) -> None:
     monitor.start(GuardLimits(loss_bb=5))
     assert monitor.snapshot is not None
     assert monitor.snapshot.hands == 1
+    monitor.stop()
+
+
+def test_a_duration_can_pass_a_day(qtbot) -> None:
+    """An elapsed time, not a time of day: a saved 25-hour limit is not read back as 01:00."""
+    dialog = SessionGuardDialog(idle_monitor(qtbot), Defaults({DURATION: 25 * 3600}))
+    qtbot.addWidget(dialog)
+
+    assert dialog.limits() == GuardLimits(duration=25 * 3600)
+    dialog.inputs[DURATION].hours.setValue(36)
+    assert dialog.limits() == GuardLimits(duration=36 * 3600)
+
+
+def test_an_open_alert_follows_the_guard(qtbot, imported, monkeypatch) -> None:
+    db, hero_id = imported
+    monitor = watching(qtbot, db, hero_id, monkeypatch, now=HAND_TIME + 60)
+    alert = SessionGuardAlert(monitor)
+    qtbot.addWidget(alert)
+    monitor.alerts.connect(lambda _fired: alert.show_pending())
+
+    monitor.start(GuardLimits(loss_bb=5))
+    assert alert.isVisible()
+    monitor.acknowledge()  # from the dialog, not from the alert
+    assert not alert.isVisible()
+
+    monitor.reset()  # fires again, and shows again
+    assert alert.isVisible()
+    monitor.stop()
+    assert not alert.isVisible()
+
+
+def test_every_reading_ends_its_transaction(qtbot, imported, monkeypatch) -> None:
+    """PostgreSQL and MySQL open one with the first SELECT; the guard must not leave it open."""
+    db, hero_id = imported
+    commits: list[int] = []
+    monkeypatch.setattr(db, "commit", lambda *args, **kwargs: commits.append(1))
+    monitor = watching(qtbot, db, hero_id, monkeypatch, now=HAND_TIME + 60)
+
+    monitor.start(GuardLimits(hands=10))
+    monitor.poll()
+
+    assert len(commits) == 2
     monitor.stop()

@@ -77,3 +77,10 @@ def test_session_guard_query_reads_epoch_seconds_from_sqlite(tmp_path) -> None:
 
     # Ring hands of player 7 since the cut-off, in order, with UTC epoch seconds.
     assert rows == [(1, 1791028800, -150, -150, 100, "USD"), (2, 1791030615, 300, 250, 100, "USD")]
+
+
+def test_session_guard_reads_mysql_times_as_utc_whatever_the_connection_zone() -> None:
+    """UNIX_TIMESTAMP reads a stored time in the connection's zone; hand times are UTC."""
+    mysql = session_stats_queries("mysql")["sessionGuardHands"]
+    assert "TIMESTAMPDIFF(SECOND, '1970-01-01 00:00:00', h.startTime)" in mysql
+    assert "UNIX_TIMESTAMP" not in mysql
