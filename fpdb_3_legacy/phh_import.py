@@ -25,12 +25,13 @@ import hashlib
 import json
 import re
 import time
-import tomllib
 from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Final
+
+from fpdb.compat import toml_module
 
 #: The extensions of one hand (``.phh``) and of several (``.phhs``, numbered TOML tables).
 PHH_EXTENSIONS: Final = (".phh", ".phhs")
@@ -179,8 +180,14 @@ class PHHDocument:
 
 def _parse_toml(text: str, source: str, line: int, label: str) -> dict[str, Any]:
     try:
-        return tomllib.loads(text)
-    except tomllib.TOMLDecodeError as error:
+        toml = toml_module()
+    except ModuleNotFoundError:
+        # Python 3.10 (the PyOxidizer builds) without the tomli backport.
+        msg = "reading PHH needs tomllib (Python 3.11+) or the tomli package"
+        raise PHHImportError(UNSUPPORTED, msg, source=f"{source}:{line}", hand=label) from None
+    try:
+        return toml.loads(text)
+    except toml.TOMLDecodeError as error:
         raise PHHImportError(MALFORMED, f"not valid TOML ({error})", source=f"{source}:{line}", hand=label) from None
 
 
@@ -330,7 +337,9 @@ class _Builder:
         if any(stack is None for stack in stacks):
             raise self.fail("a starting stack is unknown (null): the hand cannot be accounted for", UNSUPPORTED)
         count = len(stacks)
-        names = self.data.get("players") or [f"p{index}" for index in range(1, count + 1)]
+        # PHH allows an empty name for a player it does not know: that one is called pN.
+        given = self.data.get("players") or [""] * count
+        names = [str(name) if name not in (None, "") else f"p{index}" for index, name in enumerate(given, start=1)]
         seats = self.data.get("seats") or list(range(1, count + 1))
         if len(names) != count or len(seats) != count:
             raise self.fail("players, seats and starting_stacks do not have the same length")
@@ -390,7 +399,9 @@ class _Builder:
         hand_class = {"hold": HoldemOmahaHand, "stud": StudHand, "draw": DrawHand}[self.base]
         number = hand_number(self.data)
         # The concrete class (stud, draw) is chosen here; typed Any for the methods only it has.
-        hand: Any = hand_class(self.config, _PHHSource(self.document.source), PHH_SITE_NAME, gametype, "", "PHH", number)
+        hand: Any = hand_class(
+            self.config, _PHHSource(self.document.source), PHH_SITE_NAME, gametype, "", "PHH", number
+        )
         hand.handid = number
         hand.tablename = str(self.data.get("table") or self.data.get("event") or Path(self.document.source).stem)
         hand.maxseats = int(self.data.get("seat_count") or max(seat.seat for seat in seats))
@@ -410,7 +421,9 @@ class _Builder:
         self.street_bets = {seat.name: Decimal(0) for seat in seats}
         self.level = Decimal(0)
         self.dealt_this_street: set[str] = set()
+        self.drew_this_street: set[str] = set()
         self.acted_this_street = False
+        self.completed = False
         self.boards = 0
         self.cards: dict[str, list[str]] = {seat.name: [] for seat in seats}
 
@@ -439,9 +452,16 @@ class _Builder:
         self.street_bets = dict.fromkeys(self.street_bets, Decimal(0))
         self.level = Decimal(0)
         self.dealt_this_street = set()
+        self.drew_this_street = set()
         self.acted_this_street = False
 
     def _post(self, antes: list[Decimal], blinds: list[Decimal]) -> None:
+        if self.base != "stud" and len(self.seats) == 2:
+            # Heads-up PHH assigns the first two entries of both arrays in reverse: the big
+            # blind -- and a big-blind ante -- belong to p1, the small blind to p2, who has
+            # the button (PokerKit, which defines PHH, does the same).
+            antes = [antes[1], antes[0]]
+            blinds = [blinds[1], blinds[0]]
         for seat, ante in zip(self.seats, antes, strict=True):
             if ante > 0:
                 ante = min(ante, seat.behind)
@@ -452,10 +472,6 @@ class _Builder:
             return
         count = len(self.seats)
         posts = list(blinds)
-        if count == 2:
-            # Heads-up the big blind is posted by p1 and the small blind by p2, who has the
-            # button (PokerKit, which defines PHH, reverses the first two entries).
-            posts[0], posts[1] = posts[1], posts[0]
         button_blind = count > 2 and posts[0] == 0 and posts[1] == 0 and posts[-1] > 0
         for index, (seat, amount) in enumerate(zip(self.seats, posts, strict=True)):
             if amount <= 0:
@@ -534,9 +550,19 @@ class _Builder:
             raise self.fail(f"{seat.name} bets {added} with {seat.behind} behind")
         if self.level == 0:
             self.hand.addBet(self.street, seat.name, str(added))
+        elif self._completes():
+            # Third street, facing only the bring-in: completing to the small bet.
+            self.hand.addComplete(self.street, seat.name, str(total))
+            self.completed = True
         else:
             self.hand.addRaiseTo(self.street, seat.name, str(total))
         self._put_in(seat, added)
+
+    def _completes(self) -> bool:
+        if self.base != "stud" or self.street_index or self.completed:
+            return False
+        bring_in = _amount(self.data["bring_in"], "bring_in", self.fail)
+        return self.level <= bring_in
 
     def _put_in(self, seat: _Seat, amount: Decimal) -> None:
         seat.behind -= amount
@@ -613,8 +639,11 @@ class _Builder:
     def _draw(self, seat: _Seat, text: str | None) -> None:
         if self.base != "draw":
             raise self.fail("only draw games stand pat or discard")
-        if self.street_index == 0 or self.acted_this_street:
+        # A draw opens the next street: after the deal, after this street's betting, or --
+        # when everyone is all in and nobody bets -- when this player has drawn here already.
+        if self.street_index == 0 or self.acted_this_street or seat.name in self.drew_this_street:
             self._next_street()
+        self.drew_this_street.add(seat.name)
         discarded = _cards(text, self.fail) if text else []
         if not discarded:
             self.hand.addStandsPat(self.street, seat.name)
@@ -642,11 +671,15 @@ class _Builder:
 
     # -- results --------------------------------------------------------------------
     def _returned(self) -> dict[str, Decimal]:
-        """The uncalled bet: what the deepest contributor put in above anyone else."""
-        ordered = sorted(self.seats, key=lambda seat: seat.contributed, reverse=True)
-        top, second = ordered[0], ordered[1]
-        surplus = top.contributed - second.contributed
-        return {top.name: surplus} if surplus > 0 else {}
+        """The uncalled bet: what the last street's top bettor put in above anyone else.
+
+        Measured on that street's bets, not on whole contributions: antes are dead money
+        nobody has to match, and counting them would return chips that are in the pot.
+        """
+        ordered = sorted(self.street_bets.items(), key=lambda item: item[1], reverse=True)
+        (top, top_bet), (_second, second_bet) = ordered[0], ordered[1]
+        surplus = top_bet - second_bet
+        return {top: surplus} if surplus > 0 else {}
 
     def _collect(self) -> None:
         winnings = self.data.get("winnings")

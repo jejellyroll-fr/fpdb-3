@@ -71,17 +71,17 @@ them is untouched — they keep their native parsers.
 
 | PHH | fpdb |
 | --- | --- |
-| `antes` | an `ante` post per player |
+| `antes` | an `ante` post per player (heads-up, like the blinds, the first two are assigned in reverse) |
 | `blinds_or_straddles` | `small blind`, `big blind`, then `straddle`; only the last player posting is a `button blind` (short deck). Heads-up the first player posts the big blind and the second, who has the button, the small blind — PokerKit's convention |
-| `bring_in`, `pN pb` | a stud `bringin` on third street |
+| `bring_in`, `pN pb` | a stud `bringin` on third street; the first `cbr` facing it is a `completes` |
 | `pN cbr X` | a bet when nothing is bet on the street, otherwise a raise **to** X (PHH's meaning) |
 | `pN cc` | a check, or a call of what is owed — all in for less when the stack is short |
 | `pN f` | a fold |
 | `d dh pN cards` | hole cards: preflop in hold'em; per street in stud (third street: two down, one up; seventh: down); the deal and each draw in draw games |
 | `d db cards` | the flop, turn and river |
-| `pN sd [cards]` | in draw games, a discard (with the cards when known) or standing pat; it opens the next draw |
+| `pN sd [cards]` | in draw games, a discard (with the cards when known) or standing pat; it opens the next draw, with or without betting in between (all-in runouts) |
 | `pN sm cards`, `pN sm` / `sm -` | shown cards; mucked |
-| `players`, `seats`, `seat_count`, `table` / `event` | player names (`p1`…`pN` when absent), seats, table size, table name |
+| `players`, `seats`, `seat_count`, `table` / `event` | player names (`pN` for a name absent or empty, as PHH allows), seats, table size, table name |
 | `currency` | the game's currency; `play` when absent (amounts are then chips) |
 | `time`, `day`, `month`, `year`, `time_zone` | the hand's start, converted to UTC; 1970-01-01 when PHH gives no date |
 | `_hero` (user-defined) | the hero, when it names one of the players; otherwise the hand has none |
@@ -110,6 +110,10 @@ Only a hand where everyone folded to one player gets its winner without
   does not evaluate hands to find the winners of a PHH showdown.
 - PHH does not mark tournament hands: every hand is imported as a ring game.
 - Hands are stored one at a time, each committed on its own.
+- PHH is TOML, read with `tomllib` (Python 3.11+) or, on the Python 3.10 the
+  PyOxidizer builds embed, its backport `tomli`, which those builds ship.
+  Without either, PHH files are refused as unsupported; nothing else is
+  affected.
 
 ## Tests and fixtures
 

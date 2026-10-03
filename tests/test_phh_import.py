@@ -48,6 +48,8 @@ FIXTURE_GAMES = {
     "single_draw": ("27_1draw", "nl"),
     "triple_draw_yockey_arieh": ("27_3draw", "fl"),
     "badugi": ("badugi", "fl"),
+    "nl_holdem_heads_up_bb_ante": ("holdem", "nl"),
+    "triple_draw_all_in_runout": ("27_3draw", "fl"),
 }
 
 NT_HAND = """
@@ -236,7 +238,7 @@ def test_stud_brings_in_completes_and_deals_by_street() -> None:
 
     assert actions_of(hand)[3:7] == [
         ("THIRD", "p1", "bringin", 2),
-        ("THIRD", "p2", "raises", 3),
+        ("THIRD", "p2", "completes", 3),
         ("THIRD", "p3", "calls", 5),
         ("THIRD", "p1", "folds"),
     ]
@@ -402,3 +404,74 @@ def test_the_command_line_prints_the_phh_counts_and_why(capsys) -> None:
         "PHH: 7 hands found, 3 imported, 1 duplicates, 1 unsupported, 2 malformed, in 0.5s",
         "  x.phhs:4: PO5",
     ]
+
+
+# -- review of the first version -------------------------------------------------------
+
+
+def test_heads_up_antes_are_reversed_like_the_blinds_and_unnamed_players_get_pn() -> None:
+    hand = build_hand(next(iter_documents(FIXTURES / "nl_holdem_heads_up_bb_ante.phh")))
+
+    assert actions_of(hand)[:3] == [
+        ("BLINDSANTES", "p1", "ante", 3),
+        ("BLINDSANTES", "p1", "big blind", 2),
+        ("BLINDSANTES", "p2", "small blind", 1),
+    ]
+    hand.totalPot()
+    # The ante is dead money: only the 14 of the raise nobody matched goes back.
+    assert hand.pot.returned == {"p1": 14}
+
+
+def test_a_partly_named_table_keeps_its_names() -> None:
+    hand = build_hand(document(NT_HAND + 'players = ["", "Bob", ""]\n'))
+    assert [player[1] for player in hand.players] == ["p1", "Bob", "p3"]
+
+
+def test_draws_with_no_betting_between_them_still_advance_the_street() -> None:
+    hand = build_hand(next(iter_documents(FIXTURES / "triple_draw_all_in_runout.phh")))
+
+    assert [action[:3] for action in actions_of(hand) if action[0].startswith("DRAW")] == [
+        ("DRAWONE", "p1", "stands pat"),
+        ("DRAWONE", "p2", "discards"),
+        ("DRAWTWO", "p1", "stands pat"),
+        ("DRAWTWO", "p2", "discards"),
+        ("DRAWTHREE", "p1", "stands pat"),
+        ("DRAWTHREE", "p2", "discards"),
+    ]
+
+
+def test_a_stud_completion_is_stored_as_a_completion(importer, fresh_db, tmp_path) -> None:
+    shutil.copy(FIXTURES / "stud_hi.phh", tmp_path / "stud_hi.phh")
+    assert importer.addImportFile(str(tmp_path / "stud_hi.phh"))
+    importer.runImport()
+    connection = sqlite3.connect(fresh_db.database)
+    connection.row_factory = sqlite3.Row
+
+    actions = {row["actionId"] for row in connection.execute("SELECT * FROM HandsActions")}
+    connection.close()
+
+    assert 14 in actions, "completes"
+
+
+def test_without_a_toml_reader_phh_files_are_refused_not_crashed(monkeypatch) -> None:
+    """Python 3.10 (the PyOxidizer builds) has no tomllib; without tomli PHH says so."""
+    from fpdb_3_legacy import phh_import
+
+    def missing() -> Any:
+        raise ModuleNotFoundError("No module named 'tomli'")
+
+    monkeypatch.setattr(phh_import, "toml_module", missing)
+
+    [item] = list(iter_documents(FIXTURES / "razz.phh"))
+
+    assert isinstance(item, PHHImportError)
+    assert item.kind == UNSUPPORTED
+    assert "tomli" in str(item)
+
+
+def test_the_compat_toml_reader_is_tomllib_on_this_python() -> None:
+    import tomllib
+
+    from fpdb.compat import toml_module
+
+    assert toml_module() is tomllib

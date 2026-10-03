@@ -59,6 +59,16 @@
       -38
     ]
   },
+  "nl_holdem_heads_up_bb_ante": {
+    "collected": [
+      9,
+      0
+    ],
+    "payoffs": [
+      6,
+      -6
+    ]
+  },
   "nl_holdem_side_pots": {
     "collected": [
       720,
@@ -141,6 +151,16 @@
     "payoffs": [
       0,
       0
+    ]
+  },
+  "triple_draw_all_in_runout": {
+    "collected": [
+      8,
+      0
+    ],
+    "payoffs": [
+      4,
+      -4
     ]
   },
   "triple_draw_yockey_arieh": {

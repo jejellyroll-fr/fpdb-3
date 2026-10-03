@@ -420,6 +420,54 @@ actions = [
     "winnings",
 )
 
+HANDS["nl_holdem_heads_up_bb_ante"] = (
+    """# Heads-up with a big-blind ante: both arrays are assigned in reverse heads-up.
+variant = "NT"
+antes = [0, 3]
+blinds_or_straddles = [1, 2]
+min_bet = 2
+starting_stacks = [200, 200]
+actions = [
+  "d dh p1 AsKs",
+  "d dh p2 7c2d",
+  "p2 cbr 6",
+  "p1 cbr 20",
+  "p2 f",
+]
+players = ["", ""]
+""",
+    None,
+)
+
+HANDS["triple_draw_all_in_runout"] = (
+    """# All in before the first draw: the three draws follow with no betting between them.
+variant = "F2L3D"
+antes = [0, 0]
+blinds_or_straddles = [1, 2]
+small_bet = 2
+big_bet = 4
+starting_stacks = [4, 4]
+actions = [
+  "d dh p1 7h5c4d3s2c",
+  "d dh p2 9s8h6c3d2h",
+  "p2 cbr 4",
+  "p1 cc",
+  "p1 sd",
+  "p2 sd 9s",
+  "d dh p2 Kh",
+  "p1 sd",
+  "p2 sd Kh",
+  "d dh p2 Qd",
+  "p1 sd",
+  "p2 sd Qd",
+  "d dh p2 7d",
+  "p1 sm 7h5c4d3s2c",
+  "p2 sm 8h7d6c3d2h",
+]
+""",
+    "winnings",
+)
+
 expected = {}
 for name, (text, mode) in HANDS.items():
     hh = HandHistory.loads(text)
@@ -429,7 +477,8 @@ for name, (text, mode) in HANDS.items():
         print("FAIL", name, error)
         continue
     final = states[-1]
-    assert not final.status, f"{name}: hand not complete in PokerKit"
+    if final.status:
+        raise SystemExit(f"{name}: the hand is not complete in PokerKit")
     stacks = list(final.stacks)
     won = [0] * len(stacks)
     for op in final.operations:
