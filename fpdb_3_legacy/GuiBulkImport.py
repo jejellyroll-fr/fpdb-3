@@ -202,6 +202,8 @@ class GuiBulkImport(QWidget):
             f"Time: {elapsed:.2f} seconds, Stored/second: {stored / elapsed:.0f}"
         )
         log.info(completion_message)
+        # PHH files (#381) say more than the totals: what was unsupported, what malformed.
+        phh = self.importer.phh_summary()
 
         self.importer.clearFileList()
         self.settings["global_lock"].release()
@@ -244,12 +246,34 @@ class GuiBulkImport(QWidget):
                     skipped=format_number(skipped, 0),
                     errs=format_number(errs, 0),
                     elapsed=format_number(elapsed),
-                ),
+                )
+                + (self._phh_lines(phh) if phh is not None else ""),
             )
 
         main_window = getattr(self, "main_window", None) or self.parent()
         if main_window is not None and hasattr(main_window, "refresh_after_import"):
             main_window.refresh_after_import()
+
+    @staticmethod
+    def _phh_lines(phh) -> str:
+        """The PHH part of the completion message: the counts the totals fold together."""
+        return "\n\n" + _(
+            "PHH hands found: {found}\n"
+            "Imported: {imported}\n"
+            "Duplicates: {dups}\n"
+            "Partial (history stops early): {partial}\n"
+            "Unsupported variants: {unsupported}\n"
+            "Malformed: {malformed}\n"
+            "PHH import time: {seconds}s",
+        ).format(
+            found=format_number(phh.discovered, 0),
+            imported=format_number(phh.imported, 0),
+            dups=format_number(phh.duplicates, 0),
+            partial=format_number(phh.partial, 0),
+            unsupported=format_number(phh.unsupported, 0),
+            malformed=format_number(phh.malformed, 0),
+            seconds=format_number(phh.seconds),
+        )
 
     def import_error(self, error_msg: str) -> None:
         """Handle error from background import thread."""
@@ -549,6 +573,7 @@ def main(argv=None) -> int:
     (stored, dups, partial, skipped, errs, _ttime) = importer.runImport()
     elapsed = (time() - starttime) or 1
 
+    phh = importer.phh_summary()
     comparison_errors = 0
     if args.compare_regression:
         comparison_errors = _compare_regression_sidecars(args.filename, importer, quiet=args.quiet)
@@ -566,7 +591,18 @@ def main(argv=None) -> int:
         f"Regression mismatches: {format_number(comparison_errors, 0)}, "
         f"Time: {format_number(elapsed, 3)}s, Stored/second: {format_number(stored / elapsed, 0)}",
     )
+    _print_phh_summary(phh, quiet=args.quiet)
     return 0 if errs == 0 and comparison_errors == 0 else 1
+
+
+def _print_phh_summary(phh, *, quiet: bool) -> None:
+    """PHH files (#381): found, imported, duplicates, unsupported, malformed -- and why."""
+    if phh is None:
+        return
+    print(phh.summary())
+    if not quiet:
+        for error in phh.errors:
+            print(f"  {error}")
 
 
 if __name__ == "__main__":

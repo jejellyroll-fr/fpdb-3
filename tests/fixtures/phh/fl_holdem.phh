@@ -1,0 +1,22 @@
+variant = "FT"
+antes = [0, 0, 0, 0]
+blinds_or_straddles = [1, 2, 0, 0]
+small_bet = 2
+big_bet = 4
+starting_stacks = [80, 80, 80, 80]
+actions = [
+  "d dh p1 ????",
+  "d dh p2 ????",
+  "d dh p3 JsJh",
+  "d dh p4 ????",
+  "p3 cbr 4",
+  "p4 cbr 6",
+  "p1 f",
+  "p2 f",
+  "p3 cc",
+  "d db 2c7d9h",
+  "p3 cc",
+  "p4 cbr 2",
+  "p3 cbr 4",
+  "p4 f",
+]

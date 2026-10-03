@@ -1,0 +1,180 @@
+{
+  "badugi": {
+    "collected": [
+      30,
+      0,
+      0
+    ],
+    "payoffs": [
+      16,
+      -2,
+      -14
+    ]
+  },
+  "fl_holdem": {
+    "collected": [
+      0,
+      0,
+      17,
+      0
+    ],
+    "payoffs": [
+      -1,
+      -2,
+      11,
+      -8
+    ]
+  },
+  "fl_omaha_hilo_split": {
+    "collected": [
+      14,
+      14,
+      0
+    ],
+    "payoffs": [
+      0,
+      0,
+      0
+    ]
+  },
+  "nl_holdem_dwan_ivey": {
+    "collected": [
+      0,
+      0,
+      1109500
+    ],
+    "payoffs": [
+      -553500,
+      -2500,
+      556000
+    ]
+  },
+  "nl_holdem_heads_up": {
+    "collected": [
+      76,
+      0
+    ],
+    "payoffs": [
+      38,
+      -38
+    ]
+  },
+  "nl_holdem_heads_up_bb_ante": {
+    "collected": [
+      9,
+      0
+    ],
+    "payoffs": [
+      6,
+      -6
+    ]
+  },
+  "nl_holdem_side_pots": {
+    "collected": [
+      720,
+      0,
+      0,
+      0
+    ],
+    "payoffs": [
+      420,
+      -300,
+      -120,
+      0
+    ]
+  },
+  "ns_short_deck": {
+    "collected": [
+      0,
+      0,
+      15
+    ],
+    "payoffs": [
+      -7,
+      -1,
+      8
+    ]
+  },
+  "pl_omaha": {
+    "collected": [
+      0,
+      2250,
+      0
+    ],
+    "payoffs": [
+      -50,
+      1150,
+      -1100
+    ]
+  },
+  "razz": {
+    "collected": [
+      0,
+      25,
+      0
+    ],
+    "payoffs": [
+      -3,
+      14,
+      -11
+    ]
+  },
+  "single_draw": {
+    "collected": [
+      190,
+      0,
+      0
+    ],
+    "payoffs": [
+      100,
+      -10,
+      -90
+    ]
+  },
+  "stud_hi": {
+    "collected": [
+      0,
+      65,
+      0
+    ],
+    "payoffs": [
+      -3,
+      34,
+      -31
+    ]
+  },
+  "stud_hilo_split": {
+    "collected": [
+      31,
+      31
+    ],
+    "payoffs": [
+      0,
+      0
+    ]
+  },
+  "triple_draw_all_in_runout": {
+    "collected": [
+      8,
+      0
+    ],
+    "payoffs": [
+      4,
+      -4
+    ]
+  },
+  "triple_draw_yockey_arieh": {
+    "collected": [
+      0,
+      0,
+      0,
+      2510000
+    ],
+    "payoffs": [
+      -1180000,
+      -150000,
+      0,
+      1330000
+    ]
+  }
+}

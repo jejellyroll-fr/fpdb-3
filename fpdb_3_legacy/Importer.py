@@ -41,6 +41,8 @@ from fpdb_3_legacy.import_failure_cache import SIDECAR_EXTENSIONS, FailureCache
 from fpdb_3_legacy.iPoker.dispatcher import get_parser_class_for_path as get_ipoker_parser_class_for_path
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.parser_registry import get_parser_class, get_summary_class
+from fpdb_3_legacy.phh_import import PHH_SITE_NAME, PHHImportResult, is_phh_path
+from fpdb_3_legacy.phh_import import import_file as import_phh_file
 
 zmq: Any = _zmq
 
@@ -292,6 +294,8 @@ class Importer:
 
         # HandDataReporter for quality analysis
         self.hand_data_reporter = None
+        #: What each PHH file imported (#381), for whoever wants more than the totals.
+        self.phh_results: dict[str, PHHImportResult] = {}
 
         process_time()  # init clock in windows
         self.progress_start_cb: Callable[[int], None] | None = None
@@ -480,6 +484,7 @@ class Importer:
         self.updatedtime = {}
         self.pos_in_file = {}
         self.filelist = {}
+        self.phh_results = {}
         # Reassigned rather than cleared in place: callers that build an
         # Importer without running __init__ rely on this creating the cache.
         self.failed_files = FailureCache()
@@ -553,9 +558,10 @@ class Importer:
         Args:
             fpdbfile: The file object to add and update with a file ID.
         """
-        if fpdbfile.site is None:
+        if fpdbfile.site is None and fpdbfile.ftype != "phh":
             msg = f"Cannot register unidentified file: {fpdbfile.path}"
             raise ValueError(msg)
+        source_name = fpdbfile.site.name if fpdbfile.site is not None else PHH_SITE_NAME
         file = os.path.splitext(os.path.basename(fpdbfile.path))[0]
         # Filenames are str on Python 3; decode only if a bytes path slips in.
         if isinstance(file, bytes):
@@ -565,7 +571,7 @@ class Importer:
             now = datetime.datetime.utcnow()
             with self.database.transaction():
                 fpdbfile.fileId = self.database.storeFile(
-                    [file, fpdbfile.site.name, now, now, 0, 0, 0, 0, 0, 0, 0, False],
+                    [file, source_name, now, now, 0, 0, 0, 0, 0, 0, 0, False],
                 )
 
     # Add an individual file to filelist
@@ -593,6 +599,15 @@ class Importer:
         if not self._is_valid_import_file(filename):
             self.failed_files.remember(filename)
             return False
+
+        if is_phh_path(filename):
+            # A PHH file is a format, not a room: it is recognised by its extension and
+            # imported by the PHH adapter, never offered to the room identifier.
+            fpdbfile = IdentifySite.FPDBFile(filename)
+            fpdbfile.ftype = "phh"
+            self.addFileToList(fpdbfile)
+            self.filelist[filename] = fpdbfile
+            return True
 
         self.idsite.processFile(filename)
         if self.idsite.get_fobj(filename):
@@ -1071,12 +1086,47 @@ class Importer:
             (stored, duplicates, partial, skipped, errors, ttime, detected_sitename) = self._import_hh_file(fpdbfile)
         if fpdbfile.ftype == "summary":
             (stored, duplicates, partial, skipped, errors, ttime) = self._import_summary_file(fpdbfile)
+        if fpdbfile.ftype == "phh":
+            (stored, duplicates, partial, skipped, errors, ttime) = self._import_phh_file(fpdbfile)
+            detected_sitename = PHH_SITE_NAME
         if fpdbfile.ftype == "both" and fpdbfile.path not in self.updatedsize:
             self._import_summary_file(fpdbfile)
         #    pass
         log.debug(f"_import_summary_file.ttime: {ttime:.3f} {fpdbfile.ftype}")
 
         return (stored, duplicates, partial, skipped, errors, ttime, detected_sitename)
+
+    def phh_summary(self) -> PHHImportResult | None:
+        """The PHH files of this run added up, or ``None`` when there were none."""
+        if not self.phh_results:
+            return None
+        total = PHHImportResult()
+        for result in self.phh_results.values():
+            total.discovered += result.discovered
+            total.imported += result.imported
+            total.duplicates += result.duplicates
+            total.unsupported += result.unsupported
+            total.malformed += result.malformed
+            total.partial += result.partial
+            total.seconds += result.seconds
+            total.errors.extend(result.errors)
+        return total
+
+    def _import_phh_file(self, fpdbfile):
+        """Import a PHH file (#381): partial histories count as partial, unsupported as skipped, malformed as errors."""
+        result = import_phh_file(self.database, self.config, fpdbfile.path, file_id=fpdbfile.fileId or 0)
+        self.phh_results[fpdbfile.path] = result
+        log.info(result.summary())
+        for error in result.errors:
+            log.warning(f"PHH: {error}")
+        return (
+            result.imported,
+            result.duplicates,
+            result.partial,
+            result.unsupported,
+            result.malformed,
+            result.seconds,
+        )
 
     def calculate_auto2(self, db, scale, increment):
         """Determine whether to drop indexes based on database and import file sizes.
