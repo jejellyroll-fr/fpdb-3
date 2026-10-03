@@ -250,6 +250,42 @@ def _document(source: str, label: str, start: int, lines: list[str]) -> PHHDocum
     return PHHDocument(source, key, start, data)
 
 
+def _multiline_state(line: str, open_string: str | None) -> str | None:
+    """The multiline string (``\"\"\"`` or ``'''``) still open at the end of *line*, if any.
+
+    Single-line strings and comments are skipped so that their quotes open nothing.
+    """
+    index = 0
+    while index < len(line):
+        if open_string is not None:
+            if open_string == '"""' and line[index] == "\\":
+                index += 2  # an escaped character, a quote included
+                continue
+            if line.startswith(open_string, index):
+                index += 3
+                # Up to two quotes more belong to the string: '""""' ends it with one quote.
+                while index < len(line) and line[index] == open_string[0]:
+                    index += 1
+                open_string = None
+                continue
+            index += 1
+            continue
+        char = line[index]
+        if char == "#":
+            break
+        if line.startswith(('"""', "'''"), index):
+            open_string = line[index : index + 3]
+            index += 3
+        elif char in "\"'":
+            index += 1
+            while index < len(line) and line[index] != char:
+                index += 2 if char == '"' and line[index] == "\\" else 1
+            index += 1
+        else:
+            index += 1
+    return open_string
+
+
 def _iter_tables(path: Path) -> Iterator[PHHDocument | PHHImportError]:
     """The hands of a ``.phhs`` file: one top-level TOML table each, read as they come."""
     source = str(path)
@@ -257,10 +293,14 @@ def _iter_tables(path: Path) -> Iterator[PHHDocument | PHHImportError]:
     start = 1
     lines: list[str] = []
     preamble_reported = False
+    open_string: str | None = None
     with path.open(encoding="utf-8") as handle:
         for number, raw in enumerate(handle, start=1):
             stripped = raw.strip()
-            header = _TABLE_HEADER_RE.match(stripped) if stripped[:1] == "[" else None
+            # A line of a multiline string ("[second]" in a note) is text, never a header.
+            inside = open_string is not None
+            open_string = _multiline_state(raw, open_string)
+            header = _TABLE_HEADER_RE.match(stripped) if stripped[:1] == "[" and not inside else None
             if header is not None:
                 if label is not None:
                     yield _document(source, label, start, lines)
@@ -345,6 +385,11 @@ def _start_time(data: Mapping[str, Any], fail: Any) -> datetime.datetime:
             raise fail(f"{year}-{month}-{day} is not a date") from None
     else:
         return datetime.datetime(1970, 1, 1)
+    return _in_utc(local, data, fail)
+
+
+def _in_utc(local: datetime.datetime, data: Mapping[str, Any], fail: Any) -> datetime.datetime:
+    """*local* in UTC (naive), by its own offset or the hand's ``time_zone``."""
     if local.tzinfo is None and isinstance(data.get("time_zone"), str):
         try:
             from zoneinfo import ZoneInfo, ZoneInfoNotFoundError  # noqa: PLC0415 - only for dated hands
@@ -357,6 +402,11 @@ def _start_time(data: Mapping[str, Any], fail: Any) -> datetime.datetime:
                 # No time-zone database here (a build without tzdata): the zone may be valid.
                 raise fail(f"no time-zone database to convert {data['time_zone']!r}", UNSUPPORTED) from None
             raise fail(f"{data['time_zone']!r} is not a time zone") from None
+    abbreviation = data.get("time_zone_abbreviation")
+    if local.tzinfo is None and abbreviation is not None and str(abbreviation).upper() not in ("UTC", "GMT", "Z"):
+        # An abbreviation alone is ambiguous (CST is America's or China's): the hand's time
+        # cannot be put in UTC, and stored as UTC it would be off by hours.
+        raise fail(f"time_zone_abbreviation {abbreviation!r} without a time_zone cannot be converted", UNSUPPORTED)
     if local.tzinfo is not None:
         local = local.astimezone(datetime.timezone.utc).replace(tzinfo=None)
     return local

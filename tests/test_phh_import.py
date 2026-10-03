@@ -1189,3 +1189,31 @@ def test_a_sub_table_of_another_hand_is_malformed(tmp_path) -> None:
     assert isinstance(error, PHHImportError)
     assert error.kind == MALFORMED
     assert "tables of another hand: '2'" in str(error)
+
+
+# -- fifteenth review -----------------------------------------------------------------
+
+
+def test_a_header_inside_a_multiline_string_is_text(tmp_path) -> None:
+    notes = (
+        '_notes = """\n[second]\nstill the note, with a \\""" quote\n[third]\n"""\n'
+        "_literal = '''\n[fourth]\n'''\n"
+        '_single = "\\"\\"\\" is not a multiline string" # nor is """ in a comment\n'
+    )
+    path = tmp_path / "hands.phhs"
+    path.write_text(f"[1]\n{SHOWDOWN}{notes}[2]\n{SHOWDOWN}", encoding="utf-8")
+    documents = list(iter_documents(path))
+    assert [document.label for document in documents] == ["1", "2"]
+    assert documents[0].data["_notes"] == '[second]\nstill the note, with a """ quote\n[third]\n'
+    assert documents[0].data["_literal"] == "[fourth]\n"
+
+
+def test_a_time_zone_abbreviation_alone_is_unsupported_unless_utc() -> None:
+    dated = SHOWDOWN + "year = 2026\nmonth = 7\nday = 3\ntime = 12:00:00\n"
+    error = refusal(dated + 'time_zone_abbreviation = "EDT"\n')
+    assert error.kind == UNSUPPORTED
+    assert "'EDT' without a time_zone" in str(error)
+    hand = build_hand(document(dated + 'time_zone_abbreviation = "UTC"\n'))
+    assert hand.startTime == datetime.datetime(2026, 7, 3, 12)
+    both = dated + 'time_zone = "America/New_York"\ntime_zone_abbreviation = "EDT"\n'
+    assert build_hand(document(both)).startTime == datetime.datetime(2026, 7, 3, 16)
