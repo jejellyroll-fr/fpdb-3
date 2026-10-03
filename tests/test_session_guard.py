@@ -239,6 +239,12 @@ def test_limits_round_trip_through_saved_defaults() -> None:
     assert limits.enabled() == (LOSS_MONEY, LOSS_BB, DURATION, HANDS, DRAWDOWN_BB)
 
 
+@pytest.mark.parametrize("raw", ["1e309", "inf", "-inf", "nan", "0.4"])
+def test_saved_defaults_that_are_no_limit_are_left_off(raw: str) -> None:
+    # Infinite or overflowing values; and a duration under a second truncates to nothing.
+    assert GuardLimits.from_dict({"duration": raw, "loss_bb": raw if raw != "0.4" else "nan"}) == GuardLimits()
+
+
 def test_unreadable_saved_defaults_are_left_off() -> None:
     assert GuardLimits.from_dict({"loss_bb": "lots", "hands": "-3", "win_bb": "", "duration": "60"}) == GuardLimits(
         duration=60

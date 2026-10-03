@@ -22,6 +22,7 @@ guard and presents what it reports.
 from __future__ import annotations
 
 import datetime
+import math
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, fields
 from typing import Any, Final
@@ -103,11 +104,16 @@ class GuardLimits:
             raw = values.get(guard)
             if raw in (None, ""):
                 continue
-            kind = int if UNITS[guard] in (MONEY, SECONDS, COUNT) else float
             try:
-                value = kind(float(raw))
+                number = float(raw)
             except (TypeError, ValueError):
                 continue
+            # "1e309", "inf" and "nan" read as floats but are no limit: an infinite one would
+            # never fire, and an integral one would not even convert.
+            if not math.isfinite(number):
+                continue
+            value = int(number) if UNITS[guard] in (MONEY, SECONDS, COUNT) else number
+            # Checked once converted: a duration of 0.4 seconds truncates to nothing.
             if value > 0:
                 kwargs[guard] = value
         return cls(**kwargs)
