@@ -20,6 +20,7 @@ from fpdb_3_legacy import Card
 from fpdb_3_legacy.phh_import import (
     GAMES,
     MALFORMED,
+    PARTIAL,
     PHH_SITE_ID,
     PHH_SITE_NAME,
     UNSUPPORTED,
@@ -311,11 +312,31 @@ def test_more_than_three_boards_is_a_run_it_twice_and_unsupported() -> None:
     assert refusal(text).kind == UNSUPPORTED
 
 
+CHECKED_DOWN = (
+    '"p1 cc",\n  "p2 f",\n  "d db AsKsQs",\n  "p1 cc",\n  "p3 cc",\n  "d db 2c",\n  "p1 cc",\n  "p3 cc",\n'
+    '  "d db 3c",\n  "p1 cc",\n  "p3 cc",'
+)
+
+
 def test_a_showdown_without_winnings_is_not_guessed() -> None:
-    text = NT_HAND.replace('"p1 f",\n  "p2 f",', '"p1 cc",\n  "p2 f",\n  "d db AsKsQs",\n  "d db 2c",\n  "d db 3c",')
-    error = refusal(text)
+    error = refusal(NT_HAND.replace('"p1 f",\n  "p2 f",', CHECKED_DOWN))
     assert error.kind == UNSUPPORTED
     assert "without guessing" in str(error)
+
+
+@pytest.mark.parametrize(
+    "actions",
+    [
+        "[]",  # nothing dealt yet
+        '["d dh p1 ????", "d dh p2 ????", "d dh p3 ????", "p3 cbr 6"]',  # stops mid-street
+        '["d dh p1 ????", "d dh p2 ????", "d dh p3 ????", "p3 cc", "p1 cc", "p2 cc", "d db AsKsQs"]',  # no river
+    ],
+)
+def test_a_history_that_stops_before_the_end_is_partial(actions: str) -> None:
+    start = NT_HAND.index("actions = [")
+    error = refusal(NT_HAND[:start] + f"actions = {actions}\n")
+    assert error.kind == PARTIAL
+    assert "partial" in str(error)
 
 
 def test_a_missing_required_field_is_named() -> None:
@@ -339,18 +360,19 @@ def test_a_phhs_file_is_read_hand_by_hand_and_its_failures_counted(importer, fre
     parts.append("[5]\n" + acting_after_folding)
     parts.append('[6]\nvariant = "NT\nthis is not TOML\n')
     parts.append(f"[1-again]\n{(FIXTURES / 'razz.phh').read_text(encoding='utf-8')}")
+    parts.append("[7]\n" + NT_HAND[: NT_HAND.index("actions = [")] + "actions = []\n")  # stops before any deal
     dataset = tmp_path / "dataset.phhs"
     dataset.write_text("# a small dataset\n\n" + "\n".join(parts), encoding="utf-8")
 
     labels = [item.label if isinstance(item, PHHDocument) else item.kind for item in iter_documents(dataset)]
-    assert labels == ["1", "2", "3", "4", "5", MALFORMED, "1-again"]
+    assert labels == ["1", "2", "3", "4", "5", MALFORMED, "1-again", "7"]
 
     assert importer.addImportFile(str(dataset))
     stored, duplicates, partial, skipped, errors, _seconds = importer.runImport()
-    assert (stored, duplicates, partial, skipped, errors) == (3, 1, 0, 1, 2)
+    assert (stored, duplicates, partial, skipped, errors) == (3, 1, 1, 1, 2)
     summary = importer.phh_summary()
     assert summary is not None
-    assert (summary.discovered, summary.unsupported, summary.malformed) == (7, 1, 2)
+    assert (summary.discovered, summary.partial, summary.unsupported, summary.malformed) == (8, 1, 1, 2)
     assert any("dataset.phhs" in error and "PO5" in error for error in summary.errors)
     assert any("not valid TOML" in error for error in summary.errors)
 
@@ -401,7 +423,7 @@ def test_the_command_line_prints_the_phh_counts_and_why(capsys) -> None:
 
     out = capsys.readouterr().out
     assert out.splitlines() == [
-        "PHH: 7 hands found, 3 imported, 1 duplicates, 1 unsupported, 2 malformed, in 0.5s",
+        "PHH: 7 hands found, 3 imported, 1 duplicates, 0 partial, 1 unsupported, 2 malformed, in 0.5s",
         "  x.phhs:4: PO5",
     ]
 
@@ -475,3 +497,60 @@ def test_the_compat_toml_reader_is_tomllib_on_this_python() -> None:
     from fpdb.compat import toml_module
 
     assert toml_module() is tomllib
+
+
+def test_an_uncalled_all_in_bet_is_returned_even_when_the_board_runs_out() -> None:
+    """Ivey's 572,100 nobody could call is returned, not booked as winnings (finishing_stacks)."""
+    hand = build_hand(next(iter_documents(FIXTURES / "nl_holdem_dwan_ivey.phh")))
+    hand.totalPot()
+
+    assert dict(hand.collectees) == {"Tom Dwan": 1109500}
+    assert hand.pot.returned == {"Phil Ivey": 572100}
+    assert hand.totalpot == 1109500
+
+
+PO_HAND = """
+variant = "PO"
+antes = [0, 0, 0]
+blinds_or_straddles = [50, 100, 0]
+min_bet = 100
+starting_stacks = [10000, 10000, 10000]
+actions = ["d dh p1 ????????", "d dh p2 ????????", "d dh p3 ????????", "p3 cbr {raise_to}", "p1 f", "p2 f"]
+"""
+
+FL_HAND = """
+variant = "FT"
+antes = [0, 0, 0]
+blinds_or_straddles = [1, 2, 0]
+small_bet = 2
+big_bet = 4
+starting_stacks = [100, 100, {stack}]
+actions = ["d dh p1 ????", "d dh p2 ????", "d dh p3 ????", "p3 cbr {raise_to}", "p1 f", "p2 f"]
+"""
+
+
+@pytest.mark.parametrize(
+    ("text", "reason"),
+    [
+        (PO_HAND.format(raise_to=400), "at most to 350"),  # over the pot
+        (FL_HAND.format(stack=100, raise_to=5), "goes to 4, not 5"),  # not the fixed size
+        (NT_HAND.replace('"p3 cbr 6"', '"p3 cbr 3"'), "below the minimum of 4"),  # under a min-raise
+    ],
+)
+def test_amounts_outside_the_variant_limits_are_refused(text: str, reason: str) -> None:
+    error = refusal(text)
+    assert error.kind == MALFORMED
+    assert reason in str(error)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        PO_HAND.format(raise_to=350),  # exactly the pot
+        PO_HAND.replace("[10000, 10000, 10000]", "[10000, 10000, 120]").format(raise_to=120),  # all in, under the pot
+        FL_HAND.format(stack=3, raise_to=3),  # all in for less than a full raise
+        NT_HAND.replace("[100, 100, 100]", "[100, 100, 3]").replace('"p3 cbr 6"', '"p3 cbr 3"'),  # all in, short
+    ],
+)
+def test_amounts_within_the_limits_or_all_in_for_less_are_kept(text: str) -> None:
+    assert build_hand(document(text)) is not None

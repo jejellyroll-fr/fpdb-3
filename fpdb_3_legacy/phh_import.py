@@ -103,7 +103,8 @@ class PHHImportError(ValueError):
     """A PHH hand that cannot be imported reliably.
 
     ``kind`` is ``"unsupported"`` for a variant or structure fpdb cannot hold without loss,
-    ``"malformed"`` for a hand that breaks the format or the betting rules.
+    ``"malformed"`` for a hand that breaks the format or the betting rules, ``"partial"``
+    for a history that stops before the hand is over.
     """
 
     def __init__(self, kind: str, message: str, *, source: str = "", hand: str = "") -> None:
@@ -117,6 +118,9 @@ class PHHImportError(ValueError):
 
 UNSUPPORTED: Final = "unsupported"
 MALFORMED: Final = "malformed"
+#: A history that stops before the hand ends, as PHH allows: counted, never stored, since
+#: a hand with no result would bend every statistic it reached.
+PARTIAL: Final = "partial"
 
 
 @dataclass
@@ -128,12 +132,15 @@ class PHHImportResult:
     duplicates: int = 0
     unsupported: int = 0
     malformed: int = 0
+    partial: int = 0
     seconds: float = 0.0
     errors: list[str] = field(default_factory=list)
 
     def add_failure(self, error: PHHImportError) -> None:
         if error.kind == UNSUPPORTED:
             self.unsupported += 1
+        elif error.kind == PARTIAL:
+            self.partial += 1
         else:
             self.malformed += 1
         self.errors.append(str(error))
@@ -141,7 +148,8 @@ class PHHImportResult:
     def summary(self) -> str:
         return (
             f"PHH: {self.discovered} hands found, {self.imported} imported, {self.duplicates} duplicates, "
-            f"{self.unsupported} unsupported, {self.malformed} malformed, in {self.seconds:.1f}s"
+            f"{self.partial} partial, {self.unsupported} unsupported, {self.malformed} malformed, "
+            f"in {self.seconds:.1f}s"
         )
 
 
@@ -424,6 +432,10 @@ class _Builder:
         self.drew_this_street: set[str] = set()
         self.acted_this_street = False
         self.completed = False
+        # The smallest a raise may add on this street (no-limit, pot-limit), and the bets a
+        # street ended with that nobody matched, kept when the street is left behind.
+        self.raise_size = self.level
+        self.uncalled = {seat.name: Decimal(0) for seat in seats}
         self.boards = 0
         self.cards: dict[str, list[str]] = {seat.name: [] for seat in seats}
 
@@ -448,9 +460,14 @@ class _Builder:
     def _next_street(self) -> None:
         if self.street_index + 1 >= len(self.streets):
             raise self.fail(f"more streets than {self.mapping.variant} has")
+        # A bet nobody could match (everyone else all in or folded) is returned even when the
+        # board is dealt on: remembered here, before the street's bets are forgotten.
+        for name, amount in self._street_surplus().items():
+            self.uncalled[name] += amount
         self.street_index += 1
         self.street_bets = dict.fromkeys(self.street_bets, Decimal(0))
         self.level = Decimal(0)
+        self.raise_size = Decimal(0)
         self.dealt_this_street = set()
         self.drew_this_street = set()
         self.acted_this_street = False
@@ -548,6 +565,7 @@ class _Builder:
             raise self.fail(f"a bet or raise to {total} does not exceed the current bet of {self.level}")
         if added > seat.behind:
             raise self.fail(f"{seat.name} bets {added} with {seat.behind} behind")
+        self._check_size(seat, total, added)
         if self.level == 0:
             self.hand.addBet(self.street, seat.name, str(added))
         elif self._completes():
@@ -557,6 +575,43 @@ class _Builder:
         else:
             self.hand.addRaiseTo(self.street, seat.name, str(total))
         self._put_in(seat, added)
+
+    def _check_size(self, seat: _Seat, total: Decimal, added: Decimal) -> None:
+        """The amount is one the variant allows; all in for less always is.
+
+        Fixed limit: the street's bet size (a stud completion goes to the small bet, and
+        fourth street may use the big bet). No and pot limit: at least the minimum bet, or a
+        raise by at least the last raise; pot limit: at most the pot after calling.
+        """
+        all_in = added == seat.behind
+        limit = self.mapping.limit_type
+        if limit == "fl":
+            sizes = self._fixed_sizes()
+            allowed = {self.level + size for size in sizes} if not self._completes() else {sizes[0]}
+            if total not in allowed and not (all_in and total < max(allowed)):
+                raise self.fail(
+                    f"a fixed-limit bet or raise goes to {' or '.join(map(str, sorted(allowed)))}, not {total}"
+                )
+            return
+        minimum = self.level + max(self.raise_size, _amount(self.data.get("min_bet", 0), "min_bet", self.fail))
+        if total < minimum and not all_in:
+            raise self.fail(f"a bet or raise to {total} is below the minimum of {minimum}")
+        if limit == "pl":
+            pot = sum((other.contributed for other in self.seats), Decimal(0))
+            maximum = self.level + pot + (self.level - self.street_bets[seat.name])
+            if total > maximum:
+                raise self.fail(f"a pot-limit bet or raise goes at most to {maximum}, not {total}")
+        if total - self.level >= self.raise_size:
+            self.raise_size = total - self.level
+
+    def _fixed_sizes(self) -> list[Decimal]:
+        """The fixed-limit bet sizes of the current street, smallest first."""
+        small = _amount(self.data.get("small_bet"), "small_bet", self.fail)
+        big = _amount(self.data.get("big_bet"), "big_bet", self.fail)
+        early = {"hold": ("PREFLOP", "FLOP"), "stud": ("THIRD",), "draw": ("DEAL", "DRAWONE")}[self.base]
+        if self.base == "stud" and self.street == "FOURTH":
+            return [small, big]  # an open pair on fourth street lets the big bet in
+        return [small] if self.street in early else [big]
 
     def _completes(self) -> bool:
         if self.base != "stud" or self.street_index or self.completed:
@@ -670,16 +725,36 @@ class _Builder:
         # A partly shown hand ("??Kd") names no complete holding to store.
 
     # -- results --------------------------------------------------------------------
-    def _returned(self) -> dict[str, Decimal]:
-        """The uncalled bet: what the last street's top bettor put in above anyone else.
+    def _street_surplus(self) -> dict[str, Decimal]:
+        """What the current street's top bettor put in above anyone else's bet on it.
 
-        Measured on that street's bets, not on whole contributions: antes are dead money
-        nobody has to match, and counting them would return chips that are in the pot.
+        Bets, not whole contributions: antes are dead money nobody has to match.
         """
         ordered = sorted(self.street_bets.items(), key=lambda item: item[1], reverse=True)
         (top, top_bet), (_second, second_bet) = ordered[0], ordered[1]
-        surplus = top_bet - second_bet
-        return {top: surplus} if surplus > 0 else {}
+        return {top: top_bet - second_bet} if top_bet > second_bet else {}
+
+    def _returned(self) -> dict[str, Decimal]:
+        """Every uncalled bet of the hand: earlier streets' and the last one's."""
+        returned = {name: amount for name, amount in self.uncalled.items() if amount > 0}
+        for name, amount in self._street_surplus().items():
+            returned[name] = returned.get(name, Decimal(0)) + amount
+        return returned
+
+    def _finished(self) -> bool:
+        """Whether the actions reach the end of the hand: the last street dealt and closed."""
+        if self.street_index != len(self.streets) - 1:
+            return False
+        live = [seat for seat in self.seats if not seat.folded]
+        if self.base == "hold" and self.boards < len(_BOARD_SIZES):
+            return False
+        if self.base == "stud" and not self.dealt_this_street:
+            return False
+        if self.base == "draw" and not {seat.name for seat in live} <= self.drew_this_street:
+            return False
+        can_act = [seat for seat in live if seat.behind > 0]
+        matched = all(self.street_bets[seat.name] == self.level for seat in can_act)
+        return matched and (self.acted_this_street or len(can_act) <= 1)
 
     def _collect(self) -> None:
         winnings = self.data.get("winnings")
@@ -698,6 +773,8 @@ class _Builder:
                 raise self.fail("finishing_stacks are lower than the betting allows")
         else:
             live = [seat for seat in self.seats if not seat.folded]
+            if len(live) != 1 and not self._finished():
+                raise self.fail("the history stops before the hand ends (a partial hand)", PARTIAL)
             if len(live) != 1:
                 raise self.fail(
                     "the hand reaches a showdown but gives no winnings or finishing_stacks: "

@@ -36,10 +36,11 @@ configuration — no parser, no `supported_sites` entry, no HUD.
   whole. Files are read as UTF-8.
 
 The import reports, per run, how many hands were **found**, **imported**,
-**duplicates**, **unsupported** and **malformed**, and how long it took — in the
+**duplicates**, **partial**, **unsupported** and **malformed**, and how long it took — in the
 Bulk Import completion message and on the command line, which also prints each
-refusal with its file, line and hand. In the generic totals, unsupported hands
-count as *skipped* and malformed hands as *errors*.
+refusal with its file, line and hand. In the generic totals, partial hands
+count as *partial*, unsupported hands as *skipped* and malformed hands as
+*errors*.
 
 A hand is a duplicate when the same hand (the same PHH content) was imported
 before: its fpdb hand number is a hash of the hand, not the optional `hand`
@@ -88,8 +89,9 @@ them is untouched — they keep their native parsers.
 | `winnings` | what each player collected |
 | `finishing_stacks` | when there are no `winnings`: what each player collected, worked out from the stacks |
 
-Ordering and amounts are kept exactly; uncalled bets are returned and side pots
-built by fpdb's own pot calculation.
+Ordering and amounts are kept exactly; uncalled bets are returned — on any
+street, even when the board runs out after an all-in — and side pots built by
+fpdb's own pot calculation.
 
 ## Refused hands
 
@@ -99,7 +101,8 @@ stored with invented values:
 | Kind | When |
 | --- | --- |
 | unsupported | a variant with no fpdb mapping; more than three board deals (run it twice); a showdown with neither `winnings` nor `finishing_stacks` — fpdb does not pick winners itself |
-| malformed | invalid TOML; a missing required field; arrays that do not have one value per player; an action by a folded or all-in player; a bet or raise that does not exceed the current bet or the stack; a board of the wrong size; an unknown action, player or card; content before the first `[hand]` table of a `.phhs`; a hand the database refuses |
+| partial | the actions stop before the hand ends, as PHH allows (nothing dealt yet, a street left unfinished, a board not yet out): a hand without a result is not stored, since it would bend every statistic it reached |
+| malformed | invalid TOML; a missing required field; arrays that do not have one value per player; an action by a folded or all-in player; a bet or raise that does not exceed the current bet or the stack, or that the variant's limit does not allow (no limit: below the minimum bet or raise; pot limit: above the pot; fixed limit: not the street's bet size — all in for less is always allowed, the raise cap is not checked); a board of the wrong size; an unknown action, player or card; content before the first `[hand]` table of a `.phhs`; a hand the database refuses |
 
 Only a hand where everyone folded to one player gets its winner without
 `winnings` or `finishing_stacks`: the last player in takes the pot.

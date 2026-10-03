@@ -261,6 +261,7 @@ class GuiBulkImport(QWidget):
             "PHH hands found: {found}\n"
             "Imported: {imported}\n"
             "Duplicates: {dups}\n"
+            "Partial (history stops early): {partial}\n"
             "Unsupported variants: {unsupported}\n"
             "Malformed: {malformed}\n"
             "PHH import time: {seconds}s",
@@ -268,6 +269,7 @@ class GuiBulkImport(QWidget):
             found=format_number(phh.discovered, 0),
             imported=format_number(phh.imported, 0),
             dups=format_number(phh.duplicates, 0),
+            partial=format_number(phh.partial, 0),
             unsupported=format_number(phh.unsupported, 0),
             malformed=format_number(phh.malformed, 0),
             seconds=format_number(phh.seconds),

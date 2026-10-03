@@ -5404,5 +5404,5 @@ msgstr "{label} : indisponible (une main n'a pas de big blind) / {threshold}"
 msgid "{value} BB"
 msgstr "{value} BB"
 
-msgid "PHH hands found: {found}\nImported: {imported}\nDuplicates: {dups}\nUnsupported variants: {unsupported}\nMalformed: {malformed}\nPHH import time: {seconds}s"
-msgstr "Mains PHH trouvées : {found}\nImportées : {imported}\nDoublons : {dups}\nVariantes non prises en charge : {unsupported}\nMalformées : {malformed}\nDurée de l'import PHH : {seconds}s"
+msgid "PHH hands found: {found}\nImported: {imported}\nDuplicates: {dups}\nPartial (history stops early): {partial}\nUnsupported variants: {unsupported}\nMalformed: {malformed}\nPHH import time: {seconds}s"
+msgstr "Mains PHH trouvées : {found}\nImportées : {imported}\nDoublons : {dups}\nPartielles (historique interrompu) : {partial}\nVariantes non prises en charge : {unsupported}\nMalformées : {malformed}\nDurée de l'import PHH : {seconds}s"

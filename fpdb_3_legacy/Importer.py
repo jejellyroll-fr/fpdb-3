@@ -1107,18 +1107,26 @@ class Importer:
             total.duplicates += result.duplicates
             total.unsupported += result.unsupported
             total.malformed += result.malformed
+            total.partial += result.partial
             total.seconds += result.seconds
             total.errors.extend(result.errors)
         return total
 
     def _import_phh_file(self, fpdbfile):
-        """Import a PHH file (#381): unsupported variants count as skipped, malformed hands as errors."""
+        """Import a PHH file (#381): partial histories count as partial, unsupported as skipped, malformed as errors."""
         result = import_phh_file(self.database, self.config, fpdbfile.path, file_id=fpdbfile.fileId or 0)
         self.phh_results[fpdbfile.path] = result
         log.info(result.summary())
         for error in result.errors:
             log.warning(f"PHH: {error}")
-        return (result.imported, result.duplicates, 0, result.unsupported, result.malformed, result.seconds)
+        return (
+            result.imported,
+            result.duplicates,
+            result.partial,
+            result.unsupported,
+            result.malformed,
+            result.seconds,
+        )
 
     def calculate_auto2(self, db, scale, increment):
         """Determine whether to drop indexes based on database and import file sizes.
