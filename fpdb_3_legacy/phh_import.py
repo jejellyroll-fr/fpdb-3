@@ -339,6 +339,15 @@ class _Builder:
     def fail(self, message: str, kind: str = MALFORMED) -> PHHImportError:
         return PHHImportError(kind, message, source=self.document.where, hand=self.document.label)
 
+    def _cards(self, text: str) -> list[str]:
+        """Cards, refused when the variant's deck has no such card (short deck: no 2 to 5)."""
+        cards = _cards(text, self.fail)
+        if self.mapping.category == "6_holdem":
+            missing = [card for card in cards if card[0] in "2345"]
+            if missing:
+                raise self.fail(f"{' '.join(missing)} is not in a short deck")
+        return cards
+
     # -- the table ------------------------------------------------------------------
     def _seats(self) -> list[_Seat]:
         stacks = self.data["starting_stacks"]
@@ -360,6 +369,8 @@ class _Builder:
             if not isinstance(seat, int) or seat < 1:
                 raise self.fail(f"seat {seat!r} is not a seat number")
             amount = _amount(stack, f"starting stack of p{index}", self.fail)
+            if amount <= 0:
+                raise self.fail(f"the starting stack of p{index} must be positive")
             result.append(_Seat(str(name), seat, amount, amount))
         return result
 
@@ -401,6 +412,9 @@ class _Builder:
         for key in (*_REQUIRED[self.base], *_REQUIRED_BY_LIMIT[self.mapping.limit_type]):
             if key not in self.data:
                 raise self.fail(f"missing required field {key!r}")
+            # The sizes a game is built from are positive; zero would let any amount through.
+            if key in ("min_bet", "small_bet", "big_bet", "bring_in") and _amount(self.data[key], key, self.fail) <= 0:
+                raise self.fail(f"{key} must be positive")
         seats = self._seats()
         count = len(seats)
         antes = self._per_player("antes", count)
@@ -463,6 +477,8 @@ class _Builder:
     def _next_street(self) -> None:
         if self.street_index + 1 >= len(self.streets):
             raise self.fail(f"more streets than {self.mapping.variant} has")
+        if not self._street_closed():
+            raise self.fail(f"{self.street.lower()} begins its next street before its betting is over")
         # A bet nobody could match (everyone else all in or folded) is returned even when the
         # board is dealt on: remembered here, before the street's bets are forgotten.
         for name, amount in self._street_surplus().items():
@@ -649,7 +665,7 @@ class _Builder:
         self.level = max(self.level, self.street_bets[seat.name])
 
     def _deal(self, kind: str, target: str | None, text: str) -> None:
-        cards = _cards(text, self.fail)
+        cards = self._cards(text)
         if kind == "db":
             if self.base != "hold" or target is not None:
                 raise self.fail("only hold'em games deal a board")
@@ -722,7 +738,7 @@ class _Builder:
         if self.street_index == 0 or self.acted_this_street or seat.name in self.drew_this_street:
             self._next_street()
         self.drew_this_street.add(seat.name)
-        discarded = _cards(text, self.fail) if text else []
+        discarded = self._cards(text) if text else []
         if not discarded:
             self.hand.addStandsPat(self.street, seat.name)
             return
@@ -743,7 +759,7 @@ class _Builder:
             self.hand.mucked.add(seat.name)
             return
         # "sm -" shows the cards the deal already named; anything else names them here.
-        cards = list(self.cards[seat.name]) if text == "-" else _cards(text, self.fail)
+        cards = list(self.cards[seat.name]) if text == "-" else self._cards(text)
         if _known(cards):
             self.hand.addShownCards(cards, seat.name, shown=True)
         # A partly shown hand ("??Kd") names no complete holding to store.
@@ -776,12 +792,16 @@ class _Builder:
             return False
         if self.base == "draw" and not {seat.name for seat in live} <= self.drew_this_street:
             return False
-        can_act = [seat for seat in live if seat.behind > 0]
+        return self._street_closed()
+
+    def _street_closed(self) -> bool:
+        """Whether this street's betting is over: every player who can still act has had a
+        turn and matched the bet -- one check on the river with the other player still to
+        speak, or a flop dealt before the big blind's option, is a street left open."""
+        can_act = [seat for seat in self.seats if not seat.folded and seat.behind > 0]
         matched = all(self.street_bets[seat.name] == self.level for seat in can_act)
         if len(can_act) <= 1:
             return matched
-        # Closed only once every player who can still act has had a turn: one check on the
-        # river with the other player still to speak is a hand that stops mid-street.
         return matched and all(seat.name in self.acted_players for seat in can_act)
 
     def _collect(self) -> None:
@@ -814,6 +834,12 @@ class _Builder:
             pot = sum((seat.contributed for seat in self.seats), Decimal(0))
             pot -= sum(self._returned().values(), Decimal(0))
             collected = [pot if seat is live[0] else Decimal(0) for seat in self.seats]
+        available = sum((seat.contributed for seat in self.seats), Decimal(0))
+        available -= sum(self._returned().values(), Decimal(0))
+        if sum(collected, Decimal(0)) > available:
+            # What is collected comes out of the pot (less the rake); fpdb would otherwise
+            # grow the pot to match and store a win nobody paid for.
+            raise self.fail(f"{sum(collected, Decimal(0))} is collected from a pot of {available}")
         for seat, amount in zip(self.seats, collected, strict=True):
             if amount > 0:
                 self.hand.addCollectPot(seat.name, str(amount))

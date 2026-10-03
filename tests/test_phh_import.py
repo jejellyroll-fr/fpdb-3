@@ -290,7 +290,10 @@ def test_the_hand_number_is_its_content() -> None:
         (('"p3 cbr 6",', '"p9 cbr 6",'), "p9 is not one of the 3 players"),
         (('"p3 cbr 6",', '"p3 raise 6",'), "not a PHH action"),
         (('"p3 cbr 6",', '"p3 cc 6",'), "takes no amount"),
-        (('"p3 cbr 6",', '"d db AsKs",'), "the flop deals 3 cards"),
+        (
+            ('"p3 cbr 6",\n  "p1 f",\n  "p2 f",', '"p3 cc",\n  "p1 cc",\n  "p2 cc",\n  "d db AsKs",'),
+            "the flop deals 3 cards",
+        ),
         (('"p3 cbr 6",', '"p3 pb",'), "bring-in"),
         (('"p3 cbr 6",', '"p3 sd",'), "only draw games"),
         (('"d dh p1 ????",', '"d dh p1 Zz",'), "is not a list of cards"),
@@ -307,7 +310,8 @@ def test_malformed_hands_are_refused_with_their_reason(change: tuple[str, str], 
 def test_more_than_three_boards_is_a_run_it_twice_and_unsupported() -> None:
     text = NT_HAND.replace(
         '"p1 f",\n  "p2 f",',
-        '"p1 cc",\n  "p2 cc",\n  "d db AsKsQs",\n  "d db 2c",\n  "d db 3c",\n  "d db 4c",',
+        '"p1 cc",\n  "p2 cc",\n  "d db AsKsQs",\n  "p1 cc",\n  "p2 cc",\n  "p3 cc",\n  "d db 2c",\n'
+        '  "p1 cc",\n  "p2 cc",\n  "p3 cc",\n  "d db 3c",\n  "p1 cc",\n  "p2 cc",\n  "p3 cc",\n  "d db 4c",',
     )
     assert refusal(text).kind == UNSUPPORTED
 
@@ -689,3 +693,35 @@ def test_the_fourth_street_big_bet_needs_an_open_pair() -> None:
 def test_razz_has_no_open_pair_big_bet() -> None:
     error = refusal(stud_fourth("FR", "9d", 10))
     assert "goes to 5, not 10" in str(error)
+
+
+# -- fifth review ---------------------------------------------------------------------
+
+
+def test_winnings_larger_than_the_pot_are_refused() -> None:
+    error = refusal(NT_HAND + "winnings = [0, 0, 100]\n")
+    assert error.kind == MALFORMED
+    assert "collected from a pot of 5" in str(error)
+
+
+def test_a_board_dealt_before_the_big_blind_has_acted_is_refused() -> None:
+    skipped_option = NT_HAND.replace('"p3 cbr 6",\n  "p1 f",\n  "p2 f",', '"p3 f",\n  "p1 cc",\n  "d db AsKsQs",')
+    error = refusal(skipped_option)
+    assert "before its betting is over" in str(error)
+
+
+@pytest.mark.parametrize(
+    ("change", "field"),
+    [
+        (("min_bet = 2", "min_bet = 0"), "min_bet must be positive"),
+        (("starting_stacks = [100, 100, 100]", "starting_stacks = [100, 0, 100]"), "p2 must be positive"),
+    ],
+)
+def test_sizes_and_stacks_must_be_positive(change: tuple[str, str], field: str) -> None:
+    assert field in str(refusal(NT_HAND.replace(*change)))
+
+
+def test_a_short_deck_has_no_two_to_five() -> None:
+    short = NT_HAND.replace('variant = "NT"', 'variant = "NS"').replace('"d dh p1 ????"', '"d dh p1 As5d"')
+    error = refusal(short)
+    assert "5d is not in a short deck" in str(error)
