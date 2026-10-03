@@ -503,9 +503,10 @@ class _Builder:
         self.drew_this_street: set[str] = set()
         self.acted_this_street = False
         self.acted_players: set[str] = set()
-        # Who has acted since the last full bet or raise: an all-in for less than a full
-        # raise does not let them raise again (no and pot limit).
-        self.closed_to_raise: set[str] = set()
+        # The bet each player left the street at when they last acted. A player may raise again
+        # only once it has risen by a full raise since -- one all-in for less does not reopen
+        # the betting, several in a row may (no and pot limit, as PokerKit plays it).
+        self.acted_at: dict[str, Decimal] = {}
         self.completed = False
         # The smallest a raise may add on this street (no-limit, pot-limit), and the bets a
         # street ended with that nobody matched, kept when the street is left behind.
@@ -553,7 +554,7 @@ class _Builder:
         self.drew_this_street = set()
         self.acted_this_street = False
         self.acted_players = set()
-        self.closed_to_raise = set()
+        self.acted_at = {}
         # After the deal, the first live player after the button acts and draws first.
         self.last_actor = len(self.seats) - 1
         self.last_drawer = len(self.seats) - 1
@@ -646,8 +647,8 @@ class _Builder:
             self.hand.addFold(self.street, seat.name)
         else:
             {"cc": self._check_or_call, "pb": self._bring_in}.get(move, lambda s: self._bet(s, arg))(seat)
-        # Counted once the move is made: a full raise first reopens the betting for everyone.
-        self.closed_to_raise.add(seat.name)
+        # Counted once the move is made, at the bet it left the street at.
+        self.acted_at[seat.name] = self.level
 
     def _next_in_turn(self, start: int, eligible: Any) -> int | None:
         """The first player after index *start*, round the table, that *eligible* accepts."""
@@ -693,6 +694,11 @@ class _Builder:
             raise self.fail(f"a bet or raise to {total} does not exceed the current bet of {self.level}")
         if added > seat.behind:
             raise self.fail(f"{seat.name} bets {added} with {seat.behind} behind")
+        if self.level > 0 and not any(
+            other is not seat and not other.folded and other.behind > 0 for other in self.seats
+        ):
+            # Everyone else is all in: there is nobody left to call a raise (as PokerKit plays it).
+            raise self.fail(f"{seat.name} raises with everyone else all in; only a call is possible")
         self._check_size(seat, total, added)
         if self.level == 0:
             self.hand.addBet(self.street, seat.name, str(added))
@@ -721,13 +727,12 @@ class _Builder:
                     f"a fixed-limit bet or raise goes to {' or '.join(map(str, sorted(allowed)))}, not {total}"
                 )
             return
-        if self.level > 0 and seat.name in self.closed_to_raise:
+        faced = self.acted_at.get(seat.name)
+        if faced is not None and self.level - faced < self.raise_size:
             raise self.fail(f"{seat.name} may only call or fold: an all-in for less did not reopen the betting")
         minimum = self.level + max(self.raise_size, _amount(self.data.get("min_bet", 0), "min_bet", self.fail))
         if total < minimum and not all_in:
             raise self.fail(f"a bet or raise to {total} is below the minimum of {minimum}")
-        if total >= minimum:
-            self.closed_to_raise = set()  # a full bet or raise reopens the betting for everyone
         if limit == "pl":
             pot = sum((other.contributed for other in self.seats), Decimal(0))
             maximum = self.level + pot + (self.level - self.street_bets[seat.name])
@@ -823,8 +828,12 @@ class _Builder:
 
     def _undealt(self) -> list[str]:
         """Players still in who should have their cards before this street's betting."""
+        live = [seat for seat in self.seats if not seat.folded]
         if self.base == "stud" or self.street_index == 0:
-            return [seat.name for seat in self.seats if not seat.folded and seat.name not in self.dealt_this_street]
+            return [seat.name for seat in live if seat.name not in self.dealt_this_street]
+        if self.base == "draw":
+            # A draw street bets once everyone still in has drawn (or stood pat) and been served.
+            return [seat.name for seat in live if seat.name not in self.drew_this_street or self.awaiting[seat.name]]
         return []
 
     def _hole(self, seat: _Seat, street: str, *, open: list[str] | None = None, closed: list[str]) -> None:
@@ -935,21 +944,21 @@ class _Builder:
         if clash:
             raise self.fail(f"{seat.name} shows {' '.join(clash)}, which is dealt elsewhere")
         self.seen.update(card for card in cards if card != "0x")
-        if not _any_known(cards):
+        # A partly shown hand ("??Kd") keeps its known cards, and what the deal already said
+        # ("As??") fills the blanks: storing the show alone would replace the known ace.
+        dealt = self.cards[seat.name]
+        merged = [
+            shown if shown != "0x" else (dealt[index] if index < len(dealt) else "0x")
+            for index, shown in enumerate(cards)
+        ]
+        if not _any_known(merged):
             return
+        self.cards[seat.name] = merged
         if self.base == "hold" and seat.name == self.hand.hero:
-            # fpdb's hold'em show only flags the hero as shown, trusting the dealt cards; a
-            # card known only from this show would be lost, so it joins the holding.
-            dealt = self.cards[seat.name]
-            merged = [
-                shown if shown != "0x" else (dealt[index] if index < len(dealt) else "0x")
-                for index, shown in enumerate(cards)
-            ]
-            self.cards[seat.name] = merged
+            # fpdb's hold'em show only flags the hero as shown, trusting the dealt cards.
             self.hand.addHoleCards("PREFLOP", seat.name, closed=merged, shown=True, dealt=True)
             return
-        # A partly shown hand ("??Kd") keeps its known cards; the others stay blank.
-        self.hand.addShownCards(cards, seat.name, shown=True)
+        self.hand.addShownCards(merged, seat.name, shown=True)
 
     # -- results --------------------------------------------------------------------
     def _street_surplus(self) -> dict[str, Decimal]:

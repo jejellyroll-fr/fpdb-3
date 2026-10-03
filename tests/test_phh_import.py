@@ -1002,3 +1002,47 @@ def test_the_hero_s_newly_shown_card_is_kept() -> None:
     assert hand.hero == "p2"
     assert hand.holecards["PREFLOP"]["p2"][1] == ["0x", "Qd"]
     assert "p2" in hand.shown
+
+
+# -- eleventh review ------------------------------------------------------------------
+
+FOUR_HANDED = """
+variant = "NT"
+antes = [0, 0, 0, 0]
+blinds_or_straddles = [1, 2, 0, 0]
+min_bet = 2
+starting_stacks = {stacks}
+actions = ["d dh p1 AsKs", "d dh p2 QhQd", "d dh p3 7c2d", "d dh p4 8c3d", {actions}]
+"""
+
+
+def test_short_all_ins_that_add_up_to_a_full_raise_reopen_the_betting() -> None:
+    """The three cases PokerKit was asked about: it accepts the first and third, refuses the second."""
+    cumulative = FOUR_HANDED.format(
+        stacks="[7, 10, 100, 100]", actions='"p3 cbr 6", "p4 cc", "p1 cbr 7", "p2 cbr 10", "p3 cbr 20"'
+    )
+    assert refusal(cumulative).kind == PARTIAL  # accepted: the history simply stops there
+
+    single = FOUR_HANDED.format(
+        stacks="[7, 100, 100, 100]", actions='"p3 cbr 6", "p4 cc", "p1 cbr 7", "p2 f", "p3 cbr 20"'
+    )
+    assert "p3 may only call or fold" in str(refusal(single))
+    assert refusal(single.replace('"p3 cbr 20"', '"p3 cc"')).kind == PARTIAL
+
+
+def test_a_raise_with_everyone_else_all_in_is_refused() -> None:
+    three = NT_HAND.replace("[100, 100, 100]", "[7, 10, 100]").replace(
+        '"p3 cbr 6",\n  "p1 f",\n  "p2 f",', '"p3 cbr 6",\n  "p1 cbr 7",\n  "p2 cbr 10",\n  "p3 cbr 20",'
+    )
+    assert "only a call is possible" in str(refusal(three))
+
+
+def test_a_draw_street_bets_only_once_everyone_has_drawn() -> None:
+    early_bet = SINGLE_DRAW.replace('"p1 sd",\n  "p3 sd 9s",', '"p1 sd",\n  "p1 cbr 100",\n  "p3 sd 9s",')
+    assert "before p3 is dealt in" in str(refusal(early_bet))
+
+
+def test_a_partial_show_keeps_what_the_deal_already_said() -> None:
+    text = SHOWDOWN.replace('"d dh p2 QhQd"', '"d dh p2 Qh??"').replace('"p2 sm"', '"p2 sm ??Qd"')
+    hand = build_hand(document(text))
+    assert hand.holecards["PREFLOP"]["p2"][1] == ["Qh", "Qd"]
