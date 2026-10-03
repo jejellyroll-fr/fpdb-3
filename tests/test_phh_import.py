@@ -8,6 +8,7 @@ read back from the database, is checked against that independent one.
 
 from __future__ import annotations
 
+import datetime
 import json
 import shutil
 import sqlite3
@@ -1151,3 +1152,40 @@ def test_an_infinite_starting_stack_is_unsupported() -> None:
     error = refusal(NT_HAND.replace("[100, 100, 100]", "[inf, 100, 100]"))
     assert error.kind == UNSUPPORTED
     assert "a starting stack is unknown" in str(error)
+
+
+# -- fourteenth review ----------------------------------------------------------------
+
+
+def test_a_quoted_table_name_with_a_dot_is_a_hand_and_a_dotted_one_a_sub_table(tmp_path) -> None:
+    path = tmp_path / "hands.phhs"
+    path.write_text(f"[1]\n{SHOWDOWN}\n[1.notes]\nseen = true\n['session.1']\n{SHOWDOWN}", encoding="utf-8")
+    documents = list(iter_documents(path))
+    assert [document.label for document in documents] == ["1", "session.1"]
+    assert documents[0].data["notes"] == {"seen": True}
+
+
+def test_a_partial_date_keeps_what_it_gives_and_a_mistyped_one_is_malformed() -> None:
+    assert build_hand(document(SHOWDOWN + "year = 2009\n")).startTime == datetime.datetime(2009, 1, 1)
+    assert build_hand(document(SHOWDOWN + "year = 2009\nmonth = 7\n")).startTime == datetime.datetime(2009, 7, 1)
+    assert build_hand(document(SHOWDOWN + "month = 7\nday = 3\n")).startTime == datetime.datetime(1970, 1, 1)
+    error = refusal(SHOWDOWN + 'year = "2026"\nmonth = 2\nday = 3\n')
+    assert error.kind == MALFORMED
+    assert "are not a date" in str(error)
+    assert "is not a time" in str(refusal(SHOWDOWN + 'time = "noon"\n'))
+
+
+def test_seat_count_must_hold_every_seat() -> None:
+    assert build_hand(document(SHOWDOWN + "seats = [1, 6]\nseat_count = 6\n")).maxseats == 6
+    assert build_hand(document(SHOWDOWN + "seats = [1, 6]\n")).maxseats == 6
+    assert "seat_count 2 does not hold seat 6" in str(refusal(SHOWDOWN + "seats = [1, 6]\nseat_count = 2\n"))
+    assert "does not hold seat" in str(refusal(SHOWDOWN + 'seat_count = "9"\n'))
+
+
+def test_a_sub_table_of_another_hand_is_malformed(tmp_path) -> None:
+    path = tmp_path / "hands.phhs"
+    path.write_text(f"[1]\n{SHOWDOWN}\n[2.notes]\nseen = true\n", encoding="utf-8")
+    (error,) = list(iter_documents(path))
+    assert isinstance(error, PHHImportError)
+    assert error.kind == MALFORMED
+    assert "tables of another hand: '2'" in str(error)

@@ -108,7 +108,11 @@ _ACTION_RE: Final = re.compile(
     r"^(?:(?P<dealer>d)\s+(?P<deal>dh|db)(?:\s+(?P<target>p\d+))?\s+(?P<cards>\S+)|"
     r"(?P<player>p\d+)\s+(?P<move>pb|cbr|cc|f|sd|sm)(?:\s+(?P<arg>\S+))?)$"
 )
-_TABLE_HEADER_RE: Final = re.compile(r"^\[\s*([^\[\].]+?)\s*\]\s*(?:#.*)?$")
+#: A top-level table, one hand of a ``.phhs``: a quoted key (its dots are literal) or a
+#: bare one. A dotted key (``[1.notes]``) is a sub-table of the hand it follows.
+_TABLE_HEADER_RE: Final = re.compile(
+    r"^\[\s*(?:\"(?P<basic>(?:[^\"\\]|\\.)*)\"|'(?P<literal>[^']*)'|(?P<bare>[A-Za-z0-9_-]+))\s*\]\s*(?:#.*)?$"
+)
 
 
 # -- errors and results -----------------------------------------------------------------
@@ -233,10 +237,17 @@ def iter_documents(path: str | Path) -> Iterator[PHHDocument | PHHImportError]:
 
 
 def _document(source: str, label: str, start: int, lines: list[str]) -> PHHDocument | PHHImportError:
+    """One hand of a ``.phhs``: its table, parsed with its header so its sub-tables stay in it."""
     try:
-        return PHHDocument(source, label, start, _parse_toml("".join(lines), source, start, label))
+        parsed = _parse_toml("".join(lines), source, start, label)
     except PHHImportError as error:
         return error
+    if len(parsed) != 1:
+        # A table that belongs to none of the hands, such as ``[2.notes]`` under ``[1]``.
+        others = ", ".join(repr(key) for key in list(parsed)[1:])
+        return PHHImportError(MALFORMED, f"tables of another hand: {others}", source=f"{source}:{start}", hand=label)
+    ((key, data),) = parsed.items()
+    return PHHDocument(source, key, start, data)
 
 
 def _iter_tables(path: Path) -> Iterator[PHHDocument | PHHImportError]:
@@ -253,7 +264,8 @@ def _iter_tables(path: Path) -> Iterator[PHHDocument | PHHImportError]:
             if header is not None:
                 if label is not None:
                     yield _document(source, label, start, lines)
-                label, start, lines = header.group(1).strip("\"' "), number, []
+                label = next(key for key in header.group("basic", "literal", "bare") if key is not None)
+                start, lines = number, [raw]
             elif label is not None:
                 lines.append(raw)
             elif raw.strip() and not raw.lstrip().startswith("#") and not preamble_reported:
@@ -312,12 +324,20 @@ def hand_number(data: Mapping[str, Any]) -> int:
 
 
 def _start_time(data: Mapping[str, Any], fail: Any) -> datetime.datetime:
-    """The hand's start in UTC (naive, as fpdb stores it); the epoch when PHH gives no date."""
+    """The hand's start in UTC (naive, as fpdb stores it); the epoch when PHH gives no year."""
     year, month, day = data.get("year"), data.get("month"), data.get("day")
     moment = data.get("time")
+    if moment is not None and not isinstance(moment, (datetime.datetime, datetime.time)):
+        raise fail(f"time {moment!r} is not a time")
+    # The epoch stands for a hand PHH gives no date; a date given wrong is not that.
+    if any(part is not None and (not isinstance(part, int) or isinstance(part, bool)) for part in (year, month, day)):
+        raise fail(f"year, month and day {year!r}, {month!r}, {day!r} are not a date")
     if isinstance(moment, datetime.datetime):
         local = moment
-    elif isinstance(year, int) and isinstance(month, int) and isinstance(day, int):
+    elif year is not None:
+        # PHH's fields are optional one by one (its own example gives only the year): a
+        # missing month or day is the first of the period given.
+        month, day = (month, day if day is not None else 1) if month is not None else (1, 1)
         clock = moment if isinstance(moment, datetime.time) else datetime.time(0, 0)
         try:
             local = datetime.datetime.combine(datetime.date(year, month, day), clock.replace(tzinfo=None))
@@ -417,6 +437,16 @@ class _Builder:
             result.append(_Seat(str(name), seat, amount, amount))
         return result
 
+    def _seat_count(self, seats: Sequence[_Seat]) -> int:
+        """The table size: ``seat_count``, which must hold every seat, or else the highest seat."""
+        highest = max(seat.seat for seat in seats)
+        given = self.data.get("seat_count")
+        if given is None:
+            return highest
+        if not isinstance(given, int) or isinstance(given, bool) or given < highest:
+            raise self.fail(f"seat_count {given!r} does not hold seat {highest}")
+        return given
+
     def _per_player(self, key: str, count: int) -> list[Decimal]:
         values = self.data.get(key)
         if values is None:
@@ -471,7 +501,7 @@ class _Builder:
         )
         hand.handid = number
         hand.tablename = str(self.data.get("table") or self.data.get("event") or Path(self.document.source).stem)
-        hand.maxseats = int(self.data.get("seat_count") or max(seat.seat for seat in seats))
+        hand.maxseats = self._seat_count(seats)
         hand.startTime = _start_time(self.data, self.fail)
         hero = self.data.get("_hero")
         hand.hero = str(hero) if hero in {seat.name for seat in seats} else ""
