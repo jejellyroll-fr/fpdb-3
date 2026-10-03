@@ -295,3 +295,19 @@ def test_every_reading_ends_its_transaction(qtbot, imported, monkeypatch) -> Non
 
     assert len(commits) == 2
     monitor.stop()
+
+
+def test_defaults_are_saved_to_the_configuration_of_the_moment(qtbot) -> None:
+    """A reload replaces the window's configuration while the modeless dialog is open."""
+    window = {"config": Defaults()}
+    monitor = SessionGuardMonitor(lambda: None, lambda: window["config"], clock=lambda: HAND_TIME)
+    dialog = SessionGuardDialog(monitor)
+    qtbot.addWidget(dialog)
+    dialog.checks[HANDS].setChecked(True)
+
+    stale = window["config"]
+    window["config"] = Defaults()  # HUD Preferences reloaded the configuration
+    dialog.defaults_button.click()
+
+    assert stale.writes == []
+    assert window["config"].writes == [{HANDS: 1000}]

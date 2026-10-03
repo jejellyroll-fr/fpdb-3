@@ -1188,10 +1188,11 @@ class fpdb(QMainWindow):
             self.statusBar().addPermanentWidget(self.session_guard_indicator)
         dialog = getattr(self, "session_guard_dialog", None)
         if dialog is None:
-            dialog = SessionGuardDialog(self.session_guard, self.config, self)
+            # No configuration pinned: the dialog reads the window's current one, which a
+            # reload replaces while the modeless dialog stays open.
+            dialog = SessionGuardDialog(self.session_guard, parent=self)
             # Kept so the modeless dialog is not garbage-collected while open.
             self.session_guard_dialog = dialog
-        dialog.config = self.config
         dialog.show()
         dialog.raise_()
         dialog.activateWindow()

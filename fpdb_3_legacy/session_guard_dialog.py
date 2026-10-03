@@ -332,9 +332,10 @@ class SessionGuardDialog(QDialog):
     """Set the limits of the current session and see where they stand."""
 
     def __init__(self, monitor: SessionGuardMonitor, config: Any = None, parent: QWidget | None = None) -> None:
+        """*config* pins a configuration (tests); left out, the monitor's live one is used."""
         super().__init__(parent)
         self.monitor = monitor
-        self.config = config
+        self._config = config
         self.setWindowTitle(_("Session Guard"))
         self.checks: dict[str, QCheckBox] = {}
         self.inputs: dict[str, QDoubleSpinBox | QSpinBox | DurationEdit] = {}
@@ -382,8 +383,8 @@ class SessionGuardDialog(QDialog):
 
         if monitor.guard is not None:
             self.set_limits(monitor.guard.limits)
-        elif config is not None and hasattr(config, "get_session_guard_defaults"):
-            self.set_limits(GuardLimits.from_dict(config.get_session_guard_defaults()))
+        elif (current := self.config()) is not None and hasattr(current, "get_session_guard_defaults"):
+            self.set_limits(GuardLimits.from_dict(current.get_session_guard_defaults()))
         monitor.changed.connect(self.refresh)
         self.refresh()
 
@@ -446,11 +447,21 @@ class SessionGuardDialog(QDialog):
             return
         self.monitor.start(limits)
 
+    def config(self) -> Any:
+        """The configuration as it is now.
+
+        Looked up each time, not kept: the dialog is modeless, and a reload elsewhere (HUD
+        Preferences, a profile) replaces the window's configuration while it is open. Saving
+        through the old one would write its stale document over the newer one.
+        """
+        return self._config if self._config is not None else self.monitor.get_config()
+
     def save_defaults(self) -> None:
-        if self.config is None or not hasattr(self.config, "set_session_guard_defaults"):
+        config = self.config()
+        if config is None or not hasattr(config, "set_session_guard_defaults"):
             return
         try:
-            self.config.set_session_guard_defaults(self.limits().to_dict())
+            config.set_session_guard_defaults(self.limits().to_dict())
         except OSError as exc:
             QMessageBox.warning(self, _("Session Guard"), _("Could not save the defaults:\n%s") % exc)
 
