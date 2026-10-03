@@ -69,12 +69,14 @@ GAMES: Final = {
     "FB": PHHGameMapping("FB", "Fixed-limit badugi", "draw", "badugi", "fl", True),
 }
 
-#: The fields every PHH hand needs, per family (PHH's required-field table).
+#: The fields every PHH hand needs, per family, then per limit (PHH's required-field table):
+#: no and pot limit size their bets from ``min_bet``, fixed limit from the two bet sizes.
 _REQUIRED: Final = {
     "hold": ("antes", "blinds_or_straddles", "starting_stacks", "actions"),
     "draw": ("antes", "blinds_or_straddles", "starting_stacks", "actions"),
-    "stud": ("antes", "bring_in", "small_bet", "big_bet", "starting_stacks", "actions"),
+    "stud": ("antes", "bring_in", "starting_stacks", "actions"),
 }
+_REQUIRED_BY_LIMIT: Final = {"nl": ("min_bet",), "pl": ("min_bet",), "fl": ("small_bet", "big_bet")}
 
 _STREETS: Final = {
     "hold": ("PREFLOP", "FLOP", "TURN", "RIVER"),
@@ -396,7 +398,7 @@ class _Builder:
     def build(self) -> Any:
         from fpdb_3_legacy.Hand import DrawHand, HoldemOmahaHand, StudHand  # noqa: PLC0415 - Qt-free, but heavy
 
-        for key in _REQUIRED[self.base]:
+        for key in (*_REQUIRED[self.base], *_REQUIRED_BY_LIMIT[self.mapping.limit_type]):
             if key not in self.data:
                 raise self.fail(f"missing required field {key!r}")
         seats = self._seats()
@@ -431,6 +433,7 @@ class _Builder:
         self.dealt_this_street: set[str] = set()
         self.drew_this_street: set[str] = set()
         self.acted_this_street = False
+        self.acted_players: set[str] = set()
         self.completed = False
         # The smallest a raise may add on this street (no-limit, pot-limit), and the bets a
         # street ended with that nobody matched, kept when the street is left behind.
@@ -471,6 +474,7 @@ class _Builder:
         self.dealt_this_street = set()
         self.drew_this_street = set()
         self.acted_this_street = False
+        self.acted_players = set()
 
     def _post(self, antes: list[Decimal], blinds: list[Decimal]) -> None:
         if self.base != "stud" and len(self.seats) == 2:
@@ -542,6 +546,7 @@ class _Builder:
         if seat.behind <= 0 and move in ("cbr", "cc", "pb"):
             raise self.fail(f"{seat.name} is all in and cannot act")
         self.acted_this_street = True
+        self.acted_players.add(seat.name)
         if move == "f":
             seat.folded = True
             self.hand.addFold(self.street, seat.name)
@@ -617,9 +622,19 @@ class _Builder:
         small = _amount(self.data.get("small_bet"), "small_bet", self.fail)
         big = _amount(self.data.get("big_bet"), "big_bet", self.fail)
         early = {"hold": ("PREFLOP", "FLOP"), "stud": ("THIRD",), "draw": ("DEAL", "DRAWONE")}[self.base]
+        if self.street == "FOURTH" and self.mapping.category in ("studhi", "studhilo") and self._open_pair():
+            return [small, big]  # an open pair on fourth street lets the big bet in (not in razz)
         if self.base == "stud" and self.street == "FOURTH":
-            return [small, big]  # an open pair on fourth street lets the big bet in
+            return [small]
         return [small] if self.street in early else [big]
+
+    def _open_pair(self) -> bool:
+        """Whether a live player shows a pair on fourth street (third and fourth upcards)."""
+        for seat in self.seats:
+            up = self.cards[seat.name][2:4]
+            if not seat.folded and len(up) == 2 and _known(up) and up[0][0] == up[1][0]:
+                return True
+        return False
 
     def _completes(self) -> bool:
         if self.base != "stud" or self.street_index or self.completed:
@@ -763,7 +778,11 @@ class _Builder:
             return False
         can_act = [seat for seat in live if seat.behind > 0]
         matched = all(self.street_bets[seat.name] == self.level for seat in can_act)
-        return matched and (self.acted_this_street or len(can_act) <= 1)
+        if len(can_act) <= 1:
+            return matched
+        # Closed only once every player who can still act has had a turn: one check on the
+        # river with the other player still to speak is a hand that stops mid-street.
+        return matched and all(seat.name in self.acted_players for seat in can_act)
 
     def _collect(self) -> None:
         # Whether the hand is over is decided by its actions, before any result is read:

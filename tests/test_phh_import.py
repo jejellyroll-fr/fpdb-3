@@ -629,3 +629,63 @@ def test_sm_dash_shows_the_dealt_cards_and_sm_alone_mucks() -> None:
     assert hand.holecards["PREFLOP"]["p1"][1] == ["As", "Ks"]
     assert "p2" in hand.mucked
     assert "p2" not in hand.shown
+
+
+# -- fourth review --------------------------------------------------------------------
+
+
+def test_a_street_checked_by_only_some_players_is_not_finished() -> None:
+    one_check = SHOWDOWN.replace('"p1 cc",\n  "p2 cc",\n  "p1 sm -",\n  "p2 sm",\n]', '"p1 cc",\n]')
+    assert '"d db Jc",\n  "p1 cc",\n]' in one_check
+    assert refusal(one_check).kind == PARTIAL
+
+
+@pytest.mark.parametrize(
+    ("text", "field"),
+    [
+        (NT_HAND.replace("min_bet = 2\n", ""), "min_bet"),
+        (FL_HAND.format(stack=100, raise_to=4).replace("small_bet = 2\n", ""), "small_bet"),
+    ],
+)
+def test_the_variant_bet_size_fields_are_required(text: str, field: str) -> None:
+    error = refusal(text)
+    assert error.kind == MALFORMED
+    assert f"missing required field '{field}'" in str(error)
+
+
+STUD_FOURTH = """
+variant = "{variant}"
+antes = [1, 1]
+bring_in = 2
+small_bet = 5
+big_bet = 10
+starting_stacks = [100, 100]
+actions = [
+  "d dh p1 ????{p1_up}",
+  "d dh p2 ????9c",
+  "p{bring_in} pb",
+  "p{caller} cc",
+  "d dh p1 3h",
+  "d dh p2 {fourth}",
+  "p2 cbr {bet}",
+  "p1 f",
+]
+"""
+
+
+def stud_fourth(variant: str, fourth: str, bet: int) -> str:
+    # Stud brings in on the lowest upcard (p1's 2c); razz on the highest (p2's 9c).
+    p1_up, bring_in, caller = ("2c", 1, 2) if variant != "FR" else ("2c", 2, 1)
+    return STUD_FOURTH.format(variant=variant, p1_up=p1_up, bring_in=bring_in, caller=caller, fourth=fourth, bet=bet)
+
+
+def test_the_fourth_street_big_bet_needs_an_open_pair() -> None:
+    assert build_hand(document(stud_fourth("F7S", "9d", 10))) is not None  # 9c 9d showing
+    assert build_hand(document(stud_fourth("F7S", "9d", 5))) is not None  # the small bet stays allowed
+    error = refusal(stud_fourth("F7S", "Kd", 10))
+    assert "goes to 5, not 10" in str(error)
+
+
+def test_razz_has_no_open_pair_big_bet() -> None:
+    error = refusal(stud_fourth("FR", "9d", 10))
+    assert "goes to 5, not 10" in str(error)
