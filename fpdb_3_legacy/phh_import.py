@@ -23,6 +23,7 @@ from __future__ import annotations
 import datetime
 import hashlib
 import json
+import math
 import re
 import time
 from collections.abc import Iterator, Mapping, Sequence
@@ -330,7 +331,12 @@ def _start_time(data: Mapping[str, Any], fail: Any) -> datetime.datetime:
 
             local = local.replace(tzinfo=ZoneInfo(data["time_zone"]))
         except (ZoneInfoNotFoundError, ValueError):
-            pass
+            from zoneinfo import available_timezones  # noqa: PLC0415
+
+            if not available_timezones():
+                # No time-zone database here (a build without tzdata): the zone may be valid.
+                raise fail(f"no time-zone database to convert {data['time_zone']!r}", UNSUPPORTED) from None
+            raise fail(f"{data['time_zone']!r} is not a time zone") from None
     if local.tzinfo is not None:
         local = local.astimezone(datetime.timezone.utc).replace(tzinfo=None)
     return local
@@ -390,8 +396,9 @@ class _Builder:
         stacks = self.data["starting_stacks"]
         if not isinstance(stacks, list) or len(stacks) < 2:
             raise self.fail("starting_stacks must list at least two players")
-        if any(stack is None for stack in stacks):
-            raise self.fail("a starting stack is unknown (null): the hand cannot be accounted for", UNSUPPORTED)
+        if any(stack is None or (isinstance(stack, float) and math.isinf(stack)) for stack in stacks):
+            # PHH writes an unknown starting stack as null or inf.
+            raise self.fail("a starting stack is unknown: the hand cannot be accounted for", UNSUPPORTED)
         count = len(stacks)
         # PHH allows an empty name for a player it does not know: that one is called pN.
         names = _player_names(self.data.get("players") or [""] * count)
@@ -641,6 +648,9 @@ class _Builder:
             raise self.fail(f"{seat.name} acts after the betting on {self.street.lower()} is over")
         if undealt := self._undealt():
             raise self.fail(f"the betting begins before {', '.join(undealt)} is dealt in")
+        if self.base == "stud" and self.street_index == 0 and self.level == 0 and move not in ("pb", "cbr"):
+            # Third street opens with the bring-in or a completion: its player may not check or fold.
+            raise self.fail(f"{seat.name} {'folds' if move == 'f' else 'checks'} before the bring-in is posted")
         if self.base != "stud":
             # Stud's order follows the best hand showing, which takes evaluating the upcards.
             self._take_turn(seat)
@@ -704,12 +714,12 @@ class _Builder:
             # Everyone else is all in: there is nobody left to call a raise (as PokerKit plays it).
             raise self.fail(f"{seat.name} raises with everyone else all in; only a call is possible")
         self._check_size(seat, total, added)
-        if self.level == 0:
-            self.hand.addBet(self.street, seat.name, str(added))
-        elif self._completes():
-            # Third street, facing only the bring-in: completing to the small bet.
+        if self._completes():
+            # Third street, facing only the bring-in -- or in its place: completing to the small bet.
             self.hand.addComplete(self.street, seat.name, str(total))
             self.completed = True
+        elif self.level == 0:
+            self.hand.addBet(self.street, seat.name, str(added))
         else:
             self.hand.addRaiseTo(self.street, seat.name, str(total))
         self._put_in(seat, added)
@@ -750,8 +760,8 @@ class _Builder:
         small = _amount(self.data.get("small_bet"), "small_bet", self.fail)
         big = _amount(self.data.get("big_bet"), "big_bet", self.fail)
         early = {"hold": ("PREFLOP", "FLOP"), "stud": ("THIRD",), "draw": ("DEAL", "DRAWONE")}[self.base]
-        if self.street == "FOURTH" and self.mapping.category in ("studhi", "studhilo") and self._open_pair():
-            return [small, big]  # an open pair on fourth street lets the big bet in (not in razz)
+        if self.street == "FOURTH" and self.mapping.category == "studhi" and self._open_pair():
+            return [small, big]  # an open pair on fourth street lets the big bet in (stud high only)
         if self.base == "stud" and self.street == "FOURTH":
             return [small]
         return [small] if self.street in early else [big]
@@ -860,12 +870,17 @@ class _Builder:
             raise self.fail(f"{street.lower()} street deals {expected} cards, not {len(cards)}")
         previous = list(self.cards[seat.name])
         self.cards[seat.name] = [*previous, *cards]
+        self._place_stud(seat.name, street, previous, cards)
+
+    def _place_stud(self, name: str, street: str, previous: list[str], cards: list[str]) -> None:
+        """A stud street's cards where fpdb reads them (``StudHand.join_holecards``)."""
         if street == "THIRD":
-            self.hand.addPlayerCards(seat.name, street, open=[cards[2]], closed=cards[:2])
-        elif street == "SEVENTH":
-            self.hand.addPlayerCards(seat.name, street, open=[], closed=cards)
+            self.hand.addPlayerCards(name, street, open=[cards[2]], closed=cards[:2])
+        elif street == "SEVENTH" and name != self.hand.hero:
+            # Only the hero's seventh card is read from the open slot, as a room shows it.
+            self.hand.addPlayerCards(name, street, open=[], closed=cards)
         else:
-            self.hand.addPlayerCards(seat.name, street, open=cards, closed=previous)
+            self.hand.addPlayerCards(name, street, open=cards, closed=previous)
 
     def _draw_deal(self, seat: _Seat, cards: list[str]) -> None:
         if self.street_index == 0:
@@ -977,6 +992,16 @@ class _Builder:
         if self.base == "hold" and seat.name == self.hand.hero:
             # fpdb's hold'em show only flags the hero as shown, trusting the dealt cards.
             self.hand.addHoleCards("PREFLOP", seat.name, closed=merged, shown=True, dealt=True)
+            return
+        if self.base == "stud" and seat.name == self.hand.hero:
+            # Likewise in stud: the shown cards go back into each street the deal filled.
+            self.hand.shown.add(seat.name)
+            for index, street in enumerate(("THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH")):
+                dealt_to = 3 + index
+                if len(merged) < dealt_to:
+                    break
+                cards = merged[:3] if index == 0 else [merged[dealt_to - 1]]
+                self._place_stud(seat.name, street, merged[: dealt_to - len(cards)], cards)
             return
         self.hand.addShownCards(merged, seat.name, shown=True)
 
@@ -1139,7 +1164,7 @@ def build_hand(document: PHHDocument, config: Any = None) -> Any:
 
 # -- storing ----------------------------------------------------------------------------
 
-_SITE_LOOKUP_SQL: Final = "SELECT id FROM Sites WHERE id = %s"
+_SITE_LOOKUP_SQL: Final = "SELECT name, code FROM Sites WHERE id = %s"
 _SITE_INSERT_SQL: Final = "INSERT INTO Sites (id, name, code) VALUES (%s, %s, %s)"
 
 
@@ -1148,9 +1173,15 @@ def ensure_phh_site(db: Any) -> int:
     placeholder = db.sql.query.get("placeholder", "%s")
     cursor = db.get_cursor()
     cursor.execute(_SITE_LOOKUP_SQL.replace("%s", placeholder), (PHH_SITE_ID,))
-    if cursor.fetchone() is None:
+    row = cursor.fetchone()
+    if row is None:
         cursor.execute(_SITE_INSERT_SQL.replace("%s", placeholder), (PHH_SITE_ID, PHH_SITE_NAME, PHH_SITE_CODE))
         db.commit()
+    elif tuple(row) != (PHH_SITE_NAME, PHH_SITE_CODE):
+        # Another source holds the id: its hands must not be mixed with PHH's.
+        raise PHHImportError(
+            UNSUPPORTED, f"site id {PHH_SITE_ID} is {row[0]!r} ({row[1]!r}) in this database, not the PHH data source"
+        )
     return PHH_SITE_ID
 
 
@@ -1178,7 +1209,12 @@ def import_file(db: Any, config: Any, path: str | Path, *, file_id: int = 0) -> 
 
     started = time.monotonic()
     result = PHHImportResult()
-    ensure_phh_site(db)
+    try:
+        ensure_phh_site(db)
+    except PHHImportError as error:
+        result.add_failure(PHHImportError(error.kind, error.reason, source=str(path)))
+        result.seconds = time.monotonic() - started
+        return result
     build_config = _ImportConfig(config)
     for item in iter_documents(path):
         result.discovered += 1

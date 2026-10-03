@@ -28,6 +28,7 @@ from fpdb_3_legacy.phh_import import (
     PHHImportError,
     build_hand,
     hand_number,
+    import_file,
     is_phh_path,
     iter_documents,
     mapping_for,
@@ -1080,3 +1081,73 @@ def test_an_impossible_date_is_malformed() -> None:
     error = refusal(SHOWDOWN + "year = 2026\nmonth = 2\nday = 30\n")
     assert error.kind == MALFORMED
     assert "2026-2-30 is not a date" in str(error)
+
+
+# -- thirteenth review ----------------------------------------------------------------
+
+STUD_HILO = (FIXTURES / "stud_hilo_split.phh").read_text(encoding="utf-8")
+P1_SEVEN = ["Ad", "2d", "3c", "4c", "9h", "Th", "6h"]
+
+
+def test_a_misspelled_time_zone_is_malformed() -> None:
+    error = refusal(SHOWDOWN + 'year = 2026\nmonth = 2\nday = 3\ntime_zone = "America/New_Yrok"\n')
+    assert error.kind == MALFORMED
+    assert "'America/New_Yrok' is not a time zone" in str(error)
+
+
+def test_third_street_opens_with_the_bring_in_or_a_completion() -> None:
+    folds = stud_fourth("F7S", "9d", 5).replace('"p1 pb"', '"p1 f"')
+    assert "p1 folds before the bring-in is posted" in str(refusal(folds))
+    checks = stud_fourth("F7S", "9d", 5).replace('"p1 pb"', '"p1 cc"')
+    assert "p1 checks before the bring-in is posted" in str(refusal(checks))
+
+
+def test_completing_in_place_of_the_bring_in_is_a_completion() -> None:
+    hand = build_hand(document(stud_fourth("F7S", "9d", 5).replace('"p1 pb"', '"p1 cbr 5"')))
+    assert [action for action in actions_of(hand) if action[0] == "THIRD"] == [
+        ("THIRD", "p1", "completes", 5),
+        ("THIRD", "p2", "calls", 5),
+    ]
+
+
+def test_stud_hi_lo_has_no_open_pair_big_bet() -> None:
+    assert "goes to 5, not 10" in str(refusal(stud_fourth("F7S/8", "9d", 10)))
+
+
+def test_the_stud_hero_s_seventh_card_is_where_fpdb_reads_it() -> None:
+    hand = build_hand(document(STUD_HILO + '_hero = "p1"\n'))
+    assert hand.join_holecards("p1", asList=True) == P1_SEVEN
+
+
+def test_a_stud_hero_s_shown_down_cards_are_kept() -> None:
+    text = STUD_HILO.replace('"d dh p1 Ad2d3c"', '"d dh p1 ????3c"') + '_hero = "p1"\n'
+    hand = build_hand(document(text))
+    assert hand.join_holecards("p1", asList=True) == P1_SEVEN
+    assert "p1" in hand.shown
+
+
+def test_a_site_150_that_is_not_phh_is_refused(tmp_path) -> None:
+    connection = sqlite3.connect(":memory:")
+    connection.execute("CREATE TABLE Sites (id INTEGER PRIMARY KEY, name TEXT, code TEXT)")
+    connection.execute("INSERT INTO Sites VALUES (150, 'Other', 'OT')")
+
+    class FakeDb:
+        sql = type("Sql", (), {"query": {"placeholder": "?"}})()
+
+        def get_cursor(self) -> Any:
+            return connection.cursor()
+
+        def commit(self) -> None:
+            connection.commit()
+
+    path = tmp_path / "hand.phh"
+    path.write_text(SHOWDOWN, encoding="utf-8")
+    result = import_file(FakeDb(), None, path)
+    assert (result.imported, result.unsupported) == (0, 1)
+    assert "site id 150 is 'Other' ('OT')" in result.errors[0]
+
+
+def test_an_infinite_starting_stack_is_unsupported() -> None:
+    error = refusal(NT_HAND.replace("[100, 100, 100]", "[inf, 100, 100]"))
+    assert error.kind == UNSUPPORTED
+    assert "a starting stack is unknown" in str(error)
