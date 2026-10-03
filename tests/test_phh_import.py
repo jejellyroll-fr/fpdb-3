@@ -952,3 +952,53 @@ def test_hold_em_deals_go_once_round_the_table_before_the_betting(change: tuple[
 def test_a_card_cannot_be_discarded_twice() -> None:
     draw = (FIXTURES / "single_draw.phh").read_text(encoding="utf-8").replace('"p3 sd 9s"', '"p3 sd 9s9s"')
     assert "discards the same card twice" in str(refusal(draw))
+
+
+# -- tenth review ---------------------------------------------------------------------
+
+
+def test_a_runout_cannot_start_before_the_hole_cards() -> None:
+    all_in_from_the_blinds = """
+variant = "NT"
+antes = [0, 0]
+blinds_or_straddles = [1, 2]
+min_bet = 2
+starting_stacks = [2, 1]
+actions = ["d db AsKsQs", "d db 2c", "d db 3c"]
+winnings = [3, 0]
+"""
+    assert "before p1, p2 is dealt in" in str(refusal(all_in_from_the_blinds))
+
+
+def test_a_second_bring_in_is_refused() -> None:
+    stud = (FIXTURES / "stud_hi.phh").read_text(encoding="utf-8").replace('"p2 cbr 5",', '"p2 pb",', 1)
+    assert "already posted" in str(refusal(stud))
+
+
+SINGLE_DRAW = (FIXTURES / "single_draw.phh").read_text(encoding="utf-8")
+
+
+def test_a_mixed_discard_removes_the_named_card_and_an_unknown_one() -> None:
+    text = (
+        SINGLE_DRAW.replace('"d dh p1 7h5c4d3s2c"', '"d dh p1 7h5c4d3s??"')
+        .replace('"p1 sd",', '"p1 sd 7h??",')
+        .replace('"d dh p3 Kh",', '"d dh p3 Kh",\n  "d dh p1 KcQc",')
+    )
+    hand = build_hand(document(text))
+
+    assert hand.holecards["DRAWONE"]["p1"] == [["Kc", "Qc"], ["5c", "4d", "3s"]]
+    assert hand.discards["DRAWONE"]["p1"] == {"7h"}
+
+
+def test_an_unnamed_discard_from_a_fully_known_hand_is_refused() -> None:
+    text = SINGLE_DRAW.replace('"p1 sd",', '"p1 sd ??",')
+    assert "unnamed card from a hand whose cards are all known" in str(refusal(text))
+
+
+def test_the_hero_s_newly_shown_card_is_kept() -> None:
+    text = SHOWDOWN.replace('"d dh p2 QhQd"', '"d dh p2 ????"').replace('"p2 sm"', '"p2 sm ??Qd"') + '_hero = "p2"\n'
+    hand = build_hand(document(text))
+
+    assert hand.hero == "p2"
+    assert hand.holecards["PREFLOP"]["p2"][1] == ["0x", "Qd"]
+    assert "p2" in hand.shown

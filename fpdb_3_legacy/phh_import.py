@@ -534,6 +534,9 @@ class _Builder:
             raise self.fail(f"{self.street.lower()} begins its next street before its betting is over")
         if any(self.awaiting.values()):
             raise self.fail("a discard is not replaced before the next street")
+        if self.street_index == 0 and (undealt := self._undealt()):
+            # Even an all-in runout, where nobody bets, starts from everyone's hole cards.
+            raise self.fail(f"the next street comes before {', '.join(undealt)} is dealt in")
         if self.base == "stud":
             missing = [seat.name for seat in self.seats if not seat.folded and seat.name not in self.dealt_this_street]
             if missing:
@@ -674,6 +677,8 @@ class _Builder:
     def _bring_in(self, seat: _Seat) -> None:
         if self.base != "stud" or self.street_index:
             raise self.fail("a bring-in is only posted on third street in stud")
+        if self.level > 0:
+            raise self.fail("the bring-in is already posted, or completed")
         amount = min(_amount(self.data["bring_in"], "bring_in", self.fail), seat.behind)
         self.hand.addBringIn(seat.name, str(amount))
         self._put_in(seat, amount)
@@ -892,17 +897,31 @@ class _Builder:
         known = [card for card in discarded if card != "0x"]
         if len(set(known)) != len(known):
             raise self.fail(f"{seat.name} discards the same card twice")
-        if _known(discarded):
-            missing = [card for card in discarded if card not in held]
-            if _known(held) and missing:
-                raise self.fail(f"{seat.name} discards {' '.join(missing)}, which they do not hold")
-            self.cards[seat.name] = [card for card in held if card not in discarded]
-            self.seen.difference_update(discarded)
-            self.hand.addDiscard(self.street, seat.name, len(discarded), " ".join(discarded))
+        self.cards[seat.name] = self._discard(seat, held, discarded)
+        self.seen.difference_update(known)
+        if known:
+            self.hand.addDiscard(self.street, seat.name, len(discarded), " ".join(known))
         else:
-            self.cards[seat.name] = held[: max(0, len(held) - len(discarded))]
             self.hand.addDiscard(self.street, seat.name, len(discarded))
         self.awaiting[seat.name] = len(discarded)
+
+    def _discard(self, seat: _Seat, held: list[str], discarded: list[str]) -> list[str]:
+        """What is left of *held* once *discarded* is gone.
+
+        A named card leaves the hand itself -- or, when the deal did not say it, one of the
+        hand's unknown cards; ``??`` takes one of the unknown cards.
+        """
+        remaining = list(held)
+        for card in discarded:
+            if card != "0x" and card in remaining:
+                remaining.remove(card)
+            elif "0x" in remaining:
+                remaining.remove("0x")
+            elif card == "0x":
+                raise self.fail(f"{seat.name} discards an unnamed card from a hand whose cards are all known")
+            else:
+                raise self.fail(f"{seat.name} discards {card}, which they do not hold")
+        return remaining
 
     def _show(self, seat: _Seat, text: str | None) -> None:
         if not text:
@@ -916,9 +935,21 @@ class _Builder:
         if clash:
             raise self.fail(f"{seat.name} shows {' '.join(clash)}, which is dealt elsewhere")
         self.seen.update(card for card in cards if card != "0x")
-        if _any_known(cards):
-            # A partly shown hand ("??Kd") keeps its known cards; the others stay blank.
-            self.hand.addShownCards(cards, seat.name, shown=True)
+        if not _any_known(cards):
+            return
+        if self.base == "hold" and seat.name == self.hand.hero:
+            # fpdb's hold'em show only flags the hero as shown, trusting the dealt cards; a
+            # card known only from this show would be lost, so it joins the holding.
+            dealt = self.cards[seat.name]
+            merged = [
+                shown if shown != "0x" else (dealt[index] if index < len(dealt) else "0x")
+                for index, shown in enumerate(cards)
+            ]
+            self.cards[seat.name] = merged
+            self.hand.addHoleCards("PREFLOP", seat.name, closed=merged, shown=True, dealt=True)
+            return
+        # A partly shown hand ("??Kd") keeps its known cards; the others stay blank.
+        self.hand.addShownCards(cards, seat.name, shown=True)
 
     # -- results --------------------------------------------------------------------
     def _street_surplus(self) -> dict[str, Decimal]:
