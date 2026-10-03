@@ -100,7 +100,8 @@ _HAND_SIZES: Final = {
 #: How many board cards each hold'em street deals.
 _BOARD_SIZES: Final = {"FLOP": 3, "TURN": 1, "RIVER": 1}
 
-_CARD_RE: Final = re.compile(r"[2-9TJQKA?][cdhs?]")
+#: A known card, or ``??`` for one that is not: PHH has no half-known card ("A?", "?s").
+_CARD_RE: Final = re.compile(r"[2-9TJQKA][cdhs]|\?\?")
 _ACTION_RE: Final = re.compile(
     r"^(?:(?P<dealer>d)\s+(?P<deal>dh|db)(?:\s+(?P<target>p\d+))?\s+(?P<cards>\S+)|"
     r"(?P<player>p\d+)\s+(?P<move>pb|cbr|cc|f|sd|sm)(?:\s+(?P<arg>\S+))?)$"
@@ -331,6 +332,22 @@ def _start_time(data: Mapping[str, Any]) -> datetime.datetime:
     return local
 
 
+def _player_names(given: Sequence[Any]) -> list[str]:
+    """The players' names; an unnamed one is pN, or pN#2... when the file already uses that."""
+    supplied = {str(name) for name in given if name not in (None, "")}
+    names: list[str] = []
+    for index, name in enumerate(given, start=1):
+        if name not in (None, ""):
+            names.append(str(name))
+            continue
+        fallback, suffix = f"p{index}", 1
+        while fallback in supplied or fallback in names:
+            suffix += 1
+            fallback = f"p{index}#{suffix}"
+        names.append(fallback)
+    return names
+
+
 @dataclass
 class _Seat:
     name: str
@@ -373,8 +390,7 @@ class _Builder:
             raise self.fail("a starting stack is unknown (null): the hand cannot be accounted for", UNSUPPORTED)
         count = len(stacks)
         # PHH allows an empty name for a player it does not know: that one is called pN.
-        given = self.data.get("players") or [""] * count
-        names = [str(name) if name not in (None, "") else f"p{index}" for index, name in enumerate(given, start=1)]
+        names = _player_names(self.data.get("players") or [""] * count)
         seats = self.data.get("seats") or list(range(1, count + 1))
         if len(names) != count or len(seats) != count:
             raise self.fail("players, seats and starting_stacks do not have the same length")
@@ -615,6 +631,8 @@ class _Builder:
             raise self.fail(f"{seat.name} is all in and cannot act")
         if self._street_closed():
             raise self.fail(f"{seat.name} acts after the betting on {self.street.lower()} is over")
+        if undealt := self._undealt():
+            raise self.fail(f"the betting begins before {', '.join(undealt)} is dealt in")
         if self.base != "stud":
             # Stud's order follows the best hand showing, which takes evaluating the upcards.
             self._take_turn(seat)
@@ -761,6 +779,8 @@ class _Builder:
         if self.base == "hold":
             if self.street_index or self.acted_this_street:
                 raise self.fail("hole cards are dealt before any action")
+            self._check_deal_order(seat)
+            self.dealt_this_street.add(seat.name)
             self._hole(seat, "PREFLOP", closed=cards)
         elif self.base == "stud":
             self._stud_deal(seat, cards)
@@ -786,6 +806,22 @@ class _Builder:
             raise self.fail(f"the {self.street.lower()} deals {_BOARD_SIZES[self.street]} cards, not {len(cards)}")
         self.hand.setCommunityCards(self.street, cards)
 
+    def _check_deal_order(self, seat: _Seat) -> None:
+        """Hole cards go round from the first player still in to the last, once each."""
+        if seat.name in self.dealt_this_street:
+            raise self.fail(f"{seat.name} is dealt twice")
+        expected = next(
+            (other for other in self.seats if not other.folded and other.name not in self.dealt_this_street), None
+        )
+        if expected is not None and expected is not seat:
+            raise self.fail(f"{seat.name} is dealt out of turn: {expected.name} is next")
+
+    def _undealt(self) -> list[str]:
+        """Players still in who should have their cards before this street's betting."""
+        if self.base == "stud" or self.street_index == 0:
+            return [seat.name for seat in self.seats if not seat.folded and seat.name not in self.dealt_this_street]
+        return []
+
     def _hole(self, seat: _Seat, street: str, *, open: list[str] | None = None, closed: list[str]) -> None:
         self.cards[seat.name] = [*self.cards[seat.name], *(open or []), *closed]
         # Kept as soon as one card is known: the unknown ones stay "0x", fpdb's own blank.
@@ -798,6 +834,7 @@ class _Builder:
             self._next_street()
         if seat.name in self.dealt_this_street:
             raise self.fail(f"{seat.name} is dealt twice on one street")
+        self._check_deal_order(seat)
         self.dealt_this_street.add(seat.name)
         street = self.street
         expected = 3 if street == "THIRD" else 1
@@ -816,6 +853,7 @@ class _Builder:
         if self.street_index == 0:
             if self.acted_this_street or seat.name in self.dealt_this_street:
                 raise self.fail("the hands are dealt once, before any action")
+            self._check_deal_order(seat)
             self.dealt_this_street.add(seat.name)
             self._hole(seat, "DEAL", closed=cards)
             return
@@ -851,6 +889,9 @@ class _Builder:
             self.hand.addStandsPat(self.street, seat.name)
             return
         held = self.cards[seat.name]
+        known = [card for card in discarded if card != "0x"]
+        if len(set(known)) != len(known):
+            raise self.fail(f"{seat.name} discards the same card twice")
         if _known(discarded):
             missing = [card for card in discarded if card not in held]
             if _known(held) and missing:

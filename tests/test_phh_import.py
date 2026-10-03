@@ -771,7 +771,9 @@ def test_a_folded_player_collects_nothing() -> None:
 
 
 def test_a_last_street_dealt_to_only_some_players_is_partial() -> None:
-    stud = (FIXTURES / "stud_hilo_split.phh").read_text(encoding="utf-8").replace('  "d dh p2 8d",\n', "")
+    whole = (FIXTURES / "stud_hilo_split.phh").read_text(encoding="utf-8")
+    # The history stops after p1's seventh-street card: p2's never comes.
+    stud = whole[: whole.index('  "d dh p2 8d",')] + "]\n" + whole[whole.index("finishing_stacks") :]
     assert refusal(stud).kind == PARTIAL
     draw = (FIXTURES / "triple_draw_all_in_runout.phh").read_text(encoding="utf-8").replace('  "d dh p2 7d",\n', "")
     assert refusal(draw).kind == PARTIAL
@@ -885,7 +887,7 @@ def test_short_stacks_share_the_main_pot_rather_than_each_take_it() -> None:
 
 def test_every_live_stud_player_is_dealt_each_street() -> None:
     stud = (FIXTURES / "stud_hi.phh").read_text(encoding="utf-8").replace('  "d dh p3 Ks",\n', "", 1)
-    assert "p3 gets no card on fourth street" in str(refusal(stud))
+    assert "before p3 is dealt in" in str(refusal(stud))
 
 
 SHORT_ALL_IN = """
@@ -920,3 +922,33 @@ def test_a_partial_show_keeps_its_known_card() -> None:
     hand = build_hand(document(SHOWDOWN.replace('"d dh p2 QhQd"', '"d dh p2 ????"').replace('"p2 sm"', '"p2 sm ??Qd"')))
     assert "p2" in hand.shown
     assert "Qd" in hand.holecards["PREFLOP"]["p2"][1]
+
+
+# -- ninth review ---------------------------------------------------------------------
+
+
+def test_an_unnamed_player_never_takes_a_supplied_name() -> None:
+    hand = build_hand(document(NT_HAND + 'players = ["p2", "", ""]\n'))
+    assert [player[1] for player in hand.players] == ["p2", "p2#2", "p3"]
+
+
+@pytest.mark.parametrize("card", ["A?", "?s"])
+def test_a_half_known_card_is_refused(card: str) -> None:
+    assert "is not a list of cards" in str(refusal(NT_HAND.replace('"d dh p1 ????"', f'"d dh p1 {card}Kd"')))
+
+
+@pytest.mark.parametrize(
+    ("change", "reason"),
+    [
+        (('"d dh p2 ????"', '"d dh p1 ????"'), "p1 is dealt twice"),
+        (('"d dh p1 ????",\n  "d dh p2 ????",', '"d dh p2 ????",\n  "d dh p1 ????",'), "dealt out of turn: p1 is next"),
+        (('  "d dh p3 ????",\n', ""), "before p3 is dealt in"),
+    ],
+)
+def test_hold_em_deals_go_once_round_the_table_before_the_betting(change: tuple[str, str], reason: str) -> None:
+    assert reason in str(refusal(NT_HAND.replace(*change)))
+
+
+def test_a_card_cannot_be_discarded_twice() -> None:
+    draw = (FIXTURES / "single_draw.phh").read_text(encoding="utf-8").replace('"p3 sd 9s"', '"p3 sd 9s9s"')
+    assert "discards the same card twice" in str(refusal(draw))
