@@ -81,7 +81,7 @@ them is untouched — they keep their native parsers.
 | `d dh pN cards` | hole cards: preflop in hold'em; per street in stud (third street: two down, one up; seventh: down); the deal and each draw in draw games |
 | `d db cards` | the flop, turn and river |
 | `pN sd [cards]` | in draw games, a discard (with the cards when known) or standing pat; it opens the next draw, with or without betting in between (all-in runouts) |
-| `pN sm cards`, `pN sm` / `sm -` | shown cards; mucked |
+| `pN sm cards`, `pN sm -`, `pN sm` | shown cards; shown, the cards the deal already named; mucked |
 | `players`, `seats`, `seat_count`, `table` / `event` | player names (`pN` for a name absent or empty, as PHH allows), seats, table size, table name |
 | `currency` | the game's currency; `play` when absent (amounts are then chips) |
 | `time`, `day`, `month`, `year`, `time_zone` | the hand's start, converted to UTC; 1970-01-01 when PHH gives no date |
@@ -100,8 +100,8 @@ stored with invented values:
 
 | Kind | When |
 | --- | --- |
-| unsupported | a variant with no fpdb mapping; more than three board deals (run it twice); a showdown with neither `winnings` nor `finishing_stacks` — fpdb does not pick winners itself |
-| partial | the actions stop before the hand ends, as PHH allows (nothing dealt yet, a street left unfinished, a board not yet out): a hand without a result is not stored, since it would bend every statistic it reached |
+| unsupported | a variant with no fpdb mapping; an ante trimmed to a short stack (`ante_trimming_status`), whose eligibility fpdb's pooled antes cannot represent; more than three board deals (run it twice); a showdown with neither `winnings` nor `finishing_stacks` — fpdb does not pick winners itself |
+| partial | the actions stop before the hand ends, as PHH allows (nothing dealt yet, a street left unfinished, a board not yet out) — decided from the actions, even when the file carries `winnings` or `finishing_stacks` so far: a hand without a final result is not stored, since it would bend every statistic it reached |
 | malformed | invalid TOML; a missing required field; arrays that do not have one value per player; an action by a folded or all-in player; a bet or raise that does not exceed the current bet or the stack, or that the variant's limit does not allow (no limit: below the minimum bet or raise; pot limit: above the pot; fixed limit: not the street's bet size — all in for less is always allowed, the raise cap is not checked); a board of the wrong size; an unknown action, player or card; content before the first `[hand]` table of a `.phhs`; a hand the database refuses |
 
 Only a hand where everyone folded to one player gets its winner without

@@ -554,3 +554,78 @@ def test_amounts_outside_the_variant_limits_are_refused(text: str, reason: str) 
 )
 def test_amounts_within_the_limits_or_all_in_for_less_are_kept(text: str) -> None:
     assert build_hand(document(text)) is not None
+
+
+# -- third review ---------------------------------------------------------------------
+
+STOPPED_ON_THE_FLOP = (
+    NT_HAND[: NT_HAND.index("actions = [")]
+    + 'actions = ["d dh p1 ????", "d dh p2 ????", "d dh p3 ????", "p3 cc", "p1 cc", "p2 cc", "d db AsKsQs"]\n'
+)
+
+
+@pytest.mark.parametrize(
+    "results",
+    ["winnings = [0, 0, 0]", "finishing_stacks = [98, 98, 98]"],  # PHH's way of an ongoing hand
+)
+def test_an_unfinished_hand_with_results_so_far_is_still_partial(results: str) -> None:
+    error = refusal(STOPPED_ON_THE_FLOP + results + "\n")
+    assert error.kind == PARTIAL
+
+
+ANTES_HAND = """
+variant = "NT"
+antes = [10, 10, 10]
+blinds_or_straddles = [1, 2, 0]
+min_bet = 2
+starting_stacks = [5, 100, 100]
+actions = ["d dh p1 ????", "d dh p2 ????", "d dh p3 ????", "p3 cbr 6", "p2 f"]
+"""
+
+
+def test_a_trimmed_short_ante_is_unsupported() -> None:
+    error = refusal(ANTES_HAND + "ante_trimming_status = true\n")
+    assert error.kind == UNSUPPORTED
+    assert "trimmed" in str(error)
+
+
+def test_full_antes_with_trimming_on_are_imported() -> None:
+    full = ANTES_HAND.replace("[5, 100, 100]", "[100, 100, 100]").replace('"p2 f"]', '"p2 f", "p1 f"]')
+    hand = build_hand(document(full + "ante_trimming_status = true\n"))
+    assert hand is not None
+
+
+SHOWDOWN = """
+variant = "NT"
+antes = [0, 0]
+blinds_or_straddles = [1, 2]
+min_bet = 2
+starting_stacks = [100, 100]
+actions = [
+  "d dh p1 AsKs",
+  "d dh p2 QhQd",
+  "p2 cc",
+  "p1 cc",
+  "d db 2c3d4h",
+  "p1 cc",
+  "p2 cc",
+  "d db 9s",
+  "p1 cc",
+  "p2 cc",
+  "d db Jc",
+  "p1 cc",
+  "p2 cc",
+  "p1 sm -",
+  "p2 sm",
+]
+winnings = [0, 4]
+"""
+
+
+def test_sm_dash_shows_the_dealt_cards_and_sm_alone_mucks() -> None:
+    hand = build_hand(document(SHOWDOWN))
+
+    assert "p1" in hand.shown
+    assert hand.holecards["PREFLOP"]["p1"][1] == ["As", "Ks"]
+    assert "p2" in hand.mucked
+    assert "p2" not in hand.shown

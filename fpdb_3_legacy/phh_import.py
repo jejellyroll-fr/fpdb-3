@@ -479,8 +479,16 @@ class _Builder:
             # the button (PokerKit, which defines PHH, does the same).
             antes = [antes[1], antes[0]]
             blinds = [blinds[1], blinds[0]]
+        trimmed = bool(self.data.get("ante_trimming_status"))
         for seat, ante in zip(self.seats, antes, strict=True):
             if ante > 0:
+                if trimmed and ante > seat.behind:
+                    # Trimming limits a short ante's player to what everyone matched of it;
+                    # fpdb pools antes as common money anyone can win, so it cannot say that.
+                    raise self.fail(
+                        f"{seat.name}'s ante is trimmed to a short stack, which fpdb cannot represent",
+                        UNSUPPORTED,
+                    )
                 ante = min(ante, seat.behind)
                 self.hand.addAnte(seat.name, str(ante))
                 seat.behind -= ante
@@ -715,11 +723,12 @@ class _Builder:
             self.hand.addDiscard(self.street, seat.name, len(discarded))
 
     def _show(self, seat: _Seat, text: str | None) -> None:
-        cards = _cards(text, self.fail) if text else []
-        if not cards:
-            # "sm" alone, or "sm -": the cards go back unseen.
+        if not text:
+            # "sm" alone: the cards go back unseen.
             self.hand.mucked.add(seat.name)
             return
+        # "sm -" shows the cards the deal already named; anything else names them here.
+        cards = list(self.cards[seat.name]) if text == "-" else _cards(text, self.fail)
         if _known(cards):
             self.hand.addShownCards(cards, seat.name, shown=True)
         # A partly shown hand ("??Kd") names no complete holding to store.
@@ -757,6 +766,11 @@ class _Builder:
         return matched and (self.acted_this_street or len(can_act) <= 1)
 
     def _collect(self) -> None:
+        # Whether the hand is over is decided by its actions, before any result is read:
+        # PHH lets an ongoing hand carry zero winnings or its stacks so far.
+        live = [seat for seat in self.seats if not seat.folded]
+        if len(live) != 1 and not self._finished():
+            raise self.fail("the history stops before the hand ends (a partial hand)", PARTIAL)
         winnings = self.data.get("winnings")
         finishing = self.data.get("finishing_stacks")
         count = len(self.seats)
@@ -772,9 +786,6 @@ class _Builder:
             if any(amount < 0 for amount in collected):
                 raise self.fail("finishing_stacks are lower than the betting allows")
         else:
-            live = [seat for seat in self.seats if not seat.folded]
-            if len(live) != 1 and not self._finished():
-                raise self.fail("the history stops before the hand ends (a partial hand)", PARTIAL)
             if len(live) != 1:
                 raise self.fail(
                     "the hand reaches a showdown but gives no winnings or finishing_stacks: "
