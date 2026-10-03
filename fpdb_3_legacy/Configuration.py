@@ -4025,6 +4025,27 @@ class Config:
                 general_node.removeAttribute("preflop_advisor")
         self.save()
 
+    def get_session_guard_defaults(self) -> dict[str, str]:
+        """The Session Guard limits saved as defaults (#395), as stored; empty when none."""
+        for node in self.doc.getElementsByTagName("session_guard"):
+            return dict(node.attributes.items())
+        return {}
+
+    def set_session_guard_defaults(self, limits: dict[str, Any] | None) -> None:
+        """Save Session Guard limits as defaults, or forget them (``None`` or empty).
+
+        An optional ``<session_guard>`` element of the root: the shipped templates do not
+        carry it, so a configuration without one simply has no defaults.
+        """
+        for node in list(self.doc.getElementsByTagName("session_guard")):
+            node.parentNode.removeChild(node)
+        if limits:
+            node = self.doc.createElement("session_guard")
+            for name, value in sorted(limits.items()):
+                node.setAttribute(name, str(value))
+            self.doc.documentElement.appendChild(node)
+        self.save()
+
     def set_site_ids(self, sites) -> None:
         self.site_ids = dict(sites)
 
