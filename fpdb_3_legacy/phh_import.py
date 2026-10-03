@@ -27,7 +27,7 @@ import re
 import time
 from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
-from decimal import Decimal, InvalidOperation
+from decimal import ROUND_DOWN, Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Final
 
@@ -102,6 +102,7 @@ _BOARD_SIZES: Final = {"FLOP": 3, "TURN": 1, "RIVER": 1}
 
 #: A known card, or ``??`` for one that is not: PHH has no half-known card ("A?", "?s").
 _CARD_RE: Final = re.compile(r"[2-9TJQKA][cdhs]|\?\?")
+_CENT: Final = Decimal("0.01")
 _ACTION_RE: Final = re.compile(
     r"^(?:(?P<dealer>d)\s+(?P<deal>dh|db)(?:\s+(?P<target>p\d+))?\s+(?P<cards>\S+)|"
     r"(?P<player>p\d+)\s+(?P<move>pb|cbr|cc|f|sd|sm)(?:\s+(?P<arg>\S+))?)$"
@@ -274,6 +275,9 @@ def _amount(value: Any, what: str, fail: Any) -> Decimal:
         raise fail(f"{what} is not a number: {value!r}") from None
     if not amount.is_finite() or amount < 0:
         raise fail(f"{what} must be a finite non-negative number, not {value!r}")
+    if amount != amount.quantize(_CENT, rounding=ROUND_DOWN):
+        # fpdb stores every amount in hundredths: a finer one would be truncated silently.
+        raise fail(f"{what} is {value!r}: fpdb stores amounts to two decimal places", UNSUPPORTED)
     return amount
 
 
@@ -306,7 +310,7 @@ def hand_number(data: Mapping[str, Any]) -> int:
     return int.from_bytes(digest, "big") >> 2  # 62 bits: positive in every BIGINT
 
 
-def _start_time(data: Mapping[str, Any]) -> datetime.datetime:
+def _start_time(data: Mapping[str, Any], fail: Any) -> datetime.datetime:
     """The hand's start in UTC (naive, as fpdb stores it); the epoch when PHH gives no date."""
     year, month, day = data.get("year"), data.get("month"), data.get("day")
     moment = data.get("time")
@@ -317,7 +321,7 @@ def _start_time(data: Mapping[str, Any]) -> datetime.datetime:
         try:
             local = datetime.datetime.combine(datetime.date(year, month, day), clock.replace(tzinfo=None))
         except ValueError:
-            return datetime.datetime(1970, 1, 1)
+            raise fail(f"{year}-{month}-{day} is not a date") from None
     else:
         return datetime.datetime(1970, 1, 1)
     if local.tzinfo is None and isinstance(data.get("time_zone"), str):
@@ -461,7 +465,7 @@ class _Builder:
         hand.handid = number
         hand.tablename = str(self.data.get("table") or self.data.get("event") or Path(self.document.source).stem)
         hand.maxseats = int(self.data.get("seat_count") or max(seat.seat for seat in seats))
-        hand.startTime = _start_time(self.data)
+        hand.startTime = _start_time(self.data, self.fail)
         hero = self.data.get("_hero")
         hand.hero = str(hero) if hero in {seat.name for seat in seats} else ""
         # Button games: the last player has the button (the PHH convention). Stud has none.
@@ -907,6 +911,8 @@ class _Builder:
         if len(set(known)) != len(known):
             raise self.fail(f"{seat.name} discards the same card twice")
         self.cards[seat.name] = self._discard(seat, held, discarded)
+        # Every named card was this player's (held, or one of their unknown cards): it leaves
+        # the hand, free to come back from a reshuffled stub.
         self.seen.difference_update(known)
         if known:
             self.hand.addDiscard(self.street, seat.name, len(discarded), " ".join(known))
@@ -925,6 +931,8 @@ class _Builder:
             if card != "0x" and card in remaining:
                 remaining.remove(card)
             elif "0x" in remaining:
+                if card in self.seen:
+                    raise self.fail(f"{seat.name} discards {card}, which is dealt elsewhere")
                 remaining.remove("0x")
             elif card == "0x":
                 raise self.fail(f"{seat.name} discards an unnamed card from a hand whose cards are all known")
@@ -932,25 +940,37 @@ class _Builder:
                 raise self.fail(f"{seat.name} discards {card}, which they do not hold")
         return remaining
 
+    def _reconcile(self, seat: _Seat, dealt: list[str], shown: list[str]) -> list[str]:
+        """The shown hand, checked against the deal: the cards it names are the dealt ones
+        (in any order) or fill the deal's unknown or undealt cards, and its own unknown cards are the
+        dealt ones it does not name -- a partly shown ``??Kd`` keeps a dealt ``As``.
+        """
+        # A replacement not dealt yet is a card of the hand too (the history stops early).
+        pending = self.awaiting[seat.name]
+        if dealt and len(shown) != len(dealt) + pending:
+            raise self.fail(f"{seat.name} shows {len(shown)} cards for {len(dealt) + pending} dealt")
+        named = [card for card in shown if card != "0x"]
+        if len(set(named)) != len(named):
+            raise self.fail(f"{seat.name} shows the same card twice")
+        new = [card for card in named if card not in dealt]
+        clash = [card for card in new if card in self.seen]
+        if clash:
+            raise self.fail(f"{seat.name} shows {' '.join(clash)}, which is dealt elsewhere")
+        if dealt and len(new) > dealt.count("0x") + pending:
+            raise self.fail(f"{seat.name} shows {' '.join(new)}, which the deal did not give them")
+        self.seen.update(new)
+        unnamed = iter(card for card in dealt if card not in named and card != "0x")
+        return [card if card != "0x" else next(unnamed, "0x") for card in shown]
+
     def _show(self, seat: _Seat, text: str | None) -> None:
         if not text:
             # "sm" alone: the cards go back unseen.
             self.hand.mucked.add(seat.name)
             return
         # "sm -" shows the cards the deal already named; anything else names them here.
-        cards = list(self.cards[seat.name]) if text == "-" else self._cards(text)
-        own = set(self.cards[seat.name])
-        clash = [card for card in cards if card != "0x" and card not in own and card in self.seen]
-        if clash:
-            raise self.fail(f"{seat.name} shows {' '.join(clash)}, which is dealt elsewhere")
-        self.seen.update(card for card in cards if card != "0x")
-        # A partly shown hand ("??Kd") keeps its known cards, and what the deal already said
-        # ("As??") fills the blanks: storing the show alone would replace the known ace.
         dealt = self.cards[seat.name]
-        merged = [
-            shown if shown != "0x" else (dealt[index] if index < len(dealt) else "0x")
-            for index, shown in enumerate(cards)
-        ]
+        cards = list(dealt) if text == "-" else self._cards(text)
+        merged = self._reconcile(seat, dealt, cards)
         if not _any_known(merged):
             return
         self.cards[seat.name] = merged

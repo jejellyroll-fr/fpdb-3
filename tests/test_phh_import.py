@@ -1046,3 +1046,37 @@ def test_a_partial_show_keeps_what_the_deal_already_said() -> None:
     text = SHOWDOWN.replace('"d dh p2 QhQd"', '"d dh p2 Qh??"').replace('"p2 sm"', '"p2 sm ??Qd"')
     hand = build_hand(document(text))
     assert hand.holecards["PREFLOP"]["p2"][1] == ["Qh", "Qd"]
+
+
+# -- twelfth review -------------------------------------------------------------------
+
+
+def test_a_show_must_agree_with_the_deal() -> None:
+    assert build_hand(document(SHOWDOWN.replace('"p1 sm -"', '"p1 sm KsAs"'))).holecards["PREFLOP"]["p1"][1] == [
+        "Ks",
+        "As",
+    ]
+    other_cards = SHOWDOWN.replace('"p1 sm -"', '"p1 sm 7h6h"')
+    assert "p1 shows 7h 6h, which the deal did not give them" in str(refusal(other_cards))
+    half = SHOWDOWN.replace('"d dh p1 AsKs"', '"d dh p1 As??"').replace('"p1 sm -"', '"p1 sm 7h6h"')
+    assert "which the deal did not give them" in str(refusal(half))
+    too_few = SHOWDOWN.replace('"p1 sm -"', '"p1 sm As"')
+    assert "p1 shows 1 cards for 2 dealt" in str(refusal(too_few))
+
+
+def test_an_unknown_card_discarded_as_another_player_s_card_is_refused() -> None:
+    text = SINGLE_DRAW.replace('"d dh p1 7h5c4d3s2c"', '"d dh p1 7h5c4d3s??"').replace('"p1 sd",', '"p1 sd 8h",')
+    assert "p1 discards 8h, which is dealt elsewhere" in str(refusal(text))
+
+
+def test_amounts_finer_than_a_hundredth_are_unsupported() -> None:
+    error = refusal(NT_HAND.replace("[100, 100, 100]", "[100.005, 100, 100]"))
+    assert error.kind == UNSUPPORTED
+    assert "two decimal places" in str(error)
+    assert build_hand(document(NT_HAND.replace("[100, 100, 100]", "[100.25, 100, 100]")))
+
+
+def test_an_impossible_date_is_malformed() -> None:
+    error = refusal(SHOWDOWN + "year = 2026\nmonth = 2\nday = 30\n")
+    assert error.kind == MALFORMED
+    assert "2026-2-30 is not a date" in str(error)
