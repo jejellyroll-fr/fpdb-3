@@ -235,7 +235,8 @@ def _iter_tables(path: Path) -> Iterator[PHHDocument | PHHImportError]:
     preamble_reported = False
     with path.open(encoding="utf-8") as handle:
         for number, raw in enumerate(handle, start=1):
-            header = _TABLE_HEADER_RE.match(raw.strip()) if raw[:1] == "[" else None
+            stripped = raw.strip()
+            header = _TABLE_HEADER_RE.match(stripped) if stripped[:1] == "[" else None
             if header is not None:
                 if label is not None:
                     yield _document(source, label, start, lines)
@@ -438,6 +439,27 @@ class _Builder:
             hand.addPlayer(seat.seat, seat.name, str(seat.stack))
 
         self.hand = hand
+        self._start_state(seats)
+
+        self._post(antes, blinds)
+        if self.base != "stud":
+            posted = [index for index, blind in enumerate(blinds) if blind > 0]
+            self.last_actor = 0 if len(seats) == 2 else (posted[-1] if posted else len(seats) - 1)
+        actions = self.data["actions"]
+        if not isinstance(actions, list) or not all(isinstance(action, str) for action in actions):
+            raise self.fail("actions must be a list of strings")
+        for index, raw in enumerate(actions, start=1):
+            text = raw.split("#", 1)[0].strip()
+            if text:
+                try:
+                    self._act(text)
+                except PHHImportError as error:
+                    raise self.fail(f"action {index} {raw.strip()!r}: {error.reason}", error.kind) from None
+        self._collect()
+        return hand
+
+    def _start_state(self, seats: list[_Seat]) -> None:
+        """The betting state a hand is played on, before the forced bets."""
         self.seats = seats
         self.by_ref = {f"p{index}": seat for index, seat in enumerate(seats, start=1)}
         self.streets = _STREETS.get(self.base) or _DRAW_STREETS[self.mapping.category]
@@ -455,20 +477,15 @@ class _Builder:
         self.uncalled = {seat.name: Decimal(0) for seat in seats}
         self.boards = 0
         self.cards: dict[str, list[str]] = {seat.name: [] for seat in seats}
-
-        self._post(antes, blinds)
-        actions = self.data["actions"]
-        if not isinstance(actions, list) or not all(isinstance(action, str) for action in actions):
-            raise self.fail("actions must be a list of strings")
-        for index, raw in enumerate(actions, start=1):
-            text = raw.split("#", 1)[0].strip()
-            if text:
-                try:
-                    self._act(text)
-                except PHHImportError as error:
-                    raise self.fail(f"action {index} {raw.strip()!r}: {error.reason}", error.kind) from None
-        self._collect()
-        return hand
+        # Known cards in play, so one card cannot be dealt twice; discards leave it, since a
+        # draw game reshuffles them when the stub runs out.
+        self.seen: set[str] = set()
+        # Draw games: cards discarded and not yet replaced, per player.
+        self.awaiting: dict[str, int] = {seat.name: 0 for seat in seats}
+        # Whose turn it is, in button games: the index of the last player to act. Preflop,
+        # play starts after the last blind posted (heads-up, after the big blind, p1).
+        self.last_actor = len(seats) - 1
+        self.last_drawer = len(seats) - 1
 
     @property
     def street(self) -> str:
@@ -479,6 +496,8 @@ class _Builder:
             raise self.fail(f"more streets than {self.mapping.variant} has")
         if not self._street_closed():
             raise self.fail(f"{self.street.lower()} begins its next street before its betting is over")
+        if any(self.awaiting.values()):
+            raise self.fail("a discard is not replaced before the next street")
         # A bet nobody could match (everyone else all in or folded) is returned even when the
         # board is dealt on: remembered here, before the street's bets are forgotten.
         for name, amount in self._street_surplus().items():
@@ -491,6 +510,9 @@ class _Builder:
         self.drew_this_street = set()
         self.acted_this_street = False
         self.acted_players = set()
+        # After the deal, the first live player after the button acts and draws first.
+        self.last_actor = len(self.seats) - 1
+        self.last_drawer = len(self.seats) - 1
 
     def _post(self, antes: list[Decimal], blinds: list[Decimal]) -> None:
         if self.base != "stud" and len(self.seats) == 2:
@@ -557,10 +579,19 @@ class _Builder:
         if move == "sd":
             self._draw(seat, arg)
             return
+        self._betting_move(seat, move, arg)
+
+    def _betting_move(self, seat: _Seat, move: str, arg: str | None) -> None:
+        """A fold, check, call, bring-in, bet or raise, by a player allowed to make it now."""
         if arg is not None and move != "cbr":
             raise self.fail(f"'{move}' takes no amount")
         if seat.behind <= 0 and move in ("cbr", "cc", "pb"):
             raise self.fail(f"{seat.name} is all in and cannot act")
+        if self._street_closed():
+            raise self.fail(f"{seat.name} acts after the betting on {self.street.lower()} is over")
+        if self.base != "stud":
+            # Stud's order follows the best hand showing, which takes evaluating the upcards.
+            self._take_turn(seat)
         self.acted_this_street = True
         self.acted_players.add(seat.name)
         if move == "f":
@@ -568,6 +599,23 @@ class _Builder:
             self.hand.addFold(self.street, seat.name)
         else:
             {"cc": self._check_or_call, "pb": self._bring_in}.get(move, lambda s: self._bet(s, arg))(seat)
+
+    def _next_in_turn(self, start: int, eligible: Any) -> int | None:
+        """The first player after index *start*, round the table, that *eligible* accepts."""
+        count = len(self.seats)
+        for step in range(1, count + 1):
+            index = (start + step) % count
+            if eligible(self.seats[index]):
+                return index
+        return None
+
+    def _take_turn(self, seat: _Seat) -> None:
+        """A bet, call, check or fold by the player whose turn it is, in a button game."""
+        expected = self._next_in_turn(self.last_actor, lambda other: not other.folded and other.behind > 0)
+        index = self.seats.index(seat)
+        if expected is not None and expected != index:
+            raise self.fail(f"{seat.name} acts out of turn: it is {self.seats[expected].name}'s turn")
+        self.last_actor = index
 
     def _check_or_call(self, seat: _Seat) -> None:
         to_call = min(self.level - self.street_bets[seat.name], seat.behind)
@@ -666,6 +714,10 @@ class _Builder:
 
     def _deal(self, kind: str, target: str | None, text: str) -> None:
         cards = self._cards(text)
+        repeated = [card for card in cards if card != "0x" and card in self.seen]
+        if repeated or len({card for card in cards if card != "0x"}) != len([card for card in cards if card != "0x"]):
+            raise self.fail(f"{' '.join(repeated) or 'a card'} is dealt twice")
+        self.seen.update(card for card in cards if card != "0x")
         if kind == "db":
             if self.base != "hold" or target is not None:
                 raise self.fail("only hold'em games deal a board")
@@ -724,6 +776,9 @@ class _Builder:
         # Cards drawn after this street's discards: kept cards stay closed, new ones open.
         if seat.name in self.dealt_this_street:
             raise self.fail(f"{seat.name} draws twice on one street")
+        if len(cards) != self.awaiting[seat.name]:
+            raise self.fail(f"{seat.name} draws {len(cards)} cards for {self.awaiting[seat.name]} discarded")
+        self.awaiting[seat.name] = 0
         self.dealt_this_street.add(seat.name)
         kept = self.cards[seat.name]
         self.cards[seat.name] = [*kept, *cards]
@@ -737,6 +792,13 @@ class _Builder:
         # when everyone is all in and nobody bets -- when this player has drawn here already.
         if self.street_index == 0 or self.acted_this_street or seat.name in self.drew_this_street:
             self._next_street()
+        expected = self._next_in_turn(
+            self.last_drawer, lambda other: not other.folded and other.name not in self.drew_this_street
+        )
+        index = self.seats.index(seat)
+        if expected is not None and expected != index:
+            raise self.fail(f"{seat.name} draws out of turn: it is {self.seats[expected].name}'s turn")
+        self.last_drawer = index
         self.drew_this_street.add(seat.name)
         discarded = self._cards(text) if text else []
         if not discarded:
@@ -748,10 +810,12 @@ class _Builder:
             if _known(held) and missing:
                 raise self.fail(f"{seat.name} discards {' '.join(missing)}, which they do not hold")
             self.cards[seat.name] = [card for card in held if card not in discarded]
+            self.seen.difference_update(discarded)
             self.hand.addDiscard(self.street, seat.name, len(discarded), " ".join(discarded))
         else:
             self.cards[seat.name] = held[: max(0, len(held) - len(discarded))]
             self.hand.addDiscard(self.street, seat.name, len(discarded))
+        self.awaiting[seat.name] = len(discarded)
 
     def _show(self, seat: _Seat, text: str | None) -> None:
         if not text:
@@ -760,6 +824,11 @@ class _Builder:
             return
         # "sm -" shows the cards the deal already named; anything else names them here.
         cards = list(self.cards[seat.name]) if text == "-" else self._cards(text)
+        own = set(self.cards[seat.name])
+        clash = [card for card in cards if card != "0x" and card not in own and card in self.seen]
+        if clash:
+            raise self.fail(f"{seat.name} shows {' '.join(clash)}, which is dealt elsewhere")
+        self.seen.update(card for card in cards if card != "0x")
         if _known(cards):
             self.hand.addShownCards(cards, seat.name, shown=True)
         # A partly shown hand ("??Kd") names no complete holding to store.
@@ -788,9 +857,11 @@ class _Builder:
         live = [seat for seat in self.seats if not seat.folded]
         if self.base == "hold" and self.boards < len(_BOARD_SIZES):
             return False
-        if self.base == "stud" and not self.dealt_this_street:
+        if self.base == "stud" and not {seat.name for seat in live} <= self.dealt_this_street:
             return False
         if self.base == "draw" and not {seat.name for seat in live} <= self.drew_this_street:
+            return False
+        if any(self.awaiting.values()):
             return False
         return self._street_closed()
 
@@ -810,6 +881,24 @@ class _Builder:
         live = [seat for seat in self.seats if not seat.folded]
         if len(live) != 1 and not self._finished():
             raise self.fail("the history stops before the hand ends (a partial hand)", PARTIAL)
+        collected = self._collected(live)
+        available = sum((seat.contributed for seat in self.seats), Decimal(0))
+        available -= sum(self._returned().values(), Decimal(0))
+        if sum(collected, Decimal(0)) > available:
+            # What is collected comes out of the pot (less the rake); fpdb would otherwise
+            # grow the pot to match and store a win nobody paid for.
+            raise self.fail(f"{sum(collected, Decimal(0))} is collected from a pot of {available}")
+        eligible = self._eligible()
+        for seat, amount in zip(self.seats, collected, strict=True):
+            if amount > eligible[seat.name]:
+                where = "a folded player" if seat.folded else "the pots they are in"
+                raise self.fail(f"{seat.name} collects {amount}, more than {where} can win ({eligible[seat.name]})")
+        for seat, amount in zip(self.seats, collected, strict=True):
+            if amount > 0:
+                self.hand.addCollectPot(seat.name, str(amount))
+
+    def _collected(self, live: list[_Seat]) -> list[Decimal]:
+        """What each player collected: from winnings, from finishing stacks, or by a fold-out."""
         winnings = self.data.get("winnings")
         finishing = self.data.get("finishing_stacks")
         count = len(self.seats)
@@ -834,15 +923,26 @@ class _Builder:
             pot = sum((seat.contributed for seat in self.seats), Decimal(0))
             pot -= sum(self._returned().values(), Decimal(0))
             collected = [pot if seat is live[0] else Decimal(0) for seat in self.seats]
-        available = sum((seat.contributed for seat in self.seats), Decimal(0))
-        available -= sum(self._returned().values(), Decimal(0))
-        if sum(collected, Decimal(0)) > available:
-            # What is collected comes out of the pot (less the rake); fpdb would otherwise
-            # grow the pot to match and store a win nobody paid for.
-            raise self.fail(f"{sum(collected, Decimal(0))} is collected from a pot of {available}")
-        for seat, amount in zip(self.seats, collected, strict=True):
-            if amount > 0:
-                self.hand.addCollectPot(seat.name, str(amount))
+        return collected
+
+    def _eligible(self) -> dict[str, Decimal]:
+        """The most each player could collect: the main and side pots they are in.
+
+        Pots are cut at each player's net contribution (uncalled bets returned); a layer is
+        won only by a player still in the hand who put in at least that much. A folded
+        player is eligible for nothing.
+        """
+        returned = self._returned()
+        net = {seat.name: seat.contributed - returned.get(seat.name, Decimal(0)) for seat in self.seats}
+        eligible = dict.fromkeys(net, Decimal(0))
+        previous = Decimal(0)
+        for level in sorted({amount for amount in net.values() if amount > 0}):
+            layer = sum((min(amount, level) - min(amount, previous) for amount in net.values()), Decimal(0))
+            for seat in self.seats:
+                if not seat.folded and net[seat.name] >= level:
+                    eligible[seat.name] += layer
+            previous = level
+        return eligible
 
 
 class _PHHSource:

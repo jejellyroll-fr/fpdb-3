@@ -220,15 +220,21 @@ def test_heads_up_the_first_player_posts_the_big_blind() -> None:
 
 
 def test_a_straddle_and_a_button_blind_are_posted_as_such() -> None:
-    straddle = build_hand(document(NT_HAND.replace("[1, 2, 0]", "[1, 2, 4]").replace("p3 cbr 6", "p3 cbr 12")))
+    # The straddler, p3, acts last preflop: play starts after the last blind posted.
+    straddle = build_hand(
+        document(
+            NT_HAND.replace("[1, 2, 0]", "[1, 2, 4]").replace(
+                '"p3 cbr 6",\n  "p1 f",\n  "p2 f",', '"p1 cbr 12",\n  "p2 f",\n  "p3 f",'
+            )
+        )
+    )
     assert actions_of(straddle)[2] == ("BLINDSANTES", "p3", "straddle", 4)
 
     button = build_hand(
         document(
             NT_HAND.replace("[0, 0, 0]", "[1, 1, 1]")
             .replace("[1, 2, 0]", "[0, 0, 2]")
-            .replace("p3 cbr 6", "p1 cbr 6")
-            .replace('"p1 f",', '"p3 f",')
+            .replace('"p3 cbr 6",\n  "p1 f",\n  "p2 f",', '"p1 cbr 6",\n  "p2 f",\n  "p3 f",')
         )
     )
     assert ("BLINDSANTES", "p3", "button blind", 2) in actions_of(button)
@@ -594,7 +600,7 @@ def test_a_trimmed_short_ante_is_unsupported() -> None:
 
 
 def test_full_antes_with_trimming_on_are_imported() -> None:
-    full = ANTES_HAND.replace("[5, 100, 100]", "[100, 100, 100]").replace('"p2 f"]', '"p2 f", "p1 f"]')
+    full = ANTES_HAND.replace("[5, 100, 100]", "[100, 100, 100]").replace('"p2 f"]', '"p1 f", "p2 f"]')
     hand = build_hand(document(full + "ante_trimming_status = true\n"))
     assert hand is not None
 
@@ -725,3 +731,82 @@ def test_a_short_deck_has_no_two_to_five() -> None:
     short = NT_HAND.replace('variant = "NT"', 'variant = "NS"').replace('"d dh p1 ????"', '"d dh p1 As5d"')
     error = refusal(short)
     assert "5d is not in a short deck" in str(error)
+
+
+# -- sixth review ---------------------------------------------------------------------
+
+SIDE_POT = """
+variant = "NT"
+antes = [0, 0, 0]
+blinds_or_straddles = [1, 2, 0]
+min_bet = 2
+starting_stacks = [100, 100, 1]
+actions = [
+  "d dh p1 AsAd",
+  "d dh p2 KsKd",
+  "d dh p3 QsQd",
+  "p3 cc",
+  "p1 cbr 100",
+  "p2 cc",
+  "d db 2c3d4h",
+  "d db 9s",
+  "d db Jc",
+  "p1 sm -",
+  "p2 sm -",
+  "p3 sm -",
+]
+"""
+
+
+def test_a_short_stack_cannot_collect_beyond_the_main_pot() -> None:
+    # 100 + 100 + 1 in: the all-in player is in the 3-chip main pot only.
+    error = refusal(SIDE_POT + "winnings = [0, 0, 201]\n")
+    assert "more than the pots they are in can win (3)" in str(error)
+    assert build_hand(document(SIDE_POT + "winnings = [201, 0, 0]\n")) is not None
+
+
+def test_a_folded_player_collects_nothing() -> None:
+    error = refusal(NT_HAND + "winnings = [5, 0, 0]\n")
+    assert "more than a folded player can win" in str(error)
+
+
+def test_a_last_street_dealt_to_only_some_players_is_partial() -> None:
+    stud = (FIXTURES / "stud_hilo_split.phh").read_text(encoding="utf-8").replace('  "d dh p2 8d",\n', "")
+    assert refusal(stud).kind == PARTIAL
+    draw = (FIXTURES / "triple_draw_all_in_runout.phh").read_text(encoding="utf-8").replace('  "d dh p2 7d",\n', "")
+    assert refusal(draw).kind == PARTIAL
+
+
+def test_actions_out_of_turn_are_refused() -> None:
+    out_of_turn = NT_HAND.replace('"p3 cbr 6",\n  "p1 f",', '"p1 f",\n  "p3 cbr 6",')
+    assert "out of turn: it is p3's turn" in str(refusal(out_of_turn))
+    draw = (FIXTURES / "triple_draw_all_in_runout.phh").read_text(encoding="utf-8")
+    swapped = draw.replace('  "p1 sd",\n  "p2 sd 9s",', '  "p2 sd 9s",\n  "p1 sd",', 1)
+    assert "draws out of turn" in str(refusal(swapped))
+
+
+def test_acting_again_after_the_round_is_over_is_refused() -> None:
+    twice = SHOWDOWN.replace('"p1 cc",\n  "p2 cc",\n  "p1 sm -",', '"p1 cc",\n  "p2 cc",\n  "p1 cc",\n  "p1 sm -",')
+    assert "after the betting on river is over" in str(refusal(twice))
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        ('"d dh p2 QhQd"', '"d dh p2 AsQd"'),  # dealt to two players
+        ('"d db Jc"', '"d db Ks"'),  # a hole card on the board
+        ('"p2 sm"', '"p2 sm AsQd"'),  # shown, but dealt to the other player
+    ],
+)
+def test_a_card_cannot_be_dealt_twice(change: tuple[str, str]) -> None:
+    error = refusal(SHOWDOWN.replace(*change))
+    assert "twice" in str(error) or "dealt elsewhere" in str(error)
+
+
+def test_indented_hand_tables_are_read(tmp_path) -> None:
+    dataset = tmp_path / "indented.phhs"
+    dataset.write_text(
+        "  [1]\n" + NT_HAND + "\n    [2]  # second\n" + NT_HAND.replace("cbr 6", "cbr 8"), encoding="utf-8"
+    )
+
+    assert [item.label for item in iter_documents(dataset)] == ["1", "2"]
