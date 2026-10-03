@@ -87,6 +87,16 @@ _DRAW_STREETS: Final = {
     "27_3draw": ("DEAL", "DRAWONE", "DRAWTWO", "DRAWTHREE"),
     "badugi": ("DEAL", "DRAWONE", "DRAWTWO", "DRAWTHREE"),
 }
+#: How many cards a hand starts with, for the games whose hand is dealt at once.
+_HAND_SIZES: Final = {
+    "holdem": 2,
+    "6_holdem": 2,
+    "omahahi": 4,
+    "omahahilo": 4,
+    "27_1draw": 5,
+    "27_3draw": 5,
+    "badugi": 4,
+}
 #: How many board cards each hold'em street deals.
 _BOARD_SIZES: Final = {"FLOP": 3, "TURN": 1, "RIVER": 1}
 
@@ -276,6 +286,10 @@ def _cards(text: str, fail: Any) -> list[str]:
     return ["0x" if "?" in card else card for card in cards]
 
 
+def _any_known(cards: Sequence[str]) -> bool:
+    return any(card != "0x" for card in cards)
+
+
 def _known(cards: Sequence[str]) -> bool:
     return bool(cards) and all(card != "0x" for card in cards)
 
@@ -324,6 +338,7 @@ class _Seat:
     stack: Decimal
     behind: Decimal
     contributed: Decimal = Decimal(0)
+    antes: Decimal = Decimal(0)
     folded: bool = False
 
 
@@ -535,6 +550,7 @@ class _Builder:
                 self.hand.addAnte(seat.name, str(ante))
                 seat.behind -= ante
                 seat.contributed += ante
+                seat.antes += ante
         if self.base == "stud":
             return
         count = len(self.seats)
@@ -714,24 +730,18 @@ class _Builder:
 
     def _deal(self, kind: str, target: str | None, text: str) -> None:
         cards = self._cards(text)
-        repeated = [card for card in cards if card != "0x" and card in self.seen]
-        if repeated or len({card for card in cards if card != "0x"}) != len([card for card in cards if card != "0x"]):
-            raise self.fail(f"{' '.join(repeated) or 'a card'} is dealt twice")
-        self.seen.update(card for card in cards if card != "0x")
+        self._note_dealt(cards)
         if kind == "db":
-            if self.base != "hold" or target is not None:
-                raise self.fail("only hold'em games deal a board")
-            self.boards += 1
-            if self.boards > len(_BOARD_SIZES):
-                raise self.fail("more than three board deals: run-it-twice boards are not supported", UNSUPPORTED)
-            self._next_street()
-            if len(cards) != _BOARD_SIZES[self.street]:
-                raise self.fail(f"the {self.street.lower()} deals {_BOARD_SIZES[self.street]} cards, not {len(cards)}")
-            self.hand.setCommunityCards(self.street, cards)
+            if target is not None:
+                raise self.fail("a board is dealt to no player")
+            self._deal_board(cards)
             return
         if target is None:
             raise self.fail("'d dh' needs the player dealt to")
         seat = self._seat(target)
+        size = _HAND_SIZES.get(self.mapping.category)
+        if size is not None and (self.base == "hold" or self.street_index == 0) and len(cards) != size:
+            raise self.fail(f"{self.mapping.name} deals {size} hole cards, not {len(cards)}")
         if self.base == "hold":
             if self.street_index or self.acted_this_street:
                 raise self.fail("hole cards are dealt before any action")
@@ -741,9 +751,29 @@ class _Builder:
         else:
             self._draw_deal(seat, cards)
 
+    def _note_dealt(self, cards: list[str]) -> None:
+        """Refuse a known card that is already in play, then count these in."""
+        known = [card for card in cards if card != "0x"]
+        repeated = [card for card in known if card in self.seen]
+        if repeated or len(set(known)) != len(known):
+            raise self.fail(f"{' '.join(repeated) or 'a card'} is dealt twice")
+        self.seen.update(known)
+
+    def _deal_board(self, cards: list[str]) -> None:
+        if self.base != "hold":
+            raise self.fail("only hold'em games deal a board")
+        self.boards += 1
+        if self.boards > len(_BOARD_SIZES):
+            raise self.fail("more than three board deals: run-it-twice boards are not supported", UNSUPPORTED)
+        self._next_street()
+        if len(cards) != _BOARD_SIZES[self.street]:
+            raise self.fail(f"the {self.street.lower()} deals {_BOARD_SIZES[self.street]} cards, not {len(cards)}")
+        self.hand.setCommunityCards(self.street, cards)
+
     def _hole(self, seat: _Seat, street: str, *, open: list[str] | None = None, closed: list[str]) -> None:
         self.cards[seat.name] = [*self.cards[seat.name], *(open or []), *closed]
-        if _known([*(open or []), *closed]) or open:
+        # Kept as soon as one card is known: the unknown ones stay "0x", fpdb's own blank.
+        if _any_known([*(open or []), *closed]):
             self.hand.addHoleCards(street, seat.name, open=open or [], closed=closed, dealt=seat.name == self.hand.hero)
 
     def _stud_deal(self, seat: _Seat, cards: list[str]) -> None:
@@ -782,7 +812,7 @@ class _Builder:
         self.dealt_this_street.add(seat.name)
         kept = self.cards[seat.name]
         self.cards[seat.name] = [*kept, *cards]
-        if _known([*kept, *cards]):
+        if _any_known([*kept, *cards]):
             self.hand.addHoleCards(self.street, seat.name, open=cards, closed=kept, dealt=seat.name == self.hand.hero)
 
     def _draw(self, seat: _Seat, text: str | None) -> None:
@@ -928,13 +958,15 @@ class _Builder:
     def _eligible(self) -> dict[str, Decimal]:
         """The most each player could collect: the main and side pots they are in.
 
-        Pots are cut at each player's net contribution (uncalled bets returned); a layer is
-        won only by a player still in the hand who put in at least that much. A folded
+        Pots are cut at each player's net wager (antes aside, uncalled bets returned); a layer
+        is won only by a player still in the hand who wagered at least that much. Antes are
+        common money, as fpdb books them, which every player still in can win. A folded
         player is eligible for nothing.
         """
         returned = self._returned()
-        net = {seat.name: seat.contributed - returned.get(seat.name, Decimal(0)) for seat in self.seats}
-        eligible = dict.fromkeys(net, Decimal(0))
+        net = {seat.name: seat.contributed - seat.antes - returned.get(seat.name, Decimal(0)) for seat in self.seats}
+        antes = sum((seat.antes for seat in self.seats), Decimal(0))
+        eligible = {seat.name: Decimal(0) if seat.folded else antes for seat in self.seats}
         previous = Decimal(0)
         for level in sorted({amount for amount in net.values() if amount > 0}):
             layer = sum((min(amount, level) - min(amount, previous) for amount in net.values()), Decimal(0))

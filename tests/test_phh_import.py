@@ -810,3 +810,45 @@ def test_indented_hand_tables_are_read(tmp_path) -> None:
     )
 
     assert [item.label for item in iter_documents(dataset)] == ["1", "2"]
+
+
+# -- seventh review -------------------------------------------------------------------
+
+BB_ANTE = """
+variant = "NT"
+antes = [0, 3, 0]
+blinds_or_straddles = [1, 2, 0]
+min_bet = 2
+starting_stacks = [100, 100, 100]
+actions = ["d dh p1 ????", "d dh p2 ????", "d dh p3 ????", "p3 f", "p1 cc", "p2 f"]
+"""
+
+
+@pytest.mark.parametrize("results", ["", "winnings = [7, 0, 0]\n"])
+def test_a_big_blind_ante_is_common_money_anyone_still_in_can_win(results: str) -> None:
+    hand = build_hand(document(BB_ANTE + results))
+    assert dict(hand.collectees) == {"p1": 7}
+
+
+def test_a_partly_known_holding_keeps_its_known_cards(importer, fresh_db, tmp_path) -> None:
+    text = NT_HAND.replace('"d dh p3 ????"', '"d dh p3 ??Ad"')
+    assert build_hand(document(text)).holecards["PREFLOP"]["p3"] == [[], ["0x", "Ad"]]
+
+    (tmp_path / "partly.phh").write_text(text, encoding="utf-8")
+    assert importer.addImportFile(str(tmp_path / "partly.phh"))
+    assert importer.runImport()[:5] == (1, 0, 0, 0, 0)
+
+
+@pytest.mark.parametrize(
+    ("text", "reason"),
+    [
+        (NT_HAND.replace('"d dh p1 ????"', '"d dh p1 As"'), "deals 2 hole cards, not 1"),
+        (PO_HAND.replace('"d dh p1 ????????"', '"d dh p1 ????"'), "deals 4 hole cards, not 2"),
+        (
+            (FIXTURES / "badugi.phh").read_text(encoding="utf-8").replace('"d dh p1 As2d3c4h"', '"d dh p1 As2d3c4h5s"'),
+            "deals 4 hole cards, not 5",
+        ),
+    ],
+)
+def test_a_starting_hand_of_the_wrong_size_is_refused(text: str, reason: str) -> None:
+    assert reason in str(refusal(text))
