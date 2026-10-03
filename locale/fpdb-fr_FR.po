@@ -5322,3 +5322,84 @@ msgstr "Localiser PreflopAdvisor"
 
 msgid "%s is not a program that can be started."
 msgstr "%s n'est pas un programme qui peut être démarré."
+
+msgid "A Session Guard limit has been reached."
+msgstr "Une limite du Session Guard a été atteinte."
+
+msgid "Acknowledge"
+msgstr "Acquitter"
+
+msgid "Alerts for the session being played: loss, win, duration, hands, drawdown"
+msgstr "Alertes pour la session en cours : perte, gain, durée, mains, drawdown"
+
+msgid "Alerts only: fpdb never closes, sits out or otherwise touches a poker client. The session is the Session Viewer's: cash hands, ended by a 30-minute pause."
+msgstr "Alertes uniquement : fpdb ne ferme jamais un client de poker, ne vous met jamais en sit-out et n'y touche d'aucune façon. La session est celle du Session Viewer : mains cash, terminée par une pause de 30 minutes."
+
+msgid "Apply"
+msgstr "Appliquer"
+
+msgid "Choose at least one limit to watch."
+msgstr "Choisissez au moins une limite à surveiller."
+
+msgid "Could not save the defaults:\n%s"
+msgstr "Impossible d'enregistrer les valeurs par défaut :\n%s"
+
+msgid "Drawdown from peak (BB)"
+msgstr "Drawdown depuis le pic (BB)"
+
+msgid "Drawdown from peak (money)"
+msgstr "Drawdown depuis le pic (argent)"
+
+msgid "Later"
+msgstr "Plus tard"
+
+msgid "Limits for this session"
+msgstr "Limites pour cette session"
+
+msgid "Loss (BB)"
+msgstr "Perte (BB)"
+
+msgid "Loss (money)"
+msgstr "Perte (argent)"
+
+msgid "Not running."
+msgstr "Arrêté."
+
+msgid "Reset alerts"
+msgstr "Réarmer les alertes"
+
+msgid "Save as defaults"
+msgstr "Enregistrer par défaut"
+
+msgid "Session Guard"
+msgstr "Session Guard"
+
+msgid "Session Guard: click to see or change the limits"
+msgstr "Session Guard : cliquez pour voir ou modifier les limites"
+
+msgid "Session Guard: no session in progress"
+msgstr "Session Guard : aucune session en cours"
+
+msgid "Session Guard: {result} · {duration} · {hands} hands"
+msgstr "Session Guard : {result} · {duration} · {hands} mains"
+
+msgid "Session duration"
+msgstr "Durée de la session"
+
+msgid "Stop"
+msgstr "Arrêter"
+
+msgid "Win (BB)"
+msgstr "Gain (BB)"
+
+msgid "Win (money)"
+msgstr "Gain (argent)"
+
+msgid "{count} limit(s) reached"
+msgstr "{count} limite(s) atteinte(s)"
+
+msgid "{label}: unavailable (a hand has no big blind) / {threshold}"
+msgstr "{label} : indisponible (une main n'a pas de big blind) / {threshold}"
+
+msgid "{value} BB"
+msgstr "{value} BB"
