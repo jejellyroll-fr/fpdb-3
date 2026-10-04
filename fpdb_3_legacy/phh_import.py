@@ -565,12 +565,7 @@ class _Builder:
             # PHH writes an unknown starting stack as null or inf.
             raise self.fail("a starting stack is unknown: the hand cannot be accounted for", UNSUPPORTED)
         count = len(stacks)
-        # PHH allows an empty name for a player it does not know: that one is called pN.
-        given = self.data.get("players")
-        if given is not None and (not isinstance(given, list) or not all(isinstance(name, str) for name in given)):
-            raise self.fail(f"players must be a list of names, not {given!r}")
-        names = _player_names(given or [""] * count)
-        seats = self.data.get("seats") or list(range(1, count + 1))
+        names, seats = self._names_and_seats(count)
         if len(names) != count or len(seats) != count:
             raise self.fail("players, seats and starting_stacks do not have the same length")
         if len({str(name) for name in names}) != count or len(set(seats)) != count:
@@ -584,6 +579,21 @@ class _Builder:
                 raise self.fail(f"the starting stack of p{index} must be positive")
             result.append(_Seat(str(name), seat, amount, amount))
         return result
+
+    def _names_and_seats(self, count: int) -> tuple[list[str], list[Any]]:
+        """``players`` and ``seats``: absent, they are made up (``pN``, 1 to N); given -- even
+        empty -- they must have one entry per player, which the caller checks."""
+        given = self.data.get("players")
+        if given is not None and (not isinstance(given, list) or not all(isinstance(name, str) for name in given)):
+            raise self.fail(f"players must be a list of names, not {given!r}")
+        # PHH allows an empty name for a player it does not know: that one is called pN.
+        names = _player_names(given if given is not None else [""] * count)
+        seats = self.data.get("seats")
+        if seats is None:
+            return names, list(range(1, count + 1))
+        if not isinstance(seats, list):
+            raise self.fail(f"seats must be a list of seat numbers, not {seats!r}")
+        return names, seats
 
     def _seat_count(self, seats: Sequence[_Seat]) -> int:
         """The table size: ``seat_count``, which must hold every seat, or else the highest seat."""
@@ -648,7 +658,9 @@ class _Builder:
             self.config, _PHHSource(self.document.source), PHH_SITE_NAME, gametype, "", "PHH", number
         )
         hand.handid = number
-        hand.tablename = str(self.data.get("table") or self.data.get("event") or Path(self.document.source).stem)
+        # A table may be 0 (PHH allows any integer): only an absent one falls back.
+        named = [self.data.get(key) for key in ("table", "event") if self.data.get(key) is not None]
+        hand.tablename = str(named[0] if named else Path(self.document.source).stem)
         hand.maxseats = self._seat_count(seats)
         hand.startTime = _start_time(self.data, self.fail)
         hero = self.data.get("_hero")
@@ -1176,8 +1188,11 @@ class _Builder:
 
     def _reconcile(self, seat: _Seat, dealt: list[str], shown: list[str]) -> list[str]:
         """The shown hand, checked against the deal: the cards it names are the dealt ones
-        (in any order) or fill the deal's unknown or undealt cards, and its own unknown cards are the
-        dealt ones it does not name -- a partly shown ``??Kd`` keeps a dealt ``As``.
+        (in any order) or fill the deal's unknown or undealt cards.
+
+        The result keeps the deal's order -- each card where it was dealt (down or up, on its
+        street) -- the newly named cards filling its unknown and undealt places: a partly shown
+        ``??Kd`` keeps a dealt ``As``, and ``KsAs`` over ``AsKs`` changes nothing.
         """
         # A replacement not dealt yet is a card of the hand too (the history stops early).
         pending = self.awaiting[seat.name]
@@ -1193,8 +1208,17 @@ class _Builder:
         if dealt and len(new) > dealt.count("0x") + pending:
             raise self.fail(f"{seat.name} shows {' '.join(new)}, which the deal did not give them")
         self.seen.update(new)
-        unnamed = iter(card for card in dealt if card not in named and card != "0x")
-        return [card if card != "0x" else next(unnamed, "0x") for card in shown]
+        if not dealt:
+            return shown
+        merged = [*dealt, *["0x"] * pending]  # a replacement not dealt yet has a place too
+        for index, card in enumerate(shown):
+            if card == "0x" or card in dealt:
+                continue
+            # A new card goes where it is shown when the deal left that place unknown, else
+            # to the first place the deal left unknown.
+            slot = index if merged[index] == "0x" else merged.index("0x")
+            merged[slot] = card
+        return merged
 
     def _show(self, seat: _Seat, text: str | None) -> None:
         if not text:

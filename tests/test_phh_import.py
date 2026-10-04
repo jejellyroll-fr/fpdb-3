@@ -1056,9 +1056,10 @@ def test_a_partial_show_keeps_what_the_deal_already_said() -> None:
 
 
 def test_a_show_must_agree_with_the_deal() -> None:
+    # Shown in another order, the cards stay where they were dealt.
     assert build_hand(document(SHOWDOWN.replace('"p1 sm -"', '"p1 sm KsAs"'))).holecards["PREFLOP"]["p1"][1] == [
-        "Ks",
         "As",
+        "Ks",
     ]
     other_cards = SHOWDOWN.replace('"p1 sm -"', '"p1 sm 7h6h"')
     assert "p1 shows 7h 6h, which the deal did not give them" in str(refusal(other_cards))
@@ -1496,3 +1497,27 @@ def test_a_long_phh_path_is_told_apart_within_what_mysql_indexes(tmp_path) -> No
     assert first[:255] != second[:255]
     assert first.endswith("/1.phh")
     assert phh_file_name(tmp_path / "1.phh") == f"PHH/{tmp_path / '1.phh'}"
+
+
+# -- twenty-fifth review --------------------------------------------------------------
+
+
+def test_empty_players_or_seats_are_malformed() -> None:
+    assert "do not have the same length" in str(refusal(SHOWDOWN + "players = []\n"))
+    assert "do not have the same length" in str(refusal(SHOWDOWN + "seats = []\n"))
+    assert "seats must be a list" in str(refusal(SHOWDOWN + "seats = 2\n"))
+
+
+def test_a_table_numbered_0_keeps_its_number() -> None:
+    assert build_hand(document(SHOWDOWN + 'table = 0\nevent = "WSOP"\n')).tablename == "0"
+    assert build_hand(document(SHOWDOWN + 'event = "WSOP"\n')).tablename == "WSOP"
+
+
+def test_a_stud_show_in_another_order_keeps_the_deal_s_places() -> None:
+    text = STUD_HILO.replace('"d dh p1 Ad2d3c"', '"d dh p1 ????3c"').replace(
+        '"p1 sm Ad2d3c4c9hTh6h"', '"p1 sm 6hTh9h4c3c2dAd"'
+    )
+    hand = build_hand(document(text + '_hero = "p1"\n'))
+    assert hand.holecards["THIRD"]["p1"] == (["3c"], ["2d", "Ad"])
+    assert hand.holecards["FOURTH"]["p1"][0] == ["4c"]
+    assert hand.join_holecards("p1", asList=True)[2:] == P1_SEVEN[2:]
