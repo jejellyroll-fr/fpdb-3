@@ -15,6 +15,7 @@ from fpdb_3_legacy.BossToFpdb import Boss
 from fpdb_3_legacy.BovadaSummary import BovadaSummary
 from fpdb_3_legacy.BovadaToFpdb import Bovada
 from fpdb_3_legacy.CakeToFpdb import Cake
+from fpdb_3_legacy.ChipZenToFpdb import ChipZen
 from fpdb_3_legacy.CoinPokerToFpdb import CoinPoker
 from fpdb_3_legacy.EnetToFpdb import Enet
 from fpdb_3_legacy.EntractionToFpdb import Entraction
@@ -56,6 +57,7 @@ LEGACY_MODULE_REGISTRY: dict[str, str] = {
     "BovadaSummary": "fpdb_3_legacy.BovadaSummary",
     "BovadaToFpdb": "fpdb_3_legacy.BovadaToFpdb",
     "CakeToFpdb": "fpdb_3_legacy.CakeToFpdb",
+    "ChipZenToFpdb": "fpdb_3_legacy.ChipZenToFpdb",
     "CoinPokerToFpdb": "fpdb_3_legacy.CoinPokerToFpdb",
     "EnetToFpdb": "fpdb_3_legacy.EnetToFpdb",
     "EntractionToFpdb": "fpdb_3_legacy.EntractionToFpdb",
@@ -96,6 +98,7 @@ PARSER_CLASS_REGISTRY: dict[str, type[HandHistoryConverter]] = {
     "Boss": Boss,
     "Bovada": Bovada,
     "Cake": Cake,
+    "ChipZen": ChipZen,
     "CoinPoker": cast(type[HandHistoryConverter], CoinPoker),
     "Enet": Enet,
     "Entraction": Entraction,
