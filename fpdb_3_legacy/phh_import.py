@@ -721,13 +721,14 @@ class _Builder:
         trimmed = bool(self.data.get("ante_trimming_status"))
         for seat, ante in zip(self.seats, antes, strict=True):
             if ante > 0:
-                if ante > seat.behind:
-                    # A short ante's player wins only what everyone matched of it (an ante side
-                    # pot, trimmed or not); fpdb pools antes as common money anyone can win.
-                    how = "trimmed" if trimmed else "short"
+                if trimmed and ante > seat.behind:
+                    # Trimming limits a short ante's player to what everyone matched of it (an
+                    # ante side pot); fpdb pools antes as common money anyone can win. Untrimmed,
+                    # the short player may win every ante (PHH, PokerKit): that fpdb can say.
                     raise self.fail(
-                        f"{seat.name}'s ante is {how} for a short stack, which fpdb cannot represent", UNSUPPORTED
+                        f"{seat.name}'s ante is trimmed to a short stack, which fpdb cannot represent", UNSUPPORTED
                     )
+                ante = min(ante, seat.behind)
                 self.hand.addAnte(seat.name, str(ante))
                 seat.behind -= ante
                 seat.contributed += ante
@@ -768,11 +769,13 @@ class _Builder:
             return
         seat = self._seat(match.group("player"))
         move, arg = match.group("move"), match.group("arg")
-        if move == "sm":
-            self._show(seat, arg)
-            return
         if seat.folded:
             raise self.fail(f"{seat.name} acts after folding")
+        if move == "sm":
+            if not self._showdown_begun():
+                raise self.fail(f"{seat.name} shows or mucks before the showdown")
+            self._show(seat, arg)
+            return
         if move == "sd":
             self._draw(seat, arg)
             return
@@ -1206,6 +1209,13 @@ class _Builder:
         if any(self.awaiting.values()):
             return False
         return self._street_closed()
+
+    def _showdown_begun(self) -> bool:
+        """Whether cards may be shown: the hand's end, or an all-in runout (nobody left to bet)."""
+        if self._finished():
+            return True
+        can_act = [seat for seat in self.seats if not seat.folded and seat.behind > 0]
+        return len(can_act) <= 1 and self._street_closed() and not self._undealt()
 
     def _street_closed(self) -> bool:
         """Whether this street's betting is over: every player who can still act has had a

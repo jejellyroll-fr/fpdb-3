@@ -777,7 +777,9 @@ def test_a_last_street_dealt_to_only_some_players_is_partial() -> None:
     # The history stops after p1's seventh-street card: p2's never comes.
     stud = whole[: whole.index('  "d dh p2 8d",')] + "]\n" + whole[whole.index("finishing_stacks") :]
     assert refusal(stud).kind == PARTIAL
-    draw = (FIXTURES / "triple_draw_all_in_runout.phh").read_text(encoding="utf-8").replace('  "d dh p2 7d",\n', "")
+    runout = (FIXTURES / "triple_draw_all_in_runout.phh").read_text(encoding="utf-8")
+    # The history stops before p2's last replacement (and the showdown after it).
+    draw = runout[: runout.index('  "d dh p2 7d",')] + "]\n" + runout[runout.index("winnings") :]
     assert refusal(draw).kind == PARTIAL
 
 
@@ -1287,12 +1289,14 @@ def test_no_street_is_dealt_after_a_fold_out() -> None:
 # -- seventeenth review ---------------------------------------------------------------
 
 
-def test_a_short_stack_ante_is_unsupported_trimmed_or_not() -> None:
+def test_a_short_stack_ante_is_unsupported_only_when_trimmed() -> None:
+    """PokerKit 0.7.6: untrimmed, one pot of 25 all three can win; trimmed, 15 and a side pot of 10."""
     short = NT_HAND.replace("antes = [0, 0, 0]", "antes = [10, 10, 10]").replace("[100, 100, 100]", "[5, 100, 100]")
-    error = refusal(short)
+    short = short.replace('  "p1 f",\n', "")  # p1 is all in from the ante
+    assert refusal(short).kind == PARTIAL  # accepted: the history stops before the board
+    error = refusal(short + "ante_trimming_status = true\n")
     assert error.kind == UNSUPPORTED
-    assert "p1's ante is short for a short stack" in str(error)
-    assert "is trimmed for a short stack" in str(refusal(short + "ante_trimming_status = true\n"))
+    assert "p1's ante is trimmed to a short stack" in str(error)
 
 
 def test_every_date_field_given_is_kept() -> None:
@@ -1412,3 +1416,14 @@ def test_a_zone_is_checked_even_without_a_date() -> None:
     assert build_hand(document(SHOWDOWN + 'time_zone = "America/New_York"\n')).startTime == datetime.datetime(
         1970, 1, 1
     )
+
+
+# -- twenty-first review --------------------------------------------------------------
+
+
+def test_cards_are_shown_only_at_the_showdown_or_in_an_all_in_runout() -> None:
+    early = SHOWDOWN.replace('"d dh p2 QhQd",', '"d dh p2 QhQd",\n  "p1 sm -",').replace(
+        '  "p1 sm -",\n  "p2 sm",', '  "p2 sm",'
+    )
+    assert "p1 shows or mucks before the showdown" in str(refusal(early))
+    assert build_hand(next(iter_documents(FIXTURES / "triple_draw_all_in_runout.phh"))) is not None
