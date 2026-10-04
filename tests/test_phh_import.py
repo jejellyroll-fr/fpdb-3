@@ -1168,7 +1168,7 @@ def test_a_quoted_table_name_with_a_dot_is_a_hand_and_a_dotted_one_a_sub_table(t
 def test_a_partial_date_keeps_what_it_gives_and_a_mistyped_one_is_malformed() -> None:
     assert build_hand(document(SHOWDOWN + "year = 2009\n")).startTime == datetime.datetime(2009, 1, 1)
     assert build_hand(document(SHOWDOWN + "year = 2009\nmonth = 7\n")).startTime == datetime.datetime(2009, 7, 1)
-    assert build_hand(document(SHOWDOWN + "month = 7\nday = 3\n")).startTime == datetime.datetime(1970, 1, 1)
+    assert build_hand(document(SHOWDOWN + "month = 7\nday = 3\n")).startTime == datetime.datetime(1970, 7, 3)
     error = refusal(SHOWDOWN + 'year = "2026"\nmonth = 2\nday = 3\n')
     assert error.kind == MALFORMED
     assert "are not a date" in str(error)
@@ -1282,3 +1282,27 @@ def test_replacements_are_dealt_in_order_once_everyone_has_drawn() -> None:
 def test_no_street_is_dealt_after_a_fold_out() -> None:
     folded = SHOWDOWN.replace('"p2 cc",\n  "p1 cc",\n  "d db 2c3d4h",', '"p2 f",\n  "d db 2c3d4h",')
     assert "the hand is over: everyone but p1 folded" in str(refusal(folded))
+
+
+# -- seventeenth review ---------------------------------------------------------------
+
+
+def test_a_short_stack_ante_is_unsupported_trimmed_or_not() -> None:
+    short = NT_HAND.replace("antes = [0, 0, 0]", "antes = [10, 10, 10]").replace("[100, 100, 100]", "[5, 100, 100]")
+    error = refusal(short)
+    assert error.kind == UNSUPPORTED
+    assert "p1's ante is short for a short stack" in str(error)
+    assert "is trimmed for a short stack" in str(refusal(short + "ante_trimming_status = true\n"))
+
+
+def test_every_date_field_given_is_kept() -> None:
+    assert build_hand(document(SHOWDOWN + "year = 2009\nday = 15\n")).startTime == datetime.datetime(2009, 1, 15)
+    assert build_hand(document(SHOWDOWN + "day = 15\n")).startTime == datetime.datetime(1970, 1, 15)
+
+
+def test_after_the_fourth_street_big_bet_every_raise_is_big() -> None:
+    big_then = stud_fourth("F7S", "9d", 10).replace('"p1 f",', '"p1 cbr {raise_to}",')
+    assert "goes to 20, not 15" in str(refusal(big_then.replace("{raise_to}", "15")))
+    assert refusal(big_then.replace("{raise_to}", "20")).kind == PARTIAL
+    small_then_big = stud_fourth("F7S", "9d", 5).replace('"p1 f",', '"p1 cbr 15",\n  "p2 cbr 25",\n  "p1 f",')
+    assert build_hand(document(small_then_big)) is not None  # 5, raised by the big bet, then by it again

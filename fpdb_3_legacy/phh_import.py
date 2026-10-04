@@ -370,12 +370,12 @@ def _start_time(data: Mapping[str, Any], fail: Any) -> datetime.datetime:
     moment = data.get("time")
     if isinstance(moment, datetime.datetime):
         local = moment
-    elif year is not None or moment is not None:
-        # PHH's fields are optional one by one (its own example gives only the year): a
-        # missing month or day is the first of the period given, a missing year the epoch's.
-        if year is None:
-            year, month, day = 1970, 1, 1
-        month, day = (month, day if day is not None else 1) if month is not None else (1, 1)
+    elif any(part is not None for part in (year, month, day, moment)):
+        # PHH's fields are optional one by one (its own example gives only the year): each
+        # one given is kept, each one missing is the epoch's (1970, January, the 1st, 00:00).
+        year, month, day = (
+            part if part is not None else default for part, default in ((year, 1970), (month, 1), (day, 1))
+        )
         clock = moment if isinstance(moment, datetime.time) else datetime.time(0, 0)
         try:
             local = datetime.datetime.combine(datetime.date(year, month, day), clock.replace(tzinfo=None))
@@ -619,6 +619,8 @@ class _Builder:
         # the betting, several in a row may (no and pot limit, as PokerKit plays it).
         self.acted_at: dict[str, Decimal] = {}
         self.completed = False
+        # Fourth street in stud high: once a bet or raise is the big bet, every one after is.
+        self.big_bet_made = False
         # The smallest a raise may add on this street (no-limit, pot-limit), and the bets a
         # street ended with that nobody matched, kept when the street is left behind.
         self.raise_size = self.level
@@ -666,6 +668,7 @@ class _Builder:
         self.street_bets = dict.fromkeys(self.street_bets, Decimal(0))
         self.level = Decimal(0)
         self.raise_size = Decimal(0)
+        self.big_bet_made = False
         self.dealt_this_street = set()
         self.drew_this_street = set()
         self.acted_this_street = False
@@ -685,14 +688,13 @@ class _Builder:
         trimmed = bool(self.data.get("ante_trimming_status"))
         for seat, ante in zip(self.seats, antes, strict=True):
             if ante > 0:
-                if trimmed and ante > seat.behind:
-                    # Trimming limits a short ante's player to what everyone matched of it;
-                    # fpdb pools antes as common money anyone can win, so it cannot say that.
+                if ante > seat.behind:
+                    # A short ante's player wins only what everyone matched of it (an ante side
+                    # pot, trimmed or not); fpdb pools antes as common money anyone can win.
+                    how = "trimmed" if trimmed else "short"
                     raise self.fail(
-                        f"{seat.name}'s ante is trimmed to a short stack, which fpdb cannot represent",
-                        UNSUPPORTED,
+                        f"{seat.name}'s ante is {how} for a short stack, which fpdb cannot represent", UNSUPPORTED
                     )
-                ante = min(ante, seat.behind)
                 self.hand.addAnte(seat.name, str(ante))
                 seat.behind -= ante
                 seat.contributed += ante
@@ -821,6 +823,8 @@ class _Builder:
             # Everyone else is all in: there is nobody left to call a raise (as PokerKit plays it).
             raise self.fail(f"{seat.name} raises with everyone else all in; only a call is possible")
         self._check_size(seat, total, added)
+        if self.mapping.limit_type == "fl" and total - self.level == self._fixed_sizes()[-1]:
+            self.big_bet_made = True
         if self._completes():
             # Third street, facing only the bring-in -- or in its place: completing to the small bet.
             self.hand.addComplete(self.street, seat.name, str(total))
@@ -870,7 +874,9 @@ class _Builder:
         big = _amount(self.data.get("big_bet"), "big_bet", self.fail)
         early = {"hold": ("PREFLOP", "FLOP"), "stud": ("THIRD",), "draw": ("DEAL", "DRAWONE")}[self.base]
         if self.street == "FOURTH" and self.mapping.category == "studhi" and self._open_pair():
-            return [small, big]  # an open pair on fourth street lets the big bet in (stud high only)
+            # An open pair on fourth street lets the big bet in (stud high only); once it is
+            # made, the raises after it are big bets too.
+            return [big] if self.big_bet_made else [small, big]
         if self.base == "stud" and self.street == "FOURTH":
             return [small]
         return [small] if self.street in early else [big]
