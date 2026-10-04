@@ -1427,3 +1427,13 @@ def test_cards_are_shown_only_at_the_showdown_or_in_an_all_in_runout() -> None:
     )
     assert "p1 shows or mucks before the showdown" in str(refusal(early))
     assert build_hand(next(iter_documents(FIXTURES / "triple_draw_all_in_runout.phh"))) is not None
+
+
+# -- twenty-second review -------------------------------------------------------------
+
+
+def test_an_all_in_player_cannot_fold() -> None:
+    stud = STUD_SHORT_COMPLETION.format(to=6).replace('"p3 cbr 6"]', '"p3 cbr 6", "p2 f"]')
+    assert "p2 is all in and cannot act" in str(refusal(stud))
+    holdem = NT_HAND.replace("[100, 100, 100]", "[100, 100, 6]").replace('"p1 f",', '"p3 f",\n  "p1 f",')
+    assert "p3 is all in and cannot act" in str(refusal(holdem))

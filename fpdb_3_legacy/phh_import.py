@@ -785,7 +785,9 @@ class _Builder:
         """A fold, check, call, bring-in, bet or raise, by a player allowed to make it now."""
         if arg is not None and move != "cbr":
             raise self.fail(f"'{move}' takes no amount")
-        if seat.behind <= 0 and move in ("cbr", "cc", "pb"):
+        if seat.behind <= 0:
+            # Nothing left to bet, nothing to fold either: an all-in player stays in every pot
+            # they are in (stud checks no turn order, which would otherwise say so).
             raise self.fail(f"{seat.name} is all in and cannot act")
         if self._street_closed():
             raise self.fail(f"{seat.name} acts after the betting on {self.street.lower()} is over")
