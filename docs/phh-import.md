@@ -33,7 +33,7 @@ configuration — no parser, no `supported_sites` entry, no HUD.
   room detector. Each is recorded in the `Files` table by its whole path,
   `PHH/<path>`, never sharing the row of a room file named alike (`session.txt`) or of a
   PHH file of the same name in another directory.
-- A `.phhs` file holds one hand per top-level table (`[1]`, `[2]`, `["session.1"]`, …); a dotted table (`[1.notes]`) is a sub-table of its hand, and a line inside a multiline string (a note), an array or an inline table is never taken for a table. It is read
+- A `.phhs` file holds one hand per top-level table (`[1]`, `[2]`, `["session.1"]`, …); a dotted table (`[1.notes]`) is a sub-table of its hand, and a line inside a multiline string (a note), an array or an inline table is never taken for a table -- unless that value is never closed: the hand is then malformed, and the hands it swallowed are read again from the first table header inside it. It is read
   **line by line, one hand at a time**, so a large dataset is never loaded
   whole. Files are read as UTF-8.
 
@@ -75,7 +75,7 @@ them is untouched — they keep their native parsers.
 | PHH | fpdb |
 | --- | --- |
 | `antes` | an `ante` post per player (heads-up, like the blinds, the first two are assigned in reverse) |
-| `blinds_or_straddles` | `small blind`, `big blind`, then `straddle`; only the last player posting is a `button blind` (short deck). Heads-up the first player posts the big blind and the second, who has the button, the small blind — PokerKit's convention |
+| `blinds_or_straddles` | `small blind`, `big blind`, then `straddle`; only the last player posting is a `button blind` (short deck). Heads-up the first player posts the big blind and the second, who has the button, the small blind — PokerKit's convention. A blind posted all in for less sets the call at what it posted, as PokerKit plays it |
 | `bring_in`, `pN pb` | a stud `bringin` on third street; the first `cbr` facing it, or made in its place, is a `completes` |
 | `pN cbr X` | a bet when nothing is bet on the street, otherwise a raise **to** X (PHH's meaning) |
 | `pN cc` | a check, or a call of what is owed — all in for less when the stack is short |

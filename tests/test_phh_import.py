@@ -1437,3 +1437,35 @@ def test_an_all_in_player_cannot_fold() -> None:
     assert "p2 is all in and cannot act" in str(refusal(stud))
     holdem = NT_HAND.replace("[100, 100, 100]", "[100, 100, 6]").replace('"p1 f",', '"p3 f",\n  "p1 f",')
     assert "p3 is all in and cannot act" in str(refusal(holdem))
+
+
+# -- twenty-third review --------------------------------------------------------------
+
+
+def test_the_hands_after_an_unclosed_value_are_recovered(tmp_path) -> None:
+    path = tmp_path / "hands.phhs"
+    path.write_text(f'[1]\n{SHOWDOWN}_x = [\n[2]\n{SHOWDOWN}[3]\n_n = """\n[4]\n{SHOWDOWN}', encoding="utf-8")
+    items = list(iter_documents(path))
+    # [1] leaves an array open and [3] a string: each is malformed, and the hand its value
+    # swallowed comes back.
+    assert [getattr(item, "label", None) or item.kind for item in items] == [MALFORMED, "2", MALFORMED, "4"]
+    assert items[1].line == len(f"[1]\n{SHOWDOWN}_x = [\n".splitlines()) + 1
+    assert build_hand(items[1]) is not None
+    assert build_hand(items[3]) is not None
+
+
+SHORT_BIG_BLIND = """
+variant = "NT"
+antes = [0, 0, 0]
+blinds_or_straddles = [1, 2, 0]
+min_bet = 2
+starting_stacks = [100, 1, 100]
+actions = ["d dh p1 ????", "d dh p2 ????", "d dh p3 ????", {actions}]
+"""
+
+
+def test_a_short_big_blind_sets_the_call_at_what_it_posted() -> None:
+    """PokerKit 0.7.6: a big blind of 2 posted all in for 1 is called for 1, raised to at least 3."""
+    hand_text = SHORT_BIG_BLIND.format(actions='"p3 cc", "p1 cc"')
+    assert refusal(hand_text).kind == PARTIAL
+    assert "below the minimum of 3" in str(refusal(SHORT_BIG_BLIND.format(actions='"p3 cbr 2"')))

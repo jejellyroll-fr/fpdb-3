@@ -26,7 +26,7 @@ import json
 import math
 import re
 import time
-from collections.abc import Iterator, Mapping, Sequence
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from decimal import ROUND_DOWN, Decimal, InvalidOperation
 from pathlib import Path
@@ -299,34 +299,55 @@ def _multiline_end(line: str, index: int, open_string: str) -> tuple[int, str | 
 
 def _iter_tables(path: Path) -> Iterator[PHHDocument | PHHImportError]:
     """The hands of a ``.phhs`` file: one top-level TOML table each, read as they come."""
-    source = str(path)
+    with path.open(encoding="utf-8") as handle:
+        yield from _split_tables(str(path), enumerate(handle, start=1))
+
+
+def _split_tables(source: str, numbered: Iterable[tuple[int, str]]) -> Iterator[PHHDocument | PHHImportError]:
+    """Cut numbered lines at their top-level ``[name]`` headers: one hand each."""
     label: str | None = None
     start = 1
     lines: list[str] = []
+    suspects: list[int] = []
     preamble_reported = False
     open_string: str | None = None
     depth = 0
-    with path.open(encoding="utf-8") as handle:
-        for number, raw in enumerate(handle, start=1):
-            stripped = raw.strip()
-            # A line of a multiline string ("[second]" in a note) or of an array ("_x = [" then
-            # "[1]") is a value, never a header: only the document's top level has headers.
-            inside = open_string is not None or depth > 0
-            open_string, depth = _toml_state(raw, open_string, depth)
-            header = _TABLE_HEADER_RE.match(stripped) if stripped[:1] == "[" and not inside else None
+    for number, raw in numbered:
+        stripped = raw.strip()
+        # A line of a multiline string ("[second]" in a note) or of an array ("_x = [" then
+        # "[1]") is a value, never a header: only the document's top level has headers.
+        inside = open_string is not None or depth > 0
+        open_string, depth = _toml_state(raw, open_string, depth)
+        header = _TABLE_HEADER_RE.match(stripped) if stripped[:1] == "[" else None
+        if header is not None and not inside:
+            if label is not None:
+                yield from _documents(source, label, start, lines, suspects)
+            label = next(key for key in header.group("basic", "literal", "bare") if key is not None)
+            start, lines, suspects = number, [raw], []
+        elif label is not None:
             if header is not None:
-                if label is not None:
-                    yield _document(source, label, start, lines)
-                label = next(key for key in header.group("basic", "literal", "bare") if key is not None)
-                start, lines = number, [raw]
-            elif label is not None:
-                lines.append(raw)
-            elif raw.strip() and not raw.lstrip().startswith("#") and not preamble_reported:
-                # A .phhs holds hands only in [name] tables; what comes before belongs to none.
-                preamble_reported = True
-                yield PHHImportError(MALFORMED, "content before the first [hand] table", source=f"{source}:{number}")
+                suspects.append(len(lines))  # a hand of its own if the value around it never closes
+            lines.append(raw)
+        elif stripped and not stripped.startswith("#") and not preamble_reported:
+            # A .phhs holds hands only in [name] tables; what comes before belongs to none.
+            preamble_reported = True
+            yield PHHImportError(MALFORMED, "content before the first [hand] table", source=f"{source}:{number}")
     if label is not None:
-        yield _document(source, label, start, lines)
+        yield from _documents(source, label, start, lines, suspects)
+
+
+def _documents(
+    source: str, label: str, start: int, lines: list[str], suspects: list[int]
+) -> Iterator[PHHDocument | PHHImportError]:
+    """One hand's table -- or, when a value it leaves open swallowed the hands after it, the
+    malformed hand and then those hands, cut again from the first header inside that value."""
+    document = _document(source, label, start, lines)
+    if not isinstance(document, PHHImportError) or document.kind != MALFORMED or not suspects:
+        yield document
+        return
+    cut = suspects[0]
+    yield _document(source, label, start, lines[:cut])
+    yield from _split_tables(source, enumerate(lines[cut:], start=start + cut))
 
 
 # -- interpreting -----------------------------------------------------------------------
