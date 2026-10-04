@@ -365,18 +365,16 @@ def hand_number(data: Mapping[str, Any]) -> int:
 
 def _start_time(data: Mapping[str, Any], fail: Any) -> datetime.datetime:
     """The hand's start in UTC (naive, as fpdb stores it); the epoch when PHH gives no year."""
+    _check_time_fields(data, fail)
     year, month, day = data.get("year"), data.get("month"), data.get("day")
     moment = data.get("time")
-    if moment is not None and not isinstance(moment, (datetime.datetime, datetime.time)):
-        raise fail(f"time {moment!r} is not a time")
-    # The epoch stands for a hand PHH gives no date; a date given wrong is not that.
-    if any(part is not None and (not isinstance(part, int) or isinstance(part, bool)) for part in (year, month, day)):
-        raise fail(f"year, month and day {year!r}, {month!r}, {day!r} are not a date")
     if isinstance(moment, datetime.datetime):
         local = moment
-    elif year is not None:
+    elif year is not None or moment is not None:
         # PHH's fields are optional one by one (its own example gives only the year): a
-        # missing month or day is the first of the period given.
+        # missing month or day is the first of the period given, a missing year the epoch's.
+        if year is None:
+            year, month, day = 1970, 1, 1
         month, day = (month, day if day is not None else 1) if month is not None else (1, 1)
         clock = moment if isinstance(moment, datetime.time) else datetime.time(0, 0)
         try:
@@ -388,28 +386,50 @@ def _start_time(data: Mapping[str, Any], fail: Any) -> datetime.datetime:
     return _in_utc(local, data, fail)
 
 
+def _check_time_fields(data: Mapping[str, Any], fail: Any) -> None:
+    """The date and time fields, when given, are of their PHH type."""
+    year, month, day = data.get("year"), data.get("month"), data.get("day")
+    moment = data.get("time")
+    if moment is not None and not isinstance(moment, (datetime.datetime, datetime.time)):
+        raise fail(f"time {moment!r} is not a time")
+    # The epoch stands for a hand PHH gives no date; a date given wrong is not that.
+    if any(part is not None and (not isinstance(part, int) or isinstance(part, bool)) for part in (year, month, day)):
+        raise fail(f"year, month and day {year!r}, {month!r}, {day!r} are not a date")
+    for key in ("time_zone", "time_zone_abbreviation"):
+        if data.get(key) is not None and not isinstance(data[key], str):
+            raise fail(f"{key} {data[key]!r} is not a string")
+
+
 def _in_utc(local: datetime.datetime, data: Mapping[str, Any], fail: Any) -> datetime.datetime:
     """*local* in UTC (naive), by its own offset or the hand's ``time_zone``."""
-    if local.tzinfo is None and isinstance(data.get("time_zone"), str):
-        try:
-            from zoneinfo import ZoneInfo, ZoneInfoNotFoundError  # noqa: PLC0415 - only for dated hands
-
-            local = local.replace(tzinfo=ZoneInfo(data["time_zone"]))
-        except (ZoneInfoNotFoundError, ValueError):
-            from zoneinfo import available_timezones  # noqa: PLC0415
-
-            if not available_timezones():
-                # No time-zone database here (a build without tzdata): the zone may be valid.
-                raise fail(f"no time-zone database to convert {data['time_zone']!r}", UNSUPPORTED) from None
-            raise fail(f"{data['time_zone']!r} is not a time zone") from None
     abbreviation = data.get("time_zone_abbreviation")
-    if local.tzinfo is None and abbreviation is not None and str(abbreviation).upper() not in ("UTC", "GMT", "Z"):
+    if local.tzinfo is None and data.get("time_zone") is not None:
+        local = local.replace(tzinfo=_zone(data["time_zone"], fail))
+        if abbreviation is not None:
+            # The abbreviation says which of a repeated hour (the end of summer time) it is.
+            folds = [fold for fold in (0, 1) if local.replace(fold=fold).tzname() == abbreviation]
+            if not folds:
+                raise fail(f"{abbreviation!r} is not {data['time_zone']}'s abbreviation at {local:%Y-%m-%d %H:%M}")
+            local = local.replace(fold=folds[0])
+    if local.tzinfo is None and abbreviation is not None and abbreviation.upper() not in ("UTC", "GMT", "Z"):
         # An abbreviation alone is ambiguous (CST is America's or China's): the hand's time
         # cannot be put in UTC, and stored as UTC it would be off by hours.
         raise fail(f"time_zone_abbreviation {abbreviation!r} without a time_zone cannot be converted", UNSUPPORTED)
     if local.tzinfo is not None:
         local = local.astimezone(datetime.timezone.utc).replace(tzinfo=None)
     return local
+
+
+def _zone(name: str, fail: Any) -> datetime.tzinfo:
+    from zoneinfo import ZoneInfo, ZoneInfoNotFoundError, available_timezones  # noqa: PLC0415 - dated hands only
+
+    try:
+        return ZoneInfo(name)
+    except (ZoneInfoNotFoundError, ValueError):
+        if not available_timezones():
+            # No time-zone database here (a build without tzdata): the zone may be valid.
+            raise fail(f"no time-zone database to convert {name!r}", UNSUPPORTED) from None
+        raise fail(f"{name!r} is not a time zone") from None
 
 
 def _player_names(given: Sequence[Any]) -> list[str]:
@@ -620,12 +640,17 @@ class _Builder:
         return self.streets[self.street_index]
 
     def _next_street(self) -> None:
+        live = [seat.name for seat in self.seats if not seat.folded]
+        if len(live) < 2:
+            raise self.fail(f"the hand is over: everyone but {live[0]} folded")
         if self.street_index + 1 >= len(self.streets):
             raise self.fail(f"more streets than {self.mapping.variant} has")
         if not self._street_closed():
             raise self.fail(f"{self.street.lower()} begins its next street before its betting is over")
         if any(self.awaiting.values()):
             raise self.fail("a discard is not replaced before the next street")
+        if self.base == "draw" and self.street_index and (undrawn := self._undrawn()):
+            raise self.fail(f"the next draw comes before {', '.join(undrawn)} has drawn on this one")
         if self.street_index == 0 and (undealt := self._undealt()):
             # Even an all-in runout, where nobody bets, starts from everyone's hole cards.
             raise self.fail(f"the next street comes before {', '.join(undealt)} is dealt in")
@@ -741,8 +766,10 @@ class _Builder:
             self.hand.addFold(self.street, seat.name)
         else:
             {"cc": self._check_or_call, "pb": self._bring_in}.get(move, lambda s: self._bet(s, arg))(seat)
-        # Counted once the move is made, at the bet it left the street at.
-        self.acted_at[seat.name] = self.level
+        # Counted once the move is made, at the bet it left the street at. The bring-in is
+        # forced, like a blind: a completion over it leaves its player free to raise.
+        if move != "pb":
+            self.acted_at[seat.name] = self.level
 
     def _next_in_turn(self, start: int, eligible: Any) -> int | None:
         """The first player after index *start*, round the table, that *eligible* accepts."""
@@ -813,6 +840,11 @@ class _Builder:
         """
         all_in = added == seat.behind
         limit = self.mapping.limit_type
+        # Every structure: a player who acted may raise again only over a full raise since.
+        full = min(self._fixed_sizes()) if limit == "fl" else self.raise_size
+        faced = self.acted_at.get(seat.name)
+        if faced is not None and self.level - faced < full:
+            raise self.fail(f"{seat.name} may only call or fold: an all-in for less did not reopen the betting")
         if limit == "fl":
             sizes = self._fixed_sizes()
             allowed = {self.level + size for size in sizes} if not self._completes() else {sizes[0]}
@@ -821,9 +853,6 @@ class _Builder:
                     f"a fixed-limit bet or raise goes to {' or '.join(map(str, sorted(allowed)))}, not {total}"
                 )
             return
-        faced = self.acted_at.get(seat.name)
-        if faced is not None and self.level - faced < self.raise_size:
-            raise self.fail(f"{seat.name} may only call or fold: an all-in for less did not reopen the betting")
         minimum = self.level + max(self.raise_size, _amount(self.data.get("min_bet", 0), "min_bet", self.fail))
         if total < minimum and not all_in:
             raise self.fail(f"a bet or raise to {total} is below the minimum of {minimum}")
@@ -920,6 +949,10 @@ class _Builder:
         if expected is not None and expected is not seat:
             raise self.fail(f"{seat.name} is dealt out of turn: {expected.name} is next")
 
+    def _undrawn(self) -> list[str]:
+        """Players still in who have not stood pat or discarded on this draw."""
+        return [seat.name for seat in self.seats if not seat.folded and seat.name not in self.drew_this_street]
+
     def _undealt(self) -> list[str]:
         """Players still in who should have their cards before this street's betting."""
         live = [seat for seat in self.seats if not seat.folded]
@@ -975,6 +1008,19 @@ class _Builder:
             raise self.fail(f"{seat.name} draws twice on one street")
         if len(cards) != self.awaiting[seat.name]:
             raise self.fail(f"{seat.name} draws {len(cards)} cards for {self.awaiting[seat.name]} discarded")
+        if undrawn := self._undrawn():
+            raise self.fail(f"replacements are dealt once everyone has drawn: {', '.join(undrawn)} has not")
+        # Like the deal, from the first player still in to the last (those who discarded).
+        expected = next(
+            (
+                other
+                for other in self.seats
+                if not other.folded and self.awaiting[other.name] and other.name not in self.dealt_this_street
+            ),
+            None,
+        )
+        if expected is not None and expected is not seat:
+            raise self.fail(f"{seat.name} is dealt out of turn: {expected.name} is next")
         self.awaiting[seat.name] = 0
         self.dealt_this_street.add(seat.name)
         kept = self.cards[seat.name]

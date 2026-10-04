@@ -984,7 +984,7 @@ def test_a_mixed_discard_removes_the_named_card_and_an_unknown_one() -> None:
     text = (
         SINGLE_DRAW.replace('"d dh p1 7h5c4d3s2c"', '"d dh p1 7h5c4d3s??"')
         .replace('"p1 sd",', '"p1 sd 7h??",')
-        .replace('"d dh p3 Kh",', '"d dh p3 Kh",\n  "d dh p1 KcQc",')
+        .replace('"d dh p3 Kh",', '"d dh p1 KcQc",\n  "d dh p3 Kh",')
     )
     hand = build_hand(document(text))
 
@@ -1217,3 +1217,68 @@ def test_a_time_zone_abbreviation_alone_is_unsupported_unless_utc() -> None:
     assert hand.startTime == datetime.datetime(2026, 7, 3, 12)
     both = dated + 'time_zone = "America/New_York"\ntime_zone_abbreviation = "EDT"\n'
     assert build_hand(document(both)).startTime == datetime.datetime(2026, 7, 3, 16)
+
+
+# -- sixteenth review -----------------------------------------------------------------
+
+FL_FOUR = """
+variant = "FT"
+antes = [0, 0, 0, 0]
+blinds_or_straddles = [1, 2, 0, 0]
+small_bet = 2
+big_bet = 4
+starting_stacks = [100, 100, 100, 5]
+actions = ["d dh p1 ????", "d dh p2 ????", "d dh p3 ????", "d dh p4 ????", "p3 cbr 4", "p4 cbr 5", "p1 f", "p2 cc", {last}]
+"""
+
+
+def test_a_fixed_limit_all_in_for_less_does_not_reopen_the_betting() -> None:
+    """PokerKit 0.7.6 refuses p3's re-raise and accepts the call."""
+    assert "p3 may only call or fold" in str(refusal(FL_FOUR.format(last='"p3 cbr 7"')))
+    assert refusal(FL_FOUR.format(last='"p3 cc"')).kind == PARTIAL
+
+
+def test_the_bring_in_player_may_raise_over_a_completion() -> None:
+    text = stud_fourth("F7S", "9d", 5).replace('"p2 cc",', '"p2 cbr 5",\n  "p1 cbr 10",\n  "p2 cc",')
+    assert ("THIRD", "p1", "raises", 5) in actions_of(build_hand(document(text)))
+
+
+def test_a_time_without_a_date_keeps_its_clock_and_zone() -> None:
+    text = SHOWDOWN + 'time = 12:30:00\ntime_zone = "America/New_York"\n'
+    assert build_hand(document(text)).startTime == datetime.datetime(1970, 1, 1, 17, 30)
+
+
+def test_a_time_zone_that_is_not_a_string_is_malformed() -> None:
+    error = refusal(SHOWDOWN + "year = 2026\ntime_zone = 123\n")
+    assert error.kind == MALFORMED
+    assert "time_zone 123 is not a string" in str(error)
+
+
+def test_the_abbreviation_picks_the_repeated_hour() -> None:
+    night = SHOWDOWN + 'year = 2026\nmonth = 11\nday = 1\ntime = 01:30:00\ntime_zone = "America/New_York"\n'
+    assert build_hand(document(night + 'time_zone_abbreviation = "EDT"\n')).startTime == datetime.datetime(
+        2026, 11, 1, 5, 30
+    )
+    assert build_hand(document(night + 'time_zone_abbreviation = "EST"\n')).startTime == datetime.datetime(
+        2026, 11, 1, 6, 30
+    )
+    assert "'PST' is not America/New_York's abbreviation" in str(refusal(night + 'time_zone_abbreviation = "PST"\n'))
+
+
+def test_every_live_player_draws_before_the_next_draw() -> None:
+    draw = (FIXTURES / "triple_draw_all_in_runout.phh").read_text(encoding="utf-8")
+    skipped = draw.replace('  "p1 sd",\n  "p2 sd Kh",\n  "d dh p2 Qd",\n', '  "p1 sd",\n', 1)
+    assert "the next draw comes before p2 has drawn on this one" in str(refusal(skipped))
+
+
+def test_replacements_are_dealt_in_order_once_everyone_has_drawn() -> None:
+    both = SINGLE_DRAW.replace('"p1 sd",', '"p1 sd 2c",')
+    out_of_order = both.replace('"d dh p3 Kh",', '"d dh p3 Kh",\n  "d dh p1 Kc",')
+    assert "p3 is dealt out of turn: p1 is next" in str(refusal(out_of_order))
+    early = both.replace('"p3 sd 9s",\n  "d dh p3 Kh",', '"d dh p1 Kc",\n  "p3 sd 9s",\n  "d dh p3 Kh",')
+    assert "replacements are dealt once everyone has drawn: p3 has not" in str(refusal(early))
+
+
+def test_no_street_is_dealt_after_a_fold_out() -> None:
+    folded = SHOWDOWN.replace('"p2 cc",\n  "p1 cc",\n  "d db 2c3d4h",', '"p2 f",\n  "d db 2c3d4h",')
+    assert "the hand is over: everyone but p1 folded" in str(refusal(folded))
