@@ -395,6 +395,8 @@ def _start_time(data: Mapping[str, Any], fail: Any) -> datetime.datetime:
         except ValueError:
             raise fail(f"{year}-{month}-{day} is not a date") from None
     else:
+        if data.get("time_zone") is not None:
+            _zone(data["time_zone"], fail)  # a zone that does not exist is malformed, dated or not
         return datetime.datetime(1970, 1, 1)
     return _in_utc(local, data, fail)
 
@@ -430,6 +432,11 @@ def _in_utc(local: datetime.datetime, data: Mapping[str, Any], fail: Any) -> dat
             if not folds:
                 raise fail(f"{abbreviation!r} is not {data['time_zone']}'s abbreviation at {wall:%Y-%m-%d %H:%M}")
         local = local.replace(fold=folds[0])
+    location = [str(data[key]) for key in ("city", "region", "country") if data.get(key)]
+    if local.tzinfo is None and abbreviation is None and location and data.get("time") is not None:
+        # PHH reads a time with no zone as local to the hand's location, which fpdb does not
+        # resolve to a zone: stored as UTC, it would be off by hours.
+        raise fail(f"the time is local to {', '.join(location)}, with no time_zone to convert it", UNSUPPORTED)
     if local.tzinfo is None and abbreviation is not None and abbreviation.upper() not in ("UTC", "GMT", "Z"):
         # An abbreviation alone is ambiguous (CST is America's or China's): the hand's time
         # cannot be put in UTC, and stored as UTC it would be off by hours.

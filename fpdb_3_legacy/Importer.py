@@ -567,9 +567,9 @@ class Importer:
         if isinstance(file, bytes):
             file = file.decode("utf8", "replace")
         if fpdbfile.ftype == "phh":
-            # Files rows are found by name: a room's session.txt is "session", so PHH's
-            # session.phh gets a name no room file can have (a basename holds no "/").
-            file = f"{PHH_SITE_NAME}/{os.path.basename(fpdbfile.path)}"
+            # Files rows are found by name: a room's session.txt is "session", so a PHH file
+            # is named by its whole path -- no room file's name, nor another directory's 1.phh.
+            file = f"{PHH_SITE_NAME}/{os.path.abspath(fpdbfile.path)}"
         fpdbfile.fileId = self.database.get_id(file)
         if not fpdbfile.fileId:
             now = datetime.datetime.utcnow()

@@ -1370,7 +1370,7 @@ def test_a_phh_file_never_shares_the_files_row_of_a_same_named_room_file(importe
 
     (phh_id,) = file_ids
     assert phh_id != room_id
-    assert (rows[phh_id]["file"], rows[phh_id]["site"]) == ("PHH/session.phh", PHH_SITE_NAME)
+    assert (rows[phh_id]["file"], rows[phh_id]["site"]) == (f"PHH/{tmp_path / 'session.phh'}", PHH_SITE_NAME)
     assert (rows[room_id]["site"], rows[room_id]["hands"]) == ("PokerStars", 7)
 
 
@@ -1378,3 +1378,37 @@ def test_a_player_who_mucks_can_win_nothing() -> None:
     assert "p2" in build_hand(document(SHOWDOWN)).mucked  # p1 shows and wins: fine
     error = refusal(SHOWDOWN.replace("winnings = [4, 0]", "winnings = [0, 4]"))
     assert "p2 collects 4, more than a mucked hand can win (0)" in str(error)
+
+
+# -- twentieth review -----------------------------------------------------------------
+
+
+def test_same_named_phh_files_in_two_directories_have_their_own_files_rows(importer, fresh_db, tmp_path) -> None:
+    for event, fixture in (("event-a", "fl_holdem.phh"), ("event-b", "pl_omaha.phh")):
+        (tmp_path / event).mkdir()
+        shutil.copy(FIXTURES / fixture, tmp_path / event / "1.phh")
+        assert importer.addImportFile(str(tmp_path / event / "1.phh"))
+    importer.runImport()
+    connection = sqlite3.connect(fresh_db.database)
+    files = {row[0] for row in connection.execute("SELECT fileId FROM Hands")}
+    connection.close()
+    assert len(files) == 2
+
+
+def test_a_time_local_to_a_location_without_a_zone_is_unsupported() -> None:
+    located = SHOWDOWN + 'year = 2026\ntime = 12:00:00\ncity = "Toronto"\ncountry = "Canada"\n'
+    error = refusal(located)
+    assert error.kind == UNSUPPORTED
+    assert "local to Toronto, Canada" in str(error)
+    zoned = located + 'time_zone = "America/Toronto"\n'
+    assert build_hand(document(zoned)).startTime == datetime.datetime(2026, 1, 1, 17)
+    assert build_hand(document(SHOWDOWN + 'year = 2026\ncity = "Toronto"\n')) is not None  # no time, no shift
+
+
+def test_a_zone_is_checked_even_without_a_date() -> None:
+    error = refusal(SHOWDOWN + 'time_zone = "America/New_Yrok"\n')
+    assert error.kind == MALFORMED
+    assert "'America/New_Yrok' is not a time zone" in str(error)
+    assert build_hand(document(SHOWDOWN + 'time_zone = "America/New_York"\n')).startTime == datetime.datetime(
+        1970, 1, 1
+    )
