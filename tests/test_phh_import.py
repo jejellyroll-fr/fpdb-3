@@ -142,7 +142,7 @@ def test_every_fixture_is_imported(imported) -> None:
 
 def test_each_player_result_matches_pokerkit(imported) -> None:
     _importer, _totals, connection = imported
-    files = {row["id"]: row["file"] for row in connection.execute("SELECT * FROM Files")}
+    files = {row["id"]: Path(row["file"]).stem for row in connection.execute("SELECT * FROM Files")}
     file_of_hand = {row["id"]: files[row["fileId"]] for row in connection.execute("SELECT * FROM Hands")}
     results: dict[str, list[tuple[int, int]]] = {}
     for row in connection.execute("SELECT * FROM HandsPlayers"):
@@ -155,7 +155,7 @@ def test_each_player_result_matches_pokerkit(imported) -> None:
 
 def test_each_fixture_is_stored_as_its_fpdb_game(imported) -> None:
     _importer, _totals, connection = imported
-    files = {row["id"]: row["file"] for row in connection.execute("SELECT * FROM Files")}
+    files = {row["id"]: Path(row["file"]).stem for row in connection.execute("SELECT * FROM Files")}
     games = {row["id"]: dict(row) for row in connection.execute("SELECT * FROM Gametypes")}
     for hand in connection.execute("SELECT * FROM Hands"):
         game = games[hand["gametypeId"]]
@@ -618,7 +618,7 @@ actions = [
   "d dh p2 QhQd",
   "p2 cc",
   "p1 cc",
-  "d db 2c3d4h",
+  "d db Kc3d4h",
   "p1 cc",
   "p2 cc",
   "d db 9s",
@@ -630,7 +630,7 @@ actions = [
   "p1 sm -",
   "p2 sm",
 ]
-winnings = [0, 4]
+winnings = [4, 0]  # p1's kings; p2 mucks
 """
 
 
@@ -1280,7 +1280,7 @@ def test_replacements_are_dealt_in_order_once_everyone_has_drawn() -> None:
 
 
 def test_no_street_is_dealt_after_a_fold_out() -> None:
-    folded = SHOWDOWN.replace('"p2 cc",\n  "p1 cc",\n  "d db 2c3d4h",', '"p2 f",\n  "d db 2c3d4h",')
+    folded = SHOWDOWN.replace('"p2 cc",\n  "p1 cc",\n  "d db Kc3d4h",', '"p2 f",\n  "d db Kc3d4h",')
     assert "the hand is over: everyone but p1 folded" in str(refusal(folded))
 
 
@@ -1350,3 +1350,31 @@ def test_after_a_short_all_in_completion_the_next_one_adds_a_small_bet() -> None
     """PokerKit 0.7.6: after the bring-in of 1 and an all-in to 2, the minimum is 6, not 4."""
     assert "goes to 6, not 4" in str(refusal(STUD_SHORT_COMPLETION.format(to=4)))
     assert refusal(STUD_SHORT_COMPLETION.format(to=6)).kind == PARTIAL
+
+
+# -- nineteenth review ----------------------------------------------------------------
+
+
+def test_a_phh_file_never_shares_the_files_row_of_a_same_named_room_file(importer, fresh_db, tmp_path) -> None:
+    now = datetime.datetime(2026, 1, 1)
+    with importer.database.transaction():
+        room_id = importer.database.storeFile(["session", "PokerStars", now, now, 7, 7, 0, 0, 0, 0, 0, True])
+    shutil.copy(FIXTURES / "fl_holdem.phh", tmp_path / "session.phh")
+    assert importer.addImportFile(str(tmp_path / "session.phh"))
+    importer.runImport()
+    connection = sqlite3.connect(fresh_db.database)
+    connection.row_factory = sqlite3.Row
+    rows = {row["id"]: dict(row) for row in connection.execute("SELECT * FROM Files")}
+    file_ids = {row["fileId"] for row in connection.execute("SELECT * FROM Hands")}
+    connection.close()
+
+    (phh_id,) = file_ids
+    assert phh_id != room_id
+    assert (rows[phh_id]["file"], rows[phh_id]["site"]) == ("PHH/session.phh", PHH_SITE_NAME)
+    assert (rows[room_id]["site"], rows[room_id]["hands"]) == ("PokerStars", 7)
+
+
+def test_a_player_who_mucks_can_win_nothing() -> None:
+    assert "p2" in build_hand(document(SHOWDOWN)).mucked  # p1 shows and wins: fine
+    error = refusal(SHOWDOWN.replace("winnings = [4, 0]", "winnings = [0, 4]"))
+    assert "p2 collects 4, more than a mucked hand can win (0)" in str(error)

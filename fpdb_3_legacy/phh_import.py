@@ -481,6 +481,8 @@ class _Seat:
     contributed: Decimal = Decimal(0)
     antes: Decimal = Decimal(0)
     folded: bool = False
+    #: Mucked at showdown ("sm" alone): out of every pot, as a fold would be.
+    mucked: bool = False
 
 
 class _Builder:
@@ -1139,8 +1141,9 @@ class _Builder:
 
     def _show(self, seat: _Seat, text: str | None) -> None:
         if not text:
-            # "sm" alone: the cards go back unseen.
+            # "sm" alone: the cards go back unseen, and the player's claim to the pot with them.
             self.hand.mucked.add(seat.name)
+            seat.mucked = True
             return
         # "sm -" shows the cards the deal already named; anything else names them here.
         dealt = self.cards[seat.name]
@@ -1223,7 +1226,7 @@ class _Builder:
         eligible = self._eligible()
         for seat, amount in zip(self.seats, collected, strict=True):
             if amount > eligible[seat.name]:
-                where = "a folded player" if seat.folded else "the pots they are in"
+                where = "a folded player" if seat.folded else "a mucked hand" if seat.mucked else "the pots they are in"
                 raise self.fail(f"{seat.name} collects {amount}, more than {where} can win ({eligible[seat.name]})")
         # Together, too: the players capped at a pot can share it, not each take it whole.
         # Eligibility is nested (who put in more is in every pot of who put in less), so
@@ -1270,17 +1273,17 @@ class _Builder:
         Pots are cut at each player's net wager (antes aside, uncalled bets returned); a layer
         is won only by a player still in the hand who wagered at least that much. Antes are
         common money, as fpdb books them, which every player still in can win. A folded
-        player is eligible for nothing.
+        player, or one who mucked, is eligible for nothing.
         """
         returned = self._returned()
         net = {seat.name: seat.contributed - seat.antes - returned.get(seat.name, Decimal(0)) for seat in self.seats}
         antes = sum((seat.antes for seat in self.seats), Decimal(0))
-        eligible = {seat.name: Decimal(0) if seat.folded else antes for seat in self.seats}
+        eligible = {seat.name: Decimal(0) if seat.folded or seat.mucked else antes for seat in self.seats}
         previous = Decimal(0)
         for level in sorted({amount for amount in net.values() if amount > 0}):
             layer = sum((min(amount, level) - min(amount, previous) for amount in net.values()), Decimal(0))
             for seat in self.seats:
-                if not seat.folded and net[seat.name] >= level:
+                if not seat.folded and not seat.mucked and net[seat.name] >= level:
                     eligible[seat.name] += layer
             previous = level
         return eligible

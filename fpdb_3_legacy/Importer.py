@@ -566,6 +566,10 @@ class Importer:
         # Filenames are str on Python 3; decode only if a bytes path slips in.
         if isinstance(file, bytes):
             file = file.decode("utf8", "replace")
+        if fpdbfile.ftype == "phh":
+            # Files rows are found by name: a room's session.txt is "session", so PHH's
+            # session.phh gets a name no room file can have (a basename holds no "/").
+            file = f"{PHH_SITE_NAME}/{os.path.basename(fpdbfile.path)}"
         fpdbfile.fileId = self.database.get_id(file)
         if not fpdbfile.fileId:
             now = datetime.datetime.utcnow()
