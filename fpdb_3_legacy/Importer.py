@@ -41,7 +41,7 @@ from fpdb_3_legacy.import_failure_cache import SIDECAR_EXTENSIONS, FailureCache
 from fpdb_3_legacy.iPoker.dispatcher import get_parser_class_for_path as get_ipoker_parser_class_for_path
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.parser_registry import get_parser_class, get_summary_class
-from fpdb_3_legacy.phh_import import PHH_SITE_NAME, PHHImportResult, is_phh_path
+from fpdb_3_legacy.phh_import import PHH_SITE_NAME, PHHImportResult, is_phh_path, phh_file_name
 from fpdb_3_legacy.phh_import import import_file as import_phh_file
 
 zmq: Any = _zmq
@@ -567,9 +567,8 @@ class Importer:
         if isinstance(file, bytes):
             file = file.decode("utf8", "replace")
         if fpdbfile.ftype == "phh":
-            # Files rows are found by name: a room's session.txt is "session", so a PHH file
-            # is named by its whole path -- no room file's name, nor another directory's 1.phh.
-            file = f"{PHH_SITE_NAME}/{os.path.abspath(fpdbfile.path)}"
+            # Never a room file's row, nor another directory's 1.phh (see phh_file_name).
+            file = phh_file_name(fpdbfile.path)
         fpdbfile.fileId = self.database.get_id(file)
         if not fpdbfile.fileId:
             now = datetime.datetime.utcnow()

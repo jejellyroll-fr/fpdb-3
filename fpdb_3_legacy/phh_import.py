@@ -24,6 +24,7 @@ import datetime
 import hashlib
 import json
 import math
+import os
 import re
 import time
 from collections.abc import Iterable, Iterator, Mapping, Sequence
@@ -170,6 +171,25 @@ class PHHImportResult:
             f"{self.partial} partial, {self.unsupported} unsupported, {self.malformed} malformed, "
             f"in {self.seconds:.1f}s"
         )
+
+
+#: MySQL's unique index on Files.file covers its first 255 characters only.
+_FILE_NAME_LIMIT: Final = 255
+
+
+def phh_file_name(path: str | Path) -> str:
+    """A PHH file's name in the Files table: ``PHH/`` and its whole path.
+
+    Files rows are found by name, and a room file's is its extensionless basename: a path
+    (``/`` in it) can be neither that, nor another directory's ``1.phh``. Past what MySQL
+    indexes, a hash of the path comes first, so that the indexed part still tells it apart.
+    """
+    full = os.path.abspath(path)
+    name = f"{PHH_SITE_NAME}/{full}"
+    if len(name) <= _FILE_NAME_LIMIT:
+        return name
+    digest = hashlib.blake2b(full.encode("utf-8"), digest_size=16).hexdigest()
+    return f"{PHH_SITE_NAME}/{digest}/{os.path.basename(full)}"[:_FILE_NAME_LIMIT]
 
 
 def is_phh_path(path: str | Path) -> bool:
@@ -453,8 +473,9 @@ def _in_utc(local: datetime.datetime, data: Mapping[str, Any], fail: Any) -> dat
             if not folds:
                 raise fail(f"{abbreviation!r} is not {data['time_zone']}'s abbreviation at {wall:%Y-%m-%d %H:%M}")
         local = local.replace(fold=folds[0])
-    location = [str(data[key]) for key in ("city", "region", "country") if data.get(key)]
-    if local.tzinfo is None and abbreviation is None and location and data.get("time") is not None:
+    # PHH reads the time as local only to a full location: city, region and country all given.
+    location = [str(data[key]) for key in ("city", "region", "country") if data.get(key) is not None]
+    if local.tzinfo is None and abbreviation is None and len(location) == 3 and data.get("time") is not None:
         # PHH reads a time with no zone as local to the hand's location, which fpdb does not
         # resolve to a zone: stored as UTC, it would be off by hours.
         raise fail(f"the time is local to {', '.join(location)}, with no time_zone to convert it", UNSUPPORTED)
@@ -545,7 +566,10 @@ class _Builder:
             raise self.fail("a starting stack is unknown: the hand cannot be accounted for", UNSUPPORTED)
         count = len(stacks)
         # PHH allows an empty name for a player it does not know: that one is called pN.
-        names = _player_names(self.data.get("players") or [""] * count)
+        given = self.data.get("players")
+        if given is not None and (not isinstance(given, list) or not all(isinstance(name, str) for name in given)):
+            raise self.fail(f"players must be a list of names, not {given!r}")
+        names = _player_names(given or [""] * count)
         seats = self.data.get("seats") or list(range(1, count + 1))
         if len(names) != count or len(seats) != count:
             raise self.fail("players, seats and starting_stacks do not have the same length")

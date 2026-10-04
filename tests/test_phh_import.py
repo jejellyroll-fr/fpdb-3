@@ -1400,10 +1400,10 @@ def test_same_named_phh_files_in_two_directories_have_their_own_files_rows(impor
 
 
 def test_a_time_local_to_a_location_without_a_zone_is_unsupported() -> None:
-    located = SHOWDOWN + 'year = 2026\ntime = 12:00:00\ncity = "Toronto"\ncountry = "Canada"\n'
+    located = SHOWDOWN + 'year = 2026\ntime = 12:00:00\ncity = "Toronto"\nregion = "Ontario"\ncountry = "Canada"\n'
     error = refusal(located)
     assert error.kind == UNSUPPORTED
-    assert "local to Toronto, Canada" in str(error)
+    assert "local to Toronto, Ontario, Canada" in str(error)
     zoned = located + 'time_zone = "America/Toronto"\n'
     assert build_hand(document(zoned)).startTime == datetime.datetime(2026, 1, 1, 17)
     assert build_hand(document(SHOWDOWN + 'year = 2026\ncity = "Toronto"\n')) is not None  # no time, no shift
@@ -1469,3 +1469,30 @@ def test_a_short_big_blind_sets_the_call_at_what_it_posted() -> None:
     hand_text = SHORT_BIG_BLIND.format(actions='"p3 cc", "p1 cc"')
     assert refusal(hand_text).kind == PARTIAL
     assert "below the minimum of 3" in str(refusal(SHORT_BIG_BLIND.format(actions='"p3 cbr 2"')))
+
+
+# -- twenty-fourth review -------------------------------------------------------------
+
+
+def test_only_a_full_location_makes_the_time_local() -> None:
+    timed = SHOWDOWN + "year = 2026\ntime = 12:00:00\n"
+    assert build_hand(document(timed + 'city = "Toronto"\n')).startTime == datetime.datetime(2026, 1, 1, 12)
+    full = timed + 'city = "Toronto"\nregion = "Ontario"\ncountry = "Canada"\n'
+    assert refusal(full).kind == UNSUPPORTED
+
+
+def test_players_must_be_a_list_of_names() -> None:
+    assert "players must be a list of names" in str(refusal(SHOWDOWN + 'players = "Am"\n'))
+    assert "players must be a list of names" in str(refusal(SHOWDOWN + "players = [1, 2]\n"))
+    assert build_hand(document(SHOWDOWN + 'players = ["Amy", ""]\n')) is not None
+
+
+def test_a_long_phh_path_is_told_apart_within_what_mysql_indexes(tmp_path) -> None:
+    from fpdb_3_legacy.phh_import import phh_file_name
+
+    deep = tmp_path / ("d" * 120) / ("e" * 120)
+    first, second = phh_file_name(deep / "a" / "1.phh"), phh_file_name(deep / "b" / "1.phh")
+    assert len(first) <= 255 and len(second) <= 255
+    assert first[:255] != second[:255]
+    assert first.endswith("/1.phh")
+    assert phh_file_name(tmp_path / "1.phh") == f"PHH/{tmp_path / '1.phh'}"
