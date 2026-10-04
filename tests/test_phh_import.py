@@ -1306,3 +1306,47 @@ def test_after_the_fourth_street_big_bet_every_raise_is_big() -> None:
     assert refusal(big_then.replace("{raise_to}", "20")).kind == PARTIAL
     small_then_big = stud_fourth("F7S", "9d", 5).replace('"p1 f",', '"p1 cbr 15",\n  "p2 cbr 25",\n  "p1 f",')
     assert build_hand(document(small_then_big)) is not None  # 5, raised by the big bet, then by it again
+
+
+# -- eighteenth review ----------------------------------------------------------------
+
+
+def test_a_header_inside_an_array_or_inline_table_is_a_value(tmp_path) -> None:
+    values = '_x = [\n  [1],\n  { a = "[2]" },\n]\n'
+    path = tmp_path / "hands.phhs"
+    path.write_text(f"[1]\n{SHOWDOWN}{values}[2]\n{SHOWDOWN}", encoding="utf-8")
+    documents = list(iter_documents(path))
+    assert [document.label for document in documents] == ["1", "2"]
+    assert documents[0].data["_x"] == [[1], {"a": "[2]"}]
+
+
+def test_a_wall_time_the_clocks_skip_is_malformed() -> None:
+    gap = SHOWDOWN + 'year = 2026\nmonth = 3\nday = 8\ntime = 02:30:00\ntime_zone = "America/New_York"\n'
+    error = refusal(gap)
+    assert error.kind == MALFORMED
+    assert "2026-03-08 02:30 does not exist in America/New_York" in str(error)
+    after = gap.replace("02:30:00", "03:30:00")
+    assert build_hand(document(after)).startTime == datetime.datetime(2026, 3, 8, 7, 30)
+
+
+def test_a_shared_stud_card_is_unsupported() -> None:
+    error = refusal(stud_fourth("F7S", "9d", 5).replace('"d dh p2 9d",', '"d db 9d",'))
+    assert error.kind == UNSUPPORTED
+    assert "a shared stud card" in str(error)
+
+
+STUD_SHORT_COMPLETION = """
+variant = "F7S"
+antes = [0, 0, 0]
+bring_in = 1
+small_bet = 4
+big_bet = 8
+starting_stacks = [50, 2, 50]
+actions = ["d dh p1 ????2c", "d dh p2 ????8c", "d dh p3 ????9c", "p1 pb", "p2 cbr 2", "p3 cbr {to}"]
+"""
+
+
+def test_after_a_short_all_in_completion_the_next_one_adds_a_small_bet() -> None:
+    """PokerKit 0.7.6: after the bring-in of 1 and an all-in to 2, the minimum is 6, not 4."""
+    assert "goes to 6, not 4" in str(refusal(STUD_SHORT_COMPLETION.format(to=4)))
+    assert refusal(STUD_SHORT_COMPLETION.format(to=6)).kind == PARTIAL

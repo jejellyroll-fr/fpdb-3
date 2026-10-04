@@ -250,25 +250,17 @@ def _document(source: str, label: str, start: int, lines: list[str]) -> PHHDocum
     return PHHDocument(source, key, start, data)
 
 
-def _multiline_state(line: str, open_string: str | None) -> str | None:
-    """The multiline string (``\"\"\"`` or ``'''``) still open at the end of *line*, if any.
+def _toml_state(line: str, open_string: str | None, depth: int) -> tuple[str | None, int]:
+    """What is still open at the end of *line*: a multiline string (``\"\"\"`` or ``'''``),
+    and how many arrays and inline tables.
 
-    Single-line strings and comments are skipped so that their quotes open nothing.
+    Single-line strings and comments are skipped so that their quotes and brackets open
+    nothing; a table header opens and closes its brackets on its own line.
     """
     index = 0
     while index < len(line):
         if open_string is not None:
-            if open_string == '"""' and line[index] == "\\":
-                index += 2  # an escaped character, a quote included
-                continue
-            if line.startswith(open_string, index):
-                index += 3
-                # Up to two quotes more belong to the string: '""""' ends it with one quote.
-                while index < len(line) and line[index] == open_string[0]:
-                    index += 1
-                open_string = None
-                continue
-            index += 1
+            index, open_string = _multiline_end(line, index, open_string)
             continue
         char = line[index]
         if char == "#":
@@ -276,14 +268,33 @@ def _multiline_state(line: str, open_string: str | None) -> str | None:
         if line.startswith(('"""', "'''"), index):
             open_string = line[index : index + 3]
             index += 3
-        elif char in "\"'":
+            continue
+        if char in "\"'":
             index += 1
             while index < len(line) and line[index] != char:
                 index += 2 if char == '"' and line[index] == "\\" else 1
-            index += 1
+        elif char in "[{":
+            depth += 1
+        elif char in "]}":
+            depth = max(depth - 1, 0)
+        index += 1
+    return open_string, depth
+
+
+def _multiline_end(line: str, index: int, open_string: str) -> tuple[int, str | None]:
+    """Where the multiline string open at *index* ends on *line* -- or the line's end."""
+    while index < len(line):
+        if open_string == '"""' and line[index] == "\\":
+            index += 2  # an escaped character, a quote included
+        elif line.startswith(open_string, index):
+            index += 3
+            # Up to two quotes more belong to the string: '""""' ends it with one quote.
+            while index < len(line) and line[index] == open_string[0]:
+                index += 1
+            return index, None
         else:
             index += 1
-    return open_string
+    return index, open_string
 
 
 def _iter_tables(path: Path) -> Iterator[PHHDocument | PHHImportError]:
@@ -294,12 +305,14 @@ def _iter_tables(path: Path) -> Iterator[PHHDocument | PHHImportError]:
     lines: list[str] = []
     preamble_reported = False
     open_string: str | None = None
+    depth = 0
     with path.open(encoding="utf-8") as handle:
         for number, raw in enumerate(handle, start=1):
             stripped = raw.strip()
-            # A line of a multiline string ("[second]" in a note) is text, never a header.
-            inside = open_string is not None
-            open_string = _multiline_state(raw, open_string)
+            # A line of a multiline string ("[second]" in a note) or of an array ("_x = [" then
+            # "[1]") is a value, never a header: only the document's top level has headers.
+            inside = open_string is not None or depth > 0
+            open_string, depth = _toml_state(raw, open_string, depth)
             header = _TABLE_HEADER_RE.match(stripped) if stripped[:1] == "[" and not inside else None
             if header is not None:
                 if label is not None:
@@ -404,13 +417,19 @@ def _in_utc(local: datetime.datetime, data: Mapping[str, Any], fail: Any) -> dat
     """*local* in UTC (naive), by its own offset or the hand's ``time_zone``."""
     abbreviation = data.get("time_zone_abbreviation")
     if local.tzinfo is None and data.get("time_zone") is not None:
+        wall = local
         local = local.replace(tzinfo=_zone(data["time_zone"], fail))
+        # A wall time skipped when summer time begins never happened: it round-trips to
+        # another one, whichever fold.
+        folds = [fold for fold in (0, 1) if _round_trip(local.replace(fold=fold)) == wall]
+        if not folds:
+            raise fail(f"{wall:%Y-%m-%d %H:%M} does not exist in {data['time_zone']} (the clocks skip it)")
         if abbreviation is not None:
             # The abbreviation says which of a repeated hour (the end of summer time) it is.
-            folds = [fold for fold in (0, 1) if local.replace(fold=fold).tzname() == abbreviation]
+            folds = [fold for fold in folds if local.replace(fold=fold).tzname() == abbreviation]
             if not folds:
-                raise fail(f"{abbreviation!r} is not {data['time_zone']}'s abbreviation at {local:%Y-%m-%d %H:%M}")
-            local = local.replace(fold=folds[0])
+                raise fail(f"{abbreviation!r} is not {data['time_zone']}'s abbreviation at {wall:%Y-%m-%d %H:%M}")
+        local = local.replace(fold=folds[0])
     if local.tzinfo is None and abbreviation is not None and abbreviation.upper() not in ("UTC", "GMT", "Z"):
         # An abbreviation alone is ambiguous (CST is America's or China's): the hand's time
         # cannot be put in UTC, and stored as UTC it would be off by hours.
@@ -418,6 +437,11 @@ def _in_utc(local: datetime.datetime, data: Mapping[str, Any], fail: Any) -> dat
     if local.tzinfo is not None:
         local = local.astimezone(datetime.timezone.utc).replace(tzinfo=None)
     return local
+
+
+def _round_trip(aware: datetime.datetime) -> datetime.datetime:
+    """The wall time *aware* reads after a trip through UTC (naive)."""
+    return aware.astimezone(datetime.timezone.utc).astimezone(aware.tzinfo).replace(tzinfo=None)
 
 
 def _zone(name: str, fail: Any) -> datetime.tzinfo:
@@ -935,6 +959,10 @@ class _Builder:
         self.seen.update(known)
 
     def _deal_board(self, cards: list[str]) -> None:
+        if self.base == "stud":
+            # Seventh street dealt as one shared card, when the deck runs short (eight players):
+            # fpdb's stud hand has no community card to hold it.
+            raise self.fail("a shared stud card (the deck ran short) is not supported", UNSUPPORTED)
         if self.base != "hold":
             raise self.fail("only hold'em games deal a board")
         self.boards += 1
