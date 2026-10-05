@@ -279,9 +279,10 @@ def test_the_last_player_standing_takes_the_pot_when_no_result_is_given() -> Non
     assert hand.pot.returned == {"p3": 4}
 
 
-def test_the_hand_number_is_its_content() -> None:
+def test_the_hand_number_is_its_content_and_place() -> None:
     first = document(NT_HAND)
-    assert hand_number(first.data) == hand_number(document(NT_HAND, label="elsewhere").data)
+    assert hand_number(first.data, "a.phhs\x001") == hand_number(document(NT_HAND).data, "a.phhs\x001")
+    assert hand_number(first.data, "a.phhs\x001") != hand_number(first.data, "a.phhs\x002")
     assert hand_number(first.data) != hand_number(document(NT_HAND.replace("cbr 6", "cbr 8")).data)
     assert 0 < hand_number(first.data) < 2**62
 
@@ -381,7 +382,8 @@ def test_a_phhs_file_is_read_hand_by_hand_and_its_failures_counted(importer, fre
 
     assert importer.addImportFile(str(dataset))
     stored, duplicates, partial, skipped, errors, _seconds = importer.runImport()
-    assert (stored, duplicates, partial, skipped, errors) == (3, 1, 1, 1, 2)
+    # [1-again] reads like [1] but sits at another table: a hand of its own, not a duplicate.
+    assert (stored, duplicates, partial, skipped, errors) == (4, 0, 1, 1, 2)
     summary = importer.phh_summary()
     assert summary is not None
     assert (summary.discovered, summary.partial, summary.unsupported, summary.malformed) == (8, 1, 1, 2)
@@ -1537,3 +1539,25 @@ def test_a_show_of_fewer_cards_is_partial() -> None:
 def test_a_player_shows_or_mucks_once() -> None:
     twice = SHOWDOWN.replace('"p1 sm -",', '"p1 sm -",\n  "p1 sm",')
     assert "p1 shows or mucks a second time" in str(refusal(twice))
+
+
+# -- twenty-seventh review ------------------------------------------------------------
+
+
+def test_a_player_does_not_act_twice_with_nothing_changed() -> None:
+    stud = stud_fourth("F7S", "9d", 5).replace('"p2 cc",', '"p2 cbr 5",\n  "p2 cc",')
+    assert "p2 acts again with nothing changed" in str(refusal(stud))
+    checks = SHOWDOWN.replace('"d db 9s",\n  "p1 cc",\n  "p2 cc",', '"d db 9s",\n  "p1 cc",\n  "p1 cc",')
+    assert "p1 acts again with nothing changed" in str(refusal(checks))
+
+
+def test_two_hands_that_read_alike_in_one_file_are_both_imported(importer, fresh_db, tmp_path) -> None:
+    path = tmp_path / "alike.phhs"
+    path.write_text(f"[1]\n{SHOWDOWN}\n[2]\n{SHOWDOWN}", encoding="utf-8")
+    assert importer.addImportFile(str(path))
+    stored, duplicates, *_rest = importer.runImport()
+    assert (stored, duplicates) == (2, 0)
+    importer.clearFileList()  # the same file again...
+    assert importer.addImportFile(str(path))
+    stored, duplicates, *_rest = importer.runImport()
+    assert (stored, duplicates) == (0, 2)  # ...finds both as duplicates

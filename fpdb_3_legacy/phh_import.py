@@ -406,13 +406,16 @@ def _known(cards: Sequence[str]) -> bool:
     return bool(cards) and all(card != "0x" for card in cards)
 
 
-def hand_number(data: Mapping[str, Any]) -> int:
-    """A stable number for a hand: a hash of its content, so the same hand is a duplicate.
+def hand_number(data: Mapping[str, Any], occurrence: str = "") -> int:
+    """A stable number for a hand: a hash of its content and *occurrence* (its file name and
+    table), so the same hand imported again is a duplicate.
 
     The hand's own ``hand`` field is not used alone: two datasets that both number their
-    hands from 1 would otherwise be taken for each other's duplicates.
+    hands from 1 would otherwise be taken for each other's duplicates. Content alone is not
+    enough either: an anonymised dataset may hold two hands that read alike (unknown cards,
+    the same folds) at two tables of one file.
     """
-    canonical = json.dumps(data, sort_keys=True, default=str, ensure_ascii=False)
+    canonical = json.dumps([data, occurrence], sort_keys=True, default=str, ensure_ascii=False)
     digest = hashlib.blake2b(canonical.encode("utf-8"), digest_size=8).digest()
     return int.from_bytes(digest, "big") >> 2  # 62 bits: positive in every BIGINT
 
@@ -652,7 +655,7 @@ class _Builder:
         blinds = self._per_player("blinds_or_straddles", count) if self.base != "stud" else [Decimal(0)] * count
         gametype = self._gametype(blinds)
         hand_class = {"hold": HoldemOmahaHand, "stud": StudHand, "draw": DrawHand}[self.base]
-        number = hand_number(self.data)
+        number = hand_number(self.data, f"{Path(self.document.source).name}\0{self.document.label}")
         # The concrete class (stud, draw) is chosen here; typed Any for the methods only it has.
         hand: Any = hand_class(
             self.config, _PHHSource(self.document.source), PHH_SITE_NAME, gametype, "", "PHH", number
@@ -853,6 +856,10 @@ class _Builder:
             raise self.fail(f"{seat.name} is all in and cannot act")
         if self._street_closed():
             raise self.fail(f"{seat.name} acts after the betting on {self.street.lower()} is over")
+        if self.acted_at.get(seat.name) == self.level and move != "pb":
+            # Nothing happened since this player acted: it is not their turn again (stud,
+            # whose order is not checked, would otherwise take a second check or call).
+            raise self.fail(f"{seat.name} acts again with nothing changed since their last action")
         if undealt := self._undealt():
             raise self.fail(f"the betting begins before {', '.join(undealt)} is dealt in")
         if self.base == "stud" and self.street_index == 0 and self.level == 0 and move not in ("pb", "cbr"):
