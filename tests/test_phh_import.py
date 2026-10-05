@@ -1561,3 +1561,32 @@ def test_two_hands_that_read_alike_in_one_file_are_both_imported(importer, fresh
     assert importer.addImportFile(str(path))
     stored, duplicates, *_rest = importer.runImport()
     assert (stored, duplicates) == (0, 2)  # ...finds both as duplicates
+
+
+# -- twenty-eighth review -------------------------------------------------------------
+
+
+def test_identical_hands_in_same_named_files_of_two_directories_are_both_kept(importer, fresh_db, tmp_path) -> None:
+    for event in ("event-a", "event-b"):
+        (tmp_path / event).mkdir()
+        shutil.copy(FIXTURES / "fl_holdem.phh", tmp_path / event / "1.phh")
+        assert importer.addImportFile(str(tmp_path / event / "1.phh"))
+    stored, duplicates, *_rest = importer.runImport()
+    assert (stored, duplicates) == (2, 0)
+
+
+def test_a_line_that_is_not_utf8_makes_only_its_hand_malformed(tmp_path) -> None:
+    path = tmp_path / "hands.phhs"
+    good = SHOWDOWN.encode("utf-8")
+    path.write_bytes(b"[1]\n" + good + b"[2]\n# caf\xe9\n" + good + b"[3]\n" + good)
+    items = list(iter_documents(path))
+    assert [getattr(item, "label", None) or item.kind for item in items] == ["1", MALFORMED, "3"]
+    bad_line = len(good.splitlines()) + 3  # [1], its lines, [2], then the comment
+    assert f"line {bad_line} is not UTF-8" in str(items[1])
+
+    single = tmp_path / "hand.phh"
+    single.write_bytes(b"# caf\xe9\n" + good)
+    (error,) = list(iter_documents(single))
+    assert isinstance(error, PHHImportError)
+    assert error.kind == MALFORMED
+    assert "not UTF-8 (byte 5)" in str(error)

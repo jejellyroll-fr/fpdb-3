@@ -251,7 +251,12 @@ def iter_documents(path: str | Path) -> Iterator[PHHDocument | PHHImportError]:
         return
     source = str(path)
     try:
-        yield PHHDocument(source, path.name, 1, _parse_toml(path.read_text(encoding="utf-8"), source, 1, path.name))
+        text = path.read_bytes().decode("utf-8")
+    except UnicodeDecodeError as error:
+        yield PHHImportError(MALFORMED, f"not UTF-8 (byte {error.start})", source=source, hand=path.name)
+        return
+    try:
+        yield PHHDocument(source, path.name, 1, _parse_toml(text, source, 1, path.name))
     except PHHImportError as error:
         yield error
 
@@ -319,11 +324,25 @@ def _multiline_end(line: str, index: int, open_string: str) -> tuple[int, str | 
 
 def _iter_tables(path: Path) -> Iterator[PHHDocument | PHHImportError]:
     """The hands of a ``.phhs`` file: one top-level TOML table each, read as they come."""
-    with path.open(encoding="utf-8") as handle:
-        yield from _split_tables(str(path), enumerate(handle, start=1))
+    undecodable: set[int] = set()
+    with path.open("rb") as handle:
+        yield from _split_tables(str(path), _decoded(handle, undecodable), undecodable)
 
 
-def _split_tables(source: str, numbered: Iterable[tuple[int, str]]) -> Iterator[PHHDocument | PHHImportError]:
+def _decoded(handle: Iterable[bytes], undecodable: set[int]) -> Iterator[tuple[int, str]]:
+    """The numbered lines of a UTF-8 file, decoded one by one: a line that is not UTF-8 is
+    noted in *undecodable* (its hand is then malformed) and read past, not fatal to the file."""
+    for number, raw in enumerate(handle, start=1):
+        try:
+            yield number, raw.decode("utf-8")
+        except UnicodeDecodeError:
+            undecodable.add(number)
+            yield number, raw.decode("utf-8", "replace")
+
+
+def _split_tables(
+    source: str, numbered: Iterable[tuple[int, str]], undecodable: set[int]
+) -> Iterator[PHHDocument | PHHImportError]:
     """Cut numbered lines at their top-level ``[name]`` headers: one hand each."""
     label: str | None = None
     start = 1
@@ -341,7 +360,7 @@ def _split_tables(source: str, numbered: Iterable[tuple[int, str]]) -> Iterator[
         header = _TABLE_HEADER_RE.match(stripped) if stripped[:1] == "[" else None
         if header is not None and not inside:
             if label is not None:
-                yield from _documents(source, label, start, lines, suspects)
+                yield from _documents(source, label, start, lines, suspects, undecodable)
             label = next(key for key in header.group("basic", "literal", "bare") if key is not None)
             start, lines, suspects = number, [raw], []
         elif label is not None:
@@ -353,21 +372,25 @@ def _split_tables(source: str, numbered: Iterable[tuple[int, str]]) -> Iterator[
             preamble_reported = True
             yield PHHImportError(MALFORMED, "content before the first [hand] table", source=f"{source}:{number}")
     if label is not None:
-        yield from _documents(source, label, start, lines, suspects)
+        yield from _documents(source, label, start, lines, suspects, undecodable)
 
 
 def _documents(
-    source: str, label: str, start: int, lines: list[str], suspects: list[int]
+    source: str, label: str, start: int, lines: list[str], suspects: list[int], undecodable: set[int]
 ) -> Iterator[PHHDocument | PHHImportError]:
     """One hand's table -- or, when a value it leaves open swallowed the hands after it, the
-    malformed hand and then those hands, cut again from the first header inside that value."""
+    malformed hand and then those hands, cut again from the first header inside that value.
+    A line of it that is not UTF-8 makes the hand malformed."""
+    if bad := sorted(number for number in undecodable if start <= number < start + len(lines)):
+        yield PHHImportError(MALFORMED, f"line {bad[0]} is not UTF-8", source=f"{source}:{start}", hand=label)
+        return
     document = _document(source, label, start, lines)
     if not isinstance(document, PHHImportError) or document.kind != MALFORMED or not suspects:
         yield document
         return
     cut = suspects[0]
     yield _document(source, label, start, lines[:cut])
-    yield from _split_tables(source, enumerate(lines[cut:], start=start + cut))
+    yield from _split_tables(source, enumerate(lines[cut:], start=start + cut), undecodable)
 
 
 # -- interpreting -----------------------------------------------------------------------
@@ -655,7 +678,7 @@ class _Builder:
         blinds = self._per_player("blinds_or_straddles", count) if self.base != "stud" else [Decimal(0)] * count
         gametype = self._gametype(blinds)
         hand_class = {"hold": HoldemOmahaHand, "stud": StudHand, "draw": DrawHand}[self.base]
-        number = hand_number(self.data, f"{Path(self.document.source).name}\0{self.document.label}")
+        number = hand_number(self.data, f"{os.path.abspath(self.document.source)}\0{self.document.label}")
         # The concrete class (stud, draw) is chosen here; typed Any for the methods only it has.
         hand: Any = hand_class(
             self.config, _PHHSource(self.document.source), PHH_SITE_NAME, gametype, "", "PHH", number

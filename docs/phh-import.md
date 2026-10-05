@@ -35,7 +35,7 @@ configuration — no parser, no `supported_sites` entry, no HUD.
   PHH file of the same name in another directory.
 - A `.phhs` file holds one hand per top-level table (`[1]`, `[2]`, `["session.1"]`, …); a dotted table (`[1.notes]`) is a sub-table of its hand, and a line inside a multiline string (a note), an array or an inline table is never taken for a table -- unless that value is never closed: the hand is then malformed, and the hands it swallowed are read again from the first table header inside it. It is read
   **line by line, one hand at a time**, so a large dataset is never loaded
-  whole. Files are read as UTF-8.
+  whole. Files are read as UTF-8: in a `.phhs`, a line that is not makes only its hand malformed.
 
 The import reports, per run, how many hands were **found**, **imported**,
 **duplicates**, **partial**, **unsupported** and **malformed**, and how long it took — in the
@@ -45,11 +45,12 @@ count as *partial*, unsupported hands as *skipped* and malformed hands as
 *errors*.
 
 A hand is a duplicate when the same hand was imported before: its fpdb hand
-number is a hash of its PHH content and of where it sits (the file's name and,
+number is a hash of its PHH content and of where it sits (the file's path and,
 in a `.phhs`, its table), not the optional `hand` field. Two datasets that both
 number their hands from 1 are never taken for each other, two hands that read
-alike at two tables of one file (anonymised, every card unknown) are both kept,
-and importing a file again finds every hand a duplicate.
+alike (anonymised, every card unknown) at two tables or in two files are both
+kept, and importing a file again finds every hand a duplicate -- a copy moved
+elsewhere is another file, its hands new ones.
 
 ## Capability matrix
 
