@@ -1065,8 +1065,8 @@ def test_a_show_must_agree_with_the_deal() -> None:
     assert "p1 shows 7h 6h, which the deal did not give them" in str(refusal(other_cards))
     half = SHOWDOWN.replace('"d dh p1 AsKs"', '"d dh p1 As??"').replace('"p1 sm -"', '"p1 sm 7h6h"')
     assert "which the deal did not give them" in str(refusal(half))
-    too_few = SHOWDOWN.replace('"p1 sm -"', '"p1 sm As"')
-    assert "p1 shows 1 cards for 2 dealt" in str(refusal(too_few))
+    too_many = SHOWDOWN.replace('"p1 sm -"', '"p1 sm AsKs2h"')
+    assert "p1 shows 3 cards for 2 dealt" in str(refusal(too_many))
 
 
 def test_an_unknown_card_discarded_as_another_player_s_card_is_refused() -> None:
@@ -1521,3 +1521,19 @@ def test_a_stud_show_in_another_order_keeps_the_deal_s_places() -> None:
     assert hand.holecards["THIRD"]["p1"] == (["3c"], ["2d", "Ad"])
     assert hand.holecards["FOURTH"]["p1"][0] == ["4c"]
     assert hand.join_holecards("p1", asList=True)[2:] == P1_SEVEN[2:]
+
+
+# -- twenty-sixth review --------------------------------------------------------------
+
+
+def test_a_show_of_fewer_cards_is_partial() -> None:
+    """PokerKit 0.7.6, cash game: ``sm As`` over ``????`` shows ``As ??``."""
+    text = SHOWDOWN.replace('"d dh p1 AsKs"', '"d dh p1 ????"').replace('"p1 sm -"', '"p1 sm As"')
+    assert build_hand(document(text)).holecards["PREFLOP"]["p1"][1] == ["As", "0x"]
+    kept = SHOWDOWN.replace('"p1 sm -"', '"p1 sm Ks"')
+    assert build_hand(document(kept)).holecards["PREFLOP"]["p1"][1] == ["As", "Ks"]
+
+
+def test_a_player_shows_or_mucks_once() -> None:
+    twice = SHOWDOWN.replace('"p1 sm -",', '"p1 sm -",\n  "p1 sm",')
+    assert "p1 shows or mucks a second time" in str(refusal(twice))

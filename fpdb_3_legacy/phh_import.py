@@ -711,6 +711,8 @@ class _Builder:
         self.completed = False
         # Fourth street in stud high: once a bet or raise is the big bet, every one after is.
         self.big_bet_made = False
+        # The players who showed or mucked: once each.
+        self.showed_down: set[str] = set()
         # The smallest a raise may add on this street (no-limit, pot-limit), and the bets a
         # street ended with that nobody matched, kept when the street is left behind.
         self.raise_size = self.level
@@ -831,6 +833,9 @@ class _Builder:
         if move == "sm":
             if not self._showdown_begun():
                 raise self.fail(f"{seat.name} shows or mucks before the showdown")
+            if seat.name in self.showed_down:
+                raise self.fail(f"{seat.name} shows or mucks a second time")
+            self.showed_down.add(seat.name)
             self._show(seat, arg)
             return
         if move == "sd":
@@ -1196,8 +1201,10 @@ class _Builder:
         """
         # A replacement not dealt yet is a card of the hand too (the history stops early).
         pending = self.awaiting[seat.name]
-        if dealt and len(shown) != len(dealt) + pending:
+        if dealt and len(shown) > len(dealt) + pending:
             raise self.fail(f"{seat.name} shows {len(shown)} cards for {len(dealt) + pending} dealt")
+        # Fewer cards is a partial show (a cash game, as PokerKit plays it): the rest unknown.
+        shown = shown + ["0x"] * (len(dealt) + pending - len(shown))
         named = [card for card in shown if card != "0x"]
         if len(set(named)) != len(named):
             raise self.fail(f"{seat.name} shows the same card twice")
