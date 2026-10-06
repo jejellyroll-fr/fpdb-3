@@ -78,7 +78,7 @@ them is untouched — they keep their native parsers.
 | PHH | fpdb |
 | --- | --- |
 | `antes` | an `ante` post per player (heads-up, like the blinds, the first two are assigned in reverse) |
-| `blinds_or_straddles` | `small blind`, `big blind`, then `straddle`; only the last player posting is a `button blind` (short deck). Heads-up the first player posts the big blind and the second, who has the button, the small blind — PokerKit's convention. A blind posted all in for less sets the call at what it posted, as PokerKit plays it |
+| `blinds_or_straddles` | `small blind`, `big blind`, then `straddle`; only the last player posting is a `button blind` (short deck). Heads-up the first player posts the big blind and the second, who has the button, the small blind — PokerKit's convention. A blind posted all in for less sets the call at what it posted, as PokerKit plays it. The game's stakes are the small and big blind by position, never a straddle (half the big blind when there is no small one; the button blind when it is the only one) |
 | `bring_in`, `pN pb` | a stud `bringin` on third street; the first `cbr` facing it, or made in its place, is a `completes` |
 | `pN cbr X` | a bet when nothing is bet on the street, otherwise a raise **to** X (PHH's meaning) |
 | `pN cc` | a check, or a call of what is owed — all in for less when the stack is short |

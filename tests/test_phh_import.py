@@ -1602,3 +1602,24 @@ def test_the_hands_after_an_undecodable_unclosed_value_are_recovered(tmp_path) -
     items = list(iter_documents(path))
     assert [getattr(item, "label", None) or item.kind for item in items] == [MALFORMED, "2", "3"]
     assert "is not UTF-8" in str(items[0])
+
+
+# -- thirtieth review -----------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("blinds", "stakes"),
+    [
+        ("[1, 2, 0]", (1, 2)),
+        ("[1, 2, 4]", (1, 2)),  # a straddle is not the big blind
+        ("[0, 2, 4]", (1, 2)),  # no small blind: half the big one
+        ("[0, 0, 2]", (1, 2)),  # a button blind alone
+    ],
+)
+def test_the_stakes_are_the_blinds_by_position(blinds: str, stakes: tuple[int, int]) -> None:
+    from fpdb_3_legacy.phh_import import _Builder
+
+    text = NT_HAND.replace("blinds_or_straddles = [1, 2, 0]", f"blinds_or_straddles = {blinds}")
+    builder = _Builder(document(text), mapping_for("NT"), None)
+    gametype = builder._gametype(builder._per_player("blinds_or_straddles", 3))
+    assert (gametype["sb"], gametype["bb"]) == stakes

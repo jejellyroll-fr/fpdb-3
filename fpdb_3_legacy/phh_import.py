@@ -641,16 +641,25 @@ class _Builder:
             raise self.fail(f"{key} must have one value per player")
         return [_amount(value, f"{key}[{index}]", self.fail) for index, value in enumerate(values)]
 
+    def _stakes(self, blinds: list[Decimal]) -> tuple[Decimal, Decimal]:
+        """The table's small and big blind, by position as ``_post`` reads them: the first two
+        entries -- never a straddle after them -- or a short-deck button blind alone."""
+        small, big = blinds[0], blinds[1]
+        if small == 0 and big == 0 and blinds[-1] > 0:
+            return blinds[-1] / 2, blinds[-1]  # a button blind: the only blind
+        if big > 0:
+            return (small if small > 0 else big / 2), big
+        if small > 0:
+            return small / 2, small  # one blind alone: it is the big one
+        raise self.fail("no blind is posted", UNSUPPORTED)
+
     def _gametype(self, blinds: list[Decimal]) -> dict[str, Any]:
         currency = str(self.data.get("currency") or "play")
         if self.base == "stud":
             small = _amount(self.data["small_bet"], "small_bet", self.fail)
             sb = bb = small
         else:
-            posted = sorted(blind for blind in blinds if blind > 0)
-            if not posted:
-                raise self.fail("no blind is posted", UNSUPPORTED)
-            sb, bb = (posted[0], posted[1]) if len(posted) > 1 else (posted[0] / 2, posted[0])
+            sb, bb = self._stakes(blinds)
         return {
             "type": "ring",
             "base": self.base,
