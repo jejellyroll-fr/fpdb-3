@@ -1590,3 +1590,15 @@ def test_a_line_that_is_not_utf8_makes_only_its_hand_malformed(tmp_path) -> None
     assert isinstance(error, PHHImportError)
     assert error.kind == MALFORMED
     assert "not UTF-8 (byte 5)" in str(error)
+
+
+# -- twenty-ninth review --------------------------------------------------------------
+
+
+def test_the_hands_after_an_undecodable_unclosed_value_are_recovered(tmp_path) -> None:
+    path = tmp_path / "hands.phhs"
+    good = SHOWDOWN.encode("utf-8")
+    path.write_bytes(b"[1]\n" + good + b"_x = [\xff\n[2]\n" + good + b"[3]\n" + good)
+    items = list(iter_documents(path))
+    assert [getattr(item, "label", None) or item.kind for item in items] == [MALFORMED, "2", "3"]
+    assert "is not UTF-8" in str(items[0])

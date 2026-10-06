@@ -381,15 +381,17 @@ def _documents(
     """One hand's table -- or, when a value it leaves open swallowed the hands after it, the
     malformed hand and then those hands, cut again from the first header inside that value.
     A line of it that is not UTF-8 makes the hand malformed."""
+    document: PHHDocument | PHHImportError
     if bad := sorted(number for number in undecodable if start <= number < start + len(lines)):
-        yield PHHImportError(MALFORMED, f"line {bad[0]} is not UTF-8", source=f"{source}:{start}", hand=label)
-        return
-    document = _document(source, label, start, lines)
+        document = PHHImportError(MALFORMED, f"line {bad[0]} is not UTF-8", source=f"{source}:{start}", hand=label)
+    else:
+        document = _document(source, label, start, lines)
     if not isinstance(document, PHHImportError) or document.kind != MALFORMED or not suspects:
         yield document
         return
+    # Undecodable or not, a value left open may have swallowed the hands after it.
     cut = suspects[0]
-    yield _document(source, label, start, lines[:cut])
+    yield from _documents(source, label, start, lines[:cut], [], undecodable)
     yield from _split_tables(source, enumerate(lines[cut:], start=start + cut), undecodable)
 
 
