@@ -105,6 +105,8 @@ _BOARD_SIZES: Final = {"FLOP": 3, "TURN": 1, "RIVER": 1}
 #: A known card, or ``??`` for one that is not: PHH has no half-known card ("A?", "?s").
 _CARD_RE: Final = re.compile(r"[2-9TJQKA][cdhs]|\?\?")
 _CENT: Final = Decimal("0.01")
+#: PHH's currency: an ISO 4217 code.
+_CURRENCY_RE: Final = re.compile(r"[A-Z]{3}")
 _ACTION_RE: Final = re.compile(
     r"^(?:(?P<dealer>d)\s+(?P<deal>dh|db)(?:\s+(?P<target>p\d+))?\s+(?P<cards>\S+)|"
     r"(?P<player>p\d+)\s+(?P<move>pb|cbr|cc|f|sd|sm)(?:\s+(?P<arg>\S+))?)$"
@@ -499,6 +501,13 @@ def _in_utc(local: datetime.datetime, data: Mapping[str, Any], fail: Any) -> dat
             folds = [fold for fold in folds if local.replace(fold=fold).tzname() == abbreviation]
             if not folds:
                 raise fail(f"{abbreviation!r} is not {data['time_zone']}'s abbreviation at {wall:%Y-%m-%d %H:%M}")
+        if len({local.replace(fold=fold).utcoffset() for fold in folds}) > 1:
+            # The hour repeated when summer time ends, with no abbreviation to say which.
+            raise fail(
+                f"{wall:%Y-%m-%d %H:%M} happens twice in {data['time_zone']}: "
+                "a time_zone_abbreviation is needed to tell which",
+                UNSUPPORTED,
+            )
         local = local.replace(fold=folds[0])
     # PHH reads the time as local only to a full location: city, region and country all given.
     location = [str(data[key]) for key in ("city", "region", "country") if data.get(key) is not None]
@@ -661,8 +670,8 @@ class _Builder:
         currency = self.data.get("currency")
         if currency is None:
             currency = "play"  # no currency: the amounts are chips
-        elif not isinstance(currency, str) or not currency:
-            raise self.fail(f"currency {currency!r} is not a currency code")
+        elif not isinstance(currency, str) or _CURRENCY_RE.fullmatch(currency) is None:
+            raise self.fail(f"currency {currency!r} is not an ISO 4217 code (three capital letters)")
         sb, bb = (Decimal(0), Decimal(0)) if self.base == "stud" else self._stakes(blinds)
         if self.mapping.limit_type == "fl":
             # fpdb's game row has one fixed-limit size: the small bet is the big blind, the big

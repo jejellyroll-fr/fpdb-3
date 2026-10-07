@@ -1259,6 +1259,16 @@ def test_a_time_zone_that_is_not_a_string_is_malformed() -> None:
     assert "time_zone 123 is not a string" in str(error)
 
 
+def test_a_repeated_hour_without_an_abbreviation_is_unsupported() -> None:
+    night = SHOWDOWN + 'year = 2026\nmonth = 11\nday = 1\ntime = 01:30:00\ntime_zone = "America/New_York"\n'
+    error = refusal(night)
+    assert error.kind == UNSUPPORTED
+    assert "2026-11-01 01:30 happens twice in America/New_York" in str(error)
+    assert build_hand(document(night.replace("01:30:00", "02:30:00"))).startTime == datetime.datetime(
+        2026, 11, 1, 7, 30
+    )
+
+
 def test_the_abbreviation_picks_the_repeated_hour() -> None:
     night = SHOWDOWN + 'year = 2026\nmonth = 11\nday = 1\ntime = 01:30:00\ntime_zone = "America/New_York"\n'
     assert build_hand(document(night + 'time_zone_abbreviation = "EDT"\n')).startTime == datetime.datetime(
@@ -1707,7 +1717,7 @@ def test_the_filters_list_the_phh_source_after_the_rooms() -> None:
 
 
 def test_a_currency_that_is_not_a_code_is_malformed() -> None:
-    for value in ("true", "123", '""'):
-        assert "is not a currency code" in str(refusal(SHOWDOWN + f"currency = {value}\n"))
+    for value in ("true", "123", '""', '"USDX"', '"usd"'):
+        assert "is not an ISO 4217 code" in str(refusal(SHOWDOWN + f"currency = {value}\n"))
     assert build_hand(document(SHOWDOWN + 'currency = "USD"\n')).gametype["currency"] == "USD"
     assert build_hand(document(SHOWDOWN)).gametype["currency"] == "play"

@@ -415,7 +415,7 @@ class Filters(QWidget):
             else:
                 log.debug("Either 0 or more than one site matched for %s", site)
         # PHH hands come from a data source, not a configured room: offered when stored.
-        self.phh_players = phh_source_players(self.db_cursor, self.sql.query.get("placeholder", "%s"))
+        self.phh_players = self._phh_players()
         if self.phh_players:
             self.siteid[PHH_SITE_NAME] = PHH_SITE_ID
 
@@ -682,6 +682,16 @@ class Filters(QWidget):
     def getGraphOps(self) -> list[str]:
         """Get selected graph options."""
         return [g for g in self.cbGraphops if self.cbGraphops[g].isChecked()]
+
+    def _phh_players(self) -> list[str]:
+        """The PHH players to offer; none when the source cannot be read -- a filter is
+        never lost to it (a failed read is rolled back, so the next query still runs)."""
+        try:
+            return phh_source_players(self.db_cursor, str(self.sql.query.get("placeholder", "%s")))
+        except Exception:  # noqa: BLE001 - optional entries: the rooms' filters come first.
+            log.debug("The PHH data source could not be read for the filters", exc_info=True)
+            self.end_read_transaction()
+            return []
 
     def filter_sites(self) -> list[str]:
         """The sites a filter offers: the configured rooms, then the PHH data source if stored."""
