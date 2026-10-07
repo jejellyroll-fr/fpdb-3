@@ -450,9 +450,7 @@ def _start_time(data: Mapping[str, Any], fail: Any) -> datetime.datetime:
     _check_time_fields(data, fail)
     year, month, day = data.get("year"), data.get("month"), data.get("day")
     moment = data.get("time")
-    if isinstance(moment, datetime.datetime):
-        local = moment
-    elif any(part is not None for part in (year, month, day, moment)):
+    if any(part is not None for part in (year, month, day, moment)):
         # PHH's fields are optional one by one (its own example gives only the year): each
         # one given is kept, each one missing is the epoch's (1970, January, the 1st, 00:00).
         year, month, day = (
@@ -474,8 +472,9 @@ def _check_time_fields(data: Mapping[str, Any], fail: Any) -> None:
     """The date and time fields, when given, are of their PHH type."""
     year, month, day = data.get("year"), data.get("month"), data.get("day")
     moment = data.get("time")
-    if moment is not None and not isinstance(moment, (datetime.datetime, datetime.time)):
-        raise fail(f"time {moment!r} is not a time")
+    # PHH's time is a TOML local time: a date and an offset are fields of their own.
+    if moment is not None and (isinstance(moment, datetime.datetime) or not isinstance(moment, datetime.time)):
+        raise fail(f"time {moment!r} is not a local time of day")
     # The epoch stands for a hand PHH gives no date; a date given wrong is not that.
     if any(part is not None and (not isinstance(part, int) or isinstance(part, bool)) for part in (year, month, day)):
         raise fail(f"year, month and day {year!r}, {month!r}, {day!r} are not a date")
@@ -646,12 +645,17 @@ class _Builder:
         entries -- never a straddle after them -- or a short-deck button blind alone."""
         small, big = blinds[0], blinds[1]
         if small == 0 and big == 0 and blinds[-1] > 0:
-            return blinds[-1] / 2, blinds[-1]  # a button blind: the only blind
-        if big > 0:
-            return (small if small > 0 else big / 2), big
-        if small > 0:
-            return small / 2, small  # one blind alone: it is the big one
-        raise self.fail("no blind is posted", UNSUPPORTED)
+            small, big = blinds[-1] / 2, blinds[-1]  # a button blind: the only blind
+        elif big > 0:
+            small = small if small > 0 else big / 2
+        elif small > 0:
+            small, big = small / 2, small  # one blind alone: it is the big one
+        else:
+            raise self.fail("no blind is posted", UNSUPPORTED)
+        if small != small.quantize(_CENT, rounding=ROUND_DOWN):
+            # Half a blind of 0.01: fpdb's game row, in hundredths, would store no small blind.
+            raise self.fail(f"a big blind of {big} has no small blind fpdb can store", UNSUPPORTED)
+        return small, big
 
     def _gametype(self, blinds: list[Decimal]) -> dict[str, Any]:
         currency = str(self.data.get("currency") or "play")

@@ -1177,7 +1177,7 @@ def test_a_partial_date_keeps_what_it_gives_and_a_mistyped_one_is_malformed() ->
     error = refusal(SHOWDOWN + 'year = "2026"\nmonth = 2\nday = 3\n')
     assert error.kind == MALFORMED
     assert "are not a date" in str(error)
-    assert "is not a time" in str(refusal(SHOWDOWN + 'time = "noon"\n'))
+    assert "is not a local time of day" in str(refusal(SHOWDOWN + 'time = "noon"\n'))
 
 
 def test_seat_count_must_hold_every_seat() -> None:
@@ -1649,3 +1649,24 @@ def test_a_draw_hand_is_shown_only_after_the_last_draw() -> None:
     runout = (FIXTURES / "triple_draw_all_in_runout.phh").read_text(encoding="utf-8")
     early = runout.replace('  "p1 cc",\n', '  "p1 cc",\n  "p1 sm 7h5c4d3s2c",\n', 1)
     assert "p1 shows or mucks before the showdown" in str(refusal(early))
+
+
+# -- thirty-second review -------------------------------------------------------------
+
+
+def test_time_is_a_local_time_of_day() -> None:
+    error = refusal(SHOWDOWN + 'time = 2026-01-01T12:00:00Z\ntime_zone = "America/New_Yrok"\n')
+    assert error.kind == MALFORMED
+    assert "is not a local time of day" in str(error)
+    assert "is not a local time of day" in str(refusal(SHOWDOWN + "time = 2026-01-01T12:00:00\n"))
+
+
+def test_a_half_blind_finer_than_a_cent_is_unsupported() -> None:
+    from fpdb_3_legacy.phh_import import _Builder
+
+    text = NT_HAND.replace("blinds_or_straddles = [1, 2, 0]", "blinds_or_straddles = [0, 0.01, 0]")
+    builder = _Builder(document(text), mapping_for("NT"), None)
+    with pytest.raises(PHHImportError) as raised:
+        builder._gametype(builder._per_player("blinds_or_straddles", 3))
+    assert raised.value.kind == UNSUPPORTED
+    assert "a big blind of 0.01 has no small blind" in str(raised.value)
