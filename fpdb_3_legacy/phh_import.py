@@ -655,11 +655,17 @@ class _Builder:
 
     def _gametype(self, blinds: list[Decimal]) -> dict[str, Any]:
         currency = str(self.data.get("currency") or "play")
-        if self.base == "stud":
+        sb, bb = (Decimal(0), Decimal(0)) if self.base == "stud" else self._stakes(blinds)
+        if self.mapping.limit_type == "fl":
+            # fpdb's game row has one fixed-limit size: the small bet is the big blind, the big
+            # bet twice it. Any other pair would be grouped and normalised as another game.
             small = _amount(self.data["small_bet"], "small_bet", self.fail)
-            sb = bb = small
-        else:
-            sb, bb = self._stakes(blinds)
+            big = _amount(self.data["big_bet"], "big_bet", self.fail)
+            if big != 2 * small:
+                raise self.fail(
+                    f"bets of {small}/{big}: fpdb stores a fixed-limit big bet as twice the small one", UNSUPPORTED
+                )
+            sb, bb = (small if self.base == "stud" else sb), small
         return {
             "type": "ring",
             "base": self.base,
@@ -1333,6 +1339,9 @@ class _Builder:
         """Whether cards may be shown: the hand's end, or an all-in runout (nobody left to bet)."""
         if self._finished():
             return True
+        if self.base == "draw":
+            # Every draw changes the hand: it is shown once the last one is over.
+            return False
         can_act = [seat for seat in self.seats if not seat.folded and seat.behind > 0]
         return len(can_act) <= 1 and self._street_closed() and not self._undealt()
 

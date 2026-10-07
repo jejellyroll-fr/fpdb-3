@@ -1623,3 +1623,29 @@ def test_the_stakes_are_the_blinds_by_position(blinds: str, stakes: tuple[int, i
     builder = _Builder(document(text), mapping_for("NT"), None)
     gametype = builder._gametype(builder._per_player("blinds_or_straddles", 3))
     assert (gametype["sb"], gametype["bb"]) == stakes
+
+
+# -- thirty-first review --------------------------------------------------------------
+
+
+def test_a_fixed_limit_big_bet_other_than_twice_the_small_is_unsupported() -> None:
+    error = refusal(stud_fourth("F7S", "9d", 5).replace("big_bet = 10", "big_bet = 12"))
+    assert error.kind == UNSUPPORTED
+    assert "bets of 5/12" in str(error)
+
+
+def test_the_fixed_limit_small_bet_is_the_game_s_big_blind() -> None:
+    from fpdb_3_legacy.phh_import import _Builder
+
+    text = (
+        FL_FOUR.format(last='"p3 cc"').replace("small_bet = 2", "small_bet = 4").replace("big_bet = 4", "big_bet = 8")
+    )
+    builder = _Builder(document(text), mapping_for("FT"), None)
+    gametype = builder._gametype(builder._per_player("blinds_or_straddles", 4))
+    assert (gametype["sb"], gametype["bb"]) == (1, 4)
+
+
+def test_a_draw_hand_is_shown_only_after_the_last_draw() -> None:
+    runout = (FIXTURES / "triple_draw_all_in_runout.phh").read_text(encoding="utf-8")
+    early = runout.replace('  "p1 cc",\n', '  "p1 cc",\n  "p1 sm 7h5c4d3s2c",\n', 1)
+    assert "p1 shows or mucks before the showdown" in str(refusal(early))
