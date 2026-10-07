@@ -46,6 +46,7 @@ from fpdb_3_legacy import SQL, Card, Configuration, Database
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.phh_import import PHH_SITE_ID, PHH_SITE_NAME, phh_source_players
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
@@ -413,6 +414,10 @@ class Filters(QWidget):
                 self.siteid[site] = result[0][0]
             else:
                 log.debug("Either 0 or more than one site matched for %s", site)
+        # PHH hands come from a data source, not a configured room: offered when stored.
+        self.phh_players = phh_source_players(self.db_cursor, self.sql.query.get("placeholder", "%s"))
+        if self.phh_players:
+            self.siteid[PHH_SITE_NAME] = PHH_SITE_ID
 
         self.start_date = QDateEdit(QDate(1970, 1, 1))
         self.end_date = QDateEdit(QDate(2100, 1, 1))
@@ -677,6 +682,13 @@ class Filters(QWidget):
     def getGraphOps(self) -> list[str]:
         """Get selected graph options."""
         return [g for g in self.cbGraphops if self.cbGraphops[g].isChecked()]
+
+    def filter_sites(self) -> list[str]:
+        """The sites a filter offers: the configured rooms, then the PHH data source if stored."""
+        sites = list(self.conf.get_supported_sites())
+        if PHH_SITE_NAME in self.siteid:
+            sites.append(PHH_SITE_NAME)
+        return sites
 
     def getSites(self) -> list[str]:
         """Get selected sites."""
@@ -1013,6 +1025,10 @@ class Filters(QWidget):
 
             for alias in aliases:
                 self.heroList.addItem(resolve_site_icon(site), f"{alias} on {site}", ("site_alias", site, alias))
+        for name in self.phh_players:
+            self.heroList.addItem(
+                resolve_site_icon(PHH_SITE_NAME), f"{name} on {PHH_SITE_NAME}", ("site_alias", PHH_SITE_NAME, name)
+            )
 
         # Multiroom hero profiles (aggregate a player's identity across rooms).
         getter = getattr(self.conf, "get_hero_profiles", None)
@@ -1045,7 +1061,7 @@ class Filters(QWidget):
         vbox = QVBoxLayout()
         frame.setLayout(vbox)
 
-        for site in self.conf.get_supported_sites():
+        for site in self.filter_sites():
             self.cbSites[site] = QCheckBox(site)
             self.cbSites[site].setChecked(True)
 
@@ -1683,7 +1699,10 @@ class Filters(QWidget):
         seen: set[int] = set()
         resolver = getattr(self.db, "get_hero_player_ids", None)
         if callable(resolver):
-            for site in heroes:
+            # Aliases are a configured room's; a data source (PHH) has none, and its fallback --
+            # every player flagged hero there -- is not the player selected: resolved by name.
+            rooms = set(self.conf.get_supported_sites())
+            for site in (site for site in heroes if site in rooms):
                 for pid in resolver(site):
                     if pid not in seen:
                         seen.add(pid)

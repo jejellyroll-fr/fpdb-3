@@ -658,7 +658,11 @@ class _Builder:
         return small, big
 
     def _gametype(self, blinds: list[Decimal]) -> dict[str, Any]:
-        currency = str(self.data.get("currency") or "play")
+        currency = self.data.get("currency")
+        if currency is None:
+            currency = "play"  # no currency: the amounts are chips
+        elif not isinstance(currency, str) or not currency:
+            raise self.fail(f"currency {currency!r} is not a currency code")
         sb, bb = (Decimal(0), Decimal(0)) if self.base == "stud" else self._stakes(blinds)
         if self.mapping.limit_type == "fl":
             # fpdb's game row has one fixed-limit size: the small bet is the big blind, the big
@@ -1495,6 +1499,28 @@ def ensure_phh_site(db: Any) -> int:
             UNSUPPORTED, f"site id {PHH_SITE_ID} is {row[0]!r} ({row[1]!r}) in this database, not the PHH data source"
         )
     return PHH_SITE_ID
+
+
+#: The PHH players a report filter offers: the files' heroes (``_hero``) first, then the most
+#: active -- a dataset may hold thousands of players, so only the first of them.
+_SOURCE_PLAYERS_SQL: Final = (
+    "SELECT p.name FROM Players p JOIN HandsPlayers hp ON hp.playerId = p.id WHERE p.siteId = %s "
+    "GROUP BY p.id, p.name, p.hero ORDER BY p.hero DESC, COUNT(*) DESC, p.name LIMIT 50"
+)
+
+
+def phh_source_players(cursor: Any, placeholder: str = "%s") -> list[str]:
+    """The PHH players to offer in the report filters; none when no PHH hand is stored.
+
+    PHH is a data source, not a room: it has no configured hero, so the filters list the
+    players its hands hold, read from the database.
+    """
+    cursor.execute(_SITE_LOOKUP_SQL.replace("%s", placeholder), (PHH_SITE_ID,))
+    row = cursor.fetchone()
+    if row is None or tuple(row) != (PHH_SITE_NAME, PHH_SITE_CODE):
+        return []
+    cursor.execute(_SOURCE_PLAYERS_SQL.replace("%s", placeholder), (PHH_SITE_ID,))
+    return [str(name) for (name,) in cursor.fetchall()]
 
 
 class _ImportConfig(_PHHConfig):

@@ -1670,3 +1670,44 @@ def test_a_half_blind_finer_than_a_cent_is_unsupported() -> None:
         builder._gametype(builder._per_player("blinds_or_straddles", 3))
     assert raised.value.kind == UNSUPPORTED
     assert "a big blind of 0.01 has no small blind" in str(raised.value)
+
+
+# -- thirty-third review --------------------------------------------------------------
+
+
+def test_the_report_filters_offer_phh_players_heroes_first(imported) -> None:
+    from fpdb_3_legacy.phh_import import phh_source_players
+
+    _importer, _totals, connection = imported
+    players = phh_source_players(connection.cursor(), "?")
+    assert players[0] == "Alice"  # the file's _hero
+    assert {"Phil Ivey", "Tom Dwan", "Bryce Yockey"} <= set(players)
+    assert len(players) <= 50
+
+
+def test_without_phh_hands_the_filters_offer_no_phh_player() -> None:
+    from fpdb_3_legacy.phh_import import phh_source_players
+
+    connection = sqlite3.connect(":memory:")
+    connection.execute("CREATE TABLE Sites (id INTEGER PRIMARY KEY, name TEXT, code TEXT)")
+    assert phh_source_players(connection.cursor(), "?") == []
+    connection.execute("INSERT INTO Sites VALUES (150, 'Other', 'OT')")
+    assert phh_source_players(connection.cursor(), "?") == []
+
+
+def test_the_filters_list_the_phh_source_after_the_rooms() -> None:
+    from types import SimpleNamespace
+
+    from fpdb_3_legacy.Filters import Filters
+
+    rooms = SimpleNamespace(get_supported_sites=lambda: ["PokerStars"])
+    assert Filters.filter_sites(SimpleNamespace(conf=rooms, siteid={"PokerStars": 32})) == ["PokerStars"]
+    with_phh = SimpleNamespace(conf=rooms, siteid={"PokerStars": 32, "PHH": PHH_SITE_ID})
+    assert Filters.filter_sites(with_phh) == ["PokerStars", "PHH"]
+
+
+def test_a_currency_that_is_not_a_code_is_malformed() -> None:
+    for value in ("true", "123", '""'):
+        assert "is not a currency code" in str(refusal(SHOWDOWN + f"currency = {value}\n"))
+    assert build_hand(document(SHOWDOWN + 'currency = "USD"\n')).gametype["currency"] == "USD"
+    assert build_hand(document(SHOWDOWN)).gametype["currency"] == "play"
