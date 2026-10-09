@@ -27,6 +27,7 @@ import math
 import os
 import re
 import time
+import unicodedata
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from decimal import ROUND_DOWN, Decimal, InvalidOperation
@@ -643,6 +644,41 @@ def _player_names(given: Sequence[Any]) -> list[str]:
     return names
 
 
+#: Latin letters the database's collation compares as another letter or letters, but which
+#: no Unicode decomposition reaches: ``Ø`` is ``o`` to the collation and ``Æ`` is ``ae``, and
+#: neither decomposes. Mapped before the fold in ``_collation_key``, which does the rest.
+#:
+#: Measured, not read off the letter's shape. Each entry was probed against a live server on
+#: a UCA collation (the MySQL 8 default) and is a pair that collation really makes equal;
+#: letters it does *not* reach are left out -- ``Ŋ`` is not ``n`` there, nor ``Þ`` ``th`` --
+#: so nothing here guesses what a stroke means.
+_COLLATION_LETTERS: Final[dict[str, str]] = {
+    "Æ": "ae", "æ": "ae", "Ǣ": "ae", "ǣ": "ae", "Ǽ": "ae", "ǽ": "ae",
+    "Ð": "d", "ð": "d", "Đ": "d", "đ": "d",
+    "Ø": "o", "ø": "o", "Ǿ": "o", "ǿ": "o",
+    "Ħ": "h", "ħ": "h",
+    "Ŀ": "l", "ŀ": "l", "Ł": "l", "ł": "l",
+    "Œ": "oe", "œ": "oe",
+}
+
+
+def _collation_key(name: str) -> str:
+    """A name as fpdb's database compares it, not as Python compares strings.
+
+    MySQL's collation ignores case and accents -- and, on the one MySQL 8 defaults to,
+    ligatures and fullwidth letters too -- so ``Alice`` and ``alice`` are one player there,
+    and so are ``José`` and ``jose``. The unique index on ``(name, siteId)`` makes them one
+    row and ``insertPlayer()`` hands the second name the first player's id: two seats become
+    one, in the actions and in the reports, permanently.
+
+    The name goes through ``_COLLATION_LETTERS``, then a decomposition, then a strip of the
+    combining marks, then a case fold: case, accents, and everything a decomposition reaches.
+    """
+    mapped = "".join(_COLLATION_LETTERS.get(char, char) for char in name)
+    decomposed = unicodedata.normalize("NFKD", mapped)
+    return "".join(char for char in decomposed if not unicodedata.combining(char)).casefold()
+
+
 @dataclass
 class _Seat:
     name: str
@@ -696,6 +732,16 @@ class _Builder:
             # fpdb stores a player's name to 32 characters: two names alike that far would be
             # one player, their actions and results merged.
             raise self.fail(f"two players' names are the same in their first {_NAME_LIMIT} characters", UNSUPPORTED)
+        if len({_collation_key(str(name)[:_NAME_LIMIT]) for name in names}) != count:
+            # The same rule, seen from the database's side, and the same 32 characters: MySQL's
+            # default collation compares names without case or accents, so Alice and alice are
+            # one row in Players and insertPlayer() hands back the first player's id -- two
+            # seats become one. Checked here rather than left to the index, which would merge
+            # them silently instead of refusing the hand.
+            raise self.fail(
+                "two players' names are the same to the database, which ignores case and accents",
+                UNSUPPORTED,
+            )
         result = []
         for index, (name, seat, stack) in enumerate(zip(names, seats, stacks, strict=True), start=1):
             if not isinstance(seat, int) or isinstance(seat, bool) or seat < 1:

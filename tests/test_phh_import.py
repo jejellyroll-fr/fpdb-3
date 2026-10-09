@@ -1890,3 +1890,67 @@ def test_an_ante_marked_untrimmed_is_not_read_as_a_truthy_string() -> None:
     assert refusal(ANTES_HAND + 'ante_trimming_status = "no"\n').kind == MALFORMED
     assert refusal(ANTES_HAND + "ante_trimming_status = false\n").kind == PARTIAL
     assert refusal(ANTES_HAND + "ante_trimming_status = true\n").kind == UNSUPPORTED
+
+
+# -- thirty-ninth review --------------------------------------------------------------
+
+
+def test_names_differing_only_in_case_are_unsupported() -> None:
+    """MySQL's default collation is case-insensitive, so the two seats would be one player.
+
+    Measured on a live server rather than assumed: with the table exactly as
+    ``sql_schema_player.py`` and ``sql_indexes.py`` write it, inserting ``Alice`` then
+    ``alice`` leaves *one* row in ``Players`` and ``insertPlayer()`` returns the first
+    player's id both times -- the unique index on ``(name, siteId)`` and its
+    ``ON DUPLICATE KEY UPDATE ... id=LAST_INSERT_ID(id)``. Refused before it gets there.
+    """
+    error = refusal(SHOWDOWN + 'players = ["Alice", "alice"]\n')
+    assert error.kind == UNSUPPORTED
+    assert "ignores case and accents" in str(error)
+    assert build_hand(document(SHOWDOWN + 'players = ["Alice", "Bob"]\n')) is not None
+
+
+def test_names_differing_only_in_accents_are_unsupported() -> None:
+    """The same collation is accent-insensitive too: ``José`` and ``Jose`` are one player."""
+    error = refusal(SHOWDOWN + 'players = ["José", "Jose"]\n')
+    assert error.kind == UNSUPPORTED
+    assert "ignores case and accents" in str(error)
+
+
+def test_names_the_database_folds_onto_a_base_letter_are_unsupported() -> None:
+    """A decomposition reaches most of them; the ones it cannot are in ``_COLLATION_LETTERS``.
+
+    ``Ø`` is ``o`` to the collation, ``Æ`` is ``ae``, and neither decomposes -- while ``ﬁ``
+    is ``fi`` and does. Both kinds are one player to fpdb, so both are refused.
+    """
+    for left, right in [("Łukasz", "Lukasz"), ("Ø", "O"), ("Æ", "AE"), ("ﬁn", "fin")]:
+        error = refusal(SHOWDOWN + 'players = ["' + left + '", "' + right + '"]\n')
+        assert error.kind == UNSUPPORTED, (left, right)
+        assert "ignores case and accents" in str(error)
+
+
+def test_names_the_collation_keeps_apart_are_still_two_players() -> None:
+    """The control: the rule folds what the collation folds, and no more.
+
+    Measured, not assumed -- the collation does *not* read ``Ŋ`` as ``n``, nor ``Þ`` as
+    ``th``, so neither is in ``_COLLATION_LETTERS`` and neither hand is refused. A rule
+    written from the letters' shapes would have folded both.
+    """
+    assert build_hand(document(SHOWDOWN + 'players = ["Ŋór", "Nor"]\n')) is not None
+    assert build_hand(document(SHOWDOWN + 'players = ["Þór", "THor"]\n')) is not None
+
+
+def test_the_collation_check_reads_the_first_32_characters_only() -> None:
+    """Both names are stored to 32 characters, so the comparison is made on those 32.
+
+    An accent past the thirty-second character is not stored at all, so it is no collision;
+    inside them the two names are one, and the collation check is the one that says so --
+    not the truncation check, whose message is about the thirty-two characters themselves.
+    """
+    head = "b" * 31
+    beyond = 'players = ["' + head + "c" + "é" * 10 + '", "' + head + "d" + "e" * 10 + '"]\n'
+    assert build_hand(document(SHOWDOWN + beyond)) is not None
+    inside = 'players = ["' + head + 'é", "' + head + 'e"]\n'
+    error = refusal(SHOWDOWN + inside)
+    assert error.kind == UNSUPPORTED
+    assert "ignores case and accents" in str(error)
