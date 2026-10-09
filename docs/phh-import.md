@@ -149,7 +149,8 @@ Only a hand where everyone folded to one player gets its winner without
 
 - Showdown results come from the file (`winnings` or `finishing_stacks`); fpdb
   does not evaluate hands to find the winners of a PHH showdown.
-- PHH does not mark tournament hands: every hand is imported as a ring game.
+- PHH does not mark tournament hands: every hand is imported as a ring game
+  (#418).
 - The order of play is checked in hold'em and draw games; in stud it follows the
   best hand showing on each street, which would take evaluating the upcards, so
   only the end of each betting round is checked there.
@@ -168,14 +169,14 @@ imported approximately.
 
 | What | Why it is not in the importer |
 | --- | --- |
-| **Tournament hands** | PHH marks no tournament: `level`, `time_limit` and `time_banks` are validated and dropped, and every hand is stored as a ring game. Keeping them is a schema and reporting change. |
-| **Ante side pots** | `ante_trimming_status` with a stack shorter than its ante is *unsupported*: fpdb books every ante as common money, so a trimmed ante's eligibility (an ante side pot) has nowhere to go. |
-| **A shared stud card** | Eight players to seventh street need one card for the whole table; fpdb's stud model has no shared seventh card. *Unsupported*. |
-| **Run it twice** | More than three board deals is *unsupported*. |
-| **Betting-state parity with PokerKit** | The reopen rules after short all-ins cover the cases PokerKit plays; a full betting state machine, cross-checked against PokerKit, is a piece of work of its own — not one more guard in `_Builder`. |
-| **A PHH writer** | fpdb reads PHH and never writes it: the round-trip the introduction mentions is one-way today. |
-| **PHH players in the reports** | A PHH player is resolved by exact name. No aliases, no hero profiles, and `_hero` selects only the players of the file it is written in. |
-| **A byte-for-byte player name** | The root of the name collision above is that `Players.name` is compared with the server's default collation, which folds case, accents and more; the importer folds the cases it can express and refuses the hand. Giving the column an explicit binary collation would remove the class outright, but it is a schema change with a migration, and it changes what *every* importer does with a name, not only PHH. |
+| **Tournament hands** (#418) | PHH marks no tournament: `level`, `time_limit` and `time_banks` are validated and dropped, and every hand is stored as a ring game. Keeping them is a schema and reporting change. |
+| **Ante side pots** (#419) | `ante_trimming_status` with a stack shorter than its ante is *unsupported*: fpdb books every ante as common money, so a trimmed ante's eligibility (an ante side pot) has nowhere to go. |
+| **A shared stud card** (#420) | Eight players to seventh street need one card for the whole table; fpdb's stud model has no shared seventh card. *Unsupported*. |
+| **Run it twice** (#421) | More than three board deals is *unsupported*. |
+| **Betting-state parity with PokerKit** (#422) | The reopen rules after short all-ins cover the cases PokerKit plays; a full betting state machine, cross-checked against PokerKit, is a piece of work of its own — not one more guard in `_Builder`. The cross-validator it would be measured with is #385. |
+| **A PHH writer** (#382) | fpdb reads PHH and never writes it: the round-trip the introduction mentions is one-way today. Filed with the export and round-trip work. |
+| **PHH players in the reports** (#423) | A PHH player is resolved by exact name. No aliases, no hero profiles, and `_hero` selects only the players of the file it is written in. |
+| **A byte-for-byte player name** (#417) | The root of the name collision above is that `Players.name` is compared with the server's default collation, which folds case, accents and more; the importer folds the cases it can express and refuses the hand. Giving the column an explicit binary collation would remove the class outright, but it is a schema change with a migration, and it changes what *every* importer does with a name, not only PHH. |
 
 ## Tests and fixtures
 
