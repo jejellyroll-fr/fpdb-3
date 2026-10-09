@@ -1721,3 +1721,49 @@ def test_a_currency_that_is_not_a_code_is_malformed() -> None:
         assert "is not an ISO 4217 code" in str(refusal(SHOWDOWN + f"currency = {value}\n"))
     assert build_hand(document(SHOWDOWN + 'currency = "USD"\n')).gametype["currency"] == "USD"
     assert build_hand(document(SHOWDOWN)).gametype["currency"] == "play"
+
+
+# -- thirty-fifth review --------------------------------------------------------------
+
+STUD_RUNOUT = """
+variant = "F7S"
+antes = [0, 0]
+bring_in = 1
+small_bet = 2
+big_bet = 4
+starting_stacks = [50, 2]
+actions = [
+  "d dh p1 AhKh2c",
+  "d dh p2 ????9c",
+  "p1 pb",
+  "p2 cbr 2",
+  "p1 cc",
+  "p2 sm QsQd9c",
+  "d dh p1 3c",
+  "d dh p2 Qc",
+  "d dh p1 4d",
+  "d dh p2 8s",
+  "d dh p1 6h",
+  "d dh p2 7s",
+  "d dh p1 Jd",
+  "d dh p2 2h",
+  "p1 sm -",
+]
+winnings = [0, 4]
+"""
+
+
+def test_a_stud_card_shown_in_an_all_in_runout_is_kept() -> None:
+    hand = build_hand(document(STUD_RUNOUT))
+    assert "p2" in hand.shown
+    assert hand.join_holecards("p2", asList=True) == ["Qs", "Qd", "9c", "Qc", "8s", "7s", "2h"]
+
+
+def test_an_iso_4217_code_is_one_the_standard_lists() -> None:
+    assert "is not an ISO 4217 code" in str(refusal(SHOWDOWN + 'currency = "ZZZ"\n'))
+    for code in ("USD", "EUR", "GBP", "FRF"):  # in use, or withdrawn (older datasets)
+        assert build_hand(document(SHOWDOWN + f'currency = "{code}"\n')).gametype["currency"] == code
+
+
+def test_a_seat_may_not_be_a_boolean() -> None:
+    assert "seat True is not a seat number" in str(refusal(SHOWDOWN + "seats = [true, 2]\n"))

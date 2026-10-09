@@ -105,8 +105,23 @@ _BOARD_SIZES: Final = {"FLOP": 3, "TURN": 1, "RIVER": 1}
 #: A known card, or ``??`` for one that is not: PHH has no half-known card ("A?", "?s").
 _CARD_RE: Final = re.compile(r"[2-9TJQKA][cdhs]|\?\?")
 _CENT: Final = Decimal("0.01")
-#: PHH's currency: an ISO 4217 code.
-_CURRENCY_RE: Final = re.compile(r"[A-Z]{3}")
+#: PHH's currency: an ISO 4217 code -- one in use, or withdrawn since 1999 (the euro's
+#: predecessors and other recent replacements), for older datasets.
+_ISO_4217: Final = frozenset(
+    """
+        AED AFN ALL AMD ANG AOA ARS AUD AWG AZN BAM BBD BDT BGN BHD BIF BMD BND BOB BOV BRL BSD
+        BTN BWP BYN BZD CAD CDF CHE CHF CHW CLF CLP CNY COP COU CRC CUC CUP CVE CZK DJF DKK DOP
+        DZD EGP ERN ETB EUR FJD FKP GBP GEL GHS GIP GMD GNF GTQ GYD HKD HNL HTG HUF IDR ILS INR
+        IQD IRR ISK JMD JOD JPY KES KGS KHR KMF KPW KRW KWD KYD KZT LAK LBP LKR LRD LSL LYD MAD
+        MDL MGA MKD MMK MNT MOP MRU MUR MVR MWK MXN MXV MYR MZN NAD NGN NIO NOK NPR NZD OMR PAB
+        PEN PGK PHP PKR PLN PYG QAR RON RSD RUB RWF SAR SBD SCR SDG SEK SGD SHP SLE SLL SOS SRD
+        SSP STN SVC SYP SZL THB TJS TMT TND TOP TRY TTD TWD TZS UAH UGX USD USN UYI UYU UYW UZS
+        VED VES VND VUV WST XAF XAG XAU XBA XBB XBC XBD XCD XCG XDR XOF XPD XPF XPT XSU XTS XUA
+        XXX YER ZAR ZMW ZWG ZWL
+        ATS BEF BYR CYP DEM EEK ESP FIM FRF GRD HRK IEP ITL LTL LUF LVL MRO MTL NLG PTE SIT SKK
+        STD VEF ZMK
+    """.split()
+)
 _ACTION_RE: Final = re.compile(
     r"^(?:(?P<dealer>d)\s+(?P<deal>dh|db)(?:\s+(?P<target>p\d+))?\s+(?P<cards>\S+)|"
     r"(?P<player>p\d+)\s+(?P<move>pb|cbr|cc|f|sd|sm)(?:\s+(?P<arg>\S+))?)$"
@@ -608,7 +623,7 @@ class _Builder:
             raise self.fail("two players share a name or a seat")
         result = []
         for index, (name, seat, stack) in enumerate(zip(names, seats, stacks, strict=True), start=1):
-            if not isinstance(seat, int) or seat < 1:
+            if not isinstance(seat, int) or isinstance(seat, bool) or seat < 1:
                 raise self.fail(f"seat {seat!r} is not a seat number")
             amount = _amount(stack, f"starting stack of p{index}", self.fail)
             if amount <= 0:
@@ -670,7 +685,7 @@ class _Builder:
         currency = self.data.get("currency")
         if currency is None:
             currency = "play"  # no currency: the amounts are chips
-        elif not isinstance(currency, str) or _CURRENCY_RE.fullmatch(currency) is None:
+        elif not isinstance(currency, str) or currency not in _ISO_4217:
             raise self.fail(f"currency {currency!r} is not an ISO 4217 code (three capital letters)")
         sb, bb = (Decimal(0), Decimal(0)) if self.base == "stud" else self._stakes(blinds)
         if self.mapping.limit_type == "fl":
@@ -739,6 +754,12 @@ class _Builder:
             self.raise_size = self.level
             posted = [index for index, blind in enumerate(blinds) if blind > 0]
             self.last_actor = 0 if len(seats) == 2 else (posted[-1] if posted else len(seats) - 1)
+        self._play()
+        self._collect()
+        return hand
+
+    def _play(self) -> None:
+        """Every action, in order; then the stud shows, once every card is dealt."""
         actions = self.data["actions"]
         if not isinstance(actions, list) or not all(isinstance(action, str) for action in actions):
             raise self.fail("actions must be a list of strings")
@@ -749,8 +770,8 @@ class _Builder:
                     self._act(text)
                 except PHHImportError as error:
                     raise self.fail(f"action {index} {raw.strip()!r}: {error.reason}", error.kind) from None
-        self._collect()
-        return hand
+        for name in self.stud_shown:
+            self.hand.addShownCards(self.cards[name], name, shown=True)
 
     def _start_state(self, seats: list[_Seat]) -> None:
         """The betting state a hand is played on, before the forced bets."""
@@ -773,6 +794,8 @@ class _Builder:
         self.big_bet_made = False
         # The players who showed or mucked: once each.
         self.showed_down: set[str] = set()
+        # Stud players who showed (the hero aside), recorded with all their cards at the end.
+        self.stud_shown: list[str] = []
         # The smallest a raise may add on this street (no-limit, pot-limit), and the bets a
         # street ended with that nobody matched, kept when the street is left behind.
         self.raise_size = self.level
@@ -1317,6 +1340,12 @@ class _Builder:
                     break
                 cards = merged[:3] if index == 0 else [merged[dealt_to - 1]]
                 self._place_stud(seat.name, street, merged[: dealt_to - len(cards)], cards)
+            return
+        if self.base == "stud":
+            # Shown in an all-in runout, the hand may still get cards: fpdb places a stud show
+            # by its streets, so it is recorded once every card is dealt (see build).
+            self.hand.shown.add(seat.name)
+            self.stud_shown.append(seat.name)
             return
         self.hand.addShownCards(merged, seat.name, shown=True)
 
