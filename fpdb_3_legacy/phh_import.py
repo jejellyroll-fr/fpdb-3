@@ -105,6 +105,8 @@ _BOARD_SIZES: Final = {"FLOP": 3, "TURN": 1, "RIVER": 1}
 #: A known card, or ``??`` for one that is not: PHH has no half-known card ("A?", "?s").
 _CARD_RE: Final = re.compile(r"[2-9TJQKA][cdhs]|\?\?")
 _CENT: Final = Decimal("0.01")
+#: How much of a player's name fpdb stores (``Players.name``).
+_NAME_LIMIT: Final = 32
 #: PHH's currency: an ISO 4217 code -- one in use, or withdrawn since 1999 (the euro's
 #: predecessors and other recent replacements), for older datasets.
 _ISO_4217: Final = frozenset(
@@ -415,9 +417,11 @@ def _documents(
 # -- interpreting -----------------------------------------------------------------------
 
 
-def _amount(value: Any, what: str, fail: Any) -> Decimal:
-    if isinstance(value, bool) or value is None:
-        raise fail(f"{what} is not a number")
+def _amount(value: Any, what: str, fail: Any, *, text: bool = False) -> Decimal:
+    """*value* as an amount: a TOML integer or float -- or, with *text*, an action's number."""
+    if isinstance(value, bool) or value is None or (isinstance(value, str) and not text):
+        # PHH's amounts are TOML numbers: "100", a string, is not one.
+        raise fail(f"{what} is not a number: {value!r}")
     try:
         amount = Decimal(str(value))
     except (InvalidOperation, ValueError):
@@ -621,6 +625,10 @@ class _Builder:
             raise self.fail("players, seats and starting_stacks do not have the same length")
         if len({str(name) for name in names}) != count or len(set(seats)) != count:
             raise self.fail("two players share a name or a seat")
+        if len({str(name)[:_NAME_LIMIT] for name in names}) != count:
+            # fpdb stores a player's name to 32 characters: two names alike that far would be
+            # one player, their actions and results merged.
+            raise self.fail(f"two players' names are the same in their first {_NAME_LIMIT} characters", UNSUPPORTED)
         result = []
         for index, (name, seat, stack) in enumerate(zip(names, seats, stacks, strict=True), start=1):
             if not isinstance(seat, int) or isinstance(seat, bool) or seat < 1:
@@ -998,7 +1006,7 @@ class _Builder:
         """``cbr``: complete, bet or raise *to* the amount (the street's total, PHH's meaning)."""
         if arg is None:
             raise self.fail("'cbr' needs the amount bet or raised to")
-        total = _amount(arg, "the bet", self.fail)
+        total = _amount(arg, "the bet", self.fail, text=True)
         added = total - self.street_bets[seat.name]
         if total <= self.level or added <= 0:
             raise self.fail(f"a bet or raise to {total} does not exceed the current bet of {self.level}")

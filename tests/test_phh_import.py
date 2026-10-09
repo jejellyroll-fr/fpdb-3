@@ -1767,3 +1767,28 @@ def test_an_iso_4217_code_is_one_the_standard_lists() -> None:
 
 def test_a_seat_may_not_be_a_boolean() -> None:
     assert "seat True is not a seat number" in str(refusal(SHOWDOWN + "seats = [true, 2]\n"))
+
+
+# -- thirty-sixth review --------------------------------------------------------------
+
+
+def test_names_alike_in_their_first_32_characters_are_unsupported() -> None:
+    long = "a" * 32
+    error = refusal(SHOWDOWN + f'players = ["{long}x", "{long}y"]\n')
+    assert error.kind == UNSUPPORTED
+    assert "the same in their first 32 characters" in str(error)
+    assert build_hand(document(SHOWDOWN + f'players = ["{long}x", "b"]\n')) is not None
+
+
+@pytest.mark.parametrize(
+    ("change", "what"),
+    [
+        (("min_bet = 2", 'min_bet = "2"'), "min_bet"),
+        (("starting_stacks = [100, 100]", 'starting_stacks = ["100", 100]'), "starting stack of p1"),
+        (("winnings = [4, 0]", 'winnings = ["4", 0]'), "winnings[0]"),
+    ],
+)
+def test_amounts_written_as_strings_are_malformed(change: tuple[str, str], what: str) -> None:
+    error = refusal(SHOWDOWN.replace(*change))
+    assert error.kind == MALFORMED
+    assert f"{what} is not a number" in str(error)
