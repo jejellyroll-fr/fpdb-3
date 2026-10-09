@@ -1820,9 +1820,12 @@ class Filters(QWidget):
     def update_filters_for_hero(self) -> None:
         """Update all filters when hero selection changes."""
         if self.heroList and self.heroList.count() > 0:
-            selected_text = self.heroList.currentText()
-            if " on " in selected_text:
-                selected_hero, selected_site = selected_text.split(" on ")
+            # The item's data, not its label: a player's name is an arbitrary string, and
+            # "Alice on Call on PHH" is not a two-part "name on site" text. getHeroes()
+            # reads the same tuple.
+            data = self.heroList.currentData()
+            if isinstance(data, tuple) and len(data) == 3 and data[0] == "site_alias":
+                _kind, selected_site, selected_hero = data
                 self.update_sites_for_hero(selected_hero, selected_site)
                 self.update_games_for_hero(selected_hero, selected_site)
                 self.update_limits_for_hero(selected_hero, selected_site)

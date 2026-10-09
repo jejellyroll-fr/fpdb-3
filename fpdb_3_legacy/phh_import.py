@@ -664,6 +664,22 @@ class _Builder:
             raise self.fail(f"seat_count {given!r} does not hold seat {highest}")
         return given
 
+    def _table_name(self) -> str:
+        """The table label: ``table`` (a string or an integer, zero included), else ``event``
+        (a string), else the file name. A value of any other type is malformed metadata, not a
+        label to stringify -- ``table = true`` would otherwise be stored as the table "True"."""
+        table = self.data.get("table")
+        if table is not None:
+            if isinstance(table, bool) or not isinstance(table, (str, int)):
+                raise self.fail(f"table must be a string or an integer, not {table!r}")
+            return str(table)
+        event = self.data.get("event")
+        if event is not None:
+            if not isinstance(event, str):
+                raise self.fail(f"event must be a string, not {event!r}")
+            return event
+        return Path(self.document.source).stem
+
     def _per_player(self, key: str, count: int) -> list[Decimal]:
         values = self.data.get(key)
         if values is None:
@@ -741,9 +757,7 @@ class _Builder:
             self.config, _PHHSource(self.document.source), PHH_SITE_NAME, gametype, "", "PHH", number
         )
         hand.handid = number
-        # A table may be 0 (PHH allows any integer): only an absent one falls back.
-        named = [self.data.get(key) for key in ("table", "event") if self.data.get(key) is not None]
-        hand.tablename = str(named[0] if named else Path(self.document.source).stem)
+        hand.tablename = self._table_name()
         hand.maxseats = self._seat_count(seats)
         hand.startTime = _start_time(self.data, self.fail)
         hero = self.data.get("_hero")

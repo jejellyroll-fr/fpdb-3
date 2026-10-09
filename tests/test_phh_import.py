@@ -1810,3 +1810,33 @@ actions = ["d dh p1 ????2c", "d dh p2 ????8c", "d dh p3 ????9c", "p1 pb", "p2 cc
 def test_a_completion_reopens_the_betting_to_who_called_the_bring_in() -> None:
     """PokerKit 0.7.6 accepts p2's raise: the completion is the street's first full bet."""
     assert refusal(STUD_CALLERS).kind == PARTIAL
+
+
+# -- thirty-eighth review -------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("line", "what"),
+    [
+        ("table = true", "table"),
+        ("table = [1]", "table"),
+        ("table = 1.5", "table"),
+        ("event = true", "event"),
+        ("event = 3", "event"),
+    ],
+)
+def test_a_table_or_event_of_the_wrong_type_is_malformed(line: str, what: str) -> None:
+    """PHH gives ``table`` a string or an integer and ``event`` a string: anything else is
+    metadata fpdb would otherwise store as its ``str()`` -- ``table = true`` as the table
+    "True", splitting the imported hands into bogus table groups."""
+    error = refusal(SHOWDOWN + line + "\n")
+    assert error.kind == MALFORMED
+    assert f"{what} must be" in str(error)
+
+
+def test_the_table_label_is_the_table_then_the_event_then_the_file_name() -> None:
+    assert build_hand(document(SHOWDOWN + 'table = "T1"\n')).tablename == "T1"
+    # Zero is a table: only an absent one falls back.
+    assert build_hand(document(SHOWDOWN + "table = 0\n")).tablename == "0"
+    assert build_hand(document(SHOWDOWN + 'event = "Main Event"\n')).tablename == "Main Event"
+    assert build_hand(document(SHOWDOWN)).tablename == "test"

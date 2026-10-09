@@ -81,3 +81,27 @@ def test_the_filters_refresh_for_the_phh_player_selected(qtbot, importer, fresh_
 
     assert filters.games == ["27_3draw"]
     assert filters.getGames() == ["27_3draw"]
+
+
+def test_a_player_name_containing_on_is_still_selectable(qtbot, importer, fresh_db, tmp_path) -> None:
+    """A player's name is an arbitrary string: "Alice on Call" is not a "name on site" label.
+
+    The refresh parsed the combo's display text, so "Alice on Call on PHH" split into three
+    parts and raised before any filter was updated.
+    """
+    text = (FIXTURES / "nl_holdem_heads_up.phh").read_text(encoding="utf-8")
+    text = text.replace('players = ["Alice", "Bob"]', 'players = ["Alice on Call", "Bob"]')
+    text = text.replace('_hero = "Alice"', '_hero = "Alice on Call"')
+    (tmp_path / "on_call.phh").write_text(text, encoding="utf-8")
+    assert importer.addImportFile(str(tmp_path / "on_call.phh"))
+    importer.runImport()
+
+    filters = Filters(fresh_db, {"Heroes": True, "Sites": True})
+    qtbot.addWidget(filters)
+
+    entries = [filters.heroList.itemText(index) for index in range(filters.heroList.count())]
+    filters.heroList.setCurrentIndex(entries.index("Alice on Call on PHH"))
+    filters.update_filters_for_hero()
+
+    assert filters.getHeroes() == {PHH_SITE_NAME: "Alice on Call"}
+    assert filters.getSites() == [PHH_SITE_NAME]
