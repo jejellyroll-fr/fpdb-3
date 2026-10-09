@@ -64,3 +64,20 @@ def test_a_phh_player_who_is_no_hero_is_the_one_the_viewer_filters_on(qtbot, imp
     # Not Alice, the file's hero: the Hand Viewer's player filter is the selected player.
     assert filters.get_hero_ids(filters.getHeroes()) == [dwan]
     assert f"hp.playerId IN ({dwan})" in filters.replace_placeholders_with_filter_values("<player_test>")
+
+
+def test_the_filters_refresh_for_the_phh_player_selected(qtbot, importer, fresh_db, tmp_path) -> None:
+    """Alice, a file's hero, plays hold'em; Bryce Yockey triple draw: his games are offered."""
+    for fixture in ("nl_holdem_heads_up.phh", "triple_draw_yockey_arieh.phh"):
+        shutil.copy(FIXTURES / fixture, tmp_path / fixture)
+        assert importer.addImportFile(str(tmp_path / fixture))
+    importer.runImport()
+    filters = Filters(fresh_db, {"Heroes": True, "Sites": True, "Games": True, "Currencies": True})
+    qtbot.addWidget(filters)
+
+    entries = [filters.heroList.itemText(index) for index in range(filters.heroList.count())]
+    filters.heroList.setCurrentIndex(entries.index("Bryce Yockey on PHH"))
+    filters.update_filters_for_hero()
+
+    assert filters.games == ["27_3draw"]
+    assert filters.getGames() == ["27_3draw"]

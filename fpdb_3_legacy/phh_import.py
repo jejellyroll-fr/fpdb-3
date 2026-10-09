@@ -1024,6 +1024,9 @@ class _Builder:
             # Third street, facing only the bring-in -- or in its place: completing to the small bet.
             self.hand.addComplete(self.street, seat.name, str(total))
             self.completed = True
+            # The completion makes the street's first full bet: whoever only called the
+            # bring-in may raise again (PokerKit clears who has acted, too).
+            self.acted_at = {}
         elif self.level == 0:
             self.hand.addBet(self.street, seat.name, str(added))
         else:

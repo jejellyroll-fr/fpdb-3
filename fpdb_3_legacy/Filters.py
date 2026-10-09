@@ -1861,6 +1861,19 @@ class Filters(QWidget):
             # parented to the row QWidget built in fillSitesFrame.
             (checkbox.parentWidget() or checkbox).setVisible(is_match)
 
+    def _player_ids_for(self, site: str, hero: str) -> list[int]:
+        """The players a filter refresh reads for *hero* on *site*.
+
+        A configured room: every alias of its hero (or its hero-flagged players). A data
+        source (PHH) has no configured hero: the player selected, by name -- its
+        hero-flagged players are other files' heroes.
+        """
+        pids = self.db.get_hero_player_ids(site) if site in self.conf.get_supported_sites() else []
+        if not pids:
+            pid = self.db.get_player_id(self.conf, site, hero)
+            pids = [int(pid)] if pid is not None else []
+        return pids
+
     def get_actual_site_id(self, site: str, hero: str) -> int:
         """Resolve the actual site ID for the hero, mapping site variants if needed."""
         player_id = self.db.get_player_id(self.conf, site, hero)
@@ -1876,10 +1889,7 @@ class Filters(QWidget):
         usetype = self.display.get("UseType", "")
         log.debug("Game type for hero %s on site %s: %s", hero, site, usetype)
 
-        pids = self.db.get_hero_player_ids(site)
-        if not pids:
-            pid = self.db.get_player_id(self.conf, site, hero)
-            pids = [int(pid)] if pid is not None else []
+        pids = self._player_ids_for(site, hero)
 
         if pids:
             marks = ",".join(["?"] * len(pids))
@@ -1932,10 +1942,7 @@ class Filters(QWidget):
     def update_positions_for_hero(self, hero: str, site: str) -> None:
         """Update positions filter for selected hero and site."""
         site_id = self.get_actual_site_id(site, hero)
-        pids = self.db.get_hero_player_ids(site)
-        if not pids:
-            pid = self.db.get_player_id(self.conf, site, hero)
-            pids = [int(pid)] if pid is not None else []
+        pids = self._player_ids_for(site, hero)
 
         if pids:
             marks = ",".join(["?"] * len(pids))
@@ -1980,10 +1987,7 @@ class Filters(QWidget):
             return
 
         site_id = self.get_actual_site_id(site, hero)
-        pids = self.db.get_hero_player_ids(site)
-        if not pids:
-            pid = self.db.get_player_id(self.conf, site, hero)
-            pids = [int(pid)] if pid is not None else []
+        pids = self._player_ids_for(site, hero)
         if not pids:
             return
 
@@ -2032,10 +2036,7 @@ class Filters(QWidget):
         site_id = self.get_actual_site_id(site, hero)
         # debug
         log.debug("executed request for %s on %s (site_id: %s)", hero, site, site_id)
-        pids = self.db.get_hero_player_ids(site)
-        if not pids:
-            pid = self.db.get_player_id(self.conf, site, hero)
-            pids = [int(pid)] if pid is not None else []
+        pids = self._player_ids_for(site, hero)
 
         if pids:
             marks = ",".join(["?"] * len(pids))

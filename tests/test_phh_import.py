@@ -1792,3 +1792,21 @@ def test_amounts_written_as_strings_are_malformed(change: tuple[str, str], what:
     error = refusal(SHOWDOWN.replace(*change))
     assert error.kind == MALFORMED
     assert f"{what} is not a number" in str(error)
+
+
+# -- thirty-seventh review ------------------------------------------------------------
+
+STUD_CALLERS = """
+variant = "F7S"
+antes = [0, 0, 0]
+bring_in = 1
+small_bet = 4
+big_bet = 8
+starting_stacks = [100, 100, 100]
+actions = ["d dh p1 ????2c", "d dh p2 ????8c", "d dh p3 ????9c", "p1 pb", "p2 cc", "p3 cbr 4", "p1 cc", "p2 cbr 8"]
+"""
+
+
+def test_a_completion_reopens_the_betting_to_who_called_the_bring_in() -> None:
+    """PokerKit 0.7.6 accepts p2's raise: the completion is the street's first full bet."""
+    assert refusal(STUD_CALLERS).kind == PARTIAL
