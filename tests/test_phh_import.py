@@ -2080,3 +2080,82 @@ def test_a_hero_that_cannot_name_a_seat_leaves_the_hand_without_one(literal: str
     """
     hand = build_hand(document(SHOWDOWN + f"_hero = {literal}\n"))
     assert hand.hero == ""
+
+
+# -- forty-second review --------------------------------------------------------------
+
+
+@pytest.mark.parametrize("pad", [" ", "  ", "\u00a0", "\u3000"])
+def test_names_that_differ_only_in_trailing_padding_are_unsupported(pad: str) -> None:
+    """The collation is PAD SPACE, so ``Alice`` and ``Alice `` are one row in ``Players``.
+
+    Measured on the real table and its unique index: inserting ``Alice`` then ``Alice `` runs
+    ``ON DUPLICATE KEY UPDATE ... id=LAST_INSERT_ID(id)`` into the duplicate, leaving one row
+    and handing back id 1 both times -- both seats one player. A space at the *front* is a
+    character like any other and is compared, so that pair still imports.
+    """
+    error = refusal(SHOWDOWN + 'players = ["Alice", "Alice' + pad + '"]\n')
+    assert error.kind == UNSUPPORTED
+    assert "ignores case and accents" in str(error)
+
+    assert build_hand(document(SHOWDOWN + 'players = ["Alice", " Alice"]\n')) is not None
+
+
+@pytest.mark.parametrize("hidden", ["\u200b", "\u00ad", "\u200d", "\u0640", "\u0903"])
+def test_names_that_differ_by_a_character_the_collation_does_not_read_are_unsupported(hidden: str) -> None:
+    """A zero-width space, a soft hyphen, a joiner, a tatweel, a visarga: none of them count.
+
+    Measured, one at a time, against the real table: ``utf8mb4_general_ci`` keeps ``ab`` and
+    ``a\\u200bb`` apart and ``utf8mb4_uca1400_ai_ci`` does not, and a hand that imports on one
+    server and not on the other is not a rule. All five are dropped from the comparison key,
+    so both seats are one player to fpdb and the hand is refused.
+    """
+    error = refusal(SHOWDOWN + 'players = ["Alice", "Ali' + hidden + 'ce"]\n')
+    assert error.kind == UNSUPPORTED
+    assert "ignores case and accents" in str(error)
+
+
+def test_a_character_the_fold_cannot_place_is_refused_rather_than_merged() -> None:
+    """The fold is coarser than the collation, and that is the direction it errs in.
+
+    Measured: a trailing tab is *not* a pad character -- neither collation merges ``ab`` and
+    ``ab\\t`` -- but a control character is not part of a name either, so the fold drops it and
+    the two names meet. The hand is refused. A hand refused in vain costs a file; two players
+    merged into one would cost every statistic they reach, which is what this check exists for.
+    """
+    error = refusal(SHOWDOWN + 'players = ["Alice", "Alice\t"]\n')
+    assert error.kind == UNSUPPORTED
+    assert "ignores case and accents" in str(error)
+
+
+@pytest.mark.parametrize(
+    ("text", "field"),
+    [
+        (SHOWDOWN + "small_bet = 2\n", "small_bet"),
+        (SHOWDOWN + "big_bet = 4\n", "big_bet"),
+        (SHOWDOWN + "bring_in = 2\n", "bring_in"),
+        (STUD_HILO + "min_bet = 4\n", "min_bet"),
+        (STUD_HILO + "blinds_or_straddles = [0, 0, 0, 0, 0, 0]\n", "blinds_or_straddles"),
+        (FIXTURES.joinpath("single_draw.phh").read_text(encoding="utf-8") + "bring_in = 2\n", "bring_in"),
+    ],
+)
+def test_a_field_the_variant_must_not_carry_is_refused(text: str, field: str) -> None:
+    """PHH says what a variant cannot have as clearly as what it needs.
+
+    "The usage of bring-ins is mutually exclusive with blinds or straddles. In other words,
+    both must never be defined together"; ``min_bet`` "must never be specified in fixed-limit
+    games"; and ``small_bet`` and ``big_bet`` are "not a feature of pot-limit or no-limit
+    games". Nothing reads the field the variant cannot have -- stud ignores blinds, the other
+    families ignore ``min_bet`` and the bet sizes -- so the hand used to import with it
+    dropped in silence, and a file that says two contradictory things about its own stakes was
+    counted as a clean import.
+    """
+    error = refusal(text)
+    assert error.kind == MALFORMED
+    assert f"{field} is not a field of" in str(error)
+
+
+def test_the_sizing_fields_the_variant_does_allow_still_import() -> None:
+    """The control: the family's own sizing fields, and the fixtures that carry them."""
+    assert build_hand(document(SHOWDOWN)) is not None  # min_bet, no limit
+    assert build_hand(document(STUD_HILO)) is not None  # bring_in with small_bet and big_bet

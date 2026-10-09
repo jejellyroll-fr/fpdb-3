@@ -81,6 +81,24 @@ _REQUIRED: Final = {
 }
 _REQUIRED_BY_LIMIT: Final = {"nl": ("min_bet",), "pl": ("min_bet",), "fl": ("small_bet", "big_bet")}
 
+#: What a family or a limit must *not* carry. PHH's rules are as explicit about the fields a
+#: variant cannot have as about the ones it needs: "the usage of bring-ins is mutually
+#: exclusive with blinds or straddles ... both must never be defined together", ``min_bet``
+#: "must never be specified in fixed-limit games", and ``small_bet`` and ``big_bet`` are "not
+#: a feature of pot-limit or no-limit games". Nothing reads the wrong one -- stud ignores
+#: blinds, the other families ignore ``min_bet`` and the bet sizes -- so a hand carrying both
+#: used to be imported with the forbidden field dropped in silence, and is refused instead.
+_FORBIDDEN_BY_FAMILY: Final = {
+    "hold": ("bring_in",),
+    "draw": ("bring_in",),
+    "stud": ("blinds_or_straddles",),
+}
+_FORBIDDEN_BY_LIMIT: Final = {
+    "nl": ("small_bet", "big_bet"),
+    "pl": ("small_bet", "big_bet"),
+    "fl": ("min_bet",),
+}
+
 _STREETS: Final = {
     "hold": ("PREFLOP", "FLOP", "TURN", "RIVER"),
     "stud": ("THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"),
@@ -712,22 +730,63 @@ _COLLATION_LETTERS: Final[dict[str, str]] = {
     "Œ": "oe", "œ": "oe",
 }
 
+#: The joining forms and Arabic presentation marks the collations give no weight to at all:
+#: a name carrying one is compared as if it were not written. Read on the characters as they
+#: are written, *before* the decomposition -- NFKD turns ``U+FC5E`` into a space and two
+#: marks, and that space would then stand for itself in the comparison.
+#:
+#: Measured like the table above: 15 248 codepoints, one per name, inserted into fpdb's own
+#: ``Players`` table, and these are the ones the unique index took for the same name without
+#: them. ``U+FE75`` is unassigned and is covered by the range rather than listed.
+_COLLATION_JOINERS: Final[frozenset[int]] = frozenset(
+    {
+        0x0640, 0x07FA, 0x0824, 0x0828, 0x180A, 0x1CD3, 0x1CF2, 0x1CF3,
+        *range(0xFC5E, 0xFC64),
+        *range(0xFCF2, 0xFCF5),
+        *range(0xFE70, 0xFE80),
+    }
+)
+
+#: The characters a collation does not read as themselves: an attaching mark, which it reads
+#: with the letter before it, and a control or format character, which is invisible in the
+#: name it sits in. Dropped, so that ``José`` and ``Jose`` meet here -- and so that a name
+#: cannot be made to differ by a character nobody can see.
+_COLLATION_UNREAD: Final = frozenset({"Cc", "Cf", "Mn", "Mc", "Me"})
+
+#: The collations are PAD SPACE: a trailing run of these is not part of the name they
+#: compare, so ``Alice`` and ``Alice `` are one row in ``Players`` and one id out of
+#: ``insertPlayer()``. Every space separator there is -- measured, and the tab and the
+#: newline are not among them, being control characters rather than spaces.
+_COLLATION_SPACES: Final = (
+    " \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000"
+)
+
 
 def _collation_key(name: str) -> str:
     """A name as fpdb's database compares it, not as Python compares strings.
 
-    MySQL's collation ignores case and accents -- and, on the one MySQL 8 defaults to,
-    ligatures and fullwidth letters too -- so ``Alice`` and ``alice`` are one player there,
-    and so are ``José`` and ``jose``. The unique index on ``(name, siteId)`` makes them one
-    row and ``insertPlayer()`` hands the second name the first player's id: two seats become
-    one, in the actions and in the reports, permanently.
+    ``Players.name`` is a ``VARCHAR(32)`` with no ``COLLATE``, so it takes the server's
+    default: ``utf8mb4_general_ci`` on MySQL 5.7 and MariaDB up to 11.3, ``utf8mb4_0900_ai_ci``
+    on MySQL 8, ``utf8mb4_uca1400_ai_ci`` on MariaDB 11.4 and later. All three ignore case and
+    accents, so ``Alice`` and ``alice`` are one player there, and so are ``José`` and ``jose``.
+    The unique index on ``(name, siteId)`` makes them one row and ``insertPlayer()`` hands the
+    second name the first player's id: two seats become one, in the actions and in the reports,
+    permanently.
 
-    The name goes through ``_COLLATION_LETTERS``, then a decomposition, then a strip of the
-    combining marks, then a case fold: case, accents, and everything a decomposition reaches.
+    The key is a fold: :data:`_COLLATION_LETTERS`, :data:`_COLLATION_JOINERS`, a decomposition,
+    the characters of :data:`_COLLATION_UNREAD`, a case fold, and the trailing spaces of
+    :data:`_COLLATION_SPACES`. It is deliberately *coarser* than any one of the three
+    collations -- where it cannot tell two names apart it refuses the hand rather than letting
+    two players merge. Measured over 15 248 codepoints, written in the middle and at the end of
+    a name against the real table and its unique index: no pair a server would merge escapes it.
     """
-    mapped = "".join(_COLLATION_LETTERS.get(char, char) for char in name)
-    decomposed = unicodedata.normalize("NFKD", mapped)
-    return "".join(char for char in decomposed if not unicodedata.combining(char)).casefold()
+    mapped = "".join(_COLLATION_LETTERS.get(char, char) for char in name if ord(char) not in _COLLATION_JOINERS)
+    kept = []
+    for char in unicodedata.normalize("NFKD", mapped):
+        if unicodedata.combining(char) or unicodedata.category(char) in _COLLATION_UNREAD:
+            continue
+        kept.append(char)
+    return "".join(kept).casefold().rstrip(_COLLATION_SPACES)
 
 
 @dataclass
@@ -908,6 +967,10 @@ class _Builder:
             # The sizes a game is built from are positive; zero would let any amount through.
             if key in ("min_bet", "small_bet", "big_bet", "bring_in") and _amount(self.data[key], key, self.fail) <= 0:
                 raise self.fail(f"{key} must be positive")
+        # The other half of the same rules: the fields this variant must not carry at all.
+        for key in (*_FORBIDDEN_BY_FAMILY[self.base], *_FORBIDDEN_BY_LIMIT[self.mapping.limit_type]):
+            if key in self.data:
+                raise self.fail(f"{key} is not a field of {self.mapping.name}")
         seats = self._seats()
         count = len(seats)
         antes = self._per_player("antes", count)
