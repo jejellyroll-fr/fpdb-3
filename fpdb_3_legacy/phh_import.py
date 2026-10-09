@@ -940,6 +940,11 @@ class _Builder:
                 raise self.fail(
                     f"bets of {small}/{big}: fpdb stores a fixed-limit big bet as twice the small one", UNSUPPORTED
                 )
+            if self.base != "stud" and bb != small:
+                # The other half of that rule: the hand's own big blind is what ``_post``
+                # records, so a table whose big blind is not the small bet would be filed
+                # under one game row and post another's blind.
+                raise self.fail(f"a big blind of {bb} is not the fixed-limit small bet {small}", UNSUPPORTED)
             sb, bb = (small if self.base == "stud" else sb), small
         return {
             "type": "ring",
@@ -1575,6 +1580,11 @@ class _Builder:
         dealt = self.cards[seat.name]
         cards = list(dealt) if text == "-" else self._cards(text)
         merged = self._reconcile(seat, dealt, cards)
+        # Showing is the fact of showing, whatever the cards say: fpdb records it in `shown`,
+        # which the reports read (DerivedStats' `showed`) and the showdown section is written
+        # from. A show of unknown cards -- "p1 sm ????" -- is still a show; the cardless "sm"
+        # that mucks is told apart above. Nothing is placed: the cards stay as they were.
+        self.hand.shown.add(seat.name)
         if not _any_known(merged):
             return
         self.cards[seat.name] = merged

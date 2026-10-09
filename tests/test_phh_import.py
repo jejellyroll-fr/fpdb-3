@@ -12,6 +12,7 @@ import datetime
 import json
 import shutil
 import sqlite3
+from io import StringIO
 from pathlib import Path
 from typing import Any
 
@@ -1645,14 +1646,28 @@ def test_a_fixed_limit_big_bet_other_than_twice_the_small_is_unsupported() -> No
 
 
 def test_the_fixed_limit_small_bet_is_the_game_s_big_blind() -> None:
+    """fpdb's fixed-limit game row has one size, and the small bet is it.
+
+    A hold'em or draw table posts a big blind of its own, and it is the small bet -- the
+    forty-third review refuses a table where it is not, rather than overwriting it here. A
+    stud table has no blinds at all, so the small bet is the only thing that can give the
+    game row its big blind.
+    """
     from fpdb_3_legacy.phh_import import _Builder
 
     text = (
-        FL_FOUR.format(last='"p3 cc"').replace("small_bet = 2", "small_bet = 4").replace("big_bet = 4", "big_bet = 8")
+        FL_FOUR.format(last='"p3 cc"')
+        .replace("blinds_or_straddles = [1, 2, 0, 0]", "blinds_or_straddles = [2, 4, 0, 0]")
+        .replace("small_bet = 2", "small_bet = 4")
+        .replace("big_bet = 4", "big_bet = 8")
     )
     builder = _Builder(document(text), mapping_for("FT"), None)
     gametype = builder._gametype(builder._per_player("blinds_or_straddles", 4))
-    assert (gametype["sb"], gametype["bb"]) == (1, 4)
+    assert (gametype["sb"], gametype["bb"]) == (2, 4)
+
+    stud = _Builder(document((FIXTURES / "stud_hi.phh").read_text(encoding="utf-8")), mapping_for("F7S"), None)
+    gametype = stud._gametype(stud._per_player("blinds_or_straddles", 3))
+    assert (gametype["sb"], gametype["bb"]) == (5, 5)
 
 
 def test_a_draw_hand_is_shown_only_after_the_last_draw() -> None:
@@ -2159,3 +2174,131 @@ def test_the_sizing_fields_the_variant_does_allow_still_import() -> None:
     """The control: the family's own sizing fields, and the fixtures that carry them."""
     assert build_hand(document(SHOWDOWN)) is not None  # min_bet, no limit
     assert build_hand(document(STUD_HILO)) is not None  # bring_in with small_bet and big_bet
+
+
+# -- forty-third review ---------------------------------------------------------------
+
+#: A showdown where p1's cards were never named, so every card p1 can show is unknown.
+UNNAMED_SHOWDOWN = """
+variant = "NT"
+antes = [0, 0]
+blinds_or_straddles = [1, 2]
+min_bet = 2
+starting_stacks = [100, 100]
+actions = [
+  "d dh p1 ????",
+  "d dh p2 QhQd",
+  "p2 cc",
+  "p1 cc",
+  "d db Kc3d4h",
+  "p1 cc",
+  "p2 cc",
+  "d db 9s",
+  "p1 cc",
+  "p2 cc",
+  "d db Jc",
+  "p1 cc",
+  "p2 cc",
+  "p1 sm ????",
+  "p2 sm -",
+]
+winnings = [0, 0]
+finishing_stacks = [100, 100]
+"""
+
+
+@pytest.mark.parametrize("show", ["p1 sm ????", "p1 sm -"])
+def test_a_player_who_shows_only_unknown_cards_has_shown(show: str) -> None:
+    """PHH tells a show from the cardless ``sm``, and the cards are not what says so.
+
+    ``p1 sm ????`` names four unknown cards and ``p1 sm -`` the cards the deal already named,
+    which are unknown too: both say p1 showed. fpdb keeps the fact in ``shown``, which
+    ``DerivedStats`` reads as ``showed`` for the report columns and the showdown section is
+    written from, so a player left out of it is not a player without cards but a player
+    without a show. The hand is accepted either way, and nothing is invented for the cards.
+    """
+    hand = build_hand(document(UNNAMED_SHOWDOWN.replace("p1 sm ????", show)))
+    assert hand.shown == {"p1", "p2"}
+    assert hand.mucked == set()
+    assert hand.holecards["PREFLOP"].get("p1") is None
+
+
+def test_a_show_that_names_no_card_leaves_the_muck_and_the_named_show_alone() -> None:
+    """The controls: what the fix above must not change.
+
+    ``sm`` alone is PHH's muck -- the cards go back unseen, and the claim to the pot with
+    them -- so that player is still a mucker and not a shower. A show that does name cards
+    records them, on the player and on the hand.
+    """
+    mucked = build_hand(document(UNNAMED_SHOWDOWN.replace('"p1 sm ????"', '"p1 sm"')))
+    assert mucked.shown == {"p2"}
+    assert mucked.mucked == {"p1"}
+
+    named = build_hand(document(UNNAMED_SHOWDOWN.replace('"p1 sm ????"', '"p1 sm AsKs"')))
+    assert named.shown == {"p1", "p2"}
+    assert named.holecards["PREFLOP"]["p1"] == [[], ["As", "Ks"]]
+
+
+def test_a_hand_whose_show_names_no_card_is_still_written_back() -> None:
+    """Showing and holding the cards are two things, and the hand writer tells them apart.
+
+    ``writeHand`` prints the cards of every player who showed and was not dealt to whenever
+    the hand has no hero -- the usual PHH case, since ``_hero`` is optional -- so it reads
+    ``holecards`` for players it has only seen in ``shown``. A player who showed with every
+    card unknown has none on file and is skipped there rather than raising; the same state
+    already arises in the draw games, where a known show is recorded on the street it was
+    made on and never on the deal.
+    """
+    hand = build_hand(document(UNNAMED_SHOWDOWN))
+    hand.rake = 0  # the import pipeline sets it before a hand is ever written back
+    written = StringIO()
+    hand.writeHand(written)
+    assert "Dealt to p2 [Qh Qd]" in written.getvalue()
+    assert "Dealt to p1" not in written.getvalue()
+
+
+FL_BLINDS = """
+variant = "FT"
+antes = [0, 0, 0]
+blinds_or_straddles = {blinds}
+small_bet = {small_bet}
+big_bet = {big_bet}
+starting_stacks = [100, 100, 100]
+actions = ["d dh p1 ????", "d dh p2 ????", "d dh p3 ????", "p3 cbr {raise_to}", "p1 f", "p2 f"]
+"""
+
+
+@pytest.mark.parametrize(
+    ("blinds", "small_bet", "raise_to"),
+    [
+        ("[1, 3, 0]", 2, 5),  # a 3-chip big blind against 2/4 betting
+        ("[1, 4, 0]", 2, 6),  # a 4-chip big blind against 2/4 betting
+        ("[1, 2, 0]", 4, 6),  # a 2-chip big blind against 4/8 betting
+    ],
+)
+def test_a_fixed_limit_big_blind_that_is_not_the_small_bet_is_unsupported(
+    blinds: str, small_bet: int, raise_to: int
+) -> None:
+    """fpdb's game row has one fixed-limit size and the hand's blind is the other.
+
+    ``_gametype`` takes the big blind of a fixed-limit game from ``small_bet`` -- fpdb stores
+    the small bet as the big blind and the big bet as twice it -- while ``_post`` records the
+    blind the hand itself posts. When the two disagree the hand is filed under one game row
+    and posts another's blind: measured, ``[1, 3, 0]`` with ``small_bet = 2`` gave a gametype
+    of 1/2 while the actions held a 3-chip big blind, so the hand would be grouped with the
+    1/2 tables and every blind-normalised statistic read against the wrong stakes.
+    """
+    text = FL_BLINDS.format(blinds=blinds, small_bet=small_bet, big_bet=2 * small_bet, raise_to=raise_to)
+    error = refusal(text)
+    assert error.kind == UNSUPPORTED
+    assert "is not the fixed-limit small bet" in str(error)
+
+
+@pytest.mark.parametrize(("blinds", "small_bet", "raise_to"), [("[1, 2, 0]", 2, 4), ("[2, 4, 0]", 4, 8)])
+def test_a_fixed_limit_big_blind_that_is_the_small_bet_still_imports(
+    blinds: str, small_bet: int, raise_to: int
+) -> None:
+    """The control, and the fixture the importer was written against."""
+    text = FL_BLINDS.format(blinds=blinds, small_bet=small_bet, big_bet=2 * small_bet, raise_to=raise_to)
+    assert build_hand(document(text)).gametype["bb"] == small_bet
+    assert build_hand(document((FIXTURES / "fl_holdem.phh").read_text(encoding="utf-8"))) is not None
