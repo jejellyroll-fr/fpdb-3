@@ -1786,11 +1786,18 @@ def test_names_alike_in_their_first_32_characters_are_unsupported() -> None:
     ("change", "what"),
     [
         (("min_bet = 2", 'min_bet = "2"'), "min_bet"),
-        (("starting_stacks = [100, 100]", 'starting_stacks = ["100", 100]'), "starting stack of p1"),
+        (("starting_stacks = [100, 100]", 'starting_stacks = ["100", 100]'), "starting_stacks[0]"),
         (("winnings = [4, 0]", 'winnings = ["4", 0]'), "winnings[0]"),
     ],
 )
 def test_amounts_written_as_strings_are_malformed(change: tuple[str, str], what: str) -> None:
+    """Every array is checked entry by entry, so each one names its own index.
+
+    A stack used to be named by its player (``starting stack of p1``), which read better, but
+    that name came from the reader -- and an array whose reader a branch skips
+    (``finishing_stacks`` beside ``winnings``) or never runs (``time_banks``) was checked
+    nowhere. The check belongs to the field table, so all six arrays report the same way.
+    """
     error = refusal(SHOWDOWN.replace(*change))
     assert error.kind == MALFORMED
     assert f"{what} is not a number" in str(error)
@@ -1954,3 +1961,58 @@ def test_the_collation_check_reads_the_first_32_characters_only() -> None:
     error = refusal(SHOWDOWN + inside)
     assert error.kind == UNSUPPORTED
     assert "ignores case and accents" in str(error)
+
+
+# -- fortieth review ------------------------------------------------------------------
+
+
+def test_an_undated_hand_is_still_held_to_its_zone_and_abbreviation() -> None:
+    """Leaving out the date is not a way past the checks a dated hand meets.
+
+    The abbreviation is only readable against a wall time, and an undated hand has none: it is
+    read against the epoch, which is the time the hand is stored at. The stored value itself
+    does not move -- an undated hand starts at the epoch, not at the epoch shifted by its zone.
+    """
+    error = refusal(SHOWDOWN + 'time_zone_abbreviation = "EDT"\n')
+    assert error.kind == UNSUPPORTED
+    assert "without a time_zone cannot be converted" in str(error)
+
+    error = refusal(SHOWDOWN + 'time_zone = "America/New_York"\ntime_zone_abbreviation = "PST"\n')
+    assert error.kind == MALFORMED
+    assert "is not America/New_York's abbreviation" in str(error)
+
+    # The zone the abbreviation belongs to, and a zone on its own, still import at the epoch.
+    assert build_hand(document(SHOWDOWN + 'time_zone = "America/New_York"\n')).startTime == datetime.datetime(1970, 1, 1)
+    kept = SHOWDOWN + 'time_zone = "America/New_York"\ntime_zone_abbreviation = "EST"\n'
+    assert build_hand(document(kept)).startTime == datetime.datetime(1970, 1, 1)
+
+
+@pytest.mark.parametrize(
+    ("text", "field"),
+    [
+        (SHOWDOWN.replace("antes = [0, 0]", 'antes = ["0", "0"]'), "antes"),
+        (SHOWDOWN.replace("blinds_or_straddles = [1, 2]", 'blinds_or_straddles = ["1", "2"]'), "blinds_or_straddles"),
+        (SHOWDOWN.replace("starting_stacks = [100, 100]", 'starting_stacks = ["100", 100]'), "starting_stacks"),
+        (SHOWDOWN.replace("winnings = [4, 0]", 'winnings = ["4", 0]'), "winnings"),
+        (SHOWDOWN + 'finishing_stacks = ["4", "0"]\n', "finishing_stacks"),
+        (SHOWDOWN + 'time_banks = ["30", "30"]\n', "time_banks"),
+    ],
+)
+def test_every_numeric_array_is_checked_entry_by_entry(text: str, field: str) -> None:
+    """Checked whether or not the hand goes on to read the array.
+
+    ``time_banks`` is read by nothing, and ``finishing_stacks`` is skipped whenever ``winnings``
+    is also given: checking an array where its entries are read left those two accepting a
+    string entry, and the malformed hand was stored. The field table checks all six, in one
+    place, so a reader that never runs cannot be the reason an entry goes unchecked.
+    """
+    error = refusal(text)
+    assert error.kind == MALFORMED
+    assert f"{field}[0] is not a number" in str(error)
+
+
+def test_an_unknown_starting_stack_is_still_unsupported_rather_than_malformed() -> None:
+    """``inf`` is how PHH writes a stack it does not know: an unknown stack, not a type error."""
+    error = refusal(SHOWDOWN.replace("starting_stacks = [100, 100]", "starting_stacks = [inf, 100]"))
+    assert error.kind == UNSUPPORTED
+    assert "a starting stack is unknown" in str(error)

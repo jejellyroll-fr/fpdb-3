@@ -471,22 +471,24 @@ def _start_time(data: Mapping[str, Any], fail: Any) -> datetime.datetime:
     """The hand's start in UTC (naive, as fpdb stores it); the epoch when PHH gives no year."""
     year, month, day = data.get("year"), data.get("month"), data.get("day")
     moment = data.get("time")
-    if any(part is not None for part in (year, month, day, moment)):
-        # PHH's fields are optional one by one (its own example gives only the year): each
-        # one given is kept, each one missing is the epoch's (1970, January, the 1st, 00:00).
-        year, month, day = (
-            part if part is not None else default for part, default in ((year, 1970), (month, 1), (day, 1))
-        )
-        clock = moment if isinstance(moment, datetime.time) else datetime.time(0, 0)
-        try:
-            local = datetime.datetime.combine(datetime.date(year, month, day), clock.replace(tzinfo=None))
-        except ValueError:
-            raise fail(f"{year}-{month}-{day} is not a date") from None
-    else:
-        if data.get("time_zone") is not None:
-            _zone(data["time_zone"], fail)  # a zone that does not exist is malformed, dated or not
-        return datetime.datetime(1970, 1, 1)
-    return _in_utc(local, data, fail)
+    dated = any(part is not None for part in (year, month, day, moment))
+    # PHH's fields are optional one by one (its own example gives only the year): each one
+    # given is kept, each one missing is the epoch's (1970, January, the 1st, 00:00).
+    year, month, day = (
+        part if part is not None else default for part, default in ((year, 1970), (month, 1), (day, 1))
+    )
+    clock = moment if isinstance(moment, datetime.time) else datetime.time(0, 0)
+    try:
+        local = datetime.datetime.combine(datetime.date(year, month, day), clock.replace(tzinfo=None))
+    except ValueError:
+        raise fail(f"{year}-{month}-{day} is not a date") from None
+    start = _in_utc(local, data, fail)
+    # A hand that gives no date and no time starts at the epoch, whatever its zone: the epoch
+    # shifted into the hand's zone is a time the hand never gave. Its zone and abbreviation are
+    # still the hand's, and _in_utc above is what refuses them when they do not hold together
+    # -- a zone that does not exist, an abbreviation that is not the zone's, or one with no zone
+    # to read it in -- so leaving out the date is not a way past the checks a dated hand meets.
+    return start if dated else datetime.datetime(1970, 1, 1)
 
 
 #: The TOML type PHH gives each field it defines. Every one of them is checked when present,
@@ -528,22 +530,63 @@ _FIELD_TYPES: Final[dict[str, str]] = {
     "seats": "seats",
     "antes": "list",
     "blinds_or_straddles": "list",
-    "starting_stacks": "list",
+    "starting_stacks": "stacks",
     "winnings": "list",
     "finishing_stacks": "list",
     "time_banks": "list",
 }
 
-#: How a value of each kind is recognized. A list is only checked to *be* a list: what its
-#: entries must be is positional (``starting stack of p1``), and is checked where they are read.
+
+def _is_number(value: Any) -> bool:
+    """A TOML number: an integer or a float, a boolean excluded (``true`` is not 1)."""
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _is_numbers(value: Any) -> bool:
+    """A list of numbers -- every entry, whether or not anything goes on to read the list."""
+    return isinstance(value, list) and all(_is_number(entry) for entry in value)
+
+
+def _is_stacks(value: Any) -> bool:
+    """A list of stacks: numbers, an unknown one being ``null`` or ``inf`` as PHH writes it."""
+    return isinstance(value, list) and all(entry is None or _is_number(entry) for entry in value)
+
+
+def _numbers_problem(key: str, value: Any) -> str:
+    """The first entry that is not a number, named as its reader names it (``antes[0]``)."""
+    if not isinstance(value, list):
+        return f"{key} must be a list, not {value!r}"
+    for index, entry in enumerate(value):
+        if not _is_number(entry):
+            return f"{key}[{index}] is not a number: {entry!r}"
+    return f"{key} must be a list of numbers, not {value!r}"
+
+
+def _stacks_problem(key: str, value: Any) -> str:
+    """The same for a list of stacks, where ``null`` and ``inf`` are the unknown ones."""
+    if not isinstance(value, list):
+        return f"{key} must be a list, not {value!r}"
+    for index, entry in enumerate(value):
+        if entry is not None and not _is_number(entry):
+            return f"{key}[{index}] is not a number: {entry!r}"
+    return f"{key} must be a list of stacks, not {value!r}"
+
+
+#: How a value of each kind is recognized. A numeric array is checked entry by entry, here,
+#: rather than only where its entries are read: an array nothing reads (``time_banks``) or one
+#: a branch skips (``finishing_stacks`` beside ``winnings``) would otherwise carry an entry of
+#: the wrong type past every check. ``names``, ``seats`` and ``actions`` are read whatever the
+#: hand does -- by ``_names_and_seats`` and by the play loop -- so their entries are checked
+#: there, where the message can say which player or seat it is.
 _SHAPES: Final[dict[str, Callable[[Any], bool]]] = {
     "string": lambda value: isinstance(value, str),
     "integer": lambda value: isinstance(value, int) and not isinstance(value, bool),
-    "number": lambda value: isinstance(value, (int, float)) and not isinstance(value, bool),
+    "number": _is_number,
     "boolean": lambda value: isinstance(value, bool),
     "string or integer": lambda value: isinstance(value, str) or (isinstance(value, int) and not isinstance(value, bool)),
     "local time": lambda value: isinstance(value, datetime.time) and not isinstance(value, datetime.datetime),
-    "list": lambda value: isinstance(value, list),
+    "list": _is_numbers,
+    "stacks": _is_stacks,
     "names": lambda value: isinstance(value, list),
     "seats": lambda value: isinstance(value, list),
     "actions": lambda value: isinstance(value, list),
@@ -557,7 +600,8 @@ _PROBLEMS: Final[dict[str, Callable[[str, Any], str]]] = {
     "boolean": lambda key, value: f"{key} {value!r} is not a boolean",
     "string or integer": lambda key, value: f"{key} must be a string or an integer, not {value!r}",
     "local time": lambda key, value: f"time {value!r} is not a local time of day",
-    "list": lambda key, value: f"{key} must be a list, not {value!r}",
+    "list": _numbers_problem,
+    "stacks": _stacks_problem,
     "names": lambda key, value: f"players must be a list of names, not {value!r}",
     "seats": lambda key, value: f"seats must be a list of seat numbers, not {value!r}",
     "actions": lambda key, value: f"actions must be a list of strings, not {value!r}",
