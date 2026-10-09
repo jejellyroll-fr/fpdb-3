@@ -217,8 +217,15 @@ def is_phh_path(path: str | Path) -> bool:
 
 
 def mapping_for(variant: Any, *, source: str = "", hand: str = "") -> PHHGameMapping:
-    """The fpdb game of a PHH variant; anything not in :data:`GAMES` is refused."""
-    mapping = GAMES.get(str(variant))
+    """The fpdb game of a PHH variant; anything not in :data:`GAMES` is refused.
+
+    A variant of another type is a broken hand, not a game fpdb cannot hold: PHH gives
+    ``variant`` as a string, so ``variant = true`` is malformed rather than unsupported.
+    """
+    if not isinstance(variant, str):
+        msg = f"variant {variant!r} is not a string"
+        raise PHHImportError(MALFORMED, msg, source=source, hand=hand)
+    mapping = GAMES.get(variant)
     if mapping is None:
         known = ", ".join(GAMES)
         msg = f"variant {variant!r} has no fpdb mapping (supported: {known})"
@@ -496,7 +503,7 @@ def _start_time(data: Mapping[str, Any], fail: Any) -> datetime.datetime:
 #: violation, and one fpdb coerced -- ``str(table)`` as a label, a truthy string as a trimmed
 #: ante -- is a plausible but wrong value stored for good. A field PHH does not define is its
 #: user-defined space (``_hero``, a note) and is left alone. ``variant`` is absent here: it is
-#: resolved into a mapping before a hand is built.
+#: resolved into a mapping before a hand is built, and :func:`mapping_for` checks its type there.
 _FIELD_TYPES: Final[dict[str, str]] = {
     "author": "string",
     "event": "string",
@@ -917,7 +924,7 @@ class _Builder:
         hand.maxseats = self._seat_count(seats)
         hand.startTime = _start_time(self.data, self.fail)
         hero = self.data.get("_hero")
-        hand.hero = str(hero) if hero in {seat.name for seat in seats} else ""
+        hand.hero = hero if isinstance(hero, str) and hero in {seat.name for seat in seats} else ""
         # Button games: the last player has the button (the PHH convention). Stud has none.
         hand.buttonpos = seats[-1].seat if self.base != "stud" else 0
         for seat in seats:

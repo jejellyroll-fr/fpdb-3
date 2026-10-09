@@ -2016,3 +2016,67 @@ def test_an_unknown_starting_stack_is_still_unsupported_rather_than_malformed() 
     error = refusal(SHOWDOWN.replace("starting_stacks = [100, 100]", "starting_stacks = [inf, 100]"))
     assert error.kind == UNSUPPORTED
     assert "a starting stack is unknown" in str(error)
+
+
+# -- forty-first review ---------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "literal",
+    ["true", "1", "1.5", '["NT"]', '{ name = "NT" }', "1970-01-01"],
+)
+def test_a_variant_that_is_not_a_string_is_malformed_not_unsupported(literal: str) -> None:
+    """PHH gives ``variant`` as a string, so a value of another type is a broken hand.
+
+    ``mapping_for`` looked the variant up through ``str()``, which turned every other type
+    into a *variant fpdb has no mapping for*: the hand was counted as skipped, and
+    ``importFiles`` files a file under ``failed=errors > 0`` -- the malformed count -- so a
+    file whose only defect was ``variant = true`` was archived with the imported ones. A
+    variant that is not a string is a specification violation and is counted as an error.
+    """
+    error = refusal(SHOWDOWN.replace('variant = "NT"', f"variant = {literal}"))
+    assert error.kind == MALFORMED
+    assert "is not a string" in str(error)
+
+
+def test_a_variant_string_with_no_mapping_is_still_unsupported() -> None:
+    """The control: the type check must not swallow the variants fpdb genuinely cannot hold.
+
+    ``build_hand`` calls ``mapping_for`` outside its catch-all, so this is the path a string
+    variant takes: it must still reach the mapping table and be refused there.
+    """
+    error = refusal(SHOWDOWN.replace('variant = "NT"', 'variant = "ZZ"'))
+    assert error.kind == UNSUPPORTED
+    assert "has no fpdb mapping" in str(error)
+
+
+def test_a_file_whose_only_defect_is_its_variant_is_a_file_with_errors(importer, fresh_db, tmp_path) -> None:
+    """The end of the chain: malformed is what sends the file to the failed directory.
+
+    Counted as unsupported, the hand left the file looking clean and the file was archived
+    with the imports. The two counts are what the caller acts on, so they are what is read.
+    """
+    broken = tmp_path / "broken.phh"
+    broken.write_text(SHOWDOWN.replace('variant = "NT"', "variant = true"), encoding="utf-8")
+    assert importer.addImportFile(str(broken))
+
+    stored, duplicates, partial, skipped, errors, _seconds = importer.runImport()
+
+    assert (stored, duplicates, partial, skipped, errors) == (0, 0, 0, 0, 1)
+    summary = importer.phh_summary()
+    assert summary is not None
+    assert (summary.unsupported, summary.malformed) == (0, 1)
+    assert any("is not a string" in error for error in summary.errors)
+
+
+@pytest.mark.parametrize("literal", ['["Alice"]', '{ name = "Alice" }', "[1, 2]", "3", '"nobody"'])
+def test_a_hero_that_cannot_name_a_seat_leaves_the_hand_without_one(literal: str) -> None:
+    """``_hero`` is a name, and a name is a string: anything else names no seat.
+
+    The membership test hashed the value, so a list or an inline table raised ``TypeError``
+    and ``build_hand``'s catch-all reported a malformed hand. The field is one PHH does not
+    define, which fpdb reads only to name a seat: a ``_hero`` that is not one of the players
+    -- whatever its type -- means the hand has none, as it always has for a hashable value.
+    """
+    hand = build_hand(document(SHOWDOWN + f"_hero = {literal}\n"))
+    assert hand.hero == ""
