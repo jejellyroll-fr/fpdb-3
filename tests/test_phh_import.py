@@ -1176,7 +1176,7 @@ def test_a_partial_date_keeps_what_it_gives_and_a_mistyped_one_is_malformed() ->
     assert build_hand(document(SHOWDOWN + "month = 7\nday = 3\n")).startTime == datetime.datetime(1970, 7, 3)
     error = refusal(SHOWDOWN + 'year = "2026"\nmonth = 2\nday = 3\n')
     assert error.kind == MALFORMED
-    assert "are not a date" in str(error)
+    assert "year '2026' is not an integer" in str(error)
     assert "is not a local time of day" in str(refusal(SHOWDOWN + 'time = "noon"\n'))
 
 
@@ -1184,7 +1184,7 @@ def test_seat_count_must_hold_every_seat() -> None:
     assert build_hand(document(SHOWDOWN + "seats = [1, 6]\nseat_count = 6\n")).maxseats == 6
     assert build_hand(document(SHOWDOWN + "seats = [1, 6]\n")).maxseats == 6
     assert "seat_count 2 does not hold seat 6" in str(refusal(SHOWDOWN + "seats = [1, 6]\nseat_count = 2\n"))
-    assert "does not hold seat" in str(refusal(SHOWDOWN + 'seat_count = "9"\n'))
+    assert "seat_count '9' is not an integer" in str(refusal(SHOWDOWN + 'seat_count = "9"\n'))
 
 
 def test_a_sub_table_of_another_hand_is_malformed(tmp_path) -> None:
@@ -1717,7 +1717,9 @@ def test_the_filters_list_the_phh_source_after_the_rooms() -> None:
 
 
 def test_a_currency_that_is_not_a_code_is_malformed() -> None:
-    for value in ("true", "123", '""', '"USDX"', '"usd"'):
+    for value in ("true", "123"):
+        assert "is not a string" in str(refusal(SHOWDOWN + f"currency = {value}\n"))
+    for value in ('""', '"USDX"', '"usd"'):
         assert "is not an ISO 4217 code" in str(refusal(SHOWDOWN + f"currency = {value}\n"))
     assert build_hand(document(SHOWDOWN + 'currency = "USD"\n')).gametype["currency"] == "USD"
     assert build_hand(document(SHOWDOWN)).gametype["currency"] == "play"
@@ -1816,22 +1818,22 @@ def test_a_completion_reopens_the_betting_to_who_called_the_bring_in() -> None:
 
 
 @pytest.mark.parametrize(
-    ("line", "what"),
+    ("line", "reason"),
     [
-        ("table = true", "table"),
-        ("table = [1]", "table"),
-        ("table = 1.5", "table"),
-        ("event = true", "event"),
-        ("event = 3", "event"),
+        ("table = true", "table must be a string or an integer"),
+        ("table = [1]", "table must be a string or an integer"),
+        ("table = 1.5", "table must be a string or an integer"),
+        ("event = true", "event True is not a string"),
+        ("event = 3", "event 3 is not a string"),
     ],
 )
-def test_a_table_or_event_of_the_wrong_type_is_malformed(line: str, what: str) -> None:
+def test_a_table_or_event_of_the_wrong_type_is_malformed(line: str, reason: str) -> None:
     """PHH gives ``table`` a string or an integer and ``event`` a string: anything else is
     metadata fpdb would otherwise store as its ``str()`` -- ``table = true`` as the table
     "True", splitting the imported hands into bogus table groups."""
     error = refusal(SHOWDOWN + line + "\n")
     assert error.kind == MALFORMED
-    assert f"{what} must be" in str(error)
+    assert reason in str(error)
 
 
 def test_the_table_label_is_the_table_then_the_event_then_the_file_name() -> None:
@@ -1840,3 +1842,51 @@ def test_the_table_label_is_the_table_then_the_event_then_the_file_name() -> Non
     assert build_hand(document(SHOWDOWN + "table = 0\n")).tablename == "0"
     assert build_hand(document(SHOWDOWN + 'event = "Main Event"\n')).tablename == "Main Event"
     assert build_hand(document(SHOWDOWN)).tablename == "test"
+
+
+# -- the accepted subset of PHH -------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("line", "reason"),
+    [
+        # A field fpdb reads for this game.
+        ('ante_trimming_status = "yes"', "ante_trimming_status 'yes' is not a boolean"),
+        ("ante_trimming_status = 1", "ante_trimming_status 1 is not a boolean"),
+        ("city = 1", "city 1 is not a string"),
+        ('time_limit = "30"', "time_limit is not a number"),
+        # A field fpdb reads for another game, or never: still PHH's, so still checked.
+        ('bring_in = "1"', "bring_in is not a number"),
+        ("small_bet = true", "small_bet is not a number"),
+        ("finishing_stacks = 5", "finishing_stacks must be a list"),
+        ("author = 1", "author 1 is not a string"),
+        ('level = "1"', "level '1' is not an integer"),
+        ("time_banks = 5", "time_banks must be a list"),
+        ("currency_symbol = 1", "currency_symbol 1 is not a string"),
+        ("hand = true", "hand must be a string or an integer"),
+        ('url = 1', "url 1 is not a string"),
+        ("postal_code = 1", "postal_code 1 is not a string"),
+    ],
+)
+def test_a_field_of_the_wrong_type_is_refused_whether_or_not_fpdb_reads_it(line: str, reason: str) -> None:
+    """The boundary is the specification's field table, not the fields fpdb happens to use.
+
+    A value of another type is a violation PHH asks a parser to report; storing it as its
+    ``str()`` -- or reading a truthy string as a boolean -- would be a plausible but wrong
+    value kept for good. A field PHH does not define is its user-defined space, left alone.
+    """
+    error = refusal(SHOWDOWN + line + "\n")
+    assert error.kind == MALFORMED
+    assert reason in str(error)
+
+
+def test_a_user_defined_field_is_left_alone() -> None:
+    hand = build_hand(document(SHOWDOWN + '_hero = "p1"\n_notes = [1, 2]\n'))
+    assert hand.hero == "p1"
+
+
+def test_an_ante_marked_untrimmed_is_not_read_as_a_truthy_string() -> None:
+    """``bool("no")`` is true: the hand would have been refused as trimmed, or read as trimmed."""
+    assert refusal(ANTES_HAND + 'ante_trimming_status = "no"\n').kind == MALFORMED
+    assert refusal(ANTES_HAND + "ante_trimming_status = false\n").kind == PARTIAL
+    assert refusal(ANTES_HAND + "ante_trimming_status = true\n").kind == UNSUPPORTED

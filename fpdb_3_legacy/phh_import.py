@@ -27,7 +27,7 @@ import math
 import os
 import re
 import time
-from collections.abc import Iterable, Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from decimal import ROUND_DOWN, Decimal, InvalidOperation
 from pathlib import Path
@@ -468,7 +468,6 @@ def hand_number(data: Mapping[str, Any], occurrence: str = "") -> int:
 
 def _start_time(data: Mapping[str, Any], fail: Any) -> datetime.datetime:
     """The hand's start in UTC (naive, as fpdb stores it); the epoch when PHH gives no year."""
-    _check_time_fields(data, fail)
     year, month, day = data.get("year"), data.get("month"), data.get("day")
     moment = data.get("time")
     if any(part is not None for part in (year, month, day, moment)):
@@ -489,19 +488,87 @@ def _start_time(data: Mapping[str, Any], fail: Any) -> datetime.datetime:
     return _in_utc(local, data, fail)
 
 
-def _check_time_fields(data: Mapping[str, Any], fail: Any) -> None:
-    """The date and time fields, when given, are of their PHH type."""
-    year, month, day = data.get("year"), data.get("month"), data.get("day")
-    moment = data.get("time")
-    # PHH's time is a TOML local time: a date and an offset are fields of their own.
-    if moment is not None and (isinstance(moment, datetime.datetime) or not isinstance(moment, datetime.time)):
-        raise fail(f"time {moment!r} is not a local time of day")
-    # The epoch stands for a hand PHH gives no date; a date given wrong is not that.
-    if any(part is not None and (not isinstance(part, int) or isinstance(part, bool)) for part in (year, month, day)):
-        raise fail(f"year, month and day {year!r}, {month!r}, {day!r} are not a date")
-    for key in ("time_zone", "time_zone_abbreviation"):
-        if data.get(key) is not None and not isinstance(data[key], str):
-            raise fail(f"{key} {data[key]!r} is not a string")
+#: The TOML type PHH gives each field it defines. Every one of them is checked when present,
+#: whether or not fpdb reads it for this game: a value of another type is a specification
+#: violation, and one fpdb coerced -- ``str(table)`` as a label, a truthy string as a trimmed
+#: ante -- is a plausible but wrong value stored for good. A field PHH does not define is its
+#: user-defined space (``_hero``, a note) and is left alone. ``variant`` is absent here: it is
+#: resolved into a mapping before a hand is built.
+_FIELD_TYPES: Final[dict[str, str]] = {
+    "author": "string",
+    "event": "string",
+    "url": "string",
+    "venue": "string",
+    "address": "string",
+    "city": "string",
+    "region": "string",
+    "postal_code": "string",
+    "country": "string",
+    "currency": "string",
+    "currency_symbol": "string",
+    "time_zone": "string",
+    "time_zone_abbreviation": "string",
+    "level": "integer",
+    "seat_count": "integer",
+    "year": "integer",
+    "month": "integer",
+    "day": "integer",
+    "hand": "string or integer",
+    "table": "string or integer",
+    "min_bet": "number",
+    "small_bet": "number",
+    "big_bet": "number",
+    "bring_in": "number",
+    "time_limit": "number",
+    "ante_trimming_status": "boolean",
+    "time": "local time",
+    "actions": "actions",
+    "players": "names",
+    "seats": "seats",
+    "antes": "list",
+    "blinds_or_straddles": "list",
+    "starting_stacks": "list",
+    "winnings": "list",
+    "finishing_stacks": "list",
+    "time_banks": "list",
+}
+
+#: How a value of each kind is recognized. A list is only checked to *be* a list: what its
+#: entries must be is positional (``starting stack of p1``), and is checked where they are read.
+_SHAPES: Final[dict[str, Callable[[Any], bool]]] = {
+    "string": lambda value: isinstance(value, str),
+    "integer": lambda value: isinstance(value, int) and not isinstance(value, bool),
+    "number": lambda value: isinstance(value, (int, float)) and not isinstance(value, bool),
+    "boolean": lambda value: isinstance(value, bool),
+    "string or integer": lambda value: isinstance(value, str) or (isinstance(value, int) and not isinstance(value, bool)),
+    "local time": lambda value: isinstance(value, datetime.time) and not isinstance(value, datetime.datetime),
+    "list": lambda value: isinstance(value, list),
+    "names": lambda value: isinstance(value, list),
+    "seats": lambda value: isinstance(value, list),
+    "actions": lambda value: isinstance(value, list),
+}
+
+#: Why a value of another type is refused, naming the field and showing what was given.
+_PROBLEMS: Final[dict[str, Callable[[str, Any], str]]] = {
+    "string": lambda key, value: f"{key} {value!r} is not a string",
+    "integer": lambda key, value: f"{key} {value!r} is not an integer",
+    "number": lambda key, value: f"{key} is not a number",
+    "boolean": lambda key, value: f"{key} {value!r} is not a boolean",
+    "string or integer": lambda key, value: f"{key} must be a string or an integer, not {value!r}",
+    "local time": lambda key, value: f"time {value!r} is not a local time of day",
+    "list": lambda key, value: f"{key} must be a list, not {value!r}",
+    "names": lambda key, value: f"players must be a list of names, not {value!r}",
+    "seats": lambda key, value: f"seats must be a list of seat numbers, not {value!r}",
+    "actions": lambda key, value: f"actions must be a list of strings, not {value!r}",
+}
+
+
+def _check_field_types(data: Mapping[str, Any], fail: Any) -> None:
+    """Every PHH field present is of the TOML type PHH gives it (``_FIELD_TYPES``)."""
+    for key, kind in _FIELD_TYPES.items():
+        value = data.get(key)
+        if value is not None and not _SHAPES[kind](value):
+            raise fail(_PROBLEMS[kind](key, value))
 
 
 def _in_utc(local: datetime.datetime, data: Mapping[str, Any], fail: Any) -> datetime.datetime:
@@ -666,17 +733,13 @@ class _Builder:
 
     def _table_name(self) -> str:
         """The table label: ``table`` (a string or an integer, zero included), else ``event``
-        (a string), else the file name. A value of any other type is malformed metadata, not a
-        label to stringify -- ``table = true`` would otherwise be stored as the table "True"."""
+        (a string), else the file name. Both types are checked before anything is read from the
+        hand, so a label here is never another type's ``str()`` -- ``table = true`` as "True"."""
         table = self.data.get("table")
         if table is not None:
-            if isinstance(table, bool) or not isinstance(table, (str, int)):
-                raise self.fail(f"table must be a string or an integer, not {table!r}")
             return str(table)
         event = self.data.get("event")
         if event is not None:
-            if not isinstance(event, str):
-                raise self.fail(f"event must be a string, not {event!r}")
             return event
         return Path(self.document.source).stem
 
@@ -737,6 +800,9 @@ class _Builder:
 
     # -- building -------------------------------------------------------------------
     def build(self) -> Any:
+        # The accepted subset, checked before anything is read from the file: a field of
+        # another type is a specification violation, not a value to coerce.
+        _check_field_types(self.data, self.fail)
         from fpdb_3_legacy.Hand import DrawHand, HoldemOmahaHand, StudHand  # noqa: PLC0415 - Qt-free, but heavy
 
         for key in (*_REQUIRED[self.base], *_REQUIRED_BY_LIMIT[self.mapping.limit_type]):
