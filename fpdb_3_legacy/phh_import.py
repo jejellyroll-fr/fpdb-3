@@ -561,6 +561,16 @@ _FIELD_TYPES: Final[dict[str, str]] = {
     "time_banks": "list",
 }
 
+#: The PHH fields that carry one value per player, each specified as an array "of length equal
+#: to the number of players". The length is checked where the player count becomes known, not
+#: where the value is read: an array nothing reads (``time_banks``) or one a branch skips
+#: (``finishing_stacks`` beside ``winnings``) would otherwise carry the wrong number of entries
+#: past every check, and a malformed hand -- counted as an error, and so kept out of the
+#: archive -- would be imported as a good one. ``starting_stacks`` is what the count is read
+#: from, and ``players`` and ``seats`` are checked by :meth:`_Builder._seats`, where the message
+#: can name the pair that disagree.
+_PER_PLAYER_ARRAYS: Final = ("antes", "blinds_or_straddles", "winnings", "finishing_stacks", "time_banks")
+
 
 def _is_number(value: Any) -> bool:
     """A TOML number: an integer or a float, a boolean excluded (``true`` is not 1)."""
@@ -905,6 +915,18 @@ class _Builder:
             return event
         return Path(self.document.source).stem
 
+    def _check_lengths(self, count: int) -> None:
+        """Every per-player array present holds one entry per player, read or not.
+
+        One place for the whole rule, so no array's length depends on whether something goes
+        on to read it. :meth:`_per_player` still guards the count where it reads the amounts:
+        it is the reader's own precondition, and a caller may hand it any array.
+        """
+        for key in _PER_PLAYER_ARRAYS:
+            values = self.data.get(key)
+            if values is not None and (not isinstance(values, list) or len(values) != count):
+                raise self.fail(f"{key} must have one value per player")
+
     def _per_player(self, key: str, count: int) -> list[Decimal]:
         values = self.data.get(key)
         if values is None:
@@ -984,6 +1006,7 @@ class _Builder:
                 raise self.fail(f"{key} is not a field of {self.mapping.name}")
         seats = self._seats()
         count = len(seats)
+        self._check_lengths(count)
         antes = self._per_player("antes", count)
         blinds = self._per_player("blinds_or_straddles", count) if self.base != "stud" else [Decimal(0)] * count
         gametype = self._gametype(blinds)

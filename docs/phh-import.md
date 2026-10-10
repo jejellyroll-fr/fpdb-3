@@ -95,7 +95,12 @@ does with a given file is decidable without reading the code:
   array is checked entry by entry for the same reason: `time_banks` is read by
   nothing and `finishing_stacks` is skipped whenever `winnings` is given, so an
   array whose reader does not run would otherwise carry a string entry past every
-  check. A zone and an abbreviation are read for what they refuse even in a hand
+  check. Its **length** is checked in one place as well, once the player count is
+  known: PHH gives `antes`, `blinds_or_straddles`, `winnings`, `finishing_stacks`
+  and `time_banks` "length equal to the number of players", and without that check
+  the two arrays whose reader does not run are the ones left free to hold the
+  wrong number of entries — a broken hand stored, and counted as one that
+  imported. A zone and an abbreviation are read for what they refuse even in a hand
   that gives no date, so leaving the date out is not a way past them.
 - **A field PHH does not define is its user-defined space** (`_hero`, a note) and
   is left alone, whatever its type.

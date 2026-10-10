@@ -2381,3 +2381,55 @@ def test_a_supplied_name_the_fallback_does_not_fold_onto_leaves_the_fallback_alo
     hand = build_hand(document(text))
     assert [player[1] for player in hand.players] == ["p1", supplied]
 
+
+# -- forty-fifth review ---------------------------------------------------------------
+
+#: The three-player hand above with one per-player array of the wrong length. PHH gives each
+#: of these "length equal to the number of players", so three seats and two (or four) entries
+#: is a broken hand, not a hand fpdb cannot hold.
+WRONG_LENGTH = [
+    (NT_HAND.replace("antes = [0, 0, 0]", "antes = [0]"), "antes"),
+    (NT_HAND.replace("antes = [0, 0, 0]", "antes = [0, 0, 0, 0]"), "antes"),
+    (NT_HAND.replace("blinds_or_straddles = [1, 2, 0]", "blinds_or_straddles = [1, 2]"), "blinds_or_straddles"),
+    (NT_HAND.replace("blinds_or_straddles = [1, 2, 0]", "blinds_or_straddles = [1, 2, 0, 0]"), "blinds_or_straddles"),
+    (NT_HAND + "winnings = [0, 0]\n", "winnings"),
+    (NT_HAND + "winnings = [0, 0, 5, 0]\n", "winnings"),
+    # Nothing reads time_banks, and _collected reads finishing_stacks only when winnings is
+    # absent: the two arrays whose reader does not run, each short and each long.
+    (NT_HAND + "time_banks = [30]\n", "time_banks"),
+    (NT_HAND + "time_banks = [30, 30, 30, 30]\n", "time_banks"),
+    (NT_HAND + "finishing_stacks = [100]\n", "finishing_stacks"),
+    (NT_HAND + "finishing_stacks = [100, 100, 100, 100]\n", "finishing_stacks"),
+    (NT_HAND + "winnings = [0, 0, 5]\nfinishing_stacks = [100]\n", "finishing_stacks"),
+    (NT_HAND + "winnings = [0, 0, 5]\nfinishing_stacks = [100, 100, 100, 100]\n", "finishing_stacks"),
+]
+
+
+@pytest.mark.parametrize(("text", "field"), WRONG_LENGTH)
+def test_a_per_player_array_of_the_wrong_length_is_malformed(text: str, field: str) -> None:
+    """Every per-player array holds one entry per player, whether the importer reads it or not.
+
+    Measured before the fix, in this three-player hand: ``time_banks = [30]`` imported -- the
+    array is read by nothing, so nothing compared its length -- and so did a ``finishing_stacks``
+    of the wrong length whenever ``winnings`` was also given, since ``_collected`` reads the
+    first and skips the second. Both were stored with a zero malformed count, and
+    ``importFiles`` files a file under ``failed=errors > 0``, so they were archived with the
+    hands that imported.
+    """
+    error = refusal(text)
+    assert error.kind == MALFORMED
+    assert f"{field} must have one value per player" in str(error)
+
+
+def test_the_per_player_arrays_of_the_right_length_still_import() -> None:
+    """The controls: the same arrays, one entry per player, still import.
+
+    ``time_banks`` is a time, not an amount -- PHH allows a fractional one and fpdb stores no
+    time bank -- so the new rule is a length rule and does not put the field through the
+    hundredth every amount is held to.
+    """
+    assert build_hand(document(NT_HAND)) is not None
+    assert build_hand(document(NT_HAND + "time_banks = [30, 30, 30]\n")) is not None
+    assert build_hand(document(NT_HAND + "time_banks = [30.5, 30.5, 30.5]\n")) is not None
+    assert build_hand(document(NT_HAND + "winnings = [0, 0, 5]\nfinishing_stacks = [100, 100, 100]\n")) is not None
+
