@@ -45,6 +45,7 @@ from fpdb_3_legacy.http_capture_ofc import OFCHand, build_ofc_hand, load_ofc_han
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.replayer_audio import ReplayerAudio, transition_sound
 
 # import L10n
 # _ = L10n.get_translation()
@@ -776,6 +777,23 @@ class GuiReplayer(QWidget):
         self.showCards = QCheckBox(_("Hide Cards"))
         self.showCards.setChecked(True)
         self.buttonBox2.addWidget(self.showCards)
+
+        self.audio = ReplayerAudio(self, config=self.conf)
+        self._sound_frame_index = None
+        self.soundCheck = QCheckBox(_("Sound"))
+        self.soundCheck.setToolTip(_("Original PokerStars chip and card sounds during playback"))
+        self.soundCheck.setChecked(self.audio.enabled)
+        self.soundCheck.toggled.connect(self.audio.set_enabled)
+        self.buttonBox2.addWidget(self.soundCheck)
+        self.soundVolume = QSlider(Qt.Orientation.Horizontal)
+        self.soundVolume.setRange(0, 100)
+        self.soundVolume.setValue(self.audio.volume)
+        self.soundVolume.setFixedWidth(90)
+        self.soundVolume.setToolTip(_("Sound volume"))
+        self.soundVolume.valueChanged.connect(self.audio.set_volume)
+        self.soundVolume.setEnabled(self.audio.enabled)
+        self.soundCheck.toggled.connect(self.soundVolume.setEnabled)
+        self.buttonBox2.addWidget(self.soundVolume)
 
         self.deckLabel = QLabel(_("Deck:"))
         self.deckLabel.setStyleSheet("font-weight: 600; color: #9aa5ad; margin-left: 10px;")
@@ -2550,8 +2568,12 @@ class GuiReplayer(QWidget):
             self.buttonBox.addWidget(btn)
         self.buttonBox.addStretch()
 
+        self._sound_frame_index = None
+        self.audio.stop()
         self.stateSlider.setMaximum(max(0, len(self.states) - 1))
         self.stateSlider.setValue(0)
+        self._sound_frame_index = 0
+        self.audio.play("deal")
         self._sync_replayer_controls()
         self.update()
 
@@ -2569,6 +2591,12 @@ class GuiReplayer(QWidget):
 
     def slider_changed(self, value) -> None:  # noqa: F811
         if getattr(self, "states", None):
+            previous = getattr(self, "_sound_frame_index", None)
+            self._sound_frame_index = value
+            if previous is not None and value == previous + 1 and 0 <= previous < value < len(self.states):
+                self.audio.play(transition_sound(self.states[previous], self.states[value]))
+            elif previous != value:
+                self.audio.stop()
             self._sync_replayer_controls()
             self._maybe_start_fold_animation(value)
         self.update()
@@ -2653,6 +2681,14 @@ class GuiReplayer(QWidget):
 
     def start_clicked(self, checkState) -> None:
         self.stateSlider.setValue(0)
+
+    def closeEvent(self, event) -> None:
+        self.audio.stop()
+        self.playing = False
+        if getattr(self, "playTimer", None):
+            self.playTimer.stop()
+        self._fold_timer.stop()
+        super().closeEvent(event)
 
     def end_clicked(self, checkState) -> None:
         self.stateSlider.setValue(self.stateSlider.maximum())
