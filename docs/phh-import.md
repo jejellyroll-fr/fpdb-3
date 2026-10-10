@@ -113,7 +113,9 @@ does with a given file is decidable without reading the code:
   does fpdb. The comparison is deliberately coarser than any one collation — it is
   the union of the three a server may default to — so where it cannot place a
   character it refuses the hand instead of risking a merge, and a pair a server
-  would have kept apart may still be refused.
+  would have kept apart may still be refused. The name fpdb generates for an
+  unnamed player is held to it too: it is compared the same way, so it steps aside
+  to `p1#2` rather than having the hand refused for a collision fpdb itself made.
 - **PHH's field rules are read both ways round.** A family and a limit must carry
   the fields PHH gives them and no others: a bring-in is "mutually exclusive with
   blinds or straddles", `min_bet` "must never be specified in fixed-limit games",
@@ -140,7 +142,7 @@ does with a given file is decidable without reading the code:
 | `d db cards` | the flop, turn and river |
 | `pN sd [cards]` | in draw games, a discard (with the cards when known: each named card leaves the hand, each `??` one of its unknown cards) or standing pat; it opens the next draw, with or without betting in between (all-in runouts) |
 | `pN sm cards`, `pN sm -`, `pN sm` | shown cards (a partly shown hand keeps its known cards, the hero's too, and fills a `??` with the card the deal named; every card keeps the place it was dealt in, whatever order the show lists them in; fewer cards than dealt is a partial show, the rest unknown, as PokerKit plays a cash game; a show whose every card is unknown still marks the player as having shown — that is the fact PHH states and fpdb's reports read — with no cards placed for them); shown, the cards the deal already named; mucked, which forfeits any share of the pot -- only at the showdown or once nobody is left to bet (an all-in runout), and in draw games only after the last draw; a stud hand shown in a runout keeps the cards dealt to it afterwards |
-| `players`, `seats`, `seat_count`, `table` / `event` | player names (for a name absent or empty, as PHH allows, `pN` -- or `pN#2`... when the file already uses that name), seats, table size (`seat_count`, which must hold every seat; else the highest seat), table name (`table`, even 0, else `event`, else the file name); absent `players` and `seats` are made up, given ones -- even empty -- need one entry per player |
+| `players`, `seats`, `seat_count`, `table` / `event` | player names (for a name absent or empty, as PHH allows, `pN` -- or `pN#2`... when the file already uses that name or one the database folds onto it, so an unnamed player beside a supplied `P1` is `p1#2`), seats, table size (`seat_count`, which must hold every seat; else the highest seat), table name (`table`, even 0, else `event`, else the file name); absent `players` and `seats` are made up, given ones -- even empty -- need one entry per player |
 | `currency` | the game's currency; `play` when absent (amounts are then chips) |
 | `time`, `day`, `month`, `year`, `time_zone`, `time_zone_abbreviation` | the hand's start, converted to UTC; a partial date keeps every field it gives, each missing one being the epoch's (`year = 2009` alone is 2009-01-01, `month = 2` and `day = 3` alone 1970-02-03, a `time` alone that time on 1970-01-01); a time with no `time_zone` is UTC, unless the hand gives a full location (`city`, `region` and `country`), when it is refused; `time_zone_abbreviation` with a `time_zone` picks the repeated hour when summer time ends (`EST` or `EDT`); 1970-01-01 when PHH gives nothing, not even a time — the `time_zone` and `time_zone_abbreviation` it does give are still checked against that instant (a date or a time zone that does not exist, an abbreviation that is not the zone's, or one with no zone to read it in, is refused, dated or not) |
 | `_hero` (user-defined) | the hero, when it is a string naming one of the players; otherwise the hand has none |

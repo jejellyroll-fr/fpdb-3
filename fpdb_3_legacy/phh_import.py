@@ -700,16 +700,22 @@ def _zone(name: str, fail: Any) -> datetime.tzinfo:
 def _player_names(given: Sequence[Any]) -> list[str]:
     """The players' names; an unnamed one is pN, or pN#2... when the file already uses that."""
     supplied = {str(name) for name in given if name not in (None, "")}
+    # The generated name has to clear the same bar ``_seats`` sets for the file's own names. A
+    # name the database cannot tell from a supplied one -- ``P1`` is ``p1`` to it, and so is
+    # ``p1 `` -- would make two seats one player, and the hand would be refused for a name fpdb
+    # invented. Stepped aside here, exactly as the plain ``p1`` collision always was.
+    taken = {_collation_key(str(name)[:_NAME_LIMIT]) for name in supplied}
     names: list[str] = []
     for index, name in enumerate(given, start=1):
         if name not in (None, ""):
             names.append(str(name))
             continue
         fallback, suffix = f"p{index}", 1
-        while fallback in supplied or fallback in names:
+        while _collation_key(fallback[:_NAME_LIMIT]) in taken:
             suffix += 1
             fallback = f"p{index}#{suffix}"
         names.append(fallback)
+        taken.add(_collation_key(fallback[:_NAME_LIMIT]))
     return names
 
 

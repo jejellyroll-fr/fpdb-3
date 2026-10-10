@@ -2302,3 +2302,82 @@ def test_a_fixed_limit_big_blind_that_is_the_small_bet_still_imports(
     text = FL_BLINDS.format(blinds=blinds, small_bet=small_bet, big_bet=2 * small_bet, raise_to=raise_to)
     assert build_hand(document(text)).gametype["bb"] == small_bet
     assert build_hand(document((FIXTURES / "fl_holdem.phh").read_text(encoding="utf-8"))) is not None
+
+
+# -- forty-fourth review --------------------------------------------------------------
+
+#: Two seats where the file names only the second: the first is unnamed, so fpdb names it p1.
+PARTLY_NAMED = """
+variant = "NT"
+antes = [0, 0]
+blinds_or_straddles = [1, 2]
+min_bet = 2
+starting_stacks = [100, 100]
+actions = [
+  "d dh p1 ????",
+  "d dh p2 ????",
+  "p2 cc",
+  "p1 cc",
+  "d db Kc3d4h",
+  "p1 cc",
+  "p2 cc",
+  "d db 9s",
+  "p1 cc",
+  "p2 cc",
+  "d db Jc",
+  "p1 cc",
+  "p2 cc",
+]
+winnings = [0, 0]
+finishing_stacks = [100, 100]
+"""
+
+
+@pytest.mark.parametrize(
+    ("given", "expected"),
+    [
+        (["", "P1"], ["p1#2", "P1"]),  # the database reads P1 as p1
+        (["", "p1 "], ["p1#2", "p1 "]),  # and the collation is PAD SPACE
+        (["", "", "P1"], ["p1#2", "p2", "P1"]),  # the name is at another seat
+        (["", "p1"], ["p1#2", "p1"]),  # the exact collision, as before
+        (["p2", "", ""], ["p2", "p2#2", "p3"]),  # and that one, at another seat
+        (["", "P2"], ["p1", "P2"]),  # the controls: nothing folds onto p1 here
+        (["", "p1#2"], ["p1", "p1#2"]),
+        (["", ""], ["p1", "p2"]),
+    ],
+)
+def test_an_unnamed_player_steps_around_a_name_the_database_would_fold_onto(
+    given: list[str], expected: list[str]
+) -> None:
+    """The generated name has to clear the bar ``_seats`` sets for the file's own names.
+
+    An unnamed player is called ``pN``, and a supplied ``P1`` is the same name to the
+    database: the unique index on ``(name, siteId)`` would make the two seats one row and
+    ``insertPlayer()`` would hand the second the first player's id. ``_seats`` refuses the
+    hand for it, but the collision is the importer's own doing -- it chose the name -- so the
+    fallback steps aside to ``p1#2`` exactly as it always has for a supplied ``p1``.
+    """
+    from fpdb_3_legacy.phh_import import _player_names
+
+    assert _player_names(given) == expected
+
+
+@pytest.mark.parametrize("supplied", ["P1", "p1 ", "p1\u00a0", "p1\u200b"])
+def test_a_hand_whose_unnamed_player_folds_onto_a_named_one_still_imports(supplied: str) -> None:
+    """Measured before the fix: this hand was refused ``unsupported`` for the name fpdb made up.
+
+    The same hand with the name written ``p1`` imported -- it was only the collision between
+    a supplied name and the generated one that was not stepped around.
+    """
+    text = PARTLY_NAMED.replace('variant = "NT"', f'variant = "NT"\nplayers = ["", "{supplied}"]')
+    hand = build_hand(document(text))
+    assert [player[1] for player in hand.players] == ["p1#2", supplied]
+
+
+@pytest.mark.parametrize("supplied", ["P2", "x", "p1#2", "p3"])
+def test_a_supplied_name_the_fallback_does_not_fold_onto_leaves_the_fallback_alone(supplied: str) -> None:
+    """The controls: a name the database keeps apart from ``p1`` does not move it."""
+    text = PARTLY_NAMED.replace('variant = "NT"', f'variant = "NT"\nplayers = ["", "{supplied}"]')
+    hand = build_hand(document(text))
+    assert [player[1] for player in hand.players] == ["p1", supplied]
+
