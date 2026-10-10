@@ -2433,3 +2433,93 @@ def test_the_per_player_arrays_of_the_right_length_still_import() -> None:
     assert build_hand(document(NT_HAND + "time_banks = [30.5, 30.5, 30.5]\n")) is not None
     assert build_hand(document(NT_HAND + "winnings = [0, 0, 5]\nfinishing_stacks = [100, 100, 100]\n")) is not None
 
+
+# -- forty-sixth review ---------------------------------------------------------------
+
+#: A table that posts a small blind and no big blind: the array's first entry only. PHH's
+#: blinds are "two positive values in the first two indices", and the first is the small one.
+LONE_SMALL_BLIND = [
+    NT_HAND.replace("blinds_or_straddles = [1, 2, 0]", "blinds_or_straddles = [2, 0, 0]"),
+    SHOWDOWN.replace("blinds_or_straddles = [1, 2]", "blinds_or_straddles = [2, 0]"),
+]
+
+
+@pytest.mark.parametrize("text", LONE_SMALL_BLIND)
+def test_a_small_blind_with_no_big_blind_is_unsupported(text: str) -> None:
+    """A lone first entry says nothing about the big blind, so the hand is refused, not filed.
+
+    Measured before the fix: ``blinds_or_straddles = [2, 0, 0]`` imported, ``_stakes`` reading
+    the lone blind as the big one (stakes 1/2) while ``_post`` labelled the same post a *small
+    blind* of 2 -- so the hand carried a small blind equal to its game row's big blind, and
+    every blind-normalised statistic read it against the wrong size. Heads-up, ``[2, 0]`` had
+    the same mismatch. The first position is the small blind, so a big blind has to be given
+    for the game row to have one.
+    """
+    error = refusal(text)
+
+    assert error.kind == UNSUPPORTED
+    assert "a small blind of 2 and no big blind" in str(error)
+
+
+BLIND_LAYOUTS = [
+    (NT_HAND, 3, (1, 2)),  # the small and the big blind
+    (NT_HAND.replace("blinds_or_straddles = [1, 2, 0]", "blinds_or_straddles = [0, 2, 0]"), 3, (1, 2)),
+    (NT_HAND.replace("blinds_or_straddles = [1, 2, 0]", "blinds_or_straddles = [0, 0, 2]"), 3, (1, 2)),
+    (SHOWDOWN, 2, (1, 2)),  # heads-up: the first two entries are assigned in reverse
+    (SHOWDOWN.replace("blinds_or_straddles = [1, 2]", "blinds_or_straddles = [0, 2]"), 2, (1, 2)),
+]
+
+
+@pytest.mark.parametrize(("text", "count", "stakes"), BLIND_LAYOUTS)
+def test_the_blind_layouts_that_name_a_big_blind_still_give_the_game_its_stakes(
+    text: str, count: int, stakes: tuple[int, int]
+) -> None:
+    """The controls: the layouts around the refusal -- no small blind, a button blind, heads-up."""
+    from fpdb_3_legacy.phh_import import _Builder
+
+    builder = _Builder(document(text), mapping_for("NT"), None)
+    gametype = builder._gametype(builder._per_player("blinds_or_straddles", count))
+
+    assert (gametype["sb"], gametype["bb"]) == stakes
+
+
+def test_the_big_blind_the_hand_posts_is_the_game_row_s_big_blind() -> None:
+    """The invariant the lone-small-blind layout broke: the post and the game row agree."""
+    hand = build_hand(document(NT_HAND))
+
+    posted = [action[2] for action in hand.actions["BLINDSANTES"] if action[1] == "big blind"]
+    assert posted == [hand.gametype["bb"]]
+
+
+def test_a_header_inside_a_value_that_closed_is_not_a_table(tmp_path) -> None:
+    """A value that closed swallowed nothing, so the hand that holds it is not cut at it.
+
+    Measured before the fix: this file -- a hand whose multiline note holds ``[inside]`` and
+    whose ``variant`` is given twice -- came back as two malformed hands. The note had closed,
+    but its header-looking line stayed a suspect, and the unrelated TOML error sent the
+    recovery through it, so both the discovered and the malformed counts were one hand too
+    high and the first error named a string that was never left open.
+    """
+    path = tmp_path / "hands.phhs"
+    hand = SHOWDOWN.lstrip("\n").replace('variant = "NT"\n', 'variant = "NT"\nnote = """\n[inside]\n"""\n', 1)
+    path.write_text("[1]\n" + hand + 'variant = "NT"\n', encoding="utf-8")
+
+    items = list(iter_documents(path))
+
+    assert len(items) == 1
+    assert isinstance(items[0], PHHImportError)
+    assert items[0].kind == MALFORMED
+    assert "Cannot overwrite a value" in str(items[0])
+
+
+def test_a_header_inside_a_closed_value_is_just_text(tmp_path) -> None:
+    """The control: the same note, and no unrelated error -- one hand, and it imports."""
+    path = tmp_path / "hands.phhs"
+    hand = SHOWDOWN.lstrip("\n").replace('variant = "NT"\n', 'variant = "NT"\nnote = """\n[inside]\n"""\n', 1)
+    path.write_text("[1]\n" + hand, encoding="utf-8")
+
+    items = list(iter_documents(path))
+
+    assert [item.label for item in items] == ["1"]
+    assert build_hand(items[0]) is not None
+

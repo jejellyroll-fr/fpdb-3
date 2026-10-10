@@ -416,6 +416,12 @@ def _split_tables(
             # A .phhs holds hands only in [name] tables; what comes before belongs to none.
             preamble_reported = True
             yield PHHImportError(MALFORMED, "content before the first [hand] table", source=f"{source}:{number}")
+        if open_string is None and depth == 0:
+            # Nothing is open any more, so a header-looking line seen inside a value has been
+            # read for what it is -- text -- and is no hand of its own. Only a value still open
+            # at the end of the hand swallowed the tables after it; keeping a resolved suspect
+            # would cut a hand at a line that closed, inventing hands out of its text.
+            suspects.clear()
     if label is not None:
         yield from _documents(source, label, start, lines, suspects, undecodable)
 
@@ -944,7 +950,11 @@ class _Builder:
         elif big > 0:
             small = small if small > 0 else big / 2
         elif small > 0:
-            small, big = small / 2, small  # one blind alone: it is the big one
+            # A small blind and no big one. PHH's blinds are "two positive values in the first
+            # two indices", and the first is the small blind: a lone first entry says nothing
+            # about the big blind, so the game row -- which is filed under its big blind, and
+            # whose `_post` labels the first position a small blind -- has no size to take.
+            raise self.fail(f"a small blind of {small} and no big blind", UNSUPPORTED)
         else:
             raise self.fail("no blind is posted", UNSUPPORTED)
         if small != small.quantize(_CENT, rounding=ROUND_DOWN):
