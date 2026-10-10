@@ -1,0 +1,32 @@
+variant = "F7S/8"
+antes = [1, 1]
+bring_in = 2
+small_bet = 5
+big_bet = 10
+starting_stacks = [200, 200]
+actions = [
+  "d dh p1 Ad2d3c",
+  "d dh p2 KsKdQc",
+  "p1 pb",
+  "p2 cbr 5",
+  "p1 cc",
+  "d dh p1 4c",
+  "d dh p2 Qs",
+  "p2 cbr 5",
+  "p1 cc",
+  "d dh p1 9h",
+  "d dh p2 Jc",
+  "p2 cbr 10",
+  "p1 cc",
+  "d dh p1 Th",
+  "d dh p2 5d",
+  "p2 cc",
+  "p1 cc",
+  "d dh p1 6h",
+  "d dh p2 8d",
+  "p2 cbr 10",
+  "p1 cc",
+  "p2 sm KsKdQcQsJc5d8d",
+  "p1 sm Ad2d3c4c9hTh6h",
+]
+finishing_stacks = [200, 200]

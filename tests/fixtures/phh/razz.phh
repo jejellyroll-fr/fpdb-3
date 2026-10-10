@@ -1,0 +1,20 @@
+variant = "FR"
+antes = [1, 1, 1]
+bring_in = 2
+small_bet = 5
+big_bet = 10
+starting_stacks = [150, 150, 150]
+actions = [
+  "d dh p1 ????Ks",
+  "d dh p2 Ah2d3c",
+  "d dh p3 ????4h",
+  "p1 pb",
+  "p2 cbr 5",
+  "p3 cbr 10",
+  "p1 f",
+  "p2 cc",
+  "d dh p2 5c",
+  "d dh p3 Kd",
+  "p2 cbr 5",
+  "p3 f",
+]

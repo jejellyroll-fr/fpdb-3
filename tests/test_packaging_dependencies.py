@@ -27,6 +27,8 @@ NOT_PACKAGED = {
     # A meta-package pulling in every Objective-C framework binding. The macOS
     # section names the three fpdb actually imports instead, which is smaller.
     "pyobjc": "the macOS section names the individual pyobjc frameworks",
+    # Only for Python 3.10, which briefcase never builds with; there tomllib is stdlib.
+    "tomli": "tomllib's backport, needed only by the Python 3.10 PyOxidizer builds",
 }
 
 

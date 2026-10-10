@@ -1,0 +1,14 @@
+# Heads-up with a big-blind ante: both arrays are assigned in reverse heads-up.
+variant = "NT"
+antes = [0, 3]
+blinds_or_straddles = [1, 2]
+min_bet = 2
+starting_stacks = [200, 200]
+actions = [
+  "d dh p1 AsKs",
+  "d dh p2 7c2d",
+  "p2 cbr 6",
+  "p1 cbr 20",
+  "p2 f",
+]
+players = ["", ""]

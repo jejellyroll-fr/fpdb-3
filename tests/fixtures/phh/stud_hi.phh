@@ -1,0 +1,29 @@
+variant = "F7S"
+antes = [1, 1, 1]
+bring_in = 2
+small_bet = 5
+big_bet = 10
+starting_stacks = [200, 200, 200]
+actions = [
+  "d dh p1 ????2c",
+  "d dh p2 AhAd9c",
+  "d dh p3 ????Kd",
+  "p1 pb",
+  "p2 cbr 5",
+  "p3 cc",
+  "p1 f",
+  "d dh p2 4h",
+  "d dh p3 Ks",
+  "p3 cbr 5",
+  "p2 cc",
+  "d dh p2 7s",
+  "d dh p3 3d",
+  "p3 cbr 10",
+  "p2 cbr 20",
+  "p3 cc",
+  "d dh p2 Ac",
+  "d dh p3 2h",
+  "p3 cc",
+  "p2 cbr 10",
+  "p3 f",
+]
