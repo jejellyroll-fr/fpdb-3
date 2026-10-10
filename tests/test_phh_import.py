@@ -2523,3 +2523,34 @@ def test_a_header_inside_a_closed_value_is_just_text(tmp_path) -> None:
     assert [item.label for item in items] == ["1"]
     assert build_hand(items[0]) is not None
 
+
+# -- forty-seventh review -------------------------------------------------------------
+
+
+def test_a_draw_showdown_is_recorded_on_the_last_draw_not_on_the_deal() -> None:
+    """The shown holding goes on the final draw street; the deal keeps the starting hands.
+
+    Measured: ``DrawHand.addShownCards`` takes the last street that carries an action, and an
+    all-in runout still records one on every draw -- ``stands pat`` or ``discards`` -- so here
+    the target is DRAWTHREE and not DEAL. p1 stands pat throughout, so his DRAWTHREE entry can
+    only come from the showdown; p2's is the merged holding (the four he kept and the ``7d`` he
+    drew), while his DEAL entry still holds the five he was dealt. The replacement streets are
+    untouched, and the deal is not overwritten.
+    """
+    hand = build_hand(next(iter_documents(FIXTURES / "triple_draw_all_in_runout.phh")))
+
+    assert [street for street in hand.allStreets if hand.actions.get(street)][-1] == "DRAWTHREE"
+    assert hand.holecards["DEAL"]["p1"] == [[], ["7h", "5c", "4d", "3s", "2c"]]
+    assert hand.holecards["DEAL"]["p2"] == [[], ["9s", "8h", "6c", "3d", "2h"]]
+    assert hand.holecards["DRAWTHREE"]["p1"] == [[], ["7h", "5c", "4d", "3s", "2c"]]
+    assert hand.holecards["DRAWTHREE"]["p2"] == [[], ["8h", "6c", "3d", "2h", "7d"]]
+
+
+def test_the_control_a_normal_draw_also_shows_on_its_last_draw() -> None:
+    """The control: betting on the draws changes nothing -- the last draw street is still it."""
+    hand = build_hand(next(iter_documents(FIXTURES / "triple_draw_yockey_arieh.phh")))
+
+    assert [street for street in hand.allStreets if hand.actions.get(street)][-1] == "DRAWTHREE"
+    assert hand.holecards["DEAL"]["Josh Arieh"] == [[], ["As", "Qs", "6s", "5c", "3c"]]
+    assert hand.holecards["DRAWTHREE"]["Josh Arieh"] == [[], ["5c", "3c", "2h", "4d", "7c"]]
+
