@@ -2554,3 +2554,65 @@ def test_the_control_a_normal_draw_also_shows_on_its_last_draw() -> None:
     assert hand.holecards["DEAL"]["Josh Arieh"] == [[], ["As", "Qs", "6s", "5c", "3c"]]
     assert hand.holecards["DRAWTHREE"]["Josh Arieh"] == [[], ["5c", "3c", "2h", "4d", "7c"]]
 
+
+# -- forty-eighth review --------------------------------------------------------------
+
+#: 4/8 stud, third street: a bring-in of 1, a call of 1, then two all-ins short of the small
+#: bet -- 2 and 3. The first is the street's completion (the bring-in is forced, so it is the
+#: street's first bet); the second is a short all-in raise over it.
+STUD_ALL_IN_COMPLETION = """
+variant = "F7S"
+antes = [0, 0, 0, 0]
+bring_in = 1
+small_bet = 4
+big_bet = 8
+starting_stacks = [100, 100, 2, 3]
+actions = [
+  "d dh p1 ????2c",
+  "d dh p2 ????8c",
+  "d dh p3 ????9c",
+  "d dh p4 ????Tc",
+  "p1 pb",
+  "p2 cc",
+  "p3 cbr 2",
+  "p4 cbr 3",
+  "p1 cc",
+  {last}
+]
+"""
+
+#: The same street with the completion reaching the small bet (4) and a short all-in raise
+#: over it (5): p3, who completed, has already bet and may not raise again.
+STUD_SHORT_ALL_IN_RAISE = STUD_ALL_IN_COMPLETION.replace(
+    "starting_stacks = [100, 100, 2, 3]", "starting_stacks = [100, 100, 100, 5]"
+).replace('"p3 cbr 2",\n  "p4 cbr 3",', '"p3 cbr 4",\n  "p4 cbr 5",')
+
+
+def test_an_all_in_completion_short_of_the_small_bet_reopens_for_the_bring_in_caller() -> None:
+    """p2, who only called the forced bring-in, may raise over p3's all-in completion.
+
+    PokerKit 0.7.6 applies p2's raise to 7 here. The bring-in is forced, so it does not set the
+    street's yardstick for a full wager: that yardstick is 0 when the street opens and becomes
+    the size of each completion, bet or raise *increment*. p3's all-in completion to 2 is an
+    increment of 1, so 1 is the yardstick; p4's all-in to 3 is another increment of 1, and
+    PokerKit drops its short-all-in tally as soon as the tally reaches the yardstick. By p2's
+    turn the tally is empty and p2 is not among those who have acted, so its bar on raising
+    cannot apply. The small bet (4) never enters that reckoning, which is why an all-in
+    completion below it reopens while one that reaches it does not (the control below).
+    """
+    assert refusal(STUD_ALL_IN_COMPLETION.format(last='"p2 cbr 7"')).kind == PARTIAL
+    assert refusal(STUD_ALL_IN_COMPLETION.format(last='"p2 cc"')).kind == PARTIAL
+    # A raise is legal to 7 and nowhere else: 20 is refused for its size, not for reopening.
+    assert "goes to 7, not 20" in str(refusal(STUD_ALL_IN_COMPLETION.format(last='"p2 cbr 20"')))
+
+
+def test_the_control_a_short_all_in_raise_does_not_reopen_for_who_has_acted() -> None:
+    """The other side of the same rule, kept: p3 completed, so the short all-in leaves it cold.
+
+    p3's completion to 4 is an increment of 3 over the bring-in, so 3 is the street's yardstick.
+    p4's all-in to 5 is an increment of 1, below it, so the tally stands and p3 has acted:
+    PokerKit 0.7.6 answers p3's re-raise with "The player already acted and hence cannot raise
+    in face of a non-full all-in wager", and takes its call.
+    """
+    assert "p3 may only call or fold" in str(refusal(STUD_SHORT_ALL_IN_RAISE.format(last='"p3 cbr 9"')))
+    assert refusal(STUD_SHORT_ALL_IN_RAISE.format(last='"p3 cc"')).kind == PARTIAL
