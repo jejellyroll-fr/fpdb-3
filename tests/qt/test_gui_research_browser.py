@@ -10,6 +10,7 @@ stale results dropped, presets applied and saved, and empty states explained.
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 
 import pytest
@@ -672,6 +673,45 @@ def test_a_grid_cell_loads_its_hands(browser, qtbot) -> None:
     get_qapp().processEvents()
     assert browser.drill_table.rowCount() > 0
     assert "hands" in browser.drill_note.text()
+
+
+def test_the_result_slot_must_not_delete_the_thread_that_is_still_emitting(browser, qtbot, monkeypatch) -> None:
+    """A finished drill is retired off ``finished``, never from its own result slot.
+
+    A drill worker emits ``finished_ok`` from inside ``run`` and only then unwinds
+    (``GuiResearchBrowser.py``, the last line of ``_DrillWorker.run``). Deleting the
+    QThread from the slot that emission has just called destroys it while the thread
+    is still running, and Qt answers ``qFatal("QThread: Destroyed while thread is
+    still running")`` -- a SIGABRT that takes the whole process, and the CI job, with
+    it. The window is a few instructions wide in production, so hold ``run`` open
+    after its emission: a delete from the slot then always lands inside the window.
+    """
+    from fpdb_3_legacy import GuiResearchBrowser as gui
+
+    original_run = gui._DrillWorker.run
+
+    def lingering_run(self) -> None:
+        original_run(self)
+        time.sleep(0.5)
+
+    monkeypatch.setattr(gui._DrillWorker, "run", lingering_run)
+
+    _choose_view(browser, qtbot, "range")
+    matrix = browser.range_grid._matrix
+    populated = next((cell for cell in matrix.known_cells() if cell.opportunities), None)
+    if populated is None:
+        pytest.skip("the golden corpus opens no starting hand with known cards")
+
+    browser._load_cell_hands(populated.label)
+    worker = browser._drill_worker
+    assert worker is not None
+    qtbot.waitUntil(lambda: browser._drill_worker is None, timeout=30000)
+    get_qapp().processEvents()
+    assert browser.drill_table.rowCount() > 0
+    # Let the held-open thread finish before the fixture tears the widget down:
+    # a parent destroys its children, and a QThread destroyed while running is
+    # the very abort under test.
+    assert worker.wait(30000)
 
 
 def test_choosing_the_hand_strength_view_shows_the_composition(browser, qtbot) -> None:
