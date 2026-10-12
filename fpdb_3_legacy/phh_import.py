@@ -769,6 +769,29 @@ _COLLATION_JOINERS: Final[frozenset[int]] = frozenset(
     }
 )
 
+#: Every supplementary character -- U+10000 and above -- is *one* character to the collations
+#: ``Players.name`` may be compared with, and one character of weight ``U+FFFD``: "to MySQL, all
+#: supplementary characters are equal to each other". The general collations and the UCA 4.0.0
+#: ones (``utf8mb4_unicode_ci``, the collation this install's table is on) weigh them that way;
+#: the collations newer than UCA 4.0.0 keep them apart, which the fold ignores -- it errs coarse.
+#:
+#: Folded onto ``U+FFFD`` itself rather than onto a sentinel of our own. Swept, like the two
+#: tables above: every BMP codepoint written as one character of a name, against the name an
+#: emoji makes -- 63 488 of them, the surrogates and U+0000 aside. On ``utf8mb4_general_ci``
+#: ``U+FFFD`` is the *only* one of them that stands for the emoji, so the fold covers that
+#: collation exactly and reaches no BMP character it keeps apart; ``utf8mb4_unicode_ci`` keeps
+#: ``U+FFFD`` apart from the emoji too, so the fold is coarser than that one, which is the
+#: direction it errs in. In ``Players``: ``Alice😀`` then ``Alice😁`` leaves *one* row and hands
+#: back id 1 both times, on the table's own ``utf8mb4_unicode_ci`` as much as on
+#: ``utf8mb4_general_ci``, while ``utf8mb4_uca1400_ai_ci`` keeps the two apart. One
+#: supplementary character is one ``U+FFFD`` weight there and not two, which is why one
+#: character replaces one.
+#:
+#: Folded before the decomposition, for the reason ``_COLLATION_JOINERS`` is: NFKD reaches about
+#: 1 900 of the supplementary characters and turns them into BMP ones -- 1 907 with the Unicode
+#: data this Python ships -- which would then stand for themselves in the comparison.
+_COLLATION_SUPPLEMENTARY: Final = "\ufffd"
+
 #: The characters a collation does not read as themselves: an attaching mark, which it reads
 #: with the letter before it, and a control or format character, which is invisible in the
 #: name it sits in. Dropped, so that ``José`` and ``Jose`` meet here -- and so that a name
@@ -795,14 +818,24 @@ def _collation_key(name: str) -> str:
     second name the first player's id: two seats become one, in the actions and in the reports,
     permanently.
 
-    The key is a fold: :data:`_COLLATION_LETTERS`, :data:`_COLLATION_JOINERS`, a decomposition,
-    the characters of :data:`_COLLATION_UNREAD`, a case fold, and the trailing spaces of
-    :data:`_COLLATION_SPACES`. It is deliberately *coarser* than any one of the three
-    collations -- where it cannot tell two names apart it refuses the hand rather than letting
-    two players merge. Measured over 15 248 codepoints, written in the middle and at the end of
-    a name against the real table and its unique index: no pair a server would merge escapes it.
+    The key is a fold: :data:`_COLLATION_LETTERS`, :data:`_COLLATION_JOINERS`,
+    :data:`_COLLATION_SUPPLEMENTARY`, a decomposition, the characters of
+    :data:`_COLLATION_UNREAD`, a case fold, and the trailing spaces of
+    :data:`_COLLATION_SPACES`. It is deliberately *coarser* than any one of the collations a
+    server may compare a name with -- where it cannot tell two names apart it refuses the hand
+    rather than letting two players merge. Measured over 15 248 codepoints, written in the
+    middle and at the end of a name against the real table and its unique index: no pair a
+    server would merge escapes it. The supplementary characters are the one class that needed
+    no sweep of that kind -- the general and UCA 4.0.0 collations make them all equal by rule
+    -- and the fold makes them one character, ``U+FFFD``, which is the weight the general
+    collations give them and coarser than the UCA 4.0.0 one, where the replacement character
+    stands apart from them.
     """
-    mapped = "".join(_COLLATION_LETTERS.get(char, char) for char in name if ord(char) not in _COLLATION_JOINERS)
+    mapped = "".join(
+        _COLLATION_LETTERS.get(char, _COLLATION_SUPPLEMENTARY if ord(char) > 0xFFFF else char)
+        for char in name
+        if ord(char) not in _COLLATION_JOINERS
+    )
     kept = []
     for char in unicodedata.normalize("NFKD", mapped):
         if unicodedata.combining(char) or unicodedata.category(char) in _COLLATION_UNREAD:

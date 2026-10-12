@@ -2616,3 +2616,50 @@ def test_the_control_a_short_all_in_raise_does_not_reopen_for_who_has_acted() ->
     """
     assert "p3 may only call or fold" in str(refusal(STUD_SHORT_ALL_IN_RAISE.format(last='"p3 cbr 9"')))
     assert refusal(STUD_SHORT_ALL_IN_RAISE.format(last='"p3 cc"')).kind == PARTIAL
+
+
+# -- forty-ninth review ---------------------------------------------------------------
+
+#: Names that differ only in a supplementary character -- U+1F600 against U+1F601, two emoji,
+#: U+20000 against U+20001 in CJK extension B, U+1D11E against U+1D122 in musical symbols --
+#: and, last, U+1F600 against U+FFFD, the BMP character the general collations weigh a
+#: supplementary one as. None of the pairs is a case pair, so nothing but the collation's own
+#: reading of the characters makes each pair one name.
+SUPPLEMENTARY_PAIRS = [
+    ("Alice\U0001f600", "Alice\U0001f601"),
+    ("\U0001f600", "\U0001f601"),
+    ("Alice\U00020000", "Alice\U00020001"),
+    ("Alice\U0001d11e", "Alice\U0001d122"),
+    ("Alice\U0001f600", "Alice\ufffd"),
+]
+
+
+@pytest.mark.parametrize(("left", "right"), SUPPLEMENTARY_PAIRS)
+def test_names_differing_only_in_a_supplementary_character_are_unsupported(left: str, right: str) -> None:
+    """The collations put every supplementary character in one place, so both seats are one player.
+
+    Measured in ``Players``, with the table and its unique index exactly as fpdb writes them:
+    inserting ``Alice😀`` then ``Alice😁`` runs ``ON DUPLICATE KEY UPDATE ... id=LAST_INSERT_ID(id)``
+    into the duplicate, leaving *one* row and handing back id 1 both times -- the second seat's
+    actions and winnings filed under the first player. It does so on ``utf8mb4_general_ci`` and on
+    ``utf8mb4_unicode_ci``, the collation this install's table is on, and the general collation
+    weighs *every* supplementary character as one ``U+FFFD``: over the 63 488 BMP codepoints
+    written in a name, ``U+FFFD`` is the only one it takes for an emoji. ``utf8mb4_uca1400_ai_ci``
+    keeps the two emoji apart -- the fold refuses them anyway, which is the coarser direction it
+    is meant to err in.
+    """
+    error = refusal(SHOWDOWN + 'players = ["' + left + '", "' + right + '"]\n')
+    assert error.kind == UNSUPPORTED
+    assert "ignores case and accents" in str(error)
+
+
+@pytest.mark.parametrize("other", ["Bob", "Alice\u00e9", "Alic\U0001f600"])
+def test_the_supplementary_fold_does_not_refuse_every_name_that_carries_one(other: str) -> None:
+    """The control: the fold folds the characters, it does not refuse the name that carries them.
+
+    Measured, the same way: ``utf8mb4_general_ci`` reads ``Alice😀`` as ``Alice`` followed by one
+    ``U+FFFD``, so a name carrying an emoji still imports beside one that differs in a letter, in
+    a BMP character the collation keeps apart (``é``), or in the letter the same emoji follows.
+    Refusing those would cost a file for nothing.
+    """
+    assert build_hand(document(SHOWDOWN + 'players = ["Alice\U0001f600", "' + other + '"]\n')) is not None

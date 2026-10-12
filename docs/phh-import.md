@@ -108,14 +108,21 @@ does with a given file is decidable without reading the code:
   first 32 characters, compared as the collation compares them — without case,
   without accents, folding the ligatures and fullwidth letters it folds onto
   their expansion, dropping the marks it reads with the letter before them and
-  the joining forms it gives no weight to, and — the collations being `PAD SPACE`
-  — ignoring a trailing run of spaces, so `Alice` and `Alice ` are one row. Two
+  the joining forms it gives no weight to, folding every supplementary character
+  onto `U+FFFD`, which is the one character the general collations weigh them as,
+  and — the collations being `PAD SPACE` — ignoring a trailing run of spaces, so
+  `Alice` and `Alice ` are one row. Two
   players whose names meet there are refused — *unsupported* — rather than
   silently merged into one row of `Players` by the unique index on
   `(name, siteId)`, which would file both seats' actions under the first player.
   What the collation folds is measured against a live server rather than read off
   the letters' shapes: it does not take `Ŋ` for `n`, nor `Þ` for `th`, and neither
-  does fpdb. The comparison is deliberately coarser than any one collation — it is
+  does fpdb. The supplementary characters are the one class measured by rule
+  rather than one at a time: the general collations and the UCA 4.0.0 ones make
+  them all equal, so `Alice😀` and `Alice😁` are one row in `Players` and one id
+  either way, and the fold makes them one character. Of the 63 488 BMP codepoints
+  a name can carry, `U+FFFD` is the only one the general collation takes for an
+  emoji. The comparison is deliberately coarser than any one collation — it is
   the union of the three a server may default to — so where it cannot place a
   character it refuses the hand instead of risking a merge, and a pair a server
   would have kept apart may still be refused. The name fpdb generates for an
