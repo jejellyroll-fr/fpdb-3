@@ -152,6 +152,54 @@ _ACTION_RE: Final = re.compile(
 _TABLE_HEADER_RE: Final = re.compile(
     r"^\[\s*(?:\"(?P<basic>(?:[^\"\\]|\\.)*)\"|'(?P<literal>[^']*)'|(?P<bare>[A-Za-z0-9_-]+))\s*\]\s*(?:#.*)?$"
 )
+#: The escapes a basic key may carry, as TOML defines them: the seven short ones and the two
+#: ``\u``/``\U`` code-point forms. Nothing else is an escape.
+_BASIC_ESCAPES: Final = {
+    "b": "\b",
+    "t": "\t",
+    "n": "\n",
+    "f": "\f",
+    "r": "\r",
+    '"': '"',
+    "\\": "\\",
+}
+
+
+def _basic_key(text: str) -> str:
+    r"""The name a basic quoted header declares, as TOML reads it: ``["\u0031"]`` is ``[1]``.
+
+    TOML decodes a basic string's escapes before it compares keys, so ``[1]`` and ``["\u0031"]``
+    are one declaration to it and it refuses the second. Read raw they are two names, and both
+    sections would be stored -- the hand number is a hash of the section's content, so two
+    sections that differ are two hands to fpdb, and the file would count as a clean import.
+    An escape TOML does not define is left as it stands: the document is not valid TOML either
+    way, and no name is invented from it.
+    """
+    out: list[str] = []
+    index = 0
+    while index < len(text):
+        if text[index] != "\\":
+            out.append(text[index])
+            index += 1
+            continue
+        escape = text[index + 1 : index + 2]
+        if escape in _BASIC_ESCAPES:
+            out.append(_BASIC_ESCAPES[escape])
+            index += 2
+            continue
+        width = 8 if escape == "U" else 4
+        code = text[index + 2 : index + 2 + width]
+        if escape in ("u", "U") and len(code) == width:
+            try:
+                out.append(chr(int(code, 16)))
+            except ValueError:
+                pass
+            else:
+                index += 2 + width
+                continue
+        out.append("\\")  # not an escape TOML knows: the backslash stands as itself
+        index += 1
+    return "".join(out)
 
 
 # -- errors and results -----------------------------------------------------------------
@@ -388,14 +436,15 @@ def _decoded(handle: Iterable[bytes], undecodable: set[int]) -> Iterator[tuple[i
 def _split_tables(
     source: str, numbered: Iterable[tuple[int, str]], undecodable: set[int]
 ) -> Iterator[PHHDocument | PHHImportError]:
-    """Cut numbered lines at their top-level ``[name]`` headers: one hand each.
+    r"""Cut numbered lines at their top-level ``[name]`` headers: one hand each.
 
     A name the file declares twice is not a second hand. TOML refuses a repeated table --
     "Cannot declare ('1',) twice" -- and read as two hands both would be stored: the hand
     number is a hash of the section's content, so two sections that differ are two hands to
     fpdb, and the file would count as a clean import. The hand the name first declared stands
     as it is; the repetition is what the document cannot say. The names declared so far are
-    kept to see this, a few bytes per hand against hands that are read one at a time.
+    kept to see this, a few bytes per hand against hands that are read one at a time. A name
+    is the one TOML reads, its escapes decoded, so ``[1]`` and ``["\u0031"]`` are one name.
     """
     label: str | None = None
     seen: set[str] = set()
@@ -416,9 +465,11 @@ def _split_tables(
         if header is not None and not inside:
             if label is not None:
                 yield from _hand(source, label, start, lines, suspects, undecodable, duplicate)
-            label = next(key for key in header.group("basic", "literal", "bare") if key is not None)
+            key = next(key for key in header.group("basic", "literal", "bare") if key is not None)
+            # The key as TOML reads it, so that [1], ["1"], ["\u0031"] and [ 1 ] are one name.
+            # Only a basic key has escapes: a literal key's backslash is itself.
+            label = _basic_key(key) if header.group("basic") is not None else key
             start, lines, suspects = number, [raw], []
-            # The key as TOML reads it, so that [1], ["1"] and [ 1 ] are one name.
             duplicate = label in seen
             seen.add(label)
         elif label is not None:

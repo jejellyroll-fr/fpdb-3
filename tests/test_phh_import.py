@@ -2748,3 +2748,91 @@ def test_names_a_file_does_not_repeat_still_read_as_their_own_hands(tmp_path) ->
     items = list(iter_documents(nested))
     assert [item.label for item in items] == ["1"]
     assert build_hand(items[0]) is not None
+
+
+# -- fifty-first review ---------------------------------------------------------------
+
+#: One key, two spellings that differ only in how TOML writes an escape: decoded they are one
+#: name, so the second spelling is a repetition of the first -- ``[1]`` and ``["\u0031"]`` are
+#: both the key ``1``. The last element is the name TOML reads, which both must decode to.
+ESCAPED_KEY = [
+    ("[1]", '["\\u0031"]', "1", "a four-digit escape"),
+    ("[1]", '["\\U00000031"]', "1", "an eight-digit escape"),
+    ('["\\t1"]', '["\\u00091"]', "\t1", "a short escape against its code point"),
+    ('["a\\\\b"]', '["a\\u005Cb"]', "a\\b", "an escaped backslash against its code point"),
+]
+
+
+@pytest.mark.parametrize(
+    ("first", "second", "key", "what"), ESCAPED_KEY, ids=[case[3] for case in ESCAPED_KEY]
+)
+def test_a_key_written_with_an_escape_is_the_key_toml_reads(
+    first: str, second: str, key: str, what: str, tmp_path, importer
+) -> None:
+    """The escaped spelling of a key is the same name, so it is the same declaration twice.
+
+    Measured on a live import before the fix: ``[1]`` then ``["\\u0031"]`` stored *two* hands,
+    counted no duplicates and *no* malformed. The duplicate check read the header's raw text --
+    the escape undecoded -- so the two spellings were two names to it, while TOML, which decodes
+    a basic string's escapes before it compares keys, refuses the document: "Cannot declare
+    ('1',) twice". Both sections did read as the same ``PHHDocument.label`` -- that one is taken
+    from the parsed TOML -- which is what made the file look like two hands named alike rather
+    than one name declared twice.
+    """
+    razz = (FIXTURES / "razz.phh").read_text(encoding="utf-8")
+    badugi = (FIXTURES / "badugi.phh").read_text(encoding="utf-8")
+    text = f"{first}\n{razz}\n{second}\n{badugi}\n"
+    path = tmp_path / "escaped.phhs"
+    path.write_text(text, encoding="utf-8")
+
+    items = list(iter_documents(path))
+    assert [item.label for item in items if isinstance(item, PHHDocument)] == [key]
+    assert len(items) == 2
+    error = items[1]
+    assert isinstance(error, PHHImportError)
+    assert error.kind == MALFORMED
+    # The name reported is the one TOML reads, as the document's own label is.
+    assert f"the table [{key}] is declared twice" in str(error)
+    assert error.hand == key
+    repeated_on = text[: text.rindex(second)].count("\n") + 1
+    assert f":{repeated_on}" in str(error)
+
+    assert importer.addImportFile(str(path))
+    stored, duplicates, partial, skipped, errors, _seconds = importer.runImport()
+    assert (stored, duplicates, partial, skipped, errors) == (1, 0, 0, 0, 1)
+
+
+def test_a_literal_keys_backslash_is_not_an_escape(tmp_path) -> None:
+    """The mirror of the same defect: read raw, two *different* names collide and one is refused.
+
+    ``["\\u0031"]`` is the key ``1`` and ``['\\u0031']`` is the six-character name ``\\u0031`` --
+    two different tables, which TOML accepts side by side. Read raw, both headers spell the same
+    backslash-u-0-0-3-1, so the duplicate check took the second for a repetition of the first and
+    refused a hand TOML never refused. Decoding a basic key, and only a basic key, is what tells
+    the two apart: a literal key has no escapes.
+    """
+    razz = (FIXTURES / "razz.phh").read_text(encoding="utf-8")
+    badugi = (FIXTURES / "badugi.phh").read_text(encoding="utf-8")
+    path = tmp_path / "literal.phhs"
+    path.write_text(f"[\"\\u0031\"]\n{razz}\n['\\u0031']\n{badugi}\n", encoding="utf-8")
+
+    items = list(iter_documents(path))
+    assert [item.label for item in items if isinstance(item, PHHDocument)] == ["1", "\\u0031"]
+    assert not any(isinstance(item, PHHImportError) for item in items)
+
+
+def test_keys_an_escape_does_not_join_still_read_as_their_own_hands(tmp_path) -> None:
+    """The control: decoding joins the spellings of one key, it does not join two keys.
+
+    ``["\\u0032"]`` is the key ``2`` -- decoded, and *not* the key ``1`` beside it, in either
+    direction. This one reads the same before and after the fix; it is here to say that the
+    guards above fail for the reason claimed and not because every escaped key is refused.
+    """
+    razz = (FIXTURES / "razz.phh").read_text(encoding="utf-8")
+    badugi = (FIXTURES / "badugi.phh").read_text(encoding="utf-8")
+    path = tmp_path / "another.phhs"
+    path.write_text(f"[1]\n{razz}\n[\"\\u0032\"]\n{badugi}\n", encoding="utf-8")
+
+    items = list(iter_documents(path))
+    assert [item.label for item in items if isinstance(item, PHHDocument)] == ["1", "2"]
+    assert not any(isinstance(item, PHHImportError) for item in items)
