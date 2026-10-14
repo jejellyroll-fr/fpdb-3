@@ -38,7 +38,7 @@ player is resolved by name -- PHH has no configured hero or aliases.
   room detector. Each is recorded in the `Files` table by its whole path,
   `PHH/<path>` (past the 255 characters MySQL indexes, `PHH/<hash of the path>/<file name>`), never sharing the row of a room file named alike (`session.txt`) or of a
   PHH file of the same name in another directory.
-- A `.phhs` file holds one hand per top-level table (`[1]`, `[2]`, `["session.1"]`, …); a dotted table (`[1.notes]`) is a sub-table of its hand, and a line inside a multiline string (a note), an array or an inline table is never taken for a table -- a value that closes is text, whatever its lines look like -- unless that value is never closed: the hand is then malformed, and the hands it swallowed are read again from the first table header inside it. It is read
+- A `.phhs` file holds one hand per top-level table (`[1]`, `[2]`, `["session.1"]`, …); a dotted table (`[1.notes]`) is a sub-table of its hand; a name the file declares twice (`[1]` and `[1]`, or `[1]` and `["1"]`, which TOML reads as the same key) is not a second hand, TOML refusing the repetition — it is *malformed*, and the hand the name first declared stands. A line inside a multiline string (a note), an array or an inline table is never taken for a table -- a value that closes is text, whatever its lines look like -- unless that value is never closed: the hand is then malformed, and the hands it swallowed are read again from the first table header inside it. It is read
   **line by line, one hand at a time**, so a large dataset is never loaded
   whole. Files are read as UTF-8: in a `.phhs`, a line that is not makes only its hand malformed.
 

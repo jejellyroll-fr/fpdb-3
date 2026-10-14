@@ -388,8 +388,18 @@ def _decoded(handle: Iterable[bytes], undecodable: set[int]) -> Iterator[tuple[i
 def _split_tables(
     source: str, numbered: Iterable[tuple[int, str]], undecodable: set[int]
 ) -> Iterator[PHHDocument | PHHImportError]:
-    """Cut numbered lines at their top-level ``[name]`` headers: one hand each."""
+    """Cut numbered lines at their top-level ``[name]`` headers: one hand each.
+
+    A name the file declares twice is not a second hand. TOML refuses a repeated table --
+    "Cannot declare ('1',) twice" -- and read as two hands both would be stored: the hand
+    number is a hash of the section's content, so two sections that differ are two hands to
+    fpdb, and the file would count as a clean import. The hand the name first declared stands
+    as it is; the repetition is what the document cannot say. The names declared so far are
+    kept to see this, a few bytes per hand against hands that are read one at a time.
+    """
     label: str | None = None
+    seen: set[str] = set()
+    duplicate = False
     start = 1
     lines: list[str] = []
     suspects: list[int] = []
@@ -405,9 +415,12 @@ def _split_tables(
         header = _TABLE_HEADER_RE.match(stripped) if stripped[:1] == "[" else None
         if header is not None and not inside:
             if label is not None:
-                yield from _documents(source, label, start, lines, suspects, undecodable)
+                yield from _hand(source, label, start, lines, suspects, undecodable, duplicate)
             label = next(key for key in header.group("basic", "literal", "bare") if key is not None)
             start, lines, suspects = number, [raw], []
+            # The key as TOML reads it, so that [1], ["1"] and [ 1 ] are one name.
+            duplicate = label in seen
+            seen.add(label)
         elif label is not None:
             if header is not None:
                 suspects.append(len(lines))  # a hand of its own if the value around it never closes
@@ -423,7 +436,26 @@ def _split_tables(
             # would cut a hand at a line that closed, inventing hands out of its text.
             suspects.clear()
     if label is not None:
-        yield from _documents(source, label, start, lines, suspects, undecodable)
+        yield from _hand(source, label, start, lines, suspects, undecodable, duplicate)
+
+
+def _hand(
+    source: str,
+    label: str,
+    start: int,
+    lines: list[str],
+    suspects: list[int],
+    undecodable: set[int],
+    duplicate: bool,
+) -> Iterator[PHHDocument | PHHImportError]:
+    """One hand's table -- or, for a name the file has already declared, the error that stands
+    in its place. TOML refuses the repetition, so the section is not read as a hand at all."""
+    if duplicate:
+        yield PHHImportError(
+            MALFORMED, f"the table [{label}] is declared twice", source=f"{source}:{start}", hand=label
+        )
+        return
+    yield from _documents(source, label, start, lines, suspects, undecodable)
 
 
 def _documents(
@@ -431,7 +463,11 @@ def _documents(
 ) -> Iterator[PHHDocument | PHHImportError]:
     """One hand's table -- or, when a value it leaves open swallowed the hands after it, the
     malformed hand and then those hands, cut again from the first header inside that value.
-    A line of it that is not UTF-8 makes the hand malformed."""
+    A line of it that is not UTF-8 makes the hand malformed.
+
+    That re-split starts its own reckoning of declared names: a line a value swallowed is text
+    rather than a declaration, and the hand that swallowed it is already reported malformed.
+    """
     document: PHHDocument | PHHImportError
     if bad := sorted(number for number in undecodable if start <= number < start + len(lines)):
         document = PHHImportError(MALFORMED, f"line {bad[0]} is not UTF-8", source=f"{source}:{start}", hand=label)

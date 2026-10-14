@@ -2663,3 +2663,88 @@ def test_the_supplementary_fold_does_not_refuse_every_name_that_carries_one(othe
     Refusing those would cost a file for nothing.
     """
     assert build_hand(document(SHOWDOWN + 'players = ["Alice\U0001f600", "' + other + '"]\n')) is not None
+
+
+# -- fiftieth review ------------------------------------------------------------------
+
+#: The spellings of one and the same top-level key: TOML reads ``[1]``, ``["1"]`` and ``[ 1 ]``
+#: as the key ``1``, so any two of them in one file are one table declared twice.
+REPEATED_KEY = [("[1]", "[1]"), ("[1]", '["1"]'), ("[1]", "[ 1 ]")]
+
+
+@pytest.mark.parametrize(("first", "second"), REPEATED_KEY)
+def test_a_table_the_file_declares_twice_is_malformed_not_a_second_hand(
+    first: str, second: str, tmp_path, importer
+) -> None:
+    """TOML refuses a repeated table; the splitter used to read it as a second hand.
+
+    Measured on a live import before the fix: two ``[1]`` sections holding two different hands
+    stored *two* hands, counted no duplicates and *no* malformed -- and the hand number is a
+    hash of the section's contents, so the two sections really were two hands to fpdb, in the
+    reports as much as in ``Hands``. TOML itself says "Cannot declare ('1',) twice" (the two
+    spellings meet in the key TOML decodes, which is why they are one name here too). The hand
+    the name first declared is kept: it is a hand like any other, and the repetition is what
+    the document cannot say.
+    """
+    razz = (FIXTURES / "razz.phh").read_text(encoding="utf-8")
+    badugi = (FIXTURES / "badugi.phh").read_text(encoding="utf-8")
+    text = f"{first}\n{razz}\n{second}\n{badugi}\n"
+    path = tmp_path / "twice.phhs"
+    path.write_text(text, encoding="utf-8")
+
+    items = list(iter_documents(path))
+    assert [item.label for item in items if isinstance(item, PHHDocument)] == ["1"]
+    assert len(items) == 2
+    error = items[1]
+    assert isinstance(error, PHHImportError)
+    assert error.kind == MALFORMED
+    assert "the table [1] is declared twice" in str(error)
+    # The repetition is what is reported, on its own line.
+    repeated_on = text[: text.rindex(second)].count("\n") + 1
+    assert f":{repeated_on}" in str(error)
+
+    assert importer.addImportFile(str(path))
+    stored, duplicates, partial, skipped, errors, _seconds = importer.runImport()
+    assert (stored, duplicates, partial, skipped, errors) == (1, 0, 0, 0, 1)
+
+
+def test_a_repeated_table_with_the_same_contents_is_malformed_not_a_duplicate(tmp_path, importer) -> None:
+    """The same defect where it used to look harmless: two identical ``[1]`` sections.
+
+    Measured before the fix: the second section was stored as a *duplicate* of the first, so the
+    file imported with no malformed hand and the repetition went unreported. TOML refuses the
+    declaration itself, whatever the sections hold.
+    """
+    razz = (FIXTURES / "razz.phh").read_text(encoding="utf-8")
+    path = tmp_path / "alike.phhs"
+    path.write_text(f"[1]\n{razz}\n[1]\n{razz}\n", encoding="utf-8")
+
+    items = list(iter_documents(path))
+    assert len(items) == 2
+    assert isinstance(items[1], PHHImportError)
+    assert "is declared twice" in str(items[1])
+
+    assert importer.addImportFile(str(path))
+    stored, duplicates, partial, skipped, errors, _seconds = importer.runImport()
+    assert (stored, duplicates, partial, skipped, errors) == (1, 0, 0, 0, 1)
+
+
+def test_names_a_file_does_not_repeat_still_read_as_their_own_hands(tmp_path) -> None:
+    """The control: only a repetition is refused, and a sub-table is not a repetition.
+
+    ``[2]`` beside ``[1]`` is two hands, as it always was; ``[1.notes]`` is a sub-table of the
+    hand ``[1]`` -- TOML accepts it, and the splitter leaves the line to that hand rather than
+    reading it as a second declaration of ``1``.
+    """
+    razz = (FIXTURES / "razz.phh").read_text(encoding="utf-8")
+    badugi = (FIXTURES / "badugi.phh").read_text(encoding="utf-8")
+
+    distinct = tmp_path / "distinct.phhs"
+    distinct.write_text(f"[1]\n{razz}\n[2]\n{badugi}\n", encoding="utf-8")
+    assert [item.label for item in iter_documents(distinct)] == ["1", "2"]
+
+    nested = tmp_path / "nested.phhs"
+    nested.write_text(f"[1]\n{razz}\n[1.notes]\n_x = 1\n", encoding="utf-8")
+    items = list(iter_documents(nested))
+    assert [item.label for item in items] == ["1"]
+    assert build_hand(items[0]) is not None
