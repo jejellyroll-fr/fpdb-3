@@ -2836,3 +2836,198 @@ def test_keys_an_escape_does_not_join_still_read_as_their_own_hands(tmp_path) ->
     items = list(iter_documents(path))
     assert [item.label for item in items if isinstance(item, PHHDocument)] == ["1", "2"]
     assert not any(isinstance(item, PHHImportError) for item in items)
+
+
+# -- fifty-second review --------------------------------------------------------------
+
+SINGLE_DRAW = (FIXTURES / "single_draw.phh").read_text(encoding="utf-8")
+HEADS_UP = (FIXTURES / "nl_holdem_heads_up.phh").read_text(encoding="utf-8")
+
+
+def test_a_card_discarded_a_moment_ago_is_not_dealt_back() -> None:
+    """A discard is out of play, not gone -- but the stub has to run out before it comes back.
+
+    The single-draw fixture has p3 discard ``9s`` and draw ``Kh``. Dealing ``9s`` back instead
+    was *accepted* before this: the discard left the cards-in-play set, so nothing stopped the
+    very next deal from handing the same card out again, with 37 cards still in the stub.
+    PokerKit's simulation shuffles the discards in only on the draw that exhausts the stub, so
+    a card discarded a moment ago cannot be the card drawn.
+    """
+    error = refusal(SINGLE_DRAW.replace('"d dh p3 Kh"', '"d dh p3 9s"'))
+    assert error.kind == MALFORMED
+    assert "9s was discarded" in str(error)
+    assert "action 10" in str(error)
+
+
+def test_a_card_nobody_has_discarded_is_still_dealt() -> None:
+    """The control: only a discarded card is held back, and a card in play is still refused.
+
+    ``As`` is in nobody's hand and in no discard pile, so it is a card of the stub and is dealt;
+    ``2c`` is still p1's, which the check that was already there refuses.
+    """
+    assert build_hand(document(SINGLE_DRAW.replace('"d dh p3 Kh"', '"d dh p3 As"'))) is not None
+    assert "2c is dealt twice" in str(refusal(SINGLE_DRAW.replace('"d dh p3 Kh"', '"d dh p3 2c"')))
+
+
+#: A six-player single draw whose stub runs out. Thirty cards are dealt and all thirty are
+#: discarded, so the stub holds 22; the first four players draw 20 of those, leaving ``Ks``
+#: ``As``. p5's and p6's draws are the ones a reshuffled stub answers, so they legitimately
+#: draw back cards the earlier players discarded -- which is what the guard above must not
+#: refuse, and the reason the discards are tracked at all.
+_SIX_STUB = ("7h8h9hThJh", "7s8s9sTsJs", "QcKcAc", "QdKdAd", "QhKhAh", "QsKsAs")
+_SIX_DEAL = {
+    "p1": "2c3c4c5c6c",
+    "p2": "2d3d4d5d6d",
+    "p3": "2h3h4h5h6h",
+    "p4": "2s3s4s5s6s",
+    "p5": "7c8c9cTcJc",
+    "p6": "7d8d9dTdJd",
+}
+
+
+def six_player_draw(p5_draw: str = "KsAs2c3c4c") -> str:
+    """The six-player hand above, with *p5_draw* as the fifth player's replacement cards."""
+    drawn = {
+        "p1": _SIX_STUB[0],
+        "p2": _SIX_STUB[1],
+        "p3": "QcKcAcQdKd",
+        "p4": "AdQhKhAhQs",
+        "p5": p5_draw,
+        "p6": "5c6c2d3d4d",
+    }
+    return "\n".join(
+        [
+            'variant = "N2L1D"',
+            "antes = [0, 0, 0, 0, 0, 0]",
+            "blinds_or_straddles = [5, 10, 0, 0, 0, 0]",
+            "min_bet = 10",
+            "starting_stacks = [500, 500, 500, 500, 500, 500]",
+            "actions = [",
+            *[f'  "d dh {seat} {cards}",' for seat, cards in _SIX_DEAL.items()],
+            *[f'  "{seat} cc",' for seat in ("p3", "p4", "p5", "p6", "p1", "p2")],
+            *[f'  "{seat} sd {cards}",' for seat, cards in _SIX_DEAL.items()],
+            *[f'  "d dh {seat} {cards}",' for seat, cards in drawn.items()],
+            '  "p1 f",',
+            '  "p2 f",',
+            '  "p3 f",',
+            '  "p4 f",',
+            '  "p5 cbr 100",',
+            '  "p6 f",',
+            "]",
+            'players = ["p1", "p2", "p3", "p4", "p5", "p6"]',
+        ]
+    )
+
+
+def test_a_discarded_card_is_dealt_back_once_the_stub_has_run_out() -> None:
+    """The control the guard above must not break: a reshuffled stub deals the discards again.
+
+    p5's draw of five is the first that cannot come from the stub, which holds two: ``Ks`` and
+    ``As`` are its, and ``2c`` ``3c`` ``4c`` are p1's discards, which the reshuffle is what
+    makes available. Refusing this would refuse a hand PokerKit plays.
+    """
+    assert build_hand(document(six_player_draw())) is not None
+    # And the same draw while the stub still holds cards is refused, one draw earlier.
+    error = refusal(six_player_draw().replace('"d dh p1 7h8h9hThJh"', '"d dh p1 2c3c4c5c6c"'))
+    assert error.kind == MALFORMED
+    assert "2c 3c 4c 5c 6c was discarded" in str(error)
+
+
+#: One TOML date, time or datetime, and the *string* that ``str()`` writes it as -- which is
+#: the spelling the old encoding collapsed it to. A datetime's text is space-separated, so the
+#: ``T`` spelling of the same instant is another string and was never the colliding one.
+_TYPED_HERO = [
+    ("1970-01-01", "1970-01-01", "a date"),
+    ("1970-01-01T00:00:00", "1970-01-01 00:00:00", "a datetime"),
+    ("00:00:00", "00:00:00", "a time"),
+]
+
+
+@pytest.mark.parametrize(
+    ("spelled", "text", "what"), _TYPED_HERO, ids=[case[2] for case in _TYPED_HERO]
+)
+def test_a_hand_that_changes_a_fields_type_is_another_hand(spelled: str, text: str, what: str) -> None:
+    """A TOML date, time or datetime is not the string that spells it, and the hash says so.
+
+    ``json.dumps(..., default=str)`` wrote the value as its own text, which is also what a
+    string of that text writes: ``_hero = 1970-01-01`` and ``_hero = "1970-01-01"`` were one
+    hand number, so a file corrected from one to the other kept its number and was skipped as
+    a duplicate of itself. ``_hero`` is a user-defined field, so both spellings are accepted
+    and both are reachable; the hand's content differs and the number must too.
+    """
+    value = document(f"_hero = {spelled}\n")
+    as_text = document(f'_hero = "{text}"\n')
+    assert hand_number(value.data, "a.phhs\x001") != hand_number(as_text.data, "a.phhs\x001")
+    # The same hand, read twice, is still one number.
+    assert hand_number(value.data, "a.phhs\x001") == hand_number(document(f"_hero = {spelled}\n").data, "a.phhs\x001")
+
+
+def test_a_number_is_not_the_string_that_spells_it() -> None:
+    """The control: the types the old encoding did keep apart are still apart."""
+    for left, right in [("1", '"1"'), ("true", '"true"'), ("1.5", '"1.5"')]:
+        assert hand_number(document(f"_hero = {left}\n").data, "a.phhs\x001") != hand_number(
+            document(f"_hero = {right}\n").data, "a.phhs\x001"
+        )
+
+
+def heads_up(names: list[str], *, raise_size: int = 18) -> str:
+    """The heads-up fixture with *names* for its two players and that raise size.
+
+    The raise size is what makes the second hand of a file a hand of its own: the same content
+    is a duplicate of the first, and a duplicate is not what these tests are about.
+    """
+    text = HEADS_UP.replace('players = ["Alice", "Bob"]', f"players = {json.dumps(names)}")
+    text = text.replace('_hero = "Alice"', f'_hero = "{names[0]}"')
+    return text.replace("cbr 18", f"cbr {raise_size}")
+
+
+def phh_players(db: Any) -> list[str]:
+    """The names in ``Players`` for the PHH source, in the order they were stored."""
+    placeholder = db.sql.query.get("placeholder", "%s")
+    cursor = db.get_cursor()
+    cursor.execute(f"SELECT name FROM Players WHERE siteId = {placeholder} ORDER BY id", (PHH_SITE_ID,))
+    return [str(name) for (name,) in cursor.fetchall()]
+
+
+@pytest.mark.parametrize("second", ["alice", "Álice"], ids=["another case", "another accent"])
+def test_a_name_the_database_holds_is_not_stored_under_another_spelling(
+    second: str, tmp_path, importer
+) -> None:
+    """The check that refuses ``Alice`` beside ``alice`` in one hand has to see the other hands.
+
+    It read the hand's own seats only, so a later hand naming ``alice`` passed it -- and MySQL's
+    usual collation, which compares names without case or accents, put that seat in Alice's row:
+    ``insertPlayer`` upserts on the unique ``(name, siteId)`` index and hands back the existing
+    id, so the two hands' actions and winnings became one player's. Measured on the real table
+    (``UNIQUE KEY name (name, siteId)``, ``utf8mb4_unicode_ci``), ``alice`` and ``Álice`` both
+    return id 1 for a stored ``Alice``, while another ``siteId`` is a player of its own. The
+    hand is refused rather than merged, as the within-hand check already refused it.
+    """
+    path = tmp_path / "names.phhs"
+    path.write_text(
+        f"[1]\n{heads_up(['Alice', 'Bob'])}\n[2]\n{heads_up([second, 'Bob'], raise_size=20)}\n",
+        encoding="utf-8",
+    )
+
+    assert importer.addImportFile(str(path))
+    stored, duplicates, partial, skipped, errors, _seconds = importer.runImport()
+    assert (stored, duplicates, partial, skipped, errors) == (1, 0, 0, 1, 0)
+    assert phh_players(importer.database) == ["Alice", "Bob"]
+
+
+def test_the_same_name_in_another_hand_is_the_same_player(tmp_path, importer) -> None:
+    """The control: a name the database already holds *as spelled* is that player, not a refusal.
+
+    Every dataset names its players again in every hand, so this is the case the guard must let
+    through -- only a name that folds onto a stored one is refused.
+    """
+    path = tmp_path / "same.phhs"
+    path.write_text(
+        f"[1]\n{heads_up(['Alice', 'Bob'])}\n[2]\n{heads_up(['Alice', 'Bob'], raise_size=20)}\n",
+        encoding="utf-8",
+    )
+
+    assert importer.addImportFile(str(path))
+    stored, duplicates, partial, skipped, errors, _seconds = importer.runImport()
+    assert (stored, duplicates, partial, skipped, errors) == (2, 0, 0, 0, 0)
+    assert phh_players(importer.database) == ["Alice", "Bob"]

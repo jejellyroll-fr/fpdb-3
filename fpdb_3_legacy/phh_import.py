@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import datetime
 import hashlib
-import json
 import math
 import os
 import re
@@ -120,6 +119,10 @@ _HAND_SIZES: Final = {
 }
 #: How many board cards each hold'em street deals.
 _BOARD_SIZES: Final = {"FLOP": 3, "TURN": 1, "RIVER": 1}
+#: How many cards the deck holds. Only the draw games discard, and PHH's one short deck (36
+#: cards, ``6_holdem``) is a hold'em variant, which never does: the discards a reshuffle
+#: brings back are always from the 52-card deck.
+_DECK_SIZE: Final = 52
 
 #: A known card, or ``??`` for one that is not: PHH has no half-known card ("A?", "?s").
 _CARD_RE: Final = re.compile(r"[2-9TJQKA][cdhs]|\?\?")
@@ -571,6 +574,23 @@ def _known(cards: Sequence[str]) -> bool:
     return bool(cards) and all(card != "0x" for card in cards)
 
 
+def _typed(value: Any) -> str:
+    """*value* written with its TOML type at every leaf, so no two types are written alike.
+
+    ``json.dumps(..., default=str)`` wrote a date, a time and a datetime as their own text --
+    which is also what a *string* of that text writes -- so ``_hero = 1970-01-01`` and
+    ``_hero = "1970-01-01"`` came out as one number, and a hand corrected from one to the other
+    kept its number and was skipped as a duplicate of itself. The type name is written before
+    every leaf here, and a string's leaf is written with ``repr`` -- quoted and escaped -- so a
+    value of one type cannot be spelled like a value of another, not even by an inline table.
+    """
+    if isinstance(value, dict):
+        return "{" + ",".join(f"{_typed(key)}={_typed(item)}" for key, item in sorted(value.items())) + "}"
+    if isinstance(value, list):
+        return "[" + ",".join(_typed(item) for item in value) + "]"
+    return f"{type(value).__name__}:{value!r}"
+
+
 def hand_number(data: Mapping[str, Any], occurrence: str = "") -> int:
     """A stable number for a hand: a hash of its content and *occurrence* (its file name and
     table), so the same hand imported again is a duplicate.
@@ -578,9 +598,11 @@ def hand_number(data: Mapping[str, Any], occurrence: str = "") -> int:
     The hand's own ``hand`` field is not used alone: two datasets that both number their
     hands from 1 would otherwise be taken for each other's duplicates. Content alone is not
     enough either: an anonymised dataset may hold two hands that read alike (unknown cards,
-    the same folds) at two tables of one file.
+    the same folds) at two tables of one file. The content is written with the TOML type of
+    every value (``_typed``), so two hands that differ in the type of one field -- a date and
+    the string that spells it -- are two hands, not one.
     """
-    canonical = json.dumps([data, occurrence], sort_keys=True, default=str, ensure_ascii=False)
+    canonical = _typed({"hand": dict(data), "place": occurrence})
     digest = hashlib.blake2b(canonical.encode("utf-8"), digest_size=8).digest()
     return int.from_bytes(digest, "big") >> 2  # 62 bits: positive in every BIGINT
 
@@ -947,12 +969,21 @@ class _Seat:
 class _Builder:
     """Plays one PHH hand onto an fpdb Hand, keeping the betting state to translate it."""
 
-    def __init__(self, document: PHHDocument, mapping: PHHGameMapping, config: Any) -> None:
+    def __init__(
+        self,
+        document: PHHDocument,
+        mapping: PHHGameMapping,
+        config: Any,
+        taken: Mapping[str, str] | None = None,
+    ) -> None:
         self.document = document
         self.data = document.data
         self.mapping = mapping
         self.config = config
         self.base = mapping.base
+        # The PHH players the database already holds, keyed by the name it compares them under
+        # (``_collation_key``): a name that folds onto one of them is that player's row.
+        self.taken: Mapping[str, str] = taken if taken is not None else {}
 
     def fail(self, message: str, kind: str = MALFORMED) -> PHHImportError:
         return PHHImportError(kind, message, source=self.document.where, hand=self.document.label)
@@ -980,20 +1011,7 @@ class _Builder:
             raise self.fail("players, seats and starting_stacks do not have the same length")
         if len({str(name) for name in names}) != count or len(set(seats)) != count:
             raise self.fail("two players share a name or a seat")
-        if len({str(name)[:_NAME_LIMIT] for name in names}) != count:
-            # fpdb stores a player's name to 32 characters: two names alike that far would be
-            # one player, their actions and results merged.
-            raise self.fail(f"two players' names are the same in their first {_NAME_LIMIT} characters", UNSUPPORTED)
-        if len({_collation_key(str(name)[:_NAME_LIMIT]) for name in names}) != count:
-            # The same rule, seen from the database's side, and the same 32 characters: MySQL's
-            # default collation compares names without case or accents, so Alice and alice are
-            # one row in Players and insertPlayer() hands back the first player's id -- two
-            # seats become one. Checked here rather than left to the index, which would merge
-            # them silently instead of refusing the hand.
-            raise self.fail(
-                "two players' names are the same to the database, which ignores case and accents",
-                UNSUPPORTED,
-            )
+        self._refuse_colliding_names(names)
         result = []
         for index, (name, seat, stack) in enumerate(zip(names, seats, stacks, strict=True), start=1):
             if not isinstance(seat, int) or isinstance(seat, bool) or seat < 1:
@@ -1003,6 +1021,34 @@ class _Builder:
                 raise self.fail(f"the starting stack of p{index} must be positive")
             result.append(_Seat(str(name), seat, amount, amount))
         return result
+
+    def _refuse_colliding_names(self, names: Sequence[str]) -> None:
+        """Refuse the names the database would take for one player, in this hand or already.
+
+        fpdb stores a name to 32 characters and a player as one row per ``(name, siteId)``, and
+        MySQL's usual collation reads names without case or accents: two names alike that far,
+        or two that differ only in case or accent, are one row in ``Players``, where
+        ``insertPlayer()`` hands back the first player's id -- two seats become one player.
+        Checked here rather than left to the index, which would merge them silently instead of
+        refusing the hand. *taken* is the same rule across hands, which one hand cannot see: a
+        hand naming ``alice`` after one that stored ``Alice`` is refused too.
+        """
+        count = len(names)
+        if len({str(name)[:_NAME_LIMIT] for name in names}) != count:
+            raise self.fail(f"two players' names are the same in their first {_NAME_LIMIT} characters", UNSUPPORTED)
+        if len({_collation_key(str(name)[:_NAME_LIMIT]) for name in names}) != count:
+            raise self.fail(
+                "two players' names are the same to the database, which ignores case and accents",
+                UNSUPPORTED,
+            )
+        for name in names:
+            stored = str(name)[:_NAME_LIMIT]
+            existing = self.taken.get(_collation_key(stored))
+            if existing is not None and existing != stored:
+                raise self.fail(
+                    f"{stored!r} is the player {existing!r} to the database, which ignores case and accents",
+                    UNSUPPORTED,
+                )
 
     def _names_and_seats(self, count: int) -> tuple[list[str], list[Any]]:
         """``players`` and ``seats``: absent, they are made up (``pN``, 1 to N); given -- even
@@ -1217,6 +1263,9 @@ class _Builder:
         # Known cards in play, so one card cannot be dealt twice; discards leave it, since a
         # draw game reshuffles them when the stub runs out.
         self.seen: set[str] = set()
+        # The known cards discarded and not drawn again. Out of play, but not gone: they are
+        # what a reshuffled stub deals, which ``_note_dealt`` asks ``_stub()`` about.
+        self.discarded: set[str] = set()
         # Draw games: cards discarded and not yet replaced, per player.
         self.awaiting: dict[str, int] = {seat.name: 0 for seat in seats}
         # Whose turn it is, in button games: the index of the last player to act. Preflop,
@@ -1531,12 +1580,36 @@ class _Builder:
             self._draw_deal(seat, cards)
 
     def _note_dealt(self, cards: list[str]) -> None:
-        """Refuse a known card that is already in play, then count these in."""
+        """Refuse a known card that is already in play, then count these in.
+
+        A discarded card is out of play but not gone: a draw game shuffles the discards into the
+        stub once the stub runs out, so one may be dealt again -- but only then. For that to be
+        what happened the deal has to want more cards than the stub still holds, which is what
+        stops a hand from dealing back the card it discarded a moment ago with the deck still
+        full (PokerKit's simulation shuffles on the draw that exhausts the stub).
+        """
         known = [card for card in cards if card != "0x"]
         repeated = [card for card in known if card in self.seen]
         if repeated or len(set(known)) != len(known):
             raise self.fail(f"{' '.join(repeated) or 'a card'} is dealt twice")
+        if back := [card for card in known if card in self.discarded]:
+            if len(known) <= self._stub():
+                raise self.fail(
+                    f"{' '.join(back)} was discarded, and the stub still holds cards: "
+                    "the discards are not shuffled back in yet"
+                )
+        self.discarded.difference_update(known)
         self.seen.update(known)
+
+    def _stub(self) -> int:
+        """What is left of the stub: the deck, less every card in play, discarded or unknown.
+
+        Read before a deal counts its own cards in, so it is what that deal has to draw from
+        before the discards are shuffled into it. Only a draw game discards, so only a draw game
+        reads this, and every draw game in PHH deals from the 52-card deck (``_DECK_SIZE``).
+        """
+        unknown = sum(cards.count("0x") for cards in self.cards.values())
+        return _DECK_SIZE - len(self.seen) - len(self.discarded) - unknown
 
     def _deal_board(self, cards: list[str]) -> None:
         if self.base == "stud":
@@ -1667,8 +1740,9 @@ class _Builder:
             raise self.fail(f"{seat.name} discards the same card twice")
         self.cards[seat.name] = self._discard(seat, held, discarded)
         # Every named card was this player's (held, or one of their unknown cards): it leaves
-        # the hand, free to come back from a reshuffled stub.
+        # the hand for the discards, which a reshuffled stub may deal back.
         self.seen.difference_update(known)
+        self.discarded.update(known)
         if known:
             self.hand.addDiscard(self.street, seat.name, len(discarded), " ".join(known))
         else:
@@ -1719,6 +1793,7 @@ class _Builder:
         if dealt and len(new) > dealt.count("0x") + pending:
             raise self.fail(f"{seat.name} shows {' '.join(new)}, which the deal did not give them")
         self.seen.update(new)
+        self.discarded.difference_update(new)
         if not dealt:
             return shown
         merged = [*dealt, *["0x"] * pending]  # a replacement not dealt yet has a place too
@@ -1922,14 +1997,18 @@ class _PHHConfig:
         return {"saveActions": True, "callFpdbHud": False, "cacheSessions": False, "publicDB": False}
 
 
-def build_hand(document: PHHDocument, config: Any = None) -> Any:
-    """The fpdb Hand a PHH hand describes, or :class:`PHHImportError`."""
+def build_hand(document: PHHDocument, config: Any = None, taken: Mapping[str, str] | None = None) -> Any:
+    """The fpdb Hand a PHH hand describes, or :class:`PHHImportError`.
+
+    *taken* is the PHH players already in the database, keyed by the name it compares them
+    under: a hand that names one of them differently is refused rather than merged into them.
+    """
     data = document.data
     if "variant" not in data:
         raise PHHImportError(MALFORMED, "missing required field 'variant'", source=document.where, hand=document.label)
     mapping = mapping_for(data["variant"], source=document.where, hand=document.label)
     try:
-        return _Builder(document, mapping, config or _PHHConfig()).build()
+        return _Builder(document, mapping, config or _PHHConfig(), taken).build()
     except PHHImportError:
         raise
     except Exception as error:  # noqa: BLE001 - Hand.py's own refusal of a hand that does not add up.
@@ -1967,6 +2046,24 @@ _SOURCE_PLAYERS_SQL: Final = (
     "SELECT p.name FROM Players p JOIN HandsPlayers hp ON hp.playerId = p.id WHERE p.siteId = %s "
     "GROUP BY p.id, p.name, p.hero ORDER BY p.hero DESC, COUNT(*) DESC, p.name LIMIT 50"
 )
+
+
+#: The PHH players already stored, by the name the database compares them under. A player is
+#: one row per ``(name, siteId)`` and MySQL's usual collation reads names without case or
+#: accents, so a name that folds onto a stored one is that stored player's row.
+_STORED_PLAYER_NAMES_SQL: Final = "SELECT name FROM Players WHERE siteId = %s"
+
+
+def _stored_player_names(cursor: Any, placeholder: str = "%s") -> dict[str, str]:
+    """The PHH players the database holds, keyed by ``_collation_key`` of their stored name.
+
+    ``insertPlayer`` upserts on the unique ``(name, siteId)`` index, so a hand that names
+    ``alice`` where the database already holds ``Alice`` is stored under Alice's id: the two
+    hands' actions and winnings are one player's. Keyed as the database compares them, so a
+    builder can refuse that hand rather than merge it.
+    """
+    cursor.execute(_STORED_PLAYER_NAMES_SQL.replace("%s", placeholder), (PHH_SITE_ID,))
+    return {_collation_key(str(name)): str(name) for (name,) in cursor.fetchall()}
 
 
 def phh_source_players(cursor: Any, placeholder: str = "%s") -> list[str]:
@@ -2014,16 +2111,23 @@ def import_file(db: Any, config: Any, path: str | Path, *, file_id: int = 0) -> 
         result.seconds = time.monotonic() - started
         return result
     build_config = _ImportConfig(config)
+    # The players this database already holds, and the ones each hand adds to it as the file is
+    # read: a hand that names one of them in another case or accent is refused rather than
+    # merged into them (the index would file both hands under one player).
+    taken = _stored_player_names(db.get_cursor(), db.sql.query.get("placeholder", "%s"))
     for item in iter_documents(path):
         result.discovered += 1
         if isinstance(item, PHHImportError):
             result.add_failure(item)
             continue
         try:
-            hand = build_hand(item, build_config)
+            hand = build_hand(item, build_config, taken)
         except PHHImportError as error:
             result.add_failure(error)
             continue
+        # The names as they will be stored, read before the store: a hand the database refuses
+        # must not reserve them.
+        names = [str(player[1])[:_NAME_LIMIT] for player in hand.players]
         # Each hand is stored and committed on its own: empty the shared bulk buffers first,
         # or the previous hand's rows would be inserted again (as the CoinPoker feed does).
         db.resetBulkCache()
@@ -2037,6 +2141,8 @@ def import_file(db: Any, config: Any, path: str | Path, *, file_id: int = 0) -> 
             db.resetBulkCache()
             result.add_failure(PHHImportError(MALFORMED, f"not stored: {error}", source=item.where, hand=item.label))
             continue
+        for name in names:
+            taken[_collation_key(name)] = name
         result.imported += 1
     result.seconds = time.monotonic() - started
     return result

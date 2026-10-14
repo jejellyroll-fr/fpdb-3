@@ -55,7 +55,9 @@ in a `.phhs`, its table), not the optional `hand` field. Two datasets that both
 number their hands from 1 are never taken for each other, two hands that read
 alike (anonymised, every card unknown) at two tables or in two files are both
 kept, and importing a file again finds every hand a duplicate -- a copy moved
-elsewhere is another file, its hands new ones.
+elsewhere is another file, its hands new ones. Every value is hashed with the
+TOML type it was written as, so two hands that differ in the type of one field
+— a date and the string that spells it — are two hands, not one.
 
 ## Capability matrix
 
@@ -115,6 +117,9 @@ does with a given file is decidable without reading the code:
   players whose names meet there are refused — *unsupported* — rather than
   silently merged into one row of `Players` by the unique index on
   `(name, siteId)`, which would file both seats' actions under the first player.
+  The same rule reads the players the database already holds: a hand naming
+  `alice` after one that stored `Alice` is refused too, the index filing its
+  actions and winnings under that player just the same.
   What the collation folds is measured against a live server rather than read off
   the letters' shapes: it does not take `Ŋ` for `n`, nor `Þ` for `th`, and neither
   does fpdb. The supplementary characters are the one class measured by rule
@@ -152,7 +157,7 @@ does with a given file is decidable without reading the code:
 | `pN f` | a fold |
 | `d dh pN cards` | hole cards, kept as soon as one is known (unknown ones stay blank): preflop in hold'em; per street in stud (third street: two down, one up; seventh: down); the deal and each draw in draw games |
 | `d db cards` | the flop, turn and river |
-| `pN sd [cards]` | in draw games, a discard (with the cards when known: each named card leaves the hand, each `??` one of its unknown cards) or standing pat; it opens the next draw, with or without betting in between (all-in runouts) |
+| `pN sd [cards]` | in draw games, a discard (with the cards when known: each named card leaves the hand, each `??` one of its unknown cards) or standing pat; it opens the next draw, with or without betting in between (all-in runouts). A discarded card is out of play but not gone: it is dealt again only when the draw wants more cards than the stub still holds — the point at which PokerKit's simulation shuffles the discards into the stub — so a hand dealing back a card it discarded a moment ago, with the deck still full, is *malformed* |
 | `pN sm cards`, `pN sm -`, `pN sm` | shown cards (a partly shown hand keeps its known cards, the hero's too, and fills a `??` with the card the deal named; every card keeps the place it was dealt in, whatever order the show lists them in; fewer cards than dealt is a partial show, the rest unknown, as PokerKit plays a cash game; a show whose every card is unknown still marks the player as having shown — that is the fact PHH states and fpdb's reports read — with no cards placed for them); shown, the cards the deal already named; mucked, which forfeits any share of the pot -- only at the showdown or once nobody is left to bet (an all-in runout), and in draw games only after the last draw; a stud hand shown in a runout keeps the cards dealt to it afterwards |
 | `players`, `seats`, `seat_count`, `table` / `event` | player names (for a name absent or empty, as PHH allows, `pN` -- or `pN#2`... when the file already uses that name or one the database folds onto it, so an unnamed player beside a supplied `P1` is `p1#2`), seats, table size (`seat_count`, which must hold every seat; else the highest seat), table name (`table`, even 0, else `event`, else the file name); absent `players` and `seats` are made up, given ones -- even empty -- need one entry per player |
 | `currency` | the game's currency; `play` when absent (amounts are then chips) |
