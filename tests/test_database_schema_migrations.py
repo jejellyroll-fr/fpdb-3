@@ -185,6 +185,67 @@ def test_a_collation_alter_failure_rolls_back() -> None:
     assert events == ["rollback"]
 
 
+def test_an_alter_that_could_not_run_leaves_the_column_unvouched_for() -> None:
+    """The migration is best-effort, so the answer to "is it binary?" is then no.
+
+    ``ensure_feature_tables`` logs a lock timeout and retries on the next connection; a
+    caller that stores ``Alice`` and ``alice`` must not read that as success, because the
+    unique index would file both seats in one player.
+    """
+    cursor = RecordingCursor(RuntimeError("table locked"))
+    db, _events = collation_db(Database.MYSQL_INNODB, cursor, "utf8mb4_0900_ai_ci")
+
+    db._ensure_players_name_collation()
+
+    # The stub's catalogue still reports the old collation: nothing changed it.
+    assert db.players_name_compares_binary() is False
+
+
+@pytest.mark.parametrize(
+    ("backend", "collation", "expected"),
+    [
+        (Database.MYSQL_INNODB, "utf8mb4_0900_ai_ci", False),
+        (Database.MYSQL_INNODB, "utf8mb4_unicode_ci", False),
+        (Database.MYSQL_INNODB, "utf8mb4_bin", True),
+        (Database.MYSQL_INNODB, "latin1_bin", True),
+        (Database.PGSQL, None, False),
+        (Database.PGSQL, "en_US.utf8", False),
+        (Database.PGSQL, "C", True),
+        (Database.SQLITE, "NOCASE", True),
+    ],
+)
+def test_the_database_says_whether_players_name_compares_binary(
+    backend: int, collation: str | None, expected: bool
+) -> None:
+    """What the importer asks before it accepts two names differing only in case (#417)."""
+    cursor = RecordingCursor()
+    db, _events = collation_db(backend, cursor, collation)
+
+    assert db.players_name_compares_binary() is expected
+    assert cursor.statements == []
+
+
+def test_a_catalogue_that_cannot_be_read_does_not_vouch_for_the_column() -> None:
+    cursor = RecordingCursor()
+    db, events = collation_db(Database.PGSQL, cursor, None)
+
+    def fail_lookup(_table: str, _column: str) -> str:
+        raise RuntimeError("missing table")
+
+    db._column_collation = fail_lookup
+
+    assert db.players_name_compares_binary() is False
+    assert events == ["rollback"]
+
+
+def test_the_postgres_collation_lookup_is_scoped_to_the_table_it_alters() -> None:
+    """Another schema's ``Players`` must not decide whether this one needs the ALTER."""
+    from fpdb_3_legacy.database_schema import COLUMN_COLLATION_SQL
+
+    assert "table_schema = (SELECT n.nspname" in COLUMN_COLLATION_SQL
+    assert "to_regclass(%s)" in COLUMN_COLLATION_SQL
+
+
 def test_sqlite_players_name_is_declared_binary_and_keeps_case_apart(tmp_path) -> None:
     """The schema says COLLATE BINARY and ``insertPlayer`` stores both spellings."""
     from tests.helpers import analytics_golden as golden

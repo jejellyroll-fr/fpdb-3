@@ -940,7 +940,8 @@ class _Builder:
         fpdb stores a player as one row per ``(name, siteId)``, and the column's collation is
         binary (#417): case, accents and ligatures are compared as written, so ``Alice`` and
         ``alice`` are two players and neither this hand nor a later one is refused for naming
-        both. The one thing the index still folds is a trailing space, because MySQL's
+        both. :func:`import_file` checks that the migration has run before it gets here.
+        The one thing the index still folds is a trailing space, because MySQL's
         ``utf8mb4_bin`` is PAD SPACE; :func:`_storage_key` strips it here, and a hand naming
         both ``Alice`` and ``Alice `` is refused rather than merged. *taken* is the same rule
         across hands, which one hand cannot see.
@@ -2021,6 +2022,26 @@ class _ImportConfig(_PHHConfig):
         return getattr(self.config, name)
 
 
+#: Why a file is refused outright when ``Players.name`` has not been migrated yet.
+_NAMES_NOT_BINARY = (
+    "Players.name does not compare names byte for byte yet: the collation change could not run "
+    "(another connection holds the table) and is retried on the next connection. A hand naming "
+    "Alice and alice would file both seats in one player, so nothing was imported"
+)
+
+
+def _players_name_compares_binary(db: Any) -> bool:
+    """Whether *db* keeps two names that differ only in case or accent as two players (#417).
+
+    The importer's guard below assumes the unique ``(name, siteId)`` index compares names as
+    written. The migration that makes it do so is best-effort, so the database is asked instead
+    of taken on trust: one that cannot answer -- a stub in a test, a backend whose comparison is
+    already binary -- is taken at its word.
+    """
+    check = getattr(db, "players_name_compares_binary", None)
+    return True if not callable(check) else bool(check())
+
+
 def import_file(db: Any, config: Any, path: str | Path, *, file_id: int = 0) -> PHHImportResult:
     """Import every hand of one PHH file into *db*; what was found and done."""
     from fpdb_3_legacy.Exceptions import FpdbHandDuplicate  # noqa: PLC0415
@@ -2028,6 +2049,13 @@ def import_file(db: Any, config: Any, path: str | Path, *, file_id: int = 0) -> 
 
     started = time.monotonic()
     result = PHHImportResult()
+    if not _players_name_compares_binary(db):
+        # Checked before anything is written: on a column still carrying the server's default
+        # collation, ``insertPlayer`` would upsert the later spelling onto the earlier player's
+        # row and the two seats' actions would be one player's for good.
+        result.add_failure(PHHImportError(UNSUPPORTED, _NAMES_NOT_BINARY, source=str(path)))
+        result.seconds = time.monotonic() - started
+        return result
     try:
         ensure_phh_site(db)
     except PHHImportError as error:

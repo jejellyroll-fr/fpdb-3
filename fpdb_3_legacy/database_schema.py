@@ -57,9 +57,16 @@ COLUMN_WIDTH_MYSQL = (
 )
 
 # Reads a column's collation, for the one migration that has to know it before issuing DDL.
-# Scoped to the current database on MySQL for the reason COLUMN_WIDTH_MYSQL is.
+# Scoped to the current database on MySQL for the reason COLUMN_WIDTH_MYSQL is. PostgreSQL's
+# catalogue is scoped to the connected database but not to one schema, so the schema is
+# resolved from the table name exactly as the unqualified ALTER TABLE resolves it: a database
+# that holds a Players table in more than one schema must not answer for another one's row,
+# or the migration would skip the table it is about to alter -- or alter it every connection.
 COLUMN_COLLATION_SQL = (
-    "SELECT collation_name FROM information_schema.columns WHERE lower(table_name) = %s AND lower(column_name) = %s"
+    "SELECT collation_name FROM information_schema.columns "
+    "WHERE lower(table_name) = %s AND lower(column_name) = %s AND table_schema = ("
+    "SELECT n.nspname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
+    "WHERE c.oid = to_regclass(%s))"
 )
 COLUMN_COLLATION_MYSQL = (
     "SELECT collation_name FROM information_schema.columns "
@@ -79,6 +86,19 @@ SET_PLAYERS_NAME_COLLATION_PGSQL = 'ALTER TABLE Players ALTER COLUMN name TYPE V
 # PostgreSQL's C/POSIX/ucs_basic. Anything else -- MySQL's server default, PostgreSQL's locale --
 # folds at least case, or is not known not to.
 BINARY_COLLATIONS = frozenset({"binary", "c", "posix", "ucs_basic"})
+
+
+def _is_binary_collation(collation: str | None) -> bool:
+    """Whether *collation* compares text byte for byte; ``None`` is the server's default.
+
+    A default is never taken for binary: MySQL's usual one folds case and accents, and
+    PostgreSQL's is its locale, which is not known to do otherwise.
+    """
+    if collation is None:
+        return False
+    normalised = collation.lower()
+    return normalised in BINARY_COLLATIONS or normalised.endswith("_bin")
+
 
 # Session settings that apply DDL_LOCK_TIMEOUT_MS on each server backend.
 SET_PGSQL_LOCK_TIMEOUT = "SET lock_timeout = 2000"
@@ -1302,10 +1322,36 @@ class DatabaseSchemaMixin:
     def _column_collation(self, table: str, column: str) -> str | None:
         """Declared collation of a character column, or None when it takes the default."""
         c = self.get_cursor()
-        query = COLUMN_COLLATION_MYSQL if self.backend == self.MYSQL_INNODB else COLUMN_COLLATION_SQL
-        c.execute(query, (table.lower(), column.lower()))
+        if self.backend == self.MYSQL_INNODB:
+            c.execute(COLUMN_COLLATION_MYSQL, (table.lower(), column.lower()))
+        else:
+            # The table name goes to ``to_regclass`` as written, so the catalogue row is the
+            # one the unqualified ``ALTER TABLE`` addresses.
+            c.execute(COLUMN_COLLATION_SQL, (table.lower(), column.lower(), table))
         row = c.fetchone()
         return None if row is None else row[0]
+
+    def players_name_compares_binary(self) -> bool:
+        """Whether ``Players.name`` compares names byte for byte on this connection (#417).
+
+        :meth:`_ensure_players_name_collation` is best-effort, like every migration that runs
+        from :meth:`ensure_feature_tables`: a table lock it cannot take is logged and retried on
+        the next connection. The DDL it issues therefore cannot be assumed to have run, and a
+        caller that stores two names differing only in case relies on it: under the server's
+        default collation the unique ``(name, siteId)`` index files them as one row, and
+        ``insertPlayer()`` hands the second name the first player's id, merging their actions
+        and results for good. Asking the catalogue here, immediately before such an import,
+        turns that silent merge into a refused import the next connection can retry.
+
+        SQLite's default comparison is already ``BINARY``, and its DDL spells that out.
+        """
+        if self.backend == self.SQLITE:
+            return True
+        try:
+            return _is_binary_collation(self._column_collation("Players", "name"))
+        except Exception:  # noqa: BLE001 - a catalogue that cannot be read cannot vouch for the column
+            self.rollback()
+            return False
 
     def _ensure_players_name_collation(self) -> None:
         """Give ``Players.name`` an explicit binary collation (#417).
@@ -1326,6 +1372,10 @@ class DatabaseSchemaMixin:
         A database where the merge has *already* happened is not split -- the surviving row
         kept whichever spelling was inserted first, and the other is not recorded anywhere --
         so the log says so on the one connection that migrates.
+
+        Losing the race for the table leaves the column folded, so callers that store two
+        names which differ only in case must ask :meth:`players_name_compares_binary` rather
+        than take this method's success for granted.
         """
         if self.backend == self.SQLITE:
             return
@@ -1334,10 +1384,8 @@ class DatabaseSchemaMixin:
         except Exception:  # noqa: BLE001 - table absent during first-time setup
             self.rollback()
             return
-        if collation is not None:
-            normalised = collation.lower()
-            if normalised in BINARY_COLLATIONS or normalised.endswith("_bin"):
-                return
+        if _is_binary_collation(collation):
+            return
         try:
             c = self.get_cursor()
             c.execute(

@@ -202,6 +202,16 @@ wait as every other migration). The column's collation is read first, so the
 `ALTER` runs once and not on every connection; `DB_VERSION` is deliberately not
 bumped, because that flag means "recreate the tables and reimport everything".
 
+The migration is best-effort, like every other one that runs on connection: a
+table lock it cannot take is logged and retried on the next connection. So the
+importer does not take it on trust -- `import_file` asks
+`players_name_compares_binary()` first, and while the column still folds case or
+accents it refuses the *whole file* as unsupported, importing nothing rather
+than filing two spellings in one player. Retrying is a reconnected database.
+The MySQL connections both ask for `utf8mb4` for the same reason: the `utf8`
+client character set is three bytes wide, so a name such as `Alice😀` would be
+refused by the server before it reached the column that is declared to hold it.
+
 Two things the migration does not do:
 
 * **It does not split a player that was already merged.** Under the old

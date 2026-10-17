@@ -2988,6 +2988,28 @@ def test_two_seats_differing_only_in_case_are_stored_as_two_players(tmp_path, im
     assert phh_players(importer.database) == ["Alice", "alice"]
 
 
+def test_a_database_that_has_not_migrated_the_collation_refuses_the_file(tmp_path, importer) -> None:
+    """Refusing beats the merge the old column would perform (#417).
+
+    The migration that gives ``Players.name`` its binary collation is best-effort: another
+    connection holding the table makes it log and retry on the next connection. Accepting the
+    hand meanwhile would be worse than refusing it -- ``insertPlayer`` would upsert ``alice``
+    onto Alice's row and the two seats' actions would be one player's for good -- so the file
+    is refused whole and nothing is written.
+    """
+    path = tmp_path / "unmigrated.phhs"
+    path.write_text(f"[1]\n{heads_up(['Alice', 'alice'])}\n", encoding="utf-8")
+    importer.database.players_name_compares_binary = lambda: False
+
+    assert importer.addImportFile(str(path))
+    stored, duplicates, partial, skipped, errors, _seconds = importer.runImport()
+    assert (stored, duplicates, partial, skipped, errors) == (0, 0, 0, 1, 0)
+    assert phh_players(importer.database) == []
+    summary = importer.phh_summary()
+    assert summary is not None
+    assert "does not compare names byte for byte" in summary.errors[0]
+
+
 def test_the_same_name_in_another_hand_is_the_same_player(tmp_path, importer) -> None:
     """The control: a name the database already holds *as spelled* is that player, not a new one.
 
