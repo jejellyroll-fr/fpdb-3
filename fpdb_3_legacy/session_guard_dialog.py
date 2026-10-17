@@ -221,9 +221,15 @@ class SessionGuardMonitor(QObject):
         connection would sit idle in a transaction for as long as the guard runs, and
         PostgreSQL maintenance that switches it to autocommit would fail. ``commit`` defers
         to a transaction block someone else has open, so it never ends theirs.
+
+        Not on SQLite: a SELECT opens no transaction there, and fpdb's SQLite commit retries
+        a busy or broken connection with one-second sleeps -- on this, the UI thread, that
+        froze the window for five seconds when an import held the lock.
         """
         commit = getattr(db, "commit", None)
-        if not callable(commit):
+        if not callable(commit) or getattr(db, "connection", None) is None:
+            return
+        if getattr(db, "backend", None) == getattr(db, "SQLITE", object()):
             return
         try:
             commit()

@@ -1,0 +1,25 @@
+# All in before the first draw: the three draws follow with no betting between them.
+variant = "F2L3D"
+antes = [0, 0]
+blinds_or_straddles = [1, 2]
+small_bet = 2
+big_bet = 4
+starting_stacks = [4, 4]
+actions = [
+  "d dh p1 7h5c4d3s2c",
+  "d dh p2 9s8h6c3d2h",
+  "p2 cbr 4",
+  "p1 cc",
+  "p1 sd",
+  "p2 sd 9s",
+  "d dh p2 Kh",
+  "p1 sd",
+  "p2 sd Kh",
+  "d dh p2 Qd",
+  "p1 sd",
+  "p2 sd Qd",
+  "d dh p2 7d",
+  "p1 sm 7h5c4d3s2c",
+  "p2 sm 8h7d6c3d2h",
+]
+winnings = [8, 0]

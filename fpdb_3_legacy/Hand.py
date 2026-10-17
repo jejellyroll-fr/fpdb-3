@@ -2278,9 +2278,14 @@ class HoldemOmahaHand(Hand):
 
         if self.hero == "":
             for player in self.shown.difference(self.dealt):
-                fh.write(
-                    f"Dealt to {player} [{' '.join(self.holecards[hole_street][player][1])}]\n",
-                )
+                # Showing is not the same as having cards on file: a player may have shown
+                # with every card unknown (a hand history that never names them), and there
+                # is then nothing to print. The other readers of `shown` guard the same way
+                # (see the showdown section below and DrawHand's).
+                cards = self.holecards.get(hole_street, {}).get(player, [None, []])[1]
+                if not cards:
+                    continue
+                fh.write(f"Dealt to {player} [{' '.join(cards)}]\n")
 
         if self.actions[initial_street]:
             for act in self.actions[initial_street]:

@@ -1386,7 +1386,6 @@ texture*. The label already existed; nothing called it. Technical names
             return
         self.pane_switcher.set_active(1)
         self.cancel_button.setVisible(False)
-        self._worker.deleteLater()
         self._worker = None
         payload, self._scope = result
         self._render(payload)
@@ -1398,7 +1397,6 @@ texture*. The label already existed; nothing called it. Technical names
         self.pane_switcher.set_active(1)
         self.cancel_button.setVisible(False)
         if self._worker is not None and self._worker.serial == serial:
-            self._worker.deleteLater()
             self._worker = None
         self.sample_label.setText("")
         self.result_note.setText(message)
@@ -1816,6 +1814,12 @@ texture*. The label already existed; nothing called it. Technical names
         worker = _DrillWorker(self.db, self._current_query, dict(group), numerator, self._drill_serial, self)
         worker.finished_ok.connect(self._on_drill_done)
         worker.failed.connect(self._on_drill_failed)
+        # Retire the worker off ``finished``, the way the query path does. That
+        # signal is emitted only once ``run`` has returned, so the delete can
+        # never land while the thread is still inside its own ``finished_ok``
+        # emission -- which is exactly where this worker spends its last
+        # moments, and where deleting it aborts the process.
+        worker.finished.connect(worker.deleteLater)
         self._drill_worker = worker
         worker.start()
 
@@ -1826,8 +1830,8 @@ texture*. The label already existed; nothing called it. Technical names
         # set kept a dead QThread referenced by the widget for the tab's whole
         # life, and made the attribute useless as "a drill is running" --
         # anything waiting on it waited for ever, a failed drill included.
+        # Only the reference goes: the thread deletes itself off ``finished``.
         if self._drill_worker is not None and self._drill_worker.serial == serial:
-            self._drill_worker.deleteLater()
             self._drill_worker = None
         columns = rb.DRILL_COLUMNS
         self.drill_table.setRowCount(len(drill.rows))
@@ -1858,7 +1862,6 @@ texture*. The label already existed; nothing called it. Technical names
         if serial != self._drill_serial:
             return
         if self._drill_worker is not None and self._drill_worker.serial == serial:
-            self._drill_worker.deleteLater()
             self._drill_worker = None
         self.drill_note.setText(message)
 
