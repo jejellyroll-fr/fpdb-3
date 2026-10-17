@@ -150,6 +150,25 @@ def test_full_schema_executes_and_enforces_player_site_fk(backend: str) -> None:
         connection.rollback()
 
 
+def _players_name_collation(cursor: Any, backend: str) -> str | None:
+    """The collation the live ``Players.name`` declares; MySQL's catalogue needs pinning."""
+    # Two whole statements rather than one built from parts: the analyser reads a query
+    # assembled by concatenation as an injection site, even when every part is a literal.
+    if backend == "mysql":
+        cursor.execute(
+            "SELECT collation_name FROM information_schema.columns "
+            "WHERE lower(table_name) = 'players' AND lower(column_name) = 'name' "
+            "AND table_schema = DATABASE()"
+        )
+    else:
+        cursor.execute(
+            "SELECT collation_name FROM information_schema.columns "
+            "WHERE lower(table_name) = 'players' AND lower(column_name) = 'name'"
+        )
+    row = cursor.fetchone()
+    return None if row is None else row[0]
+
+
 @pytest.mark.integration
 @pytest.mark.parametrize("backend", ["postgresql", "mysql"])
 def test_players_names_that_differ_in_case_accent_or_ligature_are_two_rows(backend: str) -> None:
@@ -166,12 +185,7 @@ def test_players_names_that_differ_in_case_accent_or_ligature_are_two_rows(backe
                 cursor.execute("INSERT INTO Players(name, siteId) VALUES (%s, %s)", (name, 1))
             cursor.execute("SELECT name FROM Players ORDER BY id")
             assert tuple(row[0] for row in cursor.fetchall()) == names
-            cursor.execute(
-                "SELECT collation_name FROM information_schema.columns "
-                "WHERE lower(table_name) = 'players' AND lower(column_name) = 'name'"
-                + (" AND table_schema = DATABASE()" if backend == "mysql" else "")
-            )
-            assert cursor.fetchone()[0] == ("C" if backend == "postgresql" else "utf8mb4_bin")
+            assert _players_name_collation(cursor, backend) == ("C" if backend == "postgresql" else "utf8mb4_bin")
         connection.commit()
 
 
@@ -206,12 +220,7 @@ def test_an_existing_players_table_gains_the_binary_collation(backend: str) -> N
             cursor.execute("INSERT INTO Players(name, siteId) VALUES (%s, %s)", ("alice", 1))
             cursor.execute("SELECT name FROM Players ORDER BY id")
             assert [row[0] for row in cursor.fetchall()] == ["Alice", "alice"]
-            cursor.execute(
-                "SELECT collation_name FROM information_schema.columns "
-                "WHERE lower(table_name) = 'players' AND lower(column_name) = 'name'"
-                + (" AND table_schema = DATABASE()" if backend == "mysql" else "")
-            )
-            assert cursor.fetchone()[0] == ("C" if backend == "postgresql" else "utf8mb4_bin")
+            assert _players_name_collation(cursor, backend) == ("C" if backend == "postgresql" else "utf8mb4_bin")
         connection.commit()
 
 
