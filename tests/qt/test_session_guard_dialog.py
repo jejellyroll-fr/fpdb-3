@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 import sqlite3
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -33,6 +34,27 @@ FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "hands" / "pokerst
 #: review/nl_3bet_6max.txt: 20:00 ET on 2026-09-01, so midnight UTC. Hero opens, calls a
 #: 3-bet to $8 and folds the flop: -$8.00, -8 BB at $0.50/$1.
 HAND_TIME = datetime.datetime(2026, 9, 2, tzinfo=datetime.timezone.utc).timestamp()
+
+
+@pytest.fixture(autouse=True)
+def started_monitors(qtbot, monkeypatch) -> Iterator[list[SessionGuardMonitor]]:
+    """Every monitor a test starts, stopped when the test ends, whether it passed or not.
+
+    A started monitor polls every half minute for as long as it lives. Left running, it
+    fired during a later test, read a database the fixtures had already disconnected, and
+    froze whichever window that test had on screen for five seconds (#428).
+    """
+    started: list[SessionGuardMonitor] = []
+    start = SessionGuardMonitor.start
+
+    def tracked(self: SessionGuardMonitor, limits: GuardLimits) -> None:
+        started.append(self)
+        start(self, limits)
+
+    monkeypatch.setattr(SessionGuardMonitor, "start", tracked)
+    yield started
+    for monitor in started:
+        monitor.stop()
 
 
 class Defaults:
