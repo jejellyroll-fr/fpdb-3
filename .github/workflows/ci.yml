@@ -15,6 +15,8 @@ env:
   # The one place every job's uv version is pinned; keep it in sync with
   # [tool.uv] required-version in pyproject.toml.
   UV_VERSION: "0.12.7"
+  # Constraints every `uv pip install` below applies (PySide6 below 6.12: see the file).
+  UV_CONSTRAINT: .github/ci-constraints.txt
 
 jobs:
   config-version:
