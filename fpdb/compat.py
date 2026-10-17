@@ -18,6 +18,7 @@ rejects `enum.StrEnum` itself as incompatible with it.
 from __future__ import annotations
 
 import sys
+from types import ModuleType
 
 if sys.version_info >= (3, 11):
     from enum import StrEnum
@@ -35,4 +36,22 @@ else:
             return str(self.value)
 
 
-__all__ = ["StrEnum"]
+def toml_module() -> ModuleType:
+    """`tomllib`, or on Python 3.10 its backport `tomli`, which `tomllib` was taken from.
+
+    A function, imported when a TOML file is actually read, rather than a module-level
+    import: modules that import this one are loaded at start-up, and a missing backport
+    must cost the one feature that reads TOML, never the application.
+
+    :raises ModuleNotFoundError: on Python 3.10 without `tomli`.
+    """
+    if sys.version_info >= (3, 11):
+        import tomllib
+
+        return tomllib
+    import tomli
+
+    return tomli
+
+
+__all__ = ["StrEnum", "toml_module"]

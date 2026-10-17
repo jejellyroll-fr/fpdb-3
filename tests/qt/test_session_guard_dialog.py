@@ -79,6 +79,23 @@ def watching(qtbot, db, hero_id, monkeypatch, now: float) -> SessionGuardMonitor
     return monitor
 
 
+@pytest.fixture(autouse=True)
+def stop_every_monitor(monkeypatch):
+    """Stop the monitors a test made: a timer left running polls later tests' closed databases."""
+    created: list[SessionGuardMonitor] = []
+    original = SessionGuardMonitor.__init__
+
+    def tracking(self, *args, **kwargs):
+        original(self, *args, **kwargs)
+        created.append(self)
+
+    monkeypatch.setattr(SessionGuardMonitor, "__init__", tracking)
+    yield
+    for monitor in created:
+        monitor.timer.stop()
+        monitor.guard = None
+
+
 # -- the dialog -------------------------------------------------------------------
 
 
@@ -283,17 +300,31 @@ def test_an_open_alert_follows_the_guard(qtbot, imported, monkeypatch) -> None:
     assert not alert.isVisible()
 
 
-def test_every_reading_ends_its_transaction(qtbot, imported, monkeypatch) -> None:
+def test_every_reading_ends_its_transaction_on_a_server_database(qtbot, imported, monkeypatch) -> None:
     """PostgreSQL and MySQL open one with the first SELECT; the guard must not leave it open."""
     db, hero_id = imported
     commits: list[int] = []
     monkeypatch.setattr(db, "commit", lambda *args, **kwargs: commits.append(1))
+    monkeypatch.setattr(db, "backend", db.PGSQL)
     monitor = watching(qtbot, db, hero_id, monkeypatch, now=HAND_TIME + 60)
 
     monitor.start(GuardLimits(hands=10))
     monitor.poll()
 
     assert len(commits) == 2
+    monitor.stop()
+
+
+def test_sqlite_readings_never_commit(qtbot, imported, monkeypatch) -> None:
+    """No transaction to end, and fpdb's SQLite commit sleeps on the UI thread when it retries."""
+    db, hero_id = imported
+    commits: list[int] = []
+    monkeypatch.setattr(db, "commit", lambda *args, **kwargs: commits.append(1))
+    monitor = watching(qtbot, db, hero_id, monkeypatch, now=HAND_TIME + 60)
+
+    monitor.start(GuardLimits(hands=10))
+
+    assert commits == []
     monitor.stop()
 
 

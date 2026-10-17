@@ -588,6 +588,7 @@ requires-dist = [
     { name = "qt-material", specifier = "==2.14" },
     { name = "ruff", marker = "extra == 'test'", specifier = ">=0.12.8" },
     { name = "ruff", marker = "extra == 'test-no-gui'", specifier = ">=0.12.8" },
+    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2.0.1" },
     { name = "wheel", marker = "extra == 'build'", specifier = ">=0.42.0" },
     { name = "xcffib", marker = "extra == 'linux'", specifier = "==1.5.0" },
     { name = "xlrd", specifier = "==2.0.1" },

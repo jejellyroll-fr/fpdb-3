@@ -58,6 +58,10 @@ class FakeImporter:
         self.move_imported = None
         self.move_failed = None
 
+    def phh_summary(self):
+        # No PHH file in these imports (#381).
+        return None
+
     def clearFileList(self):
         self.cleared += 1
         self.filelist = {}
@@ -298,3 +302,34 @@ def test_no_importable_files_warns_user(qtbot, monkeypatch, tmp_path):
     assert captured["title"] == "Bulk Import"
     assert "No importable" in captured["message"]
     assert lock.released is True
+
+
+@pytest.mark.qt
+def test_a_phh_import_reports_its_own_counts(qtbot, monkeypatch, tmp_path):
+    """PHH files (#381): the completion message adds found / unsupported / malformed."""
+    from fpdb_3_legacy import GuiBulkImport
+    from fpdb_3_legacy.phh_import import PHHImportResult
+
+    class PHHImporter(FakeImporter):
+        def phh_summary(self):
+            return PHHImportResult(discovered=5, imported=2, duplicates=1, unsupported=1, malformed=1, seconds=0.2)
+
+    PHHImporter.result = (2, 1, 0, 1, 1, 0.2)
+    PHHImporter.error = None
+    PHHImporter.delay = 0
+    monkeypatch.setattr(GuiBulkImport.Importer, "Importer", PHHImporter)
+    captured = {}
+    monkeypatch.setattr(
+        GuiBulkImport.QMessageBox, "information", lambda parent, title, message: captured.update(message=message)
+    )
+
+    widget = GuiBulkImport.GuiBulkImport({"global_lock": FakeLock()}, FakeConfig(), sql=None)
+    qtbot.addWidget(widget)
+    widget.show()
+    widget.importDir.setText(str(tmp_path))
+    widget.load_clicked()
+    qtbot.waitUntil(lambda: "message" in captured, timeout=10_000)
+
+    assert "Skipped: 1" in captured["message"]
+    for line in ("PHH hands found: 5", "Unsupported variants: 1", "Malformed: 1"):
+        assert line in captured["message"]

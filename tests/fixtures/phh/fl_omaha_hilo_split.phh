@@ -1,0 +1,27 @@
+variant = "FO/8"
+antes = [0, 0, 0]
+blinds_or_straddles = [1, 2, 0]
+small_bet = 2
+big_bet = 4
+starting_stacks = [100, 100, 100]
+actions = [
+  "d dh p1 As2d9c9h",
+  "d dh p2 QsQdJcJh",
+  "d dh p3 9s9d8c8h",
+  "p3 f",
+  "p1 cbr 4",
+  "p2 cc",
+  "d db Kd5c3h",
+  "p1 cbr 2",
+  "p2 cc",
+  "d db Qc",
+  "p1 cbr 4",
+  "p2 cc",
+  "d db 7d",
+  "p1 cc",
+  "p2 cbr 4",
+  "p1 cc",
+  "p1 sm As2d9c9h",
+  "p2 sm QsQdJcJh",
+]
+winnings = [14, 14, 0]

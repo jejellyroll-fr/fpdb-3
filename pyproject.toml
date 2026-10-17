@@ -36,6 +36,9 @@ dependencies = [
     # ship with the application. Left as an extra, a packaged build could only
     # ever open SQLite or MySQL.
     "psycopg[binary]>=3.1.0",
+    # tomllib's backport, for the PHH import (#381) on the Python 3.10 the PyOxidizer
+    # builds embed; every other install runs 3.11+, where tomllib is in the stdlib.
+    "tomli>=2.0.1; python_version < '3.11'",
     "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.2.0",
 ]
 
