@@ -10,6 +10,8 @@ from typing import Any
 import pytest
 
 from fpdb_3_legacy import db_migrate, dialects
+from fpdb_3_legacy.Database import Database
+from fpdb_3_legacy.database_schema import DatabaseSchemaMixin
 from fpdb_3_legacy.SQL import Sql
 
 SCHEMA_KEYS = (
@@ -97,12 +99,16 @@ def _reset_schema(connection: Any, backend: str) -> None:
     connection.commit()
 
 
-class _LiveDatabase:
+class _LiveDatabase(DatabaseSchemaMixin):
     """Minimal Database-compatible wrapper around a live driver connection."""
 
     def __init__(self, connection: Any, backend: str) -> None:
         self.connection = connection
         self.backend = dialects.dialect_for_server(backend).backend_id
+        # What the schema mixin reads off its host to decide between the backends.
+        self.MYSQL_INNODB = Database.MYSQL_INNODB
+        self.PGSQL = Database.PGSQL
+        self.SQLITE = Database.SQLITE
 
     def get_cursor(self) -> Any:
         return self.connection.cursor()
@@ -142,6 +148,71 @@ def test_full_schema_executes_and_enforces_player_site_fk(backend: str) -> None:
             with pytest.raises(Exception):
                 cursor.execute("INSERT INTO Players(name, siteId) VALUES (%s, %s)", ("orphan", 999999))
         connection.rollback()
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("backend", ["postgresql", "mysql"])
+def test_players_names_that_differ_in_case_accent_or_ligature_are_two_rows(backend: str) -> None:
+    """The column compares byte for byte, so the unique index keeps the names apart (#417)."""
+    if backend not in _enabled_backends():
+        pytest.skip(f"live {backend} service not requested")
+
+    with _connection(backend) as connection:
+        _create_schema(connection, backend)
+        with connection.cursor() as cursor:
+            cursor.execute("INSERT INTO Sites(id, name, code) VALUES (%s, %s, %s)", (1, "Room", "RM"))
+            names = ("Alice", "alice", "Álice", "Ø", "O")
+            for name in names:
+                cursor.execute("INSERT INTO Players(name, siteId) VALUES (%s, %s)", (name, 1))
+            cursor.execute("SELECT name FROM Players ORDER BY id")
+            assert tuple(row[0] for row in cursor.fetchall()) == names
+            cursor.execute(
+                "SELECT collation_name FROM information_schema.columns "
+                "WHERE lower(table_name) = 'players' AND lower(column_name) = 'name'"
+                + (" AND table_schema = DATABASE()" if backend == "mysql" else "")
+            )
+            assert cursor.fetchone()[0] == ("C" if backend == "postgresql" else "utf8mb4_bin")
+        connection.commit()
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("backend", ["postgresql", "mysql"])
+def test_an_existing_players_table_gains_the_binary_collation(backend: str) -> None:
+    """A database made before the change is migrated on connect, once, and keeps its rows."""
+    if backend not in _enabled_backends():
+        pytest.skip(f"live {backend} service not requested")
+
+    with _connection(backend) as connection:
+        _reset_schema(connection, backend)
+        with connection.cursor() as cursor:
+            if backend == "postgresql":
+                cursor.execute(
+                    "CREATE TABLE Players (id SERIAL PRIMARY KEY, name VARCHAR(32), siteId INT, UNIQUE (name, siteId))"
+                )
+            else:
+                cursor.execute(
+                    "CREATE TABLE Players (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(32) NOT NULL, "
+                    "siteId INT, UNIQUE KEY name (name, siteId))"
+                )
+            cursor.execute("INSERT INTO Players(name, siteId) VALUES (%s, %s)", ("Alice", 1))
+        connection.commit()
+
+        live = _LiveDatabase(connection, backend)
+        # Twice: the second run reads the collation and issues no DDL.
+        DatabaseSchemaMixin._ensure_players_name_collation(live)
+        DatabaseSchemaMixin._ensure_players_name_collation(live)
+
+        with connection.cursor() as cursor:
+            cursor.execute("INSERT INTO Players(name, siteId) VALUES (%s, %s)", ("alice", 1))
+            cursor.execute("SELECT name FROM Players ORDER BY id")
+            assert [row[0] for row in cursor.fetchall()] == ["Alice", "alice"]
+            cursor.execute(
+                "SELECT collation_name FROM information_schema.columns "
+                "WHERE lower(table_name) = 'players' AND lower(column_name) = 'name'"
+                + (" AND table_schema = DATABASE()" if backend == "mysql" else "")
+            )
+            assert cursor.fetchone()[0] == ("C" if backend == "postgresql" else "utf8mb4_bin")
+        connection.commit()
 
 
 @pytest.mark.integration

@@ -2,6 +2,18 @@
 
 from __future__ import annotations
 
+#: ``Players.name`` is compared with a binary collation on every backend (#417): two players
+#: whose names differ by case, accent or ligature are two rows, not one row whose second
+#: seat ``insertPlayer()`` files under the first player's id. MySQL's character set is
+#: pinned as well as its collation -- a collation belongs to one character set, so naming
+#: ``utf8mb4_bin`` on a table that inherits the database's charset would fail wherever that
+#: charset is not utf8mb4. PostgreSQL's ``"C"`` compares bytes and is independent of the
+#: database's locale; SQLite's ``BINARY`` is its default, spelled out here to say so.
+#:
+#: MySQL's ``utf8mb4_bin`` is PAD SPACE, so a trailing space is still not compared: see
+#: ``phh_import._storage_key``. ``utf8mb4_0900_bin`` would be NO PAD, but it exists only on
+#: MySQL 8.0 and later, and MariaDB has no equivalent.
+
 
 def player_schema_queries(db_server: str) -> dict[str, str]:
     """Return backend-specific DDL for players and their ratings."""
@@ -9,7 +21,7 @@ def player_schema_queries(db_server: str) -> dict[str, str]:
         return {
             "createPlayersTable": """CREATE TABLE Players (
                         id INT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        name VARCHAR(32) NOT NULL,
+                        name VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
                         siteId SMALLINT UNSIGNED NOT NULL, FOREIGN KEY (siteId) REFERENCES Sites(id),
                         hero BOOLEAN,
                         chars char(3),
@@ -46,7 +58,7 @@ def player_schema_queries(db_server: str) -> dict[str, str]:
         return {
             "createPlayersTable": """CREATE TABLE Players (
                         id SERIAL, PRIMARY KEY (id),
-                        name VARCHAR(32),
+                        name VARCHAR(32) COLLATE "C",
                         siteId INTEGER, FOREIGN KEY (siteId) REFERENCES Sites(id),
                         hero BOOLEAN,
                         chars char(3),
@@ -79,7 +91,7 @@ def player_schema_queries(db_server: str) -> dict[str, str]:
         return {
             "createPlayersTable": """CREATE TABLE Players (
                         id INTEGER PRIMARY KEY,
-                        name TEXT,
+                        name TEXT COLLATE BINARY,
                         siteId INTEGER,
                         hero BOOLEAN,
                         chars TEXT,

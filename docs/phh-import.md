@@ -106,38 +106,26 @@ does with a given file is decidable without reading the code:
   that gives no date, so leaving the date out is not a way past them.
 - **A field PHH does not define is its user-defined space** (`_hero`, a note) and
   is left alone, whatever its type.
-- **A player's name is identified the way fpdb's database identifies it**: whole,
-  compared as the collation compares them — without case,
-  without accents, folding the ligatures and fullwidth letters it folds onto
-  their expansion, dropping the marks it reads with the letter before them and
-  the joining forms it gives no weight to, folding every supplementary character
-  onto `U+FFFD`, which is the one character the general collations weigh them as,
-  and — the collations being `PAD SPACE` — ignoring a trailing run of spaces, so
-  `Alice` and `Alice ` are one row. Two
-  players whose names meet there are refused — *unsupported* — rather than
-  silently merged into one row of `Players` by the unique index on
-  `(name, siteId)`, which would file both seats' actions under the first player.
+- **A player's name is identified the way fpdb's database identifies it**: whole
+  and byte for byte, because `Players.name` carries an explicit binary collation
+  on every backend (#417). `Alice`, `alice` and `Álice` are three players, and so
+  are `Ø`/`O` and `ﬁn`/`fin`; so are `Alice😀` and `Alice😁`. The one character
+  still read past is a trailing space: MySQL's `utf8mb4_bin` is `PAD SPACE`, so
+  `Alice` and `Alice ` are one row there and one id out of `insertPlayer()`. The
+  importer strips that one character (U+0020 — a trailing U+00A0, U+3000 or tab is
+  compared) and refuses the pair — *unsupported* — rather than let MySQL merge
+  them. It does so on PostgreSQL and SQLite too, where the space would be
+  compared, so one hand is accepted or refused the same way on every backend.
   The same rule reads the players the database already holds: a hand naming
-  `alice` after one that stored `Alice` is refused too, the index filing its
+  `Alice ` after one that stored `Alice` is refused too, the index filing its
   actions and winnings under that player just the same.
   A name longer than the 32 characters `Players.name` holds is refused —
   *unsupported* — in every hand that gives it: fpdb would keep its first 32
   characters, and from those alone no later hand, in this import or the next, can
   tell the same player named again from a second player whose name only starts
-  the same way.
-  What the collation folds is measured against a live server rather than read off
-  the letters' shapes: it does not take `Ŋ` for `n`, nor `Þ` for `th`, and neither
-  does fpdb. The supplementary characters are the one class measured by rule
-  rather than one at a time: the general collations and the UCA 4.0.0 ones make
-  them all equal, so `Alice😀` and `Alice😁` are one row in `Players` and one id
-  either way, and the fold makes them one character. Of the 63 488 BMP codepoints
-  a name can carry, `U+FFFD` is the only one the general collation takes for an
-  emoji. The comparison is deliberately coarser than any one collation — it is
-  the union of the three a server may default to — so where it cannot place a
-  character it refuses the hand instead of risking a merge, and a pair a server
-  would have kept apart may still be refused. The name fpdb generates for an
-  unnamed player is held to it too: it is compared the same way, so it steps aside
-  to `p1#2` rather than having the hand refused for a collision fpdb itself made.
+  the same way. The name fpdb generates for an unnamed player is held to the same
+  rule: it steps aside to `p1#2` rather than having the hand refused for a
+  collision fpdb itself made.
 - **PHH's field rules are read both ways round.** A family and a limit must carry
   the fields PHH gives them and no others: a bring-in is "mutually exclusive with
   blinds or straddles", `min_bet` "must never be specified in fixed-limit games",
@@ -182,7 +170,7 @@ stored with invented values:
 
 | Kind | When |
 | --- | --- |
-| unsupported | a variant with no fpdb mapping; a player name longer than the 32 characters fpdb stores of one (what is left of it could be another player's name as well, here or in a later import); two player names fpdb's database would take for one — alike once compared the way its collation compares them, without case or accents, folding the ligatures it folds, dropping the marks and joining forms it gives no weight to and the trailing spaces a `PAD SPACE` collation does not compare (`Alice` and `alice` are one row in `Players`, so both seats would be one player in the actions and the reports; so are `Alice` and `Alice `, and `Alice` and `Alic` with a zero-width space in it); a time in the hour repeated when summer time ends, with no `time_zone_abbreviation` to say which; a big blind whose half, standing for a missing small blind, is finer than a hundredth (0.005); fixed-limit bets whose big bet is not twice the small one (fpdb's game row stores the small bet as the big blind, the big bet as twice it); a fixed-limit table whose own big blind is not the small bet (the game row has one size, so the hand would be filed under one game row and post another's blind, grouping it with the wrong stakes and reading every blind-normalised statistic against them; a stud table has no blind to disagree with); a table that posts a small blind and no big blind (`blinds_or_straddles = [2, 0, 0]`, or `[2, 0]` heads-up: the first position is the small blind, so the lone entry says nothing about the big one, which is what the game row is filed under and what the hand's own post would have been measured against); an unknown starting stack (`null` or `inf`); a time zone where Python has no time-zone database to convert it; a `time_zone_abbreviation` without a `time_zone` (ambiguous: CST is America's or China's), other than UTC or GMT; a `time` with a full location (`city`, `region` and `country`) but no `time_zone` (PHH reads it as local to the location, which fpdb does not resolve); an amount finer than a hundredth (`0.005`), which fpdb's storage in hundredths would truncate; an ante trimmed to a short stack (`ante_trimming_status`), whose eligibility (an ante side pot) fpdb's pooled antes cannot represent -- untrimmed, the short player may win every ante, as fpdb books them; more than three board deals (run it twice); a shared stud card, dealt when the deck runs short (eight players on seventh street); a showdown with neither `winnings` nor `finishing_stacks` — fpdb does not pick winners itself |
+| unsupported | a variant with no fpdb mapping; a player name longer than the 32 characters fpdb stores of one (what is left of it could be another player's name as well, here or in a later import); two player names that differ only in a trailing run of spaces (`Alice` and `Alice ` are one row on MySQL, whose `utf8mb4_bin` is `PAD SPACE`, so both seats would be one player in the actions and the reports; the importer strips that one character and refuses the pair on every backend rather than merge them on one); a time in the hour repeated when summer time ends, with no `time_zone_abbreviation` to say which; a big blind whose half, standing for a missing small blind, is finer than a hundredth (0.005); fixed-limit bets whose big bet is not twice the small one (fpdb's game row stores the small bet as the big blind, the big bet as twice it); a fixed-limit table whose own big blind is not the small bet (the game row has one size, so the hand would be filed under one game row and post another's blind, grouping it with the wrong stakes and reading every blind-normalised statistic against them; a stud table has no blind to disagree with); a table that posts a small blind and no big blind (`blinds_or_straddles = [2, 0, 0]`, or `[2, 0]` heads-up: the first position is the small blind, so the lone entry says nothing about the big one, which is what the game row is filed under and what the hand's own post would have been measured against); an unknown starting stack (`null` or `inf`); a time zone where Python has no time-zone database to convert it; a `time_zone_abbreviation` without a `time_zone` (ambiguous: CST is America's or China's), other than UTC or GMT; a `time` with a full location (`city`, `region` and `country`) but no `time_zone` (PHH reads it as local to the location, which fpdb does not resolve); an amount finer than a hundredth (`0.005`), which fpdb's storage in hundredths would truncate; an ante trimmed to a short stack (`ante_trimming_status`), whose eligibility (an ante side pot) fpdb's pooled antes cannot represent -- untrimmed, the short player may win every ante, as fpdb books them; more than three board deals (run it twice); a shared stud card, dealt when the deck runs short (eight players on seventh street); a showdown with neither `winnings` nor `finishing_stacks` — fpdb does not pick winners itself |
 | partial | the actions stop before the hand ends, as PHH allows (nothing dealt yet, a board not yet out, a last stud card or a draw replacement not dealt to every player, a street where a player who can still act has not had a turn) — decided from the actions, even when the file carries `winnings` or `finishing_stacks` so far: a hand without a final result is not stored, since it would bend every statistic it reached |
 | malformed | a field of the wrong TOML type, whether fpdb reads it or not (*The accepted subset*), `variant` included -- read as a string before that table, since it is resolved into a mapping first (`variant = true` is a broken hand, not a game fpdb cannot hold); invalid TOML; a missing required field (per family, plus `min_bet` for no and pot limit, `small_bet` and `big_bet` for fixed limit) -- or a field of the other kind, one the family or the limit must not carry at all: `bring_in` beside blinds or straddles, `min_bet` in a fixed-limit hand, `small_bet` or `big_bet` in a no or pot limit one (*The accepted subset*); a bet size, bring-in or starting stack that is not positive; an amount written as a string (`"100"`: PHH's are TOML numbers); a card outside the variant's deck (2 to 5 in short deck); a street dealt before the previous one's betting is over (a flop before the big blind's option); an action out of turn in hold'em and draw games, or any action once a betting round is over; a starting hand of the wrong size (2 in hold'em, 4 in Omaha and badugi, 5 in 2-7); hole cards dealt twice, out of order (from the first player still in to the last) or not to everyone before the betting -- or an all-in runout -- begins, a draw's replacements included; a second bring-in, or a third street whose first action is neither the bring-in nor a completion (its player may not check or fold); a half-known card (`A?`, `?s`: PHH has only `??`); a card discarded twice, or a discard naming a card dealt to another player; a show that contradicts the deal (more cards than dealt, or a known card the deal did not give, beyond its unknown ones); a date or a time zone that does not exist (`2026-02-30`, `America/New_Yrok` -- checked even in an undated hand), a `currency` that is not an ISO 4217 code (one in use, or withdrawn since 1999 for older datasets: `ZZZ` is refused); a date field, `time` (a TOML local time: not a date-time, with or without an offset) or time-zone field of the wrong type; an abbreviation that is not the `time_zone`'s at that time (checked even in an undated hand, against the epoch); a wall time the clocks skip when summer time begins (`2026-03-08 02:30` in New York); a `seat_count` smaller than a seat; a known card dealt or shown twice (discards may come back, as a reshuffled stub does); winnings larger than the pot, or larger than the main and side pots a player is in -- one by one and together, so two short stacks share their main pot -- antes being common money every player still in can win (nothing for a folded player, or one who mucked); a stud street that moves on before every live player got its card; a draw that moves on before every live player stood pat or discarded, or replacements dealt before everyone has drawn or out of order; a street dealt once everyone but one player folded; arrays that do not have one value per player; a seat that is not a positive integer (`true` included); `players` that is not a list of names; an action by a folded or all-in player, or by a player who already acted with nothing changed since (stud, whose order is not checked otherwise); a show or muck before the showdown, by a folded player, or a second one by the same player; a bet or raise that does not exceed the current bet or the stack, or that the variant's limit does not allow (no limit: below the minimum bet or raise, the first raise to beat preflop being the largest blind or straddle; a raise by a player whom all-ins for less did not reopen the betting to -- several short all-ins that together make a full raise do reopen it, in fixed limit too (a full raise being the street's bet), and a completion reopens it to the bring-in and to whoever called the bring-in; a raise when every other player still in is all in; pot limit: above the pot; fixed limit: not the street's bet size, the big bet being allowed on fourth street only over an open pair in stud high (not stud hi/lo or razz), every raise after a big bet being a big bet too — all in for less is always allowed, the raise cap is not checked); a board of the wrong size; an unknown action, player or card; content before the first `[hand]` table of a `.phhs`, or a table of another hand inside one (`[2.notes]` under `[1]`); a hand the database refuses |
 
@@ -204,6 +192,28 @@ Only a hand where everyone folded to one player gets its winner without
   Without either, PHH files are refused as unsupported; nothing else is
   affected.
 
+## Player identity in the database
+
+`Players.name` has compared byte for byte since #417: `sql_schema_player.py`
+declares MySQL's `utf8mb4_bin`, PostgreSQL's `C` and SQLite's `BINARY`, and a
+database created before that is migrated on its next connection
+(`DatabaseSchemaMixin._ensure_players_name_collation`, under the same bounded lock
+wait as every other migration). The column's collation is read first, so the
+`ALTER` runs once and not on every connection; `DB_VERSION` is deliberately not
+bumped, because that flag means "recreate the tables and reimport everything".
+
+Two things the migration does not do:
+
+* **It does not split a player that was already merged.** Under the old
+  collation `Alice` and `alice` were one row, and that row kept whichever spelling
+  was stored first; the other is not recorded anywhere. Those players keep the
+  merged statistics they have, and telling them apart again means re-importing the
+  files that named both, if they still exist.
+* **Reversing it is a statement, not a repair.** Dropping the `COLLATE` clause
+  restores the server default without rewriting a row, but once two names the old
+  collation folds have been stored, the reverse `ALTER` fails on the unique
+  `(name, siteId)` index instead of merging them — which is the safe answer.
+
 ## Deferred to issues
 
 The limits that need work are filed as issues rather than fixed one at a time
@@ -220,7 +230,6 @@ imported approximately.
 | **Betting-state parity with PokerKit** (#422) | The reopen rules after short all-ins cover the cases PokerKit plays; a full betting state machine, cross-checked against PokerKit, is a piece of work of its own — not one more guard in `_Builder`. The cross-validator it would be measured with is #385. |
 | **A PHH writer** (#382) | fpdb reads PHH and never writes it: the round-trip the introduction mentions is one-way today. Filed with the export and round-trip work. |
 | **PHH players in the reports** (#423) | A PHH player is resolved by exact name. No aliases, no hero profiles, and `_hero` selects only the players of the file it is written in. |
-| **A byte-for-byte player name** (#417) | The root of the name collision above is that `Players.name` is compared with the server's default collation, which folds case, accents and more; the importer folds the cases it can express and refuses the hand. Giving the column an explicit binary collation would remove the class outright, but it is a schema change with a migration, and it changes what *every* importer does with a name, not only PHH. |
 
 ## Tests and fixtures
 

@@ -26,7 +26,6 @@ import math
 import os
 import re
 import time
-import unicodedata
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from decimal import ROUND_DOWN, Decimal, InvalidOperation
@@ -826,131 +825,44 @@ def _player_names(given: Sequence[Any]) -> list[str]:
     """The players' names; an unnamed one is pN, or pN#2... when the file already uses that."""
     supplied = {str(name) for name in given if name not in (None, "")}
     # The generated name has to clear the same bar ``_seats`` sets for the file's own names. A
-    # name the database cannot tell from a supplied one -- ``P1`` is ``p1`` to it, and so is
-    # ``p1 `` -- would make two seats one player, and the hand would be refused for a name fpdb
-    # invented. Stepped aside here, exactly as the plain ``p1`` collision always was.
-    taken = {_collation_key(str(name)) for name in supplied}
+    # name the index would take for a supplied one -- ``p1 `` is still ``p1`` to the one binary
+    # collation that pads with a space -- would make two seats one player, and the hand would be
+    # refused for a name fpdb invented. Stepped aside here, as the plain ``p1`` collision
+    # always was.
+    taken = {_storage_key(str(name)) for name in supplied}
     names: list[str] = []
     for index, name in enumerate(given, start=1):
         if name not in (None, ""):
             names.append(str(name))
             continue
         fallback, suffix = f"p{index}", 1
-        while _collation_key(fallback) in taken:
+        while _storage_key(fallback) in taken:
             suffix += 1
             fallback = f"p{index}#{suffix}"
         names.append(fallback)
-        taken.add(_collation_key(fallback))
+        taken.add(_storage_key(fallback))
     return names
 
 
-#: Latin letters the database's collation compares as another letter or letters, but which
-#: no Unicode decomposition reaches: ``Ø`` is ``o`` to the collation and ``Æ`` is ``ae``, and
-#: neither decomposes. Mapped before the fold in ``_collation_key``, which does the rest.
-#:
-#: Measured, not read off the letter's shape. Each entry was probed against a live server on
-#: a UCA collation (the MySQL 8 default) and is a pair that collation really makes equal;
-#: letters it does *not* reach are left out -- ``Ŋ`` is not ``n`` there, nor ``Þ`` ``th`` --
-#: so nothing here guesses what a stroke means.
-_COLLATION_LETTERS: Final[dict[str, str]] = {
-    "Æ": "ae", "æ": "ae", "Ǣ": "ae", "ǣ": "ae", "Ǽ": "ae", "ǽ": "ae",
-    "Ð": "d", "ð": "d", "Đ": "d", "đ": "d",
-    "Ø": "o", "ø": "o", "Ǿ": "o", "ǿ": "o",
-    "Ħ": "h", "ħ": "h",
-    "Ŀ": "l", "ŀ": "l", "Ł": "l", "ł": "l",
-    "Œ": "oe", "œ": "oe",
-}
-
-#: The joining forms and Arabic presentation marks the collations give no weight to at all:
-#: a name carrying one is compared as if it were not written. Read on the characters as they
-#: are written, *before* the decomposition -- NFKD turns ``U+FC5E`` into a space and two
-#: marks, and that space would then stand for itself in the comparison.
-#:
-#: Measured like the table above: 15 248 codepoints, one per name, inserted into fpdb's own
-#: ``Players`` table, and these are the ones the unique index took for the same name without
-#: them. ``U+FE75`` is unassigned and is covered by the range rather than listed.
-_COLLATION_JOINERS: Final[frozenset[int]] = frozenset(
-    {
-        0x0640, 0x07FA, 0x0824, 0x0828, 0x180A, 0x1CD3, 0x1CF2, 0x1CF3,
-        *range(0xFC5E, 0xFC64),
-        *range(0xFCF2, 0xFCF5),
-        *range(0xFE70, 0xFE80),
-    }
-)
-
-#: Every supplementary character -- U+10000 and above -- is *one* character to the collations
-#: ``Players.name`` may be compared with, and one character of weight ``U+FFFD``: "to MySQL, all
-#: supplementary characters are equal to each other". The general collations and the UCA 4.0.0
-#: ones (``utf8mb4_unicode_ci``, the collation this install's table is on) weigh them that way;
-#: the collations newer than UCA 4.0.0 keep them apart, which the fold ignores -- it errs coarse.
-#:
-#: Folded onto ``U+FFFD`` itself rather than onto a sentinel of our own. Swept, like the two
-#: tables above: every BMP codepoint written as one character of a name, against the name an
-#: emoji makes -- 63 488 of them, the surrogates and U+0000 aside. On ``utf8mb4_general_ci``
-#: ``U+FFFD`` is the *only* one of them that stands for the emoji, so the fold covers that
-#: collation exactly and reaches no BMP character it keeps apart; ``utf8mb4_unicode_ci`` keeps
-#: ``U+FFFD`` apart from the emoji too, so the fold is coarser than that one, which is the
-#: direction it errs in. In ``Players``: ``Alice😀`` then ``Alice😁`` leaves *one* row and hands
-#: back id 1 both times, on the table's own ``utf8mb4_unicode_ci`` as much as on
-#: ``utf8mb4_general_ci``, while ``utf8mb4_uca1400_ai_ci`` keeps the two apart. One
-#: supplementary character is one ``U+FFFD`` weight there and not two, which is why one
-#: character replaces one.
-#:
-#: Folded before the decomposition, for the reason ``_COLLATION_JOINERS`` is: NFKD reaches about
-#: 1 900 of the supplementary characters and turns them into BMP ones -- 1 907 with the Unicode
-#: data this Python ships -- which would then stand for themselves in the comparison.
-_COLLATION_SUPPLEMENTARY: Final = "\ufffd"
-
-#: The characters a collation does not read as themselves: an attaching mark, which it reads
-#: with the letter before it, and a control or format character, which is invisible in the
-#: name it sits in. Dropped, so that ``José`` and ``Jose`` meet here -- and so that a name
-#: cannot be made to differ by a character nobody can see.
-_COLLATION_UNREAD: Final = frozenset({"Cc", "Cf", "Mn", "Mc", "Me"})
-
-#: The collations are PAD SPACE: a trailing run of these is not part of the name they
-#: compare, so ``Alice`` and ``Alice `` are one row in ``Players`` and one id out of
-#: ``insertPlayer()``. Every space separator there is -- measured, and the tab and the
-#: newline are not among them, being control characters rather than spaces.
-_COLLATION_SPACES: Final = (
-    " \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000"
-)
+#: The one character MySQL's binary collations read past at the end of a name: ``utf8mb4_bin``
+#: is PAD SPACE, so ``Alice`` and ``Alice `` are one row there. Measured on the table with the
+#: index this schema writes: U+00A0, U+3000, U+200B and a tab all keep two rows.
+_PAD_CHARACTER: Final = " "
 
 
-def _collation_key(name: str) -> str:
-    """A name as fpdb's database compares it, not as Python compares strings.
+def _storage_key(name: str) -> str:
+    """A name as the unique ``(name, siteId)`` index compares it, the column now being binary.
 
-    ``Players.name`` is a ``VARCHAR(32)`` with no ``COLLATE``, so it takes the server's
-    default: ``utf8mb4_general_ci`` on MySQL 5.7 and MariaDB up to 11.3, ``utf8mb4_0900_ai_ci``
-    on MySQL 8, ``utf8mb4_uca1400_ai_ci`` on MariaDB 11.4 and later. All three ignore case and
-    accents, so ``Alice`` and ``alice`` are one player there, and so are ``José`` and ``jose``.
-    The unique index on ``(name, siteId)`` makes them one row and ``insertPlayer()`` hands the
-    second name the first player's id: two seats become one, in the actions and in the reports,
-    permanently.
-
-    The key is a fold: :data:`_COLLATION_LETTERS`, :data:`_COLLATION_JOINERS`,
-    :data:`_COLLATION_SUPPLEMENTARY`, a decomposition, the characters of
-    :data:`_COLLATION_UNREAD`, a case fold, and the trailing spaces of
-    :data:`_COLLATION_SPACES`. It is deliberately *coarser* than any one of the collations a
-    server may compare a name with -- where it cannot tell two names apart it refuses the hand
-    rather than letting two players merge. Measured over 15 248 codepoints, written in the
-    middle and at the end of a name against the real table and its unique index: no pair a
-    server would merge escapes it. The supplementary characters are the one class that needed
-    no sweep of that kind -- the general and UCA 4.0.0 collations make them all equal by rule
-    -- and the fold makes them one character, ``U+FFFD``, which is the weight the general
-    collations give them and coarser than the UCA 4.0.0 one, where the replacement character
-    stands apart from them.
+    ``Players.name`` carries an explicit binary collation on every backend (#417): case, accents
+    and ligatures are compared as written, so ``Alice`` and ``alice`` are two players, and the
+    importer no longer refuses a hand for naming them. One thing a binary collation still folds
+    is a trailing space -- MySQL's ``utf8mb4_bin`` is PAD SPACE -- and the index would file
+    ``Alice`` and ``Alice `` as one row, ``insertPlayer()`` handing the second the first's id.
+    Stripping that character keeps the pair apart here, and refusing it on PostgreSQL and SQLite
+    too, where the space would be compared, keeps one hand accepted or refused the same way on
+    every backend.
     """
-    mapped = "".join(
-        _COLLATION_LETTERS.get(char, _COLLATION_SUPPLEMENTARY if ord(char) > 0xFFFF else char)
-        for char in name
-        if ord(char) not in _COLLATION_JOINERS
-    )
-    kept = []
-    for char in unicodedata.normalize("NFKD", mapped):
-        if unicodedata.combining(char) or unicodedata.category(char) in _COLLATION_UNREAD:
-            continue
-        kept.append(char)
-    return "".join(kept).casefold().rstrip(_COLLATION_SPACES)
+    return name.rstrip(_PAD_CHARACTER)
 
 
 @dataclass
@@ -982,7 +894,7 @@ class _Builder:
         self.config = config
         self.base = mapping.base
         # The PHH players the database already holds, keyed by the name it compares them under
-        # (``_collation_key``): a name that folds onto one of them is that player's row.
+        # (``_storage_key``): a name that meets one of them there is that player's row.
         self.taken: Mapping[str, str] = taken if taken is not None else {}
 
     def fail(self, message: str, kind: str = MALFORMED) -> PHHImportError:
@@ -1023,15 +935,15 @@ class _Builder:
         return result
 
     def _refuse_colliding_names(self, names: Sequence[str]) -> None:
-        """Refuse the names the database would take for one player, in this hand or already.
+        """Refuse the names the unique index would take for one player, here or already stored.
 
-        fpdb stores a player as one row per ``(name, siteId)``, and MySQL's usual collation
-        reads names without case or accents: two names that differ only in case or accent are
-        one row in ``Players``, where ``insertPlayer()`` hands back the first player's id -- two
-        seats become one player. Checked here rather than left to the index, which would merge
-        them silently instead of refusing the hand. *taken* is the same rule across hands, which
-        one hand cannot see: a hand naming ``alice`` after one that stored ``Alice`` is refused
-        too.
+        fpdb stores a player as one row per ``(name, siteId)``, and the column's collation is
+        binary (#417): case, accents and ligatures are compared as written, so ``Alice`` and
+        ``alice`` are two players and neither this hand nor a later one is refused for naming
+        both. The one thing the index still folds is a trailing space, because MySQL's
+        ``utf8mb4_bin`` is PAD SPACE; :func:`_storage_key` strips it here, and a hand naming
+        both ``Alice`` and ``Alice `` is refused rather than merged. *taken* is the same rule
+        across hands, which one hand cannot see.
 
         A name longer than the ``_NAME_LIMIT`` characters ``Players.name`` holds is refused
         outright. ``insertPlayer()`` would keep its first ``_NAME_LIMIT`` characters, and from
@@ -1044,16 +956,16 @@ class _Builder:
                 f"{overlong[0]!r} is longer than the {_NAME_LIMIT} characters fpdb stores of a name",
                 UNSUPPORTED,
             )
-        if len({_collation_key(str(name)) for name in names}) != len(names):
+        if len({_storage_key(str(name)) for name in names}) != len(names):
             raise self.fail(
-                "two players' names are the same to the database, which ignores case and accents",
+                "two players' names are the same to the database, which ignores a trailing space",
                 UNSUPPORTED,
             )
         for name in names:
-            existing = self.taken.get(_collation_key(str(name)))
+            existing = self.taken.get(_storage_key(str(name)))
             if existing is not None and existing != str(name):
                 raise self.fail(
-                    f"{str(name)!r} is the player {existing!r} to the database, which ignores case and accents",
+                    f"{str(name)!r} is the player {existing!r} to the database, which ignores a trailing space",
                     UNSUPPORTED,
                 )
 
@@ -2010,8 +1922,9 @@ class _PHHConfig:
 def build_hand(document: PHHDocument, config: Any = None, taken: Mapping[str, str] | None = None) -> Any:
     """The fpdb Hand a PHH hand describes, or :class:`PHHImportError`.
 
-    *taken* is the PHH players already in the database, keyed by the name it compares them
-    under: a hand that names one of them differently is refused rather than merged into them.
+    *taken* is the PHH players already in the database, keyed by the name the unique index
+    compares them under: a hand that names one of them with a different trailing run of spaces
+    is refused rather than merged into them (see :func:`_storage_key`).
     """
     data = document.data
     if "variant" not in data:
@@ -2058,22 +1971,23 @@ _SOURCE_PLAYERS_SQL: Final = (
 )
 
 
-#: The PHH players already stored, by the name the database compares them under. A player is
-#: one row per ``(name, siteId)`` and MySQL's usual collation reads names without case or
-#: accents, so a name that folds onto a stored one is that stored player's row.
+#: The PHH players already stored, by the name the unique index compares them under. A player
+#: is one row per ``(name, siteId)``; the collation is binary, so only a trailing space still
+#: makes two names one row (see :func:`_storage_key`).
 _STORED_PLAYER_NAMES_SQL: Final = "SELECT name FROM Players WHERE siteId = %s"
 
 
 def _stored_player_names(cursor: Any, placeholder: str = "%s") -> dict[str, str]:
-    """The PHH players the database holds, keyed by ``_collation_key`` of their stored name.
+    """The PHH players the database holds, keyed by ``_storage_key`` of their stored name.
 
-    ``insertPlayer`` upserts on the unique ``(name, siteId)`` index, so a hand that names
-    ``alice`` where the database already holds ``Alice`` is stored under Alice's id: the two
-    hands' actions and winnings are one player's. Keyed as the database compares them, so a
-    builder can refuse that hand rather than merge it.
+    ``insertPlayer`` upserts on the unique ``(name, siteId)`` index, so a hand naming ``Alice``
+    where the database holds ``Alice `` is stored under that player's id on MySQL: the two
+    hands' actions and winnings become one player's. Keyed as the index compares them, so a
+    builder can refuse that hand rather than merge it. A name that differs in case or accent
+    is a different player now, and is stored as one.
     """
     cursor.execute(_STORED_PLAYER_NAMES_SQL.replace("%s", placeholder), (PHH_SITE_ID,))
-    return {_collation_key(str(name)): str(name) for (name,) in cursor.fetchall()}
+    return {_storage_key(str(name)): str(name) for (name,) in cursor.fetchall()}
 
 
 def phh_source_players(cursor: Any, placeholder: str = "%s") -> list[str]:
@@ -2122,8 +2036,8 @@ def import_file(db: Any, config: Any, path: str | Path, *, file_id: int = 0) -> 
         return result
     build_config = _ImportConfig(config)
     # The players this database already holds, and the ones each hand adds to it as the file is
-    # read: a hand that names one of them in another case or accent is refused rather than
-    # merged into them (the index would file both hands under one player).
+    # read: a hand that names one of them with a different trailing run of spaces is refused
+    # rather than merged into them (the MySQL index would file both hands under one player).
     taken = _stored_player_names(db.get_cursor(), db.sql.query.get("placeholder", "%s"))
     for item in iter_documents(path):
         result.discovered += 1
@@ -2152,7 +2066,7 @@ def import_file(db: Any, config: Any, path: str | Path, *, file_id: int = 0) -> 
             result.add_failure(PHHImportError(MALFORMED, f"not stored: {error}", source=item.where, hand=item.label))
             continue
         for name in names:
-            taken[_collation_key(name)] = name
+            taken[_storage_key(name)] = name
         result.imported += 1
     result.seconds = time.monotonic() - started
     return result
