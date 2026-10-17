@@ -1789,12 +1789,13 @@ def test_a_seat_may_not_be_a_boolean() -> None:
 # -- thirty-sixth review --------------------------------------------------------------
 
 
-def test_names_alike_in_their_first_32_characters_are_unsupported() -> None:
+def test_a_name_longer_than_32_characters_is_unsupported() -> None:
+    """``Players.name`` holds 32 characters: a longer name is refused, one of 32 is not."""
     long = "a" * 32
-    error = refusal(SHOWDOWN + f'players = ["{long}x", "{long}y"]\n')
+    error = refusal(SHOWDOWN + f'players = ["{long}x", "b"]\n')
     assert error.kind == UNSUPPORTED
-    assert "the same in their first 32 characters" in str(error)
-    assert build_hand(document(SHOWDOWN + f'players = ["{long}x", "b"]\n')) is not None
+    assert "longer than the 32 characters" in str(error)
+    assert build_hand(document(SHOWDOWN + f'players = ["{long}", "b"]\n')) is not None
 
 
 @pytest.mark.parametrize(
@@ -1962,16 +1963,9 @@ def test_names_the_collation_keeps_apart_are_still_two_players() -> None:
     assert build_hand(document(SHOWDOWN + 'players = ["Þór", "THor"]\n')) is not None
 
 
-def test_the_collation_check_reads_the_first_32_characters_only() -> None:
-    """Both names are stored to 32 characters, so the comparison is made on those 32.
-
-    An accent past the thirty-second character is not stored at all, so it is no collision;
-    inside them the two names are one, and the collation check is the one that says so --
-    not the truncation check, whose message is about the thirty-two characters themselves.
-    """
+def test_the_collation_check_reads_names_to_their_full_length() -> None:
+    """Two 32-character names that differ only in their last letter's accent are one row."""
     head = "b" * 31
-    beyond = 'players = ["' + head + "c" + "é" * 10 + '", "' + head + "d" + "e" * 10 + '"]\n'
-    assert build_hand(document(SHOWDOWN + beyond)) is not None
     inside = 'players = ["' + head + 'é", "' + head + 'e"]\n'
     error = refusal(SHOWDOWN + inside)
     assert error.kind == UNSUPPORTED
@@ -2883,18 +2877,21 @@ _SIX_DEAL = {
     "p5": "7c8c9cTcJc",
     "p6": "7d8d9dTdJd",
 }
+#: What each player is dealt on the first draw: the stub, in order, for the first four, and for
+#: p5 and p6 the cards of the discards that the reshuffle is what makes available.
+_SIX_FIRST_DRAW = {
+    "p1": _SIX_STUB[0],
+    "p2": _SIX_STUB[1],
+    "p3": "QcKcAcQdKd",
+    "p4": "AdQhKhAhQs",
+    "p5": "KsAs2c3c4c",
+    "p6": "5c6c2d3d4d",
+}
 
 
 def six_player_draw(p5_draw: str = "KsAs2c3c4c") -> str:
     """The six-player hand above, with *p5_draw* as the fifth player's replacement cards."""
-    drawn = {
-        "p1": _SIX_STUB[0],
-        "p2": _SIX_STUB[1],
-        "p3": "QcKcAcQdKd",
-        "p4": "AdQhKhAhQs",
-        "p5": p5_draw,
-        "p6": "5c6c2d3d4d",
-    }
+    drawn = {**_SIX_FIRST_DRAW, "p5": p5_draw}
     return "\n".join(
         [
             'variant = "N2L1D"',
@@ -2981,11 +2978,13 @@ def heads_up(names: list[str], *, raise_size: int = 18) -> str:
     return text.replace("cbr 18", f"cbr {raise_size}")
 
 
+_PHH_PLAYERS_SQL = "SELECT name FROM Players WHERE siteId = %s ORDER BY id"
+
+
 def phh_players(db: Any) -> list[str]:
     """The names in ``Players`` for the PHH source, in the order they were stored."""
-    placeholder = db.sql.query.get("placeholder", "%s")
     cursor = db.get_cursor()
-    cursor.execute(f"SELECT name FROM Players WHERE siteId = {placeholder} ORDER BY id", (PHH_SITE_ID,))
+    cursor.execute(_PHH_PLAYERS_SQL.replace("%s", db.sql.query.get("placeholder", "%s")), (PHH_SITE_ID,))
     return [str(name) for (name,) in cursor.fetchall()]
 
 
@@ -3031,3 +3030,118 @@ def test_the_same_name_in_another_hand_is_the_same_player(tmp_path, importer) ->
     stored, duplicates, partial, skipped, errors, _seconds = importer.runImport()
     assert (stored, duplicates, partial, skipped, errors) == (2, 0, 0, 0, 0)
     assert phh_players(importer.database) == ["Alice", "Bob"]
+
+
+# -- fifty-third review ---------------------------------------------------------------
+
+#: A name as long as ``Players.name`` holds (``VARCHAR(32)``), and two that run past it.
+_LONG_NAME = "a" * 32
+
+
+def test_names_the_database_would_cut_short_are_refused_in_every_hand(tmp_path, importer) -> None:
+    """``insertPlayer`` keeps 32 characters of a name, so two names alike that far are one row.
+
+    ``a…ax`` and ``a…ay`` are two players whose names agree in every character the database
+    keeps: ``insertPlayer`` sends ``name[:32]``, the unique index on ``(name, siteId)`` finds the
+    row the first hand made, and ``ON DUPLICATE KEY UPDATE ... id=LAST_INSERT_ID(id)`` answers
+    with that row's id, so the second hand's actions and winnings become the first player's.
+    The row holds nothing that tells the second player from the first named again, so neither
+    hand is stored: a name longer than the column is refused wherever it appears.
+    """
+    path = tmp_path / "long.phhs"
+    path.write_text(
+        f"[1]\n{heads_up([f'{_LONG_NAME}x', 'Bob'])}\n"
+        f"[2]\n{heads_up([f'{_LONG_NAME}y', 'Bob'], raise_size=20)}\n",
+        encoding="utf-8",
+    )
+
+    assert importer.addImportFile(str(path))
+    stored, duplicates, partial, skipped, errors, _seconds = importer.runImport()
+    assert (stored, duplicates, partial, skipped, errors) == (0, 0, 0, 2, 0)
+    assert phh_players(importer.database) == []
+
+
+def test_a_32_character_name_is_one_player_across_imports(tmp_path, importer) -> None:
+    """The control: a name the column holds whole is the same player in a later import.
+
+    That is what refusing longer names buys. Accepting them, the second import's hand could
+    not have been told from a second player's -- it would have had to be refused, or merged.
+    """
+    first, second = tmp_path / "first.phh", tmp_path / "second.phh"
+    first.write_text(heads_up([_LONG_NAME, "Bob"]), encoding="utf-8")
+    second.write_text(heads_up([_LONG_NAME, "Bob"], raise_size=20), encoding="utf-8")
+
+    assert importer.addImportFile(str(first))
+    assert importer.runImport()[0] == 1
+    assert importer.addImportFile(str(second))
+    assert importer.runImport()[0] == 1
+    assert phh_players(importer.database) == [_LONG_NAME, "Bob"]
+
+
+_SIX_ORDER = ("p1", "p2", "p3", "p4", "p5", "p6")
+#: The second draw round of the six-player hand: one card back each, and one taken from the 22
+#: cards the first draw's reshuffle left in the stub. p1's is what the guard below varies.
+_SECOND_DISCARD = {"p1": "7h", "p2": "7s", "p3": "Qd", "p4": "Qs", "p5": "4c", "p6": "4d"}
+_SECOND_DRAW = {"p1": "5d", "p2": "6d", "p3": "2h", "p4": "2s", "p5": "7c", "p6": "7d"}
+
+
+def six_player_triple_draw(p1_second_draw: str = "5d") -> str:
+    """The six-player hand above carried on to a second draw round, *p1_second_draw* aside.
+
+    The first draw is the one that exhausts the stub, so the second draws from the 22 cards the
+    reshuffle left: p1's ``5d``, p2's ``6d`` and so on are those cards.
+    """
+    drawn = {**_SECOND_DRAW, "p1": p1_second_draw}
+    actions = [
+        *[f'  "d dh {seat} {cards}",' for seat, cards in _SIX_DEAL.items()],
+        *[f'  "{seat} cc",' for seat in ("p3", "p4", "p5", "p6", "p1", "p2")],
+        *[f'  "{seat} sd {cards}",' for seat, cards in _SIX_DEAL.items()],
+        *[f'  "d dh {seat} {cards}",' for seat, cards in _SIX_FIRST_DRAW.items()],
+        *[f'  "{seat} cc",' for seat in _SIX_ORDER],
+        *[f'  "{seat} sd {cards}",' for seat, cards in _SECOND_DISCARD.items()],
+        *[f'  "d dh {seat} {cards}",' for seat, cards in drawn.items()],
+        *[f'  "{seat} cc",' for seat in _SIX_ORDER],
+        *[f'  "{seat} sd",' for seat in _SIX_ORDER],
+        *[f'  "{seat} f",' for seat in _SIX_ORDER[:5]],
+    ]
+    return "\n".join(
+        [
+            'variant = "F2L3D"',
+            "antes = [0, 0, 0, 0, 0, 0]",
+            "blinds_or_straddles = [5, 10, 0, 0, 0, 0]",
+            "small_bet = 10",
+            "big_bet = 20",
+            "starting_stacks = [500, 500, 500, 500, 500, 500]",
+            "actions = [",
+            *actions,
+            "]",
+            'players = ["p1", "p2", "p3", "p4", "p5", "p6"]',
+        ]
+    )
+
+
+def test_a_card_discarded_after_the_reshuffle_is_not_dealt_back() -> None:
+    """The pile the reshuffle made is the stub, and what a later draw discards is out of play.
+
+    The first draw is the one that exhausts the stub -- p5 wants five cards and it holds two --
+    so the discards are shuffled in and the 22 cards left of that pile *are* the stub. p1 gives
+    back the ``7h`` on the second draw and is dealt it straight back: that needs the discards
+    shuffled in again, which a stub of 22 cards has not earned. Left in ``self.discarded``, the
+    pile stayed counted out of play for the rest of the hand, so ``_stub()`` read zero and the
+    check could not fire however the hand went on.
+    """
+    error = refusal(six_player_triple_draw("7h"))
+    assert error.kind == MALFORMED
+    assert "7h was discarded" in str(error)
+    assert "action 37" in str(error)
+
+
+@pytest.mark.parametrize("drawn", ["5d", "3h"], ids=["the card it was played with", "another of the pile"])
+def test_a_card_the_reshuffle_returned_is_still_dealt(drawn: str) -> None:
+    """The control: the second draw is answered by that pile, and dealing from it is the hand.
+
+    ``5d`` is what p1 was dealt, ``3h`` another card the pile holds that no hand does: both are
+    the stub after the reshuffle, so both are dealt. Refusing either would refuse a hand
+    PokerKit plays, which is what the discard pile is tracked for in the first place.
+    """
+    assert build_hand(document(six_player_triple_draw(drawn))) is not None

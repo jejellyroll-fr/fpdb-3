@@ -829,18 +829,18 @@ def _player_names(given: Sequence[Any]) -> list[str]:
     # name the database cannot tell from a supplied one -- ``P1`` is ``p1`` to it, and so is
     # ``p1 `` -- would make two seats one player, and the hand would be refused for a name fpdb
     # invented. Stepped aside here, exactly as the plain ``p1`` collision always was.
-    taken = {_collation_key(str(name)[:_NAME_LIMIT]) for name in supplied}
+    taken = {_collation_key(str(name)) for name in supplied}
     names: list[str] = []
     for index, name in enumerate(given, start=1):
         if name not in (None, ""):
             names.append(str(name))
             continue
         fallback, suffix = f"p{index}", 1
-        while _collation_key(fallback[:_NAME_LIMIT]) in taken:
+        while _collation_key(fallback) in taken:
             suffix += 1
             fallback = f"p{index}#{suffix}"
         names.append(fallback)
-        taken.add(_collation_key(fallback[:_NAME_LIMIT]))
+        taken.add(_collation_key(fallback))
     return names
 
 
@@ -1025,28 +1025,35 @@ class _Builder:
     def _refuse_colliding_names(self, names: Sequence[str]) -> None:
         """Refuse the names the database would take for one player, in this hand or already.
 
-        fpdb stores a name to 32 characters and a player as one row per ``(name, siteId)``, and
-        MySQL's usual collation reads names without case or accents: two names alike that far,
-        or two that differ only in case or accent, are one row in ``Players``, where
-        ``insertPlayer()`` hands back the first player's id -- two seats become one player.
-        Checked here rather than left to the index, which would merge them silently instead of
-        refusing the hand. *taken* is the same rule across hands, which one hand cannot see: a
-        hand naming ``alice`` after one that stored ``Alice`` is refused too.
+        fpdb stores a player as one row per ``(name, siteId)``, and MySQL's usual collation
+        reads names without case or accents: two names that differ only in case or accent are
+        one row in ``Players``, where ``insertPlayer()`` hands back the first player's id -- two
+        seats become one player. Checked here rather than left to the index, which would merge
+        them silently instead of refusing the hand. *taken* is the same rule across hands, which
+        one hand cannot see: a hand naming ``alice`` after one that stored ``Alice`` is refused
+        too.
+
+        A name longer than the ``_NAME_LIMIT`` characters ``Players.name`` holds is refused
+        outright. ``insertPlayer()`` would keep its first ``_NAME_LIMIT`` characters, and from
+        those alone no later hand -- in this import or the next -- can tell the same player
+        named again from a second player whose name only starts the same way: the first would
+        have to be accepted and the second refused, and the row holds nothing to choose by.
         """
-        count = len(names)
-        if len({str(name)[:_NAME_LIMIT] for name in names}) != count:
-            raise self.fail(f"two players' names are the same in their first {_NAME_LIMIT} characters", UNSUPPORTED)
-        if len({_collation_key(str(name)[:_NAME_LIMIT]) for name in names}) != count:
+        if overlong := [str(name) for name in names if len(str(name)) > _NAME_LIMIT]:
+            raise self.fail(
+                f"{overlong[0]!r} is longer than the {_NAME_LIMIT} characters fpdb stores of a name",
+                UNSUPPORTED,
+            )
+        if len({_collation_key(str(name)) for name in names}) != len(names):
             raise self.fail(
                 "two players' names are the same to the database, which ignores case and accents",
                 UNSUPPORTED,
             )
         for name in names:
-            stored = str(name)[:_NAME_LIMIT]
-            existing = self.taken.get(_collation_key(stored))
-            if existing is not None and existing != stored:
+            existing = self.taken.get(_collation_key(str(name)))
+            if existing is not None and existing != str(name):
                 raise self.fail(
-                    f"{stored!r} is the player {existing!r} to the database, which ignores case and accents",
+                    f"{str(name)!r} is the player {existing!r} to the database, which ignores case and accents",
                     UNSUPPORTED,
                 )
 
@@ -1586,19 +1593,22 @@ class _Builder:
         stub once the stub runs out, so one may be dealt again -- but only then. For that to be
         what happened the deal has to want more cards than the stub still holds, which is what
         stops a hand from dealing back the card it discarded a moment ago with the deck still
-        full (PokerKit's simulation shuffles on the draw that exhausts the stub).
+        full (PokerKit's simulation shuffles on the draw that exhausts the stub). That deal is
+        the one the shuffle answers, so the whole pile goes back into the stub here: what a
+        later draw of the same hand discards is out of play again, and a hand that deals one of
+        those straight back -- the stub still holding cards -- is malformed as before.
         """
         known = [card for card in cards if card != "0x"]
         repeated = [card for card in known if card in self.seen]
         if repeated or len(set(known)) != len(known):
             raise self.fail(f"{' '.join(repeated) or 'a card'} is dealt twice")
-        if back := [card for card in known if card in self.discarded]:
-            if len(known) <= self._stub():
-                raise self.fail(
-                    f"{' '.join(back)} was discarded, and the stub still holds cards: "
-                    "the discards are not shuffled back in yet"
-                )
-        self.discarded.difference_update(known)
+        if len(known) > self._stub():
+            self.discarded.clear()
+        elif back := [card for card in known if card in self.discarded]:
+            raise self.fail(
+                f"{' '.join(back)} was discarded, and the stub still holds cards: "
+                "the discards are not shuffled back in yet"
+            )
         self.seen.update(known)
 
     def _stub(self) -> int:
@@ -2127,7 +2137,7 @@ def import_file(db: Any, config: Any, path: str | Path, *, file_id: int = 0) -> 
             continue
         # The names as they will be stored, read before the store: a hand the database refuses
         # must not reserve them.
-        names = [str(player[1])[:_NAME_LIMIT] for player in hand.players]
+        names = [str(player[1]) for player in hand.players]
         # Each hand is stored and committed on its own: empty the shared bulk buffers first,
         # or the previous hand's rows would be inserted again (as the CoinPoker feed does).
         db.resetBulkCache()
