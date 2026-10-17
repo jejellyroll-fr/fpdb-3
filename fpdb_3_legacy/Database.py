@@ -787,7 +787,13 @@ class Database(
             self.connection.commit()
         else:
             # sqlite commits can fail because of shared locks on the database (SQLITE_BUSY)
-            # re-try commit if it fails in case this happened
+            # re-try commit if it fails in case this happened. Only a lock is worth the
+            # wait: a closed or missing connection, a full disk or an I/O error fails the
+            # same way every time, and each pause blocks the caller -- the Qt main thread
+            # for the Session Guard (#428). Extended codes (SQLITE_BUSY_SNAPSHOT, ...)
+            # carry their primary code in the low byte.
+            import sqlite3
+
             maxtimes = 5
             pause = 1
             ok = False
@@ -796,9 +802,16 @@ class Database(
                     self.connection.commit()
                     # log.debug(("commit finished ok, i = ")+str(i))
                     ok = True
-                except Exception as e:  # intentional broad catch: sqlite commit retried on transient SQLITE_BUSY lock
+                except sqlite3.OperationalError as e:
+                    primary = (getattr(e, "sqlite_errorcode", None) or 0) & 0xFF
+                    if primary not in (sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED):
+                        log.exception(f"commit {i} failed, not retried: info={sys.exc_info()}, value={e}")
+                        break
                     log.exception(f"commit {i} failed: info={sys.exc_info()}, value={e}")
                     sleep(pause)
+                except Exception as e:  # intentional broad catch: reported as the FpdbError below
+                    log.exception(f"commit {i} failed, not retried: info={sys.exc_info()}, value={e}")
+                    break
                 if ok:
                     break
             if not ok:
