@@ -2389,7 +2389,7 @@ class PokerStars(HandHistoryConverter):
         log.debug("Regex for cash game: %s", regex)
 
         if game_type == "tour":
-            regex = f"{re.escape(str(tournament))} (Table|Tisch) {re.escape(str(table_number))}"
+            regex = f"{re.escape(str(tournament))} (Table|Tisch|Tavolo) {re.escape(str(table_number))}"
             log.debug("Regex for tournament: %s", regex)
             log.info(
                 "Stars table_name=%r, tournament=%r, table_number=%r",

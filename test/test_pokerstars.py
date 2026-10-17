@@ -1433,7 +1433,7 @@ Seat 2: Player1 mucked [7h 2c]"""
     def test_get_table_title_re_tournament(self) -> None:
         """Test getTableTitleRe for tournaments."""
         result = PokerStars.getTableTitleRe("tour", "Test Table", "Tournament #123", "5")
-        expected = "Tournament\\ \\#123 (Table|Tisch) 5"
+        expected = "Tournament\\ \\#123 (Table|Tisch|Tavolo) 5"
         self.assertEqual(result, expected)
 
     def test_parse_rake_and_pot(self) -> None:
