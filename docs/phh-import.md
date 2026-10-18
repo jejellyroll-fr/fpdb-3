@@ -52,14 +52,18 @@ Those aliases are resolved exactly as a room's `<hero_alias>` entries are:
 * `get_hero_aliases("PHH")` returns them, so `get_hero_player_ids("PHH")` reads
   every player among them that the database holds -- by exact name, as #417
   stores names.
-* In the report filters, selecting one of them selects them all, as selecting a
-  room's alias does. Any other PHH player is still that player alone, by name.
+* Selecting one of them selects them all: in the report filters, as selecting a
+  room's alias does, and in the reports themselves -- graphs, sessions, opponents,
+  tourney graph and statistics, ring statistics -- through
+  `get_selected_player_ids`. Any other PHH player is still that player alone, by
+  name.
 * Without aliases a PHH hero is no one. The hero-flagged players a room falls back
   to are, for PHH, each file's own `_hero`, which are not one player, so they are
   never read as the hero.
 * A **hero profile** may link a PHH name with a room's (`PokerStars:jeje` and
-  `PHH:jeje`), and the reports then group their hands as one player, as for two
-  rooms.
+  `PHH:jeje`). The filters and the Hand Viewer then read their hands as one
+  player's, as for two rooms. The reports listed above do not read profiles, for
+  rooms either: they resolve the site and name selected.
 
 Only the hero is aliased, as in the native importers: an opponent written two ways
 in a corpus is two players, here as on any room.

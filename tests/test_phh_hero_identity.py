@@ -57,3 +57,23 @@ def test_a_profile_groups_a_phh_name_with_a_room_name(db) -> None:
     db.config.save_hero_profile("Me", [("PokerStars", "jeje"), (PHH_SITE_NAME, "jeje_phh")])
 
     assert db.get_hero_player_ids(profile="Me") == sorted([stars, phh])
+
+
+def test_a_report_reads_every_phh_alias_for_one_selected(db) -> None:
+    """Graphs, sessions, opponents and tourney views resolve through this (#423)."""
+    jeje = player(db, "jeje", PHH_SITE_NAME)
+    jeje76 = player(db, "jeje76", PHH_SITE_NAME)
+    villain = player(db, "villain", PHH_SITE_NAME)
+    db.config.set_data_source_hero_aliases(PHH_SITE_NAME, ["jeje", "jeje76"])
+
+    assert db.get_selected_player_ids(PHH_SITE_NAME, "jeje76") == sorted([jeje, jeje76])
+    # Any other PHH player is that player alone.
+    assert db.get_selected_player_ids(PHH_SITE_NAME, "villain") == [villain]
+
+
+def test_a_report_on_a_room_still_reads_the_name_selected(db) -> None:
+    """A room's reports are unchanged: the alias selected, not the whole group."""
+    stars = player(db, "jeje", "PokerStars")
+    player(db, "jeje_old", "PokerStars")
+
+    assert db.get_selected_player_ids("PokerStars", "jeje") == [stars]

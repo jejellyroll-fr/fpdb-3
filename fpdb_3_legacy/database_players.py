@@ -181,6 +181,22 @@ class DatabasePlayersMixin:
 
         return sorted(ids)
 
+    def get_selected_player_ids(self, site_name, name):
+        """The players a report reads for *name* selected on *site_name*.
+
+        The name selected, resolved variant-aware -- ``get_player_id`` maps a
+        "PokerStars" selection to the hero's "PokerStars.FR" account, so data imported
+        under a site skin still shows -- and the site's hero players when it resolves to
+        no one. On a data source (PHH), one of its configured hero aliases stands for
+        all of them (#423), as it does in the report filters.
+        """
+        if self._is_data_source(site_name) and name in self._hero_aliases(site_name):
+            ids = self.get_hero_player_ids(site_name)
+            if ids:
+                return ids
+        result = self.get_player_id(self.config, site_name, name)
+        return [int(result)] if result is not None else self.get_hero_player_ids(site_name)
+
     def getHeroIds(self, pids, sitename):
         try:
             hero_ids = []

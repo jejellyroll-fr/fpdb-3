@@ -166,7 +166,8 @@ def test_the_data_sources_tab_edits_the_phh_hero_aliases(qtbot) -> None:
 
     tabs = [dia.tabs.tabText(i) for i in range(dia.tabs.count())]
     assert "Data Sources" in tabs
-    assert dia.data_source_inputs["PHH"].text() == "jeje"
+    assert dia.data_source_inputs["PHH"].toPlainText() == "jeje"
 
-    dia.data_source_inputs["PHH"].setText("jeje, , jeje76, jeje")
-    assert dia.get_data_source_changes() == {"PHH": ["jeje", "jeje76"]}
+    # One name per line: a PHH name is any string, a comma included, matched exactly.
+    dia.data_source_inputs["PHH"].setPlainText("jeje\n\nSmith, John\n jeje76 \njeje")
+    assert dia.get_data_source_changes() == {"PHH": ["jeje", "Smith, John", "jeje76"]}

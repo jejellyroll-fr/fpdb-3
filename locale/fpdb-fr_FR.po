@@ -5416,5 +5416,5 @@ msgstr "Une source de données comme PHH n'est pas une room : elle n'a pas de ps
 msgid "%s hero aliases:"
 msgstr "Alias du héros %s :"
 
-msgid "Your names in these hands, comma separated"
-msgstr "Vos noms dans ces mains, séparés par des virgules"
+msgid "Your names in these hands, one per line"
+msgstr "Vos noms dans ces mains, un par ligne"

@@ -27,6 +27,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QListWidget,
     QMessageBox,
+    QPlainTextEdit,
     QPushButton,
     QScrollArea,
     QTableWidget,
@@ -665,19 +666,17 @@ class ModernSitePreferencesDialog(QDialog):
         intro.setProperty("class", "caption")
         layout.addWidget(intro)
 
-        self.data_source_inputs: dict[str, QLineEdit] = {}
+        # One name per line, not comma separated as a room's aliases are: a PHH player's
+        # name is any string, "Smith, John" included, and is matched exactly.
+        self.data_source_inputs: dict[str, QPlainTextEdit] = {}
         getter = getattr(self.config, "get_data_source_hero_aliases", None)
         for name in self._data_source_names():
-            row = QHBoxLayout()
-            label = QLabel(_("%s hero aliases:") % name)
-            label.setMinimumWidth(160)
-            row.addWidget(label)
-            aliases_input = QLineEdit()
-            aliases_input.setText(", ".join(getter(name) if callable(getter) else []))
-            aliases_input.setPlaceholderText(_("Your names in these hands, comma separated"))
-            aliases_input.setProperty("class", "outlined")
-            row.addWidget(aliases_input)
-            layout.addLayout(row)
+            layout.addWidget(QLabel(_("%s hero aliases:") % name))
+            aliases_input = QPlainTextEdit()
+            aliases_input.setPlainText("\n".join(getter(name) if callable(getter) else []))
+            aliases_input.setPlaceholderText(_("Your names in these hands, one per line"))
+            aliases_input.setMaximumHeight(120)
+            layout.addWidget(aliases_input)
             self.data_source_inputs[name] = aliases_input
 
         layout.addStretch()
@@ -688,7 +687,7 @@ class ModernSitePreferencesDialog(QDialog):
         changes: dict[str, list[str]] = {}
         for name, aliases_input in self.data_source_inputs.items():
             aliases: list[str] = []
-            for alias in (part.strip() for part in aliases_input.text().split(",")):
+            for alias in (line.strip() for line in aliases_input.toPlainText().splitlines()):
                 if alias and alias not in aliases:
                     aliases.append(alias)
             changes[name] = aliases

@@ -142,12 +142,9 @@ class GuiGraphViewer(QSplitter):
             _hname = heroes.get(site, "")
             if not _hname:
                 continue
-            # Plot the hero the user selected, resolved variant-aware:
-            # get_player_id maps a "PokerStars" selection to the hero's
-            # "PokerStars.FR" account, so data imported under a site skin still
-            # shows. Fall back to the site's hero-flagged players if unresolved.
-            result = self.db.get_player_id(self.conf, site, _hname)
-            pids = [int(result)] if result is not None else self.db.get_hero_player_ids(site)
+            # The hero selected, resolved variant-aware -- and on PHH every configured
+            # hero alias (#423): see Database.get_selected_player_ids.
+            pids = self.db.get_selected_player_ids(site, _hname)
             for pid in pids:
                 if pid not in playerids:
                     playerids.append(pid)
