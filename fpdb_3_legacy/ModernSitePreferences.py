@@ -580,6 +580,7 @@ class ModernSitePreferencesDialog(QDialog):
         self.tabs = QTabWidget()
         self.tabs.addTab(self.setup_sites_tab(), _("Sites"))
         self.tabs.addTab(self.setup_profiles_tab(), _("Hero Profiles"))
+        self.tabs.addTab(self.setup_data_sources_tab(), _("Data Sources"))
         main_layout.addWidget(self.tabs)
 
         # Action buttons
@@ -645,6 +646,55 @@ class ModernSitePreferencesDialog(QDialog):
         return tab
 
     # ------------------------------------------------------------------ #
+    # Data Sources tab (the hero of a source that is not a room, #423)    #
+    # ------------------------------------------------------------------ #
+
+    def setup_data_sources_tab(self) -> QWidget:
+        """Build the 'Data Sources' tab: the hero aliases of each data source (PHH)."""
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+
+        intro = QLabel(
+            _(
+                "A data source such as PHH is not a poker room: it has no screen name. "
+                "Name the players that are you in its hands, and the reports read them as "
+                "one hero, as a room's aliases are."
+            )
+        )
+        intro.setWordWrap(True)
+        intro.setProperty("class", "caption")
+        layout.addWidget(intro)
+
+        self.data_source_inputs: dict[str, QLineEdit] = {}
+        getter = getattr(self.config, "get_data_source_hero_aliases", None)
+        for name in self._data_source_names():
+            row = QHBoxLayout()
+            label = QLabel(_("%s hero aliases:") % name)
+            label.setMinimumWidth(160)
+            row.addWidget(label)
+            aliases_input = QLineEdit()
+            aliases_input.setText(", ".join(getter(name) if callable(getter) else []))
+            aliases_input.setPlaceholderText(_("Your names in these hands, comma separated"))
+            aliases_input.setProperty("class", "outlined")
+            row.addWidget(aliases_input)
+            layout.addLayout(row)
+            self.data_source_inputs[name] = aliases_input
+
+        layout.addStretch()
+        return tab
+
+    def get_data_source_changes(self) -> dict[str, list[str]]:
+        """Return ``{source: [alias, ...]}`` to persist on save, deduplicated and in order."""
+        changes: dict[str, list[str]] = {}
+        for name, aliases_input in self.data_source_inputs.items():
+            aliases: list[str] = []
+            for alias in (part.strip() for part in aliases_input.text().split(",")):
+                if alias and alias not in aliases:
+                    aliases.append(alias)
+            changes[name] = aliases
+        return changes
+
+    # ------------------------------------------------------------------ #
     # Hero Profiles tab (multiroom hero identities)                       #
     # ------------------------------------------------------------------ #
 
@@ -660,13 +710,21 @@ class ModernSitePreferencesDialog(QDialog):
         self._loading_profile = False
 
     def _all_site_names(self) -> list[str]:
+        """The sites a profile link can name: every room, then the data sources (PHH, #423)."""
         getter = getattr(self.config, "get_supported_sites", None)
         if callable(getter):
             try:
-                return list(getter(all=True))
+                names = list(getter(all=True))
             except TypeError:
-                return list(getter())
-        return list(getattr(self.config, "supported_sites", {}).keys())
+                names = list(getter())
+        else:
+            names = list(getattr(self.config, "supported_sites", {}).keys())
+        names.extend(source for source in self._data_source_names() if source not in names)
+        return names
+
+    def _data_source_names(self) -> list[str]:
+        getter = getattr(self.config, "get_data_source_names", None)
+        return list(getter()) if callable(getter) else []
 
     def setup_profiles_tab(self) -> QWidget:
         """Build the 'Hero Profiles' tab: profile list + link editor."""

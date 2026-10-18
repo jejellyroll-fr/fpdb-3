@@ -27,8 +27,42 @@ configuration — no parser, no `supported_sites` entry, no HUD.
 
 Once PHH hands are stored, the report filters (statistics, graphs, sessions, Hand
 Viewer) offer the `PHH` source next to the configured rooms, with its players to
-select: the files' heroes (`_hero`) first, then the most active, up to 50. A PHH
-player is resolved by name -- PHH has no configured hero or aliases.
+select: its configured hero aliases first, then the files' heroes (`_hero`), then
+the most active, up to 50. A PHH player is resolved by exact name unless it is one
+of those aliases (see *The PHH hero*).
+
+## The PHH hero
+
+A data source has no `screen_name`, so its hero is the list of names that are you
+in its hands (#423). *Configure ▸ Site Settings ▸ Data Sources* edits it, and
+it is stored as an optional element of the configuration (the shipped templates do
+not carry it):
+
+```xml
+<data_sources>
+    <data_source name="PHH">
+        <hero_alias name="jeje"/>
+        <hero_alias name="jeje76"/>
+    </data_source>
+</data_sources>
+```
+
+Those aliases are resolved exactly as a room's `<hero_alias>` entries are:
+
+* `get_hero_aliases("PHH")` returns them, so `get_hero_player_ids("PHH")` reads
+  every player among them that the database holds -- by exact name, as #417
+  stores names.
+* In the report filters, selecting one of them selects them all, as selecting a
+  room's alias does. Any other PHH player is still that player alone, by name.
+* Without aliases a PHH hero is no one. The hero-flagged players a room falls back
+  to are, for PHH, each file's own `_hero`, which are not one player, so they are
+  never read as the hero.
+* A **hero profile** may link a PHH name with a room's (`PokerStars:jeje` and
+  `PHH:jeje`), and the reports then group their hands as one player, as for two
+  rooms.
+
+Only the hero is aliased, as in the native importers: an opponent written two ways
+in a corpus is two players, here as on any room.
 
 ## Importing
 
@@ -239,7 +273,6 @@ imported approximately.
 | **Run it twice** (#421) | More than three board deals is *unsupported*. |
 | **Betting-state parity with PokerKit** (#422) | The reopen rules after short all-ins cover the cases PokerKit plays; a full betting state machine, cross-checked against PokerKit, is a piece of work of its own — not one more guard in `_Builder`. The cross-validator it would be measured with is #385. |
 | **A PHH writer** (#382) | fpdb reads PHH and never writes it: the round-trip the introduction mentions is one-way today. Filed with the export and round-trip work. |
-| **PHH players in the reports** (#423) | A PHH player is resolved by exact name. No aliases, no hero profiles, and `_hero` selects only the players of the file it is written in. |
 
 ## Tests and fixtures
 

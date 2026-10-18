@@ -105,3 +105,49 @@ def test_a_player_name_containing_on_is_still_selectable(qtbot, importer, fresh_
 
     assert filters.getHeroes() == {PHH_SITE_NAME: "Alice on Call"}
     assert filters.getSites() == [PHH_SITE_NAME]
+
+
+def _import(importer, tmp_path, *fixtures: str) -> None:
+    for fixture in fixtures:
+        shutil.copy(FIXTURES / fixture, tmp_path / fixture)
+        assert importer.addImportFile(str(tmp_path / fixture))
+    importer.runImport()
+
+
+def _select(filters: Filters, text: str) -> None:
+    entries = [filters.heroList.itemText(index) for index in range(filters.heroList.count())]
+    filters.heroList.setCurrentIndex(entries.index(text))
+
+
+def test_configured_phh_aliases_come_first_and_select_one_hero(qtbot, importer, fresh_db, tmp_path) -> None:
+    """#423: the PHH names configured as you are one hero, as a room's aliases are."""
+    _import(importer, tmp_path, "nl_holdem_heads_up.phh", "nl_holdem_dwan_ivey.phh")
+    fresh_db.config.set_data_source_hero_aliases(PHH_SITE_NAME, ["Tom Dwan", "Alice"])
+    filters = Filters(fresh_db, {"Heroes": True, "Sites": True})
+    qtbot.addWidget(filters)
+
+    phh_entries = [
+        filters.heroList.itemText(index)
+        for index in range(filters.heroList.count())
+        if filters.heroList.itemText(index).endswith(f" on {PHH_SITE_NAME}")
+    ]
+    assert phh_entries[:2] == ["Tom Dwan on PHH", "Alice on PHH"]
+    assert phh_entries.count("Alice on PHH") == 1
+
+    _select(filters, "Alice on PHH")
+    alice = int(fresh_db.get_player_id(fresh_db.config, PHH_SITE_NAME, "Alice"))
+    dwan = int(fresh_db.get_player_id(fresh_db.config, PHH_SITE_NAME, "Tom Dwan"))
+    assert sorted(filters.get_hero_ids(filters.getHeroes())) == sorted([alice, dwan])
+    assert sorted(filters._player_ids_for(PHH_SITE_NAME, "Alice")) == sorted([alice, dwan])
+
+
+def test_a_phh_player_who_is_no_alias_is_still_read_by_name(qtbot, importer, fresh_db, tmp_path) -> None:
+    _import(importer, tmp_path, "nl_holdem_heads_up.phh", "nl_holdem_dwan_ivey.phh")
+    fresh_db.config.set_data_source_hero_aliases(PHH_SITE_NAME, ["Tom Dwan", "Alice"])
+    filters = Filters(fresh_db, {"Heroes": True, "Sites": True})
+    qtbot.addWidget(filters)
+
+    _select(filters, "Bob on PHH")
+    bob = int(fresh_db.get_player_id(fresh_db.config, PHH_SITE_NAME, "Bob"))
+    assert filters.get_hero_ids(filters.getHeroes()) == [bob]
+    assert filters._player_ids_for(PHH_SITE_NAME, "Bob") == [bob]

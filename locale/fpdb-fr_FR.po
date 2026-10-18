@@ -5406,3 +5406,15 @@ msgstr "{value} BB"
 
 msgid "PHH hands found: {found}\nImported: {imported}\nDuplicates: {dups}\nPartial (history stops early): {partial}\nUnsupported variants: {unsupported}\nMalformed: {malformed}\nPHH import time: {seconds}s"
 msgstr "Mains PHH trouvées : {found}\nImportées : {imported}\nDoublons : {dups}\nPartielles (historique interrompu) : {partial}\nVariantes non prises en charge : {unsupported}\nMalformées : {malformed}\nDurée de l'import PHH : {seconds}s"
+
+msgid "Data Sources"
+msgstr "Sources de données"
+
+msgid "A data source such as PHH is not a poker room: it has no screen name. Name the players that are you in its hands, and the reports read them as one hero, as a room's aliases are."
+msgstr "Une source de données comme PHH n'est pas une room : elle n'a pas de pseudo. Indiquez les joueurs qui sont vous dans ses mains, et les rapports les lisent comme un seul héros, comme les alias d'une room."
+
+msgid "%s hero aliases:"
+msgstr "Alias du héros %s :"
+
+msgid "Your names in these hands, comma separated"
+msgstr "Vos noms dans ces mains, séparés par des virgules"

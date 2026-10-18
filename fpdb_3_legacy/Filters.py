@@ -685,13 +685,22 @@ class Filters(QWidget):
 
     def _phh_players(self) -> list[str]:
         """The PHH players to offer; none when the source cannot be read -- a filter is
-        never lost to it (a failed read is rolled back, so the next query still runs)."""
+        never lost to it (a failed read is rolled back, so the next query still runs).
+
+        Its configured hero aliases come first (#423), as a room lists its own; the
+        source is still offered only once it holds hands.
+        """
         try:
-            return phh_source_players(self.db_cursor, str(self.sql.query.get("placeholder", "%s")))
+            players = phh_source_players(self.db_cursor, str(self.sql.query.get("placeholder", "%s")))
         except Exception:  # noqa: BLE001 - optional entries: the rooms' filters come first.
             log.debug("The PHH data source could not be read for the filters", exc_info=True)
             self.end_read_transaction()
             return []
+        if not players:
+            return []
+        getter = getattr(self.conf, "get_data_source_hero_aliases", None)
+        aliases = list(getter(PHH_SITE_NAME)) if callable(getter) else []
+        return [*aliases, *(name for name in players if name not in aliases)]
 
     def filter_sites(self) -> list[str]:
         """The sites a filter offers: the configured rooms, then the PHH data source if stored."""
@@ -791,6 +800,9 @@ class Filters(QWidget):
                     if norm_s.startswith(norm_parent) or norm_parent.startswith(norm_s):
                         site_name = site
                         break
+            is_source = getattr(self.conf, "is_data_source", None)
+            if site_name is None and callable(is_source) and is_source(sitename):
+                site_name = sitename  # a data source (PHH) names its hero aliases itself (#423)
             if site_name:
                 aliases = self.conf.get_hero_aliases(site_name)
                 player_names = {p[1] for p in hand.players if len(p) > 1}
@@ -1709,10 +1721,7 @@ class Filters(QWidget):
         seen: set[int] = set()
         resolver = getattr(self.db, "get_hero_player_ids", None)
         if callable(resolver):
-            # Aliases are a configured room's; a data source (PHH) has none, and its fallback --
-            # every player flagged hero there -- is not the player selected: resolved by name.
-            rooms = set(self.conf.get_supported_sites())
-            for site in (site for site in heroes if site in rooms):
+            for site in (site for site, hero in heroes.items() if self._resolves_by_alias(site, hero)):
                 for pid in resolver(site):
                     if pid not in seen:
                         seen.add(pid)
@@ -1725,6 +1734,19 @@ class Filters(QWidget):
                     seen.add(int(result))
                     hero_ids.append(int(result))
         return hero_ids
+
+    def _resolves_by_alias(self, site: str, hero: str) -> bool:
+        """Whether *hero* on *site* stands for every hero alias configured there.
+
+        A configured room: always -- each of its aliases is the same hero. A data source
+        (PHH): only when the player selected is one of its configured hero aliases
+        (#423). Any other of its players is read by name: its hero-flagged players are
+        each file's own ``_hero``, not the player selected.
+        """
+        if site in self.conf.get_supported_sites():
+            return True
+        is_source = getattr(self.conf, "is_data_source", None)
+        return bool(callable(is_source) and is_source(site) and hero in self.conf.get_hero_aliases(site))
 
     @staticmethod
     def _stretch_calendar_cells(cal: QCalendarWidget) -> None:
@@ -1868,10 +1890,11 @@ class Filters(QWidget):
         """The players a filter refresh reads for *hero* on *site*.
 
         A configured room: every alias of its hero (or its hero-flagged players). A data
-        source (PHH) has no configured hero: the player selected, by name -- its
-        hero-flagged players are other files' heroes.
+        source (PHH): every configured hero alias when the player selected is one of them
+        (#423), otherwise the player selected, by name -- its hero-flagged players are
+        other files' heroes.
         """
-        pids = self.db.get_hero_player_ids(site) if site in self.conf.get_supported_sites() else []
+        pids = self.db.get_hero_player_ids(site) if self._resolves_by_alias(site, hero) else []
         if not pids:
             pid = self.db.get_player_id(self.conf, site, hero)
             pids = [int(pid)] if pid is not None else []

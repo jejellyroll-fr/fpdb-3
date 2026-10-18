@@ -721,6 +721,37 @@ class HeroProfile:
         return f"HeroProfile {self.name} (default={self.default}) [{links}]"
 
 
+#: Sources fpdb stores hands under without being a poker room: no parser, no
+#: ``<site>`` entry, no HUD. Each is its own ``Sites`` row (``phh_import.PHH_SITE_NAME``).
+DATA_SOURCES: tuple[str, ...] = ("PHH",)
+
+
+class DataSource:
+    """The hero identity of a data source (#423): which of its players are the hero.
+
+    A data source is not a room, so it has no ``<site>`` and no ``screen_name``; its
+    hero is a list of names, resolved exactly like a room's hero aliases. Parsed from::
+
+        <data_sources>
+            <data_source name="PHH">
+                <hero_alias name="jeje"/>
+                <hero_alias name="jeje76"/>
+            </data_source>
+        </data_sources>
+    """
+
+    def __init__(self, node) -> None:
+        self.name = node.getAttribute("name")
+        self.hero_aliases: list[str] = []
+        for alias_node in node.getElementsByTagName("hero_alias"):
+            alias = alias_node.getAttribute("name")
+            if alias and alias not in self.hero_aliases:
+                self.hero_aliases.append(alias)
+
+    def __str__(self) -> str:
+        return f"DataSource {self.name} [{', '.join(self.hero_aliases)}]"
+
+
 class Stat:
     def __init__(self, node) -> None:
         rowcol = node.getAttribute("_rowcol")  # human string "(r,c)" values >0)
@@ -1764,6 +1795,7 @@ class Config:
 
         self.supported_sites: dict[str, Any] = {}
         self.hero_profiles: dict[str, HeroProfile] = {}
+        self.data_sources: dict[str, DataSource] = {}
         self.supported_games: dict[str, Supported_games] = {}
         self.supported_databases: dict[str, Database] = {}
         self.aux_windows: dict[str, Aux_window] = {}
@@ -1865,6 +1897,12 @@ class Config:
             hp = HeroProfile(node=hp_node)
             if hp.name:
                 self.hero_profiles[hp.name] = hp
+
+        # Data source hero identities (optional <data_sources> section, #423).
+        for ds_node in doc.getElementsByTagName("data_source"):
+            source = DataSource(node=ds_node)
+            if source.name:
+                self.data_sources[source.name] = source
 
         # Load site_ids from XML config
         for site_id_node in doc.getElementsByTagName("site_id"):
@@ -2661,7 +2699,8 @@ class Config:
         The primary ``screen_name`` is always first, followed by any extra
         ``<hero_alias>`` entries (deduplicated). Returns ``[]`` for an unknown
         site. Backward compatible: a site without aliases yields
-        ``[screen_name]``.
+        ``[screen_name]``. A data source (``PHH``) answers with its own
+        ``<data_source>`` aliases, so its hero resolves the way a room's does (#423).
         """
         site = self.supported_sites.get(site_name)
         if site is None and site_name:
@@ -2670,8 +2709,69 @@ class Config:
                     site = v
                     break
         if site is None:
-            return []
+            return self.get_data_source_hero_aliases(site_name)
         return list(getattr(site, "hero_aliases", []) or ([site.screen_name] if site.screen_name else []))
+
+    def get_data_source_names(self) -> list[str]:
+        """The data sources a hero can be configured for: the built-in ones, then any other configured."""
+        names = list(DATA_SOURCES)
+        names.extend(name for name in self.data_sources if name not in names)
+        return names
+
+    def is_data_source(self, name) -> bool:
+        """True if *name* is a data source rather than a configured room."""
+        return bool(name) and name not in self.supported_sites and name in self.get_data_source_names()
+
+    def get_data_source_hero_aliases(self, name) -> list[str]:
+        """The hero aliases configured for a data source; ``[]`` when none are."""
+        if not name:
+            return []
+        source = self.data_sources.get(name)
+        if source is None:
+            source = next((v for k, v in self.data_sources.items() if k.lower() == name.lower()), None)
+        return list(source.hero_aliases) if source is not None else []
+
+    def _get_data_sources_node(self, create=False):
+        """Return the ``<data_sources>`` DOM node, optionally creating it."""
+        nodes = self.doc.getElementsByTagName("data_sources")
+        if nodes:
+            return nodes[0]
+        if not create:
+            return None
+        node = self.doc.createElement("data_sources")
+        self.doc.documentElement.appendChild(node)
+        return node
+
+    def set_data_source_hero_aliases(self, name, aliases) -> None:
+        """Persist a data source's hero aliases into the config DOM (#423).
+
+        Replaces the ``<data_source>`` of that name; no aliases removes it, so a
+        configuration that never named a hero for a source carries no entry for it.
+        Keeps the in-memory ``data_sources`` in sync. Like :meth:`set_hero_aliases`,
+        the caller saves.
+        """
+        ordered: list[str] = []
+        for alias in aliases:
+            if alias and alias not in ordered:
+                ordered.append(alias)
+
+        sources_node = self._get_data_sources_node(create=bool(ordered))
+        if sources_node is not None:
+            for old in list(sources_node.getElementsByTagName("data_source")):
+                if old.getAttribute("name") == name:
+                    sources_node.removeChild(old)
+        if not ordered:
+            self.data_sources.pop(name, None)
+            return
+
+        source_node = self.doc.createElement("data_source")
+        source_node.setAttribute("name", name)
+        for alias in ordered:
+            alias_node = self.doc.createElement("hero_alias")
+            alias_node.setAttribute("name", alias)
+            source_node.appendChild(alias_node)
+        sources_node.appendChild(source_node)
+        self.data_sources[name] = DataSource(node=source_node)
 
     def set_hero_aliases(self, site_name, aliases) -> None:
         """Persist the hero aliases for a site into the config DOM.
