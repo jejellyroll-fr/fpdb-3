@@ -115,6 +115,18 @@ def collation_db(backend: int, cursor: RecordingCursor, collation: str | None) -
             "utf8mb4_0900_ai_ci",
             "ALTER TABLE Players MODIFY name VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL",
         ),
+        # Byte for byte, but in a character set that cannot store every name: Alice😀 would be
+        # refused at insertion, so the column is moved to utf8mb4 as well.
+        (
+            Database.MYSQL_INNODB,
+            "latin1_bin",
+            "ALTER TABLE Players MODIFY name VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL",
+        ),
+        (
+            Database.MYSQL_INNODB,
+            "utf8mb3_bin",
+            "ALTER TABLE Players MODIFY name VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL",
+        ),
         # PostgreSQL's default reports None, and its locale is not known to be byte order.
         (Database.PGSQL, None, 'ALTER TABLE Players ALTER COLUMN name TYPE VARCHAR(32) COLLATE "C"'),
     ],
@@ -133,7 +145,7 @@ def test_players_name_gets_a_binary_collation(backend: int, collation: str | Non
     ("backend", "collation"),
     [
         (Database.MYSQL_INNODB, "utf8mb4_bin"),
-        (Database.MYSQL_INNODB, "latin1_bin"),
+        (Database.MYSQL_INNODB, "utf8mb4_0900_bin"),
         (Database.PGSQL, "C"),
         (Database.PGSQL, "POSIX"),
         (Database.PGSQL, "ucs_basic"),
@@ -207,7 +219,12 @@ def test_an_alter_that_could_not_run_leaves_the_column_unvouched_for() -> None:
         (Database.MYSQL_INNODB, "utf8mb4_0900_ai_ci", False),
         (Database.MYSQL_INNODB, "utf8mb4_unicode_ci", False),
         (Database.MYSQL_INNODB, "utf8mb4_bin", True),
-        (Database.MYSQL_INNODB, "latin1_bin", True),
+        (Database.MYSQL_INNODB, "utf8mb4_0900_bin", True),
+        # Binary, but not utf8mb4: the column cannot store every name yet.
+        (Database.MYSQL_INNODB, "latin1_bin", False),
+        (Database.MYSQL_INNODB, "utf8mb3_bin", False),
+        # On PostgreSQL a *_bin name proves nothing: only C, POSIX and ucs_basic are byte order.
+        (Database.PGSQL, "utf8mb4_bin", False),
         (Database.PGSQL, None, False),
         (Database.PGSQL, "en_US.utf8", False),
         (Database.PGSQL, "C", True),

@@ -82,22 +82,26 @@ SET_PLAYERS_NAME_COLLATION_MYSQL = (
 )
 SET_PLAYERS_NAME_COLLATION_PGSQL = 'ALTER TABLE Players ALTER COLUMN name TYPE VARCHAR(32) COLLATE "C"'
 
-# Collations that compare a name byte for byte: the binary collation of any character set, and
-# PostgreSQL's C/POSIX/ucs_basic. Anything else -- MySQL's server default, PostgreSQL's locale --
-# folds at least case, or is not known not to.
-BINARY_COLLATIONS = frozenset({"binary", "c", "posix", "ucs_basic"})
+# PostgreSQL's collations that compare a name byte for byte. Anything else -- its locale, or
+# MySQL's server default -- folds at least case, or is not known not to.
+PGSQL_BINARY_COLLATIONS = frozenset({"c", "posix", "ucs_basic"})
 
 
-def _is_binary_collation(collation: str | None) -> bool:
-    """Whether *collation* compares text byte for byte; ``None`` is the server's default.
+def _is_binary_collation(collation: str | None, *, mysql: bool) -> bool:
+    """Whether *collation* stores and compares a name as the migration leaves it.
 
-    A default is never taken for binary: MySQL's usual one folds case and accents, and
-    PostgreSQL's is its locale, which is not known to do otherwise.
+    ``None`` is the server's default, and a default is never taken for binary: MySQL's usual
+    one folds case and accents, and PostgreSQL's is its locale, which is not known to do
+    otherwise. On MySQL a binary collation counts only in ``utf8mb4`` (``utf8mb4_bin``,
+    ``utf8mb4_0900_bin``): ``latin1_bin`` or ``utf8mb3_bin`` compare byte for byte but cannot
+    store every name -- ``Alice😀`` is refused at insertion -- so they are migrated too.
     """
     if collation is None:
         return False
     normalised = collation.lower()
-    return normalised in BINARY_COLLATIONS or normalised.endswith("_bin")
+    if mysql:
+        return normalised.startswith("utf8mb4_") and normalised.endswith("_bin")
+    return normalised in PGSQL_BINARY_COLLATIONS
 
 
 # Session settings that apply DDL_LOCK_TIMEOUT_MS on each server backend.
@@ -1348,7 +1352,9 @@ class DatabaseSchemaMixin:
         if self.backend == self.SQLITE:
             return True
         try:
-            return _is_binary_collation(self._column_collation("Players", "name"))
+            return _is_binary_collation(
+                self._column_collation("Players", "name"), mysql=self.backend == self.MYSQL_INNODB
+            )
         except Exception:  # noqa: BLE001 - a catalogue that cannot be read cannot vouch for the column
             self.rollback()
             return False
@@ -1384,7 +1390,7 @@ class DatabaseSchemaMixin:
         except Exception:  # noqa: BLE001 - table absent during first-time setup
             self.rollback()
             return
-        if _is_binary_collation(collation):
+        if _is_binary_collation(collation, mysql=self.backend == self.MYSQL_INNODB):
             return
         try:
             c = self.get_cursor()
