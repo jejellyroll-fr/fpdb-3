@@ -56,6 +56,54 @@ COLUMN_WIDTH_MYSQL = (
     "WHERE lower(table_name) = %s AND lower(column_name) = %s AND table_schema = DATABASE()"
 )
 
+# Reads a column's collation, for the one migration that has to know it before issuing DDL.
+# Scoped to the current database on MySQL for the reason COLUMN_WIDTH_MYSQL is. PostgreSQL's
+# catalogue is scoped to the connected database but not to one schema, so the schema is
+# resolved from the table name exactly as the unqualified ALTER TABLE resolves it: a database
+# that holds a Players table in more than one schema must not answer for another one's row,
+# or the migration would skip the table it is about to alter -- or alter it every connection.
+COLUMN_COLLATION_SQL = (
+    "SELECT collation_name FROM information_schema.columns "
+    "WHERE lower(table_name) = %s AND lower(column_name) = %s AND table_schema = ("
+    "SELECT n.nspname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
+    "WHERE c.oid = to_regclass(%s))"
+)
+COLUMN_COLLATION_MYSQL = (
+    "SELECT collation_name FROM information_schema.columns "
+    "WHERE lower(table_name) = %s AND lower(column_name) = %s AND table_schema = DATABASE()"
+)
+
+# Players.name compares byte for byte after this migration (#417): case, accents and ligatures
+# are distinct, so the unique (name, siteId) index no longer files two players as one. The
+# character set is named with the collation because a collation belongs to one character set;
+# MySQL's utf8mb4_bin is PAD SPACE, so a trailing space still compares equal there.
+SET_PLAYERS_NAME_COLLATION_MYSQL = (
+    "ALTER TABLE Players MODIFY name VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL"
+)
+SET_PLAYERS_NAME_COLLATION_PGSQL = 'ALTER TABLE Players ALTER COLUMN name TYPE VARCHAR(32) COLLATE "C"'
+
+# PostgreSQL's collations that compare a name byte for byte. Anything else -- its locale, or
+# MySQL's server default -- folds at least case, or is not known not to.
+PGSQL_BINARY_COLLATIONS = frozenset({"c", "posix", "ucs_basic"})
+
+
+def _is_binary_collation(collation: str | None, *, mysql: bool) -> bool:
+    """Whether *collation* stores and compares a name as the migration leaves it.
+
+    ``None`` is the server's default, and a default is never taken for binary: MySQL's usual
+    one folds case and accents, and PostgreSQL's is its locale, which is not known to do
+    otherwise. On MySQL a binary collation counts only in ``utf8mb4`` (``utf8mb4_bin``,
+    ``utf8mb4_0900_bin``): ``latin1_bin`` or ``utf8mb3_bin`` compare byte for byte but cannot
+    store every name -- ``Alice😀`` is refused at insertion -- so they are migrated too.
+    """
+    if collation is None:
+        return False
+    normalised = collation.lower()
+    if mysql:
+        return normalised.startswith("utf8mb4_") and normalised.endswith("_bin")
+    return normalised in PGSQL_BINARY_COLLATIONS
+
+
 # Session settings that apply DDL_LOCK_TIMEOUT_MS on each server backend.
 SET_PGSQL_LOCK_TIMEOUT = "SET lock_timeout = 2000"
 RESET_PGSQL_LOCK_TIMEOUT = "SET lock_timeout = DEFAULT"
@@ -1156,6 +1204,7 @@ class DatabaseSchemaMixin:
                 self.rollback()
 
         self._ensure_gametype_category_width()
+        self._ensure_players_name_collation()
 
         # The analytics lifecycle bookkeeping (#305): the meta table itself,
         # then the version stamps. On a database that predates versioning the
@@ -1273,6 +1322,96 @@ class DatabaseSchemaMixin:
                 "Could not widen Gametypes.category to varchar(%d); retrying on the next connection",
                 GAMETYPE_CATEGORY_WIDTH,
             )
+
+    def _column_collation(self, table: str, column: str) -> str | None:
+        """Declared collation of a character column, or None when it takes the default."""
+        c = self.get_cursor()
+        if self.backend == self.MYSQL_INNODB:
+            c.execute(COLUMN_COLLATION_MYSQL, (table.lower(), column.lower()))
+        else:
+            # The table name goes to ``to_regclass`` as written, so the catalogue row is the
+            # one the unqualified ``ALTER TABLE`` addresses.
+            c.execute(COLUMN_COLLATION_SQL, (table.lower(), column.lower(), table))
+        row = c.fetchone()
+        return None if row is None else row[0]
+
+    def players_name_compares_binary(self) -> bool:
+        """Whether ``Players.name`` compares names byte for byte on this connection (#417).
+
+        :meth:`_ensure_players_name_collation` is best-effort, like every migration that runs
+        from :meth:`ensure_feature_tables`: a table lock it cannot take is logged and retried on
+        the next connection. The DDL it issues therefore cannot be assumed to have run, and a
+        caller that stores two names differing only in case relies on it: under the server's
+        default collation the unique ``(name, siteId)`` index files them as one row, and
+        ``insertPlayer()`` hands the second name the first player's id, merging their actions
+        and results for good. Asking the catalogue here, immediately before such an import,
+        turns that silent merge into a refused import the next connection can retry.
+
+        SQLite's default comparison is already ``BINARY``, and its DDL spells that out.
+        """
+        if self.backend == self.SQLITE:
+            return True
+        try:
+            return _is_binary_collation(
+                self._column_collation("Players", "name"), mysql=self.backend == self.MYSQL_INNODB
+            )
+        except Exception:  # noqa: BLE001 - a catalogue that cannot be read cannot vouch for the column
+            self.rollback()
+            return False
+
+    def _ensure_players_name_collation(self) -> None:
+        """Give ``Players.name`` an explicit binary collation (#417).
+
+        The column was created with no ``COLLATE``, so it compared names with the server's
+        default: on MySQL that ignores case and accents, and the unique index on
+        ``(name, siteId)`` made ``Alice`` and ``alice`` one row -- ``insertPlayer()``'s upsert
+        handed the second seat the first player's id, merging their actions and results for
+        good. The column now compares byte for byte, so two such names are two players.
+
+        Read before writing, like the Gametypes width migration: the ALTER rewrites the table
+        and rebuilds the index, so it must run once, not on every connection. PostgreSQL's
+        ``"C"`` makes the comparison independent of the database's locale; SQLite's default
+        is already ``BINARY``.
+
+        Reversing the migration is a statement, not a data repair: the DDL without its
+        ``COLLATE`` clause restores the server default, and no row is rewritten by reverting.
+        A database where the merge has *already* happened is not split -- the surviving row
+        kept whichever spelling was inserted first, and the other is not recorded anywhere --
+        so the log says so on the one connection that migrates.
+
+        Losing the race for the table leaves the column folded, so callers that store two
+        names which differ only in case must ask :meth:`players_name_compares_binary` rather
+        than take this method's success for granted.
+        """
+        if self.backend == self.SQLITE:
+            return
+        try:
+            collation = self._column_collation("Players", "name")
+        except Exception:  # noqa: BLE001 - table absent during first-time setup
+            self.rollback()
+            return
+        if _is_binary_collation(collation, mysql=self.backend == self.MYSQL_INNODB):
+            return
+        try:
+            c = self.get_cursor()
+            c.execute(
+                SET_PLAYERS_NAME_COLLATION_MYSQL
+                if self.backend == self.MYSQL_INNODB
+                else SET_PLAYERS_NAME_COLLATION_PGSQL
+            )
+            self.commit()
+        except Exception:  # noqa: BLE001 - another connection holds the table; retried next connection.
+            self.rollback()
+            log.warning(
+                "Could not give Players.name a binary collation; retrying on the next connection",
+                exc_info=True,
+            )
+            return
+        log.info("Gave Players.name a binary collation: names now compare byte for byte")
+        log.warning(
+            "Players already merged under the old collation stay one row: the row kept only the "
+            "first spelling, so the other cannot be recovered or split",
+        )
 
     def _ensure_table_columns(self, table: str, definitions: dict[str, str]) -> None:
         try:

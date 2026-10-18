@@ -23,6 +23,18 @@ def test_players_ddl_keeps_backend_specific_identity_and_site_link() -> None:
     assert "REFERENCES Sites(id) ON DELETE CASCADE" in sqlite
 
 
+#: ``Players.name`` compares byte for byte (#417): case, accents and ligatures are distinct, so
+#: two players whose names differ there are two rows and their actions stay apart.
+def test_players_name_is_declared_with_a_binary_collation() -> None:
+    mysql = player_schema_queries("mysql")["createPlayersTable"]
+    postgresql = player_schema_queries("postgresql")["createPlayersTable"]
+    sqlite = player_schema_queries("sqlite")["createPlayersTable"]
+
+    assert "name VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL" in mysql
+    assert 'name VARCHAR(32) COLLATE "C"' in postgresql
+    assert "name TEXT COLLATE BINARY" in sqlite
+
+
 def test_autorates_ddl_keeps_backend_specific_relations() -> None:
     mysql = player_schema_queries("mysql")["createAutoratesTable"]
     postgresql = player_schema_queries("postgresql")["createAutoratesTable"]

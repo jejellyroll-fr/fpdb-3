@@ -158,6 +158,29 @@ def convert_decimal(s):
     return Decimal(s)
 
 
+def _mysql_connection_kwargs(host, port, user, password, database) -> dict[str, Any]:
+    """What both MySQL connection paths pass to the driver.
+
+    ``utf8mb4`` is not a preference. ``Players.name`` holds supplementary characters as
+    ``utf8mb4`` since #417, and MySQL's ``utf8`` client character set is three bytes wide: with
+    it, a hand naming ``Alice😀`` is refused by the server (``incorrect string value``) before
+    the name reaches a column that can hold it. One helper rather than the same dict twice, so
+    a character set fix cannot reach one connection path and miss the other.
+    """
+    kwargs: dict[str, Any] = {
+        "host": host,
+        "user": user,
+        "passwd": password,
+        "db": database,
+        "charset": "utf8mb4",
+        "use_unicode": True,
+        **MYSQL_NETWORK_KWARGS,
+    }
+    if port:
+        kwargs["port"] = int(port)
+    return kwargs
+
+
 # These are for appendStats. Insert new stats at the right place, because
 # SQL needs strict order.
 
@@ -584,17 +607,7 @@ class Database(
         # Note: SQLAlchemy 2.0 removed pool.manage
         # MySQLdb has its own connection pooling, so we don't need it
         try:
-            kwargs = {
-                "host": host,
-                "user": user,
-                "passwd": password,
-                "db": database,
-                "charset": "utf8",
-                "use_unicode": True,
-                **MYSQL_NETWORK_KWARGS,
-            }
-            if port:
-                kwargs["port"] = int(port)
+            kwargs = _mysql_connection_kwargs(host, port, user, password, database)
 
             self.connection = MySQLdb.connect(**kwargs)
             self.__connected = True
@@ -1014,18 +1027,7 @@ class Database(
             pymysql.install_as_MySQLdb()
             import MySQLdb
 
-        kwargs = {
-            "host": self.host,
-            "user": self.user,
-            "passwd": self.password,
-            "db": self.database,
-            "charset": "utf8",
-            "use_unicode": True,
-            **MYSQL_NETWORK_KWARGS,
-        }
-        if self.port:
-            kwargs["port"] = int(self.port)
-        return MySQLdb.connect(**kwargs)
+        return MySQLdb.connect(**_mysql_connection_kwargs(self.host, self.port, self.user, self.password, self.database))
 
     def close_connection(self) -> None:
         if getattr(self, "connection", None):

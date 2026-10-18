@@ -89,6 +89,10 @@ def actions_of(hand: Any) -> list[tuple]:
     return [(street, *action[:3]) for street in hand.allStreets for action in hand.actions.get(street, [])]
 
 
+def names_of(hand: Any) -> list[str]:
+    return [str(player[1]) for player in hand.players]
+
+
 # -- the mapping ------------------------------------------------------------------------
 
 
@@ -1918,58 +1922,37 @@ def test_an_ante_marked_untrimmed_is_not_read_as_a_truthy_string() -> None:
 # -- thirty-ninth review --------------------------------------------------------------
 
 
-def test_names_differing_only_in_case_are_unsupported() -> None:
-    """MySQL's default collation is case-insensitive, so the two seats would be one player.
+def test_names_differing_only_in_case_are_two_players() -> None:
+    """``Players.name`` compares byte for byte (#417), so the two seats are two players.
 
-    Measured on a live server rather than assumed: with the table exactly as
-    ``sql_schema_player.py`` and ``sql_indexes.py`` write it, inserting ``Alice`` then
-    ``alice`` leaves *one* row in ``Players`` and ``insertPlayer()`` returns the first
-    player's id both times -- the unique index on ``(name, siteId)`` and its
-    ``ON DUPLICATE KEY UPDATE ... id=LAST_INSERT_ID(id)``. Refused before it gets there.
+    Before the column had an explicit binary collation, MySQL compared names with the
+    server's default, which ignores case: ``Alice`` and ``alice`` left *one* row in
+    ``Players`` and ``insertPlayer()`` handed the second seat the first player's id, their
+    actions and results one player's for good. The collation is now binary on every backend.
     """
-    error = refusal(SHOWDOWN + 'players = ["Alice", "alice"]\n')
-    assert error.kind == UNSUPPORTED
-    assert "ignores case and accents" in str(error)
-    assert build_hand(document(SHOWDOWN + 'players = ["Alice", "Bob"]\n')) is not None
+    assert names_of(build_hand(document(heads_up(["Alice", "alice"])))) == ["Alice", "alice"]
 
 
-def test_names_differing_only_in_accents_are_unsupported() -> None:
-    """The same collation is accent-insensitive too: ``José`` and ``Jose`` are one player."""
-    error = refusal(SHOWDOWN + 'players = ["José", "Jose"]\n')
-    assert error.kind == UNSUPPORTED
-    assert "ignores case and accents" in str(error)
+def test_names_differing_only_in_accents_are_two_players() -> None:
+    """The default collation was accent-insensitive too: ``José`` and ``Jose`` were one row."""
+    assert names_of(build_hand(document(heads_up(["José", "Jose"])))) == ["José", "Jose"]
 
 
-def test_names_the_database_folds_onto_a_base_letter_are_unsupported() -> None:
-    """A decomposition reaches most of them; the ones it cannot are in ``_COLLATION_LETTERS``.
-
-    ``Ø`` is ``o`` to the collation, ``Æ`` is ``ae``, and neither decomposes -- while ``ﬁ``
-    is ``fi`` and does. Both kinds are one player to fpdb, so both are refused.
-    """
+def test_names_differing_by_a_ligature_or_a_stroke_are_two_players() -> None:
+    """``Ø`` is ``o`` to a UCA collation and ``Æ`` is ``ae``; a binary one reads both."""
     for left, right in [("Łukasz", "Lukasz"), ("Ø", "O"), ("Æ", "AE"), ("ﬁn", "fin")]:
-        error = refusal(SHOWDOWN + 'players = ["' + left + '", "' + right + '"]\n')
-        assert error.kind == UNSUPPORTED, (left, right)
-        assert "ignores case and accents" in str(error)
+        assert names_of(build_hand(document(heads_up([left, right])))) == [left, right]
 
 
-def test_names_the_collation_keeps_apart_are_still_two_players() -> None:
-    """The control: the rule folds what the collation folds, and no more.
+def test_the_whole_name_is_compared_to_its_full_length() -> None:
+    """Two 32-character names that differ only in the last letter's accent are two players.
 
-    Measured, not assumed -- the collation does *not* read ``Ŋ`` as ``n``, nor ``Þ`` as
-    ``th``, so neither is in ``_COLLATION_LETTERS`` and neither hand is refused. A rule
-    written from the letters' shapes would have folded both.
+    The fold used to read every character of them, not the first 32 alone: names that long
+    were refused before the storage stopped needing it.
     """
-    assert build_hand(document(SHOWDOWN + 'players = ["Ŋór", "Nor"]\n')) is not None
-    assert build_hand(document(SHOWDOWN + 'players = ["Þór", "THor"]\n')) is not None
-
-
-def test_the_collation_check_reads_names_to_their_full_length() -> None:
-    """Two 32-character names that differ only in their last letter's accent are one row."""
     head = "b" * 31
-    inside = 'players = ["' + head + 'é", "' + head + 'e"]\n'
-    error = refusal(SHOWDOWN + inside)
-    assert error.kind == UNSUPPORTED
-    assert "ignores case and accents" in str(error)
+    left, right = head + "é", head + "e"
+    assert names_of(build_hand(document(heads_up([left, right])))) == [left, right]
 
 
 # -- fortieth review ------------------------------------------------------------------
@@ -2094,47 +2077,42 @@ def test_a_hero_that_cannot_name_a_seat_leaves_the_hand_without_one(literal: str
 # -- forty-second review --------------------------------------------------------------
 
 
-@pytest.mark.parametrize("pad", [" ", "  ", "\u00a0", "\u3000"])
-def test_names_that_differ_only_in_trailing_padding_are_unsupported(pad: str) -> None:
-    """The collation is PAD SPACE, so ``Alice`` and ``Alice `` are one row in ``Players``.
+@pytest.mark.parametrize("pad", [" ", "  "])
+def test_names_that_differ_only_in_trailing_spaces_are_unsupported(pad: str) -> None:
+    """``utf8mb4_bin`` is PAD SPACE, so ``Alice`` and ``Alice `` are one row on MySQL.
 
     Measured on the real table and its unique index: inserting ``Alice`` then ``Alice `` runs
     ``ON DUPLICATE KEY UPDATE ... id=LAST_INSERT_ID(id)`` into the duplicate, leaving one row
-    and handing back id 1 both times -- both seats one player. A space at the *front* is a
-    character like any other and is compared, so that pair still imports.
+    and handing back id 1 both times -- both seats one player. ``utf8mb4_0900_bin`` would keep
+    them apart, but MariaDB has no equivalent, so the pair is refused rather than merged on the
+    one backend that would. A space at the *front* is compared everywhere and still imports.
     """
-    error = refusal(SHOWDOWN + 'players = ["Alice", "Alice' + pad + '"]\n')
-    assert error.kind == UNSUPPORTED
-    assert "ignores case and accents" in str(error)
+    assert refusal(heads_up(["Alice", "Alice" + pad])).kind == UNSUPPORTED
+    assert names_of(build_hand(document(heads_up(["Alice", " Alice"])))) == ["Alice", " Alice"]
 
-    assert build_hand(document(SHOWDOWN + 'players = ["Alice", " Alice"]\n')) is not None
+
+@pytest.mark.parametrize("pad", ["\u00a0", "\u3000", "\t"])
+def test_the_only_pad_character_is_the_ascii_space(pad: str) -> None:
+    """The other characters a UCA collation reads past are compared by a binary one.
+
+    Measured on the table: ``utf8mb4_bin`` merges ``Alice`` and ``Alice `` but keeps a
+    trailing U+00A0, U+3000 or tab as a name of its own.
+    """
+    assert names_of(build_hand(document(heads_up(["Alice", "Alice" + pad])))) == [
+        "Alice",
+        "Alice" + pad,
+    ]
 
 
 @pytest.mark.parametrize("hidden", ["\u200b", "\u00ad", "\u200d", "\u0640", "\u0903"])
-def test_names_that_differ_by_a_character_the_collation_does_not_read_are_unsupported(hidden: str) -> None:
-    """A zero-width space, a soft hyphen, a joiner, a tatweel, a visarga: none of them count.
+def test_names_that_differ_by_an_invisible_character_are_two_players(hidden: str) -> None:
+    """A zero-width space, a soft hyphen, a joiner, a tatweel, a visarga: all are compared.
 
-    Measured, one at a time, against the real table: ``utf8mb4_general_ci`` keeps ``ab`` and
-    ``a\\u200bb`` apart and ``utf8mb4_uca1400_ai_ci`` does not, and a hand that imports on one
-    server and not on the other is not a rule. All five are dropped from the comparison key,
-    so both seats are one player to fpdb and the hand is refused.
+    The importer used to drop them, so the two seats met. A binary collation reads every
+    codepoint as itself, and the two names are two players.
     """
-    error = refusal(SHOWDOWN + 'players = ["Alice", "Ali' + hidden + 'ce"]\n')
-    assert error.kind == UNSUPPORTED
-    assert "ignores case and accents" in str(error)
-
-
-def test_a_character_the_fold_cannot_place_is_refused_rather_than_merged() -> None:
-    """The fold is coarser than the collation, and that is the direction it errs in.
-
-    Measured: a trailing tab is *not* a pad character -- neither collation merges ``ab`` and
-    ``ab\\t`` -- but a control character is not part of a name either, so the fold drops it and
-    the two names meet. The hand is refused. A hand refused in vain costs a file; two players
-    merged into one would cost every statistic they reach, which is what this check exists for.
-    """
-    error = refusal(SHOWDOWN + 'players = ["Alice", "Alice\t"]\n')
-    assert error.kind == UNSUPPORTED
-    assert "ignores case and accents" in str(error)
+    left, right = "Alice", "Ali" + hidden + "ce"
+    assert names_of(build_hand(document(heads_up([left, right])))) == [left, right]
 
 
 @pytest.mark.parametrize(
@@ -2330,50 +2308,51 @@ finishing_stacks = [100, 100]
 @pytest.mark.parametrize(
     ("given", "expected"),
     [
-        (["", "P1"], ["p1#2", "P1"]),  # the database reads P1 as p1
-        (["", "p1 "], ["p1#2", "p1 "]),  # and the collation is PAD SPACE
-        (["", "", "P1"], ["p1#2", "p2", "P1"]),  # the name is at another seat
+        (["", "P1"], ["p1", "P1"]),  # P1 is a name of its own under a binary collation
+        (["", "p1 "], ["p1#2", "p1 "]),  # the space is still a pad character, though
+        (["", "", "P1"], ["p1", "p2", "P1"]),  # and the name is at another seat
         (["", "p1"], ["p1#2", "p1"]),  # the exact collision, as before
         (["p2", "", ""], ["p2", "p2#2", "p3"]),  # and that one, at another seat
-        (["", "P2"], ["p1", "P2"]),  # the controls: nothing folds onto p1 here
+        (["", "P2"], ["p1", "P2"]),  # the controls: nothing meets p1 here
+        (["", "p1\u00a0"], ["p1", "p1\u00a0"]),  # not even a non-breaking space
         (["", "p1#2"], ["p1", "p1#2"]),
         (["", ""], ["p1", "p2"]),
     ],
 )
-def test_an_unnamed_player_steps_around_a_name_the_database_would_fold_onto(
+def test_an_unnamed_player_steps_around_a_name_the_index_would_take(
     given: list[str], expected: list[str]
 ) -> None:
     """The generated name has to clear the bar ``_seats`` sets for the file's own names.
 
-    An unnamed player is called ``pN``, and a supplied ``P1`` is the same name to the
-    database: the unique index on ``(name, siteId)`` would make the two seats one row and
-    ``insertPlayer()`` would hand the second the first player's id. ``_seats`` refuses the
-    hand for it, but the collision is the importer's own doing -- it chose the name -- so the
-    fallback steps aside to ``p1#2`` exactly as it always has for a supplied ``p1``.
+    An unnamed player is called ``pN``. The index files a generated ``p1`` and a supplied
+    ``p1`` as one row, so the fallback steps aside to ``p1#2`` exactly as it always has; a
+    supplied ``p1 `` is still ``p1`` to MySQL's PAD SPACE binary collation, and steps it aside
+    too. ``P1`` and ``p1\u00a0`` are names of their own now (#417) and leave it alone.
     """
     from fpdb_3_legacy.phh_import import _player_names
 
     assert _player_names(given) == expected
 
 
-@pytest.mark.parametrize("supplied", ["P1", "p1 ", "p1\u00a0", "p1\u200b"])
-def test_a_hand_whose_unnamed_player_folds_onto_a_named_one_still_imports(supplied: str) -> None:
+@pytest.mark.parametrize("supplied", ["p1 ", "p1  "])
+def test_a_hand_whose_unnamed_player_meets_a_named_one_on_a_space_still_imports(supplied: str) -> None:
     """Measured before the fix: this hand was refused ``unsupported`` for the name fpdb made up.
 
     The same hand with the name written ``p1`` imported -- it was only the collision between
-    a supplied name and the generated one that was not stepped around.
+    a supplied name and the generated one that was not stepped around. A supplied ``p1 `` is
+    the same name to the one binary collation that pads with a space, so it steps aside too.
     """
     text = PARTLY_NAMED.replace('variant = "NT"', f'variant = "NT"\nplayers = ["", "{supplied}"]')
     hand = build_hand(document(text))
-    assert [player[1] for player in hand.players] == ["p1#2", supplied]
+    assert names_of(hand) == ["p1#2", supplied]
 
 
-@pytest.mark.parametrize("supplied", ["P2", "x", "p1#2", "p3"])
-def test_a_supplied_name_the_fallback_does_not_fold_onto_leaves_the_fallback_alone(supplied: str) -> None:
+@pytest.mark.parametrize("supplied", ["P2", "P1", "p1\u00a0", "p1\u200b", "x", "p1#2", "p3"])
+def test_a_supplied_name_the_binary_collation_keeps_apart_leaves_the_fallback_alone(supplied: str) -> None:
     """The controls: a name the database keeps apart from ``p1`` does not move it."""
     text = PARTLY_NAMED.replace('variant = "NT"', f'variant = "NT"\nplayers = ["", "{supplied}"]')
     hand = build_hand(document(text))
-    assert [player[1] for player in hand.players] == ["p1", supplied]
+    assert names_of(hand) == ["p1", supplied]
 
 
 # -- forty-fifth review ---------------------------------------------------------------
@@ -2616,9 +2595,9 @@ def test_the_control_a_short_all_in_raise_does_not_reopen_for_who_has_acted() ->
 
 #: Names that differ only in a supplementary character -- U+1F600 against U+1F601, two emoji,
 #: U+20000 against U+20001 in CJK extension B, U+1D11E against U+1D122 in musical symbols --
-#: and, last, U+1F600 against U+FFFD, the BMP character the general collations weigh a
-#: supplementary one as. None of the pairs is a case pair, so nothing but the collation's own
-#: reading of the characters makes each pair one name.
+#: and, last, U+1F600 against U+FFFD. A binary collation compares the codepoints, so each pair
+#: is two names; the UCA collations the column used to inherit weighed every supplementary
+#: character as one U+FFFD, which made each pair one name.
 SUPPLEMENTARY_PAIRS = [
     ("Alice\U0001f600", "Alice\U0001f601"),
     ("\U0001f600", "\U0001f601"),
@@ -2629,34 +2608,15 @@ SUPPLEMENTARY_PAIRS = [
 
 
 @pytest.mark.parametrize(("left", "right"), SUPPLEMENTARY_PAIRS)
-def test_names_differing_only_in_a_supplementary_character_are_unsupported(left: str, right: str) -> None:
-    """The collations put every supplementary character in one place, so both seats are one player.
+def test_names_differing_only_in_a_supplementary_character_are_two_players(left: str, right: str) -> None:
+    """A binary collation reads each supplementary character as itself, so both seats are kept.
 
-    Measured in ``Players``, with the table and its unique index exactly as fpdb writes them:
-    inserting ``Alice😀`` then ``Alice😁`` runs ``ON DUPLICATE KEY UPDATE ... id=LAST_INSERT_ID(id)``
-    into the duplicate, leaving *one* row and handing back id 1 both times -- the second seat's
-    actions and winnings filed under the first player. It does so on ``utf8mb4_general_ci`` and on
-    ``utf8mb4_unicode_ci``, the collation this install's table is on, and the general collation
-    weighs *every* supplementary character as one ``U+FFFD``: over the 63 488 BMP codepoints
-    written in a name, ``U+FFFD`` is the only one it takes for an emoji. ``utf8mb4_uca1400_ai_ci``
-    keeps the two emoji apart -- the fold refuses them anyway, which is the coarser direction it
-    is meant to err in.
+    Measured before the schema change: inserting ``Alice😀`` then ``Alice😁`` ran
+    ``ON DUPLICATE KEY UPDATE ... id=LAST_INSERT_ID(id)`` into the duplicate on
+    ``utf8mb4_general_ci`` and on ``utf8mb4_unicode_ci``, leaving *one* row and handing back
+    id 1 both times -- the second seat's actions and winnings filed under the first player.
     """
-    error = refusal(SHOWDOWN + 'players = ["' + left + '", "' + right + '"]\n')
-    assert error.kind == UNSUPPORTED
-    assert "ignores case and accents" in str(error)
-
-
-@pytest.mark.parametrize("other", ["Bob", "Alice\u00e9", "Alic\U0001f600"])
-def test_the_supplementary_fold_does_not_refuse_every_name_that_carries_one(other: str) -> None:
-    """The control: the fold folds the characters, it does not refuse the name that carries them.
-
-    Measured, the same way: ``utf8mb4_general_ci`` reads ``Alice😀`` as ``Alice`` followed by one
-    ``U+FFFD``, so a name carrying an emoji still imports beside one that differs in a letter, in
-    a BMP character the collation keeps apart (``é``), or in the letter the same emoji follows.
-    Refusing those would cost a file for nothing.
-    """
-    assert build_hand(document(SHOWDOWN + 'players = ["Alice\U0001f600", "' + other + '"]\n')) is not None
+    assert names_of(build_hand(document(heads_up([left, right])))) == [left, right]
 
 
 # -- fiftieth review ------------------------------------------------------------------
@@ -2973,7 +2933,7 @@ def heads_up(names: list[str], *, raise_size: int = 18) -> str:
     The raise size is what makes the second hand of a file a hand of its own: the same content
     is a duplicate of the first, and a duplicate is not what these tests are about.
     """
-    text = HEADS_UP.replace('players = ["Alice", "Bob"]', f"players = {json.dumps(names)}")
+    text = HEADS_UP.replace('players = ["Alice", "Bob"]', f"players = {json.dumps(names, ensure_ascii=False)}")
     text = text.replace('_hero = "Alice"', f'_hero = "{names[0]}"')
     return text.replace("cbr 18", f"cbr {raise_size}")
 
@@ -2989,18 +2949,16 @@ def phh_players(db: Any) -> list[str]:
 
 
 @pytest.mark.parametrize("second", ["alice", "Álice"], ids=["another case", "another accent"])
-def test_a_name_the_database_holds_is_not_stored_under_another_spelling(
+def test_a_name_the_database_holds_in_another_case_or_accent_is_another_player(
     second: str, tmp_path, importer
 ) -> None:
-    """The check that refuses ``Alice`` beside ``alice`` in one hand has to see the other hands.
+    """The index compares a stored name byte for byte, so the later hand adds a player.
 
-    It read the hand's own seats only, so a later hand naming ``alice`` passed it -- and MySQL's
-    usual collation, which compares names without case or accents, put that seat in Alice's row:
-    ``insertPlayer`` upserts on the unique ``(name, siteId)`` index and hands back the existing
-    id, so the two hands' actions and winnings became one player's. Measured on the real table
-    (``UNIQUE KEY name (name, siteId)``, ``utf8mb4_unicode_ci``), ``alice`` and ``Álice`` both
-    return id 1 for a stored ``Alice``, while another ``siteId`` is a player of its own. The
-    hand is refused rather than merged, as the within-hand check already refused it.
+    Measured before the schema change: MySQL's usual collation, which compares names without
+    case or accents, put ``alice`` and ``Álice`` in Alice's row -- ``insertPlayer`` upserts on
+    the unique ``(name, siteId)`` index and handed back the existing id, so the two hands'
+    actions and winnings became one player's. The column is binary now (#417) and both names
+    are rows of their own, whichever hand saw them first.
     """
     path = tmp_path / "names.phhs"
     path.write_text(
@@ -3010,15 +2968,53 @@ def test_a_name_the_database_holds_is_not_stored_under_another_spelling(
 
     assert importer.addImportFile(str(path))
     stored, duplicates, partial, skipped, errors, _seconds = importer.runImport()
-    assert (stored, duplicates, partial, skipped, errors) == (1, 0, 0, 1, 0)
-    assert phh_players(importer.database) == ["Alice", "Bob"]
+    assert (stored, duplicates, partial, skipped, errors) == (2, 0, 0, 0, 0)
+    assert phh_players(importer.database) == ["Alice", "Bob", second]
+
+
+def test_two_seats_differing_only_in_case_are_stored_as_two_players(tmp_path, importer) -> None:
+    """One hand may seat ``Alice`` and ``alice``: the column keeps them apart (#417).
+
+    The importer refused this hand before the schema change -- MySQL's default collation would
+    have filed both seats in one row, their actions and winnings one player's. On the binary
+    column they are two players, and the hand imports.
+    """
+    path = tmp_path / "case.phhs"
+    path.write_text(f"[1]\n{heads_up(['Alice', 'alice'])}\n", encoding="utf-8")
+
+    assert importer.addImportFile(str(path))
+    stored, duplicates, partial, skipped, errors, _seconds = importer.runImport()
+    assert (stored, duplicates, partial, skipped, errors) == (1, 0, 0, 0, 0)
+    assert phh_players(importer.database) == ["Alice", "alice"]
+
+
+def test_a_database_that_has_not_migrated_the_collation_refuses_the_file(tmp_path, importer) -> None:
+    """Refusing beats the merge the old column would perform (#417).
+
+    The migration that gives ``Players.name`` its binary collation is best-effort: another
+    connection holding the table makes it log and retry on the next connection. Accepting the
+    hand meanwhile would be worse than refusing it -- ``insertPlayer`` would upsert ``alice``
+    onto Alice's row and the two seats' actions would be one player's for good -- so the file
+    is refused whole and nothing is written.
+    """
+    path = tmp_path / "unmigrated.phhs"
+    path.write_text(f"[1]\n{heads_up(['Alice', 'alice'])}\n", encoding="utf-8")
+    importer.database.players_name_compares_binary = lambda: False
+
+    assert importer.addImportFile(str(path))
+    stored, duplicates, partial, skipped, errors, _seconds = importer.runImport()
+    assert (stored, duplicates, partial, skipped, errors) == (0, 0, 0, 1, 0)
+    assert phh_players(importer.database) == []
+    summary = importer.phh_summary()
+    assert summary is not None
+    assert "does not compare names byte for byte" in summary.errors[0]
 
 
 def test_the_same_name_in_another_hand_is_the_same_player(tmp_path, importer) -> None:
-    """The control: a name the database already holds *as spelled* is that player, not a refusal.
+    """The control: a name the database already holds *as spelled* is that player, not a new one.
 
     Every dataset names its players again in every hand, so this is the case the guard must let
-    through -- only a name that folds onto a stored one is refused.
+    through -- only a name that meets a stored one on a trailing space is refused.
     """
     path = tmp_path / "same.phhs"
     path.write_text(
