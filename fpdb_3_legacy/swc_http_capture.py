@@ -21,8 +21,9 @@ try:
     from playwright.sync_api import Error as PlaywrightError
     from playwright.sync_api import sync_playwright
 except ImportError:
-    print("[ERROR] Playwright library is not installed.")
-    print("[ERROR] Please install Playwright (pip install playwright && playwright install chromium).")
+    # Printed rather than logged: the SwC console shows this process's output.
+    print("[ERROR] The SwC Poker HTTP capture needs Playwright, an optional dependency.")
+    print("[ERROR] From the fpdb source directory: pip install -e '.[swc]' && playwright install chromium")
     sys.exit(1)
 
 

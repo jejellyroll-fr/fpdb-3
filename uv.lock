@@ -479,7 +479,6 @@ dependencies = [
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "numpy", version = "2.5.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "pandas" },
-    { name = "playwright" },
     { name = "psutil" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pymysql" },
@@ -511,6 +510,9 @@ mysql = [
 ]
 postgresql = [
     { name = "psycopg", extra = ["binary"] },
+]
+swc = [
+    { name = "playwright" },
 ]
 test = [
     { name = "httpx" },
@@ -560,7 +562,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.1.0" },
     { name = "pandas", specifier = ">=2.2.2" },
     { name = "pillow", marker = "extra == 'build'", specifier = ">=10.0.0" },
-    { name = "playwright", specifier = ">=1.40.0" },
+    { name = "playwright", marker = "extra == 'swc'", specifier = ">=1.40.0" },
     { name = "psutil", specifier = ">=5.9.0" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.1.0" },
     { name = "psycopg", extras = ["binary"], marker = "extra == 'postgresql'", specifier = ">=3.1.0" },
@@ -593,7 +595,7 @@ requires-dist = [
     { name = "xcffib", marker = "extra == 'linux'", specifier = "==1.5.0" },
     { name = "xlrd", specifier = "==2.0.1" },
 ]
-provides-extras = ["build", "test", "test-no-gui", "windows", "linux", "macos", "postgresql", "mysql"]
+provides-extras = ["build", "test", "test-no-gui", "windows", "linux", "macos", "postgresql", "mysql", "swc"]
 
 [[package]]
 name = "frozenlist"

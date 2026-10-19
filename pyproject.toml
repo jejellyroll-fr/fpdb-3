@@ -28,7 +28,6 @@ dependencies = [
     "aiohttp>=3.13.2",
     "cachetools==5.5.0",
     "xlrd==2.0.1",
-    "playwright>=1.40.0",
     "pymysql>=1.1.0",
     "defusedxml>=0.7.1",
     "pyqtgraph>=0.13.0",
@@ -78,6 +77,12 @@ linux = ["xcffib==1.5.0", "PySide6>=6.8.1"]
 macos = ["PySide6>=6.8.1"]
 postgresql = ["psycopg[binary]>=3.1.0"]
 mysql = ["mysqlclient==2.2.4"]
+# The SwC Poker HTTP capture drives a browser through Playwright. It is the only
+# consumer, it runs from a source install only (it is launched as
+# `sys.executable swc_http_capture.py`), and it also needs
+# `playwright install chromium`, so the library stays out of every other install
+# and out of the packaged builds (#439).
+swc = ["playwright>=1.40.0"]
 
 [project.scripts]
 fpdb_3_legacy = "fpdb_3_legacy.legacy_launcher:main"
@@ -315,7 +320,6 @@ requires = [
     "aiohttp>=3.13.2",
     "cachetools==5.5.0",
     "xlrd==2.0.1",
-    "playwright>=1.40.0",
     "defusedxml>=0.7.1",
     # Read by the Merge and Winamax summary parsers.
     "beautifulsoup4==4.12.3",
