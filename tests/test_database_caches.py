@@ -444,27 +444,34 @@ def test_positions_cache_keys_on_seats_max_position_and_position() -> None:
 # --------------------------------------------------------------------------
 
 
+def _queued_hand(hand_id: int, tourney_id: int | None, gametype_id: int) -> list:
+    """A Hands row as storeHand queues it: id, tableName, siteHandNo, tourneyId, gametypeId, sessionId, fileId."""
+    return [hand_id, "Table", 900000 + hand_id, tourney_id, gametype_id, None, 1]
+
+
 def test_hands_receive_the_session_id_resolved_for_them() -> None:
     db = caches_host()
     db.hids = [101, 102]
-    db.hbulk = [[None, None, None, None, None], [None, None, 42, None, None]]
+    db.hbulk = [_queued_hand(101, None, 3), _queued_hand(102, 42, 4)]
     db.s = {"bk": [], 101: {"id": 7, "wid": 1, "mid": 2}, 102: {"id": 8, "wid": 1, "mid": 2}}
 
     db.appendHandsSessionIds()
 
-    assert [row[4] for row in db.hbulk] == [7, 8]
+    assert [row[database_caches.HANDS_ROW_SESSION_ID] for row in db.hbulk] == [7, 8]
+    # The gametype stays the hand's own (#592: it used to receive the session id).
+    assert [row[4] for row in db.hbulk] == [3, 4]
     assert db.tbulk == {42: 8}
 
 
 def test_a_hand_without_a_session_keeps_its_empty_session_id() -> None:
     db = caches_host()
     db.hids = [101]
-    db.hbulk = [[None, None, None, None, None]]
+    db.hbulk = [_queued_hand(101, None, 3)]
     db.s = {"bk": []}
 
     db.appendHandsSessionIds()
 
-    assert db.hbulk[0][4] is None
+    assert db.hbulk[0][database_caches.HANDS_ROW_SESSION_ID] is None
     assert db.tbulk == {}
 
 
