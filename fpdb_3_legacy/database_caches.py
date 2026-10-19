@@ -15,6 +15,15 @@ import pytz
 from fpdb_3_legacy.action_enum_stats import CACHE_KEYS as ACTION_ENUM_CACHE_KEYS
 from fpdb_3_legacy.loggingFpdb import get_logger
 
+# Positions in the Hands row storeHand queues in hbulk, which follows the column
+# order of the "store_hand" query: id, tableName, siteHandNo, tourneyId,
+# gametypeId, sessionId, ... When id was put first (734247d8) these were left
+# one short, so every hand imported with session caching on had its gametypeId
+# overwritten by its session id, its sessionId left empty, and Tourneys was
+# looked up by hand number (#592). test_database_caches.py pins them to the query.
+HANDS_ROW_TOURNEY_ID = 3
+HANDS_ROW_SESSION_ID = 5
+
 log = get_logger("db")
 
 CACHE_KEYS = [
@@ -1249,9 +1258,9 @@ class DatabaseCachesMixin:
     def appendHandsSessionIds(self) -> None:
         for i in range(len(self.hbulk)):
             hid = self.hids[i]
-            tid = self.hbulk[i][2]
+            tid = self.hbulk[i][HANDS_ROW_TOURNEY_ID]
             sc = self.s.get(hid)
             if sc is not None:
-                self.hbulk[i][4] = sc["id"]
+                self.hbulk[i][HANDS_ROW_SESSION_ID] = sc["id"]
                 if tid:
                     self.tbulk[tid] = sc["id"]
