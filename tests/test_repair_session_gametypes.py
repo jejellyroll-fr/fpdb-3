@@ -11,6 +11,7 @@ from __future__ import annotations
 import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -49,6 +50,7 @@ IPOKER_HOLDEM_RING = (
 MISFILE_HAND = "UPDATE Hands SET gametypeId = ? WHERE id = ?"
 MOVE_TO_FILE_OF = "UPDATE Hands SET fileId = (SELECT fileId FROM Hands WHERE siteHandNo = ?) WHERE id = ?"
 NLHE_CASH_HAND = 3858162574
+MOVE_IN_TIME = "UPDATE Hands SET startTime = ? WHERE id = ?"
 FORGET_PLAYER_SESSIONS = (
     "DELETE FROM SessionsCache WHERE playerId = (SELECT MIN(playerId) FROM HandsPlayers WHERE handId = ?)"
 )
@@ -301,3 +303,47 @@ def test_a_session_window_is_found_without_walking_every_older_one() -> None:
     assert windows.containing(start + timedelta(hours=9_999, minutes=10)) == [9_999]
     assert windows.containing(start + timedelta(hours=5_000, minutes=45)) == []
     assert steps <= 4
+
+
+def _fix(hand_id: int, hero_seat: int) -> repair_tool.HandFix:
+    return repair_tool.HandFix(hand_id, 555, hero_seat, 101, 3, 101)
+
+
+@pytest.mark.parametrize(
+    ("public", "correct_copy_for", "kept", "set_aside"),
+    [
+        (True, None, [1, 2], []),  # each hero's view is its own row
+        (False, None, [1], [2]),  # one row per hand
+        (True, 1, [2], [1]),  # hero 1 was re-imported correctly, hero 2 was not
+    ],
+)
+def test_reconciliation_follows_the_unique_key(monkeypatch, public, correct_copy_for, kept, set_aside) -> None:
+    def fetch(_db, statement, params=()):
+        if statement == repair_tool.SELECT_SAME_HAND_FOR_HERO:
+            return [(9,)] if params[2] == correct_copy_for else []
+        if statement == repair_tool.SELECT_SAME_HAND:
+            return [(1,), (2,)]
+        raise AssertionError(statement)
+
+    monkeypatch.setattr(repair_tool, "_fetch", fetch)
+    found = repair_tool.Survey(hand_fixes=[_fix(1, 1), _fix(2, 2)])
+
+    repair_tool._set_aside_reimported(SimpleNamespace(publicDB=public), found)
+
+    assert [fix.hand_id for fix in found.hand_fixes] == kept
+    assert [fix.hand_id for fix in found.reimported] == set_aside
+
+
+def test_a_file_name_shared_by_two_histories_is_ambiguous(open_copy) -> None:
+    """Files keeps base names only: a hand far from the 5 card session may come from another history."""
+    config, clean = open_copy("clean")
+    (hand_id,) = _rows(clean, FIVE_CARD_HAND)[0]
+    (holdem,) = _rows(clean, IPOKER_HOLDEM_RING)[0]
+    clean.get_cursor().execute(MISFILE_HAND, (holdem, hand_id))
+    clean.get_cursor().execute(MOVE_IN_TIME, ("2020-03-01 12:00:00", hand_id))
+    clean.commit()
+
+    found = repair_tool.survey(clean, repair_tool.ipoker_sites(config))
+
+    assert found.misclassified == {}
+    assert any("100BB Feldkirch 10, 488784806" in line for line in found.unresolved)

@@ -46,7 +46,7 @@ import sys
 from bisect import bisect_right
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from itertools import accumulate
 from pathlib import Path
 
@@ -59,9 +59,13 @@ from fpdb_3_legacy.Database import Database  # noqa: E402
 from tools.cleanup_ipoker_anon_players import DELETE_BY_HAND, _sql, ipoker_sites  # noqa: E402
 
 SELECT_UNSESSIONED_HANDS = (
-    "SELECT id, gametypeId, startTime, tourneyId, tableName, siteHandNo FROM Hands WHERE sessionId IS NULL ORDER BY id"
+    "SELECT id, gametypeId, startTime, tourneyId, tableName, siteHandNo, heroSeat "
+    "FROM Hands WHERE sessionId IS NULL ORDER BY id"
 )
+# The key the siteHandNo unique index enforces: heroSeat belongs to it only in
+# a public database, where each hero's view of a hand is its own row.
 SELECT_SAME_HAND = "SELECT id FROM Hands WHERE siteHandNo = %s AND gametypeId = %s"
+SELECT_SAME_HAND_FOR_HERO = "SELECT id FROM Hands WHERE siteHandNo = %s AND gametypeId = %s AND heroSeat = %s"
 SELECT_UNSESSIONED_SEATS = (
     "SELECT hp.handId, hp.playerId FROM HandsPlayers hp JOIN Hands h ON h.id = hp.handId WHERE h.sessionId IS NULL"
 )
@@ -73,7 +77,9 @@ SELECT_GAMETYPES = (
 )
 SELECT_UNSESSIONED_TOURNEYS = "SELECT id FROM Tourneys WHERE sessionId IS NULL"
 SELECT_TOURNEY_HANDS = "SELECT id, tourneyId, startTime, sessionId FROM Hands WHERE tourneyId IS NOT NULL"
-SELECT_HANDS_FOR_TABLES = "SELECT h.id, h.gametypeId, h.tableName, f.file FROM Hands h JOIN Files f ON f.id = h.fileId"
+SELECT_HANDS_FOR_TABLES = (
+    "SELECT h.id, h.gametypeId, h.tableName, f.file, h.startTime FROM Hands h JOIN Files f ON f.id = h.fileId"
+)
 SELECT_SEATS_PER_HAND = "SELECT h.id, h.gametypeId, COUNT(*) FROM HandsPlayers hp JOIN Hands h ON h.id = hp.handId GROUP BY h.id, h.gametypeId"
 SELECT_HUD_COUNTS = "SELECT gametypeId, SUM(n) FROM HudCache GROUP BY gametypeId"
 
@@ -83,12 +89,17 @@ UPDATE_TOURNEY = "UPDATE Tourneys SET sessionId = %s WHERE id = %s"
 FIVE_CARD_OMAHA = "5_omahahi"
 # The site the iPoker converter falls back to when it cannot tell the skin.
 IPOKER_NETWORK = "iPoker"
+# Files only records a history's base name, so two files of the same name are
+# one Files row. Hands of one session follow each other within minutes; a
+# longer gap means the group mixes histories that cannot be told apart.
+MAX_SESSION_GAP = timedelta(hours=2)
 
 
 @dataclass(frozen=True)
 class HandFix:
     hand_id: int
     site_hand_no: int
+    hero_seat: int
     stored_gametype: int
     gametype: int
     session: int
@@ -170,7 +181,9 @@ def find_hand_fixes(db, found: Survey) -> None:
     for hand_id, player_id in _fetch(db, SELECT_UNSESSIONED_SEATS):
         seats[int(hand_id)].append(int(player_id))
 
-    for hand_id, stored_gametype, start, _tourney, table, site_hand_no in _fetch(db, SELECT_UNSESSIONED_HANDS):
+    for hand_id, stored_gametype, start, _tourney, table, site_hand_no, hero_seat in _fetch(
+        db, SELECT_UNSESSIONED_HANDS
+    ):
         sessions = windows.containing(start)
         if not sessions:
             # Imported without session caching: nothing was overwritten.
@@ -188,7 +201,9 @@ def find_hand_fixes(db, found: Survey) -> None:
         (session,) = sessions
         if int(stored_gametype) not in (gametype, session):
             found.cross_check_mismatches += 1
-        found.hand_fixes.append(HandFix(int(hand_id), int(site_hand_no), int(stored_gametype), gametype, session))
+        found.hand_fixes.append(
+            HandFix(int(hand_id), int(site_hand_no), int(hero_seat), int(stored_gametype), gametype, session)
+        )
     _set_aside_reimported(db, found)
 
 
@@ -200,14 +215,19 @@ def _set_aside_reimported(db, found: Survey) -> None:
     gametype the other copy already holds would break the siteHandNo unique
     index; the damaged copy is the one to remove.
     """
+    public = bool(getattr(db, "publicDB", False))
     damaged = {fix.hand_id for fix in found.hand_fixes}
-    groups: dict[tuple[int, int], list[HandFix]] = defaultdict(list)
+    groups: dict[tuple[int, int, int | None], list[HandFix]] = defaultdict(list)
     for fix in found.hand_fixes:
-        groups[(fix.site_hand_no, fix.gametype)].append(fix)
+        groups[(fix.site_hand_no, fix.gametype, fix.hero_seat if public else None)].append(fix)
     keep: list[HandFix] = []
-    for (site_hand_no, gametype), fixes in groups.items():
+    for (site_hand_no, gametype, hero_seat), fixes in groups.items():
         fixes.sort(key=lambda fix: fix.hand_id)
-        stored = [int(row[0]) for row in _fetch(db, SELECT_SAME_HAND, (site_hand_no, gametype))]
+        if hero_seat is None:
+            rows = _fetch(db, SELECT_SAME_HAND, (site_hand_no, gametype))
+        else:
+            rows = _fetch(db, SELECT_SAME_HAND_FOR_HERO, (site_hand_no, gametype, hero_seat))
+        stored = [int(row[0]) for row in rows]
         if any(hand_id not in damaged for hand_id in stored):
             found.reimported.extend(fixes)
         else:
@@ -236,29 +256,62 @@ def find_tourney_fixes(db, found: Survey) -> None:
     found.tourney_fixes = {tourney_id: session for tourney_id, (_start, session) in sorted(last.items())}
 
 
+def _follows_five_card_run(hands: list[tuple[datetime, int, bool]]) -> tuple[list[int], bool]:
+    """The non 5 card hands that continue a run opened by a 5 card hand, and whether all of them do.
+
+    ``hands`` holds (start, hand id, is 5 card Omaha). A run is a chain of hands
+    no more than MAX_SESSION_GAP apart; the bug only ever misread the hands
+    after the first, 5 card, hand of a session.
+    """
+    following: list[int] = []
+    all_follow = True
+    in_run = False
+    previous: datetime | None = None
+    for start, hand_id, five_card in sorted(hands):
+        if previous is not None and start - previous > MAX_SESSION_GAP:
+            in_run = False
+        previous = start
+        if five_card:
+            in_run = True
+        elif in_run:
+            following.append(hand_id)
+        else:
+            all_follow = False
+    return following, all_follow
+
+
 def find_misclassified_five_card_omaha(db, sites: set[str], found: Survey) -> None:
     """iPoker files whose table holds 5 card Omaha hands and hands under another game.
 
     The bug only ever split one session file: its first hand was read as 5 card
-    Omaha and the rest as something else. Grouping by file as well as table keeps
-    a table name reused elsewhere, for another game, out of it.
+    Omaha and the rest as something else. Grouping by file and table keeps a
+    table name reused elsewhere out of it; because Files keeps base names only,
+    a group whose other hands do not all continue a 5 card session is reported
+    as ambiguous rather than offered for deletion.
     """
     gametypes = {int(row[0]): row for row in _fetch(db, SELECT_GAMETYPES)}
     ipoker = {gid for gid, row in gametypes.items() if row[6] in sites | {IPOKER_NETWORK}}
     repaired = {fix.hand_id: fix.gametype for fix in found.hand_fixes}
     removed = {fix.hand_id for fix in found.reimported}
-    groups: dict[tuple[str, str], dict[int, list[int]]] = defaultdict(lambda: defaultdict(list))
-    for hand_id, stored, table, file_name in _fetch(db, SELECT_HANDS_FOR_TABLES):
+    groups: dict[tuple[str, str], list[tuple[datetime, int, bool]]] = defaultdict(list)
+    for hand_id, stored, table, file_name, start in _fetch(db, SELECT_HANDS_FOR_TABLES):
         if int(hand_id) in removed:
             continue
         gametype = repaired.get(int(hand_id), int(stored))
         if gametype in ipoker:
-            groups[(str(file_name), str(table))][gametype].append(int(hand_id))
-    for key, by_gametype in sorted(groups.items()):
-        five_card = [gid for gid in by_gametype if gametypes[gid][2] == FIVE_CARD_OMAHA]
-        others = [hand for gid, hands in by_gametype.items() if gid not in five_card for hand in hands]
-        if five_card and others:
-            found.misclassified[key] = sorted(others)
+            five_card = gametypes[gametype][2] == FIVE_CARD_OMAHA
+            groups[(str(file_name), str(table))].append((start, int(hand_id), five_card))
+    for (file_name, table), hands in sorted(groups.items()):
+        if not any(five_card for _start, _id, five_card in hands) or all(five for _s, _i, five in hands):
+            continue
+        following, all_follow = _follows_five_card_run(hands)
+        if all_follow:
+            found.misclassified[(file_name, table)] = sorted(following)
+        else:
+            found.unresolved.append(
+                f"{table} (file {file_name}): 5 card Omaha and other hands that do not follow one session; "
+                "files with the same name cannot be told apart, so nothing is offered for deletion"
+            )
 
 
 def find_hud_shortfall(db, found: Survey) -> None:
