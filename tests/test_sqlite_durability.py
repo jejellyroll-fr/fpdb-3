@@ -25,21 +25,17 @@ def database(tmp_path: Path) -> Database:
     return database
 
 
-def _pragma(cursor, name: str):
-    cursor.execute("PRAGMA " + name)
-    return cursor.fetchone()[0]
+def _assert_crash_safe(cursor) -> None:
+    cursor.execute("PRAGMA journal_mode")
+    assert str(cursor.fetchone()[0]).lower() == "wal"
+    cursor.execute("PRAGMA synchronous")
+    assert cursor.fetchone()[0] == SYNCHRONOUS_NORMAL
 
 
 def test_the_main_connection_is_crash_safe(database: Database) -> None:
-    cursor = database.get_cursor()
-
-    assert str(_pragma(cursor, "journal_mode")).lower() == "wal"
-    assert _pragma(cursor, "synchronous") == SYNCHRONOUS_NORMAL
+    _assert_crash_safe(database.get_cursor())
 
 
 def test_a_worker_connection_is_crash_safe(database: Database) -> None:
     with database.worker_connection() as connection:
-        cursor = connection.cursor()
-
-        assert str(_pragma(cursor, "journal_mode")).lower() == "wal"
-        assert _pragma(cursor, "synchronous") == SYNCHRONOUS_NORMAL
+        _assert_crash_safe(connection.cursor())

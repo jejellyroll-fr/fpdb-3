@@ -5,19 +5,31 @@ from unittest.mock import MagicMock, patch
 import pytest
 from PySide6.QtWidgets import QApplication
 
-pytestmark = pytest.mark.qt
-
-# Ensure QApplication is initialized for widgets
-app = QApplication.instance() or QApplication([])
-
 from fpdb_3_legacy.GuiGraphViewer import GuiGraphViewer
 from fpdb_3_legacy.GuiRingPlayerStats import GuiRingPlayerStats
 from fpdb_3_legacy.GuiSessionViewer import GuiSessionViewer
 from fpdb_3_legacy.GuiTourneyGraphViewer import GuiTourneyGraphViewer
 from fpdb_3_legacy.GuiTourneyPlayerStats import GuiTourneyPlayerStats
 
+pytestmark = pytest.mark.qt
+
+
+def _ensure_application() -> None:
+    """Create the QApplication when a test runs, not when the module is imported.
+
+    pytest imports this module even when the default ``-m "not qt"`` run then
+    deselects every test in it; constructing the application at import time
+    loads a display platform plugin, which aborts on a headless machine.
+    """
+    if QApplication.instance() is None:
+        QApplication([])
+
 
 class TestEmptyDataPopups(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        _ensure_application()
+
     def setUp(self):
         # Create standard mocks for db, config, sql
         self.mock_cursor = MagicMock()
@@ -341,6 +353,10 @@ class TestEmptyDataPopups(unittest.TestCase):
 
 
 class TestHudImportExport(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        _ensure_application()
+
     def setUp(self):
         import xml.dom.minidom
 
