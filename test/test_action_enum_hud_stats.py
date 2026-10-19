@@ -317,8 +317,8 @@ class TestCacheRebuild:
         db.backend = Database.Database.SQLITE
         db.build_full_hudcache = True
         query = db.replace_statscache("ring", table, SQL.Sql(db_server="sqlite").query["rebuildCache"])
-        assert "<extra_insert_columns>" not in query
-        assert "<extra_select_columns>" not in query
+        assert "<stat_insert_columns>" not in query
+        assert "<stat_select_columns>" not in query
         assert not [key for key in CACHE_KEYS if key in query]
 
 
