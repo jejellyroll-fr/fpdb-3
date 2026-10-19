@@ -220,8 +220,9 @@ class RingStatsController(QObject):
             _hname = heroes.get(site, "")
             if not _hname:
                 continue
-            result = self.db.get_player_id(self.conf, site, _hname)
-            pids = [int(result)] if result is not None else self.db.get_hero_player_ids(site)
+            # The hero selected, resolved variant-aware -- and on PHH every configured
+            # hero alias (#423): see Database.get_selected_player_ids.
+            pids = self.db.get_selected_player_ids(site, _hname)
             for pid in pids:
                 if pid not in playerids:
                     playerids.append(pid)

@@ -137,3 +137,37 @@ def test_profiles_tab_loads_and_deletes_existing(qtbot) -> None:
     working, deleted = dia.get_profile_changes()
     assert "Old" not in working
     assert "Old" in deleted
+
+
+@pytest.mark.qt
+def test_a_profile_link_can_name_the_phh_source(qtbot) -> None:
+    """#423: a PHH name joins a room's in one hero profile."""
+    cfg, dia = _dialog(qtbot)
+    room = cfg.get_supported_sites(all=True)[0]
+
+    assert "PHH" in dia._all_site_names()
+    dia.add_profile("Me")
+    dia.add_link_row(room, "jeje")
+    dia.add_link_row("PHH", "jeje_phh")
+
+    working, _deleted = dia.get_profile_changes()
+    assert working["Me"]["links"] == [(room, "jeje"), ("PHH", "jeje_phh")]
+
+
+@pytest.mark.qt
+def test_the_data_sources_tab_edits_the_phh_hero_aliases(qtbot) -> None:
+    from fpdb_3_legacy.Configuration import Config
+    from fpdb_3_legacy.ModernSitePreferences import ModernSitePreferencesDialog
+
+    cfg = Config(file="HUD_config.xml")
+    cfg.set_data_source_hero_aliases("PHH", ["jeje"])  # in memory only: never saved here
+    dia = ModernSitePreferencesDialog(cfg)
+    qtbot.addWidget(dia)
+
+    tabs = [dia.tabs.tabText(i) for i in range(dia.tabs.count())]
+    assert "Data Sources" in tabs
+    assert dia.data_source_inputs["PHH"].toPlainText() == "jeje"
+
+    # One name per line: a PHH name is any string, a comma included, matched exactly.
+    dia.data_source_inputs["PHH"].setPlainText("jeje\n\nSmith, John\n jeje76 \njeje")
+    assert dia.get_data_source_changes() == {"PHH": ["jeje", "Smith, John", "jeje76"]}

@@ -1241,6 +1241,11 @@ class fpdb(QMainWindow):
                     if hero_aliases is not None:
                         self.config.set_hero_aliases(site_name, hero_aliases)
 
+            # Apply data source hero aliases (Data Sources tab, #423).
+            if hasattr(dia, "get_data_source_changes"):
+                for source_name, source_aliases in dia.get_data_source_changes().items():
+                    self.config.set_data_source_hero_aliases(source_name, source_aliases)
+
             # Apply multiroom hero profile changes (Hero Profiles tab).
             if hasattr(dia, "get_profile_changes"):
                 working, deleted = dia.get_profile_changes()

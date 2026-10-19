@@ -150,8 +150,18 @@ class DatabasePlayersMixin:
             ids.update(self._resolve_alias_ids(site_name, aliases))
         return sorted(ids)
 
+    def _is_data_source(self, site_name) -> bool:
+        """Whether *site_name* is a data source (PHH) rather than a configured room."""
+        is_source = getattr(self.config, "is_data_source", None)
+        return bool(callable(is_source) and is_source(site_name))
+
     def get_hero_player_ids(self, site_name=None, profile=None):
-        """Return every hero playerId for a site (multi-alias aware)."""
+        """Return every hero playerId for a site (multi-alias aware).
+
+        A data source (PHH) answers with its configured hero aliases only (#423): its
+        hero-flagged players are each file's own ``_hero``, not one hero, so they are no
+        fallback there.
+        """
         if profile is not None:
             return self.get_hero_player_ids_for_profile(profile)
 
@@ -162,7 +172,7 @@ class DatabasePlayersMixin:
 
         ids = self._resolve_alias_ids(site_name, self._hero_aliases(site_name))
 
-        if not ids:
+        if not ids and not self._is_data_source(site_name):
             ph = self.sql.query["placeholder"]
             q = "SELECT id FROM Players WHERE siteId=%s AND hero=%s".replace("%s", ph)
             c = self.get_cursor()
@@ -170,6 +180,22 @@ class DatabasePlayersMixin:
             ids.update(int(r[0]) for r in c.fetchall())
 
         return sorted(ids)
+
+    def get_selected_player_ids(self, site_name, name):
+        """The players a report reads for *name* selected on *site_name*.
+
+        The name selected, resolved variant-aware -- ``get_player_id`` maps a
+        "PokerStars" selection to the hero's "PokerStars.FR" account, so data imported
+        under a site skin still shows -- and the site's hero players when it resolves to
+        no one. On a data source (PHH), one of its configured hero aliases stands for
+        all of them (#423), as it does in the report filters.
+        """
+        if self._is_data_source(site_name) and name in self._hero_aliases(site_name):
+            ids = self.get_hero_player_ids(site_name)
+            if ids:
+                return ids
+        result = self.get_player_id(self.config, site_name, name)
+        return [int(result)] if result is not None else self.get_hero_player_ids(site_name)
 
     def getHeroIds(self, pids, sitename):
         try:
