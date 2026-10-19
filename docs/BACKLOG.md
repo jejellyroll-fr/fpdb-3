@@ -28,15 +28,15 @@ useful *before* import and does not touch the database. Migration of rows that
 are already inserted still does not exist — the three `backfill_*` scripts
 cover boards, showdown and auto notes, not identifiers.
 
-**To do.** Write a maintenance script that, for every imported iPoker file,
-finds the hand whose `siteHandNo` equals a `sessioncode` in the corpus, then
-deletes or reconciles it. It should be run once, with a `--dry-run` mode.
+**Done for the hand tables (#440).** `tools/repair_ipoker_session_ids.py`
+removes the duplicates and, given the files (`--hh-dir`), renumbers the hands
+stored only under their session code. Report-only by default, `--rehearse`
+rolls back, `--apply` backs a SQLite database up first. See
+[ipoker-session-code-repair.md](ipoker-session-code-repair.md).
 
-**Risk.** High: it deletes database rows. Make `--dry-run` the default, show a
-count before taking action, and document the backup procedure. Note that the
-3.4.2 tool made the opposite choice — `--dry-run` is an optional flag there,
-not the default — because it only touches files that the importer can
-regenerate. That reasoning no longer applies once the database is written.
+**What remains.** The HUD and session caches keep one extra hand per affected
+file. They can be repaired once a cache rebuild reproduces what the import
+writes (#591); iPoker's gametype attribution (#592) has to be right first.
 
 ---
 
