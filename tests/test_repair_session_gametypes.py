@@ -9,6 +9,7 @@ hold the gametypes, sessions and tournament sessions a clean import stores.
 from __future__ import annotations
 
 import shutil
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -46,6 +47,8 @@ IPOKER_HOLDEM_RING = (
     "WHERE s.name = 'iPoker' AND g.type = 'ring' AND g.category = 'holdem'"
 )
 MISFILE_HAND = "UPDATE Hands SET gametypeId = ? WHERE id = ?"
+MOVE_TO_FILE_OF = "UPDATE Hands SET fileId = (SELECT fileId FROM Hands WHERE siteHandNo = ?) WHERE id = ?"
+NLHE_CASH_HAND = 3858162574
 FORGET_PLAYER_SESSIONS = (
     "DELETE FROM SessionsCache WHERE playerId = (SELECT MIN(playerId) FROM HandsPlayers WHERE handId = ?)"
 )
@@ -221,7 +224,7 @@ def test_misclassified_five_card_omaha_is_deleted_for_a_reimport(open_copy) -> N
     clean.commit()
 
     found = repair_tool.survey(clean, repair_tool.ipoker_sites(config))
-    assert found.misclassified == {"100BB Feldkirch 10, 488784806": [hand_id]}
+    assert found.misclassified == {("5CPLO-EUR-2.00-4.00-201905", "100BB Feldkirch 10, 488784806"): [hand_id]}
 
     repair_tool.repair(clean, found, commit=True, delete_misclassified=True)
     _import(config)
@@ -249,3 +252,52 @@ def test_the_command_line_backs_up_and_repairs(open_copy, monkeypatch, tmp_path,
     assert "Backup:" in out and backup.exists()
     assert "#591" in out
     assert _rows(damaged, HANDS) == _rows(clean, HANDS)
+
+
+def test_a_table_name_reused_by_another_file_is_not_misclassified(open_copy) -> None:
+    """Only a session file split by the bug counts, not every hand under the same table name."""
+    config, clean = open_copy("clean")
+    (hand_id,) = _rows(clean, FIVE_CARD_HAND)[0]
+    (holdem,) = _rows(clean, IPOKER_HOLDEM_RING)[0]
+    clean.get_cursor().execute(MISFILE_HAND, (holdem, hand_id))
+    clean.get_cursor().execute(MOVE_TO_FILE_OF, (NLHE_CASH_HAND, hand_id))
+    clean.commit()
+
+    found = repair_tool.survey(clean, repair_tool.ipoker_sites(config))
+
+    assert found.misclassified == {}
+
+
+def test_a_damaged_database_imported_again_is_reconciled(open_copy) -> None:
+    """Each re-imported hand keeps its correct copy; the damaged one is deleted, not moved onto its key."""
+    config, damaged = open_copy("damaged")
+    _config, clean = open_copy("clean")
+    _import(config)
+    reimported = Database(config)
+
+    found = repair_tool.survey(reimported, repair_tool.ipoker_sites(config))
+    repair_tool.repair(reimported, found, commit=True)
+
+    assert len(found.reimported) == len(_rows(clean, HANDS))
+    assert found.hand_fixes == []
+    assert [row[:2] for row in _rows(reimported, HANDS)] == [row[:2] for row in _rows(clean, HANDS)]
+
+
+def test_a_session_window_is_found_without_walking_every_older_one() -> None:
+    start = datetime(2024, 1, 1)
+    rows = [(i, start + timedelta(hours=i), start + timedelta(hours=i, minutes=30)) for i in range(10_000)]
+    windows = repair_tool.SessionWindows(rows)
+    steps = 0
+    original = windows.rows
+
+    class CountingList(list):
+        def __getitem__(self, index):
+            nonlocal steps
+            steps += 1
+            return list.__getitem__(self, index)
+
+    windows.rows = CountingList(original)
+
+    assert windows.containing(start + timedelta(hours=9_999, minutes=10)) == [9_999]
+    assert windows.containing(start + timedelta(hours=5_000, minutes=45)) == []
+    assert steps <= 4
