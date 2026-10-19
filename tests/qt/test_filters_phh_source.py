@@ -151,3 +151,23 @@ def test_a_phh_player_who_is_no_alias_is_still_read_by_name(qtbot, importer, fre
     bob = int(fresh_db.get_player_id(fresh_db.config, PHH_SITE_NAME, "Bob"))
     assert filters.get_hero_ids(filters.getHeroes()) == [bob]
     assert filters._player_ids_for(PHH_SITE_NAME, "Bob") == [bob]
+
+
+def test_a_profile_link_names_the_hero_of_a_phh_hand(qtbot, importer, fresh_db, tmp_path) -> None:
+    """A PHH profile link need not also be a PHH alias: the Hand Viewer keeps the hand.
+
+    Selecting a profile empties getHeroes(), so the hero came only from the source's
+    aliases: a hand naming the profile's PHH player got none and was dropped.
+    """
+    from types import SimpleNamespace
+
+    _import(importer, tmp_path, "nl_holdem_dwan_ivey.phh")
+    fresh_db.config.set_data_source_hero_aliases(PHH_SITE_NAME, [])
+    fresh_db.config.save_hero_profile("Me", [(PHH_SITE_NAME, "Tom Dwan")])
+    filters = Filters(fresh_db, {"Heroes": True, "Sites": True})
+    qtbot.addWidget(filters)
+    _select(filters, "[Profile] Me")
+    hand = SimpleNamespace(players=[(1, "Phil Ivey", 0), (2, "Tom Dwan", 0)])
+
+    assert filters.getHeroes() == {}
+    assert filters.get_hero_for_site(PHH_SITE_NAME, hand) == "Tom Dwan"

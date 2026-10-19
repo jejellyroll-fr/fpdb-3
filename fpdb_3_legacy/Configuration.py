@@ -2478,6 +2478,19 @@ class Config:
                 ss = Stat_sets(node=ss_node)
                 stat_sets[ss.name] = ss
 
+            # Hero identities: multiroom profiles and data sources (#423). Read here
+            # too, or a reload kept the identities the file no longer holds.
+            hero_profiles = {}
+            for hp_node in doc.getElementsByTagName("hero_profile"):
+                hp = HeroProfile(node=hp_node)
+                if hp.name:
+                    hero_profiles[hp.name] = hp
+            data_sources = {}
+            for ds_node in doc.getElementsByTagName("data_source"):
+                source = DataSource(node=ds_node)
+                if source.name:
+                    data_sources[source.name] = source
+
             # Profile selection rules
             hud_profile_rules = parse_hud_profile_rules(doc)
 
@@ -2518,6 +2531,8 @@ class Config:
         self.doc = doc
         self.general = general
         self.supported_sites = supported_sites
+        self.hero_profiles = hero_profiles
+        self.data_sources = data_sources
         self.supported_games = supported_games
         self.supported_databases = supported_databases
         self.db_selected = db_selected

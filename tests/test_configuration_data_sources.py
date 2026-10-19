@@ -114,3 +114,36 @@ def test_clearing_a_source_never_configured_writes_nothing(build) -> None:
     config.set_data_source_hero_aliases("PHH", [])
 
     assert config.doc.getElementsByTagName("data_sources") == []
+
+
+def test_a_reload_reads_the_aliases_and_profiles_the_file_now_holds(build) -> None:
+    """Config.reload() is what ConfigurationManager applies to the live configuration."""
+    config = build(PHH_ALIASES)
+    edited = Config(file=str(build.path))
+    edited.set_data_source_hero_aliases("PHH", ["other"])
+    edited.save_hero_profile("Me", [("PokerStars", "jeje"), ("PHH", "other")])
+    edited.save()
+
+    assert config.reload() is True
+
+    assert config.get_hero_aliases("PHH") == ["other"]
+    assert config.hero_profiles["Me"].links == [("PokerStars", "jeje"), ("PHH", "other")]
+
+
+def test_the_manager_sees_an_identity_edit_as_a_change(build) -> None:
+    """Otherwise an edit to them alone is "No changes detected", and nothing is reloaded."""
+    from fpdb_3_legacy.ConfigurationManager import ConfigurationManager
+
+    old = build(PHH_ALIASES)
+    new = Config(file=str(build.path))
+    new.set_data_source_hero_aliases("PHH", ["jeje"])
+    new.save_hero_profile("Me", [("PHH", "jeje")])
+
+    changes = ConfigurationManager._identity_changes(old, new)
+
+    assert [(change.path, change.old_value, change.new_value) for change in changes] == [
+        ("data_sources.PHH", ["jeje", "jeje76"], ["jeje"]),
+        ("hero_profiles.Me", None, (False, [("PHH", "jeje")])),
+    ]
+    assert not any(ConfigurationManager()._requires_restart(change) for change in changes)
+    assert ConfigurationManager._identity_changes(old, old) == []

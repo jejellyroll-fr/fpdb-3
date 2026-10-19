@@ -804,7 +804,14 @@ class Filters(QWidget):
             if site_name is None and callable(is_source) and is_source(sitename):
                 site_name = sitename  # a data source (PHH) names its hero aliases itself (#423)
             if site_name:
-                aliases = self.conf.get_hero_aliases(site_name)
+                aliases = list(self.conf.get_hero_aliases(site_name))
+                # A selected hero profile names its own alias on each site, which need not
+                # be a configured alias there too (a PHH link, #423): getHeroes() is empty
+                # for a profile, so without this the hand had no hero and was dropped.
+                profile = self.get_selected_hero_profile()
+                if profile is not None:
+                    linked = profile.aliases_by_site().get(site_name, [])
+                    aliases.extend(alias for alias in linked if alias not in aliases)
                 player_names = {p[1] for p in hand.players if len(p) > 1}
                 for alias in aliases:
                     if alias in player_names:

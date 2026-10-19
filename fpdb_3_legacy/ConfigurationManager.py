@@ -97,6 +97,8 @@ class ConfigurationManager:
         "supported_sites.*.screen_name",  # Screen name
         "supported_sites.*.HH_path",  # Hand history path
         "supported_sites.*.TS_path",  # Tournament summary path
+        "data_sources.*",  # A data source's hero aliases (#423)
+        "hero_profiles.*",  # Multiroom hero profiles
         "hud_ui.*",  # HUD UI settings
         "general.qt_material_theme",  # Qt material theme
         "general.popup_theme",  # Popup theme
@@ -408,6 +410,10 @@ class ConfigurationManager:
                                     ),
                                 )
 
+            # Compare hero identities (#423): data source aliases and hero profiles.
+            # Without a change found here, an edit to them alone reloads nothing.
+            changes.extend(self._identity_changes(old_config, new_config))
+
             # Compare import settings
             if hasattr(old_config, "imp") and hasattr(new_config, "imp"):
                 old_imp = old_config.imp
@@ -494,6 +500,31 @@ class ConfigurationManager:
 
             traceback.print_exc()
 
+        return changes
+
+    @staticmethod
+    def _identity_changes(
+        old_config: Configuration.Config,
+        new_config: Configuration.Config,
+    ) -> list[ConfigChange]:
+        """The data source aliases and hero profiles that differ between two configurations."""
+
+        def sources(config: Any) -> dict[str, list[str]]:
+            return {name: list(ds.hero_aliases) for name, ds in getattr(config, "data_sources", {}).items()}
+
+        def profiles(config: Any) -> dict[str, tuple[bool, list[tuple[str, str]]]]:
+            return {
+                name: (bool(hp.default), list(hp.links)) for name, hp in getattr(config, "hero_profiles", {}).items()
+            }
+
+        changes = []
+        for section, read in (("data_sources", sources), ("hero_profiles", profiles)):
+            old, new = read(old_config), read(new_config)
+            for name in sorted(set(old) | set(new)):
+                if old.get(name) != new.get(name):
+                    changes.append(
+                        ConfigChange(ChangeType.SITE_SETTINGS, f"{section}.{name}", old.get(name), new.get(name))
+                    )
         return changes
 
     def _requires_restart(self, change: ConfigChange) -> bool:
