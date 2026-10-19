@@ -251,28 +251,18 @@ jobs:
           fpdb_3_legacy/backfill_autonotes.py
           fpdb_3_legacy/card_path.py
           fpdb_3_legacy/legacy_launcher.py
-          fpdb_3_legacy/migrate_tests.py
-          fpdb_3_legacy/migrate_to_pyside6.py
-          fpdb_3_legacy/validate_pyside6_migration.py
           fpdb_3_legacy/swc_poker_console.py
           fpdb_3_legacy/AutoNotePlo.py
           fpdb_3_legacy/MergeStructures.py
           fpdb_3_legacy/stat_registry.py
           fpdb_3_legacy/pt4_import.py
           fpdb_3_legacy/pt4hud.py
-          fpdb_3_legacy/debug_imports.py
-          fpdb_3_legacy/debug_imports_v2.py
-          fpdb_3_legacy/debug_partypoker_parser.py
-          fpdb_3_legacy/test_draw_starting_hand.py
-          fpdb_3_legacy/test_empty_data_popups.py
-          fpdb_3_legacy/test_ftp_detection.py
-          fpdb_3_legacy/test_leak_detector.py
-          fpdb_3_legacy/test_opponents_report.py
-          fpdb_3_legacy/test_partypoker_fix.py
-          fpdb_3_legacy/test_player_profiler.py
-          fpdb_3_legacy/test_rit_parser.py
-          fpdb_3_legacy/fetch_comments.py
-          fpdb_3_legacy/fetch_reviews.py
+          tests/test_draw_starting_hand.py
+          tests/qt/test_empty_data_popups.py
+          tests/test_leak_detector.py
+          tests/test_opponents_report.py
+          tools/fetch_pr_comments.py
+          tools/fetch_pr_reviews.py
           fpdb_3_legacy/fix_draw_starting_hands.py
           fpdb_3_legacy/loggingFpdb.py
           fpdb_3_legacy/WinamaxSummary.py
@@ -337,9 +327,8 @@ jobs:
         run: >-
           mypy
           fpdb_3_legacy/ring_stats
-          fpdb_3_legacy/test_feature_1_1.py
-          fpdb_3_legacy/test_migration.py
-          fpdb_3_legacy/validate_migration.py
+          tests/test_numpy_migration.py
+          tools/validate_migration.py
       - name: Lint newly modernized modules
         run: >-
           ruff check

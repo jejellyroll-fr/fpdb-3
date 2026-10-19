@@ -14,12 +14,7 @@ starting hand (e.g. only 2 of 5 cards).
 See Hand.DrawHand.__init__ / Hand.addShownCards.
 """
 
-import logging
-import os
 import sys
-
-logging.disable(logging.CRITICAL)
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Mock GUI deps only when PySide6 is unavailable (mirrors other parser tests).
 try:
@@ -30,9 +25,9 @@ except ImportError:
     for _m in ("PySide6", "PySide6.QtCore", "PySide6.QtGui", "PySide6.QtWidgets"):
         sys.modules[_m] = MagicMock()
 
-import Configuration
-import Hand as LegacyHand
-from PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy import Configuration
+from fpdb_3_legacy import Hand as LegacyHand
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 FIVE_CARD_DRAW_HH = """PokerStars Hand #35839231732:  5 Card Draw Limit ($0.05/$0.10 USD) - 2009/11/25 19:17:00 ET
 Table 'Test' 6-max Seat #1 is the button
@@ -125,7 +120,8 @@ Total pot $0.60 | Rake $0.05
 
 
 def _build_hand(hand_text=FIVE_CARD_DRAW_HH, category="fivedraw"):
-    config = Configuration.Config()
+    # The repository template, never the user's own ~/.fpdb configuration.
+    config = Configuration.Config(file="HUD_config.xml")
     hhc = PokerStars(config, in_path="-", sitename="PokerStars", autostart=False)
     gametype = {
         "type": "ring",

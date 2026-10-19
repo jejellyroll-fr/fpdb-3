@@ -228,7 +228,6 @@ ignore = [
 "fpdb_3_legacy/iPoker/base.py" = ["C901"]
 "fpdb_3_legacy/interlocks.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/loggingFpdb.py" = ["C901", "PLR0912", "PLR0915"]
-"fpdb_3_legacy/migrate_to_pyside6.py" = ["C901"]
 "fpdb_3_legacy/pt4_import.py" = ["C901"]
 "fpdb_3_legacy/pt4hud.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/ring_stats/__init__.py" = ["C901", "PLR0912", "PLR0915"]
@@ -242,7 +241,6 @@ ignore = [
 "fpdb_3_legacy/swc_http_adapter.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/swc_http_capture.py" = ["C901", "PLR0915"]
 "fpdb_3_legacy/swc_poker_console.py" = ["C901", "PLR0912", "PLR0915"]
-"fpdb_3_legacy/test_partypoker_fix.py" = ["PLR0912", "PLR0915"]
 "test/test_hand.py" = ["C901", "PLR0912", "PLR0915"]
 "test/test_pt4hud_import.py" = ["PLR0915"]
 "tests/helpers/mock_hand.py" = ["PLR0915"]
@@ -294,9 +292,6 @@ omit = [
     "*/test/*",
     "*/tests/*",
     "*/__pycache__/*",
-    "fpdb_3_legacy/test_*.py",
-    "fpdb_3_legacy/migrate_*.py",
-    "fpdb_3_legacy/validate_*.py",
 ]
 
 [tool.briefcase]

@@ -124,3 +124,21 @@ def test_profile_tables_are_complete() -> None:
     ):
         assert profile in PROFILE_ICONS
         assert profile in PROFILE_COLORS
+
+
+def test_do_stat_serves_the_playerprofile_virtual_stat() -> None:
+    from fpdb_3_legacy.Stats import do_stat, playerprofile
+
+    stat_dict = {1: {"n": 100, "vpip_opp": 100, "vpip": 12, "pfr_opp": 100, "pfr": 8}}
+    result = do_stat(stat_dict, 1, "playerprofile")
+
+    assert result is not None
+    assert result[0] == "nit"
+    assert result[1] == "🐌"
+    assert result[5] == "Player Profile"
+
+    # get_valid_stats calls the stat with no data at all.
+    result_none = playerprofile(None, None)
+    assert result_none[0] == "unknown"
+    assert result_none[1] == "❓"
+    assert result_none[5] == "Player Profile"

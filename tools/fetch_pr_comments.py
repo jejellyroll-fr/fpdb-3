@@ -7,7 +7,7 @@ import sys
 
 try:
     if len(sys.argv) < 2:
-        print("Usage: python3 fetch_comments.py <pr_number>")
+        print("Usage: python3 tools/fetch_pr_comments.py <pr_number>")
         sys.exit(1)
 
     pr_number = sys.argv[1]
