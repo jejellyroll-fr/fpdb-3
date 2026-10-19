@@ -65,7 +65,6 @@ jobs:
           tools/coverage_ratchet.py
           fpdb_3_legacy/__init__.py
           fpdb_3_legacy/equity.py
-          fpdb_3_legacy/fpdb_api.py
           fpdb_3_legacy/HandDataReporter.py
           fpdb_3_legacy/ImprovedErrorHandler.py
           fpdb_3_legacy/interlocks.py
@@ -251,7 +250,6 @@ jobs:
           fpdb_3_legacy/backfill_showdown.py
           fpdb_3_legacy/backfill_autonotes.py
           fpdb_3_legacy/card_path.py
-          fpdb_3_legacy/fpdb_cli.py
           fpdb_3_legacy/legacy_launcher.py
           fpdb_3_legacy/migrate_tests.py
           fpdb_3_legacy/migrate_to_pyside6.py
@@ -265,7 +263,6 @@ jobs:
           fpdb_3_legacy/debug_imports.py
           fpdb_3_legacy/debug_imports_v2.py
           fpdb_3_legacy/debug_partypoker_parser.py
-          fpdb_3_legacy/test_fpdb_api.py
           fpdb_3_legacy/test_draw_starting_hand.py
           fpdb_3_legacy/test_empty_data_popups.py
           fpdb_3_legacy/test_ftp_detection.py
