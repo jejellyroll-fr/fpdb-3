@@ -79,6 +79,15 @@ def _hand_numbers(db) -> list[int]:
     return [int(row[0]) for row in cursor.fetchall()]
 
 
+HUD_COUNTS = "SELECT gametypeId, playerId, seats, position, SUM(n), SUM(totalProfit) FROM HudCache GROUP BY 1, 2, 3, 4"
+
+
+def _hud_counts(db) -> list[tuple]:
+    cursor = db.get_cursor()
+    cursor.execute(HUD_COUNTS)
+    return sorted(tuple(row) for row in cursor.fetchall())
+
+
 def _row_counts(db) -> dict[str, int]:
     cursor = db.get_cursor()
     counts = {}
@@ -169,6 +178,8 @@ def test_removing_the_duplicates_matches_a_clean_import(open_copy) -> None:
     assert changed["Hands"] == len(SESSION_CODES)
     assert _hand_numbers(db) == _hand_numbers(reference)
     assert _row_counts(db) == _row_counts(reference)
+    # Rebuilt from the repaired hands, the HUD cache no longer counts the duplicates (#591).
+    assert _hud_counts(db) == _hud_counts(reference)
 
 
 def test_a_rehearsal_writes_nothing(open_copy) -> None:
@@ -242,7 +253,7 @@ def test_the_command_line_reports_backs_up_and_repairs(open_copy, monkeypatch, t
     assert repair_tool.main(["--apply", "--backup", str(backup)]) == 0
     out = capsys.readouterr().out
     assert "Backup:" in out and backup.exists()
-    assert "#591" in out
+    assert "were rebuilt" in out
     assert _hand_numbers(db) == _hand_numbers(reference)
 
 

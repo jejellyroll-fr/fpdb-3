@@ -34,9 +34,9 @@ stored only under their session code. Report-only by default, `--rehearse`
 rolls back, `--apply` backs a SQLite database up first. See
 [ipoker-session-code-repair.md](ipoker-session-code-repair.md).
 
-**What remains.** The HUD and session caches keep one extra hand per affected
-file. They can be repaired once a cache rebuild reproduces what the import
-writes (#591); iPoker's gametype attribution (#592) has to be right first.
+**What remains.** The tool now rebuilds HudCache, CardsCache and
+PositionsCache (#591). SessionsCache and TourneysCache keep one extra hand per
+affected file until they can be rebuilt (#598).
 
 ---
 

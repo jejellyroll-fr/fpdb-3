@@ -44,21 +44,12 @@ then add `--i-have-a-backup`.
 ## What it changes, and what it does not
 
 It deletes the stale hands from every table keyed on a hand — the same list
-`tools/cleanup_ipoker_anon_players.py` uses — renumbers the lone ones, and
-drops the analytics aggregates, which are recomputed from the hands on the
-next read.
+`tools/cleanup_ipoker_anon_players.py` uses — renumbers the lone ones, drops
+the analytics aggregates, which are recomputed from the hands on the next read,
+and rebuilds **HudCache, CardsCache and PositionsCache** from the repaired
+hands, which reproduces what a clean import writes (#591).
 
-It does **not** touch HudCache, SessionsCache, TourneysCache, CardsCache or
-PositionsCache. Those keep the removed hand's contribution: **one extra hand
-per affected file**, in the HUD and in the session caches. Two open bugs
-prevent a correct repair today:
-
-- [#591](https://github.com/jejellyroll-fr/fpdb-3/issues/591): rebuilding a
-  cache does not reproduce what the import wrote, and SessionsCache and
-  TourneysCache have no rebuild at all;
-- [#592](https://github.com/jejellyroll-fr/fpdb-3/issues/592): iPoker hands are
-  stored under the wrong gametype, so the cache rows a hand fed cannot be found
-  reliably.
-
-Once #591 is fixed, the caches are repaired by rebuilding them after this tool
-has run.
+SessionsCache and TourneysCache have no rebuild yet
+([#598](https://github.com/jejellyroll-fr/fpdb-3/issues/598)): they keep the
+removed hand's contribution, **one extra hand per affected file**, in the
+session statistics.

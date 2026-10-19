@@ -41,6 +41,10 @@ SEED_SESSION = (
 HANDS = "SELECT siteHandNo, gametypeId, sessionId FROM Hands ORDER BY siteHandNo"
 TOURNEYS = "SELECT id, sessionId FROM Tourneys ORDER BY id"
 HAND_COUNT = "SELECT COUNT(*) FROM Hands"
+HUD_COUNTS = (
+    "SELECT gametypeId, playerId, seats, position, SUM(n), SUM(totalProfit) "
+    "FROM HudCache GROUP BY gametypeId, playerId, seats, position ORDER BY gametypeId, playerId, seats, position"
+)
 TOUR_GAMETYPE = "SELECT id FROM Gametypes WHERE type = 'tour'"
 FIVE_CARD_HAND = "SELECT id FROM Hands WHERE siteHandNo = 3422554305"
 IPOKER_HOLDEM_RING = (
@@ -149,6 +153,10 @@ def test_the_repair_matches_a_clean_import(open_copy) -> None:
 
     assert _rows(damaged, HANDS) == _rows(clean, HANDS)
     assert _rows(damaged, TOURNEYS) == _rows(clean, TOURNEYS)
+    # Rebuilt from the repaired hands, HudCache matches too -- the tournament
+    # rows the damaged import never wrote included (#591).
+    assert _rows(damaged, HUD_COUNTS) == _rows(clean, HUD_COUNTS)
+    assert repair_tool.survey(damaged, repair_tool.ipoker_sites(config)).hud_shortfall == {}
 
 
 def test_a_clean_database_needs_nothing(open_copy) -> None:
