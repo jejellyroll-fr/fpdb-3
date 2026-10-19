@@ -97,6 +97,12 @@ re_char = re.compile("[^a-zA-Z]")
 GAMEINFO_CACHE_SIZE = 2000
 GAMEINFO_CACHE_TTL = 3600
 
+# Every SQLite connection runs in WAL mode. With synchronous=OFF a crash of the
+# operating system or a power cut can corrupt the database file, not only lose
+# the last transactions; in WAL mode NORMAL is corruption-safe and still skips
+# the fsync on each commit (it syncs at checkpoints), so imports stay fast (#436).
+SQLITE_SYNCHRONOUS_PRAGMA = "PRAGMA synchronous=NORMAL"
+
 #    FreePokerTools modules
 
 
@@ -729,8 +735,8 @@ class Database(
                 "PRAGMA journal_mode=WAL",
             )  # use memory for temp tables/indexes
             self.cursor.execute(
-                "PRAGMA synchronous=0",
-            )  # don't wait for file writes to finish
+                SQLITE_SYNCHRONOUS_PRAGMA,
+            )  # crash-safe in WAL mode, see SQLITE_SYNCHRONOUS_PRAGMA
             self.cursor.execute(
                 "PRAGMA busy_timeout=60000",
             )  # wait up to 60 seconds for locks
@@ -988,7 +994,7 @@ class Database(
         )
         conn.execute("PRAGMA busy_timeout=60000")
         conn.execute("PRAGMA journal_mode=WAL")
-        conn.execute("PRAGMA synchronous=0")
+        conn.execute(SQLITE_SYNCHRONOUS_PRAGMA)
         conn.create_function("floor", 1, math.floor)
         conn.create_function("sqrt", 1, math.sqrt)
         tmp = sqlitemath()
