@@ -355,3 +355,23 @@ def test_a_file_name_shared_by_two_histories_is_ambiguous(open_copy) -> None:
 
     assert found.misclassified == {}
     assert any("100BB Feldkirch 10, 488784806" in line for line in found.unresolved)
+
+
+def test_a_failed_cache_rebuild_leaves_everything_as_it_was(open_copy, monkeypatch) -> None:
+    """The repaired hands and the three rebuilds are one transaction."""
+    config, damaged = open_copy("damaged")
+    before = (_rows(damaged, HANDS), _rows(damaged, TOURNEYS), _rows(damaged, HUD_COUNTS))
+    found = repair_tool.survey(damaged, repair_tool.ipoker_sites(config))
+    rebuild = damaged.rebuild_cache
+
+    def failing(h_start, v_start, table="HudCache", ttid=None, wmid=None, commit=True):
+        if table == "PositionsCache":
+            raise RuntimeError("connection lost")
+        rebuild(h_start, v_start, table, ttid, wmid, commit)
+
+    monkeypatch.setattr(damaged, "rebuild_cache", failing)
+
+    with pytest.raises(RuntimeError):
+        repair_tool.repair(damaged, found, commit=True)
+
+    assert (_rows(damaged, HANDS), _rows(damaged, TOURNEYS), _rows(damaged, HUD_COUNTS)) == before

@@ -10,6 +10,7 @@ each cache and require the rows the import wrote.
 from __future__ import annotations
 
 import shutil
+import time
 from pathlib import Path
 
 import pytest
@@ -153,3 +154,43 @@ def test_the_action_enum_counters_follow_the_import() -> None:
     _insert, select = rebuild_stat_columns("sqlite", [faced])
 
     assert "in ('F', 'C', 'R')" in select
+
+
+TWISTER_DAYS = "SELECT DISTINCT styleKey FROM HudCache WHERE tourneyTypeId IS NOT NULL ORDER BY styleKey"
+
+
+@pytest.fixture
+def utc_machine(monkeypatch):
+    """Run as on a machine set to UTC, then give the process its own time zone back."""
+    monkeypatch.setenv("TZ", "UTC")
+    time.tzset()
+    yield
+    monkeypatch.undo()
+    time.tzset()
+
+
+def test_a_rebuild_puts_hands_near_midnight_in_the_import_s_day(tmp_path, utc_machine) -> None:
+    """HudCache buckets a hand into the player's day: UTC start minus day_start and the UTC offset.
+
+    The Twister hands start at 00:57 UTC; with day_start at one hour they belong
+    to the day before, as the import files them. The rebuild used to take the
+    UTC date and moved them to the next day.
+    """
+    config = _config(tmp_path)
+    Database(config).recreate_tables()
+    db = Database(config)
+    db.day_start = 1.0
+    importer = Importer(caller=None, settings={"testData": False, "threads": 1}, config=config, sql=None)
+    importer.database = db
+    importer.addImportFile(str(FILES[2]), "auto")
+    importer.runImport()
+    database = Database(config)
+    database.day_start = 1.0
+    imported = _rows(database, "HudCache")
+    cursor = database.get_cursor()
+    cursor.execute(TWISTER_DAYS)
+    assert cursor.fetchall() == [("d140406",)]
+
+    database.rebuild_cache(None, None, "HudCache")
+
+    _assert_same_rows(_rows(database, "HudCache"), imported)

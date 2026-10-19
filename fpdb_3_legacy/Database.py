@@ -1643,33 +1643,21 @@ class Database(
                         else 'E'
                    end                                            as hc_position""",
             )
+            # The day of the hand as storeHudCache takes it: its UTC start
+            # time moved back by the same offset, in whole minutes.
+            minutes = round(self.hud_day_offset().total_seconds() / 60)
             if self.backend == self.PGSQL:
-                query = query.replace(
-                    "<styleKey>",
-                    ",'d' || to_char(h.startTime, 'YYMMDD')",
-                )
-                query = query.replace(
-                    "<styleKeyGroup>",
-                    ",to_char(h.startTime, 'YYMMDD')",
-                )
+                day = "to_char(h.startTime - INTERVAL '" + str(minutes) + " minutes', 'YYMMDD')"
+                query = query.replace("<styleKey>", ",'d' || " + day)
+                query = query.replace("<styleKeyGroup>", "," + day)
             elif self.backend == self.SQLITE:
-                query = query.replace(
-                    "<styleKey>",
-                    ",'d' || substr(strftime('%Y%m%d', h.startTime),3,7)",
-                )
-                query = query.replace(
-                    "<styleKeyGroup>",
-                    ",substr(strftime('%Y%m%d', h.startTime),3,7)",
-                )
+                day = "substr(strftime('%Y%m%d', h.startTime, '" + f"{-minutes:+d}" + " minutes'),3,7)"
+                query = query.replace("<styleKey>", ",'d' || " + day)
+                query = query.replace("<styleKeyGroup>", "," + day)
             elif self.backend == self.MYSQL_INNODB:
-                query = query.replace(
-                    "<styleKey>",
-                    ",date_format(h.startTime, 'd%y%m%d')",
-                )
-                query = query.replace(
-                    "<styleKeyGroup>",
-                    ",date_format(h.startTime, 'd%y%m%d')",
-                )
+                day = "date_format(h.startTime - INTERVAL " + str(minutes) + " MINUTE, 'd%y%m%d')"
+                query = query.replace("<styleKey>", "," + day)
+                query = query.replace("<styleKeyGroup>", "," + day)
         else:
             query = query.replace(
                 "<hc_position>",
@@ -1831,7 +1819,7 @@ class Database(
         query = query.replace("<tourney_join_clause>", tourney_join).replace("<where_clause>", where)
         return self.replace_statscache(game_type, table, query)
 
-    def _rebuild_ring_cache(self, table, h_start, v_start, wmid) -> None:
+    def _rebuild_ring_cache(self, table, h_start, v_start, wmid, commit: bool = True) -> None:
         """Rebuild the cash half of a statistics cache."""
         if self.hero_ids is None:
             if wmid:
@@ -1853,10 +1841,11 @@ class Database(
                 + "   AND hp.tourneysPlayersId IS NULL)"
             )
         self.get_cursor().execute(self.rebuild_sql("ring", table, where))
-        self.commit()
+        if commit:
+            self.commit()
         # print ("Rebuild cache(cash) took %.1f seconds") % (time() - stime,)
 
-    def _rebuild_tourney_cache(self, table, h_start, v_start, ttid, wmid) -> None:
+    def _rebuild_tourney_cache(self, table, h_start, v_start, ttid, wmid, commit: bool = True) -> None:
         """Rebuild the tournament half of a statistics cache."""
         if ttid:
             where = f"WHERE t.tourneyTypeId = {ttid}<hero_where>"
@@ -1880,7 +1869,8 @@ class Database(
                 + "   AND hp.tourneysPlayersId >= 0)"
             )
         self.get_cursor().execute(self.rebuild_sql("tour", table, where))
-        self.commit()
+        if commit:
+            self.commit()
         # print ("Rebuild hudcache took %.1f seconds") % (time() - stime,)
 
     def rebuild_cache(
@@ -1890,18 +1880,25 @@ class Database(
         table="HudCache",
         ttid=None,
         wmid=None,
+        commit: bool = True,
     ) -> None:
-        """Clears hudcache and rebuilds from the individual handsplayers records."""
+        """Clears hudcache and rebuilds from the individual handsplayers records.
+
+        With ``commit=False`` nothing is committed: the clear and both inserts
+        stay in the caller's transaction, which a maintenance tool commits or
+        rolls back together with its own changes.
+        """
         h_start, v_start = self._rebuild_prepare_heroes(h_start, v_start)
 
         if not ttid and not wmid:
             self.get_cursor().execute(self.sql.query[f"clear{table}"])
-            self.commit()
+            if commit:
+                self.commit()
 
         if not ttid:
-            self._rebuild_ring_cache(table, h_start, v_start, wmid)
+            self._rebuild_ring_cache(table, h_start, v_start, wmid, commit)
 
-        self._rebuild_tourney_cache(table, h_start, v_start, ttid, wmid)
+        self._rebuild_tourney_cache(table, h_start, v_start, ttid, wmid, commit)
 
     # end def rebuild_cache
 

@@ -273,3 +273,23 @@ def test_aggregates_are_dropped_before_any_hand_is_deleted(open_copy, monkeypatc
 
     repair_tool.repair(db, found, commit=True)
     assert hands_when_invalidated == [hands_before]
+
+
+def test_a_failed_cache_rebuild_leaves_everything_as_it_was(open_copy, monkeypatch) -> None:
+    """The deletions and the three rebuilds are one transaction."""
+    config, db = open_copy("duplicated")
+    before = (_hand_numbers(db), _row_counts(db), _hud_counts(db))
+    found = repair_tool.survey(db, repair_tool.ipoker_sites(config), [])
+    rebuild = db.rebuild_cache
+
+    def failing(h_start, v_start, table="HudCache", ttid=None, wmid=None, commit=True):
+        if table == "PositionsCache":
+            raise RuntimeError("connection lost")
+        rebuild(h_start, v_start, table, ttid, wmid, commit)
+
+    monkeypatch.setattr(db, "rebuild_cache", failing)
+
+    with pytest.raises(RuntimeError):
+        repair_tool.repair(db, found, commit=True)
+
+    assert (_hand_numbers(db), _row_counts(db), _hud_counts(db)) == before

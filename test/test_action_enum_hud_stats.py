@@ -277,6 +277,7 @@ class TestCacheRebuild:
         db = Database.Database.__new__(Database.Database)
         db.backend = Database.Database.SQLITE
         db.build_full_hudcache = True
+        db.day_start = 0.0
         db.sql = sql
         db.connection = conn
         db.hero_ids = None

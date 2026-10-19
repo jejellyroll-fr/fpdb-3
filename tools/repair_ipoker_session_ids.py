@@ -280,17 +280,19 @@ def repair(db, found: Survey, *, commit: bool) -> dict[str, int]:
         for rename in found.renames:
             cursor.execute(_sql(RENAME_HAND, ph), (rename.gamecode, rename.hand.id))
             changed["Hands renumbered"] = changed.get("Hands renumbered", 0) + 1
+        if found.duplicates:
+            # In the same transaction as the deletions: a failure part-way
+            # leaves neither removed hands nor a half-rebuilt cache behind.
+            for table in REBUILT_CACHES:
+                db.rebuild_cache(None, None, table, commit=False)
+            changed["Caches rebuilt"] = len(REBUILT_CACHES)
     except Exception:
         db.connection.rollback()
         raise
-    if not commit:
+    if commit:
+        db.connection.commit()
+    else:
         db.connection.rollback()
-        return changed
-
-    db.connection.commit()
-    if found.duplicates:
-        for table in REBUILT_CACHES:
-            db.rebuild_cache(None, None, table)
     return changed
 
 

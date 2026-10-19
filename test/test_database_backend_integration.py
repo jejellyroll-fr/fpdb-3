@@ -447,6 +447,7 @@ def test_the_generated_cache_rebuild_runs_on_the_live_schema(backend: str, table
     host.backend = dialects.dialect_for_server(backend).backend_id
     host.sql = Sql(db_server=backend)
     host.build_full_hudcache = True
+    host.day_start = 0.0
     query = host.rebuild_sql(game_type, table, REBUILD_WHERE[game_type])
 
     with _connection(backend) as connection:

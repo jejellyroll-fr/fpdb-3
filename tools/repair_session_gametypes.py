@@ -383,19 +383,21 @@ def repair(db, found: Survey, *, commit: bool, delete_misclassified: bool = Fals
     changed: dict[str, int] = defaultdict(int)
     try:
         _write(db, found, to_delete, changed)
+        if moving:
+            # Rebuilt from the repaired hands, in the same transaction: the
+            # hands now sit under their own gametype, the rows the damaged
+            # import never wrote come back, and a failure part-way leaves
+            # neither a repaired hand nor a half-rebuilt cache behind.
+            for table in REBUILT_CACHES:
+                db.rebuild_cache(None, None, table, commit=False)
+            changed["Caches rebuilt"] = len(REBUILT_CACHES)
     except Exception:
         db.connection.rollback()
         raise
-    if not commit:
+    if commit:
+        db.connection.commit()
+    else:
         db.connection.rollback()
-        return dict(changed)
-    db.connection.commit()
-    if moving:
-        # Rebuilt from the repaired hands: the hands now sit under their own
-        # gametype, and the rows the damaged import never wrote come back.
-        for table in REBUILT_CACHES:
-            db.rebuild_cache(None, None, table)
-        changed["Caches rebuilt"] = len(REBUILT_CACHES)
     return dict(changed)
 
 
