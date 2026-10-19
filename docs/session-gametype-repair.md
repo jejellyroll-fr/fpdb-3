@@ -40,6 +40,11 @@ A hand whose players do not agree on one game type, or that falls in more than
 one session, is listed under *Left alone* and not touched. Hands imported
 without session caching are not affected and are not changed.
 
+If you already imported the same files again, those hands are in the database
+twice: the damaged row and a correct one. The tool keeps the correct one and
+deletes the damaged copy (the HUD and session caches keep counting it until
+#591 is fixed).
+
 `--apply` copies a SQLite database next to itself before writing
 (`<database>.before-595-<date>`), or to `--backup PATH`. PostgreSQL and MySQL
 cannot be copied from here: back the database up with the server's own tools,

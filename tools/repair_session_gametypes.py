@@ -47,6 +47,7 @@ from bisect import bisect_right
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
+from itertools import accumulate
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -58,8 +59,9 @@ from fpdb_3_legacy.Database import Database  # noqa: E402
 from tools.cleanup_ipoker_anon_players import DELETE_BY_HAND, _sql, ipoker_sites  # noqa: E402
 
 SELECT_UNSESSIONED_HANDS = (
-    "SELECT id, gametypeId, startTime, tourneyId, tableName FROM Hands WHERE sessionId IS NULL ORDER BY id"
+    "SELECT id, gametypeId, startTime, tourneyId, tableName, siteHandNo FROM Hands WHERE sessionId IS NULL ORDER BY id"
 )
+SELECT_SAME_HAND = "SELECT id FROM Hands WHERE siteHandNo = %s AND gametypeId = %s"
 SELECT_UNSESSIONED_SEATS = (
     "SELECT hp.handId, hp.playerId FROM HandsPlayers hp JOIN Hands h ON h.id = hp.handId WHERE h.sessionId IS NULL"
 )
@@ -71,7 +73,7 @@ SELECT_GAMETYPES = (
 )
 SELECT_UNSESSIONED_TOURNEYS = "SELECT id FROM Tourneys WHERE sessionId IS NULL"
 SELECT_TOURNEY_HANDS = "SELECT id, tourneyId, startTime, sessionId FROM Hands WHERE tourneyId IS NOT NULL"
-SELECT_HANDS_FOR_TABLES = "SELECT id, gametypeId, tableName, sessionId FROM Hands"
+SELECT_HANDS_FOR_TABLES = "SELECT h.id, h.gametypeId, h.tableName, f.file FROM Hands h JOIN Files f ON f.id = h.fileId"
 SELECT_SEATS_PER_HAND = "SELECT h.id, h.gametypeId, COUNT(*) FROM HandsPlayers hp JOIN Hands h ON h.id = hp.handId GROUP BY h.id, h.gametypeId"
 SELECT_HUD_COUNTS = "SELECT gametypeId, SUM(n) FROM HudCache GROUP BY gametypeId"
 
@@ -86,6 +88,7 @@ IPOKER_NETWORK = "iPoker"
 @dataclass(frozen=True)
 class HandFix:
     hand_id: int
+    site_hand_no: int
     stored_gametype: int
     gametype: int
     session: int
@@ -94,15 +97,18 @@ class HandFix:
 @dataclass
 class Survey:
     hand_fixes: list[HandFix] = field(default_factory=list)
+    # Damaged rows whose hand is already stored under its right gametype --
+    # a re-import of the damaged database stored it again.
+    reimported: list[HandFix] = field(default_factory=list)
     tourney_fixes: dict[int, int] = field(default_factory=dict)
-    misclassified: dict[str, list[int]] = field(default_factory=dict)
+    misclassified: dict[tuple[str, str], list[int]] = field(default_factory=dict)
     hud_shortfall: dict[int, tuple[int, int]] = field(default_factory=dict)
     unresolved: list[str] = field(default_factory=list)
     cross_check_mismatches: int = 0
 
     @property
     def writes(self) -> bool:
-        return bool(self.hand_fixes or self.tourney_fixes)
+        return bool(self.hand_fixes or self.reimported or self.tourney_fixes)
 
 
 # ---------------------------------------------------------------------------
@@ -116,11 +122,14 @@ class SessionWindows:
     def __init__(self, rows) -> None:
         self.rows = [(start, end, int(session_id)) for session_id, start, end in rows]
         self.starts = [start for start, _end, _id in self.rows]
+        # The latest end among the windows up to each index: once it falls
+        # before the moment, no earlier window can contain it.
+        self.reach = list(accumulate((end for _start, end, _id in self.rows), max))
 
     def containing(self, moment: datetime) -> list[int]:
         found = []
         index = bisect_right(self.starts, moment) - 1
-        while index >= 0:
+        while index >= 0 and self.reach[index] >= moment:
             start, end, session_id = self.rows[index]
             if start <= moment <= end:
                 found.append(session_id)
@@ -161,7 +170,7 @@ def find_hand_fixes(db, found: Survey) -> None:
     for hand_id, player_id in _fetch(db, SELECT_UNSESSIONED_SEATS):
         seats[int(hand_id)].append(int(player_id))
 
-    for hand_id, stored_gametype, start, _tourney, table in _fetch(db, SELECT_UNSESSIONED_HANDS):
+    for hand_id, stored_gametype, start, _tourney, table, site_hand_no in _fetch(db, SELECT_UNSESSIONED_HANDS):
         sessions = windows.containing(start)
         if not sessions:
             # Imported without session caching: nothing was overwritten.
@@ -179,7 +188,33 @@ def find_hand_fixes(db, found: Survey) -> None:
         (session,) = sessions
         if int(stored_gametype) not in (gametype, session):
             found.cross_check_mismatches += 1
-        found.hand_fixes.append(HandFix(int(hand_id), int(stored_gametype), gametype, session))
+        found.hand_fixes.append(HandFix(int(hand_id), int(site_hand_no), int(stored_gametype), gametype, session))
+    _set_aside_reimported(db, found)
+
+
+def _set_aside_reimported(db, found: Survey) -> None:
+    """Keep one row per hand: a damaged row whose hand exists under the right gametype goes.
+
+    Re-importing a damaged database stored those hands again, since the
+    duplicate check could not find them. Moving the damaged row onto the
+    gametype the other copy already holds would break the siteHandNo unique
+    index; the damaged copy is the one to remove.
+    """
+    damaged = {fix.hand_id for fix in found.hand_fixes}
+    groups: dict[tuple[int, int], list[HandFix]] = defaultdict(list)
+    for fix in found.hand_fixes:
+        groups[(fix.site_hand_no, fix.gametype)].append(fix)
+    keep: list[HandFix] = []
+    for (site_hand_no, gametype), fixes in groups.items():
+        fixes.sort(key=lambda fix: fix.hand_id)
+        stored = [int(row[0]) for row in _fetch(db, SELECT_SAME_HAND, (site_hand_no, gametype))]
+        if any(hand_id not in damaged for hand_id in stored):
+            found.reimported.extend(fixes)
+        else:
+            keep.append(fixes[0])
+            found.reimported.extend(fixes[1:])
+    found.hand_fixes = sorted(keep, key=lambda fix: fix.hand_id)
+    found.reimported.sort(key=lambda fix: fix.hand_id)
 
 
 def find_tourney_fixes(db, found: Survey) -> None:
@@ -188,8 +223,11 @@ def find_tourney_fixes(db, found: Survey) -> None:
     if not missing:
         return
     repaired = {fix.hand_id: fix.session for fix in found.hand_fixes}
+    removed = {fix.hand_id for fix in found.reimported}
     last: dict[int, tuple[datetime, int]] = {}
     for hand_id, tourney_id, start, session in _fetch(db, SELECT_TOURNEY_HANDS):
+        if int(hand_id) in removed:
+            continue
         session = repaired.get(int(hand_id), session)
         if int(tourney_id) in missing and session is not None:
             current = last.get(int(tourney_id))
@@ -199,20 +237,28 @@ def find_tourney_fixes(db, found: Survey) -> None:
 
 
 def find_misclassified_five_card_omaha(db, sites: set[str], found: Survey) -> None:
-    """iPoker tables holding 5 card Omaha hands and hands under any other game."""
+    """iPoker files whose table holds 5 card Omaha hands and hands under another game.
+
+    The bug only ever split one session file: its first hand was read as 5 card
+    Omaha and the rest as something else. Grouping by file as well as table keeps
+    a table name reused elsewhere, for another game, out of it.
+    """
     gametypes = {int(row[0]): row for row in _fetch(db, SELECT_GAMETYPES)}
     ipoker = {gid for gid, row in gametypes.items() if row[6] in sites | {IPOKER_NETWORK}}
     repaired = {fix.hand_id: fix.gametype for fix in found.hand_fixes}
-    tables: dict[str, dict[int, list[int]]] = defaultdict(lambda: defaultdict(list))
-    for hand_id, stored, table, _session in _fetch(db, SELECT_HANDS_FOR_TABLES):
+    removed = {fix.hand_id for fix in found.reimported}
+    groups: dict[tuple[str, str], dict[int, list[int]]] = defaultdict(lambda: defaultdict(list))
+    for hand_id, stored, table, file_name in _fetch(db, SELECT_HANDS_FOR_TABLES):
+        if int(hand_id) in removed:
+            continue
         gametype = repaired.get(int(hand_id), int(stored))
         if gametype in ipoker:
-            tables[str(table)][gametype].append(int(hand_id))
-    for table, by_gametype in sorted(tables.items()):
+            groups[(str(file_name), str(table))][gametype].append(int(hand_id))
+    for key, by_gametype in sorted(groups.items()):
         five_card = [gid for gid in by_gametype if gametypes[gid][2] == FIVE_CARD_OMAHA]
         others = [hand for gid, hands in by_gametype.items() if gid not in five_card for hand in hands]
         if five_card and others:
-            found.misclassified[table] = sorted(others)
+            found.misclassified[key] = sorted(others)
 
 
 def find_hud_shortfall(db, found: Survey) -> None:
@@ -222,9 +268,11 @@ def find_hud_shortfall(db, found: Survey) -> None:
         # The HUD cache is not kept for this database; nothing to compare.
         return
     repaired = {fix.hand_id: fix.gametype for fix in found.hand_fixes}
+    removed = {fix.hand_id for fix in found.reimported}
     seats: dict[int, int] = defaultdict(int)
     for hand_id, stored, count in _fetch(db, SELECT_SEATS_PER_HAND):
-        seats[repaired.get(int(hand_id), int(stored))] += int(count)
+        if int(hand_id) not in removed:
+            seats[repaired.get(int(hand_id), int(stored))] += int(count)
     for gametype_id, count in sorted(seats.items()):
         cached = hud.get(gametype_id, 0)
         if cached < count:
@@ -248,9 +296,10 @@ def survey(db, sites: set[str]) -> Survey:
 def repair(db, found: Survey, *, commit: bool, delete_misclassified: bool = False) -> dict[str, int]:
     """Write the fixes in one transaction; ``commit=False`` rolls it back."""
     ph = db.sql.query["placeholder"]
-    to_delete = (
-        sorted({hand for hands in found.misclassified.values() for hand in hands}) if delete_misclassified else []
+    misclassified = (
+        {hand for hands in found.misclassified.values() for hand in hands} if delete_misclassified else set()
     )
+    to_delete = sorted(misclassified | {fix.hand_id for fix in found.reimported})
     if commit and (found.hand_fixes or to_delete):
         # Moving or deleting hands changes the rows stored analytics counters
         # were built from; drop them first so no failure below leaves them stale.
@@ -258,6 +307,13 @@ def repair(db, found: Survey, *, commit: bool, delete_misclassified: bool = Fals
     cursor = db.get_cursor()
     changed: dict[str, int] = defaultdict(int)
     try:
+        # Deletions first: a re-imported copy's damaged twin must be gone
+        # before its key is given back to the row that stays.
+        for hand_id in to_delete:
+            for table, statement in DELETE_BY_HAND:
+                cursor.execute(_sql(statement, ph), (hand_id,))
+                if cursor.rowcount and cursor.rowcount > 0:
+                    changed[f"{table} deleted"] += cursor.rowcount
         for fix in found.hand_fixes:
             cursor.execute(_sql(UPDATE_HAND, ph), (fix.gametype, fix.session, fix.hand_id))
             changed["Hands repaired"] += 1
@@ -266,11 +322,6 @@ def repair(db, found: Survey, *, commit: bool, delete_misclassified: bool = Fals
         for tourney_id, session in found.tourney_fixes.items():
             cursor.execute(_sql(UPDATE_TOURNEY, ph), (session, tourney_id))
             changed["Tourneys given their session"] += 1
-        for hand_id in to_delete:
-            for table, statement in DELETE_BY_HAND:
-                cursor.execute(_sql(statement, ph), (hand_id,))
-                if cursor.rowcount and cursor.rowcount > 0:
-                    changed[f"{table} deleted"] += cursor.rowcount
     except Exception:
         db.connection.rollback()
         raise
@@ -305,6 +356,11 @@ def report(found: Survey) -> None:
     print(f"{len(found.hand_fixes)} hand(s) without their session; {len(moved)} of them under the wrong gametype.")
     if found.cross_check_mismatches:
         print(f"  {found.cross_check_mismatches} stored gametype(s) were neither the session nor the recovered one.")
+    if found.reimported:
+        print(
+            f"{len(found.reimported)} damaged row(s) whose hand was imported again under its right gametype: "
+            "the damaged copy is deleted (the HUD and session caches keep counting it, #591)."
+        )
     print(f"{len(found.tourney_fixes)} tournament(s) without their session.")
     if found.unresolved:
         print("\nLeft alone:")
@@ -313,8 +369,8 @@ def report(found: Survey) -> None:
     if found.misclassified:
         count = sum(len(hands) for hands in found.misclassified.values())
         print(f"\n{count} iPoker 5 card Omaha hand(s) stored under another game, at:")
-        for table, table_hands in found.misclassified.items():
-            print(f"  {table}: {len(table_hands)} hand(s)")
+        for (file_name, table), table_hands in found.misclassified.items():
+            print(f"  {table} (file {file_name}): {len(table_hands)} hand(s)")
         print("  Their amounts are wrong too: delete them (--delete-misclassified) and re-import those files.")
     if found.hud_shortfall:
         print("\nHudCache counts fewer player-hands than the hands table for:")
