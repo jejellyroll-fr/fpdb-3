@@ -60,15 +60,6 @@ python fpdb_3_legacy/fpdb.pyw
 
 # HUD process
 python fpdb_3_legacy/HUD_main.pyw
-
-# Legacy CLI
-python fpdb_3_legacy/fpdb_cli.py --help
-
-# Legacy REST API launcher
-python fpdb_3_legacy/run_fpdb_api.py
-
-# Web launcher
-python fpdb_3_legacy/run_fpdb_web.py
 ```
 
 ### Linux / Wayland
@@ -102,8 +93,6 @@ fpdb_3_legacy/
 ├── Hand.py, Database.py  # core hand model + DB layer
 ├── Hud.py, HUD_main.pyw  # HUD overlay
 ├── fpdb.pyw              # desktop GUI entry point
-├── fpdb_cli.py           # CLI entry point
-├── run_fpdb_*.py         # api / web / full launchers
 └── legacy_launcher.py    # `fpdb_3_legacy` console script
 ```
 

@@ -28,7 +28,6 @@ dependencies = [
     "aiohttp>=3.13.2",
     "cachetools==5.5.0",
     "xlrd==2.0.1",
-    "playwright>=1.40.0",
     "pymysql>=1.1.0",
     "defusedxml>=0.7.1",
     "pyqtgraph>=0.13.0",
@@ -78,6 +77,12 @@ linux = ["xcffib==1.5.0", "PySide6>=6.8.1"]
 macos = ["PySide6>=6.8.1"]
 postgresql = ["psycopg[binary]>=3.1.0"]
 mysql = ["mysqlclient==2.2.4"]
+# The SwC Poker HTTP capture drives a browser through Playwright. It is the only
+# consumer, it runs from a source install only (it is launched as
+# `sys.executable swc_http_capture.py`), and it also needs
+# `playwright install chromium`, so the library stays out of every other install
+# and out of the packaged builds (#439).
+swc = ["playwright>=1.40.0"]
 
 [project.scripts]
 fpdb_3_legacy = "fpdb_3_legacy.legacy_launcher:main"
@@ -228,7 +233,6 @@ ignore = [
 "fpdb_3_legacy/iPoker/base.py" = ["C901"]
 "fpdb_3_legacy/interlocks.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/loggingFpdb.py" = ["C901", "PLR0912", "PLR0915"]
-"fpdb_3_legacy/migrate_to_pyside6.py" = ["C901"]
 "fpdb_3_legacy/pt4_import.py" = ["C901"]
 "fpdb_3_legacy/pt4hud.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/ring_stats/__init__.py" = ["C901", "PLR0912", "PLR0915"]
@@ -242,7 +246,6 @@ ignore = [
 "fpdb_3_legacy/swc_http_adapter.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/swc_http_capture.py" = ["C901", "PLR0915"]
 "fpdb_3_legacy/swc_poker_console.py" = ["C901", "PLR0912", "PLR0915"]
-"fpdb_3_legacy/test_partypoker_fix.py" = ["PLR0912", "PLR0915"]
 "test/test_hand.py" = ["C901", "PLR0912", "PLR0915"]
 "test/test_pt4hud_import.py" = ["PLR0915"]
 "tests/helpers/mock_hand.py" = ["PLR0915"]
@@ -294,9 +297,6 @@ omit = [
     "*/test/*",
     "*/tests/*",
     "*/__pycache__/*",
-    "fpdb_3_legacy/test_*.py",
-    "fpdb_3_legacy/migrate_*.py",
-    "fpdb_3_legacy/validate_*.py",
 ]
 
 [tool.briefcase]
@@ -320,7 +320,6 @@ requires = [
     "aiohttp>=3.13.2",
     "cachetools==5.5.0",
     "xlrd==2.0.1",
-    "playwright>=1.40.0",
     "defusedxml>=0.7.1",
     # Read by the Merge and Winamax summary parsers.
     "beautifulsoup4==4.12.3",

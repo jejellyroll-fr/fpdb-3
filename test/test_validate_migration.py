@@ -14,7 +14,7 @@ import dis
 
 import pytest
 
-from fpdb_3_legacy import validate_migration
+from tools import validate_migration
 
 
 def test_every_probe_actually_imports() -> None:

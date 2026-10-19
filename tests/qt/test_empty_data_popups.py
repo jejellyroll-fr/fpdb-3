@@ -1,12 +1,9 @@
-#!/usr/bin/env python3
 import unittest
 from typing import cast
 from unittest.mock import MagicMock, patch
 
+import pytest
 from PySide6.QtWidgets import QApplication
-
-# Ensure QApplication is initialized for widgets
-app = QApplication.instance() or QApplication([])
 
 from fpdb_3_legacy.GuiGraphViewer import GuiGraphViewer
 from fpdb_3_legacy.GuiRingPlayerStats import GuiRingPlayerStats
@@ -14,8 +11,25 @@ from fpdb_3_legacy.GuiSessionViewer import GuiSessionViewer
 from fpdb_3_legacy.GuiTourneyGraphViewer import GuiTourneyGraphViewer
 from fpdb_3_legacy.GuiTourneyPlayerStats import GuiTourneyPlayerStats
 
+pytestmark = pytest.mark.qt
+
+
+def _ensure_application() -> None:
+    """Create the QApplication when a test runs, not when the module is imported.
+
+    pytest imports this module even when the default ``-m "not qt"`` run then
+    deselects every test in it; constructing the application at import time
+    loads a display platform plugin, which aborts on a headless machine.
+    """
+    if QApplication.instance() is None:
+        QApplication([])
+
 
 class TestEmptyDataPopups(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        _ensure_application()
+
     def setUp(self):
         # Create standard mocks for db, config, sql
         self.mock_cursor = MagicMock()
@@ -95,7 +109,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer.filters.getGraphOps.return_value = ["$"]
 
         # Mock getRingProfitGraph to return empty/None
-        viewer.getRingProfitGraph = MagicMock(return_value=(None, None, None, None))  # type: ignore[method-assign]
+        viewer.getRingProfitGraph = MagicMock(return_value=(None, None, None, None, None))  # type: ignore[method-assign]
 
         # Run generateGraph
         viewer.generateGraph(None)
@@ -126,40 +140,29 @@ class TestEmptyDataPopups(unittest.TestCase):
         mock_exec.assert_called_once()
         cast(MagicMock, viewer.db.rollback).assert_called()
 
-    @patch("PySide6.QtWidgets.QMessageBox.exec")
-    def test_gui_session_viewer_empty(self, mock_exec):
-        """Test GuiSessionViewer shows QMessageBox and returns early when data is empty."""
+    def test_gui_session_viewer_empty(self):
+        """An empty session query shows the no-data notice, clears the graph and rolls back.
+
+        The query runs in a DbWorker; the test plays the worker's part by
+        calling the slot connected to ``finished`` with no rows.
+        """
         viewer = GuiSessionViewer(self.mock_conf, self.mock_sql, None, None, self.mock_colors)
 
-        # Mock filters
         viewer.filters = MagicMock()
-        viewer.filters.getSites.return_value = ["PokerStars"]
-        viewer.filters.getHeroes.return_value = {"PokerStars": "jeje_sat"}
-        viewer.filters.getSiteIds.return_value = {"PokerStars": 2}
-        viewer.filters.getGames.return_value = ["holdem"]
-        viewer.filters.getCurrencies.return_value = ["USD"]
-        viewer.filters.getLimits.return_value = ["All"]
-        viewer.filters.getSeats.return_value = None
-
-        # Mock generateDatasets to return empty lists
-        viewer.generateDatasets = MagicMock(return_value=([], []))  # type: ignore[method-assign]
-
-        # Mock clearGraphData
+        viewer.filters.getDates.return_value = ("2026-01-01 00:00:00", "2026-01-31 23:59:59")
+        viewer.filters.display = {}
+        viewer.filters.get_limits_where_clause.return_value = ""
         viewer.clearGraphData = MagicMock()  # type: ignore[method-assign]
 
-        # Run createStatsPane
-        viewer.createStatsPane(
-            MagicMock(),
-            [8],
-            [2],
-            ["holdem"],
-            ["USD"],
-            ["All"],
-            None,
-        )
+        with (
+            patch("fpdb_3_legacy.GuiSessionViewer.DbWorker") as worker_class,
+            patch("fpdb_3_legacy.GuiSessionViewer.gui_empty_state.show_no_data") as show_no_data,
+        ):
+            viewer.createStatsPane(MagicMock(), [8], [2], ["holdem"], ["USD"], ["All"], None)
+            on_finished = worker_class.return_value.finished.connect.call_args.args[0]
+            on_finished("sessionStats", [], [])
 
-        # Assert QMessageBox was shown and graph cleared
-        mock_exec.assert_called_once()
+        show_no_data.assert_called_once()
         viewer.clearGraphData.assert_called_once()
         cast(MagicMock, viewer.db.rollback).assert_called()
 
@@ -350,6 +353,10 @@ class TestEmptyDataPopups(unittest.TestCase):
 
 
 class TestHudImportExport(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        _ensure_application()
+
     def setUp(self):
         import xml.dom.minidom
 
@@ -400,7 +407,9 @@ class TestHudImportExport(unittest.TestCase):
     @patch("PySide6.QtWidgets.QFileDialog.getSaveFileName")
     @patch("PySide6.QtWidgets.QMessageBox.question")
     @patch("PySide6.QtWidgets.QMessageBox.information")
-    def test_hud_export(self, mock_info, mock_question, mock_save):
+    @patch("PySide6.QtWidgets.QMessageBox.critical")
+    @patch("PySide6.QtWidgets.QMessageBox.warning")
+    def test_hud_export(self, mock_warning, mock_critical, mock_info, mock_question, mock_save):
         import os
         import tempfile
         import xml.dom.minidom
@@ -439,7 +448,7 @@ class TestHudImportExport(unittest.TestCase):
         prefs.profile_combo.setCurrentIndex(0)
 
         # Mock LayoutSelectionDialog exec to accept and return ps_default
-        with patch("fpdb_3_legacy.ModernHudPreferences.LayoutSelectionDialog") as MockDlgClass:
+        with patch("fpdb_3_legacy.modern_hud_preferences.main_dialog.LayoutSelectionDialog") as MockDlgClass:
             mock_dlg = MockDlgClass.return_value
             mock_dlg.exec.return_value = QDialog.DialogCode.Accepted
             mock_dlg.get_selected_layouts.return_value = ["ps_default"]

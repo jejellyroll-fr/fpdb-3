@@ -15,9 +15,6 @@ import sys
 import unittest
 from pathlib import Path
 
-# Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent))
-
 import numpy as np
 from numpy import append, cumsum, diff, nonzero
 
@@ -114,7 +111,7 @@ class TestNumPyMigration(unittest.TestCase):
         from numpy import var
 
         data = [1, 2, 3, 4, 5]
-        variance = var(data)
+        variance = float(var(data))
 
         # Variance de [1,2,3,4,5] = 2.0
         self.assertAlmostEqual(variance, 2.0)
@@ -129,7 +126,7 @@ class TestNumPyMigration(unittest.TestCase):
         migration porte sur le code de FPDB, qui doit utiliser les méthodes de
         tableau, et c'est lui qui est vérifié ici.
         """
-        legacy_dir = Path(__file__).resolve().parent
+        legacy_dir = Path(__file__).resolve().parent.parent / "fpdb_3_legacy"
         for module in ("GuiGraphViewer.py", "GuiSessionViewer.py"):
             content = (legacy_dir / module).read_text(encoding="utf-8")
             for name in ("max", "min", "sum"):
