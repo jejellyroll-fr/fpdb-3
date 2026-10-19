@@ -3,7 +3,7 @@ parser matched by whitelisting attribute names, so such hands never imported.
 
 Two tags change when the remaining players run the board more than once:
 
-    <player ... board1win="EUR0" board2win="EUR456,87" .../>
+    <player ... board1win="€0" board2win="€456,87" .../>
     <cards board="board1" type="River">S2</cards>
 
 re_player_info and re_board both consume ``<tag ...>`` as one-or-more
