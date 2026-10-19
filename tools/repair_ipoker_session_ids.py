@@ -261,6 +261,13 @@ def repair(db, found: Survey, *, commit: bool) -> dict[str, int]:
     schema does not have -- without writing to it.
     """
     ph = db.sql.query["placeholder"]
+    if commit and found.duplicates:
+        # Stored counters were built from the rows about to be deleted, and the
+        # watermark cannot see a deletion. Dropping them first means no failure
+        # below can leave counters that still include deleted hands; dropping
+        # them needlessly only costs a recomputation on the next read. Not done
+        # when rehearsing, which must write nothing.
+        analytics_cache.invalidate_aggregates(db, "#440: iPoker duplicate hands removed")
     cursor = db.get_cursor()
     changed: dict[str, int] = {}
     try:
@@ -280,10 +287,6 @@ def repair(db, found: Survey, *, commit: bool) -> dict[str, int]:
         return changed
 
     db.connection.commit()
-    if found.duplicates:
-        # Stored counters were built from the deleted rows; the watermark cannot
-        # see a deletion, so they are dropped and recomputed on the next read.
-        analytics_cache.invalidate_aggregates(db, "#440: iPoker duplicate hands removed")
     return changed
 
 

@@ -244,3 +244,21 @@ def test_the_command_line_reports_backs_up_and_repairs(open_copy, monkeypatch, t
     assert "Backup:" in out and backup.exists()
     assert "#591" in out
     assert _hand_numbers(db) == _hand_numbers(reference)
+
+
+def test_aggregates_are_dropped_before_any_hand_is_deleted(open_copy, monkeypatch) -> None:
+    config, db = open_copy("duplicated")
+    found = repair_tool.survey(db, repair_tool.ipoker_sites(config), [])
+    hands_when_invalidated = []
+    monkeypatch.setattr(
+        repair_tool.analytics_cache,
+        "invalidate_aggregates",
+        lambda database, _reason="": hands_when_invalidated.append(len(_hand_numbers(database))),
+    )
+    hands_before = len(_hand_numbers(db))
+
+    repair_tool.repair(db, found, commit=False)
+    assert hands_when_invalidated == []
+
+    repair_tool.repair(db, found, commit=True)
+    assert hands_when_invalidated == [hands_before]
