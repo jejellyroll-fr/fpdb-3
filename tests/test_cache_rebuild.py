@@ -10,7 +10,7 @@ each cache and require the rows the import wrote.
 from __future__ import annotations
 
 import shutil
-import time
+from datetime import timedelta
 from pathlib import Path
 
 import pytest
@@ -18,7 +18,7 @@ import pytest
 from fpdb_3_legacy.action_enum_stats import CACHE_KEYS as ACTION_ENUM_CACHE_KEYS
 from fpdb_3_legacy.cache_rebuild import rebuild_stat_columns
 from fpdb_3_legacy.Database import Database
-from fpdb_3_legacy.database_caches import CACHE_KEYS, HUDCACHE_EXTRA_KEYS, SESSION_CACHE_KEYS
+from fpdb_3_legacy.database_caches import CACHE_KEYS, HUDCACHE_EXTRA_KEYS, SESSION_CACHE_KEYS, DatabaseCachesMixin
 from fpdb_3_legacy.Importer import Importer
 from tests.helpers import analytics_golden as golden
 
@@ -159,33 +159,23 @@ def test_the_action_enum_counters_follow_the_import() -> None:
 TWISTER_DAYS = "SELECT DISTINCT styleKey FROM HudCache WHERE tourneyTypeId IS NOT NULL ORDER BY styleKey"
 
 
-@pytest.fixture
-def utc_machine(monkeypatch):
-    """Run as on a machine set to UTC, then give the process its own time zone back."""
-    monkeypatch.setenv("TZ", "UTC")
-    time.tzset()
-    yield
-    monkeypatch.undo()
-    time.tzset()
-
-
-def test_a_rebuild_puts_hands_near_midnight_in_the_import_s_day(tmp_path, utc_machine) -> None:
+def test_a_rebuild_puts_hands_near_midnight_in_the_import_s_day(tmp_path, monkeypatch) -> None:
     """HudCache buckets a hand into the player's day: UTC start minus day_start and the UTC offset.
 
-    The Twister hands start at 00:57 UTC; with day_start at one hour they belong
-    to the day before, as the import files them. The rebuild used to take the
-    UTC date and moved them to the next day.
+    The Twister hands start at 00:57 UTC; moved back one hour they belong to the
+    day before, as the import files them. The rebuild used to take the UTC date
+    and moved them to the next day. The offset is pinned rather than read off the
+    machine's time zone, so the check is the same on every runner.
     """
+    monkeypatch.setattr(DatabaseCachesMixin, "hud_day_offset", lambda _self: timedelta(hours=1))
     config = _config(tmp_path)
     Database(config).recreate_tables()
     db = Database(config)
-    db.day_start = 1.0
     importer = Importer(caller=None, settings={"testData": False, "threads": 1}, config=config, sql=None)
     importer.database = db
     importer.addImportFile(str(FILES[2]), "auto")
     importer.runImport()
     database = Database(config)
-    database.day_start = 1.0
     imported = _rows(database, "HudCache")
     cursor = database.get_cursor()
     cursor.execute(TWISTER_DAYS)
