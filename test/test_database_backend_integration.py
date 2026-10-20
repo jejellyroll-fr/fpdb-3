@@ -510,7 +510,8 @@ def test_the_hud_day_follows_the_hand_s_own_offset_on_the_live_server(backend: s
     host = Database.__new__(Database)
     host.backend = dialects.dialect_for_server(backend).backend_id
     minutes = hud_day.minutes_sql(datetime(2026, 1, 1), datetime(2026, 12, 31), 0.0)
-    query = HAND_AT[backend].replace("<day>", host.hud_day_sql(minutes))
+    # The drivers format the statement with %, which MySQL's date_format also uses.
+    query = HAND_AT[backend].replace("<day>", host.hud_day_sql(minutes).replace("%", "%%"))
 
     with _connection(backend) as connection, connection.cursor() as cursor:
         days = []
