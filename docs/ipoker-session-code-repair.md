@@ -46,10 +46,8 @@ then add `--i-have-a-backup`.
 It deletes the stale hands from every table keyed on a hand — the same list
 `tools/cleanup_ipoker_anon_players.py` uses — renumbers the lone ones, drops
 the analytics aggregates, which are recomputed from the hands on the next read,
-and rebuilds **HudCache, CardsCache and PositionsCache** from the repaired
-hands, which reproduces what a clean import writes (#591).
-
-SessionsCache and TourneysCache have no rebuild yet
-([#598](https://github.com/jejellyroll-fr/fpdb-3/issues/598)): they keep the
-removed hand's contribution, **one extra hand per affected file**, in the
-session statistics.
+and rebuilds every cache from the repaired hands: **HudCache** (#591) and, when
+session caching is on, **Sessions, SessionsCache, TourneysCache, CardsCache and
+PositionsCache**
+([#598](https://github.com/jejellyroll-fr/fpdb-3/issues/598)). Each matches
+what a clean import writes, so the removed hands no longer count anywhere.

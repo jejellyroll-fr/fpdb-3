@@ -39,7 +39,7 @@ from typing import Any
 import pytz
 from cachetools import TTLCache
 
-from fpdb_3_legacy import SQL, Card, Configuration, db_profile
+from fpdb_3_legacy import SQL, Card, Configuration, db_profile, session_rebuild
 from fpdb_3_legacy.cache_rebuild import rebuild_stat_columns
 from fpdb_3_legacy.database_aof import DatabaseAofMixin
 from fpdb_3_legacy.database_auto_notes import DatabaseAutoNotesMixin
@@ -2329,17 +2329,43 @@ class Database(
         self.commit()
 
     def rebuild_caches(self) -> None:
-        tables: tuple[str, ...] | set[str]
-        if self.callHud and self.cacheSessions:
-            tables = ("HudCache", "CardsCache", "PositionsCache")
-        elif self.callHud:
-            tables = ("HudCache",)
-        elif self.cacheSessions:
-            tables = ("CardsCache", "PositionsCache")
+        if self.callHud:
+            self.rebuild_cache(None, None, "HudCache")
+        if self.cacheSessions:
+            self.rebuild_session_caches()
+
+    def rebuild_hand_caches(self, commit: bool = True) -> tuple[str, ...]:
+        """Rebuild every cache derived from the hands, as a repair that moved or deleted hands needs.
+
+        The session tables when sessions are cached, or were when the database
+        was imported: their rows would otherwise keep counting what the repair
+        changed. Returns the tables rebuilt.
+        """
+        self.rebuild_cache(None, None, "HudCache", commit=False)
+        tables: tuple[str, ...]
+        if self.cacheSessions or session_rebuild.has_sessions(self):
+            self.rebuild_session_caches(commit=False)
+            tables = ("HudCache", "Sessions", "SessionsCache", "TourneysCache", "CardsCache", "PositionsCache")
         else:
-            tables = set()
-        for t in tables:
-            self.rebuild_cache(None, None, t)
+            for table in ("CardsCache", "PositionsCache"):
+                self.rebuild_cache(None, None, table, commit=False)
+            tables = ("HudCache", "CardsCache", "PositionsCache")
+        if commit:
+            self.commit()
+        return tables
+
+    def rebuild_sessions(self, commit: bool = True, batch: int = session_rebuild.BATCH) -> None:
+        """Regenerate Sessions, SessionsCache, TourneysCache and the session ids from the hands (#598)."""
+        session_rebuild.rebuild_sessions(self, commit=commit, batch=batch)
+
+    def rebuild_session_caches(self, commit: bool = True) -> None:
+        """Rebuild the sessions, then the two caches that read their week and month through them."""
+        self.rebuild_sessions(commit=False)
+        for table in ("CardsCache", "PositionsCache"):
+            self.rebuild_cache(None, None, table, commit=False)
+        session_rebuild.delete_orphan_periods(self)
+        if commit:
+            self.commit()
 
     def resetClean(self) -> None:
         self.ttold = set()

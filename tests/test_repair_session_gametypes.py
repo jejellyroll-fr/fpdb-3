@@ -38,12 +38,28 @@ SEED_SESSION = (
     "INSERT INTO Sessions (id, weekId, monthId, sessionStart, sessionEnd) "
     "VALUES (100, NULL, NULL, '2000-01-01 00:00:00', '2000-01-01 00:00:00')"
 )
-HANDS = "SELECT siteHandNo, gametypeId, sessionId FROM Hands ORDER BY siteHandNo"
-TOURNEYS = "SELECT id, sessionId FROM Tourneys ORDER BY id"
+# The raw ids, to show the damage: the session id stored as the gametype.
+HAND_IDS = "SELECT siteHandNo, gametypeId, sessionId FROM Hands ORDER BY siteHandNo"
+# A session by its window: the repair rebuilds the sessions, which renumbers them (#598).
+HANDS = (
+    "SELECT h.siteHandNo, h.gametypeId, s.sessionStart, s.sessionEnd FROM Hands h "
+    "LEFT JOIN Sessions s ON s.id = h.sessionId ORDER BY h.siteHandNo"
+)
+TOURNEYS = (
+    "SELECT t.id, s.sessionStart, s.sessionEnd FROM Tourneys t LEFT JOIN Sessions s ON s.id = t.sessionId ORDER BY t.id"
+)
 HAND_COUNT = "SELECT COUNT(*) FROM Hands"
 HUD_COUNTS = (
     "SELECT gametypeId, playerId, seats, position, SUM(n), SUM(totalProfit) "
     "FROM HudCache GROUP BY gametypeId, playerId, seats, position ORDER BY gametypeId, playerId, seats, position"
+)
+SESSION_TABLES = (
+    # The seeded session holds no hand; a rebuild does not bring it back.
+    "SELECT sessionStart, sessionEnd FROM Sessions s WHERE EXISTS (SELECT 1 FROM Hands h WHERE h.sessionId = s.id) "
+    "ORDER BY sessionStart",
+    "SELECT gametypeId, playerId, startTime, endTime, n, totalProfit FROM SessionsCache "
+    "ORDER BY gametypeId, playerId, startTime",
+    "SELECT tourneyId, playerId, startTime, endTime, n, totalProfit FROM TourneysCache ORDER BY tourneyId, playerId",
 )
 TOUR_GAMETYPE = "SELECT id FROM Gametypes WHERE type = 'tour'"
 FIVE_CARD_HAND = "SELECT id FROM Hands WHERE siteHandNo = 3422554305"
@@ -133,13 +149,13 @@ def test_the_scenario_reproduces_the_damage(open_copy) -> None:
     _config, clean = open_copy("clean")
     _config, damaged = open_copy("damaged")
 
-    clean_hands = {row[0]: row[1:] for row in _rows(clean, HANDS)}
-    damaged_hands = {row[0]: row[1:] for row in _rows(damaged, HANDS)}
+    clean_hands = {row[0]: row[1:] for row in _rows(clean, HAND_IDS)}
+    damaged_hands = {row[0]: row[1:] for row in _rows(damaged, HAND_IDS)}
     assert clean_hands.keys() == damaged_hands.keys()
     assert all(session is not None for _gametype, session in clean_hands.values())
     # The damaged gametype is the session id; the session column is empty.
     assert all(damaged_hands[k] == (clean_hands[k][1], None) for k in clean_hands)
-    assert [session for _id, session in _rows(damaged, TOURNEYS)] == [None]
+    assert [row[1:] for row in _rows(damaged, TOURNEYS)] == [(None, None)]
 
 
 def test_the_repair_matches_a_clean_import(open_copy) -> None:
@@ -156,6 +172,9 @@ def test_the_repair_matches_a_clean_import(open_copy) -> None:
     # Rebuilt from the repaired hands, HudCache matches too -- the tournament
     # rows the damaged import never wrote included (#591).
     assert _rows(damaged, HUD_COUNTS) == _rows(clean, HUD_COUNTS)
+    # And the session tables, rebuilt from the same hands (#598).
+    for statement in SESSION_TABLES:
+        assert _rows(damaged, statement) == _rows(clean, statement), statement
     assert repair_tool.survey(damaged, repair_tool.ipoker_sites(config)).hud_shortfall == {}
 
 
