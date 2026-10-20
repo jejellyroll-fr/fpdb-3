@@ -32,6 +32,10 @@ def cache_rebuild_queries(db_server: str) -> dict[str, str]:
     return {"rebuildCache": REBUILD_TEMPLATE}
 
 
+# The first and last hand, between which the HudCache day offsets are worked out (#600).
+HAND_TIME_RANGE = "SELECT MIN(startTime), MAX(startTime) FROM Hands"
+
+
 # Session rebuild (#598): the session tables are emptied, then the import's own
 # session grouping is replayed over the stored hands in time order.
 SESSION_REBUILD_CLEAR = (

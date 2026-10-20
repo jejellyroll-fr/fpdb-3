@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytz
 
+from fpdb_3_legacy import hud_day
 from fpdb_3_legacy.action_enum_stats import CACHE_KEYS as ACTION_ENUM_CACHE_KEYS
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -484,27 +485,13 @@ class DatabaseCachesMixin:
 
         def insertOrUpdate(self, type: Any, cursor: Any, key: Any, select: Any, insert: Any) -> Any: ...
 
-    def hud_day_offset(self) -> timedelta:
-        """How far a hand's UTC start time is moved back before HudCache takes its day.
-
-        The machine's UTC offset and the configured day_start, so a hand is
-        bucketed into the player's own day. The cache rebuild applies the same
-        offset in SQL (#591); the two must agree or a rebuild moves the hands
-        played near midnight to another day.
-        """
-        tz = datetime.utcnow() - datetime.today()
-        tz_offset = round(tz.total_seconds() / 3600)
-        return timedelta(hours=self.day_start + tz_offset)
-
     def storeHudCache(self, gid, gametype, pids, starttime, pdata, doinsert=False) -> None:
         """Update cached statistics. If update fails because no record exists, do an insert."""
         if pdata:
-            # starttime is UTC; shifting it by the machine's offset and by
-            # day_start buckets it into the player's own day. timedelta.seconds
-            # is unsigned, so east of UTC it used to report 21..23 hours instead
-            # of a small negative and filed hands under the previous day.
-            starttime_offset = starttime - self.hud_day_offset()
-            styleKey = datetime.strftime(starttime_offset, "d%y%m%d")
+            # starttime is UTC; the hand's own local time, moved back by
+            # day_start, buckets it into the player's day (#600). The cache
+            # rebuild computes the same day in SQL.
+            styleKey = hud_day.style_key(starttime, self.day_start)
             seats = len(pids)
 
         pos = {

@@ -39,7 +39,7 @@ from typing import Any
 import pytz
 from cachetools import TTLCache
 
-from fpdb_3_legacy import SQL, Card, Configuration, db_profile, session_rebuild
+from fpdb_3_legacy import SQL, Card, Configuration, db_profile, hud_day, session_rebuild
 from fpdb_3_legacy.cache_rebuild import rebuild_stat_columns
 from fpdb_3_legacy.database_aof import DatabaseAofMixin
 from fpdb_3_legacy.database_auto_notes import DatabaseAutoNotesMixin
@@ -75,6 +75,7 @@ from fpdb_3_legacy.Exceptions import (
     FpdbPostgresqlNoDatabase,
 )
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.sql_queries_cache_rebuild import HAND_TIME_RANGE
 from fpdb_3_legacy.table_info import TableInfo
 
 # #import L10n
@@ -1643,21 +1644,9 @@ class Database(
                         else 'E'
                    end                                            as hc_position""",
             )
-            # The day of the hand as storeHudCache takes it: its UTC start
-            # time moved back by the same offset, in whole minutes.
-            minutes = round(self.hud_day_offset().total_seconds() / 60)
-            if self.backend == self.PGSQL:
-                day = "to_char(h.startTime - INTERVAL '" + str(minutes) + " minutes', 'YYMMDD')"
-                query = query.replace("<styleKey>", ",'d' || " + day)
-                query = query.replace("<styleKeyGroup>", "," + day)
-            elif self.backend == self.SQLITE:
-                day = "substr(strftime('%Y%m%d', h.startTime, '" + f"{-minutes:+d}" + " minutes'),3,7)"
-                query = query.replace("<styleKey>", ",'d' || " + day)
-                query = query.replace("<styleKeyGroup>", "," + day)
-            elif self.backend == self.MYSQL_INNODB:
-                day = "date_format(h.startTime - INTERVAL " + str(minutes) + " MINUTE, 'd%y%m%d')"
-                query = query.replace("<styleKey>", "," + day)
-                query = query.replace("<styleKeyGroup>", "," + day)
+            day = self.hud_day_sql(self._hud_day_minutes())
+            query = query.replace("<styleKey>", "," + day)
+            query = query.replace("<styleKeyGroup>", "," + day)
         else:
             query = query.replace(
                 "<hc_position>",
@@ -1766,6 +1755,24 @@ class Database(
 
         query = self._apply_tourney_clauses(query, type)
         return query
+
+    def hud_day_sql(self, minutes: str) -> str:
+        """The styleKey of a hand as storeHudCache takes it: ``dYYMMDD`` of its UTC
+        start time moved by ``minutes``, the offset in force at that time (#600)."""
+        if self.backend == self.PGSQL:
+            return "'d' || to_char(h.startTime + " + minutes + " * INTERVAL '1 minute', 'YYMMDD')"
+        if self.backend == self.MYSQL_INNODB:
+            return "date_format(h.startTime + INTERVAL " + minutes + " MINUTE, 'd%y%m%d')"
+        return "'d' || substr(strftime('%Y%m%d', h.startTime, " + minutes + " || ' minutes'), 3, 7)"
+
+    def _hud_day_minutes(self) -> str:
+        """SQL for the minutes from a hand's UTC start to its HudCache day, over the stored hands."""
+        first = last = None
+        if getattr(self, "connection", None) is not None:
+            cursor = self.get_cursor()
+            cursor.execute(HAND_TIME_RANGE)
+            first, last = (hud_day.parse_time(value) for value in cursor.fetchone())
+        return hud_day.minutes_sql(first, last, self.day_start)
 
     def replace_statscache(self, type, table, query):
         if table == "HudCache":
