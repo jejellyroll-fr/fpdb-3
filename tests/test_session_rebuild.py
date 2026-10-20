@@ -145,6 +145,23 @@ def test_a_rebuild_gives_back_what_the_import_wrote(database, batch) -> None:
     _assert_same(_snapshot(database), imported)
 
 
+def test_hands_sharing_a_start_time_are_each_read_once(database) -> None:
+    """The batches resume after the last (startTime, id) read, so ties across a batch boundary are kept."""
+    cursor = database.get_cursor()
+    cursor.execute(
+        "UPDATE Hands SET startTime = (SELECT MIN(startTime) FROM Hands WHERE tourneyId IS NOT NULL) "
+        "WHERE tourneyId IS NOT NULL"
+    )
+    database.commit()
+    database.rebuild_sessions()
+    whole = _snapshot(database)
+
+    database.rebuild_sessions(batch=1)
+
+    assert all(whole["Hands"].values()), "a hand the batches skipped"
+    _assert_same(_snapshot(database), whole)
+
+
 def test_a_rebuild_drops_what_no_hand_supports(database) -> None:
     imported = _snapshot(database)
     cursor = database.get_cursor()

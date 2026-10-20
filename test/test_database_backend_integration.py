@@ -17,8 +17,9 @@ from fpdb_3_legacy.phh_import import import_file as import_phh_file
 from fpdb_3_legacy.SQL import Sql
 from fpdb_3_legacy.sql_queries_cache_rebuild import (
     SESSION_REBUILD_CLEAR,
+    SESSION_REBUILD_FIRST_HANDS,
     SESSION_REBUILD_HAND_SESSION,
-    SESSION_REBUILD_HANDS,
+    SESSION_REBUILD_NEXT_HANDS,
     SESSION_REBUILD_ORPHAN_PERIODS,
 )
 
@@ -477,7 +478,8 @@ def test_the_session_rebuild_statements_run_on_the_live_schema(backend: str) -> 
         with connection.cursor() as cursor:
             for statement in SESSION_REBUILD_CLEAR:
                 cursor.execute(statement)
-            cursor.execute(SESSION_REBUILD_HANDS)
+            cursor.execute(SESSION_REBUILD_FIRST_HANDS, (500,))
+            cursor.execute(SESSION_REBUILD_NEXT_HANDS, ("2026-01-01 00:00:00", "2026-01-01 00:00:00", 1, 500))
             cursor.execute(players, (1, 2))
             assert len(cursor.description) == 4 + len(session_rebuild.STORED_KEYS)
             cursor.execute(SESSION_REBUILD_HAND_SESSION, (1, 1))

@@ -2341,6 +2341,7 @@ class Database(
         Returns the tables rebuilt.
         """
         self.rebuild_cache(None, None, "HudCache", commit=False)
+        tables: tuple[str, ...]
         if self.cacheSessions:
             self.rebuild_session_caches(commit=False)
             tables = ("HudCache", "Sessions", "SessionsCache", "TourneysCache", "CardsCache", "PositionsCache")

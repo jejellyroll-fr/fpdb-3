@@ -21,16 +21,17 @@ from typing import Any
 from fpdb_3_legacy.database_caches import SESSION_CACHE_KEYS
 from fpdb_3_legacy.sql_queries_cache_rebuild import (
     SESSION_REBUILD_CLEAR,
+    SESSION_REBUILD_FIRST_HANDS,
     SESSION_REBUILD_HAND_SESSION,
-    SESSION_REBUILD_HANDS,
+    SESSION_REBUILD_NEXT_HANDS,
     SESSION_REBUILD_ORPHAN_PERIODS,
     SESSION_REBUILD_PLAYERS,
 )
 
-# Hands replayed per batch: the import's grouping compares each hand with every
-# session of its batch, so one batch for a whole database would be quadratic.
-# Sessions that run across batches are merged through the database, as
-# successive files are.
+# Hands read and replayed per batch: the import's grouping compares each hand
+# with every session of its batch, so one batch for a whole database would be
+# quadratic, and would hold every hand in memory. Sessions that run across
+# batches are merged through the database, as successive files are.
 BATCH = 500
 
 # Keys the import computes rather than reads from HandsPlayers (DerivedStats).
@@ -56,11 +57,11 @@ def rebuild_sessions(db: Any, *, commit: bool = True, batch: int = BATCH) -> Non
         cursor = db.get_cursor()
         for statement in SESSION_REBUILD_CLEAR:
             cursor.execute(statement)
-        cursor.execute(SESSION_REBUILD_HANDS)
-        hands = cursor.fetchall()
         players = _players_query(db)
-        for start in range(0, len(hands), batch):
-            _replay(db, hands[start : start + batch], players)
+        hands = _first_hands(db, batch)
+        while hands:
+            _replay(db, hands, players)
+            hands = _next_hands(db, hands[-1], batch)
     finally:
         db._in_transaction -= 1
         for name, value in saved.items():
@@ -74,6 +75,21 @@ def delete_orphan_periods(db: Any) -> None:
     cursor = db.get_cursor()
     for statement in SESSION_REBUILD_ORPHAN_PERIODS:
         cursor.execute(statement)
+
+
+def _first_hands(db: Any, batch: int) -> list[Any]:
+    cursor = db.get_cursor()
+    cursor.execute(SESSION_REBUILD_FIRST_HANDS.replace("%s", db.sql.query["placeholder"]), (batch,))
+    return cursor.fetchall()
+
+
+def _next_hands(db: Any, last: Sequence[Any], batch: int) -> list[Any]:
+    """The batch after ``last``, in (startTime, id) order."""
+    cursor = db.get_cursor()
+    cursor.execute(
+        SESSION_REBUILD_NEXT_HANDS.replace("%s", db.sql.query["placeholder"]), (last[1], last[1], last[0], batch)
+    )
+    return cursor.fetchall()
 
 
 def _players_query(db: Any) -> str:

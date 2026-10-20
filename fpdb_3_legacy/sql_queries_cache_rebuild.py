@@ -42,10 +42,20 @@ SESSION_REBUILD_CLEAR = (
     "DELETE FROM Sessions",
 )
 
-SESSION_REBUILD_HANDS = """SELECT h.id, h.startTime, h.tourneyId, h.gametypeId, g.type
+# Read one batch at a time, resuming after the last (startTime, id) read: the
+# hands of a large database never sit in memory at once.
+SESSION_REBUILD_FIRST_HANDS = """SELECT h.id, h.startTime, h.tourneyId, h.gametypeId, g.type
             FROM Hands h
             INNER JOIN Gametypes g ON (h.gametypeId = g.id)
-            ORDER BY h.startTime, h.id"""
+            ORDER BY h.startTime, h.id
+            LIMIT %s"""
+
+SESSION_REBUILD_NEXT_HANDS = """SELECT h.id, h.startTime, h.tourneyId, h.gametypeId, g.type
+            FROM Hands h
+            INNER JOIN Gametypes g ON (h.gametypeId = g.id)
+            WHERE h.startTime > %s OR (h.startTime = %s AND h.id > %s)
+            ORDER BY h.startTime, h.id
+            LIMIT %s"""
 
 SESSION_REBUILD_PLAYERS = """SELECT hp.handId, hp.playerId, hp.sawShowdown, hp.totalProfit<columns>
             FROM HandsPlayers hp
