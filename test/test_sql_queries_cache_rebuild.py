@@ -14,11 +14,9 @@ def test_cache_rebuild_query_is_installed_exactly() -> None:
 def test_cache_rebuild_keeps_stats_and_composition_placeholders() -> None:
     for backend in ("mysql", "postgresql", "sqlite"):
         query = cache_rebuild_queries(backend)["rebuildCache"]
-        assert "street0VPIChance" in query
-        assert "street0VPI" in query
-        assert "totalProfit" in query
-        assert "allInEV" in query
         for placeholder in (
+            "<stat_insert_columns>",
+            "<stat_select_columns>",
             "<insert>",
             "<select>",
             "<group>",

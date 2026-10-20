@@ -23,12 +23,10 @@ gamecode pairs, which confirms the duplicates by id and finds the second case:
 a hand stored only under its session code is given its gamecode.
 
 The repair works on the hand tables (Hands, HandsPlayers, HandsActions and
-everything else keyed on a hand) and drops the analytics aggregates, which are
-recomputed from those tables. It does **not** touch HudCache, SessionsCache,
-TourneysCache, CardsCache or PositionsCache: they keep the duplicate's
-contribution -- one extra hand per affected file -- because no rebuild can
-reproduce them yet (#591) and the gametype their rows are keyed on is not
-reliable for iPoker (#592).
+everything else keyed on a hand), drops the analytics aggregates, and rebuilds
+HudCache, CardsCache and PositionsCache from the hands (#591). SessionsCache and
+TourneysCache have no rebuild: they keep the duplicate's contribution, one extra
+hand per affected file.
 
     python tools/repair_ipoker_session_ids.py                       # report only
     python tools/repair_ipoker_session_ids.py --hh-dir ~/iPokerHH   # report, with the files
@@ -81,6 +79,9 @@ RENAME_HAND = "UPDATE Hands SET siteHandNo = %s WHERE id = %s"
 
 SESSION_RE = re.compile(rb'<session\b[^>]*\bsessioncode="(\d+)"')
 GAME_RE = re.compile(rb'<game\b[^>]*\bgamecode="(\d+)"')
+
+# Caches whose rebuild from the hands reproduces what the import wrote (#591).
+REBUILT_CACHES = ("HudCache", "CardsCache", "PositionsCache")
 
 # The site the converter falls back to when it cannot tell which skin a file
 # came from (iPoker/base.py). The configured skins alone would miss those hands.
@@ -279,14 +280,19 @@ def repair(db, found: Survey, *, commit: bool) -> dict[str, int]:
         for rename in found.renames:
             cursor.execute(_sql(RENAME_HAND, ph), (rename.gamecode, rename.hand.id))
             changed["Hands renumbered"] = changed.get("Hands renumbered", 0) + 1
+        if found.duplicates:
+            # In the same transaction as the deletions: a failure part-way
+            # leaves neither removed hands nor a half-rebuilt cache behind.
+            for table in REBUILT_CACHES:
+                db.rebuild_cache(None, None, table, commit=False)
+            changed["Caches rebuilt"] = len(REBUILT_CACHES)
     except Exception:
         db.connection.rollback()
         raise
-    if not commit:
+    if commit:
+        db.connection.commit()
+    else:
         db.connection.rollback()
-        return changed
-
-    db.connection.commit()
     return changed
 
 
@@ -381,8 +387,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  {count:>5}  {table}")
     if found.duplicates:
         print(
-            "\nThe HUD and session caches still count each removed hand once more (#591, #592); "
-            "reports, graphs and research read the hands and are now right."
+            "\nHudCache, CardsCache and PositionsCache were rebuilt from the hands. SessionsCache and "
+            "TourneysCache have no rebuild and still count each removed hand once more."
         )
     return 0
 

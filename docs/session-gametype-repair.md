@@ -42,8 +42,11 @@ without session caching are not affected and are not changed.
 
 If you already imported the same files again, those hands are in the database
 twice: the damaged row and a correct one. The tool keeps the correct one and
-deletes the damaged copy (the HUD and session caches keep counting it until
-#591 is fixed).
+deletes the damaged copy.
+
+After writing, `--apply` rebuilds **HudCache, CardsCache and PositionsCache**
+from the repaired hands (#591): the HUD statistics follow the hands to their
+right game, and the tournament rows the damaged import never wrote come back.
 
 `--apply` copies a SQLite database next to itself before writing
 (`<database>.before-595-<date>`), or to `--backup PATH`. PostgreSQL and MySQL
@@ -61,7 +64,6 @@ duplicates, so delete them first, then re-import those files with this version:
 python tools/repair_session_gametypes.py --apply --delete-misclassified
 ```
 
-**HUD cache rows that were never written.** The report lists the game types
-whose HUD cache counts fewer hands than the database holds. Rebuilding the
-cache does not restore them yet (#591); importing everything again into a fresh
-database does.
+**The session caches.** SessionsCache and TourneysCache have no rebuild yet
+([#598](https://github.com/jejellyroll-fr/fpdb-3/issues/598)); a deleted
+duplicate stays counted there.

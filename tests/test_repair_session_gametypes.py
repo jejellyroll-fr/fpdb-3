@@ -41,6 +41,10 @@ SEED_SESSION = (
 HANDS = "SELECT siteHandNo, gametypeId, sessionId FROM Hands ORDER BY siteHandNo"
 TOURNEYS = "SELECT id, sessionId FROM Tourneys ORDER BY id"
 HAND_COUNT = "SELECT COUNT(*) FROM Hands"
+HUD_COUNTS = (
+    "SELECT gametypeId, playerId, seats, position, SUM(n), SUM(totalProfit) "
+    "FROM HudCache GROUP BY gametypeId, playerId, seats, position ORDER BY gametypeId, playerId, seats, position"
+)
 TOUR_GAMETYPE = "SELECT id FROM Gametypes WHERE type = 'tour'"
 FIVE_CARD_HAND = "SELECT id FROM Hands WHERE siteHandNo = 3422554305"
 IPOKER_HOLDEM_RING = (
@@ -149,6 +153,10 @@ def test_the_repair_matches_a_clean_import(open_copy) -> None:
 
     assert _rows(damaged, HANDS) == _rows(clean, HANDS)
     assert _rows(damaged, TOURNEYS) == _rows(clean, TOURNEYS)
+    # Rebuilt from the repaired hands, HudCache matches too -- the tournament
+    # rows the damaged import never wrote included (#591).
+    assert _rows(damaged, HUD_COUNTS) == _rows(clean, HUD_COUNTS)
+    assert repair_tool.survey(damaged, repair_tool.ipoker_sites(config)).hud_shortfall == {}
 
 
 def test_a_clean_database_needs_nothing(open_copy) -> None:
@@ -347,3 +355,23 @@ def test_a_file_name_shared_by_two_histories_is_ambiguous(open_copy) -> None:
 
     assert found.misclassified == {}
     assert any("100BB Feldkirch 10, 488784806" in line for line in found.unresolved)
+
+
+def test_a_failed_cache_rebuild_leaves_everything_as_it_was(open_copy, monkeypatch) -> None:
+    """The repaired hands and the three rebuilds are one transaction."""
+    config, damaged = open_copy("damaged")
+    before = (_rows(damaged, HANDS), _rows(damaged, TOURNEYS), _rows(damaged, HUD_COUNTS))
+    found = repair_tool.survey(damaged, repair_tool.ipoker_sites(config))
+    rebuild = damaged.rebuild_cache
+
+    def failing(h_start, v_start, table="HudCache", ttid=None, wmid=None, commit=True):
+        if table == "PositionsCache":
+            raise RuntimeError("connection lost")
+        rebuild(h_start, v_start, table, ttid, wmid, commit)
+
+    monkeypatch.setattr(damaged, "rebuild_cache", failing)
+
+    with pytest.raises(RuntimeError):
+        repair_tool.repair(damaged, found, commit=True)
+
+    assert (_rows(damaged, HANDS), _rows(damaged, TOURNEYS), _rows(damaged, HUD_COUNTS)) == before

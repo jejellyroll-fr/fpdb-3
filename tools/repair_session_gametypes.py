@@ -26,8 +26,9 @@ It also reports what it cannot repair from the database:
   blinds. ``--delete-misclassified`` removes them so that re-importing their
   files stores them again correctly; without it they are only listed.
 * game types whose HudCache counts fewer hands than the hands table: the
-  tournament hands of a damaged import wrote no HudCache rows. A cache rebuild
-  cannot restore them yet (#591); re-importing into a fresh database does.
+  tournament hands of a damaged import wrote no HudCache rows. ``--apply``
+  rebuilds HudCache, CardsCache and PositionsCache from the repaired hands
+  (#591), which restores them; SessionsCache and TourneysCache have no rebuild.
 
     python tools/repair_session_gametypes.py              # report only
     python tools/repair_session_gametypes.py --rehearse   # run it, then roll back
@@ -87,6 +88,8 @@ UPDATE_HAND = "UPDATE Hands SET gametypeId = %s, sessionId = %s WHERE id = %s"
 UPDATE_TOURNEY = "UPDATE Tourneys SET sessionId = %s WHERE id = %s"
 
 FIVE_CARD_OMAHA = "5_omahahi"
+# Caches whose rebuild from the hands reproduces what the import wrote (#591).
+REBUILT_CACHES = ("HudCache", "CardsCache", "PositionsCache")
 # The site the iPoker converter falls back to when it cannot tell the skin.
 IPOKER_NETWORK = "iPoker"
 # Files only records a history's base name, so two files of the same name are
@@ -346,35 +349,48 @@ def survey(db, sites: set[str]) -> Survey:
 # ---------------------------------------------------------------------------
 
 
+def _write(db, found: Survey, to_delete: list[int], changed: dict[str, int]) -> None:
+    ph = db.sql.query["placeholder"]
+    cursor = db.get_cursor()
+    # Deletions first: a re-imported copy's damaged twin must be gone before
+    # its key is given back to the row that stays.
+    for hand_id in to_delete:
+        for table, statement in DELETE_BY_HAND:
+            cursor.execute(_sql(statement, ph), (hand_id,))
+            if cursor.rowcount and cursor.rowcount > 0:
+                changed[f"{table} deleted"] += cursor.rowcount
+    for fix in found.hand_fixes:
+        cursor.execute(_sql(UPDATE_HAND, ph), (fix.gametype, fix.session, fix.hand_id))
+        changed["Hands repaired"] += 1
+        if fix.gametype != fix.stored_gametype:
+            changed["Hands moved to their gametype"] += 1
+    for tourney_id, session in found.tourney_fixes.items():
+        cursor.execute(_sql(UPDATE_TOURNEY, ph), (session, tourney_id))
+        changed["Tourneys given their session"] += 1
+
+
 def repair(db, found: Survey, *, commit: bool, delete_misclassified: bool = False) -> dict[str, int]:
     """Write the fixes in one transaction; ``commit=False`` rolls it back."""
-    ph = db.sql.query["placeholder"]
     misclassified = (
         {hand for hands in found.misclassified.values() for hand in hands} if delete_misclassified else set()
     )
     to_delete = sorted(misclassified | {fix.hand_id for fix in found.reimported})
-    if commit and (found.hand_fixes or to_delete):
+    moving = bool(found.hand_fixes or to_delete)
+    if commit and moving:
         # Moving or deleting hands changes the rows stored analytics counters
         # were built from; drop them first so no failure below leaves them stale.
         analytics_cache.invalidate_aggregates(db, "#595: hands regrouped by gametype")
-    cursor = db.get_cursor()
     changed: dict[str, int] = defaultdict(int)
     try:
-        # Deletions first: a re-imported copy's damaged twin must be gone
-        # before its key is given back to the row that stays.
-        for hand_id in to_delete:
-            for table, statement in DELETE_BY_HAND:
-                cursor.execute(_sql(statement, ph), (hand_id,))
-                if cursor.rowcount and cursor.rowcount > 0:
-                    changed[f"{table} deleted"] += cursor.rowcount
-        for fix in found.hand_fixes:
-            cursor.execute(_sql(UPDATE_HAND, ph), (fix.gametype, fix.session, fix.hand_id))
-            changed["Hands repaired"] += 1
-            if fix.gametype != fix.stored_gametype:
-                changed["Hands moved to their gametype"] += 1
-        for tourney_id, session in found.tourney_fixes.items():
-            cursor.execute(_sql(UPDATE_TOURNEY, ph), (session, tourney_id))
-            changed["Tourneys given their session"] += 1
+        _write(db, found, to_delete, changed)
+        if moving:
+            # Rebuilt from the repaired hands, in the same transaction: the
+            # hands now sit under their own gametype, the rows the damaged
+            # import never wrote come back, and a failure part-way leaves
+            # neither a repaired hand nor a half-rebuilt cache behind.
+            for table in REBUILT_CACHES:
+                db.rebuild_cache(None, None, table, commit=False)
+            changed["Caches rebuilt"] = len(REBUILT_CACHES)
     except Exception:
         db.connection.rollback()
         raise
@@ -412,7 +428,7 @@ def report(found: Survey) -> None:
     if found.reimported:
         print(
             f"{len(found.reimported)} damaged row(s) whose hand was imported again under its right gametype: "
-            "the damaged copy is deleted (the HUD and session caches keep counting it, #591)."
+            "the damaged copy is deleted (SessionsCache and TourneysCache keep counting it)."
         )
     print(f"{len(found.tourney_fixes)} tournament(s) without their session.")
     if found.unresolved:
@@ -429,7 +445,7 @@ def report(found: Survey) -> None:
         print("\nHudCache counts fewer player-hands than the hands table for:")
         for gametype_id, (in_hands, cached) in found.hud_shortfall.items():
             print(f"  gametype {gametype_id}: {in_hands} in the hands, {cached} in HudCache")
-        print("  A cache rebuild cannot restore them yet (#591); re-import into a fresh database does.")
+        print("  --apply rebuilds HudCache, CardsCache and PositionsCache from the repaired hands (#591).")
 
 
 def build_parser() -> argparse.ArgumentParser:

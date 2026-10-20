@@ -425,3 +425,33 @@ def test_data_round_trip_between_mysql_and_postgresql_repairs_sequences() -> Non
             cursor.execute("INSERT INTO Sites(name, code) VALUES (%s, %s)", ("MySQL Sequence", "MS"))
             assert cursor.lastrowid == 9
         mysql_connection.rollback()
+
+
+# What _rebuild_ring_cache / _rebuild_tourney_cache pass without hero filtering.
+REBUILD_WHERE = {
+    "ring": "WHERE g.type = 'ring'<hero_where>",
+    "tour": "WHERE g.type = 'tour'<hero_where>",
+}
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("backend", ["postgresql", "mysql"])
+@pytest.mark.parametrize("table", ["HudCache", "CardsCache", "PositionsCache"])
+@pytest.mark.parametrize("game_type", ["ring", "tour"])
+def test_the_generated_cache_rebuild_runs_on_the_live_schema(backend: str, table: str, game_type: str) -> None:
+    """PostgreSQL type-checks the statement before reading a row: summing a BOOLEAN fails here (#591)."""
+    if backend not in _enabled_backends():
+        pytest.skip(f"live {backend} service not requested")
+
+    host = Database.__new__(Database)
+    host.backend = dialects.dialect_for_server(backend).backend_id
+    host.sql = Sql(db_server=backend)
+    host.build_full_hudcache = True
+    host.day_start = 0.0
+    query = host.rebuild_sql(game_type, table, REBUILD_WHERE[game_type])
+
+    with _connection(backend) as connection:
+        _create_schema(connection, backend)
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+        connection.rollback()

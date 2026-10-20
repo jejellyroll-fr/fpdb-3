@@ -79,6 +79,15 @@ def _hand_numbers(db) -> list[int]:
     return [int(row[0]) for row in cursor.fetchall()]
 
 
+HUD_COUNTS = "SELECT gametypeId, playerId, seats, position, SUM(n), SUM(totalProfit) FROM HudCache GROUP BY 1, 2, 3, 4"
+
+
+def _hud_counts(db) -> list[tuple]:
+    cursor = db.get_cursor()
+    cursor.execute(HUD_COUNTS)
+    return sorted(tuple(row) for row in cursor.fetchall())
+
+
 def _row_counts(db) -> dict[str, int]:
     cursor = db.get_cursor()
     counts = {}
@@ -169,6 +178,8 @@ def test_removing_the_duplicates_matches_a_clean_import(open_copy) -> None:
     assert changed["Hands"] == len(SESSION_CODES)
     assert _hand_numbers(db) == _hand_numbers(reference)
     assert _row_counts(db) == _row_counts(reference)
+    # Rebuilt from the repaired hands, the HUD cache no longer counts the duplicates (#591).
+    assert _hud_counts(db) == _hud_counts(reference)
 
 
 def test_a_rehearsal_writes_nothing(open_copy) -> None:
@@ -242,7 +253,7 @@ def test_the_command_line_reports_backs_up_and_repairs(open_copy, monkeypatch, t
     assert repair_tool.main(["--apply", "--backup", str(backup)]) == 0
     out = capsys.readouterr().out
     assert "Backup:" in out and backup.exists()
-    assert "#591" in out
+    assert "were rebuilt" in out
     assert _hand_numbers(db) == _hand_numbers(reference)
 
 
@@ -262,3 +273,23 @@ def test_aggregates_are_dropped_before_any_hand_is_deleted(open_copy, monkeypatc
 
     repair_tool.repair(db, found, commit=True)
     assert hands_when_invalidated == [hands_before]
+
+
+def test_a_failed_cache_rebuild_leaves_everything_as_it_was(open_copy, monkeypatch) -> None:
+    """The deletions and the three rebuilds are one transaction."""
+    config, db = open_copy("duplicated")
+    before = (_hand_numbers(db), _row_counts(db), _hud_counts(db))
+    found = repair_tool.survey(db, repair_tool.ipoker_sites(config), [])
+    rebuild = db.rebuild_cache
+
+    def failing(h_start, v_start, table="HudCache", ttid=None, wmid=None, commit=True):
+        if table == "PositionsCache":
+            raise RuntimeError("connection lost")
+        rebuild(h_start, v_start, table, ttid, wmid, commit)
+
+    monkeypatch.setattr(db, "rebuild_cache", failing)
+
+    with pytest.raises(RuntimeError):
+        repair_tool.repair(db, found, commit=True)
+
+    assert (_hand_numbers(db), _row_counts(db), _hud_counts(db)) == before
