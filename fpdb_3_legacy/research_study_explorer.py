@@ -95,15 +95,19 @@ class StudyGame:
 #: being hidden.
 GAME_LABELS: Final[dict[str, str]] = {
     "holdem": "Hold'em",
-    "omahahi": "Pot-Limit Omaha",
+    "omahahi": "Pot-Limit Omaha 4c",
     "omahahilo": "Omaha Hi/Lo",
-    "5_omahahi": "5-card PLO",
+    "5_omahahi": "Pot-Limit Omaha 5c",
     "6_omahahi": "6-card PLO",
 }
 
 
-def game_label(game: str) -> str:
-    """The readable name of one stored game category."""
+def game_label(game: str | list[str] | tuple[str, ...]) -> str:
+    """The readable name of one stored game category or a combined population."""
+    if not isinstance(game, str):
+        if set(game) == {"omahahi", "5_omahahi"}:
+            return "PLO 4c + 5c"
+        return " + ".join(game_label(value) for value in game)
     return GAME_LABELS.get(game, game.replace("_", " ").title())
 
 
@@ -186,16 +190,16 @@ class StudyExplorerModel:
     def games(self) -> tuple[StudyGame, ...]:
         """The games the shipped studies declare, with how many each has.
 
-        A study declares the game it is about, so the landing page can offer
+        A study declares the games it supports, so the landing page can offer
         the ones this library actually has rather than a hard-coded pair of
-        names. Studies that declare no game apply to any of them and are
+        names. Compatible variants share a study. Studies that declare no games apply to any of them and are
         counted in every entry (#368).
         """
         declared: dict[str, int] = {}
         for study in self.registry.studies:
-            if study.game:
-                declared[study.game] = declared.get(study.game, 0) + 1
-        shared = sum(1 for study in self.registry.studies if not study.game)
+            for game in set(study.games):
+                declared[game] = declared.get(game, 0) + 1
+        shared = sum(1 for study in self.registry.studies if not study.games)
         return tuple(
             StudyGame(id=game, label=game_label(game), study_count=count + shared)
             for game, count in sorted(declared.items(), key=lambda item: (-item[1], item[0]))
@@ -233,7 +237,7 @@ class StudyExplorerModel:
         """
         studies = self.registry.studies
         if game not in (None, "", "any"):
-            studies = tuple(study for study in studies if not study.game or study.game == game)
+            studies = tuple(study for study in studies if not study.games or game in study.games)
         if tournament is not None:
             studies = tuple(
                 study for study in studies
@@ -330,6 +334,9 @@ class StudyExplorerModel:
             if value in (None, "", "any"):
                 continue
             if name in effective and effective[name] != value:
+                if name == "game" and study.accepts_game_filter(value):
+                    effective[name] = value
+                    continue
                 unavailable = (
                     f"{study.title} is not available for {name}={value!r}; "
                     f"this study requires {name}={effective[name]!r}"

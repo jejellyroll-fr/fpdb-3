@@ -50,9 +50,10 @@ def test_category_navigation_is_generated_from_registry(explorer) -> None:
     assert all("3-bet pot" in explorer.study_list.item(row).text().lower() for row in range(explorer.study_list.count()))
 
 
-def test_choosing_omaha_lists_plo_studies_and_no_holdem_only_ones(explorer) -> None:
+@pytest.mark.parametrize("game", ["omahahi", "5_omahahi"])
+def test_choosing_omaha_lists_plo_studies_and_no_holdem_only_ones(explorer, game) -> None:
     """A PLO player sees a PLO hierarchy, not an empty Hold'em one (#368)."""
-    explorer.game_combo.setCurrentIndex(explorer.game_combo.findData("omahahi"))
+    explorer.game_combo.setCurrentIndex(explorer.game_combo.findData(game))
     listed = [
         explorer.model.registry.get(str(explorer.study_list.item(row).data(256)))
         for row in range(explorer.study_list.count())
@@ -67,6 +68,17 @@ def test_choosing_omaha_lists_plo_studies_and_no_holdem_only_ones(explorer) -> N
         if button.isEnabled()
     }
     assert {"Preflop", "Single-Raised Pots", "3-bet Pots"} <= spots
+    _select(explorer, "plo_srp_pfr_ip_flop")
+    explorer.open_button.click()
+    assert explorer.opened_selection.available
+    assert explorer.opened_selection.effective_filters["game"] == game
+
+
+def test_a_plo_study_with_any_game_selected_opens_both_variants(explorer) -> None:
+    _select(explorer, "plo_srp_pfr_ip_flop")
+    explorer.open_button.click()
+    assert explorer.opened_selection.available
+    assert explorer.opened_selection.effective_filters["game"] == ["omahahi", "5_omahahi"]
 
 
 def test_the_game_list_offers_the_tokens_the_database_stores(explorer) -> None:
@@ -76,6 +88,7 @@ def test_the_game_list_offers_the_tokens_the_database_stores(explorer) -> None:
     assert None in values
     assert "holdem" in values
     assert "omahahi" in values
+    assert "5_omahahi" in values
     assert "omaha" not in values
 
 
