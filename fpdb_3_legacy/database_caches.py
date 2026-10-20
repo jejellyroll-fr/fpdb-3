@@ -1034,10 +1034,9 @@ class DatabaseCachesMixin:
                     self.tc[k]["endTime"] = startTime
 
         if doinsert:
-            update_TC = self.sql.query["update_TC"].replace(
-                "%s",
-                self.sql.query["placeholder"],
-            )
+            # The placeholders are replaced once <UPDATE> is filled in, since
+            # it brings its own %s.
+            update_TC = self.sql.query["update_TC"]
             insert_TC = self.sql.query["insert_TC"].replace(
                 "%s",
                 self.sql.query["placeholder"],
@@ -1073,6 +1072,7 @@ class DatabaseCachesMixin:
                     else:
                         q = update_TC.replace("<UPDATE>", "")
                         row = tc["line"] + list(k[:2])
+                    q = q.replace("%s", self.sql.query["placeholder"])
                     c.execute(q, row)
                 elif num == 0:
                     row = [sc["id"], tc["startTime"], tc["endTime"]] + list(k[:2]) + tc["line"]

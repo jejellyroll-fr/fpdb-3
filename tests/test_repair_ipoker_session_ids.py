@@ -66,9 +66,18 @@ def _import(config, *, pattern: re.Pattern[str]) -> None:
         iPoker.re_hand_info = original
 
 
+def _session_config(directory: Path):
+    """Session caching on, so the session tables are part of the repair (#598)."""
+    config = golden.build_config(directory)
+    params = dict(config.get_import_parameters())
+    params["cacheSessions"] = True
+    config.get_import_parameters = lambda: params
+    return config
+
+
 def _new_database(directory: Path):
     directory.mkdir(parents=True, exist_ok=True)
-    config = golden.build_config(directory)
+    config = _session_config(directory)
     Database(config).recreate_tables()
     return config
 
@@ -80,12 +89,26 @@ def _hand_numbers(db) -> list[int]:
 
 
 HUD_COUNTS = "SELECT gametypeId, playerId, seats, position, SUM(n), SUM(totalProfit) FROM HudCache GROUP BY 1, 2, 3, 4"
+SESSION_TABLES = {
+    "Sessions": "SELECT sessionStart, sessionEnd FROM Sessions",
+    "SessionsCache": "SELECT gametypeId, playerId, startTime, endTime, n, totalProfit FROM SessionsCache",
+    "TourneysCache": "SELECT tourneyId, playerId, startTime, endTime, n, totalProfit FROM TourneysCache",
+}
 
 
 def _hud_counts(db) -> list[tuple]:
     cursor = db.get_cursor()
     cursor.execute(HUD_COUNTS)
     return sorted(tuple(row) for row in cursor.fetchall())
+
+
+def _session_tables(db) -> dict[str, list[tuple]]:
+    cursor = db.get_cursor()
+    tables = {}
+    for table, statement in SESSION_TABLES.items():
+        cursor.execute(statement)
+        tables[table] = sorted(tuple(row) for row in cursor.fetchall())
+    return tables
 
 
 def _row_counts(db) -> dict[str, int]:
@@ -125,7 +148,7 @@ def open_copy(templates, tmp_path):
     def _open(name: str):
         target = tmp_path / name
         shutil.copytree(templates[name], target)
-        config = golden.build_config(target)
+        config = _session_config(target)
         return config, Database(config)
 
     return _open
@@ -178,8 +201,11 @@ def test_removing_the_duplicates_matches_a_clean_import(open_copy) -> None:
     assert changed["Hands"] == len(SESSION_CODES)
     assert _hand_numbers(db) == _hand_numbers(reference)
     assert _row_counts(db) == _row_counts(reference)
-    # Rebuilt from the repaired hands, the HUD cache no longer counts the duplicates (#591).
+    # Rebuilt from the repaired hands, the HUD cache no longer counts the duplicates (#591),
+    # nor do the session tables (#598).
     assert _hud_counts(db) == _hud_counts(reference)
+    assert _session_tables(reference)["TourneysCache"]
+    assert _session_tables(db) == _session_tables(reference)
 
 
 def test_a_rehearsal_writes_nothing(open_copy) -> None:

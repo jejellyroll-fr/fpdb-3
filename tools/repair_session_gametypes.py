@@ -27,8 +27,8 @@ It also reports what it cannot repair from the database:
   files stores them again correctly; without it they are only listed.
 * game types whose HudCache counts fewer hands than the hands table: the
   tournament hands of a damaged import wrote no HudCache rows. ``--apply``
-  rebuilds HudCache, CardsCache and PositionsCache from the repaired hands
-  (#591), which restores them; SessionsCache and TourneysCache have no rebuild.
+  rebuilds every cache from the repaired hands, HudCache (#591) and the session
+  tables with CardsCache and PositionsCache (#598), which restores them.
 
     python tools/repair_session_gametypes.py              # report only
     python tools/repair_session_gametypes.py --rehearse   # run it, then roll back
@@ -88,8 +88,6 @@ UPDATE_HAND = "UPDATE Hands SET gametypeId = %s, sessionId = %s WHERE id = %s"
 UPDATE_TOURNEY = "UPDATE Tourneys SET sessionId = %s WHERE id = %s"
 
 FIVE_CARD_OMAHA = "5_omahahi"
-# Caches whose rebuild from the hands reproduces what the import wrote (#591).
-REBUILT_CACHES = ("HudCache", "CardsCache", "PositionsCache")
 # The site the iPoker converter falls back to when it cannot tell the skin.
 IPOKER_NETWORK = "iPoker"
 # Files only records a history's base name, so two files of the same name are
@@ -388,9 +386,7 @@ def repair(db, found: Survey, *, commit: bool, delete_misclassified: bool = Fals
             # hands now sit under their own gametype, the rows the damaged
             # import never wrote come back, and a failure part-way leaves
             # neither a repaired hand nor a half-rebuilt cache behind.
-            for table in REBUILT_CACHES:
-                db.rebuild_cache(None, None, table, commit=False)
-            changed["Caches rebuilt"] = len(REBUILT_CACHES)
+            changed["Caches rebuilt"] = len(db.rebuild_hand_caches(commit=False))
     except Exception:
         db.connection.rollback()
         raise
@@ -428,7 +424,7 @@ def report(found: Survey) -> None:
     if found.reimported:
         print(
             f"{len(found.reimported)} damaged row(s) whose hand was imported again under its right gametype: "
-            "the damaged copy is deleted (SessionsCache and TourneysCache keep counting it)."
+            "the damaged copy is deleted."
         )
     print(f"{len(found.tourney_fixes)} tournament(s) without their session.")
     if found.unresolved:

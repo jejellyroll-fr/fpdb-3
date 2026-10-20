@@ -10,11 +10,17 @@ from typing import Any
 
 import pytest
 
-from fpdb_3_legacy import db_migrate, dialects
+from fpdb_3_legacy import db_migrate, dialects, session_rebuild
 from fpdb_3_legacy.Database import Database
 from fpdb_3_legacy.database_schema import COLUMN_COLLATION_SQL, DatabaseSchemaMixin
 from fpdb_3_legacy.phh_import import import_file as import_phh_file
 from fpdb_3_legacy.SQL import Sql
+from fpdb_3_legacy.sql_queries_cache_rebuild import (
+    SESSION_REBUILD_CLEAR,
+    SESSION_REBUILD_HAND_SESSION,
+    SESSION_REBUILD_HANDS,
+    SESSION_REBUILD_ORPHAN_PERIODS,
+)
 
 SCHEMA_KEYS = (
     "createSettingsTable",
@@ -454,4 +460,27 @@ def test_the_generated_cache_rebuild_runs_on_the_live_schema(backend: str, table
         _create_schema(connection, backend)
         with connection.cursor() as cursor:
             cursor.execute(query)
+        connection.rollback()
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("backend", ["postgresql", "mysql"])
+def test_the_session_rebuild_statements_run_on_the_live_schema(backend: str) -> None:
+    """Every statement the session rebuild issues, against the real tables (#598)."""
+    if backend not in _enabled_backends():
+        pytest.skip(f"live {backend} service not requested")
+
+    players = session_rebuild._players_query(None).replace("<hand_ids>", "%s, %s")
+
+    with _connection(backend) as connection:
+        _create_schema(connection, backend)
+        with connection.cursor() as cursor:
+            for statement in SESSION_REBUILD_CLEAR:
+                cursor.execute(statement)
+            cursor.execute(SESSION_REBUILD_HANDS)
+            cursor.execute(players, (1, 2))
+            assert len(cursor.description) == 4 + len(session_rebuild.STORED_KEYS)
+            cursor.execute(SESSION_REBUILD_HAND_SESSION, (1, 1))
+            for statement in SESSION_REBUILD_ORPHAN_PERIODS:
+                cursor.execute(statement)
         connection.rollback()

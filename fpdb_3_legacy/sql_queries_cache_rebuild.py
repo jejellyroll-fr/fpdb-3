@@ -30,3 +30,36 @@ def cache_rebuild_queries(db_server: str) -> dict[str, str]:
     if db_server not in ("mysql", "postgresql", "sqlite"):
         return {}
     return {"rebuildCache": REBUILD_TEMPLATE}
+
+
+# Session rebuild (#598): the session tables are emptied, then the import's own
+# session grouping is replayed over the stored hands in time order.
+SESSION_REBUILD_CLEAR = (
+    "DELETE FROM SessionsCache",
+    "DELETE FROM TourneysCache",
+    "UPDATE Hands SET sessionId = NULL",
+    "UPDATE Tourneys SET sessionId = NULL",
+    "DELETE FROM Sessions",
+)
+
+SESSION_REBUILD_HANDS = """SELECT h.id, h.startTime, h.tourneyId, h.gametypeId, g.type
+            FROM Hands h
+            INNER JOIN Gametypes g ON (h.gametypeId = g.id)
+            ORDER BY h.startTime, h.id"""
+
+SESSION_REBUILD_PLAYERS = """SELECT hp.handId, hp.playerId, hp.sawShowdown, hp.totalProfit<columns>
+            FROM HandsPlayers hp
+            WHERE hp.handId IN (<hand_ids>)
+            ORDER BY hp.handId, hp.seatNo"""
+
+SESSION_REBUILD_HAND_SESSION = "UPDATE Hands SET sessionId = %s WHERE id = %s"
+
+# Weeks and months no session and no period cache points at any more.
+SESSION_REBUILD_ORPHAN_PERIODS = (
+    """DELETE FROM Weeks WHERE NOT EXISTS (SELECT 1 FROM Sessions s WHERE s.weekId = Weeks.id)
+            AND NOT EXISTS (SELECT 1 FROM CardsCache c WHERE c.weekId = Weeks.id)
+            AND NOT EXISTS (SELECT 1 FROM PositionsCache p WHERE p.weekId = Weeks.id)""",
+    """DELETE FROM Months WHERE NOT EXISTS (SELECT 1 FROM Sessions s WHERE s.monthId = Months.id)
+            AND NOT EXISTS (SELECT 1 FROM CardsCache c WHERE c.monthId = Months.id)
+            AND NOT EXISTS (SELECT 1 FROM PositionsCache p WHERE p.monthId = Months.id)""",
+)

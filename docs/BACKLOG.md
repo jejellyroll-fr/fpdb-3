@@ -34,9 +34,9 @@ stored only under their session code. Report-only by default, `--rehearse`
 rolls back, `--apply` backs a SQLite database up first. See
 [ipoker-session-code-repair.md](ipoker-session-code-repair.md).
 
-**What remains.** The tool now rebuilds HudCache, CardsCache and
-PositionsCache (#591). SessionsCache and TourneysCache keep one extra hand per
-affected file until they can be rebuilt (#598).
+**Caches.** The tool rebuilds every cache from the repaired hands: HudCache
+(#591), then the session tables with CardsCache and PositionsCache (#598).
+Nothing remains of the duplicates.
 
 ---
 

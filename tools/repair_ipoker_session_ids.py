@@ -24,9 +24,8 @@ a hand stored only under its session code is given its gamecode.
 
 The repair works on the hand tables (Hands, HandsPlayers, HandsActions and
 everything else keyed on a hand), drops the analytics aggregates, and rebuilds
-HudCache, CardsCache and PositionsCache from the hands (#591). SessionsCache and
-TourneysCache have no rebuild: they keep the duplicate's contribution, one extra
-hand per affected file.
+every cache from the hands: HudCache (#591) and, when sessions are cached, the
+session tables with CardsCache and PositionsCache (#598).
 
     python tools/repair_ipoker_session_ids.py                       # report only
     python tools/repair_ipoker_session_ids.py --hh-dir ~/iPokerHH   # report, with the files
@@ -79,9 +78,6 @@ RENAME_HAND = "UPDATE Hands SET siteHandNo = %s WHERE id = %s"
 
 SESSION_RE = re.compile(rb'<session\b[^>]*\bsessioncode="(\d+)"')
 GAME_RE = re.compile(rb'<game\b[^>]*\bgamecode="(\d+)"')
-
-# Caches whose rebuild from the hands reproduces what the import wrote (#591).
-REBUILT_CACHES = ("HudCache", "CardsCache", "PositionsCache")
 
 # The site the converter falls back to when it cannot tell which skin a file
 # came from (iPoker/base.py). The configured skins alone would miss those hands.
@@ -283,9 +279,7 @@ def repair(db, found: Survey, *, commit: bool) -> dict[str, int]:
         if found.duplicates:
             # In the same transaction as the deletions: a failure part-way
             # leaves neither removed hands nor a half-rebuilt cache behind.
-            for table in REBUILT_CACHES:
-                db.rebuild_cache(None, None, table, commit=False)
-            changed["Caches rebuilt"] = len(REBUILT_CACHES)
+            changed["Caches rebuilt"] = len(db.rebuild_hand_caches(commit=False))
     except Exception:
         db.connection.rollback()
         raise
@@ -386,10 +380,7 @@ def main(argv: list[str] | None = None) -> int:
     for table, count in sorted(changed.items()):
         print(f"  {count:>5}  {table}")
     if found.duplicates:
-        print(
-            "\nHudCache, CardsCache and PositionsCache were rebuilt from the hands. SessionsCache and "
-            "TourneysCache have no rebuild and still count each removed hand once more."
-        )
+        print("\nThe caches were rebuilt from the hands.")
     return 0
 
 
