@@ -2337,12 +2337,13 @@ class Database(
     def rebuild_hand_caches(self, commit: bool = True) -> tuple[str, ...]:
         """Rebuild every cache derived from the hands, as a repair that moved or deleted hands needs.
 
-        The session tables only when sessions are cached, as the import does.
-        Returns the tables rebuilt.
+        The session tables when sessions are cached, or were when the database
+        was imported: their rows would otherwise keep counting what the repair
+        changed. Returns the tables rebuilt.
         """
         self.rebuild_cache(None, None, "HudCache", commit=False)
         tables: tuple[str, ...]
-        if self.cacheSessions:
+        if self.cacheSessions or session_rebuild.has_sessions(self):
             self.rebuild_session_caches(commit=False)
             tables = ("HudCache", "Sessions", "SessionsCache", "TourneysCache", "CardsCache", "PositionsCache")
         else:

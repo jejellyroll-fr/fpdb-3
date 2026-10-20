@@ -208,6 +208,22 @@ def test_removing_the_duplicates_matches_a_clean_import(open_copy) -> None:
     assert _session_tables(db) == _session_tables(reference)
 
 
+def test_sessions_imported_earlier_are_rebuilt_with_caching_now_off(templates, tmp_path, open_copy) -> None:
+    """The session tables follow the database's data, not today's import setting."""
+    _ref_config, reference = open_copy("reference")
+    target = tmp_path / "caching-off"
+    shutil.copytree(templates["duplicated"], target)
+    config = golden.build_config(target)
+    db = Database(config)
+    assert not db.cacheSessions
+    found = repair_tool.survey(db, repair_tool.ipoker_sites(config), [])
+
+    changed = repair_tool.repair(db, found, commit=True)
+
+    assert changed["Caches rebuilt"] == 6
+    assert _session_tables(db) == _session_tables(reference)
+
+
 def test_a_rehearsal_writes_nothing(open_copy) -> None:
     config, db = open_copy("duplicated")
     before = (_hand_numbers(db), _row_counts(db))

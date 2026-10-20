@@ -20,6 +20,7 @@ from typing import Any
 
 from fpdb_3_legacy.database_caches import SESSION_CACHE_KEYS
 from fpdb_3_legacy.sql_queries_cache_rebuild import (
+    SESSION_REBUILD_ANY_SESSION,
     SESSION_REBUILD_CLEAR,
     SESSION_REBUILD_FIRST_HANDS,
     SESSION_REBUILD_HAND_SESSION,
@@ -68,6 +69,14 @@ def rebuild_sessions(db: Any, *, commit: bool = True, batch: int = BATCH) -> Non
             setattr(db, name, value)
     if commit:
         db.commit()
+
+
+def has_sessions(db: Any) -> bool:
+    """Whether the database holds sessions, which a repair must then rebuild whatever the current setting."""
+    cursor = db.get_cursor()
+    cursor.execute(SESSION_REBUILD_ANY_SESSION)
+    row = cursor.fetchone()
+    return row is not None and row[0] is not None
 
 
 def delete_orphan_periods(db: Any) -> None:

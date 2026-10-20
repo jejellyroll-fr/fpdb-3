@@ -16,6 +16,7 @@ from fpdb_3_legacy.database_schema import COLUMN_COLLATION_SQL, DatabaseSchemaMi
 from fpdb_3_legacy.phh_import import import_file as import_phh_file
 from fpdb_3_legacy.SQL import Sql
 from fpdb_3_legacy.sql_queries_cache_rebuild import (
+    SESSION_REBUILD_ANY_SESSION,
     SESSION_REBUILD_CLEAR,
     SESSION_REBUILD_FIRST_HANDS,
     SESSION_REBUILD_HAND_SESSION,
@@ -476,6 +477,7 @@ def test_the_session_rebuild_statements_run_on_the_live_schema(backend: str) -> 
     with _connection(backend) as connection:
         _create_schema(connection, backend)
         with connection.cursor() as cursor:
+            cursor.execute(SESSION_REBUILD_ANY_SESSION)
             for statement in SESSION_REBUILD_CLEAR:
                 cursor.execute(statement)
             cursor.execute(SESSION_REBUILD_FIRST_HANDS, (500,))

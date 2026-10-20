@@ -62,6 +62,9 @@ SESSION_REBUILD_PLAYERS = """SELECT hp.handId, hp.playerId, hp.sawShowdown, hp.t
             WHERE hp.handId IN (<hand_ids>)
             ORDER BY hp.handId, hp.seatNo"""
 
+# Whether the database holds sessions, whatever the current import setting.
+SESSION_REBUILD_ANY_SESSION = "SELECT MIN(id) FROM Sessions"
+
 SESSION_REBUILD_HAND_SESSION = "UPDATE Hands SET sessionId = %s WHERE id = %s"
 
 # Weeks and months no session and no period cache points at any more.
