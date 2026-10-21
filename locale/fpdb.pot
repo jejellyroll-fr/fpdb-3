@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 13:02+0200\n"
+"POT-Creation-Date: 2026-10-21 20:37+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2635,6 +2635,10 @@ msgid "You have unsaved configuration changes."
 msgstr ""
 
 #: fpdb_3_legacy/fpdb.pyw
+msgid "Checking for updates…"
+msgstr ""
+
+#: fpdb_3_legacy/fpdb.pyw
 msgid "Unknown Site"
 msgstr ""
 
@@ -3130,6 +3134,14 @@ msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Version, packaging and runtime environment details"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/update_notice.py
+msgid "Check for updates"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Ask GitHub whether a newer fpdb release is out"
 msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
@@ -5417,4 +5429,46 @@ msgstr ""
 #: fpdb_3_legacy/table_export.py
 #, python-format
 msgid "Export displayed values as %s…"
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+msgid "Release notes"
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+#, python-format
+msgid "Download %s"
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+#, python-format
+msgid "fpdb %(new)s is available (you have %(current)s)."
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+msgid "Hide this notice"
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+msgid ""
+"fpdb can check once a day whether a newer release is available on GitHub, "
+"and tell you in the status bar.\n"
+"\n"
+"The check is a single anonymous request to the GitHub releases page: it "
+"sends nothing about you or your hands, and fpdb never downloads or installs "
+"anything by itself.\n"
+"\n"
+"You can change this later in File > Preferences (general: "
+"check_for_updates), and check by hand with Help > Check for updates.\n"
+"\n"
+"Check for updates automatically?"
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+#, python-format
+msgid "fpdb %s is the latest release."
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+msgid "GitHub could not be reached. Check your connection and try again later."
 msgstr ""

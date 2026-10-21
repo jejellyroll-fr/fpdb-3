@@ -215,6 +215,11 @@ def menu_layout() -> tuple[Menu, ...]:
                     "tab_version_info",
                     tip=N_("Version, packaging and runtime environment details"),
                 ),
+                MenuItem(
+                    N_("Check for updates"),
+                    "check_for_updates",
+                    tip=N_("Ask GitHub whether a newer fpdb release is out"),
+                ),
                 MenuItem(N_("Stats Guide"), "tabStatsInfo"),
                 MenuItem(
                     N_("Research Browser for Omaha"),

@@ -4140,6 +4140,29 @@ class Config:
                 general_node.removeAttribute("preflop_advisor")
         self.save()
 
+    def get_check_for_updates(self) -> bool | None:
+        """Whether fpdb looks for a newer release at startup (#445); None until the user has been asked.
+
+        An optional ``check_for_updates`` attribute on ``<general>``, absent from the
+        shipped templates so that the first start asks instead of deciding.
+        """
+        value = self.general.get("check_for_updates")
+        if value is None:
+            return None
+        return str(value).strip().lower() in ("true", "1", "yes")
+
+    def get_update_prereleases(self) -> bool:
+        """Whether the update check also announces pre-releases (``update_prereleases``, off by default)."""
+        return str(self.general.get("update_prereleases", "")).strip().lower() in ("true", "1", "yes")
+
+    def set_check_for_updates(self, enabled: bool) -> None:
+        """Record the user's answer to the update question, and save."""
+        value = "True" if enabled else "False"
+        self.general["check_for_updates"] = value
+        for general_node in self.doc.getElementsByTagName("general"):
+            general_node.setAttribute("check_for_updates", value)
+        self.save()
+
     def get_session_guard_defaults(self) -> dict[str, str]:
         """The Session Guard limits saved as defaults (#395), as stored; empty when none."""
         for node in self.doc.getElementsByTagName("session_guard"):
