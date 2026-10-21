@@ -30,7 +30,8 @@ import zmq as _zmq
 from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout
 
-from fpdb_3_legacy import Configuration, Database, IdentifySite, db_profile
+from fpdb_3_legacy import Configuration, Database, IdentifySite, db_profile, import_prefetch
+from fpdb_3_legacy.equity import load_poker_eval
 from fpdb_3_legacy.Exceptions import (
     FpdbHandDuplicate,
     FpdbHandPartial,
@@ -284,10 +285,10 @@ class Importer:
         # every owned id sequence before auto/bulk import starts inserting rows.
         with self.database.transaction():
             self.database.repair_sequences()
-        self.writerdbs = []
+        self.writerdbs: list[Any] = []
+        # Workers computing a bulk import's all-in equities ahead of it (#443);
+        # 1 is none. It used to open writer connections nothing wrote through.
         self.settings.setdefault("threads", 1)
-        for _i in range(self.settings["threads"]):
-            self.writerdbs.append(Database.Database(self.config, sql=self.sql))
 
         # Modification: specify port for ZMQ
         self.zmq_sender: ZMQSender | None = None
@@ -375,17 +376,17 @@ class Importer:
         self.settings["handsInDB"] = value
 
     def setThreads(self, value) -> None:
-        """Set the number of threads used for importing.
+        """Set how many worker processes a bulk import uses (#443).
 
-        Updates the 'threads' setting and ensures the writer database list matches the thread count.
+        The workers parse the files ahead of the import and compute their exact
+        all-in equities, which is where most of the time goes; the import
+        itself stays sequential. 1 (the default) uses none, -1 every core but
+        one, up to four. Auto-import never uses them.
 
         Args:
-            value: The number of threads to use for importing.
+            value: The number of worker processes, or -1 for automatic.
         """
         self.settings["threads"] = value
-        if self.settings["threads"] > len(self.writerdbs):
-            for _i in range(self.settings["threads"] - len(self.writerdbs)):
-                self.writerdbs.append(Database.Database(self.config, sql=self.sql))
 
     def setDropIndexes(self, value) -> None:
         """Set the dropIndexes setting for the importer.
@@ -980,42 +981,49 @@ class Importer:
             assert self.progress_start_cb is not None
             self.progress_start_cb(len(self.filelist))
 
-        for f in self.filelist:
-            if not has_callbacks:
-                ProgressDialog.progress_update(f, str(self.database.getHandCount()))
-            else:
-                assert self.progress_update_cb is not None
-                self.progress_update_cb(f, str(self.database.getHandCount()))
+        prefetch = self._start_equity_prefetch()
+        try:
+            for f in self.filelist:
+                if not has_callbacks:
+                    ProgressDialog.progress_update(f, str(self.database.getHandCount()))
+                else:
+                    assert self.progress_update_cb is not None
+                    self.progress_update_cb(f, str(self.database.getHandCount()))
+                if prefetch is not None:
+                    prefetch.before_import(f)
 
-            try:
-                (stored, duplicates, partial, skipped, errors, ttime, _) = self._import_despatch(self.filelist[f])
-                totstored += stored
-                totdups += duplicates
-                totpartial += partial
-                totskipped += skipped
-                toterrors += errors
+                try:
+                    (stored, duplicates, partial, skipped, errors, ttime, _) = self._import_despatch(self.filelist[f])
+                    totstored += stored
+                    totdups += duplicates
+                    totpartial += partial
+                    totskipped += skipped
+                    toterrors += errors
 
-                self.logImport(
-                    "bulk",
-                    f,
-                    stored,
-                    duplicates,
-                    partial,
-                    skipped,
-                    errors,
-                    ttime,
-                    self.filelist[f].fileId,
-                )
-            except Exception as e:  # intentional broad catch: file import must isolate per-file failures.
-                self.database.rollback()
-                log.exception(f"A fatal error occurred while processing file: {f}. Error: {e}")
-                toterrors += 1
-                self._relocate_processed_file(f, failed=True)
-                continue
+                    self.logImport(
+                        "bulk",
+                        f,
+                        stored,
+                        duplicates,
+                        partial,
+                        skipped,
+                        errors,
+                        ttime,
+                        self.filelist[f].fileId,
+                    )
+                except Exception as e:  # intentional broad catch: file import must isolate per-file failures.
+                    self.database.rollback()
+                    log.exception(f"A fatal error occurred while processing file: {f}. Error: {e}")
+                    toterrors += 1
+                    self._relocate_processed_file(f, failed=True)
+                    continue
 
-            # Optionally archive the file once processed: successful imports go to
-            # the "imported" directory, files that produced errors to the "failed" one.
-            self._relocate_processed_file(f, failed=errors > 0)
+                # Optionally archive the file once processed: successful imports go to
+                # the "imported" directory, files that produced errors to the "failed" one.
+                self._relocate_processed_file(f, failed=errors > 0)
+        finally:
+            if prefetch is not None:
+                prefetch.close()
 
         if not has_callbacks:
             ProgressDialog.accept()
@@ -1027,6 +1035,32 @@ class Importer:
         return totstored, totdups, totpartial, totskipped, toterrors
 
     # end def importFiles
+
+    def _start_equity_prefetch(self) -> import_prefetch.EquityPrefetch | None:
+        """Start the workers that compute the files' all-in equities ahead of a bulk import (#443).
+
+        None for auto-import, whose latency the HUD waits on, without the
+        equity engine, with fewer than two hand history files, and in the
+        packaged builds until their multiprocessing dispatch
+        (subprocess_launch.dispatch_multiprocessing) is checked on a bundle.
+        """
+        workers = import_prefetch.worker_count(self.settings.get("threads"))
+        if self.mode == "auto" or workers == 0 or getattr(sys, "frozen", False) or getattr(sys, "oxidized", False):
+            return None
+        jobs = [
+            import_prefetch.PrefetchJob(path, fpdbfile.site.filter_name, fpdbfile.site.name, bool(fpdbfile.archive))
+            for path, fpdbfile in self.filelist.items()
+            if fpdbfile.ftype in ("hh", "both") and fpdbfile.site is not None
+        ]
+        if len(jobs) < 2 or load_poker_eval() is None:
+            return None
+        try:
+            prefetch = import_prefetch.EquityPrefetch(self.config, min(workers, len(jobs)))
+            prefetch.submit(jobs)
+        except (OSError, RuntimeError, ValueError):
+            log.warning("Importing without equity workers: they could not start", exc_info=True)
+            return None
+        return prefetch
 
     def _relocate_processed_file(self, filepath: str, *, failed: bool) -> None:
         """Move a just-processed file to the configured imported/failed directory.

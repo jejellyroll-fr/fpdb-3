@@ -114,9 +114,6 @@ class BulkImportThread(QThread):
 class GuiBulkImport(QWidget):
     """Widget for bulk importing hand history files."""
 
-    # Configuration  -  update these as preferred:
-    allow_threads = False  # set to True to try out the threads field
-
     def load_clicked(self) -> None:
         """Handle load button click event by spawning a background thread."""
         # Does the lock acquisition need to be more sophisticated for multiple dirs?
@@ -150,6 +147,8 @@ class GuiBulkImport(QWidget):
 
             self.importer.setHandsInDB(self.n_hands_in_db)
             self.importer.setMode("bulk")
+            # Equity workers ahead of the import (#443), as the command line does.
+            self.importer.setThreads(-1)
             self.importer.setCallHud(False)
             self._apply_move_settings()
 

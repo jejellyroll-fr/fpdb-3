@@ -1910,3 +1910,20 @@ def test_backfill_prepare_hand_sets_ids_and_generates_notes():
     assert {note.rule_id for note in notes} >= {"hwang_plo_081"}
     assert all(note.hand_id == 555 for note in notes)
     assert any(note.player_id == 11 for note in notes)
+
+
+def test_the_settings_are_read_without_walking_the_whole_configuration():
+    """<autonotes> is a child of the root; the import asks for it about ten times a hand (#443)."""
+    config = config_from_xml(
+        "<FreePokerToolsConfig><sites><site><layout/></site></sites>"
+        '<autonotes enabled="False" maxPerHand="2"/></FreePokerToolsConfig>'
+    )
+
+    def walk(_name):
+        raise AssertionError("walked the whole document")
+
+    config.doc.getElementsByTagName = walk
+
+    assert autonotes_enabled(config) is False
+    assert max_auto_notes_per_hand(config) == 2
+    assert autonotes_enabled(config_from_xml("<FreePokerToolsConfig/>")) is True
