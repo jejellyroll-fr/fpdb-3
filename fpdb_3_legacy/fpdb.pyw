@@ -24,10 +24,13 @@ import sys
 if not hasattr(datetime, "UTC"):
     datetime.UTC = datetime.timezone.utc
 
-from fpdb_3_legacy.subprocess_launch import dispatch_hud_main, dispatch_run_module
+from fpdb_3_legacy.subprocess_launch import dispatch_hud_main, dispatch_multiprocessing, dispatch_run_module
 
 # Frozen builds have no "python -m": helper processes re-invoke this executable
-# with --run-module. Dispatch before pulling in the GUI stack below.
+# with --run-module, and multiprocessing workers with --multiprocessing-fork.
+# Dispatch before pulling in the GUI stack below.
+if __name__ == "__main__":
+    dispatch_multiprocessing()
 if __name__ == "__main__" and dispatch_run_module():
     sys.exit(0)
 if __name__ == "__main__" and dispatch_hud_main():

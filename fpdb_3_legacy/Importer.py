@@ -1041,7 +1041,8 @@ class Importer:
 
         None for auto-import, whose latency the HUD waits on, without the
         equity engine, with fewer than two hand history files, and in the
-        packaged builds, which do not set up multiprocessing yet.
+        packaged builds until their multiprocessing dispatch
+        (subprocess_launch.dispatch_multiprocessing) is checked on a bundle.
         """
         workers = import_prefetch.worker_count(self.settings.get("threads"))
         if self.mode == "auto" or workers == 0 or getattr(sys, "frozen", False) or getattr(sys, "oxidized", False):

@@ -69,6 +69,14 @@ batching. When it reaches a hand, the equity is usually known already.
 - **Configuration.** Workers read a copy of the in-memory configuration in a
   private temporary directory, never the user's file, because building a
   configuration may migrate and save it.
-- **Packaged builds.** The PyInstaller and PyOxidizer bundles do not set up
-  multiprocessing (`freeze_support`), and a spawned worker could start the
-  application again, so they import sequentially for now.
+- **Packaged builds.** In a bundle `sys.executable` is fpdb itself, so
+  multiprocessing starts each worker as `fpdb --multiprocessing-fork ...` and,
+  on macOS and Linux, its resource tracker as `fpdb -B -c "...resource_tracker..."`.
+  `subprocess_launch.dispatch_multiprocessing` runs both before the GUI, from
+  `fpdb.pyw` and from PyOxidizer's run command; `multiprocessing.freeze_support()`
+  would only handle workers, and only on Windows. It works in an emulation of a
+  frozen launch, but has not been checked on a built bundle yet, so the bundles
+  still import sequentially (the guard in `Importer._start_equity_prefetch`).
+  To lift it: build a bundle, bulk import a few files with `threads=-1` through
+  `fpdb --run-module fpdb_3_legacy.GuiBulkImport -x -C <throwaway config>`, and
+  check that the workers run and that no fpdb process is left behind.

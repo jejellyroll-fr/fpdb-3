@@ -135,6 +135,10 @@ def make_exe(dist):
         "if os.path.isdir(lib_dir):",
         "    sys.path.insert(0, lib_dir)",
         "os.chdir(root)",
+        # A multiprocessing worker (the bulk import's equity workers, #443) is
+        # this binary started with --multiprocessing-fork; run it, never the GUI.
+        "from fpdb_3_legacy.subprocess_launch import dispatch_multiprocessing",
+        "dispatch_multiprocessing()",
         "if len(sys.argv) > 1 and sys.argv[1] == '--hud':",
         "    sys.argv.pop(1)",
         "    runpy.run_path(os.path.join(legacy_dir, 'HUD_main.pyw'), run_name='__main__')",

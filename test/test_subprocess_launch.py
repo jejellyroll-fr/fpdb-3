@@ -10,8 +10,10 @@ import pytest
 
 from fpdb_3_legacy.subprocess_launch import (
     HUD_FLAG,
+    MULTIPROCESSING_FLAG,
     RUN_MODULE_FLAG,
     dispatch_hud_main,
+    dispatch_multiprocessing,
     dispatch_run_module,
     hud_main_command,
     python_module_command,
@@ -132,3 +134,63 @@ def test_dispatch_hud_main_runs_packaged_script_with_forwarded_args(monkeypatch)
 
     assert Path(sys.argv[0]).name == "HUD_main.pyw"
     assert sys.argv[1:] == ["--config", "bundled.xml"]
+
+
+def test_a_normal_launch_is_not_a_multiprocessing_worker(monkeypatch) -> None:
+    from multiprocessing import spawn
+
+    monkeypatch.setattr(spawn, "freeze_support", lambda: pytest.fail("started a worker"))
+
+    assert dispatch_multiprocessing(["fpdb"]) is False
+    assert dispatch_multiprocessing(["fpdb", "--hud"]) is False
+
+
+def test_a_frozen_worker_runs_multiprocessing_and_exits(monkeypatch) -> None:
+    """multiprocessing starts a frozen worker as `fpdb --multiprocessing-fork ...` (#443).
+
+    multiprocessing.freeze_support() handles that only on Windows; on macOS and
+    Linux the worker would open another fpdb window.
+    """
+    from multiprocessing import spawn
+
+    seen: list[list[str]] = []
+    monkeypatch.setattr(spawn, "freeze_support", lambda: seen.append(list(sys.argv)))
+    monkeypatch.setattr(sys, "argv", list(sys.argv))
+    argv = ["fpdb", MULTIPROCESSING_FLAG, "tracker_fd=5", "pipe_handle=7"]
+
+    with pytest.raises(SystemExit) as exited:
+        dispatch_multiprocessing(argv)
+
+    assert exited.value.code == 0
+    assert seen == [argv]
+
+
+def test_a_frozen_resource_tracker_runs_and_exits(monkeypatch) -> None:
+    """multiprocessing also starts its resource tracker through the frozen executable."""
+    from multiprocessing import resource_tracker
+
+    seen: list[int] = []
+    monkeypatch.setattr(resource_tracker, "main", seen.append)
+    argv = ["fpdb", "-B", "-c", "from multiprocessing.resource_tracker import main;main(8)"]
+
+    with pytest.raises(SystemExit):
+        dispatch_multiprocessing(argv)
+
+    assert seen == [8]
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ["fpdb", "-c", "from multiprocessing.resource_tracker import main;main(8); import os"],
+        ["fpdb", "-c", "import os"],
+        ["fpdb", "file.txt", "-c", "from multiprocessing.resource_tracker import main;main(8)"],
+    ],
+    ids=["extra-code", "other-code", "not-a-flag"],
+)
+def test_only_the_exact_tracker_command_is_run(monkeypatch, argv) -> None:
+    from multiprocessing import resource_tracker
+
+    monkeypatch.setattr(resource_tracker, "main", lambda _fd: pytest.fail("ran the tracker"))
+
+    assert dispatch_multiprocessing(argv) is False
