@@ -98,6 +98,20 @@ def _shown(path: Path) -> str:
     return str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)
 
 
+def _report_gap(fresh: Path, committed: Path) -> None:
+    """Name the strings the source and the committed template disagree on."""
+    source = {entry.msgid for entry in i18n_compile.read_entries(fresh) if entry.msgid}
+    template = (
+        {entry.msgid for entry in i18n_compile.read_entries(committed) if entry.msgid} if committed.exists() else set()
+    )
+    for label, strings in (
+        ("in the source, not the template", source - template),
+        ("in the template, not the source", template - source),
+    ):
+        for msgid in sorted(strings)[:20]:
+            print(f"{label}: {msgid!r}")
+
+
 def catalogues() -> list[Path]:
     return [LOCALE / f"{i18n_compile.DOMAIN}-{lang}.po" for lang in i18n_compile.available_locales(LOCALE)]
 
@@ -119,6 +133,7 @@ def check() -> int:
         write_pot(fresh)
         if not POT.exists() or _messages(fresh) != _messages(POT):
             stale.append(_shown(POT))
+            _report_gap(fresh, POT)
         for po in catalogues():
             merged = Path(tmp) / po.name
             merge(po, POT, merged)
