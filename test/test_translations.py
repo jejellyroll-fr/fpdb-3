@@ -190,3 +190,14 @@ def test_a_catalogue_that_lags_the_template_is_reported(tmp_path, monkeypatch):
     monkeypatch.setattr(update_pot, "POT", locale / "fpdb.pot")
 
     assert update_pot.check() == 1
+
+
+@pytest.mark.skipif(not __import__("shutil").which("msgmerge"), reason="GNU gettext missing")
+def test_a_new_source_string_missing_from_the_template_is_reported(monkeypatch, capsys):
+    from tools import update_pot
+
+    strings = update_pot.source_strings()
+    monkeypatch.setattr(update_pot, "source_strings", lambda: strings | {"A string nobody merged"})
+
+    assert update_pot.check() == 1
+    assert "'A string nobody merged'" in capsys.readouterr().out

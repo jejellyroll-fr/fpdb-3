@@ -20,6 +20,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import ast
 import shutil
 import subprocess
 import sys
@@ -98,18 +99,45 @@ def _shown(path: Path) -> str:
     return str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)
 
 
-def _report_gap(fresh: Path, committed: Path) -> None:
-    """Name the strings the source and the committed template disagree on."""
-    source = {entry.msgid for entry in i18n_compile.read_entries(fresh) if entry.msgid}
-    template = (
-        {entry.msgid for entry in i18n_compile.read_entries(committed) if entry.msgid} if committed.exists() else set()
+def source_strings() -> set[str]:
+    """Every literal passed to ``_()`` or ``N_()`` in the source, read with ``ast``.
+
+    The check compares the template with this rather than with a fresh
+    xgettext run: xgettext versions do not extract the same strings (CI's
+    gettext 0.21 is not 1.0), and the check must not depend on the runner.
+    It is what xgettext 1.0 extracts, string for string.
+    """
+    strings: set[str] = set()
+    for path in sorted([*SRC.rglob("*.py"), *SRC.rglob("*.pyw")]):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id in ("_", "N_")
+                and node.args
+                and isinstance(node.args[0], ast.Constant)
+                and isinstance(node.args[0].value, str)
+                and node.args[0].value
+            ):
+                strings.add(node.args[0].value)
+    return strings
+
+
+def _template_gap(template: Path) -> list[str]:
+    """The strings the source and the committed template disagree on, named."""
+    source = source_strings()
+    committed = (
+        {entry.msgid for entry in i18n_compile.read_entries(template) if entry.msgid} if template.exists() else set()
     )
-    for label, strings in (
-        ("in the source, not the template", source - template),
-        ("in the template, not the source", template - source),
-    ):
-        for msgid in sorted(strings)[:20]:
-            print(f"{label}: {msgid!r}")
+    return [
+        f"{label}: {msgid!r}"
+        for label, strings in (
+            ("in the source, not the template", source - committed),
+            ("in the template, not the source", committed - source),
+        )
+        for msgid in sorted(strings)
+    ]
 
 
 def catalogues() -> list[Path]:
@@ -128,12 +156,11 @@ def completion_table() -> str:
 def check() -> int:
     """1 when the template or a catalogue is not what the source and the template give."""
     stale = []
+    gap = _template_gap(POT)
+    if gap:
+        stale.append(_shown(POT))
+        print("\n".join(gap[:40]))
     with tempfile.TemporaryDirectory() as tmp:
-        fresh = Path(tmp) / "fpdb.pot"
-        write_pot(fresh)
-        if not POT.exists() or _messages(fresh) != _messages(POT):
-            stale.append(_shown(POT))
-            _report_gap(fresh, POT)
         for po in catalogues():
             merged = Path(tmp) / po.name
             merge(po, POT, merged)
