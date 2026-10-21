@@ -8,6 +8,7 @@ the repository's shipped file, read only.
 from __future__ import annotations
 
 import shutil
+import threading
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -15,10 +16,11 @@ import pytest
 
 pytest.importorskip("PySide6.QtWidgets")
 
-from PySide6.QtWidgets import QWizard  # noqa: E402 - after the Qt availability probe
+from PySide6.QtWidgets import QMainWindow, QWizard  # noqa: E402 - after the Qt availability probe
 
+from fpdb_3_legacy import Importer  # noqa: E402
 from fpdb_3_legacy.Configuration import Config  # noqa: E402
-from fpdb_3_legacy.GuiTrackerMigration import GuiTrackerMigration  # noqa: E402
+from fpdb_3_legacy.GuiTrackerMigration import GuiTrackerMigration, ScanThread  # noqa: E402
 from fpdb_3_legacy.Importer import FileImportResult  # noqa: E402
 from fpdb_3_legacy.tracker_migration import ExportScan  # noqa: E402
 
@@ -234,3 +236,56 @@ def test_a_scan_the_user_moved_past_cannot_overwrite_the_current_one(qtbot, conf
 
     assert set(wizard.scan_page.scan.rooms) == {"GGPoker"}
     assert wizard.scan_page.rooms.item(0, 0).text() == "GGPoker"
+
+
+class SlowScan(ScanThread):
+    """A scan that runs until the test lets it go."""
+
+    def __init__(self, release: threading.Event) -> None:
+        super().__init__(None, "")
+        self.release = release
+
+    def run(self) -> None:
+        self.release.wait(10)
+
+
+@pytest.mark.qt
+def test_a_scan_that_outlives_the_wizard_is_kept_until_it_finishes(qtbot, config) -> None:
+    wizard = open_wizard(qtbot, config, FakeImporter(), FakeLock())
+    release = threading.Event()
+    slow = SlowScan(release)
+    wizard.scan_page.running.append(slow)
+    slow.start()
+
+    wizard.scan_page.stop(wait_ms=20)  # the bounded wait runs out
+
+    assert slow.isRunning()
+    assert slow in Importer._orphaned_imports  # held, so it is not destroyed while running
+    assert slow not in wizard.scan_page.running
+    release.set()
+    assert slow.wait(5000)
+    Importer.reap_orphaned_imports()
+    assert slow not in Importer._orphaned_imports
+
+
+class MainWindow(QMainWindow):
+    def __init__(self) -> None:
+        super().__init__()
+        self.refreshed = 0
+
+    def refresh_after_import(self) -> None:
+        self.refreshed += 1
+
+
+@pytest.mark.qt
+def test_open_stats_tabs_are_refreshed_once_the_import_ends(qtbot, config, archive) -> None:
+    window = MainWindow()
+    qtbot.addWidget(window)
+    wizard = GuiTrackerMigration({"global_lock": FakeLock()}, config, parent=window, importer=FakeImporter())
+    wizard.show()
+    advance_to_scan(qtbot, wizard, archive)
+
+    wizard.next()
+    qtbot.waitUntil(wizard.import_page.isComplete, timeout=10000)
+
+    assert window.refreshed == 1

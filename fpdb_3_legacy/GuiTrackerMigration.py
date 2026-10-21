@@ -10,6 +10,7 @@ Bulk Import tab is set to, so the tracker keeps a complete archive.
 from __future__ import annotations
 
 import os
+import warnings
 from contextlib import suppress
 from typing import Any
 
@@ -185,10 +186,28 @@ class ScanPage(QWizardPage):
         super().cleanupPage()
 
     def stop(self, wait_ms: int = 5000) -> None:
-        """Let running scans finish before the wizard goes away; they only read files."""
+        """Let running scans finish before the wizard goes away; they only read files.
+
+        The wait is bounded, since it runs on the UI thread. A scan of a large
+        archive that overruns it is handed to the importer's orphan keeper,
+        which holds it until it has really finished: dropping a running QThread
+        takes the application down. Its signals are cut first, because the page
+        they would reach is about to be deleted.
+        """
+        from fpdb_3_legacy.Importer import adopt_orphaned_import
+
         self.thread = None
         for thread in list(self.running):
-            thread.wait(wait_ms)
+            if thread.wait(wait_ms):
+                continue
+            # PySide warns when a signal has nothing left to disconnect; that is fine here.
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", RuntimeWarning)
+                for signal in (thread.scanned, thread.failed, thread.finished):
+                    with suppress(RuntimeError, TypeError):
+                        signal.disconnect()
+            self.running.remove(thread)
+            adopt_orphaned_import(thread, lambda: None)  # nothing to clean up: a scan only reads
 
     def show_scan(self, scan: ExportScan) -> None:
         self.scan = scan
@@ -381,6 +400,10 @@ class GuiTrackerMigration(QWizard):
         scan = self.scan_page.scan
         self.summary_page.show_summary(rooms, len(scan.unsupported) if scan else 0)
         self.import_page.finish(_("Import finished."))
+        # Open stats tabs built their filters before these games, limits and currencies existed.
+        main_window = self.parent()
+        if main_window is not None and hasattr(main_window, "refresh_after_import"):
+            main_window.refresh_after_import()
 
     def import_error(self, message: str) -> None:
         self._release_lock()
