@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 13:02+0200\n"
+"POT-Creation-Date: 2026-10-21 13:33+0200\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -21,9 +21,9 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s cannot read all stud/razz hands yet."
-msgstr ""
+msgstr "%s encara no pot llegir totes les mans de stud/razz."
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py
 #, python-format
@@ -42,31 +42,33 @@ msgid "AbsoluteToFpdb.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
+#, fuzzy
 msgid "No bringin found."
-msgstr ""
+msgstr "No s'ha trobat cap bring-in."
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
 msgid "No small blind"
 msgstr "No hi ha cega petita"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Player bringing in: %s for %s"
-msgstr ""
+msgstr "Jugador amb bring-in: %s per %s"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/BossToFpdb.py
 #: fpdb_3_legacy/EnetToFpdb.py fpdb_3_legacy/EntractionToFpdb.py
 #: fpdb_3_legacy/EverestToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
 #: fpdb_3_legacy/FulltiltToFpdb.py fpdb_3_legacy/MicrogamingToFpdb.py
 #: fpdb_3_legacy/OnGameToFpdb.py fpdb_3_legacy/PkrToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Unimplemented %s: '%s' '%s'"
-msgstr ""
+msgstr "No implementat %s: '%s' '%s'"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EnetToFpdb.py
 #: fpdb_3_legacy/EverleafToFpdb.py fpdb_3_legacy/OnGameToFpdb.py
+#, fuzzy
 msgid "reading antes"
-msgstr ""
+msgstr "llegint els antes"
 
 #: fpdb_3_legacy/BossToFpdb.py
 #, python-format
@@ -93,36 +95,39 @@ msgstr ""
 #: fpdb_3_legacy/EntractionToFpdb.py fpdb_3_legacy/FulltiltToFpdb.py
 #: fpdb_3_legacy/MicrogamingToFpdb.py fpdb_3_legacy/OnGameToFpdb.py
 #: fpdb_3_legacy/PkrToFpdb.py
+#, fuzzy
 msgid "DEBUG:"
-msgstr ""
+msgstr "DEBUG:"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "Reading configuration file %s"
 msgid "Configuration modified*"
-msgstr "Llegint fitxer de configuració %s"
-
-#: fpdb_3_legacy/ConfigReloadWidget.py
-msgid "Configuration up to date"
-msgstr ""
+msgstr "Configuració modificada*"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "Reading configuration file %s"
+msgid "Configuration up to date"
+msgstr "Configuració al dia"
+
+#: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Reload configuration"
-msgstr "Llegint fitxer de configuració %s"
+msgstr "Torna a carregar la configuració"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Reload error"
-msgstr ""
+msgstr "Error en tornar a carregar"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Reloading..."
-msgstr ""
+msgstr "Tornant a carregar..."
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Restart required"
-msgstr ""
+msgstr "Cal reiniciar"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 msgid "↻"
@@ -149,8 +154,9 @@ msgstr ""
 
 #: fpdb_3_legacy/EnetToFpdb.py fpdb_3_legacy/EntractionToFpdb.py
 #: fpdb_3_legacy/OnGameToFpdb.py
+#, fuzzy
 msgid "not found"
-msgstr ""
+msgstr "no trobat"
 
 #: fpdb_3_legacy/EntractionToFpdb.py
 #, python-format
@@ -200,44 +206,54 @@ msgid "EverleafToFpdb.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "2-7 Drawmaha"
-msgstr ""
+msgstr "2-7 Drawmaha"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "2-7 Razz"
-msgstr ""
+msgstr "Razz 2-7"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Draw"
-msgstr ""
+msgstr "Draw de 5 cartes"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Omaha"
-msgstr ""
+msgstr "Omaha de 5 cartes"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Omaha Hi/Lo"
-msgstr ""
+msgstr "Omaha de 5 cartes Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Stud"
-msgstr ""
+msgstr "Stud de 5 cartes"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "6 Card Omaha"
-msgstr ""
+msgstr "Omaha de 6 cartes"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "7 Card Stud"
-msgstr ""
+msgstr "Stud de 7 cartes"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "7 Card Stud Hi/Lo"
-msgstr ""
+msgstr "Stud de 7 cartes Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "A-5 Single Draw"
-msgstr ""
+msgstr "A-5 Single Draw"
 
 #: fpdb_3_legacy/Filters.py
 msgid "All"
@@ -252,52 +268,63 @@ msgid "And:"
 msgstr "I:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "AoF Hold'em"
-msgstr ""
+msgstr "Hold'em AoF"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "AoF Omaha"
-msgstr ""
+msgstr "Omaha AoF"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badacey"
-msgstr ""
+msgstr "Badacey"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badeucey"
-msgstr ""
+msgstr "Badeucey"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badugi"
-msgstr ""
+msgstr "Badugi"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Between:"
 msgstr "Entre:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Buyin"
-msgstr ""
+msgstr "Buy-in"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Cal"
-msgstr ""
+msgstr "Cal"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Category"
-msgstr ""
+msgstr "Categoria"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Courchevel"
-msgstr ""
+msgstr "Courchevel"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Courchevel Hi/Lo"
-msgstr ""
+msgstr "Courchevel Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Currencies"
-msgstr ""
+msgstr "Monedes"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Date:"
@@ -308,28 +335,33 @@ msgid "Done"
 msgstr "Fet"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Double hold'em"
-msgstr ""
+msgstr "Double hold'em"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "EV"
-msgstr ""
+msgstr "EV"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Euro"
-msgstr ""
+msgstr "Euro"
 
 #: fpdb_3_legacy/Filters.py
 msgid "From:"
 msgstr "Des de:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Fusion"
-msgstr ""
+msgstr "Fusion"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Games"
-msgstr ""
+msgstr "Jocs"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Grouping:"
@@ -340,36 +372,43 @@ msgid "Hero:"
 msgstr "Heroi:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Hold'em"
-msgstr ""
+msgstr "Hold'em"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Hole Cards"
-msgstr ""
+msgstr "Cartes pròpies"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Irish"
-msgstr ""
+msgstr "Irish"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Limit Type"
-msgstr ""
+msgstr "Tipus de límit"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Limits:"
 msgstr "Limits:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Min # Hands:"
-msgstr ""
+msgstr "Mín. de mans:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Net profit excluding splash pots"
-msgstr ""
+msgstr "Benefici net sense splash pots"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Non-Showdown Winnings"
-msgstr ""
+msgstr "Guanys sense showdown"
 
 #: fpdb_3_legacy/Filters.py
 msgid "None"
@@ -380,24 +419,28 @@ msgid "Number of Players:"
 msgstr "Nombre de Jugadors:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Off Suit"
-msgstr ""
+msgstr "Offsuit"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Omaha"
-msgstr ""
+msgstr "Omaha"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Omaha Hi/Lo"
-msgstr ""
+msgstr "Omaha Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
 msgid "Pick a date"
 msgstr "Selecciona una data"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Play Money"
-msgstr ""
+msgstr "Diners de joc"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -405,24 +448,29 @@ msgid "Positions:"
 msgstr "Mostra Classificació"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Razz"
-msgstr ""
+msgstr "Razz"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Refresh Filters"
-msgstr ""
+msgstr "Actualitza els filtres"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Reset"
-msgstr ""
+msgstr "Restableix"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Ring"
-msgstr ""
+msgstr "Cash"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Show Graph In:"
-msgstr ""
+msgstr "Mostra el gràfic en:"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Show Limits"
@@ -437,45 +485,53 @@ msgid "Show Position Stats"
 msgstr "Mostra Classificació"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Showdown Winnings"
-msgstr ""
+msgstr "Guanys amb showdown"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Single Draw 2-7 Lowball"
-msgstr ""
+msgstr "Single Draw 2-7 Lowball"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Sites"
-msgstr ""
+msgstr "Sales"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Suited"
-msgstr ""
+msgstr "Suited"
 
 #: fpdb_3_legacy/Filters.py
 msgid "To:"
 msgstr "Fins:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Tournament Dollar"
-msgstr ""
+msgstr "Dòlar de torneig"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Tourney"
 msgstr "Tornei"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Triple Draw 2-7 Lowball"
-msgstr ""
+msgstr "Triple Draw 2-7 Lowball"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Triple Draw A-5 Lowball"
-msgstr ""
+msgstr "Triple Draw A-5 Lowball"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "US Dollar"
-msgstr ""
+msgstr "Dòlar dels EUA"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
 #, python-format
@@ -493,17 +549,19 @@ msgid "FullTiltPokerSummary.parseSummaryXLS: '%s' '%s"
 msgstr ""
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
+#, fuzzy
 msgid "Unable to locate currency"
-msgstr ""
+msgstr "No s'ha trobat la moneda"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
+#, fuzzy
 msgid "parseSummary FAIL"
-msgstr ""
+msgstr "Error de parseSummary"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s Failed to detect button (hand #%s cancelled?)"
-msgstr ""
+msgstr "%s No s'ha detectat el botó (mà #%s cancel·lada?)"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
 #, python-format
@@ -522,230 +580,284 @@ msgid "FulltiltToFpdb.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Hand '%s' was cancelled."
-msgstr ""
+msgstr "La mà '%s' s'ha cancel·lat."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Hand '%s' was not dealt (dead hand)."
-msgstr ""
+msgstr "La mà '%s' no s'ha repartit (mà morta)."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Hand is not cleanly split into pre and post Summary %s."
-msgstr ""
+msgstr "La mà no està separada netament abans i després del resum %s."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "No players detected in hand %s."
-msgstr ""
+msgstr "No s'ha detectat cap jugador a la mà %s."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Database is back. Auto Import resumed."
 msgstr ""
+"\n"
+"La base de dades ha tornat. Importació automàtica represa."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Database unreachable. Auto Import paused, retrying..."
 msgstr ""
+"\n"
+"Base de dades inaccessible. Importació automàtica en pausa, tornant-ho a "
+"provar..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Stop requested while an import was still running; it will finish in the "
 "background."
 msgstr ""
+"\n"
+"S'ha demanat aturar mentre una importació encara era en curs; acabarà en "
+"segon pla."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "SwC Native Live HUD tailing thread started."
 msgstr ""
+"\n"
+"S'ha iniciat el fil de seguiment del HUD natiu de SwC."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "SwC live capture is not available on this platform. Importing SwC files "
 "still works."
 msgstr ""
+"\n"
+"La captura en directe de SwC no està disponible en aquesta plataforma. La "
+"importació de fitxers de SwC continua funcionant."
 
 #: fpdb_3_legacy/GuiAutoImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "\n"
 "SwC live capture unavailable: {reason}. Importing SwC hand history files "
 "still works."
 msgstr ""
+"\n"
+"Captura en directe de SwC no disponible: {reason}. La importació "
+"d'historials de SwC continua funcionant."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Auto Import Ready.\n"
-msgstr ""
+msgstr "Importació automàtica a punt.\n"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Auto Import Running..."
-msgstr ""
+msgstr "Importació automàtica en curs..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Database unreachable - retrying"
-msgstr ""
+msgstr "Base de dades inaccessible - tornant-ho a provar"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "FPDB Auto Import"
-msgstr ""
+msgstr "Importació automàtica de FPDB"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Import cycle is taking longer than usual..."
-msgstr ""
+msgstr "El cicle d'importació tarda més del normal..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Log"
-msgstr ""
+msgstr "Registre"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Ready"
-msgstr ""
+msgstr "A punt"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Settings"
-msgstr ""
+msgstr "Configuració"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Start Auto Import"
-msgstr ""
+msgstr "Inicia la importació automàtica"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Stop Auto Import"
-msgstr ""
+msgstr "Atura la importació automàtica"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Stopping Auto Import..."
-msgstr ""
+msgstr "Aturant la importació automàtica..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "SwC live capture could not attach: {reason}. Importing SwC hand history "
 "files still works."
 msgstr ""
+"La captura en directe de SwC no s'ha pogut connectar: {reason}. La "
+"importació d'historials de SwC continua funcionant."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Time between imports (seconds):"
-msgstr ""
+msgstr "Temps entre importacions (segons):"
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Automatic Notes"
-msgstr ""
+msgstr "Notes automàtiques"
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Enable or disable automatic player-note rules."
-msgstr ""
+msgstr "Activa o desactiva les regles de notes automàtiques de jugadors."
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Generate automatic notes"
-msgstr ""
-
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
-msgid "Custom Rules"
-msgstr ""
-
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
-msgid "Database hands"
-msgstr ""
-
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
-msgid "Dry Run"
-msgstr ""
-
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
-msgid "Dry Run DB"
-msgstr ""
-
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/menu_layout.py
-msgid "File"
-msgstr ""
-
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
-msgid "Folder"
-msgstr ""
+msgstr "Genera notes automàtiques"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "From:"
+msgid "Custom Rules"
+msgstr "Regles personalitzades"
+
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
+msgid "Database hands"
+msgstr "Mans de la base de dades"
+
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
+msgid "Dry Run"
+msgstr "Prova en sec"
+
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
+msgid "Dry Run DB"
+msgstr "Prova en sec a la BD"
+
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "File"
+msgstr "Fitxer"
+
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
+msgid "Folder"
+msgstr "Carpeta"
+
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "From"
-msgstr "Des de:"
+msgstr "Des de"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Hand-history source"
-msgstr ""
+msgstr "Origen dels historials"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Idle"
-msgstr ""
+msgstr "Inactiu"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Latest: -"
-msgstr ""
+msgstr "Darrera: -"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Limit"
-msgstr ""
+msgstr "Límit"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Load Notes"
-msgstr ""
+msgstr "Carrega les notes"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Notes: 0"
-msgstr ""
+msgstr "Notes: 0"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "All Players"
 msgid "Player"
-msgstr "Tots els Jugadors"
+msgstr "Jugador"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "All Players"
 msgid "Player Notes"
-msgstr "Tots els Jugadors"
+msgstr "Notes de jugadors"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Pool"
-msgstr ""
+msgstr "Pool"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Recent generated notes"
-msgstr ""
+msgstr "Notes generades recentment"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Refresh Pool Summary"
-msgstr ""
+msgstr "Actualitza el resum del pool"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Rule set"
-msgstr ""
+msgstr "Conjunt de regles"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Run"
-msgstr ""
+msgstr "Executa"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Search"
-msgstr ""
+msgstr "Cerca"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/GuiBulkImport.py
 #: fpdb_3_legacy/hand_share_dialog.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Site"
-msgstr ""
+msgstr "Sala"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
@@ -753,47 +865,57 @@ msgid "To"
 msgstr "Fins:"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top players by generated notes"
-msgstr ""
+msgstr "Jugadors amb més notes generades"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top rule: -"
-msgstr ""
+msgstr "Regla principal: -"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top rules"
-msgstr ""
+msgstr "Regles principals"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Write DB Notes"
-msgstr ""
+msgstr "Escriu les notes a la BD"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Write Notes"
-msgstr ""
+msgstr "Escriu les notes"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Browse..."
-msgstr ""
+msgstr "Navega..."
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Bulk Import"
-msgstr ""
+msgstr "Importació massiva"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Bulk Import Error"
-msgstr ""
+msgstr "Error d'importació massiva"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Choose a destination directory"
-msgstr ""
+msgstr "Trieu una carpeta de destinació"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Configured Import Directories:"
-msgstr ""
+msgstr "Carpetes d'importació configurades:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Import complete.\n"
 "\n"
@@ -805,29 +927,46 @@ msgid ""
 "Errors: {errs}\n"
 "Time: {elapsed}s"
 msgstr ""
+"Importació completada.\n"
+"\n"
+"Fitxers processats: {files}\n"
+"Desades: {stored}\n"
+"Duplicades: {dups}\n"
+"Parcials: {partial}\n"
+"Omeses: {skipped}\n"
+"Errors: {errs}\n"
+"Temps: {elapsed} s"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Importing..."
-msgstr ""
+msgstr "Important..."
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Move failed files to:"
-msgstr ""
+msgstr "Mou els fitxers fallits a:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Move imported files to:"
-msgstr ""
+msgstr "Mou els fitxers importats a:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid ""
 "No importable hand-history files were found in the selected directories.\n"
 "\n"
 "Check that the configured paths contain hand histories (plain text files), "
 "not just archives or exports."
 msgstr ""
+"No s'ha trobat cap historial importable a les carpetes seleccionades.\n"
+"\n"
+"Comproveu que els camins configurats contenen historials de mans (fitxers de "
+"text), no només arxius comprimits o exportacions."
 
 #: fpdb_3_legacy/GuiBulkImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "PHH hands found: {found}\n"
 "Imported: {imported}\n"
@@ -837,956 +976,1198 @@ msgid ""
 "Malformed: {malformed}\n"
 "PHH import time: {seconds}s"
 msgstr ""
+"Mans PHH trobades: {found}\n"
+"Importades: {imported}\n"
+"Duplicades: {dups}\n"
+"Parcials (l'historial acaba abans): {partial}\n"
+"Variants no compatibles: {unsupported}\n"
+"Mal formades: {malformed}\n"
+"Temps d'importació PHH: {seconds} s"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Path"
-msgstr ""
+msgstr "Camí"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Please choose the path that you want to Auto Import"
-msgstr ""
+msgstr "Trieu el camí que voleu importar automàticament"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
 msgstr ""
+"Inicia també HUD_main (desmarqueu-ho si el HUD o la importació automàtica ja "
+"s'executen)."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Capture failed to start — see the log above."
-msgstr ""
+msgstr "La captura no s'ha pogut iniciar — vegeu el registre de dalt."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Default game:"
-msgstr ""
+msgstr "Joc per defecte:"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Dry run (no DB insert)"
-msgstr ""
+msgstr "Prova en sec (sense inserir a la BD)"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Finishing previous capture…"
-msgstr ""
+msgstr "Acabant la captura anterior…"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Idle."
-msgstr ""
+msgstr "Inactiu."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Interface:"
-msgstr ""
+msgstr "Interfície:"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Launch HUD"
-msgstr ""
+msgstr "Inicia el HUD"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Refresh interfaces"
-msgstr ""
+msgstr "Actualitza les interfícies"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
-msgstr ""
+msgstr "Demanant privilegis… accepteu l'avís i després jugueu a CoinPoker."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Start capture"
-msgstr ""
+msgstr "Inicia la captura"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py fpdb_3_legacy/session_guard_dialog.py
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Stop"
-msgstr ""
+msgstr "Atura"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Stopping…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "+ New Rule"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#: fpdb_3_legacy/GuiResearchBrowser.py
-msgid "Actions"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-format
-msgid "Are you sure you want to delete rule '%s'?"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-brace-format
-msgid "Board ({flop})"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Board:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Captured Evidence Schema"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Custom Auto Notes rules saved successfully!"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Delete Rule"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Duplicate Rule IDs"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Empty HH"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Enabled"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Generated Note: (None)"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-brace-format
-msgid "Hole Cards ({hole})"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Hole:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "ID"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Live Testing Sandbox"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Logical Conditions (No-Code GUI)"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "No Rule"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-brace-format
-msgid ""
-"Note Template (Tags: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, {spr}):"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Paste raw GGPoker or PokerStars hand history text here to test..."
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Please paste a Hand History text to evaluate against."
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Please select or create a rule to evaluate."
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Remove Condition"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Root Operator:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Rule / Group"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Rule ID:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Rule Metadata"
-msgstr ""
+msgstr "Aturant…"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
-#| msgid "File name: %s"
+msgid "+ New Rule"
+msgstr "+ Regla nova"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
+msgid "Actions"
+msgstr "Accions"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy, python-format
+msgid "Are you sure you want to delete rule '%s'?"
+msgstr "Segur que voleu suprimir la regla '%s'?"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy, python-brace-format
+msgid "Board ({flop})"
+msgstr "Board ({flop})"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Board:"
+msgstr "Board:"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Captured Evidence Schema"
+msgstr "Esquema de les dades capturades"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Custom Auto Notes rules saved successfully!"
+msgstr "Regles de notes automàtiques personalitzades desades!"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Delete Rule"
+msgstr "Suprimeix la regla"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Duplicate Rule IDs"
+msgstr "ID de regles duplicats"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Empty HH"
+msgstr "Historial buit"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Enabled"
+msgstr "Activada"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Generated Note: (None)"
+msgstr "Nota generada: (cap)"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy, python-brace-format
+msgid "Hole Cards ({hole})"
+msgstr "Cartes pròpies ({hole})"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Hole:"
+msgstr "Cartes pròpies:"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "ID"
+msgstr "ID"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Live Testing Sandbox"
+msgstr "Entorn de proves en directe"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Logical Conditions (No-Code GUI)"
+msgstr "Condicions lògiques (sense codi)"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "No Rule"
+msgstr "Cap regla"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy, python-brace-format
+msgid ""
+"Note Template (Tags: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, {spr}):"
+msgstr ""
+"Plantilla de nota (etiquetes: {player}, {hole}, {flop}, {eff_stack_bb}, "
+"{pot}, {spr}):"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Paste raw GGPoker or PokerStars hand history text here to test..."
+msgstr ""
+"Enganxeu aquí el text brut d'un historial de GGPoker o PokerStars per "
+"provar..."
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Please paste a Hand History text to evaluate against."
+msgstr "Enganxeu el text d'un historial de mà amb què avaluar."
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Please select or create a rule to evaluate."
+msgstr "Seleccioneu o creeu una regla per avaluar."
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Remove Condition"
+msgstr "Elimina la condició"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Root Operator:"
+msgstr "Operador arrel:"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Rule / Group"
+msgstr "Regla / grup"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Rule ID:"
+msgstr "ID de la regla:"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Rule Metadata"
+msgstr "Metadades de la regla"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule Name:"
-msgstr "Nom del fitxer: %s"
+msgstr "Nom de la regla:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule Set:"
-msgstr ""
+msgstr "Conjunt de regles:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule Sets & Custom Rules"
-msgstr ""
+msgstr "Conjunts de regles i regles personalitzades"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Saved"
-msgstr ""
+msgstr "Desat"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Stack & SPR"
-msgstr ""
+msgstr "Stack i SPR"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Status: READY"
-msgstr ""
+msgstr "Estat: A PUNT"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Test Source (Raw Hand History Text):"
-msgstr ""
+msgstr "Font de prova (text brut de l'historial):"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "These rule IDs are used more than once: %s\n"
 "\n"
 "Give each rule a unique ID before saving."
 msgstr ""
+"Aquests ID de regles s'utilitzen més d'una vegada: %s\n"
+"\n"
+"Doneu a cada regla un ID únic abans de desar."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "➕ Add Condition"
-msgstr ""
+msgstr "➕ Afegeix una condició"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "💾 Save Rules"
-msgstr ""
+msgstr "💾 Desa les regles"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📋 Duplicate"
-msgstr ""
+msgstr "📋 Duplica"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🗑️ Delete"
-msgstr ""
+msgstr "🗑️ Suprimeix"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "🧪 Evaluate Rule"
-msgstr ""
+msgstr "🧪 Avalua la regla"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "🧪 Test Sandbox"
-msgstr ""
+msgstr "🧪 Entorn de proves"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "A database name is required."
-msgstr ""
+msgstr "Cal un nom de base de dades."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "A host is required for PostgreSQL/MySQL."
-msgstr ""
+msgstr "Cal un amfitrió per a PostgreSQL/MySQL."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Add database"
-msgstr ""
+msgstr "Afegeix una base de dades"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Add..."
-msgstr ""
+msgstr "Afegeix..."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Backend"
-msgstr ""
+msgstr "Motor"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Backend:"
-msgstr ""
+msgstr "Motor:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Configured databases:"
-msgstr ""
+msgstr "Bases de dades configurades:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Create database"
-msgstr ""
+msgstr "Crea la base de dades"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Create tables"
-msgstr ""
+msgstr "Crea les taules"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Default"
-msgstr ""
+msgstr "Per defecte"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Default database changed"
-msgstr ""
+msgstr "S'ha canviat la base de dades per defecte"
 
 #: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Delete"
-msgstr ""
+msgstr "Suprimeix"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Delete database"
-msgstr ""
+msgstr "Suprimeix la base de dades"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Edit database"
-msgstr ""
+msgstr "Edita la base de dades"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Edit..."
-msgstr ""
+msgstr "Edita..."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Host / Path"
-msgstr ""
+msgstr "Amfitrió / camí"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Host:"
-msgstr ""
+msgstr "Amfitrió:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Invalid database settings"
-msgstr ""
+msgstr "Configuració de base de dades no vàlida"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Migrate database"
-msgstr ""
+msgstr "Migra la base de dades"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Migrate to..."
-msgstr ""
+msgstr "Migra a..."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Migrating database"
-msgstr ""
+msgstr "Migrant la base de dades"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
 #: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Name:"
-msgstr ""
+msgstr "Nom:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Password:"
-msgstr ""
+msgstr "Contrasenya:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Port must be a number between 1 and 65535."
-msgstr ""
+msgstr "El port ha de ser un nombre entre 1 i 65535."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Port:"
-msgstr ""
+msgstr "Port:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid ""
 "SQLite databases are created automatically. Use 'Create tables' to "
 "initialise the schema."
 msgstr ""
+"Les bases SQLite es creen automàticament. Feu servir «Crea les taules» per "
+"inicialitzar l'esquema."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Set as default"
-msgstr ""
+msgstr "Estableix per defecte"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Test connection"
-msgstr ""
+msgstr "Prova la connexió"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "There is no other database to migrate into. Add one first."
-msgstr ""
+msgstr "No hi ha cap altra base de dades on migrar. Afegiu-ne una primer."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid ""
 "This is the only configured database and cannot be deleted — fpdb needs at "
 "least one. Add another database first."
 msgstr ""
+"És l'única base de dades configurada i no es pot suprimir — fpdb en "
+"necessita almenys una. Afegiu-ne primer una altra."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "User"
-msgstr ""
+msgstr "Usuari"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "User:"
-msgstr ""
+msgstr "Usuari:"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Field actions"
-msgstr ""
+msgstr "Accions del field"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Field population"
-msgstr ""
+msgstr "Població del field"
 
 #: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Loading hands…"
-msgstr ""
+msgstr "Carregant les mans…"
 
 #: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Next ▶"
-msgstr ""
+msgstr "Següent ▶"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Select a row to see the hands behind both sides of it."
-msgstr ""
+msgstr "Seleccioneu una fila per veure les mans dels dos costats."
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Source hands"
-msgstr ""
+msgstr "Mans d'origen"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid ""
 "These hands use the same filters as the other side; only the population "
 "differs."
 msgstr ""
+"Aquestes mans fan servir els mateixos filtres que l'altre costat; només "
+"canvia la població."
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Your actions"
-msgstr ""
+msgstr "Les vostres accions"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Your population"
-msgstr ""
+msgstr "La vostra població"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "◀ Previous"
-msgstr ""
+msgstr "◀ Anterior"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, fuzzy
 msgid "Export to File"
-msgstr ""
+msgstr "Exporta a un fitxer"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, fuzzy
 msgid "FPDB 3 info"
-msgstr ""
+msgstr "Informació de FPDB 3"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Hands"
-msgstr ""
+msgstr "Mans"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
+#, fuzzy
 msgid "Net profit excluding splash"
-msgstr ""
+msgstr "Benefici net sense splash"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
+#, fuzzy
 msgid "Non-showdown"
-msgstr ""
+msgstr "Sense showdown"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
+#, fuzzy
 msgid "Profit"
-msgstr ""
+msgstr "Benefici"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, fuzzy
 msgid "Refresh Graph"
-msgstr ""
+msgstr "Actualitza el gràfic"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Showdown"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "100–150% pot"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "25–50% pot"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "3-bet"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "4-bet"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "50–75% pot"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "75–100% pot"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Advanced review filters"
-msgstr ""
+msgstr "Showdown"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "All Players"
+msgid "100–150% pot"
+msgstr "100–150% del pot"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "25–50% pot"
+msgstr "25–50% del pot"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "3-bet"
+msgstr "3-bet"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "4-bet"
+msgstr "4-bet"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "50–75% pot"
+msgstr "50–75% del pot"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "75–100% pot"
+msgstr "75–100% del pot"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Advanced review filters"
+msgstr "Filtres de revisió avançats"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "All hands"
-msgstr "Tots els Jugadors"
+msgstr "Totes les mans"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "All starting hands"
-msgstr ""
+msgstr "Totes les mans inicials"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Analytics data unavailable"
-msgstr ""
+msgstr "Dades d'anàlisi no disponibles"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Any"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Any card"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Any sizing"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Apply review filters"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Bet"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Bet / raise sizing"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Broadway"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Call open"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Called"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Check-raise"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Checked"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Choose hands…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Clear"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Continuation bet"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourHandViewer.py
-msgid "Copy hand history"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Did not VPIP"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/research_labels.py
-msgid "Effective stack (BB)"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Exact known cards"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Exclude splash pots"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Faced 3-bet"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Faced c-bet"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Faced open"
-msgstr ""
+msgstr "Qualsevol"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "Site filter:"
+msgid "Any card"
+msgstr "Qualsevol carta"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Any sizing"
+msgstr "Qualsevol mida"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Apply review filters"
+msgstr "Aplica els filtres de revisió"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Bet"
+msgstr "Aposta"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Bet / raise sizing"
+msgstr "Mida de l'aposta / pujada"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Broadway"
+msgstr "Broadway"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Call open"
+msgstr "Call a l'obertura"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Called"
+msgstr "Ha igualat"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Check-raise"
+msgstr "Check-raise"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Checked"
+msgstr "Ha passat"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Choose hands…"
+msgstr "Tria les mans…"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Clear"
+msgstr "Esborra"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Continuation bet"
+msgstr "Aposta de continuació"
+
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourHandViewer.py
+#, fuzzy
+msgid "Copy hand history"
+msgstr "Copia l'historial de la mà"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Did not VPIP"
+msgstr "Sense VPIP"
+
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Effective stack (BB)"
+msgstr "Stack efectiu (BB)"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Exact known cards"
+msgstr "Cartes conegudes exactes"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Exclude splash pots"
+msgstr "Exclou els splash pots"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Faced 3-bet"
+msgstr "Davant d'un 3-bet"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Faced c-bet"
+msgstr "Davant d'una c-bet"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Faced open"
+msgstr "Davant d'una obertura"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Filter: "
-msgstr "Filtre de lloc:"
+msgstr "Filtre: "
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Filter: splash pot"
-msgstr ""
+msgstr "Filtre: splash pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Final pot (BB)"
-msgstr ""
+msgstr "Pot final (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Folded"
-msgstr ""
+msgstr "S'ha retirat"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Hold'em starting hand"
-msgstr ""
+msgstr "Mà inicial de Hold'em"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Invalid review filter"
-msgstr ""
+msgstr "Filtre de revisió no vàlid"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Invert"
-msgstr ""
+msgstr "Inverteix"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Limp"
-msgstr ""
+msgstr "Limp"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Net result (BB)"
-msgstr ""
+msgstr "Resultat net (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid ""
 "No hands were queried, to avoid presenting an incomplete result as empty."
 msgstr ""
+"No s'ha consultat cap mà, per no presentar com a buit un resultat incomplet."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Offsuit"
-msgstr ""
+msgstr "Offsuit"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Over 150% pot"
-msgstr ""
+msgstr "Més del 150% del pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Pairs"
-msgstr ""
+msgstr "Parelles"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Players in hand"
-msgstr ""
+msgstr "Jugadors a la mà"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Postflop"
-msgstr ""
+msgstr "Postflop"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Preflop"
-msgstr ""
+msgstr "Preflop"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "RFI"
-msgstr ""
+msgstr "RFI"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Raised"
-msgstr ""
+msgstr "Ha pujat"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw flop"
-msgstr ""
+msgstr "Ha vist el flop"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw river"
-msgstr ""
+msgstr "Ha vist el river"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw turn"
-msgstr ""
+msgstr "Ha vist el turn"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Splash pots only"
-msgstr ""
+msgstr "Només splash pots"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Squeeze"
-msgstr ""
+msgstr "Squeeze"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Starting-hand range"
-msgstr ""
+msgstr "Rang de mans inicials"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid ""
 "The analytics status needed by these filters could not be verified. No "
 "results were queried; check the database and rebuild analytics data before "
 "retrying."
 msgstr ""
+"No s'ha pogut verificar l'estat de les dades d'anàlisi que necessiten "
+"aquests filtres. No s'ha consultat cap resultat; reviseu la base de dades i "
+"reconstruïu les dades d'anàlisi abans de tornar-ho a provar."
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "The minimum cannot exceed the maximum for {}."
-msgstr ""
+msgstr "El mínim no pot superar el màxim per a {}."
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "These analytics rows were created by a newer fpdb version: {names}."
 msgstr ""
+"Aquestes files d'anàlisi les ha creat una versió més nova de fpdb: {names}."
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "These filters need missing or outdated analytics data: {names}."
 msgstr ""
+"Aquests filtres necessiten dades d'anàlisi absents o obsoletes: {names}."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Under 25% pot"
-msgstr ""
+msgstr "Menys del 25% del pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Upgrade fpdb before using these filters."
-msgstr ""
+msgstr "Actualitzeu fpdb abans de fer servir aquests filtres."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Use Database → Rebuild Analytics Data, then retry the filter."
 msgstr ""
+"Feu servir Base de dades → Reconstrueix les dades d'anàlisi i torneu a "
+"aplicar el filtre."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "VPIP"
-msgstr ""
+msgstr "VPIP"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Went all-in"
-msgstr ""
+msgstr "Ha anat all-in"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "max"
-msgstr ""
+msgstr "màx."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "max BB"
-msgstr ""
+msgstr "BB màx."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "min"
-msgstr ""
+msgstr "mín."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "min BB"
-msgstr ""
+msgstr "BB mín."
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{} classes selected"
-msgstr ""
+msgstr "{} classes seleccionades"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "◀ Prev"
-msgstr ""
+msgstr "◀ Ant."
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Copy selection to clipboard"
-msgstr ""
+msgstr "Copia la selecció al porta-retalls"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Filter by Module:"
-msgstr ""
+msgstr "Filtra per mòdul:"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Log Viewer"
-msgstr ""
+msgstr "Visor de registres"
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Refresh"
-msgstr ""
+msgstr "Actualitza"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Select Log File:"
-msgstr ""
+msgstr "Seleccioneu el fitxer de registre:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Min hands vs hero:"
-msgstr ""
+msgstr "Mín. de mans contra l'heroi:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Sort by:"
-msgstr ""
+msgstr "Ordena per:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Top N opponents:"
-msgstr ""
+msgstr "Top N rivals:"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Auxiliary Windows"
-msgstr ""
+msgstr "Finestres auxiliars"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Column Heading"
-msgstr ""
+msgstr "Capçalera de columna"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Databases"
-msgstr ""
+msgstr "Bases de dades"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Field Type"
-msgstr ""
+msgstr "Tipus de camp"
 
 #: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Format"
-msgstr ""
+msgstr "Format"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "General"
-msgstr ""
+msgstr "General"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "HUD"
-msgstr ""
+msgstr "HUD"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Hand History Converters"
-msgstr ""
+msgstr "Convertidors d'historials"
 
 #: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import"
-msgstr ""
+msgstr "Importació"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Left/Right Align"
-msgstr ""
+msgstr "Alineació esquerra/dreta"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Mucked"
-msgstr ""
+msgstr "Mucked"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Popup Name"
-msgstr ""
+msgstr "Nom de la finestra emergent"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Popup Windows"
-msgstr ""
+msgstr "Finestres emergents"
 
 #: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Ring Player Stats"
-msgstr ""
+msgstr "Estadístiques de jugadors de cash"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Setting"
-msgstr ""
+msgstr "Paràmetre"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Show in Position Stats"
-msgstr ""
+msgstr "Mostra a les estadístiques per posició"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Show in Summaries"
-msgstr ""
+msgstr "Mostra als resums"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stat"
-msgstr ""
+msgstr "Estadística"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Stat Name"
-msgstr ""
+msgstr "Nom de l'estadística"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Stud mucked"
-msgstr ""
+msgstr "Stud mucked"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Tour Player Stats"
-msgstr ""
+msgstr "Estadístiques de jugadors de torneig"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Value (double-click to change)"
-msgstr ""
+msgstr "Valor (doble clic per canviar-lo)"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Window"
-msgstr ""
+msgstr "Finestra"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Card deck"
-msgstr ""
+msgstr "Baralla de cartes"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Copy or save this hand as text, Markdown or forum code"
-msgstr ""
+msgstr "Copia o desa aquesta mà com a text, Markdown o codi de fòrum"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Current card deck preview"
-msgstr ""
+msgstr "Previsualització de la baralla actual"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Deck:"
-msgstr ""
+msgstr "Baralla:"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "End"
-msgstr ""
+msgstr "Final"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "FPDB Hand Replayer"
-msgstr ""
+msgstr "Reproductor de mans FPDB"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Hide Cards"
-msgstr ""
+msgstr "Amaga les cartes"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Next"
-msgstr ""
+msgstr "Següent"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Next action"
-msgstr ""
+msgstr "Acció següent"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Play"
-msgstr ""
+msgstr "Reprodueix"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Prev"
-msgstr ""
+msgstr "Ant."
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Previous action"
-msgstr ""
+msgstr "Acció anterior"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Send this hand's preflop decisions to PreflopAdvisor"
-msgstr ""
+msgstr "Envia les decisions preflop d'aquesta mà a PreflopAdvisor"
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Share..."
-msgstr ""
+msgstr "Comparteix..."
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Solver review..."
-msgstr ""
+msgstr "Revisió amb solver..."
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Start"
-msgstr ""
+msgstr "Inici"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "-- built-in presets --"
-msgstr ""
+msgstr "-- preajustos integrats --"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "-- saved presets --"
-msgstr ""
+msgstr "-- preajustos desats --"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -1794,505 +2175,632 @@ msgid "?"
 msgstr ""
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "A gap is only as good as the smaller of the two samples beside it."
 msgstr ""
+"Una diferència només és tan bona com la més petita de les dues mostres del "
+"costat."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add or remove one of the known values."
-msgstr ""
+msgstr "Afegeix o treu un dels valors coneguts."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add the selected dimension to the breakdown."
-msgstr ""
+msgstr "Afegeix la dimensió seleccionada al desglossament."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add this filter"
-msgstr ""
+msgstr "Afegeix aquest filtre"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Adjust {variables} for your own game."
-msgstr ""
+msgstr "Ajusteu {variables} al vostre joc."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Adjust: {variables}"
-msgstr ""
+msgstr "Ajusteu: {variables}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Aim for at least {n} decisions."
-msgstr ""
+msgstr "Apunteu a almenys {n} decisions."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "All hands in the population"
-msgstr ""
+msgstr "Totes les mans de la població"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Any leaves the condition out of the query entirely."
-msgstr ""
+msgstr "«Qualsevol» deixa la condició completament fora de la consulta."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Ask a poker question"
-msgstr ""
+msgstr "Feu una pregunta de pòquer"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Ask your own question"
-msgstr ""
+msgstr "Feu la vostra pròpia pregunta"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Break down by"
-msgstr ""
+msgstr "Desglossa per"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Choose a dimension to split the result by."
-msgstr ""
+msgstr "Trieu una dimensió per desglossar el resultat."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Choose one or more…"
-msgstr ""
+msgstr "Trieu-ne un o més…"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Comma-separated group-by dimensions (engine vocabulary)"
-msgstr ""
+msgstr "Dimensions d'agrupació separades per comes (vocabulari del motor)"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Compare with the field"
-msgstr ""
+msgstr "Compara amb el field"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Count"
-msgstr ""
+msgstr "Recompte"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Decisions"
-msgstr ""
+msgstr "Decisions"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a cell to load the hands behind it."
-msgstr ""
+msgstr "Feu doble clic en una cel·la per carregar les mans que la formen."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a result row to load its hands."
-msgstr ""
+msgstr "Feu doble clic en una fila de resultat per carregar-ne les mans."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "Double-click a row to load its hands. Numerator/denominator are shown per "
 "row."
 msgstr ""
+"Feu doble clic en una fila per carregar-ne les mans. El numerador i el "
+"denominador es mostren a cada fila."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a row to see your hands and the field's, side by side."
 msgstr ""
+"Feu doble clic en una fila per veure les vostres mans i les del field, una "
+"al costat de l'altra."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click the row to load its hands."
-msgstr ""
+msgstr "Feu doble clic a la fila per carregar-ne les mans."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Every decision the question applies to: the sample size."
-msgstr ""
+msgstr "Cada decisió a què s'aplica la pregunta: la mida de la mostra."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "FPDB Replayer"
-msgstr ""
+msgstr "Reproductor FPDB"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Field"
-msgstr ""
+msgstr "Field"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Field sample"
-msgstr ""
+msgstr "Mostra del field"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Filters"
-msgstr ""
+msgstr "Filtres"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Frequency (%)"
-msgstr ""
+msgstr "Freqüència (%)"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Gap"
-msgstr ""
+msgstr "Diferència"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "How many of those decisions the metric counted."
-msgstr ""
+msgstr "Quantes d'aquestes decisions ha comptat la mètrica."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Matching hands"
-msgstr ""
+msgstr "Mans coincidents"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Metric"
-msgstr ""
+msgstr "Mètrica"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "No matching hands were found for either population."
-msgstr ""
+msgstr "No s'ha trobat cap mà coincident per a cap de les dues poblacions."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Only the hands where the metric fired"
-msgstr ""
+msgstr "Només les mans on s'ha activat la mètrica"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Open the Research Browser quick start"
-msgstr ""
+msgstr "Obre la guia ràpida del Research Browser"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Pick one of the answers this workbench knows how to show."
-msgstr ""
+msgstr "Trieu una de les respostes que aquest banc de treball sap mostrar."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Poker labels"
-msgstr ""
+msgstr "Termes de pòquer"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "Poker labels use the terminology most readers see at the table.\n"
 "Technical names expose the analytics engine's fields and values."
 msgstr ""
+"Els termes de pòquer fan servir la terminologia que la majoria veu a la "
+"taula.\n"
+"Els noms tècnics mostren els camps i valors del motor d'anàlisi."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Query cancelled."
-msgstr ""
+msgstr "Consulta cancel·lada."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Remove this breakdown"
-msgstr ""
+msgstr "Treu aquest desglossament"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Remove this filter"
-msgstr ""
+msgstr "Treu aquest filtre"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Research browser"
-msgstr ""
+msgstr "Research Browser"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Results"
-msgstr ""
+msgstr "Resultats"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Run the same question twice -- yours and the field's -- side by side."
 msgstr ""
+"Fa la mateixa pregunta dues vegades -- la vostra i la del field -- una al "
+"costat de l'altra."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Running…"
-msgstr ""
+msgstr "Executant…"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Save"
-msgstr ""
+msgstr "Desa"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Save preset"
-msgstr ""
+msgstr "Desa el preajust"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Saved as \"{saved}\". The built-in preset \"{original}\" is unchanged."
-msgstr ""
+msgstr "Desat com a «{saved}». El preajust integrat «{original}» no canvia."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Show technical query controls"
-msgstr ""
+msgstr "Mostra els controls tècnics de consulta"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Show the engine's own filter names and free-text values."
-msgstr ""
+msgstr "Mostra els noms de filtre del motor i els valors de text lliure."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Technical names"
-msgstr ""
+msgstr "Noms tècnics"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "The Research Browser answers questions about the hands in your database. "
 "Pick a question below, change any value that should be different for you, "
 "then press Run. The sample size is always shown, and every row can be opened "
 "as the hands behind it."
 msgstr ""
+"El Research Browser respon preguntes sobre les mans de la vostra base de "
+"dades. Trieu una pregunta a sota, canvieu els valors que hagin de ser "
+"diferents per a vosaltres i premeu Executa. La mida de la mostra sempre es "
+"mostra, i cada fila es pot obrir per veure les mans que la formen."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "The analytics data for {names} has never been built. A question that reads "
 "it answers zero until it is: Database -> Rebuild Analytics Data."
 msgstr ""
+"Les dades d'anàlisi de {names} no s'han construït mai. Una pregunta que les "
+"llegeixi respon zero fins aleshores: Base de dades -> Reconstrueix les dades "
+"d'anàlisi."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "The analytics data for {names} was derived by older rules, so a question "
 "that reads it may answer zero: Database -> Rebuild Analytics Data."
 msgstr ""
+"Les dades d'anàlisi de {names} s'han derivat amb regles antigues, així que "
+"una pregunta que les llegeixi pot respondre zero: Base de dades -> "
+"Reconstrueix les dades d'anàlisi."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "The measurement itself, over the sample above."
-msgstr ""
+msgstr "La mesura mateixa, sobre la mostra de dalt."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "The question the controls above currently ask."
-msgstr ""
+msgstr "La pregunta que plantegen ara els controls de dalt."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "These questions need the analytics tables rebuilt before they can answer: "
 "{subsystems}. Rebuild them from the database menu, then run a question."
 msgstr ""
+"Aquestes preguntes necessiten reconstruir les taules d'anàlisi abans de "
+"poder respondre: {subsystems}. Reconstruïu-les des del menú de base de dades "
+"i després executeu una pregunta."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Try one of these:"
-msgstr ""
+msgstr "Proveu-ne una d'aquestes:"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Unknown group-by dimension(s): {names}. Known: {known}."
-msgstr ""
+msgstr "Dimensió/ns d'agrupació desconeguda/es: {names}. Conegudes: {known}."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "View"
-msgstr ""
+msgstr "Visualització"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Vocabulary"
-msgstr ""
+msgstr "Vocabulari"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Yes"
-msgstr ""
+msgstr "Sí"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "You"
-msgstr ""
+msgstr "Vosaltres"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Your sample"
-msgstr ""
+msgstr "La vostra mostra"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "e.g. street, response"
-msgstr ""
+msgstr "p. ex. street, response"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "e.g. {example}"
-msgstr ""
+msgstr "p. ex. {example}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "from"
-msgstr ""
+msgstr "des de"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "or type a value"
-msgstr ""
+msgstr "o escriviu un valor"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "to"
-msgstr ""
+msgstr "fins a"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{hero} decisions of yours, {field} of the field's"
-msgstr ""
+msgstr "{hero} decisions vostres, {field} del field"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{question} — {how}"
-msgstr ""
+msgstr "{question} — {how}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "■ Cancel"
-msgstr ""
+msgstr "■ Cancel·la"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "▶ Run"
-msgstr ""
+msgstr "▶ Executa"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "＋ Add breakdown"
-msgstr ""
+msgstr "＋ Afegeix un desglossament"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid ""
 "Cells without enough of a sample stay uncoloured; hover one to read its "
 "count."
 msgstr ""
+"Les cel·les sense prou mostra queden sense color; passeu-hi el ratolí per "
+"veure'n el recompte."
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Colour by:"
-msgstr ""
+msgstr "Acoloreix per:"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "No cell is below the sample threshold."
-msgstr ""
+msgstr "Cap cel·la no és per sota del llindar de mostra."
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Realized {realized} over {hands} hands; EV-adjusted {ev} ({luck} of it luck)."
 msgstr ""
+"Realitzat {realized} en {hands} mans; ajustat per EV {ev} ({luck} de sort)."
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Share"
-msgstr ""
+msgstr "Proporció"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "{decisions} decisions in this selection have no known hole cards and are not "
 "in the grid; {share} of the decisions are drawn."
 msgstr ""
+"{decisions} decisions d'aquesta selecció no tenen cartes pròpies conegudes i "
+"no són a la graella; es mostren {share} de les decisions."
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{label}: {classified} classified decisions of {total} ({share} covered)"
 msgstr ""
+"{label}: {classified} decisions classificades de {total} ({share} cobertes)"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{n} decisions are counted apart: their cards were never known."
 msgstr ""
+"{n} decisions es compten a part: les seves cartes no es van conèixer mai."
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Cumulative result (BB)"
-msgstr ""
+msgstr "Resultat acumulat (BB)"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Hand Breakdown for all levels listed above"
-msgstr ""
+msgstr "Desglossament de mans per a tots els nivells de dalt"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Native-currency totals omitted (multiple currencies)"
-msgstr ""
+msgstr "Totals en la moneda original omesos (diverses monedes)"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Profit: {profit} · Currency/hour: {hour}"
-msgstr ""
+msgstr "Benefici: {profit} · Moneda/hora: {hour}"
 
 #: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Session"
-msgstr ""
+msgstr "Sessió"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Sessions: {sessions} · Hands: {hands} · Playing time: {duration} · Profit: "
 "{profit_bb} BB · bb/100: {bb100} · BB/hour: {bb_hour} · BB hands: {bb_hands}/"
 "{hands}"
 msgstr ""
+"Sessions: {sessions} · Mans: {hands} · Temps de joc: {duration} · Benefici: "
+"{profit_bb} BB · bb/100: {bb100} · BB/hora: {bb_hour} · Mans en BB: "
+"{bb_hands}/{hands}"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{hours}h {minutes}m"
-msgstr ""
+msgstr "{hours} h {minutes} min"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{minutes}m"
-msgstr ""
+msgstr "{minutes} min"
 
 #: fpdb_3_legacy/GuiTourHandViewer.py
+#, fuzzy
 msgid "Load Hands"
-msgstr ""
+msgstr "Carrega les mans"
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, fuzzy
 msgid "Refresh Stats"
-msgstr ""
-
-#: fpdb_3_legacy/GuiVersionInfo.py
-msgid "Clipboard unavailable"
-msgstr ""
+msgstr "Actualitza les estadístiques"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 #, fuzzy
-#| msgid "Reading configuration file %s"
+msgid "Clipboard unavailable"
+msgstr "Porta-retalls no disponible"
+
+#: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Configuration file"
-msgstr "Llegint fitxer de configuració %s"
+msgstr "Fitxer de configuració"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Copy report"
-msgstr ""
+msgstr "Copia l'informe"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Copy these details to the clipboard for a bug report"
-msgstr ""
+msgstr "Copia aquestes dades al porta-retalls per a un informe d'error"
 
 #: fpdb_3_legacy/GuiVersionInfo.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Database"
-msgstr ""
+msgstr "Base de dades"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Documentation"
-msgstr ""
+msgstr "Documentació"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "FPDB version"
-msgstr ""
+msgstr "Versió de FPDB"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Git branch"
-msgstr ""
+msgstr "Branca de Git"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Git checkout"
-msgstr ""
+msgstr "Checkout de Git"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Git commit"
-msgstr ""
+msgstr "Commit de Git"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "GitHub repository"
-msgstr ""
+msgstr "Repositori de GitHub"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Links"
-msgstr ""
+msgstr "Enllaços"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Packaging"
-msgstr ""
+msgstr "Empaquetament"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Report an issue"
-msgstr ""
+msgstr "Informa d'un problema"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Report copied to clipboard"
-msgstr ""
+msgstr "Informe copiat al porta-retalls"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Version and environment"
-msgstr ""
+msgstr "Versió i entorn"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Working tree"
-msgstr ""
+msgstr "Arbre de treball"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "clean"
-msgstr ""
+msgstr "net"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "modified (uncommitted changes)"
-msgstr ""
+msgstr "modificat (canvis sense commit)"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "not a git checkout (packaged or exported build)"
-msgstr ""
+msgstr "no és un checkout de Git (versió empaquetada o exportada)"
 
 #: fpdb_3_legacy/MergeSummary.py
 msgid "MergeSummary.determineGameType: HORSE found, unsupported"
@@ -2321,8 +2829,9 @@ msgid "MergeSummary.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/MergeSummary.py
+#, fuzzy
 msgid "The tournament was not found or is invalid"
-msgstr ""
+msgstr "El torneig no s'ha trobat o no és vàlid"
 
 #: fpdb_3_legacy/MicrogamingToFpdb.py
 #, python-format
@@ -2339,76 +2848,90 @@ msgid "0"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Players</b>"
-msgstr ""
+msgstr "<b>Jugadors</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Seat</b>"
-msgstr ""
+msgstr "<b>Seient</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Visual Selection</b>"
-msgstr ""
+msgstr "<b>Selecció visual</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Auto-save changes"
-msgstr ""
+msgstr "Desa els canvis automàticament"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py fpdb_3_legacy/ThemeCreatorDialog.py
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cancel"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSeatPreferences.py
-msgid "Configure your favorite seats for each table size"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSeatPreferences.py
-msgid "Export Settings"
-msgstr ""
+msgstr "Cancel·la"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #, fuzzy
-#| msgid "Import Complete"
-msgid "Import Settings"
-msgstr "Importació Completada"
+msgid "Configure your favorite seats for each table size"
+msgstr "Configureu els vostres seients preferits per a cada mida de taula"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
+msgid "Export Settings"
+msgstr "Exporta la configuració"
+
+#: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
+msgid "Import Settings"
+msgstr "Importa la configuració"
+
+#: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Reset to Default"
-msgstr ""
+msgstr "Restableix els valors per defecte"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Save Changes"
-msgstr ""
+msgstr "Desa els canvis"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Search sites..."
-msgstr ""
+msgstr "Cerca sales..."
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Seat Preferences"
-msgstr ""
+msgstr "Preferències de seient"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Show:"
-msgstr ""
+msgstr "Mostra:"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "✓ Enabled"
-msgstr ""
+msgstr "✓ Activat"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "✗ Disabled"
-msgstr ""
+msgstr "✗ Desactivat"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "💡 Set to 0 to disable favorite seat for a table size"
-msgstr ""
+msgstr "💡 Poseu 0 per desactivar el seient preferit d'una mida de taula"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
@@ -2416,91 +2939,111 @@ msgid "🔍"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s hero aliases:"
-msgstr ""
+msgstr "Àlies d'heroi de %s:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "(search in enabled sites only)"
-msgstr ""
+msgstr "(cerca només a les sales activades)"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid ""
 "A data source such as PHH is not a poker room: it has no screen name. Name "
 "the players that are you in its hands, and the reports read them as one "
 "hero, as a room's aliases are."
 msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Add link"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Browse"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Configure your poker sites and usernames"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Data Sources"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Default profile"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Enter your username"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Hand History:"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Hero Profiles"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "New"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Old nicknames / extra accounts, comma separated"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Other Aliases:"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Path to hand history files"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Path to tournament summaries"
-msgstr ""
+"Una font de dades com PHH no és una sala de pòquer: no té nom de jugador. "
+"Indiqueu quins jugadors sou vosaltres a les seves mans, i els informes els "
+"llegiran com un sol heroi, com els àlies d'una sala."
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-#| msgid "File name: %s"
+msgid "Add link"
+msgstr "Afegeix un enllaç"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Browse"
+msgstr "Navega"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Configure your poker sites and usernames"
+msgstr "Configureu les vostres sales de pòquer i noms d'usuari"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Data Sources"
+msgstr "Fonts de dades"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Default profile"
+msgstr "Perfil per defecte"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Enter your username"
+msgstr "Introduïu el vostre nom d'usuari"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Hand History:"
+msgstr "Historial de mans:"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Hero Profiles"
+msgstr "Perfils d'heroi"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "New"
+msgstr "Nou"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Old nicknames / extra accounts, comma separated"
+msgstr "Nicks antics / comptes addicionals, separats per comes"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Other Aliases:"
+msgstr "Altres àlies:"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Path to hand history files"
+msgstr "Camí dels historials de mans"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Path to tournament summaries"
+msgstr "Camí dels resums de torneig"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Profile name"
-msgstr "Nom del fitxer: %s"
+msgstr "Nom del perfil"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Remove link"
-msgstr ""
+msgstr "Treu l'enllaç"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Screen Name:"
-msgstr ""
+msgstr "Nom de jugador:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Site Preferences"
-msgstr ""
+msgstr "Preferències de sales"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
@@ -2508,8 +3051,9 @@ msgid "Tournament:"
 msgstr "Tornei"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Your names in these hands, one per line"
-msgstr ""
+msgstr "Els vostres noms en aquestes mans, un per línia"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🎭"
@@ -2528,21 +3072,24 @@ msgid "📁"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "🔍 Auto-Detect All Visible Sites"
-msgstr ""
+msgstr "🔍 Detecta automàticament totes les sales visibles"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "🔍 Auto-Detect Paths"
-msgstr ""
+msgstr "🔍 Detecta els camins automàticament"
 
 #: fpdb_3_legacy/OnGameToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "DATETIME not matched: '%s'"
-msgstr ""
+msgstr "DATETIME sense coincidència: '%s'"
 
 #: fpdb_3_legacy/OnGameToFpdb.py
+#, fuzzy
 msgid "No small blinds found."
-msgstr ""
+msgstr "No s'ha trobat cap cega petita."
 
 #: fpdb_3_legacy/OnGameToFpdb.py
 #, python-format
@@ -2576,20 +3123,24 @@ msgid "PkrToFpdb.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Brief description of your theme"
-msgstr ""
+msgstr "Breu descripció del tema"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Create Custom Theme"
-msgstr ""
+msgstr "Crea un tema personalitzat"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Create Theme"
-msgstr ""
+msgstr "Crea el tema"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Update Preview"
-msgstr ""
+msgstr "Actualitza la previsualització"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
 #, fuzzy
@@ -2597,116 +3148,146 @@ msgid "Your name"
 msgstr "Tornei"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "e.g., my_custom_theme"
-msgstr ""
+msgstr "p. ex., el_meu_tema"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Back up and upgrade"
-msgstr ""
+msgstr "Fes còpia i actualitza"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Clear All"
-msgstr ""
+msgstr "Esborra-ho tot"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Configuration needs attention"
-msgstr ""
+msgstr "La configuració requereix atenció"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Confirm recreating HUD cache"
-msgstr ""
+msgstr "Confirmeu la recreació de la memòria cau del HUD"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Database Statistics"
-msgstr ""
+msgstr "Estadístiques de la base de dades"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Deselect All"
-msgstr ""
+msgstr "Desselecciona-ho tot"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Enable or disable sites for HUD display"
-msgstr ""
+msgstr "Activa o desactiva sales per mostrar el HUD"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Free Poker DB 3"
-msgstr ""
+msgstr "Free Poker DB 3"
 
 #: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Manage HUD Sites"
-msgstr ""
+msgstr "Gestiona les sales del HUD"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "PT4 HUD imported"
-msgstr ""
+msgstr "HUD de PT4 importat"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "PT4 stats import"
-msgstr ""
+msgstr "Importació d'estadístiques de PT4"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Please confirm that you want to re-create the HUD cache."
-msgstr ""
+msgstr "Confirmeu que voleu recrear la memòria cau del HUD."
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Search:"
-msgstr ""
+msgstr "Cerca:"
 
 #: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Select All"
-msgstr ""
+msgstr "Selecciona-ho tot"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Skip these games when importing"
-msgstr ""
+msgstr "Omet aquests jocs en importar"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Unknown Site"
-msgstr ""
+msgstr "Sala desconeguda"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Unsaved Changes"
-msgstr ""
+msgstr "Canvis sense desar"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "You have unsaved configuration changes."
-msgstr ""
+msgstr "Teniu canvis de configuració sense desar."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "Check the hero selected in the Heroes filter and make sure hands for that "
 "player were imported for the selected site."
 msgstr ""
+"Comproveu l'heroi seleccionat al filtre Herois i que s'han importat mans "
+"d'aquest jugador per a la sala seleccionada."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No currency is selected in the filters."
-msgstr ""
+msgstr "No hi ha cap moneda seleccionada als filtres."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No data to display"
-msgstr ""
+msgstr "No hi ha dades per mostrar"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No game type is selected in the filters."
-msgstr ""
+msgstr "No hi ha cap tipus de joc seleccionat als filtres."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No hand matches the selected filters."
-msgstr ""
+msgstr "Cap mà no coincideix amb els filtres seleccionats."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No limit is selected in the filters."
-msgstr ""
+msgstr "No hi ha cap límit seleccionat als filtres."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No player matches the selected site and hero."
-msgstr ""
+msgstr "Cap jugador no coincideix amb la sala i l'heroi seleccionats."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No site is selected in the filters."
-msgstr ""
+msgstr "No hi ha cap sala seleccionada als filtres."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "Nothing has been imported into this database — that is normal right after "
 "creating or recreating the tables.\n"
@@ -2714,42 +3295,59 @@ msgid ""
 "Import hand histories first (Import > Bulk Import, or start the auto-"
 "import), then refresh this tab."
 msgstr ""
+"No s'ha importat res en aquesta base de dades — és normal just després de "
+"crear o recrear les taules.\n"
+"\n"
+"Importeu primer historials de mans (Importació > Importació massiva, o "
+"inicieu la importació automàtica) i després actualitzeu aquesta pestanya."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "The database holds hands, but none of them match this selection.\n"
 "\n"
 "Widen the filters (dates, limits, games, seats) and refresh."
 msgstr ""
+"La base de dades conté mans, però cap no coincideix amb aquesta selecció.\n"
+"\n"
+"Amplieu els filtres (dates, límits, jocs, seients) i actualitzeu."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one currency on the left, then refresh."
-msgstr ""
+msgstr "Marqueu almenys una moneda a l'esquerra i després actualitzeu."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one game on the left, then refresh."
-msgstr ""
+msgstr "Marqueu almenys un joc a l'esquerra i després actualitzeu."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one limit (stake) on the left, then refresh."
-msgstr ""
+msgstr "Marqueu almenys un límit (stake) a l'esquerra i després actualitzeu."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one site in the Sites section on the left, then refresh."
 msgstr ""
+"Marqueu almenys una sala a la secció Sales de l'esquerra i després "
+"actualitzeu."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Your database contains no hands yet."
-msgstr ""
+msgstr "La vostra base de dades encara no conté cap mà."
 
 #: fpdb_3_legacy/hand_review_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s is not a program that can be started."
-msgstr ""
+msgstr "%s no és un programa que es pugui iniciar."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Copy JSON"
-msgstr ""
+msgstr "Copia el JSON"
 
 #: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy, python-format
@@ -2759,87 +3357,111 @@ msgid ""
 msgstr "No es pot trobar el fitxer %s"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Every hero decision of the hand"
-msgstr ""
+msgstr "Totes les decisions de l'heroi a la mà"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Hand review (*.json)"
-msgstr ""
+msgstr "Revisió de mà (*.json)"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Locate PreflopAdvisor"
-msgstr ""
+msgstr "Localitza PreflopAdvisor"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Open in PreflopAdvisor"
-msgstr ""
+msgstr "Obre a PreflopAdvisor"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid ""
 "Open it in PreflopAdvisor, or save the file and load it there with Review "
 "Hands > Load a hand review."
 msgstr ""
+"Obriu-la a PreflopAdvisor, o deseu el fitxer i carregueu-lo allà amb Review "
+"Hands > Load a hand review."
 
 #: fpdb_3_legacy/hand_review_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "PreflopAdvisor could not be started:\n"
 "%s\n"
 "\n"
 "Locate it?"
 msgstr ""
+"No s'ha pogut iniciar PreflopAdvisor:\n"
+"%s\n"
+"\n"
+"Voleu localitzar-lo?"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Review:"
-msgstr ""
+msgstr "Revisió:"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Save for PreflopAdvisor..."
-msgstr ""
+msgstr "Desa per a PreflopAdvisor..."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Save hand review"
-msgstr ""
+msgstr "Desa la revisió de mà"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Solver review"
-msgstr ""
+msgstr "Revisió amb solver"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Solver review (PreflopAdvisor)..."
-msgstr ""
+msgstr "Revisió amb solver (PreflopAdvisor)..."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "This decision"
-msgstr ""
+msgstr "Aquesta decisió"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "This hand cannot be sent to PreflopAdvisor."
-msgstr ""
+msgstr "Aquesta mà no es pot enviar a PreflopAdvisor."
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Amounts"
-msgstr ""
+msgstr "Imports"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Big blinds"
-msgstr ""
+msgstr "Cegues grans"
 
 #: fpdb_3_legacy/hand_share_dialog.py fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Copy"
-msgstr ""
+msgstr "Copia"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as Markdown"
-msgstr ""
+msgstr "Copia com a Markdown"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as Markdown in BB"
-msgstr ""
+msgstr "Copia com a Markdown en BB"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as text"
-msgstr ""
+msgstr "Copia com a text"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy, python-format
@@ -2849,318 +3471,401 @@ msgid ""
 msgstr "No es pot trobar el fitxer %s"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Date and time"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "EV cashout"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Forum (BBCode)"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Hand number"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Hide every name (Hero, Villain 1 ...)"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Include"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Keep every name"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Keep my name, hide opponents"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Markdown"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Money / chips"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Names"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Plain text"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Rake"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Save hand"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Save..."
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Share hand"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Showdown and results"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Stacks"
-msgstr ""
+msgstr "Data i hora"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
-#| msgid "File name: %s"
+msgid "EV cashout"
+msgstr "Cashout per EV"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Forum (BBCode)"
+msgstr "Fòrum (BBCode)"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Hand number"
+msgstr "Número de mà"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Hide every name (Hero, Villain 1 ...)"
+msgstr "Amaga tots els noms (Hero, Villain 1 ...)"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Include"
+msgstr "Inclou"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Keep every name"
+msgstr "Mantén tots els noms"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Keep my name, hide opponents"
+msgstr "Mantén el meu nom, amaga els rivals"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Markdown"
+msgstr "Markdown"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Money / chips"
+msgstr "Diners / fitxes"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Names"
+msgstr "Noms"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Plain text"
+msgstr "Text pla"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Rake"
+msgstr "Rake"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Save hand"
+msgstr "Desa la mà"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Save..."
+msgstr "Desa..."
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Share hand"
+msgstr "Comparteix la mà"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Showdown and results"
+msgstr "Showdown i resultats"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Stacks"
+msgstr "Stacks"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Table name"
-msgstr "Nom del fitxer: %s"
+msgstr "Nom de la taula"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "This game has no big blind to count in."
-msgstr ""
+msgstr "Aquest joc no té cega gran amb què comptar."
 
 #: fpdb_3_legacy/hand_share_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "This hand could not be rendered:\n"
 "%s"
 msgstr ""
+"No s'ha pogut mostrar aquesta mà:\n"
+"%s"
 
 #: fpdb_3_legacy/i18n.py
+#, fuzzy
 msgid "Stack"
-msgstr ""
+msgstr "Stack"
 
 #: fpdb_3_legacy/i18n.py
+#, fuzzy
 msgid "Stack (bb)"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "About"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "About the program"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Advanced logger manager"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid ""
-"Alerts for the session being played: loss, win, duration, hands, drawdown"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Auto Note Rules"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Auto Notes Workbench"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Cash"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "CoinPoker Live Capture"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Configure"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Create or Recreate Tables"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Databases…"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Dump Database to Textfile"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Edit automatic player-note rules"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Edit your preferences"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Export the whole database to a text file (slow)"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Graphs"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "HUD Preferences"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "HUD and Auto Import"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Hand Viewer"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Help"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Help Tab"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import PT4 HUD (.pt4hud)"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import PT4 Stats (.pt4stat)"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import PokerTracker 4 custom statistics as declarative stat descriptors"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import a PokerTracker 4 HUD layout (stats + range charts)"
-msgstr ""
+msgstr "Stack (bb)"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Import Complete"
-msgid "Import filters"
-msgstr "Importació Completada"
+msgid "About"
+msgstr "Quant a"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "About the program"
+msgstr "Quant al programa"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)"
+msgstr ""
+"Afegeix, edita, prova i selecciona la base de dades (SQLite / PostgreSQL / "
+"MySQL)"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Advanced logger manager"
+msgstr "Gestor avançat de registres"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid ""
+"Alerts for the session being played: loss, win, duration, hands, drawdown"
+msgstr "Alertes per a la sessió en joc: pèrdua, guany, durada, mans, drawdown"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Auto Note Rules"
+msgstr "Regles de notes automàtiques"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Auto Notes Workbench"
+msgstr "Banc de treball de notes automàtiques"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Cash"
+msgstr "Cash"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "CoinPoker Live Capture"
+msgstr "Captura en directe de CoinPoker"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Configure"
+msgstr "Configura"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Create or Recreate Tables"
+msgstr "Crea o recrea les taules"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Databases…"
+msgstr "Bases de dades…"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Dump Database to Textfile"
+msgstr "Bolca la base de dades a un fitxer de text"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Edit automatic player-note rules"
+msgstr "Edita les regles de notes automàtiques de jugadors"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Edit your preferences"
+msgstr "Editeu les vostres preferències"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Export the whole database to a text file (slow)"
+msgstr "Exporta tota la base de dades a un fitxer de text (lent)"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Graphs"
+msgstr "Gràfics"
+
+#: fpdb_3_legacy/menu_layout.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "HUD Preferences"
+msgstr "Preferències del HUD"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "HUD and Auto Import"
+msgstr "HUD i importació automàtica"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Hand Viewer"
+msgstr "Visor de mans"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Help"
+msgstr "Ajuda"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Help Tab"
+msgstr "Pestanya d'ajuda"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import PT4 HUD (.pt4hud)"
+msgstr "Importa un HUD de PT4 (.pt4hud)"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import PT4 Stats (.pt4stat)"
+msgstr "Importa estadístiques de PT4 (.pt4stat)"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import PokerTracker 4 custom statistics as declarative stat descriptors"
+msgstr ""
+"Importa estadístiques personalitzades de PokerTracker 4 com a descriptors "
+"declaratius"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import a PokerTracker 4 HUD layout (stats + range charts)"
+msgstr ""
+"Importa una disposició de HUD de PokerTracker 4 (estadístiques + gràfics de "
+"rang)"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import filters"
+msgstr "Filtres d'importació"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import, enable, disable, uninstall and export declarative stat packs"
 msgstr ""
+"Importa, activa, desactiva, desinstal·la i exporta paquets d'estadístiques "
+"declaratives"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Language"
-msgstr ""
+msgstr "Idioma"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Launch SwC HTTP Capture"
-msgstr ""
+msgstr "Inicia la captura HTTP de SwC"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Log Messages"
-msgstr ""
+msgstr "Missatges de registre"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Log and debug messages"
-msgstr ""
+msgstr "Missatges de registre i depuració"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Logger Dev Tool"
-msgstr ""
+msgstr "Eina de desenvolupament de registres"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Opponents Report"
-msgstr ""
+msgstr "Informe de rivals"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Preferences"
-msgstr ""
+msgstr "Preferències"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Quit"
-msgstr ""
+msgstr "Surt"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Quit the program"
-msgstr ""
+msgstr "Surt del programa"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid ""
 "Re-derive the situations and hand states the Research Browser and HUD read"
 msgstr ""
+"Torna a derivar les situacions i estats de mà que llegeixen el Research "
+"Browser i el HUD"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Rebuild Analytics Data"
-msgstr ""
+msgstr "Reconstrueix les dades d'anàlisi"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Rebuild DB Indexes"
-msgstr ""
+msgstr "Reconstrueix els índexs de la BD"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Rebuild HUD Cache"
-msgstr ""
+msgstr "Reconstrueix la memòria cau del HUD"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Research Browser"
-msgstr ""
+msgstr "Research Browser"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Research Browser for Omaha"
-msgstr ""
+msgstr "Research Browser per a l'Omaha"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Seat Settings"
-msgstr ""
+msgstr "Configuració de seients"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Session Guard"
-msgstr ""
+msgstr "Session Guard"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Session Stats"
-msgstr ""
+msgstr "Estadístiques de sessió"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Site Settings"
-msgstr ""
+msgstr "Configuració de sales"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Stat Packs"
-msgstr ""
+msgstr "Paquets d'estadístiques"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Statistics"
-msgstr ""
+msgstr "Estadístiques"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Stats Guide"
-msgstr ""
+msgstr "Guia d'estadístiques"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Study Explorer"
-msgstr ""
+msgstr "Study Explorer"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Themes"
-msgstr ""
+msgstr "Temes"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tools"
-msgstr ""
+msgstr "Eines"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -3168,76 +3873,93 @@ msgid "Tournament"
 msgstr "Tornei"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tourney Graphs"
-msgstr ""
+msgstr "Gràfics de tornejos"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tourney Hand Viewer"
-msgstr ""
+msgstr "Visor de mans de torneig"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tourney Stats"
-msgstr ""
+msgstr "Estadístiques de tornejos"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Version"
-msgstr ""
+msgstr "Versió"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Version, packaging and runtime environment details"
-msgstr ""
+msgstr "Detalls de versió, empaquetament i entorn d'execució"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "View database statistics"
-msgstr ""
+msgstr "Mostra les estadístiques de la base de dades"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "What every filter is for in a four-card game, and the two that are not"
 msgstr ""
+"Per a què serveix cada filtre en un joc de quatre cartes, i els dos que no"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "+"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
 msgid "Add an item to this row"
-msgstr ""
+msgstr "Afegeix un element a aquesta fila"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
 msgid "Remove the last item of this row"
-msgstr ""
+msgstr "Treu l'últim element d'aquesta fila"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "−"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Add/Edit Statistic"
-msgstr ""
+msgstr "Afegeix/edita una estadística"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Block Properties"
-msgstr ""
+msgstr "Propietats del bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Click Action:"
-msgstr ""
+msgstr "Acció en fer clic:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Column:"
-msgstr ""
+msgstr "Columna:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Edit Popup Statistic"
-msgstr ""
+msgstr "Edita l'estadística de la finestra emergent"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Edit Popup Window"
-msgstr ""
+msgstr "Edita la finestra emergent"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Export Layout Coordinates"
-msgstr ""
+msgstr "Exporta les coordenades de disposició"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -3245,213 +3967,277 @@ msgid "Grid Position:"
 msgstr "Mostra Classificació"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "High Range:"
-msgstr ""
+msgstr "Rang alt:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Low Range:"
-msgstr ""
+msgstr "Rang baix:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Middle color:"
-msgstr ""
+msgstr "Color intermedi:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid ""
 "Minimum width of each statistic cell; Automatic keeps the legacy default"
 msgstr ""
+"Amplada mínima de cada cel·la d'estadística; Automàtic manté el valor antic"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "OK"
-msgstr ""
+msgstr "D'acord"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Optional: Action when stat is clicked"
-msgstr ""
+msgstr "Opcional: acció en fer clic a l'estadística"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Optional: Popup to show on hover"
-msgstr ""
+msgstr "Opcional: finestra emergent en passar el ratolí"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Optional: Submenu name for hierarchical popups"
-msgstr ""
+msgstr "Opcional: nom del submenú per a finestres emergents jeràrquiques"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Override the automatic section used by ModernSubmenu"
-msgstr ""
+msgstr "Substitueix la secció automàtica que fa servir ModernSubmenu"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Popup:"
-msgstr ""
+msgstr "Finestra emergent:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Preview shows how statistic colors will change based on values"
 msgstr ""
+"La previsualització mostra com canvien els colors de l'estadística segons "
+"els valors"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Row:"
-msgstr ""
+msgstr "Fila:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Select None"
-msgstr ""
+msgstr "No en seleccionis cap"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid ""
 "Select the site layout coordinates you want to include in the package.\n"
 "This will let other users position the HUD boxes exactly like yours."
 msgstr ""
+"Seleccioneu les coordenades de disposició de les sales que voleu incloure al "
+"paquet.\n"
+"Així altres usuaris podran col·locar les caixes del HUD exactament com les "
+"vostres."
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr ""
+"Mostra aquest tauler només per a un rival en aquesta posició (buit = sempre)"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Statistic:"
-msgstr ""
+msgstr "Estadística:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Use middle color for values between thresholds"
-msgstr ""
+msgstr "Fes servir el color intermedi per als valors entre llindars"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Values above"
-msgstr ""
+msgstr "Valors per sobre de"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Values below"
-msgstr ""
+msgstr "Valors per sota de"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "show as"
-msgstr ""
+msgstr "mostra com a"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "➕ Add Stat"
-msgstr ""
+msgstr "➕ Afegeix una estadística"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "➖ Remove Stat"
-msgstr ""
+msgstr "➖ Treu l'estadística"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "(none)"
-msgstr ""
+msgstr "(cap)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "A panel rule with these conditions and this profile already exists."
 msgstr ""
+"Ja existeix una regla de tauler amb aquestes condicions i aquest perfil."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "A profile definition with these selectors already exists."
-msgstr ""
+msgstr "Ja existeix una definició de perfil amb aquests selectors."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "ANY"
-msgstr ""
+msgstr "QUALSEVOL"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "ANY table"
-msgstr ""
+msgstr "QUALSEVOL taula"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Active Profile Definitions"
-msgstr ""
+msgstr "Definicions de perfil actives"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Active Profile:"
-msgstr ""
+msgstr "Perfil actiu:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add"
-msgstr ""
+msgstr "Afegeix"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Block"
-msgstr ""
+msgstr "Afegeix un bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Label"
-msgstr ""
+msgstr "Afegeix una etiqueta"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Line"
-msgstr ""
+msgstr "Afegeix una línia"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Profile Definition"
-msgstr ""
+msgstr "Afegeix una definició de perfil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Stat"
-msgstr ""
+msgstr "Afegeix una estadística"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
-msgstr ""
+msgstr "Afegeix una línia separadora horitzontal (PT4 'Horz Line') a un tauler"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a new panel (block) to a multi-panel HUD"
-msgstr ""
+msgstr "Afegeix un tauler (bloc) nou a un HUD de diversos taulers"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a text label (column/row header or caption) to a panel"
 msgstr ""
+"Afegeix una etiqueta de text (capçalera de columna/fila o llegenda) a un "
+"tauler"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add stat"
-msgstr ""
+msgstr "Afegeix una estadística"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add to block"
-msgstr ""
+msgstr "Afegeix al bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Analytics-backed stats"
-msgstr ""
+msgstr "Estadístiques basades en l'anàlisi"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Append the profile emoji (e.g. 🐟, 🐌, 🎯) and color the player's name in "
 "the HUD."
 msgstr ""
+"Afegeix l'emoji del perfil (p. ex. 🐟, 🐌, 🎯) i acoloreix el nom del "
+"jugador al HUD."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr ""
+"Per sota d'aquest nombre de mans el tauler es reté i es mostra el substitut."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Block Props"
-msgstr ""
+msgstr "Props. del bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot add this rule"
-msgstr ""
+msgstr "No es pot afegir aquesta regla"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot export"
-msgstr ""
+msgstr "No es pot exportar"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot import"
-msgstr ""
+msgstr "No es pot importar"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot update this rule"
-msgstr ""
+msgstr "No es pot actualitzar aquesta regla"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Class:"
-msgstr ""
+msgstr "Classe:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Color Ranges"
-msgstr ""
+msgstr "Rangs de color"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3459,202 +4245,256 @@ msgid "Conditions"
 msgstr "Mostra Classificació"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Design"
-msgstr ""
+msgstr "Disseny"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Disabled: this rule never matches."
-msgstr ""
+msgstr "Desactivada: aquesta regla no coincideix mai."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Duplicate rule"
-msgstr ""
+msgstr "Regla duplicada"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Edit"
-msgstr ""
+msgstr "Edita"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Edit the selected panel's title/border colours, position and label"
 msgstr ""
+"Edita el títol, els colors de la vora, la posició i l'etiqueta del tauler "
+"seleccionat"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Effective profile for these selectors"
-msgstr ""
+msgstr "Perfil efectiu per a aquests selectors"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Enable Player Profiling (Categorization)"
-msgstr ""
+msgstr "Activa el perfilat de jugadors (categorització)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Enable auto-classification of players into Nit, Calling Station, Fish, "
 "Maniac, LAG, Reg, TAG."
 msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Export panel rules"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Export…"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Fallback"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#: fpdb_3_legacy/research_labels.py
-msgid "Game"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "General HUD and Profiling Settings"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "HUD Preview"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "HUD Profile"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "HUD Profile Configuration"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "HUD imported — refresh required"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "HUD profile"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Hands for this seat"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Horz Line"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Icons:"
-msgstr ""
+"Activa la classificació automàtica de jugadors en Nit, Calling Station, "
+"Fish, Maniac, LAG, Reg, TAG."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Import Complete"
+msgid "Export panel rules"
+msgstr "Exporta les regles dels taulers"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Export…"
+msgstr "Exporta…"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Fallback"
+msgstr "Substitut"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Game"
+msgstr "Joc"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "General HUD and Profiling Settings"
+msgstr "Configuració general del HUD i del perfilat"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "HUD Preview"
+msgstr "Previsualització del HUD"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "HUD Profile"
+msgstr "Perfil de HUD"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "HUD Profile Configuration"
+msgstr "Configuració de perfils de HUD"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "HUD imported — refresh required"
+msgstr "HUD importat — cal actualitzar"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "HUD profile"
+msgstr "Perfil de HUD"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Hands for this seat"
+msgstr "Mans per a aquest seient"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Horz Line"
+msgstr "Línia horitzontal"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Icons:"
+msgstr "Icones:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Import panel rules"
-msgstr "Importació Completada"
+msgstr "Importa les regles dels taulers"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Imported {count} rule(s)."
-msgstr ""
+msgstr "{count} regla/es importada/es."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Import…"
-msgstr ""
+msgstr "Importa…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Issues"
-msgstr ""
+msgstr "Problemes"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Item Properties"
-msgstr ""
+msgstr "Propietats de l'element"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Items"
-msgstr ""
+msgstr "Elements"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Layout Conflict"
-msgstr ""
+msgstr "Conflicte de disposicions"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Min sample"
-msgstr ""
+msgstr "Mostra mín."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Minimum hands required for profiling:"
-msgstr ""
+msgstr "Mans mínimes per al perfilat:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Move down"
-msgstr ""
+msgstr "Mou avall"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Move up"
-msgstr ""
+msgstr "Mou amunt"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "New Profile"
-msgstr ""
+msgstr "Perfil nou"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "No HUD profile of this name exists; the game default will be used instead."
 msgstr ""
+"No existeix cap perfil de HUD amb aquest nom; es farà servir el "
+"predeterminat del joc."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "No HUD profile of this name exists; this rule will be ignored."
 msgstr ""
+"No existeix cap perfil de HUD amb aquest nom; aquesta regla s'ignorarà."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Off by default. When it is on, the panels a rule names are shown and every "
 "other block keeps the position rule it has always had."
 msgstr ""
+"Desactivat per defecte. Quan s'activa, es mostren els taulers que anomena "
+"una regla i la resta de blocs mantenen la regla de posició que sempre han "
+"tingut."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Open preview at 100% real size in a new window"
-msgstr ""
+msgstr "Obre la previsualització al 100% de la mida real en una finestra nova"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Open the Dynamic HUD guide"
-msgstr ""
+msgstr "Obre la guia del HUD dinàmic"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel"
-msgstr ""
+msgstr "Tauler"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel documents (*.json)"
-msgstr ""
+msgstr "Documents de taulers (*.json)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel rules"
-msgstr ""
+msgstr "Regles dels taulers"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panels"
-msgstr ""
+msgstr "Taulers"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
-msgstr ""
+msgstr "Trieu un joc (i un format) per veure el predeterminat que s'aplicaria."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a HUD profile first."
-msgstr ""
+msgstr "Trieu primer un perfil de HUD."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Players"
-msgstr ""
+msgstr "Jugadors"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Popup Conflict"
-msgstr ""
+msgstr "Conflicte de finestres emergents"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Popup Preview"
-msgstr ""
+msgstr "Previsualització de la finestra emergent"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3662,16 +4502,19 @@ msgid "Positional panels:"
 msgstr "Mostra Classificació"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Preview, by the same resolver the HUD uses"
-msgstr ""
+msgstr "Previsualització, amb el mateix resolutor que fa servir el HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Priority"
-msgstr ""
+msgstr "Prioritat"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Profile Conflict"
-msgstr ""
+msgstr "Conflicte de perfils"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3679,543 +4522,689 @@ msgid "Profile actions"
 msgstr "Mostra Classificació"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Remove"
-msgstr ""
+msgstr "Treu"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "File name: %s"
 msgid "Rule name"
-msgstr "Nom del fitxer: %s"
+msgstr "Nom de la regla"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Sample column"
-msgstr ""
+msgstr "Columna de mostra"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Seats"
-msgstr ""
+msgstr "Seients"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Select Popup:"
-msgstr ""
+msgstr "Seleccioneu la finestra emergent:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Select a rule to update first."
-msgstr ""
+msgstr "Seleccioneu primer una regla per actualitzar."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show hero HUD"
-msgstr ""
+msgstr "Mostra el HUD de l'heroi"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show profile emoji and color code directly on player name labels"
 msgstr ""
+"Mostra l'emoji i el color del perfil directament als noms dels jugadors"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show the panels that fit the hand"
-msgstr ""
+msgstr "Mostra els taulers que encaixen amb la mà"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Speed"
-msgstr ""
+msgstr "Velocitat"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stats whose value comes from the analytics layer rather than a column."
 msgstr ""
+"Estadístiques el valor de les quals ve de la capa d'anàlisi i no d'una "
+"columna."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Text"
-msgstr ""
+msgstr "Text"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Text label (header / caption) — not a stat"
-msgstr ""
+msgstr "Etiqueta de text (capçalera / llegenda) — no és una estadística"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The HUD profile was imported and saved, but the application could not "
 "refresh its configuration. Restart fpdb to apply it. You do not need to "
 "import the file again."
 msgstr ""
+"El perfil de HUD s'ha importat i desat, però l'aplicació no ha pogut "
+"actualitzar la configuració. Reinicieu fpdb per aplicar-lo. No cal tornar a "
+"importar el fitxer."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The HUDs fpdb ships, as a seat would see them. Pick a context to watch the "
 "Dynamic package change panel, and read the popup paths to find where a "
 "number lives before you go looking for it at a table."
 msgstr ""
+"Els HUD que inclou fpdb, tal com els veuria un seient. Trieu un context per "
+"veure com el paquet Dynamic canvia de tauler, i llegiu els camins de les "
+"finestres emergents per saber on és un número abans de buscar-lo a una taula."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The minimum number of hands tracked on an opponent before profiling is "
 "computed."
 msgstr ""
+"El nombre mínim de mans seguides d'un rival abans de calcular-ne el perfil."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The preview uses the same compact label grid as the in-game HUD.\n"
 "Spacing, font, colors and HUD cell values come from the selected profile."
 msgstr ""
+"La previsualització fa servir la mateixa graella compacta d'etiquetes que el "
+"HUD en joc.\n"
+"L'espaiat, la font, els colors i els valors de les cel·les surten del perfil "
+"seleccionat."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Theme:"
-msgstr ""
+msgstr "Tema:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Then show"
-msgstr ""
+msgstr "Llavors mostra"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Update rule"
-msgstr ""
+msgstr "Actualitza la regla"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Update selected"
-msgstr ""
+msgstr "Actualitza la seleccionada"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "When this is the spot"
-msgstr ""
+msgstr "Quan la situació és"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Wrote {path}"
-msgstr ""
+msgstr "S'ha escrit {path}"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "all profiles"
-msgstr ""
+msgstr "tots els perfils"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "always"
-msgstr ""
+msgstr "sempre"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "optional name"
-msgstr ""
+msgstr "nom opcional"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "the profile grid"
-msgstr ""
+msgstr "la graella del perfil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{profile} — from the rule {selectors}"
-msgstr ""
+msgstr "{profile} — per la regla {selectors}"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{profile} — no rule matches, so the game default applies"
 msgstr ""
+"{profile} — cap regla no coincideix, així que s'aplica el predeterminat del "
+"joc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "—"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "↑ Up"
-msgstr ""
+msgstr "↑ Amunt"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "↓ Down"
-msgstr ""
+msgstr "↓ Avall"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "⚙️ General Settings"
-msgstr ""
+msgstr "⚙️ Configuració general"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➕ Add"
-msgstr ""
+msgstr "➕ Afegeix"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➕ New Popup"
-msgstr ""
+msgstr "➕ Finestra emergent nova"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➕ New Profile"
-msgstr ""
+msgstr "➕ Perfil nou"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➖ Remove"
-msgstr ""
+msgstr "➖ Treu"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🃏 Reference HUDs"
-msgstr ""
+msgstr "🃏 HUD de referència"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🎯 Profile Select"
-msgstr ""
+msgstr "🎯 Selecció de perfil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "💬 Popup Windows"
-msgstr ""
+msgstr "💬 Finestres emergents"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📊 Statistics"
-msgstr ""
+msgstr "📊 Estadístiques"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📝 Edit"
-msgstr ""
+msgstr "📝 Edita"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📤 Export HUD"
-msgstr ""
+msgstr "📤 Exporta el HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📥 Import HUD"
-msgstr ""
+msgstr "📥 Importa un HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🔍 Real Size"
-msgstr ""
+msgstr "🔍 Mida real"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🧩 Dynamic Panels"
-msgstr ""
+msgstr "🧩 Taulers dinàmics"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "100% Reset"
-msgstr ""
+msgstr "Restableix al 100%"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Close"
-msgstr ""
+msgstr "Tanca"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Natural Size: {w} × {h} px  (Scale: {scale}%)"
-msgstr ""
+msgstr "Mida natural: {w} × {h} px  (escala: {scale}%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Reset to 100% natural size"
-msgstr ""
+msgstr "Torna al 100% de la mida natural"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Zoom in (+25%)"
-msgstr ""
+msgstr "Apropa (+25%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Zoom out (-25%)"
-msgstr ""
+msgstr "Allunya (-25%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "🔍 Popup Preview — {name} (Real Size)"
-msgstr ""
+msgstr "🔍 Previsualització — {name} (mida real)"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid "Context"
-msgstr ""
+msgstr "Context"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid ""
 "Every popup a cell of this package opens, and everything those popups "
 "navigate to. A row ending in an arrow leaves the package for the shipped "
 "popup library."
 msgstr ""
+"Cada finestra emergent que obre una cel·la d'aquest paquet, i tot allò a què "
+"porten aquestes finestres. Una fila que acaba amb una fletxa surt del paquet "
+"cap a la biblioteca de finestres emergents inclosa."
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid "Reference HUD"
-msgstr ""
+msgstr "HUD de referència"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "% of pot"
-msgstr ""
+msgstr "% del pot"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "A family of situations, such as postflop defence."
-msgstr ""
+msgstr "Una família de situacions, com la defensa postflop."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "A legacy PT4 stat column the decision feeds."
-msgstr ""
+msgstr "Una columna d'estadística PT4 antiga que alimenta la decisió."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Action"
-msgstr ""
+msgstr "Acció"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Action faced"
-msgstr ""
+msgstr "Acció afrontada"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Action taken"
-msgstr ""
+msgstr "Acció feta"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Aggressor, defender or passive."
-msgstr ""
+msgstr "Agressor, defensor o passiu."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "All-in"
-msgstr ""
+msgstr "All-in"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Amount to call"
-msgstr ""
+msgstr "Import per igualar"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "BB"
-msgstr ""
+msgstr "BB"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Beats how much of the range"
-msgstr ""
+msgstr "Quina part del rang supera"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size"
-msgstr ""
+msgstr "Mida de l'aposta"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size (% of pot)"
-msgstr ""
+msgstr "Mida de l'aposta (% del pot)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size (basis points)"
-msgstr ""
+msgstr "Mida de l'aposta (punts bàsics)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size bucket"
-msgstr ""
+msgstr "Tram de mida de l'aposta"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced"
-msgstr ""
+msgstr "Mida de l'aposta afrontada"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced (% of pot)"
-msgstr ""
+msgstr "Mida de l'aposta afrontada (% del pot)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced (basis points)"
-msgstr ""
+msgstr "Mida de l'aposta afrontada (punts bàsics)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced bucket"
-msgstr ""
+msgstr "Tram de mida de l'aposta afrontada"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet sizing"
-msgstr ""
+msgstr "Mides d'aposta"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Big blind (chips)"
-msgstr ""
+msgstr "Cega gran (fitxes)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blocker (all of)"
-msgstr ""
+msgstr "Bloquejador (tots)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blocker (any of)"
-msgstr ""
+msgstr "Bloquejador (algun de)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blocker (none of)"
-msgstr ""
+msgstr "Bloquejador (cap de)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blockers the actor held (any of them)."
-msgstr ""
+msgstr "Bloquejadors que tenia qui actuava (algun d'ells)."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blockers the actor must have all of."
-msgstr ""
+msgstr "Bloquejadors que qui actuava ha de tenir tots."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board"
-msgstr ""
+msgstr "Board"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board connectivity"
-msgstr ""
+msgstr "Connectivitat del board"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board dealt"
-msgstr ""
+msgstr "Board repartit"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board high card"
-msgstr ""
+msgstr "Carta alta del board"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board pairing"
-msgstr ""
+msgstr "Aparellament del board"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board street"
-msgstr ""
+msgstr "Carrer del board"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board suit structure"
-msgstr ""
+msgstr "Estructura de pals del board"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture"
-msgstr ""
+msgstr "Textura del board"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture (all of)"
-msgstr ""
+msgstr "Textura del board (totes)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture flags the board must have all of."
-msgstr ""
+msgstr "Marques de textura que el board ha de tenir totes."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Cards discarded at the draw; zero means stand pat and unknown discard counts "
 "stay unclassified."
 msgstr ""
+"Cartes descartades al canvi; zero vol dir servit, i els descarts desconeguts "
+"queden sense classificar."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Cards drawn"
-msgstr ""
+msgstr "Cartes canviades"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Cards drawn (0 = stand pat)"
-msgstr ""
+msgstr "Cartes canviades (0 = servit)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Currency"
-msgstr ""
+msgstr "Moneda"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw (all of)"
-msgstr ""
+msgstr "Projecte (tots)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw (any of)"
-msgstr ""
+msgstr "Projecte (algun de)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw (none of)"
-msgstr ""
+msgstr "Projecte (cap de)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw number"
-msgstr ""
+msgstr "Número de descart"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draws the actor had: flush draws, gutshots and the rest (any of them)."
 msgstr ""
+"Projectes de qui actuava: de color, gutshots i la resta (algun d'ells)."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draws the actor must have all of."
-msgstr ""
+msgstr "Projectes que qui actuava ha de tenir tots."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "EV-adjusted result (all-in EV)"
-msgstr ""
+msgstr "resultat ajustat per EV (EV d'all-in)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "EV-adjusted result per decision"
-msgstr ""
+msgstr "resultat ajustat per EV per decisió"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack"
-msgstr ""
+msgstr "Stack efectiu"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack (chips)"
-msgstr ""
+msgstr "Stack efectiu (fitxes)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack in the bands a tournament is played in."
-msgstr ""
+msgstr "Stack efectiu en els trams en què es juga un torneig."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Every situation the decision matched, not only the most specific one. Use "
 "this to ask how often an opportunity was taken: raising an open makes the "
 "decision a 3-bet, so only this keeps it among the opens faced."
 msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Facing an all-in"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Fixed limit, no limit and the other betting structures."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Game and stake"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Game family"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Hand"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Hand state known"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Hand strength"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Hand-classified street"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Hands after"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Hands before"
-msgstr ""
+"Cada situació amb què va coincidir la decisió, no només la més concreta. "
+"Serveix per preguntar amb quina freqüència es va aprofitar una oportunitat: "
+"pujar una obertura converteix la decisió en un 3-bet, i només aquest filtre "
+"la manté entre les obertures afrontades."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hero:"
-msgid "Hero"
-msgstr "Heroi:"
+msgid "Facing an all-in"
+msgstr "Davant d'un all-in"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Fixed limit, no limit and the other betting structures."
+msgstr "Límit fix, no limit i les altres estructures d'aposta."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Game and stake"
+msgstr "Joc i stake"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Game family"
+msgstr "Família de joc"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand"
+msgstr "Mà"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand state known"
+msgstr "Estat de la mà conegut"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand strength"
+msgstr "Força de la mà"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand-classified street"
+msgstr "Carrer de classificació de la mà"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hands after"
+msgstr "Mans després de"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hands before"
+msgstr "Mans abans de"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hero"
+msgstr "Heroi"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hero's own decisions, or everyone except hero. Any keeps both."
 msgstr ""
+"Les decisions de l'heroi, o de tothom excepte l'heroi. «Qualsevol» manté "
+"totes dues."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hole cards"
-msgstr ""
+msgstr "Cartes pròpies"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hole cards known"
-msgstr ""
+msgstr "Cartes pròpies conegudes"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many holdings the holding beats."
-msgstr ""
+msgstr "Quantes combinacions supera la mà."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many players were dealt into the hand."
-msgstr ""
+msgstr "Quants jugadors van rebre cartes a la mà."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many players were still in the hand."
-msgstr ""
+msgstr "Quants jugadors encara eren a la mà."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many raises came before this decision."
-msgstr ""
+msgstr "Quantes pujades hi va haver abans d'aquesta decisió."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How much the actor had to call."
-msgstr ""
+msgstr "Quant havia d'igualar qui actuava."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How strong the holding is: nuts, near nuts, strong, medium or weak."
-msgstr ""
+msgstr "Com de forta és la mà: nuts, gairebé nuts, forta, mitjana o feble."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -4223,116 +5212,145 @@ msgid "In position"
 msgstr "Mostra Classificació"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "In position versus the bettor"
-msgstr ""
+msgstr "En posició davant de qui aposta"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "In position versus the previous aggressor"
-msgstr ""
+msgstr "En posició davant l'agressor anterior"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Is the aggressor"
-msgstr ""
+msgstr "És l'agressor"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Is the preflop aggressor"
-msgstr ""
+msgstr "És l'agressor preflop"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat column"
-msgstr ""
+msgstr "Columna d'estadística antiga"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat response"
-msgstr ""
+msgstr "Resposta d'estadística antiga"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Linked player identity"
-msgstr ""
+msgstr "Identitat de jugador vinculada"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Made hand"
-msgstr ""
+msgstr "Mà feta"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Made hand rank"
-msgstr ""
+msgstr "Rang de la mà feta"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Multiway"
-msgstr ""
+msgstr "Multiway"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Named texture flags such as monotone or connected (any of them)."
 msgstr ""
+"Marques de textura amb nom, com monocolor o connectat (alguna d'elles)."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One import session."
-msgstr ""
+msgstr "Una sessió d'importació."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One specific hand."
-msgstr ""
+msgstr "Una mà concreta."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One specific tournament."
-msgstr ""
+msgstr "Un torneig concret."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions played on or after this date."
-msgstr ""
+msgstr "Només les decisions jugades en aquesta data o després."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions played on or before this date."
-msgstr ""
+msgstr "Només les decisions jugades en aquesta data o abans."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions with none of the named blockers."
-msgstr ""
+msgstr "Només decisions sense cap dels bloquejadors indicats."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions with none of the named draws."
-msgstr ""
+msgstr "Només decisions sense cap dels projectes indicats."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only hands imported after this hand id."
-msgstr ""
+msgstr "Només les mans importades després d'aquest id de mà."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only hands imported before this hand id."
-msgstr ""
+msgstr "Només les mans importades abans d'aquest id de mà."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Opponent position"
-msgstr ""
+msgstr "Posició del rival"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Other"
-msgstr ""
+msgstr "Altres"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pair detail"
-msgstr ""
+msgstr "Detall de la parella"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Played since"
-msgstr ""
+msgstr "Jugat des de"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Played until"
-msgstr ""
+msgstr "Jugat fins a"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Players in the hand"
-msgstr ""
+msgstr "Jugadors a la mà"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Poker room"
-msgstr ""
+msgstr "Sala de pòquer"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Position"
-msgstr ""
+msgstr "Posició"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -4340,256 +5358,321 @@ msgid "Position and stack"
 msgstr "Mostra Classificació"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pot before the action"
-msgstr ""
+msgstr "Pot abans de l'acció"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pot odds"
-msgstr ""
+msgstr "Pot odds"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pot type"
-msgstr ""
+msgstr "Tipus de pot"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Preflop, flop, turn or river."
-msgstr ""
+msgstr "Preflop, flop, turn o river."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Rainbow, two-tone, monotone and the deeper flush boards."
 msgstr ""
+"Arc de Sant Martí, dos pals, monocolor i els boards de color més marcats."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Raises before"
-msgstr ""
+msgstr "Pujades prèvies"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Range holdings"
-msgstr ""
+msgstr "Combinacions del rang"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Relative position"
-msgstr ""
+msgstr "Posició relativa"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Response"
-msgstr ""
+msgstr "Resposta"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Restrict the population to a set of players."
-msgstr ""
+msgstr "Restringeix la població a un conjunt de jugadors."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Restrict the population to one player."
-msgstr ""
+msgstr "Restringeix la població a un jugador."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Restrict to a linked (site, alias) identity."
-msgstr ""
+msgstr "Restringeix a una identitat vinculada (sala, àlies)."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Role"
-msgstr ""
+msgstr "Rol"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Runout"
-msgstr ""
+msgstr "Runout"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "SPR"
-msgstr ""
+msgstr "SPR"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "SPR band"
-msgstr ""
+msgstr "Tram de SPR"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Seats between the actor and the button."
-msgstr ""
+msgstr "Seients entre qui actua i el botó."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Seats dealt in"
-msgstr ""
+msgstr "Seients repartits"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Short, medium, deep or very deep stacks."
-msgstr ""
+msgstr "Stacks curts, mitjans, profunds o molt profunds."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Situation"
-msgstr ""
+msgstr "Situació"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Situation family"
-msgstr ""
+msgstr "Família de situacions"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Situation, including the ones it led to"
-msgstr ""
+msgstr "Situació, incloses les que ha provocat"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stack depth"
-msgstr ""
+msgstr "Profunditat de l'stack"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stack depth band"
-msgstr ""
+msgstr "Tram de profunditat de l'stack"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stack-to-pot ratio before the action."
-msgstr ""
+msgstr "Relació stack/pot abans de l'acció."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stake (big blinds)"
-msgstr ""
+msgstr "Stake (cegues grans)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Starting hand"
-msgstr ""
+msgstr "Mà inicial"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Street"
-msgstr ""
+msgstr "Carrer"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Street and pot"
-msgstr ""
+msgstr "Carrer i pot"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Street number"
-msgstr ""
+msgstr "Número de carrer"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Table size"
-msgstr ""
+msgstr "Mida de la taula"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The 169 Hold'em starting-hand classes."
-msgstr ""
+msgstr "Les 169 classes de mans inicials de Hold'em."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The bet size faced, in the configured sizing buckets."
-msgstr ""
+msgstr "La mida d'aposta afrontada, en els trams de mida configurats."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The bet size made, in the configured sizing buckets."
-msgstr ""
+msgstr "La mida d'aposta feta, en els trams de mida configurats."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The big blind in chips, for mixed stakes."
-msgstr ""
+msgstr "La cega gran en fitxes, per a stakes barrejats."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The board street as a number, the flop being one."
-msgstr ""
+msgstr "El carrer del board com a nombre, el flop és u."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The currency the game was played in."
-msgstr ""
+msgstr "La moneda en què es va jugar."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The decision, normalized: fold, check, call, bet or raise."
 msgstr ""
+"La decisió, normalitzada: retirar-se, passar, igualar, apostar o pujar."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The game family: hold'em/omaha, stud or draw."
-msgstr ""
+msgstr "La família de joc: hold'em/omaha, stud o draw."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The game variant, such as Hold'em or Omaha."
-msgstr ""
+msgstr "La variant de joc, com Hold'em o Omaha."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The highest card of the board."
-msgstr ""
+msgstr "La carta més alta del board."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The letter a legacy PT4 stat column records."
-msgstr ""
+msgstr "La lletra que registra una columna d'estadística PT4 antiga."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The made hand the actor held: pairs, sets, straights and so on."
-msgstr ""
+msgstr "La mà feta de qui actuava: parelles, trios, escales, etc."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The most specific situation the decision matched."
-msgstr ""
+msgstr "La situació més concreta amb què va coincidir la decisió."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The pot odds offered, in basis points."
-msgstr ""
+msgstr "Les pot odds ofertes, en punts bàsics."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The pot size before the action, in chips."
-msgstr ""
+msgstr "La mida del pot abans de l'acció, en fitxes."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The same ratio as the bands a player thinks in."
-msgstr ""
+msgstr "La mateixa relació, en els trams amb què pensa un jugador."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The seat of the player the action was against."
-msgstr ""
+msgstr "El seient del jugador contra qui va anar l'acció."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The seat of the player who acted."
-msgstr ""
+msgstr "El seient del jugador que va actuar."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The shape of the pot: unopened, limped, single-raised, 3-bet, 4-bet."
-msgstr ""
+msgstr "La forma del pot: sense obrir, amb limp, una pujada, 3-bet, 4-bet."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The share of the range the holding beats."
-msgstr ""
+msgstr "La part del rang que la mà supera."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The size of the bet faced, as a percentage of the pot."
-msgstr ""
+msgstr "La mida de l'aposta afrontada, com a percentatge del pot."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The size of the bet faced, in basis points of the pot."
-msgstr ""
+msgstr "La mida de l'aposta afrontada, en punts bàsics del pot."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The size of the bet made, as a percentage of the pot."
-msgstr ""
+msgstr "La mida de l'aposta feta, com a percentatge del pot."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The size of the bet made, in basis points of the pot."
-msgstr ""
+msgstr "La mida de l'aposta feta, en punts bàsics del pot."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The size of the game, expressed in big blinds."
-msgstr ""
+msgstr "La mida de la partida, expressada en cegues grans."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The smaller of the two stacks, in big blinds."
-msgstr ""
+msgstr "El menor dels dos stacks, en cegues grans."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The smaller of the two stacks, in chips."
-msgstr ""
+msgstr "El menor dels dos stacks, en fitxes."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The street as a number, preflop being zero."
-msgstr ""
+msgstr "El carrer com a nombre, el preflop és zero."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The street the hand state was classified on."
-msgstr ""
+msgstr "El carrer en què es va classificar l'estat de la mà."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The strength of the made hand, as a number."
-msgstr ""
+msgstr "La força de la mà feta, com a nombre."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The table size, such as 6-max or full ring."
-msgstr ""
+msgstr "La mida de la taula, com 6-max o full ring."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Three or more players saw the decision."
-msgstr ""
+msgstr "Tres jugadors o més van veure la decisió."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -4597,511 +5680,635 @@ msgid "Tournament or cash"
 msgstr "Tornei"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Was the previous aggressor"
-msgstr ""
+msgstr "Era l'agressor anterior"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "What the actor did, including draw-game discards and stand-pat decisions."
 msgstr ""
+"Què va fer qui actuava, inclosos els descarts i les servides dels jocs de "
+"canvi."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "What the actor was facing."
-msgstr ""
+msgstr "A què s'enfrontava qui actuava."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "What the turn or river card changed."
-msgstr ""
+msgstr "Què va canviar la carta del turn o del river."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the action in front of the actor was an all-in."
-msgstr ""
+msgstr "Si l'acció davant de qui actuava va ser un all-in."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the action put the player all-in."
-msgstr ""
+msgstr "Si l'acció va deixar el jugador all-in."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor has position on the bettor."
-msgstr ""
+msgstr "Si qui actuava té posició sobre qui aposta."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor has position on the previous aggressor."
-msgstr ""
+msgstr "Si qui actuava té posició sobre l'agressor anterior."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor raised preflop."
-msgstr ""
+msgstr "Si qui actuava va pujar preflop."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was in position."
-msgstr ""
+msgstr "Si qui actuava era en posició."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was the aggressor on the previous street."
-msgstr ""
+msgstr "Si qui actuava va ser l'agressor al carrer anterior."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was the aggressor on this street."
-msgstr ""
+msgstr "Si qui actuava era l'agressor en aquest carrer."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the board is connected, semi-connected or disconnected."
-msgstr ""
+msgstr "Si el board està connectat, semiconnectat o desconnectat."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the board is unpaired, paired, or more."
-msgstr ""
+msgstr "Si el board està sense aparellar, aparellat o més."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Which draw round the player reached; only recorded discard or stand-pat "
 "actions count."
 msgstr ""
+"Quina ronda de descart va assolir el jugador; només compten els descarts o "
+"les servides registrats."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Which pair the actor held: overpair, top pair, set and so on."
-msgstr ""
+msgstr "Quina parella tenia qui actuava: overpair, top pair, set, etc."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Which poker room the hands were played on."
-msgstr ""
+msgstr "A quina sala de pòquer es van jugar les mans."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes for tournament hands, No for cash game hands."
-msgstr ""
+msgstr "Sí per a les mans de torneig, No per a les mans de cash."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes on the flop and later, No before the flop."
-msgstr ""
+msgstr "Sí al flop i després, No abans del flop."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes only for decisions whose cards were shown."
-msgstr ""
+msgstr "Sí només per a les decisions les cartes de les quals es van mostrar."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes only where the cards were known and classified."
-msgstr ""
+msgstr "Sí només on les cartes eren conegudes i classificades."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "all-in frequency"
-msgstr ""
+msgstr "freqüència d'all-in"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average SPR"
-msgstr ""
+msgstr "SPR mitjà"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average bet size (basis points of the pot)"
-msgstr ""
+msgstr "mida mitjana de l'aposta (punts bàsics del pot)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average bet size faced (basis points of the pot)"
-msgstr ""
+msgstr "mida mitjana de l'aposta afrontada (punts bàsics del pot)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average pot size"
-msgstr ""
+msgstr "mida mitjana del pot"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "bet frequency"
-msgstr ""
+msgstr "freqüència d'aposta"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "bp"
-msgstr ""
+msgstr "pb"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "call frequency"
-msgstr ""
+msgstr "freqüència de call"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "check frequency"
-msgstr ""
+msgstr "freqüència de check"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "chips"
-msgstr ""
+msgstr "fitxes"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "fold frequency"
-msgstr ""
+msgstr "freqüència de retirada"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "holdings"
-msgstr ""
+msgstr "combinacions"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many actions"
-msgstr ""
+msgstr "quantes accions"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many decisions"
-msgstr ""
+msgstr "quantes decisions"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many hands"
-msgstr ""
+msgstr "quantes mans"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Show Number of Players"
 msgid "how many players"
-msgstr "Mostra Nombre of Players"
+msgstr "quants jugadors"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how often the decision is taken"
-msgstr ""
+msgstr "amb quina freqüència es pren la decisió"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "id"
-msgstr ""
+msgstr "id"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "per-hand frequency"
-msgstr ""
+msgstr "freqüència per mà"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "raise frequency"
-msgstr ""
+msgstr "freqüència de pujada"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "realized profit"
-msgstr ""
+msgstr "benefici realitzat"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "realized profit per decision"
-msgstr ""
+msgstr "benefici realitzat per decisió"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "seats"
-msgstr ""
+msgstr "seients"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "street"
-msgstr ""
+msgstr "carrer"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Column Configuration"
-msgstr ""
+msgstr "Configuració de columnes"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Columns"
-msgstr ""
+msgstr "Columnes"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Dashboard"
-msgstr ""
+msgstr "Tauler de control"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Detailed Filters"
-msgstr ""
+msgstr "Filtres detallats"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Hand Filters:"
-msgstr ""
+msgstr "Filtres de mans:"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 #, fuzzy
-#| msgid "Show Position Stats"
 msgid "Position Heatmap"
-msgstr "Mostra Classificació"
+msgstr "Mapa de calor per posició"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Restrict to hand types:"
-msgstr ""
+msgstr "Restringeix a tipus de mà:"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Starting Hands"
-msgstr ""
+msgstr "Mans inicials"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Stats Tables"
-msgstr ""
+msgstr "Taules d'estadístiques"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "and"
-msgstr ""
+msgstr "i"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "between"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Big Blind fold to steal"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Call Raise preflop"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Continuation Bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Flop 3-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Flop 4-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Flop open bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Flops seen"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Fold to preflop 3-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Fold to preflop 4-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Preflop 3-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Preflop 4-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Raise First In"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Re-steal"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% River 3-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% River 4-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% River open bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Showdowns seen"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Small Blind fold to steal"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Steal attempt"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Steal success"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Turn 3-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Turn 4-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Turn open bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Went to showdown after seeing flop"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Won money after seeing flop"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Won money at showdown"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Big Blinds won per 100 hands"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Big Blinds won per 100 hands excluding rake"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Flop aggression frequency"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Game type (Hold'em, Omaha, etc.)"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Measure of uncertainty"
-msgstr ""
+msgstr "entre"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Number of Players:"
+msgid "% Big Blind fold to steal"
+msgstr "% retirada de la cega gran davant robatori"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Call Raise preflop"
+msgstr "% call a pujada preflop"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Continuation Bet"
+msgstr "% aposta de continuació"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Flop 3-bet"
+msgstr "% 3-bet al flop"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Flop 4-bet"
+msgstr "% 4-bet al flop"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Flop open bet"
+msgstr "% aposta d'obertura al flop"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Flops seen"
+msgstr "% flops vistos"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Fold to preflop 3-bet"
+msgstr "% retirada davant 3-bet preflop"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Fold to preflop 4-bet"
+msgstr "% retirada davant 4-bet preflop"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Preflop 3-bet"
+msgstr "% 3-bet preflop"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Preflop 4-bet"
+msgstr "% 4-bet preflop"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Raise First In"
+msgstr "% raise first in"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Re-steal"
+msgstr "% re-steal"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% River 3-bet"
+msgstr "% 3-bet al river"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% River 4-bet"
+msgstr "% 4-bet al river"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% River open bet"
+msgstr "% aposta d'obertura al river"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Showdowns seen"
+msgstr "% showdowns vistos"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Small Blind fold to steal"
+msgstr "% retirada de la cega petita davant robatori"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Steal attempt"
+msgstr "% intent de robatori"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Steal success"
+msgstr "% robatori reeixit"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Turn 3-bet"
+msgstr "% 3-bet al turn"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Turn 4-bet"
+msgstr "% 4-bet al turn"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Turn open bet"
+msgstr "% aposta d'obertura al turn"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Went to showdown after seeing flop"
+msgstr "% ha anat al showdown després de veure el flop"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Won money after seeing flop"
+msgstr "% ha guanyat diners després de veure el flop"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Won money at showdown"
+msgstr "% ha guanyat diners al showdown"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Big Blinds won per 100 hands"
+msgstr "Cegues grans guanyades per 100 mans"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Big Blinds won per 100 hands excluding rake"
+msgstr "Cegues grans guanyades per 100 mans sense rake"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Flop aggression frequency"
+msgstr "Freqüència d'agressió al flop"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Game type (Hold'em, Omaha, etc.)"
+msgstr "Tipus de joc (Hold'em, Omaha, etc.)"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Measure of uncertainty"
+msgstr "Mesura d'incertesa"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Number of hands played"
-msgstr "Nombre de Jugadors:"
+msgstr "Nombre de mans jugades"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Number of seats at the table"
-msgstr ""
+msgstr "Nombre de seients a la taula"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Player name"
-msgstr ""
+msgstr "Nom del jugador"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Position at the table"
-msgstr ""
+msgstr "Posició a la taula"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Postflop aggression factor"
-msgstr ""
+msgstr "Factor d'agressió postflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Postflop aggression frequency"
-msgstr ""
+msgstr "Freqüència d'agressió postflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Preflop raise"
-msgstr ""
+msgstr "Pujada preflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Profit per hand"
-msgstr ""
+msgstr "Benefici per mà"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Profit per hand excluding rake"
-msgstr ""
+msgstr "Benefici per mà sense rake"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Rake paid"
-msgstr ""
+msgstr "Rake pagat"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "River aggression frequency"
-msgstr ""
+msgstr "Freqüència d'agressió al river"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Starting cards (Hole cards)"
-msgstr ""
+msgstr "Cartes inicials (cartes pròpies)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Total net profit"
-msgstr ""
+msgstr "Benefici net total"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Turn aggression frequency"
-msgstr ""
+msgstr "Freqüència d'agressió al turn"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Voluntarily put money in pot preflop"
-msgstr ""
+msgstr "Diners posats voluntàriament al pot preflop"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
-msgstr ""
+msgstr "Perfil preflop (VPIP vs PFR)"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "<b>Hand: {0}</b><br/>Hands: {1}<br/>VPIP: {2}%<br/>Profit: {3}"
-msgstr ""
+msgstr "<b>Mà: {0}</b><br/>Mans: {1}<br/>VPIP: {2}%<br/>Benefici: {3}"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Color the grid by:"
-msgstr ""
+msgstr "Acoloreix la graella per:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Filtered range:"
-msgstr ""
+msgstr "Rang filtrat:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Hand: {0}\n"
 "No statistics available"
 msgstr ""
+"Mà: {0}\n"
+"No hi ha estadístiques disponibles"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Hold'em Starting Hand Grid"
-msgstr ""
+msgstr "Graella de mans inicials de Hold'em"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 4-Card Texture Analysis"
-msgstr ""
+msgstr "Anàlisi de textura d'Omaha de 4 cartes"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 5-Card Texture Analysis"
-msgstr ""
+msgstr "Anàlisi de textura d'Omaha de 5 cartes"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 6-Card Texture Analysis"
-msgstr ""
+msgstr "Anàlisi de textura d'Omaha de 6 cartes"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha Texture Analysis"
-msgstr ""
+msgstr "Anàlisi de textura d'Omaha"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Starting Hands Analysis"
-msgstr ""
+msgstr "Anàlisi de mans inicials"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "min sample:"
-msgstr ""
+msgstr "mostra mín.:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "{0} decisions in this selection have no known hole cards and are not in the "
 "grid"
 msgstr ""
+"{0} decisions d'aquesta selecció no tenen cartes pròpies conegudes i no són "
+"a la graella"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
 msgid "Hand Breakdown"
-msgstr ""
+msgstr "Desglossament de mans"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
 msgid "Statistics group:"
-msgstr ""
+msgstr "Grup d'estadístiques:"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "A Session Guard limit has been reached."
-msgstr ""
+msgstr "S'ha assolit un límit de Session Guard."
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Acknowledge"
-msgstr ""
+msgstr "Entès"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid ""
 "Alerts only: fpdb never closes, sits out or otherwise touches a poker "
 "client. The session is the Session Viewer's: cash hands, ended by a 30-"
 "minute pause."
 msgstr ""
+"Només alertes: fpdb mai no tanca, no fa seure fora ni toca de cap altra "
+"manera un client de pòquer. La sessió és la del visor de sessions: mans de "
+"cash, acabada per una pausa de 30 minuts."
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Apply"
-msgstr ""
+msgstr "Aplica"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Choose at least one limit to watch."
-msgstr ""
+msgstr "Trieu almenys un límit per vigilar."
 
 #: fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy, python-format
@@ -5111,160 +6318,188 @@ msgid ""
 msgstr "No es pot trobar el fitxer %s"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Drawdown from peak (BB)"
-msgstr ""
+msgstr "Caiguda des del màxim (BB)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Drawdown from peak (money)"
-msgstr ""
+msgstr "Caiguda des del màxim (diners)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Later"
-msgstr ""
+msgstr "Més tard"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Limits for this session"
-msgstr ""
+msgstr "Límits per a aquesta sessió"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Loss (BB)"
-msgstr ""
+msgstr "Pèrdua (BB)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Loss (money)"
-msgstr ""
+msgstr "Pèrdua (diners)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Not running."
-msgstr ""
+msgstr "No s'està executant."
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Reset alerts"
-msgstr ""
+msgstr "Restableix les alertes"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Save as defaults"
-msgstr ""
+msgstr "Desa com a predeterminat"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Session Guard: click to see or change the limits"
-msgstr ""
+msgstr "Session Guard: feu clic per veure o canviar els límits"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Session Guard: no session in progress"
-msgstr ""
+msgstr "Session Guard: no hi ha cap sessió en curs"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Session Guard: {result} · {duration} · {hands} hands"
-msgstr ""
+msgstr "Session Guard: {result} · {duration} · {hands} mans"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Session duration"
-msgstr ""
+msgstr "Durada de la sessió"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Win (BB)"
-msgstr ""
+msgstr "Guany (BB)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Win (money)"
-msgstr ""
+msgstr "Guany (diners)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{count} limit(s) reached"
-msgstr ""
+msgstr "{count} límit(s) assolit(s)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{label}: unavailable (a hand has no big blind) / {threshold}"
-msgstr ""
+msgstr "{label}: no disponible (una mà no té cega gran) / {threshold}"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{value} BB"
-msgstr ""
+msgstr "{value} BB"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid ""
 "A stat pack adds declarative stats, and optionally Research presets, without "
 "changing fpdb. Packs are data only: no Python, no SQL."
 msgstr ""
+"Un paquet d'estadístiques afegeix estadístiques declaratives i, "
+"opcionalment, preajustos de Research, sense modificar fpdb. Els paquets són "
+"només dades: ni Python ni SQL."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "All Players"
 msgid "All files"
-msgstr "Tots els Jugadors"
+msgstr "Tots els fitxers"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Author"
-msgstr ""
+msgstr "Autor"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Built-in"
-msgstr ""
+msgstr "Integrat"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy, python-format
-#| msgid "Could not find file %s"
 msgid ""
 "Could not read the pack:\n"
 "%s"
-msgstr "No es pot trobar el fitxer %s"
+msgstr ""
+"No s'ha pogut llegir el paquet:\n"
+"%s"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Disable"
-msgstr ""
+msgstr "Desactiva"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Disabled"
-msgstr ""
+msgstr "Desactivat"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Disabled %s."
-msgstr ""
+msgstr "%s desactivat."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Enable"
-msgstr ""
+msgstr "Activa"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Enabled %s."
-msgstr ""
+msgstr "%s activat."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Export stat pack"
-msgstr ""
+msgstr "Exporta el paquet d'estadístiques"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Export..."
-msgstr ""
+msgstr "Exporta..."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Exported to %s."
-msgstr ""
+msgstr "Exportat a %s."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Import pack..."
-msgstr ""
+msgstr "Importa un paquet..."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Import stat pack"
-msgstr ""
+msgstr "Importa un paquet d'estadístiques"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Installed %s."
-msgstr ""
+msgstr "%s instal·lat."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Invalid"
-msgstr ""
+msgstr "No vàlid"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
@@ -5272,73 +6507,89 @@ msgid "Location:"
 msgstr "Mostra Classificació"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Pack"
-msgstr ""
+msgstr "Paquet"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Restart fpdb and the HUD to use the change everywhere."
-msgstr ""
+msgstr "Reinicieu fpdb i el HUD per fer servir el canvi a tot arreu."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Stat pack"
-msgstr ""
+msgstr "Paquet d'estadístiques"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Stat packs"
-msgstr ""
+msgstr "Paquets d'estadístiques"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Stats"
-msgstr ""
+msgstr "Estadístiques"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Stats:"
-msgstr ""
+msgstr "Estadístiques:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Status"
-msgstr ""
+msgstr "Estat"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "The pack state was not changed:\n"
 "%s"
 msgstr ""
+"L'estat del paquet no s'ha canviat:\n"
+"%s"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "This pack cannot be installed:"
-msgstr ""
+msgstr "Aquest paquet no es pot instal·lar:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "This pack is already installed. Replace it with this version?"
 msgstr ""
+"Aquest paquet ja està instal·lat. Voleu substituir-lo per aquesta versió?"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "This pack is not loaded:"
-msgstr ""
+msgstr "Aquest paquet no està carregat:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Uninstall"
-msgstr ""
+msgstr "Desinstal·la"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Uninstall %s?"
-msgstr ""
+msgstr "Voleu desinstal·lar %s?"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Uninstall stat pack"
-msgstr ""
+msgstr "Desinstal·la el paquet d'estadístiques"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Uninstalled %s."
-msgstr ""
+msgstr "%s desinstal·lat."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "User installed"
-msgstr ""
+msgstr "Instal·lat per l'usuari"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "<"
@@ -5357,129 +6608,155 @@ msgid ">>"
 msgstr ""
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "BOTTOM :"
-msgstr ""
+msgstr "BOTTOM:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Capture Console (Logs):"
-msgstr ""
+msgstr "Consola de captura (registres):"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Captured Hand History:"
-msgstr ""
+msgstr "Historial de mà capturat:"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "cards ="
 msgid "Cards:"
-msgstr "cartes ="
+msgstr "Cartes:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Hands Captured: 0"
-msgstr ""
+msgstr "Mans capturades: 0"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Import All OFC"
-msgstr ""
+msgstr "Importa tot l'OFC"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Import OFC to DB"
-msgstr ""
+msgstr "Importa OFC a la BD"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "In Hand:"
-msgstr ""
+msgstr "A la mà:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "MIDDLE :"
-msgstr ""
+msgstr "MIDDLE:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Open DB Replayer"
-msgstr ""
+msgstr "Obre el reproductor de la BD"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Open Hand Folder"
-msgstr ""
+msgstr "Obre la carpeta de mans"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Refresh Hands"
-msgstr ""
+msgstr "Actualitza les mans"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Select a hand to start replay"
-msgstr ""
+msgstr "Seleccioneu una mà per iniciar la reproducció"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Start Capture"
-msgstr ""
+msgstr "Inicia la captura"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Status: 🔴 Stopped"
-msgstr ""
+msgstr "Estat: 🔴 Aturat"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Statut : 🔴 Arrêté"
-msgstr ""
+msgstr "Estat: 🔴 Aturat"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Statut : 🟢 En Cours"
-msgstr ""
+msgstr "Estat: 🟢 En curs"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Step 0 / 0"
-msgstr ""
+msgstr "Pas 0 / 0"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "SwC"
-msgstr ""
+msgstr "SwC"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "SwC Poker - Capture Console & Replayer"
-msgstr ""
+msgstr "SwC Poker - Consola de captura i reproductor"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "TOP :"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Confirm overwrite"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Copy entire table"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Copy entire table with headers"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Copy with headers"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Export displayed values"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-#, python-format
-msgid "Export displayed values as %s…"
-msgstr ""
+msgstr "TOP:"
 
 #: fpdb_3_legacy/table_export.py
 #, fuzzy
-#| msgid "commit failed"
-msgid "Export failed"
-msgstr "commit ha fallat"
+msgid "Confirm overwrite"
+msgstr "Confirmeu la sobreescriptura"
 
 #: fpdb_3_legacy/table_export.py
-#, python-format
+#, fuzzy
+msgid "Copy entire table"
+msgstr "Copia tota la taula"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Copy entire table with headers"
+msgstr "Copia tota la taula amb capçaleres"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Copy with headers"
+msgstr "Copia amb capçaleres"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Export displayed values"
+msgstr "Exporta els valors mostrats"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy, python-format
+msgid "Export displayed values as %s…"
+msgstr "Exporta els valors mostrats com a %s…"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Export failed"
+msgstr "Error d'exportació"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy, python-format
 msgid ""
 "The file already exists:\n"
 "%s\n"
 "Do you want to replace it?"
 msgstr ""
+"El fitxer ja existeix:\n"
+"%s\n"
+"Voleu substituir-lo?"
 
 #~ msgid "*** WARNING UNKNOWN MYSQL ERROR:"
 #~ msgstr "*** ALERTA MYSQL ERROR DESCONEGUT:"

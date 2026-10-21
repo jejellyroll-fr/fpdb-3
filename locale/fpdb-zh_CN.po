@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 13:02+0200\n"
+"POT-Creation-Date: 2026-10-21 13:33+0200\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -18,9 +18,9 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0\n"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s cannot read all stud/razz hands yet."
-msgstr ""
+msgstr "%s 暂时无法读取所有梭哈/拉兹牌局。"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py
 #, python-format
@@ -39,26 +39,28 @@ msgid "AbsoluteToFpdb.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
+#, fuzzy
 msgid "No bringin found."
-msgstr ""
+msgstr "未找到强制下注。"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
+#, fuzzy
 msgid "No small blind"
-msgstr ""
+msgstr "没有小盲注"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Player bringing in: %s for %s"
-msgstr ""
+msgstr "强制下注玩家: %s，金额 %s"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/BossToFpdb.py
 #: fpdb_3_legacy/EnetToFpdb.py fpdb_3_legacy/EntractionToFpdb.py
 #: fpdb_3_legacy/EverestToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
 #: fpdb_3_legacy/FulltiltToFpdb.py fpdb_3_legacy/MicrogamingToFpdb.py
 #: fpdb_3_legacy/OnGameToFpdb.py fpdb_3_legacy/PkrToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Unimplemented %s: '%s' '%s'"
-msgstr ""
+msgstr "未实现的 %s: '%s' '%s'"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EnetToFpdb.py
 #: fpdb_3_legacy/EverleafToFpdb.py fpdb_3_legacy/OnGameToFpdb.py
@@ -90,36 +92,39 @@ msgstr ""
 #: fpdb_3_legacy/EntractionToFpdb.py fpdb_3_legacy/FulltiltToFpdb.py
 #: fpdb_3_legacy/MicrogamingToFpdb.py fpdb_3_legacy/OnGameToFpdb.py
 #: fpdb_3_legacy/PkrToFpdb.py
+#, fuzzy
 msgid "DEBUG:"
-msgstr ""
+msgstr "DEBUG:"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "Reading configuration file %s"
 msgid "Configuration modified*"
-msgstr "读取配置文件 %s"
-
-#: fpdb_3_legacy/ConfigReloadWidget.py
-msgid "Configuration up to date"
-msgstr ""
+msgstr "配置已更改*"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "Reading configuration file %s"
+msgid "Configuration up to date"
+msgstr "配置已更新"
+
+#: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Reload configuration"
-msgstr "读取配置文件 %s"
+msgstr "重新加载配置"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Reload error"
-msgstr ""
+msgstr "重新加载出错"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Reloading..."
-msgstr ""
+msgstr "正在重新加载..."
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Restart required"
-msgstr ""
+msgstr "需要重启"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 msgid "↻"
@@ -198,281 +203,350 @@ msgid "EverleafToFpdb.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "2-7 Drawmaha"
-msgstr ""
+msgstr "2-7 Drawmaha"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "2-7 Razz"
-msgstr ""
+msgstr "2-7 拉兹"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Draw"
-msgstr ""
+msgstr "五张换牌"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Omaha"
-msgstr ""
+msgstr "五张奥马哈"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Omaha Hi/Lo"
-msgstr ""
+msgstr "五张奥马哈高低"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Stud"
-msgstr ""
+msgstr "五张梭哈"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "6 Card Omaha"
-msgstr ""
+msgstr "六张奥马哈"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "7 Card Stud"
-msgstr ""
+msgstr "七张梭哈"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "7 Card Stud Hi/Lo"
-msgstr ""
+msgstr "七张梭哈高低"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "A-5 Single Draw"
-msgstr ""
+msgstr "A-5 单次换牌"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "All"
-msgstr ""
+msgstr "全部"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "All Players"
-msgstr ""
+msgstr "所有玩家"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "And:"
-msgstr ""
+msgstr "和:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "AoF Hold'em"
-msgstr ""
+msgstr "AoF 德州扑克"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "AoF Omaha"
-msgstr ""
+msgstr "AoF 奥马哈"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badacey"
-msgstr ""
+msgstr "Badacey"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badeucey"
-msgstr ""
+msgstr "Badeucey"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badugi"
-msgstr ""
+msgstr "Badugi"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Between:"
-msgstr ""
+msgstr "介于:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Buyin"
-msgstr ""
+msgstr "买入"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Cal"
-msgstr ""
+msgstr "日历"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Category"
-msgstr ""
+msgstr "类别"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Courchevel"
-msgstr ""
+msgstr "Courchevel"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Courchevel Hi/Lo"
-msgstr ""
+msgstr "Courchevel 高低"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Currencies"
-msgstr ""
+msgstr "货币"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Date:"
-msgstr ""
+msgstr "日期:"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Done"
-msgstr ""
+msgstr "完成"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Double hold'em"
-msgstr ""
+msgstr "双德州扑克"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "EV"
-msgstr ""
+msgstr "EV"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Euro"
-msgstr ""
+msgstr "欧元"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "From:"
-msgstr ""
+msgstr "从:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Fusion"
-msgstr ""
+msgstr "Fusion"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Games"
-msgstr ""
+msgstr "游戏"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Grouping:"
-msgstr ""
+msgstr "分组:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Hero:"
-msgstr ""
+msgstr "主角:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Hold'em"
-msgstr ""
+msgstr "德州扑克"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Hole Cards"
-msgstr ""
+msgstr "底牌"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Irish"
-msgstr ""
+msgstr "Irish"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Limit Type"
-msgstr ""
+msgstr "限注类型"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Limits:"
-msgstr ""
+msgstr "级别:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Min # Hands:"
-msgstr ""
+msgstr "最少手数:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Net profit excluding splash pots"
-msgstr ""
+msgstr "不含 splash pot 的净利润"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Non-Showdown Winnings"
-msgstr ""
+msgstr "非摊牌赢利"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "None"
-msgstr ""
+msgstr "无"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Number of Players:"
-msgstr ""
+msgstr "人数:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Off Suit"
-msgstr ""
+msgstr "不同花"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Omaha"
-msgstr ""
+msgstr "奥马哈"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Omaha Hi/Lo"
-msgstr ""
+msgstr "奥马哈高低"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Pick a date"
-msgstr ""
+msgstr "选择日期"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Play Money"
-msgstr ""
+msgstr "游戏币"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Positions:"
-msgstr ""
+msgstr "位置:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Razz"
-msgstr ""
+msgstr "拉兹"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Refresh Filters"
-msgstr ""
+msgstr "刷新筛选"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Reset"
-msgstr ""
+msgstr "重置"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Ring"
-msgstr ""
+msgstr "现金局"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Show Graph In:"
-msgstr ""
+msgstr "图表显示:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Show Limits"
-msgstr ""
+msgstr "显示级别"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Show Number of Players"
-msgstr ""
+msgstr "显示人数"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Show Position Stats"
-msgstr ""
+msgstr "显示位置统计"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Showdown Winnings"
-msgstr ""
+msgstr "摊牌赢利"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Single Draw 2-7 Lowball"
-msgstr ""
+msgstr "单次换牌 2-7 低牌"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Sites"
-msgstr ""
+msgstr "站点"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Suited"
-msgstr ""
+msgstr "同花"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "To:"
-msgstr ""
+msgstr "到:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Tournament Dollar"
-msgstr ""
+msgstr "锦标赛美元"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Tourney"
-msgstr ""
+msgstr "锦标赛"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Triple Draw 2-7 Lowball"
-msgstr ""
+msgstr "三次换牌 2-7 低牌"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Triple Draw A-5 Lowball"
-msgstr ""
+msgstr "三次换牌 A-5 低牌"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "US Dollar"
-msgstr ""
+msgstr "美元"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
 #, python-format
@@ -490,17 +564,19 @@ msgid "FullTiltPokerSummary.parseSummaryXLS: '%s' '%s"
 msgstr ""
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
+#, fuzzy
 msgid "Unable to locate currency"
-msgstr ""
+msgstr "未找到货币"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
+#, fuzzy
 msgid "parseSummary FAIL"
-msgstr ""
+msgstr "parseSummary 错误"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s Failed to detect button (hand #%s cancelled?)"
-msgstr ""
+msgstr "%s 未找到庄家按钮（牌局 #%s 已取消?）"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
 #, python-format
@@ -519,148 +595,184 @@ msgid "FulltiltToFpdb.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Hand '%s' was cancelled."
-msgstr ""
+msgstr "牌局 '%s' 已被取消。"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Hand '%s' was not dealt (dead hand)."
-msgstr ""
+msgstr "牌局 '%s' 未发牌（死牌局）。"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Hand is not cleanly split into pre and post Summary %s."
-msgstr ""
+msgstr "牌局在摘要 %s 前后没有清晰分隔。"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "No players detected in hand %s."
-msgstr ""
+msgstr "牌局 %s 中未发现玩家。"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Database is back. Auto Import resumed."
 msgstr ""
+"\n"
+"数据库已恢复可用。继续自动导入。"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Database unreachable. Auto Import paused, retrying..."
 msgstr ""
+"\n"
+"数据库不可用。自动导入已暂停，正在重试..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Stop requested while an import was still running; it will finish in the "
 "background."
 msgstr ""
+"\n"
+"在导入进行时请求了停止；导入将在后台完成。"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "SwC Native Live HUD tailing thread started."
 msgstr ""
+"\n"
+"已启动 SwC 原生 HUD 监视线程。"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "SwC live capture is not available on this platform. Importing SwC files "
 "still works."
 msgstr ""
+"\n"
+"SwC 实时捕获在此平台上不可用。SwC 文件导入仍然可用。"
 
 #: fpdb_3_legacy/GuiAutoImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "\n"
 "SwC live capture unavailable: {reason}. Importing SwC hand history files "
 "still works."
 msgstr ""
+"\n"
+"SwC 实时捕获不可用: {reason}。SwC 手牌历史导入仍然可用。"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Auto Import Ready.\n"
-msgstr ""
+msgstr "自动导入已就绪。\n"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Auto Import Running..."
-msgstr ""
+msgstr "自动导入运行中..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Database unreachable - retrying"
-msgstr ""
+msgstr "数据库不可用 - 正在重试"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "FPDB Auto Import"
-msgstr ""
+msgstr "FPDB 自动导入"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Import cycle is taking longer than usual..."
-msgstr ""
+msgstr "导入周期耗时比平常长..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Log"
-msgstr ""
+msgstr "日志"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Ready"
-msgstr ""
+msgstr "就绪"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Settings"
-msgstr ""
+msgstr "设置"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Start Auto Import"
-msgstr ""
+msgstr "开始自动导入"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Stop Auto Import"
-msgstr ""
+msgstr "停止自动导入"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Stopping Auto Import..."
-msgstr ""
+msgstr "正在停止自动导入..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "SwC live capture could not attach: {reason}. Importing SwC hand history "
 "files still works."
-msgstr ""
+msgstr "SwC 实时捕获无法连接: {reason}。SwC 手牌历史导入仍然可用。"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Time between imports (seconds):"
-msgstr ""
+msgstr "导入间隔（秒）:"
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Automatic Notes"
-msgstr ""
+msgstr "自动笔记"
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Enable or disable automatic player-note rules."
-msgstr ""
+msgstr "启用或禁用自动玩家笔记规则。"
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Generate automatic notes"
-msgstr ""
+msgstr "生成自动笔记"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Custom Rules"
-msgstr ""
+msgstr "自定义规则"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Database hands"
-msgstr ""
+msgstr "数据库手牌"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Dry Run"
-msgstr ""
+msgstr "试运行"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Dry Run DB"
-msgstr ""
+msgstr "数据库试运行"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -668,38 +780,46 @@ msgid "File"
 msgstr "文件名：%s"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Folder"
-msgstr ""
+msgstr "文件夹"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "From"
-msgstr ""
+msgstr "从"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Hand-history source"
-msgstr ""
+msgstr "手牌历史来源"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Idle"
-msgstr ""
+msgstr "空闲"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Latest: -"
-msgstr ""
+msgstr "最新: -"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Limit"
-msgstr ""
+msgstr "级别"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Load Notes"
-msgstr ""
+msgstr "加载笔记"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Notes: 0"
-msgstr ""
+msgstr "笔记: 0"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -712,81 +832,99 @@ msgid "Player Notes"
 msgstr "文件名：%s"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Pool"
-msgstr ""
+msgstr "玩家池"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Recent generated notes"
-msgstr ""
+msgstr "最近的笔记"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Refresh Pool Summary"
-msgstr ""
+msgstr "刷新玩家池摘要"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Rule set"
-msgstr ""
+msgstr "规则集"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Run"
-msgstr ""
+msgstr "运行"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Search"
-msgstr ""
+msgstr "搜索"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/GuiBulkImport.py
 #: fpdb_3_legacy/hand_share_dialog.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Site"
-msgstr ""
+msgstr "站点"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "To"
-msgstr ""
+msgstr "到"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top players by generated notes"
-msgstr ""
+msgstr "笔记最多的玩家"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top rule: -"
-msgstr ""
+msgstr "主要规则: -"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top rules"
-msgstr ""
+msgstr "主要规则"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Write DB Notes"
-msgstr ""
+msgstr "将笔记写入数据库"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Write Notes"
-msgstr ""
+msgstr "写入笔记"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Browse..."
-msgstr ""
+msgstr "浏览..."
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Bulk Import"
-msgstr ""
+msgstr "批量导入"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Bulk Import Error"
-msgstr ""
+msgstr "批量导入错误"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Choose a destination directory"
-msgstr ""
+msgstr "选择目标文件夹"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Configured Import Directories:"
-msgstr ""
+msgstr "已配置的导入文件夹:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Import complete.\n"
 "\n"
@@ -798,29 +936,45 @@ msgid ""
 "Errors: {errs}\n"
 "Time: {elapsed}s"
 msgstr ""
+"导入完成。\n"
+"\n"
+"已处理文件: {files}\n"
+"已存储: {stored}\n"
+"重复: {dups}\n"
+"部分: {partial}\n"
+"已跳过: {skipped}\n"
+"错误: {errs}\n"
+"用时: {elapsed} 秒"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Importing..."
-msgstr ""
+msgstr "正在导入..."
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Move failed files to:"
-msgstr ""
+msgstr "将失败文件移动到:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Move imported files to:"
-msgstr ""
+msgstr "将已导入文件移动到:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid ""
 "No importable hand-history files were found in the selected directories.\n"
 "\n"
 "Check that the configured paths contain hand histories (plain text files), "
 "not just archives or exports."
 msgstr ""
+"在所选文件夹中未找到可导入的手牌历史。\n"
+"\n"
+"请检查配置的路径中是否包含手牌历史（文本文件），而不只是压缩包或导出文件。"
 
 #: fpdb_3_legacy/GuiBulkImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "PHH hands found: {found}\n"
 "Imported: {imported}\n"
@@ -830,560 +984,694 @@ msgid ""
 "Malformed: {malformed}\n"
 "PHH import time: {seconds}s"
 msgstr ""
+"找到的 PHH 手牌: {found}\n"
+"已导入: {imported}\n"
+"重复: {dups}\n"
+"部分（历史提前结束）: {partial}\n"
+"不支持的变体: {unsupported}\n"
+"格式错误: {malformed}\n"
+"PHH 导入用时: {seconds} 秒"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Path"
-msgstr ""
+msgstr "路径"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Please choose the path that you want to Auto Import"
-msgstr ""
+msgstr "选择自动导入路径"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
-msgstr ""
+msgstr "同时启动 HUD_main（如果 HUD/自动导入已在运行，请取消勾选）。"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Capture failed to start — see the log above."
-msgstr ""
+msgstr "捕获未能启动 — 请查看上方日志。"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Default game:"
-msgstr ""
+msgstr "默认游戏:"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Dry run (no DB insert)"
-msgstr ""
+msgstr "试运行（不写入数据库）"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Finishing previous capture…"
-msgstr ""
+msgstr "正在结束上一次捕获…"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Idle."
-msgstr ""
+msgstr "空闲。"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Interface:"
-msgstr ""
+msgstr "网络接口:"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Launch HUD"
-msgstr ""
+msgstr "启动 HUD"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Refresh interfaces"
-msgstr ""
+msgstr "刷新网络接口"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
-msgstr ""
+msgstr "正在请求权限… 请批准提示，然后开始玩 CoinPoker。"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Start capture"
-msgstr ""
+msgstr "开始捕获"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py fpdb_3_legacy/session_guard_dialog.py
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Stop"
-msgstr ""
+msgstr "停止"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Stopping…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "+ New Rule"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#: fpdb_3_legacy/GuiResearchBrowser.py
-msgid "Actions"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-format
-msgid "Are you sure you want to delete rule '%s'?"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-brace-format
-msgid "Board ({flop})"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Board:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Captured Evidence Schema"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Custom Auto Notes rules saved successfully!"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Delete Rule"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Duplicate Rule IDs"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Empty HH"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Enabled"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Generated Note: (None)"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-brace-format
-msgid "Hole Cards ({hole})"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Hole:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "ID"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Live Testing Sandbox"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Logical Conditions (No-Code GUI)"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "No Rule"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-brace-format
-msgid ""
-"Note Template (Tags: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, {spr}):"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Paste raw GGPoker or PokerStars hand history text here to test..."
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Please paste a Hand History text to evaluate against."
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Please select or create a rule to evaluate."
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Remove Condition"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Root Operator:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Rule / Group"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Rule ID:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Rule Metadata"
-msgstr ""
+msgstr "正在停止…"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
-#| msgid "File name: %s"
+msgid "+ New Rule"
+msgstr "+ 新规则"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
+msgid "Actions"
+msgstr "行动"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy, python-format
+msgid "Are you sure you want to delete rule '%s'?"
+msgstr "确定要删除规则 '%s' 吗?"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy, python-brace-format
+msgid "Board ({flop})"
+msgstr "公共牌 ({flop})"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Board:"
+msgstr "公共牌:"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Captured Evidence Schema"
+msgstr "捕获数据结构"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Custom Auto Notes rules saved successfully!"
+msgstr "自定义自动笔记规则已保存!"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Delete Rule"
+msgstr "删除规则"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Duplicate Rule IDs"
+msgstr "规则 ID 重复"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Empty HH"
+msgstr "历史为空"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Enabled"
+msgstr "已启用"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Generated Note: (None)"
+msgstr "生成的笔记: （无）"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy, python-brace-format
+msgid "Hole Cards ({hole})"
+msgstr "底牌 ({hole})"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Hole:"
+msgstr "底牌:"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "ID"
+msgstr "ID"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Live Testing Sandbox"
+msgstr "实时测试沙盒"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Logical Conditions (No-Code GUI)"
+msgstr "逻辑条件（无代码）"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "No Rule"
+msgstr "没有规则"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy, python-brace-format
+msgid ""
+"Note Template (Tags: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, {spr}):"
+msgstr ""
+"笔记模板（标签: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, {spr}）:"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Paste raw GGPoker or PokerStars hand history text here to test..."
+msgstr "在此粘贴 GGPoker 或 PokerStars 的原始手牌历史文本进行测试..."
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Please paste a Hand History text to evaluate against."
+msgstr "请粘贴要评估的手牌历史文本。"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Please select or create a rule to evaluate."
+msgstr "请选择或创建要评估的规则。"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Remove Condition"
+msgstr "删除条件"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Root Operator:"
+msgstr "根运算符:"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Rule / Group"
+msgstr "规则 / 分组"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Rule ID:"
+msgstr "规则 ID:"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Rule Metadata"
+msgstr "规则元数据"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule Name:"
-msgstr "文件名：%s"
+msgstr "规则名称:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule Set:"
-msgstr ""
+msgstr "规则集:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule Sets & Custom Rules"
-msgstr ""
+msgstr "规则集与自定义规则"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Saved"
-msgstr ""
+msgstr "已保存"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Stack & SPR"
-msgstr ""
+msgstr "筹码与 SPR"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Status: READY"
-msgstr ""
+msgstr "状态: 就绪"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Test Source (Raw Hand History Text):"
-msgstr ""
+msgstr "测试来源（原始手牌历史文本）:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "These rule IDs are used more than once: %s\n"
 "\n"
 "Give each rule a unique ID before saving."
 msgstr ""
+"以下规则 ID 被多次使用: %s\n"
+"\n"
+"保存前请为每条规则设置唯一 ID。"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "➕ Add Condition"
-msgstr ""
+msgstr "➕ 添加条件"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "💾 Save Rules"
-msgstr ""
+msgstr "💾 保存规则"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📋 Duplicate"
-msgstr ""
+msgstr "📋 复制"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🗑️ Delete"
-msgstr ""
+msgstr "🗑️ 删除"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "🧪 Evaluate Rule"
-msgstr ""
+msgstr "🧪 评估规则"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "🧪 Test Sandbox"
-msgstr ""
+msgstr "🧪 沙盒"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "A database name is required."
-msgstr ""
+msgstr "需要数据库名称。"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "A host is required for PostgreSQL/MySQL."
-msgstr ""
+msgstr "PostgreSQL/MySQL 需要主机。"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Add database"
-msgstr ""
+msgstr "添加数据库"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Add..."
-msgstr ""
+msgstr "添加..."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Backend"
-msgstr ""
+msgstr "后端"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Backend:"
-msgstr ""
+msgstr "后端:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Configured databases:"
-msgstr ""
+msgstr "已配置的数据库:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Create database"
-msgstr ""
+msgstr "创建数据库"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Create tables"
-msgstr ""
+msgstr "创建数据表"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Default"
-msgstr ""
+msgstr "默认"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Default database changed"
-msgstr ""
+msgstr "默认数据库已更改"
 
 #: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Delete"
-msgstr ""
+msgstr "删除"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Delete database"
-msgstr ""
+msgstr "删除数据库"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Edit database"
-msgstr ""
+msgstr "编辑数据库"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Edit..."
-msgstr ""
+msgstr "编辑..."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Host / Path"
-msgstr ""
+msgstr "主机 / 路径"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Host:"
-msgstr ""
+msgstr "主机:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Invalid database settings"
-msgstr ""
+msgstr "无效的数据库设置"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Migrate database"
-msgstr ""
+msgstr "迁移数据库"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Migrate to..."
-msgstr ""
+msgstr "迁移到..."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Migrating database"
-msgstr ""
+msgstr "正在迁移数据库"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Name"
-msgstr ""
+msgstr "名称"
 
 #: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Name:"
-msgstr ""
+msgstr "名称:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Password:"
-msgstr ""
+msgstr "密码:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Port must be a number between 1 and 65535."
-msgstr ""
+msgstr "端口必须是 1 到 65535 之间的数字。"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Port:"
-msgstr ""
+msgstr "端口:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid ""
 "SQLite databases are created automatically. Use 'Create tables' to "
 "initialise the schema."
-msgstr ""
+msgstr "SQLite 数据库会自动创建。请使用“创建数据表”来建立结构。"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Set as default"
-msgstr ""
+msgstr "设为默认"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Test connection"
-msgstr ""
+msgstr "测试连接"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "There is no other database to migrate into. Add one first."
-msgstr ""
+msgstr "没有其他可迁移到的数据库。请先添加一个。"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid ""
 "This is the only configured database and cannot be deleted — fpdb needs at "
 "least one. Add another database first."
 msgstr ""
+"这是唯一已配置的数据库，无法删除 — fpdb 至少需要一个。请先添加另一个数据库。"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "User"
-msgstr ""
+msgstr "用户"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "User:"
-msgstr ""
+msgstr "用户:"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Field actions"
-msgstr ""
+msgstr "对手池行动"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Field population"
-msgstr ""
+msgstr "对手池样本群体"
 
 #: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
-#| msgid "reading antes"
 msgid "Loading hands…"
-msgstr "读取赌注"
+msgstr "正在加载手牌…"
 
 #: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Next ▶"
-msgstr ""
+msgstr "下一个 ▶"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Select a row to see the hands behind both sides of it."
-msgstr ""
+msgstr "选择一行以查看两侧的手牌。"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Source hands"
-msgstr ""
+msgstr "来源手牌"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid ""
 "These hands use the same filters as the other side; only the population "
 "differs."
-msgstr ""
+msgstr "这些手牌使用与另一侧相同的筛选；只有样本群体不同。"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Your actions"
-msgstr ""
+msgstr "你的行动"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Your population"
-msgstr ""
+msgstr "你的样本群体"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "◀ Previous"
-msgstr ""
+msgstr "◀ 上一个"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, fuzzy
 msgid "Export to File"
-msgstr ""
+msgstr "导出到文件"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, fuzzy
 msgid "FPDB 3 info"
-msgstr ""
+msgstr "关于 FPDB 3"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Hands"
-msgstr ""
+msgstr "手牌"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
+#, fuzzy
 msgid "Net profit excluding splash"
-msgstr ""
+msgstr "不含 splash 的净利润"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
+#, fuzzy
 msgid "Non-showdown"
-msgstr ""
+msgstr "非摊牌"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
+#, fuzzy
 msgid "Profit"
-msgstr ""
+msgstr "利润"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, fuzzy
 msgid "Refresh Graph"
-msgstr ""
+msgstr "刷新图表"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Showdown"
-msgstr ""
+msgstr "摊牌"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "100–150% pot"
-msgstr ""
+msgstr "底池的 100–150%"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "25–50% pot"
-msgstr ""
+msgstr "底池的 25–50%"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "3-bet"
-msgstr ""
+msgstr "3-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "4-bet"
-msgstr ""
+msgstr "4-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "50–75% pot"
-msgstr ""
+msgstr "底池的 50–75%"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "75–100% pot"
-msgstr ""
+msgstr "底池的 75–100%"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Advanced review filters"
-msgstr ""
+msgstr "高级分析筛选"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "All hands"
-msgstr ""
+msgstr "所有手牌"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "All starting hands"
-msgstr ""
+msgstr "所有起手牌"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Analytics data unavailable"
-msgstr ""
+msgstr "分析数据不可用"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Any"
-msgstr ""
+msgstr "任意"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Any card"
-msgstr ""
+msgstr "任意牌"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Any sizing"
-msgstr ""
+msgstr "任意尺度"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Apply review filters"
-msgstr ""
+msgstr "应用分析筛选"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Bet"
-msgstr ""
+msgstr "下注"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Bet / raise sizing"
-msgstr ""
+msgstr "下注 / 加注尺度"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Broadway"
-msgstr ""
+msgstr "Broadway"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Call open"
-msgstr ""
+msgstr "跟注开局加注"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Called"
-msgstr ""
+msgstr "跟注"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Check-raise"
-msgstr ""
+msgstr "过牌加注"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Checked"
-msgstr ""
+msgstr "过牌"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Choose hands…"
-msgstr ""
+msgstr "选择手牌…"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Clear"
-msgstr ""
+msgstr "清除"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Continuation bet"
-msgstr ""
+msgstr "持续下注"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourHandViewer.py
 #, fuzzy
@@ -1391,85 +1679,105 @@ msgid "Copy hand history"
 msgstr "处理输入历史记录"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Did not VPIP"
-msgstr ""
+msgstr "无 VPIP"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack (BB)"
-msgstr ""
+msgstr "有效筹码 (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Exact known cards"
-msgstr ""
+msgstr "确切已知的牌"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Exclude splash pots"
-msgstr ""
+msgstr "排除 splash pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Faced 3-bet"
-msgstr ""
+msgstr "面对 3-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Faced c-bet"
-msgstr ""
+msgstr "面对持续下注"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Faced open"
-msgstr ""
+msgstr "面对开局加注"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Filter: "
-msgstr ""
+msgstr "筛选: "
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Filter: splash pot"
-msgstr ""
+msgstr "筛选: splash pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Final pot (BB)"
-msgstr ""
+msgstr "最终底池 (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Folded"
-msgstr ""
+msgstr "弃牌"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Hold'em starting hand"
-msgstr ""
+msgstr "德州扑克起手牌"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Invalid review filter"
-msgstr ""
+msgstr "无效的分析筛选"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Invert"
-msgstr ""
+msgstr "反选"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Limp"
-msgstr ""
+msgstr "溜入"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Net result (BB)"
-msgstr ""
+msgstr "净结果 (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid ""
 "No hands were queried, to avoid presenting an incomplete result as empty."
-msgstr ""
+msgstr "为避免将不完整的结果显示为空，手牌查询未执行。"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Offsuit"
-msgstr ""
+msgstr "不同花"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Over 150% pot"
-msgstr ""
+msgstr "超过底池的 150%"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Pairs"
-msgstr ""
+msgstr "对子"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -1477,309 +1785,381 @@ msgid "Players in hand"
 msgstr "文件名：%s"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Postflop"
-msgstr ""
+msgstr "翻牌后"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Preflop"
-msgstr ""
+msgstr "翻牌前"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "RFI"
-msgstr ""
+msgstr "RFI"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Raised"
-msgstr ""
+msgstr "加注"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw flop"
-msgstr ""
+msgstr "看到翻牌"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw river"
-msgstr ""
+msgstr "看到河牌"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw turn"
-msgstr ""
+msgstr "看到转牌"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Splash pots only"
-msgstr ""
+msgstr "仅 splash pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Squeeze"
-msgstr ""
+msgstr "挤压"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Starting-hand range"
-msgstr ""
+msgstr "起手牌范围"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid ""
 "The analytics status needed by these filters could not be verified. No "
 "results were queried; check the database and rebuild analytics data before "
 "retrying."
 msgstr ""
+"无法检查这些筛选所需分析数据的状态。查询未执行；请检查数据库并重建分析数据后"
+"再试。"
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "The minimum cannot exceed the maximum for {}."
-msgstr ""
+msgstr "最小值不能超过最大值 {}。"
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "These analytics rows were created by a newer fpdb version: {names}."
-msgstr ""
+msgstr "这些分析数据由更新版本的 fpdb 生成: {names}。"
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "These filters need missing or outdated analytics data: {names}."
-msgstr ""
+msgstr "这些筛选需要缺失或过时的分析数据: {names}。"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Under 25% pot"
-msgstr ""
+msgstr "小于底池的 25%"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Upgrade fpdb before using these filters."
-msgstr ""
+msgstr "使用这些筛选前请更新 fpdb。"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Use Database → Rebuild Analytics Data, then retry the filter."
-msgstr ""
+msgstr "请使用 数据库 → 重建分析数据，然后重新运行筛选。"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "VPIP"
-msgstr ""
+msgstr "VPIP"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Went all-in"
-msgstr ""
+msgstr "全下"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "max"
-msgstr ""
+msgstr "最大"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "max BB"
-msgstr ""
+msgstr "最大 BB"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "min"
-msgstr ""
+msgstr "最小"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "min BB"
-msgstr ""
+msgstr "最小 BB"
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{} classes selected"
-msgstr ""
+msgstr "已选择的类别: {}"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "◀ Prev"
-msgstr ""
+msgstr "◀ 上"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Copy selection to clipboard"
-msgstr ""
+msgstr "将所选内容复制到剪贴板"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Filter by Module:"
-msgstr ""
+msgstr "按模块筛选:"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Log Viewer"
-msgstr ""
+msgstr "日志查看器"
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Refresh"
-msgstr ""
+msgstr "刷新"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Select Log File:"
-msgstr ""
+msgstr "选择日志文件:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Min hands vs hero:"
-msgstr ""
+msgstr "与主角的最少手数:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Sort by:"
-msgstr ""
+msgstr "排序依据:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Top N opponents:"
-msgstr ""
+msgstr "前 N 名对手:"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Auxiliary Windows"
-msgstr ""
+msgstr "辅助窗口"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Column Heading"
-msgstr ""
+msgstr "列标题"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Databases"
-msgstr ""
+msgstr "数据库"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Field Type"
-msgstr ""
+msgstr "字段类型"
 
 #: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Format"
-msgstr ""
+msgstr "格式"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "General"
-msgstr ""
+msgstr "常规"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "HUD"
-msgstr ""
+msgstr "HUD"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Hand History Converters"
-msgstr ""
+msgstr "手牌历史转换器"
 
 #: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import"
-msgstr ""
+msgstr "导入"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Left/Right Align"
-msgstr ""
+msgstr "左/右对齐"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Mucked"
-msgstr ""
+msgstr "弃牌"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Popup Name"
-msgstr ""
+msgstr "弹出窗口名称"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Popup Windows"
-msgstr ""
+msgstr "弹出窗口"
 
 #: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Ring Player Stats"
-msgstr ""
+msgstr "现金局玩家统计"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Setting"
-msgstr ""
+msgstr "设置"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Show in Position Stats"
-msgstr ""
+msgstr "在位置统计中显示"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Show in Summaries"
-msgstr ""
+msgstr "在摘要中显示"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stat"
-msgstr ""
+msgstr "统计"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Stat Name"
-msgstr ""
+msgstr "统计名称"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Stud mucked"
-msgstr ""
+msgstr "梭哈的弃牌"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Tour Player Stats"
-msgstr ""
+msgstr "锦标赛玩家统计"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Value (double-click to change)"
-msgstr ""
+msgstr "值（双击修改）"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Window"
-msgstr ""
+msgstr "窗口"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Card deck"
-msgstr ""
+msgstr "牌组"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Copy or save this hand as text, Markdown or forum code"
-msgstr ""
+msgstr "将此手牌复制或保存为文本、Markdown 或论坛代码"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Current card deck preview"
-msgstr ""
+msgstr "当前牌组预览"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Deck:"
-msgstr ""
+msgstr "牌组:"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "End"
-msgstr ""
+msgstr "结尾"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "FPDB Hand Replayer"
-msgstr ""
+msgstr "FPDB 手牌回放器"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Hide Cards"
-msgstr ""
+msgstr "隐藏牌"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Next"
-msgstr ""
+msgstr "下一个"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Next action"
-msgstr ""
+msgstr "下一个行动"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Play"
-msgstr ""
+msgstr "播放"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Prev"
-msgstr ""
+msgstr "上一个"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Previous action"
-msgstr ""
+msgstr "上一个行动"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Send this hand's preflop decisions to PreflopAdvisor"
-msgstr ""
+msgstr "将此手牌的翻牌前决策发送到 PreflopAdvisor"
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Share..."
-msgstr ""
+msgstr "分享..."
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Solver review..."
-msgstr ""
+msgstr "用求解器分析..."
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Start"
-msgstr ""
+msgstr "开头"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "-- built-in presets --"
-msgstr ""
+msgstr "-- 内置预设 --"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "-- saved presets --"
-msgstr ""
+msgstr "-- 已保存的预设 --"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -1787,505 +2167,614 @@ msgid "?"
 msgstr ""
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "A gap is only as good as the smaller of the two samples beside it."
-msgstr ""
+msgstr "差距的可信度取决于两侧样本中较小的那个。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add or remove one of the known values."
-msgstr ""
+msgstr "添加或删除一个已知值。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add the selected dimension to the breakdown."
-msgstr ""
+msgstr "将所选维度添加到拆分中。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add this filter"
-msgstr ""
+msgstr "添加此筛选"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Adjust {variables} for your own game."
-msgstr ""
+msgstr "根据你自己的游戏调整 {variables}。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Adjust: {variables}"
-msgstr ""
+msgstr "调整: {variables}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Aim for at least {n} decisions."
-msgstr ""
+msgstr "目标至少 {n} 个决策。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "All hands in the population"
-msgstr ""
+msgstr "样本群体中的所有手牌"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Any leaves the condition out of the query entirely."
-msgstr ""
+msgstr "“任意”会将该条件从查询中完全移除。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Ask a poker question"
-msgstr ""
+msgstr "提出一个扑克问题"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Ask your own question"
-msgstr ""
+msgstr "提出你的问题"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Break down by"
-msgstr ""
+msgstr "拆分依据"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Choose a dimension to split the result by."
-msgstr ""
+msgstr "选择用于拆分结果的维度。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Choose one or more…"
-msgstr ""
+msgstr "选择一个或多个…"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Comma-separated group-by dimensions (engine vocabulary)"
-msgstr ""
+msgstr "逗号分隔的分组维度（引擎术语）"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Compare with the field"
-msgstr ""
+msgstr "与对手池比较"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Count"
-msgstr ""
+msgstr "数量"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Decisions"
-msgstr ""
+msgstr "决策"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a cell to load the hands behind it."
-msgstr ""
+msgstr "双击单元格以加载其背后的手牌。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a result row to load its hands."
-msgstr ""
+msgstr "双击结果行以加载其手牌。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "Double-click a row to load its hands. Numerator/denominator are shown per "
 "row."
-msgstr ""
+msgstr "双击一行以加载其手牌。每行显示分子/分母。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a row to see your hands and the field's, side by side."
-msgstr ""
+msgstr "双击一行以并排查看你的手牌和对手池的手牌。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click the row to load its hands."
-msgstr ""
+msgstr "双击该行以加载其手牌。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Every decision the question applies to: the sample size."
-msgstr ""
+msgstr "问题适用的所有决策: 样本量。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "FPDB Replayer"
-msgstr ""
+msgstr "FPDB 回放器"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Field"
-msgstr ""
+msgstr "对手池"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Field sample"
-msgstr ""
+msgstr "对手池样本"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Filters"
-msgstr ""
+msgstr "筛选"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Frequency (%)"
-msgstr ""
+msgstr "频率 (%)"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Gap"
-msgstr ""
+msgstr "差距"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "How many of those decisions the metric counted."
-msgstr ""
+msgstr "这些决策中被指标计入的数量。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Matching hands"
-msgstr ""
+msgstr "匹配的手牌"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Metric"
-msgstr ""
+msgstr "指标"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "No"
-msgstr ""
+msgstr "否"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "No matching hands were found for either population."
-msgstr ""
+msgstr "两个样本群体都没有找到匹配的手牌。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Only the hands where the metric fired"
-msgstr ""
+msgstr "仅指标触发的手牌"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Open the Research Browser quick start"
-msgstr ""
+msgstr "打开研究浏览器快速入门"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Pick one of the answers this workbench knows how to show."
-msgstr ""
+msgstr "选择此工具可以显示的答案之一。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Poker labels"
-msgstr ""
+msgstr "扑克术语"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "Poker labels use the terminology most readers see at the table.\n"
 "Technical names expose the analytics engine's fields and values."
 msgstr ""
+"扑克术语使用大多数读者在牌桌上看到的说法。\n"
+"技术名称显示分析引擎的字段和值。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Query cancelled."
-msgstr ""
+msgstr "查询已取消。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Remove this breakdown"
-msgstr ""
+msgstr "删除此拆分"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Remove this filter"
-msgstr ""
+msgstr "删除此筛选"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Research browser"
-msgstr ""
+msgstr "研究浏览器"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Results"
-msgstr ""
+msgstr "结果"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Run the same question twice -- yours and the field's -- side by side."
-msgstr ""
+msgstr "将同一问题运行两次 — 你的和对手池的 — 并排显示。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Running…"
-msgstr ""
+msgstr "正在运行…"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Save"
-msgstr ""
+msgstr "保存"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Save preset"
-msgstr ""
+msgstr "保存预设"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Saved as \"{saved}\". The built-in preset \"{original}\" is unchanged."
-msgstr ""
+msgstr "已保存为“{saved}”。内置预设“{original}”未更改。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Show technical query controls"
-msgstr ""
+msgstr "显示技术查询控件"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Show the engine's own filter names and free-text values."
-msgstr ""
+msgstr "显示引擎自身的筛选名称和自由文本值。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Technical names"
-msgstr ""
+msgstr "技术名称"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "The Research Browser answers questions about the hands in your database. "
 "Pick a question below, change any value that should be different for you, "
 "then press Run. The sample size is always shown, and every row can be opened "
 "as the hands behind it."
 msgstr ""
+"研究浏览器回答关于你数据库中手牌的问题。在下方选择一个问题，修改需要符合你自"
+"己情况的值，然后点击“运行”。样本量始终会显示，每一行都可以展开为其背后的手"
+"牌。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "The analytics data for {names} has never been built. A question that reads "
 "it answers zero until it is: Database -> Rebuild Analytics Data."
 msgstr ""
+"{names} 的分析数据从未构建过。读取它的问题在构建前都会返回零: 数据库 -> 重建"
+"分析数据。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "The analytics data for {names} was derived by older rules, so a question "
 "that reads it may answer zero: Database -> Rebuild Analytics Data."
 msgstr ""
+"{names} 的分析数据是按旧规则生成的，因此读取它的问题可能返回零: 数据库 -> 重"
+"建分析数据。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "The measurement itself, over the sample above."
-msgstr ""
+msgstr "基于上述样本的测量值本身。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "The question the controls above currently ask."
-msgstr ""
+msgstr "上方控件当前提出的问题。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "These questions need the analytics tables rebuilt before they can answer: "
 "{subsystems}. Rebuild them from the database menu, then run a question."
 msgstr ""
+"这些问题需要先重建分析数据表才能回答: {subsystems}。请从数据库菜单重建，然后"
+"运行问题。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Try one of these:"
-msgstr ""
+msgstr "试试这些:"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Unknown group-by dimension(s): {names}. Known: {known}."
-msgstr ""
+msgstr "未知的分组维度: {names}。已知: {known}。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "View"
-msgstr ""
+msgstr "视图"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Vocabulary"
-msgstr ""
+msgstr "术语"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Yes"
-msgstr ""
+msgstr "是"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "You"
-msgstr ""
+msgstr "你"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Your sample"
-msgstr ""
+msgstr "你的样本"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "e.g. street, response"
-msgstr ""
+msgstr "例如 street, response"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "e.g. {example}"
-msgstr ""
+msgstr "例如 {example}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "from"
-msgstr ""
+msgstr "从"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "or type a value"
-msgstr ""
+msgstr "或输入一个值"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "to"
-msgstr ""
+msgstr "到"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{hero} decisions of yours, {field} of the field's"
-msgstr ""
+msgstr "你的决策 {hero} 个，对手池的 {field} 个"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{question} — {how}"
-msgstr ""
+msgstr "{question} — {how}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "■ Cancel"
-msgstr ""
+msgstr "■ 取消"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "▶ Run"
-msgstr ""
+msgstr "▶ 运行"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "＋ Add breakdown"
-msgstr ""
+msgstr "＋ 添加拆分"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid ""
 "Cells without enough of a sample stay uncoloured; hover one to read its "
 "count."
-msgstr ""
+msgstr "样本不足的单元格不着色；将鼠标悬停可查看其数量。"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Colour by:"
-msgstr ""
+msgstr "着色依据:"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "No cell is below the sample threshold."
-msgstr ""
+msgstr "没有单元格低于样本阈值。"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Realized {realized} over {hands} hands; EV-adjusted {ev} ({luck} of it luck)."
 msgstr ""
+"{hands} 手牌实际结果 {realized}；EV 调整后 {ev}（其中 {luck} 为运气）。"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Share"
-msgstr ""
+msgstr "占比"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "{decisions} decisions in this selection have no known hole cards and are not "
 "in the grid; {share} of the decisions are drawn."
 msgstr ""
+"此选择中有 {decisions} 个决策的底牌未知，未包含在网格中；已绘制 {share} 的决"
+"策。"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{label}: {classified} classified decisions of {total} ({share} covered)"
-msgstr ""
+msgstr "{label}: {total} 个决策中已分类 {classified} 个（覆盖 {share}）"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{n} decisions are counted apart: their cards were never known."
-msgstr ""
+msgstr "{n} 个决策被单独统计: 它们的牌从未公开。"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Cumulative result (BB)"
-msgstr ""
+msgstr "累计结果 (BB)"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Hand Breakdown for all levels listed above"
-msgstr ""
+msgstr "上述所有级别的手牌明细"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Native-currency totals omitted (multiple currencies)"
-msgstr ""
+msgstr "已省略本币合计（多种货币）"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Profit: {profit} · Currency/hour: {hour}"
-msgstr ""
+msgstr "利润: {profit} · 货币/小时: {hour}"
 
 #: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Session"
-msgstr ""
+msgstr "会话"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Sessions: {sessions} · Hands: {hands} · Playing time: {duration} · Profit: "
 "{profit_bb} BB · bb/100: {bb100} · BB/hour: {bb_hour} · BB hands: {bb_hands}/"
 "{hands}"
 msgstr ""
+"会话: {sessions} · 手牌: {hands} · 游戏时间: {duration} · 利润: {profit_bb} "
+"BB · bb/100: {bb100} · BB/小时: {bb_hour} · BB 手牌: {bb_hands}/{hands}"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{hours}h {minutes}m"
-msgstr ""
+msgstr "{hours}小时 {minutes}分"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{minutes}m"
-msgstr ""
+msgstr "{minutes}分"
 
 #: fpdb_3_legacy/GuiTourHandViewer.py
+#, fuzzy
 msgid "Load Hands"
-msgstr ""
+msgstr "加载手牌"
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, fuzzy
 msgid "Refresh Stats"
-msgstr ""
-
-#: fpdb_3_legacy/GuiVersionInfo.py
-msgid "Clipboard unavailable"
-msgstr ""
+msgstr "刷新统计"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 #, fuzzy
-#| msgid "Reading configuration file %s"
+msgid "Clipboard unavailable"
+msgstr "剪贴板不可用"
+
+#: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Configuration file"
-msgstr "读取配置文件 %s"
+msgstr "配置文件"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Copy report"
-msgstr ""
+msgstr "复制报告"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Copy these details to the clipboard for a bug report"
-msgstr ""
+msgstr "将这些详细信息复制到剪贴板以便报告错误"
 
 #: fpdb_3_legacy/GuiVersionInfo.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Database"
-msgstr ""
+msgstr "数据库"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Documentation"
-msgstr ""
+msgstr "文档"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "FPDB version"
-msgstr ""
+msgstr "FPDB 版本"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Git branch"
-msgstr ""
+msgstr "Git 分支"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Git checkout"
-msgstr ""
+msgstr "Git 检出"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Git commit"
-msgstr ""
+msgstr "Git 提交"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "GitHub repository"
-msgstr ""
+msgstr "GitHub 仓库"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Links"
-msgstr ""
+msgstr "链接"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Packaging"
-msgstr ""
+msgstr "打包方式"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Report an issue"
-msgstr ""
+msgstr "报告问题"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Report copied to clipboard"
-msgstr ""
+msgstr "报告已复制到剪贴板"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Version and environment"
-msgstr ""
+msgstr "版本与环境"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Working tree"
-msgstr ""
+msgstr "工作树"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "clean"
-msgstr ""
+msgstr "干净"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "modified (uncommitted changes)"
-msgstr ""
+msgstr "已修改（有未提交的更改）"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "not a git checkout (packaged or exported build)"
-msgstr ""
+msgstr "不是 git 检出（打包版或导出版）"
 
 #: fpdb_3_legacy/MergeSummary.py
 msgid "MergeSummary.determineGameType: HORSE found, unsupported"
@@ -2333,74 +2822,90 @@ msgid "0"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Players</b>"
-msgstr ""
+msgstr "<b>人数</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Seat</b>"
-msgstr ""
+msgstr "<b>座位</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Visual Selection</b>"
-msgstr ""
+msgstr "<b>可视化选择</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Auto-save changes"
-msgstr ""
+msgstr "自动保存更改"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py fpdb_3_legacy/ThemeCreatorDialog.py
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cancel"
-msgstr ""
+msgstr "取消"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Configure your favorite seats for each table size"
-msgstr ""
+msgstr "为每种桌型设置你的偏好座位"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Export Settings"
-msgstr ""
+msgstr "导出设置"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Import Settings"
-msgstr ""
+msgstr "导入设置"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Reset to Default"
-msgstr ""
+msgstr "恢复默认"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Save Changes"
-msgstr ""
+msgstr "保存更改"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Search sites..."
-msgstr ""
+msgstr "搜索站点..."
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Seat Preferences"
-msgstr ""
+msgstr "座位偏好"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Show:"
-msgstr ""
+msgstr "显示:"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "✓ Enabled"
-msgstr ""
+msgstr "✓ 已启用"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "✗ Disabled"
-msgstr ""
+msgstr "✗ 已禁用"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "💡 Set to 0 to disable favorite seat for a table size"
-msgstr ""
+msgstr "💡 设为 0 可禁用该桌型的偏好座位"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
@@ -2408,44 +2913,54 @@ msgid "🔍"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s hero aliases:"
-msgstr ""
+msgstr "%s 主角别名:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "(search in enabled sites only)"
-msgstr ""
+msgstr "（仅在已启用的站点中搜索）"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid ""
 "A data source such as PHH is not a poker room: it has no screen name. Name "
 "the players that are you in its hands, and the reports read them as one "
 "hero, as a room's aliases are."
 msgstr ""
+"像 PHH 这样的数据来源不是扑克室: 它没有昵称。请指定其手牌中代表你的玩家，报告"
+"会像处理扑克室别名一样，把他们视为同一个主角。"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Add link"
-msgstr ""
+msgstr "添加关联"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Browse"
-msgstr ""
+msgstr "浏览"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Configure your poker sites and usernames"
-msgstr ""
+msgstr "配置你的扑克站点和用户名"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Data Sources"
-msgstr ""
+msgstr "数据来源"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Default profile"
-msgstr ""
+msgstr "默认档案"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Enter your username"
-msgstr ""
+msgstr "输入你的用户名"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
@@ -2453,21 +2968,25 @@ msgid "Hand History:"
 msgstr "处理输入历史记录"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Hero Profiles"
-msgstr ""
+msgstr "主角档案"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "New"
-msgstr ""
+msgstr "新建"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Old nicknames / extra accounts, comma separated"
-msgstr ""
+msgstr "旧昵称 / 额外账户，用逗号分隔"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Other Aliases:"
-msgstr ""
+msgstr "其他别名:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
@@ -2475,8 +2994,9 @@ msgid "Path to hand history files"
 msgstr "处理输入历史记录"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Path to tournament summaries"
-msgstr ""
+msgstr "锦标赛摘要路径"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
@@ -2484,16 +3004,19 @@ msgid "Profile name"
 msgstr "文件名：%s"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Remove link"
-msgstr ""
+msgstr "删除关联"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Screen Name:"
-msgstr ""
+msgstr "昵称:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Site Preferences"
-msgstr ""
+msgstr "站点偏好"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
@@ -2501,8 +3024,9 @@ msgid "Tournament:"
 msgstr "文件%s无法找到"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Your names in these hands, one per line"
-msgstr ""
+msgstr "你在这些手牌中的名字，每行一个"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🎭"
@@ -2521,21 +3045,24 @@ msgid "📁"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "🔍 Auto-Detect All Visible Sites"
-msgstr ""
+msgstr "🔍 自动检测所有可见站点"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "🔍 Auto-Detect Paths"
-msgstr ""
+msgstr "🔍 自动检测路径"
 
 #: fpdb_3_legacy/OnGameToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "DATETIME not matched: '%s'"
-msgstr ""
+msgstr "DATETIME 不匹配: '%s'"
 
 #: fpdb_3_legacy/OnGameToFpdb.py
+#, fuzzy
 msgid "No small blinds found."
-msgstr ""
+msgstr "未找到小盲注。"
 
 #: fpdb_3_legacy/OnGameToFpdb.py
 #, python-format
@@ -2569,20 +3096,24 @@ msgid "PkrToFpdb.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Brief description of your theme"
-msgstr ""
+msgstr "主题的简短描述"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Create Custom Theme"
-msgstr ""
+msgstr "创建自定义主题"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Create Theme"
-msgstr ""
+msgstr "创建主题"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Update Preview"
-msgstr ""
+msgstr "更新预览"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
 #, fuzzy
@@ -2590,116 +3121,144 @@ msgid "Your name"
 msgstr "文件%s无法找到"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "e.g., my_custom_theme"
-msgstr ""
+msgstr "例如 my_custom_theme"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Back up and upgrade"
-msgstr ""
+msgstr "备份并升级"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Clear All"
-msgstr ""
+msgstr "全部清除"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Configuration needs attention"
-msgstr ""
+msgstr "配置需要处理"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Confirm recreating HUD cache"
-msgstr ""
+msgstr "确认重建 HUD 缓存"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Database Statistics"
-msgstr ""
+msgstr "数据库统计"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Deselect All"
-msgstr ""
+msgstr "全不选"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Enable or disable sites for HUD display"
-msgstr ""
+msgstr "启用或禁用站点的 HUD 显示"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Free Poker DB 3"
-msgstr ""
+msgstr "Free Poker DB 3"
 
 #: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Manage HUD Sites"
-msgstr ""
+msgstr "管理 HUD 站点"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "PT4 HUD imported"
-msgstr ""
+msgstr "已导入 PT4 HUD"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "PT4 stats import"
-msgstr ""
+msgstr "PT4 统计导入"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Please confirm that you want to re-create the HUD cache."
-msgstr ""
+msgstr "请确认你要重新创建 HUD 缓存。"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Search:"
-msgstr ""
+msgstr "搜索:"
 
 #: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Select All"
-msgstr ""
+msgstr "全选"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Skip these games when importing"
-msgstr ""
+msgstr "导入时跳过这些游戏"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Unknown Site"
-msgstr ""
+msgstr "未知站点"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Unsaved Changes"
-msgstr ""
+msgstr "未保存的更改"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "You have unsaved configuration changes."
-msgstr ""
+msgstr "你有未保存的配置更改。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "Check the hero selected in the Heroes filter and make sure hands for that "
 "player were imported for the selected site."
-msgstr ""
+msgstr "请检查“主角”筛选中选择的主角，并确认该玩家在所选站点的手牌已导入。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No currency is selected in the filters."
-msgstr ""
+msgstr "筛选中未选择任何货币。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No data to display"
-msgstr ""
+msgstr "没有可显示的数据"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No game type is selected in the filters."
-msgstr ""
+msgstr "筛选中未选择任何游戏类型。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No hand matches the selected filters."
-msgstr ""
+msgstr "没有手牌匹配所选筛选。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No limit is selected in the filters."
-msgstr ""
+msgstr "筛选中未选择任何级别。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No player matches the selected site and hero."
-msgstr ""
+msgstr "没有玩家匹配所选站点和主角。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No site is selected in the filters."
-msgstr ""
+msgstr "筛选中未选择任何站点。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "Nothing has been imported into this database — that is normal right after "
 "creating or recreating the tables.\n"
@@ -2707,42 +3266,55 @@ msgid ""
 "Import hand histories first (Import > Bulk Import, or start the auto-"
 "import), then refresh this tab."
 msgstr ""
+"此数据库尚未导入任何内容 — 刚创建或重建数据表后这是正常的。\n"
+"\n"
+"请先导入手牌历史（导入 > 批量导入，或启动自动导入），然后刷新此标签页。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "The database holds hands, but none of them match this selection.\n"
 "\n"
 "Widen the filters (dates, limits, games, seats) and refresh."
 msgstr ""
+"数据库中有手牌，但没有一手符合此选择。\n"
+"\n"
+"请放宽筛选（日期、级别、游戏、座位）后刷新。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one currency on the left, then refresh."
-msgstr ""
+msgstr "请在左侧至少勾选一种货币，然后刷新。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one game on the left, then refresh."
-msgstr ""
+msgstr "请在左侧至少勾选一个游戏，然后刷新。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one limit (stake) on the left, then refresh."
-msgstr ""
+msgstr "请在左侧至少勾选一个级别（盲注），然后刷新。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one site in the Sites section on the left, then refresh."
-msgstr ""
+msgstr "请在左侧“站点”部分至少勾选一个站点，然后刷新。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Your database contains no hands yet."
-msgstr ""
+msgstr "你的数据库中还没有手牌。"
 
 #: fpdb_3_legacy/hand_review_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s is not a program that can be started."
-msgstr ""
+msgstr "%s 不是可以启动的程序。"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Copy JSON"
-msgstr ""
+msgstr "复制 JSON"
 
 #: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy, python-format
@@ -2752,87 +3324,111 @@ msgid ""
 msgstr "文件%s无法找到"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Every hero decision of the hand"
-msgstr ""
+msgstr "本手牌中主角的所有决策"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Hand review (*.json)"
-msgstr ""
+msgstr "手牌复盘 (*.json)"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Locate PreflopAdvisor"
-msgstr ""
+msgstr "定位 PreflopAdvisor"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Open in PreflopAdvisor"
-msgstr ""
+msgstr "在 PreflopAdvisor 中打开"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid ""
 "Open it in PreflopAdvisor, or save the file and load it there with Review "
 "Hands > Load a hand review."
 msgstr ""
+"在 PreflopAdvisor 中打开，或保存文件后在其中通过 Review Hands > Load a hand "
+"review 加载。"
 
 #: fpdb_3_legacy/hand_review_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "PreflopAdvisor could not be started:\n"
 "%s\n"
 "\n"
 "Locate it?"
 msgstr ""
+"无法启动 PreflopAdvisor:\n"
+"%s\n"
+"\n"
+"要定位它吗?"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Review:"
-msgstr ""
+msgstr "复盘:"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Save for PreflopAdvisor..."
-msgstr ""
+msgstr "为 PreflopAdvisor 保存..."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Save hand review"
-msgstr ""
+msgstr "保存手牌复盘"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Solver review"
-msgstr ""
+msgstr "求解器复盘"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Solver review (PreflopAdvisor)..."
-msgstr ""
+msgstr "求解器复盘 (PreflopAdvisor)..."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "This decision"
-msgstr ""
+msgstr "此决策"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "This hand cannot be sent to PreflopAdvisor."
-msgstr ""
+msgstr "此手牌无法发送到 PreflopAdvisor。"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Amounts"
-msgstr ""
+msgstr "金额"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Big blinds"
-msgstr ""
+msgstr "大盲注"
 
 #: fpdb_3_legacy/hand_share_dialog.py fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Copy"
-msgstr ""
+msgstr "复制"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as Markdown"
-msgstr ""
+msgstr "复制为 Markdown"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as Markdown in BB"
-msgstr ""
+msgstr "以 BB 为单位复制为 Markdown"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as text"
-msgstr ""
+msgstr "复制为文本"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy, python-format
@@ -2842,76 +3438,94 @@ msgid ""
 msgstr "无法解码：“%s”\n"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Date and time"
-msgstr ""
+msgstr "日期和时间"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "EV cashout"
-msgstr ""
+msgstr "EV 兑现"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Forum (BBCode)"
-msgstr ""
+msgstr "论坛 (BBCode)"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Hand number"
-msgstr ""
+msgstr "手牌编号"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Hide every name (Hero, Villain 1 ...)"
-msgstr ""
+msgstr "隐藏所有名字 (Hero, Villain 1 ...)"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Include"
-msgstr ""
+msgstr "包含"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Keep every name"
-msgstr ""
+msgstr "保留所有名字"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Keep my name, hide opponents"
-msgstr ""
+msgstr "保留我的名字，隐藏对手"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Markdown"
-msgstr ""
+msgstr "Markdown"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Money / chips"
-msgstr ""
+msgstr "金额 / 筹码"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Names"
-msgstr ""
+msgstr "名字"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Plain text"
-msgstr ""
+msgstr "纯文本"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Rake"
-msgstr ""
+msgstr "抽水"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Save hand"
-msgstr ""
+msgstr "保存手牌"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Save..."
-msgstr ""
+msgstr "保存..."
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Share hand"
-msgstr ""
+msgstr "分享手牌"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Showdown and results"
-msgstr ""
+msgstr "摊牌与结果"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Stacks"
-msgstr ""
+msgstr "筹码量"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
@@ -2919,238 +3533,296 @@ msgid "Table name"
 msgstr "文件名：%s"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "This game has no big blind to count in."
-msgstr ""
+msgstr "此游戏没有可用于计算的大盲注。"
 
 #: fpdb_3_legacy/hand_share_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "This hand could not be rendered:\n"
 "%s"
 msgstr ""
+"无法渲染此手牌:\n"
+"%s"
 
 #: fpdb_3_legacy/i18n.py
+#, fuzzy
 msgid "Stack"
-msgstr ""
+msgstr "筹码量"
 
 #: fpdb_3_legacy/i18n.py
+#, fuzzy
 msgid "Stack (bb)"
-msgstr ""
+msgstr "筹码量 (bb)"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "About"
-msgstr ""
+msgstr "关于"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "About the program"
-msgstr ""
+msgstr "关于本程序"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)"
-msgstr ""
+msgstr "添加、编辑、测试和选择数据库 (SQLite / PostgreSQL / MySQL)"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Advanced logger manager"
-msgstr ""
+msgstr "高级日志管理器"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid ""
 "Alerts for the session being played: loss, win, duration, hands, drawdown"
-msgstr ""
+msgstr "当前会话的提醒: 亏损、盈利、时长、手数、回撤"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Auto Note Rules"
-msgstr ""
+msgstr "自动笔记规则"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Auto Notes Workbench"
-msgstr ""
+msgstr "自动笔记工作台"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Cash"
-msgstr ""
+msgstr "现金局"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "CoinPoker Live Capture"
-msgstr ""
+msgstr "CoinPoker 实时捕获"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Configure"
-msgstr ""
+msgstr "配置"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Create or Recreate Tables"
-msgstr ""
+msgstr "创建或重建数据表"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Databases…"
-msgstr ""
+msgstr "数据库…"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Dump Database to Textfile"
-msgstr ""
+msgstr "将数据库转储到文本文件"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Edit automatic player-note rules"
-msgstr ""
+msgstr "编辑自动玩家笔记规则"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Edit your preferences"
-msgstr ""
+msgstr "编辑你的偏好设置"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Export the whole database to a text file (slow)"
-msgstr ""
+msgstr "将整个数据库导出到文本文件（较慢）"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Graphs"
-msgstr ""
+msgstr "图表"
 
 #: fpdb_3_legacy/menu_layout.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Preferences"
-msgstr ""
+msgstr "HUD 偏好设置"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "HUD and Auto Import"
-msgstr ""
+msgstr "HUD 与自动导入"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Hand Viewer"
-msgstr ""
+msgstr "手牌查看器"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Help"
-msgstr ""
+msgstr "帮助"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Help Tab"
-msgstr ""
+msgstr "帮助标签页"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import PT4 HUD (.pt4hud)"
-msgstr ""
+msgstr "导入 PT4 HUD (.pt4hud)"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import PT4 Stats (.pt4stat)"
-msgstr ""
+msgstr "导入 PT4 统计 (.pt4stat)"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import PokerTracker 4 custom statistics as declarative stat descriptors"
-msgstr ""
+msgstr "将 PokerTracker 4 自定义统计导入为声明式统计描述"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import a PokerTracker 4 HUD layout (stats + range charts)"
-msgstr ""
+msgstr "导入 PokerTracker 4 HUD 布局（统计 + 范围图）"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import filters"
-msgstr ""
+msgstr "导入筛选"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import, enable, disable, uninstall and export declarative stat packs"
-msgstr ""
+msgstr "导入、启用、禁用、卸载和导出声明式统计包"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Language"
-msgstr ""
+msgstr "语言"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Launch SwC HTTP Capture"
-msgstr ""
+msgstr "启动 SwC HTTP 捕获"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Log Messages"
-msgstr ""
+msgstr "日志消息"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Log and debug messages"
-msgstr ""
+msgstr "日志和调试消息"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Logger Dev Tool"
-msgstr ""
+msgstr "日志开发工具"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Opponents Report"
-msgstr ""
+msgstr "对手报告"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Preferences"
-msgstr ""
+msgstr "偏好设置"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Quit"
-msgstr ""
+msgstr "退出"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Quit the program"
-msgstr ""
+msgstr "退出程序"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid ""
 "Re-derive the situations and hand states the Research Browser and HUD read"
-msgstr ""
+msgstr "重新推导研究浏览器和 HUD 读取的局面和手牌状态"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Rebuild Analytics Data"
-msgstr ""
+msgstr "重建分析数据"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Rebuild DB Indexes"
-msgstr ""
+msgstr "重建数据库索引"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Rebuild HUD Cache"
-msgstr ""
+msgstr "重建 HUD 缓存"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Research Browser"
-msgstr ""
+msgstr "研究浏览器"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Research Browser for Omaha"
-msgstr ""
+msgstr "奥马哈研究浏览器"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Seat Settings"
-msgstr ""
+msgstr "座位设置"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Session Guard"
-msgstr ""
+msgstr "会话守护"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Session Stats"
-msgstr ""
+msgstr "会话统计"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Site Settings"
-msgstr ""
+msgstr "站点设置"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Stat Packs"
-msgstr ""
+msgstr "统计包"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Statistics"
-msgstr ""
+msgstr "统计"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Stats Guide"
-msgstr ""
+msgstr "统计指南"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Study Explorer"
-msgstr ""
+msgstr "学习浏览器"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Themes"
-msgstr ""
+msgstr "主题"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tools"
-msgstr ""
+msgstr "工具"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -3158,513 +3830,635 @@ msgid "Tournament"
 msgstr "文件%s无法找到"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tourney Graphs"
-msgstr ""
+msgstr "锦标赛图表"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tourney Hand Viewer"
-msgstr ""
+msgstr "锦标赛手牌查看器"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tourney Stats"
-msgstr ""
+msgstr "锦标赛统计"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Version"
-msgstr ""
+msgstr "版本"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Version, packaging and runtime environment details"
-msgstr ""
+msgstr "版本、打包和运行环境详情"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "View database statistics"
-msgstr ""
+msgstr "查看数据库统计"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "What every filter is for in a four-card game, and the two that are not"
-msgstr ""
+msgstr "在四张牌游戏中每个筛选的用途，以及不适用的两个"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "+"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
 msgid "Add an item to this row"
-msgstr ""
+msgstr "向此行添加一项"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
 msgid "Remove the last item of this row"
-msgstr ""
+msgstr "删除此行的最后一项"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "−"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Add/Edit Statistic"
-msgstr ""
+msgstr "添加/编辑统计"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Block Properties"
-msgstr ""
+msgstr "区块属性"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Click Action:"
-msgstr ""
+msgstr "点击动作:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Column:"
-msgstr ""
+msgstr "列:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Edit Popup Statistic"
-msgstr ""
+msgstr "编辑弹出窗口统计"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Edit Popup Window"
-msgstr ""
+msgstr "编辑弹出窗口"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Export Layout Coordinates"
-msgstr ""
+msgstr "导出布局坐标"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Grid Position:"
-msgstr ""
+msgstr "网格位置:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "High Range:"
-msgstr ""
+msgstr "高值范围:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Low Range:"
-msgstr ""
+msgstr "低值范围:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Middle color:"
-msgstr ""
+msgstr "中间色:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid ""
 "Minimum width of each statistic cell; Automatic keeps the legacy default"
-msgstr ""
+msgstr "每个统计单元格的最小宽度；“自动”保持旧的默认值"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "OK"
-msgstr ""
+msgstr "确定"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Optional: Action when stat is clicked"
-msgstr ""
+msgstr "可选: 点击统计时的动作"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Optional: Popup to show on hover"
-msgstr ""
+msgstr "可选: 鼠标悬停时显示的弹出窗口"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Optional: Submenu name for hierarchical popups"
-msgstr ""
+msgstr "可选: 分层弹出窗口的子菜单名称"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Override the automatic section used by ModernSubmenu"
-msgstr ""
+msgstr "覆盖 ModernSubmenu 使用的自动分区"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Popup:"
-msgstr ""
+msgstr "弹出窗口:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Preview shows how statistic colors will change based on values"
-msgstr ""
+msgstr "预览显示统计颜色如何随数值变化"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Row:"
-msgstr ""
+msgstr "行:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Select None"
-msgstr ""
+msgstr "全不选"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid ""
 "Select the site layout coordinates you want to include in the package.\n"
 "This will let other users position the HUD boxes exactly like yours."
 msgstr ""
+"选择要包含在包中的站点布局坐标。\n"
+"这将让其他用户把 HUD 框放在与你完全相同的位置。"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Show this panel only for a villain in this position (blank = always)"
-msgstr ""
+msgstr "仅对处于此位置的对手显示此面板（留空 = 始终显示）"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Statistic:"
-msgstr ""
+msgstr "统计:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Use middle color for values between thresholds"
-msgstr ""
+msgstr "阈值之间的值使用中间色"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Values above"
-msgstr ""
+msgstr "高于此值"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Values below"
-msgstr ""
+msgstr "低于此值"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "show as"
-msgstr ""
+msgstr "显示为"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "➕ Add Stat"
-msgstr ""
+msgstr "➕ 添加统计"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "➖ Remove Stat"
-msgstr ""
+msgstr "➖ 删除统计"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "(none)"
-msgstr ""
+msgstr "（无）"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "A panel rule with these conditions and this profile already exists."
-msgstr ""
+msgstr "具有这些条件和此档案的面板规则已存在。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "A profile definition with these selectors already exists."
-msgstr ""
+msgstr "具有这些选择条件的档案定义已存在。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "ANY"
-msgstr ""
+msgstr "任意"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "ANY table"
-msgstr ""
+msgstr "任意牌桌"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Active Profile Definitions"
-msgstr ""
+msgstr "当前档案定义"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Active Profile:"
-msgstr ""
+msgstr "当前档案:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add"
-msgstr ""
+msgstr "添加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Block"
-msgstr ""
+msgstr "添加区块"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Label"
-msgstr ""
+msgstr "添加标签"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Line"
-msgstr ""
+msgstr "添加线条"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Profile Definition"
-msgstr ""
+msgstr "添加档案定义"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Stat"
-msgstr ""
+msgstr "添加统计"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
-msgstr ""
+msgstr "向面板添加水平分隔线 (PT4 'Horz Line')"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a new panel (block) to a multi-panel HUD"
-msgstr ""
+msgstr "向多面板 HUD 添加新面板（区块）"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a text label (column/row header or caption) to a panel"
-msgstr ""
+msgstr "向面板添加文本标签（列/行标题或说明）"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add stat"
-msgstr ""
+msgstr "添加统计"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add to block"
-msgstr ""
+msgstr "添加到区块"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Analytics-backed stats"
-msgstr ""
+msgstr "基于分析的统计"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Append the profile emoji (e.g. 🐟, 🐌, 🎯) and color the player's name in "
 "the HUD."
-msgstr ""
+msgstr "在 HUD 中添加分类表情（例如 🐟, 🐌, 🎯）并为玩家名字着色。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Below this many hands the panel is withheld and the fallback shows."
-msgstr ""
+msgstr "手数低于此值时不显示该面板，改为显示后备内容。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Block Props"
-msgstr ""
+msgstr "区块属性"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot add this rule"
-msgstr ""
+msgstr "无法添加此规则"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot export"
-msgstr ""
+msgstr "无法导出"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot import"
-msgstr ""
+msgstr "无法导入"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot update this rule"
-msgstr ""
+msgstr "无法更新此规则"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Class:"
-msgstr ""
+msgstr "类:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Color Ranges"
-msgstr ""
+msgstr "颜色范围"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Conditions"
-msgstr ""
+msgstr "条件"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Design"
-msgstr ""
+msgstr "设计"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Disabled: this rule never matches."
-msgstr ""
+msgstr "已禁用: 此规则永不匹配。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Duplicate rule"
-msgstr ""
+msgstr "规则重复"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Edit"
-msgstr ""
+msgstr "编辑"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Edit the selected panel's title/border colours, position and label"
-msgstr ""
+msgstr "编辑所选面板的标题/边框颜色、位置和标签"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Effective profile for these selectors"
-msgstr ""
+msgstr "这些选择条件下生效的档案"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Enable Player Profiling (Categorization)"
-msgstr ""
+msgstr "启用玩家分类"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Enable auto-classification of players into Nit, Calling Station, Fish, "
 "Maniac, LAG, Reg, TAG."
-msgstr ""
+msgstr "自动将玩家分类为 Nit、Calling Station、Fish、Maniac、LAG、Reg、TAG。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Export panel rules"
-msgstr ""
+msgstr "导出面板规则"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Export…"
-msgstr ""
+msgstr "导出…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Fallback"
-msgstr ""
+msgstr "后备"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Game"
-msgstr ""
+msgstr "游戏"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "General HUD and Profiling Settings"
-msgstr ""
+msgstr "HUD 与玩家分类常规设置"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Preview"
-msgstr ""
+msgstr "HUD 预览"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Profile"
-msgstr ""
+msgstr "HUD 档案"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Profile Configuration"
-msgstr ""
+msgstr "HUD 档案配置"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD imported — refresh required"
-msgstr ""
+msgstr "HUD 已导入 — 需要刷新"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD profile"
-msgstr ""
+msgstr "HUD 档案"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Hands for this seat"
-msgstr ""
+msgstr "此座位的手数"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Horz Line"
-msgstr ""
+msgstr "水平线"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Icons:"
-msgstr ""
+msgstr "图标:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Import panel rules"
-msgstr ""
+msgstr "导入面板规则"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Imported {count} rule(s)."
-msgstr ""
+msgstr "已导入 {count} 条规则。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Import…"
-msgstr ""
+msgstr "导入…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Issues"
-msgstr ""
+msgstr "问题"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Item Properties"
-msgstr ""
+msgstr "项目属性"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Items"
-msgstr ""
+msgstr "项目"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Layout Conflict"
-msgstr ""
+msgstr "布局冲突"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Min sample"
-msgstr ""
+msgstr "最小样本"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Minimum hands required for profiling:"
-msgstr ""
+msgstr "分类所需的最少手数:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Move down"
-msgstr ""
+msgstr "下移"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Move up"
-msgstr ""
+msgstr "上移"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "New Profile"
-msgstr ""
+msgstr "新档案"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "No HUD profile of this name exists; the game default will be used instead."
-msgstr ""
+msgstr "不存在此名称的 HUD 档案；将改用游戏默认档案。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "No HUD profile of this name exists; this rule will be ignored."
-msgstr ""
+msgstr "不存在此名称的 HUD 档案；此规则将被忽略。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Off by default. When it is on, the panels a rule names are shown and every "
 "other block keeps the position rule it has always had."
-msgstr ""
+msgstr "默认关闭。开启后，将显示规则指定的面板，其他区块保持其一贯的位置规则。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Open preview at 100% real size in a new window"
-msgstr ""
+msgstr "在新窗口中以 100% 实际大小打开预览"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Open the Dynamic HUD guide"
-msgstr ""
+msgstr "打开 Dynamic HUD 指南"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel"
-msgstr ""
+msgstr "面板"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel documents (*.json)"
-msgstr ""
+msgstr "面板文档 (*.json)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel rules"
-msgstr ""
+msgstr "面板规则"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panels"
-msgstr ""
+msgstr "面板"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
-msgstr ""
+msgstr "选择一个游戏（和格式）以查看将适用的默认档案。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a HUD profile first."
-msgstr ""
+msgstr "请先选择一个 HUD 档案。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Players"
-msgstr ""
+msgstr "人数"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Popup Conflict"
-msgstr ""
+msgstr "弹出窗口冲突"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Popup Preview"
-msgstr ""
+msgstr "弹出窗口预览"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Positional panels:"
-msgstr ""
+msgstr "位置面板:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Preview, by the same resolver the HUD uses"
-msgstr ""
+msgstr "使用与 HUD 相同的解析器预览"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Priority"
-msgstr ""
+msgstr "优先级"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Profile Conflict"
-msgstr ""
+msgstr "档案冲突"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Profile actions"
-msgstr ""
+msgstr "档案操作"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Remove"
-msgstr ""
+msgstr "删除"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3672,627 +4466,782 @@ msgid "Rule name"
 msgstr "文件名：%s"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Sample column"
-msgstr ""
+msgstr "样本列"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Seats"
-msgstr ""
+msgstr "座位数"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Select Popup:"
-msgstr ""
+msgstr "选择弹出窗口:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Select a rule to update first."
-msgstr ""
+msgstr "请先选择要更新的规则。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show hero HUD"
-msgstr ""
+msgstr "显示主角 HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show profile emoji and color code directly on player name labels"
-msgstr ""
+msgstr "直接在玩家名字标签上显示分类表情和颜色"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show the panels that fit the hand"
-msgstr ""
+msgstr "显示适合该手牌的面板"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Speed"
-msgstr ""
+msgstr "速度"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stats whose value comes from the analytics layer rather than a column."
-msgstr ""
+msgstr "数值来自分析层而非数据列的统计。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Text"
-msgstr ""
+msgstr "文本"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Text label (header / caption) — not a stat"
-msgstr ""
+msgstr "文本标签（标题 / 说明）— 不是统计"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The HUD profile was imported and saved, but the application could not "
 "refresh its configuration. Restart fpdb to apply it. You do not need to "
 "import the file again."
 msgstr ""
+"HUD 档案已导入并保存，但应用程序无法刷新其配置。请重启 fpdb 以应用。无需再次"
+"导入该文件。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The HUDs fpdb ships, as a seat would see them. Pick a context to watch the "
 "Dynamic package change panel, and read the popup paths to find where a "
 "number lives before you go looking for it at a table."
 msgstr ""
+"fpdb 附带的 HUD，按座位上看到的样子展示。选择一个场景，观察 Dynamic 包如何切"
+"换面板，并阅读弹出窗口路径，在牌桌上寻找某个数字之前就知道它在哪里。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The minimum number of hands tracked on an opponent before profiling is "
 "computed."
-msgstr ""
+msgstr "计算分类前需要记录的对手最少手数。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The preview uses the same compact label grid as the in-game HUD.\n"
 "Spacing, font, colors and HUD cell values come from the selected profile."
 msgstr ""
+"预览使用与游戏内 HUD 相同的紧凑标签网格。\n"
+"间距、字体、颜色和 HUD 单元格的值来自所选档案。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Theme:"
-msgstr ""
+msgstr "主题:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Then show"
-msgstr ""
+msgstr "则显示"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Update rule"
-msgstr ""
+msgstr "更新规则"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Update selected"
-msgstr ""
+msgstr "更新所选"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "When this is the spot"
-msgstr ""
+msgstr "当局面为"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Wrote {path}"
-msgstr ""
+msgstr "已写入 {path}"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "all profiles"
-msgstr ""
+msgstr "所有档案"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "always"
-msgstr ""
+msgstr "始终"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "optional name"
-msgstr ""
+msgstr "可选名称"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "the profile grid"
-msgstr ""
+msgstr "档案网格"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{profile} — from the rule {selectors}"
-msgstr ""
+msgstr "{profile} — 来自规则 {selectors}"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{profile} — no rule matches, so the game default applies"
-msgstr ""
+msgstr "{profile} — 没有匹配的规则，因此使用游戏默认档案"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "—"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "↑ Up"
-msgstr ""
+msgstr "↑ 上移"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "↓ Down"
-msgstr ""
+msgstr "↓ 下移"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "⚙️ General Settings"
-msgstr ""
+msgstr "⚙️ 常规设置"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➕ Add"
-msgstr ""
+msgstr "➕ 添加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➕ New Popup"
-msgstr ""
+msgstr "➕ 新弹出窗口"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➕ New Profile"
-msgstr ""
+msgstr "➕ 新档案"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➖ Remove"
-msgstr ""
+msgstr "➖ 删除"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🃏 Reference HUDs"
-msgstr ""
+msgstr "🃏 参考 HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🎯 Profile Select"
-msgstr ""
+msgstr "🎯 档案选择"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "💬 Popup Windows"
-msgstr ""
+msgstr "💬 弹出窗口"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📊 Statistics"
-msgstr ""
+msgstr "📊 统计"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📝 Edit"
-msgstr ""
+msgstr "📝 编辑"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📤 Export HUD"
-msgstr ""
+msgstr "📤 导出 HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📥 Import HUD"
-msgstr ""
+msgstr "📥 导入 HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🔍 Real Size"
-msgstr ""
+msgstr "🔍 实际大小"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🧩 Dynamic Panels"
-msgstr ""
+msgstr "🧩 动态面板"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "100% Reset"
-msgstr ""
+msgstr "100% 重置"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Close"
-msgstr ""
+msgstr "关闭"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Natural Size: {w} × {h} px  (Scale: {scale}%)"
-msgstr ""
+msgstr "原始大小: {w} × {h} px  （缩放: {scale}%）"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Reset to 100% natural size"
-msgstr ""
+msgstr "重置为 100% 原始大小"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Zoom in (+25%)"
-msgstr ""
+msgstr "放大 (+25%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Zoom out (-25%)"
-msgstr ""
+msgstr "缩小 (-25%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "🔍 Popup Preview — {name} (Real Size)"
-msgstr ""
+msgstr "🔍 弹出窗口预览 — {name}（实际大小）"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid "Context"
-msgstr ""
+msgstr "场景"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid ""
 "Every popup a cell of this package opens, and everything those popups "
 "navigate to. A row ending in an arrow leaves the package for the shipped "
 "popup library."
 msgstr ""
+"此包的单元格打开的所有弹出窗口，以及这些弹出窗口能跳转到的所有内容。以箭头结"
+"尾的行会离开此包，进入附带的弹出窗口库。"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid "Reference HUD"
-msgstr ""
+msgstr "参考 HUD"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "% of pot"
-msgstr ""
+msgstr "底池 %"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "A family of situations, such as postflop defence."
-msgstr ""
+msgstr "一类局面，例如翻牌后防守。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "A legacy PT4 stat column the decision feeds."
-msgstr ""
+msgstr "该决策所对应的旧版 PT4 统计列。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Action"
-msgstr ""
+msgstr "行动"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Action faced"
-msgstr ""
+msgstr "面对的行动"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Action taken"
-msgstr ""
+msgstr "采取的行动"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Aggressor, defender or passive."
-msgstr ""
+msgstr "进攻者、防守者或被动。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "All-in"
-msgstr ""
+msgstr "全下"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Amount to call"
-msgstr ""
+msgstr "跟注金额"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "BB"
-msgstr ""
+msgstr "BB"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Beats how much of the range"
-msgstr ""
+msgstr "胜过范围的比例"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size"
-msgstr ""
+msgstr "下注尺度"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size (% of pot)"
-msgstr ""
+msgstr "下注尺度（底池 %）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size (basis points)"
-msgstr ""
+msgstr "下注尺度（基点）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size bucket"
-msgstr ""
+msgstr "下注尺度区间"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced"
-msgstr ""
+msgstr "面对的下注尺度"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced (% of pot)"
-msgstr ""
+msgstr "面对的下注尺度（底池 %）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced (basis points)"
-msgstr ""
+msgstr "面对的下注尺度（基点）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced bucket"
-msgstr ""
+msgstr "面对的下注尺度区间"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet sizing"
-msgstr ""
+msgstr "下注尺度"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Big blind (chips)"
-msgstr ""
+msgstr "大盲注（筹码）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blocker (all of)"
-msgstr ""
+msgstr "阻断牌（全部）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blocker (any of)"
-msgstr ""
+msgstr "阻断牌（任一）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blocker (none of)"
-msgstr ""
+msgstr "阻断牌（均无）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blockers the actor held (any of them)."
-msgstr ""
+msgstr "行动者持有的阻断牌（任一）。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blockers the actor must have all of."
-msgstr ""
+msgstr "行动者必须全部具备的阻断牌。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board"
-msgstr ""
+msgstr "公共牌"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board connectivity"
-msgstr ""
+msgstr "公共牌连接性"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board dealt"
-msgstr ""
+msgstr "已发公共牌"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board high card"
-msgstr ""
+msgstr "公共牌最大牌"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board pairing"
-msgstr ""
+msgstr "公共牌对子情况"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board street"
-msgstr ""
+msgstr "公共牌所在街"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board suit structure"
-msgstr ""
+msgstr "公共牌花色结构"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture"
-msgstr ""
+msgstr "公共牌结构"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture (all of)"
-msgstr ""
+msgstr "公共牌结构（全部）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture flags the board must have all of."
-msgstr ""
+msgstr "公共牌必须全部具备的结构标记。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Cards discarded at the draw; zero means stand pat and unknown discard counts "
 "stay unclassified."
-msgstr ""
+msgstr "换牌时弃掉的牌数；零表示不换牌，未知的弃牌数保持未分类。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Cards drawn"
-msgstr ""
+msgstr "换掉的牌"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Cards drawn (0 = stand pat)"
-msgstr ""
+msgstr "换掉的牌（0 = 不换牌）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Currency"
-msgstr ""
+msgstr "货币"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw (all of)"
-msgstr ""
+msgstr "听牌（全部）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw (any of)"
-msgstr ""
+msgstr "听牌（任一）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw (none of)"
-msgstr ""
+msgstr "听牌（均无）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw number"
-msgstr ""
+msgstr "换牌轮次"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draws the actor had: flush draws, gutshots and the rest (any of them)."
-msgstr ""
+msgstr "行动者的听牌: 同花听牌、卡顺听牌等（任一）。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draws the actor must have all of."
-msgstr ""
+msgstr "行动者必须全部具备的听牌。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "EV-adjusted result (all-in EV)"
-msgstr ""
+msgstr "EV 调整结果（全下 EV）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "EV-adjusted result per decision"
-msgstr ""
+msgstr "每个决策的 EV 调整结果"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack"
-msgstr ""
+msgstr "有效筹码"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack (chips)"
-msgstr ""
+msgstr "有效筹码（筹码）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack in the bands a tournament is played in."
-msgstr ""
+msgstr "以锦标赛常用区间表示的有效筹码。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Every situation the decision matched, not only the most specific one. Use "
 "this to ask how often an opportunity was taken: raising an open makes the "
 "decision a 3-bet, so only this keeps it among the opens faced."
 msgstr ""
+"决策匹配的所有局面，而不只是最具体的那个。用它来查询机会被利用的频率: 对开局"
+"加注再加注会使该决策成为 3-bet，只有用它才能让该决策保留在“面对开局加注”之"
+"中。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Facing an all-in"
-msgstr ""
+msgstr "面对全下"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Fixed limit, no limit and the other betting structures."
-msgstr ""
+msgstr "固定限注、无限注以及其他下注结构。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Game and stake"
-msgstr ""
+msgstr "游戏与级别"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Game family"
-msgstr ""
+msgstr "游戏类别"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hand"
-msgstr ""
+msgstr "手牌"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hand state known"
-msgstr ""
+msgstr "已知手牌状态"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hand strength"
-msgstr ""
+msgstr "牌力"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hand-classified street"
-msgstr ""
+msgstr "手牌分类所在街"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hands after"
-msgstr ""
+msgstr "此手牌之后"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hands before"
-msgstr ""
+msgstr "此手牌之前"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hero"
-msgstr ""
+msgstr "主角"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hero's own decisions, or everyone except hero. Any keeps both."
-msgstr ""
+msgstr "主角自己的决策，或除主角外的所有人。“任意”两者都保留。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hole cards"
-msgstr ""
+msgstr "底牌"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hole cards known"
-msgstr ""
+msgstr "已知底牌"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many holdings the holding beats."
-msgstr ""
+msgstr "该牌胜过的组合数。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many players were dealt into the hand."
-msgstr ""
+msgstr "该手牌中发牌的玩家人数。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many players were still in the hand."
-msgstr ""
+msgstr "仍在牌局中的玩家人数。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many raises came before this decision."
-msgstr ""
+msgstr "此决策之前有多少次加注。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How much the actor had to call."
-msgstr ""
+msgstr "行动者需要跟注的金额。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How strong the holding is: nuts, near nuts, strong, medium or weak."
-msgstr ""
+msgstr "牌力强弱: 坚果、接近坚果、强、中或弱。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "In position"
-msgstr ""
+msgstr "有利位置"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "In position versus the bettor"
-msgstr ""
+msgstr "相对下注者处于有利位置"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "In position versus the previous aggressor"
-msgstr ""
+msgstr "相对上一个进攻者处于有利位置"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Is the aggressor"
-msgstr ""
+msgstr "是进攻者"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Is the preflop aggressor"
-msgstr ""
+msgstr "是翻牌前进攻者"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat column"
-msgstr ""
+msgstr "旧版统计列"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat response"
-msgstr ""
+msgstr "旧版统计应对"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Linked player identity"
-msgstr ""
+msgstr "关联的玩家身份"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Made hand"
-msgstr ""
+msgstr "成牌"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Made hand rank"
-msgstr ""
+msgstr "成牌等级"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Multiway"
-msgstr ""
+msgstr "多人底池"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Named texture flags such as monotone or connected (any of them)."
-msgstr ""
+msgstr "命名的结构标记，例如单花或连接（任一）。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One import session."
-msgstr ""
+msgstr "一次导入会话。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One specific hand."
-msgstr ""
+msgstr "某一手特定的牌。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One specific tournament."
-msgstr ""
+msgstr "某一个特定锦标赛。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions played on or after this date."
-msgstr ""
+msgstr "仅在此日期当天或之后的决策。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions played on or before this date."
-msgstr ""
+msgstr "仅在此日期当天或之前的决策。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions with none of the named blockers."
-msgstr ""
+msgstr "仅不含任何指定阻断牌的决策。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions with none of the named draws."
-msgstr ""
+msgstr "仅不含任何指定听牌的决策。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only hands imported after this hand id."
-msgstr ""
+msgstr "仅在此手牌 ID 之后导入的手牌。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only hands imported before this hand id."
-msgstr ""
+msgstr "仅在此手牌 ID 之前导入的手牌。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Opponent position"
-msgstr ""
+msgstr "对手位置"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Other"
-msgstr ""
+msgstr "其他"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pair detail"
-msgstr ""
+msgstr "对子详情"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -4310,268 +5259,334 @@ msgid "Players in the hand"
 msgstr "文件名：%s"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Poker room"
-msgstr ""
+msgstr "扑克室"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Position"
-msgstr ""
+msgstr "位置"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Position and stack"
-msgstr ""
+msgstr "位置与筹码"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pot before the action"
-msgstr ""
+msgstr "行动前底池"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pot odds"
-msgstr ""
+msgstr "底池赔率"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pot type"
-msgstr ""
+msgstr "底池类型"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Preflop, flop, turn or river."
-msgstr ""
+msgstr "翻牌前、翻牌、转牌或河牌。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Rainbow, two-tone, monotone and the deeper flush boards."
-msgstr ""
+msgstr "彩虹面、双花面、单花面以及更多同花的公共牌。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Raises before"
-msgstr ""
+msgstr "之前的加注次数"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Range holdings"
-msgstr ""
+msgstr "范围组合"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Relative position"
-msgstr ""
+msgstr "相对位置"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Response"
-msgstr ""
+msgstr "应对"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Restrict the population to a set of players."
-msgstr ""
+msgstr "将样本群体限制为一组玩家。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Restrict the population to one player."
-msgstr ""
+msgstr "将样本群体限制为一名玩家。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Restrict to a linked (site, alias) identity."
-msgstr ""
+msgstr "限制为某个关联的（站点, 别名）身份。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Role"
-msgstr ""
+msgstr "角色"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Runout"
-msgstr ""
+msgstr "后续发牌"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "SPR"
-msgstr ""
+msgstr "SPR"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "SPR band"
-msgstr ""
+msgstr "SPR 区间"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Seats between the actor and the button."
-msgstr ""
+msgstr "行动者与庄家按钮之间的座位数。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Seats dealt in"
-msgstr ""
+msgstr "发牌座位数"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Short, medium, deep or very deep stacks."
-msgstr ""
+msgstr "短、中、深或很深的筹码。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Situation"
-msgstr ""
+msgstr "局面"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Situation family"
-msgstr ""
+msgstr "局面类别"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Situation, including the ones it led to"
-msgstr ""
+msgstr "局面，包括由其引出的局面"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stack depth"
-msgstr ""
+msgstr "筹码深度"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stack depth band"
-msgstr ""
+msgstr "筹码深度区间"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stack-to-pot ratio before the action."
-msgstr ""
+msgstr "行动前的筹码底池比。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stake (big blinds)"
-msgstr ""
+msgstr "级别（大盲注）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Starting hand"
-msgstr ""
+msgstr "起手牌"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Street"
-msgstr ""
+msgstr "街"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Street and pot"
-msgstr ""
+msgstr "街与底池"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Street number"
-msgstr ""
+msgstr "街序号"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Table size"
-msgstr ""
+msgstr "桌型"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The 169 Hold'em starting-hand classes."
-msgstr ""
+msgstr "德州扑克的 169 种起手牌类别。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The bet size faced, in the configured sizing buckets."
-msgstr ""
+msgstr "面对的下注尺度，按配置的尺度区间划分。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The bet size made, in the configured sizing buckets."
-msgstr ""
+msgstr "下注尺度，按配置的尺度区间划分。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The big blind in chips, for mixed stakes."
-msgstr ""
+msgstr "以筹码计的大盲注，用于混合级别。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The board street as a number, the flop being one."
-msgstr ""
+msgstr "以数字表示的公共牌街，翻牌为一。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The currency the game was played in."
-msgstr ""
+msgstr "游戏所用的货币。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The decision, normalized: fold, check, call, bet or raise."
-msgstr ""
+msgstr "标准化后的决策: 弃牌、过牌、跟注、下注或加注。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The game family: hold'em/omaha, stud or draw."
-msgstr ""
+msgstr "游戏类别: 德州扑克/奥马哈、梭哈或换牌。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The game variant, such as Hold'em or Omaha."
-msgstr ""
+msgstr "游戏变体，例如德州扑克或奥马哈。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The highest card of the board."
-msgstr ""
+msgstr "公共牌中最大的牌。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The letter a legacy PT4 stat column records."
-msgstr ""
+msgstr "旧版 PT4 统计列记录的字母。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The made hand the actor held: pairs, sets, straights and so on."
-msgstr ""
+msgstr "行动者的成牌: 对子、三条、顺子等。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The most specific situation the decision matched."
-msgstr ""
+msgstr "决策匹配的最具体局面。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The pot odds offered, in basis points."
-msgstr ""
+msgstr "提供的底池赔率，以基点计。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The pot size before the action, in chips."
-msgstr ""
+msgstr "行动前的底池大小，以筹码计。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The same ratio as the bands a player thinks in."
-msgstr ""
+msgstr "以玩家常用区间表示的同一比例。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The seat of the player the action was against."
-msgstr ""
+msgstr "被针对的玩家的座位。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The seat of the player who acted."
-msgstr ""
+msgstr "行动玩家的座位。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The shape of the pot: unopened, limped, single-raised, 3-bet, 4-bet."
-msgstr ""
+msgstr "底池形态: 未开局、溜入、单次加注、3-bet、4-bet。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The share of the range the holding beats."
-msgstr ""
+msgstr "该牌胜过的范围比例。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The size of the bet faced, as a percentage of the pot."
-msgstr ""
+msgstr "面对的下注尺度，以底池的百分比计。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The size of the bet faced, in basis points of the pot."
-msgstr ""
+msgstr "面对的下注尺度，以底池的基点计。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The size of the bet made, as a percentage of the pot."
-msgstr ""
+msgstr "下注尺度，以底池的百分比计。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The size of the bet made, in basis points of the pot."
-msgstr ""
+msgstr "下注尺度，以底池的基点计。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The size of the game, expressed in big blinds."
-msgstr ""
+msgstr "以大盲注表示的游戏级别。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The smaller of the two stacks, in big blinds."
-msgstr ""
+msgstr "两个筹码量中较小者，以大盲注计。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The smaller of the two stacks, in chips."
-msgstr ""
+msgstr "两个筹码量中较小者，以筹码计。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The street as a number, preflop being zero."
-msgstr ""
+msgstr "以数字表示的街，翻牌前为零。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The street the hand state was classified on."
-msgstr ""
+msgstr "手牌状态被分类时所在的街。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The strength of the made hand, as a number."
-msgstr ""
+msgstr "成牌的强度，以数字表示。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The table size, such as 6-max or full ring."
-msgstr ""
+msgstr "桌型，例如 6 人桌或满桌。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Three or more players saw the decision."
-msgstr ""
+msgstr "三名或更多玩家参与了该决策。"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -4579,363 +5594,452 @@ msgid "Tournament or cash"
 msgstr "文件%s无法找到"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Was the previous aggressor"
-msgstr ""
+msgstr "曾是上一个进攻者"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "What the actor did, including draw-game discards and stand-pat decisions."
-msgstr ""
+msgstr "行动者做了什么，包括换牌游戏中的换牌和不换牌决定。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "What the actor was facing."
-msgstr ""
+msgstr "行动者面对的情况。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "What the turn or river card changed."
-msgstr ""
+msgstr "转牌或河牌改变了什么。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the action in front of the actor was an all-in."
-msgstr ""
+msgstr "行动者面前的行动是否为全下。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the action put the player all-in."
-msgstr ""
+msgstr "该行动是否使玩家全下。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor has position on the bettor."
-msgstr ""
+msgstr "行动者相对下注者是否有位置。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor has position on the previous aggressor."
-msgstr ""
+msgstr "行动者相对上一个进攻者是否有位置。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor raised preflop."
-msgstr ""
+msgstr "行动者是否在翻牌前加注。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was in position."
-msgstr ""
+msgstr "行动者是否处于有利位置。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was the aggressor on the previous street."
-msgstr ""
+msgstr "行动者是否为上一条街的进攻者。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was the aggressor on this street."
-msgstr ""
+msgstr "行动者是否为本街的进攻者。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the board is connected, semi-connected or disconnected."
-msgstr ""
+msgstr "公共牌是连接、半连接还是不连接。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the board is unpaired, paired, or more."
-msgstr ""
+msgstr "公共牌是否无对子、有对子或更多。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Which draw round the player reached; only recorded discard or stand-pat "
 "actions count."
-msgstr ""
+msgstr "玩家到达的换牌轮次；只计入已记录的换牌或不换牌行动。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Which pair the actor held: overpair, top pair, set and so on."
-msgstr ""
+msgstr "行动者持有的对子: 超对、顶对、暗三等。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Which poker room the hands were played on."
-msgstr ""
+msgstr "手牌所在的扑克室。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes for tournament hands, No for cash game hands."
-msgstr ""
+msgstr "锦标赛手牌为“是”，现金局手牌为“否”。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes on the flop and later, No before the flop."
-msgstr ""
+msgstr "翻牌及之后为“是”，翻牌前为“否”。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes only for decisions whose cards were shown."
-msgstr ""
+msgstr "仅对亮出牌的决策为“是”。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes only where the cards were known and classified."
-msgstr ""
+msgstr "仅在牌已知并已分类时为“是”。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "all-in frequency"
-msgstr ""
+msgstr "全下频率"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average SPR"
-msgstr ""
+msgstr "平均 SPR"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average bet size (basis points of the pot)"
-msgstr ""
+msgstr "平均下注尺度（底池基点）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average bet size faced (basis points of the pot)"
-msgstr ""
+msgstr "面对的平均下注尺度（底池基点）"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average pot size"
-msgstr ""
+msgstr "平均底池大小"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "bet frequency"
-msgstr ""
+msgstr "下注频率"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "bp"
-msgstr ""
+msgstr "bp"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "call frequency"
-msgstr ""
+msgstr "跟注频率"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "check frequency"
-msgstr ""
+msgstr "过牌频率"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "chips"
-msgstr ""
+msgstr "筹码"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "fold frequency"
-msgstr ""
+msgstr "弃牌频率"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "holdings"
-msgstr ""
+msgstr "组合"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many actions"
-msgstr ""
+msgstr "行动数"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many decisions"
-msgstr ""
+msgstr "决策数"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many hands"
-msgstr ""
+msgstr "手数"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many players"
-msgstr ""
+msgstr "玩家数"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how often the decision is taken"
-msgstr ""
+msgstr "采取该决策的频率"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "id"
-msgstr ""
+msgstr "id"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "per-hand frequency"
-msgstr ""
+msgstr "每手频率"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "raise frequency"
-msgstr ""
+msgstr "加注频率"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "realized profit"
-msgstr ""
+msgstr "实际利润"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "realized profit per decision"
-msgstr ""
+msgstr "每个决策的实际利润"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "seats"
-msgstr ""
+msgstr "座位"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "street"
-msgstr ""
+msgstr "街"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Column Configuration"
-msgstr ""
+msgstr "列配置"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Columns"
-msgstr ""
+msgstr "列"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Dashboard"
-msgstr ""
+msgstr "仪表盘"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Detailed Filters"
-msgstr ""
+msgstr "详细筛选"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Hand Filters:"
-msgstr ""
+msgstr "手牌筛选:"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Position Heatmap"
-msgstr ""
+msgstr "位置热力图"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Restrict to hand types:"
-msgstr ""
+msgstr "限制手牌类型:"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Starting Hands"
-msgstr ""
+msgstr "起手牌"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Stats Tables"
-msgstr ""
+msgstr "统计表"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "and"
-msgstr ""
+msgstr "和"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "between"
-msgstr ""
+msgstr "介于"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Big Blind fold to steal"
-msgstr ""
+msgstr "% 大盲面对偷盲弃牌"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Call Raise preflop"
-msgstr ""
+msgstr "% 翻牌前跟注加注"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Continuation Bet"
-msgstr ""
+msgstr "% 持续下注"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flop 3-bet"
-msgstr ""
+msgstr "% 翻牌 3-bet"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flop 4-bet"
-msgstr ""
+msgstr "% 翻牌 4-bet"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flop open bet"
-msgstr ""
+msgstr "% 翻牌首先下注"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flops seen"
-msgstr ""
+msgstr "% 看到翻牌"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Fold to preflop 3-bet"
-msgstr ""
+msgstr "% 面对翻牌前 3-bet 弃牌"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Fold to preflop 4-bet"
-msgstr ""
+msgstr "% 面对翻牌前 4-bet 弃牌"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Preflop 3-bet"
-msgstr ""
+msgstr "% 翻牌前 3-bet"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Preflop 4-bet"
-msgstr ""
+msgstr "% 翻牌前 4-bet"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Raise First In"
-msgstr ""
+msgstr "% 率先加注入池"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Re-steal"
-msgstr ""
+msgstr "% 反偷盲"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% River 3-bet"
-msgstr ""
+msgstr "% 河牌 3-bet"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% River 4-bet"
-msgstr ""
+msgstr "% 河牌 4-bet"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% River open bet"
-msgstr ""
+msgstr "% 河牌首先下注"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Showdowns seen"
-msgstr ""
+msgstr "% 看到摊牌"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Small Blind fold to steal"
-msgstr ""
+msgstr "% 小盲面对偷盲弃牌"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Steal attempt"
-msgstr ""
+msgstr "% 偷盲尝试"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Steal success"
-msgstr ""
+msgstr "% 偷盲成功"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Turn 3-bet"
-msgstr ""
+msgstr "% 转牌 3-bet"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Turn 4-bet"
-msgstr ""
+msgstr "% 转牌 4-bet"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Turn open bet"
-msgstr ""
+msgstr "% 转牌首先下注"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Went to showdown after seeing flop"
-msgstr ""
+msgstr "% 看到翻牌后进入摊牌"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Won money after seeing flop"
-msgstr ""
+msgstr "% 看到翻牌后赢钱"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Won money at showdown"
-msgstr ""
+msgstr "% 摊牌时赢钱"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Big Blinds won per 100 hands"
-msgstr ""
+msgstr "每 100 手赢得的大盲注"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Big Blinds won per 100 hands excluding rake"
-msgstr ""
+msgstr "每 100 手赢得的大盲注（不含抽水）"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Flop aggression frequency"
-msgstr ""
+msgstr "翻牌激进频率"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Game type (Hold'em, Omaha, etc.)"
-msgstr ""
+msgstr "游戏类型（德州扑克、奥马哈等）"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Measure of uncertainty"
-msgstr ""
+msgstr "不确定性度量"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Number of hands played"
-msgstr ""
+msgstr "已玩手数"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Number of seats at the table"
-msgstr ""
+msgstr "牌桌座位数"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -4943,142 +6047,175 @@ msgid "Player name"
 msgstr "文件名：%s"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Position at the table"
-msgstr ""
+msgstr "牌桌位置"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Postflop aggression factor"
-msgstr ""
+msgstr "翻牌后激进因子"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Postflop aggression frequency"
-msgstr ""
+msgstr "翻牌后激进频率"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Preflop raise"
-msgstr ""
+msgstr "翻牌前加注"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Profit per hand"
-msgstr ""
+msgstr "每手利润"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Profit per hand excluding rake"
-msgstr ""
+msgstr "每手利润（不含抽水）"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Rake paid"
-msgstr ""
+msgstr "已付抽水"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "River aggression frequency"
-msgstr ""
+msgstr "河牌激进频率"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Starting cards (Hole cards)"
-msgstr ""
+msgstr "起手牌（底牌）"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Total net profit"
-msgstr ""
+msgstr "总净利润"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Turn aggression frequency"
-msgstr ""
+msgstr "转牌激进频率"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Voluntarily put money in pot preflop"
-msgstr ""
+msgstr "翻牌前主动入池"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
-msgstr ""
+msgstr "翻牌前风格 (VPIP 对 PFR)"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "<b>Hand: {0}</b><br/>Hands: {1}<br/>VPIP: {2}%<br/>Profit: {3}"
-msgstr ""
+msgstr "<b>手牌: {0}</b><br/>手数: {1}<br/>VPIP: {2}%<br/>利润: {3}"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Color the grid by:"
-msgstr ""
+msgstr "网格着色依据:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Filtered range:"
-msgstr ""
+msgstr "筛选后的范围:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Hand: {0}\n"
 "No statistics available"
 msgstr ""
+"手牌: {0}\n"
+"无可用统计"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Hold'em Starting Hand Grid"
-msgstr ""
+msgstr "德州扑克起手牌网格"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 4-Card Texture Analysis"
-msgstr ""
+msgstr "奥马哈四张牌结构分析"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 5-Card Texture Analysis"
-msgstr ""
+msgstr "奥马哈五张牌结构分析"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 6-Card Texture Analysis"
-msgstr ""
+msgstr "奥马哈六张牌结构分析"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha Texture Analysis"
-msgstr ""
+msgstr "奥马哈结构分析"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Starting Hands Analysis"
-msgstr ""
+msgstr "起手牌分析"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "min sample:"
-msgstr ""
+msgstr "最小样本:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "{0} decisions in this selection have no known hole cards and are not in the "
 "grid"
-msgstr ""
+msgstr "此选择中有 {0} 个决策的底牌未知，未包含在网格中"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
 msgid "Hand Breakdown"
-msgstr ""
+msgstr "手牌明细"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
 msgid "Statistics group:"
-msgstr ""
+msgstr "统计分组:"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "A Session Guard limit has been reached."
-msgstr ""
+msgstr "已达到会话守护限制。"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Acknowledge"
-msgstr ""
+msgstr "确认"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid ""
 "Alerts only: fpdb never closes, sits out or otherwise touches a poker "
 "client. The session is the Session Viewer's: cash hands, ended by a 30-"
 "minute pause."
 msgstr ""
+"仅提醒: fpdb 绝不会关闭、暂离或以其他方式操作扑克客户端。会话与会话查看器的定"
+"义相同: 现金局手牌，以 30 分钟的暂停结束。"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Apply"
-msgstr ""
+msgstr "应用"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Choose at least one limit to watch."
-msgstr ""
+msgstr "请至少选择一个要监控的限制。"
 
 #: fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy, python-format
@@ -5088,231 +6225,276 @@ msgid ""
 msgstr "文件%s无法找到"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Drawdown from peak (BB)"
-msgstr ""
+msgstr "峰值回撤 (BB)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Drawdown from peak (money)"
-msgstr ""
+msgstr "峰值回撤（金额）"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Later"
-msgstr ""
+msgstr "稍后"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Limits for this session"
-msgstr ""
+msgstr "本次会话的限制"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Loss (BB)"
-msgstr ""
+msgstr "亏损 (BB)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Loss (money)"
-msgstr ""
+msgstr "亏损（金额）"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Not running."
-msgstr ""
+msgstr "未运行。"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Reset alerts"
-msgstr ""
+msgstr "重置提醒"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Save as defaults"
-msgstr ""
+msgstr "保存为默认"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Session Guard: click to see or change the limits"
-msgstr ""
+msgstr "会话守护: 点击查看或更改限制"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Session Guard: no session in progress"
-msgstr ""
+msgstr "会话守护: 没有进行中的会话"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Session Guard: {result} · {duration} · {hands} hands"
-msgstr ""
+msgstr "会话守护: {result} · {duration} · {hands} 手"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Session duration"
-msgstr ""
+msgstr "会话时长"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Win (BB)"
-msgstr ""
+msgstr "盈利 (BB)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Win (money)"
-msgstr ""
+msgstr "盈利（金额）"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{count} limit(s) reached"
-msgstr ""
+msgstr "已达到 {count} 个限制"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{label}: unavailable (a hand has no big blind) / {threshold}"
-msgstr ""
+msgstr "{label}: 不可用（有手牌没有大盲注）/ {threshold}"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{value} BB"
-msgstr ""
+msgstr "{value} BB"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid ""
 "A stat pack adds declarative stats, and optionally Research presets, without "
 "changing fpdb. Packs are data only: no Python, no SQL."
 msgstr ""
+"统计包在不修改 fpdb 的情况下添加声明式统计，并可选地添加研究预设。统计包只包"
+"含数据: 没有 Python，没有 SQL。"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "All files"
-msgstr ""
+msgstr "所有文件"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Author"
-msgstr ""
+msgstr "作者"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Built-in"
-msgstr ""
+msgstr "内置"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy, python-format
-#| msgid "Could not find file %s"
 msgid ""
 "Could not read the pack:\n"
 "%s"
-msgstr "文件%s无法找到"
+msgstr ""
+"无法读取统计包:\n"
+"%s"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Disable"
-msgstr ""
+msgstr "禁用"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Disabled"
-msgstr ""
+msgstr "已禁用"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Disabled %s."
-msgstr ""
+msgstr "已禁用 %s。"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Enable"
-msgstr ""
+msgstr "启用"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Enabled %s."
-msgstr ""
+msgstr "已启用 %s。"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Export stat pack"
-msgstr ""
+msgstr "导出统计包"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Export..."
-msgstr ""
+msgstr "导出..."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Exported to %s."
-msgstr ""
+msgstr "已导出到 %s。"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Import pack..."
-msgstr ""
+msgstr "导入统计包..."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Import stat pack"
-msgstr ""
+msgstr "导入统计包"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Installed %s."
-msgstr ""
+msgstr "已安装 %s。"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Invalid"
-msgstr ""
+msgstr "无效"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Location:"
-msgstr ""
+msgstr "位置:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Pack"
-msgstr ""
+msgstr "统计包"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Restart fpdb and the HUD to use the change everywhere."
-msgstr ""
+msgstr "重启 fpdb 和 HUD 以使更改在所有地方生效。"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Stat pack"
-msgstr ""
+msgstr "统计包"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Stat packs"
-msgstr ""
+msgstr "统计包"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Stats"
-msgstr ""
+msgstr "统计"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Stats:"
-msgstr ""
+msgstr "统计:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Status"
-msgstr ""
+msgstr "状态"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "The pack state was not changed:\n"
 "%s"
 msgstr ""
+"统计包状态未更改:\n"
+"%s"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "This pack cannot be installed:"
-msgstr ""
+msgstr "无法安装此统计包:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "This pack is already installed. Replace it with this version?"
-msgstr ""
+msgstr "此统计包已安装。要用此版本替换吗?"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "This pack is not loaded:"
-msgstr ""
+msgstr "此统计包未加载:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Uninstall"
-msgstr ""
+msgstr "卸载"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Uninstall %s?"
-msgstr ""
+msgstr "卸载 %s?"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Uninstall stat pack"
-msgstr ""
+msgstr "卸载统计包"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Uninstalled %s."
-msgstr ""
+msgstr "已卸载 %s。"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "User installed"
-msgstr ""
+msgstr "用户安装"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "<"
@@ -5331,12 +6513,14 @@ msgid ">>"
 msgstr ""
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "BOTTOM :"
-msgstr ""
+msgstr "下道:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Capture Console (Logs):"
-msgstr ""
+msgstr "捕获控制台（日志）:"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
@@ -5344,113 +6528,140 @@ msgid "Captured Hand History:"
 msgstr "处理输入历史记录"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Cards:"
-msgstr ""
+msgstr "牌:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Hands Captured: 0"
-msgstr ""
+msgstr "已捕获手牌: 0"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Import All OFC"
-msgstr ""
+msgstr "导入全部 OFC"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Import OFC to DB"
-msgstr ""
+msgstr "将 OFC 导入数据库"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "In Hand:"
-msgstr ""
+msgstr "手牌中:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "MIDDLE :"
-msgstr ""
+msgstr "中道:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Open DB Replayer"
-msgstr ""
+msgstr "打开数据库回放器"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Open Hand Folder"
-msgstr ""
+msgstr "打开手牌文件夹"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Refresh Hands"
-msgstr ""
+msgstr "刷新手牌"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Select a hand to start replay"
-msgstr ""
+msgstr "选择一手牌开始回放"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Start Capture"
-msgstr ""
+msgstr "开始捕获"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Status: 🔴 Stopped"
-msgstr ""
+msgstr "状态: 🔴 已停止"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Statut : 🔴 Arrêté"
-msgstr ""
+msgstr "状态: 🔴 已停止"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Statut : 🟢 En Cours"
-msgstr ""
+msgstr "状态: 🟢 运行中"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Step 0 / 0"
-msgstr ""
+msgstr "步骤 0 / 0"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "SwC"
-msgstr ""
+msgstr "SwC"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "SwC Poker - Capture Console & Replayer"
-msgstr ""
+msgstr "SwC Poker - 捕获控制台与回放器"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "TOP :"
-msgstr ""
+msgstr "上道:"
 
 #: fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Confirm overwrite"
-msgstr ""
+msgstr "确认覆盖"
 
 #: fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Copy entire table"
-msgstr ""
+msgstr "复制整个表格"
 
 #: fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Copy entire table with headers"
-msgstr ""
+msgstr "带标题复制整个表格"
 
 #: fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Copy with headers"
-msgstr ""
+msgstr "带标题复制"
 
 #: fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Export displayed values"
-msgstr ""
+msgstr "导出显示的值"
 
 #: fpdb_3_legacy/table_export.py
-#, python-format
+#, fuzzy, python-format
 msgid "Export displayed values as %s…"
-msgstr ""
+msgstr "将显示的值导出为 %s…"
 
 #: fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Export failed"
-msgstr ""
+msgstr "导出失败"
 
 #: fpdb_3_legacy/table_export.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "The file already exists:\n"
 "%s\n"
 "Do you want to replace it?"
 msgstr ""
+"文件已存在:\n"
+"%s\n"
+"要替换它吗?"
 
 #, fuzzy
 #~ msgid "%s not found in %s..."
