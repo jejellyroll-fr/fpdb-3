@@ -10,15 +10,16 @@ each cache and require the rows the import wrote.
 from __future__ import annotations
 
 import shutil
-from datetime import timedelta
 from pathlib import Path
 
 import pytest
+import pytz
 
+from fpdb_3_legacy import hud_day
 from fpdb_3_legacy.action_enum_stats import CACHE_KEYS as ACTION_ENUM_CACHE_KEYS
 from fpdb_3_legacy.cache_rebuild import rebuild_stat_columns
 from fpdb_3_legacy.Database import Database
-from fpdb_3_legacy.database_caches import CACHE_KEYS, HUDCACHE_EXTRA_KEYS, SESSION_CACHE_KEYS, DatabaseCachesMixin
+from fpdb_3_legacy.database_caches import CACHE_KEYS, HUDCACHE_EXTRA_KEYS, SESSION_CACHE_KEYS
 from fpdb_3_legacy.Importer import Importer
 from tests.helpers import analytics_golden as golden
 
@@ -157,29 +158,34 @@ def test_the_action_enum_counters_follow_the_import() -> None:
 
 
 TWISTER_DAYS = "SELECT DISTINCT styleKey FROM HudCache WHERE tourneyTypeId IS NOT NULL ORDER BY styleKey"
+STYLE_KEYS = "SELECT DISTINCT styleKey FROM HudCache ORDER BY styleKey"
+NEW_YORK = pytz.timezone("America/New_York")
 
 
-def test_a_rebuild_puts_hands_near_midnight_in_the_import_s_day(tmp_path, monkeypatch) -> None:
-    """HudCache buckets a hand into the player's day: UTC start minus day_start and the UTC offset.
+def test_a_rebuild_puts_each_hand_in_the_import_s_day_across_seasons(tmp_path, monkeypatch) -> None:
+    """HudCache buckets a hand into the player's day, at the UTC offset of the hand's own date (#600).
 
-    The Twister hands start at 00:57 UTC; moved back one hour they belong to the
-    day before, as the import files them. The rebuild used to take the UTC date
-    and moved them to the next day. The offset is pinned rather than read off the
-    machine's time zone, so the check is the same on every runner.
+    In New York the files fall in winter time (2009-11), on either side of the
+    2013 change and in summer time (2014-04), so the rebuild's offset is a CASE
+    over the changes. The Twister hands start at 00:57 UTC: 20:57 the day
+    before in New York. The zone is pinned with pytz, so the check is the same
+    on every runner.
     """
-    monkeypatch.setattr(DatabaseCachesMixin, "hud_day_offset", lambda _self: timedelta(hours=1))
+    monkeypatch.setattr(hud_day, "local_offset", lambda utc: pytz.utc.localize(utc).astimezone(NEW_YORK).utcoffset())
     config = _config(tmp_path)
     Database(config).recreate_tables()
     db = Database(config)
     importer = Importer(caller=None, settings={"testData": False, "threads": 1}, config=config, sql=None)
     importer.database = db
-    importer.addImportFile(str(FILES[2]), "auto")
+    for path in FILES:
+        importer.addImportFile(str(path), "auto")
     importer.runImport()
     database = Database(config)
     imported = _rows(database, "HudCache")
     cursor = database.get_cursor()
     cursor.execute(TWISTER_DAYS)
     assert cursor.fetchall() == [("d140406",)]
+    assert "CASE" in database._hud_day_minutes()
 
     database.rebuild_cache(None, None, "HudCache")
 

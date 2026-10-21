@@ -5,12 +5,14 @@ from __future__ import annotations
 import os
 from collections.abc import Iterator
 from contextlib import contextmanager
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import pytest
+import pytz
 
-from fpdb_3_legacy import db_migrate, dialects, session_rebuild
+from fpdb_3_legacy import db_migrate, dialects, hud_day, session_rebuild
 from fpdb_3_legacy.Database import Database
 from fpdb_3_legacy.database_schema import COLUMN_COLLATION_SQL, DatabaseSchemaMixin
 from fpdb_3_legacy.phh_import import import_file as import_phh_file
@@ -488,3 +490,32 @@ def test_the_session_rebuild_statements_run_on_the_live_schema(backend: str) -> 
             for statement in SESSION_REBUILD_ORPHAN_PERIODS:
                 cursor.execute(statement)
         connection.rollback()
+
+
+HAND_AT = {
+    "postgresql": "SELECT <day> FROM (SELECT CAST(%s AS TIMESTAMP) AS startTime) h",
+    "mysql": "SELECT <day> FROM (SELECT CAST(%s AS DATETIME) AS startTime) h",
+}
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("backend", ["postgresql", "mysql"])
+def test_the_hud_day_follows_the_hand_s_own_offset_on_the_live_server(backend: str, monkeypatch) -> None:
+    """The CASE over New York's 2026 changes files a 04:30 UTC hand by its own season (#600)."""
+    if backend not in _enabled_backends():
+        pytest.skip(f"live {backend} service not requested")
+
+    new_york = pytz.timezone("America/New_York")
+    monkeypatch.setattr(hud_day, "local_offset", lambda utc: pytz.utc.localize(utc).astimezone(new_york).utcoffset())
+    host = Database.__new__(Database)
+    host.backend = dialects.dialect_for_server(backend).backend_id
+    minutes = hud_day.minutes_sql(datetime(2026, 1, 1), datetime(2026, 12, 31), 0.0)
+    # The drivers format the statement with %, which MySQL's date_format also uses.
+    query = HAND_AT[backend].replace("<day>", host.hud_day_sql(minutes).replace("%", "%%"))
+
+    with _connection(backend) as connection, connection.cursor() as cursor:
+        days = []
+        for start in ("2026-01-15 04:30:00", "2026-07-15 04:30:00"):
+            cursor.execute(query, (start,))
+            days.append(cursor.fetchone()[0])
+    assert days == ["d260114", "d260715"]
