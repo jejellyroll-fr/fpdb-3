@@ -87,6 +87,9 @@ class FakeImporter:
     def setMode(self, value):
         self.mode = value
 
+    def setThreads(self, value):
+        self.threads = value
+
     def setCallHud(self, value):
         self.call_hud = value
 
@@ -142,6 +145,7 @@ def test_import_button_triggers_use_case(qtbot, bulk_import_widget, tmp_path):
     assert widget.importer.progress_callbacks is not None
     assert widget.importer.hands_in_db == 7
     assert widget.importer.mode == "bulk"
+    assert widget.importer.threads == -1  # equity workers, as the command line uses (#443)
     assert widget.importer.call_hud is False
 
 

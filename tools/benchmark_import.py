@@ -131,10 +131,11 @@ def import_once(files: Sequence[Path], workdir: Path, workers: int = 1) -> Impor
         }
     )
     config.get_db_parameters = lambda: params
-    Database(config).recreate_tables()
+    schema = Database(config)
+    schema.recreate_tables()
+    schema.close_connection()
 
     importer = Importer(caller=None, settings={"testData": False, "threads": workers}, config=config, sql=None)
-    importer.database = Database(config)
     for path in files:
         importer.addImportFile(str(path), "auto")
 
@@ -143,7 +144,8 @@ def import_once(files: Sequence[Path], workdir: Path, workers: int = 1) -> Impor
     with _timed(phases):
         stored, *_rest = importer.runImport()
     seconds = perf_counter() - started
-    importer.database.disconnect()
+    # Every connection closed, or Windows cannot remove the temporary directory.
+    importer.close()
     phases["write"] = seconds - phases["parse"] - phases["derive"] - phases["workers"]
     return ImportTiming(hands=stored, seconds=seconds, phases=dict(phases))
 
