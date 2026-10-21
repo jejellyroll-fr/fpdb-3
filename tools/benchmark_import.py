@@ -29,6 +29,7 @@ Results are recorded in docs/import-performance.md.
 from __future__ import annotations
 
 import argparse
+import gc
 import glob
 import logging
 import shutil
@@ -152,9 +153,13 @@ def import_once(files: Sequence[Path], workdir: Path, workers: int = 1) -> Impor
 
 def benchmark(files: Sequence[Path], repeats: int, workers: int = 1) -> list[ImportTiming]:
     timings = []
-    with tempfile.TemporaryDirectory(prefix="fpdb-import-bench-") as root:
+    # On Windows the import can keep a handle on the database file after every
+    # connection the benchmark sees is closed; a directory left behind in the
+    # temporary folder must not fail the measurement.
+    with tempfile.TemporaryDirectory(prefix="fpdb-import-bench-", ignore_cleanup_errors=True) as root:
         for run in range(repeats):
             timings.append(import_once(files, Path(root) / f"run{run}", workers))
+        gc.collect()
     return timings
 
 
