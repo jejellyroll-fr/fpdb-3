@@ -201,3 +201,10 @@ def test_a_new_source_string_missing_from_the_template_is_reported(monkeypatch, 
 
     assert update_pot.check() == 1
     assert "'A string nobody merged'" in capsys.readouterr().out
+
+
+def test_no_translation_call_sits_in_an_f_string():
+    """xgettext before 0.22 does not extract one, so a template written with it would drop the string."""
+    from tools import update_pot
+
+    assert update_pot.calls_in_fstrings() == []

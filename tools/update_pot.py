@@ -124,6 +124,26 @@ def source_strings() -> set[str]:
     return strings
 
 
+def calls_in_fstrings() -> list[str]:
+    """``_("...")`` calls inside an f-string, which xgettext before 0.22 does not extract."""
+    found = []
+    for path in sorted([*SRC.rglob("*.py"), *SRC.rglob("*.pyw")]):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for fstring in ast.walk(tree):
+            if not isinstance(fstring, ast.JoinedStr):
+                continue
+            for node in ast.walk(fstring):
+                if (
+                    isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Name)
+                    and node.func.id in ("_", "N_")
+                    and node.args
+                    and isinstance(node.args[0], ast.Constant)
+                ):
+                    found.append(f"{path.relative_to(ROOT)}:{node.lineno}: {node.args[0].value!r}")
+    return found
+
+
 def _template_gap(template: Path) -> list[str]:
     """The strings the source and the committed template disagree on, named."""
     source = source_strings()
@@ -155,6 +175,10 @@ def completion_table() -> str:
 
 def check() -> int:
     """1 when the template or a catalogue is not what the source and the template give."""
+    nested = calls_in_fstrings()
+    if nested:
+        print("Move these translation calls out of their f-string; older xgettext misses them:")
+        print("  " + "\n  ".join(nested))
     stale = []
     gap = _template_gap(POT)
     if gap:
@@ -168,6 +192,8 @@ def check() -> int:
                 stale.append(_shown(po))
             i18n_compile.generate_mo(i18n_compile.parse_po(po))  # must compile
     print(completion_table())
+    if nested:
+        return 1
     if stale:
         print("\nOut of date (run: python tools/update_pot.py --merge):\n  " + "\n  ".join(stale))
         return 1
