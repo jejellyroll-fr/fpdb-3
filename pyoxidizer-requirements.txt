@@ -12,7 +12,7 @@ pyzmq>=26.0.3
 qt-material==2.14
 numpy>=2.1.0
 pytz==2024.1
-aiohttp>=3.13.2
+aiohttp>=3.14.4
 cachetools==5.5.0
 xlrd==2.0.1
 pymysql>=1.1.0
