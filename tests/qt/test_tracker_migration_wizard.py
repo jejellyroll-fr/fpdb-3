@@ -20,6 +20,7 @@ from PySide6.QtWidgets import QWizard  # noqa: E402 - after the Qt availability 
 from fpdb_3_legacy.Configuration import Config  # noqa: E402
 from fpdb_3_legacy.GuiTrackerMigration import GuiTrackerMigration  # noqa: E402
 from fpdb_3_legacy.Importer import FileImportResult  # noqa: E402
+from fpdb_3_legacy.tracker_migration import ExportScan  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 CASH = ROOT / "regression-test-files" / "cash"
@@ -43,6 +44,7 @@ class FakeImporter:
 
     def __init__(self) -> None:
         self.calls: dict[str, object] = {}
+        self.sources: list[tuple[str, str]] = []
         self.filelist: dict[str, object] = {}
         self.file_results: dict[str, FileImportResult] = {}
         self.database = SimpleNamespace(getHandCount=lambda: 0)
@@ -54,8 +56,8 @@ class FakeImporter:
         raise AttributeError(name)
 
     def addBulkImportImportFileOrDir(self, path, site="auto"):
-        self.calls["source"] = (path, site)
-        self.filelist = {"a": None, "b": None}
+        self.sources.append((path, site))
+        self.filelist[path] = None
         return True
 
     def set_progress_callbacks(self, start_cb, update_cb, end_cb) -> None:
@@ -129,7 +131,7 @@ def test_the_scan_lists_rooms_and_unreadable_files_before_importing(qtbot, confi
     assert rooms == {"PokerStars.COM": "2", "Winamax": "2"}
     assert wizard.scan_page.unsupported.count() == 1
     assert wizard.scan_page.isComplete()
-    assert "source" not in importer.calls  # nothing imported yet
+    assert importer.sources == []  # nothing imported yet
 
 
 @pytest.mark.qt
@@ -151,7 +153,9 @@ def test_the_import_never_moves_the_tracker_s_files_and_ends_with_a_summary(qtbo
     wizard.next()  # scan -> import
     qtbot.waitUntil(wizard.import_page.isComplete, timeout=10000)
 
-    assert importer.calls["source"] == (str(archive), "auto")
+    scanned = sorted(path for files in wizard.scan_page.scan.rooms.values() for path in files)
+    assert sorted(path for path, _site in importer.sources) == scanned  # what the preview showed, no more
+    assert {site for _path, site in importer.sources} == {"auto"}
     assert importer.calls["setMoveImportedFiles"] == (False,)
     assert importer.calls["setMoveFailedFiles"] == (False,)
     assert not lock.held  # released once the import ended
@@ -176,7 +180,7 @@ def test_a_running_import_elsewhere_blocks_this_one(qtbot, config, archive) -> N
 
     assert "Another import is running" in wizard.import_page.current.text()
     assert not wizard.import_page.isComplete()
-    assert "source" not in importer.calls
+    assert importer.sources == []
 
 
 @pytest.mark.qt
@@ -187,3 +191,46 @@ def test_closing_the_wizard_closes_its_importer(qtbot, config) -> None:
     wizard.reject()
 
     assert importer.closed
+
+
+@pytest.mark.qt
+def test_a_symlink_in_the_archive_is_neither_shown_nor_imported(qtbot, config, archive, tmp_path_factory) -> None:
+    outside = tmp_path_factory.mktemp("outside")
+    source = next(p for p in sorted((CASH / "Winamax").rglob("*.txt")) if p.stat().st_size)
+    target = outside / "elsewhere.txt"
+    shutil.copy(source, target)
+    try:
+        (archive / "link.txt").symlink_to(target)
+    except OSError:
+        pytest.skip("symlinks are not available here")
+    importer = FakeImporter()
+    wizard = open_wizard(qtbot, config, importer, FakeLock())
+    advance_to_scan(qtbot, wizard, archive)
+
+    wizard.next()
+    qtbot.waitUntil(wizard.import_page.isComplete, timeout=10000)
+
+    imported = [Path(path).name for path, _site in importer.sources]
+    assert "link.txt" not in imported and "elsewhere.txt" not in imported
+    assert len(imported) == 4
+
+
+@pytest.mark.qt
+def test_a_scan_the_user_moved_past_cannot_overwrite_the_current_one(qtbot, config, archive, tmp_path) -> None:
+    wizard = open_wizard(qtbot, config, FakeImporter(), FakeLock())
+    advance_to_scan(qtbot, wizard, archive)
+    first = wizard.scan_page.thread
+
+    wizard.back()  # to the source page: another folder
+    second_folder = tmp_path / "second"
+    second_folder.mkdir()
+    shutil.copy(next(p for p in sorted((CASH / "GGPoker").rglob("*.txt")) if p.stat().st_size), second_folder)
+    wizard.source_page.folder.setText(str(second_folder))
+    wizard.next()
+    qtbot.waitUntil(lambda: wizard.scan_page.scan is not None, timeout=10000)
+
+    # The first folder's scan answers late: it must not replace the second folder's preview.
+    first.scanned.emit(ExportScan(rooms={"PokerStars.COM": ["late.txt"] * 9}))
+
+    assert set(wizard.scan_page.scan.rooms) == {"GGPoker"}
+    assert wizard.scan_page.rooms.item(0, 0).text() == "GGPoker"

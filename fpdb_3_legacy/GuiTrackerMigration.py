@@ -140,6 +140,9 @@ class ScanPage(QWizardPage):
         self.source_page = source_page
         self.scan: ExportScan | None = None
         self.thread: ScanThread | None = None
+        # Every scan still running, current or not: a QThread dropped while it runs
+        # takes the application down, so each is kept until it has finished.
+        self.running: list[ScanThread] = []
         self.setTitle(_("What the folder holds"))
         self.setSubTitle(_("Nothing is imported yet."))
         layout = QVBoxLayout(self)
@@ -160,13 +163,32 @@ class ScanPage(QWizardPage):
         self.unsupported.clear()
         self.unsupported_label.clear()
         self.status.setText(_("Reading the folder…"))
-        self.thread = ScanThread(self.config, self.source_page.folder.text().strip())
-        self.thread.scanned.connect(self.show_scan)
-        self.thread.failed.connect(
-            lambda message: self.status.setText(_("The folder could not be read:\n%s") % message)
+        thread = ScanThread(self.config, self.source_page.folder.text().strip())
+        self.thread = thread
+        self.running.append(thread)
+        # A scan the user has moved past (Back, another folder, Next) may still
+        # answer; only the current one gets to fill the page.
+        thread.scanned.connect(lambda scan: self.show_scan(scan) if self.thread is thread else None)
+        thread.failed.connect(
+            lambda message: (
+                self.status.setText(_("The folder could not be read:\n%s") % message) if self.thread is thread else None
+            )
         )
-        self.thread.start()
+        thread.finished.connect(lambda: self.running.remove(thread) if thread in self.running else None)
+        thread.start()
         self.completeChanged.emit()
+
+    def cleanupPage(self) -> None:
+        # Back from this page: whatever is still being read is no longer what the user will import.
+        self.thread = None
+        self.scan = None
+        super().cleanupPage()
+
+    def stop(self, wait_ms: int = 5000) -> None:
+        """Let running scans finish before the wizard goes away; they only read files."""
+        self.thread = None
+        for thread in list(self.running):
+            thread.wait(wait_ms)
 
     def show_scan(self, scan: ExportScan) -> None:
         self.scan = scan
@@ -336,7 +358,11 @@ class GuiTrackerMigration(QWizard):
         importer.setMoveImportedFiles(False)
         importer.setMoveFailedFiles(False)
         self.button(QWizard.WizardButton.BackButton).setEnabled(False)
-        self.import_thread = BulkImportThread(importer, [(self.source_page.folder.text().strip(), "auto")])
+        # Exactly the files the preview showed: walking the folder again would also take
+        # what the scan leaves out on purpose (symlinks, which can point outside the archive).
+        scan = self.scan_page.scan
+        sources = [(path, "auto") for files in (scan.rooms.values() if scan else ()) for path in files]
+        self.import_thread = BulkImportThread(importer, sources)
         self.import_thread.progress_started.connect(self.import_page.on_started)
         self.import_thread.progress_updated.connect(self.import_page.on_file)
         self.import_thread.finished.connect(self.import_finished)
@@ -378,6 +404,7 @@ class GuiTrackerMigration(QWizard):
         super().accept()
 
     def _close_importer(self) -> None:
+        self.scan_page.stop()
         self._release_lock()
         importer = self.importer
         if importer is not None and not self.import_running():
