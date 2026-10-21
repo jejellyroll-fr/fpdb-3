@@ -1454,7 +1454,7 @@ class fpdb(QMainWindow):
 
         from fpdb_3_legacy import menu_layout
         from fpdb_3_legacy.Configuration import GRAPHICS_PATH
-        from fpdb_3_legacy.i18n_compile import available_locales
+        from fpdb_3_legacy.i18n_compile import available_locales, completion
 
         menu = parent_menu.addMenu(title)
         locale_dir = Path(GRAPHICS_PATH).parent / "locale"
@@ -1470,7 +1470,12 @@ class fpdb(QMainWindow):
             elif code == menu_layout.SOURCE_LANGUAGE:
                 label = "English"
             else:
-                label = QLocale(code).nativeLanguageName().capitalize() or code
+                try:
+                    done = completion(locale_dir / f"fpdb-{code}.po")
+                except OSError:
+                    done = None
+                name = QLocale(code).nativeLanguageName().capitalize() or code
+                label = menu_layout.language_label(name, done)
             action = QAction(label, self, checkable=True)
             action.setChecked(checked)
             action.triggered.connect(partial(self._on_select_language, code))

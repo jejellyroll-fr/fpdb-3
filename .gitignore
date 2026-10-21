@@ -57,7 +57,7 @@ cover/
 
 # Translations
 *.mo
-*.pot
+# locale/fpdb.pot is committed: translators and the platform work from it (#444).
 .briefcase-resources/
 
 # Django stuff:

@@ -120,3 +120,73 @@ def test_menu_translate_honours_installed_catalog(tmp_path, _restore_gettext):
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+FUZZY_PO = (
+    'msgid ""\nmsgstr "Content-Type: text/plain; charset=UTF-8\\n"\n\n'
+    'msgid "Checked"\nmsgstr "Checké"\n\n'
+    "#, fuzzy, python-format\n"
+    "#| msgid \"Mucked\"\n"
+    'msgid "Folded"\nmsgstr "Dossier"\n\n'
+    'msgid "Invert"\nmsgstr ""\n\n'
+    '#~ msgid "Gone"\n#~ msgstr "Parti"\n'
+)
+
+
+def test_a_fuzzy_translation_is_not_shown(tmp_path):
+    """msgmerge marks a guess from a similar string fuzzy: like msgfmt, it is left out (#444)."""
+    po = tmp_path / "fpdb-xx_XX.po"
+    po.write_text(FUZZY_PO, encoding="utf-8")
+
+    messages = i18n_compile.parse_po(po)
+
+    assert messages.get("Checked") == "Checké"
+    assert "Folded" not in messages
+    assert "Invert" not in messages
+    assert "Gone" not in messages, "an obsolete entry is not a translation"
+
+
+def test_completion_counts_what_is_shown(tmp_path):
+    po = tmp_path / "fpdb-xx_XX.po"
+    po.write_text(FUZZY_PO, encoding="utf-8")
+
+    assert i18n_compile.completion(po) == (1, 3)
+
+
+def test_the_french_catalogue_has_no_fuzzy_entry_left():
+    """Its fuzzy entries were reviewed when the catalogues were merged with the source (#444)."""
+    fuzzy = [entry.msgid for entry in i18n_compile.read_entries(LOCALE_DIR / "fpdb-fr_FR.po") if entry.fuzzy]
+
+    assert fuzzy == []
+
+
+@pytest.mark.parametrize(
+    ("completion", "label"),
+    [((611, 1275), "Français (47 %)"), ((0, 1275), "Français (0 %)"), (None, "Français"), ((0, 0), "Français")],
+)
+def test_the_language_menu_shows_completion(completion, label):
+    assert menu_layout.language_label("Français", completion) == label
+
+
+@pytest.mark.skipif(not all(map(__import__("shutil").which, ("xgettext", "msgmerge"))), reason="GNU gettext missing")
+def test_the_catalogues_are_merged_with_the_source():
+    """What CI runs: locale/fpdb.pot and every catalogue follow the source (#444)."""
+    from tools import update_pot
+
+    assert update_pot.check() == 0
+
+
+@pytest.mark.skipif(not all(map(__import__("shutil").which, ("xgettext", "msgmerge"))), reason="GNU gettext missing")
+def test_a_catalogue_that_lags_the_template_is_reported(tmp_path, monkeypatch):
+    from tools import update_pot
+
+    locale = tmp_path / "locale"
+    locale.mkdir()
+    (locale / "fpdb.pot").write_bytes((LOCALE_DIR / "fpdb.pot").read_bytes())
+    lagging = (LOCALE_DIR / "fpdb-de_DE.po").read_text(encoding="utf-8")
+    lagging = lagging.replace('msgid "Configure"\n', 'msgid "Configure the past"\n', 1)
+    (locale / "fpdb-de_DE.po").write_text(lagging, encoding="utf-8")
+    monkeypatch.setattr(update_pot, "LOCALE", locale)
+    monkeypatch.setattr(update_pot, "POT", locale / "fpdb.pot")
+
+    assert update_pot.check() == 1

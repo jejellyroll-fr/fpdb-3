@@ -168,6 +168,24 @@ release artifacts are Developer ID signed and notarized only when the repository
 credentials are configured; otherwise the workflow publishes an ad-hoc artifact with the limitations
 described there.
 
+## 🌍 Help translate fpdb
+
+fpdb speaks 14 languages, most of them only partly: *View ▸ Language* shows how much of the
+interface each one covers. Translations live in `locale/fpdb-<language>.po`, one file per
+language, kept in step with the source through `locale/fpdb.pot`.
+
+To translate:
+
+1. Open your language's `.po` file in [Poedit](https://poedit.net/) (or any gettext editor) and
+   fill in the empty entries. An entry marked *fuzzy* is a guess from a similar string: check it,
+   then clear the mark — fpdb does not show fuzzy translations.
+2. Check your work with `python tools/update_pot.py --check`, which also prints each language's
+   completion (it needs GNU gettext: `brew install gettext` or `apt install gettext`).
+3. Open a pull request against `development`.
+
+Developers who add or change a translatable string run `python tools/update_pot.py --merge`; CI
+fails when the template or a catalogue lags the source.
+
 ## Credits
 
 FPDB-3 continues the original FPDB project, whose history predates the Python
