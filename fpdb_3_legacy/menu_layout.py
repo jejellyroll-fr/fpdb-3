@@ -132,6 +132,11 @@ def menu_layout() -> tuple[Menu, ...]:
             (
                 MenuItem(N_("Bulk Import"), "tab_bulk_import", "Ctrl+B"),
                 MenuItem(N_("HUD and Auto Import"), "tab_auto_import", "Ctrl+A"),
+                MenuItem(
+                    N_("From Another Tracker…"),
+                    "dia_tracker_migration",
+                    tip=N_("Bring your hands over from PokerTracker 4 or Holdem Manager 3"),
+                ),
                 # The capture tab exists only to feed CoinPoker; it stays out of
                 # the menu while that room's support is switched off.
                 *(
