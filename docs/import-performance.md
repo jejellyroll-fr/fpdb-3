@@ -16,7 +16,8 @@ splits the time into three phases:
 | --- | --- |
 | parse | the converter reading the file into hands (`HandHistoryConverter.start`) |
 | derive | player and gametype lookups and the derived statistics, all-in equity included (`Hand.prepInsert`, `Hand.assembleHand`) |
-| write | everything else: the inserts, the caches, auto notes, and waiting for the workers |
+| workers | with `--workers`: starting them, handing them the files, waiting for a file one of them has started |
+| write | everything else: the inserts, the caches, auto notes |
 
 The default corpus is the cash hand histories of six rooms in
 `regression-test-files/` (PokerStars, Winamax, GGPoker, PartyPoker, iPoker,
@@ -30,7 +31,7 @@ Apple M-series, 10 cores, SQLite, best of two runs:
 | --- | --- | --- | --- | --- | --- |
 | before #443 | 14.85 s | 48.7 | 1.27 s | 8.72 s | 4.86 s |
 | auto-notes lookup fixed | 10.72 s | 67.5 | 1.18 s | 8.23 s | 1.30 s |
-| + 4 equity workers | 5.68 s | 127.2 | 1.28 s | 1.61 s | 2.79 s |
+| + 4 equity workers | 6.20 s | 116.6 | 1.35 s | 2.83 s | 1.61 s (+ 0.40 s workers) |
 
 ## Where the time went
 
@@ -58,8 +59,11 @@ batching. When it reaches a hand, the equity is usually known already.
 - **Output.** Exhaustive enumeration is deterministic, so the database is the
   same with or without workers; `tests/test_import_prefetch.py` imports the
   same files both ways and compares every table, timestamps aside.
-- **Never slower.** A file no worker has started is cancelled and imported as
-  before; only a file a worker is already on is waited for.
+- **Waiting.** Workers report each file they start. The import waits only for
+  a file a worker has started, whose remaining work is less than all of it; a
+  file still queued is cancelled and imported as before. The pool's own state
+  cannot tell the two apart: it marks a queued job running before any worker
+  has it.
 - **The setting.** `threads` sets the number of workers: 1 is none, -1 every
   core but one, up to four (more cost more in start-up and memory than they
   save here). The bulk import window and its command line

@@ -15,11 +15,13 @@ The phases:
 * parse  -- the converter reading the file into hands (HandHistoryConverter.start);
 * derive -- player and gametype lookups and the derived statistics, all-in
   equity included (Hand.prepInsert and Hand.assembleHand);
+* workers -- with ``--workers``: starting them, handing them the files, and
+  waiting for a file one of them has started (EquityPrefetch);
 * write  -- everything else: the inserts, the caches, auto notes.
 
 With ``--workers N`` the import starts N worker processes that compute the
 all-in equities ahead of it (fpdb_3_legacy/import_prefetch.py); derive then
-mostly measures what is left of it, and the workers' start-up is in the total.
+mostly measures what is left of it.
 
 Results are recorded in docs/import-performance.md.
 """
@@ -74,14 +76,19 @@ def corpus_files(patterns: Sequence[str]) -> list[Path]:
 
 @contextmanager
 def _timed(phases: dict[str, float]) -> Iterator[None]:
-    """Add the time spent in the parse and derive methods to ``phases``."""
+    """Add the time spent in the parse, derive and worker methods to ``phases``."""
     from fpdb_3_legacy.Hand import Hand
     from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter
+    from fpdb_3_legacy.import_prefetch import EquityPrefetch
 
     targets = (
         (HandHistoryConverter, "start", "parse"),
         (Hand, "prepInsert", "derive"),
         (Hand, "assembleHand", "derive"),
+        (EquityPrefetch, "__init__", "workers"),
+        (EquityPrefetch, "submit", "workers"),
+        (EquityPrefetch, "before_import", "workers"),
+        (EquityPrefetch, "close", "workers"),
     )
     originals = [(owner, name, getattr(owner, name)) for owner, name, _phase in targets]
 
@@ -137,7 +144,7 @@ def import_once(files: Sequence[Path], workdir: Path, workers: int = 1) -> Impor
         stored, *_rest = importer.runImport()
     seconds = perf_counter() - started
     importer.database.disconnect()
-    phases["write"] = seconds - phases["parse"] - phases["derive"]
+    phases["write"] = seconds - phases["parse"] - phases["derive"] - phases["workers"]
     return ImportTiming(hands=stored, seconds=seconds, phases=dict(phases))
 
 
@@ -155,7 +162,7 @@ def format_timings(files: Sequence[Path], timings: Sequence[ImportTiming]) -> st
         f"{len(files)} files, {best.hands} hands, best of {len(timings)} run(s)",
         f"  total   {best.seconds:7.2f} s   {best.hands_per_second:7.1f} hands/s",
     ]
-    for phase in ("parse", "derive", "write"):
+    for phase in ("parse", "derive", "workers", "write"):
         share = best.phases[phase] / best.seconds if best.seconds else 0.0
         lines.append(f"  {phase:<7} {best.phases[phase]:7.2f} s   {share:6.1%}")
     if len(timings) > 1:

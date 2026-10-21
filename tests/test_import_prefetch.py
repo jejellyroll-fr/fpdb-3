@@ -7,6 +7,7 @@ single writer; the database must not depend on whether they did.
 
 from __future__ import annotations
 
+import re
 import sqlite3
 import sys
 from decimal import Decimal
@@ -29,9 +30,14 @@ FILES = (
     STARS / "NLHE-FR-USD-0.01-0.02-201005.microgrind.txt",
     REPO / "regression-test-files/cash/iPoker/Flop/PLO-USD-0.01-0.02-201108.Sample.txt",
 )
-# When each import ran: Files records it per file, Hands per hand, auto notes per note.
-TIMED_TABLES = {"Files"}
-TIMED_COLUMNS = {"importTime", "createdTs", "updatedTs"}
+# When each import ran: Files records it per file, Hands per hand, auto notes
+# per note. Set to one value before the comparison, in a transaction rolled back after.
+CLEAR_TIMES = (
+    "DELETE FROM Files",
+    "UPDATE Hands SET importTime = '1970-01-01 00:00:00'",
+    "UPDATE PlayerAutoNotes SET createdTs = '1970-01-01 00:00:00', updatedTs = '1970-01-01 00:00:00'",
+)
+INSERT = re.compile(r'INSERT INTO "(\w+)"')
 
 
 def _import(directory: Path, threads: int) -> Path:
@@ -47,20 +53,21 @@ def _import(directory: Path, threads: int) -> Path:
     return directory / "golden.sqlite3"
 
 
-def _tables(database: Path) -> dict[str, list[tuple]]:
+def _tables(database: Path) -> dict[str, list[str]]:
+    """Every row of every table, as SQLite dumps it, timestamps aside."""
     connection = sqlite3.connect(database)
     try:
-        names = [row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")]
-        tables = {}
-        for name in names:
-            if name in TIMED_TABLES:
-                continue
-            cursor = connection.execute("SELECT * FROM " + name)  # noqa: S608 - catalogue names
-            kept = [i for i, column in enumerate(cursor.description) if column[0] not in TIMED_COLUMNS]
-            tables[name] = sorted((tuple(row[i] for i in kept) for row in cursor.fetchall()), key=repr)
-        return tables
+        for statement in CLEAR_TIMES:
+            connection.execute(statement)
+        tables: dict[str, list[str]] = {}
+        for line in connection.iterdump():
+            match = INSERT.match(line)
+            if match:
+                tables.setdefault(match.group(1), []).append(line)
+        connection.rollback()
     finally:
         connection.close()
+    return {table: sorted(rows) for table, rows in tables.items()}
 
 
 @pytest.mark.skipif(equity.load_poker_eval() is None, reason="the equity engine is not installed")

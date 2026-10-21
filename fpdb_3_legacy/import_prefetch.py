@@ -18,6 +18,7 @@ save it.
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import multiprocessing
 import os
@@ -58,6 +59,8 @@ def worker_count(threads: int | None) -> int:
 
 
 _worker_config: Any = None
+# Where a worker reports the files it starts: a queued job is not one yet.
+_worker_started: Any = None
 
 
 class _PlaceholderIds:
@@ -83,8 +86,9 @@ class _PlaceholderIds:
         return {}
 
 
-def _start_worker(config_file: str) -> None:
-    global _worker_config
+def _start_worker(config_file: str, started: Any = None) -> None:
+    global _worker_config, _worker_started
+    _worker_started = started
     logging.disable(logging.CRITICAL)
     from fpdb_3_legacy.Configuration import Config
 
@@ -93,6 +97,8 @@ def _start_worker(config_file: str) -> None:
 
 def exact_equities(job: PrefetchJob) -> dict[equity.ExactKey, equity.EquityResult]:
     """Parse and derive one file; return the exact equities that computed. Never raises."""
+    if _worker_started is not None:
+        _worker_started.put(job.path)
     try:
         from fpdb_3_legacy.iPoker.dispatcher import get_parser_class_for_path
         from fpdb_3_legacy.parser_registry import get_parser_class
@@ -114,11 +120,10 @@ def exact_equities(job: PrefetchJob) -> dict[equity.ExactKey, equity.EquityResul
             converter.start()
             ids = _PlaceholderIds()
             for hand in converter.getProcessedHands():
-                try:
+                # A hand that fails here fails in the import too, which reports it.
+                with contextlib.suppress(Exception):
                     hand.prepInsert(ids)
                     hand.assembleHand()
-                except Exception:  # noqa: BLE001 - the import derives this hand again and reports it
-                    continue
         return dict(recorded)
     except Exception:  # noqa: BLE001 - a worker that fails only means the import computes the equities itself
         return {}
@@ -131,11 +136,14 @@ class EquityPrefetch:
         self._directory = tempfile.TemporaryDirectory(prefix="fpdb-import-")
         config_file = Path(self._directory.name) / "HUD_config.xml"
         config_file.write_text(config.doc.toxml(), encoding="utf-8")
+        context = multiprocessing.get_context("spawn")
+        self._started_queue = context.SimpleQueue()
+        self._started: set[str] = set()
         self._pool = ProcessPoolExecutor(
             max_workers=workers,
-            mp_context=multiprocessing.get_context("spawn"),
+            mp_context=context,
             initializer=_start_worker,
-            initargs=(str(config_file),),
+            initargs=(str(config_file), self._started_queue),
         )
         self._futures: dict[str, Future[dict[equity.ExactKey, equity.EquityResult]]] = {}
 
@@ -144,21 +152,29 @@ class EquityPrefetch:
             self._futures[job.path] = self._pool.submit(exact_equities, job)
 
     def before_import(self, path: str) -> None:
-        """Make the file's equities available, if a worker has them or is computing them.
+        """Make the file's equities available if a worker has them or has started on them.
 
-        A file no worker has started is cancelled and left to the import: waiting
-        for it would be slower than computing it.
+        Only a file a worker reported starting is waited for: the rest of its
+        work is less than all of it. A queued file is left to the import, which
+        computes its equities as before; the pool marks a queued job running
+        before any worker has it, so its state cannot tell the two apart.
         """
         future = self._futures.pop(path, None)
-        if future is None or future.cancel():
+        if future is None:
             return
-        try:
-            equity.remember_exact(future.result())
-        except Exception:  # noqa: BLE001 - e.g. a worker killed; the import computes the equities itself
-            log.debug("Equity prefetch for %s failed", path, exc_info=True)
+        while not self._started_queue.empty():
+            self._started.add(self._started_queue.get())
+        if not future.done() and path not in self._started:
+            future.cancel()
+            return
+        if future.cancelled() or future.exception() is not None:
+            log.debug("Equity prefetch for %s failed", path, exc_info=future.exception())
+            return
+        equity.remember_exact(future.result())
 
     def close(self) -> None:
         self._pool.shutdown(wait=False, cancel_futures=True)
+        self._started_queue.close()
         self._futures.clear()
         equity.forget_exact()
         self._directory.cleanup()
