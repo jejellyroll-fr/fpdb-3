@@ -97,6 +97,35 @@ def _candidate_files(folder: str) -> Iterable[str]:
                 yield path
 
 
+# PokerTracker's own export format carries hands of several rooms. IdentifySite
+# names them "PokerTracker", or an iPoker skin whenever "GAME #" appears -- Merge's
+# "MERGE_GAME #" included -- and leaves the room to the parser, which reads it
+# from the hand header. The scan reads it the same way, so preview and import agree.
+_POKERTRACKER = "PokerTracker"
+_HEAD_CHARS = 5000
+
+
+def _room(found: Any, path: str) -> str | None:
+    """The room a file's hands were played in, as the import will record it."""
+    site = getattr(found, "site", None)
+    name = getattr(site, "name", None)
+    if getattr(site, "filter_name", None) != _POKERTRACKER:
+        return name
+    from fpdb_3_legacy.PokerTrackerToFpdb import PokerTracker
+
+    try:
+        with open(path, encoding=getattr(found, "kodec", None) or "utf-8", errors="replace") as handle:
+            head = handle.read(_HEAD_CHARS)
+    except (OSError, LookupError):
+        return name
+    match = PokerTracker.re_Site.search(head)
+    if match is None:
+        return name
+    room = PokerTracker.sites[match.group("SITE")][0]
+    # The parser too keeps the iPoker skin IdentifySite found; any other room is the header's.
+    return name if room == "iPoker" else room
+
+
 def scan_folder(config: Any, folder: str, identifier: Any = None) -> ExportScan:
     """Sort the files under ``folder`` by room, as the bulk import will.
 
@@ -119,7 +148,7 @@ def scan_folder(config: Any, folder: str, identifier: Any = None) -> ExportScan:
             continue
         identifier.processFile(path)
         found = identifier.get_fobj(path)
-        site = getattr(getattr(found, "site", None), "name", None) if found else None
+        site = _room(found, path) if found else None
         if site is None:
             scan.unsupported.append(path)
             continue

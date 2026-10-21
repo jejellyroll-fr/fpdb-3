@@ -134,8 +134,8 @@ def test_the_summary_is_told_room_by_room_busiest_first() -> None:
     ]
 
 
-def test_the_importer_keeps_each_file_s_result(tmp_path) -> None:
-    """``Importer.file_results`` is what the summary reads; a file that blows up counts as an error."""
+def bare_importer() -> Importer:
+    """An Importer that runs importFiles without a database; _import_despatch is the test's."""
     importer = Importer.__new__(Importer)
     importer.settings = {}
     importer.mode = "bulk"
@@ -145,6 +145,12 @@ def test_the_importer_keeps_each_file_s_result(tmp_path) -> None:
     importer._start_equity_prefetch = lambda: None
     importer.logImport = MagicMock()
     importer._relocate_processed_file = MagicMock()
+    return importer
+
+
+def test_the_importer_keeps_each_file_s_result(tmp_path) -> None:
+    """``Importer.file_results`` is what the summary reads; a file that blows up counts as an error."""
+    importer = bare_importer()
     good, bad = FPDBFile(str(tmp_path / "good.txt")), FPDBFile(str(tmp_path / "bad.txt"))
     good.site = SimpleNamespace(name="Winamax")
     bad.site = SimpleNamespace(name="PokerStars.COM")
@@ -162,6 +168,36 @@ def test_the_importer_keeps_each_file_s_result(tmp_path) -> None:
         good.path: FileImportResult("Winamax", stored=7, duplicates=2, partial=1),
         bad.path: FileImportResult("PokerStars.COM", errors=1),
     }
+
+
+@pytest.mark.parametrize(("detected", "expected"), [("Merge", "Merge"), (None, "PokerTracker"), ("", "PokerTracker")])
+def test_the_room_the_parser_found_wins_over_the_identified_one(tmp_path, detected, expected) -> None:
+    """A PokerTracker-format file is identified as "PokerTracker"; only parsing tells which room it was."""
+    importer = bare_importer()
+    export = FPDBFile(str(tmp_path / "export.txt"))
+    export.site = SimpleNamespace(name="PokerTracker")
+    importer.filelist = {export.path: export}
+    importer._import_despatch = lambda _f: (3, 0, 0, 0, 0, 0.1, detected)
+
+    importer.importFiles(None)
+
+    assert importer.file_results[export.path].site == expected
+
+
+def test_pokertracker_format_files_are_previewed_under_their_own_room(config, tmp_path) -> None:
+    """The scan reads the room from the hand header as the parser does, so preview and import agree."""
+    corpus_dir = CASH / "PokerTracker"
+    for path in sorted(p for p in corpus_dir.rglob("*.txt") if p.stat().st_size):
+        shutil.copy(path, tmp_path / path.name)
+
+    scan = scan_folder(config, str(tmp_path))
+
+    assert "PokerTracker" not in scan.rooms
+    assert {"Merge", "Microgaming", "Everest"} <= set(scan.rooms)
+    merge_files = {Path(p).name for p in scan.rooms["Merge"]}
+    for name in merge_files | {Path(p).name for f in scan.rooms.values() for p in f}:
+        header = (tmp_path / name).read_bytes()[:300]
+        assert (b"MERGE_GAME #" in header or b"Merge Game #" in header) == (name in merge_files), name
 
 
 def test_the_validity_rule_is_the_importer_s() -> None:

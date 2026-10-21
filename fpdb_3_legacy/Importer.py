@@ -1018,10 +1018,13 @@ class Importer:
                     prefetch.before_import(f)
 
                 try:
-                    (stored, duplicates, partial, skipped, errors, ttime, _) = self._import_despatch(self.filelist[f])
-                    self.file_results[f] = FileImportResult(
-                        _site_name(self.filelist[f]), stored, duplicates, partial, skipped, errors
+                    (stored, duplicates, partial, skipped, errors, ttime, detected) = self._import_despatch(
+                        self.filelist[f]
                     )
+                    # The parser's room when it found one: a PokerTracker-format file is
+                    # identified as "PokerTracker" and only parsing tells Merge from Everest.
+                    room = detected if isinstance(detected, str) and detected else _site_name(self.filelist[f])
+                    self.file_results[f] = FileImportResult(room, stored, duplicates, partial, skipped, errors)
                     totstored += stored
                     totdups += duplicates
                     totpartial += partial
