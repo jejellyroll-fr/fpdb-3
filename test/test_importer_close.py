@@ -62,7 +62,6 @@ def test_close_releases_the_importers_own_connections() -> None:
     importer, path = _sqlite_importer()
     try:
         assert importer.database.connection is not None
-        assert importer.writerdbs and all(db.connection is not None for db in importer.writerdbs)
 
         importer.close()
 
@@ -72,19 +71,28 @@ def test_close_releases_the_importers_own_connections() -> None:
         path.unlink(missing_ok=True)
 
 
-def test_every_writer_thread_gets_its_connection_closed() -> None:
-    # One connection per thread, so a multi-threaded import leaves several
-    # behind; closing only the importer's own would still hold the file.
+def test_threads_open_no_writer_connection() -> None:
+    # threads now sets the equity workers of a bulk import (#443); it used to
+    # open one connection per thread that nothing wrote through.
     importer, path = _sqlite_importer(threads=3)
     try:
-        writers = list(importer.writerdbs)
-        assert len(writers) == 3
+        assert importer.writerdbs == []
 
         importer.close()
 
-        assert all(db.connection is None for db in writers)
+        assert importer.database.connection is None
     finally:
         path.unlink(missing_ok=True)
+
+
+def test_every_writer_gets_its_connection_closed() -> None:
+    # Closing only the importer's own connection would still hold the file.
+    writers = [MagicMock(name=f"writer{i}") for i in range(3)]
+
+    _bare_importer([MagicMock(name="own"), *writers]).close()
+
+    for writer in writers:
+        writer.close_connection.assert_called_once_with()
 
 
 def test_closing_twice_is_a_no_op() -> None:

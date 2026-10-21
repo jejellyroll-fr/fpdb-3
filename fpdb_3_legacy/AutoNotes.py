@@ -442,11 +442,21 @@ def rule_enabled(config, rule_id: str, rule_set_name: str = RULE_SET_HWANG_PLO_P
 
 
 def _autonotes_node(config):
+    """The <autonotes> element, a child of the configuration's root.
+
+    That is where the example configuration has it and where
+    ensure_autonotes_node creates it. Only the root's children are looked at:
+    getElementsByTagName walked the whole document, and the import asks about
+    ten times per hand, which was a third of the import time (#443).
+    """
     doc = getattr(config, "doc", None)
-    if doc is None:
+    root = getattr(doc, "documentElement", None) if doc is not None else None
+    if root is None:
         return None
-    nodes = doc.getElementsByTagName("autonotes")
-    return nodes[0] if nodes else None
+    for child in root.childNodes:
+        if getattr(child, "tagName", None) == "autonotes":
+            return child
+    return None
 
 
 def _string_to_bool(value: str, default=True) -> bool:
