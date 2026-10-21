@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 13:02+0200\n"
+"POT-Creation-Date: 2026-10-21 13:33+0200\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -29,7 +29,7 @@ msgstr "%s ne peut pas encore lire toutes les mains de stud/razz."
 #: fpdb_3_legacy/AbsoluteToFpdb.py
 #, python-format
 msgid "AbsoluteToFpdb.determineGameType: '%s'"
-msgstr ""
+msgstr "AbsoluteToFpdb.determineGameType : '%s'"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py
 #, python-format
@@ -81,7 +81,7 @@ msgstr ""
 #: fpdb_3_legacy/BossToFpdb.py
 #, python-format
 msgid "BossToFpdb.determineGameType: '%s'"
-msgstr ""
+msgstr "BossToFpdb.determineGameType : '%s'"
 
 #: fpdb_3_legacy/BossToFpdb.py
 #, python-format
@@ -107,7 +107,7 @@ msgstr "Configuration modifiée*"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 msgid "Configuration up to date"
-msgstr ""
+msgstr "Configuration à jour"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 msgid "Reload configuration"
@@ -123,11 +123,11 @@ msgstr "Rechargement..."
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 msgid "Restart required"
-msgstr ""
+msgstr "Redémarrage nécessaire"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 msgid "↻"
-msgstr ""
+msgstr "↻"
 
 #: fpdb_3_legacy/EnetToFpdb.py
 #, python-format
@@ -152,12 +152,12 @@ msgstr "EnetToFpdb.readHandInfo : impossible de déterminer la devise."
 #: fpdb_3_legacy/EnetToFpdb.py fpdb_3_legacy/EntractionToFpdb.py
 #: fpdb_3_legacy/OnGameToFpdb.py
 msgid "not found"
-msgstr ""
+msgstr "introuvable"
 
 #: fpdb_3_legacy/EntractionToFpdb.py
 #, python-format
 msgid "EntractionToFpdb.determineGameType: '%s'"
-msgstr ""
+msgstr "EntractionToFpdb.determineGameType : '%s'"
 
 #: fpdb_3_legacy/EntractionToFpdb.py
 #, python-format
@@ -192,7 +192,7 @@ msgstr "EverestToFpdb.readHandInfo : '%s'"
 #: fpdb_3_legacy/EverleafToFpdb.py
 #, python-format
 msgid "EverleafToFpdb.determineGameType: '%s'"
-msgstr ""
+msgstr "EverleafToFpdb.determineGameType : '%s'"
 
 #: fpdb_3_legacy/EverleafToFpdb.py
 #, python-format
@@ -209,43 +209,43 @@ msgstr "EverleafToFpdb.readHandInfo : '%s'"
 
 #: fpdb_3_legacy/Filters.py
 msgid "2-7 Drawmaha"
-msgstr ""
+msgstr "2-7 Drawmaha"
 
 #: fpdb_3_legacy/Filters.py
 msgid "2-7 Razz"
-msgstr ""
+msgstr "Razz 2-7"
 
 #: fpdb_3_legacy/Filters.py
 msgid "5 Card Draw"
-msgstr ""
+msgstr "Draw 5 cartes"
 
 #: fpdb_3_legacy/Filters.py
 msgid "5 Card Omaha"
-msgstr ""
+msgstr "Omaha 5 cartes"
 
 #: fpdb_3_legacy/Filters.py
 msgid "5 Card Omaha Hi/Lo"
-msgstr ""
+msgstr "Omaha 5 cartes Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py
 msgid "5 Card Stud"
-msgstr ""
+msgstr "Stud 5 cartes"
 
 #: fpdb_3_legacy/Filters.py
 msgid "6 Card Omaha"
-msgstr ""
+msgstr "Omaha 6 cartes"
 
 #: fpdb_3_legacy/Filters.py
 msgid "7 Card Stud"
-msgstr ""
+msgstr "Stud 7 cartes"
 
 #: fpdb_3_legacy/Filters.py
 msgid "7 Card Stud Hi/Lo"
-msgstr ""
+msgstr "Stud 7 cartes Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py
 msgid "A-5 Single Draw"
-msgstr ""
+msgstr "A-5 Single Draw"
 
 #: fpdb_3_legacy/Filters.py
 msgid "All"
@@ -261,23 +261,23 @@ msgstr "Et:"
 
 #: fpdb_3_legacy/Filters.py
 msgid "AoF Hold'em"
-msgstr ""
+msgstr "Hold'em AoF"
 
 #: fpdb_3_legacy/Filters.py
 msgid "AoF Omaha"
-msgstr ""
+msgstr "Omaha AoF"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Badacey"
-msgstr ""
+msgstr "Badacey"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Badeucey"
-msgstr ""
+msgstr "Badeucey"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Badugi"
-msgstr ""
+msgstr "Badugi"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Between:"
@@ -289,7 +289,7 @@ msgstr "Buy-in"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
 msgid "Cal"
-msgstr ""
+msgstr "Cal"
 
 # --- Vague 2: filters panel ---
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiResearchViews.py
@@ -298,15 +298,15 @@ msgstr "Catégorie"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Courchevel"
-msgstr ""
+msgstr "Courchevel"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Courchevel Hi/Lo"
-msgstr ""
+msgstr "Courchevel Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Currencies"
-msgstr ""
+msgstr "Devises"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Date:"
@@ -318,15 +318,15 @@ msgstr "Fait"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Double hold'em"
-msgstr ""
+msgstr "Double hold'em"
 
 #: fpdb_3_legacy/Filters.py
 msgid "EV"
-msgstr ""
+msgstr "EV"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Euro"
-msgstr ""
+msgstr "Euro"
 
 #: fpdb_3_legacy/Filters.py
 msgid "From:"
@@ -350,7 +350,7 @@ msgstr "Héros:"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Hold'em"
-msgstr ""
+msgstr "Hold'em"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Hole Cards"
@@ -358,7 +358,7 @@ msgstr "Cartes privatives"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Irish"
-msgstr ""
+msgstr "Irish"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Limit Type"
@@ -374,7 +374,7 @@ msgstr "Min # Mains:"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Net profit excluding splash pots"
-msgstr ""
+msgstr "Profit net hors splash pots"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Non-Showdown Winnings"
@@ -394,11 +394,11 @@ msgstr "Dépareillées"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Omaha"
-msgstr ""
+msgstr "Omaha"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Omaha Hi/Lo"
-msgstr ""
+msgstr "Omaha Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
 msgid "Pick a date"
@@ -406,7 +406,7 @@ msgstr "Choisir une date"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Play Money"
-msgstr ""
+msgstr "Argent fictif"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Positions:"
@@ -414,7 +414,7 @@ msgstr "Positions :"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Razz"
-msgstr ""
+msgstr "Razz"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Refresh Filters"
@@ -450,7 +450,7 @@ msgstr "Gains avec abattage"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Single Draw 2-7 Lowball"
-msgstr ""
+msgstr "Single Draw 2-7 Lowball"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/ModernSitePreferences.py
@@ -467,7 +467,7 @@ msgstr "À:"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Tournament Dollar"
-msgstr ""
+msgstr "Dollar de tournoi"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Tourney"
@@ -475,30 +475,30 @@ msgstr "Tournoi"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Triple Draw 2-7 Lowball"
-msgstr ""
+msgstr "Triple Draw 2-7 Lowball"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Triple Draw A-5 Lowball"
-msgstr ""
+msgstr "Triple Draw A-5 Lowball"
 
 #: fpdb_3_legacy/Filters.py
 msgid "US Dollar"
-msgstr ""
+msgstr "Dollar US"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
 #, python-format
 msgid "FullTiltPokerSummary.parseSummary: '%s'"
-msgstr ""
+msgstr "FullTiltPokerSummary.parseSummary : '%s'"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
 #, python-format
 msgid "FullTiltPokerSummary.parseSummaryXLS Game '%s' not found"
-msgstr ""
+msgstr "FullTiltPokerSummary.parseSummaryXLS : jeu '%s' introuvable"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
 #, python-format
 msgid "FullTiltPokerSummary.parseSummaryXLS: '%s' '%s"
-msgstr ""
+msgstr "FullTiltPokerSummary.parseSummaryXLS : '%s' '%s"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
 msgid "Unable to locate currency"
@@ -506,7 +506,7 @@ msgstr "Impossible de trouver la devise"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
 msgid "parseSummary FAIL"
-msgstr ""
+msgstr "Échec de parseSummary"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
 #, python-format
@@ -516,7 +516,7 @@ msgstr "%s n'a pas réussi à identifier le bouton (main #%s annulée?)"
 #: fpdb_3_legacy/FulltiltToFpdb.py
 #, python-format
 msgid "FulltiltToFpdb.determineGameType: '%s'"
-msgstr ""
+msgstr "FulltiltToFpdb.determineGameType : '%s'"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
 #, python-format
@@ -534,17 +534,17 @@ msgstr "FulltiltToFpdb.readHandInfo : '%s'"
 #: fpdb_3_legacy/FulltiltToFpdb.py
 #, python-format
 msgid "Hand '%s' was cancelled."
-msgstr ""
+msgstr "La main '%s' a été annulée."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
 #, python-format
 msgid "Hand '%s' was not dealt (dead hand)."
-msgstr ""
+msgstr "La main '%s' n'a pas été distribuée (main morte)."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
 #, python-format
 msgid "Hand is not cleanly split into pre and post Summary %s."
-msgstr ""
+msgstr "La main n'est pas nettement séparée avant et après le résumé %s."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
 #, python-format
@@ -556,12 +556,16 @@ msgid ""
 "\n"
 "Database is back. Auto Import resumed."
 msgstr ""
+"\n"
+"La base de données est de retour. Auto-importation reprise."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid ""
 "\n"
 "Database unreachable. Auto Import paused, retrying..."
 msgstr ""
+"\n"
+"Base de données injoignable. Auto-importation en pause, nouvelle tentative..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid ""
@@ -569,12 +573,17 @@ msgid ""
 "Stop requested while an import was still running; it will finish in the "
 "background."
 msgstr ""
+"\n"
+"Arrêt demandé alors qu'un import était en cours ; il se terminera en arrière-"
+"plan."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid ""
 "\n"
 "SwC Native Live HUD tailing thread started."
 msgstr ""
+"\n"
+"Thread de suivi du HUD natif SwC démarré."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid ""
@@ -582,6 +591,9 @@ msgid ""
 "SwC live capture is not available on this platform. Importing SwC files "
 "still works."
 msgstr ""
+"\n"
+"La capture en direct SwC n'est pas disponible sur cette plateforme. L'import "
+"des fichiers SwC fonctionne toujours."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, python-brace-format
@@ -590,6 +602,9 @@ msgid ""
 "SwC live capture unavailable: {reason}. Importing SwC hand history files "
 "still works."
 msgstr ""
+"\n"
+"Capture en direct SwC indisponible : {reason}. L'import des fichiers "
+"d'historique SwC fonctionne toujours."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid "Auto Import Ready.\n"
@@ -601,7 +616,7 @@ msgstr "Import automatique en cours…"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid "Database unreachable - retrying"
-msgstr ""
+msgstr "Base de données injoignable - nouvelle tentative"
 
 # --- Vague 2: auto import panel ---
 #: fpdb_3_legacy/GuiAutoImport.py
@@ -610,7 +625,7 @@ msgstr "Import automatique FPDB"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid "Import cycle is taking longer than usual..."
-msgstr ""
+msgstr "Le cycle d'import prend plus de temps que d'habitude..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid "Log"
@@ -643,6 +658,8 @@ msgid ""
 "SwC live capture could not attach: {reason}. Importing SwC hand history "
 "files still works."
 msgstr ""
+"La capture en direct SwC n'a pas pu s'attacher : {reason}. L'import des "
+"fichiers d'historique SwC fonctionne toujours."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid "Time between imports (seconds):"
@@ -728,7 +745,7 @@ msgstr "Pool"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 msgid "Recent generated notes"
-msgstr ""
+msgstr "Notes générées récentes"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 msgid "Refresh Pool Summary"
@@ -758,7 +775,7 @@ msgstr "À"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 msgid "Top players by generated notes"
-msgstr ""
+msgstr "Joueurs avec le plus de notes générées"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 msgid "Top rule: -"
@@ -809,6 +826,15 @@ msgid ""
 "Errors: {errs}\n"
 "Time: {elapsed}s"
 msgstr ""
+"Import terminé.\n"
+"\n"
+"Fichiers traités : {files}\n"
+"Enregistrées : {stored}\n"
+"Doublons : {dups}\n"
+"Partielles : {partial}\n"
+"Ignorées : {skipped}\n"
+"Erreurs : {errs}\n"
+"Durée : {elapsed} s"
 
 # --- Vague 2: bulk import panel ---
 #: fpdb_3_legacy/GuiBulkImport.py
@@ -830,6 +856,11 @@ msgid ""
 "Check that the configured paths contain hand histories (plain text files), "
 "not just archives or exports."
 msgstr ""
+"Aucun fichier d'historique importable n'a été trouvé dans les répertoires "
+"sélectionnés.\n"
+"\n"
+"Vérifiez que les chemins configurés contiennent des historiques de mains "
+"(fichiers texte), et pas seulement des archives ou des exports."
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, python-brace-format
@@ -861,10 +892,12 @@ msgstr "Choisissez le dossier où vous voulez auto-importer"
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
 msgstr ""
+"Démarrer aussi HUD_main (décochez si le HUD ou l'auto-importation tourne "
+"déjà)."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 msgid "Capture failed to start — see the log above."
-msgstr ""
+msgstr "La capture n'a pas pu démarrer — voir le journal ci-dessus."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 msgid "Default game:"
@@ -872,11 +905,11 @@ msgstr "Jeu par défaut :"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 msgid "Dry run (no DB insert)"
-msgstr ""
+msgstr "Essai à blanc (pas d'insertion en base)"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 msgid "Finishing previous capture…"
-msgstr ""
+msgstr "Fin de la capture précédente…"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 msgid "Idle."
@@ -884,11 +917,11 @@ msgstr "Inactif."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 msgid "Interface:"
-msgstr ""
+msgstr "Interface :"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 msgid "Launch HUD"
-msgstr ""
+msgstr "Lancer le HUD"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 msgid "Refresh interfaces"
@@ -896,11 +929,11 @@ msgstr "Rafraîchir les interfaces"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
-msgstr ""
+msgstr "Demande des privilèges… acceptez la demande, puis jouez sur CoinPoker."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 msgid "Start capture"
-msgstr ""
+msgstr "Démarrer la capture"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py fpdb_3_legacy/session_guard_dialog.py
 #: fpdb_3_legacy/swc_poker_console.py
@@ -909,7 +942,7 @@ msgstr "Arrêter"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 msgid "Stopping…"
-msgstr ""
+msgstr "Arrêt…"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "+ New Rule"
@@ -923,12 +956,12 @@ msgstr "Actions"
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, python-format
 msgid "Are you sure you want to delete rule '%s'?"
-msgstr ""
+msgstr "Voulez-vous vraiment supprimer la règle '%s' ?"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, python-brace-format
 msgid "Board ({flop})"
-msgstr ""
+msgstr "Board ({flop})"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Board:"
@@ -936,11 +969,11 @@ msgstr "Tableau:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Captured Evidence Schema"
-msgstr ""
+msgstr "Schéma des éléments capturés"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Custom Auto Notes rules saved successfully!"
-msgstr ""
+msgstr "Règles de notes automatiques personnalisées enregistrées !"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Delete Rule"
@@ -948,11 +981,11 @@ msgstr "Supprimer la règle"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Duplicate Rule IDs"
-msgstr ""
+msgstr "ID de règles en double"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Empty HH"
-msgstr ""
+msgstr "Historique vide"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -970,19 +1003,19 @@ msgstr "Cartes privatives ({hole})"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Hole:"
-msgstr ""
+msgstr "Cartes privatives :"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Live Testing Sandbox"
-msgstr ""
+msgstr "Bac à sable de test en direct"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Logical Conditions (No-Code GUI)"
-msgstr ""
+msgstr "Conditions logiques (interface sans code)"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "No Rule"
@@ -993,14 +1026,18 @@ msgstr "Aucune règle"
 msgid ""
 "Note Template (Tags: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, {spr}):"
 msgstr ""
+"Modèle de note (balises : {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, "
+"{spr}) :"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Paste raw GGPoker or PokerStars hand history text here to test..."
 msgstr ""
+"Collez ici le texte brut d'un historique de main GGPoker ou PokerStars pour "
+"tester..."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Please paste a Hand History text to evaluate against."
-msgstr ""
+msgstr "Collez le texte d'un historique de main sur lequel évaluer la règle."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Please select or create a rule to evaluate."
@@ -1008,15 +1045,15 @@ msgstr "Sélectionnez ou créez une règle à évaluer."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Remove Condition"
-msgstr ""
+msgstr "Retirer la condition"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Root Operator:"
-msgstr ""
+msgstr "Opérateur racine :"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Rule / Group"
-msgstr ""
+msgstr "Règle / groupe"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Rule ID:"
@@ -1036,7 +1073,7 @@ msgstr "Jeu de règles :"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Rule Sets & Custom Rules"
-msgstr ""
+msgstr "Jeux de règles et règles personnalisées"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Saved"
@@ -1052,7 +1089,7 @@ msgstr "Statut : PRÊT"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Test Source (Raw Hand History Text):"
-msgstr ""
+msgstr "Source de test (texte brut d'historique de main) :"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, python-format
@@ -1061,19 +1098,22 @@ msgid ""
 "\n"
 "Give each rule a unique ID before saving."
 msgstr ""
+"Ces ID de règles sont utilisés plus d'une fois : %s\n"
+"\n"
+"Donnez un ID unique à chaque règle avant d'enregistrer."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "➕ Add Condition"
-msgstr ""
+msgstr "➕ Ajouter une condition"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "💾 Save Rules"
-msgstr ""
+msgstr "💾 Enregistrer les règles"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "📋 Duplicate"
-msgstr ""
+msgstr "📋 Dupliquer"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -1082,11 +1122,11 @@ msgstr "🗑️ Supprimer"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "🧪 Evaluate Rule"
-msgstr ""
+msgstr "🧪 Évaluer la règle"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "🧪 Test Sandbox"
-msgstr ""
+msgstr "🧪 Bac à sable de test"
 
 # --- Vague 2: fpdb-3 UI (menus & database panel) ---
 #: fpdb_3_legacy/GuiDatabase.py
@@ -1095,7 +1135,7 @@ msgstr "Un nom de base de données est requis."
 
 #: fpdb_3_legacy/GuiDatabase.py
 msgid "A host is required for PostgreSQL/MySQL."
-msgstr ""
+msgstr "Un hôte est requis pour PostgreSQL/MySQL."
 
 #: fpdb_3_legacy/GuiDatabase.py
 msgid "Add database"
@@ -1191,7 +1231,7 @@ msgstr "Mot de passe :"
 
 #: fpdb_3_legacy/GuiDatabase.py
 msgid "Port must be a number between 1 and 65535."
-msgstr ""
+msgstr "Le port doit être un nombre entre 1 et 65535."
 
 #: fpdb_3_legacy/GuiDatabase.py
 msgid "Port:"
@@ -1202,6 +1242,8 @@ msgid ""
 "SQLite databases are created automatically. Use 'Create tables' to "
 "initialise the schema."
 msgstr ""
+"Les bases SQLite sont créées automatiquement. Utilisez « Créer les tables » "
+"pour initialiser le schéma."
 
 #: fpdb_3_legacy/GuiDatabase.py
 msgid "Set as default"
@@ -1214,12 +1256,15 @@ msgstr "Tester la connexion"
 #: fpdb_3_legacy/GuiDatabase.py
 msgid "There is no other database to migrate into. Add one first."
 msgstr ""
+"Il n'y a pas d'autre base vers laquelle migrer. Ajoutez-en une d'abord."
 
 #: fpdb_3_legacy/GuiDatabase.py
 msgid ""
 "This is the only configured database and cannot be deleted — fpdb needs at "
 "least one. Add another database first."
 msgstr ""
+"C'est la seule base de données configurée, elle ne peut pas être supprimée — "
+"fpdb en a besoin d'au moins une. Ajoutez d'abord une autre base."
 
 #: fpdb_3_legacy/GuiDatabase.py
 msgid "User"
@@ -1235,7 +1280,7 @@ msgstr "Actions du field"
 
 #: fpdb_3_legacy/GuiDrillDown.py
 msgid "Field population"
-msgstr ""
+msgstr "Population du field"
 
 #: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Loading hands…"
@@ -1247,7 +1292,7 @@ msgstr "Suiv. ▶"
 
 #: fpdb_3_legacy/GuiDrillDown.py
 msgid "Select a row to see the hands behind both sides of it."
-msgstr ""
+msgstr "Sélectionnez une ligne pour voir les mains derrière ses deux côtés."
 
 #: fpdb_3_legacy/GuiDrillDown.py
 msgid "Source hands"
@@ -1258,6 +1303,8 @@ msgid ""
 "These hands use the same filters as the other side; only the population "
 "differs."
 msgstr ""
+"Ces mains utilisent les mêmes filtres que l'autre côté ; seule la population "
+"diffère."
 
 #: fpdb_3_legacy/GuiDrillDown.py
 msgid "Your actions"
@@ -1265,7 +1312,7 @@ msgstr "Vos actions"
 
 #: fpdb_3_legacy/GuiDrillDown.py
 msgid "Your population"
-msgstr ""
+msgstr "Votre population"
 
 # --- Vague 2: hand/log viewers & auto notes ---
 #: fpdb_3_legacy/GuiDrillDown.py
@@ -1288,7 +1335,7 @@ msgstr "Mains"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
 msgid "Net profit excluding splash"
-msgstr ""
+msgstr "Profit net hors splash"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
 msgid "Non-showdown"
@@ -1296,7 +1343,7 @@ msgstr "Sans-showdown"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
 msgid "Profit"
-msgstr ""
+msgstr "Profit"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
 msgid "Refresh Graph"
@@ -1309,27 +1356,27 @@ msgstr "Showdown"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "100–150% pot"
-msgstr ""
+msgstr "100–150 % du pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "25–50% pot"
-msgstr ""
+msgstr "25–50 % du pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "3-bet"
-msgstr ""
+msgstr "3-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "4-bet"
-msgstr ""
+msgstr "4-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "50–75% pot"
-msgstr ""
+msgstr "50–75 % du pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "75–100% pot"
-msgstr ""
+msgstr "75–100 % du pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Advanced review filters"
@@ -1345,39 +1392,39 @@ msgstr "Toutes les mains de départ"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Analytics data unavailable"
-msgstr ""
+msgstr "Données d'analyse indisponibles"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Any"
-msgstr ""
+msgstr "Indifférent"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Any card"
-msgstr ""
+msgstr "N'importe quelle carte"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Any sizing"
-msgstr ""
+msgstr "Toute taille"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Apply review filters"
-msgstr ""
+msgstr "Appliquer les filtres de revue"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Bet"
-msgstr ""
+msgstr "Mise"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Bet / raise sizing"
-msgstr ""
+msgstr "Taille de mise / relance"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Broadway"
-msgstr ""
+msgstr "Broadway"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Call open"
-msgstr ""
+msgstr "Call d'ouverture"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Called"
@@ -1385,7 +1432,7 @@ msgstr "Payé"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Check-raise"
-msgstr ""
+msgstr "Check-raise"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Checked"
@@ -1393,7 +1440,7 @@ msgstr "Checké"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Choose hands…"
-msgstr ""
+msgstr "Choisir les mains…"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Clear"
@@ -1401,7 +1448,7 @@ msgstr "Effacer"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Continuation bet"
-msgstr ""
+msgstr "Mise de continuation"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourHandViewer.py
 msgid "Copy hand history"
@@ -1409,31 +1456,31 @@ msgstr "Copier l'historique de la main"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Did not VPIP"
-msgstr ""
+msgstr "Pas de VPIP"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/research_labels.py
 msgid "Effective stack (BB)"
-msgstr ""
+msgstr "Tapis effectif (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Exact known cards"
-msgstr ""
+msgstr "Cartes connues exactes"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Exclude splash pots"
-msgstr ""
+msgstr "Exclure les splash pots"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Faced 3-bet"
-msgstr ""
+msgstr "Face à un 3-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Faced c-bet"
-msgstr ""
+msgstr "Face à un c-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Faced open"
-msgstr ""
+msgstr "Face à une ouverture"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Filter: "
@@ -1457,7 +1504,7 @@ msgstr "Main de départ Hold'em"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Invalid review filter"
-msgstr ""
+msgstr "Filtre de revue invalide"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Invert"
@@ -1465,16 +1512,18 @@ msgstr "Inverser"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Limp"
-msgstr ""
+msgstr "Limp"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Net result (BB)"
-msgstr ""
+msgstr "Résultat net (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid ""
 "No hands were queried, to avoid presenting an incomplete result as empty."
 msgstr ""
+"Aucune main n'a été demandée, pour ne pas présenter un résultat incomplet "
+"comme vide."
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Offsuit"
@@ -1482,11 +1531,11 @@ msgstr "Dépareillée"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Over 150% pot"
-msgstr ""
+msgstr "Plus de 150 % du pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Pairs"
-msgstr ""
+msgstr "Paires"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Players in hand"
@@ -1494,43 +1543,43 @@ msgstr "Joueurs dans la main"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Postflop"
-msgstr ""
+msgstr "Postflop"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Preflop"
-msgstr ""
+msgstr "Préflop"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "RFI"
-msgstr ""
+msgstr "RFI"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Raised"
-msgstr ""
+msgstr "Relancé"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Saw flop"
-msgstr ""
+msgstr "A vu le flop"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Saw river"
-msgstr ""
+msgstr "A vu la river"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Saw turn"
-msgstr ""
+msgstr "A vu la turn"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Splash pots only"
-msgstr ""
+msgstr "Splash pots uniquement"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Squeeze"
-msgstr ""
+msgstr "Squeeze"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Starting-hand range"
-msgstr ""
+msgstr "Range de mains de départ"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid ""
@@ -1538,25 +1587,31 @@ msgid ""
 "results were queried; check the database and rebuild analytics data before "
 "retrying."
 msgstr ""
+"L'état des données d'analyse requis par ces filtres n'a pas pu être vérifié. "
+"Aucun résultat n'a été demandé ; vérifiez la base de données et "
+"reconstruisez les données d'analyse avant de réessayer."
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, python-brace-format
 msgid "The minimum cannot exceed the maximum for {}."
-msgstr ""
+msgstr "Le minimum ne peut pas dépasser le maximum pour {}."
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, python-brace-format
 msgid "These analytics rows were created by a newer fpdb version: {names}."
 msgstr ""
+"Ces lignes d'analyse ont été créées par une version plus récente de fpdb : "
+"{names}."
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, python-brace-format
 msgid "These filters need missing or outdated analytics data: {names}."
 msgstr ""
+"Ces filtres ont besoin de données d'analyse manquantes ou périmées : {names}."
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Under 25% pot"
-msgstr ""
+msgstr "Moins de 25 % du pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Upgrade fpdb before using these filters."
@@ -1565,35 +1620,37 @@ msgstr "Mettez fpdb à jour avant d'utiliser ces filtres."
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Use Database → Rebuild Analytics Data, then retry the filter."
 msgstr ""
+"Utilisez Base de données → Reconstruire les données d'analyse, puis relancez "
+"le filtre."
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "VPIP"
-msgstr ""
+msgstr "VPIP"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Went all-in"
-msgstr ""
+msgstr "Tapis"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "max"
-msgstr ""
+msgstr "max"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "max BB"
-msgstr ""
+msgstr "BB max"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "min"
-msgstr ""
+msgstr "min"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "min BB"
-msgstr ""
+msgstr "BB min"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, python-brace-format
 msgid "{} classes selected"
-msgstr ""
+msgstr "{} classes sélectionnées"
 
 # --- Vague 2: hand/log viewers & auto notes ---
 #: fpdb_3_legacy/GuiHandViewer.py
@@ -1794,67 +1851,68 @@ msgstr "Début"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "-- built-in presets --"
-msgstr ""
+msgstr "-- préréglages intégrés --"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "-- saved presets --"
-msgstr ""
+msgstr "-- préréglages enregistrés --"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "?"
-msgstr ""
+msgstr "?"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "A gap is only as good as the smaller of the two samples beside it."
 msgstr ""
+"Un écart ne vaut que le plus petit des deux échantillons à côté de lui."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Add or remove one of the known values."
-msgstr ""
+msgstr "Ajouter ou retirer une des valeurs connues."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Add the selected dimension to the breakdown."
-msgstr ""
+msgstr "Ajouter la dimension sélectionnée à la ventilation."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Add this filter"
-msgstr ""
+msgstr "Ajouter ce filtre"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, python-brace-format
 msgid "Adjust {variables} for your own game."
-msgstr ""
+msgstr "Ajustez {variables} à votre propre jeu."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, python-brace-format
 msgid "Adjust: {variables}"
-msgstr ""
+msgstr "Ajuster : {variables}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, python-brace-format
 msgid "Aim for at least {n} decisions."
-msgstr ""
+msgstr "Visez au moins {n} décisions."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "All hands in the population"
-msgstr ""
+msgstr "Toutes les mains de la population"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Any leaves the condition out of the query entirely."
-msgstr ""
+msgstr "« Indifférent » retire complètement la condition de la requête."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Ask a poker question"
-msgstr ""
+msgstr "Poser une question de poker"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Ask your own question"
-msgstr ""
+msgstr "Posez votre propre question"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Break down by"
-msgstr ""
+msgstr "Ventiler par"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Choose a dimension to split the result by."
@@ -1862,15 +1920,16 @@ msgstr "Choisissez une dimension pour ventiler le résultat."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Choose one or more…"
-msgstr ""
+msgstr "Choisir une ou plusieurs…"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Comma-separated group-by dimensions (engine vocabulary)"
 msgstr ""
+"Dimensions de regroupement séparées par des virgules (vocabulaire du moteur)"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Compare with the field"
-msgstr ""
+msgstr "Comparer avec le field"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Count"
@@ -1883,28 +1942,35 @@ msgstr "Décisions"
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Double-click a cell to load the hands behind it."
 msgstr ""
+"Double-cliquez sur une cellule pour charger les mains qui la composent."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Double-click a result row to load its hands."
-msgstr ""
+msgstr "Double-cliquez sur une ligne de résultat pour charger ses mains."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid ""
 "Double-click a row to load its hands. Numerator/denominator are shown per "
 "row."
 msgstr ""
+"Double-cliquez sur une ligne pour charger ses mains. Le numérateur et le "
+"dénominateur sont affichés par ligne."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Double-click a row to see your hands and the field's, side by side."
 msgstr ""
+"Double-cliquez sur une ligne pour voir vos mains et celles du field, côte à "
+"côte."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Double-click the row to load its hands."
-msgstr ""
+msgstr "Double-cliquez sur la ligne pour charger ses mains."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Every decision the question applies to: the sample size."
 msgstr ""
+"Toutes les décisions auxquelles la question s'applique : la taille de "
+"l'échantillon."
 
 # --- Vague 2: replayer, auto-notes workbench, HUD popups ---
 #: fpdb_3_legacy/GuiResearchBrowser.py
@@ -1925,7 +1991,7 @@ msgstr "Filtres"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Frequency (%)"
-msgstr ""
+msgstr "Fréquence (%)"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Gap"
@@ -1933,7 +1999,7 @@ msgstr "Écart"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "How many of those decisions the metric counted."
-msgstr ""
+msgstr "Combien de ces décisions la mesure a comptées."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Matching hands"
@@ -1941,7 +2007,7 @@ msgstr "Mains correspondantes"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Metric"
-msgstr ""
+msgstr "Mesure"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -1951,36 +2017,39 @@ msgstr "Non"
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "No matching hands were found for either population."
 msgstr ""
+"Aucune main correspondante n'a été trouvée pour l'une ou l'autre population."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Only the hands where the metric fired"
-msgstr ""
+msgstr "Seulement les mains où la mesure s'est déclenchée"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Open the Research Browser quick start"
-msgstr ""
+msgstr "Ouvrir le guide de démarrage du Research Browser"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Pick one of the answers this workbench knows how to show."
-msgstr ""
+msgstr "Choisissez une des réponses que cet atelier sait afficher."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Poker labels"
-msgstr ""
+msgstr "Termes de poker"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid ""
 "Poker labels use the terminology most readers see at the table.\n"
 "Technical names expose the analytics engine's fields and values."
 msgstr ""
+"Les termes de poker sont ceux que la plupart des joueurs voient à la table.\n"
+"Les noms techniques montrent les champs et valeurs du moteur d'analyse."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Query cancelled."
-msgstr ""
+msgstr "Requête annulée."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Remove this breakdown"
-msgstr ""
+msgstr "Retirer cette ventilation"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Remove this filter"
@@ -1988,7 +2057,7 @@ msgstr "Retirer ce filtre"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Research browser"
-msgstr ""
+msgstr "Research Browser"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Results"
@@ -1997,10 +2066,11 @@ msgstr "Résultats"
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Run the same question twice -- yours and the field's -- side by side."
 msgstr ""
+"Pose deux fois la même question -- la vôtre et celle du field -- côte à côte."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Running…"
-msgstr ""
+msgstr "En cours…"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Save"
@@ -2008,20 +2078,22 @@ msgstr "Enregistrer"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Save preset"
-msgstr ""
+msgstr "Enregistrer le préréglage"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, python-brace-format
 msgid "Saved as \"{saved}\". The built-in preset \"{original}\" is unchanged."
 msgstr ""
+"Enregistré sous « {saved} ». Le préréglage intégré « {original} » n'est pas "
+"modifié."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Show technical query controls"
-msgstr ""
+msgstr "Afficher les contrôles techniques de requête"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Show the engine's own filter names and free-text values."
-msgstr ""
+msgstr "Afficher les noms de filtres du moteur et les valeurs en texte libre."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Technical names"
@@ -2034,6 +2106,11 @@ msgid ""
 "then press Run. The sample size is always shown, and every row can be opened "
 "as the hands behind it."
 msgstr ""
+"Le Research Browser répond à des questions sur les mains de votre base. "
+"Choisissez une question ci-dessous, modifiez les valeurs qui doivent être "
+"différentes pour vous, puis appuyez sur Lancer. La taille de l'échantillon "
+"est toujours affichée, et chaque ligne peut être ouverte sur les mains qui "
+"la composent."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, python-brace-format
@@ -2041,6 +2118,9 @@ msgid ""
 "The analytics data for {names} has never been built. A question that reads "
 "it answers zero until it is: Database -> Rebuild Analytics Data."
 msgstr ""
+"Les données d'analyse de {names} n'ont jamais été construites. Une question "
+"qui les lit répond zéro tant qu'elles ne le sont pas : Base de données -> "
+"Reconstruire les données d'analyse."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, python-brace-format
@@ -2048,14 +2128,17 @@ msgid ""
 "The analytics data for {names} was derived by older rules, so a question "
 "that reads it may answer zero: Database -> Rebuild Analytics Data."
 msgstr ""
+"Les données d'analyse de {names} ont été dérivées par d'anciennes règles, "
+"une question qui les lit peut donc répondre zéro : Base de données -> "
+"Reconstruire les données d'analyse."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "The measurement itself, over the sample above."
-msgstr ""
+msgstr "La mesure elle-même, sur l'échantillon ci-dessus."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "The question the controls above currently ask."
-msgstr ""
+msgstr "La question que posent actuellement les contrôles ci-dessus."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, python-brace-format
@@ -2063,15 +2146,18 @@ msgid ""
 "These questions need the analytics tables rebuilt before they can answer: "
 "{subsystems}. Rebuild them from the database menu, then run a question."
 msgstr ""
+"Ces questions nécessitent la reconstruction des tables d'analyse avant de "
+"pouvoir répondre : {subsystems}. Reconstruisez-les depuis le menu Base de "
+"données, puis lancez une question."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Try one of these:"
-msgstr ""
+msgstr "Essayez l'une de celles-ci :"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, python-brace-format
 msgid "Unknown group-by dimension(s): {names}. Known: {known}."
-msgstr ""
+msgstr "Dimension(s) de regroupement inconnue(s) : {names}. Connues : {known}."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/menu_layout.py
 msgid "View"
@@ -2079,7 +2165,7 @@ msgstr "Affichage"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Vocabulary"
-msgstr ""
+msgstr "Vocabulaire"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -2088,28 +2174,28 @@ msgstr "Oui"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "You"
-msgstr ""
+msgstr "Vous"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Your sample"
-msgstr ""
+msgstr "Votre échantillon"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "e.g. street, response"
-msgstr ""
+msgstr "ex. street, response"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, python-brace-format
 msgid "e.g. {example}"
-msgstr ""
+msgstr "ex. {example}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "from"
-msgstr ""
+msgstr "de"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "or type a value"
-msgstr ""
+msgstr "ou saisissez une valeur"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "to"
@@ -2118,30 +2204,32 @@ msgstr "à"
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, python-brace-format
 msgid "{hero} decisions of yours, {field} of the field's"
-msgstr ""
+msgstr "{hero} décisions des vôtres, {field} de celles du field"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, python-brace-format
 msgid "{question} — {how}"
-msgstr ""
+msgstr "{question} — {how}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "■ Cancel"
-msgstr ""
+msgstr "■ Annuler"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "▶ Run"
-msgstr ""
+msgstr "▶ Lancer"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "＋ Add breakdown"
-msgstr ""
+msgstr "＋ Ajouter une ventilation"
 
 #: fpdb_3_legacy/GuiResearchViews.py
 msgid ""
 "Cells without enough of a sample stay uncoloured; hover one to read its "
 "count."
 msgstr ""
+"Les cellules sans échantillon suffisant restent sans couleur ; survolez-en "
+"une pour lire son effectif."
 
 #: fpdb_3_legacy/GuiResearchViews.py
 msgid "Colour by:"
@@ -2149,13 +2237,15 @@ msgstr "Colorer selon :"
 
 #: fpdb_3_legacy/GuiResearchViews.py
 msgid "No cell is below the sample threshold."
-msgstr ""
+msgstr "Aucune cellule n'est sous le seuil d'échantillon."
 
 #: fpdb_3_legacy/GuiResearchViews.py
 #, python-brace-format
 msgid ""
 "Realized {realized} over {hands} hands; EV-adjusted {ev} ({luck} of it luck)."
 msgstr ""
+"Réalisé {realized} sur {hands} mains ; ajusté à l'EV {ev} (dont {luck} de "
+"chance)."
 
 #: fpdb_3_legacy/GuiResearchViews.py
 msgid "Share"
@@ -2167,20 +2257,25 @@ msgid ""
 "{decisions} decisions in this selection have no known hole cards and are not "
 "in the grid; {share} of the decisions are drawn."
 msgstr ""
+"{decisions} décisions de cette sélection n'ont pas de cartes privatives "
+"connues et ne sont pas dans la grille ; {share} des décisions sont "
+"représentées."
 
 #: fpdb_3_legacy/GuiResearchViews.py
 #, python-brace-format
 msgid "{label}: {classified} classified decisions of {total} ({share} covered)"
 msgstr ""
+"{label} : {classified} décisions classées sur {total} ({share} couvertes)"
 
 #: fpdb_3_legacy/GuiResearchViews.py
 #, python-brace-format
 msgid "{n} decisions are counted apart: their cards were never known."
 msgstr ""
+"{n} décisions sont comptées à part : leurs cartes n'ont jamais été connues."
 
 #: fpdb_3_legacy/GuiSessionViewer.py
 msgid "Cumulative result (BB)"
-msgstr ""
+msgstr "Résultat cumulé (BB)"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
 msgid "Hand Breakdown for all levels listed above"
@@ -2188,12 +2283,12 @@ msgstr "Répartition des mains pour tous les niveaux ci-dessus"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
 msgid "Native-currency totals omitted (multiple currencies)"
-msgstr ""
+msgstr "Totaux en devise d'origine omis (plusieurs devises)"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
 #, python-brace-format
 msgid "Profit: {profit} · Currency/hour: {hour}"
-msgstr ""
+msgstr "Profit : {profit} · Devise/heure : {hour}"
 
 #: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/research_labels.py
 msgid "Session"
@@ -2206,16 +2301,19 @@ msgid ""
 "{profit_bb} BB · bb/100: {bb100} · BB/hour: {bb_hour} · BB hands: {bb_hands}/"
 "{hands}"
 msgstr ""
+"Sessions : {sessions} · Mains : {hands} · Temps de jeu : {duration} · "
+"Profit : {profit_bb} BB · bb/100 : {bb100} · BB/heure : {bb_hour} · Mains en "
+"BB : {bb_hands}/{hands}"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
 #, python-brace-format
 msgid "{hours}h {minutes}m"
-msgstr ""
+msgstr "{hours} h {minutes} min"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
 #, python-brace-format
 msgid "{minutes}m"
-msgstr ""
+msgstr "{minutes} min"
 
 #: fpdb_3_legacy/GuiTourHandViewer.py
 msgid "Load Hands"
@@ -2227,7 +2325,7 @@ msgstr "Rafraîchir Stats"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Clipboard unavailable"
-msgstr ""
+msgstr "Presse-papiers indisponible"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Configuration file"
@@ -2239,7 +2337,7 @@ msgstr "Copier le rapport"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Copy these details to the clipboard for a bug report"
-msgstr ""
+msgstr "Copier ces informations dans le presse-papiers pour un rapport de bug"
 
 #: fpdb_3_legacy/GuiVersionInfo.py fpdb_3_legacy/menu_layout.py
 msgid "Database"
@@ -2255,23 +2353,23 @@ msgstr "Version de FPDB"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Git branch"
-msgstr ""
+msgstr "Branche Git"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Git checkout"
-msgstr ""
+msgstr "Dépôt Git"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Git commit"
-msgstr ""
+msgstr "Commit Git"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "GitHub repository"
-msgstr ""
+msgstr "Dépôt GitHub"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Links"
-msgstr ""
+msgstr "Liens"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Packaging"
@@ -2279,7 +2377,7 @@ msgstr "Empaquetage"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Report an issue"
-msgstr ""
+msgstr "Signaler un problème"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Report copied to clipboard"
@@ -2287,35 +2385,37 @@ msgstr "Rapport copié dans le presse-papiers"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Version and environment"
-msgstr ""
+msgstr "Version et environnement"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Working tree"
-msgstr ""
+msgstr "Arbre de travail"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "clean"
-msgstr ""
+msgstr "propre"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "modified (uncommitted changes)"
-msgstr ""
+msgstr "modifié (changements non commités)"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "not a git checkout (packaged or exported build)"
-msgstr ""
+msgstr "pas un dépôt Git (version empaquetée ou exportée)"
 
 #: fpdb_3_legacy/MergeSummary.py
 msgid "MergeSummary.determineGameType: HORSE found, unsupported"
-msgstr ""
+msgstr "MergeSummary.determineGameType : HORSE trouvé, non pris en charge"
 
 #: fpdb_3_legacy/MergeSummary.py
 msgid "MergeSummary.determineGameType: Muli-table SnG found, unsupported"
 msgstr ""
+"MergeSummary.determineGameType : SnG multi-tables trouvé, non pris en charge"
 
 #: fpdb_3_legacy/MergeSummary.py
 msgid "MergeSummary.determineGameType: No match in SnG_Structures"
 msgstr ""
+"MergeSummary.determineGameType : aucune correspondance dans SnG_Structures"
 
 #: fpdb_3_legacy/MergeSummary.py
 msgid "MergeSummary.determineGameType: game type not found"
@@ -2324,6 +2424,7 @@ msgstr "MergeSummary.determineGameType : type de jeu introuvable"
 #: fpdb_3_legacy/MergeSummary.py
 msgid "MergeSummary.parseSummaryFile: Could not parse summary file"
 msgstr ""
+"MergeSummary.parseSummaryFile : impossible d'analyser le fichier de résumé"
 
 #: fpdb_3_legacy/MergeSummary.py
 #, python-format
@@ -2332,12 +2433,12 @@ msgstr "MergeSummary.readHandInfo : '%s'"
 
 #: fpdb_3_legacy/MergeSummary.py
 msgid "The tournament was not found or is invalid"
-msgstr ""
+msgstr "Le tournoi est introuvable ou invalide"
 
 #: fpdb_3_legacy/MicrogamingToFpdb.py
 #, python-format
 msgid "MicrogamingToFpdb.determineGameType: '%s'"
-msgstr ""
+msgstr "MicrogamingToFpdb.determineGameType : '%s'"
 
 #: fpdb_3_legacy/MicrogamingToFpdb.py
 #, python-format
@@ -2346,7 +2447,7 @@ msgstr "MicrogamingToFpdb.readHandInfo : '%s'"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 msgid "0"
-msgstr ""
+msgstr "0"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 msgid "<b>Players</b>"
@@ -2354,11 +2455,11 @@ msgstr "<b>Joueurs</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 msgid "<b>Seat</b>"
-msgstr ""
+msgstr "<b>Siège</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 msgid "<b>Visual Selection</b>"
-msgstr ""
+msgstr "<b>Sélection visuelle</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 msgid "Auto-save changes"
@@ -2369,11 +2470,11 @@ msgstr "Enregistrer automatiquement les modifications"
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cancel"
-msgstr ""
+msgstr "Annuler"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 msgid "Configure your favorite seats for each table size"
-msgstr ""
+msgstr "Configurez vos sièges favoris pour chaque taille de table"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 msgid "Export Settings"
@@ -2396,7 +2497,7 @@ msgstr "Enregistrer les modifications"
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Search sites..."
-msgstr ""
+msgstr "Rechercher des sites..."
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 msgid "Seat Preferences"
@@ -2416,12 +2517,12 @@ msgstr "✗ Désactivé"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 msgid "💡 Set to 0 to disable favorite seat for a table size"
-msgstr ""
+msgstr "💡 Mettez 0 pour désactiver le siège favori pour une taille de table"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🔍"
-msgstr ""
+msgstr "🔍"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, python-format
@@ -2444,7 +2545,7 @@ msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Add link"
-msgstr ""
+msgstr "Ajouter un lien"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Browse"
@@ -2452,7 +2553,7 @@ msgstr "Parcourir"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Configure your poker sites and usernames"
-msgstr ""
+msgstr "Configurez vos sites de poker et vos pseudos"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Data Sources"
@@ -2472,16 +2573,16 @@ msgstr "Historique des mains :"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Hero Profiles"
-msgstr ""
+msgstr "Profils de héros"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "New"
-msgstr ""
+msgstr "Nouveau"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Old nicknames / extra accounts, comma separated"
-msgstr ""
+msgstr "Anciens pseudos / comptes supplémentaires, séparés par des virgules"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Other Aliases:"
@@ -2501,7 +2602,7 @@ msgstr "Nom du profil"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Remove link"
-msgstr ""
+msgstr "Retirer le lien"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Screen Name:"
@@ -2521,27 +2622,27 @@ msgstr "Vos noms dans ces mains, un par ligne"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🎭"
-msgstr ""
+msgstr "🎭"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🏆"
-msgstr ""
+msgstr "🏆"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "👤"
-msgstr ""
+msgstr "👤"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "📁"
-msgstr ""
+msgstr "📁"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🔍 Auto-Detect All Visible Sites"
-msgstr ""
+msgstr "🔍 Détecter automatiquement tous les sites visibles"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🔍 Auto-Detect Paths"
-msgstr ""
+msgstr "🔍 Détecter les chemins automatiquement"
 
 #: fpdb_3_legacy/OnGameToFpdb.py
 #, python-format
@@ -2555,7 +2656,7 @@ msgstr "Aucune petite blinde trouvée."
 #: fpdb_3_legacy/OnGameToFpdb.py
 #, python-format
 msgid "OnGameToFpdb.determineGameType: '%s'"
-msgstr ""
+msgstr "OnGameToFpdb.determineGameType : '%s'"
 
 #: fpdb_3_legacy/OnGameToFpdb.py
 #, python-format
@@ -2567,7 +2668,7 @@ msgstr ""
 #: fpdb_3_legacy/OnGameToFpdb.py
 #, python-format
 msgid "OnGameToFpdb.determineGameType: Limit not found in '%s'"
-msgstr ""
+msgstr "OnGameToFpdb.determineGameType : limite introuvable dans '%s'"
 
 #: fpdb_3_legacy/OnGameToFpdb.py
 #, python-format
@@ -2577,7 +2678,7 @@ msgstr "OnGameToFpdb.readHandInfo : '%s'"
 #: fpdb_3_legacy/PkrToFpdb.py
 #, python-format
 msgid "PkrToFpdb.determineGameType: '%s'"
-msgstr ""
+msgstr "PkrToFpdb.determineGameType : '%s'"
 
 #: fpdb_3_legacy/PkrToFpdb.py
 #, python-format
@@ -2586,11 +2687,11 @@ msgstr "PkrToFpdb.readHandInfo : '%s'"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
 msgid "Brief description of your theme"
-msgstr ""
+msgstr "Brève description de votre thème"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
 msgid "Create Custom Theme"
-msgstr ""
+msgstr "Créer un thème personnalisé"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
 msgid "Create Theme"
@@ -2606,11 +2707,11 @@ msgstr "Votre nom"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
 msgid "e.g., my_custom_theme"
-msgstr ""
+msgstr "ex. mon_theme_perso"
 
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Back up and upgrade"
-msgstr ""
+msgstr "Sauvegarder et mettre à jour"
 
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Clear All"
@@ -2618,7 +2719,7 @@ msgstr "Tout effacer"
 
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Configuration needs attention"
-msgstr ""
+msgstr "La configuration demande votre attention"
 
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Confirm recreating HUD cache"
@@ -2638,7 +2739,7 @@ msgstr "Activer ou désactiver les sites pour l'affichage du HUD"
 
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Free Poker DB 3"
-msgstr ""
+msgstr "Free Poker DB 3"
 
 #: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
 msgid "Manage HUD Sites"
@@ -2671,7 +2772,7 @@ msgstr "Ignorer ces jeux à l'import"
 
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Unknown Site"
-msgstr ""
+msgstr "Site inconnu"
 
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Unsaved Changes"
@@ -2981,11 +3082,13 @@ msgstr "À propos"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "About the program"
-msgstr ""
+msgstr "À propos du programme"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)"
 msgstr ""
+"Ajouter, modifier, tester et choisir la base de données (SQLite / "
+"PostgreSQL / MySQL)"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Advanced logger manager"
@@ -3006,11 +3109,11 @@ msgstr "Atelier de notes automatiques"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Cash"
-msgstr ""
+msgstr "Cash"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "CoinPoker Live Capture"
-msgstr ""
+msgstr "Capture en direct CoinPoker"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Configure"
@@ -3038,7 +3141,7 @@ msgstr "Modifier vos préférences"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Export the whole database to a text file (slow)"
-msgstr ""
+msgstr "Exporter toute la base de données dans un fichier texte (lent)"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Graphs"
@@ -3063,11 +3166,11 @@ msgstr "Aide"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Help Tab"
-msgstr ""
+msgstr "Onglet d'aide"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Import PT4 HUD (.pt4hud)"
-msgstr ""
+msgstr "Importer un HUD PT4 (.pt4hud)"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Import PT4 Stats (.pt4stat)"
@@ -3076,10 +3179,13 @@ msgstr "Importer des stats PT4 (.pt4stat)"
 #: fpdb_3_legacy/menu_layout.py
 msgid "Import PokerTracker 4 custom statistics as declarative stat descriptors"
 msgstr ""
+"Importer des statistiques personnalisées PokerTracker 4 comme descripteurs "
+"de stats déclaratifs"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Import a PokerTracker 4 HUD layout (stats + range charts)"
 msgstr ""
+"Importer une disposition de HUD PokerTracker 4 (stats + tableaux de range)"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Import filters"
@@ -3097,7 +3203,7 @@ msgstr "Langue"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Launch SwC HTTP Capture"
-msgstr ""
+msgstr "Lancer la capture HTTP SwC"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Log Messages"
@@ -3109,7 +3215,7 @@ msgstr "Messages de journal et de débogage"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Logger Dev Tool"
-msgstr ""
+msgstr "Outil de développement des journaux"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Opponents Report"
@@ -3125,16 +3231,18 @@ msgstr "Quitter"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Quit the program"
-msgstr ""
+msgstr "Quitter le programme"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid ""
 "Re-derive the situations and hand states the Research Browser and HUD read"
 msgstr ""
+"Recalculer les situations et les états de main que lisent le Research "
+"Browser et le HUD"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Rebuild Analytics Data"
-msgstr ""
+msgstr "Reconstruire les données d'analyse"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Rebuild DB Indexes"
@@ -3146,11 +3254,11 @@ msgstr "Reconstruction du Cache HUD"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Research Browser"
-msgstr ""
+msgstr "Research Browser"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Research Browser for Omaha"
-msgstr ""
+msgstr "Research Browser pour l'Omaha"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Seat Settings"
@@ -3182,7 +3290,7 @@ msgstr "Guide des stats"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Study Explorer"
-msgstr ""
+msgstr "Study Explorer"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Themes"
@@ -3214,7 +3322,7 @@ msgstr "Version"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Version, packaging and runtime environment details"
-msgstr ""
+msgstr "Détails de version, d'empaquetage et d'environnement d'exécution"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "View database statistics"
@@ -3223,22 +3331,24 @@ msgstr "Voir les statistiques de la base de données"
 #: fpdb_3_legacy/menu_layout.py
 msgid "What every filter is for in a four-card game, and the two that are not"
 msgstr ""
+"À quoi sert chaque filtre dans un jeu à quatre cartes, et les deux qui ne "
+"servent pas"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "+"
-msgstr ""
+msgstr "+"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "Add an item to this row"
-msgstr ""
+msgstr "Ajouter un élément à cette ligne"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "Remove the last item of this row"
-msgstr ""
+msgstr "Retirer le dernier élément de cette ligne"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "−"
-msgstr ""
+msgstr "−"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Add/Edit Statistic"
@@ -3246,15 +3356,15 @@ msgstr "Ajouter/modifier une statistique"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Block Properties"
-msgstr ""
+msgstr "Propriétés du bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Click Action:"
-msgstr ""
+msgstr "Action au clic :"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Column:"
-msgstr ""
+msgstr "Colonne :"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Edit Popup Statistic"
@@ -3266,7 +3376,7 @@ msgstr "Modifier la fenêtre popup"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Export Layout Coordinates"
-msgstr ""
+msgstr "Exporter les coordonnées de disposition"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Grid Position:"
@@ -3274,40 +3384,42 @@ msgstr "Position dans la grille :"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "High Range:"
-msgstr ""
+msgstr "Plage haute :"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Low Range:"
-msgstr ""
+msgstr "Plage basse :"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Middle color:"
-msgstr ""
+msgstr "Couleur intermédiaire :"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid ""
 "Minimum width of each statistic cell; Automatic keeps the legacy default"
 msgstr ""
+"Largeur minimale de chaque cellule de statistique ; Automatique conserve la "
+"valeur historique"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Optional: Action when stat is clicked"
-msgstr ""
+msgstr "Facultatif : action quand la stat est cliquée"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Optional: Popup to show on hover"
-msgstr ""
+msgstr "Facultatif : popup à afficher au survol"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Optional: Submenu name for hierarchical popups"
-msgstr ""
+msgstr "Facultatif : nom de sous-menu pour les popups hiérarchiques"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Override the automatic section used by ModernSubmenu"
-msgstr ""
+msgstr "Remplacer la section automatique utilisée par ModernSubmenu"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Popup:"
@@ -3316,10 +3428,12 @@ msgstr "Popup :"
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Preview shows how statistic colors will change based on values"
 msgstr ""
+"L'aperçu montre comment les couleurs de la statistique changent selon les "
+"valeurs"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Row:"
-msgstr ""
+msgstr "Ligne :"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Select None"
@@ -3330,10 +3444,16 @@ msgid ""
 "Select the site layout coordinates you want to include in the package.\n"
 "This will let other users position the HUD boxes exactly like yours."
 msgstr ""
+"Sélectionnez les coordonnées de disposition des sites à inclure dans le "
+"paquet.\n"
+"Les autres utilisateurs pourront ainsi placer les blocs du HUD exactement "
+"comme les vôtres."
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr ""
+"Afficher ce panneau seulement pour un adversaire à cette position (vide = "
+"toujours)"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Statistic:"
@@ -3341,15 +3461,15 @@ msgstr "Statistique :"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Use middle color for values between thresholds"
-msgstr ""
+msgstr "Utiliser la couleur intermédiaire pour les valeurs entre les seuils"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Values above"
-msgstr ""
+msgstr "Valeurs supérieures à"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Values below"
-msgstr ""
+msgstr "Valeurs inférieures à"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "show as"
@@ -3357,11 +3477,11 @@ msgstr "afficher comme"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "➕ Add Stat"
-msgstr ""
+msgstr "➕ Ajouter une stat"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "➖ Remove Stat"
-msgstr ""
+msgstr "➖ Retirer la stat"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
@@ -3369,27 +3489,27 @@ msgstr "#"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "(none)"
-msgstr ""
+msgstr "(aucun)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "A panel rule with these conditions and this profile already exists."
-msgstr ""
+msgstr "Une règle de panneau avec ces conditions et ce profil existe déjà."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "A profile definition with these selectors already exists."
-msgstr ""
+msgstr "Une définition de profil avec ces sélecteurs existe déjà."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "ANY"
-msgstr ""
+msgstr "TOUS"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "ANY table"
-msgstr ""
+msgstr "TOUTE table"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Active Profile Definitions"
-msgstr ""
+msgstr "Définitions de profil actives"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Active Profile:"
@@ -3401,7 +3521,7 @@ msgstr "Ajouter"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add Block"
-msgstr ""
+msgstr "Ajouter un bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add Label"
@@ -3409,11 +3529,11 @@ msgstr "Ajouter un libellé"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add Line"
-msgstr ""
+msgstr "Ajouter une ligne"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add Profile Definition"
-msgstr ""
+msgstr "Ajouter une définition de profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add Stat"
@@ -3422,14 +3542,16 @@ msgstr "Ajouter une stat"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
 msgstr ""
+"Ajouter une ligne de séparation horizontale (« Horz Line » PT4) à un panneau"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add a new panel (block) to a multi-panel HUD"
-msgstr ""
+msgstr "Ajouter un nouveau panneau (bloc) à un HUD multi-panneaux"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add a text label (column/row header or caption) to a panel"
 msgstr ""
+"Ajouter un libellé texte (en-tête de colonne/ligne ou légende) à un panneau"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add stat"
@@ -3437,29 +3559,33 @@ msgstr "Ajouter une stat"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add to block"
-msgstr ""
+msgstr "Ajouter au bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Analytics-backed stats"
-msgstr ""
+msgstr "Stats issues de l'analyse"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "Append the profile emoji (e.g. 🐟, 🐌, 🎯) and color the player's name in "
 "the HUD."
 msgstr ""
+"Ajoute l'emoji du profil (ex. 🐟, 🐌, 🎯) et colore le nom du joueur dans le "
+"HUD."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr ""
+"En dessous de ce nombre de mains, le panneau est masqué et le repli "
+"s'affiche."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Block Props"
-msgstr ""
+msgstr "Propr. du bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cannot add this rule"
-msgstr ""
+msgstr "Impossible d'ajouter cette règle"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cannot export"
@@ -3471,15 +3597,15 @@ msgstr "Import impossible"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cannot update this rule"
-msgstr ""
+msgstr "Impossible de mettre à jour cette règle"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Class:"
-msgstr ""
+msgstr "Classe :"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Color Ranges"
-msgstr ""
+msgstr "Plages de couleur"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Conditions"
@@ -3487,15 +3613,15 @@ msgstr "Conditions"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Design"
-msgstr ""
+msgstr "Conception"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Disabled: this rule never matches."
-msgstr ""
+msgstr "Désactivée : cette règle ne correspond jamais."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Duplicate rule"
-msgstr ""
+msgstr "Règle en double"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Edit"
@@ -3504,20 +3630,24 @@ msgstr "Édition"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Edit the selected panel's title/border colours, position and label"
 msgstr ""
+"Modifier le titre, les couleurs de bordure, la position et le libellé du "
+"panneau sélectionné"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Effective profile for these selectors"
-msgstr ""
+msgstr "Profil effectif pour ces sélecteurs"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Enable Player Profiling (Categorization)"
-msgstr ""
+msgstr "Activer le profilage des joueurs (catégorisation)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "Enable auto-classification of players into Nit, Calling Station, Fish, "
 "Maniac, LAG, Reg, TAG."
 msgstr ""
+"Activer le classement automatique des joueurs en Nit, Calling Station, Fish, "
+"Maniac, LAG, Reg, TAG."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Export panel rules"
@@ -3529,7 +3659,7 @@ msgstr "Exporter…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Fallback"
-msgstr ""
+msgstr "Repli"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
@@ -3538,7 +3668,7 @@ msgstr "Jeu"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "General HUD and Profiling Settings"
-msgstr ""
+msgstr "Paramètres généraux du HUD et du profilage"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "HUD Preview"
@@ -3550,15 +3680,15 @@ msgstr "Profil du HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "HUD Profile Configuration"
-msgstr ""
+msgstr "Configuration des profils de HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "HUD imported — refresh required"
-msgstr ""
+msgstr "HUD importé — actualisation nécessaire"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "HUD profile"
-msgstr ""
+msgstr "Profil de HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Hands for this seat"
@@ -3566,11 +3696,11 @@ msgstr "Mains pour ce siège"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Horz Line"
-msgstr ""
+msgstr "Ligne horizontale"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Icons:"
-msgstr ""
+msgstr "Icônes :"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Import panel rules"
@@ -3579,7 +3709,7 @@ msgstr "Importer les règles des panneaux"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid "Imported {count} rule(s)."
-msgstr ""
+msgstr "{count} règle(s) importée(s)."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Import…"
@@ -3587,86 +3717,93 @@ msgstr "Importer…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Issues"
-msgstr ""
+msgstr "Problèmes"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Item Properties"
-msgstr ""
+msgstr "Propriétés de l'élément"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Items"
-msgstr ""
+msgstr "Éléments"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Layout Conflict"
-msgstr ""
+msgstr "Conflit de disposition"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Min sample"
-msgstr ""
+msgstr "Échantillon min."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Minimum hands required for profiling:"
-msgstr ""
+msgstr "Mains minimum pour le profilage :"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Move down"
-msgstr ""
+msgstr "Descendre"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Move up"
-msgstr ""
+msgstr "Monter"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "New Profile"
-msgstr ""
+msgstr "Nouveau profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "No HUD profile of this name exists; the game default will be used instead."
 msgstr ""
+"Aucun profil de HUD de ce nom n'existe ; le profil par défaut du jeu sera "
+"utilisé à la place."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "No HUD profile of this name exists; this rule will be ignored."
-msgstr ""
+msgstr "Aucun profil de HUD de ce nom n'existe ; cette règle sera ignorée."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "Off by default. When it is on, the panels a rule names are shown and every "
 "other block keeps the position rule it has always had."
 msgstr ""
+"Désactivé par défaut. Quand il est activé, les panneaux qu'une règle nomme "
+"sont affichés et tous les autres blocs gardent la règle de position qu'ils "
+"ont toujours eue."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Open preview at 100% real size in a new window"
-msgstr ""
+msgstr "Ouvrir l'aperçu à 100 % de sa taille réelle dans une nouvelle fenêtre"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Open the Dynamic HUD guide"
-msgstr ""
+msgstr "Ouvrir le guide du HUD dynamique"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Panel"
-msgstr ""
+msgstr "Panneau"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Panel documents (*.json)"
-msgstr ""
+msgstr "Documents de panneaux (*.json)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Panel rules"
-msgstr ""
+msgstr "Règles des panneaux"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Panels"
-msgstr ""
+msgstr "Panneaux"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr ""
+"Choisissez un jeu (et un format) pour voir le profil par défaut qui "
+"s'appliquerait."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Pick a HUD profile first."
-msgstr ""
+msgstr "Choisissez d'abord un profil de HUD."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
@@ -3675,7 +3812,7 @@ msgstr "Joueurs"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Popup Conflict"
-msgstr ""
+msgstr "Conflit de popup"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Popup Preview"
@@ -3687,15 +3824,15 @@ msgstr "Panneaux par position :"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Preview, by the same resolver the HUD uses"
-msgstr ""
+msgstr "Aperçu, par le même résolveur que le HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Priority"
-msgstr ""
+msgstr "Priorité"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Profile Conflict"
-msgstr ""
+msgstr "Conflit de profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Profile actions"
@@ -3703,7 +3840,7 @@ msgstr "Actions sur le profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Remove"
-msgstr ""
+msgstr "Retirer"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Rule name"
@@ -3711,11 +3848,11 @@ msgstr "Nom de la règle"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Sample column"
-msgstr ""
+msgstr "Colonne d'échantillon"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Seats"
-msgstr ""
+msgstr "Sièges"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Select Popup:"
@@ -3723,7 +3860,7 @@ msgstr "Choisir le popup :"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Select a rule to update first."
-msgstr ""
+msgstr "Sélectionnez d'abord une règle à mettre à jour."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Show hero HUD"
@@ -3732,18 +3869,21 @@ msgstr "Afficher le HUD du héros"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Show profile emoji and color code directly on player name labels"
 msgstr ""
+"Afficher l'emoji et le code couleur du profil directement sur le nom des "
+"joueurs"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Show the panels that fit the hand"
-msgstr ""
+msgstr "Afficher les panneaux adaptés à la main"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Speed"
-msgstr ""
+msgstr "Vitesse"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Stats whose value comes from the analytics layer rather than a column."
 msgstr ""
+"Stats dont la valeur vient de la couche d'analyse plutôt que d'une colonne."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Text"
@@ -3751,7 +3891,7 @@ msgstr "Texte"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Text label (header / caption) — not a stat"
-msgstr ""
+msgstr "Libellé texte (en-tête / légende) — pas une stat"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
@@ -3759,6 +3899,9 @@ msgid ""
 "refresh its configuration. Restart fpdb to apply it. You do not need to "
 "import the file again."
 msgstr ""
+"Le profil de HUD a été importé et enregistré, mais l'application n'a pas pu "
+"actualiser sa configuration. Redémarrez fpdb pour l'appliquer. Inutile "
+"d'importer le fichier à nouveau."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
@@ -3766,18 +3909,27 @@ msgid ""
 "Dynamic package change panel, and read the popup paths to find where a "
 "number lives before you go looking for it at a table."
 msgstr ""
+"Les HUD fournis avec fpdb, tels qu'un siège les verrait. Choisissez un "
+"contexte pour voir le paquet Dynamic changer de panneau, et lisez les "
+"chemins des popups pour savoir où se trouve un chiffre avant d'aller le "
+"chercher à une table."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "The minimum number of hands tracked on an opponent before profiling is "
 "computed."
 msgstr ""
+"Le nombre minimum de mains suivies sur un adversaire avant le calcul du "
+"profil."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "The preview uses the same compact label grid as the in-game HUD.\n"
 "Spacing, font, colors and HUD cell values come from the selected profile."
 msgstr ""
+"L'aperçu utilise la même grille compacte de libellés que le HUD en jeu.\n"
+"L'espacement, la police, les couleurs et les valeurs des cellules viennent "
+"du profil sélectionné."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Theme:"
@@ -3789,20 +3941,20 @@ msgstr "Puis afficher"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Update rule"
-msgstr ""
+msgstr "Mettre à jour la règle"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Update selected"
-msgstr ""
+msgstr "Mettre à jour la sélection"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "When this is the spot"
-msgstr ""
+msgstr "Quand la situation est"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid "Wrote {path}"
-msgstr ""
+msgstr "{path} écrit"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "all profiles"
@@ -3810,7 +3962,7 @@ msgstr "tous les profils"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "always"
-msgstr ""
+msgstr "toujours"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "optional name"
@@ -3818,29 +3970,31 @@ msgstr "nom facultatif"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "the profile grid"
-msgstr ""
+msgstr "la grille du profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid "{profile} — from the rule {selectors}"
-msgstr ""
+msgstr "{profile} — par la règle {selectors}"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid "{profile} — no rule matches, so the game default applies"
 msgstr ""
+"{profile} — aucune règle ne correspond, le profil par défaut du jeu "
+"s'applique"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "—"
-msgstr ""
+msgstr "—"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "↑ Up"
-msgstr ""
+msgstr "↑ Monter"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "↓ Down"
-msgstr ""
+msgstr "↓ Descendre"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "⚙️ General Settings"
@@ -3848,19 +4002,19 @@ msgstr "⚙️ Paramètres généraux"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "➕ Add"
-msgstr ""
+msgstr "➕ Ajouter"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "➕ New Popup"
-msgstr ""
+msgstr "➕ Nouveau popup"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "➕ New Profile"
-msgstr ""
+msgstr "➕ Nouveau profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "➖ Remove"
-msgstr ""
+msgstr "➖ Retirer"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "🃏 Reference HUDs"
@@ -3868,7 +4022,7 @@ msgstr "🃏 HUD de référence"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "🎯 Profile Select"
-msgstr ""
+msgstr "🎯 Choix du profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "💬 Popup Windows"
@@ -3884,7 +4038,7 @@ msgstr "📝 Modifier"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "📤 Export HUD"
-msgstr ""
+msgstr "📤 Exporter le HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "📥 Import HUD"
@@ -3892,11 +4046,11 @@ msgstr "📥 Importer un HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "🔍 Real Size"
-msgstr ""
+msgstr "🔍 Taille réelle"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "🧩 Dynamic Panels"
-msgstr ""
+msgstr "🧩 Panneaux dynamiques"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 msgid "100% Reset"
@@ -3904,29 +4058,29 @@ msgstr "Réinitialiser à 100 %"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 msgid "Close"
-msgstr ""
+msgstr "Fermer"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, python-brace-format
 msgid "Natural Size: {w} × {h} px  (Scale: {scale}%)"
-msgstr ""
+msgstr "Taille naturelle : {w} × {h} px  (échelle : {scale} %)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 msgid "Reset to 100% natural size"
-msgstr ""
+msgstr "Revenir à 100 % de la taille naturelle"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 msgid "Zoom in (+25%)"
-msgstr ""
+msgstr "Zoom avant (+25 %)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 msgid "Zoom out (-25%)"
-msgstr ""
+msgstr "Zoom arrière (-25 %)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, python-brace-format
 msgid "🔍 Popup Preview — {name} (Real Size)"
-msgstr ""
+msgstr "🔍 Aperçu du popup — {name} (taille réelle)"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
 msgid "Context"
@@ -3938,6 +4092,9 @@ msgid ""
 "navigate to. A row ending in an arrow leaves the package for the shipped "
 "popup library."
 msgstr ""
+"Tous les popups qu'ouvre une cellule de ce paquet, et tout ce vers quoi ces "
+"popups mènent. Une ligne qui se termine par une flèche quitte le paquet pour "
+"la bibliothèque de popups fournie."
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
 msgid "Reference HUD"
@@ -3945,15 +4102,15 @@ msgstr "HUD de référence"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "% of pot"
-msgstr ""
+msgstr "% du pot"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "A family of situations, such as postflop defence."
-msgstr ""
+msgstr "Une famille de situations, comme la défense postflop."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "A legacy PT4 stat column the decision feeds."
-msgstr ""
+msgstr "Une colonne de stat PT4 historique que la décision alimente."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Action"
@@ -3961,19 +4118,19 @@ msgstr "Action"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Action faced"
-msgstr ""
+msgstr "Action subie"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Action taken"
-msgstr ""
+msgstr "Action effectuée"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Aggressor, defender or passive."
-msgstr ""
+msgstr "Agresseur, défenseur ou passif."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "All-in"
-msgstr ""
+msgstr "Tapis"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Amount to call"
@@ -3985,43 +4142,43 @@ msgstr "BB"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Beats how much of the range"
-msgstr ""
+msgstr "Bat quelle part de la range"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Bet size"
-msgstr ""
+msgstr "Taille de mise"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Bet size (% of pot)"
-msgstr ""
+msgstr "Taille de mise (% du pot)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Bet size (basis points)"
-msgstr ""
+msgstr "Taille de mise (points de base)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Bet size bucket"
-msgstr ""
+msgstr "Tranche de taille de mise"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Bet size faced"
-msgstr ""
+msgstr "Taille de mise subie"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Bet size faced (% of pot)"
-msgstr ""
+msgstr "Taille de mise subie (% du pot)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Bet size faced (basis points)"
-msgstr ""
+msgstr "Taille de mise subie (points de base)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Bet size faced bucket"
-msgstr ""
+msgstr "Tranche de taille de mise subie"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Bet sizing"
-msgstr ""
+msgstr "Taille de mise"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Big blind (chips)"
@@ -4029,23 +4186,23 @@ msgstr "Grosse blinde (jetons)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Blocker (all of)"
-msgstr ""
+msgstr "Bloqueur (tous)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Blocker (any of)"
-msgstr ""
+msgstr "Bloqueur (l'un de)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Blocker (none of)"
-msgstr ""
+msgstr "Bloqueur (aucun de)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Blockers the actor held (any of them)."
-msgstr ""
+msgstr "Les bloqueurs de l'acteur (l'un d'eux)."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Blockers the actor must have all of."
-msgstr ""
+msgstr "Les bloqueurs que l'acteur doit tous avoir."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Board"
@@ -4053,7 +4210,7 @@ msgstr "Board"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Board connectivity"
-msgstr ""
+msgstr "Connectivité du board"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Board dealt"
@@ -4061,37 +4218,39 @@ msgstr "Board distribué"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Board high card"
-msgstr ""
+msgstr "Carte haute du board"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Board pairing"
-msgstr ""
+msgstr "Board apparié"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Board street"
-msgstr ""
+msgstr "Street du board"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Board suit structure"
-msgstr ""
+msgstr "Structure des couleurs du board"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Board texture"
-msgstr ""
+msgstr "Texture du board"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Board texture (all of)"
-msgstr ""
+msgstr "Texture du board (toutes)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Board texture flags the board must have all of."
-msgstr ""
+msgstr "Indicateurs de texture que le board doit tous avoir."
 
 #: fpdb_3_legacy/research_labels.py
 msgid ""
 "Cards discarded at the draw; zero means stand pat and unknown discard counts "
 "stay unclassified."
 msgstr ""
+"Cartes défaussées au tirage ; zéro signifie servi, et les défausses "
+"inconnues restent non classées."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Cards drawn"
@@ -4099,7 +4258,7 @@ msgstr "Cartes tirées"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Cards drawn (0 = stand pat)"
-msgstr ""
+msgstr "Cartes tirées (0 = servi)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Currency"
@@ -4107,15 +4266,15 @@ msgstr "Devise"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Draw (all of)"
-msgstr ""
+msgstr "Tirage (tous)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Draw (any of)"
-msgstr ""
+msgstr "Tirage (l'un de)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Draw (none of)"
-msgstr ""
+msgstr "Tirage (aucun de)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Draw number"
@@ -4124,30 +4283,33 @@ msgstr "Numéro du tirage"
 #: fpdb_3_legacy/research_labels.py
 msgid "Draws the actor had: flush draws, gutshots and the rest (any of them)."
 msgstr ""
+"Les tirages de l'acteur : tirages couleur, ventrales et les autres (l'un "
+"d'eux)."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Draws the actor must have all of."
-msgstr ""
+msgstr "Les tirages que l'acteur doit tous avoir."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "EV-adjusted result (all-in EV)"
-msgstr ""
+msgstr "résultat ajusté à l'EV (EV des tapis)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "EV-adjusted result per decision"
-msgstr ""
+msgstr "résultat ajusté à l'EV par décision"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Effective stack"
-msgstr ""
+msgstr "Tapis effectif"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Effective stack (chips)"
-msgstr ""
+msgstr "Tapis effectif (jetons)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Effective stack in the bands a tournament is played in."
 msgstr ""
+"Le tapis effectif dans les tranches dans lesquelles se joue un tournoi."
 
 #: fpdb_3_legacy/research_labels.py
 msgid ""
@@ -4155,14 +4317,18 @@ msgid ""
 "this to ask how often an opportunity was taken: raising an open makes the "
 "decision a 3-bet, so only this keeps it among the opens faced."
 msgstr ""
+"Toutes les situations auxquelles la décision correspond, pas seulement la "
+"plus précise. Sert à demander combien de fois une opportunité a été saisie : "
+"relancer une ouverture fait de la décision un 3-bet, seul ce filtre la garde "
+"parmi les ouvertures subies."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Facing an all-in"
-msgstr ""
+msgstr "Face à un tapis"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Fixed limit, no limit and the other betting structures."
-msgstr ""
+msgstr "Limite fixe, no limit et les autres structures d'enchères."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Game and stake"
@@ -4170,7 +4336,7 @@ msgstr "Jeu et limite"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Game family"
-msgstr ""
+msgstr "Famille de jeu"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Hand"
@@ -4178,7 +4344,7 @@ msgstr "Main"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Hand state known"
-msgstr ""
+msgstr "État de main connu"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Hand strength"
@@ -4186,7 +4352,7 @@ msgstr "Force de la main"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Hand-classified street"
-msgstr ""
+msgstr "Street classée par main"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Hands after"
@@ -4203,6 +4369,8 @@ msgstr "Héros"
 #: fpdb_3_legacy/research_labels.py
 msgid "Hero's own decisions, or everyone except hero. Any keeps both."
 msgstr ""
+"Les décisions du héros, ou tout le monde sauf le héros. « Indifférent » "
+"garde les deux."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Hole cards"
@@ -4214,7 +4382,7 @@ msgstr "Cartes privatives connues"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "How many holdings the holding beats."
-msgstr ""
+msgstr "Combien de combinaisons la main bat."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "How many players were dealt into the hand."
@@ -4226,15 +4394,15 @@ msgstr "Nombre de joueurs encore dans la main."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "How many raises came before this decision."
-msgstr ""
+msgstr "Combien de relances ont précédé cette décision."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "How much the actor had to call."
-msgstr ""
+msgstr "Combien l'acteur devait payer."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "How strong the holding is: nuts, near nuts, strong, medium or weak."
-msgstr ""
+msgstr "La force de la main : nuts, quasi nuts, forte, moyenne ou faible."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "In position"
@@ -4242,31 +4410,31 @@ msgstr "En position"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "In position versus the bettor"
-msgstr ""
+msgstr "En position face au miseur"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "In position versus the previous aggressor"
-msgstr ""
+msgstr "En position face à l'agresseur précédent"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Is the aggressor"
-msgstr ""
+msgstr "Est l'agresseur"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Is the preflop aggressor"
-msgstr ""
+msgstr "Est l'agresseur préflop"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Legacy stat column"
-msgstr ""
+msgstr "Colonne de stat historique"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Legacy stat response"
-msgstr ""
+msgstr "Réponse de stat historique"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Linked player identity"
-msgstr ""
+msgstr "Identité de joueur liée"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Made hand"
@@ -4278,11 +4446,12 @@ msgstr "Rang de la main faite"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Multiway"
-msgstr ""
+msgstr "Multiway"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Named texture flags such as monotone or connected (any of them)."
 msgstr ""
+"Indicateurs de texture nommés, comme monocolore ou connecté (l'un d'eux)."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "One import session."
@@ -4290,7 +4459,7 @@ msgstr "Une session d'import."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "One specific hand."
-msgstr ""
+msgstr "Une main précise."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "One specific tournament."
@@ -4298,27 +4467,27 @@ msgstr "Un tournoi précis."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Only decisions played on or after this date."
-msgstr ""
+msgstr "Seulement les décisions jouées à cette date ou après."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Only decisions played on or before this date."
-msgstr ""
+msgstr "Seulement les décisions jouées à cette date ou avant."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Only decisions with none of the named blockers."
-msgstr ""
+msgstr "Seulement les décisions sans aucun des bloqueurs nommés."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Only decisions with none of the named draws."
-msgstr ""
+msgstr "Seulement les décisions sans aucun des tirages nommés."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Only hands imported after this hand id."
-msgstr ""
+msgstr "Seulement les mains importées après cet id de main."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Only hands imported before this hand id."
-msgstr ""
+msgstr "Seulement les mains importées avant cet id de main."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Opponent position"
@@ -4326,11 +4495,11 @@ msgstr "Position de l'adversaire"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Other"
-msgstr ""
+msgstr "Autre"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Pair detail"
-msgstr ""
+msgstr "Détail de la paire"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Played since"
@@ -4346,7 +4515,7 @@ msgstr "Joueurs dans la main"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Poker room"
-msgstr ""
+msgstr "Salle de poker"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Position"
@@ -4358,71 +4527,72 @@ msgstr "Position et tapis"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Pot before the action"
-msgstr ""
+msgstr "Pot avant l'action"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Pot odds"
-msgstr ""
+msgstr "Cote du pot"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Pot type"
-msgstr ""
+msgstr "Type de pot"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Preflop, flop, turn or river."
-msgstr ""
+msgstr "Préflop, flop, turn ou river."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Rainbow, two-tone, monotone and the deeper flush boards."
 msgstr ""
+"Arc-en-ciel, deux couleurs, monocolore et les boards à couleur plus marquée."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Raises before"
-msgstr ""
+msgstr "Relances avant"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Range holdings"
-msgstr ""
+msgstr "Combinaisons de la range"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Relative position"
-msgstr ""
+msgstr "Position relative"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Response"
-msgstr ""
+msgstr "Réponse"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Restrict the population to a set of players."
-msgstr ""
+msgstr "Restreindre la population à un ensemble de joueurs."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Restrict the population to one player."
-msgstr ""
+msgstr "Restreindre la population à un joueur."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Restrict to a linked (site, alias) identity."
-msgstr ""
+msgstr "Restreindre à une identité liée (site, alias)."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Role"
-msgstr ""
+msgstr "Rôle"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Runout"
-msgstr ""
+msgstr "Runout"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "SPR"
-msgstr ""
+msgstr "SPR"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "SPR band"
-msgstr ""
+msgstr "Tranche de SPR"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Seats between the actor and the button."
-msgstr ""
+msgstr "Les sièges entre l'acteur et le bouton."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Seats dealt in"
@@ -4430,7 +4600,7 @@ msgstr "Sièges servis"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Short, medium, deep or very deep stacks."
-msgstr ""
+msgstr "Tapis courts, moyens, profonds ou très profonds."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Situation"
@@ -4438,11 +4608,11 @@ msgstr "Situation"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Situation family"
-msgstr ""
+msgstr "Famille de situations"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Situation, including the ones it led to"
-msgstr ""
+msgstr "Situation, y compris celles auxquelles elle a mené"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Stack depth"
@@ -4450,11 +4620,11 @@ msgstr "Profondeur de tapis"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Stack depth band"
-msgstr ""
+msgstr "Tranche de profondeur de tapis"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Stack-to-pot ratio before the action."
-msgstr ""
+msgstr "Ratio tapis/pot avant l'action."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Stake (big blinds)"
@@ -4466,15 +4636,15 @@ msgstr "Main de départ"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Street"
-msgstr ""
+msgstr "Street"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Street and pot"
-msgstr ""
+msgstr "Street et pot"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Street number"
-msgstr ""
+msgstr "Numéro de street"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Table size"
@@ -4482,131 +4652,131 @@ msgstr "Taille de la table"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The 169 Hold'em starting-hand classes."
-msgstr ""
+msgstr "Les 169 classes de mains de départ du Hold'em."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The bet size faced, in the configured sizing buckets."
-msgstr ""
+msgstr "La taille de mise subie, dans les tranches de taille configurées."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The bet size made, in the configured sizing buckets."
-msgstr ""
+msgstr "La taille de mise faite, dans les tranches de taille configurées."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The big blind in chips, for mixed stakes."
-msgstr ""
+msgstr "La grosse blinde en jetons, pour des limites mélangées."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The board street as a number, the flop being one."
-msgstr ""
+msgstr "La street du board sous forme de nombre, le flop valant un."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The currency the game was played in."
-msgstr ""
+msgstr "La devise dans laquelle la partie a été jouée."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The decision, normalized: fold, check, call, bet or raise."
-msgstr ""
+msgstr "La décision, normalisée : passe, check, paye, mise ou relance."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The game family: hold'em/omaha, stud or draw."
-msgstr ""
+msgstr "La famille de jeu : hold'em/omaha, stud ou draw."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The game variant, such as Hold'em or Omaha."
-msgstr ""
+msgstr "La variante de jeu, comme le Hold'em ou l'Omaha."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The highest card of the board."
-msgstr ""
+msgstr "La carte la plus haute du board."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The letter a legacy PT4 stat column records."
-msgstr ""
+msgstr "La lettre qu'enregistre une colonne de stat PT4 historique."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The made hand the actor held: pairs, sets, straights and so on."
-msgstr ""
+msgstr "La main faite par l'acteur : paires, brelans, quintes, etc."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The most specific situation the decision matched."
-msgstr ""
+msgstr "La situation la plus précise à laquelle la décision correspond."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The pot odds offered, in basis points."
-msgstr ""
+msgstr "La cote du pot offerte, en points de base."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The pot size before the action, in chips."
-msgstr ""
+msgstr "La taille du pot avant l'action, en jetons."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The same ratio as the bands a player thinks in."
-msgstr ""
+msgstr "Le même ratio, dans les tranches auxquelles pense un joueur."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The seat of the player the action was against."
-msgstr ""
+msgstr "Le siège du joueur contre qui l'action a été faite."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The seat of the player who acted."
-msgstr ""
+msgstr "Le siège du joueur qui a agi."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The shape of the pot: unopened, limped, single-raised, 3-bet, 4-bet."
-msgstr ""
+msgstr "La forme du pot : non ouvert, limpé, relancé une fois, 3-bet, 4-bet."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The share of the range the holding beats."
-msgstr ""
+msgstr "La part de la range que la main bat."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The size of the bet faced, as a percentage of the pot."
-msgstr ""
+msgstr "La taille de la mise subie, en pourcentage du pot."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The size of the bet faced, in basis points of the pot."
-msgstr ""
+msgstr "La taille de la mise subie, en points de base du pot."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The size of the bet made, as a percentage of the pot."
-msgstr ""
+msgstr "La taille de la mise faite, en pourcentage du pot."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The size of the bet made, in basis points of the pot."
-msgstr ""
+msgstr "La taille de la mise faite, en points de base du pot."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The size of the game, expressed in big blinds."
-msgstr ""
+msgstr "La taille de la partie, exprimée en grosses blindes."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The smaller of the two stacks, in big blinds."
-msgstr ""
+msgstr "Le plus petit des deux tapis, en grosses blindes."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The smaller of the two stacks, in chips."
-msgstr ""
+msgstr "Le plus petit des deux tapis, en jetons."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The street as a number, preflop being zero."
-msgstr ""
+msgstr "La street sous forme de nombre, le préflop valant zéro."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The street the hand state was classified on."
-msgstr ""
+msgstr "La street sur laquelle l'état de main a été classé."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The strength of the made hand, as a number."
-msgstr ""
+msgstr "La force de la main faite, sous forme de nombre."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "The table size, such as 6-max or full ring."
-msgstr ""
+msgstr "La taille de la table, comme 6-max ou full ring."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Three or more players saw the decision."
-msgstr ""
+msgstr "Trois joueurs ou plus ont vu la décision."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Tournament or cash"
@@ -4614,142 +4784,146 @@ msgstr "Tournoi ou cash"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Was the previous aggressor"
-msgstr ""
+msgstr "Était l'agresseur précédent"
 
 #: fpdb_3_legacy/research_labels.py
 msgid ""
 "What the actor did, including draw-game discards and stand-pat decisions."
 msgstr ""
+"Ce que l'acteur a fait, y compris les défausses et les servis des jeux à "
+"tirage."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "What the actor was facing."
-msgstr ""
+msgstr "Ce à quoi l'acteur faisait face."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "What the turn or river card changed."
-msgstr ""
+msgstr "Ce que la carte de la turn ou de la river a changé."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Whether the action in front of the actor was an all-in."
-msgstr ""
+msgstr "Si l'action devant l'acteur était un tapis."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Whether the action put the player all-in."
-msgstr ""
+msgstr "Si l'action a mis le joueur à tapis."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Whether the actor has position on the bettor."
-msgstr ""
+msgstr "Si l'acteur a la position sur le miseur."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Whether the actor has position on the previous aggressor."
-msgstr ""
+msgstr "Si l'acteur a la position sur l'agresseur précédent."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Whether the actor raised preflop."
-msgstr ""
+msgstr "Si l'acteur a relancé préflop."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Whether the actor was in position."
-msgstr ""
+msgstr "Si l'acteur était en position."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Whether the actor was the aggressor on the previous street."
-msgstr ""
+msgstr "Si l'acteur était l'agresseur sur la street précédente."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Whether the actor was the aggressor on this street."
-msgstr ""
+msgstr "Si l'acteur était l'agresseur sur cette street."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Whether the board is connected, semi-connected or disconnected."
-msgstr ""
+msgstr "Si le board est connecté, semi-connecté ou déconnecté."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Whether the board is unpaired, paired, or more."
-msgstr ""
+msgstr "Si le board est non apparié, apparié ou plus."
 
 #: fpdb_3_legacy/research_labels.py
 msgid ""
 "Which draw round the player reached; only recorded discard or stand-pat "
 "actions count."
 msgstr ""
+"Le tour de tirage atteint par le joueur ; seules les défausses ou les servis "
+"enregistrés comptent."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Which pair the actor held: overpair, top pair, set and so on."
-msgstr ""
+msgstr "La paire de l'acteur : overpair, top pair, brelan, etc."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Which poker room the hands were played on."
-msgstr ""
+msgstr "La salle de poker où les mains ont été jouées."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Yes for tournament hands, No for cash game hands."
-msgstr ""
+msgstr "Oui pour les mains de tournoi, Non pour les mains de cash game."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Yes on the flop and later, No before the flop."
-msgstr ""
+msgstr "Oui au flop et après, Non avant le flop."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Yes only for decisions whose cards were shown."
-msgstr ""
+msgstr "Oui seulement pour les décisions dont les cartes ont été montrées."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Yes only where the cards were known and classified."
-msgstr ""
+msgstr "Oui seulement là où les cartes étaient connues et classées."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "all-in frequency"
-msgstr ""
+msgstr "fréquence de tapis"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "average SPR"
-msgstr ""
+msgstr "SPR moyen"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "average bet size (basis points of the pot)"
-msgstr ""
+msgstr "taille de mise moyenne (points de base du pot)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "average bet size faced (basis points of the pot)"
-msgstr ""
+msgstr "taille de mise subie moyenne (points de base du pot)"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "average pot size"
-msgstr ""
+msgstr "taille de pot moyenne"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "bet frequency"
-msgstr ""
+msgstr "fréquence de mise"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "bp"
-msgstr ""
+msgstr "pb"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "call frequency"
-msgstr ""
+msgstr "fréquence de call"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "check frequency"
-msgstr ""
+msgstr "fréquence de check"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "chips"
-msgstr ""
+msgstr "jetons"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "fold frequency"
-msgstr ""
+msgstr "fréquence de passe"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "holdings"
-msgstr ""
+msgstr "combinaisons"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "how many actions"
-msgstr ""
+msgstr "nombre d'actions"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "how many decisions"
@@ -4757,7 +4931,7 @@ msgstr "nombre de décisions"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "how many hands"
-msgstr ""
+msgstr "nombre de mains"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "how many players"
@@ -4765,7 +4939,7 @@ msgstr "nombre de joueurs"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "how often the decision is taken"
-msgstr ""
+msgstr "fréquence de la décision"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "id"
@@ -4773,39 +4947,39 @@ msgstr "id"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "per-hand frequency"
-msgstr ""
+msgstr "fréquence par main"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "raise frequency"
-msgstr ""
+msgstr "fréquence de relance"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "realized profit"
-msgstr ""
+msgstr "profit réalisé"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "realized profit per decision"
-msgstr ""
+msgstr "profit réalisé par décision"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "seats"
-msgstr ""
+msgstr "sièges"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "street"
-msgstr ""
+msgstr "street"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 msgid "Column Configuration"
-msgstr ""
+msgstr "Configuration des colonnes"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 msgid "Columns"
-msgstr ""
+msgstr "Colonnes"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 msgid "Dashboard"
-msgstr ""
+msgstr "Tableau de bord"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 msgid "Detailed Filters"
@@ -4845,27 +5019,27 @@ msgstr "% couché de la grosse blinde face au vol"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Call Raise preflop"
-msgstr ""
+msgstr "% call de relance préflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Continuation Bet"
-msgstr ""
+msgstr "% mise de continuation"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Flop 3-bet"
-msgstr ""
+msgstr "% 3-bet au flop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Flop 4-bet"
-msgstr ""
+msgstr "% 4-bet au flop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Flop open bet"
-msgstr ""
+msgstr "% mise d'ouverture au flop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Flops seen"
-msgstr ""
+msgstr "% flops vus"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Fold to preflop 3-bet"
@@ -4877,31 +5051,31 @@ msgstr "% couché face au 4-bet préflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Preflop 3-bet"
-msgstr ""
+msgstr "% 3-bet préflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Preflop 4-bet"
-msgstr ""
+msgstr "% 4-bet préflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Raise First In"
-msgstr ""
+msgstr "% relance en premier (RFI)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Re-steal"
-msgstr ""
+msgstr "% re-steal"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% River 3-bet"
-msgstr ""
+msgstr "% 3-bet à la river"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% River 4-bet"
-msgstr ""
+msgstr "% 4-bet à la river"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% River open bet"
-msgstr ""
+msgstr "% mise d'ouverture à la river"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Showdowns seen"
@@ -4921,15 +5095,15 @@ msgstr "% vols réussis"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Turn 3-bet"
-msgstr ""
+msgstr "% 3-bet à la turn"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Turn 4-bet"
-msgstr ""
+msgstr "% 4-bet à la turn"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Turn open bet"
-msgstr ""
+msgstr "% mise d'ouverture à la turn"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Went to showdown after seeing flop"
@@ -4937,11 +5111,11 @@ msgstr "% allé au showdown après avoir vu le flop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Won money after seeing flop"
-msgstr ""
+msgstr "% gagné de l'argent après avoir vu le flop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Won money at showdown"
-msgstr ""
+msgstr "% gagné de l'argent au showdown"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Big Blinds won per 100 hands"
@@ -4953,15 +5127,15 @@ msgstr "Grosses blindes gagnées pour 100 mains, hors rake"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Flop aggression frequency"
-msgstr ""
+msgstr "Fréquence d'agression au flop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Game type (Hold'em, Omaha, etc.)"
-msgstr ""
+msgstr "Type de jeu (Hold'em, Omaha, etc.)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Measure of uncertainty"
-msgstr ""
+msgstr "Mesure d'incertitude"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Number of hands played"
@@ -4981,11 +5155,11 @@ msgstr "Position à la table"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Postflop aggression factor"
-msgstr ""
+msgstr "Facteur d'agression postflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Postflop aggression frequency"
-msgstr ""
+msgstr "Fréquence d'agression postflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Preflop raise"
@@ -5005,11 +5179,11 @@ msgstr "Rake payé"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "River aggression frequency"
-msgstr ""
+msgstr "Fréquence d'agression à la river"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Starting cards (Hole cards)"
-msgstr ""
+msgstr "Cartes de départ (cartes privatives)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Total net profit"
@@ -5017,7 +5191,7 @@ msgstr "Profit net total"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Turn aggression frequency"
-msgstr ""
+msgstr "Fréquence d'agression à la turn"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Voluntarily put money in pot preflop"
@@ -5025,16 +5199,16 @@ msgstr "Argent mis volontairement au pot préflop"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 msgid "Preflop Profile (VPIP vs PFR)"
-msgstr ""
+msgstr "Profil préflop (VPIP vs PFR)"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, python-brace-format
 msgid "<b>Hand: {0}</b><br/>Hands: {1}<br/>VPIP: {2}%<br/>Profit: {3}"
-msgstr ""
+msgstr "<b>Main : {0}</b><br/>Mains : {1}<br/>VPIP : {2} %<br/>Profit : {3}"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 msgid "Color the grid by:"
-msgstr ""
+msgstr "Colorer la grille selon :"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 msgid "Filtered range:"
@@ -5046,34 +5220,36 @@ msgid ""
 "Hand: {0}\n"
 "No statistics available"
 msgstr ""
+"Main : {0}\n"
+"Aucune statistique disponible"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 msgid "Hold'em Starting Hand Grid"
-msgstr ""
+msgstr "Grille des mains de départ Hold'em"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 msgid "Omaha 4-Card Texture Analysis"
-msgstr ""
+msgstr "Analyse de texture Omaha 4 cartes"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 msgid "Omaha 5-Card Texture Analysis"
-msgstr ""
+msgstr "Analyse de texture Omaha 5 cartes"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 msgid "Omaha 6-Card Texture Analysis"
-msgstr ""
+msgstr "Analyse de texture Omaha 6 cartes"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 msgid "Omaha Texture Analysis"
-msgstr ""
+msgstr "Analyse de texture Omaha"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 msgid "Starting Hands Analysis"
-msgstr ""
+msgstr "Analyse des mains de départ"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 msgid "min sample:"
-msgstr ""
+msgstr "échantillon min. :"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, python-brace-format
@@ -5081,6 +5257,8 @@ msgid ""
 "{0} decisions in this selection have no known hole cards and are not in the "
 "grid"
 msgstr ""
+"{0} décisions de cette sélection n'ont pas de cartes privatives connues et "
+"ne sont pas dans la grille"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
 msgid "Hand Breakdown"
@@ -5360,27 +5538,27 @@ msgstr "Installé par l'utilisateur"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "<"
-msgstr ""
+msgstr "<"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "<<"
-msgstr ""
+msgstr "<<"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid ">"
-msgstr ""
+msgstr ">"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid ">>"
-msgstr ""
+msgstr ">>"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "BOTTOM :"
-msgstr ""
+msgstr "BOTTOM :"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "Capture Console (Logs):"
-msgstr ""
+msgstr "Console de capture (journaux) :"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "Captured Hand History:"
@@ -5392,7 +5570,7 @@ msgstr "Cartes :"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "Hands Captured: 0"
-msgstr ""
+msgstr "Mains capturées : 0"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "Import All OFC"
@@ -5400,7 +5578,7 @@ msgstr "Tout importer (OFC)"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "Import OFC to DB"
-msgstr ""
+msgstr "Importer l'OFC en base"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "In Hand:"
@@ -5408,7 +5586,7 @@ msgstr "Dans la main :"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "MIDDLE :"
-msgstr ""
+msgstr "MIDDLE :"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "Open DB Replayer"
@@ -5424,43 +5602,43 @@ msgstr "Rafraîchir les mains"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "Select a hand to start replay"
-msgstr ""
+msgstr "Sélectionnez une main pour démarrer le rejeu"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "Start Capture"
-msgstr ""
+msgstr "Démarrer la capture"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "Status: 🔴 Stopped"
-msgstr ""
+msgstr "Statut : 🔴 Arrêté"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "Statut : 🔴 Arrêté"
-msgstr ""
+msgstr "Statut : 🔴 Arrêté"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "Statut : 🟢 En Cours"
-msgstr ""
+msgstr "Statut : 🟢 En cours"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "Step 0 / 0"
-msgstr ""
+msgstr "Étape 0 / 0"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "SwC"
-msgstr ""
+msgstr "SwC"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "SwC Poker - Capture Console & Replayer"
-msgstr ""
+msgstr "SwC Poker - Console de capture et rejoueur"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "TOP :"
-msgstr ""
+msgstr "TOP :"
 
 #: fpdb_3_legacy/table_export.py
 msgid "Confirm overwrite"
-msgstr ""
+msgstr "Confirmer le remplacement"
 
 #: fpdb_3_legacy/table_export.py
 msgid "Copy entire table"
@@ -5468,20 +5646,20 @@ msgstr "Copier tout le tableau"
 
 #: fpdb_3_legacy/table_export.py
 msgid "Copy entire table with headers"
-msgstr ""
+msgstr "Copier tout le tableau avec les en-têtes"
 
 #: fpdb_3_legacy/table_export.py
 msgid "Copy with headers"
-msgstr ""
+msgstr "Copier avec les en-têtes"
 
 #: fpdb_3_legacy/table_export.py
 msgid "Export displayed values"
-msgstr ""
+msgstr "Exporter les valeurs affichées"
 
 #: fpdb_3_legacy/table_export.py
 #, python-format
 msgid "Export displayed values as %s…"
-msgstr ""
+msgstr "Exporter les valeurs affichées en %s…"
 
 #: fpdb_3_legacy/table_export.py
 msgid "Export failed"
@@ -5494,6 +5672,9 @@ msgid ""
 "%s\n"
 "Do you want to replace it?"
 msgstr ""
+"Le fichier existe déjà :\n"
+"%s\n"
+"Voulez-vous le remplacer ?"
 
 #, fuzzy
 #~ msgid "    drop index failed: "

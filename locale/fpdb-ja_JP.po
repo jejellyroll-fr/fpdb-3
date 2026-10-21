@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 13:02+0200\n"
+"POT-Creation-Date: 2026-10-21 13:33+0200\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -24,9 +24,9 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s cannot read all stud/razz hands yet."
-msgstr ""
+msgstr "%s はまだすべてのスタッド/ラズのハンドを読み込めません。"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py
 #, python-format
@@ -50,13 +50,14 @@ msgid "No bringin found."
 msgstr "ブリングインが見つかりません。"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
+#, fuzzy
 msgid "No small blind"
-msgstr ""
+msgstr "スモールブラインドなし"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Player bringing in: %s for %s"
-msgstr ""
+msgstr "ブリングインのプレイヤー: %s (%s)"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/BossToFpdb.py
 #: fpdb_3_legacy/EnetToFpdb.py fpdb_3_legacy/EntractionToFpdb.py
@@ -101,30 +102,34 @@ msgid "DEBUG:"
 msgstr "DEBUG:"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Configuration modified*"
-msgstr ""
-
-#: fpdb_3_legacy/ConfigReloadWidget.py
-msgid "Configuration up to date"
-msgstr ""
-
-#: fpdb_3_legacy/ConfigReloadWidget.py
-msgid "Reload configuration"
-msgstr ""
-
-#: fpdb_3_legacy/ConfigReloadWidget.py
-msgid "Reload error"
-msgstr ""
+msgstr "設定が変更されました*"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "Waiting..."
-msgid "Reloading..."
-msgstr "待機中..."
+msgid "Configuration up to date"
+msgstr "設定を更新しました"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
+msgid "Reload configuration"
+msgstr "設定を再読み込み"
+
+#: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
+msgid "Reload error"
+msgstr "再読み込みエラー"
+
+#: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
+msgid "Reloading..."
+msgstr "再読み込み中..."
+
+#: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Restart required"
-msgstr ""
+msgstr "再起動が必要です"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 msgid "↻"
@@ -151,8 +156,9 @@ msgstr "EnetToFpdb.readHandInfo: 通貨の自動判別に失敗しました。"
 
 #: fpdb_3_legacy/EnetToFpdb.py fpdb_3_legacy/EntractionToFpdb.py
 #: fpdb_3_legacy/OnGameToFpdb.py
+#, fuzzy
 msgid "not found"
-msgstr ""
+msgstr "見つかりません"
 
 #: fpdb_3_legacy/EntractionToFpdb.py
 #, python-format
@@ -202,14 +208,14 @@ msgid "EverleafToFpdb.readHandInfo: '%s'"
 msgstr "EverleafToFpdb.readHandInfo: '%s'"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "2-7 Drawmaha"
-msgstr ""
+msgstr "2-7 Drawmaha"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
-#| msgid "Razz"
 msgid "2-7 Razz"
-msgstr "Razz"
+msgstr "2-7 ラズ"
 
 #: fpdb_3_legacy/Filters.py
 msgid "5 Card Draw"
@@ -240,8 +246,9 @@ msgid "7 Card Stud Hi/Lo"
 msgstr "7カードスタッドH/L"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "A-5 Single Draw"
-msgstr ""
+msgstr "A-5 シングルドロー"
 
 #: fpdb_3_legacy/Filters.py
 msgid "All"
@@ -257,23 +264,23 @@ msgstr "から:"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
-#| msgid "Hold'em"
 msgid "AoF Hold'em"
-msgstr "テキサスホールデム"
+msgstr "AoF ホールデム"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
-#| msgid "Omaha"
 msgid "AoF Omaha"
-msgstr "オマハ"
+msgstr "AoF オマハ"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badacey"
-msgstr ""
+msgstr "Badacey"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badeucey"
-msgstr ""
+msgstr "Badeucey"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Badugi"
@@ -284,16 +291,19 @@ msgid "Between:"
 msgstr " "
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Buyin"
-msgstr ""
+msgstr "バイイン"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Cal"
-msgstr ""
+msgstr "カレンダー"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Category"
-msgstr ""
+msgstr "カテゴリ"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Courchevel"
@@ -333,13 +343,13 @@ msgstr "開始日:"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
-#| msgid "Session"
 msgid "Fusion"
-msgstr "このセッション"
+msgstr "Fusion"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Games"
-msgstr ""
+msgstr "ゲーム"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Grouping:"
@@ -363,21 +373,22 @@ msgstr "アイリッシュ"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
-#| msgid "Fetch Type"
 msgid "Limit Type"
-msgstr "形式"
+msgstr "リミットの種類"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Limits:"
-msgstr ""
+msgstr "リミット:"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Min # Hands:"
 msgstr "最低ハンド数:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Net profit excluding splash pots"
-msgstr ""
+msgstr "スプラッシュポットを除く純利益"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Non-Showdown Winnings"
@@ -392,8 +403,9 @@ msgid "Number of Players:"
 msgstr "プレイヤー数:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Off Suit"
-msgstr ""
+msgstr "オフスート"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Omaha"
@@ -404,8 +416,9 @@ msgid "Omaha Hi/Lo"
 msgstr "オマハH/L"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Pick a date"
-msgstr ""
+msgstr "日付を選択"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Play Money"
@@ -421,13 +434,13 @@ msgstr "Razz"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
-#| msgid "Refresh Stats"
 msgid "Refresh Filters"
-msgstr "統計を再計算"
+msgstr "フィルターを更新"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Reset"
-msgstr ""
+msgstr "リセット"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Ring"
@@ -506,8 +519,9 @@ msgid "FullTiltPokerSummary.parseSummaryXLS: '%s' '%s"
 msgstr "FullTiltPokerSummary.parseSummaryXLS: '%s' '%s"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
+#, fuzzy
 msgid "Unable to locate currency"
-msgstr ""
+msgstr "通貨が見つかりません"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
 msgid "parseSummary FAIL"
@@ -541,9 +555,8 @@ msgstr "ハンド '%s' は取り消されました."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
 #, fuzzy, python-format
-#| msgid "Hand '%s' was cancelled."
 msgid "Hand '%s' was not dealt (dead hand)."
-msgstr "ハンド '%s' は取り消されました."
+msgstr "ハンド '%s' は配られていません (デッドハンド)。"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
 #, python-format
@@ -556,87 +569,104 @@ msgid "No players detected in hand %s."
 msgstr "ハンド %s で自動判別できたプレイヤーがいません。"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Database is back. Auto Import resumed."
 msgstr ""
+"\n"
+"データベースが再び利用可能になりました。自動インポートを再開します。"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Database unreachable. Auto Import paused, retrying..."
 msgstr ""
+"\n"
+"データベースが利用できません。自動インポートを一時停止し、再試行中..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Stop requested while an import was still running; it will finish in the "
 "background."
 msgstr ""
+"\n"
+"インポート実行中に停止が要求されました。バックグラウンドで完了します。"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "SwC Native Live HUD tailing thread started."
 msgstr ""
+"\n"
+"SwC ネイティブ HUD の監視スレッドを開始しました。"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "SwC live capture is not available on this platform. Importing SwC files "
 "still works."
 msgstr ""
+"\n"
+"このプラットフォームでは SwC のライブキャプチャを利用できません。SwC ファイル"
+"のインポートは引き続き使用できます。"
 
 #: fpdb_3_legacy/GuiAutoImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "\n"
 "SwC live capture unavailable: {reason}. Importing SwC hand history files "
 "still works."
 msgstr ""
+"\n"
+"SwC のライブキャプチャを利用できません: {reason}。SwC ハンド履歴のインポート"
+"は引き続き使用できます。"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Auto Import Ready."
 msgid "Auto Import Ready.\n"
-msgstr "自動インポートの準備完了"
+msgstr "自動インポートの準備ができました。\n"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Auto Import Running"
 msgid "Auto Import Running..."
-msgstr "自動インポート実行中"
+msgstr "自動インポート実行中..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Database unreachable - retrying"
-msgstr ""
+msgstr "データベースが利用できません - 再試行中"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Auto Import"
 msgid "FPDB Auto Import"
-msgstr "自動インポート"
-
-#: fpdb_3_legacy/GuiAutoImport.py
-msgid "Import cycle is taking longer than usual..."
-msgstr ""
+msgstr "FPDB 自動インポート"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "HUD Log"
+msgid "Import cycle is taking longer than usual..."
+msgstr "インポート処理に通常より時間がかかっています..."
+
+#: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Log"
-msgstr "HUDログ"
+msgstr "ログ"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Ready"
-msgstr ""
+msgstr "準備完了"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Setting"
 msgid "Settings"
-msgstr "設定項目"
+msgstr "設定"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid "Start Auto Import"
@@ -648,140 +678,144 @@ msgstr "自動インポートを停止する"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Stopping Auto Import."
 msgid "Stopping Auto Import..."
-msgstr "自動インポートを停止中。"
+msgstr "自動インポートを停止中..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "SwC live capture could not attach: {reason}. Importing SwC hand history "
 "files still works."
 msgstr ""
+"SwC のライブキャプチャに接続できませんでした: {reason}。SwC ハンド履歴のイン"
+"ポートは引き続き使用できます。"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Time between imports in seconds:"
 msgid "Time between imports (seconds):"
-msgstr "インポート間隔(秒):"
+msgstr "インポート間隔 (秒):"
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Automatic Notes"
-msgstr ""
+msgstr "自動ノート"
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Enable or disable automatic player-note rules."
-msgstr ""
+msgstr "自動プレイヤーノートのルールを有効または無効にします。"
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Generate automatic notes"
-msgstr ""
+msgstr "自動ノートを生成"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Custom"
 msgid "Custom Rules"
-msgstr "指定する"
+msgstr "カスタムルール"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Databases"
 msgid "Database hands"
-msgstr "データベース"
+msgstr "データベースのハンド"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Dry Run"
-msgstr ""
+msgstr "ドライラン"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Dry Run DB"
-msgstr ""
+msgstr "DB でドライラン"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Filename"
 msgid "File"
-msgstr "ファイル名"
+msgstr "ファイル"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Mail Folder"
 msgid "Folder"
-msgstr "IMAPフォルダ"
+msgstr "フォルダー"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "From:"
 msgid "From"
-msgstr "開始日:"
+msgstr "開始"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Hand History Converters"
 msgid "Hand-history source"
-msgstr "ハンド履歴変換"
+msgstr "ハンド履歴のソース"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Idle"
-msgstr ""
+msgstr "待機中"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Latest: -"
-msgstr ""
+msgstr "最新: -"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Limit"
-msgstr ""
+msgstr "リミット"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Load Hands"
 msgid "Load Notes"
-msgstr "ハンドを読込"
+msgstr "ノートを読み込む"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Notes: 0"
-msgstr ""
+msgstr "ノート: 0"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Players"
 msgid "Player"
 msgstr "プレイヤー"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Player Name"
 msgid "Player Notes"
-msgstr "プレイヤー名"
-
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
-msgid "Pool"
-msgstr ""
-
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
-msgid "Recent generated notes"
-msgstr ""
+msgstr "プレイヤーノート"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Refresh Stats"
+msgid "Pool"
+msgstr "プール"
+
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
+msgid "Recent generated notes"
+msgstr "最近のノート"
+
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Refresh Pool Summary"
-msgstr "統計を再計算"
+msgstr "プールの概要を更新"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Rule set"
-msgstr ""
+msgstr "ルールセット"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Run"
-msgstr ""
+msgstr "実行"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Search"
-msgstr ""
+msgstr "検索"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/GuiBulkImport.py
 #: fpdb_3_legacy/hand_share_dialog.py
@@ -794,24 +828,29 @@ msgid "To"
 msgstr "〜"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top players by generated notes"
-msgstr ""
+msgstr "ノートの多いプレイヤー"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top rule: -"
-msgstr ""
+msgstr "主なルール: -"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top rules"
-msgstr ""
+msgstr "主なルール"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Write DB Notes"
-msgstr ""
+msgstr "DB にノートを書き込む"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Write Notes"
-msgstr ""
+msgstr "ノートを書き込む"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Browse..."
@@ -823,20 +862,21 @@ msgstr "一括インポート"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-#| msgid "Bulk Import"
 msgid "Bulk Import Error"
-msgstr "一括インポート"
+msgstr "一括インポートのエラー"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Choose a destination directory"
-msgstr ""
+msgstr "移動先フォルダーを選択"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Configured Import Directories:"
-msgstr ""
+msgstr "設定済みのインポートフォルダー:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Import complete.\n"
 "\n"
@@ -848,31 +888,46 @@ msgid ""
 "Errors: {errs}\n"
 "Time: {elapsed}s"
 msgstr ""
+"インポート完了。\n"
+"\n"
+"処理したファイル: {files}\n"
+"保存: {stored}\n"
+"重複: {dups}\n"
+"部分的: {partial}\n"
+"スキップ: {skipped}\n"
+"エラー: {errs}\n"
+"時間: {elapsed} 秒"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-#| msgid "Importing"
 msgid "Importing..."
-msgstr "インポート中"
+msgstr "インポート中..."
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Move failed files to:"
-msgstr ""
+msgstr "失敗したファイルの移動先:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Move imported files to:"
-msgstr ""
+msgstr "インポートしたファイルの移動先:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid ""
 "No importable hand-history files were found in the selected directories.\n"
 "\n"
 "Check that the configured paths contain hand histories (plain text files), "
 "not just archives or exports."
 msgstr ""
+"選択したフォルダーにインポートできるハンド履歴が見つかりませんでした。\n"
+"\n"
+"設定したパスにアーカイブやエクスポートだけでなく、ハンド履歴 (テキストファイ"
+"ル) が含まれているか確認してください。"
 
 #: fpdb_3_legacy/GuiBulkImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "PHH hands found: {found}\n"
 "Imported: {imported}\n"
@@ -882,479 +937,549 @@ msgid ""
 "Malformed: {malformed}\n"
 "PHH import time: {seconds}s"
 msgstr ""
+"見つかった PHH ハンド: {found}\n"
+"インポート: {imported}\n"
+"重複: {dups}\n"
+"部分的 (履歴が途中で終了): {partial}\n"
+"未対応のバリアント: {unsupported}\n"
+"不正な形式: {malformed}\n"
+"PHH インポート時間: {seconds} 秒"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Path"
-msgstr ""
+msgstr "パス"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Please choose the path that you want to Auto Import"
 msgstr "自動インポートの対象ディレクトリを選択してください"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
 msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Capture failed to start — see the log above."
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Default game:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Dry run (no DB insert)"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Finishing previous capture…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Idle."
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Interface:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Launch HUD"
-msgstr ""
+"HUD_main も起動します (HUD/自動インポートが既に実行中の場合はチェックを外して"
+"ください)。"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 #, fuzzy
-#| msgid "Refresh Stats"
-msgid "Refresh interfaces"
-msgstr "統計を再計算"
+msgid "Capture failed to start — see the log above."
+msgstr "キャプチャを開始できませんでした — 上のログを参照してください。"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Default game:"
+msgstr "デフォルトのゲーム:"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Dry run (no DB insert)"
+msgstr "ドライラン (DB に書き込まない)"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Finishing previous capture…"
+msgstr "前回のキャプチャを終了中…"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Idle."
+msgstr "待機中。"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Interface:"
+msgstr "インターフェース:"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Launch HUD"
+msgstr "HUD を起動"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Refresh interfaces"
+msgstr "インターフェースを更新"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
 msgstr ""
+"権限を要求中… プロンプトを承認してから CoinPoker をプレイしてください。"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Start capture"
-msgstr ""
+msgstr "キャプチャを開始"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py fpdb_3_legacy/session_guard_dialog.py
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Stop"
-msgstr ""
+msgstr "停止"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Stopping…"
-msgstr ""
+msgstr "停止中…"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "+ New Rule"
-msgstr ""
+msgstr "+ 新しいルール"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Actions"
-msgstr ""
+msgstr "アクション"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-format
+#, fuzzy, python-format
 msgid "Are you sure you want to delete rule '%s'?"
-msgstr ""
+msgstr "ルール '%s' を削除してもよろしいですか?"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Board ({flop})"
-msgstr ""
+msgstr "ボード ({flop})"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Board:"
 msgstr "ボード:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Captured Evidence Schema"
-msgstr ""
+msgstr "取得データのスキーマ"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Custom Auto Notes rules saved successfully!"
-msgstr ""
+msgstr "カスタム自動ノートのルールを保存しました!"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Delete Rule"
-msgstr ""
+msgstr "ルールを削除"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Duplicate Rule IDs"
-msgstr ""
+msgstr "ルール ID の重複"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Empty HH"
-msgstr ""
+msgstr "履歴が空です"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Enabled"
-msgstr ""
+msgstr "有効"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Generated Note: (None)"
-msgstr ""
+msgstr "生成されたノート: (なし)"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy, python-brace-format
-#| msgid "Hole Cards"
 msgid "Hole Cards ({hole})"
-msgstr "ホールカード"
+msgstr "ホールカード ({hole})"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Hole:"
-msgstr ""
+msgstr "ホールカード:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Live Testing Sandbox"
-msgstr ""
+msgstr "ライブテストサンドボックス"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Logical Conditions (No-Code GUI)"
-msgstr ""
+msgstr "論理条件 (ノーコード)"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "No Rule"
-msgstr ""
+msgstr "ルールがありません"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Note Template (Tags: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, {spr}):"
 msgstr ""
+"ノートのテンプレート (タグ: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, "
+"{spr}):"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Paste raw GGPoker or PokerStars hand history text here to test..."
 msgstr ""
+"テスト用に GGPoker または PokerStars のハンド履歴の生テキストをここに貼り付け"
+"てください..."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Please paste a Hand History text to evaluate against."
-msgstr ""
+msgstr "評価するハンド履歴のテキストを貼り付けてください。"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
-#| msgid "Please recreate tables."
 msgid "Please select or create a rule to evaluate."
-msgstr "DBテーブルを再作成してください"
+msgstr "評価するルールを選択または作成してください。"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Remove Condition"
-msgstr ""
+msgstr "条件を削除"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Root Operator:"
-msgstr ""
+msgstr "ルート演算子:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule / Group"
-msgstr ""
+msgstr "ルール / グループ"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule ID:"
-msgstr ""
+msgstr "ルール ID:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule Metadata"
-msgstr ""
+msgstr "ルールのメタデータ"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
-#| msgid "Player Name"
 msgid "Rule Name:"
-msgstr "プレイヤー名"
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Rule Set:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Rule Sets & Custom Rules"
-msgstr ""
+msgstr "ルール名:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
-#| msgid "Save"
+msgid "Rule Set:"
+msgstr "ルールセット:"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Rule Sets & Custom Rules"
+msgstr "ルールセットとカスタムルール"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Saved"
-msgstr "保存"
+msgstr "保存しました"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Stack & SPR"
-msgstr ""
+msgstr "スタックと SPR"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Status: READY"
-msgstr ""
+msgstr "状態: 準備完了"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Test Source (Raw Hand History Text):"
-msgstr ""
+msgstr "テストのソース (ハンド履歴の生テキスト):"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "These rule IDs are used more than once: %s\n"
 "\n"
 "Give each rule a unique ID before saving."
 msgstr ""
+"次のルール ID が複数回使われています: %s\n"
+"\n"
+"保存する前に各ルールに一意の ID を付けてください。"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "➕ Add Condition"
-msgstr ""
+msgstr "➕ 条件を追加"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "💾 Save Rules"
-msgstr ""
+msgstr "💾 ルールを保存"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📋 Duplicate"
-msgstr ""
+msgstr "📋 複製"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🗑️ Delete"
-msgstr ""
+msgstr "🗑️ 削除"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "🧪 Evaluate Rule"
-msgstr ""
+msgstr "🧪 ルールを評価"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "🧪 Test Sandbox"
-msgstr ""
+msgstr "🧪 サンドボックス"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "A database name is required."
-msgstr ""
+msgstr "データベース名が必要です。"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "A host is required for PostgreSQL/MySQL."
-msgstr ""
+msgstr "PostgreSQL/MySQL にはホストが必要です。"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Add New Database"
 msgid "Add database"
-msgstr "新しいデータベースを追加"
+msgstr "データベースを追加"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Add..."
-msgstr ""
+msgstr "追加..."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Backend"
-msgstr ""
+msgstr "バックエンド"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Backend:"
-msgstr ""
+msgstr "バックエンド:"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Confirm rebuilding database indexes"
 msgid "Configured databases:"
-msgstr "データベースのインデックス再構築の確認"
+msgstr "設定済みのデータベース:"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Database"
 msgid "Create database"
-msgstr "データベース"
+msgstr "データベースを作成"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Recreating tables."
 msgid "Create tables"
-msgstr "DBテーブルを再作成中。"
+msgstr "テーブルを作成"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Default"
-msgstr ""
+msgstr "デフォルト"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Database created"
 msgid "Default database changed"
-msgstr "データベースが作成されました"
+msgstr "デフォルトのデータベースを変更しました"
 
 #: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Delete"
-msgstr ""
+msgstr "削除"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Database"
 msgid "Delete database"
-msgstr "データベース"
+msgstr "データベースを削除"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Database"
 msgid "Edit database"
-msgstr "データベース"
+msgstr "データベースを編集"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Edit"
 msgid "Edit..."
-msgstr "編集"
+msgstr "編集..."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Host / Path"
-msgstr ""
+msgstr "ホスト / パス"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Host"
 msgid "Host:"
-msgstr "ホスト"
+msgstr "ホスト:"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Strong Warning - Invalid database version"
 msgid "Invalid database settings"
-msgstr "Strong Warning - 無効なデータベースバージョンです"
+msgstr "無効なデータベース設定"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Maintain Databases"
 msgid "Migrate database"
-msgstr "データベースの保守"
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Migrate to..."
-msgstr ""
+msgstr "データベースを移行"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Maintain Databases"
-msgid "Migrating database"
-msgstr "データベースの保守"
+msgid "Migrate to..."
+msgstr "移行先..."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
+msgid "Migrating database"
+msgstr "データベースを移行中"
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Name"
-msgstr ""
+msgstr "名前"
 
 #: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "DB Name"
 msgid "Name:"
-msgstr "データベース名"
+msgstr "名前:"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Password"
 msgid "Password:"
-msgstr "パスワード"
+msgstr "パスワード:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Port must be a number between 1 and 65535."
-msgstr ""
+msgstr "ポートは 1 から 65535 の数値でなければなりません。"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Port:"
-msgstr ""
+msgstr "ポート:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid ""
 "SQLite databases are created automatically. Use 'Create tables' to "
 "initialise the schema."
 msgstr ""
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Set as default"
-msgstr ""
+"SQLite データベースは自動的に作成されます。スキーマの作成には「テーブルを作"
+"成」を使ってください。"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Offsuit connectors"
+msgid "Set as default"
+msgstr "デフォルトに設定"
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Test connection"
-msgstr "オフスートコネクタ"
+msgstr "接続をテスト"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "There is no other database to migrate into. Add one first."
-msgstr ""
+msgstr "移行先となる他のデータベースがありません。先に追加してください。"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid ""
 "This is the only configured database and cannot be deleted — fpdb needs at "
 "least one. Add another database first."
 msgstr ""
+"これは唯一の設定済みデータベースのため削除できません — fpdb には少なくとも 1 "
+"つ必要です。先に別のデータベースを追加してください。"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Username"
 msgid "User"
-msgstr "ユーザ名"
+msgstr "ユーザー"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Username"
 msgid "User:"
-msgstr "ユーザ名"
+msgstr "ユーザー:"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Field actions"
-msgstr ""
+msgstr "フィールドのアクション"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Field population"
-msgstr ""
+msgstr "フィールドの母集団"
 
 #: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
-#| msgid "Load Hands"
 msgid "Loading hands…"
-msgstr "ハンドを読込"
+msgstr "ハンドを読み込み中…"
 
 #: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Next ▶"
-msgstr ""
+msgstr "次へ ▶"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Select a row to see the hands behind both sides of it."
-msgstr ""
+msgstr "行を選択すると、両側のハンドが表示されます。"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Source hands"
-msgstr ""
+msgstr "元のハンド"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid ""
 "These hands use the same filters as the other side; only the population "
 "differs."
 msgstr ""
+"これらのハンドは反対側と同じフィルターを使います。違いは母集団だけです。"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Your actions"
-msgstr ""
+msgstr "あなたのアクション"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Your population"
-msgstr ""
+msgstr "あなたの母集団"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "◀ Previous"
-msgstr ""
+msgstr "◀ 前へ"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
 msgid "Export to File"
 msgstr "ファイルにエクスポート"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, fuzzy
 msgid "FPDB 3 info"
-msgstr ""
+msgstr "FPDB 3 について"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/session_guard_dialog.py
@@ -1362,8 +1487,9 @@ msgid "Hands"
 msgstr "ハンド数"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
+#, fuzzy
 msgid "Net profit excluding splash"
-msgstr ""
+msgstr "スプラッシュを除く純利益"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
 msgid "Non-showdown"
@@ -1383,323 +1509,380 @@ msgid "Showdown"
 msgstr "ショーダウン"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "100–150% pot"
-msgstr ""
+msgstr "ポットの 100–150%"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "25–50% pot"
-msgstr ""
+msgstr "ポットの 25–50%"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "3-bet"
-msgstr ""
+msgstr "3ベット"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "4-bet"
-msgstr ""
+msgstr "4ベット"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "50–75% pot"
-msgstr ""
+msgstr "ポットの 50–75%"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "75–100% pot"
-msgstr ""
+msgstr "ポットの 75–100%"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "Advanced Preferences"
 msgid "Advanced review filters"
-msgstr "高度な設定"
+msgstr "詳細分析フィルター"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "All Players"
 msgid "All hands"
-msgstr "すべてのプレイヤー"
+msgstr "すべてのハンド"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "AddDB starting"
 msgid "All starting hands"
-msgstr "AddDB開始"
+msgstr "すべてのスターティングハンド"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Analytics data unavailable"
-msgstr ""
+msgstr "分析データを利用できません"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Any"
-msgstr ""
+msgstr "任意"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Any card"
-msgstr ""
+msgstr "任意のカード"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Any sizing"
-msgstr ""
+msgstr "任意のサイズ"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Apply review filters"
-msgstr ""
+msgstr "分析フィルターを適用"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Bet"
-msgstr ""
+msgstr "ベット"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Bet / raise sizing"
-msgstr ""
+msgstr "ベット / レイズのサイズ"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Broadway"
-msgstr ""
+msgstr "ブロードウェイ"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Call open"
-msgstr ""
+msgstr "オープンにコール"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Called"
-msgstr ""
+msgstr "コール"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Check-raise"
-msgstr ""
+msgstr "チェックレイズ"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "Mucked"
 msgid "Checked"
-msgstr "Mucked"
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Choose hands…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Clear"
-msgstr ""
+msgstr "チェック"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "% continuation bet"
+msgid "Choose hands…"
+msgstr "ハンドを選択…"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Clear"
+msgstr "クリア"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Continuation bet"
-msgstr "コンディニュエーションベット率(CB)"
+msgstr "コンティニュエーションベット"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourHandViewer.py
 #, fuzzy
-#| msgid "Partial hand history"
 msgid "Copy hand history"
-msgstr "部分的なハンド履歴"
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Did not VPIP"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/research_labels.py
-msgid "Effective stack (BB)"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Exact known cards"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Exclude splash pots"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Faced 3-bet"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Faced c-bet"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Faced open"
-msgstr ""
+msgstr "ハンド履歴をコピー"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "Filters"
+msgid "Did not VPIP"
+msgstr "VPIP なし"
+
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Effective stack (BB)"
+msgstr "エフェクティブスタック (BB)"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Exact known cards"
+msgstr "正確に判明しているカード"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Exclude splash pots"
+msgstr "スプラッシュポットを除く"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Faced 3-bet"
+msgstr "3ベットに対して"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Faced c-bet"
+msgstr "Cベットに対して"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Faced open"
+msgstr "オープンに対して"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Filter: "
-msgstr "フィルタ"
+msgstr "フィルター: "
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Filter: splash pot"
-msgstr ""
+msgstr "フィルター: スプラッシュポット"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Final pot (BB)"
-msgstr ""
+msgstr "最終ポット (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Folded"
-msgstr ""
+msgstr "フォールド"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Hold'em starting hand"
-msgstr ""
+msgstr "ホールデムのスターティングハンド"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Invalid review filter"
-msgstr ""
+msgstr "無効な分析フィルター"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Invert"
-msgstr ""
+msgstr "反転"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Limp"
-msgstr ""
+msgstr "リンプ"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Net result (BB)"
-msgstr ""
+msgstr "純結果 (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid ""
 "No hands were queried, to avoid presenting an incomplete result as empty."
 msgstr ""
+"不完全な結果が空として表示されないよう、ハンドのクエリは実行されていません。"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Offsuit"
 msgstr "オフスート"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Over 150% pot"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Pairs"
-msgstr ""
+msgstr "ポットの 150% 超"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "Player name"
+msgid "Pairs"
+msgstr "ペア"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Players in hand"
-msgstr "プレイヤー名"
+msgstr "ハンド参加人数"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Postflop"
-msgstr ""
+msgstr "ポストフロップ"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Preflop"
-msgstr ""
+msgstr "プリフロップ"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "RFI"
-msgstr ""
+msgstr "RFI"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Raised"
-msgstr ""
+msgstr "レイズ"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw flop"
-msgstr ""
+msgstr "フロップを見た"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw river"
-msgstr ""
+msgstr "リバーを見た"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw turn"
-msgstr ""
+msgstr "ターンを見た"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Splash pots only"
-msgstr ""
+msgstr "スプラッシュポットのみ"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Squeeze"
-msgstr ""
+msgstr "スクイーズ"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Starting-hand range"
-msgstr ""
+msgstr "スターティングハンドのレンジ"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid ""
 "The analytics status needed by these filters could not be verified. No "
 "results were queried; check the database and rebuild analytics data before "
 "retrying."
 msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
-msgid "The minimum cannot exceed the maximum for {}."
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
-msgid "These analytics rows were created by a newer fpdb version: {names}."
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
-msgid "These filters need missing or outdated analytics data: {names}."
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Under 25% pot"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Upgrade fpdb before using these filters."
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Use Database → Rebuild Analytics Data, then retry the filter."
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "VPIP"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Went all-in"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "max"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "max BB"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "min"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "min BB"
-msgstr ""
+"これらのフィルターに必要な分析データの状態を確認できませんでした。クエリは実"
+"行されていません。データベースを確認し、分析データを再構築してから再試行して"
+"ください。"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy, python-brace-format
-#| msgid "Please select site"
-msgid "{} classes selected"
-msgstr "DBテーブルを再作成してください"
+msgid "The minimum cannot exceed the maximum for {}."
+msgstr "最小値は最大値 {} を超えることはできません。"
 
 #: fpdb_3_legacy/GuiHandViewer.py
-msgid "◀ Prev"
+#, fuzzy, python-brace-format
+msgid "These analytics rows were created by a newer fpdb version: {names}."
 msgstr ""
+"これらの分析データは新しいバージョンの fpdb で作成されました: {names}。"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy, python-brace-format
+msgid "These filters need missing or outdated analytics data: {names}."
+msgstr ""
+"これらのフィルターには、存在しないか古くなった分析データが必要です: {names}。"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Under 25% pot"
+msgstr "ポットの 25% 未満"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Upgrade fpdb before using these filters."
+msgstr "これらのフィルターを使う前に fpdb を更新してください。"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Use Database → Rebuild Analytics Data, then retry the filter."
+msgstr ""
+"データベース → 分析データを再構築 を実行してから、フィルターをもう一度実行し"
+"てください。"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "VPIP"
+msgstr "VPIP"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Went all-in"
+msgstr "オールイン"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "max"
+msgstr "最大"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "max BB"
+msgstr "最大 BB"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "min"
+msgstr "最小"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "min BB"
+msgstr "最小 BB"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy, python-brace-format
+msgid "{} classes selected"
+msgstr "選択されたクラス: {}"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "◀ Prev"
+msgstr "◀ 前"
 
 #: fpdb_3_legacy/GuiLogView.py
 #, fuzzy
-#| msgid "Copy to Clipboard"
 msgid "Copy selection to clipboard"
-msgstr "クリップボードにコピー"
+msgstr "選択内容をクリップボードにコピー"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Filter by Module:"
-msgstr ""
+msgstr "モジュールで絞り込み:"
 
 #: fpdb_3_legacy/GuiLogView.py
 msgid "Log Viewer"
@@ -1710,22 +1893,24 @@ msgid "Refresh"
 msgstr "再表示"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Select Log File:"
-msgstr ""
+msgstr "ログファイルを選択:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
 #, fuzzy
-#| msgid "Min # Hands:"
 msgid "Min hands vs hero:"
-msgstr "最低ハンド数:"
+msgstr "ヒーローとの最小ハンド数:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Sort by:"
-msgstr ""
+msgstr "並べ替え:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Top N opponents:"
-msgstr ""
+msgstr "上位 N 人の対戦相手:"
 
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Auxiliary Windows"
@@ -1789,12 +1974,14 @@ msgid "Setting"
 msgstr "設定項目"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Show in Position Stats"
-msgstr ""
+msgstr "ポジション別統計に表示"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Show in Summaries"
-msgstr ""
+msgstr "サマリーに表示"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -1802,8 +1989,9 @@ msgid "Stat"
 msgstr "統計"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Stat Name"
-msgstr ""
+msgstr "統計名"
 
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Stud mucked"
@@ -1811,9 +1999,8 @@ msgstr "Stud mucked"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #, fuzzy
-#| msgid "Ring Player Stats"
 msgid "Tour Player Stats"
-msgstr "リングプレイヤー統計"
+msgstr "トーナメントプレイヤーの統計"
 
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Value (double-click to change)"
@@ -1825,87 +2012,93 @@ msgstr "ウィンドウ"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
-#| msgid "5 Card Stud"
 msgid "Card deck"
-msgstr "5カードスタッド"
+msgstr "カードデッキ"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Copy or save this hand as text, Markdown or forum code"
-msgstr ""
+msgstr "このハンドをテキスト、Markdown、フォーラムコードとしてコピーまたは保存"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Current card deck preview"
-msgstr ""
+msgstr "現在のデッキのプレビュー"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Deck:"
-msgstr ""
+msgstr "デッキ:"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
-#| msgid "and"
 msgid "End"
-msgstr "から"
+msgstr "最後"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "FPDB Hand Replayer"
-msgstr ""
+msgstr "FPDB ハンドリプレイヤー"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
-#| msgid "Hole Cards"
 msgid "Hide Cards"
-msgstr "ホールカード"
+msgstr "カードを隠す"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Next"
-msgstr ""
+msgstr "次"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Next action"
-msgstr ""
+msgstr "次のアクション"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
-#| msgid "Players"
 msgid "Play"
-msgstr "プレイヤー"
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "Prev"
-msgstr ""
+msgstr "再生"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
-#| msgid "Position"
-msgid "Previous action"
-msgstr "ポジション"
+msgid "Prev"
+msgstr "前"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+msgid "Previous action"
+msgstr "前のアクション"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Send this hand's preflop decisions to PreflopAdvisor"
-msgstr ""
+msgstr "このハンドのプリフロップの判断を PreflopAdvisor に送信"
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Share..."
-msgstr ""
+msgstr "共有..."
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
-#| msgid "Stove (preview)"
 msgid "Solver review..."
-msgstr "ストーブ(試作段階)"
+msgstr "ソルバーで分析..."
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Start"
-msgstr ""
+msgstr "最初"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "-- built-in presets --"
-msgstr ""
+msgstr "-- 組み込みプリセット --"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "-- saved presets --"
-msgstr ""
+msgstr "-- 保存したプリセット --"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -1913,153 +2106,173 @@ msgid "?"
 msgstr ""
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "A gap is only as good as the smaller of the two samples beside it."
-msgstr ""
+msgstr "差の信頼性は、両側の 2 つのサンプルのうち小さい方で決まります。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add or remove one of the known values."
-msgstr ""
+msgstr "既知の値のいずれかを追加または削除します。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add the selected dimension to the breakdown."
-msgstr ""
+msgstr "選択したディメンションを分割に追加します。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add this filter"
-msgstr ""
+msgstr "このフィルターを追加"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Adjust {variables} for your own game."
-msgstr ""
+msgstr "自分のゲームに合わせて {variables} を調整してください。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Adjust: {variables}"
-msgstr ""
+msgstr "調整: {variables}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Aim for at least {n} decisions."
-msgstr ""
+msgstr "少なくとも {n} 件の判断を目安にしてください。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "All hands in the population"
-msgstr ""
+msgstr "母集団のすべてのハンド"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Any leaves the condition out of the query entirely."
-msgstr ""
+msgstr "「任意」を選ぶと、その条件はクエリから完全に除外されます。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Ask a poker question"
-msgstr ""
+msgstr "ポーカーの質問をする"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Ask your own question"
-msgstr ""
+msgstr "質問をする"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Break down by"
-msgstr ""
+msgstr "分割"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Choose a dimension to split the result by."
-msgstr ""
+msgstr "結果を分割するディメンションを選択します。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Choose one or more…"
-msgstr ""
+msgstr "1 つ以上選択…"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Comma-separated group-by dimensions (engine vocabulary)"
-msgstr ""
+msgstr "カンマ区切りのグループ化ディメンション (エンジンの用語)"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Compare with the field"
-msgstr ""
+msgstr "フィールドと比較"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Count"
-msgstr ""
+msgstr "件数"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/GuiResearchViews.py
 #, fuzzy
-#| msgid "Session"
 msgid "Decisions"
-msgstr "このセッション"
+msgstr "判断"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a cell to load the hands behind it."
-msgstr ""
+msgstr "セルをダブルクリックすると、その元になったハンドを読み込みます。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a result row to load its hands."
-msgstr ""
+msgstr "結果の行をダブルクリックすると、そのハンドを読み込みます。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "Double-click a row to load its hands. Numerator/denominator are shown per "
 "row."
 msgstr ""
+"行をダブルクリックすると、そのハンドを読み込みます。分子/分母は行ごとに表示さ"
+"れます。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a row to see your hands and the field's, side by side."
 msgstr ""
+"行をダブルクリックすると、あなたとフィールドのハンドを並べて表示します。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click the row to load its hands."
-msgstr ""
+msgstr "行をダブルクリックすると、そのハンドを読み込みます。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Every decision the question applies to: the sample size."
-msgstr ""
+msgstr "質問の対象となるすべての判断: サンプルサイズ。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
-#| msgid "Players"
 msgid "FPDB Replayer"
-msgstr "プレイヤー"
+msgstr "FPDB リプレイヤー"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
-#| msgid "Field Type"
 msgid "Field"
-msgstr "フィールドのデータ型"
+msgstr "フィールド"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
-#| msgid "Field Type"
 msgid "Field sample"
-msgstr "フィールドのデータ型"
+msgstr "フィールドのサンプル"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Filters"
 msgstr "フィルタ"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Frequency (%)"
-msgstr ""
+msgstr "頻度 (%)"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
-#| msgid "Graphs"
 msgid "Gap"
-msgstr "グラフ"
-
-#: fpdb_3_legacy/GuiResearchBrowser.py
-msgid "How many of those decisions the metric counted."
-msgstr ""
+msgstr "差"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
-#| msgid "Min # Hands:"
-msgid "Matching hands"
-msgstr "最低ハンド数:"
+msgid "How many of those decisions the metric counted."
+msgstr "それらの判断のうち、指標がカウントした数。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
+msgid "Matching hands"
+msgstr "一致するハンド"
+
+#: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Metric"
-msgstr ""
+msgstr "指標"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -2067,139 +2280,172 @@ msgid "No"
 msgstr "いいえ"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "No matching hands were found for either population."
-msgstr ""
+msgstr "どちらの母集団にも一致するハンドが見つかりませんでした。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Only the hands where the metric fired"
-msgstr ""
+msgstr "指標が該当したハンドのみ"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Open the Research Browser quick start"
-msgstr ""
+msgstr "リサーチブラウザーのクイックスタートを開く"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Pick one of the answers this workbench knows how to show."
-msgstr ""
+msgstr "このツールが表示できる回答のいずれかを選択します。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Poker labels"
-msgstr ""
+msgstr "ポーカー用語"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "Poker labels use the terminology most readers see at the table.\n"
 "Technical names expose the analytics engine's fields and values."
 msgstr ""
+"ポーカー用語は、多くのプレイヤーがテーブルで目にする言葉を使います。\n"
+"技術名は分析エンジンのフィールドと値をそのまま表示します。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Query cancelled."
-msgstr ""
+msgstr "クエリをキャンセルしました。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Remove this breakdown"
-msgstr ""
+msgstr "この分割を削除"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Remove this filter"
-msgstr ""
+msgstr "このフィルターを削除"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Research browser"
-msgstr ""
+msgstr "リサーチブラウザー"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Results"
 msgstr "結果"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Run the same question twice -- yours and the field's -- side by side."
-msgstr ""
+msgstr "同じ質問を 2 回実行します — あなたとフィールド — を並べて表示。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Running…"
-msgstr ""
+msgstr "実行中…"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Save"
 msgstr "保存"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Save preset"
-msgstr ""
+msgstr "プリセットを保存"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Saved as \"{saved}\". The built-in preset \"{original}\" is unchanged."
 msgstr ""
+"「{saved}」として保存しました。組み込みプリセット「{original}」は変更されてい"
+"ません。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Show technical query controls"
-msgstr ""
+msgstr "技術的なクエリのコントロールを表示"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Show the engine's own filter names and free-text values."
-msgstr ""
+msgstr "エンジン独自のフィルター名と自由入力の値を表示します。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Technical names"
-msgstr ""
+msgstr "技術名"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "The Research Browser answers questions about the hands in your database. "
 "Pick a question below, change any value that should be different for you, "
 "then press Run. The sample size is always shown, and every row can be opened "
 "as the hands behind it."
 msgstr ""
+"リサーチブラウザーは、データベース内のハンドについての質問に答えます。下から"
+"質問を選び、自分に合わせて変えたい値を変更して「実行」を押してください。サン"
+"プルサイズは常に表示され、各行からその元になったハンドを開くことができます。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "The analytics data for {names} has never been built. A question that reads "
 "it answers zero until it is: Database -> Rebuild Analytics Data."
 msgstr ""
+"{names} の分析データはまだ一度も構築されていません。これを読む質問は構築され"
+"るまで 0 を返します: データベース -> 分析データを再構築。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "The analytics data for {names} was derived by older rules, so a question "
 "that reads it may answer zero: Database -> Rebuild Analytics Data."
 msgstr ""
+"{names} の分析データは古いルールで生成されたため、これを読む質問は 0 を返すこ"
+"とがあります: データベース -> 分析データを再構築。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "The measurement itself, over the sample above."
-msgstr ""
+msgstr "上のサンプルに対する測定値そのもの。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "The question the controls above currently ask."
-msgstr ""
+msgstr "上のコントロールで現在設定されている質問。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "These questions need the analytics tables rebuilt before they can answer: "
 "{subsystems}. Rebuild them from the database menu, then run a question."
 msgstr ""
+"これらの質問に答えるには、分析テーブルの再構築が必要です: {subsystems}。デー"
+"タベースメニューから再構築してから、質問を実行してください。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Try one of these:"
-msgstr ""
+msgstr "次のいずれかを試してください:"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Unknown group-by dimension(s): {names}. Known: {known}."
-msgstr ""
+msgstr "不明なグループ化ディメンション: {names}。既知のもの: {known}。"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Viewers"
 msgid "View"
-msgstr "ビューア"
+msgstr "表示"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Vocabulary"
-msgstr ""
+msgstr "用語"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -2207,135 +2453,157 @@ msgid "Yes"
 msgstr "はい"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "You"
-msgstr ""
+msgstr "あなた"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Your sample"
-msgstr ""
+msgstr "あなたのサンプル"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "e.g. street, response"
-msgstr ""
+msgstr "例: street, response"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "e.g. {example}"
-msgstr ""
+msgstr "例: {example}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "from"
-msgstr ""
+msgstr "から"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "or type a value"
-msgstr ""
+msgstr "または値を入力"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "to"
-msgstr ""
+msgstr "まで"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{hero} decisions of yours, {field} of the field's"
-msgstr ""
+msgstr "あなたの判断 {hero} 件、フィールドの判断 {field} 件"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{question} — {how}"
-msgstr ""
+msgstr "{question} — {how}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "■ Cancel"
-msgstr ""
+msgstr "■ キャンセル"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "▶ Run"
-msgstr ""
+msgstr "▶ 実行"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "＋ Add breakdown"
-msgstr ""
+msgstr "＋ 分割を追加"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid ""
 "Cells without enough of a sample stay uncoloured; hover one to read its "
 "count."
 msgstr ""
+"サンプルが不十分なセルは色付けされません。マウスを重ねると件数が表示されま"
+"す。"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Colour by:"
-msgstr ""
+msgstr "色分け:"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "No cell is below the sample threshold."
-msgstr ""
+msgstr "サンプルのしきい値を下回るセルはありません。"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Realized {realized} over {hands} hands; EV-adjusted {ev} ({luck} of it luck)."
-msgstr ""
+msgstr "{hands} ハンドで実現値 {realized}、EV 調整後 {ev} (うち {luck} は運)。"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Share"
-msgstr ""
+msgstr "割合"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "{decisions} decisions in this selection have no known hole cards and are not "
 "in the grid; {share} of the decisions are drawn."
 msgstr ""
+"この選択の {decisions} 件の判断はホールカードが不明なためグリッドに含まれてい"
+"ません。判断の {share} が描画されています。"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{label}: {classified} classified decisions of {total} ({share} covered)"
-msgstr ""
+msgstr "{label}: {total} 件中 {classified} 件の判断を分類 ({share} をカバー)"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{n} decisions are counted apart: their cards were never known."
-msgstr ""
+msgstr "{n} 件の判断は別に集計されています: カードが一度も判明しませんでした。"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Cumulative result (BB)"
-msgstr ""
+msgstr "累積結果 (BB)"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
 msgid "Hand Breakdown for all levels listed above"
 msgstr "上に表示された全レベルのハンド集計"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Native-currency totals omitted (multiple currencies)"
-msgstr ""
+msgstr "現地通貨の合計は省略されています (複数の通貨)"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Profit: {profit} · Currency/hour: {hour}"
-msgstr ""
+msgstr "利益: {profit} · 通貨/時: {hour}"
 
 #: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/research_labels.py
 msgid "Session"
 msgstr "このセッション"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Sessions: {sessions} · Hands: {hands} · Playing time: {duration} · Profit: "
 "{profit_bb} BB · bb/100: {bb100} · BB/hour: {bb_hour} · BB hands: {bb_hands}/"
 "{hands}"
 msgstr ""
+"セッション: {sessions} · ハンド: {hands} · プレイ時間: {duration} · 利益: "
+"{profit_bb} BB · bb/100: {bb100} · BB/時: {bb_hour} · BB ハンド: {bb_hands}/"
+"{hands}"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{hours}h {minutes}m"
-msgstr ""
+msgstr "{hours}時間 {minutes}分"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{minutes}m"
-msgstr ""
+msgstr "{minutes}分"
 
 #: fpdb_3_legacy/GuiTourHandViewer.py
 msgid "Load Hands"
@@ -2346,90 +2614,103 @@ msgid "Refresh Stats"
 msgstr "統計を再計算"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Clipboard unavailable"
-msgstr ""
+msgstr "クリップボードを利用できません"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 #, fuzzy
-#| msgid "Config file"
 msgid "Configuration file"
 msgstr "設定ファイル"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Copy report"
-msgstr ""
+msgstr "レポートをコピー"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Copy these details to the clipboard for a bug report"
-msgstr ""
+msgstr "バグ報告用にこの詳細をクリップボードにコピー"
 
 #: fpdb_3_legacy/GuiVersionInfo.py fpdb_3_legacy/menu_layout.py
 msgid "Database"
 msgstr "データベース"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Documentation"
-msgstr ""
+msgstr "ドキュメント"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 #, fuzzy
-#| msgid "fpdb version"
 msgid "FPDB version"
-msgstr "fpdb バージョン"
-
-#: fpdb_3_legacy/GuiVersionInfo.py
-msgid "Git branch"
-msgstr ""
-
-#: fpdb_3_legacy/GuiVersionInfo.py
-msgid "Git checkout"
-msgstr ""
-
-#: fpdb_3_legacy/GuiVersionInfo.py
-msgid "Git commit"
-msgstr ""
-
-#: fpdb_3_legacy/GuiVersionInfo.py
-msgid "GitHub repository"
-msgstr ""
-
-#: fpdb_3_legacy/GuiVersionInfo.py
-msgid "Links"
-msgstr ""
-
-#: fpdb_3_legacy/GuiVersionInfo.py
-msgid "Packaging"
-msgstr ""
-
-#: fpdb_3_legacy/GuiVersionInfo.py
-msgid "Report an issue"
-msgstr ""
+msgstr "FPDB バージョン"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 #, fuzzy
-#| msgid "Copy to Clipboard"
+msgid "Git branch"
+msgstr "Git ブランチ"
+
+#: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
+msgid "Git checkout"
+msgstr "Git チェックアウト"
+
+#: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
+msgid "Git commit"
+msgstr "Git コミット"
+
+#: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
+msgid "GitHub repository"
+msgstr "GitHub リポジトリ"
+
+#: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
+msgid "Links"
+msgstr "リンク"
+
+#: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
+msgid "Packaging"
+msgstr "パッケージング"
+
+#: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
+msgid "Report an issue"
+msgstr "問題を報告"
+
+#: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Report copied to clipboard"
-msgstr "クリップボードにコピー"
+msgstr "レポートをクリップボードにコピーしました"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Version and environment"
-msgstr ""
+msgstr "バージョンと環境"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Working tree"
-msgstr ""
+msgstr "作業ツリー"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "clean"
-msgstr ""
+msgstr "クリーン"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "modified (uncommitted changes)"
-msgstr ""
+msgstr "変更あり (未コミットの変更)"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "not a git checkout (packaged or exported build)"
-msgstr ""
+msgstr "Git チェックアウトではありません (パッケージ版またはエクスポート版)"
 
 #: fpdb_3_legacy/MergeSummary.py
 msgid "MergeSummary.determineGameType: HORSE found, unsupported"
@@ -2482,83 +2763,89 @@ msgstr ""
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #, fuzzy
-#| msgid "Players"
 msgid "<b>Players</b>"
-msgstr "プレイヤー"
+msgstr "<b>人数</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Seat</b>"
-msgstr ""
+msgstr "<b>席</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Visual Selection</b>"
-msgstr ""
+msgstr "<b>ビジュアル選択</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Auto-save changes"
-msgstr ""
+msgstr "変更を自動保存"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py fpdb_3_legacy/ThemeCreatorDialog.py
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cancel"
-msgstr ""
+msgstr "キャンセル"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Configure your favorite seats for each table size"
-msgstr ""
+msgstr "テーブルサイズごとにお気に入りの席を設定します"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #, fuzzy
-#| msgid "Site Settings"
 msgid "Export Settings"
-msgstr "ポーカーサイト設定"
+msgstr "設定をエクスポート"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #, fuzzy
-#| msgid "Importing"
 msgid "Import Settings"
-msgstr "インポート中"
+msgstr "設定をインポート"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Reset to Default"
-msgstr ""
+msgstr "デフォルトに戻す"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Save Changes"
-msgstr ""
+msgstr "変更を保存"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Search sites..."
-msgstr ""
+msgstr "サイトを検索..."
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #, fuzzy
-#| msgid "Site Preferences"
 msgid "Seat Preferences"
-msgstr "ポーカーサイト設定"
+msgstr "席の設定"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #, fuzzy
-#| msgid "Showdown"
 msgid "Show:"
-msgstr "ショーダウン"
+msgstr "表示:"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "✓ Enabled"
-msgstr ""
+msgstr "✓ 有効"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "✗ Disabled"
-msgstr ""
+msgstr "✗ 無効"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "💡 Set to 0 to disable favorite seat for a table size"
-msgstr ""
+msgstr "💡 0 に設定すると、そのテーブルサイズのお気に入り席を無効にします"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
@@ -2566,97 +2853,106 @@ msgid "🔍"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s hero aliases:"
-msgstr ""
+msgstr "%s のヒーローの別名:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-#| msgid "No enabled sites found"
 msgid "(search in enabled sites only)"
-msgstr "有効なポーカーサイトがありません"
+msgstr "(有効なサイトのみ検索)"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid ""
 "A data source such as PHH is not a poker room: it has no screen name. Name "
 "the players that are you in its hands, and the reports read them as one "
 "hero, as a room's aliases are."
 msgstr ""
+"PHH のようなデータソースはポーカールームではないため、スクリーンネームがあり"
+"ません。そのハンドの中であなた自身にあたるプレイヤーを指定すると、レポートは"
+"ルームの別名と同じように、それらを 1 人のヒーローとして扱います。"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Add link"
-msgstr ""
+msgstr "リンクを追加"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-#| msgid "Browse..."
 msgid "Browse"
-msgstr "参照..."
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Configure your poker sites and usernames"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Data Sources"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Default profile"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Enter your username"
-msgstr ""
+msgstr "参照"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-#| msgid "Hand History Path"
-msgid "Hand History:"
-msgstr "ハンド履歴ディレクトリ"
+msgid "Configure your poker sites and usernames"
+msgstr "ポーカーサイトとユーザー名を設定します"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Data Sources"
+msgstr "データソース"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Default profile"
+msgstr "デフォルトのプロフィール"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Enter your username"
+msgstr "ユーザー名を入力"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Hand History:"
+msgstr "ハンド履歴:"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Hero Profiles"
-msgstr ""
+msgstr "ヒーロープロフィール"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "New"
-msgstr ""
+msgstr "新規"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Old nicknames / extra accounts, comma separated"
-msgstr ""
+msgstr "旧ニックネーム / 追加アカウント (カンマ区切り)"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Other Aliases:"
-msgstr ""
+msgstr "その他の別名:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-#| msgid "Partial hand history"
 msgid "Path to hand history files"
-msgstr "部分的なハンド履歴"
+msgstr "ハンド履歴ファイルのパス"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Path to tournament summaries"
-msgstr ""
+msgstr "トーナメントサマリーのパス"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-#| msgid "Filename"
 msgid "Profile name"
-msgstr "ファイル名"
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Remove link"
-msgstr ""
+msgstr "プロフィール名"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-#| msgid "Screen Name"
+msgid "Remove link"
+msgstr "リンクを削除"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Screen Name:"
-msgstr "スクリーン名"
+msgstr "スクリーンネーム:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Site Preferences"
@@ -2664,13 +2960,13 @@ msgstr "ポーカーサイト設定"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-#| msgid "Tournament"
 msgid "Tournament:"
-msgstr "トーナメント"
+msgstr "トーナメント:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Your names in these hands, one per line"
-msgstr ""
+msgstr "これらのハンドでのあなたの名前 (1 行に 1 つ)"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🎭"
@@ -2689,12 +2985,14 @@ msgid "📁"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "🔍 Auto-Detect All Visible Sites"
-msgstr ""
+msgstr "🔍 表示中のすべてのサイトを自動検出"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "🔍 Auto-Detect Paths"
-msgstr ""
+msgstr "🔍 パスを自動検出"
 
 #: fpdb_3_legacy/OnGameToFpdb.py
 #, python-format
@@ -2737,150 +3035,168 @@ msgid "PkrToFpdb.readHandInfo: '%s'"
 msgstr "PkrToFpdb.readHandInfo: '%s'"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Brief description of your theme"
-msgstr ""
+msgstr "テーマの簡単な説明"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Create Custom Theme"
-msgstr ""
+msgstr "カスタムテーマを作成"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Create Theme"
-msgstr ""
+msgstr "テーマを作成"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
 #, fuzzy
-#| msgid "Stove (preview)"
 msgid "Update Preview"
-msgstr "ストーブ(試作段階)"
+msgstr "プレビューを更新"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
 #, fuzzy
-#| msgid "Tournament"
 msgid "Your name"
-msgstr "トーナメント"
+msgstr "あなたの名前"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "e.g., my_custom_theme"
-msgstr ""
-
-#: fpdb_3_legacy/fpdb.pyw
-msgid "Back up and upgrade"
-msgstr ""
-
-#: fpdb_3_legacy/fpdb.pyw
-msgid "Clear All"
-msgstr ""
-
-#: fpdb_3_legacy/fpdb.pyw
-msgid "Configuration needs attention"
-msgstr ""
+msgstr "例: my_custom_theme"
 
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
-#| msgid "Confirm deleting and recreating tables"
+msgid "Back up and upgrade"
+msgstr "バックアップしてアップグレード"
+
+#: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
+msgid "Clear All"
+msgstr "すべてクリア"
+
+#: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
+msgid "Configuration needs attention"
+msgstr "設定に注意が必要です"
+
+#: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Confirm recreating HUD cache"
-msgstr "DBテーブルの削除と再作成の確認"
+msgstr "HUD キャッシュの再作成の確認"
 
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Database Statistics"
 msgstr "データベース統計情報"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Deselect All"
-msgstr ""
+msgstr "すべて選択解除"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Enable or disable sites for HUD display"
-msgstr ""
+msgstr "HUD を表示するサイトを有効または無効にします"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Free Poker DB 3"
-msgstr ""
+msgstr "Free Poker DB 3"
 
 #: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Manage HUD Sites"
-msgstr ""
+msgstr "HUD サイトの管理"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "PT4 HUD imported"
-msgstr ""
+msgstr "PT4 HUD をインポートしました"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "PT4 stats import"
-msgstr ""
+msgstr "PT4 統計のインポート"
 
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Please confirm that you want to re-create the HUD cache."
 msgstr "HUDキャッシュを再生成してよろしいですか?"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Search:"
-msgstr ""
+msgstr "検索:"
 
 #: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Select All"
-msgstr ""
+msgstr "すべて選択"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Skip these games when importing"
-msgstr ""
+msgstr "インポート時にこれらのゲームをスキップ"
 
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Unknown Site"
 msgstr "不明なポーカーサイト"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Unsaved Changes"
-msgstr ""
+msgstr "未保存の変更"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "You have unsaved configuration changes."
-msgstr ""
+msgstr "未保存の設定変更があります。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "Check the hero selected in the Heroes filter and make sure hands for that "
 "player were imported for the selected site."
 msgstr ""
+"「ヒーロー」フィルターで選択したヒーローを確認し、そのプレイヤーのハンドが選"
+"択したサイトでインポートされていることを確認してください。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No currency is selected in the filters."
-msgstr ""
+msgstr "フィルターで通貨が選択されていません。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No data to display"
-msgstr ""
+msgstr "表示するデータがありません"
 
 #: fpdb_3_legacy/gui_empty_state.py
 #, fuzzy
-#| msgid "No players detected in hand %s."
 msgid "No game type is selected in the filters."
-msgstr "ハンド %s で自動判別できたプレイヤーがいません。"
+msgstr "フィルターでゲームの種類が選択されていません。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No hand matches the selected filters."
-msgstr ""
+msgstr "選択したフィルターに一致するハンドがありません。"
 
 #: fpdb_3_legacy/gui_empty_state.py
 #, fuzzy
-#| msgid "No sites selected - defaulting to PokerStars"
 msgid "No limit is selected in the filters."
-msgstr "ポーカーサイトが選択されていません - 初期設定のPokerStarsにします"
+msgstr "フィルターでリミットが選択されていません。"
 
 #: fpdb_3_legacy/gui_empty_state.py
 #, fuzzy
-#| msgid "No players detected in hand %s."
 msgid "No player matches the selected site and hero."
-msgstr "ハンド %s で自動判別できたプレイヤーがいません。"
+msgstr "選択したサイトとヒーローに一致するプレイヤーがいません。"
 
 #: fpdb_3_legacy/gui_empty_state.py
 #, fuzzy
-#| msgid "No sites selected - defaulting to PokerStars"
 msgid "No site is selected in the filters."
-msgstr "ポーカーサイトが選択されていません - 初期設定のPokerStarsにします"
+msgstr "フィルターでサイトが選択されていません。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "Nothing has been imported into this database — that is normal right after "
 "creating or recreating the tables.\n"
@@ -2888,295 +3204,351 @@ msgid ""
 "Import hand histories first (Import > Bulk Import, or start the auto-"
 "import), then refresh this tab."
 msgstr ""
+"このデータベースにはまだ何もインポートされていません — テーブルを作成または再"
+"作成した直後はこれが普通です。\n"
+"\n"
+"まずハンド履歴をインポートし (インポート > 一括インポート、または自動インポー"
+"トを開始)、このタブを更新してください。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "The database holds hands, but none of them match this selection.\n"
 "\n"
 "Widen the filters (dates, limits, games, seats) and refresh."
 msgstr ""
+"データベースにハンドはありますが、この選択に一致するものはありません。\n"
+"\n"
+"フィルター (日付、リミット、ゲーム、席) を広げて更新してください。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one currency on the left, then refresh."
-msgstr ""
+msgstr "左側で少なくとも 1 つの通貨にチェックを入れてから更新してください。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one game on the left, then refresh."
-msgstr ""
+msgstr "左側で少なくとも 1 つのゲームにチェックを入れてから更新してください。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one limit (stake) on the left, then refresh."
 msgstr ""
+"左側で少なくとも 1 つのリミット (ステーク) にチェックを入れてから更新してくだ"
+"さい。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one site in the Sites section on the left, then refresh."
 msgstr ""
+"左側の「サイト」セクションで少なくとも 1 つのサイトにチェックを入れてから更新"
+"してください。"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Your database contains no hands yet."
-msgstr ""
-
-#: fpdb_3_legacy/hand_review_dialog.py
-#, python-format
-msgid "%s is not a program that can be started."
-msgstr ""
-
-#: fpdb_3_legacy/hand_review_dialog.py
-msgid "Copy JSON"
-msgstr ""
+msgstr "データベースにはまだハンドがありません。"
 
 #: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy, python-format
-#| msgid "Could not setup log file %s"
+msgid "%s is not a program that can be started."
+msgstr "%s は起動可能なプログラムではありません。"
+
+#: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
+msgid "Copy JSON"
+msgstr "JSON をコピー"
+
+#: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy, python-format
 msgid ""
 "Could not save the hand review:\n"
 "%s"
-msgstr "ログファイル %s が準備できません"
+msgstr ""
+"ハンドレビューを保存できませんでした:\n"
+"%s"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Every hero decision of the hand"
-msgstr ""
+msgstr "このハンドのヒーローのすべての判断"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Hand review (*.json)"
-msgstr ""
+msgstr "ハンドレビュー (*.json)"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Locate PreflopAdvisor"
-msgstr ""
+msgstr "PreflopAdvisor の場所を指定"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Open in PreflopAdvisor"
-msgstr ""
+msgstr "PreflopAdvisor で開く"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid ""
 "Open it in PreflopAdvisor, or save the file and load it there with Review "
 "Hands > Load a hand review."
 msgstr ""
+"PreflopAdvisor で開くか、ファイルを保存して Review Hands > Load a hand "
+"review で読み込んでください。"
 
 #: fpdb_3_legacy/hand_review_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "PreflopAdvisor could not be started:\n"
 "%s\n"
 "\n"
 "Locate it?"
 msgstr ""
+"PreflopAdvisor を起動できませんでした:\n"
+"%s\n"
+"\n"
+"場所を指定しますか?"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Review:"
-msgstr ""
+msgstr "レビュー:"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Save for PreflopAdvisor..."
-msgstr ""
+msgstr "PreflopAdvisor 用に保存..."
 
 #: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy
-#| msgid "Stove (preview)"
 msgid "Save hand review"
-msgstr "ストーブ(試作段階)"
+msgstr "ハンドレビューを保存"
 
 #: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy
-#| msgid "Stove (preview)"
 msgid "Solver review"
-msgstr "ストーブ(試作段階)"
+msgstr "ソルバーレビュー"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Solver review (PreflopAdvisor)..."
-msgstr ""
+msgstr "ソルバーレビュー (PreflopAdvisor)..."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "This decision"
-msgstr ""
+msgstr "この判断"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "This hand cannot be sent to PreflopAdvisor."
-msgstr ""
+msgstr "このハンドは PreflopAdvisor に送信できません。"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Amounts"
-msgstr ""
+msgstr "金額"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Big blinds"
-msgstr ""
+msgstr "ビッグブラインド"
 
 #: fpdb_3_legacy/hand_share_dialog.py fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Copy"
-msgstr ""
+msgstr "コピー"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as Markdown"
-msgstr ""
+msgstr "Markdown としてコピー"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as Markdown in BB"
-msgstr ""
+msgstr "BB 単位の Markdown としてコピー"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as text"
-msgstr ""
+msgstr "テキストとしてコピー"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy, python-format
-#| msgid "Could not encode: \"%s\""
 msgid ""
 "Could not save the hand:\n"
 "%s"
-msgstr "エンコードできません: \"%s\""
+msgstr ""
+"ハンドを保存できませんでした:\n"
+"%s"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
-#| msgid "Date/Time"
 msgid "Date and time"
 msgstr "日時"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "EV cashout"
-msgstr ""
+msgstr "EV キャッシュアウト"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Forum (BBCode)"
-msgstr ""
+msgstr "フォーラム (BBCode)"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
-#| msgid "Any Number"
 msgid "Hand number"
-msgstr "どれでも"
+msgstr "ハンド番号"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Hide every name (Hero, Villain 1 ...)"
-msgstr ""
+msgstr "すべての名前を隠す (Hero, Villain 1 ...)"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Include"
-msgstr ""
+msgstr "含める"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Keep every name"
-msgstr ""
+msgstr "すべての名前を残す"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Keep my name, hide opponents"
-msgstr ""
+msgstr "自分の名前は残し、対戦相手を隠す"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Markdown"
-msgstr ""
+msgstr "Markdown"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Money / chips"
-msgstr ""
+msgstr "金額 / チップ"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
-#| msgid "DB Name"
 msgid "Names"
-msgstr "データベース名"
+msgstr "名前"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Plain text"
-msgstr ""
+msgstr "プレーンテキスト"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Rake"
-msgstr ""
+msgstr "レーキ"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
-#| msgid "Save"
 msgid "Save hand"
-msgstr "保存"
+msgstr "ハンドを保存"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
-#| msgid "Save"
 msgid "Save..."
-msgstr "保存"
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Share hand"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Showdown and results"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Stacks"
-msgstr ""
+msgstr "保存..."
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
-#| msgid "Player name"
+msgid "Share hand"
+msgstr "ハンドを共有"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Showdown and results"
+msgstr "ショーダウンと結果"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Stacks"
+msgstr "スタック"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Table name"
-msgstr "プレイヤー名"
+msgstr "テーブル名"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "This game has no big blind to count in."
-msgstr ""
+msgstr "このゲームには基準となるビッグブラインドがありません。"
 
 #: fpdb_3_legacy/hand_share_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "This hand could not be rendered:\n"
 "%s"
 msgstr ""
+"このハンドを表示できませんでした:\n"
+"%s"
 
 #: fpdb_3_legacy/i18n.py
 #, fuzzy
-#| msgid "bb stack"
 msgid "Stack"
-msgstr "bbスタック"
+msgstr "スタック"
 
 #: fpdb_3_legacy/i18n.py
+#, fuzzy
 msgid "Stack (bb)"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "About"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "About the program"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)"
-msgstr ""
+msgstr "スタック (bb)"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Advanced Preferences"
-msgid "Advanced logger manager"
-msgstr "高度な設定"
+msgid "About"
+msgstr "このプログラムについて"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "About the program"
+msgstr "このプログラムについて"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)"
+msgstr "データベースの追加、編集、テスト、選択 (SQLite / PostgreSQL / MySQL)"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Advanced logger manager"
+msgstr "高度なロガー管理"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid ""
 "Alerts for the session being played: loss, win, duration, hands, drawdown"
 msgstr ""
+"プレイ中のセッションのアラート: 損失、勝ち、時間、ハンド数、ドローダウン"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Auto Import Ready."
 msgid "Auto Note Rules"
-msgstr "自動インポートの準備完了"
+msgstr "自動ノートのルール"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Auto Notes Workbench"
-msgstr ""
+msgstr "自動ノートワークベンチ"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Cash"
 msgstr "リングゲーム"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "CoinPoker Live Capture"
-msgstr ""
+msgstr "CoinPoker ライブキャプチャ"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Configure"
@@ -3188,29 +3560,28 @@ msgstr "データベースのテーブル作成・再作成"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Databases"
 msgid "Databases…"
-msgstr "データベース"
+msgstr "データベース…"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Dump Database to Textfile (takes ALOT of time)"
 msgid "Dump Database to Textfile"
-msgstr "データベースをテキストファイルにダンプ(時間がかかります)"
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Edit automatic player-note rules"
-msgstr ""
+msgstr "データベースをテキストファイルにダンプ"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Site Preferences"
-msgid "Edit your preferences"
-msgstr "ポーカーサイト設定"
+msgid "Edit automatic player-note rules"
+msgstr "自動プレイヤーノートのルールを編集"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Edit your preferences"
+msgstr "環境設定を編集"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Export the whole database to a text file (slow)"
-msgstr ""
+msgstr "データベース全体をテキストファイルにエクスポート (低速)"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Graphs"
@@ -3219,9 +3590,8 @@ msgstr "グラフ"
 #: fpdb_3_legacy/menu_layout.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Preferences"
 msgid "HUD Preferences"
-msgstr "設定"
+msgstr "HUD の環境設定"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "HUD and Auto Import"
@@ -3240,40 +3610,46 @@ msgid "Help Tab"
 msgstr "ヘルプのタブ"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import PT4 HUD (.pt4hud)"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import PT4 Stats (.pt4stat)"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import PokerTracker 4 custom statistics as declarative stat descriptors"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import a PokerTracker 4 HUD layout (stats + range charts)"
-msgstr ""
+msgstr "PT4 HUD をインポート (.pt4hud)"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Import Complete"
-msgid "Import filters"
-msgstr "インポート完了"
+msgid "Import PT4 Stats (.pt4stat)"
+msgstr "PT4 統計をインポート (.pt4stat)"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import PokerTracker 4 custom statistics as declarative stat descriptors"
+msgstr "PokerTracker 4 のカスタム統計を宣言的な統計定義としてインポート"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import a PokerTracker 4 HUD layout (stats + range charts)"
+msgstr "PokerTracker 4 の HUD レイアウトをインポート (統計 + レンジチャート)"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import filters"
+msgstr "インポートフィルター"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import, enable, disable, uninstall and export declarative stat packs"
 msgstr ""
+"宣言的な統計パックのインポート、有効化、無効化、アンインストール、エクスポー"
+"ト"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "language"
 msgid "Language"
 msgstr "言語"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Launch SwC HTTP Capture"
-msgstr ""
+msgstr "SwC HTTP キャプチャを起動"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Log Messages"
@@ -3281,19 +3657,18 @@ msgstr "ログメッセージ"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Log Messages"
 msgid "Log and debug messages"
-msgstr "ログメッセージ"
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Logger Dev Tool"
-msgstr ""
+msgstr "ログとデバッグメッセージ"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Show Opponent Stats for"
+msgid "Logger Dev Tool"
+msgstr "ロガー開発ツール"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Opponents Report"
-msgstr "対戦相手の統計を表示"
+msgstr "対戦相手レポート"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Preferences"
@@ -3304,17 +3679,20 @@ msgid "Quit"
 msgstr "終了"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Quit the program"
-msgstr ""
+msgstr "プログラムを終了"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid ""
 "Re-derive the situations and hand states the Research Browser and HUD read"
-msgstr ""
+msgstr "リサーチブラウザーと HUD が読む状況とハンド状態を再生成します"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Rebuild Analytics Data"
-msgstr ""
+msgstr "分析データを再構築"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Rebuild DB Indexes"
@@ -3325,24 +3703,24 @@ msgid "Rebuild HUD Cache"
 msgstr "HUDキャッシュを再構築"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Research Browser"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Research Browser for Omaha"
-msgstr ""
+msgstr "リサーチブラウザー"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Site Settings"
+msgid "Research Browser for Omaha"
+msgstr "オマハ向けリサーチブラウザー"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Seat Settings"
-msgstr "ポーカーサイト設定"
+msgstr "席の設定"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy
-#| msgid "Session"
 msgid "Session Guard"
-msgstr "このセッション"
+msgstr "セッションガード"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Session Stats"
@@ -3354,29 +3732,32 @@ msgstr "ポーカーサイト設定"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Statistics"
 msgid "Stat Packs"
-msgstr "統計情報"
+msgstr "統計パック"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Statistics"
 msgstr "統計情報"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Stats Guide"
-msgstr ""
+msgstr "統計ガイド"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Study Explorer"
-msgstr ""
+msgstr "スタディエクスプローラー"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Themes"
-msgstr ""
+msgstr "テーマ"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tools"
-msgstr ""
+msgstr "ツール"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/research_labels.py
 msgid "Tournament"
@@ -3388,9 +3769,8 @@ msgstr "トーナメントグラフ"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Tourney Viewer"
 msgid "Tourney Hand Viewer"
-msgstr "トーナメントビューア"
+msgstr "トーナメントのハンドビューアー"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Tourney Stats"
@@ -3398,35 +3778,39 @@ msgstr "トーナメント統計"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Session"
 msgid "Version"
-msgstr "このセッション"
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Version, packaging and runtime environment details"
-msgstr ""
+msgstr "バージョン"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Database Statistics"
-msgid "View database statistics"
-msgstr "データベース統計情報"
+msgid "Version, packaging and runtime environment details"
+msgstr "バージョン、パッケージング、実行環境の詳細"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "View database statistics"
+msgstr "データベースの統計を表示"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "What every filter is for in a four-card game, and the two that are not"
 msgstr ""
+"4 枚カードのゲームで各フィルターが何のためにあるか、そして使えない 2 つについ"
+"て"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "+"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
 msgid "Add an item to this row"
-msgstr ""
+msgstr "この行に項目を追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
 msgid "Remove the last item of this row"
-msgstr ""
+msgstr "この行の最後の項目を削除"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "−"
@@ -3434,459 +3818,544 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-#| msgid "Statistics"
 msgid "Add/Edit Statistic"
-msgstr "統計情報"
+msgstr "統計の追加/編集"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Block Properties"
-msgstr ""
+msgstr "ブロックのプロパティ"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Click Action:"
-msgstr ""
+msgstr "クリック時の動作:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Column:"
-msgstr ""
+msgstr "列:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-#| msgid "Statistics"
 msgid "Edit Popup Statistic"
-msgstr "統計情報"
+msgstr "ポップアップの統計を編集"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-#| msgid "Popup Windows"
 msgid "Edit Popup Window"
-msgstr "ポップアップウィンドウ"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Export Layout Coordinates"
-msgstr ""
+msgstr "ポップアップウィンドウを編集"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-#| msgid "Positions:"
+msgid "Export Layout Coordinates"
+msgstr "レイアウト座標をエクスポート"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Grid Position:"
-msgstr "ポジション:"
+msgstr "グリッド位置:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "High Range:"
-msgstr ""
+msgstr "高い範囲:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Low Range:"
-msgstr ""
+msgstr "低い範囲:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Middle color:"
-msgstr ""
+msgstr "中間色:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid ""
 "Minimum width of each statistic cell; Automatic keeps the legacy default"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "OK"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Optional: Action when stat is clicked"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Optional: Popup to show on hover"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Optional: Submenu name for hierarchical popups"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Override the automatic section used by ModernSubmenu"
-msgstr ""
+msgstr "各統計セルの最小幅。「自動」は従来のデフォルトを維持します"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-#| msgid "Popup Name"
+msgid "OK"
+msgstr "OK"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Optional: Action when stat is clicked"
+msgstr "任意: 統計をクリックしたときの動作"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Optional: Popup to show on hover"
+msgstr "任意: マウスを重ねたときに表示するポップアップ"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Optional: Submenu name for hierarchical popups"
+msgstr "任意: 階層型ポップアップのサブメニュー名"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Override the automatic section used by ModernSubmenu"
+msgstr "ModernSubmenu が使う自動セクションを上書き"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Popup:"
-msgstr "ポップアップ名"
+msgstr "ポップアップ:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Preview shows how statistic colors will change based on values"
-msgstr ""
+msgstr "プレビューは値に応じて統計の色がどう変わるかを示します"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Row:"
-msgstr ""
+msgstr "行:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Select None"
-msgstr ""
+msgstr "選択なし"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid ""
 "Select the site layout coordinates you want to include in the package.\n"
 "This will let other users position the HUD boxes exactly like yours."
 msgstr ""
+"パッケージに含めるサイトのレイアウト座標を選択してください。\n"
+"他のユーザーが HUD ボックスをあなたとまったく同じ位置に配置できるようになりま"
+"す。"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Show this panel only for a villain in this position (blank = always)"
-msgstr ""
+msgstr "このポジションの相手に対してのみこのパネルを表示 (空欄 = 常に表示)"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-#| msgid "Statistics"
 msgid "Statistic:"
-msgstr "統計情報"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Use middle color for values between thresholds"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Values above"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Values below"
-msgstr ""
+msgstr "統計:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-#| msgid "show all"
+msgid "Use middle color for values between thresholds"
+msgstr "しきい値の間の値に中間色を使う"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Values above"
+msgstr "この値超"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Values below"
+msgstr "この値未満"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "show as"
-msgstr "すべて表示"
+msgstr "表示色"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "➕ Add Stat"
-msgstr ""
+msgstr "➕ 統計を追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "➖ Remove Stat"
-msgstr ""
+msgstr "➖ 統計を削除"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "(none)"
-msgstr ""
+msgstr "(なし)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "A panel rule with these conditions and this profile already exists."
-msgstr ""
+msgstr "これらの条件とこのプロフィールを持つパネルのルールは既に存在します。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "A profile definition with these selectors already exists."
-msgstr ""
+msgstr "これらの条件のプロフィール定義は既に存在します。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "ANY"
-msgstr ""
+msgstr "任意"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "ANY table"
-msgstr ""
+msgstr "任意のテーブル"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Active Profile Definitions"
-msgstr ""
+msgstr "有効なプロフィール定義"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Active Profile:"
-msgstr ""
+msgstr "有効なプロフィール:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add"
 msgstr "追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Block"
-msgstr ""
+msgstr "ブロックを追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Label"
-msgstr ""
+msgstr "ラベルを追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Line"
-msgstr ""
+msgstr "線を追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Profile Definition"
-msgstr ""
+msgstr "プロフィール定義を追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Stat"
 msgid "Add Stat"
-msgstr "統計"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add a new panel (block) to a multi-panel HUD"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add a text label (column/row header or caption) to a panel"
-msgstr ""
+msgstr "統計を追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "AddDB starting"
+msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
+msgstr "パネルに水平区切り線 (PT4 'Horz Line') を追加"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add a new panel (block) to a multi-panel HUD"
+msgstr "マルチパネル HUD に新しいパネル (ブロック) を追加"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add a text label (column/row header or caption) to a panel"
+msgstr "パネルにテキストラベル (列/行の見出しやキャプション) を追加"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add stat"
-msgstr "AddDB開始"
+msgstr "統計を追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add to block"
-msgstr ""
+msgstr "ブロックに追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Analytics-backed stats"
-msgstr ""
+msgstr "分析ベースの統計"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Append the profile emoji (e.g. 🐟, 🐌, 🎯) and color the player's name in "
 "the HUD."
 msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Below this many hands the panel is withheld and the fallback shows."
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Block Props"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Cannot add this rule"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Cannot export"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Cannot import"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Cannot update this rule"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Class:"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Color Ranges"
-msgstr ""
+"HUD でプロフィールの絵文字 (例: 🐟, 🐌, 🎯) を付け、プレイヤー名に色を付けま"
+"す。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Positions:"
+msgid "Below this many hands the panel is withheld and the fallback shows."
+msgstr "ハンド数がこれを下回るとパネルは表示されず、代替表示が使われます。"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Block Props"
+msgstr "ブロック設定"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Cannot add this rule"
+msgstr "このルールを追加できません"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Cannot export"
+msgstr "エクスポートできません"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Cannot import"
+msgstr "インポートできません"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Cannot update this rule"
+msgstr "このルールを更新できません"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Class:"
+msgstr "クラス:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Color Ranges"
+msgstr "色の範囲"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Conditions"
-msgstr "ポジション:"
+msgstr "条件"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Design"
-msgstr ""
+msgstr "デザイン"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Disabled: this rule never matches."
-msgstr ""
+msgstr "無効: このルールは一致しません。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Duplicate rule"
-msgstr ""
+msgstr "ルールの重複"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Edit"
 msgstr "編集"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Edit the selected panel's title/border colours, position and label"
-msgstr ""
+msgstr "選択したパネルのタイトル/枠の色、位置、ラベルを編集"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Effective profile for these selectors"
-msgstr ""
+msgstr "これらの条件で有効になるプロフィール"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Enable Player Profiling (Categorization)"
-msgstr ""
+msgstr "プレイヤーのプロファイリング (分類) を有効にする"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Enable auto-classification of players into Nit, Calling Station, Fish, "
 "Maniac, LAG, Reg, TAG."
 msgstr ""
+"プレイヤーを Nit、Calling Station、Fish、Maniac、LAG、Reg、TAG に自動分類しま"
+"す。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Export to File"
 msgid "Export panel rules"
-msgstr "ファイルにエクスポート"
+msgstr "パネルのルールをエクスポート"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Export…"
-msgstr ""
+msgstr "エクスポート…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Fallback"
-msgstr ""
+msgstr "代替表示"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Game"
-msgstr ""
+msgstr "ゲーム"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "General HUD and Profiling Settings"
-msgstr ""
+msgstr "HUD とプロファイリングの一般設定"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Preview"
-msgstr ""
+msgstr "HUD プレビュー"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Profile"
-msgstr ""
+msgstr "HUD プロフィール"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Profile Configuration"
-msgstr ""
+msgstr "HUD プロフィールの設定"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD imported — refresh required"
-msgstr ""
+msgstr "HUD をインポートしました — 更新が必要です"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD profile"
-msgstr ""
+msgstr "HUD プロフィール"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Hands seen at this table"
 msgid "Hands for this seat"
-msgstr "ハンドこの卓で取得"
+msgstr "この席のハンド数"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Horz Line"
-msgstr ""
+msgstr "水平線"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Icons:"
-msgstr ""
+msgstr "アイコン:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Import All"
 msgid "Import panel rules"
-msgstr "すべてインポート"
+msgstr "パネルのルールをインポート"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Imported {count} rule(s)."
-msgstr ""
+msgstr "{count} 件のルールをインポートしました。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Import"
 msgid "Import…"
-msgstr "インポート"
+msgstr "インポート…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Issues"
-msgstr ""
+msgstr "問題"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Item Properties"
-msgstr ""
+msgstr "項目のプロパティ"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Items"
-msgstr ""
+msgstr "項目"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Layout Conflict"
-msgstr ""
+msgstr "レイアウトの競合"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Min sample"
-msgstr ""
+msgstr "最小サンプル"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Minimum hands required for profiling:"
-msgstr ""
+msgstr "プロファイリングに必要な最小ハンド数:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Move down"
-msgstr ""
+msgstr "下へ移動"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Move up"
-msgstr ""
+msgstr "上へ移動"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "New Profile"
-msgstr ""
+msgstr "新しいプロフィール"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "No HUD profile of this name exists; the game default will be used instead."
 msgstr ""
+"この名前の HUD プロフィールは存在しません。代わりにゲームのデフォルトが使われ"
+"ます。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "No HUD profile of this name exists; this rule will be ignored."
-msgstr ""
+msgstr "この名前の HUD プロフィールは存在しません。このルールは無視されます。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Off by default. When it is on, the panels a rule names are shown and every "
 "other block keeps the position rule it has always had."
 msgstr ""
+"デフォルトではオフです。オンにすると、ルールで指定されたパネルが表示され、そ"
+"の他のブロックは従来どおりの位置ルールを保ちます。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Open preview at 100% real size in a new window"
-msgstr ""
+msgstr "新しいウィンドウで 100% 実寸のプレビューを開く"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Open the Dynamic HUD guide"
-msgstr ""
+msgstr "Dynamic HUD ガイドを開く"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel"
-msgstr ""
+msgstr "パネル"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel documents (*.json)"
-msgstr ""
+msgstr "パネルのドキュメント (*.json)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel rules"
-msgstr ""
+msgstr "パネルのルール"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panels"
-msgstr ""
+msgstr "パネル"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr ""
+"適用されるデフォルトを確認するには、ゲーム (とフォーマット) を選んでくださ"
+"い。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a HUD profile first."
-msgstr ""
+msgstr "先に HUD プロフィールを選択してください。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
@@ -3894,745 +4363,852 @@ msgid "Players"
 msgstr "プレイヤー"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Popup Conflict"
-msgstr ""
+msgstr "ポップアップの競合"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Popup Windows"
 msgid "Popup Preview"
-msgstr "ポップアップウィンドウ"
+msgstr "ポップアップのプレビュー"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Positional Stats"
 msgid "Positional panels:"
-msgstr "ポジション別統計"
+msgstr "ポジション別パネル:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Preview, by the same resolver the HUD uses"
-msgstr ""
+msgstr "HUD と同じリゾルバーによるプレビュー"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Priority"
-msgstr ""
+msgstr "優先度"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Profile Conflict"
-msgstr ""
+msgstr "プロフィールの競合"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Positions:"
 msgid "Profile actions"
-msgstr "ポジション:"
+msgstr "プロフィールの操作"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Remove"
-msgstr ""
+msgstr "削除"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Filename"
 msgid "Rule name"
-msgstr "ファイル名"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Sample column"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Seats"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Select Popup:"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Select a rule to update first."
-msgstr ""
+msgstr "ルール名"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Stop this HUD"
+msgid "Sample column"
+msgstr "サンプル列"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Seats"
+msgstr "席数"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Select Popup:"
+msgstr "ポップアップを選択:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Select a rule to update first."
+msgstr "先に更新するルールを選択してください。"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show hero HUD"
-msgstr "このHUDを停止する"
+msgstr "ヒーローの HUD を表示"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show profile emoji and color code directly on player name labels"
-msgstr ""
+msgstr "プレイヤー名のラベルにプロフィールの絵文字と色を直接表示"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show the panels that fit the hand"
-msgstr ""
+msgstr "ハンドに合ったパネルを表示"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Speed"
-msgstr ""
+msgstr "スピード"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stats whose value comes from the analytics layer rather than a column."
-msgstr ""
+msgstr "値が列ではなく分析レイヤーから得られる統計。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Text"
 msgstr "ログテキスト"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Text label (header / caption) — not a stat"
-msgstr ""
+msgstr "テキストラベル (見出し / キャプション) — 統計ではありません"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The HUD profile was imported and saved, but the application could not "
 "refresh its configuration. Restart fpdb to apply it. You do not need to "
 "import the file again."
 msgstr ""
+"HUD プロフィールはインポートされ保存されましたが、アプリケーションは設定を更"
+"新できませんでした。適用するには fpdb を再起動してください。ファイルを再度イ"
+"ンポートする必要はありません。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The HUDs fpdb ships, as a seat would see them. Pick a context to watch the "
 "Dynamic package change panel, and read the popup paths to find where a "
 "number lives before you go looking for it at a table."
 msgstr ""
+"fpdb に付属する HUD を、席から見える形で表示します。コンテキストを選ぶと "
+"Dynamic パッケージがパネルを切り替える様子を確認でき、ポップアップのパスを読"
+"めば、テーブルで探す前にどの数値がどこにあるかがわかります。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The minimum number of hands tracked on an opponent before profiling is "
 "computed."
-msgstr ""
+msgstr "プロファイリングを計算する前に、対戦相手について記録する最小ハンド数。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The preview uses the same compact label grid as the in-game HUD.\n"
 "Spacing, font, colors and HUD cell values come from the selected profile."
 msgstr ""
+"プレビューはゲーム内 HUD と同じコンパクトなラベルグリッドを使います。\n"
+"間隔、フォント、色、HUD セルの値は選択したプロフィールから取得されます。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Theme:"
-msgstr ""
+msgstr "テーマ:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "show"
 msgid "Then show"
-msgstr "表示"
+msgstr "表示するもの"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Update rule"
-msgstr ""
+msgstr "ルールを更新"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Please select site"
 msgid "Update selected"
-msgstr "DBテーブルを再作成してください"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "When this is the spot"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
-msgid "Wrote {path}"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "all profiles"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "always"
-msgstr ""
+msgstr "選択を更新"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Positional Stats"
+msgid "When this is the spot"
+msgstr "この状況のとき"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy, python-brace-format
+msgid "Wrote {path}"
+msgstr "{path} に書き込みました"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "all profiles"
+msgstr "すべてのプロフィール"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "always"
+msgstr "常に"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "optional name"
-msgstr "ポジション別統計"
+msgstr "任意の名前"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "the profile grid"
-msgstr ""
+msgstr "プロフィールのグリッド"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{profile} — from the rule {selectors}"
-msgstr ""
+msgstr "{profile} — ルール {selectors} による"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{profile} — no rule matches, so the game default applies"
-msgstr ""
+msgstr "{profile} — 一致するルールがないため、ゲームのデフォルトが適用されます"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "—"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "↑ Up"
-msgstr ""
+msgstr "↑ 上へ"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "↓ Down"
-msgstr ""
+msgstr "↓ 下へ"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "⚙️ General Settings"
-msgstr ""
+msgstr "⚙️ 一般設定"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➕ Add"
-msgstr ""
+msgstr "➕ 追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➕ New Popup"
-msgstr ""
+msgstr "➕ 新しいポップアップ"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➕ New Profile"
-msgstr ""
+msgstr "➕ 新しいプロフィール"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➖ Remove"
-msgstr ""
+msgstr "➖ 削除"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Preferences"
 msgid "🃏 Reference HUDs"
-msgstr "設定"
+msgstr "🃏 リファレンス HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🎯 Profile Select"
-msgstr ""
+msgstr "🎯 プロフィール選択"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Popup Windows"
 msgid "💬 Popup Windows"
-msgstr "ポップアップウィンドウ"
+msgstr "💬 ポップアップウィンドウ"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Statistics"
 msgid "📊 Statistics"
-msgstr "統計情報"
+msgstr "📊 統計"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Edit"
 msgid "📝 Edit"
-msgstr "編集"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "📤 Export HUD"
-msgstr ""
+msgstr "📝 編集"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Auto Import and HUD"
+msgid "📤 Export HUD"
+msgstr "📤 HUD をエクスポート"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📥 Import HUD"
-msgstr "自動インポートとHUD"
+msgstr "📥 HUD をインポート"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🔍 Real Size"
-msgstr ""
+msgstr "🔍 実寸"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🧩 Dynamic Panels"
-msgstr ""
+msgstr "🧩 ダイナミックパネル"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "100% Reset"
-msgstr ""
+msgstr "100% にリセット"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 msgid "Close"
 msgstr "閉じる"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Natural Size: {w} × {h} px  (Scale: {scale}%)"
-msgstr ""
+msgstr "原寸: {w} × {h} px  (倍率: {scale}%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Reset to 100% natural size"
-msgstr ""
+msgstr "100% の原寸にリセット"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Zoom in (+25%)"
-msgstr ""
+msgstr "拡大 (+25%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Zoom out (-25%)"
-msgstr ""
+msgstr "縮小 (-25%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "🔍 Popup Preview — {name} (Real Size)"
-msgstr ""
+msgstr "🔍 ポップアップのプレビュー — {name} (実寸)"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid "Context"
-msgstr ""
+msgstr "コンテキスト"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid ""
 "Every popup a cell of this package opens, and everything those popups "
 "navigate to. A row ending in an arrow leaves the package for the shipped "
 "popup library."
 msgstr ""
+"このパッケージのセルが開くすべてのポップアップと、それらのポップアップから移"
+"動できるすべての項目。矢印で終わる行は、パッケージを離れて付属のポップアップ"
+"ライブラリへ移動します。"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
 #, fuzzy
-#| msgid "Preferences"
 msgid "Reference HUD"
-msgstr "設定"
+msgstr "リファレンス HUD"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "% of pot"
-msgstr ""
+msgstr "ポットの %"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "A family of situations, such as postflop defence."
-msgstr ""
+msgstr "ポストフロップのディフェンスなどの状況のファミリー。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "A legacy PT4 stat column the decision feeds."
-msgstr ""
+msgstr "判断が反映される従来の PT4 統計列。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Action"
-msgstr ""
+msgstr "アクション"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Action faced"
-msgstr ""
+msgstr "直面したアクション"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Action taken"
-msgstr ""
+msgstr "取ったアクション"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Aggressor, defender or passive."
-msgstr ""
+msgstr "アグレッサー、ディフェンダー、パッシブ。"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "All-in EV"
 msgid "All-in"
-msgstr "オールインEV"
+msgstr "オールイン"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Amount of rake paid"
 msgid "Amount to call"
-msgstr "支払ったレーキ総額"
+msgstr "コールに必要な額"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "BB"
 msgstr "BB"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Beats how much of the range"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size (% of pot)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size (basis points)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size bucket"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size faced"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size faced (% of pot)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size faced (basis points)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size faced bucket"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet sizing"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Big blind (chips)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Blocker (all of)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Blocker (any of)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Blocker (none of)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Blockers the actor held (any of them)."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Blockers the actor must have all of."
-msgstr ""
+msgstr "レンジのどれだけに勝つか"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Board:"
+msgid "Bet size"
+msgstr "ベットサイズ"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size (% of pot)"
+msgstr "ベットサイズ (ポットの %)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size (basis points)"
+msgstr "ベットサイズ (ベーシスポイント)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size bucket"
+msgstr "ベットサイズの区分"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size faced"
+msgstr "直面したベットサイズ"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size faced (% of pot)"
+msgstr "直面したベットサイズ (ポットの %)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size faced (basis points)"
+msgstr "直面したベットサイズ (ベーシスポイント)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size faced bucket"
+msgstr "直面したベットサイズの区分"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet sizing"
+msgstr "ベットサイズ"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Big blind (chips)"
+msgstr "ビッグブラインド (チップ)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Blocker (all of)"
+msgstr "ブロッカー (すべて)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Blocker (any of)"
+msgstr "ブロッカー (いずれか)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Blocker (none of)"
+msgstr "ブロッカー (いずれもなし)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Blockers the actor held (any of them)."
+msgstr "アクションしたプレイヤーが持つブロッカー (いずれか)。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Blockers the actor must have all of."
+msgstr "アクションしたプレイヤーがすべて持つ必要のあるブロッカー。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board"
-msgstr "ボード:"
+msgstr "ボード"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board connectivity"
-msgstr ""
+msgstr "ボードのつながり"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board dealt"
-msgstr ""
+msgstr "ボードが配られた"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board high card"
-msgstr ""
+msgstr "ボードの最高カード"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board pairing"
-msgstr ""
+msgstr "ボードのペア"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board street"
-msgstr ""
+msgstr "ボードのストリート"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board suit structure"
-msgstr ""
+msgstr "ボードのスート構成"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture"
-msgstr ""
+msgstr "ボードのテクスチャ"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture (all of)"
-msgstr ""
+msgstr "ボードのテクスチャ (すべて)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture flags the board must have all of."
-msgstr ""
+msgstr "ボードがすべて持つ必要のあるテクスチャフラグ。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Cards discarded at the draw; zero means stand pat and unknown discard counts "
 "stay unclassified."
 msgstr ""
+"ドローで捨てたカード枚数。0 はスタンドパットを意味し、不明な枚数は未分類のま"
+"まです。"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "5 Card Draw"
 msgid "Cards drawn"
-msgstr "5カードドロー"
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Cards drawn (0 = stand pat)"
-msgstr ""
+msgstr "交換したカード"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Currencies"
+msgid "Cards drawn (0 = stand pat)"
+msgstr "交換したカード (0 = スタンドパット)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Currency"
 msgstr "通貨"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw (all of)"
-msgstr ""
+msgstr "ドロー (すべて)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw (any of)"
-msgstr ""
+msgstr "ドロー (いずれか)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw (none of)"
-msgstr ""
+msgstr "ドロー (いずれもなし)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw number"
-msgstr ""
+msgstr "ドロー回数"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draws the actor had: flush draws, gutshots and the rest (any of them)."
 msgstr ""
+"アクションしたプレイヤーのドロー: フラッシュドロー、ガットショットなど (いず"
+"れか)。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draws the actor must have all of."
-msgstr ""
+msgstr "アクションしたプレイヤーがすべて持つ必要のあるドロー。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "EV-adjusted result (all-in EV)"
-msgstr ""
+msgstr "EV 調整後の結果 (オールイン EV)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "EV-adjusted result per decision"
-msgstr ""
+msgstr "判断あたりの EV 調整後の結果"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack"
-msgstr ""
+msgstr "エフェクティブスタック"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack (chips)"
-msgstr ""
+msgstr "エフェクティブスタック (チップ)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack in the bands a tournament is played in."
-msgstr ""
+msgstr "トーナメントで用いられる帯で表したエフェクティブスタック。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Every situation the decision matched, not only the most specific one. Use "
 "this to ask how often an opportunity was taken: raising an open makes the "
 "decision a 3-bet, so only this keeps it among the opens faced."
 msgstr ""
+"最も具体的なものだけでなく、判断が一致したすべての状況。機会がどれだけ活かさ"
+"れたかを調べるのに使います: オープンにレイズするとその判断は 3ベットになるた"
+"め、これを使った場合のみ、直面したオープンの中に残ります。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Facing an all-in"
-msgstr ""
+msgstr "オールインに直面"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Fixed limit, no limit and the other betting structures."
-msgstr ""
+msgstr "フィックスドリミット、ノーリミット、その他のベッティング構造。"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Game start line"
 msgid "Game and stake"
-msgstr "ゲームのスタートライン"
+msgstr "ゲームとステーク"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Game family"
-msgstr ""
+msgstr "ゲームファミリー"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hands"
 msgid "Hand"
-msgstr "ハンド数"
+msgstr "ハンド"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hand state known"
-msgstr ""
+msgstr "ハンド状態が判明"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hand History Path"
 msgid "Hand strength"
-msgstr "ハンド履歴ディレクトリ"
+msgstr "ハンドの強さ"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hand-classified street"
-msgstr ""
+msgstr "ハンド分類のストリート"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hand Filters:"
 msgid "Hands after"
-msgstr "ハンドフィルタ:"
+msgstr "このハンド以降"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hands/file:"
 msgid "Hands before"
-msgstr "ハンド/ファイル:"
+msgstr "このハンド以前"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hero:"
 msgid "Hero"
-msgstr "Hero:"
+msgstr "ヒーロー"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hero's own decisions, or everyone except hero. Any keeps both."
 msgstr ""
+"ヒーロー自身の判断、またはヒーロー以外の全員。「任意」は両方を含みます。"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hole Cards"
 msgid "Hole cards"
 msgstr "ホールカード"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hole Cards"
 msgid "Hole cards known"
-msgstr "ホールカード"
+msgstr "ホールカード判明"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many holdings the holding beats."
-msgstr ""
+msgstr "そのハンドが勝つハンドの数。"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "No players detected in hand %s."
 msgid "How many players were dealt into the hand."
-msgstr "ハンド %s で自動判別できたプレイヤーがいません。"
+msgstr "ハンドに参加したプレイヤー数。"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "No players detected in hand %s."
 msgid "How many players were still in the hand."
-msgstr "ハンド %s で自動判別できたプレイヤーがいません。"
+msgstr "ハンドにまだ残っていたプレイヤー数。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many raises came before this decision."
-msgstr ""
+msgstr "この判断の前に何回レイズがあったか。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How much the actor had to call."
-msgstr ""
+msgstr "アクションしたプレイヤーがコールに必要だった額。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How strong the holding is: nuts, near nuts, strong, medium or weak."
-msgstr ""
+msgstr "ハンドの強さ: ナッツ、ナッツに近い、強い、中程度、弱い。"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Position"
 msgid "In position"
-msgstr "ポジション"
+msgstr "インポジション"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "In position versus the bettor"
-msgstr ""
+msgstr "ベッターに対してインポジション"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "In position versus the previous aggressor"
-msgstr ""
+msgstr "前のアグレッサーに対してインポジション"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Is the aggressor"
-msgstr ""
+msgstr "アグレッサーである"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Is the preflop aggressor"
-msgstr ""
+msgstr "プリフロップのアグレッサーである"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat column"
-msgstr ""
+msgstr "従来の統計列"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat response"
-msgstr ""
+msgstr "従来の統計の対応"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Linked player identity"
-msgstr ""
+msgstr "リンクされたプレイヤー ID"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Made hand"
-msgstr ""
+msgstr "完成役"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Made hand rank"
-msgstr ""
+msgstr "完成役のランク"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Multiway"
-msgstr ""
+msgstr "マルチウェイ"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Named texture flags such as monotone or connected (any of them)."
-msgstr ""
+msgstr "モノトーンやコネクトなどの名前付きテクスチャフラグ (いずれか)。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One import session."
-msgstr ""
+msgstr "1 回のインポートセッション。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One specific hand."
-msgstr ""
+msgstr "特定の 1 つのハンド。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One specific tournament."
-msgstr ""
+msgstr "特定の 1 つのトーナメント。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions played on or after this date."
-msgstr ""
+msgstr "この日付以降にプレイされた判断のみ。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions played on or before this date."
-msgstr ""
+msgstr "この日付以前にプレイされた判断のみ。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions with none of the named blockers."
-msgstr ""
+msgstr "指定したブロッカーをどれも持たない判断のみ。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions with none of the named draws."
-msgstr ""
+msgstr "指定したドローをどれも持たない判断のみ。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only hands imported after this hand id."
-msgstr ""
+msgstr "このハンド ID より後にインポートされたハンドのみ。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only hands imported before this hand id."
-msgstr ""
+msgstr "このハンド ID より前にインポートされたハンドのみ。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Opponent position"
-msgstr ""
+msgstr "相手のポジション"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Other"
-msgstr ""
+msgstr "その他"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pair detail"
-msgstr ""
+msgstr "ペアの詳細"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Player name"
 msgid "Played since"
-msgstr "プレイヤー名"
+msgstr "プレイ開始日"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Player name"
 msgid "Played until"
-msgstr "プレイヤー名"
+msgstr "プレイ終了日"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Player Disconnected"
 msgid "Players in the hand"
-msgstr "プレイヤーがDisconnectedです"
+msgstr "ハンド参加人数"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Poker room"
-msgstr ""
+msgstr "ポーカールーム"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Position"
@@ -4640,476 +5216,577 @@ msgstr "ポジション"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Positional Stats"
 msgid "Position and stack"
-msgstr "ポジション別統計"
+msgstr "ポジションとスタック"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pot before the action"
-msgstr ""
+msgstr "アクション前のポット"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pot odds"
-msgstr ""
+msgstr "ポットオッズ"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pot type"
-msgstr ""
+msgstr "ポットの種類"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Preflop, flop, turn or river."
-msgstr ""
+msgstr "プリフロップ、フロップ、ターン、リバー。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Rainbow, two-tone, monotone and the deeper flush boards."
 msgstr ""
+"レインボー、ツートーン、モノトーン、さらにフラッシュの可能性が高いボード。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Raises before"
-msgstr ""
+msgstr "前のレイズ回数"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Range holdings"
-msgstr ""
+msgstr "レンジのハンド"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Relative position"
-msgstr ""
+msgstr "相対ポジション"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Response"
-msgstr ""
+msgstr "対応"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Restrict the population to a set of players."
-msgstr ""
+msgstr "母集団をプレイヤーのセットに限定します。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Restrict the population to one player."
-msgstr ""
+msgstr "母集団を 1 人のプレイヤーに限定します。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Restrict to a linked (site, alias) identity."
-msgstr ""
+msgstr "リンクされた (サイト, 別名) ID に限定します。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Role"
-msgstr ""
+msgstr "役割"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Runout"
-msgstr ""
+msgstr "ランアウト"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "SPR"
-msgstr ""
+msgstr "SPR"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "SPR band"
-msgstr ""
+msgstr "SPR の帯"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Seats between the actor and the button."
-msgstr ""
+msgstr "アクションしたプレイヤーとボタンの間の席数。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Seats dealt in"
-msgstr ""
+msgstr "配られた席数"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Short, medium, deep or very deep stacks."
-msgstr ""
+msgstr "ショート、ミディアム、ディープ、ベリーディープのスタック。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Situation"
-msgstr ""
+msgstr "状況"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Situation family"
-msgstr ""
+msgstr "状況のファミリー"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Situation, including the ones it led to"
-msgstr ""
+msgstr "状況 (そこから派生したものを含む)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stack depth"
-msgstr ""
+msgstr "スタックの深さ"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stack depth band"
-msgstr ""
+msgstr "スタックの深さの帯"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stack-to-pot ratio before the action."
-msgstr ""
+msgstr "アクション前のスタック対ポット比。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stake (big blinds)"
-msgstr ""
+msgstr "ステーク (ビッグブラインド)"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Setting"
 msgid "Starting hand"
-msgstr "設定項目"
+msgstr "スターティングハンド"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Street"
-msgstr ""
+msgstr "ストリート"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Street and pot"
-msgstr ""
+msgstr "ストリートとポット"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Street number"
-msgstr ""
+msgstr "ストリート番号"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Table Closed"
 msgid "Table size"
-msgstr "卓が閉じられました"
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The 169 Hold'em starting-hand classes."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The bet size faced, in the configured sizing buckets."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The bet size made, in the configured sizing buckets."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The big blind in chips, for mixed stakes."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The board street as a number, the flop being one."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The currency the game was played in."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The decision, normalized: fold, check, call, bet or raise."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The game family: hold'em/omaha, stud or draw."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The game variant, such as Hold'em or Omaha."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The highest card of the board."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The letter a legacy PT4 stat column records."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The made hand the actor held: pairs, sets, straights and so on."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The most specific situation the decision matched."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The pot odds offered, in basis points."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The pot size before the action, in chips."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The same ratio as the bands a player thinks in."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The seat of the player the action was against."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The seat of the player who acted."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The shape of the pot: unopened, limped, single-raised, 3-bet, 4-bet."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The share of the range the holding beats."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The size of the bet faced, as a percentage of the pot."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The size of the bet faced, in basis points of the pot."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The size of the bet made, as a percentage of the pot."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The size of the bet made, in basis points of the pot."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The size of the game, expressed in big blinds."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The smaller of the two stacks, in big blinds."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The smaller of the two stacks, in chips."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The street as a number, preflop being zero."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The street the hand state was classified on."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The strength of the made hand, as a number."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The table size, such as 6-max or full ring."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Three or more players saw the decision."
-msgstr ""
+msgstr "テーブルサイズ"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Tournaments"
+msgid "The 169 Hold'em starting-hand classes."
+msgstr "ホールデムのスターティングハンド 169 クラス。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The bet size faced, in the configured sizing buckets."
+msgstr "直面したベットサイズ (設定したサイズ区分)。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The bet size made, in the configured sizing buckets."
+msgstr "行ったベットサイズ (設定したサイズ区分)。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The big blind in chips, for mixed stakes."
+msgstr "混在ステーク用の、チップ単位のビッグブラインド。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The board street as a number, the flop being one."
+msgstr "数値で表したボードのストリート (フロップが 1)。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The currency the game was played in."
+msgstr "ゲームがプレイされた通貨。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The decision, normalized: fold, check, call, bet or raise."
+msgstr "正規化された判断: フォールド、チェック、コール、ベット、レイズ。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The game family: hold'em/omaha, stud or draw."
+msgstr "ゲームファミリー: ホールデム/オマハ、スタッド、ドロー。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The game variant, such as Hold'em or Omaha."
+msgstr "ホールデムやオマハなどのゲームのバリアント。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The highest card of the board."
+msgstr "ボードの最も高いカード。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The letter a legacy PT4 stat column records."
+msgstr "従来の PT4 統計列が記録する文字。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The made hand the actor held: pairs, sets, straights and so on."
+msgstr "アクションしたプレイヤーの完成役: ペア、セット、ストレートなど。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The most specific situation the decision matched."
+msgstr "判断が一致した最も具体的な状況。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The pot odds offered, in basis points."
+msgstr "提示されたポットオッズ (ベーシスポイント)。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The pot size before the action, in chips."
+msgstr "アクション前のポットサイズ (チップ単位)。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The same ratio as the bands a player thinks in."
+msgstr "プレイヤーが考える帯で表した同じ比率。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The seat of the player the action was against."
+msgstr "アクションの相手プレイヤーの席。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The seat of the player who acted."
+msgstr "アクションしたプレイヤーの席。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The shape of the pot: unopened, limped, single-raised, 3-bet, 4-bet."
+msgstr "ポットの形: アンオープン、リンプ、シングルレイズ、3ベット、4ベット。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The share of the range the holding beats."
+msgstr "そのハンドが勝つレンジの割合。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The size of the bet faced, as a percentage of the pot."
+msgstr "直面したベットのサイズ (ポットに対するパーセント)。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The size of the bet faced, in basis points of the pot."
+msgstr "直面したベットのサイズ (ポットに対するベーシスポイント)。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The size of the bet made, as a percentage of the pot."
+msgstr "行ったベットのサイズ (ポットに対するパーセント)。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The size of the bet made, in basis points of the pot."
+msgstr "行ったベットのサイズ (ポットに対するベーシスポイント)。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The size of the game, expressed in big blinds."
+msgstr "ビッグブラインドで表したゲームの大きさ。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The smaller of the two stacks, in big blinds."
+msgstr "2 つのスタックのうち小さい方 (ビッグブラインド単位)。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The smaller of the two stacks, in chips."
+msgstr "2 つのスタックのうち小さい方 (チップ単位)。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The street as a number, preflop being zero."
+msgstr "数値で表したストリート (プリフロップが 0)。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The street the hand state was classified on."
+msgstr "ハンド状態が分類されたストリート。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The strength of the made hand, as a number."
+msgstr "完成役の強さ (数値)。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The table size, such as 6-max or full ring."
+msgstr "6-max やフルリングなどのテーブルサイズ。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Three or more players saw the decision."
+msgstr "3 人以上のプレイヤーがその判断を見た。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Tournament or cash"
-msgstr "トーナメント数"
+msgstr "トーナメントまたはキャッシュ"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Was the previous aggressor"
-msgstr ""
+msgstr "前のアグレッサーだった"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "What the actor did, including draw-game discards and stand-pat decisions."
 msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "What the actor was facing."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "What the turn or river card changed."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Whether the action in front of the actor was an all-in."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Whether the action put the player all-in."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Whether the actor has position on the bettor."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Whether the actor has position on the previous aggressor."
-msgstr ""
+"アクションしたプレイヤーが行ったこと (ドローゲームの交換やスタンドパットの判"
+"断を含む)。"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "% called a raise preflop"
+msgid "What the actor was facing."
+msgstr "アクションしたプレイヤーが直面していたもの。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "What the turn or river card changed."
+msgstr "ターンまたはリバーのカードで何が変わったか。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Whether the action in front of the actor was an all-in."
+msgstr "アクションしたプレイヤーの前のアクションがオールインだったか。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Whether the action put the player all-in."
+msgstr "そのアクションでプレイヤーがオールインになったか。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Whether the actor has position on the bettor."
+msgstr "アクションしたプレイヤーがベッターに対してポジションを持つか。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Whether the actor has position on the previous aggressor."
+msgstr "アクションしたプレイヤーが前のアグレッサーに対してポジションを持つか。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor raised preflop."
-msgstr "% プリフロップでのレイズへのコール率"
+msgstr "アクションしたプレイヤーがプリフロップでレイズしたか。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was in position."
-msgstr ""
+msgstr "アクションしたプレイヤーがインポジションだったか。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was the aggressor on the previous street."
-msgstr ""
+msgstr "アクションしたプレイヤーが前のストリートのアグレッサーだったか。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was the aggressor on this street."
-msgstr ""
+msgstr "アクションしたプレイヤーがこのストリートのアグレッサーだったか。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the board is connected, semi-connected or disconnected."
-msgstr ""
+msgstr "ボードがコネクト、セミコネクト、ディスコネクトのどれか。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the board is unpaired, paired, or more."
-msgstr ""
+msgstr "ボードがペアなし、ペアあり、それ以上か。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Which draw round the player reached; only recorded discard or stand-pat "
 "actions count."
 msgstr ""
+"プレイヤーが到達したドローのラウンド。記録された交換またはスタンドパットのア"
+"クションのみカウントします。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Which pair the actor held: overpair, top pair, set and so on."
 msgstr ""
+"アクションしたプレイヤーのペアの種類: オーバーペア、トップペア、セットなど。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Which poker room the hands were played on."
-msgstr ""
+msgstr "ハンドがプレイされたポーカールーム。"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Player or tournament not found."
 msgid "Yes for tournament hands, No for cash game hands."
-msgstr "プレイヤーまたはトーナメントが見つかりません。"
+msgstr "トーナメントのハンドは「はい」、キャッシュゲームのハンドは「いいえ」。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes on the flop and later, No before the flop."
-msgstr ""
+msgstr "フロップ以降は「はい」、フロップ前は「いいえ」。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes only for decisions whose cards were shown."
-msgstr ""
+msgstr "カードが公開された判断のみ「はい」。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes only where the cards were known and classified."
-msgstr ""
+msgstr "カードが判明し分類された場合のみ「はい」。"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "all-in frequency"
-msgstr ""
+msgstr "オールイン頻度"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average SPR"
-msgstr ""
+msgstr "平均 SPR"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average bet size (basis points of the pot)"
-msgstr ""
+msgstr "平均ベットサイズ (ポットに対するベーシスポイント)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average bet size faced (basis points of the pot)"
-msgstr ""
+msgstr "直面した平均ベットサイズ (ポットに対するベーシスポイント)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average pot size"
-msgstr ""
+msgstr "平均ポットサイズ"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "bet frequency"
-msgstr ""
+msgstr "ベット頻度"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "bp"
-msgstr ""
+msgstr "bp"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "call frequency"
-msgstr ""
+msgstr "コール頻度"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "check frequency"
-msgstr ""
+msgstr "チェック頻度"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "chips"
-msgstr ""
+msgstr "チップ"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "% fold frequency 7th street"
 msgid "fold frequency"
-msgstr "% 7thストリートでのフォールド率"
+msgstr "フォールド頻度"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "holdings"
-msgstr ""
+msgstr "ハンド"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many actions"
-msgstr ""
+msgstr "アクション数"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many decisions"
-msgstr ""
+msgstr "判断の数"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many hands"
-msgstr ""
+msgstr "ハンド数"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Show Number of Players"
 msgid "how many players"
-msgstr "プレイヤー人数別に表示"
-
-#: fpdb_3_legacy/research_labels.py
-msgid "how often the decision is taken"
-msgstr ""
+msgstr "プレイヤー数"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "hide"
+msgid "how often the decision is taken"
+msgstr "その判断が取られる頻度"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "id"
-msgstr "隠す"
+msgstr "ID"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "per-hand frequency"
-msgstr ""
+msgstr "ハンドあたりの頻度"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "raise frequency"
-msgstr ""
+msgstr "レイズ頻度"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "realized profit"
-msgstr ""
+msgstr "実現利益"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "realized profit per decision"
-msgstr ""
+msgstr "判断あたりの実現利益"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "seats"
-msgstr ""
+msgstr "席"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "street"
-msgstr ""
+msgstr "ストリート"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Column Configuration"
-msgstr ""
+msgstr "列の設定"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Columns"
-msgstr ""
+msgstr "列"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Dashboard"
-msgstr ""
+msgstr "ダッシュボード"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 msgid "Detailed Filters"
@@ -5121,9 +5798,8 @@ msgstr "ハンドフィルタ:"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 #, fuzzy
-#| msgid "Positional Stats"
 msgid "Position Heatmap"
-msgstr "ポジション別統計"
+msgstr "ポジション別ヒートマップ"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 msgid "Restrict to hand types:"
@@ -5131,13 +5807,13 @@ msgstr "制限するハンド種別:"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 #, fuzzy
-#| msgid "Min # Hands:"
 msgid "Starting Hands"
-msgstr "最低ハンド数:"
+msgstr "スターティングハンド"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Stats Tables"
-msgstr ""
+msgstr "統計テーブル"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 msgid "and"
@@ -5149,155 +5825,153 @@ msgstr " "
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% folded blind to steal"
 msgid "% Big Blind fold to steal"
-msgstr "% スチールに対するフォールド率"
+msgstr "% ビッグブラインドのスチールへのフォールド"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% called a raise preflop"
 msgid "% Call Raise preflop"
-msgstr "% プリフロップでのレイズへのコール率"
+msgstr "% プリフロップのレイズへのコール"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% continuation bet"
 msgid "% Continuation Bet"
-msgstr "コンディニュエーションベット率(CB)"
+msgstr "% コンティニュエーションベット"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flop 3-bet"
-msgstr ""
+msgstr "% フロップ 3ベット"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flop 4-bet"
-msgstr ""
+msgstr "% フロップ 4ベット"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flop open bet"
-msgstr ""
+msgstr "% フロップのオープンベット"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flops seen"
-msgstr ""
+msgstr "% フロップを見た"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% fold to 3 bet preflop/3rd street"
 msgid "% Fold to preflop 3-bet"
-msgstr "3betに対するフォールド率"
+msgstr "% プリフロップ 3ベットにフォールド"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% fold to 3 bet preflop/3rd street"
 msgid "% Fold to preflop 4-bet"
-msgstr "3betに対するフォールド率"
+msgstr "% プリフロップ 4ベットにフォールド"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Preflop 3-bet"
-msgstr ""
+msgstr "% プリフロップ 3ベット"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Preflop 4-bet"
-msgstr ""
+msgstr "% プリフロップ 4ベット"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Raise First In"
-msgstr ""
+msgstr "% レイズファーストイン"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% raise to steal"
 msgid "% Re-steal"
-msgstr "% スチールレイズ率"
+msgstr "% リスチール"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% River 3-bet"
-msgstr ""
+msgstr "% リバー 3ベット"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% River 4-bet"
-msgstr ""
+msgstr "% リバー 4ベット"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% River open bet"
-msgstr ""
+msgstr "% リバーのオープンベット"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Showdown"
 msgid "% Showdowns seen"
-msgstr "ショーダウン"
+msgstr "% ショーダウンを見た"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% folded blind to steal"
 msgid "% Small Blind fold to steal"
-msgstr "% スチールに対するフォールド率"
+msgstr "% スモールブラインドのスチールへのフォールド"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% steal attempted"
 msgid "% Steal attempt"
-msgstr "% スチール率"
+msgstr "% スチール試行"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% steal success"
 msgid "% Steal success"
-msgstr "% スチール成功率"
+msgstr "% スチール成功"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Turn 3-bet"
-msgstr ""
+msgstr "% ターン 3ベット"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Turn 4-bet"
-msgstr ""
+msgstr "% ターン 4ベット"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Turn open bet"
-msgstr ""
+msgstr "% ターンのオープンベット"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% went to showdown when seen flop/4th street"
 msgid "% Went to showdown after seeing flop"
-msgstr "% フロップ/4thストリート以降のショウダウン率"
+msgstr "% フロップ後にショーダウンへ進んだ"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% won money when seen flop/4th street"
 msgid "% Won money after seeing flop"
-msgstr "% フロップ/4thストリート以降の勝率"
+msgstr "% フロップ後に勝った"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% won some money at showdown"
 msgid "% Won money at showdown"
-msgstr "% ショーダウン勝率"
+msgstr "% ショーダウンで勝った"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Big blinds won per 100 hands"
 msgid "Big Blinds won per 100 hands"
-msgstr "100ハンドあたりのビッグブラインド単位での収益"
+msgstr "100 ハンドあたりの獲得ビッグブラインド"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Big blinds won per 100 hands when excluding rake"
 msgid "Big Blinds won per 100 hands excluding rake"
-msgstr "レーキを除いた100ハンドあたりのビッグブラインド単位での収益"
+msgstr "100 ハンドあたりの獲得ビッグブラインド (レーキ除く)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Post-flop aggression frequency"
 msgid "Flop aggression frequency"
-msgstr "ポストフロップでのアグレッシブ度"
+msgstr "フロップのアグレッション頻度"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Game type (Hold'em, Omaha, etc.)"
-msgstr ""
+msgstr "ゲームの種類 (ホールデム、オマハなど)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Measure of uncertainty"
@@ -5305,15 +5979,13 @@ msgstr "バラツキの尺度"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Number of hands seen"
 msgid "Number of hands played"
-msgstr "配られたハンド数"
+msgstr "プレイしたハンド数"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Number of Seats"
 msgid "Number of seats at the table"
-msgstr "席数"
+msgstr "テーブルの席数"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Player name"
@@ -5321,421 +5993,459 @@ msgstr "プレイヤー名"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Positional Stats"
 msgid "Position at the table"
-msgstr "ポジション別統計"
+msgstr "テーブルでのポジション"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Post-flop aggression frequency"
 msgid "Postflop aggression factor"
-msgstr "ポストフロップでのアグレッシブ度"
+msgstr "ポストフロップのアグレッションファクター"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Post-flop aggression frequency"
 msgid "Postflop aggression frequency"
-msgstr "ポストフロップでのアグレッシブ度"
+msgstr "ポストフロップのアグレッション頻度"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Preflop/3rd street raise %"
 msgid "Preflop raise"
-msgstr "プリフロップ/3rdストリート)レイズ率"
+msgstr "プリフロップレイズ"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Profit per 100 hands"
 msgid "Profit per hand"
-msgstr "100ハンドあたりの収益"
+msgstr "ハンドあたりの利益"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Big blinds won per 100 hands when excluding rake"
 msgid "Profit per hand excluding rake"
-msgstr "レーキを除いた100ハンドあたりのビッグブラインド単位での収益"
+msgstr "ハンドあたりの利益 (レーキ除く)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Rake paid"
-msgstr ""
+msgstr "支払ったレーキ"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Post-flop aggression frequency"
 msgid "River aggression frequency"
-msgstr "ポストフロップでのアグレッシブ度"
+msgstr "リバーのアグレッション頻度"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Starting cards (Hole cards)"
-msgstr ""
+msgstr "スターティングカード (ホールカード)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Total Profit"
 msgid "Total net profit"
-msgstr "総収益"
+msgstr "総純利益"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Post-flop aggression frequency"
 msgid "Turn aggression frequency"
-msgstr "ポストフロップでのアグレッシブ度"
+msgstr "ターンのアグレッション頻度"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Voluntarily put in preflop/3rd street %"
 msgid "Voluntarily put money in pot preflop"
-msgstr "プリフロップ/3rdストリートでの自主的参加率"
+msgstr "プリフロップで自発的にポットへチップを入れた割合"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
-msgstr ""
+msgstr "プリフロッププロフィール (VPIP 対 PFR)"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "<b>Hand: {0}</b><br/>Hands: {1}<br/>VPIP: {2}%<br/>Profit: {3}"
-msgstr ""
+msgstr "<b>ハンド: {0}</b><br/>ハンド数: {1}<br/>VPIP: {2}%<br/>利益: {3}"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Color the grid by:"
-msgstr ""
+msgstr "グリッドの色分け:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Filtered range:"
-msgstr ""
+msgstr "絞り込んだレンジ:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Hand: {0}\n"
 "No statistics available"
 msgstr ""
+"ハンド: {0}\n"
+"統計がありません"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Hold'em Starting Hand Grid"
-msgstr ""
+msgstr "ホールデムのスターティングハンドグリッド"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 4-Card Texture Analysis"
-msgstr ""
+msgstr "オマハ 4 カードのテクスチャ分析"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 5-Card Texture Analysis"
-msgstr ""
+msgstr "オマハ 5 カードのテクスチャ分析"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 6-Card Texture Analysis"
-msgstr ""
+msgstr "オマハ 6 カードのテクスチャ分析"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha Texture Analysis"
-msgstr ""
+msgstr "オマハのテクスチャ分析"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Starting Hands Analysis"
-msgstr ""
+msgstr "スターティングハンド分析"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "min sample:"
-msgstr ""
+msgstr "最小サンプル:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "{0} decisions in this selection have no known hole cards and are not in the "
 "grid"
 msgstr ""
-
-#: fpdb_3_legacy/ring_stats/views/table_view.py
-msgid "Hand Breakdown"
-msgstr ""
+"この選択の {0} 件の判断はホールカードが不明なためグリッドに含まれていません"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy
-#| msgid "Statistics"
+msgid "Hand Breakdown"
+msgstr "ハンドの内訳"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
 msgid "Statistics group:"
-msgstr "統計情報"
+msgstr "統計グループ:"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "A Session Guard limit has been reached."
-msgstr ""
+msgstr "セッションガードの上限に達しました。"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Acknowledge"
-msgstr ""
+msgstr "確認"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid ""
 "Alerts only: fpdb never closes, sits out or otherwise touches a poker "
 "client. The session is the Session Viewer's: cash hands, ended by a 30-"
 "minute pause."
 msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Apply"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Choose at least one limit to watch."
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-#, fuzzy, python-format
-#| msgid "Could not setup log file %s"
-msgid ""
-"Could not save the defaults:\n"
-"%s"
-msgstr "ログファイル %s が準備できません"
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Drawdown from peak (BB)"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Drawdown from peak (money)"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Later"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Limits for this session"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Loss (BB)"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Loss (money)"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Not running."
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Reset alerts"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Save as defaults"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Session Guard: click to see or change the limits"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Session Guard: no session in progress"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
-msgid "Session Guard: {result} · {duration} · {hands} hands"
-msgstr ""
+"アラートのみ: fpdb がポーカークライアントを閉じたり、着席を外したり、その他の"
+"操作をすることはありません。セッションはセッションビューアーと同じ定義です: "
+"キャッシュのハンドで、30 分の休止で終了します。"
 
 #: fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy
-#| msgid "Session Stats"
+msgid "Apply"
+msgstr "適用"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Choose at least one limit to watch."
+msgstr "監視する上限を少なくとも 1 つ選んでください。"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy, python-format
+msgid ""
+"Could not save the defaults:\n"
+"%s"
+msgstr ""
+"デフォルトを保存できませんでした:\n"
+"%s"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Drawdown from peak (BB)"
+msgstr "ピークからのドローダウン (BB)"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Drawdown from peak (money)"
+msgstr "ピークからのドローダウン (金額)"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Later"
+msgstr "後で"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Limits for this session"
+msgstr "このセッションの上限"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Loss (BB)"
+msgstr "損失 (BB)"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Loss (money)"
+msgstr "損失 (金額)"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Not running."
+msgstr "実行されていません。"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Reset alerts"
+msgstr "アラートをリセット"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Save as defaults"
+msgstr "デフォルトとして保存"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Session Guard: click to see or change the limits"
+msgstr "セッションガード: クリックして上限を表示または変更"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Session Guard: no session in progress"
+msgstr "セッションガード: 進行中のセッションはありません"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy, python-brace-format
+msgid "Session Guard: {result} · {duration} · {hands} hands"
+msgstr "セッションガード: {result} · {duration} · {hands} ハンド"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Session duration"
-msgstr "セッション統計"
+msgstr "セッション時間"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Win (BB)"
-msgstr ""
+msgstr "勝ち (BB)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Win (money)"
-msgstr ""
+msgstr "勝ち (金額)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{count} limit(s) reached"
-msgstr ""
+msgstr "{count} 件の上限に到達"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{label}: unavailable (a hand has no big blind) / {threshold}"
 msgstr ""
+"{label}: 利用不可 (ビッグブラインドのないハンドがあります) / {threshold}"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{value} BB"
-msgstr ""
+msgstr "{value} BB"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid ""
 "A stat pack adds declarative stats, and optionally Research presets, without "
 "changing fpdb. Packs are data only: no Python, no SQL."
 msgstr ""
+"統計パックは fpdb を変更せずに宣言的な統計と、必要に応じてリサーチ用プリセッ"
+"トを追加します。パックはデータのみで、Python も SQL も含みません。"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "All Time"
 msgid "All files"
-msgstr "全期間"
+msgstr "すべてのファイル"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Author"
-msgstr ""
+msgstr "作成者"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Built-in"
-msgstr ""
+msgstr "組み込み"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy, python-format
-#| msgid "Could not find file %s"
 msgid ""
 "Could not read the pack:\n"
 "%s"
-msgstr "ファイルが見つかりません %s"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Disable"
 msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Disabled"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
-msgid "Disabled %s."
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Enable"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
-msgid "Enabled %s."
-msgstr ""
+"パックを読み込めませんでした:\n"
+"%s"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Export to File"
-msgid "Export stat pack"
-msgstr "ファイルにエクスポート"
+msgid "Disable"
+msgstr "無効化"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Export..."
-msgstr ""
+#, fuzzy
+msgid "Disabled"
+msgstr "無効"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy, python-format
-#| msgid "Export to File"
+msgid "Disabled %s."
+msgstr "%s を無効にしました。"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Enable"
+msgstr "有効化"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Enabled %s."
+msgstr "%s を有効にしました。"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Export stat pack"
+msgstr "統計パックをエクスポート"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Export..."
+msgstr "エクスポート..."
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
 msgid "Exported to %s."
-msgstr "ファイルにエクスポート"
+msgstr "%s にエクスポートしました。"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Import clicked"
 msgid "Import pack..."
-msgstr "インポートがクリックされました"
+msgstr "パックをインポート..."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Import clicked"
 msgid "Import stat pack"
-msgstr "インポートがクリックされました"
+msgstr "統計パックをインポート"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Installed %s."
-msgstr ""
+msgstr "%s をインストールしました。"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Invalid"
-msgstr ""
+msgstr "不正"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Positions:"
 msgid "Location:"
-msgstr "ポジション:"
+msgstr "場所:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Pack"
-msgstr ""
+msgstr "パック"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Restart fpdb and the HUD to use the change everywhere."
-msgstr ""
+msgstr "変更をすべての場所で使うには、fpdb と HUD を再起動してください。"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Stat"
 msgid "Stat pack"
-msgstr "統計"
+msgstr "統計パック"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Statistics"
 msgid "Stat packs"
-msgstr "統計情報"
+msgstr "統計パック"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Stat"
 msgid "Stats"
 msgstr "統計"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Stat"
 msgid "Stats:"
-msgstr "統計"
+msgstr "統計:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Status"
-msgstr ""
+msgstr "状態"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "The pack state was not changed:\n"
 "%s"
 msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "This pack cannot be installed:"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "This pack is already installed. Replace it with this version?"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "This pack is not loaded:"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Uninstall"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
-msgid "Uninstall %s?"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Uninstall stat pack"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
-msgid "Uninstalled %s."
-msgstr ""
+"パックの状態は変更されませんでした:\n"
+"%s"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Username"
+msgid "This pack cannot be installed:"
+msgstr "このパックはインストールできません:"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "This pack is already installed. Replace it with this version?"
+msgstr ""
+"このパックは既にインストールされています。このバージョンで置き換えますか?"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "This pack is not loaded:"
+msgstr "このパックは読み込まれていません:"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Uninstall"
+msgstr "アンインストール"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Uninstall %s?"
+msgstr "%s をアンインストールしますか?"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Uninstall stat pack"
+msgstr "統計パックをアンインストール"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Uninstalled %s."
+msgstr "%s をアンインストールしました。"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "User installed"
-msgstr "ユーザ名"
+msgstr "ユーザーがインストール"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "<"
@@ -5754,139 +6464,155 @@ msgid ">>"
 msgstr ""
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "BOTTOM :"
-msgstr ""
+msgstr "ボトム:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Capture Console (Logs):"
-msgstr ""
+msgstr "キャプチャコンソール (ログ):"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "Partial hand history"
 msgid "Captured Hand History:"
-msgstr "部分的なハンド履歴"
+msgstr "キャプチャしたハンド履歴:"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "Card:"
 msgid "Cards:"
 msgstr "カード:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Hands Captured: 0"
-msgstr ""
+msgstr "キャプチャしたハンド: 0"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "Import All"
 msgid "Import All OFC"
-msgstr "すべてインポート"
+msgstr "すべての OFC をインポート"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Import OFC to DB"
-msgstr ""
+msgstr "OFC を DB にインポート"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "Min # Hands:"
 msgid "In Hand:"
-msgstr "最低ハンド数:"
+msgstr "ハンド内:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "MIDDLE :"
-msgstr ""
+msgstr "ミドル:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Open DB Replayer"
-msgstr ""
+msgstr "DB リプレイヤーを開く"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "Hand Filters:"
 msgid "Open Hand Folder"
-msgstr "ハンドフィルタ:"
+msgstr "ハンドのフォルダーを開く"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "Refresh Stats"
 msgid "Refresh Hands"
-msgstr "統計を再計算"
+msgstr "ハンドを更新"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Select a hand to start replay"
-msgstr ""
+msgstr "リプレイを開始するハンドを選択"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Start Capture"
-msgstr ""
+msgstr "キャプチャを開始"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Status: 🔴 Stopped"
-msgstr ""
+msgstr "状態: 🔴 停止中"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Statut : 🔴 Arrêté"
-msgstr ""
+msgstr "状態: 🔴 停止中"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Statut : 🟢 En Cours"
-msgstr ""
+msgstr "状態: 🟢 実行中"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Step 0 / 0"
-msgstr ""
+msgstr "ステップ 0 / 0"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "SwC"
-msgstr ""
+msgstr "SwC"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "SwC Poker - Capture Console & Replayer"
-msgstr ""
+msgstr "SwC Poker - キャプチャコンソールとリプレイヤー"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "TOP :"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Confirm overwrite"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Copy entire table"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Copy entire table with headers"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Copy with headers"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Export displayed values"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-#, python-format
-msgid "Export displayed values as %s…"
-msgstr ""
+msgstr "トップ:"
 
 #: fpdb_3_legacy/table_export.py
 #, fuzzy
-#| msgid "Export to File"
-msgid "Export failed"
-msgstr "ファイルにエクスポート"
+msgid "Confirm overwrite"
+msgstr "上書きの確認"
 
 #: fpdb_3_legacy/table_export.py
-#, python-format
+#, fuzzy
+msgid "Copy entire table"
+msgstr "テーブル全体をコピー"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Copy entire table with headers"
+msgstr "見出し付きでテーブル全体をコピー"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Copy with headers"
+msgstr "見出し付きでコピー"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Export displayed values"
+msgstr "表示中の値をエクスポート"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy, python-format
+msgid "Export displayed values as %s…"
+msgstr "表示中の値を %s としてエクスポート…"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Export failed"
+msgstr "エクスポートに失敗しました"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy, python-format
 msgid ""
 "The file already exists:\n"
 "%s\n"
 "Do you want to replace it?"
 msgstr ""
+"ファイルは既に存在します:\n"
+"%s\n"
+"置き換えますか?"
 
 #~ msgid "    drop index failed: "
 #~ msgstr "    drop index failed: "
