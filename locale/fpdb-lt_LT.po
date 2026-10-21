@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 13:02+0200\n"
+"POT-Creation-Date: 2026-10-21 13:33+0200\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -20,9 +20,9 @@ msgstr ""
 "(n%100<10 || n%100>=20) ? 1 : 2)\n"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s cannot read all stud/razz hands yet."
-msgstr ""
+msgstr "%s dar negali perskaityti visų stud/razz rankų."
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py
 #, python-format
@@ -49,23 +49,24 @@ msgid "No small blind"
 msgstr "Nėra mažojo statymo"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Player bringing in: %s for %s"
-msgstr ""
+msgstr "Žaidėjas su bring-in: %s už %s"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/BossToFpdb.py
 #: fpdb_3_legacy/EnetToFpdb.py fpdb_3_legacy/EntractionToFpdb.py
 #: fpdb_3_legacy/EverestToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
 #: fpdb_3_legacy/FulltiltToFpdb.py fpdb_3_legacy/MicrogamingToFpdb.py
 #: fpdb_3_legacy/OnGameToFpdb.py fpdb_3_legacy/PkrToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Unimplemented %s: '%s' '%s'"
-msgstr ""
+msgstr "Neįgyvendinta %s: '%s' '%s'"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EnetToFpdb.py
 #: fpdb_3_legacy/EverleafToFpdb.py fpdb_3_legacy/OnGameToFpdb.py
+#, fuzzy
 msgid "reading antes"
-msgstr ""
+msgstr "skaitomi antai"
 
 #: fpdb_3_legacy/BossToFpdb.py
 #, python-format
@@ -92,40 +93,39 @@ msgstr ""
 #: fpdb_3_legacy/EntractionToFpdb.py fpdb_3_legacy/FulltiltToFpdb.py
 #: fpdb_3_legacy/MicrogamingToFpdb.py fpdb_3_legacy/OnGameToFpdb.py
 #: fpdb_3_legacy/PkrToFpdb.py
+#, fuzzy
 msgid "DEBUG:"
-msgstr ""
+msgstr "DEBUG:"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "Reading configuration file %s"
 msgid "Configuration modified*"
-msgstr "Skaito nustatymų failą %s"
+msgstr "Konfigūracija pakeista*"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Configuration up to date"
-msgstr ""
+msgstr "Konfigūracija atnaujinta"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "Reading configuration file %s"
 msgid "Reload configuration"
-msgstr "Skaito nustatymų failą %s"
+msgstr "Iš naujo įkelti konfigūraciją"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "loadDbs error: "
 msgid "Reload error"
-msgstr "loadDbs klaida"
+msgstr "Įkėlimo iš naujo klaida"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "Waiting..."
 msgid "Reloading..."
-msgstr "Laukiama..."
+msgstr "Įkeliama iš naujo..."
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Restart required"
-msgstr ""
+msgstr "Reikia paleisti iš naujo"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 msgid "↻"
@@ -152,8 +152,9 @@ msgstr ""
 
 #: fpdb_3_legacy/EnetToFpdb.py fpdb_3_legacy/EntractionToFpdb.py
 #: fpdb_3_legacy/OnGameToFpdb.py
+#, fuzzy
 msgid "not found"
-msgstr ""
+msgstr "nerasta"
 
 #: fpdb_3_legacy/EntractionToFpdb.py
 #, python-format
@@ -203,44 +204,54 @@ msgid "EverleafToFpdb.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "2-7 Drawmaha"
-msgstr ""
+msgstr "2-7 Drawmaha"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "2-7 Razz"
-msgstr ""
+msgstr "2-7 Razz"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Draw"
-msgstr ""
+msgstr "5 kortų draw"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Omaha"
-msgstr ""
+msgstr "5 kortų Omaha"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Omaha Hi/Lo"
-msgstr ""
+msgstr "5 kortų Omaha Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Stud"
-msgstr ""
+msgstr "5 kortų stud"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "6 Card Omaha"
-msgstr ""
+msgstr "6 kortų Omaha"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "7 Card Stud"
-msgstr ""
+msgstr "7 kortų stud"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "7 Card Stud Hi/Lo"
-msgstr ""
+msgstr "7 kortų stud Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "A-5 Single Draw"
-msgstr ""
+msgstr "A-5 Single Draw"
 
 #: fpdb_3_legacy/Filters.py
 msgid "All"
@@ -255,52 +266,63 @@ msgid "And:"
 msgstr "Ir:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "AoF Hold'em"
-msgstr ""
+msgstr "AoF Hold'em"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "AoF Omaha"
-msgstr ""
+msgstr "AoF Omaha"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badacey"
-msgstr ""
+msgstr "Badacey"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badeucey"
-msgstr ""
+msgstr "Badeucey"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badugi"
-msgstr ""
+msgstr "Badugi"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Between:"
 msgstr "Tarp:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Buyin"
-msgstr ""
+msgstr "Įnašas"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Cal"
-msgstr ""
+msgstr "Kal."
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Category"
-msgstr ""
+msgstr "Kategorija"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Courchevel"
-msgstr ""
+msgstr "Courchevel"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Courchevel Hi/Lo"
-msgstr ""
+msgstr "Courchevel Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Currencies"
-msgstr ""
+msgstr "Valiutos"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Date:"
@@ -311,16 +333,19 @@ msgid "Done"
 msgstr "Baigta"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Double hold'em"
-msgstr ""
+msgstr "Dvigubas hold'em"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "EV"
-msgstr ""
+msgstr "EV"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Euro"
-msgstr ""
+msgstr "Euras"
 
 #: fpdb_3_legacy/Filters.py
 msgid "From:"
@@ -332,8 +357,9 @@ msgid "Fusion"
 msgstr "Sesijos"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Games"
-msgstr ""
+msgstr "Žaidimai"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Grouping:"
@@ -344,8 +370,9 @@ msgid "Hero:"
 msgstr "Herojus:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Hold'em"
-msgstr ""
+msgstr "Hold'em"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -353,26 +380,28 @@ msgid "Hole Cards"
 msgstr "Turimos kortos"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Irish"
-msgstr ""
+msgstr "Irish"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
-#| msgid "Fetch Type"
 msgid "Limit Type"
-msgstr "Priėmimo būdas"
+msgstr "Limito tipas"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Limits:"
 msgstr "Limitai:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Min # Hands:"
-msgstr ""
+msgstr "Min. rankų:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Net profit excluding splash pots"
-msgstr ""
+msgstr "Grynasis pelnas be splash pot"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Non-Showdown Winnings"
@@ -387,24 +416,28 @@ msgid "Number of Players:"
 msgstr "Žaidėjų skaičius:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Off Suit"
-msgstr ""
+msgstr "Skirtingų spalvų"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Omaha"
-msgstr ""
+msgstr "Omaha"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Omaha Hi/Lo"
-msgstr ""
+msgstr "Omaha Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
 msgid "Pick a date"
 msgstr "Pasirinkite datą"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Play Money"
-msgstr ""
+msgstr "Žaidimo pinigai"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -412,18 +445,19 @@ msgid "Positions:"
 msgstr "Pozicija"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Razz"
-msgstr ""
+msgstr "Razz"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
-#| msgid "Refresh Stats"
 msgid "Refresh Filters"
-msgstr "Atnaujinti Rodiklius"
+msgstr "Atnaujinti filtrus"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Reset"
-msgstr ""
+msgstr "Atstatyti"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Ring"
@@ -450,41 +484,48 @@ msgid "Showdown Winnings"
 msgstr "Laimėjimai po bendrų kortų atvertimo"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Single Draw 2-7 Lowball"
-msgstr ""
+msgstr "Single Draw 2-7 Lowball"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Sites"
-msgstr ""
+msgstr "Kambariai"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Suited"
-msgstr ""
+msgstr "Vienos spalvos"
 
 #: fpdb_3_legacy/Filters.py
 msgid "To:"
 msgstr "Iki:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Tournament Dollar"
-msgstr ""
+msgstr "Turnyro doleris"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Tourney"
 msgstr "Turnyras"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Triple Draw 2-7 Lowball"
-msgstr ""
+msgstr "Triple Draw 2-7 Lowball"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Triple Draw A-5 Lowball"
-msgstr ""
+msgstr "Triple Draw A-5 Lowball"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "US Dollar"
-msgstr ""
+msgstr "JAV doleris"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
 #, python-format
@@ -506,13 +547,14 @@ msgid "Unable to locate currency"
 msgstr "Nepavyko nustatyti valiutos"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
+#, fuzzy
 msgid "parseSummary FAIL"
-msgstr ""
+msgstr "parseSummary klaida"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s Failed to detect button (hand #%s cancelled?)"
-msgstr ""
+msgstr "%s Mygtukas neaptiktas (ranka #%s atšaukta?)"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
 #, python-format
@@ -531,142 +573,169 @@ msgid "FulltiltToFpdb.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Hand '%s' was cancelled."
-msgstr ""
+msgstr "Ranka '%s' buvo atšaukta."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Hand '%s' was not dealt (dead hand)."
-msgstr ""
+msgstr "Ranka '%s' nebuvo išdalyta (negyva ranka)."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Hand is not cleanly split into pre and post Summary %s."
-msgstr ""
+msgstr "Ranka nėra aiškiai padalyta prieš ir po santraukos %s."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "No players detected in hand %s."
-msgstr ""
+msgstr "Rankoje %s žaidėjų neaptikta."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Database is back. Auto Import resumed."
 msgstr ""
+"\n"
+"Duomenų bazė vėl pasiekiama. Automatinis importas tęsiamas."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Database unreachable. Auto Import paused, retrying..."
 msgstr ""
+"\n"
+"Duomenų bazė nepasiekiama. Automatinis importas pristabdytas, bandoma dar "
+"kartą..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Stop requested while an import was still running; it will finish in the "
 "background."
 msgstr ""
+"\n"
+"Paprašyta sustabdyti, kol importas dar vyko; jis baigsis fone."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "SwC Native Live HUD tailing thread started."
 msgstr ""
+"\n"
+"Paleista SwC savosios HUD sekimo gija."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "SwC live capture is not available on this platform. Importing SwC files "
 "still works."
 msgstr ""
+"\n"
+"SwC tiesioginis fiksavimas šioje platformoje negalimas. SwC failų importas "
+"vis dar veikia."
 
 #: fpdb_3_legacy/GuiAutoImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "\n"
 "SwC live capture unavailable: {reason}. Importing SwC hand history files "
 "still works."
 msgstr ""
+"\n"
+"SwC tiesioginis fiksavimas negalimas: {reason}. SwC rankų istorijų importas "
+"vis dar veikia."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Auto Import Ready."
 msgid "Auto Import Ready.\n"
-msgstr "Automatinis importavimas paruoštas."
+msgstr "Automatinis importas paruoštas.\n"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Auto Import Ready."
 msgid "Auto Import Running..."
-msgstr "Automatinis importavimas paruoštas."
-
-#: fpdb_3_legacy/GuiAutoImport.py
-msgid "Database unreachable - retrying"
-msgstr ""
+msgstr "Vyksta automatinis importas..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Auto Import Ready."
+msgid "Database unreachable - retrying"
+msgstr "Duomenų bazė nepasiekiama - bandoma dar kartą"
+
+#: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "FPDB Auto Import"
-msgstr "Automatinis importavimas paruoštas."
+msgstr "FPDB automatinis importas"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Import cycle is taking longer than usual..."
-msgstr ""
+msgstr "Importo ciklas trunka ilgiau nei įprastai..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Log"
-msgstr ""
+msgstr "Žurnalas"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Ready"
-msgstr ""
+msgstr "Paruošta"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Setting"
 msgid "Settings"
 msgstr "Nustatymai"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Start Auto Import"
-msgstr ""
+msgstr "Pradėti automatinį importą"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Stop Auto Import"
-msgstr ""
+msgstr "Stabdyti automatinį importą"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Stopping Auto Import..."
-msgstr ""
+msgstr "Stabdomas automatinis importas..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "SwC live capture could not attach: {reason}. Importing SwC hand history "
 "files still works."
 msgstr ""
+"SwC tiesioginis fiksavimas negalėjo prisijungti: {reason}. SwC rankų "
+"istorijų importas vis dar veikia."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Time between imports in seconds:"
 msgid "Time between imports (seconds):"
-msgstr "Importavimo intervalai sekundėmis:"
+msgstr "Laikas tarp importų (sekundės):"
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Automatic Notes"
-msgstr ""
+msgstr "Automatinės pastabos"
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Enable or disable automatic player-note rules."
-msgstr ""
+msgstr "Įjungti arba išjungti automatinių pastabų apie žaidėjus taisykles."
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Generate automatic notes"
-msgstr ""
+msgstr "Kurti automatines pastabas"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
@@ -675,51 +744,55 @@ msgstr "Pagal nuožiūrą"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Database created"
 msgid "Database hands"
-msgstr "Duombazė sukurta"
+msgstr "Duomenų bazės rankos"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Dry Run"
-msgstr ""
+msgstr "Bandomasis vykdymas"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Dry Run DB"
-msgstr ""
+msgstr "Bandomasis vykdymas DB"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "File"
-msgstr ""
+msgstr "Failas"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Mail Folder"
 msgid "Folder"
-msgstr "Pašto aplankas"
+msgstr "Aplankas"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "From:"
 msgid "From"
-msgstr "Nuo:"
+msgstr "Nuo"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Hand-history source"
-msgstr ""
+msgstr "Rankų istorijų šaltinis"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Idle"
-msgstr ""
+msgstr "Neaktyvus"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Latest: -"
-msgstr ""
+msgstr "Naujausia: -"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Limit"
-msgstr ""
+msgstr "Limitas"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
@@ -727,14 +800,14 @@ msgid "Load Notes"
 msgstr "Rankos"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Notes: 0"
-msgstr ""
+msgstr "Pastabos: 0"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "All Players"
 msgid "Player"
-msgstr "Visi Žaidėjai"
+msgstr "Žaidėjas"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
@@ -742,30 +815,34 @@ msgid "Player Notes"
 msgstr "Naudotojo vardas"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Pool"
-msgstr ""
-
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
-msgid "Recent generated notes"
-msgstr ""
+msgstr "Telkinys"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Refresh Stats"
+msgid "Recent generated notes"
+msgstr "Naujausios pastabos"
+
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Refresh Pool Summary"
-msgstr "Atnaujinti Rodiklius"
+msgstr "Atnaujinti telkinio suvestinę"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Rule set"
-msgstr ""
+msgstr "Taisyklių rinkinys"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Run"
-msgstr ""
+msgstr "Vykdyti"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Search"
-msgstr ""
+msgstr "Ieškoti"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/GuiBulkImport.py
 #: fpdb_3_legacy/hand_share_dialog.py
@@ -779,47 +856,56 @@ msgid "To"
 msgstr "Iki:"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top players by generated notes"
-msgstr ""
+msgstr "Žaidėjai, turintys daugiausia pastabų"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top rule: -"
-msgstr ""
+msgstr "Pagrindinė taisyklė: -"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top rules"
-msgstr ""
+msgstr "Pagrindinės taisyklės"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Write DB Notes"
-msgstr ""
+msgstr "Įrašyti pastabas į DB"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Write Notes"
-msgstr ""
+msgstr "Įrašyti pastabas"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Browse..."
 msgstr "Naršyti..."
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Bulk Import"
-msgstr ""
+msgstr "Masinis importas"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Bulk Import Error"
-msgstr ""
+msgstr "Masinio importo klaida"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Choose a destination directory"
-msgstr ""
+msgstr "Pasirinkite paskirties aplanką"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Configured Import Directories:"
-msgstr ""
+msgstr "Sukonfigūruoti importo aplankai:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Import complete.\n"
 "\n"
@@ -831,31 +917,46 @@ msgid ""
 "Errors: {errs}\n"
 "Time: {elapsed}s"
 msgstr ""
+"Importas baigtas.\n"
+"\n"
+"Apdorota failų: {files}\n"
+"Įrašyta: {stored}\n"
+"Dublikatų: {dups}\n"
+"Dalinių: {partial}\n"
+"Praleista: {skipped}\n"
+"Klaidų: {errs}\n"
+"Laikas: {elapsed} s"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-#| msgid "Waiting..."
 msgid "Importing..."
-msgstr "Laukiama..."
+msgstr "Importuojama..."
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Move failed files to:"
-msgstr ""
+msgstr "Nepavykusius failus perkelti į:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Move imported files to:"
-msgstr ""
+msgstr "Importuotus failus perkelti į:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid ""
 "No importable hand-history files were found in the selected directories.\n"
 "\n"
 "Check that the configured paths contain hand histories (plain text files), "
 "not just archives or exports."
 msgstr ""
+"Pasirinktuose aplankuose nerasta importuotinų rankų istorijų.\n"
+"\n"
+"Patikrinkite, ar sukonfigūruotuose keliuose yra rankų istorijos (tekstiniai "
+"failai), o ne vien archyvai ar eksportai."
 
 #: fpdb_3_legacy/GuiBulkImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "PHH hands found: {found}\n"
 "Imported: {imported}\n"
@@ -865,121 +966,152 @@ msgid ""
 "Malformed: {malformed}\n"
 "PHH import time: {seconds}s"
 msgstr ""
+"Rasta PHH rankų: {found}\n"
+"Importuota: {imported}\n"
+"Dublikatų: {dups}\n"
+"Dalinių (istorija baigiasi anksčiau): {partial}\n"
+"Nepalaikomų variantų: {unsupported}\n"
+"Sugadintų: {malformed}\n"
+"PHH importo laikas: {seconds} s"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Path"
-msgstr ""
+msgstr "Kelias"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Please choose the path that you want to Auto Import"
 msgstr "Pasirinkite vietą kurią norite automatiškai importuoti"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
 msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Capture failed to start — see the log above."
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Default game:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Dry run (no DB insert)"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Finishing previous capture…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Idle."
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Interface:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Launch HUD"
-msgstr ""
+"Taip pat paleisti HUD_main (nužymėkite, jei HUD/automatinis importas jau "
+"veikia)."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 #, fuzzy
-#| msgid "Refresh Stats"
+msgid "Capture failed to start — see the log above."
+msgstr "Fiksavimas nepasileido — žr. žurnalą aukščiau."
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Default game:"
+msgstr "Numatytasis žaidimas:"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Dry run (no DB insert)"
+msgstr "Bandomasis vykdymas (be įrašymo į DB)"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Finishing previous capture…"
+msgstr "Baigiamas ankstesnis fiksavimas…"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Idle."
+msgstr "Neaktyvus."
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Interface:"
+msgstr "Sąsaja:"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Launch HUD"
+msgstr "Paleisti HUD"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Refresh interfaces"
-msgstr "Atnaujinti Rodiklius"
+msgstr "Atnaujinti sąsajas"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
-msgstr ""
+msgstr "Prašoma teisių… patvirtinkite užklausą, tada žaiskite CoinPoker."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Start capture"
-msgstr ""
+msgstr "Pradėti fiksavimą"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py fpdb_3_legacy/session_guard_dialog.py
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Stop"
-msgstr ""
+msgstr "Stabdyti"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Stopping…"
-msgstr ""
+msgstr "Stabdoma…"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "+ New Rule"
-msgstr ""
+msgstr "+ Nauja taisyklė"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Actions"
-msgstr ""
+msgstr "Veiksmai"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-format
+#, fuzzy, python-format
 msgid "Are you sure you want to delete rule '%s'?"
-msgstr ""
+msgstr "Ar tikrai ištrinti taisyklę '%s'?"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Board ({flop})"
-msgstr ""
+msgstr "Bordas ({flop})"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Board:"
-msgstr ""
+msgstr "Bordas:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Captured Evidence Schema"
-msgstr ""
+msgstr "Užfiksuotų duomenų schema"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Custom Auto Notes rules saved successfully!"
-msgstr ""
+msgstr "Savos automatinių pastabų taisyklės įrašytos!"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Delete Rule"
-msgstr ""
+msgstr "Ištrinti taisyklę"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Duplicate Rule IDs"
-msgstr ""
+msgstr "Pasikartojantys taisyklių ID"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Empty HH"
-msgstr ""
+msgstr "Tuščia istorija"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Enabled"
-msgstr ""
+msgstr "Įjungta"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Generated Note: (None)"
-msgstr ""
+msgstr "Sukurta pastaba: (nėra)"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy, python-brace-format
@@ -987,228 +1119,264 @@ msgid "Hole Cards ({hole})"
 msgstr "Turimos kortos"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Hole:"
-msgstr ""
+msgstr "Savos kortos:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Live Testing Sandbox"
-msgstr ""
+msgstr "Tiesioginių bandymų aplinka"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Logical Conditions (No-Code GUI)"
-msgstr ""
+msgstr "Loginės sąlygos (be kodo)"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "No Rule"
-msgstr ""
+msgstr "Nėra taisyklės"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Note Template (Tags: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, {spr}):"
 msgstr ""
+"Pastabos šablonas (žymės: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, "
+"{spr}):"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Paste raw GGPoker or PokerStars hand history text here to test..."
 msgstr ""
+"Įklijuokite čia neapdorotą GGPoker ar PokerStars rankos istorijos tekstą "
+"bandymui..."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Please paste a Hand History text to evaluate against."
-msgstr ""
+msgstr "Įklijuokite rankos istorijos tekstą įvertinimui."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Please select or create a rule to evaluate."
-msgstr ""
+msgstr "Pasirinkite arba sukurkite taisyklę įvertinimui."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Remove Condition"
-msgstr ""
+msgstr "Pašalinti sąlygą"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Root Operator:"
-msgstr ""
+msgstr "Šakninis operatorius:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule / Group"
-msgstr ""
+msgstr "Taisyklė / grupė"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule ID:"
-msgstr ""
+msgstr "Taisyklės ID:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule Metadata"
-msgstr ""
+msgstr "Taisyklės metaduomenys"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
-#| msgid "File name: %s"
 msgid "Rule Name:"
-msgstr "Falio pavadinimas: %s"
+msgstr "Taisyklės pavadinimas:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule Set:"
-msgstr ""
+msgstr "Taisyklių rinkinys:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule Sets & Custom Rules"
-msgstr ""
+msgstr "Taisyklių rinkiniai ir savos taisyklės"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
-#| msgid "Save"
 msgid "Saved"
-msgstr "Išsaugoti"
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Stack & SPR"
-msgstr ""
+msgstr "Įrašyta"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
-#| msgid "Status"
+msgid "Stack & SPR"
+msgstr "Stekas ir SPR"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Status: READY"
-msgstr "Būsena"
+msgstr "Būsena: PARUOŠTA"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Test Source (Raw Hand History Text):"
-msgstr ""
+msgstr "Bandymo šaltinis (neapdorotas rankos istorijos tekstas):"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "These rule IDs are used more than once: %s\n"
 "\n"
 "Give each rule a unique ID before saving."
 msgstr ""
+"Šie taisyklių ID naudojami daugiau nei kartą: %s\n"
+"\n"
+"Prieš įrašydami suteikite kiekvienai taisyklei unikalų ID."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "➕ Add Condition"
-msgstr ""
+msgstr "➕ Pridėti sąlygą"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "💾 Save Rules"
-msgstr ""
+msgstr "💾 Įrašyti taisykles"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📋 Duplicate"
-msgstr ""
+msgstr "📋 Dubliuoti"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🗑️ Delete"
-msgstr ""
+msgstr "🗑️ Ištrinti"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "🧪 Evaluate Rule"
-msgstr ""
+msgstr "🧪 Įvertinti taisyklę"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "🧪 Test Sandbox"
-msgstr ""
+msgstr "🧪 Bandymų aplinka"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "A database name is required."
-msgstr ""
+msgstr "Reikia duomenų bazės pavadinimo."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "A host is required for PostgreSQL/MySQL."
-msgstr ""
+msgstr "PostgreSQL/MySQL reikia serverio."
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Add New Database"
 msgid "Add database"
-msgstr "Sukurti naują duombazę."
+msgstr "Pridėti duomenų bazę"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Add..."
-msgstr ""
+msgstr "Pridėti..."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Backend"
-msgstr ""
+msgstr "Sistema"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Backend:"
-msgstr ""
+msgstr "Sistema:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Configured databases:"
-msgstr ""
+msgstr "Sukonfigūruotos duomenų bazės:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Create database"
-msgstr ""
+msgstr "Sukurti duomenų bazę"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Can't find table %s"
 msgid "Create tables"
-msgstr "Nepavyksta rasti stalo %s"
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Default"
-msgstr ""
+msgstr "Sukurti lenteles"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Database created"
+msgid "Default"
+msgstr "Numatytoji"
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Default database changed"
-msgstr "Duombazė sukurta"
+msgstr "Numatytoji duomenų bazė pakeista"
 
 #: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Delete"
-msgstr ""
+msgstr "Ištrinti"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Delete database"
-msgstr ""
+msgstr "Ištrinti duomenų bazę"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Add New Database"
 msgid "Edit database"
-msgstr "Sukurti naują duombazę."
+msgstr "Redaguoti duomenų bazę"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Edit"
 msgid "Edit..."
-msgstr "Keisti"
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Host / Path"
-msgstr ""
+msgstr "Redaguoti..."
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Host"
+msgid "Host / Path"
+msgstr "Serveris / kelias"
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Host:"
-msgstr "Tiekėjas"
+msgstr "Serveris:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Invalid database settings"
-msgstr ""
+msgstr "Netinkami duomenų bazės nustatymai"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Migrate database"
-msgstr ""
+msgstr "Perkelti duomenų bazę"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Migrate to..."
-msgstr ""
+msgstr "Perkelti į..."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Migrating database"
-msgstr ""
+msgstr "Perkeliama duomenų bazė"
 
 #: fpdb_3_legacy/GuiDatabase.py
 msgid "Name"
@@ -1218,71 +1386,77 @@ msgstr "Pavadinimas"
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Name"
 msgid "Name:"
-msgstr "Pavadinimas"
+msgstr "Pavadinimas:"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Password"
 msgid "Password:"
-msgstr "Slaptažodis"
+msgstr "Slaptažodis:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Port must be a number between 1 and 65535."
-msgstr ""
+msgstr "Prievadas turi būti skaičius nuo 1 iki 65535."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Port:"
-msgstr ""
+msgstr "Prievadas:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid ""
 "SQLite databases are created automatically. Use 'Create tables' to "
 "initialise the schema."
 msgstr ""
+"SQLite duomenų bazės kuriamos automatiškai. Schemai sukurti naudokite "
+"„Sukurti lenteles“."
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Set max seats"
 msgid "Set as default"
-msgstr "Nurodyti maksimalų vietų skaičių"
+msgstr "Nustatyti numatytąja"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Testing database connections ... "
 msgid "Test connection"
-msgstr "Tikrinamas duombazės ryšys ..."
+msgstr "Tikrinti ryšį"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "There is no other database to migrate into. Add one first."
 msgstr ""
+"Nėra kitos duomenų bazės, į kurią perkelti. Pirmiausia pridėkite vieną."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid ""
 "This is the only configured database and cannot be deleted — fpdb needs at "
 "least one. Add another database first."
 msgstr ""
+"Tai vienintelė sukonfigūruota duomenų bazė, jos ištrinti negalima — fpdb "
+"reikia bent vienos. Pirmiausia pridėkite kitą duomenų bazę."
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Username"
 msgid "User"
-msgstr "Naudotojo vardas"
+msgstr "Naudotojas"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Username"
 msgid "User:"
-msgstr "Naudotojo vardas"
+msgstr "Naudotojas:"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Field actions"
-msgstr ""
+msgstr "Lauko veiksmai"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Field population"
-msgstr ""
+msgstr "Lauko populiacija"
 
 #: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
@@ -1290,42 +1464,53 @@ msgid "Loading hands…"
 msgstr "Rankos"
 
 #: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Next ▶"
-msgstr ""
+msgstr "Kita ▶"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Select a row to see the hands behind both sides of it."
-msgstr ""
+msgstr "Pasirinkite eilutę, kad pamatytumėte rankas abiejose pusėse."
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Source hands"
-msgstr ""
+msgstr "Šaltinio rankos"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid ""
 "These hands use the same filters as the other side; only the population "
 "differs."
 msgstr ""
+"Šios rankos naudoja tuos pačius filtrus kaip kita pusė; skiriasi tik "
+"populiacija."
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Your actions"
-msgstr ""
+msgstr "Jūsų veiksmai"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Your population"
-msgstr ""
+msgstr "Jūsų populiacija"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "◀ Previous"
-msgstr ""
+msgstr "◀ Ankstesnė"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, fuzzy
 msgid "Export to File"
-msgstr ""
+msgstr "Eksportuoti į failą"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, fuzzy
 msgid "FPDB 3 info"
-msgstr ""
+msgstr "FPDB 3 informacija"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/session_guard_dialog.py
@@ -1333,212 +1518,258 @@ msgid "Hands"
 msgstr "Rankos"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
+#, fuzzy
 msgid "Net profit excluding splash"
-msgstr ""
+msgstr "Grynasis pelnas be splash"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
+#, fuzzy
 msgid "Non-showdown"
-msgstr ""
+msgstr "Be showdown"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
+#, fuzzy
 msgid "Profit"
-msgstr ""
+msgstr "Pelnas"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, fuzzy
 msgid "Refresh Graph"
-msgstr ""
+msgstr "Atnaujinti grafiką"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Showdown"
-msgstr ""
+msgstr "Showdown"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "100–150% pot"
-msgstr ""
+msgstr "100–150% banko"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "25–50% pot"
-msgstr ""
+msgstr "25–50% banko"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "3-bet"
-msgstr ""
+msgstr "3-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "4-bet"
-msgstr ""
+msgstr "4-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "50–75% pot"
-msgstr ""
+msgstr "50–75% banko"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "75–100% pot"
-msgstr ""
+msgstr "75–100% banko"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Advanced review filters"
-msgstr ""
+msgstr "Išplėstiniai analizės filtrai"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "All Players"
 msgid "All hands"
-msgstr "Visi Žaidėjai"
+msgstr "Visos rankos"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "AddDB starting"
 msgid "All starting hands"
-msgstr "Atidaromas AddDB"
+msgstr "Visos pradinės rankos"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Analytics data unavailable"
-msgstr ""
+msgstr "Analitiniai duomenys nepasiekiami"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Any"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Any card"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Any sizing"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Apply review filters"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Bet"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Bet / raise sizing"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Broadway"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Call open"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Called"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Check-raise"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Checked"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Choose hands…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Clear"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Continuation bet"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourHandViewer.py
-msgid "Copy hand history"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Did not VPIP"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/research_labels.py
-msgid "Effective stack (BB)"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Exact known cards"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Exclude splash pots"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Faced 3-bet"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Faced c-bet"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Faced open"
-msgstr ""
+msgstr "Bet kuris"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "Hand Filters:"
+msgid "Any card"
+msgstr "Bet kuri korta"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Any sizing"
+msgstr "Bet koks dydis"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Apply review filters"
+msgstr "Taikyti analizės filtrus"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Bet"
+msgstr "Statymas"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Bet / raise sizing"
+msgstr "Statymo / pakėlimo dydis"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Broadway"
+msgstr "Broadway"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Call open"
+msgstr "Sulygino atidarymą"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Called"
+msgstr "Sulygino"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Check-raise"
+msgstr "Check-raise"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Checked"
+msgstr "Patikrino"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Choose hands…"
+msgstr "Pasirinkti rankas…"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Clear"
+msgstr "Išvalyti"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Continuation bet"
+msgstr "Tęstinis statymas"
+
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourHandViewer.py
+#, fuzzy
+msgid "Copy hand history"
+msgstr "Kopijuoti rankos istoriją"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Did not VPIP"
+msgstr "Be VPIP"
+
+#: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Effective stack (BB)"
+msgstr "Efektyvus stekas (BB)"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Exact known cards"
+msgstr "Tiksliai žinomos kortos"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Exclude splash pots"
+msgstr "Be splash pot"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Faced 3-bet"
+msgstr "Prieš 3-bet"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Faced c-bet"
+msgstr "Prieš c-bet"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Faced open"
+msgstr "Prieš atidarymą"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Filter: "
-msgstr "Rankų filtrai:"
+msgstr "Filtras: "
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Filter: splash pot"
-msgstr ""
+msgstr "Filtras: splash pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Final pot (BB)"
-msgstr ""
+msgstr "Galutinis bankas (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Folded"
-msgstr ""
+msgstr "Numetė"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Hold'em starting hand"
-msgstr ""
+msgstr "Hold'em pradinė ranka"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Invalid review filter"
-msgstr ""
+msgstr "Netinkamas analizės filtras"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Invert"
-msgstr ""
+msgstr "Apversti"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Limp"
-msgstr ""
+msgstr "Limp"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Net result (BB)"
-msgstr ""
+msgstr "Grynasis rezultatas (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid ""
 "No hands were queried, to avoid presenting an incomplete result as empty."
 msgstr ""
+"Rankų užklausa nevykdyta, kad neišsamus rezultatas nebūtų parodytas kaip "
+"tuščias."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Offsuit"
-msgstr ""
+msgstr "Skirtingų spalvų"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Over 150% pot"
-msgstr ""
+msgstr "Daugiau nei 150% banko"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Pairs"
-msgstr ""
+msgstr "Poros"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -1546,119 +1777,148 @@ msgid "Players in hand"
 msgstr "Naudotojo vardas"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Postflop"
-msgstr ""
+msgstr "Postflopas"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Preflop"
-msgstr ""
+msgstr "Preflopas"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "RFI"
-msgstr ""
+msgstr "RFI"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Raised"
-msgstr ""
+msgstr "Pakėlė"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw flop"
-msgstr ""
+msgstr "Matė flopą"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw river"
-msgstr ""
+msgstr "Matė riverį"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw turn"
-msgstr ""
+msgstr "Matė tėrną"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Splash pots only"
-msgstr ""
+msgstr "Tik splash pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Squeeze"
-msgstr ""
+msgstr "Squeeze"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Starting-hand range"
-msgstr ""
+msgstr "Pradinių rankų intervalas"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid ""
 "The analytics status needed by these filters could not be verified. No "
 "results were queried; check the database and rebuild analytics data before "
 "retrying."
 msgstr ""
+"Nepavyko patikrinti šiems filtrams reikalingų analitinių duomenų būsenos. "
+"Užklausa nevykdyta; patikrinkite duomenų bazę ir atkurkite analitinius "
+"duomenis prieš bandydami dar kartą."
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "The minimum cannot exceed the maximum for {}."
-msgstr ""
+msgstr "Minimumas negali viršyti maksimumo {}."
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "These analytics rows were created by a newer fpdb version: {names}."
-msgstr ""
+msgstr "Šias analitines eilutes sukūrė naujesnė fpdb versija: {names}."
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "These filters need missing or outdated analytics data: {names}."
 msgstr ""
+"Šiems filtrams reikia trūkstamų arba pasenusių analitinių duomenų: {names}."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Under 25% pot"
-msgstr ""
+msgstr "Mažiau nei 25% banko"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Upgrade fpdb before using these filters."
-msgstr ""
+msgstr "Prieš naudodami šiuos filtrus, atnaujinkite fpdb."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Use Database → Rebuild Analytics Data, then retry the filter."
 msgstr ""
+"Naudokite Duomenų bazė → Atkurti analitinius duomenis, tada pakartokite "
+"filtrą."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "VPIP"
-msgstr ""
+msgstr "VPIP"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Went all-in"
-msgstr ""
+msgstr "Ėjo all-in"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "max"
-msgstr ""
+msgstr "maks."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "max BB"
-msgstr ""
+msgstr "maks. BB"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "min"
-msgstr ""
+msgstr "min."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "min BB"
-msgstr ""
+msgstr "min. BB"
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{} classes selected"
-msgstr ""
+msgstr "Pasirinkta klasių: {}"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "◀ Prev"
-msgstr ""
+msgstr "◀ Ankst."
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Copy selection to clipboard"
-msgstr ""
+msgstr "Kopijuoti pažymėtą į iškarpinę"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Filter by Module:"
-msgstr ""
+msgstr "Filtruoti pagal modulį:"
 
 #: fpdb_3_legacy/GuiLogView.py
 #, fuzzy
@@ -1670,140 +1930,170 @@ msgid "Refresh"
 msgstr "Atnaujinti"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Select Log File:"
-msgstr ""
+msgstr "Pasirinkite žurnalo failą:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Min hands vs hero:"
-msgstr ""
+msgstr "Min. rankų prieš herojų:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Sort by:"
-msgstr ""
+msgstr "Rikiuoti pagal:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Top N opponents:"
-msgstr ""
+msgstr "Top N varžovų:"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Auxiliary Windows"
-msgstr ""
+msgstr "Pagalbiniai langai"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Column Heading"
-msgstr ""
+msgstr "Stulpelio antraštė"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Databases"
-msgstr ""
+msgstr "Duomenų bazės"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Field Type"
-msgstr ""
+msgstr "Lauko tipas"
 
 #: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Format"
-msgstr ""
+msgstr "Formatas"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "General"
-msgstr ""
+msgstr "Bendra"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "HUD"
-msgstr ""
+msgstr "HUD"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Hand History Converters"
-msgstr ""
+msgstr "Rankų istorijų konverteriai"
 
 #: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import"
-msgstr ""
+msgstr "Importas"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Left/Right Align"
-msgstr ""
+msgstr "Lygiuoti kairėn/dešinėn"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Mucked"
-msgstr ""
+msgstr "Numestos kortos"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Popup Name"
-msgstr ""
+msgstr "Iššokančio lango pavadinimas"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Popup Windows"
-msgstr ""
+msgstr "Iššokantys langai"
 
 #: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Ring Player Stats"
-msgstr ""
+msgstr "Cash žaidėjų statistika"
 
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Setting"
 msgstr "Nustatymai"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Show in Position Stats"
-msgstr ""
+msgstr "Rodyti pozicijų statistikoje"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Show in Summaries"
-msgstr ""
+msgstr "Rodyti suvestinėse"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stat"
-msgstr ""
+msgstr "Statistika"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Stat Name"
-msgstr ""
+msgstr "Statistikos pavadinimas"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Stud mucked"
-msgstr ""
+msgstr "Stud, numestos kortos"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Tour Player Stats"
-msgstr ""
+msgstr "Turnyrų žaidėjų statistika"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Value (double-click to change)"
-msgstr ""
+msgstr "Reikšmė (dukart spustelėkite pakeisti)"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Window"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "Card deck"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "Copy or save this hand as text, Markdown or forum code"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "Current card deck preview"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "Deck:"
-msgstr ""
+msgstr "Langas"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
-#| msgid "and"
-msgid "End"
-msgstr "ir"
+msgid "Card deck"
+msgstr "Kortų kaladė"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+msgid "Copy or save this hand as text, Markdown or forum code"
+msgstr "Kopijuoti arba įrašyti šią ranką kaip tekstą, Markdown ar forumo kodą"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+msgid "Current card deck preview"
+msgstr "Dabartinės kaladės peržiūra"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+msgid "Deck:"
+msgstr "Kaladė:"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+msgid "End"
+msgstr "Pabaiga"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "FPDB Hand Replayer"
-msgstr ""
+msgstr "FPDB rankų grotuvas"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
@@ -1811,50 +2101,59 @@ msgid "Hide Cards"
 msgstr "Turimos kortos"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Next"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "Next action"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "Play"
-msgstr ""
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "Prev"
-msgstr ""
+msgstr "Kitas"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
-#| msgid "Position"
-msgid "Previous action"
-msgstr "Pozicija"
+msgid "Next action"
+msgstr "Kitas veiksmas"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+msgid "Play"
+msgstr "Groti"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+msgid "Prev"
+msgstr "Ankst."
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+msgid "Previous action"
+msgstr "Ankstesnis veiksmas"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Send this hand's preflop decisions to PreflopAdvisor"
-msgstr ""
+msgstr "Siųsti šios rankos preflopo sprendimus į PreflopAdvisor"
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Share..."
-msgstr ""
+msgstr "Bendrinti..."
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Solver review..."
-msgstr ""
+msgstr "Analizė su solveriu..."
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Start"
-msgstr ""
+msgstr "Pradžia"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "-- built-in presets --"
-msgstr ""
+msgstr "-- integruoti šablonai --"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "-- saved presets --"
-msgstr ""
+msgstr "-- įrašyti šablonai --"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -1862,143 +2161,176 @@ msgid "?"
 msgstr ""
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "A gap is only as good as the smaller of the two samples beside it."
 msgstr ""
+"Skirtumas yra tiek patikimas, kiek mažesnė iš dviejų šalia esančių imčių."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add or remove one of the known values."
-msgstr ""
+msgstr "Pridėti arba pašalinti vieną iš žinomų reikšmių."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add the selected dimension to the breakdown."
-msgstr ""
+msgstr "Pridėti pasirinktą dimensiją prie skaidymo."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add this filter"
-msgstr ""
+msgstr "Pridėti šį filtrą"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Adjust {variables} for your own game."
-msgstr ""
+msgstr "Pritaikykite {variables} savo žaidimui."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Adjust: {variables}"
-msgstr ""
+msgstr "Koreguoti: {variables}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Aim for at least {n} decisions."
-msgstr ""
+msgstr "Siekite bent {n} sprendimų."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "All hands in the population"
-msgstr ""
+msgstr "Visos populiacijos rankos"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Any leaves the condition out of the query entirely."
-msgstr ""
+msgstr "„Bet kuris“ visiškai išmeta sąlygą iš užklausos."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Ask a poker question"
-msgstr ""
+msgstr "Užduokite pokerio klausimą"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Ask your own question"
-msgstr ""
+msgstr "Užduokite savo klausimą"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Break down by"
-msgstr ""
+msgstr "Skaidyti pagal"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Choose a dimension to split the result by."
-msgstr ""
+msgstr "Pasirinkite dimensiją, pagal kurią skaidyti rezultatą."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Choose one or more…"
-msgstr ""
+msgstr "Pasirinkite vieną ar kelis…"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Comma-separated group-by dimensions (engine vocabulary)"
-msgstr ""
+msgstr "Kableliais atskirtos grupavimo dimensijos (variklio žodynas)"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Compare with the field"
-msgstr ""
+msgstr "Palyginti su lauku"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Count"
-msgstr ""
+msgstr "Kiekis"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/GuiResearchViews.py
 #, fuzzy
-#| msgid "Sessions"
 msgid "Decisions"
-msgstr "Sesijos"
+msgstr "Sprendimai"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a cell to load the hands behind it."
-msgstr ""
+msgstr "Dukart spustelėkite langelį, kad įkeltumėte už jo esančias rankas."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a result row to load its hands."
-msgstr ""
+msgstr "Dukart spustelėkite rezultato eilutę, kad įkeltumėte jos rankas."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "Double-click a row to load its hands. Numerator/denominator are shown per "
 "row."
 msgstr ""
+"Dukart spustelėkite eilutę, kad įkeltumėte jos rankas. Skaitiklis/vardiklis "
+"rodomi kiekvienoje eilutėje."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a row to see your hands and the field's, side by side."
 msgstr ""
+"Dukart spustelėkite eilutę, kad pamatytumėte savo ir lauko rankas šalia "
+"vienas kito."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click the row to load its hands."
-msgstr ""
+msgstr "Dukart spustelėkite eilutę, kad įkeltumėte jos rankas."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Every decision the question applies to: the sample size."
-msgstr ""
+msgstr "Visi sprendimai, kuriems taikomas klausimas: imties dydis."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "FPDB Replayer"
-msgstr ""
+msgstr "FPDB rankų grotuvas"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Field"
-msgstr ""
+msgstr "Laukas"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Field sample"
-msgstr ""
+msgstr "Lauko imtis"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Filters"
-msgstr ""
+msgstr "Filtrai"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Frequency (%)"
-msgstr ""
+msgstr "Dažnis (%)"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Gap"
-msgstr ""
+msgstr "Skirtumas"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "How many of those decisions the metric counted."
-msgstr ""
+msgstr "Kiek tų sprendimų metrika užskaitė."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Matching hands"
-msgstr ""
+msgstr "Atitinkančios rankos"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Metric"
-msgstr ""
+msgstr "Metrika"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -2006,137 +2338,175 @@ msgid "No"
 msgstr "Ne"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "No matching hands were found for either population."
-msgstr ""
+msgstr "Nė vienai populiacijai atitinkančių rankų nerasta."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Only the hands where the metric fired"
-msgstr ""
+msgstr "Tik rankos, kuriose metrika suveikė"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Open the Research Browser quick start"
-msgstr ""
+msgstr "Atidaryti tyrimų naršyklės greitąją pradžią"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Pick one of the answers this workbench knows how to show."
-msgstr ""
+msgstr "Pasirinkite vieną iš atsakymų, kuriuos šis įrankis gali parodyti."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Poker labels"
-msgstr ""
+msgstr "Pokerio terminai"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "Poker labels use the terminology most readers see at the table.\n"
 "Technical names expose the analytics engine's fields and values."
 msgstr ""
+"Pokerio terminai naudoja žodyną, kurį dauguma skaitytojų mato prie stalo.\n"
+"Techniniai pavadinimai rodo analizės variklio laukus ir reikšmes."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Query cancelled."
-msgstr ""
+msgstr "Užklausa atšaukta."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Remove this breakdown"
-msgstr ""
+msgstr "Pašalinti šį skaidymą"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Remove this filter"
-msgstr ""
+msgstr "Pašalinti šį filtrą"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Research browser"
-msgstr ""
+msgstr "Tyrimų naršyklė"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Results"
-msgstr ""
+msgstr "Rezultatai"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Run the same question twice -- yours and the field's -- side by side."
 msgstr ""
+"Vykdyti tą patį klausimą du kartus — jūsų ir lauko — šalia vienas kito."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Running…"
-msgstr ""
+msgstr "Vykdoma…"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Save"
 msgstr "Išsaugoti"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Save preset"
-msgstr ""
+msgstr "Įrašyti šabloną"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Saved as \"{saved}\". The built-in preset \"{original}\" is unchanged."
-msgstr ""
+msgstr "Įrašyta kaip „{saved}“. Integruotas šablonas „{original}“ nepakeistas."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Show technical query controls"
-msgstr ""
+msgstr "Rodyti techninius užklausos valdiklius"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Show the engine's own filter names and free-text values."
-msgstr ""
+msgstr "Rodyti variklio filtrų pavadinimus ir laisvo teksto reikšmes."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Technical names"
-msgstr ""
+msgstr "Techniniai pavadinimai"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "The Research Browser answers questions about the hands in your database. "
 "Pick a question below, change any value that should be different for you, "
 "then press Run. The sample size is always shown, and every row can be opened "
 "as the hands behind it."
 msgstr ""
+"Tyrimų naršyklė atsako į klausimus apie rankas jūsų duomenų bazėje. "
+"Pasirinkite klausimą žemiau, pakeiskite reikšmes, kurios jums turėtų būti "
+"kitokios, ir spauskite „Vykdyti“. Imties dydis visada rodomas, o kiekvieną "
+"eilutę galima atidaryti kaip už jos esančias rankas."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "The analytics data for {names} has never been built. A question that reads "
 "it answers zero until it is: Database -> Rebuild Analytics Data."
 msgstr ""
+"Analitiniai duomenys {names} dar niekada nebuvo sukurti. Juos skaitantis "
+"klausimas atsakys nuliu, kol jie bus sukurti: Duomenų bazė -> Atkurti "
+"analitinius duomenis."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "The analytics data for {names} was derived by older rules, so a question "
 "that reads it may answer zero: Database -> Rebuild Analytics Data."
 msgstr ""
+"Analitiniai duomenys {names} buvo išvesti pagal senesnes taisykles, todėl "
+"juos skaitantis klausimas gali atsakyti nuliu: Duomenų bazė -> Atkurti "
+"analitinius duomenis."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "The measurement itself, over the sample above."
-msgstr ""
+msgstr "Pats matavimas, apskaičiuotas aukščiau nurodytai imčiai."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "The question the controls above currently ask."
-msgstr ""
+msgstr "Klausimas, kurį dabar užduoda aukščiau esantys valdikliai."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "These questions need the analytics tables rebuilt before they can answer: "
 "{subsystems}. Rebuild them from the database menu, then run a question."
 msgstr ""
+"Šiems klausimams atsakyti reikia atkurti analitines lenteles: {subsystems}. "
+"Atkurkite jas iš duomenų bazės meniu, tada vykdykite klausimą."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Try one of these:"
-msgstr ""
+msgstr "Išbandykite vieną iš šių:"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Unknown group-by dimension(s): {names}. Known: {known}."
-msgstr ""
+msgstr "Nežinoma (-os) grupavimo dimensija (-os): {names}. Žinomos: {known}."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "View"
-msgstr ""
+msgstr "Rodinys"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Vocabulary"
-msgstr ""
+msgstr "Žodynas"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -2144,115 +2514,136 @@ msgid "Yes"
 msgstr "Taip"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "You"
-msgstr ""
-
-#: fpdb_3_legacy/GuiResearchBrowser.py
-msgid "Your sample"
-msgstr ""
-
-#: fpdb_3_legacy/GuiResearchBrowser.py
-msgid "e.g. street, response"
-msgstr ""
-
-#: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
-msgid "e.g. {example}"
-msgstr ""
-
-#: fpdb_3_legacy/GuiResearchBrowser.py
-msgid "from"
-msgstr ""
-
-#: fpdb_3_legacy/GuiResearchBrowser.py
-msgid "or type a value"
-msgstr ""
+msgstr "Jūs"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
-#| msgid "auto"
+msgid "Your sample"
+msgstr "Jūsų imtis"
+
+#: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
+msgid "e.g. street, response"
+msgstr "pvz. street, response"
+
+#: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy, python-brace-format
+msgid "e.g. {example}"
+msgstr "pvz. {example}"
+
+#: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
+msgid "from"
+msgstr "nuo"
+
+#: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
+msgid "or type a value"
+msgstr "arba įveskite reikšmę"
+
+#: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "to"
-msgstr "automatiškai"
+msgstr "iki"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{hero} decisions of yours, {field} of the field's"
-msgstr ""
+msgstr "Jūsų sprendimų: {hero}, lauko: {field}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{question} — {how}"
-msgstr ""
+msgstr "{question} — {how}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "■ Cancel"
-msgstr ""
+msgstr "■ Atšaukti"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "▶ Run"
-msgstr ""
+msgstr "▶ Vykdyti"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "＋ Add breakdown"
-msgstr ""
+msgstr "＋ Pridėti skaidymą"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid ""
 "Cells without enough of a sample stay uncoloured; hover one to read its "
 "count."
 msgstr ""
+"Langeliai be pakankamos imties lieka nespalvoti; užveskite pelę, kad "
+"pamatytumėte kiekį."
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Colour by:"
-msgstr ""
+msgstr "Spalvinti pagal:"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "No cell is below the sample threshold."
-msgstr ""
+msgstr "Nė vienas langelis nėra žemiau imties ribos."
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Realized {realized} over {hands} hands; EV-adjusted {ev} ({luck} of it luck)."
 msgstr ""
+"Realizuota {realized} per {hands} rankų; EV koreguota {ev} (iš jų {luck} — "
+"sėkmė)."
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Share"
-msgstr ""
+msgstr "Dalis"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "{decisions} decisions in this selection have no known hole cards and are not "
 "in the grid; {share} of the decisions are drawn."
 msgstr ""
+"{decisions} šios atrankos sprendimų neturi žinomų savų kortų ir nėra "
+"tinklelyje; pavaizduota {share} sprendimų."
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{label}: {classified} classified decisions of {total} ({share} covered)"
 msgstr ""
+"{label}: {classified} klasifikuotų sprendimų iš {total} (padengta {share})"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{n} decisions are counted apart: their cards were never known."
-msgstr ""
+msgstr "{n} sprendimų skaičiuojami atskirai: jų kortos niekada nebuvo žinomos."
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Cumulative result (BB)"
-msgstr ""
+msgstr "Sukauptas rezultatas (BB)"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Hand Breakdown for all levels listed above"
-msgstr ""
+msgstr "Rankų suskirstymas visiems aukščiau išvardytiems lygiams"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Native-currency totals omitted (multiple currencies)"
-msgstr ""
+msgstr "Sumos vietine valiuta praleistos (kelios valiutos)"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Profit: {profit} · Currency/hour: {hour}"
-msgstr ""
+msgstr "Pelnas: {profit} · Valiuta/val.: {hour}"
 
 #: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -2260,22 +2651,25 @@ msgid "Session"
 msgstr "Sesijos"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Sessions: {sessions} · Hands: {hands} · Playing time: {duration} · Profit: "
 "{profit_bb} BB · bb/100: {bb100} · BB/hour: {bb_hour} · BB hands: {bb_hands}/"
 "{hands}"
 msgstr ""
+"Sesijos: {sessions} · Rankos: {hands} · Žaidimo laikas: {duration} · Pelnas: "
+"{profit_bb} BB · bb/100: {bb100} · BB/val.: {bb_hour} · BB rankos: "
+"{bb_hands}/{hands}"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{hours}h {minutes}m"
-msgstr ""
+msgstr "{hours} val. {minutes} min."
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{minutes}m"
-msgstr ""
+msgstr "{minutes} min."
 
 #: fpdb_3_legacy/GuiTourHandViewer.py
 #, fuzzy
@@ -2287,88 +2681,104 @@ msgid "Refresh Stats"
 msgstr "Atnaujinti Rodiklius"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Clipboard unavailable"
-msgstr ""
+msgstr "Iškarpinė nepasiekiama"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 #, fuzzy
-#| msgid "Reading configuration file %s"
 msgid "Configuration file"
-msgstr "Skaito nustatymų failą %s"
+msgstr "Konfigūracijos failas"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Copy report"
-msgstr ""
+msgstr "Kopijuoti ataskaitą"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Copy these details to the clipboard for a bug report"
-msgstr ""
+msgstr "Kopijuoti šią informaciją į iškarpinę klaidos pranešimui"
 
 #: fpdb_3_legacy/GuiVersionInfo.py fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Add New Database"
 msgid "Database"
-msgstr "Sukurti naują duombazę."
+msgstr "Duomenų bazė"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Documentation"
-msgstr ""
+msgstr "Dokumentacija"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "FPDB version"
-msgstr ""
+msgstr "FPDB versija"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Git branch"
-msgstr ""
+msgstr "Git šaka"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Git checkout"
-msgstr ""
+msgstr "Git kopija"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Git commit"
-msgstr ""
+msgstr "Git įrašas"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "GitHub repository"
-msgstr ""
+msgstr "GitHub saugykla"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Links"
-msgstr ""
+msgstr "Nuorodos"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Packaging"
-msgstr ""
+msgstr "Pakavimas"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Report an issue"
-msgstr ""
+msgstr "Pranešti apie problemą"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Report copied to clipboard"
-msgstr ""
+msgstr "Ataskaita nukopijuota į iškarpinę"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Version and environment"
-msgstr ""
+msgstr "Versija ir aplinka"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Working tree"
-msgstr ""
+msgstr "Darbinis medis"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "clean"
-msgstr ""
+msgstr "švari"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "modified (uncommitted changes)"
-msgstr ""
+msgstr "pakeista (neįrašyti pakeitimai)"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "not a git checkout (packaged or exported build)"
-msgstr ""
+msgstr "ne git kopija (supakuota arba eksportuota versija)"
 
 #: fpdb_3_legacy/MergeSummary.py
 msgid "MergeSummary.determineGameType: HORSE found, unsupported"
@@ -2397,8 +2807,9 @@ msgid "MergeSummary.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/MergeSummary.py
+#, fuzzy
 msgid "The tournament was not found or is invalid"
-msgstr ""
+msgstr "Turnyras nerastas arba netinkamas"
 
 #: fpdb_3_legacy/MicrogamingToFpdb.py
 #, python-format
@@ -2415,31 +2826,37 @@ msgid "0"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Players</b>"
-msgstr ""
+msgstr "<b>Žaidėjai</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Seat</b>"
-msgstr ""
+msgstr "<b>Vieta</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Visual Selection</b>"
-msgstr ""
+msgstr "<b>Vizualus pasirinkimas</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Auto-save changes"
-msgstr ""
+msgstr "Automatiškai įrašyti pakeitimus"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py fpdb_3_legacy/ThemeCreatorDialog.py
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cancel"
-msgstr ""
+msgstr "Atšaukti"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Configure your favorite seats for each table size"
-msgstr ""
+msgstr "Nustatykite mėgstamas vietas kiekvienam stalo dydžiui"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #, fuzzy
@@ -2452,39 +2869,47 @@ msgid "Import Settings"
 msgstr "Nustatymai"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Reset to Default"
-msgstr ""
+msgstr "Atkurti numatytuosius"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Save Changes"
-msgstr ""
+msgstr "Įrašyti pakeitimus"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Search sites..."
-msgstr ""
+msgstr "Ieškoti svetainių..."
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Seat Preferences"
-msgstr ""
+msgstr "Vietų nuostatos"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Show:"
-msgstr ""
+msgstr "Rodyti:"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "✓ Enabled"
-msgstr ""
+msgstr "✓ Įjungta"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "✗ Disabled"
-msgstr ""
+msgstr "✗ Išjungta"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "💡 Set to 0 to disable favorite seat for a table size"
-msgstr ""
+msgstr "💡 Nustatykite 0, kad išjungtumėte mėgstamą vietą šiam stalo dydžiui"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
@@ -2492,9 +2917,9 @@ msgid "🔍"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s hero aliases:"
-msgstr ""
+msgstr "%s herojaus slapyvardžiai:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
@@ -2502,70 +2927,81 @@ msgid "(search in enabled sites only)"
 msgstr "Nerasti limitai"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid ""
 "A data source such as PHH is not a poker room: it has no screen name. Name "
 "the players that are you in its hands, and the reports read them as one "
 "hero, as a room's aliases are."
 msgstr ""
+"Duomenų šaltinis, toks kaip PHH, nėra pokerio kambarys: jis neturi "
+"slapyvardžio. Nurodykite žaidėjus, kurie jo rankose esate jūs, ir ataskaitos "
+"juos skaitys kaip vieną herojų, kaip kambario slapyvardžius."
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Add link"
-msgstr ""
+msgstr "Pridėti saitą"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-#| msgid "Browse..."
 msgid "Browse"
-msgstr "Naršyti..."
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Configure your poker sites and usernames"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Data Sources"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Default profile"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Enter your username"
-msgstr ""
+msgstr "Naršyti"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-#| msgid "Hand Filters:"
-msgid "Hand History:"
-msgstr "Rankų filtrai:"
+msgid "Configure your poker sites and usernames"
+msgstr "Nustatykite savo pokerio svetaines ir naudotojų vardus"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Data Sources"
+msgstr "Duomenų šaltiniai"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Default profile"
+msgstr "Numatytasis profilis"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Enter your username"
+msgstr "Įveskite savo naudotojo vardą"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Hand History:"
+msgstr "Rankų istorija:"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Hero Profiles"
-msgstr ""
+msgstr "Herojaus profiliai"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "New"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Old nicknames / extra accounts, comma separated"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Other Aliases:"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Path to hand history files"
-msgstr ""
+msgstr "Naujas"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-#| msgid "No Tournament summaries found."
+msgid "Old nicknames / extra accounts, comma separated"
+msgstr "Seni slapyvardžiai / papildomos paskyros, atskirti kableliais"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Other Aliases:"
+msgstr "Kiti slapyvardžiai:"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Path to hand history files"
+msgstr "Kelias iki rankų istorijų failų"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Path to tournament summaries"
-msgstr "Jokių turnyrų apžvalgų nerasta"
+msgstr "Kelias iki turnyrų santraukų"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
@@ -2573,16 +3009,19 @@ msgid "Profile name"
 msgstr "Naudotojo vardas"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Remove link"
-msgstr ""
+msgstr "Pašalinti saitą"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Screen Name:"
-msgstr ""
+msgstr "Slapyvardis:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Site Preferences"
-msgstr ""
+msgstr "Svetainių nuostatos"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
@@ -2590,8 +3029,9 @@ msgid "Tournament:"
 msgstr "Turnyrai"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Your names in these hands, one per line"
-msgstr ""
+msgstr "Jūsų vardai šiose rankose, po vieną eilutėje"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🎭"
@@ -2610,17 +3050,19 @@ msgid "📁"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "🔍 Auto-Detect All Visible Sites"
-msgstr ""
+msgstr "🔍 Automatiškai aptikti visas matomas svetaines"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "🔍 Auto-Detect Paths"
-msgstr ""
+msgstr "🔍 Automatiškai aptikti kelius"
 
 #: fpdb_3_legacy/OnGameToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "DATETIME not matched: '%s'"
-msgstr ""
+msgstr "DATETIME neatitiko: '%s'"
 
 #: fpdb_3_legacy/OnGameToFpdb.py
 #, fuzzy
@@ -2659,20 +3101,24 @@ msgid "PkrToFpdb.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Brief description of your theme"
-msgstr ""
+msgstr "Trumpas jūsų temos aprašymas"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Create Custom Theme"
-msgstr ""
+msgstr "Sukurti savą temą"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Create Theme"
-msgstr ""
+msgstr "Sukurti temą"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Update Preview"
-msgstr ""
+msgstr "Atnaujinti peržiūrą"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
 #, fuzzy
@@ -2680,120 +3126,146 @@ msgid "Your name"
 msgstr "Turnyrai"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "e.g., my_custom_theme"
-msgstr ""
+msgstr "pvz., mano_tema"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Back up and upgrade"
-msgstr ""
+msgstr "Sukurti atsarginę kopiją ir atnaujinti"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Clear All"
-msgstr ""
+msgstr "Išvalyti viską"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Configuration needs attention"
-msgstr ""
+msgstr "Konfigūracijai reikia dėmesio"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Confirm recreating HUD cache"
-msgstr ""
+msgstr "Patvirtinkite HUD podėlio atkūrimą"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Database Statistics"
-msgstr ""
+msgstr "Duomenų bazės statistika"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Deselect All"
-msgstr ""
+msgstr "Atžymėti visus"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Enable or disable sites for HUD display"
-msgstr ""
+msgstr "Įjungti arba išjungti svetaines HUD rodymui"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Free Poker DB 3"
-msgstr ""
+msgstr "Free Poker DB 3"
 
 #: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Manage HUD Sites"
-msgstr ""
+msgstr "Tvarkyti HUD svetaines"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "PT4 HUD imported"
-msgstr ""
+msgstr "PT4 HUD importuotas"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "PT4 stats import"
-msgstr ""
+msgstr "PT4 statistikos importas"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Please confirm that you want to re-create the HUD cache."
-msgstr ""
+msgstr "Patvirtinkite, kad norite iš naujo sukurti HUD podėlį."
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Search:"
-msgstr ""
+msgstr "Ieškoti:"
 
 #: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Select All"
-msgstr ""
+msgstr "Pažymėti visus"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Skip these games when importing"
-msgstr ""
+msgstr "Praleisti šiuos žaidimus importuojant"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Unknown Site"
-msgstr ""
+msgstr "Nežinoma svetainė"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Unsaved Changes"
-msgstr ""
+msgstr "Neįrašyti pakeitimai"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "You have unsaved configuration changes."
-msgstr ""
+msgstr "Turite neįrašytų konfigūracijos pakeitimų."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "Check the hero selected in the Heroes filter and make sure hands for that "
 "player were imported for the selected site."
 msgstr ""
+"Patikrinkite filtre „Herojai“ pasirinktą herojų ir įsitikinkite, kad to "
+"žaidėjo rankos buvo importuotos pasirinktai svetainei."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No currency is selected in the filters."
-msgstr ""
+msgstr "Filtruose nepasirinkta jokia valiuta."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No data to display"
-msgstr ""
+msgstr "Nėra rodomų duomenų"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No game type is selected in the filters."
-msgstr ""
+msgstr "Filtruose nepasirinktas joks žaidimo tipas."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No hand matches the selected filters."
-msgstr ""
+msgstr "Nė viena ranka neatitinka pasirinktų filtrų."
 
 #: fpdb_3_legacy/gui_empty_state.py
 #, fuzzy
-#| msgid "No sites selected - defaulting to PokerStars"
 msgid "No limit is selected in the filters."
-msgstr "Neaptikta jokių saitų - PokerStars nustatytas kaip pagrindinis"
-
-#: fpdb_3_legacy/gui_empty_state.py
-msgid "No player matches the selected site and hero."
-msgstr ""
+msgstr "Filtruose nepasirinktas joks limitas."
 
 #: fpdb_3_legacy/gui_empty_state.py
 #, fuzzy
-#| msgid "No sites selected - defaulting to PokerStars"
-msgid "No site is selected in the filters."
-msgstr "Neaptikta jokių saitų - PokerStars nustatytas kaip pagrindinis"
+msgid "No player matches the selected site and hero."
+msgstr "Nė vienas žaidėjas neatitinka pasirinktos svetainės ir herojaus."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
+msgid "No site is selected in the filters."
+msgstr "Filtruose nepasirinkta jokia svetainė."
+
+#: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "Nothing has been imported into this database — that is normal right after "
 "creating or recreating the tables.\n"
@@ -2801,42 +3273,60 @@ msgid ""
 "Import hand histories first (Import > Bulk Import, or start the auto-"
 "import), then refresh this tab."
 msgstr ""
+"Į šią duomenų bazę dar niekas neimportuota — tai įprasta iškart sukūrus ar "
+"atkūrus lenteles.\n"
+"\n"
+"Pirmiausia importuokite rankų istorijas (Importas > Masinis importas arba "
+"paleiskite automatinį importą), tada atnaujinkite šį skirtuką."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "The database holds hands, but none of them match this selection.\n"
 "\n"
 "Widen the filters (dates, limits, games, seats) and refresh."
 msgstr ""
+"Duomenų bazėje yra rankų, bet nė viena neatitinka šios atrankos.\n"
+"\n"
+"Išplėskite filtrus (datas, limitus, žaidimus, vietas) ir atnaujinkite."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one currency on the left, then refresh."
-msgstr ""
+msgstr "Pažymėkite bent vieną valiutą kairėje, tada atnaujinkite."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one game on the left, then refresh."
-msgstr ""
+msgstr "Pažymėkite bent vieną žaidimą kairėje, tada atnaujinkite."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one limit (stake) on the left, then refresh."
 msgstr ""
+"Pažymėkite bent vieną limitą (statymų dydį) kairėje, tada atnaujinkite."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one site in the Sites section on the left, then refresh."
 msgstr ""
+"Pažymėkite bent vieną svetainę kairėje esančioje skiltyje „Svetainės“, tada "
+"atnaujinkite."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Your database contains no hands yet."
-msgstr ""
+msgstr "Jūsų duomenų bazėje dar nėra rankų."
 
 #: fpdb_3_legacy/hand_review_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s is not a program that can be started."
-msgstr ""
+msgstr "%s nėra paleidžiama programa."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Copy JSON"
-msgstr ""
+msgstr "Kopijuoti JSON"
 
 #: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy, python-format
@@ -2846,87 +3336,111 @@ msgid ""
 msgstr "Failas nerastas %s"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Every hero decision of the hand"
-msgstr ""
+msgstr "Visi herojaus sprendimai šioje rankoje"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Hand review (*.json)"
-msgstr ""
+msgstr "Rankos peržiūra (*.json)"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Locate PreflopAdvisor"
-msgstr ""
+msgstr "Rasti PreflopAdvisor"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Open in PreflopAdvisor"
-msgstr ""
+msgstr "Atidaryti PreflopAdvisor"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid ""
 "Open it in PreflopAdvisor, or save the file and load it there with Review "
 "Hands > Load a hand review."
 msgstr ""
+"Atidarykite jį PreflopAdvisor arba įrašykite failą ir įkelkite ten per "
+"Review Hands > Load a hand review."
 
 #: fpdb_3_legacy/hand_review_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "PreflopAdvisor could not be started:\n"
 "%s\n"
 "\n"
 "Locate it?"
 msgstr ""
+"Nepavyko paleisti PreflopAdvisor:\n"
+"%s\n"
+"\n"
+"Rasti jį?"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Review:"
-msgstr ""
+msgstr "Peržiūra:"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Save for PreflopAdvisor..."
-msgstr ""
+msgstr "Įrašyti PreflopAdvisor..."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Save hand review"
-msgstr ""
+msgstr "Įrašyti rankos peržiūrą"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Solver review"
-msgstr ""
+msgstr "Solverio peržiūra"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Solver review (PreflopAdvisor)..."
-msgstr ""
+msgstr "Solverio peržiūra (PreflopAdvisor)..."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "This decision"
-msgstr ""
+msgstr "Šis sprendimas"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "This hand cannot be sent to PreflopAdvisor."
-msgstr ""
+msgstr "Šios rankos negalima išsiųsti į PreflopAdvisor."
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Amounts"
-msgstr ""
+msgstr "Sumos"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Big blinds"
-msgstr ""
+msgstr "Didieji blindai"
 
 #: fpdb_3_legacy/hand_share_dialog.py fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Copy"
-msgstr ""
+msgstr "Kopijuoti"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as Markdown"
-msgstr ""
+msgstr "Kopijuoti kaip Markdown"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as Markdown in BB"
-msgstr ""
+msgstr "Kopijuoti kaip Markdown BB vienetais"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as text"
-msgstr ""
+msgstr "Kopijuoti kaip tekstą"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy, python-format
@@ -2936,16 +3450,19 @@ msgid ""
 msgstr "Failas nerastas %s"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Date and time"
-msgstr ""
+msgstr "Data ir laikas"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "EV cashout"
-msgstr ""
+msgstr "EV cashout"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Forum (BBCode)"
-msgstr ""
+msgstr "Forumas (BBCode)"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
@@ -2953,66 +3470,74 @@ msgid "Hand number"
 msgstr "Betkoks skaičius"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Hide every name (Hero, Villain 1 ...)"
-msgstr ""
+msgstr "Slėpti visus vardus (Hero, Villain 1 ...)"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Include"
-msgstr ""
+msgstr "Įtraukti"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Keep every name"
-msgstr ""
+msgstr "Palikti visus vardus"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Keep my name, hide opponents"
-msgstr ""
+msgstr "Palikti mano vardą, slėpti varžovus"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Markdown"
-msgstr ""
+msgstr "Markdown"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Money / chips"
-msgstr ""
+msgstr "Pinigai / žetonai"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
-#| msgid "Name"
 msgid "Names"
-msgstr "Pavadinimas"
+msgstr "Vardai"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Plain text"
-msgstr ""
+msgstr "Paprastas tekstas"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Rake"
-msgstr ""
+msgstr "Rake"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
-#| msgid "Save"
 msgid "Save hand"
-msgstr "Išsaugoti"
+msgstr "Įrašyti ranką"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
-#| msgid "Save"
 msgid "Save..."
-msgstr "Išsaugoti"
+msgstr "Įrašyti..."
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Share hand"
-msgstr ""
+msgstr "Bendrinti ranką"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Showdown and results"
-msgstr ""
+msgstr "Showdown ir rezultatai"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Stacks"
-msgstr ""
+msgstr "Stekai"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
@@ -3020,105 +3545,129 @@ msgid "Table name"
 msgstr "Naudotojo vardas"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "This game has no big blind to count in."
-msgstr ""
+msgstr "Šis žaidimas neturi didžiojo blindo, pagal kurį skaičiuoti."
 
 #: fpdb_3_legacy/hand_share_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "This hand could not be rendered:\n"
 "%s"
 msgstr ""
+"Šios rankos nepavyko atvaizduoti:\n"
+"%s"
 
 #: fpdb_3_legacy/i18n.py
+#, fuzzy
 msgid "Stack"
-msgstr ""
+msgstr "Stekas"
 
 #: fpdb_3_legacy/i18n.py
+#, fuzzy
 msgid "Stack (bb)"
-msgstr ""
+msgstr "Stekas (bb)"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "About"
-msgstr ""
+msgstr "Apie"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "About the program"
-msgstr ""
+msgstr "Apie programą"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)"
 msgstr ""
+"Pridėti, redaguoti, tikrinti ir pasirinkti duomenų bazę (SQLite / "
+"PostgreSQL / MySQL)"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Advanced logger manager"
-msgstr ""
+msgstr "Išplėstinė žurnalo tvarkyklė"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid ""
 "Alerts for the session being played: loss, win, duration, hands, drawdown"
 msgstr ""
+"Įspėjimai apie žaidžiamą sesiją: nuostolis, laimėjimas, trukmė, rankos, "
+"nuosmukis"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Auto Import Ready."
 msgid "Auto Note Rules"
-msgstr "Automatinis importavimas paruoštas."
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Auto Notes Workbench"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Cash"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "CoinPoker Live Capture"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Configure"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Create or Recreate Tables"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Databases…"
-msgstr ""
+msgstr "Automatinių pastabų taisyklės"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Database creation failed"
+msgid "Auto Notes Workbench"
+msgstr "Automatinių pastabų dirbtuvės"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Cash"
+msgstr "Cash"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "CoinPoker Live Capture"
+msgstr "CoinPoker tiesioginis fiksavimas"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Configure"
+msgstr "Konfigūruoti"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Create or Recreate Tables"
+msgstr "Sukurti arba atkurti lenteles"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Databases…"
+msgstr "Duomenų bazės…"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Dump Database to Textfile"
-msgstr "Duombazės kūrimas nepavyko"
+msgstr "Iškelti duomenų bazę į tekstinį failą"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Edit automatic player-note rules"
-msgstr ""
+msgstr "Redaguoti automatinių pastabų apie žaidėjus taisykles"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Edit your preferences"
-msgstr ""
+msgstr "Redaguoti nuostatas"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Export the whole database to a text file (slow)"
-msgstr ""
+msgstr "Eksportuoti visą duomenų bazę į tekstinį failą (lėta)"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Graphs"
-msgstr ""
+msgstr "Grafikai"
 
 #: fpdb_3_legacy/menu_layout.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Preferences"
-msgstr ""
+msgstr "HUD nuostatos"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "HUD and Auto Import"
-msgstr ""
+msgstr "HUD ir automatinis importas"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -3126,99 +3675,127 @@ msgid "Hand Viewer"
 msgstr "Rankų filtrai:"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Help"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Help Tab"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import PT4 HUD (.pt4hud)"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import PT4 Stats (.pt4stat)"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import PokerTracker 4 custom statistics as declarative stat descriptors"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import a PokerTracker 4 HUD layout (stats + range charts)"
-msgstr ""
+msgstr "Pagalba"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Import Complete"
-msgid "Import filters"
-msgstr "Importavimas baigtas."
+msgid "Help Tab"
+msgstr "Pagalbos skirtukas"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import PT4 HUD (.pt4hud)"
+msgstr "Importuoti PT4 HUD (.pt4hud)"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import PT4 Stats (.pt4stat)"
+msgstr "Importuoti PT4 statistiką (.pt4stat)"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import PokerTracker 4 custom statistics as declarative stat descriptors"
+msgstr ""
+"Importuoti PokerTracker 4 savą statistiką kaip deklaratyvius statistikos "
+"aprašus"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import a PokerTracker 4 HUD layout (stats + range charts)"
+msgstr ""
+"Importuoti PokerTracker 4 HUD išdėstymą (statistika + intervalų lentelės)"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import filters"
+msgstr "Importo filtrai"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import, enable, disable, uninstall and export declarative stat packs"
 msgstr ""
+"Importuoti, įjungti, išjungti, pašalinti ir eksportuoti deklaratyvius "
+"statistikos paketus"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Language"
-msgstr ""
+msgstr "Kalba"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Launch SwC HTTP Capture"
-msgstr ""
+msgstr "Paleisti SwC HTTP fiksavimą"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Log Messages"
-msgstr ""
+msgstr "Žurnalo pranešimai"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Log and debug messages"
-msgstr ""
+msgstr "Žurnalo ir derinimo pranešimai"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Logger Dev Tool"
-msgstr ""
+msgstr "Žurnalo kūrėjo įrankis"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Opponents Report"
-msgstr ""
+msgstr "Varžovų ataskaita"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Preferences"
-msgstr ""
+msgstr "Nuostatos"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Quit"
-msgstr ""
+msgstr "Išeiti"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Quit the program"
-msgstr ""
+msgstr "Išeiti iš programos"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid ""
 "Re-derive the situations and hand states the Research Browser and HUD read"
 msgstr ""
+"Iš naujo išvesti situacijas ir rankų būsenas, kurias skaito tyrimų naršyklė "
+"ir HUD"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Rebuild Analytics Data"
-msgstr ""
+msgstr "Atkurti analitinius duomenis"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Rebuild DB Indexes"
-msgstr ""
+msgstr "Atkurti DB indeksus"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Rebuild HUD Cache"
-msgstr ""
+msgstr "Atkurti HUD podėlį"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Research Browser"
-msgstr ""
+msgstr "Tyrimų naršyklė"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Research Browser for Omaha"
-msgstr ""
+msgstr "Tyrimų naršyklė Omahai"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -3231,8 +3808,9 @@ msgid "Session Guard"
 msgstr "Sesijos"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Session Stats"
-msgstr ""
+msgstr "Sesijų statistika"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -3241,29 +3819,33 @@ msgstr "Nustatymai"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Status"
 msgid "Stat Packs"
-msgstr "Būsena"
+msgstr "Statistikos paketai"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Statistics"
-msgstr ""
+msgstr "Statistika"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Stats Guide"
-msgstr ""
+msgstr "Statistikos vadovas"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Study Explorer"
-msgstr ""
+msgstr "Studijų naršyklė"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Themes"
-msgstr ""
+msgstr "Temos"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tools"
-msgstr ""
+msgstr "Įrankiai"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -3271,8 +3853,9 @@ msgid "Tournament"
 msgstr "Turnyrai"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tourney Graphs"
-msgstr ""
+msgstr "Turnyrų grafikai"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -3280,8 +3863,9 @@ msgid "Tourney Hand Viewer"
 msgstr "Rankų filtrai:"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tourney Stats"
-msgstr ""
+msgstr "Turnyrų statistika"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
@@ -3289,60 +3873,73 @@ msgid "Version"
 msgstr "Sesijos"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Version, packaging and runtime environment details"
-msgstr ""
+msgstr "Versijos, pakavimo ir vykdymo aplinkos informacija"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "View database statistics"
-msgstr ""
+msgstr "Peržiūrėti duomenų bazės statistiką"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "What every filter is for in a four-card game, and the two that are not"
 msgstr ""
+"Kam skirtas kiekvienas filtras keturių kortų žaidime, ir du, kurie netinka"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "+"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
 msgid "Add an item to this row"
-msgstr ""
+msgstr "Pridėti elementą į šią eilutę"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
 msgid "Remove the last item of this row"
-msgstr ""
+msgstr "Pašalinti paskutinį šios eilutės elementą"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "−"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Add/Edit Statistic"
-msgstr ""
+msgstr "Pridėti/redaguoti statistiką"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Block Properties"
-msgstr ""
+msgstr "Bloko savybės"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Click Action:"
-msgstr ""
+msgstr "Veiksmas spustelėjus:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Column:"
-msgstr ""
+msgstr "Stulpelis:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Edit Popup Statistic"
-msgstr ""
+msgstr "Redaguoti iššokančio lango statistiką"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Edit Popup Window"
-msgstr ""
+msgstr "Redaguoti iššokantį langą"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Export Layout Coordinates"
-msgstr ""
+msgstr "Eksportuoti išdėstymo koordinates"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -3350,219 +3947,273 @@ msgid "Grid Position:"
 msgstr "Pozicija"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "High Range:"
-msgstr ""
+msgstr "Aukštas intervalas:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Low Range:"
-msgstr ""
+msgstr "Žemas intervalas:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Middle color:"
-msgstr ""
+msgstr "Vidurinė spalva:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid ""
 "Minimum width of each statistic cell; Automatic keeps the legacy default"
 msgstr ""
+"Mažiausias kiekvieno statistikos langelio plotis; „Automatinis“ išlaiko "
+"senąją numatytąją reikšmę"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "OK"
-msgstr ""
+msgstr "Gerai"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Optional: Action when stat is clicked"
-msgstr ""
+msgstr "Neprivaloma: veiksmas spustelėjus statistiką"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Optional: Popup to show on hover"
-msgstr ""
+msgstr "Neprivaloma: iššokantis langas užvedus pelę"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Optional: Submenu name for hierarchical popups"
-msgstr ""
+msgstr "Neprivaloma: submeniu pavadinimas hierarchiniams iššokantiems langams"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Override the automatic section used by ModernSubmenu"
-msgstr ""
+msgstr "Pakeisti automatinę ModernSubmenu naudojamą skiltį"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Popup:"
-msgstr ""
+msgstr "Iššokantis langas:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Preview shows how statistic colors will change based on values"
-msgstr ""
+msgstr "Peržiūra rodo, kaip statistikos spalvos keisis pagal reikšmes"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Row:"
-msgstr ""
+msgstr "Eilutė:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Select None"
-msgstr ""
+msgstr "Nieko nepasirinkti"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid ""
 "Select the site layout coordinates you want to include in the package.\n"
 "This will let other users position the HUD boxes exactly like yours."
 msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Show this panel only for a villain in this position (blank = always)"
-msgstr ""
+"Pasirinkite svetainių išdėstymo koordinates, kurias norite įtraukti į "
+"paketą.\n"
+"Tai leis kitiems naudotojams išdėstyti HUD langelius lygiai taip pat kaip "
+"jūsų."
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-#| msgid "Status"
+msgid "Show this panel only for a villain in this position (blank = always)"
+msgstr "Rodyti šį skydelį tik varžovui šioje pozicijoje (tuščia = visada)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Statistic:"
-msgstr "Būsena"
+msgstr "Statistika:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Use middle color for values between thresholds"
-msgstr ""
+msgstr "Naudoti vidurinę spalvą reikšmėms tarp ribų"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Values above"
-msgstr ""
+msgstr "Reikšmės aukščiau"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Values below"
-msgstr ""
+msgstr "Reikšmės žemiau"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "show as"
-msgstr ""
+msgstr "rodyti kaip"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "➕ Add Stat"
-msgstr ""
+msgstr "➕ Pridėti statistiką"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "➖ Remove Stat"
-msgstr ""
+msgstr "➖ Pašalinti statistiką"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "(none)"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "A panel rule with these conditions and this profile already exists."
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "A profile definition with these selectors already exists."
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "ANY"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "ANY table"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Active Profile Definitions"
-msgstr ""
+msgstr "(nėra)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Archive File"
+msgid "A panel rule with these conditions and this profile already exists."
+msgstr "Skydelio taisyklė su šiomis sąlygomis ir šiuo profiliu jau egzistuoja."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "A profile definition with these selectors already exists."
+msgstr "Profilio apibrėžimas su šiais parinkikliais jau egzistuoja."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "ANY"
+msgstr "BET KOKS"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "ANY table"
+msgstr "BET KOKS stalas"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Active Profile Definitions"
+msgstr "Aktyvūs profilių apibrėžimai"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Active Profile:"
-msgstr "Archyvuoti failą"
+msgstr "Aktyvus profilis:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add"
-msgstr ""
+msgstr "Pridėti"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Block"
-msgstr ""
+msgstr "Pridėti bloką"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Label"
-msgstr ""
+msgstr "Pridėti etiketę"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Line"
-msgstr ""
+msgstr "Pridėti liniją"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Profile Definition"
-msgstr ""
+msgstr "Pridėti profilio apibrėžimą"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Stat"
-msgstr ""
+msgstr "Pridėti statistiką"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
-msgstr ""
+msgstr "Pridėti horizontalią skiriamąją liniją (PT4 'Horz Line') į skydelį"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a new panel (block) to a multi-panel HUD"
-msgstr ""
+msgstr "Pridėti naują skydelį (bloką) į kelių skydelių HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a text label (column/row header or caption) to a panel"
 msgstr ""
+"Pridėti teksto etiketę (stulpelio/eilutės antraštę ar užrašą) į skydelį"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "AddDB starting"
 msgid "Add stat"
-msgstr "Atidaromas AddDB"
+msgstr "Pridėti statistiką"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add to block"
-msgstr ""
+msgstr "Pridėti į bloką"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Analytics-backed stats"
-msgstr ""
+msgstr "Analitika paremta statistika"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Append the profile emoji (e.g. 🐟, 🐌, 🎯) and color the player's name in "
 "the HUD."
 msgstr ""
+"Pridėti profilio jaustuką (pvz. 🐟, 🐌, 🎯) ir nuspalvinti žaidėjo vardą HUD."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr ""
+"Esant mažiau rankų nei šis skaičius, skydelis nerodomas ir rodoma atsarginė "
+"parinktis."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Block Props"
-msgstr ""
+msgstr "Bloko savyb."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot add this rule"
-msgstr ""
+msgstr "Negalima pridėti šios taisyklės"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot export"
-msgstr ""
+msgstr "Negalima eksportuoti"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot import"
-msgstr ""
+msgstr "Negalima importuoti"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot update this rule"
-msgstr ""
+msgstr "Negalima atnaujinti šios taisyklės"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Class:"
-msgstr ""
+msgstr "Klasė:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Color Ranges"
-msgstr ""
+msgstr "Spalvų intervalai"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3570,204 +4221,254 @@ msgid "Conditions"
 msgstr "Pozicija"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Design"
-msgstr ""
+msgstr "Dizainas"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Disabled: this rule never matches."
-msgstr ""
+msgstr "Išjungta: ši taisyklė niekada neatitinka."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Duplicate rule"
-msgstr ""
+msgstr "Pasikartojanti taisyklė"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Edit"
 msgstr "Keisti"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Edit the selected panel's title/border colours, position and label"
 msgstr ""
+"Redaguoti pasirinkto skydelio pavadinimo/rėmelio spalvas, poziciją ir etiketę"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Effective profile for these selectors"
-msgstr ""
+msgstr "Galiojantis profilis šiems parinkikliams"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Enable Player Profiling (Categorization)"
-msgstr ""
+msgstr "Įjungti žaidėjų profiliavimą (kategorizavimą)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Enable auto-classification of players into Nit, Calling Station, Fish, "
 "Maniac, LAG, Reg, TAG."
 msgstr ""
+"Įjungti automatinį žaidėjų klasifikavimą į Nit, Calling Station, Fish, "
+"Maniac, LAG, Reg, TAG."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Export panel rules"
-msgstr ""
+msgstr "Eksportuoti skydelių taisykles"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Export…"
-msgstr ""
+msgstr "Eksportuoti…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Fallback"
-msgstr ""
+msgstr "Atsarginė parinktis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Game"
-msgstr ""
+msgstr "Žaidimas"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "General HUD and Profiling Settings"
-msgstr ""
+msgstr "Bendri HUD ir profiliavimo nustatymai"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Preview"
-msgstr ""
+msgstr "HUD peržiūra"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Profile"
-msgstr ""
+msgstr "HUD profilis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Profile Configuration"
-msgstr ""
+msgstr "HUD profilio konfigūracija"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD imported — refresh required"
-msgstr ""
+msgstr "HUD importuotas — reikia atnaujinti"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD profile"
-msgstr ""
+msgstr "HUD profilis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Hands for this seat"
-msgstr ""
+msgstr "Šios vietos rankos"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Horz Line"
-msgstr ""
+msgstr "Horiz. linija"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Icons:"
-msgstr ""
+msgstr "Piktogramos:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Import All"
 msgid "Import panel rules"
-msgstr "Įkelti Viską"
+msgstr "Importuoti skydelių taisykles"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Imported {count} rule(s)."
-msgstr ""
+msgstr "Importuota taisyklių: {count}."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Import All"
 msgid "Import…"
-msgstr "Įkelti Viską"
+msgstr "Importuoti…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Issues"
-msgstr ""
+msgstr "Problemos"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Item Properties"
-msgstr ""
+msgstr "Elemento savybės"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Items"
-msgstr ""
+msgstr "Elementai"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Layout Conflict"
-msgstr ""
+msgstr "Išdėstymų konfliktas"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Min sample"
-msgstr ""
+msgstr "Min. imtis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Minimum hands required for profiling:"
-msgstr ""
+msgstr "Mažiausias profiliavimui reikalingas rankų skaičius:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Move down"
-msgstr ""
+msgstr "Perkelti žemyn"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Move up"
-msgstr ""
+msgstr "Perkelti aukštyn"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "New Profile"
-msgstr ""
+msgstr "Naujas profilis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "No HUD profile of this name exists; the game default will be used instead."
 msgstr ""
+"Tokio pavadinimo HUD profilio nėra; vietoj jo bus naudojamas žaidimo "
+"numatytasis."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "No HUD profile of this name exists; this rule will be ignored."
-msgstr ""
+msgstr "Tokio pavadinimo HUD profilio nėra; ši taisyklė bus ignoruojama."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Off by default. When it is on, the panels a rule names are shown and every "
 "other block keeps the position rule it has always had."
 msgstr ""
+"Pagal numatymą išjungta. Įjungus rodomi taisyklėje nurodyti skydeliai, o "
+"kiti blokai išlaiko savo įprastą pozicijos taisyklę."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Open preview at 100% real size in a new window"
-msgstr ""
+msgstr "Atidaryti peržiūrą 100% tikru dydžiu naujame lange"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Open the Dynamic HUD guide"
-msgstr ""
+msgstr "Atidaryti Dynamic HUD vadovą"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel"
-msgstr ""
+msgstr "Skydelis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel documents (*.json)"
-msgstr ""
+msgstr "Skydelių dokumentai (*.json)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel rules"
-msgstr ""
+msgstr "Skydelių taisyklės"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panels"
-msgstr ""
+msgstr "Skydeliai"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr ""
+"Pasirinkite žaidimą (ir formatą), kad pamatytumėte taikytiną numatytąjį "
+"profilį."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a HUD profile first."
-msgstr ""
+msgstr "Pirmiausia pasirinkite HUD profilį."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Players"
-msgstr ""
+msgstr "Žaidėjai"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Popup Conflict"
-msgstr ""
+msgstr "Iššokančių langų konfliktas"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Popup Preview"
-msgstr ""
+msgstr "Iššokančio lango peržiūra"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3775,16 +4476,19 @@ msgid "Positional panels:"
 msgstr "Pozicija"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Preview, by the same resolver the HUD uses"
-msgstr ""
+msgstr "Peržiūra, naudojant tą patį sprendiklį kaip HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Priority"
-msgstr ""
+msgstr "Prioritetas"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Profile Conflict"
-msgstr ""
+msgstr "Profilių konfliktas"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3792,8 +4496,9 @@ msgid "Profile actions"
 msgstr "Pozicija"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Remove"
-msgstr ""
+msgstr "Pašalinti"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3801,20 +4506,24 @@ msgid "Rule name"
 msgstr "Naudotojo vardas"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Sample column"
-msgstr ""
+msgstr "Imties stulpelis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Seats"
-msgstr ""
+msgstr "Vietos"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Select Popup:"
-msgstr ""
+msgstr "Pasirinkite iššokantį langą:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Select a rule to update first."
-msgstr ""
+msgstr "Pirmiausia pasirinkite taisyklę, kurią norite atnaujinti."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3822,491 +4531,609 @@ msgid "Show hero HUD"
 msgstr "Užbaigti šį HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show profile emoji and color code directly on player name labels"
 msgstr ""
+"Rodyti profilio jaustuką ir spalvos kodą tiesiai žaidėjų vardų etiketėse"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show the panels that fit the hand"
-msgstr ""
+msgstr "Rodyti rankai tinkančius skydelius"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Speed"
-msgstr ""
+msgstr "Greitis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stats whose value comes from the analytics layer rather than a column."
 msgstr ""
+"Statistika, kurios reikšmė gaunama iš analizės sluoksnio, o ne iš stulpelio."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Text"
-msgstr ""
+msgstr "Tekstas"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Text label (header / caption) — not a stat"
-msgstr ""
+msgstr "Teksto etiketė (antraštė / užrašas) — ne statistika"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The HUD profile was imported and saved, but the application could not "
 "refresh its configuration. Restart fpdb to apply it. You do not need to "
 "import the file again."
 msgstr ""
+"HUD profilis buvo importuotas ir įrašytas, bet programa negalėjo atnaujinti "
+"savo konfigūracijos. Paleiskite fpdb iš naujo, kad jis būtų pritaikytas. "
+"Failo importuoti dar kartą nereikia."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The HUDs fpdb ships, as a seat would see them. Pick a context to watch the "
 "Dynamic package change panel, and read the popup paths to find where a "
 "number lives before you go looking for it at a table."
 msgstr ""
+"HUD, kuriuos pateikia fpdb, taip, kaip juos matytų vieta prie stalo. "
+"Pasirinkite kontekstą, kad pamatytumėte, kaip Dynamic paketas keičia "
+"skydelius, ir perskaitykite iššokančių langų kelius, kad žinotumėte, kur yra "
+"skaičius, prieš ieškodami jo prie stalo."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The minimum number of hands tracked on an opponent before profiling is "
 "computed."
 msgstr ""
+"Mažiausias rankų su varžovu skaičius, nuo kurio skaičiuojamas profilis."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The preview uses the same compact label grid as the in-game HUD.\n"
 "Spacing, font, colors and HUD cell values come from the selected profile."
 msgstr ""
+"Peržiūra naudoja tą patį kompaktišką etikečių tinklelį kaip žaidimo HUD.\n"
+"Tarpai, šriftas, spalvos ir HUD langelių reikšmės imamos iš pasirinkto "
+"profilio."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Theme:"
-msgstr ""
+msgstr "Tema:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Then show"
-msgstr ""
+msgstr "Tada rodyti"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Update rule"
-msgstr ""
+msgstr "Atnaujinti taisyklę"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Update selected"
-msgstr ""
+msgstr "Atnaujinti pasirinktą"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "When this is the spot"
-msgstr ""
+msgstr "Kai situacija yra"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Wrote {path}"
-msgstr ""
+msgstr "Įrašyta {path}"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "all profiles"
-msgstr ""
+msgstr "visi profiliai"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "always"
-msgstr ""
+msgstr "visada"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "optional name"
-msgstr ""
+msgstr "neprivalomas pavadinimas"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "the profile grid"
-msgstr ""
+msgstr "profilio tinklelis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{profile} — from the rule {selectors}"
-msgstr ""
+msgstr "{profile} — pagal taisyklę {selectors}"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{profile} — no rule matches, so the game default applies"
 msgstr ""
+"{profile} — jokia taisyklė neatitinka, todėl taikomas žaidimo numatytasis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "—"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "↑ Up"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "↓ Down"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "⚙️ General Settings"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "➕ Add"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "➕ New Popup"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "➕ New Profile"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "➖ Remove"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "🃏 Reference HUDs"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "🎯 Profile Select"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "💬 Popup Windows"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "📊 Statistics"
-msgstr ""
+msgstr "↑ Aukštyn"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Edit"
+msgid "↓ Down"
+msgstr "↓ Žemyn"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "⚙️ General Settings"
+msgstr "⚙️ Bendri nustatymai"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "➕ Add"
+msgstr "➕ Pridėti"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "➕ New Popup"
+msgstr "➕ Naujas iššokantis langas"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "➕ New Profile"
+msgstr "➕ Naujas profilis"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "➖ Remove"
+msgstr "➖ Pašalinti"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "🃏 Reference HUDs"
+msgstr "🃏 Pavyzdiniai HUD"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "🎯 Profile Select"
+msgstr "🎯 Profilio pasirinkimas"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "💬 Popup Windows"
+msgstr "💬 Iššokantys langai"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "📊 Statistics"
+msgstr "📊 Statistika"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📝 Edit"
-msgstr "Keisti"
+msgstr "📝 Redaguoti"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📤 Export HUD"
-msgstr ""
+msgstr "📤 Eksportuoti HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📥 Import HUD"
-msgstr ""
+msgstr "📥 Importuoti HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🔍 Real Size"
-msgstr ""
+msgstr "🔍 Tikras dydis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🧩 Dynamic Panels"
-msgstr ""
+msgstr "🧩 Dinaminiai skydeliai"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "100% Reset"
-msgstr ""
+msgstr "100% atstatyti"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Close"
-msgstr ""
+msgstr "Uždaryti"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Natural Size: {w} × {h} px  (Scale: {scale}%)"
-msgstr ""
+msgstr "Natūralus dydis: {w} × {h} px  (mastelis: {scale}%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Reset to 100% natural size"
-msgstr ""
+msgstr "Atstatyti į 100% natūralų dydį"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Zoom in (+25%)"
-msgstr ""
+msgstr "Artinti (+25%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Zoom out (-25%)"
-msgstr ""
+msgstr "Tolinti (-25%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "🔍 Popup Preview — {name} (Real Size)"
-msgstr ""
+msgstr "🔍 Iššokančio lango peržiūra — {name} (tikras dydis)"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid "Context"
-msgstr ""
+msgstr "Kontekstas"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid ""
 "Every popup a cell of this package opens, and everything those popups "
 "navigate to. A row ending in an arrow leaves the package for the shipped "
 "popup library."
 msgstr ""
+"Kiekvienas iššokantis langas, kurį atidaro šio paketo langelis, ir viskas, į "
+"ką tie langai nukreipia. Rodykle besibaigianti eilutė palieka paketą ir veda "
+"į pateikiamą iššokančių langų biblioteką."
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid "Reference HUD"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "% of pot"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "A family of situations, such as postflop defence."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "A legacy PT4 stat column the decision feeds."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Action"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Action faced"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Action taken"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Aggressor, defender or passive."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "All-in"
-msgstr ""
+msgstr "Pavyzdinis HUD"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Amount of rake paid"
+msgid "% of pot"
+msgstr "% banko"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "A family of situations, such as postflop defence."
+msgstr "Situacijų šeima, pvz. gynyba po flopo."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "A legacy PT4 stat column the decision feeds."
+msgstr "Senasis PT4 statistikos stulpelis, kurį maitina sprendimas."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Action"
+msgstr "Veiksmas"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Action faced"
+msgstr "Veiksmas, su kuriuo susidurta"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Action taken"
+msgstr "Atliktas veiksmas"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Aggressor, defender or passive."
+msgstr "Agresorius, gynėjas ar pasyvus."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "All-in"
+msgstr "All-in"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Amount to call"
-msgstr "Sumokėtų mokesčių kiekis"
+msgstr "Suma sulyginti"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "BB"
 msgstr "BB"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Beats how much of the range"
-msgstr ""
+msgstr "Kokią intervalo dalį įveikia"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size"
-msgstr ""
+msgstr "Statymo dydis"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size (% of pot)"
-msgstr ""
+msgstr "Statymo dydis (% banko)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size (basis points)"
-msgstr ""
+msgstr "Statymo dydis (baziniais punktais)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size bucket"
-msgstr ""
+msgstr "Statymo dydžio grupė"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced"
-msgstr ""
+msgstr "Statymo, su kuriuo susidurta, dydis"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced (% of pot)"
-msgstr ""
+msgstr "Statymo, su kuriuo susidurta, dydis (% banko)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced (basis points)"
-msgstr ""
+msgstr "Statymo, su kuriuo susidurta, dydis (baziniais punktais)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced bucket"
-msgstr ""
+msgstr "Statymo, su kuriuo susidurta, dydžio grupė"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet sizing"
-msgstr ""
+msgstr "Statymų dydžiai"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Big blind (chips)"
-msgstr ""
+msgstr "Didysis blindas (žetonais)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blocker (all of)"
-msgstr ""
+msgstr "Blokeris (visi)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blocker (any of)"
-msgstr ""
+msgstr "Blokeris (bet kuris)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blocker (none of)"
-msgstr ""
+msgstr "Blokeris (nė vieno)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blockers the actor held (any of them)."
-msgstr ""
+msgstr "Veikėjo turėti blokeriai (bet kuris iš jų)."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blockers the actor must have all of."
-msgstr ""
+msgstr "Blokeriai, kuriuos veikėjas turi turėti visus."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board"
-msgstr ""
+msgstr "Bordas"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board connectivity"
-msgstr ""
+msgstr "Bordo sujungtumas"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board dealt"
-msgstr ""
+msgstr "Bordas išdalytas"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board high card"
-msgstr ""
+msgstr "Aukščiausia bordo korta"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board pairing"
-msgstr ""
+msgstr "Bordo poros"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board street"
-msgstr ""
+msgstr "Bordo gatvė"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board suit structure"
-msgstr ""
+msgstr "Bordo spalvų struktūra"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture"
-msgstr ""
+msgstr "Bordo tekstūra"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture (all of)"
-msgstr ""
+msgstr "Bordo tekstūra (visos)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture flags the board must have all of."
-msgstr ""
+msgstr "Bordo tekstūros žymės, kurias bordas turi turėti visas."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Cards discarded at the draw; zero means stand pat and unknown discard counts "
 "stay unclassified."
 msgstr ""
+"Kortos, išmestos keitimo metu; nulis reiškia stand pat, o nežinomi išmetimų "
+"kiekiai lieka neklasifikuoti."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Cards drawn"
-msgstr ""
+msgstr "Pakeistos kortos"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Cards drawn (0 = stand pat)"
-msgstr ""
+msgstr "Pakeistos kortos (0 = stand pat)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Currency"
-msgstr ""
+msgstr "Valiuta"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw (all of)"
-msgstr ""
+msgstr "Dro (visi)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw (any of)"
-msgstr ""
+msgstr "Dro (bet kuris)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw (none of)"
-msgstr ""
+msgstr "Dro (nė vieno)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw number"
-msgstr ""
+msgstr "Keitimo numeris"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draws the actor had: flush draws, gutshots and the rest (any of them)."
-msgstr ""
+msgstr "Veikėjo turėti dro: flush dro, gutshot ir kiti (bet kuris iš jų)."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draws the actor must have all of."
-msgstr ""
+msgstr "Dro, kuriuos veikėjas turi turėti visus."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "EV-adjusted result (all-in EV)"
-msgstr ""
+msgstr "EV koreguotas rezultatas (all-in EV)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "EV-adjusted result per decision"
-msgstr ""
+msgstr "EV koreguotas rezultatas per sprendimą"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack"
-msgstr ""
+msgstr "Efektyvus stekas"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack (chips)"
-msgstr ""
+msgstr "Efektyvus stekas (žetonais)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack in the bands a tournament is played in."
-msgstr ""
+msgstr "Efektyvus stekas intervalais, kuriais žaidžiamas turnyras."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Every situation the decision matched, not only the most specific one. Use "
 "this to ask how often an opportunity was taken: raising an open makes the "
 "decision a 3-bet, so only this keeps it among the opens faced."
 msgstr ""
+"Kiekviena situacija, kurią sprendimas atitiko, ne tik pati konkrečiausia. "
+"Naudokite tai klausdami, kaip dažnai buvo pasinaudota galimybe: pakėlus "
+"atidarymą sprendimas tampa 3-bet, todėl tik tai jį palieka tarp atidarymų, "
+"su kuriais susidurta."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Facing an all-in"
-msgstr ""
+msgstr "Prieš all-in"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Fixed limit, no limit and the other betting structures."
-msgstr ""
+msgstr "Fiksuotas limitas, be limito ir kitos statymų struktūros."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Game and stake"
-msgstr ""
+msgstr "Žaidimas ir statymų dydis"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Game family"
-msgstr ""
+msgstr "Žaidimų šeima"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hands"
 msgid "Hand"
-msgstr "Rankos"
+msgstr "Ranka"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hand state known"
-msgstr ""
+msgstr "Žinoma rankos būsena"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hand strength"
-msgstr ""
+msgstr "Rankos stiprumas"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hand-classified street"
-msgstr ""
+msgstr "Klasifikuota rankos gatvė"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hand Filters:"
 msgid "Hands after"
-msgstr "Rankų filtrai:"
+msgstr "Rankos po"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hands/file:"
 msgid "Hands before"
-msgstr "Rankos/failas"
+msgstr "Rankos prieš"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hero:"
 msgid "Hero"
-msgstr "Herojus:"
+msgstr "Herojus"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hero's own decisions, or everyone except hero. Any keeps both."
 msgstr ""
+"Herojaus sprendimai arba visi, išskyrus herojų. „Bet kuris“ palieka abu."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Hole cards"
@@ -4314,131 +5141,159 @@ msgstr "Turimos kortos"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hole cards"
 msgid "Hole cards known"
-msgstr "Turimos kortos"
-
-#: fpdb_3_legacy/research_labels.py
-msgid "How many holdings the holding beats."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "How many players were dealt into the hand."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "How many players were still in the hand."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "How many raises came before this decision."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "How much the actor had to call."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "How strong the holding is: nuts, near nuts, strong, medium or weak."
-msgstr ""
+msgstr "Žinomos savos kortos"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Position"
+msgid "How many holdings the holding beats."
+msgstr "Kiek rankų ši ranka įveikia."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "How many players were dealt into the hand."
+msgstr "Kiek žaidėjų gavo kortas šioje rankoje."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "How many players were still in the hand."
+msgstr "Kiek žaidėjų dar buvo rankoje."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "How many raises came before this decision."
+msgstr "Kiek pakėlimų buvo prieš šį sprendimą."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "How much the actor had to call."
+msgstr "Kiek veikėjas turėjo sulyginti."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "How strong the holding is: nuts, near nuts, strong, medium or weak."
+msgstr "Kokia stipri ranka: nuts, beveik nuts, stipri, vidutinė ar silpna."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "In position"
-msgstr "Pozicija"
+msgstr "Su pozicija"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "In position versus the bettor"
-msgstr ""
+msgstr "Su pozicija prieš statytoją"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "In position versus the previous aggressor"
-msgstr ""
+msgstr "Su pozicija prieš ankstesnį agresorių"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Is the aggressor"
-msgstr ""
+msgstr "Yra agresorius"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Is the preflop aggressor"
-msgstr ""
+msgstr "Yra preflopo agresorius"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat column"
-msgstr ""
+msgstr "Senasis statistikos stulpelis"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat response"
-msgstr ""
+msgstr "Senosios statistikos atsakas"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Linked player identity"
-msgstr ""
+msgstr "Susieta žaidėjo tapatybė"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Made hand"
-msgstr ""
+msgstr "Sudaryta kombinacija"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Made hand rank"
-msgstr ""
+msgstr "Sudarytos kombinacijos rangas"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Multiway"
-msgstr ""
+msgstr "Keli žaidėjai"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Named texture flags such as monotone or connected (any of them)."
 msgstr ""
+"Pavadintos tekstūros žymės, pvz. monotone ar connected (bet kuri iš jų)."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One import session."
-msgstr ""
+msgstr "Viena importo sesija."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One specific hand."
-msgstr ""
+msgstr "Viena konkreti ranka."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One specific tournament."
-msgstr ""
+msgstr "Vienas konkretus turnyras."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions played on or after this date."
-msgstr ""
+msgstr "Tik sprendimai, žaisti šią datą ar vėliau."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions played on or before this date."
-msgstr ""
+msgstr "Tik sprendimai, žaisti šią datą ar anksčiau."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions with none of the named blockers."
-msgstr ""
+msgstr "Tik sprendimai be nė vieno iš nurodytų blokerių."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions with none of the named draws."
-msgstr ""
+msgstr "Tik sprendimai be nė vieno iš nurodytų dro."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only hands imported after this hand id."
-msgstr ""
+msgstr "Tik rankos, importuotos po šio rankos ID."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only hands imported before this hand id."
-msgstr ""
+msgstr "Tik rankos, importuotos prieš šį rankos ID."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Opponent position"
-msgstr ""
+msgstr "Varžovo pozicija"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Other"
-msgstr ""
+msgstr "Kita"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pair detail"
-msgstr ""
+msgstr "Poros detalė"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -4456,8 +5311,9 @@ msgid "Players in the hand"
 msgstr "Naudotojo vardas"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Poker room"
-msgstr ""
+msgstr "Pokerio kambarys"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Position"
@@ -4469,461 +5325,572 @@ msgid "Position and stack"
 msgstr "Pozicija"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pot before the action"
-msgstr ""
+msgstr "Bankas prieš veiksmą"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pot odds"
-msgstr ""
+msgstr "Banko šansai"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pot type"
-msgstr ""
+msgstr "Banko tipas"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Preflop, flop, turn or river."
-msgstr ""
+msgstr "Preflopas, flopas, tėrnas ar riveris."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Rainbow, two-tone, monotone and the deeper flush boards."
-msgstr ""
+msgstr "Rainbow, two-tone, monotone ir gilesni flush bordai."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Raises before"
-msgstr ""
+msgstr "Pakėlimai prieš"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Range holdings"
-msgstr ""
+msgstr "Intervalo rankos"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Relative position"
-msgstr ""
+msgstr "Santykinė pozicija"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Response"
-msgstr ""
+msgstr "Atsakas"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Restrict the population to a set of players."
-msgstr ""
+msgstr "Apriboti populiaciją žaidėjų rinkiniu."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Restrict the population to one player."
-msgstr ""
+msgstr "Apriboti populiaciją vienu žaidėju."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Restrict to a linked (site, alias) identity."
-msgstr ""
+msgstr "Apriboti susieta (svetainė, slapyvardis) tapatybe."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Role"
-msgstr ""
+msgstr "Vaidmuo"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Runout"
-msgstr ""
+msgstr "Likusios kortos"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "SPR"
-msgstr ""
+msgstr "SPR"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "SPR band"
-msgstr ""
+msgstr "SPR intervalas"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Seats between the actor and the button."
-msgstr ""
+msgstr "Vietos tarp veikėjo ir mygtuko."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Seats dealt in"
-msgstr ""
+msgstr "Išdalytos vietos"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Short, medium, deep or very deep stacks."
-msgstr ""
+msgstr "Trumpi, vidutiniai, gilūs ar labai gilūs stekai."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Situation"
-msgstr ""
+msgstr "Situacija"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Situation family"
-msgstr ""
+msgstr "Situacijų šeima"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Situation, including the ones it led to"
-msgstr ""
+msgstr "Situacija, įskaitant tas, į kurias ji vedė"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stack depth"
-msgstr ""
+msgstr "Steko gylis"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stack depth band"
-msgstr ""
+msgstr "Steko gylio intervalas"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stack-to-pot ratio before the action."
-msgstr ""
+msgstr "Steko ir banko santykis prieš veiksmą."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stake (big blinds)"
-msgstr ""
+msgstr "Statymų dydis (didžiaisiais blindais)"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Setting"
 msgid "Starting hand"
-msgstr "Nustatymai"
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Street"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Street and pot"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Street number"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Table size"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The 169 Hold'em starting-hand classes."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The bet size faced, in the configured sizing buckets."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The bet size made, in the configured sizing buckets."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The big blind in chips, for mixed stakes."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The board street as a number, the flop being one."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The currency the game was played in."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The decision, normalized: fold, check, call, bet or raise."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The game family: hold'em/omaha, stud or draw."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The game variant, such as Hold'em or Omaha."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The highest card of the board."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The letter a legacy PT4 stat column records."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The made hand the actor held: pairs, sets, straights and so on."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The most specific situation the decision matched."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The pot odds offered, in basis points."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The pot size before the action, in chips."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The same ratio as the bands a player thinks in."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The seat of the player the action was against."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The seat of the player who acted."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The shape of the pot: unopened, limped, single-raised, 3-bet, 4-bet."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The share of the range the holding beats."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The size of the bet faced, as a percentage of the pot."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The size of the bet faced, in basis points of the pot."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The size of the bet made, as a percentage of the pot."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The size of the bet made, in basis points of the pot."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The size of the game, expressed in big blinds."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The smaller of the two stacks, in big blinds."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The smaller of the two stacks, in chips."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The street as a number, preflop being zero."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The street the hand state was classified on."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The strength of the made hand, as a number."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The table size, such as 6-max or full ring."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Three or more players saw the decision."
-msgstr ""
+msgstr "Pradinė ranka"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Tournaments"
+msgid "Street"
+msgstr "Gatvė"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Street and pot"
+msgstr "Gatvė ir bankas"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Street number"
+msgstr "Gatvės numeris"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Table size"
+msgstr "Stalo dydis"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The 169 Hold'em starting-hand classes."
+msgstr "169 Hold'em pradinių rankų klasės."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The bet size faced, in the configured sizing buckets."
+msgstr "Statymo, su kuriuo susidurta, dydis sukonfigūruotomis dydžių grupėmis."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The bet size made, in the configured sizing buckets."
+msgstr "Atlikto statymo dydis sukonfigūruotomis dydžių grupėmis."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The big blind in chips, for mixed stakes."
+msgstr "Didysis blindas žetonais, mišriems statymų dydžiams."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The board street as a number, the flop being one."
+msgstr "Bordo gatvė kaip skaičius, flopas – vienas."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The currency the game was played in."
+msgstr "Valiuta, kuria buvo žaidžiama."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The decision, normalized: fold, check, call, bet or raise."
+msgstr "Sprendimas, normalizuotas: fold, check, call, bet ar raise."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The game family: hold'em/omaha, stud or draw."
+msgstr "Žaidimų šeima: hold'em/omaha, stud ar draw."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The game variant, such as Hold'em or Omaha."
+msgstr "Žaidimo variantas, pvz. Hold'em ar Omaha."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The highest card of the board."
+msgstr "Aukščiausia bordo korta."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The letter a legacy PT4 stat column records."
+msgstr "Raidė, kurią įrašo senasis PT4 statistikos stulpelis."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The made hand the actor held: pairs, sets, straights and so on."
+msgstr "Veikėjo turėta kombinacija: poros, setai, stritai ir t. t."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The most specific situation the decision matched."
+msgstr "Konkrečiausia situacija, kurią sprendimas atitiko."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The pot odds offered, in basis points."
+msgstr "Siūlomi banko šansai, baziniais punktais."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The pot size before the action, in chips."
+msgstr "Banko dydis prieš veiksmą, žetonais."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The same ratio as the bands a player thinks in."
+msgstr "Tas pats santykis intervalais, kuriais mąsto žaidėjas."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The seat of the player the action was against."
+msgstr "Žaidėjo, prieš kurį atliktas veiksmas, vieta."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The seat of the player who acted."
+msgstr "Veikusio žaidėjo vieta."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The shape of the pot: unopened, limped, single-raised, 3-bet, 4-bet."
+msgstr "Banko forma: neatidarytas, su limp, vieno pakėlimo, 3-bet, 4-bet."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The share of the range the holding beats."
+msgstr "Intervalo dalis, kurią ranka įveikia."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The size of the bet faced, as a percentage of the pot."
+msgstr "Statymo, su kuriuo susidurta, dydis, procentais nuo banko."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The size of the bet faced, in basis points of the pot."
+msgstr "Statymo, su kuriuo susidurta, dydis, banko baziniais punktais."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The size of the bet made, as a percentage of the pot."
+msgstr "Atlikto statymo dydis, procentais nuo banko."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The size of the bet made, in basis points of the pot."
+msgstr "Atlikto statymo dydis, banko baziniais punktais."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The size of the game, expressed in big blinds."
+msgstr "Žaidimo dydis, išreikštas didžiaisiais blindais."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The smaller of the two stacks, in big blinds."
+msgstr "Mažesnis iš dviejų stekų, didžiaisiais blindais."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The smaller of the two stacks, in chips."
+msgstr "Mažesnis iš dviejų stekų, žetonais."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The street as a number, preflop being zero."
+msgstr "Gatvė kaip skaičius, preflopas – nulis."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The street the hand state was classified on."
+msgstr "Gatvė, kurioje rankos būsena buvo klasifikuota."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The strength of the made hand, as a number."
+msgstr "Sudarytos kombinacijos stiprumas, kaip skaičius."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The table size, such as 6-max or full ring."
+msgstr "Stalo dydis, pvz. 6-max ar pilnas stalas."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Three or more players saw the decision."
+msgstr "Sprendimą matė trys ar daugiau žaidėjų."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Tournament or cash"
-msgstr "Turnyrai"
+msgstr "Turnyras ar cash"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Was the previous aggressor"
-msgstr ""
+msgstr "Buvo ankstesnis agresorius"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "What the actor did, including draw-game discards and stand-pat decisions."
 msgstr ""
+"Ką veikėjas padarė, įskaitant draw žaidimų kortų keitimą ir stand-pat "
+"sprendimus."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "What the actor was facing."
-msgstr ""
+msgstr "Su kuo veikėjas susidūrė."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "What the turn or river card changed."
-msgstr ""
+msgstr "Ką pakeitė tėrno ar riverio korta."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the action in front of the actor was an all-in."
-msgstr ""
+msgstr "Ar veiksmas prieš veikėją buvo all-in."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the action put the player all-in."
-msgstr ""
+msgstr "Ar veiksmas pastatė žaidėją all-in."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor has position on the bettor."
-msgstr ""
+msgstr "Ar veikėjas turi poziciją prieš statytoją."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor has position on the previous aggressor."
-msgstr ""
+msgstr "Ar veikėjas turi poziciją prieš ankstesnį agresorių."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor raised preflop."
-msgstr ""
+msgstr "Ar veikėjas pakėlė preflope."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was in position."
-msgstr ""
+msgstr "Ar veikėjas turėjo poziciją."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was the aggressor on the previous street."
-msgstr ""
+msgstr "Ar veikėjas buvo agresorius ankstesnėje gatvėje."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was the aggressor on this street."
-msgstr ""
+msgstr "Ar veikėjas buvo agresorius šioje gatvėje."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the board is connected, semi-connected or disconnected."
-msgstr ""
+msgstr "Ar bordas sujungtas, iš dalies sujungtas ar nesujungtas."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the board is unpaired, paired, or more."
-msgstr ""
+msgstr "Ar bordas be poros, su pora ar daugiau."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Which draw round the player reached; only recorded discard or stand-pat "
 "actions count."
 msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Which pair the actor held: overpair, top pair, set and so on."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Which poker room the hands were played on."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Yes for tournament hands, No for cash game hands."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Yes on the flop and later, No before the flop."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Yes only for decisions whose cards were shown."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Yes only where the cards were known and classified."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "all-in frequency"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "average SPR"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "average bet size (basis points of the pot)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "average bet size faced (basis points of the pot)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "average pot size"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "bet frequency"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "bp"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "call frequency"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "check frequency"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "chips"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "fold frequency"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "holdings"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "how many actions"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "how many decisions"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "how many hands"
-msgstr ""
+"Kurį keitimo raundą žaidėjas pasiekė; skaičiuojami tik užfiksuoti kortų "
+"keitimo ar stand-pat veiksmai."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Show Number of Players"
+msgid "Which pair the actor held: overpair, top pair, set and so on."
+msgstr "Kokią porą veikėjas turėjo: overpair, top pair, setą ir t. t."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Which poker room the hands were played on."
+msgstr "Kuriame pokerio kambaryje rankos buvo žaistos."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Yes for tournament hands, No for cash game hands."
+msgstr "Taip – turnyrų rankoms, Ne – cash žaidimų rankoms."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Yes on the flop and later, No before the flop."
+msgstr "Taip flope ir vėliau, Ne prieš flopą."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Yes only for decisions whose cards were shown."
+msgstr "Taip tik sprendimams, kurių kortos buvo parodytos."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Yes only where the cards were known and classified."
+msgstr "Taip tik ten, kur kortos buvo žinomos ir klasifikuotos."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "all-in frequency"
+msgstr "all-in dažnis"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "average SPR"
+msgstr "vidutinis SPR"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "average bet size (basis points of the pot)"
+msgstr "vidutinis statymo dydis (banko baziniais punktais)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "average bet size faced (basis points of the pot)"
+msgstr ""
+"vidutinis statymo, su kuriuo susidurta, dydis (banko baziniais punktais)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "average pot size"
+msgstr "vidutinis banko dydis"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "bet frequency"
+msgstr "bet dažnis"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "bp"
+msgstr "bp"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "call frequency"
+msgstr "call dažnis"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "check frequency"
+msgstr "check dažnis"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "chips"
+msgstr "žetonai"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "fold frequency"
+msgstr "fold dažnis"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "holdings"
+msgstr "rankos"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "how many actions"
+msgstr "kiek veiksmų"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "how many decisions"
+msgstr "kiek sprendimų"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "how many hands"
+msgstr "kiek rankų"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many players"
-msgstr "Rodyti skaičių Žaidėjų"
+msgstr "kiek žaidėjų"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how often the decision is taken"
-msgstr ""
+msgstr "kaip dažnai priimamas sprendimas"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "id"
-msgstr ""
+msgstr "id"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "per-hand frequency"
-msgstr ""
+msgstr "dažnis per ranką"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "raise frequency"
-msgstr ""
+msgstr "raise dažnis"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "realized profit"
-msgstr ""
+msgstr "realizuotas pelnas"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "realized profit per decision"
-msgstr ""
+msgstr "realizuotas pelnas per sprendimą"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "seats"
-msgstr ""
+msgstr "vietos"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "street"
-msgstr ""
+msgstr "gatvė"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Column Configuration"
-msgstr ""
+msgstr "Stulpelių konfigūracija"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Columns"
-msgstr ""
+msgstr "Stulpeliai"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Dashboard"
-msgstr ""
+msgstr "Skydelis"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 msgid "Detailed Filters"
@@ -4935,21 +5902,23 @@ msgstr "Rankų filtrai:"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 #, fuzzy
-#| msgid "Position"
 msgid "Position Heatmap"
-msgstr "Pozicija"
+msgstr "Pozicijų šilumos žemėlapis"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Restrict to hand types:"
-msgstr ""
+msgstr "Apriboti rankų tipais:"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Starting Hands"
-msgstr ""
+msgstr "Pradinės rankos"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Stats Tables"
-msgstr ""
+msgstr "Statistikos lentelės"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 msgid "and"
@@ -4961,147 +5930,168 @@ msgstr "tarp"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% folded SB to steal"
 msgid "% Big Blind fold to steal"
-msgstr "% numesta iš SB kai vagia"
+msgstr "% didžiojo blindo fold prieš steal"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Call Raise preflop"
-msgstr ""
+msgstr "% call prieš raise preflope"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Continuation Bet"
-msgstr ""
+msgstr "% tęstinis statymas"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flop 3-bet"
-msgstr ""
+msgstr "% 3-bet flope"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flop 4-bet"
-msgstr ""
+msgstr "% 4-bet flope"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flop open bet"
-msgstr ""
+msgstr "% pirmas statymas flope"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flops seen"
-msgstr ""
+msgstr "% matyti flopai"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Fold to preflop 3-bet"
-msgstr ""
+msgstr "% fold prieš 3-bet preflope"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Fold to preflop 4-bet"
-msgstr ""
+msgstr "% fold prieš 4-bet preflope"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Preflop 3-bet"
-msgstr ""
+msgstr "% 3-bet preflope"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Preflop 4-bet"
-msgstr ""
+msgstr "% 4-bet preflope"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Raise First In"
-msgstr ""
+msgstr "% Raise First In"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Re-steal"
-msgstr ""
+msgstr "% Re-steal"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% River 3-bet"
-msgstr ""
+msgstr "% 3-bet riveryje"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% River 4-bet"
-msgstr ""
+msgstr "% 4-bet riveryje"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% River open bet"
-msgstr ""
+msgstr "% pirmas statymas riveryje"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Showdown Winnings"
 msgid "% Showdowns seen"
-msgstr "Laimėjimai po bendrų kortų atvertimo"
+msgstr "% matyti showdown"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% folded SB to steal"
 msgid "% Small Blind fold to steal"
-msgstr "% numesta iš SB kai vagia"
+msgstr "% mažojo blindo fold prieš steal"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% steal attempted"
 msgid "% Steal attempt"
-msgstr "% bandyta vogti"
+msgstr "% steal bandymas"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Steal success"
-msgstr ""
+msgstr "% steal sėkmė"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Turn 3-bet"
-msgstr ""
+msgstr "% 3-bet tėrne"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Turn 4-bet"
-msgstr ""
+msgstr "% 4-bet tėrne"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Turn open bet"
-msgstr ""
+msgstr "% pirmas statymas tėrne"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Went to showdown after seeing flop"
-msgstr ""
+msgstr "% nuėjo iki showdown po flopo"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Won money after seeing flop"
-msgstr ""
+msgstr "% laimėjo pinigų po flopo"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Won money at showdown"
-msgstr ""
+msgstr "% laimėjo pinigų per showdown"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Big Blinds won per 100 hands"
-msgstr ""
+msgstr "Laimėta didžiųjų blindų per 100 rankų"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Big Blinds won per 100 hands excluding rake"
-msgstr ""
+msgstr "Laimėta didžiųjų blindų per 100 rankų be rake"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Flop aggression frequency"
-msgstr ""
+msgstr "Agresijos dažnis flope"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Game type (Hold'em, Omaha, etc.)"
-msgstr ""
+msgstr "Žaidimo tipas (Hold'em, Omaha ir kt.)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Measure of uncertainty"
-msgstr ""
+msgstr "Neapibrėžtumo matas"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Number of Players:"
 msgid "Number of hands played"
-msgstr "Žaidėjų skaičius:"
+msgstr "Sužaistų rankų skaičius"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Number of Seats"
 msgid "Number of seats at the table"
-msgstr "Vietų skaičius"
+msgstr "Vietų prie stalo skaičius"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -5109,144 +6099,177 @@ msgid "Player name"
 msgstr "Naudotojo vardas"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Position at the table"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Postflop aggression factor"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Postflop aggression frequency"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Preflop raise"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Profit per hand"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Profit per hand excluding rake"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Rake paid"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "River aggression frequency"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Starting cards (Hole cards)"
-msgstr ""
+msgstr "Pozicija prie stalo"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Total Profit"
+msgid "Postflop aggression factor"
+msgstr "Agresijos faktorius po flopo"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Postflop aggression frequency"
+msgstr "Agresijos dažnis po flopo"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Preflop raise"
+msgstr "Pakėlimas preflope"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Profit per hand"
+msgstr "Pelnas per ranką"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Profit per hand excluding rake"
+msgstr "Pelnas per ranką be rake"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Rake paid"
+msgstr "Sumokėtas rake"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "River aggression frequency"
+msgstr "Agresijos dažnis riveryje"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Starting cards (Hole cards)"
+msgstr "Pradinės kortos (savos kortos)"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Total net profit"
-msgstr "Bendras Pelnas"
+msgstr "Bendras grynasis pelnas"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Turn aggression frequency"
-msgstr ""
+msgstr "Agresijos dažnis tėrne"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Voluntarily put money in pot preflop"
-msgstr ""
+msgstr "Savanoriškai įdėta pinigų į banką preflope"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
-msgstr ""
+msgstr "Preflopo profilis (VPIP prieš PFR)"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "<b>Hand: {0}</b><br/>Hands: {1}<br/>VPIP: {2}%<br/>Profit: {3}"
-msgstr ""
+msgstr "<b>Ranka: {0}</b><br/>Rankos: {1}<br/>VPIP: {2}%<br/>Pelnas: {3}"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Color the grid by:"
-msgstr ""
+msgstr "Spalvinti tinklelį pagal:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Filtered range:"
-msgstr ""
+msgstr "Filtruotas intervalas:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Hand: {0}\n"
 "No statistics available"
 msgstr ""
+"Ranka: {0}\n"
+"Statistikos nėra"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Hold'em Starting Hand Grid"
-msgstr ""
+msgstr "Hold'em pradinių rankų tinklelis"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 4-Card Texture Analysis"
-msgstr ""
+msgstr "Omaha 4 kortų tekstūros analizė"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 5-Card Texture Analysis"
-msgstr ""
+msgstr "Omaha 5 kortų tekstūros analizė"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 6-Card Texture Analysis"
-msgstr ""
+msgstr "Omaha 6 kortų tekstūros analizė"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha Texture Analysis"
-msgstr ""
+msgstr "Omaha tekstūros analizė"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Starting Hands Analysis"
-msgstr ""
+msgstr "Pradinių rankų analizė"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "min sample:"
-msgstr ""
+msgstr "min. imtis:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "{0} decisions in this selection have no known hole cards and are not in the "
 "grid"
 msgstr ""
+"{0} šios atrankos sprendimų neturi žinomų savų kortų ir nėra tinklelyje"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
 msgid "Hand Breakdown"
-msgstr ""
+msgstr "Rankų suskirstymas"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
 msgid "Statistics group:"
-msgstr ""
+msgstr "Statistikos grupė:"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "A Session Guard limit has been reached."
-msgstr ""
+msgstr "Pasiektas sesijos sargo limitas."
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Acknowledge"
-msgstr ""
+msgstr "Patvirtinti"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid ""
 "Alerts only: fpdb never closes, sits out or otherwise touches a poker "
 "client. The session is the Session Viewer's: cash hands, ended by a 30-"
 "minute pause."
 msgstr ""
+"Tik įspėjimai: fpdb niekada neuždaro, nepraleidžia ėjimų ir kitaip neliečia "
+"pokerio kliento. Sesija yra sesijų peržiūros sesija: cash rankos, baigiamos "
+"30 minučių pertrauka."
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Apply"
-msgstr ""
+msgstr "Taikyti"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Choose at least one limit to watch."
-msgstr ""
+msgstr "Pasirinkite bent vieną stebimą limitą."
 
 #: fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy, python-format
@@ -5256,53 +6279,64 @@ msgid ""
 msgstr "Failas nerastas %s"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Drawdown from peak (BB)"
-msgstr ""
+msgstr "Nuosmukis nuo piko (BB)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Drawdown from peak (money)"
-msgstr ""
+msgstr "Nuosmukis nuo piko (pinigais)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Later"
-msgstr ""
+msgstr "Vėliau"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Limits for this session"
-msgstr ""
+msgstr "Šios sesijos limitai"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Loss (BB)"
-msgstr ""
+msgstr "Nuostolis (BB)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Loss (money)"
-msgstr ""
+msgstr "Nuostolis (pinigais)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Not running."
-msgstr ""
+msgstr "Neveikia."
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Reset alerts"
-msgstr ""
+msgstr "Atstatyti įspėjimus"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Save as defaults"
-msgstr ""
+msgstr "Įrašyti kaip numatytuosius"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Session Guard: click to see or change the limits"
-msgstr ""
+msgstr "Sesijos sargas: spustelėkite, kad pamatytumėte ar pakeistumėte limitus"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Session Guard: no session in progress"
-msgstr ""
+msgstr "Sesijos sargas: nėra vykstančios sesijos"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Session Guard: {result} · {duration} · {hands} hands"
-msgstr ""
+msgstr "Sesijos sargas: {result} · {duration} · {hands} rankų"
 
 #: fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy
@@ -5310,33 +6344,39 @@ msgid "Session duration"
 msgstr "Sesijos"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Win (BB)"
-msgstr ""
+msgstr "Laimėjimas (BB)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Win (money)"
-msgstr ""
+msgstr "Laimėjimas (pinigais)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{count} limit(s) reached"
-msgstr ""
+msgstr "Pasiekta limitų: {count}"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{label}: unavailable (a hand has no big blind) / {threshold}"
-msgstr ""
+msgstr "{label}: nepasiekiama (ranka neturi didžiojo blindo) / {threshold}"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{value} BB"
-msgstr ""
+msgstr "{value} BB"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid ""
 "A stat pack adds declarative stats, and optionally Research presets, without "
 "changing fpdb. Packs are data only: no Python, no SQL."
 msgstr ""
+"Statistikos paketas prideda deklaratyvią statistiką ir, pasirinktinai, "
+"tyrimų šablonus, nekeisdamas fpdb. Paketai yra tik duomenys: be Python, be "
+"SQL."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
@@ -5344,72 +6384,83 @@ msgid "All files"
 msgstr "Visą laiką"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Author"
-msgstr ""
+msgstr "Autorius"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Built-in"
-msgstr ""
+msgstr "Integruotas"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy, python-format
-#| msgid "Could not find file %s"
 msgid ""
 "Could not read the pack:\n"
 "%s"
-msgstr "Failas nerastas %s"
+msgstr ""
+"Nepavyko perskaityti paketo:\n"
+"%s"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Disable"
-msgstr ""
+msgstr "Išjungti"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Disabled"
-msgstr ""
+msgstr "Išjungtas"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Disabled %s."
-msgstr ""
+msgstr "Išjungta %s."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Enable"
-msgstr ""
+msgstr "Įjungti"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Enabled %s."
-msgstr ""
+msgstr "Įjungta %s."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Export stat pack"
-msgstr ""
+msgstr "Eksportuoti statistikos paketą"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Export..."
-msgstr ""
+msgstr "Eksportuoti..."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Exported to %s."
-msgstr ""
+msgstr "Eksportuota į %s."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Import pack..."
-msgstr ""
+msgstr "Importuoti paketą..."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Import stat pack"
-msgstr ""
+msgstr "Importuoti statistikos paketą"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Installed %s."
-msgstr ""
+msgstr "Įdiegta %s."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Invalid"
-msgstr ""
+msgstr "Netinkamas"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
@@ -5417,81 +6468,87 @@ msgid "Location:"
 msgstr "Pozicija"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Pack"
-msgstr ""
+msgstr "Paketas"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Restart fpdb and the HUD to use the change everywhere."
-msgstr ""
+msgstr "Paleiskite fpdb ir HUD iš naujo, kad pakeitimas veiktų visur."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Stat pack"
-msgstr ""
+msgstr "Statistikos paketas"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Status"
 msgid "Stat packs"
-msgstr "Būsena"
+msgstr "Statistikos paketai"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Status"
 msgid "Stats"
-msgstr "Būsena"
+msgstr "Statistika"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Status"
 msgid "Stats:"
-msgstr "Būsena"
+msgstr "Statistika:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 msgid "Status"
 msgstr "Būsena"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "The pack state was not changed:\n"
 "%s"
 msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "This pack cannot be installed:"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "This pack is already installed. Replace it with this version?"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "This pack is not loaded:"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Uninstall"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
-msgid "Uninstall %s?"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Uninstall stat pack"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
-msgid "Uninstalled %s."
-msgstr ""
+"Paketo būsena nepakeista:\n"
+"%s"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Username"
+msgid "This pack cannot be installed:"
+msgstr "Šio paketo negalima įdiegti:"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "This pack is already installed. Replace it with this version?"
+msgstr "Šis paketas jau įdiegtas. Pakeisti jį šia versija?"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "This pack is not loaded:"
+msgstr "Šis paketas neįkeltas:"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Uninstall"
+msgstr "Pašalinti"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Uninstall %s?"
+msgstr "Pašalinti %s?"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Uninstall stat pack"
+msgstr "Pašalinti statistikos paketą"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Uninstalled %s."
+msgstr "Pašalinta %s."
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "User installed"
-msgstr "Naudotojo vardas"
+msgstr "Naudotojo įdiegtas"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "<"
@@ -5510,16 +6567,19 @@ msgid ">>"
 msgstr ""
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "BOTTOM :"
-msgstr ""
+msgstr "APAČIA:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Capture Console (Logs):"
-msgstr ""
+msgstr "Fiksavimo konsolė (žurnalai):"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Captured Hand History:"
-msgstr ""
+msgstr "Užfiksuota rankų istorija:"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
@@ -5527,117 +6587,135 @@ msgid "Cards:"
 msgstr "Turimos kortos"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Hands Captured: 0"
-msgstr ""
+msgstr "Užfiksuota rankų: 0"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "Import All"
 msgid "Import All OFC"
-msgstr "Įkelti Viską"
+msgstr "Importuoti visus OFC"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Import OFC to DB"
-msgstr ""
+msgstr "Importuoti OFC į DB"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "Hands"
 msgid "In Hand:"
-msgstr "Rankos"
+msgstr "Rankoje:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "MIDDLE :"
-msgstr ""
+msgstr "VIDURYS:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Open DB Replayer"
-msgstr ""
+msgstr "Atidaryti DB grotuvą"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "Hand Filters:"
 msgid "Open Hand Folder"
-msgstr "Rankų filtrai:"
+msgstr "Atidaryti rankų aplanką"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "Refresh Stats"
 msgid "Refresh Hands"
-msgstr "Atnaujinti Rodiklius"
+msgstr "Atnaujinti rankas"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Select a hand to start replay"
-msgstr ""
+msgstr "Pasirinkite ranką, kad pradėtumėte peržiūrą"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Start Capture"
-msgstr ""
+msgstr "Pradėti fiksavimą"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Status: 🔴 Stopped"
-msgstr ""
+msgstr "Būsena: 🔴 Sustabdyta"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Statut : 🔴 Arrêté"
-msgstr ""
+msgstr "Būsena: 🔴 Sustabdyta"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Statut : 🟢 En Cours"
-msgstr ""
+msgstr "Būsena: 🟢 Vyksta"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Step 0 / 0"
-msgstr ""
+msgstr "Žingsnis 0 / 0"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "SwC"
-msgstr ""
+msgstr "SwC"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "SwC Poker - Capture Console & Replayer"
-msgstr ""
+msgstr "SwC Poker - fiksavimo konsolė ir grotuvas"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "TOP :"
-msgstr ""
+msgstr "VIRŠUS:"
 
 #: fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Confirm overwrite"
-msgstr ""
+msgstr "Patvirtinkite perrašymą"
 
 #: fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Copy entire table"
-msgstr ""
+msgstr "Kopijuoti visą lentelę"
 
 #: fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Copy entire table with headers"
-msgstr ""
+msgstr "Kopijuoti visą lentelę su antraštėmis"
 
 #: fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Copy with headers"
-msgstr ""
+msgstr "Kopijuoti su antraštėmis"
 
 #: fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Export displayed values"
-msgstr ""
+msgstr "Eksportuoti rodomas reikšmes"
 
 #: fpdb_3_legacy/table_export.py
-#, python-format
+#, fuzzy, python-format
 msgid "Export displayed values as %s…"
-msgstr ""
+msgstr "Eksportuoti rodomas reikšmes kaip %s…"
 
 #: fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Export failed"
-msgstr ""
+msgstr "Eksportas nepavyko"
 
 #: fpdb_3_legacy/table_export.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "The file already exists:\n"
 "%s\n"
 "Do you want to replace it?"
 msgstr ""
+"Failas jau egzistuoja:\n"
+"%s\n"
+"Ar norite jį pakeisti?"
 
 #~ msgid "  0.33 to 3.0 x Current Blinds"
 #~ msgstr "nuo 0.33 iki 3.0 x esami statymai"

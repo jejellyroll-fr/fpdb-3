@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 13:02+0200\n"
+"POT-Creation-Date: 2026-10-21 13:33+0200\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -97,35 +97,33 @@ msgstr "DEBUG:"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "Reading configuration file %s"
 msgid "Configuration modified*"
-msgstr "Citire fisier de configurare %s"
+msgstr "Configurație modificată*"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Configuration up to date"
-msgstr ""
+msgstr "Configurația este la zi"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "Reading configuration file %s"
 msgid "Reload configuration"
-msgstr "Citire fisier de configurare %s"
+msgstr "Reîncarcă configurația"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "loadDbs error: "
 msgid "Reload error"
-msgstr "eroare loadDbs:"
+msgstr "Eroare la reîncărcare"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "Waiting..."
 msgid "Reloading..."
-msgstr "In asteptare..."
+msgstr "Se reîncarcă..."
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Restart required"
-msgstr ""
+msgstr "Repornire necesară"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 msgid "↻"
@@ -206,44 +204,54 @@ msgid "EverleafToFpdb.readHandInfo: '%s'"
 msgstr "Nepotrivire in readHandInfo: '%s'"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "2-7 Drawmaha"
-msgstr ""
+msgstr "2-7 Drawmaha"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "2-7 Razz"
-msgstr ""
+msgstr "Razz 2-7"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Draw"
-msgstr ""
+msgstr "Draw cu 5 cărți"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Omaha"
-msgstr ""
+msgstr "Omaha cu 5 cărți"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Omaha Hi/Lo"
-msgstr ""
+msgstr "Omaha cu 5 cărți Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Stud"
-msgstr ""
+msgstr "Stud cu 5 cărți"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "6 Card Omaha"
-msgstr ""
+msgstr "Omaha cu 6 cărți"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "7 Card Stud"
-msgstr ""
+msgstr "Stud cu 7 cărți"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "7 Card Stud Hi/Lo"
-msgstr ""
+msgstr "Stud cu 7 cărți Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "A-5 Single Draw"
-msgstr ""
+msgstr "A-5 Single Draw"
 
 #: fpdb_3_legacy/Filters.py
 msgid "All"
@@ -258,32 +266,38 @@ msgid "And:"
 msgstr "Si:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "AoF Hold'em"
-msgstr ""
+msgstr "Hold'em AoF"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "AoF Omaha"
-msgstr ""
+msgstr "Omaha AoF"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badacey"
-msgstr ""
+msgstr "Badacey"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badeucey"
-msgstr ""
+msgstr "Badeucey"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badugi"
-msgstr ""
+msgstr "Badugi"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Between:"
 msgstr "Intre:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Buyin"
-msgstr ""
+msgstr "Buy-in"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
 #, fuzzy
@@ -291,20 +305,24 @@ msgid "Cal"
 msgstr "Tot"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Category"
-msgstr ""
+msgstr "Categorie"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Courchevel"
-msgstr ""
+msgstr "Courchevel"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Courchevel Hi/Lo"
-msgstr ""
+msgstr "Courchevel Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Currencies"
-msgstr ""
+msgstr "Monede"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Date:"
@@ -315,16 +333,19 @@ msgid "Done"
 msgstr "Gata"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Double hold'em"
-msgstr ""
+msgstr "Double hold'em"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "EV"
-msgstr ""
+msgstr "EV"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Euro"
-msgstr ""
+msgstr "Euro"
 
 #: fpdb_3_legacy/Filters.py
 msgid "From:"
@@ -348,8 +369,9 @@ msgid "Hero:"
 msgstr "Eroul:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Hold'em"
-msgstr ""
+msgstr "Hold'em"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -357,14 +379,14 @@ msgid "Hole Cards"
 msgstr "Cartile comune"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Irish"
-msgstr ""
+msgstr "Irish"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
-#| msgid "Limit"
 msgid "Limit Type"
-msgstr "Limita"
+msgstr "Tip de limită"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Limits:"
@@ -375,8 +397,9 @@ msgid "Min # Hands:"
 msgstr "Minim # miini:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Net profit excluding splash pots"
-msgstr ""
+msgstr "Profit net fără splash pot"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Non-Showdown Winnings"
@@ -391,24 +414,28 @@ msgid "Number of Players:"
 msgstr "Numar de jucatori:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Off Suit"
-msgstr ""
+msgstr "Offsuit"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Omaha"
-msgstr ""
+msgstr "Omaha"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Omaha Hi/Lo"
-msgstr ""
+msgstr "Omaha Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
 msgid "Pick a date"
 msgstr "Alege o data"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Play Money"
-msgstr ""
+msgstr "Bani virtuali"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -416,18 +443,19 @@ msgid "Positions:"
 msgstr "Pozitie"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Razz"
-msgstr ""
+msgstr "Razz"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
-#| msgid "Refresh Stats"
 msgid "Refresh Filters"
-msgstr "Refresh Statistici"
+msgstr "Reîmprospătează filtrele"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Reset"
-msgstr ""
+msgstr "Resetează"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Ring"
@@ -454,8 +482,9 @@ msgid "Showdown Winnings"
 msgstr "Cistigurile la Showdown"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Single Draw 2-7 Lowball"
-msgstr ""
+msgstr "Single Draw 2-7 Lowball"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/ModernSitePreferences.py
@@ -480,16 +509,19 @@ msgid "Tourney"
 msgstr "Turneu"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Triple Draw 2-7 Lowball"
-msgstr ""
+msgstr "Triple Draw 2-7 Lowball"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Triple Draw A-5 Lowball"
-msgstr ""
+msgstr "Triple Draw A-5 Lowball"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "US Dollar"
-msgstr ""
+msgstr "Dolar american"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
 #, python-format
@@ -511,8 +543,9 @@ msgid "Unable to locate currency"
 msgstr "Nu pot localiza moneda"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
+#, fuzzy
 msgid "parseSummary FAIL"
-msgstr ""
+msgstr "Eșec parseSummary"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
 #, python-format
@@ -536,19 +569,19 @@ msgid "FulltiltToFpdb.readHandInfo: '%s'"
 msgstr "Nepotrivire in readHandInfo: '%s'"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Hand '%s' was cancelled."
-msgstr ""
+msgstr "Mâna '%s' a fost anulată."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Hand '%s' was not dealt (dead hand)."
-msgstr ""
+msgstr "Mâna '%s' nu a fost împărțită (mână moartă)."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Hand is not cleanly split into pre and post Summary %s."
-msgstr ""
+msgstr "Mâna nu este separată clar înainte și după rezumatul %s."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
 #, fuzzy, python-format
@@ -556,87 +589,104 @@ msgid "No players detected in hand %s."
 msgstr "readPlayerStacks: Nu s-au detectat jucatori (mina #%s)"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Database is back. Auto Import resumed."
 msgstr ""
+"\n"
+"Baza de date este din nou disponibilă. Import automat reluat."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Database unreachable. Auto Import paused, retrying..."
 msgstr ""
+"\n"
+"Baza de date inaccesibilă. Import automat în pauză, nouă încercare..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Stop requested while an import was still running; it will finish in the "
 "background."
 msgstr ""
+"\n"
+"Oprire cerută în timp ce un import încă rula; se va termina în fundal."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "SwC Native Live HUD tailing thread started."
 msgstr ""
+"\n"
+"Firul de urmărire al HUD-ului nativ SwC a pornit."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "SwC live capture is not available on this platform. Importing SwC files "
 "still works."
 msgstr ""
+"\n"
+"Captura live SwC nu este disponibilă pe această platformă. Importul "
+"fișierelor SwC funcționează în continuare."
 
 #: fpdb_3_legacy/GuiAutoImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "\n"
 "SwC live capture unavailable: {reason}. Importing SwC hand history files "
 "still works."
 msgstr ""
+"\n"
+"Captura live SwC indisponibilă: {reason}. Importul istoricelor de mâini SwC "
+"funcționează în continuare."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Auto Import Ready."
 msgid "Auto Import Ready.\n"
-msgstr "Importul automat e pregatit."
+msgstr "Import automat pregătit.\n"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Auto Import Running"
 msgid "Auto Import Running..."
-msgstr "Auto Import in desfasurare"
+msgstr "Import automat în curs..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Database unreachable - retrying"
-msgstr ""
+msgstr "Baza de date inaccesibilă - nouă încercare"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Stop Auto Import"
 msgid "FPDB Auto Import"
-msgstr "Opreste Auto Import"
-
-#: fpdb_3_legacy/GuiAutoImport.py
-msgid "Import cycle is taking longer than usual..."
-msgstr ""
+msgstr "Import automat FPDB"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "HUD Log"
+msgid "Import cycle is taking longer than usual..."
+msgstr "Ciclul de import durează mai mult decât de obicei..."
+
+#: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Log"
-msgstr "Jurnal HUD"
+msgstr "Jurnal"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Ready"
-msgstr ""
+msgstr "Pregătit"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Setting"
 msgid "Settings"
-msgstr "Setari"
+msgstr "Setări"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid "Start Auto Import"
@@ -652,29 +702,33 @@ msgid "Stopping Auto Import..."
 msgstr "Opreste Auto Import"
 
 #: fpdb_3_legacy/GuiAutoImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "SwC live capture could not attach: {reason}. Importing SwC hand history "
 "files still works."
 msgstr ""
+"Captura live SwC nu s-a putut conecta: {reason}. Importul istoricelor de "
+"mâini SwC funcționează în continuare."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
-#| msgid "Time between imports in seconds:"
 msgid "Time between imports (seconds):"
-msgstr "Timpul dintre importuri in secunde:"
+msgstr "Timp între importuri (secunde):"
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Automatic Notes"
-msgstr ""
+msgstr "Note automate"
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Enable or disable automatic player-note rules."
-msgstr ""
+msgstr "Activează sau dezactivează regulile de note automate despre jucători."
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Generate automatic notes"
-msgstr ""
+msgstr "Generează note automate"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
@@ -683,17 +737,18 @@ msgstr "  Personalizat"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Databases"
 msgid "Database hands"
-msgstr "Baze de date"
+msgstr "Mâini din baza de date"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Dry Run"
-msgstr ""
+msgstr "Rulare de probă"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Dry Run DB"
-msgstr ""
+msgstr "Rulare de probă BD"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -702,29 +757,28 @@ msgstr "Nume fisier:"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Mail Folder"
 msgid "Folder"
-msgstr "Directorul pentru mail"
+msgstr "Dosar"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "From:"
 msgid "From"
-msgstr "De la:"
+msgstr "De la"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Hand History Converters"
 msgid "Hand-history source"
-msgstr "Convertoare pentru istoricul miinilor"
+msgstr "Sursa istoricelor de mâini"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Idle"
-msgstr ""
+msgstr "Inactiv"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Latest: -"
-msgstr ""
+msgstr "Cea mai recentă: -"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -738,46 +792,49 @@ msgid "Load Notes"
 msgstr "Miini"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Notes: 0"
-msgstr ""
+msgstr "Note: 0"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Players"
 msgid "Player"
-msgstr "Jucatori"
+msgstr "Jucător"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Player Name"
 msgid "Player Notes"
-msgstr "Nume jucator"
-
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
-msgid "Pool"
-msgstr ""
-
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
-msgid "Recent generated notes"
-msgstr ""
+msgstr "Note despre jucători"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Refresh Stats"
+msgid "Pool"
+msgstr "Pool"
+
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
+msgid "Recent generated notes"
+msgstr "Note generate recent"
+
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Refresh Pool Summary"
-msgstr "Refresh Statistici"
+msgstr "Reîmprospătează rezumatul pool-ului"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Rule set"
-msgstr ""
+msgstr "Set de reguli"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Run"
-msgstr ""
+msgstr "Rulează"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Search"
-msgstr ""
+msgstr "Caută"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/GuiBulkImport.py
 #: fpdb_3_legacy/hand_share_dialog.py
@@ -791,24 +848,29 @@ msgid "To"
 msgstr "La:"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top players by generated notes"
-msgstr ""
+msgstr "Jucătorii cu cele mai multe note generate"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top rule: -"
-msgstr ""
+msgstr "Regula principală: -"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top rules"
-msgstr ""
+msgstr "Regulile principale"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Write DB Notes"
-msgstr ""
+msgstr "Scrie notele în BD"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Write Notes"
-msgstr ""
+msgstr "Scrie notele"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Browse..."
@@ -820,20 +882,21 @@ msgstr "Importare in Masa"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy
-#| msgid "Bulk Import"
 msgid "Bulk Import Error"
-msgstr "Importare in Masa"
+msgstr "Eroare la importul în masă"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Choose a destination directory"
-msgstr ""
+msgstr "Alegeți un dosar de destinație"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Configured Import Directories:"
-msgstr ""
+msgstr "Dosare de import configurate:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Import complete.\n"
 "\n"
@@ -845,29 +908,45 @@ msgid ""
 "Errors: {errs}\n"
 "Time: {elapsed}s"
 msgstr ""
+"Import finalizat.\n"
+"\n"
+"Fișiere procesate: {files}\n"
+"Salvate: {stored}\n"
+"Duplicate: {dups}\n"
+"Parțiale: {partial}\n"
+"Omise: {skipped}\n"
+"Erori: {errs}\n"
+"Timp: {elapsed} s"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Importing..."
 msgstr "Importare..."
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Move failed files to:"
-msgstr ""
+msgstr "Mută fișierele eșuate în:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Move imported files to:"
-msgstr ""
+msgstr "Mută fișierele importate în:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid ""
 "No importable hand-history files were found in the selected directories.\n"
 "\n"
 "Check that the configured paths contain hand histories (plain text files), "
 "not just archives or exports."
 msgstr ""
+"În dosarele selectate nu s-au găsit istorice de mâini importabile.\n"
+"\n"
+"Verificați că căile configurate conțin istorice de mâini (fișiere text), nu "
+"doar arhive sau exporturi."
 
 #: fpdb_3_legacy/GuiBulkImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "PHH hands found: {found}\n"
 "Imported: {imported}\n"
@@ -877,121 +956,150 @@ msgid ""
 "Malformed: {malformed}\n"
 "PHH import time: {seconds}s"
 msgstr ""
+"Mâini PHH găsite: {found}\n"
+"Importate: {imported}\n"
+"Duplicate: {dups}\n"
+"Parțiale (istoricul se oprește devreme): {partial}\n"
+"Variante neacceptate: {unsupported}\n"
+"Deformate: {malformed}\n"
+"Timp de import PHH: {seconds} s"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Path"
-msgstr ""
+msgstr "Cale"
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Please choose the path that you want to Auto Import"
 msgstr "Alegeti calea dorita pentru Importarea Automata"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
 msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Capture failed to start — see the log above."
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Default game:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Dry run (no DB insert)"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Finishing previous capture…"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Idle."
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Interface:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Launch HUD"
-msgstr ""
+"Pornește și HUD_main (debifați dacă HUD-ul/importul automat rulează deja)."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 #, fuzzy
-#| msgid "Refresh Stats"
+msgid "Capture failed to start — see the log above."
+msgstr "Captura nu a putut porni — vedeți jurnalul de mai sus."
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Default game:"
+msgstr "Joc implicit:"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Dry run (no DB insert)"
+msgstr "Rulare de probă (fără inserare în BD)"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Finishing previous capture…"
+msgstr "Se încheie captura anterioară…"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Idle."
+msgstr "Inactiv."
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Interface:"
+msgstr "Interfață:"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Launch HUD"
+msgstr "Pornește HUD"
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Refresh interfaces"
-msgstr "Refresh Statistici"
+msgstr "Reîmprospătează interfețele"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
-msgstr ""
+msgstr "Se cer privilegii… acceptați solicitarea, apoi jucați pe CoinPoker."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Start capture"
-msgstr ""
+msgstr "Pornește captura"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py fpdb_3_legacy/session_guard_dialog.py
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Stop"
-msgstr ""
+msgstr "Oprește"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Stopping…"
-msgstr ""
+msgstr "Se oprește…"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "+ New Rule"
-msgstr ""
+msgstr "+ Regulă nouă"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Actions"
-msgstr ""
+msgstr "Acțiuni"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-format
+#, fuzzy, python-format
 msgid "Are you sure you want to delete rule '%s'?"
-msgstr ""
+msgstr "Sigur ștergeți regula '%s'?"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Board ({flop})"
-msgstr ""
+msgstr "Board ({flop})"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 msgid "Board:"
 msgstr "Masa:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Captured Evidence Schema"
-msgstr ""
+msgstr "Schema datelor capturate"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Custom Auto Notes rules saved successfully!"
-msgstr ""
+msgstr "Regulile personalizate de note automate au fost salvate!"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Delete Rule"
-msgstr ""
+msgstr "Șterge regula"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Duplicate Rule IDs"
-msgstr ""
+msgstr "ID-uri de reguli duplicate"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Empty HH"
-msgstr ""
+msgstr "Istoric gol"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Enabled"
-msgstr ""
+msgstr "Activată"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Generated Note: (None)"
-msgstr ""
+msgstr "Notă generată: (niciuna)"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy, python-brace-format
@@ -999,244 +1107,264 @@ msgid "Hole Cards ({hole})"
 msgstr "Cartile comune"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Hole:"
-msgstr ""
+msgstr "Cărți proprii:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Live Testing Sandbox"
-msgstr ""
+msgstr "Mediu de test live"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Logical Conditions (No-Code GUI)"
-msgstr ""
+msgstr "Condiții logice (fără cod)"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "No Rule"
-msgstr ""
+msgstr "Nicio regulă"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Note Template (Tags: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, {spr}):"
 msgstr ""
+"Șablon de notă (etichete: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, "
+"{spr}):"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Paste raw GGPoker or PokerStars hand history text here to test..."
 msgstr ""
+"Lipiți aici textul brut al unui istoric de mână GGPoker sau PokerStars "
+"pentru a testa..."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Please paste a Hand History text to evaluate against."
-msgstr ""
+msgstr "Lipiți textul unui istoric de mână pe care să evaluați."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
-#| msgid "Please recreate tables."
 msgid "Please select or create a rule to evaluate."
-msgstr "Recreati tabelele."
+msgstr "Selectați sau creați o regulă de evaluat."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Remove Condition"
-msgstr ""
+msgstr "Elimină condiția"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Root Operator:"
-msgstr ""
+msgstr "Operator rădăcină:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule / Group"
-msgstr ""
+msgstr "Regulă / grup"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule ID:"
-msgstr ""
+msgstr "ID-ul regulii:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule Metadata"
-msgstr ""
+msgstr "Metadatele regulii"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
-#| msgid "Player Name"
 msgid "Rule Name:"
-msgstr "Nume jucator"
+msgstr "Numele regulii:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule Set:"
-msgstr ""
+msgstr "Set de reguli:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule Sets & Custom Rules"
-msgstr ""
+msgstr "Seturi de reguli și reguli personalizate"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
-#| msgid "Save"
 msgid "Saved"
-msgstr "Save"
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Stack & SPR"
-msgstr ""
+msgstr "Salvat"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
-#| msgid "Status"
+msgid "Stack & SPR"
+msgstr "Stack și SPR"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Status: READY"
-msgstr "Stare"
+msgstr "Stare: PREGĂTIT"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Test Source (Raw Hand History Text):"
-msgstr ""
+msgstr "Sursă de test (text brut al istoricului de mână):"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "These rule IDs are used more than once: %s\n"
 "\n"
 "Give each rule a unique ID before saving."
 msgstr ""
+"Aceste ID-uri de reguli sunt folosite de mai multe ori: %s\n"
+"\n"
+"Dați fiecărei reguli un ID unic înainte de salvare."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "➕ Add Condition"
-msgstr ""
+msgstr "➕ Adaugă condiție"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "💾 Save Rules"
-msgstr ""
+msgstr "💾 Salvează regulile"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📋 Duplicate"
-msgstr ""
+msgstr "📋 Duplică"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🗑️ Delete"
-msgstr ""
+msgstr "🗑️ Șterge"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "🧪 Evaluate Rule"
-msgstr ""
+msgstr "🧪 Evaluează regula"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "🧪 Test Sandbox"
-msgstr ""
+msgstr "🧪 Mediu de test"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "No Database Name given"
 msgid "A database name is required."
-msgstr "Nu s-a dat numele bazei de date"
+msgstr "Este necesar un nume de bază de date."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "A host is required for PostgreSQL/MySQL."
-msgstr ""
+msgstr "Pentru PostgreSQL/MySQL este necesară o gazdă."
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Add New Database"
 msgid "Add database"
-msgstr "Adaugare baza de date noua"
+msgstr "Adaugă bază de date"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Add..."
-msgstr ""
+msgstr "Adaugă..."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Backend"
-msgstr ""
+msgstr "Backend"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Backend:"
-msgstr ""
+msgstr "Backend:"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Confirm rebuilding database indexes"
 msgid "Configured databases:"
-msgstr "Confirmati recladirea indexurilor in baza de date"
+msgstr "Baze de date configurate:"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Database"
 msgid "Create database"
-msgstr "Baza de date"
+msgstr "Creează baza de date"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Recreating tables."
 msgid "Create tables"
-msgstr "Recreare tabele."
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Default"
-msgstr ""
+msgstr "Creează tabelele"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Database created"
+msgid "Default"
+msgstr "Implicit"
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Default database changed"
-msgstr "baza de date creata"
+msgstr "Baza de date implicită a fost schimbată"
 
 #: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Delete"
-msgstr ""
+msgstr "Șterge"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Database"
 msgid "Delete database"
-msgstr "Baza de date"
+msgstr "Șterge baza de date"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Database"
 msgid "Edit database"
-msgstr "Baza de date"
+msgstr "Editează baza de date"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Edit"
 msgid "Edit..."
-msgstr "Editare"
+msgstr "Editează..."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Host / Path"
-msgstr ""
+msgstr "Gazdă / cale"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Host"
 msgid "Host:"
-msgstr "Destinatie"
+msgstr "Gazdă:"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Strong Warning - Invalid database version"
 msgid "Invalid database settings"
-msgstr "Avertizare serioasa - Versiune invalida a bazei de date"
+msgstr "Setări de bază de date invalide"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Maintain Databases"
 msgid "Migrate database"
-msgstr "Intretinere Baze de date"
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Migrate to..."
-msgstr ""
+msgstr "Migrează baza de date"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Maintain Databases"
+msgid "Migrate to..."
+msgstr "Migrează către..."
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Migrating database"
-msgstr "Intretinere Baze de date"
+msgstr "Se migrează baza de date"
 
 #: fpdb_3_legacy/GuiDatabase.py
 msgid "Name"
@@ -1246,71 +1374,77 @@ msgstr "Nume"
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Name"
 msgid "Name:"
-msgstr "Nume"
+msgstr "Nume:"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Password"
 msgid "Password:"
-msgstr "Parola"
+msgstr "Parolă:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Port must be a number between 1 and 65535."
-msgstr ""
+msgstr "Portul trebuie să fie un număr între 1 și 65535."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Port:"
-msgstr ""
+msgstr "Port:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid ""
 "SQLite databases are created automatically. Use 'Create tables' to "
 "initialise the schema."
 msgstr ""
+"Bazele SQLite sunt create automat. Folosiți „Creează tabelele” pentru a "
+"inițializa schema."
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Set max seats"
 msgid "Set as default"
-msgstr "Seteaza maxim locuri"
+msgstr "Setează ca implicită"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Offsuit connectors"
 msgid "Test connection"
-msgstr "Conectori fara suita"
+msgstr "Testează conexiunea"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "There is no other database to migrate into. Add one first."
 msgstr ""
+"Nu există altă bază de date către care să migrați. Adăugați una mai întâi."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid ""
 "This is the only configured database and cannot be deleted — fpdb needs at "
 "least one. Add another database first."
 msgstr ""
+"Aceasta este singura bază de date configurată și nu poate fi ștearsă — fpdb "
+"are nevoie de cel puțin una. Adăugați mai întâi o altă bază."
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Username"
 msgid "User"
-msgstr "Nume utilizator"
+msgstr "Utilizator"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Username"
 msgid "User:"
-msgstr "Nume utilizator"
+msgstr "Utilizator:"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Field actions"
-msgstr ""
+msgstr "Acțiunile field-ului"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Field population"
-msgstr ""
+msgstr "Populația field-ului"
 
 #: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
@@ -1318,42 +1452,52 @@ msgid "Loading hands…"
 msgstr "Miini"
 
 #: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Next ▶"
-msgstr ""
+msgstr "Următor ▶"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Select a row to see the hands behind both sides of it."
-msgstr ""
+msgstr "Selectați un rând pentru a vedea mâinile din spatele ambelor părți."
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Source hands"
-msgstr ""
+msgstr "Mâini sursă"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid ""
 "These hands use the same filters as the other side; only the population "
 "differs."
 msgstr ""
+"Aceste mâini folosesc aceleași filtre ca cealaltă parte; diferă doar "
+"populația."
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Your actions"
-msgstr ""
+msgstr "Acțiunile dvs."
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Your population"
-msgstr ""
+msgstr "Populația dvs."
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "◀ Previous"
-msgstr ""
+msgstr "◀ Anterior"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
 msgid "Export to File"
 msgstr "Export spre fisier"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, fuzzy
 msgid "FPDB 3 info"
-msgstr ""
+msgstr "Informații FPDB 3"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/session_guard_dialog.py
@@ -1361,8 +1505,9 @@ msgid "Hands"
 msgstr "Miini"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
+#, fuzzy
 msgid "Net profit excluding splash"
-msgstr ""
+msgstr "Profit net fără splash"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
 msgid "Non-showdown"
@@ -1383,205 +1528,231 @@ msgid "Showdown"
 msgstr "Showdown"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "100–150% pot"
-msgstr ""
+msgstr "100–150% din pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "25–50% pot"
-msgstr ""
+msgstr "25–50% din pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "3-bet"
-msgstr ""
+msgstr "3-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "4-bet"
-msgstr ""
+msgstr "4-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "50–75% pot"
-msgstr ""
+msgstr "50–75% din pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "75–100% pot"
-msgstr ""
+msgstr "75–100% din pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "Advanced Preferences"
 msgid "Advanced review filters"
-msgstr "Preferinte avansate"
+msgstr "Filtre de analiză avansate"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "All Players"
 msgid "All hands"
-msgstr "Toti jucatorii"
+msgstr "Toate mâinile"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "AddDB starting"
 msgid "All starting hands"
-msgstr "pornire AddDB"
+msgstr "Toate mâinile de start"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Analytics data unavailable"
-msgstr ""
+msgstr "Date de analiză indisponibile"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Any"
-msgstr ""
+msgstr "Oricare"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Any card"
-msgstr ""
+msgstr "Orice carte"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Any sizing"
-msgstr ""
+msgstr "Orice mărime"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Apply review filters"
-msgstr ""
+msgstr "Aplică filtrele de analiză"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Bet"
-msgstr ""
+msgstr "Pariu"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Bet / raise sizing"
-msgstr ""
+msgstr "Mărimea pariului / raise-ului"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Broadway"
-msgstr ""
+msgstr "Broadway"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Call open"
-msgstr ""
+msgstr "Call la deschidere"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "called"
 msgid "Called"
-msgstr "platit"
+msgstr "A dat call"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Check-raise"
-msgstr ""
+msgstr "Check-raise"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "Mucked"
 msgid "Checked"
-msgstr "Mucked"
+msgstr "A dat check"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Choose hands…"
-msgstr ""
+msgstr "Alege mâinile…"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "Clear Dates"
 msgid "Clear"
-msgstr "Goleste datele"
+msgstr "Golește"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "% continuation bet"
 msgid "Continuation bet"
-msgstr "% continuare pariere"
+msgstr "Pariu de continuare"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourHandViewer.py
+#, fuzzy
 msgid "Copy hand history"
-msgstr ""
+msgstr "Copiază istoricul mâinii"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Did not VPIP"
-msgstr ""
+msgstr "Fără VPIP"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack (BB)"
-msgstr ""
+msgstr "Stack efectiv (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Exact known cards"
-msgstr ""
+msgstr "Cărți cunoscute exacte"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Exclude splash pots"
-msgstr ""
+msgstr "Exclude splash pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Faced 3-bet"
-msgstr ""
+msgstr "În fața unui 3-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Faced c-bet"
-msgstr ""
+msgstr "În fața unui c-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Faced open"
-msgstr ""
+msgstr "În fața unei deschideri"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "Filters"
 msgid "Filter: "
-msgstr "Filters"
+msgstr "Filtru: "
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Filter: splash pot"
-msgstr ""
+msgstr "Filtru: splash pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Final pot (BB)"
-msgstr ""
+msgstr "Pot final (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Folded"
-msgstr ""
+msgstr "A dat fold"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "***Error storing hand:"
 msgid "Hold'em starting hand"
-msgstr "*** Eroare la inregistrarea miinii:"
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Invalid review filter"
-msgstr ""
+msgstr "Mână de start Hold'em"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "converter"
+msgid "Invalid review filter"
+msgstr "Filtru de analiză invalid"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Invert"
-msgstr "convertizor"
+msgstr "Inversează"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Limp"
-msgstr ""
+msgstr "Limp"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Net result (BB)"
-msgstr ""
+msgstr "Rezultat net (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid ""
 "No hands were queried, to avoid presenting an incomplete result as empty."
 msgstr ""
+"Nu s-au interogat mâini, pentru a nu prezenta un rezultat incomplet ca fiind "
+"gol."
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Offsuit"
 msgstr "Fara suita"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Over 150% pot"
-msgstr ""
+msgstr "Peste 150% din pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Pairs"
-msgstr ""
+msgstr "Perechi"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -1589,120 +1760,150 @@ msgid "Players in hand"
 msgstr "Nume jucator"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Postflop"
-msgstr ""
+msgstr "Postflop"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Preflop"
-msgstr ""
+msgstr "Preflop"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "RFI"
-msgstr ""
+msgstr "RFI"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Raised"
-msgstr ""
+msgstr "A dat raise"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw flop"
-msgstr ""
+msgstr "A văzut flopul"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw river"
-msgstr ""
+msgstr "A văzut riverul"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw turn"
-msgstr ""
+msgstr "A văzut turnul"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Splash pots only"
-msgstr ""
+msgstr "Doar splash pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Squeeze"
-msgstr ""
+msgstr "Squeeze"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Starting-hand range"
-msgstr ""
+msgstr "Range de mâini de start"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid ""
 "The analytics status needed by these filters could not be verified. No "
 "results were queried; check the database and rebuild analytics data before "
 "retrying."
 msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
-msgid "The minimum cannot exceed the maximum for {}."
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
-msgid "These analytics rows were created by a newer fpdb version: {names}."
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
-msgid "These filters need missing or outdated analytics data: {names}."
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Under 25% pot"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Upgrade fpdb before using these filters."
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Use Database → Rebuild Analytics Data, then retry the filter."
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "VPIP"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "Went all-in"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "max"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "max BB"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "min"
-msgstr ""
-
-#: fpdb_3_legacy/GuiHandViewer.py
-msgid "min BB"
-msgstr ""
+"Starea datelor de analiză necesare acestor filtre nu a putut fi verificată. "
+"Nu s-a interogat niciun rezultat; verificați baza de date și reconstruiți "
+"datele de analiză înainte de a reîncerca."
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy, python-brace-format
-#| msgid "Please select site"
-msgid "{} classes selected"
-msgstr "Selectati site-ul"
+msgid "The minimum cannot exceed the maximum for {}."
+msgstr "Minimul nu poate depăși maximul pentru {}."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy, python-brace-format
+msgid "These analytics rows were created by a newer fpdb version: {names}."
+msgstr ""
+"Aceste rânduri de analiză au fost create de o versiune mai nouă de fpdb: "
+"{names}."
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy, python-brace-format
+msgid "These filters need missing or outdated analytics data: {names}."
+msgstr ""
+"Aceste filtre au nevoie de date de analiză lipsă sau învechite: {names}."
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Under 25% pot"
+msgstr "Sub 25% din pot"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Upgrade fpdb before using these filters."
+msgstr "Actualizați fpdb înainte de a folosi aceste filtre."
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Use Database → Rebuild Analytics Data, then retry the filter."
+msgstr ""
+"Folosiți Bază de date → Reconstruiește datele de analiză, apoi reîncercați "
+"filtrul."
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "VPIP"
+msgstr "VPIP"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "Went all-in"
+msgstr "A mers all-in"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "max"
+msgstr "max"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "max BB"
+msgstr "BB max"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "min"
+msgstr "min"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
+msgid "min BB"
+msgstr "BB min"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy, python-brace-format
+msgid "{} classes selected"
+msgstr "{} clase selectate"
+
+#: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "◀ Prev"
-msgstr ""
+msgstr "◀ Ant."
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Copy selection to clipboard"
-msgstr ""
+msgstr "Copiază selecția în clipboard"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Filter by Module:"
-msgstr ""
+msgstr "Filtrează după modul:"
 
 #: fpdb_3_legacy/GuiLogView.py
 msgid "Log Viewer"
@@ -1713,22 +1914,24 @@ msgid "Refresh"
 msgstr "Reincarcare"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Select Log File:"
-msgstr ""
+msgstr "Selectați fișierul jurnal:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
 #, fuzzy
-#| msgid "Min # Hands:"
 msgid "Min hands vs hero:"
-msgstr "Minim # miini:"
+msgstr "Min. mâini contra eroului:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Sort by:"
-msgstr ""
+msgstr "Sortează după:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Top N opponents:"
-msgstr ""
+msgstr "Top N adversari:"
 
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Auxiliary Windows"
@@ -1814,9 +2017,8 @@ msgstr "Stud mucked"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #, fuzzy
-#| msgid "Ring Player Stats"
 msgid "Tour Player Stats"
-msgstr "Statisticile jucatorului cash"
+msgstr "Statistici jucători de turneu"
 
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Value (double-click to change)"
@@ -1827,32 +2029,34 @@ msgid "Window"
 msgstr "Ferestre"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Card deck"
-msgstr ""
+msgstr "Pachet de cărți"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Copy or save this hand as text, Markdown or forum code"
-msgstr ""
+msgstr "Copiați sau salvați această mână ca text, Markdown sau cod de forum"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Current card deck preview"
-msgstr ""
+msgstr "Previzualizarea pachetului curent"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Deck:"
-msgstr ""
+msgstr "Pachet:"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
-#| msgid "and"
 msgid "End"
-msgstr "si"
+msgstr "Sfârșit"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
-#| msgid "Hand Replayer"
 msgid "FPDB Hand Replayer"
-msgstr "Rejucare Mina"
+msgstr "Player de mâini FPDB"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
@@ -1860,54 +2064,59 @@ msgid "Hide Cards"
 msgstr "Cartile comune"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Next"
-msgstr ""
+msgstr "Următor"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Next action"
-msgstr ""
+msgstr "Acțiunea următoare"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
-#| msgid "Players"
 msgid "Play"
-msgstr "Jucatori"
-
-#: fpdb_3_legacy/GuiReplayer.py
-msgid "Prev"
-msgstr ""
+msgstr "Redă"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
-#| msgid "Position"
-msgid "Previous action"
-msgstr "Pozitie"
+msgid "Prev"
+msgstr "Ant."
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+msgid "Previous action"
+msgstr "Acțiunea anterioară"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Send this hand's preflop decisions to PreflopAdvisor"
-msgstr ""
+msgstr "Trimite deciziile preflop ale acestei mâini la PreflopAdvisor"
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Share..."
-msgstr ""
+msgstr "Partajează..."
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
-#| msgid "Stove (preview)"
 msgid "Solver review..."
-msgstr "Stove (previzualizare)"
+msgstr "Analiză cu solver..."
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Start"
-msgstr ""
+msgstr "Început"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "-- built-in presets --"
-msgstr ""
+msgstr "-- presetări integrate --"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "-- saved presets --"
-msgstr ""
+msgstr "-- presetări salvate --"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -1915,153 +2124,176 @@ msgid "?"
 msgstr ""
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "A gap is only as good as the smaller of the two samples beside it."
 msgstr ""
+"O diferență valorează doar cât cel mai mic dintre cele două eșantioane de "
+"lângă ea."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add or remove one of the known values."
-msgstr ""
+msgstr "Adaugă sau elimină una dintre valorile cunoscute."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add the selected dimension to the breakdown."
-msgstr ""
+msgstr "Adaugă dimensiunea selectată la defalcare."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add this filter"
-msgstr ""
+msgstr "Adaugă acest filtru"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Adjust {variables} for your own game."
-msgstr ""
+msgstr "Ajustați {variables} la propriul joc."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Adjust: {variables}"
-msgstr ""
+msgstr "Ajustați: {variables}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Aim for at least {n} decisions."
-msgstr ""
+msgstr "Țintiți cel puțin {n} decizii."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "All hands in the population"
-msgstr ""
+msgstr "Toate mâinile populației"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Any leaves the condition out of the query entirely."
-msgstr ""
+msgstr "„Oricare” scoate complet condiția din interogare."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Ask a poker question"
-msgstr ""
+msgstr "Puneți o întrebare de poker"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Ask your own question"
-msgstr ""
+msgstr "Puneți-vă propria întrebare"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Break down by"
-msgstr ""
+msgstr "Defalcă după"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Choose a dimension to split the result by."
-msgstr ""
+msgstr "Alegeți o dimensiune după care să împărțiți rezultatul."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Choose one or more…"
-msgstr ""
+msgstr "Alegeți una sau mai multe…"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Comma-separated group-by dimensions (engine vocabulary)"
-msgstr ""
+msgstr "Dimensiuni de grupare separate prin virgulă (vocabularul motorului)"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Compare with the field"
-msgstr ""
+msgstr "Compară cu field-ul"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Count"
-msgstr ""
+msgstr "Număr"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/GuiResearchViews.py
 #, fuzzy
-#| msgid "Sessions"
 msgid "Decisions"
-msgstr "Sesiuni"
+msgstr "Decizii"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a cell to load the hands behind it."
-msgstr ""
+msgstr "Dublu clic pe o celulă pentru a încărca mâinile din spatele ei."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a result row to load its hands."
-msgstr ""
+msgstr "Dublu clic pe un rând de rezultat pentru a-i încărca mâinile."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "Double-click a row to load its hands. Numerator/denominator are shown per "
 "row."
 msgstr ""
+"Dublu clic pe un rând pentru a-i încărca mâinile. Numărătorul/numitorul sunt "
+"afișați pe fiecare rând."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a row to see your hands and the field's, side by side."
 msgstr ""
+"Dublu clic pe un rând pentru a vedea mâinile dvs. și ale field-ului, una "
+"lângă alta."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click the row to load its hands."
-msgstr ""
+msgstr "Dublu clic pe rând pentru a-i încărca mâinile."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Every decision the question applies to: the sample size."
-msgstr ""
+msgstr "Fiecare decizie la care se aplică întrebarea: mărimea eșantionului."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
-#| msgid "Hand Replayer"
 msgid "FPDB Replayer"
-msgstr "Rejucare Mina"
+msgstr "Player FPDB"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
-#| msgid "Field Type"
 msgid "Field"
-msgstr "Tipul cimpului"
+msgstr "Field"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
-#| msgid "Field Type"
 msgid "Field sample"
-msgstr "Tipul cimpului"
+msgstr "Eșantionul field-ului"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Filters"
 msgstr "Filters"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Frequency (%)"
-msgstr ""
+msgstr "Frecvență (%)"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
-#| msgid "Graphs"
 msgid "Gap"
-msgstr "Grafice"
-
-#: fpdb_3_legacy/GuiResearchBrowser.py
-msgid "How many of those decisions the metric counted."
-msgstr ""
+msgstr "Diferență"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
-#| msgid "Min # Hands:"
-msgid "Matching hands"
-msgstr "Minim # miini:"
+msgid "How many of those decisions the metric counted."
+msgstr "Câte dintre aceste decizii a numărat măsura."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
+msgid "Matching hands"
+msgstr "Mâini potrivite"
+
+#: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Metric"
-msgstr ""
+msgstr "Măsură"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -2069,139 +2301,179 @@ msgid "No"
 msgstr "Nu"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "No matching hands were found for either population."
-msgstr ""
+msgstr "Nu s-au găsit mâini potrivite pentru niciuna dintre populații."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Only the hands where the metric fired"
-msgstr ""
+msgstr "Doar mâinile în care măsura s-a declanșat"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Open the Research Browser quick start"
-msgstr ""
+msgstr "Deschide ghidul rapid al Research Browser"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Pick one of the answers this workbench knows how to show."
 msgstr ""
+"Alegeți unul dintre răspunsurile pe care acest atelier știe să le arate."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Poker labels"
-msgstr ""
+msgstr "Termeni de poker"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "Poker labels use the terminology most readers see at the table.\n"
 "Technical names expose the analytics engine's fields and values."
 msgstr ""
+"Termenii de poker folosesc terminologia pe care o văd la masă majoritatea "
+"jucătorilor.\n"
+"Numele tehnice arată câmpurile și valorile motorului de analiză."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Query cancelled."
-msgstr ""
+msgstr "Interogare anulată."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Remove this breakdown"
-msgstr ""
+msgstr "Elimină această defalcare"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Remove this filter"
-msgstr ""
+msgstr "Elimină acest filtru"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Research browser"
-msgstr ""
+msgstr "Research Browser"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Results"
 msgstr "Rezultate"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Run the same question twice -- yours and the field's -- side by side."
 msgstr ""
+"Pune aceeași întrebare de două ori -- a dvs. și a field-ului -- una lângă "
+"alta."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Running…"
-msgstr ""
+msgstr "Se rulează…"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Save"
 msgstr "Save"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Save preset"
-msgstr ""
+msgstr "Salvează presetarea"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Saved as \"{saved}\". The built-in preset \"{original}\" is unchanged."
 msgstr ""
+"Salvată ca „{saved}”. Presetarea integrată „{original}” rămâne neschimbată."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Show technical query controls"
-msgstr ""
+msgstr "Arată comenzile tehnice de interogare"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Show the engine's own filter names and free-text values."
-msgstr ""
+msgstr "Arată numele de filtre ale motorului și valorile text libere."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Technical names"
-msgstr ""
+msgstr "Nume tehnice"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "The Research Browser answers questions about the hands in your database. "
 "Pick a question below, change any value that should be different for you, "
 "then press Run. The sample size is always shown, and every row can be opened "
 "as the hands behind it."
 msgstr ""
+"Research Browser răspunde la întrebări despre mâinile din baza dvs. de date. "
+"Alegeți o întrebare de mai jos, schimbați valorile care trebuie să fie "
+"altele pentru dvs., apoi apăsați Rulează. Mărimea eșantionului este mereu "
+"afișată, iar fiecare rând poate fi deschis pe mâinile din spatele lui."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "The analytics data for {names} has never been built. A question that reads "
 "it answers zero until it is: Database -> Rebuild Analytics Data."
 msgstr ""
+"Datele de analiză pentru {names} nu au fost construite niciodată. O "
+"întrebare care le citește răspunde zero până atunci: Bază de date -> "
+"Reconstruiește datele de analiză."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "The analytics data for {names} was derived by older rules, so a question "
 "that reads it may answer zero: Database -> Rebuild Analytics Data."
 msgstr ""
+"Datele de analiză pentru {names} au fost derivate după reguli vechi, deci o "
+"întrebare care le citește poate răspunde zero: Bază de date -> "
+"Reconstruiește datele de analiză."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "The measurement itself, over the sample above."
-msgstr ""
+msgstr "Măsurarea însăși, pe eșantionul de mai sus."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "The question the controls above currently ask."
-msgstr ""
+msgstr "Întrebarea pe care o pun acum comenzile de mai sus."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "These questions need the analytics tables rebuilt before they can answer: "
 "{subsystems}. Rebuild them from the database menu, then run a question."
 msgstr ""
+"Aceste întrebări au nevoie de reconstruirea tabelelor de analiză înainte de "
+"a putea răspunde: {subsystems}. Reconstruiți-le din meniul bazei de date, "
+"apoi rulați o întrebare."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Try one of these:"
-msgstr ""
+msgstr "Încercați una dintre acestea:"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Unknown group-by dimension(s): {names}. Known: {known}."
-msgstr ""
+msgstr "Dimensiuni de grupare necunoscute: {names}. Cunoscute: {known}."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Viewers"
 msgid "View"
-msgstr "Vizitatori"
+msgstr "Vizualizare"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Vocabulary"
-msgstr ""
+msgstr "Vocabular"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -2209,115 +2481,137 @@ msgid "Yes"
 msgstr "Da"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "You"
-msgstr ""
-
-#: fpdb_3_legacy/GuiResearchBrowser.py
-msgid "Your sample"
-msgstr ""
-
-#: fpdb_3_legacy/GuiResearchBrowser.py
-msgid "e.g. street, response"
-msgstr ""
-
-#: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
-msgid "e.g. {example}"
-msgstr ""
-
-#: fpdb_3_legacy/GuiResearchBrowser.py
-msgid "from"
-msgstr ""
-
-#: fpdb_3_legacy/GuiResearchBrowser.py
-msgid "or type a value"
-msgstr ""
+msgstr "Dvs."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
-#| msgid "auto"
+msgid "Your sample"
+msgstr "Eșantionul dvs."
+
+#: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
+msgid "e.g. street, response"
+msgstr "ex. street, response"
+
+#: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy, python-brace-format
+msgid "e.g. {example}"
+msgstr "ex. {example}"
+
+#: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
+msgid "from"
+msgstr "de la"
+
+#: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
+msgid "or type a value"
+msgstr "sau tastați o valoare"
+
+#: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "to"
-msgstr "auto"
+msgstr "până la"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{hero} decisions of yours, {field} of the field's"
-msgstr ""
+msgstr "{hero} decizii ale dvs., {field} ale field-ului"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{question} — {how}"
-msgstr ""
+msgstr "{question} — {how}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "■ Cancel"
-msgstr ""
+msgstr "■ Anulează"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "▶ Run"
-msgstr ""
+msgstr "▶ Rulează"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "＋ Add breakdown"
-msgstr ""
+msgstr "＋ Adaugă defalcare"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid ""
 "Cells without enough of a sample stay uncoloured; hover one to read its "
 "count."
 msgstr ""
+"Celulele fără un eșantion suficient rămân necolorate; treceți cu mouse-ul "
+"peste una pentru a-i citi numărul."
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Colour by:"
-msgstr ""
+msgstr "Colorează după:"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "No cell is below the sample threshold."
-msgstr ""
+msgstr "Nicio celulă nu este sub pragul de eșantion."
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Realized {realized} over {hands} hands; EV-adjusted {ev} ({luck} of it luck)."
 msgstr ""
+"Realizat {realized} în {hands} mâini; ajustat EV {ev} (din care noroc "
+"{luck})."
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Share"
-msgstr ""
+msgstr "Pondere"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "{decisions} decisions in this selection have no known hole cards and are not "
 "in the grid; {share} of the decisions are drawn."
 msgstr ""
+"{decisions} decizii din această selecție nu au cărți proprii cunoscute și nu "
+"sunt în grilă; sunt reprezentate {share} din decizii."
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{label}: {classified} classified decisions of {total} ({share} covered)"
 msgstr ""
+"{label}: {classified} decizii clasificate din {total} ({share} acoperite)"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{n} decisions are counted apart: their cards were never known."
 msgstr ""
+"{n} decizii sunt numărate separat: cărțile lor nu au fost niciodată "
+"cunoscute."
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Cumulative result (BB)"
-msgstr ""
+msgstr "Rezultat cumulat (BB)"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
 msgid "Hand Breakdown for all levels listed above"
 msgstr "Analiza miinilor pentru toate nivelele e aratata mai sus"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Native-currency totals omitted (multiple currencies)"
-msgstr ""
+msgstr "Totalurile în moneda originală omise (mai multe monede)"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Profit: {profit} · Currency/hour: {hour}"
-msgstr ""
+msgstr "Profit: {profit} · Monedă/oră: {hour}"
 
 #: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -2325,22 +2619,25 @@ msgid "Session"
 msgstr "Sesiuni"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Sessions: {sessions} · Hands: {hands} · Playing time: {duration} · Profit: "
 "{profit_bb} BB · bb/100: {bb100} · BB/hour: {bb_hour} · BB hands: {bb_hands}/"
 "{hands}"
 msgstr ""
+"Sesiuni: {sessions} · Mâini: {hands} · Timp de joc: {duration} · Profit: "
+"{profit_bb} BB · bb/100: {bb100} · BB/oră: {bb_hour} · Mâini în BB: "
+"{bb_hands}/{hands}"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{hours}h {minutes}m"
-msgstr ""
+msgstr "{hours} h {minutes} min"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{minutes}m"
-msgstr ""
+msgstr "{minutes} min"
 
 #: fpdb_3_legacy/GuiTourHandViewer.py
 #, fuzzy
@@ -2352,88 +2649,103 @@ msgid "Refresh Stats"
 msgstr "Refresh Statistici"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Clipboard unavailable"
-msgstr ""
+msgstr "Clipboard indisponibil"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 #, fuzzy
-#| msgid "Config file"
 msgid "Configuration file"
-msgstr "Fisier configurare"
+msgstr "Fișier de configurare"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Copy report"
-msgstr ""
+msgstr "Copiază raportul"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Copy these details to the clipboard for a bug report"
-msgstr ""
+msgstr "Copiați aceste detalii în clipboard pentru un raport de eroare"
 
 #: fpdb_3_legacy/GuiVersionInfo.py fpdb_3_legacy/menu_layout.py
 msgid "Database"
 msgstr "Baza de date"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Documentation"
-msgstr ""
+msgstr "Documentație"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 #, fuzzy
-#| msgid "fpdb version"
 msgid "FPDB version"
-msgstr "versiune fpdb"
+msgstr "Versiunea FPDB"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Git branch"
-msgstr ""
+msgstr "Ramură Git"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Git checkout"
-msgstr ""
+msgstr "Checkout Git"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Git commit"
-msgstr ""
+msgstr "Commit Git"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "GitHub repository"
-msgstr ""
+msgstr "Depozit GitHub"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Links"
-msgstr ""
+msgstr "Linkuri"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Packaging"
-msgstr ""
+msgstr "Împachetare"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Report an issue"
-msgstr ""
+msgstr "Raportează o problemă"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Report copied to clipboard"
-msgstr ""
+msgstr "Raport copiat în clipboard"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Version and environment"
-msgstr ""
+msgstr "Versiune și mediu"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Working tree"
-msgstr ""
+msgstr "Arbore de lucru"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "clean"
-msgstr ""
+msgstr "curat"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "modified (uncommitted changes)"
-msgstr ""
+msgstr "modificat (modificări necomise)"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "not a git checkout (packaged or exported build)"
-msgstr ""
+msgstr "nu este un checkout Git (versiune împachetată sau exportată)"
 
 #: fpdb_3_legacy/MergeSummary.py
 msgid "MergeSummary.determineGameType: HORSE found, unsupported"
@@ -2482,17 +2794,18 @@ msgstr ""
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #, fuzzy
-#| msgid "Players"
 msgid "<b>Players</b>"
-msgstr "Jucatori"
+msgstr "<b>Jucători</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Seat</b>"
-msgstr ""
+msgstr "<b>Loc</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Visual Selection</b>"
-msgstr ""
+msgstr "<b>Selecție vizuală</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #, fuzzy
@@ -2503,12 +2816,14 @@ msgstr "hud_main: Joc schimbat."
 #: fpdb_3_legacy/ModernSitePreferences.py fpdb_3_legacy/ThemeCreatorDialog.py
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cancel"
-msgstr ""
+msgstr "Anulează"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Configure your favorite seats for each table size"
-msgstr ""
+msgstr "Configurați locurile preferate pentru fiecare mărime de masă"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #, fuzzy
@@ -2517,13 +2832,13 @@ msgstr "Setari"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #, fuzzy
-#| msgid "Importing"
 msgid "Import Settings"
-msgstr "Importare"
+msgstr "Importă setările"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Reset to Default"
-msgstr ""
+msgstr "Revino la implicit"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
@@ -2534,32 +2849,34 @@ msgstr "hud_main: Joc schimbat."
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Search sites..."
-msgstr ""
+msgstr "Caută site-uri..."
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #, fuzzy
-#| msgid "Site Preferences"
 msgid "Seat Preferences"
-msgstr "Preferite Site"
+msgstr "Preferințe de loc"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #, fuzzy
-#| msgid "Showdown"
 msgid "Show:"
-msgstr "Showdown"
+msgstr "Arată:"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "✓ Enabled"
-msgstr ""
+msgstr "✓ Activat"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "✗ Disabled"
-msgstr ""
+msgstr "✗ Dezactivat"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "💡 Set to 0 to disable favorite seat for a table size"
-msgstr ""
+msgstr "💡 Setați 0 pentru a dezactiva locul preferat pentru o mărime de masă"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
@@ -2567,9 +2884,9 @@ msgid "🔍"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s hero aliases:"
-msgstr ""
+msgstr "Aliasuri de erou pentru %s:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
@@ -2577,39 +2894,45 @@ msgid "(search in enabled sites only)"
 msgstr "Nu gasesc limitele"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid ""
 "A data source such as PHH is not a poker room: it has no screen name. Name "
 "the players that are you in its hands, and the reports read them as one "
 "hero, as a room's aliases are."
 msgstr ""
+"O sursă de date precum PHH nu este o cameră de poker: nu are nume de "
+"jucător. Indicați ce jucători sunteți dvs. în mâinile ei, iar rapoartele îi "
+"vor citi ca pe un singur erou, ca aliasurile unei camere."
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Add link"
-msgstr ""
+msgstr "Adaugă legătură"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-#| msgid "Browse..."
 msgid "Browse"
-msgstr "Cautare..."
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Configure your poker sites and usernames"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Data Sources"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Default profile"
-msgstr ""
+msgstr "Răsfoiește"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-#| msgid "Enter Tournament"
+msgid "Configure your poker sites and usernames"
+msgstr "Configurați site-urile de poker și numele de utilizator"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Data Sources"
+msgstr "Surse de date"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Default profile"
+msgstr "Profil implicit"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Enter your username"
-msgstr "Introdu Turneu"
+msgstr "Introduceți numele de utilizator"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
@@ -2617,31 +2940,35 @@ msgid "Hand History:"
 msgstr "Cale Istoric"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Hero Profiles"
-msgstr ""
+msgstr "Profiluri de erou"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "New"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Old nicknames / extra accounts, comma separated"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Other Aliases:"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Path to hand history files"
-msgstr ""
+msgstr "Nou"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-#| msgid "No Tournament summaries found."
+msgid "Old nicknames / extra accounts, comma separated"
+msgstr "Nickname-uri vechi / conturi suplimentare, separate prin virgulă"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Other Aliases:"
+msgstr "Alte aliasuri:"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
+msgid "Path to hand history files"
+msgstr "Calea către istoricele de mâini"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Path to tournament summaries"
-msgstr "Nu s-au gasit sumare de turnee"
+msgstr "Calea către rezumatele turneelor"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
@@ -2649,14 +2976,14 @@ msgid "Profile name"
 msgstr "Nume fisier:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Remove link"
-msgstr ""
+msgstr "Elimină legătura"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
-#| msgid "Screen Name"
 msgid "Screen Name:"
-msgstr "Nume Afisat"
+msgstr "Nume de jucător:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Site Preferences"
@@ -2668,8 +2995,9 @@ msgid "Tournament:"
 msgstr "Turnee"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Your names in these hands, one per line"
-msgstr ""
+msgstr "Numele dvs. în aceste mâini, câte unul pe rând"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🎭"
@@ -2688,12 +3016,14 @@ msgid "📁"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "🔍 Auto-Detect All Visible Sites"
-msgstr ""
+msgstr "🔍 Detectează automat toate site-urile vizibile"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "🔍 Auto-Detect Paths"
-msgstr ""
+msgstr "🔍 Detectează automat căile"
 
 #: fpdb_3_legacy/OnGameToFpdb.py
 #, python-format
@@ -2737,22 +3067,24 @@ msgid "PkrToFpdb.readHandInfo: '%s'"
 msgstr "Nepotrivire in readHandInfo: '%s'"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Brief description of your theme"
-msgstr ""
-
-#: fpdb_3_legacy/ThemeCreatorDialog.py
-msgid "Create Custom Theme"
-msgstr ""
-
-#: fpdb_3_legacy/ThemeCreatorDialog.py
-msgid "Create Theme"
-msgstr ""
+msgstr "Scurtă descriere a temei"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
 #, fuzzy
-#| msgid "Stove (preview)"
+msgid "Create Custom Theme"
+msgstr "Creează temă personalizată"
+
+#: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
+msgid "Create Theme"
+msgstr "Creează tema"
+
+#: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Update Preview"
-msgstr "Stove (previzualizare)"
+msgstr "Actualizează previzualizarea"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
 #, fuzzy
@@ -2760,98 +3092,115 @@ msgid "Your name"
 msgstr "Turnee"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "e.g., my_custom_theme"
-msgstr ""
+msgstr "ex. tema_mea_personala"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Back up and upgrade"
-msgstr ""
+msgstr "Fă copie de rezervă și actualizează"
 
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
-#| msgid "Clear Dates"
 msgid "Clear All"
-msgstr "Goleste datele"
-
-#: fpdb_3_legacy/fpdb.pyw
-msgid "Configuration needs attention"
-msgstr ""
+msgstr "Golește tot"
 
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
-#| msgid "Confirm deleting and recreating tables"
+msgid "Configuration needs attention"
+msgstr "Configurația necesită atenție"
+
+#: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Confirm recreating HUD cache"
-msgstr "Confirmati stergerea si recrearea tabelelor"
+msgstr "Confirmați recrearea cache-ului HUD"
 
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Database Statistics"
 msgstr "Statisticile Bazei de date"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Deselect All"
-msgstr ""
+msgstr "Deselectează tot"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Enable or disable sites for HUD display"
-msgstr ""
+msgstr "Activează sau dezactivează site-urile pentru afișarea HUD"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Free Poker DB 3"
-msgstr ""
+msgstr "Free Poker DB 3"
 
 #: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Manage HUD Sites"
-msgstr ""
+msgstr "Gestionează site-urile HUD"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "PT4 HUD imported"
-msgstr ""
+msgstr "HUD PT4 importat"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "PT4 stats import"
-msgstr ""
+msgstr "Import de statistici PT4"
 
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Please confirm that you want to re-create the HUD cache."
 msgstr "Rugam confirmati ca doriti sa recreati cache-ul pentru HUD."
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Search:"
-msgstr ""
+msgstr "Caută:"
 
 #: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Select All"
-msgstr ""
+msgstr "Selectează tot"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Skip these games when importing"
-msgstr ""
+msgstr "Omite aceste jocuri la import"
 
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Unknown Site"
 msgstr "Site Necunoscut"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Unsaved Changes"
-msgstr ""
+msgstr "Modificări nesalvate"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "You have unsaved configuration changes."
-msgstr ""
+msgstr "Aveți modificări de configurație nesalvate."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "Check the hero selected in the Heroes filter and make sure hands for that "
 "player were imported for the selected site."
 msgstr ""
+"Verificați eroul selectat în filtrul Eroi și că mâinile acelui jucător au "
+"fost importate pentru site-ul selectat."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No currency is selected in the filters."
-msgstr ""
+msgstr "În filtre nu este selectată nicio monedă."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No data to display"
-msgstr ""
+msgstr "Nu există date de afișat"
 
 #: fpdb_3_legacy/gui_empty_state.py
 #, fuzzy
@@ -2859,14 +3208,14 @@ msgid "No game type is selected in the filters."
 msgstr "readPlayerStacks: Nu s-au detectat jucatori (mina #%s)"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No hand matches the selected filters."
-msgstr ""
+msgstr "Nicio mână nu corespunde filtrelor selectate."
 
 #: fpdb_3_legacy/gui_empty_state.py
 #, fuzzy
-#| msgid "No sites selected - defaulting to PokerStars"
 msgid "No limit is selected in the filters."
-msgstr "Nu s-au selectat site-uri - implicit va fi PokerStars"
+msgstr "În filtre nu este selectată nicio limită."
 
 #: fpdb_3_legacy/gui_empty_state.py
 #, fuzzy
@@ -2875,11 +3224,11 @@ msgstr "readPlayerStacks: Nu s-au detectat jucatori (mina #%s)"
 
 #: fpdb_3_legacy/gui_empty_state.py
 #, fuzzy
-#| msgid "No sites selected - defaulting to PokerStars"
 msgid "No site is selected in the filters."
-msgstr "Nu s-au selectat site-uri - implicit va fi PokerStars"
+msgstr "În filtre nu este selectat niciun site."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "Nothing has been imported into this database — that is normal right after "
 "creating or recreating the tables.\n"
@@ -2887,42 +3236,59 @@ msgid ""
 "Import hand histories first (Import > Bulk Import, or start the auto-"
 "import), then refresh this tab."
 msgstr ""
+"În această bază de date nu s-a importat nimic — e normal imediat după "
+"crearea sau recrearea tabelelor.\n"
+"\n"
+"Importați mai întâi istorice de mâini (Import > Import în masă sau porniți "
+"importul automat), apoi reîmprospătați această filă."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "The database holds hands, but none of them match this selection.\n"
 "\n"
 "Widen the filters (dates, limits, games, seats) and refresh."
 msgstr ""
+"Baza de date conține mâini, dar niciuna nu corespunde acestei selecții.\n"
+"\n"
+"Lărgiți filtrele (date, limite, jocuri, locuri) și reîmprospătați."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one currency on the left, then refresh."
-msgstr ""
+msgstr "Bifați cel puțin o monedă în stânga, apoi reîmprospătați."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one game on the left, then refresh."
-msgstr ""
+msgstr "Bifați cel puțin un joc în stânga, apoi reîmprospătați."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one limit (stake) on the left, then refresh."
-msgstr ""
+msgstr "Bifați cel puțin o limită (miză) în stânga, apoi reîmprospătați."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one site in the Sites section on the left, then refresh."
 msgstr ""
+"Bifați cel puțin un site în secțiunea Site-uri din stânga, apoi "
+"reîmprospătați."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Your database contains no hands yet."
-msgstr ""
+msgstr "Baza dvs. de date nu conține încă mâini."
 
 #: fpdb_3_legacy/hand_review_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s is not a program that can be started."
-msgstr ""
+msgstr "%s nu este un program care poate fi pornit."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Copy JSON"
-msgstr ""
+msgstr "Copiază JSON"
 
 #: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy, python-format
@@ -2932,113 +3298,135 @@ msgid ""
 msgstr "Nu se gaseste fisierul %s"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Every hero decision of the hand"
-msgstr ""
+msgstr "Fiecare decizie a eroului în mână"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Hand review (*.json)"
-msgstr ""
+msgstr "Analiză de mână (*.json)"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Locate PreflopAdvisor"
-msgstr ""
+msgstr "Localizează PreflopAdvisor"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Open in PreflopAdvisor"
-msgstr ""
+msgstr "Deschide în PreflopAdvisor"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid ""
 "Open it in PreflopAdvisor, or save the file and load it there with Review "
 "Hands > Load a hand review."
 msgstr ""
+"Deschideți-o în PreflopAdvisor sau salvați fișierul și încărcați-l acolo cu "
+"Review Hands > Load a hand review."
 
 #: fpdb_3_legacy/hand_review_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "PreflopAdvisor could not be started:\n"
 "%s\n"
 "\n"
 "Locate it?"
 msgstr ""
+"PreflopAdvisor nu a putut porni:\n"
+"%s\n"
+"\n"
+"Îl localizați?"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Review:"
-msgstr ""
+msgstr "Analiză:"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Save for PreflopAdvisor..."
-msgstr ""
+msgstr "Salvează pentru PreflopAdvisor..."
 
 #: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy
-#| msgid "Stove (preview)"
 msgid "Save hand review"
-msgstr "Stove (previzualizare)"
+msgstr "Salvează analiza de mână"
 
 #: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy
-#| msgid "Stove (preview)"
 msgid "Solver review"
-msgstr "Stove (previzualizare)"
+msgstr "Analiză cu solver"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Solver review (PreflopAdvisor)..."
-msgstr ""
+msgstr "Analiză cu solver (PreflopAdvisor)..."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "This decision"
-msgstr ""
+msgstr "Această decizie"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "This hand cannot be sent to PreflopAdvisor."
-msgstr ""
+msgstr "Această mână nu poate fi trimisă la PreflopAdvisor."
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Amounts"
-msgstr ""
+msgstr "Sume"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Big blinds"
-msgstr ""
+msgstr "Big blind-uri"
 
 #: fpdb_3_legacy/hand_share_dialog.py fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Copy"
-msgstr ""
+msgstr "Copiază"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as Markdown"
-msgstr ""
+msgstr "Copiază ca Markdown"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as Markdown in BB"
-msgstr ""
+msgstr "Copiază ca Markdown în BB"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as text"
-msgstr ""
+msgstr "Copiază ca text"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy, python-format
-#| msgid "Could not encode: \"%s\""
 msgid ""
 "Could not save the hand:\n"
 "%s"
-msgstr "Nu pot coda: \"%s\""
+msgstr ""
+"Mâna nu a putut fi salvată:\n"
+"%s"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
-#| msgid "Date/Time"
 msgid "Date and time"
-msgstr "Data/Ora"
+msgstr "Data și ora"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "EV cashout"
-msgstr ""
+msgstr "Cashout EV"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Forum (BBCode)"
-msgstr ""
+msgstr "Forum (BBCode)"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
@@ -3046,66 +3434,74 @@ msgid "Hand number"
 msgstr "  Orice numar"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Hide every name (Hero, Villain 1 ...)"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Include"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Keep every name"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Keep my name, hide opponents"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Markdown"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Money / chips"
-msgstr ""
+msgstr "Ascunde toate numele (Hero, Villain 1 ...)"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
-#| msgid "Name"
+msgid "Include"
+msgstr "Include"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Keep every name"
+msgstr "Păstrează toate numele"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Keep my name, hide opponents"
+msgstr "Păstrează numele meu, ascunde adversarii"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Markdown"
+msgstr "Markdown"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Money / chips"
+msgstr "Bani / jetoane"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Names"
 msgstr "Nume"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Plain text"
-msgstr ""
+msgstr "Text simplu"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Rake"
-msgstr ""
+msgstr "Rake"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
-#| msgid "Save"
 msgid "Save hand"
-msgstr "Save"
+msgstr "Salvează mâna"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
-#| msgid "Save"
 msgid "Save..."
-msgstr "Save"
+msgstr "Salvează..."
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Share hand"
-msgstr ""
+msgstr "Partajează mâna"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Showdown and results"
-msgstr ""
+msgstr "Showdown și rezultate"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Stacks"
-msgstr ""
+msgstr "Stack-uri"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
@@ -3113,64 +3509,77 @@ msgid "Table name"
 msgstr "hud_main: Joc schimbat."
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "This game has no big blind to count in."
-msgstr ""
+msgstr "Acest joc nu are big blind după care să se numere."
 
 #: fpdb_3_legacy/hand_share_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "This hand could not be rendered:\n"
 "%s"
 msgstr ""
+"Această mână nu a putut fi afișată:\n"
+"%s"
 
 #: fpdb_3_legacy/i18n.py
+#, fuzzy
 msgid "Stack"
-msgstr ""
+msgstr "Stack"
 
 #: fpdb_3_legacy/i18n.py
+#, fuzzy
 msgid "Stack (bb)"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "About"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "About the program"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)"
-msgstr ""
+msgstr "Stack (bb)"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Advanced Preferences"
-msgid "Advanced logger manager"
-msgstr "Preferinte avansate"
+msgid "About"
+msgstr "Despre"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "About the program"
+msgstr "Despre program"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)"
+msgstr ""
+"Adaugă, editează, testează și selectează baza de date (SQLite / PostgreSQL / "
+"MySQL)"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Advanced logger manager"
+msgstr "Manager avansat de jurnale"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid ""
 "Alerts for the session being played: loss, win, duration, hands, drawdown"
 msgstr ""
+"Alerte pentru sesiunea în curs: pierdere, câștig, durată, mâini, drawdown"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Auto Import Ready."
 msgid "Auto Note Rules"
-msgstr "Importul automat e pregatit."
+msgstr "Reguli de note automate"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Auto Notes Workbench"
-msgstr ""
+msgstr "Atelier de note automate"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Cash"
-msgstr ""
+msgstr "Cash"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "CoinPoker Live Capture"
-msgstr ""
+msgstr "Captură live CoinPoker"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -3183,29 +3592,28 @@ msgstr "Creare sau recreare Tabele"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Databases"
 msgid "Databases…"
-msgstr "Baze de date"
+msgstr "Baze de date…"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Dump Database to Textfile (takes ALOT of time)"
 msgid "Dump Database to Textfile"
-msgstr "Varza Baza de date in fisier text (dureaza MULT timp)"
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Edit automatic player-note rules"
-msgstr ""
+msgstr "Descarcă baza de date într-un fișier text"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Site Preferences"
-msgid "Edit your preferences"
-msgstr "Preferite Site"
+msgid "Edit automatic player-note rules"
+msgstr "Editează regulile de note automate despre jucători"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Edit your preferences"
+msgstr "Editați preferințele"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Export the whole database to a text file (slow)"
-msgstr ""
+msgstr "Exportă întreaga bază de date într-un fișier text (lent)"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Graphs"
@@ -3237,40 +3645,48 @@ msgid "Help Tab"
 msgstr "Ajutor"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import PT4 HUD (.pt4hud)"
-msgstr ""
+msgstr "Importă HUD PT4 (.pt4hud)"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import PT4 Stats (.pt4stat)"
-msgstr ""
+msgstr "Importă statistici PT4 (.pt4stat)"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import PokerTracker 4 custom statistics as declarative stat descriptors"
 msgstr ""
+"Importă statistici personalizate PokerTracker 4 ca descriptori declarativi"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import a PokerTracker 4 HUD layout (stats + range charts)"
 msgstr ""
+"Importă un aranjament HUD PokerTracker 4 (statistici + grafice de range)"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Import Complete"
 msgid "Import filters"
-msgstr "Importare completa"
+msgstr "Filtre de import"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import, enable, disable, uninstall and export declarative stat packs"
 msgstr ""
+"Importă, activează, dezactivează, dezinstalează și exportă pachete de "
+"statistici declarative"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "language"
 msgid "Language"
-msgstr "limba"
+msgstr "Limbă"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Launch SwC HTTP Capture"
-msgstr ""
+msgstr "Pornește captura HTTP SwC"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Log Messages"
@@ -3278,13 +3694,13 @@ msgstr "Jurnalizare Mesaje"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Log Messages"
 msgid "Log and debug messages"
-msgstr "Jurnalizare Mesaje"
+msgstr "Mesaje de jurnal și depanare"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Logger Dev Tool"
-msgstr ""
+msgstr "Instrument de dezvoltare pentru jurnal"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -3301,17 +3717,21 @@ msgid "Quit"
 msgstr "Iesire"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Quit the program"
-msgstr ""
+msgstr "Ieșire din program"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid ""
 "Re-derive the situations and hand states the Research Browser and HUD read"
 msgstr ""
+"Recalculează situațiile și stările de mână citite de Research Browser și HUD"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Rebuild Analytics Data"
-msgstr ""
+msgstr "Reconstruiește datele de analiză"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Rebuild DB Indexes"
@@ -3322,12 +3742,14 @@ msgid "Rebuild HUD Cache"
 msgstr "Recladire cache HUD"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Research Browser"
-msgstr ""
+msgstr "Research Browser"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Research Browser for Omaha"
-msgstr ""
+msgstr "Research Browser pentru Omaha"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -3350,9 +3772,8 @@ msgstr "Setari"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Stat Name"
 msgid "Stat Packs"
-msgstr "Nume Statistica"
+msgstr "Pachete de statistici"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Statistics"
@@ -3360,21 +3781,23 @@ msgstr "Statistici"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Stat Name"
 msgid "Stats Guide"
-msgstr "Nume Statistica"
+msgstr "Ghid de statistici"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Study Explorer"
-msgstr ""
+msgstr "Study Explorer"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Themes"
-msgstr ""
+msgstr "Teme"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tools"
-msgstr ""
+msgstr "Instrumente"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -3387,9 +3810,8 @@ msgstr "Grafice Turneu"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Tourney Viewer"
 msgid "Tourney Hand Viewer"
-msgstr "Vizualizare Turneu"
+msgstr "Vizualizator de mâini de turneu"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Tourney Stats"
@@ -3401,30 +3823,35 @@ msgid "Version"
 msgstr "Sesiuni"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Version, packaging and runtime environment details"
-msgstr ""
+msgstr "Detalii despre versiune, împachetare și mediul de rulare"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Database Statistics"
 msgid "View database statistics"
-msgstr "Statisticile Bazei de date"
+msgstr "Vezi statisticile bazei de date"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "What every filter is for in a four-card game, and the two that are not"
 msgstr ""
+"La ce folosește fiecare filtru într-un joc cu patru cărți, și cele două care "
+"nu folosesc"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "+"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
 msgid "Add an item to this row"
-msgstr ""
+msgstr "Adaugă un element pe acest rând"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
 msgid "Remove the last item of this row"
-msgstr ""
+msgstr "Elimină ultimul element de pe acest rând"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "−"
@@ -3432,37 +3859,38 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-#| msgid "Statistics"
 msgid "Add/Edit Statistic"
-msgstr "Statistici"
+msgstr "Adaugă/editează statistica"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Block Properties"
-msgstr ""
+msgstr "Proprietățile blocului"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Click Action:"
-msgstr ""
+msgstr "Acțiune la clic:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Column:"
-msgstr ""
+msgstr "Coloană:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-#| msgid "Statistics"
 msgid "Edit Popup Statistic"
-msgstr "Statistici"
+msgstr "Editează statistica pop-up-ului"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-#| msgid "Popup Windows"
 msgid "Edit Popup Window"
-msgstr "Ferestre popup"
+msgstr "Editează fereastra pop-up"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Export Layout Coordinates"
-msgstr ""
+msgstr "Exportă coordonatele aranjamentului"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -3470,87 +3898,109 @@ msgid "Grid Position:"
 msgstr "Pozitie"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "High Range:"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Low Range:"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Middle color:"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid ""
-"Minimum width of each statistic cell; Automatic keeps the legacy default"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "OK"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Optional: Action when stat is clicked"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Optional: Popup to show on hover"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Optional: Submenu name for hierarchical popups"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Override the automatic section used by ModernSubmenu"
-msgstr ""
+msgstr "Interval sus:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-#| msgid "Popup Name"
-msgid "Popup:"
-msgstr "Nume popup"
+msgid "Low Range:"
+msgstr "Interval jos:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Middle color:"
+msgstr "Culoarea de mijloc:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid ""
+"Minimum width of each statistic cell; Automatic keeps the legacy default"
+msgstr ""
+"Lățimea minimă a fiecărei celule de statistică; Automat păstrează valoarea "
+"veche"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "OK"
+msgstr "OK"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Optional: Action when stat is clicked"
+msgstr "Opțional: acțiune la clic pe statistică"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Optional: Popup to show on hover"
+msgstr "Opțional: pop-up afișat la trecerea mouse-ului"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Optional: Submenu name for hierarchical popups"
+msgstr "Opțional: numele submeniului pentru pop-up-uri ierarhice"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Override the automatic section used by ModernSubmenu"
+msgstr "Înlocuiește secțiunea automată folosită de ModernSubmenu"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Popup:"
+msgstr "Pop-up:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Preview shows how statistic colors will change based on values"
 msgstr ""
+"Previzualizarea arată cum se schimbă culorile statisticii în funcție de "
+"valori"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Row:"
-msgstr ""
+msgstr "Rând:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Select None"
-msgstr ""
+msgstr "Deselectează tot"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid ""
 "Select the site layout coordinates you want to include in the package.\n"
 "This will let other users position the HUD boxes exactly like yours."
 msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Show this panel only for a villain in this position (blank = always)"
-msgstr ""
+"Selectați coordonatele de aranjament ale site-urilor de inclus în pachet.\n"
+"Astfel alți utilizatori pot așeza casetele HUD exact ca dvs."
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-#| msgid "Statistics"
+msgid "Show this panel only for a villain in this position (blank = always)"
+msgstr ""
+"Arată acest panou doar pentru un adversar pe această poziție (gol = mereu)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Statistic:"
-msgstr "Statistici"
+msgstr "Statistică:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Use middle color for values between thresholds"
-msgstr ""
+msgstr "Folosește culoarea de mijloc pentru valorile dintre praguri"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Values above"
-msgstr ""
+msgstr "Valori peste"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Values below"
-msgstr ""
+msgstr "Valori sub"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -3558,136 +4008,161 @@ msgid "show as"
 msgstr "arata"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "➕ Add Stat"
-msgstr ""
+msgstr "➕ Adaugă statistică"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "➖ Remove Stat"
-msgstr ""
+msgstr "➖ Elimină statistica"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr "#"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "(none)"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "A panel rule with these conditions and this profile already exists."
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "A profile definition with these selectors already exists."
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "ANY"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "ANY table"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Active Profile Definitions"
-msgstr ""
+msgstr "(niciunul)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Archive File"
+msgid "A panel rule with these conditions and this profile already exists."
+msgstr "Există deja o regulă de panou cu aceste condiții și acest profil."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "A profile definition with these selectors already exists."
+msgstr "Există deja o definiție de profil cu acești selectori."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "ANY"
+msgstr "ORICARE"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "ANY table"
+msgstr "ORICE masă"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Active Profile Definitions"
+msgstr "Definiții de profil active"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Active Profile:"
-msgstr "Fisierul arhiva"
+msgstr "Profil activ:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add"
 msgstr "Adaugare"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Block"
-msgstr ""
+msgstr "Adaugă bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Label"
-msgstr ""
+msgstr "Adaugă etichetă"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Line"
-msgstr ""
+msgstr "Adaugă linie"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Profile Definition"
-msgstr ""
+msgstr "Adaugă definiție de profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Stat"
 msgid "Add Stat"
-msgstr "Statistica"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add a new panel (block) to a multi-panel HUD"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add a text label (column/row header or caption) to a panel"
-msgstr ""
+msgstr "Adaugă statistică"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "AddDB starting"
+msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
+msgstr "Adaugă o linie orizontală de separare (PT4 'Horz Line') pe un panou"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add a new panel (block) to a multi-panel HUD"
+msgstr "Adaugă un panou nou (bloc) la un HUD cu mai multe panouri"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add a text label (column/row header or caption) to a panel"
+msgstr "Adaugă o etichetă text (antet de coloană/rând sau legendă) pe un panou"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add stat"
-msgstr "pornire AddDB"
+msgstr "Adaugă statistică"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add to block"
-msgstr ""
+msgstr "Adaugă în bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Analytics-backed stats"
-msgstr ""
+msgstr "Statistici bazate pe analiză"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Append the profile emoji (e.g. 🐟, 🐌, 🎯) and color the player's name in "
 "the HUD."
 msgstr ""
+"Adaugă emoji-ul profilului (ex. 🐟, 🐌, 🎯) și colorează numele jucătorului "
+"în HUD."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Below this many hands the panel is withheld and the fallback shows."
-msgstr ""
+msgstr "Sub acest număr de mâini panoul este reținut și apare înlocuitorul."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Block Props"
-msgstr ""
+msgstr "Prop. bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot add this rule"
-msgstr ""
+msgstr "Regula nu poate fi adăugată"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot export"
-msgstr ""
+msgstr "Export imposibil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot import"
-msgstr ""
+msgstr "Import imposibil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot update this rule"
-msgstr ""
+msgstr "Regula nu poate fi actualizată"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Class:"
-msgstr ""
+msgstr "Clasă:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Color Ranges"
-msgstr ""
+msgstr "Intervale de culoare"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3695,83 +4170,99 @@ msgid "Conditions"
 msgstr "Pozitie"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Design"
-msgstr ""
+msgstr "Design"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Disabled: this rule never matches."
-msgstr ""
+msgstr "Dezactivată: această regulă nu se potrivește niciodată."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Duplicate rule"
-msgstr ""
+msgstr "Regulă duplicată"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Edit"
 msgstr "Editare"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Edit the selected panel's title/border colours, position and label"
 msgstr ""
+"Editează titlul, culorile marginii, poziția și eticheta panoului selectat"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Effective profile for these selectors"
-msgstr ""
+msgstr "Profilul efectiv pentru acești selectori"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Enable Player Profiling (Categorization)"
-msgstr ""
+msgstr "Activează profilarea jucătorilor (categorisire)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Enable auto-classification of players into Nit, Calling Station, Fish, "
 "Maniac, LAG, Reg, TAG."
 msgstr ""
+"Activează clasificarea automată a jucătorilor în Nit, Calling Station, Fish, "
+"Maniac, LAG, Reg, TAG."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Export to File"
 msgid "Export panel rules"
-msgstr "Export spre fisier"
+msgstr "Exportă regulile panourilor"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Export…"
-msgstr ""
+msgstr "Exportă…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Fallback"
-msgstr ""
+msgstr "Înlocuitor"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Games"
 msgid "Game"
-msgstr "Jocuri"
+msgstr "Joc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "General HUD and Profiling Settings"
-msgstr ""
+msgstr "Setări generale HUD și de profilare"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Preview"
-msgstr ""
+msgstr "Previzualizare HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Profile"
-msgstr ""
+msgstr "Profil HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Profile Configuration"
-msgstr ""
+msgstr "Configurarea profilurilor HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD imported — refresh required"
-msgstr ""
+msgstr "HUD importat — reîmprospătare necesară"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD profile"
-msgstr ""
+msgstr "Profil HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3779,112 +4270,137 @@ msgid "Hands for this seat"
 msgstr "handList este"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Horz Line"
-msgstr ""
+msgstr "Linie orizontală"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Icons:"
-msgstr ""
+msgstr "Pictograme:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Import All"
 msgid "Import panel rules"
-msgstr "Import toate"
+msgstr "Importă regulile panourilor"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Imported {count} rule(s)."
-msgstr ""
+msgstr "{count} regulă(i) importată(e)."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Import"
 msgid "Import…"
-msgstr "Importare"
+msgstr "Importă…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Issues"
-msgstr ""
+msgstr "Probleme"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Item Properties"
-msgstr ""
+msgstr "Proprietățile elementului"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Items"
-msgstr ""
+msgstr "Elemente"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Layout Conflict"
-msgstr ""
+msgstr "Conflict de aranjament"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Min sample"
-msgstr ""
+msgstr "Eșantion min."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Minimum hands required for profiling:"
-msgstr ""
+msgstr "Mâini minime pentru profilare:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Move down"
-msgstr ""
+msgstr "Mută jos"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Move up"
-msgstr ""
+msgstr "Mută sus"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "New Profile"
-msgstr ""
+msgstr "Profil nou"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "No HUD profile of this name exists; the game default will be used instead."
 msgstr ""
+"Nu există un profil HUD cu acest nume; se va folosi implicitul jocului."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "No HUD profile of this name exists; this rule will be ignored."
-msgstr ""
+msgstr "Nu există un profil HUD cu acest nume; regula va fi ignorată."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Off by default. When it is on, the panels a rule names are shown and every "
 "other block keeps the position rule it has always had."
 msgstr ""
+"Dezactivat implicit. Când este activ, se arată panourile numite de o regulă, "
+"iar orice alt bloc își păstrează regula de poziție de dinainte."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Open preview at 100% real size in a new window"
 msgstr ""
+"Deschide previzualizarea la 100% din mărimea reală într-o fereastră nouă"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Open the Dynamic HUD guide"
-msgstr ""
+msgstr "Deschide ghidul HUD-ului dinamic"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel"
-msgstr ""
+msgstr "Panou"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel documents (*.json)"
-msgstr ""
+msgstr "Documente de panouri (*.json)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel rules"
-msgstr ""
+msgstr "Regulile panourilor"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panels"
-msgstr ""
+msgstr "Panouri"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr ""
+"Alegeți un joc (și un format) pentru a vedea implicitul care s-ar aplica."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a HUD profile first."
-msgstr ""
+msgstr "Alegeți mai întâi un profil HUD."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
@@ -3892,32 +4408,34 @@ msgid "Players"
 msgstr "Jucatori"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Popup Conflict"
-msgstr ""
+msgstr "Conflict de pop-up"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Popup Windows"
 msgid "Popup Preview"
-msgstr "Ferestre popup"
+msgstr "Previzualizarea pop-up-ului"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Positional Stats"
 msgid "Positional panels:"
-msgstr "Statistici Pozitionale"
+msgstr "Panouri pe poziții:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Preview, by the same resolver the HUD uses"
-msgstr ""
+msgstr "Previzualizare, cu același rezolvitor ca HUD-ul"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Priority"
-msgstr ""
+msgstr "Prioritate"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Profile Conflict"
-msgstr ""
+msgstr "Conflict de profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3925,8 +4443,9 @@ msgid "Profile actions"
 msgstr "Pozitie"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Remove"
-msgstr ""
+msgstr "Elimină"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3934,22 +4453,24 @@ msgid "Rule name"
 msgstr "Nume fisier:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Sample column"
-msgstr ""
+msgstr "Coloana eșantionului"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "For #Seats:"
 msgid "Seats"
-msgstr "Pentru #Locuri:"
+msgstr "Locuri"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Select Popup:"
-msgstr ""
+msgstr "Selectați pop-up-ul:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Select a rule to update first."
-msgstr ""
+msgstr "Selectați mai întâi o regulă de actualizat."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3957,143 +4478,175 @@ msgid "Show hero HUD"
 msgstr "Opreste acest HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show profile emoji and color code directly on player name labels"
-msgstr ""
+msgstr "Arată emoji-ul și culoarea profilului direct pe numele jucătorilor"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show the panels that fit the hand"
-msgstr ""
+msgstr "Arată panourile potrivite mâinii"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Speed"
-msgstr ""
+msgstr "Viteză"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stats whose value comes from the analytics layer rather than a column."
 msgstr ""
+"Statistici a căror valoare vine din stratul de analiză, nu dintr-o coloană."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Text"
 msgstr "Text"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Text label (header / caption) — not a stat"
-msgstr ""
+msgstr "Etichetă text (antet / legendă) — nu o statistică"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The HUD profile was imported and saved, but the application could not "
 "refresh its configuration. Restart fpdb to apply it. You do not need to "
 "import the file again."
 msgstr ""
+"Profilul HUD a fost importat și salvat, dar aplicația nu și-a putut "
+"reîmprospăta configurația. Reporniți fpdb pentru a-l aplica. Nu este nevoie "
+"să importați din nou fișierul."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The HUDs fpdb ships, as a seat would see them. Pick a context to watch the "
 "Dynamic package change panel, and read the popup paths to find where a "
 "number lives before you go looking for it at a table."
 msgstr ""
+"HUD-urile livrate cu fpdb, așa cum le-ar vedea un loc. Alegeți un context "
+"pentru a vedea pachetul Dynamic schimbând panoul și citiți căile pop-up-"
+"urilor ca să știți unde se află un număr înainte să-l căutați la masă."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The minimum number of hands tracked on an opponent before profiling is "
 "computed."
 msgstr ""
+"Numărul minim de mâini urmărite pentru un adversar înainte de calcularea "
+"profilului."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The preview uses the same compact label grid as the in-game HUD.\n"
 "Spacing, font, colors and HUD cell values come from the selected profile."
 msgstr ""
+"Previzualizarea folosește aceeași grilă compactă de etichete ca HUD-ul din "
+"joc.\n"
+"Spațierea, fontul, culorile și valorile celulelor vin din profilul selectat."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Theme:"
-msgstr ""
+msgstr "Temă:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "show"
 msgid "Then show"
-msgstr "arata"
+msgstr "Atunci arată"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Update rule"
-msgstr ""
+msgstr "Actualizează regula"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Please select site"
 msgid "Update selected"
-msgstr "Selectati site-ul"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "When this is the spot"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
-msgid "Wrote {path}"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "all profiles"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "always"
-msgstr ""
+msgstr "Actualizează selecția"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Positional Stats"
+msgid "When this is the spot"
+msgstr "Când situația este"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy, python-brace-format
+msgid "Wrote {path}"
+msgstr "Scris {path}"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "all profiles"
+msgstr "toate profilurile"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "always"
+msgstr "mereu"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "optional name"
-msgstr "Statistici Pozitionale"
+msgstr "nume opțional"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "the profile grid"
-msgstr ""
+msgstr "grila profilului"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{profile} — from the rule {selectors}"
-msgstr ""
+msgstr "{profile} — din regula {selectors}"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{profile} — no rule matches, so the game default applies"
 msgstr ""
+"{profile} — nicio regulă nu se potrivește, deci se aplică implicitul jocului"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "—"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "↑ Up"
-msgstr ""
+msgstr "↑ Sus"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "↓ Down"
-msgstr ""
+msgstr "↓ Jos"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "⚙️ General Settings"
-msgstr ""
+msgstr "⚙️ Setări generale"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➕ Add"
-msgstr ""
+msgstr "➕ Adaugă"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➕ New Popup"
-msgstr ""
+msgstr "➕ Pop-up nou"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➕ New Profile"
-msgstr ""
+msgstr "➕ Profil nou"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➖ Remove"
-msgstr ""
+msgstr "➖ Elimină"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -4101,85 +4654,95 @@ msgid "🃏 Reference HUDs"
 msgstr "Preferinte HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🎯 Profile Select"
-msgstr ""
+msgstr "🎯 Alegerea profilului"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Popup Windows"
 msgid "💬 Popup Windows"
-msgstr "Ferestre popup"
+msgstr "💬 Ferestre pop-up"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Statistics"
 msgid "📊 Statistics"
-msgstr "Statistici"
+msgstr "📊 Statistici"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Edit"
 msgid "📝 Edit"
-msgstr "Editare"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "📤 Export HUD"
-msgstr ""
+msgstr "📝 Editează"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Auto Import and HUD"
+msgid "📤 Export HUD"
+msgstr "📤 Exportă HUD"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📥 Import HUD"
-msgstr "Importare automata si HUD"
+msgstr "📥 Importă HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🔍 Real Size"
-msgstr ""
+msgstr "🔍 Mărime reală"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🧩 Dynamic Panels"
-msgstr ""
+msgstr "🧩 Panouri dinamice"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "100% Reset"
-msgstr ""
+msgstr "Resetează la 100%"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Close"
-msgstr ""
+msgstr "Închide"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Natural Size: {w} × {h} px  (Scale: {scale}%)"
-msgstr ""
+msgstr "Mărime naturală: {w} × {h} px  (scară: {scale}%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Reset to 100% natural size"
-msgstr ""
+msgstr "Revino la 100% din mărimea naturală"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Zoom in (+25%)"
-msgstr ""
+msgstr "Mărește (+25%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Zoom out (-25%)"
-msgstr ""
+msgstr "Micșorează (-25%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "🔍 Popup Preview — {name} (Real Size)"
-msgstr ""
+msgstr "🔍 Previzualizare pop-up — {name} (mărime reală)"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid "Context"
-msgstr ""
+msgstr "Context"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid ""
 "Every popup a cell of this package opens, and everything those popups "
 "navigate to. A row ending in an arrow leaves the package for the shipped "
 "popup library."
 msgstr ""
+"Fiecare pop-up deschis de o celulă a acestui pachet și tot ce deschid acele "
+"pop-up-uri. Un rând care se termină cu o săgeată iese din pachet spre "
+"biblioteca de pop-up-uri livrată."
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
 #, fuzzy
@@ -4187,251 +4750,306 @@ msgid "Reference HUD"
 msgstr "Preferinte HUD"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "% of pot"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "A family of situations, such as postflop defence."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "A legacy PT4 stat column the decision feeds."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Action"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Action faced"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Action taken"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Aggressor, defender or passive."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "All-in"
-msgstr ""
+msgstr "% din pot"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Amount of rake paid"
+msgid "A family of situations, such as postflop defence."
+msgstr "O familie de situații, precum apărarea postflop."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "A legacy PT4 stat column the decision feeds."
+msgstr "O coloană veche de statistică PT4 pe care o alimentează decizia."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Action"
+msgstr "Acțiune"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Action faced"
+msgstr "Acțiune întâmpinată"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Action taken"
+msgstr "Acțiune făcută"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Aggressor, defender or passive."
+msgstr "Agresor, apărător sau pasiv."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "All-in"
+msgstr "All-in"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Amount to call"
-msgstr "Valoare rake platita"
+msgstr "Suma de plătit"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "BB"
 msgstr "BB"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Beats how much of the range"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size (% of pot)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size (basis points)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size bucket"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size faced"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size faced (% of pot)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size faced (basis points)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet size faced bucket"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Bet sizing"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Big blind (chips)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Blocker (all of)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Blocker (any of)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Blocker (none of)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Blockers the actor held (any of them)."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Blockers the actor must have all of."
-msgstr ""
+msgstr "Cât din range bate"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Board:"
+msgid "Bet size"
+msgstr "Mărimea pariului"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size (% of pot)"
+msgstr "Mărimea pariului (% din pot)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size (basis points)"
+msgstr "Mărimea pariului (puncte de bază)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size bucket"
+msgstr "Interval de mărime a pariului"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size faced"
+msgstr "Mărimea pariului întâmpinat"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size faced (% of pot)"
+msgstr "Mărimea pariului întâmpinat (% din pot)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size faced (basis points)"
+msgstr "Mărimea pariului întâmpinat (puncte de bază)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet size faced bucket"
+msgstr "Interval de mărime a pariului întâmpinat"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Bet sizing"
+msgstr "Mărimi de pariu"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Big blind (chips)"
+msgstr "Big blind (jetoane)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Blocker (all of)"
+msgstr "Blocker (toate)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Blocker (any of)"
+msgstr "Blocker (unul dintre)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Blocker (none of)"
+msgstr "Blocker (niciunul dintre)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Blockers the actor held (any of them)."
+msgstr "Blocker-ele celui care acționa (oricare)."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Blockers the actor must have all of."
+msgstr "Blocker-e pe care cel care acționa trebuie să le aibă pe toate."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board"
-msgstr "Masa:"
+msgstr "Board"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board connectivity"
-msgstr ""
+msgstr "Conectivitatea board-ului"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board dealt"
-msgstr ""
+msgstr "Board împărțit"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board high card"
-msgstr ""
+msgstr "Cea mai mare carte de pe board"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board pairing"
-msgstr ""
+msgstr "Împerecherea board-ului"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board street"
-msgstr ""
+msgstr "Strada board-ului"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board suit structure"
-msgstr ""
+msgstr "Structura culorilor de pe board"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture"
-msgstr ""
+msgstr "Textura board-ului"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture (all of)"
-msgstr ""
+msgstr "Textura board-ului (toate)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture flags the board must have all of."
-msgstr ""
+msgstr "Indicatori de textură pe care board-ul trebuie să-i aibă pe toți."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Cards discarded at the draw; zero means stand pat and unknown discard counts "
 "stay unclassified."
 msgstr ""
+"Cărțile aruncate la schimb; zero înseamnă păstrare, iar schimburile "
+"necunoscute rămân neclasificate."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Cards drawn"
-msgstr ""
+msgstr "Cărți schimbate"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Cards drawn (0 = stand pat)"
-msgstr ""
+msgstr "Cărți schimbate (0 = păstrare)"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Curr."
 msgid "Currency"
-msgstr "Moneda."
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Draw (all of)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Draw (any of)"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Draw (none of)"
-msgstr ""
+msgstr "Monedă"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "raw time:"
-msgid "Draw number"
-msgstr "timp brut:"
+msgid "Draw (all of)"
+msgstr "Draw (toate)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Draw (any of)"
+msgstr "Draw (unul dintre)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Draw (none of)"
+msgstr "Draw (niciunul dintre)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Draw number"
+msgstr "Numărul schimbului"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draws the actor had: flush draws, gutshots and the rest (any of them)."
 msgstr ""
+"Draw-urile celui care acționa: draw-uri de culoare, gutshot-uri și restul "
+"(oricare)."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draws the actor must have all of."
-msgstr ""
+msgstr "Draw-uri pe care cel care acționa trebuie să le aibă pe toate."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "EV-adjusted result (all-in EV)"
-msgstr ""
+msgstr "rezultat ajustat EV (EV all-in)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "EV-adjusted result per decision"
-msgstr ""
+msgstr "rezultat ajustat EV pe decizie"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack"
-msgstr ""
+msgstr "Stack efectiv"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack (chips)"
-msgstr ""
+msgstr "Stack efectiv (jetoane)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack in the bands a tournament is played in."
-msgstr ""
+msgstr "Stack efectiv în intervalele în care se joacă un turneu."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Every situation the decision matched, not only the most specific one. Use "
 "this to ask how often an opportunity was taken: raising an open makes the "
 "decision a 3-bet, so only this keeps it among the opens faced."
 msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Facing an all-in"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Fixed limit, no limit and the other betting structures."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Game and stake"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Game family"
-msgstr ""
+"Fiecare situație căreia i s-a potrivit decizia, nu doar cea mai specifică. "
+"Folosiți-o pentru a afla cât de des a fost folosită o oportunitate: un raise "
+"peste o deschidere face din decizie un 3-bet, iar doar acest filtru o "
+"păstrează printre deschiderile întâmpinate."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hands"
-msgid "Hand"
-msgstr "Miini"
+msgid "Facing an all-in"
+msgstr "În fața unui all-in"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Fixed limit, no limit and the other betting structures."
+msgstr "Limită fixă, no limit și celelalte structuri de pariere."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Game and stake"
+msgstr "Joc și miză"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Game family"
+msgstr "Familie de joc"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand"
+msgstr "Mână"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hand state known"
-msgstr ""
+msgstr "Starea mâinii cunoscută"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -4439,30 +5057,31 @@ msgid "Hand strength"
 msgstr "Cale Istoric"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hand-classified street"
-msgstr ""
+msgstr "Strada clasificării mâinii"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hand Filters:"
 msgid "Hands after"
-msgstr "Filtre miini:"
+msgstr "Mâini după"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hands/file:"
 msgid "Hands before"
-msgstr "Miini/fisier:"
+msgstr "Mâini înainte de"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hero:"
 msgid "Hero"
-msgstr "Eroul:"
+msgstr "Erou"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hero's own decisions, or everyone except hero. Any keeps both."
 msgstr ""
+"Deciziile eroului sau ale tuturor în afară de erou. „Oricare” le păstrează "
+"pe amândouă."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Hole cards"
@@ -4470,13 +5089,13 @@ msgstr "Cartile comune"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hole cards"
 msgid "Hole cards known"
-msgstr "Cartile comune"
+msgstr "Cărți proprii cunoscute"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many holdings the holding beats."
-msgstr ""
+msgstr "Câte combinații bate mâna."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -4489,38 +5108,45 @@ msgid "How many players were still in the hand."
 msgstr "readPlayerStacks: Nu s-au detectat jucatori (mina #%s)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many raises came before this decision."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "How much the actor had to call."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "How strong the holding is: nuts, near nuts, strong, medium or weak."
-msgstr ""
+msgstr "Câte raise-uri au fost înaintea acestei decizii."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Position"
+msgid "How much the actor had to call."
+msgstr "Cât trebuia să plătească cel care acționa."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "How strong the holding is: nuts, near nuts, strong, medium or weak."
+msgstr ""
+"Cât de puternică este mâna: nuts, aproape nuts, puternică, medie sau slabă."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "In position"
-msgstr "Pozitie"
+msgstr "În poziție"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "In position versus the bettor"
-msgstr ""
+msgstr "În poziție față de cel care a pariat"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "In position versus the previous aggressor"
-msgstr ""
+msgstr "În poziție față de agresorul anterior"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Is the aggressor"
-msgstr ""
+msgstr "Este agresorul"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Is the preflop aggressor"
-msgstr ""
+msgstr "Este agresorul preflop"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -4539,76 +5165,89 @@ msgstr ""
 "Statistici legale:"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Linked player identity"
-msgstr ""
+msgstr "Identitate de jucător legată"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Read no hands."
 msgid "Made hand"
-msgstr "Nu s-au citit miini."
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Made hand rank"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Multiway"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Named texture flags such as monotone or connected (any of them)."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "One import session."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "One specific hand."
-msgstr ""
+msgstr "Mână făcută"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Enter Tournament"
+msgid "Made hand rank"
+msgstr "Rangul mâinii făcute"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Multiway"
+msgstr "Multiway"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Named texture flags such as monotone or connected (any of them)."
+msgstr "Indicatori de textură numiți, precum monotone sau conectat (oricare)."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "One import session."
+msgstr "O sesiune de import."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "One specific hand."
+msgstr "O mână anume."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One specific tournament."
-msgstr "Introdu Turneu"
+msgstr "Un turneu anume."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions played on or after this date."
-msgstr ""
+msgstr "Doar deciziile jucate la această dată sau după."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions played on or before this date."
-msgstr ""
+msgstr "Doar deciziile jucate la această dată sau înainte."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions with none of the named blockers."
-msgstr ""
+msgstr "Doar deciziile fără niciunul dintre blocker-ele numite."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions with none of the named draws."
-msgstr ""
+msgstr "Doar deciziile fără niciunul dintre draw-urile numite."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only hands imported after this hand id."
-msgstr ""
+msgstr "Doar mâinile importate după acest id de mână."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only hands imported before this hand id."
-msgstr ""
+msgstr "Doar mâinile importate înainte de acest id de mână."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Opponent position"
-msgstr ""
+msgstr "Poziția adversarului"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Other"
-msgstr ""
+msgstr "Altele"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pair detail"
-msgstr ""
+msgstr "Detaliul perechii"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -4626,8 +5265,9 @@ msgid "Players in the hand"
 msgstr "Nume jucator"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Poker room"
-msgstr ""
+msgstr "Cameră de poker"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Position"
@@ -4635,131 +5275,158 @@ msgstr "Pozitie"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Positional Stats"
 msgid "Position and stack"
-msgstr "Statistici Pozitionale"
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Pot before the action"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Pot odds"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Pot type"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Preflop, flop, turn or river."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Rainbow, two-tone, monotone and the deeper flush boards."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Raises before"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Range holdings"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Relative position"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Response"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Restrict the population to a set of players."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Restrict the population to one player."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Restrict to a linked (site, alias) identity."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Role"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Runout"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "SPR"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "SPR band"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Seats between the actor and the button."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Seats dealt in"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Short, medium, deep or very deep stacks."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Situation"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Situation family"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Situation, including the ones it led to"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Stack depth"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Stack depth band"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Stack-to-pot ratio before the action."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Stake (big blinds)"
-msgstr ""
+msgstr "Poziție și stack"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Setting"
+msgid "Pot before the action"
+msgstr "Pot înainte de acțiune"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Pot odds"
+msgstr "Pot odds"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Pot type"
+msgstr "Tip de pot"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Preflop, flop, turn or river."
+msgstr "Preflop, flop, turn sau river."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Rainbow, two-tone, monotone and the deeper flush boards."
+msgstr "Rainbow, two-tone, monotone și board-urile cu culoare mai puternică."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Raises before"
+msgstr "Raise-uri înainte"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Range holdings"
+msgstr "Combinații ale range-ului"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Relative position"
+msgstr "Poziție relativă"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Response"
+msgstr "Răspuns"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Restrict the population to a set of players."
+msgstr "Restrânge populația la un grup de jucători."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Restrict the population to one player."
+msgstr "Restrânge populația la un jucător."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Restrict to a linked (site, alias) identity."
+msgstr "Restrânge la o identitate legată (site, alias)."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Role"
+msgstr "Rol"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Runout"
+msgstr "Runout"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "SPR"
+msgstr "SPR"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "SPR band"
+msgstr "Interval SPR"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Seats between the actor and the button."
+msgstr "Locurile dintre cel care acționează și buton."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Seats dealt in"
+msgstr "Locuri cu cărți"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Short, medium, deep or very deep stacks."
+msgstr "Stack-uri scurte, medii, adânci sau foarte adânci."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Situation"
+msgstr "Situație"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Situation family"
+msgstr "Familie de situații"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Situation, including the ones it led to"
+msgstr "Situație, inclusiv cele la care a dus"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Stack depth"
+msgstr "Adâncimea stack-ului"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Stack depth band"
+msgstr "Interval de adâncime a stack-ului"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Stack-to-pot ratio before the action."
+msgstr "Raportul stack/pot înainte de acțiune."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Stake (big blinds)"
+msgstr "Miză (big blind-uri)"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Starting hand"
-msgstr "Setari"
+msgstr "Mână de start"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Street"
-msgstr ""
+msgstr "Stradă"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Street and pot"
-msgstr ""
+msgstr "Stradă și pot"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Street number"
-msgstr ""
+msgstr "Numărul străzii"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -4767,209 +5434,264 @@ msgid "Table size"
 msgstr "hud_main: Joc schimbat."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The 169 Hold'em starting-hand classes."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The bet size faced, in the configured sizing buckets."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The bet size made, in the configured sizing buckets."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The big blind in chips, for mixed stakes."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The board street as a number, the flop being one."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The currency the game was played in."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The decision, normalized: fold, check, call, bet or raise."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The game family: hold'em/omaha, stud or draw."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The game variant, such as Hold'em or Omaha."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The highest card of the board."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The letter a legacy PT4 stat column records."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The made hand the actor held: pairs, sets, straights and so on."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The most specific situation the decision matched."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The pot odds offered, in basis points."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The pot size before the action, in chips."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The same ratio as the bands a player thinks in."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The seat of the player the action was against."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The seat of the player who acted."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The shape of the pot: unopened, limped, single-raised, 3-bet, 4-bet."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The share of the range the holding beats."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The size of the bet faced, as a percentage of the pot."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The size of the bet faced, in basis points of the pot."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The size of the bet made, as a percentage of the pot."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The size of the bet made, in basis points of the pot."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The size of the game, expressed in big blinds."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The smaller of the two stacks, in big blinds."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The smaller of the two stacks, in chips."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The street as a number, preflop being zero."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The street the hand state was classified on."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The strength of the made hand, as a number."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "The table size, such as 6-max or full ring."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Three or more players saw the decision."
-msgstr ""
+msgstr "Cele 169 de clase de mâini de start Hold'em."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Tournaments"
-msgid "Tournament or cash"
-msgstr "Turnee"
+msgid "The bet size faced, in the configured sizing buckets."
+msgstr "Mărimea pariului întâmpinat, în intervalele configurate."
 
 #: fpdb_3_legacy/research_labels.py
-msgid "Was the previous aggressor"
+#, fuzzy
+msgid "The bet size made, in the configured sizing buckets."
+msgstr "Mărimea pariului făcut, în intervalele configurate."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The big blind in chips, for mixed stakes."
+msgstr "Big blind-ul în jetoane, pentru mize mixte."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The board street as a number, the flop being one."
+msgstr "Strada board-ului ca număr, flopul fiind unu."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The currency the game was played in."
+msgstr "Moneda în care s-a jucat."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The decision, normalized: fold, check, call, bet or raise."
+msgstr "Decizia, normalizată: fold, check, call, pariu sau raise."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The game family: hold'em/omaha, stud or draw."
+msgstr "Familia de joc: hold'em/omaha, stud sau draw."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The game variant, such as Hold'em or Omaha."
+msgstr "Varianta de joc, precum Hold'em sau Omaha."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The highest card of the board."
+msgstr "Cea mai mare carte de pe board."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The letter a legacy PT4 stat column records."
+msgstr "Litera pe care o înregistrează o coloană veche de statistică PT4."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The made hand the actor held: pairs, sets, straights and so on."
 msgstr ""
+"Mâna făcută a celui care acționa: perechi, trei de un fel, chinte și așa mai "
+"departe."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The most specific situation the decision matched."
+msgstr "Cea mai specifică situație căreia i s-a potrivit decizia."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The pot odds offered, in basis points."
+msgstr "Pot odds oferite, în puncte de bază."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The pot size before the action, in chips."
+msgstr "Mărimea potului înainte de acțiune, în jetoane."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The same ratio as the bands a player thinks in."
+msgstr "Același raport, în intervalele în care gândește un jucător."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The seat of the player the action was against."
+msgstr "Locul jucătorului împotriva căruia a fost acțiunea."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The seat of the player who acted."
+msgstr "Locul jucătorului care a acționat."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The shape of the pot: unopened, limped, single-raised, 3-bet, 4-bet."
+msgstr "Forma potului: nedeschis, cu limp, un raise, 3-bet, 4-bet."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The share of the range the holding beats."
+msgstr "Partea din range pe care o bate mâna."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The size of the bet faced, as a percentage of the pot."
+msgstr "Mărimea pariului întâmpinat, ca procent din pot."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The size of the bet faced, in basis points of the pot."
+msgstr "Mărimea pariului întâmpinat, în puncte de bază din pot."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The size of the bet made, as a percentage of the pot."
+msgstr "Mărimea pariului făcut, ca procent din pot."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The size of the bet made, in basis points of the pot."
+msgstr "Mărimea pariului făcut, în puncte de bază din pot."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The size of the game, expressed in big blinds."
+msgstr "Mărimea jocului, exprimată în big blind-uri."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The smaller of the two stacks, in big blinds."
+msgstr "Cel mai mic dintre cele două stack-uri, în big blind-uri."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The smaller of the two stacks, in chips."
+msgstr "Cel mai mic dintre cele două stack-uri, în jetoane."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The street as a number, preflop being zero."
+msgstr "Strada ca număr, preflop fiind zero."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The street the hand state was classified on."
+msgstr "Strada pe care a fost clasificată starea mâinii."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The strength of the made hand, as a number."
+msgstr "Forța mâinii făcute, ca număr."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "The table size, such as 6-max or full ring."
+msgstr "Mărimea mesei, precum 6-max sau full ring."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Three or more players saw the decision."
+msgstr "Trei sau mai mulți jucători au văzut decizia."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Tournament or cash"
+msgstr "Turneu sau cash"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Was the previous aggressor"
+msgstr "A fost agresorul anterior"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "What the actor did, including draw-game discards and stand-pat decisions."
 msgstr ""
+"Ce a făcut cel care acționa, inclusiv schimburile și păstrările din jocurile "
+"draw."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "What the actor was facing."
-msgstr ""
+msgstr "Ce întâmpina cel care acționa."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "What the turn or river card changed."
-msgstr ""
+msgstr "Ce a schimbat cartea de turn sau river."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the action in front of the actor was an all-in."
-msgstr ""
+msgstr "Dacă acțiunea dinaintea celui care acționa a fost un all-in."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the action put the player all-in."
-msgstr ""
+msgstr "Dacă acțiunea l-a pus pe jucător all-in."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor has position on the bettor."
-msgstr ""
+msgstr "Dacă cel care acționa are poziție față de cel care a pariat."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor has position on the previous aggressor."
-msgstr ""
+msgstr "Dacă cel care acționa are poziție față de agresorul anterior."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor raised preflop."
-msgstr ""
+msgstr "Dacă cel care acționa a dat raise preflop."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was in position."
-msgstr ""
+msgstr "Dacă cel care a acționat era în poziție."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was the aggressor on the previous street."
-msgstr ""
+msgstr "Dacă cel care acționa a fost agresorul pe strada anterioară."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was the aggressor on this street."
-msgstr ""
+msgstr "Dacă cel care acționa era agresorul pe această stradă."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the board is connected, semi-connected or disconnected."
-msgstr ""
+msgstr "Dacă board-ul este conectat, semiconectat sau neconectat."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the board is unpaired, paired, or more."
-msgstr ""
+msgstr "Dacă board-ul este neîmperecheat, împerecheat sau mai mult."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Which draw round the player reached; only recorded discard or stand-pat "
 "actions count."
 msgstr ""
+"Ce rundă de schimb a atins jucătorul; contează doar schimburile sau "
+"păstrările înregistrate."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Which pair the actor held: overpair, top pair, set and so on."
 msgstr ""
+"Ce pereche avea cel care acționa: overpair, top pair, set și așa mai departe."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Which poker room the hands were played on."
-msgstr ""
+msgstr "În ce cameră de poker s-au jucat mâinile."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -4977,130 +5699,154 @@ msgid "Yes for tournament hands, No for cash game hands."
 msgstr "Nu s-au gasit sumare de turnee"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes on the flop and later, No before the flop."
-msgstr ""
+msgstr "Da la flop și după, Nu înainte de flop."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes only for decisions whose cards were shown."
-msgstr ""
+msgstr "Da doar pentru deciziile ale căror cărți au fost arătate."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes only where the cards were known and classified."
-msgstr ""
+msgstr "Da doar unde cărțile erau cunoscute și clasificate."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "all-in frequency"
-msgstr ""
+msgstr "frecvența de all-in"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average SPR"
-msgstr ""
+msgstr "SPR mediu"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average bet size (basis points of the pot)"
-msgstr ""
+msgstr "mărimea medie a pariului (puncte de bază din pot)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average bet size faced (basis points of the pot)"
-msgstr ""
+msgstr "mărimea medie a pariului întâmpinat (puncte de bază din pot)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average pot size"
-msgstr ""
+msgstr "mărimea medie a potului"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "bet frequency"
-msgstr ""
+msgstr "frecvența de pariu"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "bp"
-msgstr ""
+msgstr "pb"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "call frequency"
-msgstr ""
+msgstr "frecvența de call"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "check frequency"
-msgstr ""
+msgstr "frecvența de check"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "chips"
-msgstr ""
+msgstr "jetoane"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "% fold frequency 7th street"
 msgid "fold frequency"
-msgstr "% frecventa aruncarii pe strada a 7a"
+msgstr "frecvența de fold"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "holdings"
-msgstr ""
+msgstr "combinații"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many actions"
-msgstr ""
+msgstr "câte acțiuni"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many decisions"
-msgstr ""
+msgstr "câte decizii"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many hands"
-msgstr ""
+msgstr "câte mâini"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Show Number of Players"
 msgid "how many players"
-msgstr "Arata Numarul de Jucatori"
-
-#: fpdb_3_legacy/research_labels.py
-msgid "how often the decision is taken"
-msgstr ""
+msgstr "câți jucători"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "hide"
+msgid "how often the decision is taken"
+msgstr "cât de des se ia decizia"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "id"
-msgstr "ascunde"
+msgstr "id"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "per-hand frequency"
-msgstr ""
+msgstr "frecvență pe mână"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "raise frequency"
-msgstr ""
+msgstr "frecvența de raise"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "realized profit"
-msgstr ""
+msgstr "profit realizat"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "realized profit per decision"
-msgstr ""
+msgstr "profit realizat pe decizie"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "seats"
-msgstr ""
+msgstr "locuri"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "street"
-msgstr ""
+msgstr "stradă"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Column Configuration"
-msgstr ""
+msgstr "Configurarea coloanelor"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Columns"
-msgstr ""
+msgstr "Coloane"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Dashboard"
-msgstr ""
+msgstr "Tablou de bord"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 msgid "Detailed Filters"
@@ -5112,9 +5858,8 @@ msgstr "Filtre miini:"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 #, fuzzy
-#| msgid "Positional Stats"
 msgid "Position Heatmap"
-msgstr "Statistici Pozitionale"
+msgstr "Hartă termică a pozițiilor"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 msgid "Restrict to hand types:"
@@ -5122,15 +5867,13 @@ msgstr "Restringe la tipurile miinilor:"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 #, fuzzy
-#| msgid "Min # Hands:"
 msgid "Starting Hands"
-msgstr "Minim # miini:"
+msgstr "Mâini de start"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 #, fuzzy
-#| msgid "Stat Name"
 msgid "Stats Tables"
-msgstr "Nume Statistica"
+msgstr "Tabele de statistici"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 msgid "and"
@@ -5142,139 +5885,138 @@ msgstr "intre"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% folded blind to steal"
 msgid "% Big Blind fold to steal"
-msgstr "% aruncat blind la furt"
+msgstr "% fold big blind la furt"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% squeeze preflop"
 msgid "% Call Raise preflop"
-msgstr "% stoarcere inainte de flop"
+msgstr "% call la raise preflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% continuation bet"
 msgid "% Continuation Bet"
-msgstr "% continuare pariere"
+msgstr "% pariu de continuare"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flop 3-bet"
-msgstr ""
+msgstr "% 3-bet la flop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flop 4-bet"
-msgstr ""
+msgstr "% 4-bet la flop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flop open bet"
-msgstr ""
+msgstr "% pariu de deschidere la flop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Flops seen"
-msgstr ""
+msgstr "% flopuri văzute"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% fold to 3 bet preflop/3rd street"
 msgid "% Fold to preflop 3-bet"
-msgstr "% fold la 3bet inainte de flop/strada a 3-a"
+msgstr "% fold la 3-bet preflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% fold to 3 bet preflop/3rd street"
 msgid "% Fold to preflop 4-bet"
-msgstr "% fold la 3bet inainte de flop/strada a 3-a"
+msgstr "% fold la 4-bet preflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Preflop 3-bet"
-msgstr ""
+msgstr "% 3-bet preflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Preflop 4-bet"
-msgstr ""
+msgstr "% 4-bet preflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Raise First In"
-msgstr ""
+msgstr "% raise first in"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% raise to steal"
 msgid "% Re-steal"
-msgstr "% ridicare la furt"
+msgstr "% re-steal"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% River 3-bet"
-msgstr ""
+msgstr "% 3-bet la river"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% River 4-bet"
-msgstr ""
+msgstr "% 4-bet la river"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% River open bet"
-msgstr ""
+msgstr "% pariu de deschidere la river"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Showdown"
 msgid "% Showdowns seen"
-msgstr "Showdown"
+msgstr "% showdown-uri văzute"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% folded blind to steal"
 msgid "% Small Blind fold to steal"
-msgstr "% aruncat blind la furt"
+msgstr "% fold small blind la furt"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% steal attempted"
 msgid "% Steal attempt"
-msgstr "% tentative de furt"
+msgstr "% încercare de furt"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% steal success"
 msgid "% Steal success"
-msgstr "% succes la furat"
+msgstr "% furt reușit"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Turn 3-bet"
-msgstr ""
+msgstr "% 3-bet la turn"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Turn 4-bet"
-msgstr ""
+msgstr "% 4-bet la turn"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "% Turn open bet"
-msgstr ""
+msgstr "% pariu de deschidere la turn"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% went to showdown when seen flop/4th street"
 msgid "% Went to showdown after seeing flop"
-msgstr "% ajuns la showdown dupa ce s-a vazut flop/strada a 4-a"
+msgstr "% a ajuns la showdown după flop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% won money when seen flop/4th street"
 msgid "% Won money after seeing flop"
-msgstr "% bani cistigati cu flop vazut/pe strada a 4a"
+msgstr "% a câștigat bani după flop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "% won some money at showdown"
 msgid "% Won money at showdown"
-msgstr "% cistig la showdown"
+msgstr "% a câștigat bani la showdown"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Big blinds won per 100 hands"
 msgid "Big Blinds won per 100 hands"
-msgstr "Blinduri mari cistigate per 100 miini"
+msgstr "Big blind-uri câștigate la 100 de mâini"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -5285,29 +6027,28 @@ msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Post-flop aggression frequency"
 msgid "Flop aggression frequency"
-msgstr "Frecventa agresiunii dupa flop"
+msgstr "Frecvență de agresivitate la flop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Game type (Hold'em, Omaha, etc.)"
-msgstr ""
+msgstr "Tip de joc (Hold'em, Omaha etc.)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Measure of uncertainty"
-msgstr ""
+msgstr "Măsură a incertitudinii"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Number of hands seen"
 msgid "Number of hands played"
-msgstr "Numar miini vazute"
+msgstr "Număr de mâini jucate"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Number of Seats"
 msgid "Number of seats at the table"
-msgstr "Numar de locuri"
+msgstr "Număr de locuri la masă"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -5316,33 +6057,28 @@ msgstr "Nume jucator"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Positional Stats"
 msgid "Position at the table"
-msgstr "Statistici Pozitionale"
+msgstr "Poziția la masă"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Post-flop aggression frequency"
 msgid "Postflop aggression factor"
-msgstr "Frecventa agresiunii dupa flop"
+msgstr "Factor de agresivitate postflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Post-flop aggression frequency"
 msgid "Postflop aggression frequency"
-msgstr "Frecventa agresiunii dupa flop"
+msgstr "Frecvență de agresivitate postflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Preflop/3rd street raise %"
 msgid "Preflop raise"
-msgstr "Ridicare inainte de flop/strada a 3-a %"
+msgstr "Raise preflop"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Profit per 100 hands"
 msgid "Profit per hand"
-msgstr "Profit per 100 miini"
+msgstr "Profit pe mână"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -5352,128 +6088,148 @@ msgstr ""
 "cind excludem rake"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Rake paid"
-msgstr ""
+msgstr "Rake plătit"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Post-flop aggression frequency"
 msgid "River aggression frequency"
-msgstr "Frecventa agresiunii dupa flop"
+msgstr "Frecvență de agresivitate la river"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Starting cards (Hole cards)"
-msgstr ""
+msgstr "Cărți de start (cărți proprii)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Total Profit"
 msgid "Total net profit"
-msgstr "Profit total"
+msgstr "Profit net total"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Post-flop aggression frequency"
 msgid "Turn aggression frequency"
-msgstr "Frecventa agresiunii dupa flop"
+msgstr "Frecvență de agresivitate la turn"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Voluntarily put in preflop/3rd street %"
 msgid "Voluntarily put money in pot preflop"
-msgstr "Pus voluntar inainte de flop/strada a 3-a %"
+msgstr "Bani puși voluntar în pot preflop"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
-msgstr ""
+msgstr "Profil preflop (VPIP vs PFR)"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "<b>Hand: {0}</b><br/>Hands: {1}<br/>VPIP: {2}%<br/>Profit: {3}"
-msgstr ""
+msgstr "<b>Mână: {0}</b><br/>Mâini: {1}<br/>VPIP: {2}%<br/>Profit: {3}"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Color the grid by:"
-msgstr ""
+msgstr "Colorează grila după:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Filtered range:"
-msgstr ""
+msgstr "Range filtrat:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Hand: {0}\n"
 "No statistics available"
 msgstr ""
+"Mână: {0}\n"
+"Nicio statistică disponibilă"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Hold'em Starting Hand Grid"
-msgstr ""
+msgstr "Grila mâinilor de start Hold'em"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 4-Card Texture Analysis"
-msgstr ""
+msgstr "Analiza texturii Omaha cu 4 cărți"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 5-Card Texture Analysis"
-msgstr ""
+msgstr "Analiza texturii Omaha cu 5 cărți"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 6-Card Texture Analysis"
-msgstr ""
+msgstr "Analiza texturii Omaha cu 6 cărți"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha Texture Analysis"
-msgstr ""
+msgstr "Analiza texturii Omaha"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Starting Hands Analysis"
-msgstr ""
+msgstr "Analiza mâinilor de start"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "min sample:"
-msgstr ""
+msgstr "eșantion min.:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "{0} decisions in this selection have no known hole cards and are not in the "
 "grid"
 msgstr ""
-
-#: fpdb_3_legacy/ring_stats/views/table_view.py
-msgid "Hand Breakdown"
-msgstr ""
+"{0} decizii din această selecție nu au cărți proprii cunoscute și nu sunt în "
+"grilă"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy
-#| msgid "Statistics"
+msgid "Hand Breakdown"
+msgstr "Defalcarea mâinilor"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
 msgid "Statistics group:"
-msgstr "Statistici"
+msgstr "Grup de statistici:"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "A Session Guard limit has been reached."
-msgstr ""
+msgstr "A fost atinsă o limită Session Guard."
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Acknowledge"
-msgstr ""
+msgstr "Am înțeles"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid ""
 "Alerts only: fpdb never closes, sits out or otherwise touches a poker "
 "client. The session is the Session Viewer's: cash hands, ended by a 30-"
 "minute pause."
 msgstr ""
+"Doar alerte: fpdb nu închide, nu scoate de la masă și nu atinge în niciun "
+"fel un client de poker. Sesiunea este cea din vizualizatorul de sesiuni: "
+"mâini cash, încheiată de o pauză de 30 de minute."
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Apply"
-msgstr ""
+msgstr "Aplică"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Choose at least one limit to watch."
-msgstr ""
+msgstr "Alegeți cel puțin o limită de urmărit."
 
 #: fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy, python-format
@@ -5483,88 +6239,104 @@ msgid ""
 msgstr "Nu se gaseste fisierul %s"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Drawdown from peak (BB)"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Drawdown from peak (money)"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Later"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Limits for this session"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Loss (BB)"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Loss (money)"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Not running."
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Reset alerts"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Save as defaults"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Session Guard: click to see or change the limits"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Session Guard: no session in progress"
-msgstr ""
-
-#: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
-msgid "Session Guard: {result} · {duration} · {hands} hands"
-msgstr ""
+msgstr "Scădere de la vârf (BB)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy
-#| msgid "Session Stats"
+msgid "Drawdown from peak (money)"
+msgstr "Scădere de la vârf (bani)"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Later"
+msgstr "Mai târziu"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Limits for this session"
+msgstr "Limite pentru această sesiune"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Loss (BB)"
+msgstr "Pierdere (BB)"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Loss (money)"
+msgstr "Pierdere (bani)"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Not running."
+msgstr "Nu rulează."
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Reset alerts"
+msgstr "Resetează alertele"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Save as defaults"
+msgstr "Salvează ca implicite"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Session Guard: click to see or change the limits"
+msgstr "Session Guard: clic pentru a vedea sau schimba limitele"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Session Guard: no session in progress"
+msgstr "Session Guard: nicio sesiune în curs"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy, python-brace-format
+msgid "Session Guard: {result} · {duration} · {hands} hands"
+msgstr "Session Guard: {result} · {duration} · {hands} mâini"
+
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Session duration"
-msgstr "Statistici Sesiune"
+msgstr "Durata sesiunii"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Win (BB)"
-msgstr ""
+msgstr "Câștig (BB)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Win (money)"
-msgstr ""
+msgstr "Câștig (bani)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{count} limit(s) reached"
-msgstr ""
+msgstr "{count} limită(e) atinsă(e)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{label}: unavailable (a hand has no big blind) / {threshold}"
-msgstr ""
+msgstr "{label}: indisponibil (o mână nu are big blind) / {threshold}"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{value} BB"
-msgstr ""
+msgstr "{value} BB"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid ""
 "A stat pack adds declarative stats, and optionally Research presets, without "
 "changing fpdb. Packs are data only: no Python, no SQL."
 msgstr ""
+"Un pachet de statistici adaugă statistici declarative și, opțional, "
+"presetări Research, fără a modifica fpdb. Pachetele sunt doar date: fără "
+"Python, fără SQL."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
@@ -5572,81 +6344,83 @@ msgid "All files"
 msgstr "  De oricind"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Author"
-msgstr ""
+msgstr "Autor"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Built-in"
-msgstr ""
+msgstr "Integrat"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy, python-format
-#| msgid "Could not find file %s"
 msgid ""
 "Could not read the pack:\n"
 "%s"
-msgstr "Nu se gaseste fisierul %s"
+msgstr ""
+"Pachetul nu a putut fi citit:\n"
+"%s"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Disable"
-msgstr ""
+msgstr "Dezactivează"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Disabled"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
-msgid "Disabled %s."
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Enable"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
-msgid "Enabled %s."
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-#| msgid "Export to File"
-msgid "Export stat pack"
-msgstr "Export spre fisier"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-#| msgid "Importing..."
-msgid "Export..."
-msgstr "Importare..."
+msgstr "Dezactivat"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy, python-format
-#| msgid "Export to File"
+msgid "Disabled %s."
+msgstr "%s dezactivat."
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Enable"
+msgstr "Activează"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Enabled %s."
+msgstr "%s activat."
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Export stat pack"
+msgstr "Exportă pachetul de statistici"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Export..."
+msgstr "Exportă..."
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
 msgid "Exported to %s."
-msgstr "Export spre fisier"
+msgstr "Exportat în %s."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Importing..."
 msgid "Import pack..."
-msgstr "Importare..."
+msgstr "Importă pachet..."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Import clicked"
 msgid "Import stat pack"
-msgstr "S-a selectat importarea"
+msgstr "Importă pachet de statistici"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Installed %s."
-msgstr ""
+msgstr "%s instalat."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Invalid"
-msgstr ""
+msgstr "Invalid"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
@@ -5654,83 +6428,87 @@ msgid "Location:"
 msgstr "Pozitie"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Pack"
-msgstr ""
+msgstr "Pachet"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Restart fpdb and the HUD to use the change everywhere."
-msgstr ""
+msgstr "Reporniți fpdb și HUD-ul pentru a folosi modificarea peste tot."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Stat Name"
 msgid "Stat pack"
-msgstr "Nume Statistica"
+msgstr "Pachet de statistici"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Stat Name"
 msgid "Stat packs"
-msgstr "Nume Statistica"
+msgstr "Pachete de statistici"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Status"
 msgid "Stats"
-msgstr "Stare"
+msgstr "Statistici"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Status"
 msgid "Stats:"
-msgstr "Stare"
+msgstr "Statistici:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 msgid "Status"
 msgstr "Stare"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "The pack state was not changed:\n"
 "%s"
 msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "This pack cannot be installed:"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "This pack is already installed. Replace it with this version?"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "This pack is not loaded:"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Uninstall"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
-msgid "Uninstall %s?"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Uninstall stat pack"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
-msgid "Uninstalled %s."
-msgstr ""
+"Starea pachetului nu a fost schimbată:\n"
+"%s"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Username"
+msgid "This pack cannot be installed:"
+msgstr "Acest pachet nu poate fi instalat:"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "This pack is already installed. Replace it with this version?"
+msgstr "Acest pachet este deja instalat. Îl înlocuiți cu această versiune?"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "This pack is not loaded:"
+msgstr "Acest pachet nu este încărcat:"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Uninstall"
+msgstr "Dezinstalează"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Uninstall %s?"
+msgstr "Dezinstalați %s?"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Uninstall stat pack"
+msgstr "Dezinstalează pachetul de statistici"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Uninstalled %s."
+msgstr "%s dezinstalat."
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "User installed"
-msgstr "Nume utilizator"
+msgstr "Instalat de utilizator"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "<"
@@ -5749,12 +6527,14 @@ msgid ">>"
 msgstr ""
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "BOTTOM :"
-msgstr ""
+msgstr "BOTTOM:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Capture Console (Logs):"
-msgstr ""
+msgstr "Consolă de captură (jurnale):"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
@@ -5767,121 +6547,135 @@ msgid "Cards:"
 msgstr "Masa:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Hands Captured: 0"
-msgstr ""
+msgstr "Mâini capturate: 0"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "Import All"
 msgid "Import All OFC"
-msgstr "Import toate"
+msgstr "Importă tot OFC"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Import OFC to DB"
-msgstr ""
+msgstr "Importă OFC în BD"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "Min # Hands:"
 msgid "In Hand:"
-msgstr "Minim # miini:"
+msgstr "În mână:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "MIDDLE :"
-msgstr ""
+msgstr "MIDDLE:"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "Hand Replayer"
 msgid "Open DB Replayer"
-msgstr "Rejucare Mina"
+msgstr "Deschide playerul BD"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "Hand Filters:"
 msgid "Open Hand Folder"
-msgstr "Filtre miini:"
+msgstr "Deschide dosarul mâinilor"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "Refresh Stats"
 msgid "Refresh Hands"
-msgstr "Refresh Statistici"
+msgstr "Reîmprospătează mâinile"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Select a hand to start replay"
-msgstr ""
+msgstr "Selectați o mână pentru a porni redarea"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Start Capture"
-msgstr ""
+msgstr "Pornește captura"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Status: 🔴 Stopped"
-msgstr ""
+msgstr "Stare: 🔴 Oprit"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Statut : 🔴 Arrêté"
-msgstr ""
+msgstr "Stare: 🔴 Oprit"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Statut : 🟢 En Cours"
-msgstr ""
+msgstr "Stare: 🟢 În desfășurare"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Step 0 / 0"
-msgstr ""
+msgstr "Pasul 0 / 0"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "SwC"
-msgstr ""
+msgstr "SwC"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "SwC Poker - Capture Console & Replayer"
-msgstr ""
+msgstr "SwC Poker - Consolă de captură și player"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "TOP :"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Confirm overwrite"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Copy entire table"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Copy entire table with headers"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Copy with headers"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Export displayed values"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-#, python-format
-msgid "Export displayed values as %s…"
-msgstr ""
+msgstr "TOP:"
 
 #: fpdb_3_legacy/table_export.py
 #, fuzzy
-#| msgid "Export to File"
-msgid "Export failed"
-msgstr "Export spre fisier"
+msgid "Confirm overwrite"
+msgstr "Confirmați suprascrierea"
 
 #: fpdb_3_legacy/table_export.py
-#, python-format
+#, fuzzy
+msgid "Copy entire table"
+msgstr "Copiază tot tabelul"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Copy entire table with headers"
+msgstr "Copiază tot tabelul cu antete"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Copy with headers"
+msgstr "Copiază cu antete"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Export displayed values"
+msgstr "Exportă valorile afișate"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy, python-format
+msgid "Export displayed values as %s…"
+msgstr "Exportă valorile afișate ca %s…"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Export failed"
+msgstr "Export eșuat"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy, python-format
 msgid ""
 "The file already exists:\n"
 "%s\n"
 "Do you want to replace it?"
 msgstr ""
+"Fișierul există deja:\n"
+"%s\n"
+"Vreți să-l înlocuiți?"
 
 #~ msgid ""
 #~ "\n"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 13:02+0200\n"
+"POT-Creation-Date: 2026-10-21 13:33+0200\n"
 "PO-Revision-Date: 2011-12-03 21:57+0000\n"
 "Last-Translator: LimburgCwboy <hdps.een@gmail.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.net/projects/p/fpdb/"
@@ -20,9 +20,9 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s cannot read all stud/razz hands yet."
-msgstr ""
+msgstr "%s kan nog niet alle stud/razz-handen lezen."
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py
 #, python-format
@@ -49,18 +49,18 @@ msgid "No small blind"
 msgstr "Geen small blind"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Player bringing in: %s for %s"
-msgstr ""
+msgstr "Speler met bring-in: %s voor %s"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/BossToFpdb.py
 #: fpdb_3_legacy/EnetToFpdb.py fpdb_3_legacy/EntractionToFpdb.py
 #: fpdb_3_legacy/EverestToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
 #: fpdb_3_legacy/FulltiltToFpdb.py fpdb_3_legacy/MicrogamingToFpdb.py
 #: fpdb_3_legacy/OnGameToFpdb.py fpdb_3_legacy/PkrToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Unimplemented %s: '%s' '%s'"
-msgstr ""
+msgstr "Niet geïmplementeerd %s: '%s' '%s'"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EnetToFpdb.py
 #: fpdb_3_legacy/EverleafToFpdb.py fpdb_3_legacy/OnGameToFpdb.py
@@ -92,38 +92,39 @@ msgstr ""
 #: fpdb_3_legacy/EntractionToFpdb.py fpdb_3_legacy/FulltiltToFpdb.py
 #: fpdb_3_legacy/MicrogamingToFpdb.py fpdb_3_legacy/OnGameToFpdb.py
 #: fpdb_3_legacy/PkrToFpdb.py
+#, fuzzy
 msgid "DEBUG:"
-msgstr ""
+msgstr "DEBUG:"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "Reading configuration file %s"
 msgid "Configuration modified*"
-msgstr "Lezen configuratiebestand %s"
+msgstr "Configuratie gewijzigd*"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Configuration up to date"
-msgstr ""
+msgstr "Configuratie is actueel"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "Reading configuration file %s"
 msgid "Reload configuration"
-msgstr "Lezen configuratiebestand %s"
+msgstr "Configuratie herladen"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 #, fuzzy
-#| msgid "loadDbs error: "
 msgid "Reload error"
-msgstr "LaadDbs fout:"
+msgstr "Fout bij herladen"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Reloading..."
-msgstr ""
+msgstr "Bezig met herladen..."
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
+#, fuzzy
 msgid "Restart required"
-msgstr ""
+msgstr "Herstart vereist"
 
 #: fpdb_3_legacy/ConfigReloadWidget.py
 msgid "↻"
@@ -150,8 +151,9 @@ msgstr ""
 
 #: fpdb_3_legacy/EnetToFpdb.py fpdb_3_legacy/EntractionToFpdb.py
 #: fpdb_3_legacy/OnGameToFpdb.py
+#, fuzzy
 msgid "not found"
-msgstr ""
+msgstr "niet gevonden"
 
 #: fpdb_3_legacy/EntractionToFpdb.py
 #, python-format
@@ -201,44 +203,54 @@ msgid "EverleafToFpdb.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "2-7 Drawmaha"
-msgstr ""
+msgstr "2-7 Drawmaha"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "2-7 Razz"
-msgstr ""
+msgstr "2-7 Razz"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Draw"
-msgstr ""
+msgstr "5 Card Draw"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Omaha"
-msgstr ""
+msgstr "5 Card Omaha"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Omaha Hi/Lo"
-msgstr ""
+msgstr "5 Card Omaha Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "5 Card Stud"
-msgstr ""
+msgstr "5 Card Stud"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "6 Card Omaha"
-msgstr ""
+msgstr "6 Card Omaha"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "7 Card Stud"
-msgstr ""
+msgstr "7 Card Stud"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "7 Card Stud Hi/Lo"
-msgstr ""
+msgstr "7 Card Stud Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "A-5 Single Draw"
-msgstr ""
+msgstr "A-5 Single Draw"
 
 #: fpdb_3_legacy/Filters.py
 msgid "All"
@@ -253,84 +265,102 @@ msgid "And:"
 msgstr "En:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "AoF Hold'em"
-msgstr ""
+msgstr "AoF Hold'em"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "AoF Omaha"
-msgstr ""
+msgstr "AoF Omaha"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badacey"
-msgstr ""
+msgstr "Badacey"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badeucey"
-msgstr ""
+msgstr "Badeucey"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Badugi"
-msgstr ""
+msgstr "Badugi"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Between:"
 msgstr "Tussen:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Buyin"
-msgstr ""
+msgstr "Buy-in"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Cal"
-msgstr ""
+msgstr "Kal"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Category"
-msgstr ""
+msgstr "Categorie"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Courchevel"
-msgstr ""
+msgstr "Courchevel"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Courchevel Hi/Lo"
-msgstr ""
+msgstr "Courchevel Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Currencies"
-msgstr ""
+msgstr "Valuta's"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Date:"
 msgstr "Datum:"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Done"
-msgstr ""
+msgstr "Klaar"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Double hold'em"
-msgstr ""
+msgstr "Double hold'em"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "EV"
-msgstr ""
+msgstr "EV"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Euro"
-msgstr ""
+msgstr "Euro"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "From:"
-msgstr ""
+msgstr "Van:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Fusion"
-msgstr ""
+msgstr "Fusion"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Games"
-msgstr ""
+msgstr "Spellen"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Grouping:"
@@ -341,36 +371,43 @@ msgid "Hero:"
 msgstr "Held:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Hold'em"
-msgstr ""
+msgstr "Hold'em"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Hole Cards"
-msgstr ""
+msgstr "Hole cards"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Irish"
-msgstr ""
+msgstr "Irish"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Limit Type"
-msgstr ""
+msgstr "Limiettype"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Limits:"
 msgstr "Limieten:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Min # Hands:"
-msgstr ""
+msgstr "Min. # handen:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Net profit excluding splash pots"
-msgstr ""
+msgstr "Nettowinst zonder splash pots"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Non-Showdown Winnings"
-msgstr ""
+msgstr "Winst zonder showdown"
 
 #: fpdb_3_legacy/Filters.py
 msgid "None"
@@ -381,24 +418,29 @@ msgid "Number of Players:"
 msgstr "Spelersaantal:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Off Suit"
-msgstr ""
+msgstr "Offsuit"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Omaha"
-msgstr ""
+msgstr "Omaha"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Omaha Hi/Lo"
-msgstr ""
+msgstr "Omaha Hi/Lo"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Pick a date"
-msgstr ""
+msgstr "Kies een datum"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Play Money"
-msgstr ""
+msgstr "Speelgeld"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -406,8 +448,9 @@ msgid "Positions:"
 msgstr "Toon Positie Stats"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Razz"
-msgstr ""
+msgstr "Razz"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -415,16 +458,18 @@ msgid "Refresh Filters"
 msgstr "Ververs"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Reset"
-msgstr ""
+msgstr "Herstellen"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Ring"
 msgstr "Ring"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Show Graph In:"
-msgstr ""
+msgstr "Grafiek tonen in:"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Show Limits"
@@ -439,45 +484,55 @@ msgid "Show Position Stats"
 msgstr "Toon Positie Stats"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Showdown Winnings"
-msgstr ""
+msgstr "Winst met showdown"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Single Draw 2-7 Lowball"
-msgstr ""
+msgstr "Single Draw 2-7 Lowball"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Sites"
-msgstr ""
+msgstr "Sites"
 
 #: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Suited"
-msgstr ""
+msgstr "Suited"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "To:"
-msgstr ""
+msgstr "Tot:"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Tournament Dollar"
-msgstr ""
+msgstr "Toernooidollar"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Tourney"
-msgstr ""
+msgstr "Toernooi"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Triple Draw 2-7 Lowball"
-msgstr ""
+msgstr "Triple Draw 2-7 Lowball"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "Triple Draw A-5 Lowball"
-msgstr ""
+msgstr "Triple Draw A-5 Lowball"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "US Dollar"
-msgstr ""
+msgstr "Amerikaanse dollar"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
 #, python-format
@@ -495,17 +550,19 @@ msgid "FullTiltPokerSummary.parseSummaryXLS: '%s' '%s"
 msgstr ""
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
+#, fuzzy
 msgid "Unable to locate currency"
-msgstr ""
+msgstr "Valuta niet gevonden"
 
 #: fpdb_3_legacy/FullTiltPokerSummary.py
+#, fuzzy
 msgid "parseSummary FAIL"
-msgstr ""
+msgstr "parseSummary mislukt"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s Failed to detect button (hand #%s cancelled?)"
-msgstr ""
+msgstr "%s Button niet gevonden (hand #%s geannuleerd?)"
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
 #, python-format
@@ -524,194 +581,241 @@ msgid "FulltiltToFpdb.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Hand '%s' was cancelled."
-msgstr ""
+msgstr "Hand '%s' is geannuleerd."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Hand '%s' was not dealt (dead hand)."
-msgstr ""
+msgstr "Hand '%s' is niet gedeeld (dode hand)."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "Hand is not cleanly split into pre and post Summary %s."
-msgstr ""
+msgstr "Hand is niet netjes gesplitst voor en na de samenvatting %s."
 
 #: fpdb_3_legacy/FulltiltToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "No players detected in hand %s."
-msgstr ""
+msgstr "Geen spelers gevonden in hand %s."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Database is back. Auto Import resumed."
 msgstr ""
+"\n"
+"Database is terug. Automatisch importeren hervat."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Database unreachable. Auto Import paused, retrying..."
 msgstr ""
+"\n"
+"Database onbereikbaar. Automatisch importeren gepauzeerd, nieuwe poging..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "Stop requested while an import was still running; it will finish in the "
 "background."
 msgstr ""
+"\n"
+"Stoppen gevraagd terwijl een import nog liep; die wordt op de achtergrond "
+"afgerond."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "SwC Native Live HUD tailing thread started."
 msgstr ""
+"\n"
+"SwC Native Live HUD-thread gestart."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid ""
 "\n"
 "SwC live capture is not available on this platform. Importing SwC files "
 "still works."
 msgstr ""
+"\n"
+"Live-opname van SwC is niet beschikbaar op dit platform. Het importeren van "
+"SwC-bestanden werkt nog steeds."
 
 #: fpdb_3_legacy/GuiAutoImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "\n"
 "SwC live capture unavailable: {reason}. Importing SwC hand history files "
 "still works."
 msgstr ""
+"\n"
+"Live-opname van SwC niet beschikbaar: {reason}. Het importeren van SwC-"
+"handgeschiedenissen werkt nog steeds."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Auto Import Ready.\n"
-msgstr ""
+msgstr "Automatisch importeren gereed.\n"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Auto Import Running..."
-msgstr ""
+msgstr "Automatisch importeren bezig..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Database unreachable - retrying"
-msgstr ""
+msgstr "Database onbereikbaar - nieuwe poging"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "FPDB Auto Import"
-msgstr ""
+msgstr "FPDB automatisch importeren"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Import cycle is taking longer than usual..."
-msgstr ""
+msgstr "De importcyclus duurt langer dan gewoonlijk..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Log"
-msgstr ""
+msgstr "Logboek"
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Ready"
-msgstr ""
+msgstr "Gereed"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Settings"
-msgstr ""
+msgstr "Instellingen"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Start Auto Import"
-msgstr ""
+msgstr "Automatisch importeren starten"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Stop Auto Import"
-msgstr ""
+msgstr "Automatisch importeren stoppen"
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Stopping Auto Import..."
-msgstr ""
+msgstr "Automatisch importeren wordt gestopt..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "SwC live capture could not attach: {reason}. Importing SwC hand history "
 "files still works."
 msgstr ""
+"Live-opname van SwC kon niet koppelen: {reason}. Het importeren van SwC-"
+"handgeschiedenissen werkt nog steeds."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
 msgid "Time between imports (seconds):"
-msgstr ""
+msgstr "Tijd tussen imports (seconden):"
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Automatic Notes"
-msgstr ""
+msgstr "Automatische notities"
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Enable or disable automatic player-note rules."
-msgstr ""
+msgstr "Regels voor automatische spelernotities in- of uitschakelen."
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
+#, fuzzy
 msgid "Generate automatic notes"
-msgstr ""
-
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
-msgid "Custom Rules"
-msgstr ""
+msgstr "Automatische notities maken"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
-#| msgid "Database created"
+msgid "Custom Rules"
+msgstr "Eigen regels"
+
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Database hands"
-msgstr "Database aangemaakt"
+msgstr "Handen uit de database"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Dry Run"
-msgstr ""
+msgstr "Proefdraai"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Dry Run DB"
-msgstr ""
+msgstr "Proefdraai DB"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "File"
-msgstr ""
+msgstr "Bestand"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Folder"
-msgstr ""
+msgstr "Map"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "From"
-msgstr ""
+msgstr "Van"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Hand-history source"
-msgstr ""
+msgstr "Bron van handgeschiedenissen"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Idle"
-msgstr ""
+msgstr "Inactief"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Latest: -"
-msgstr ""
+msgstr "Laatste: -"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Limit"
-msgstr ""
+msgstr "Limiet"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Load Notes"
-msgstr ""
+msgstr "Notities laden"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Notes: 0"
-msgstr ""
+msgstr "Notities: 0"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "All Players"
 msgid "Player"
-msgstr "Alle spelers"
+msgstr "Speler"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
 #, fuzzy
@@ -719,81 +823,99 @@ msgid "Player Notes"
 msgstr "Gebruikersnaam"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Pool"
-msgstr ""
+msgstr "Pool"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Recent generated notes"
-msgstr ""
+msgstr "Recent gemaakte notities"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Refresh Pool Summary"
-msgstr ""
+msgstr "Pooloverzicht vernieuwen"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Rule set"
-msgstr ""
+msgstr "Regelset"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Run"
-msgstr ""
+msgstr "Uitvoeren"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Search"
-msgstr ""
+msgstr "Zoeken"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/GuiBulkImport.py
 #: fpdb_3_legacy/hand_share_dialog.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Site"
-msgstr ""
+msgstr "Site"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "To"
-msgstr ""
+msgstr "Tot"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top players by generated notes"
-msgstr ""
+msgstr "Spelers met de meeste gemaakte notities"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top rule: -"
-msgstr ""
+msgstr "Topregel: -"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Top rules"
-msgstr ""
+msgstr "Topregels"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Write DB Notes"
-msgstr ""
+msgstr "DB-notities schrijven"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py
+#, fuzzy
 msgid "Write Notes"
-msgstr ""
+msgstr "Notities schrijven"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Browse..."
-msgstr ""
+msgstr "Bladeren..."
 
 #: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Bulk Import"
-msgstr ""
+msgstr "Bulkimport"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Bulk Import Error"
-msgstr ""
+msgstr "Fout bij bulkimport"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Choose a destination directory"
-msgstr ""
+msgstr "Kies een doelmap"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Configured Import Directories:"
-msgstr ""
+msgstr "Ingestelde importmappen:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Import complete.\n"
 "\n"
@@ -805,29 +927,46 @@ msgid ""
 "Errors: {errs}\n"
 "Time: {elapsed}s"
 msgstr ""
+"Import voltooid.\n"
+"\n"
+"Verwerkte bestanden: {files}\n"
+"Opgeslagen: {stored}\n"
+"Duplicaten: {dups}\n"
+"Onvolledig: {partial}\n"
+"Overgeslagen: {skipped}\n"
+"Fouten: {errs}\n"
+"Tijd: {elapsed} s"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Importing..."
-msgstr ""
+msgstr "Bezig met importeren..."
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Move failed files to:"
-msgstr ""
+msgstr "Mislukte bestanden verplaatsen naar:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Move imported files to:"
-msgstr ""
+msgstr "Geïmporteerde bestanden verplaatsen naar:"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid ""
 "No importable hand-history files were found in the selected directories.\n"
 "\n"
 "Check that the configured paths contain hand histories (plain text files), "
 "not just archives or exports."
 msgstr ""
+"In de gekozen mappen zijn geen importeerbare handgeschiedenissen gevonden.\n"
+"\n"
+"Controleer of de ingestelde paden handgeschiedenissen (tekstbestanden) "
+"bevatten en niet alleen archieven of exports."
 
 #: fpdb_3_legacy/GuiBulkImport.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "PHH hands found: {found}\n"
 "Imported: {imported}\n"
@@ -837,46 +976,64 @@ msgid ""
 "Malformed: {malformed}\n"
 "PHH import time: {seconds}s"
 msgstr ""
+"Gevonden PHH-handen: {found}\n"
+"Geïmporteerd: {imported}\n"
+"Duplicaten: {dups}\n"
+"Onvolledig (geschiedenis stopt vroeg): {partial}\n"
+"Niet-ondersteunde varianten: {unsupported}\n"
+"Misvormd: {malformed}\n"
+"PHH-importtijd: {seconds} s"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Path"
-msgstr ""
+msgstr "Pad"
 
 #: fpdb_3_legacy/GuiBulkImport.py
+#, fuzzy
 msgid "Please choose the path that you want to Auto Import"
-msgstr ""
+msgstr "Kies het pad dat u automatisch wilt importeren"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
 msgstr ""
+"Ook HUD_main starten (uitvinken als HUD/automatisch importeren al draait)."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Capture failed to start — see the log above."
-msgstr ""
+msgstr "Opname kon niet starten — zie het logboek hierboven."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Default game:"
-msgstr ""
+msgstr "Standaardspel:"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Dry run (no DB insert)"
-msgstr ""
+msgstr "Proefdraai (niets in de DB)"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Finishing previous capture…"
-msgstr ""
+msgstr "Vorige opname wordt afgerond…"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Idle."
-msgstr ""
+msgstr "Inactief."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Interface:"
-msgstr ""
+msgstr "Interface:"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Launch HUD"
-msgstr ""
+msgstr "HUD starten"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 #, fuzzy
@@ -884,298 +1041,352 @@ msgid "Refresh interfaces"
 msgstr "Ververs"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
 msgstr ""
+"Rechten worden gevraagd… accepteer de melding en speel dan op CoinPoker."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Start capture"
-msgstr ""
+msgstr "Opname starten"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py fpdb_3_legacy/session_guard_dialog.py
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Stop"
-msgstr ""
+msgstr "Stoppen"
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
+#, fuzzy
 msgid "Stopping…"
-msgstr ""
+msgstr "Bezig met stoppen…"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "+ New Rule"
-msgstr ""
+msgstr "+ Nieuwe regel"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Actions"
-msgstr ""
+msgstr "Acties"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-format
+#, fuzzy, python-format
 msgid "Are you sure you want to delete rule '%s'?"
-msgstr ""
+msgstr "Weet u zeker dat u regel '%s' wilt verwijderen?"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Board ({flop})"
-msgstr ""
+msgstr "Board ({flop})"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Board:"
-msgstr ""
+msgstr "Board:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Captured Evidence Schema"
-msgstr ""
+msgstr "Schema van vastgelegde gegevens"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Custom Auto Notes rules saved successfully!"
-msgstr ""
+msgstr "Eigen regels voor automatische notities opgeslagen!"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Delete Rule"
-msgstr ""
+msgstr "Regel verwijderen"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Duplicate Rule IDs"
-msgstr ""
+msgstr "Dubbele regel-ID's"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Empty HH"
-msgstr ""
+msgstr "Lege handgeschiedenis"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Enabled"
-msgstr ""
+msgstr "Ingeschakeld"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Generated Note: (None)"
-msgstr ""
+msgstr "Gemaakte notitie: (geen)"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Hole Cards ({hole})"
-msgstr ""
+msgstr "Hole cards ({hole})"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Hole:"
-msgstr ""
+msgstr "Hole cards:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Live Testing Sandbox"
-msgstr ""
+msgstr "Live-testomgeving"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Logical Conditions (No-Code GUI)"
-msgstr ""
+msgstr "Logische voorwaarden (zonder code)"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "No Rule"
-msgstr ""
+msgstr "Geen regel"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Note Template (Tags: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, {spr}):"
 msgstr ""
+"Notitiesjabloon (tags: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, "
+"{spr}):"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Paste raw GGPoker or PokerStars hand history text here to test..."
 msgstr ""
+"Plak hier ruwe GGPoker- of PokerStars-handgeschiedenistekst om te testen..."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Please paste a Hand History text to evaluate against."
-msgstr ""
+msgstr "Plak een handgeschiedenistekst om tegen te evalueren."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Please select or create a rule to evaluate."
-msgstr ""
+msgstr "Kies of maak een regel om te evalueren."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Remove Condition"
-msgstr ""
+msgstr "Voorwaarde verwijderen"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Root Operator:"
-msgstr ""
+msgstr "Hoofdoperator:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule / Group"
-msgstr ""
+msgstr "Regel / groep"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule ID:"
-msgstr ""
+msgstr "Regel-ID:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Rule Metadata"
-msgstr ""
+msgstr "Regelmetadata"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
-#| msgid "File name: %s"
 msgid "Rule Name:"
-msgstr "Bestandsnaam %s"
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Rule Set:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Rule Sets & Custom Rules"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Saved"
-msgstr ""
-
-#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-msgid "Stack & SPR"
-msgstr ""
+msgstr "Regelnaam:"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
-#| msgid "Status"
+msgid "Rule Set:"
+msgstr "Regelset:"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Rule Sets & Custom Rules"
+msgstr "Regelsets en eigen regels"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Saved"
+msgstr "Opgeslagen"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
+msgid "Stack & SPR"
+msgstr "Stack & SPR"
+
+#: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Status: READY"
-msgstr "Status"
+msgstr "Status: GEREED"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "Test Source (Raw Hand History Text):"
-msgstr ""
+msgstr "Testbron (ruwe handgeschiedenistekst):"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "These rule IDs are used more than once: %s\n"
 "\n"
 "Give each rule a unique ID before saving."
 msgstr ""
+"Deze regel-ID's worden meer dan eens gebruikt: %s\n"
+"\n"
+"Geef elke regel een unieke ID voordat u opslaat."
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "➕ Add Condition"
-msgstr ""
+msgstr "➕ Voorwaarde toevoegen"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "💾 Save Rules"
-msgstr ""
+msgstr "💾 Regels opslaan"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📋 Duplicate"
-msgstr ""
+msgstr "📋 Dupliceren"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🗑️ Delete"
-msgstr ""
+msgstr "🗑️ Verwijderen"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "🧪 Evaluate Rule"
-msgstr ""
+msgstr "🧪 Regel evalueren"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
+#, fuzzy
 msgid "🧪 Test Sandbox"
-msgstr ""
+msgstr "🧪 Testomgeving"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "No Database Name given"
 msgid "A database name is required."
-msgstr "Geen Database Naam aangegeven"
+msgstr "Een databasenaam is vereist."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "A host is required for PostgreSQL/MySQL."
-msgstr ""
+msgstr "Voor PostgreSQL/MySQL is een host vereist."
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Add New Database"
 msgid "Add database"
-msgstr "Toevoegen Nieuwe Database"
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Add..."
-msgstr ""
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Backend"
-msgstr ""
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Backend:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Configured databases:"
-msgstr ""
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Create database"
-msgstr ""
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Create tables"
-msgstr ""
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Default"
-msgstr ""
+msgstr "Database toevoegen"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Database created"
+msgid "Add..."
+msgstr "Toevoegen..."
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
+msgid "Backend"
+msgstr "Backend"
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
+msgid "Backend:"
+msgstr "Backend:"
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
+msgid "Configured databases:"
+msgstr "Ingestelde databases:"
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
+msgid "Create database"
+msgstr "Database maken"
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
+msgid "Create tables"
+msgstr "Tabellen maken"
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
+msgid "Default"
+msgstr "Standaard"
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Default database changed"
-msgstr "Database aangemaakt"
+msgstr "Standaarddatabase gewijzigd"
 
 #: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Delete"
-msgstr ""
+msgstr "Verwijderen"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Delete database"
-msgstr ""
+msgstr "Database verwijderen"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Add New Database"
 msgid "Edit database"
-msgstr "Toevoegen Nieuwe Database"
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Edit..."
-msgstr ""
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Host / Path"
-msgstr ""
+msgstr "Database bewerken"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Host"
+msgid "Edit..."
+msgstr "Bewerken..."
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
+msgid "Host / Path"
+msgstr "Host / pad"
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Host:"
-msgstr "Host"
+msgstr "Host:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Invalid database settings"
-msgstr ""
+msgstr "Ongeldige database-instellingen"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Migrate database"
-msgstr ""
+msgstr "Database migreren"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Migrate to..."
-msgstr ""
+msgstr "Migreren naar..."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Migrating database"
-msgstr ""
+msgstr "Database wordt gemigreerd"
 
 #: fpdb_3_legacy/GuiDatabase.py
 msgid "Name"
@@ -1185,324 +1396,390 @@ msgstr "Naam"
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "Name"
 msgid "Name:"
-msgstr "Naam"
+msgstr "Naam:"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Password"
 msgid "Password:"
-msgstr "Wachtwoord"
+msgstr "Wachtwoord:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Port must be a number between 1 and 65535."
-msgstr ""
+msgstr "De poort moet een getal tussen 1 en 65535 zijn."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Port:"
-msgstr ""
+msgstr "Poort:"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid ""
 "SQLite databases are created automatically. Use 'Create tables' to "
 "initialise the schema."
 msgstr ""
-
-#: fpdb_3_legacy/GuiDatabase.py
-msgid "Set as default"
-msgstr ""
+"SQLite-databases worden automatisch gemaakt. Gebruik 'Tabellen maken' om het "
+"schema aan te maken."
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Testing database connections ... "
+msgid "Set as default"
+msgstr "Als standaard instellen"
+
+#: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "Test connection"
-msgstr "Testen database verbindingen ..."
+msgstr "Verbinding testen"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid "There is no other database to migrate into. Add one first."
-msgstr ""
+msgstr "Er is geen andere database om naar te migreren. Voeg er eerst een toe."
 
 #: fpdb_3_legacy/GuiDatabase.py
+#, fuzzy
 msgid ""
 "This is the only configured database and cannot be deleted — fpdb needs at "
 "least one. Add another database first."
 msgstr ""
+"Dit is de enige ingestelde database en kan niet worden verwijderd — fpdb "
+"heeft er minstens één nodig. Voeg eerst een andere database toe."
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Username"
 msgid "User"
-msgstr "Gebruikersnaam"
+msgstr "Gebruiker"
 
 #: fpdb_3_legacy/GuiDatabase.py
 #, fuzzy
-#| msgid "Username"
 msgid "User:"
-msgstr "Gebruikersnaam"
+msgstr "Gebruiker:"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Field actions"
-msgstr ""
+msgstr "Acties van het field"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Field population"
-msgstr ""
+msgstr "Populatie van het field"
 
 #: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy
-#| msgid "reading antes"
 msgid "Loading hands…"
-msgstr "Lezen antes"
+msgstr "Handen laden…"
 
 #: fpdb_3_legacy/GuiDrillDown.py fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Next ▶"
-msgstr ""
+msgstr "Volgende ▶"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Select a row to see the hands behind both sides of it."
-msgstr ""
+msgstr "Kies een rij om de handen achter beide kanten te zien."
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Source hands"
-msgstr ""
+msgstr "Bronhanden"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid ""
 "These hands use the same filters as the other side; only the population "
 "differs."
 msgstr ""
+"Deze handen gebruiken dezelfde filters als de andere kant; alleen de "
+"populatie verschilt."
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Your actions"
-msgstr ""
+msgstr "Uw acties"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "Your population"
-msgstr ""
+msgstr "Uw populatie"
 
 #: fpdb_3_legacy/GuiDrillDown.py
+#, fuzzy
 msgid "◀ Previous"
-msgstr ""
+msgstr "◀ Vorige"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, fuzzy
 msgid "Export to File"
-msgstr ""
+msgstr "Naar bestand exporteren"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, fuzzy
 msgid "FPDB 3 info"
-msgstr ""
+msgstr "FPDB 3-info"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Hands"
-msgstr ""
+msgstr "Handen"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
+#, fuzzy
 msgid "Net profit excluding splash"
-msgstr ""
+msgstr "Nettowinst zonder splash"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
+#, fuzzy
 msgid "Non-showdown"
-msgstr ""
+msgstr "Zonder showdown"
 
 #: fpdb_3_legacy/GuiGraphViewer.py
+#, fuzzy
 msgid "Profit"
-msgstr ""
+msgstr "Winst"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, fuzzy
 msgid "Refresh Graph"
-msgstr ""
+msgstr "Grafiek vernieuwen"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Showdown"
-msgstr ""
+msgstr "Showdown"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "100–150% pot"
-msgstr ""
+msgstr "100–150% pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "25–50% pot"
-msgstr ""
+msgstr "25–50% pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "3-bet"
-msgstr ""
+msgstr "3-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "4-bet"
-msgstr ""
+msgstr "4-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "50–75% pot"
-msgstr ""
+msgstr "50–75% pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "75–100% pot"
-msgstr ""
+msgstr "75–100% pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Advanced review filters"
-msgstr ""
+msgstr "Geavanceerde reviewfilters"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "All Players"
 msgid "All hands"
-msgstr "Alle spelers"
+msgstr "Alle handen"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
-#| msgid "AddDB starting"
 msgid "All starting hands"
-msgstr "Starten AddDB"
+msgstr "Alle starthanden"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Analytics data unavailable"
-msgstr ""
+msgstr "Analysegegevens niet beschikbaar"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Any"
-msgstr ""
+msgstr "Willekeurig"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Any card"
-msgstr ""
+msgstr "Elke kaart"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Any sizing"
-msgstr ""
+msgstr "Elke grootte"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Apply review filters"
-msgstr ""
+msgstr "Reviewfilters toepassen"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Bet"
-msgstr ""
+msgstr "Bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Bet / raise sizing"
-msgstr ""
+msgstr "Bet-/raisegrootte"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Broadway"
-msgstr ""
+msgstr "Broadway"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Call open"
-msgstr ""
+msgstr "Open gecalld"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Called"
-msgstr ""
+msgstr "Gecalld"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Check-raise"
-msgstr ""
+msgstr "Check-raise"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Checked"
-msgstr ""
+msgstr "Gecheckt"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Choose hands…"
-msgstr ""
+msgstr "Handen kiezen…"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Clear"
-msgstr ""
+msgstr "Wissen"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Continuation bet"
-msgstr ""
+msgstr "Continuation bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiTourHandViewer.py
+#, fuzzy
 msgid "Copy hand history"
-msgstr ""
+msgstr "Handgeschiedenis kopiëren"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Did not VPIP"
-msgstr ""
+msgstr "Geen VPIP"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack (BB)"
-msgstr ""
+msgstr "Effectieve stack (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Exact known cards"
-msgstr ""
+msgstr "Exact bekende kaarten"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Exclude splash pots"
-msgstr ""
+msgstr "Splash pots uitsluiten"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Faced 3-bet"
-msgstr ""
+msgstr "Tegen 3-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Faced c-bet"
-msgstr ""
+msgstr "Tegen c-bet"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Faced open"
-msgstr ""
+msgstr "Tegen open"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Filter: "
-msgstr ""
+msgstr "Filter: "
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Filter: splash pot"
-msgstr ""
+msgstr "Filter: splash pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Final pot (BB)"
-msgstr ""
+msgstr "Eindpot (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Folded"
-msgstr ""
+msgstr "Gefold"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Hold'em starting hand"
-msgstr ""
+msgstr "Hold'em-starthand"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Invalid review filter"
-msgstr ""
+msgstr "Ongeldig reviewfilter"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Invert"
-msgstr ""
+msgstr "Omkeren"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Limp"
-msgstr ""
+msgstr "Limp"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Net result (BB)"
-msgstr ""
+msgstr "Nettoresultaat (BB)"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid ""
 "No hands were queried, to avoid presenting an incomplete result as empty."
 msgstr ""
+"Er zijn geen handen opgevraagd, om een onvolledig resultaat niet als leeg te "
+"tonen."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Offsuit"
-msgstr ""
+msgstr "Offsuit"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Over 150% pot"
-msgstr ""
+msgstr "Meer dan 150% pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Pairs"
-msgstr ""
+msgstr "Paren"
 
 #: fpdb_3_legacy/GuiHandViewer.py
 #, fuzzy
@@ -1510,309 +1787,384 @@ msgid "Players in hand"
 msgstr "Gebruikersnaam"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Postflop"
-msgstr ""
+msgstr "Postflop"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Preflop"
-msgstr ""
+msgstr "Preflop"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "RFI"
-msgstr ""
+msgstr "RFI"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Raised"
-msgstr ""
+msgstr "Geraised"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw flop"
-msgstr ""
+msgstr "Flop gezien"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw river"
-msgstr ""
+msgstr "River gezien"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Saw turn"
-msgstr ""
+msgstr "Turn gezien"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Splash pots only"
-msgstr ""
+msgstr "Alleen splash pots"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Squeeze"
-msgstr ""
+msgstr "Squeeze"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Starting-hand range"
-msgstr ""
+msgstr "Range van starthanden"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid ""
 "The analytics status needed by these filters could not be verified. No "
 "results were queried; check the database and rebuild analytics data before "
 "retrying."
 msgstr ""
+"De analysestatus die deze filters nodig hebben, kon niet worden "
+"gecontroleerd. Er zijn geen resultaten opgevraagd; controleer de database en "
+"bouw de analysegegevens opnieuw op voordat u het opnieuw probeert."
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "The minimum cannot exceed the maximum for {}."
-msgstr ""
+msgstr "Het minimum mag het maximum voor {} niet overschrijden."
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "These analytics rows were created by a newer fpdb version: {names}."
-msgstr ""
+msgstr "Deze analyserijen zijn gemaakt door een nieuwere fpdb-versie: {names}."
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "These filters need missing or outdated analytics data: {names}."
 msgstr ""
+"Deze filters hebben ontbrekende of verouderde analysegegevens nodig: {names}."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Under 25% pot"
-msgstr ""
+msgstr "Minder dan 25% pot"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Upgrade fpdb before using these filters."
-msgstr ""
+msgstr "Werk fpdb bij voordat u deze filters gebruikt."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Use Database → Rebuild Analytics Data, then retry the filter."
 msgstr ""
+"Gebruik Database → Analysegegevens opnieuw opbouwen en probeer het filter "
+"dan opnieuw."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "VPIP"
-msgstr ""
+msgstr "VPIP"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "Went all-in"
-msgstr ""
+msgstr "All-in gegaan"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "max"
-msgstr ""
+msgstr "max."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "max BB"
-msgstr ""
+msgstr "max. BB"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "min"
-msgstr ""
+msgstr "min."
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "min BB"
-msgstr ""
+msgstr "min. BB"
 
 #: fpdb_3_legacy/GuiHandViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{} classes selected"
-msgstr ""
+msgstr "{} klassen geselecteerd"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#, fuzzy
 msgid "◀ Prev"
-msgstr ""
+msgstr "◀ Vorige"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Copy selection to clipboard"
-msgstr ""
+msgstr "Selectie naar het klembord kopiëren"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Filter by Module:"
-msgstr ""
+msgstr "Filteren op module:"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Log Viewer"
-msgstr ""
+msgstr "Logweergave"
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
 msgid "Refresh"
 msgstr "Ververs"
 
 #: fpdb_3_legacy/GuiLogView.py
+#, fuzzy
 msgid "Select Log File:"
-msgstr ""
+msgstr "Logbestand kiezen:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Min hands vs hero:"
-msgstr ""
+msgstr "Min. handen tegen hero:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Sort by:"
-msgstr ""
+msgstr "Sorteren op:"
 
 #: fpdb_3_legacy/GuiOpponentsReport.py
+#, fuzzy
 msgid "Top N opponents:"
-msgstr ""
+msgstr "Top N tegenstanders:"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Auxiliary Windows"
-msgstr ""
+msgstr "Hulpvensters"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Column Heading"
-msgstr ""
+msgstr "Kolomkop"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Databases"
-msgstr ""
+msgstr "Databases"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Field Type"
-msgstr ""
+msgstr "Veldtype"
 
 #: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Format"
-msgstr ""
+msgstr "Formaat"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "General"
-msgstr ""
+msgstr "Algemeen"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "HUD"
-msgstr ""
+msgstr "HUD"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Hand History Converters"
-msgstr ""
+msgstr "Handgeschiedenisconverters"
 
 #: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Import"
-msgstr ""
+msgstr "Importeren"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Left/Right Align"
-msgstr ""
+msgstr "Links/rechts uitlijnen"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Mucked"
-msgstr ""
+msgstr "Gemuckt"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Popup Name"
-msgstr ""
+msgstr "Pop-upnaam"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Popup Windows"
-msgstr ""
+msgstr "Pop-upvensters"
 
 #: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Ring Player Stats"
-msgstr ""
+msgstr "Cash-spelersstatistieken"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Setting"
-msgstr ""
+msgstr "Instelling"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Show in Position Stats"
-msgstr ""
+msgstr "Tonen in positiestatistieken"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Show in Summaries"
-msgstr ""
+msgstr "Tonen in samenvattingen"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stat"
-msgstr ""
+msgstr "Stat"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Stat Name"
-msgstr ""
+msgstr "Statnaam"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Stud mucked"
-msgstr ""
+msgstr "Stud gemuckt"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Tour Player Stats"
-msgstr ""
+msgstr "Toernooi-spelersstatistieken"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Value (double-click to change)"
-msgstr ""
+msgstr "Waarde (dubbelklik om te wijzigen)"
 
 #: fpdb_3_legacy/GuiPrefs.py
+#, fuzzy
 msgid "Window"
-msgstr ""
+msgstr "Venster"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Card deck"
-msgstr ""
+msgstr "Kaartspel"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Copy or save this hand as text, Markdown or forum code"
-msgstr ""
+msgstr "Deze hand kopiëren of opslaan als tekst, Markdown of forumcode"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Current card deck preview"
-msgstr ""
+msgstr "Voorbeeld van het huidige kaartspel"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Deck:"
-msgstr ""
+msgstr "Kaartspel:"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "End"
-msgstr ""
+msgstr "Einde"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "FPDB Hand Replayer"
-msgstr ""
+msgstr "FPDB-handreplayer"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Hide Cards"
-msgstr ""
+msgstr "Kaarten verbergen"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Next"
-msgstr ""
+msgstr "Volgende"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Next action"
-msgstr ""
+msgstr "Volgende actie"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Play"
-msgstr ""
+msgstr "Afspelen"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Prev"
-msgstr ""
+msgstr "Vorige"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Previous action"
-msgstr ""
+msgstr "Vorige actie"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Send this hand's preflop decisions to PreflopAdvisor"
-msgstr ""
+msgstr "De preflopbeslissingen van deze hand naar PreflopAdvisor sturen"
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Share..."
-msgstr ""
+msgstr "Delen..."
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
 msgid "Solver review..."
-msgstr ""
+msgstr "Solver-review..."
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Start"
-msgstr ""
+msgstr "Begin"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "-- built-in presets --"
-msgstr ""
+msgstr "-- ingebouwde voorinstellingen --"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "-- saved presets --"
-msgstr ""
+msgstr "-- opgeslagen voorinstellingen --"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -1820,507 +2172,635 @@ msgid "?"
 msgstr ""
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "A gap is only as good as the smaller of the two samples beside it."
 msgstr ""
+"Een verschil is maar zo goed als de kleinste van de twee steekproeven "
+"ernaast."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add or remove one of the known values."
-msgstr ""
+msgstr "Een van de bekende waarden toevoegen of verwijderen."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add the selected dimension to the breakdown."
-msgstr ""
+msgstr "De gekozen dimensie aan de uitsplitsing toevoegen."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Add this filter"
-msgstr ""
+msgstr "Dit filter toevoegen"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Adjust {variables} for your own game."
-msgstr ""
+msgstr "Pas {variables} aan uw eigen spel aan."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Adjust: {variables}"
-msgstr ""
+msgstr "Aanpassen: {variables}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Aim for at least {n} decisions."
-msgstr ""
+msgstr "Mik op minstens {n} beslissingen."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "All hands in the population"
-msgstr ""
+msgstr "Alle handen van de populatie"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Any leaves the condition out of the query entirely."
-msgstr ""
+msgstr "'Willekeurig' laat de voorwaarde helemaal uit de query weg."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Ask a poker question"
-msgstr ""
+msgstr "Een pokervraag stellen"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Ask your own question"
-msgstr ""
+msgstr "Stel uw eigen vraag"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Break down by"
-msgstr ""
+msgstr "Uitsplitsen naar"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Choose a dimension to split the result by."
-msgstr ""
+msgstr "Kies een dimensie om het resultaat op te splitsen."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Choose one or more…"
-msgstr ""
+msgstr "Kies er een of meer…"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Comma-separated group-by dimensions (engine vocabulary)"
 msgstr ""
+"Door komma's gescheiden groeperingsdimensies (vocabulaire van de engine)"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Compare with the field"
-msgstr ""
+msgstr "Vergelijken met het field"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Count"
-msgstr ""
+msgstr "Aantal"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Decisions"
-msgstr ""
+msgstr "Beslissingen"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a cell to load the hands behind it."
-msgstr ""
+msgstr "Dubbelklik op een cel om de handen erachter te laden."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a result row to load its hands."
-msgstr ""
+msgstr "Dubbelklik op een resultaatrij om de handen ervan te laden."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "Double-click a row to load its hands. Numerator/denominator are shown per "
 "row."
 msgstr ""
+"Dubbelklik op een rij om de handen ervan te laden. Teller/noemer worden per "
+"rij getoond."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click a row to see your hands and the field's, side by side."
 msgstr ""
+"Dubbelklik op een rij om uw handen en die van het field naast elkaar te zien."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Double-click the row to load its hands."
-msgstr ""
+msgstr "Dubbelklik op de rij om de handen ervan te laden."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Every decision the question applies to: the sample size."
 msgstr ""
+"Elke beslissing waarop de vraag van toepassing is: de steekproefgrootte."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "FPDB Replayer"
-msgstr ""
+msgstr "FPDB-replayer"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Field"
-msgstr ""
+msgstr "Field"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Field sample"
-msgstr ""
+msgstr "Steekproef van het field"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Filters"
-msgstr ""
+msgstr "Filters"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Frequency (%)"
-msgstr ""
+msgstr "Frequentie (%)"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Gap"
-msgstr ""
+msgstr "Verschil"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "How many of those decisions the metric counted."
-msgstr ""
+msgstr "Hoeveel van die beslissingen de maatstaf telde."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Matching hands"
-msgstr ""
+msgstr "Overeenkomende handen"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Metric"
-msgstr ""
+msgstr "Maatstaf"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "No"
-msgstr ""
+msgstr "Nee"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "No matching hands were found for either population."
-msgstr ""
+msgstr "Voor geen van beide populaties zijn overeenkomende handen gevonden."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Only the hands where the metric fired"
-msgstr ""
+msgstr "Alleen de handen waarin de maatstaf afging"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Open the Research Browser quick start"
-msgstr ""
+msgstr "De snelstartgids van de Research Browser openen"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Pick one of the answers this workbench knows how to show."
-msgstr ""
+msgstr "Kies een van de antwoorden die deze werkbank kan tonen."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Poker labels"
-msgstr ""
+msgstr "Pokertermen"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "Poker labels use the terminology most readers see at the table.\n"
 "Technical names expose the analytics engine's fields and values."
 msgstr ""
+"Pokertermen gebruiken de terminologie die de meeste spelers aan tafel zien.\n"
+"Technische namen tonen de velden en waarden van de analyse-engine."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Query cancelled."
-msgstr ""
+msgstr "Query geannuleerd."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Remove this breakdown"
-msgstr ""
+msgstr "Deze uitsplitsing verwijderen"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Remove this filter"
-msgstr ""
+msgstr "Dit filter verwijderen"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Research browser"
-msgstr ""
+msgstr "Research Browser"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Results"
-msgstr ""
+msgstr "Resultaten"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Run the same question twice -- yours and the field's -- side by side."
 msgstr ""
+"Stelt dezelfde vraag twee keer -- die van u en die van het field -- naast "
+"elkaar."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Running…"
-msgstr ""
+msgstr "Bezig…"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Save"
-msgstr ""
+msgstr "Opslaan"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Save preset"
-msgstr ""
+msgstr "Voorinstelling opslaan"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Saved as \"{saved}\". The built-in preset \"{original}\" is unchanged."
 msgstr ""
+"Opgeslagen als \"{saved}\". De ingebouwde voorinstelling \"{original}\" is "
+"niet gewijzigd."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Show technical query controls"
-msgstr ""
+msgstr "Technische querybediening tonen"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Show the engine's own filter names and free-text values."
-msgstr ""
+msgstr "De filternamen van de engine en vrije-tekstwaarden tonen."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Technical names"
-msgstr ""
+msgstr "Technische namen"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid ""
 "The Research Browser answers questions about the hands in your database. "
 "Pick a question below, change any value that should be different for you, "
 "then press Run. The sample size is always shown, and every row can be opened "
 "as the hands behind it."
 msgstr ""
+"De Research Browser beantwoordt vragen over de handen in uw database. Kies "
+"hieronder een vraag, wijzig de waarden die voor u anders moeten zijn en druk "
+"op Uitvoeren. De steekproefgrootte wordt altijd getoond, en elke rij kan "
+"worden geopend op de handen erachter."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "The analytics data for {names} has never been built. A question that reads "
 "it answers zero until it is: Database -> Rebuild Analytics Data."
 msgstr ""
+"De analysegegevens voor {names} zijn nooit opgebouwd. Een vraag die ze "
+"leest, antwoordt nul tot dat gebeurd is: Database -> Analysegegevens opnieuw "
+"opbouwen."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "The analytics data for {names} was derived by older rules, so a question "
 "that reads it may answer zero: Database -> Rebuild Analytics Data."
 msgstr ""
+"De analysegegevens voor {names} zijn met oudere regels afgeleid, dus een "
+"vraag die ze leest, kan nul antwoorden: Database -> Analysegegevens opnieuw "
+"opbouwen."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "The measurement itself, over the sample above."
-msgstr ""
+msgstr "De meting zelf, over de steekproef hierboven."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "The question the controls above currently ask."
-msgstr ""
+msgstr "De vraag die de bedieningselementen hierboven nu stellen."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "These questions need the analytics tables rebuilt before they can answer: "
 "{subsystems}. Rebuild them from the database menu, then run a question."
 msgstr ""
+"Deze vragen hebben opnieuw opgebouwde analysetabellen nodig voordat ze "
+"kunnen antwoorden: {subsystems}. Bouw ze opnieuw op via het databasemenu en "
+"voer dan een vraag uit."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Try one of these:"
-msgstr ""
+msgstr "Probeer er een van:"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Unknown group-by dimension(s): {names}. Known: {known}."
-msgstr ""
+msgstr "Onbekende groeperingsdimensie(s): {names}. Bekend: {known}."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "View"
-msgstr ""
+msgstr "Weergave"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Vocabulary"
-msgstr ""
+msgstr "Woordenschat"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Yes"
-msgstr ""
+msgstr "Ja"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "You"
-msgstr ""
+msgstr "U"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "Your sample"
-msgstr ""
+msgstr "Uw steekproef"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "e.g. street, response"
-msgstr ""
+msgstr "bijv. street, response"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "e.g. {example}"
-msgstr ""
+msgstr "bijv. {example}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "from"
-msgstr ""
+msgstr "van"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "or type a value"
-msgstr ""
+msgstr "of typ een waarde"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "to"
-msgstr ""
+msgstr "tot"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{hero} decisions of yours, {field} of the field's"
-msgstr ""
+msgstr "{hero} beslissingen van u, {field} van het field"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{question} — {how}"
-msgstr ""
+msgstr "{question} — {how}"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "■ Cancel"
-msgstr ""
+msgstr "■ Annuleren"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "▶ Run"
-msgstr ""
+msgstr "▶ Uitvoeren"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#, fuzzy
 msgid "＋ Add breakdown"
-msgstr ""
+msgstr "＋ Uitsplitsing toevoegen"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid ""
 "Cells without enough of a sample stay uncoloured; hover one to read its "
 "count."
 msgstr ""
+"Cellen zonder voldoende steekproef blijven ongekleurd; beweeg over een cel "
+"om het aantal te lezen."
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Colour by:"
-msgstr ""
+msgstr "Kleuren op:"
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "No cell is below the sample threshold."
-msgstr ""
+msgstr "Geen enkele cel zit onder de steekproefdrempel."
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Realized {realized} over {hands} hands; EV-adjusted {ev} ({luck} of it luck)."
 msgstr ""
+"Gerealiseerd {realized} over {hands} handen; EV-gecorrigeerd {ev} ({luck} "
+"daarvan geluk)."
 
 #: fpdb_3_legacy/GuiResearchViews.py
+#, fuzzy
 msgid "Share"
-msgstr ""
+msgstr "Aandeel"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "{decisions} decisions in this selection have no known hole cards and are not "
 "in the grid; {share} of the decisions are drawn."
 msgstr ""
+"{decisions} beslissingen in deze selectie hebben geen bekende hole cards en "
+"staan niet in het raster; {share} van de beslissingen is weergegeven."
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{label}: {classified} classified decisions of {total} ({share} covered)"
 msgstr ""
+"{label}: {classified} geclassificeerde beslissingen van {total} ({share} "
+"gedekt)"
 
 #: fpdb_3_legacy/GuiResearchViews.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{n} decisions are counted apart: their cards were never known."
-msgstr ""
+msgstr "{n} beslissingen worden apart geteld: hun kaarten waren nooit bekend."
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Cumulative result (BB)"
-msgstr ""
+msgstr "Cumulatief resultaat (BB)"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Hand Breakdown for all levels listed above"
-msgstr ""
+msgstr "Handuitsplitsing voor alle hierboven genoemde niveaus"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
+#, fuzzy
 msgid "Native-currency totals omitted (multiple currencies)"
-msgstr ""
+msgstr "Totalen in oorspronkelijke valuta weggelaten (meerdere valuta's)"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Profit: {profit} · Currency/hour: {hour}"
-msgstr ""
+msgstr "Winst: {profit} · Valuta/uur: {hour}"
 
 #: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Session"
-msgstr ""
+msgstr "Sessie"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Sessions: {sessions} · Hands: {hands} · Playing time: {duration} · Profit: "
 "{profit_bb} BB · bb/100: {bb100} · BB/hour: {bb_hour} · BB hands: {bb_hands}/"
 "{hands}"
 msgstr ""
+"Sessies: {sessions} · Handen: {hands} · Speeltijd: {duration} · Winst: "
+"{profit_bb} BB · bb/100: {bb100} · BB/uur: {bb_hour} · BB-handen: {bb_hands}/"
+"{hands}"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{hours}h {minutes}m"
-msgstr ""
+msgstr "{hours} u {minutes} min"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{minutes}m"
-msgstr ""
+msgstr "{minutes} min"
 
 #: fpdb_3_legacy/GuiTourHandViewer.py
+#, fuzzy
 msgid "Load Hands"
-msgstr ""
+msgstr "Handen laden"
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
+#, fuzzy
 msgid "Refresh Stats"
-msgstr ""
-
-#: fpdb_3_legacy/GuiVersionInfo.py
-msgid "Clipboard unavailable"
-msgstr ""
+msgstr "Statistieken vernieuwen"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 #, fuzzy
-#| msgid "Reading configuration file %s"
+msgid "Clipboard unavailable"
+msgstr "Klembord niet beschikbaar"
+
+#: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Configuration file"
-msgstr "Lezen configuratiebestand %s"
+msgstr "Configuratiebestand"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Copy report"
-msgstr ""
+msgstr "Rapport kopiëren"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Copy these details to the clipboard for a bug report"
-msgstr ""
+msgstr "Deze gegevens naar het klembord kopiëren voor een foutrapport"
 
 #: fpdb_3_legacy/GuiVersionInfo.py fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Add New Database"
 msgid "Database"
-msgstr "Toevoegen Nieuwe Database"
+msgstr "Database"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Documentation"
-msgstr ""
+msgstr "Documentatie"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "FPDB version"
-msgstr ""
+msgstr "FPDB-versie"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Git branch"
-msgstr ""
+msgstr "Git-branch"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Git checkout"
-msgstr ""
+msgstr "Git-checkout"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Git commit"
-msgstr ""
+msgstr "Git-commit"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "GitHub repository"
-msgstr ""
+msgstr "GitHub-repository"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Links"
-msgstr ""
+msgstr "Links"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Packaging"
-msgstr ""
+msgstr "Verpakking"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Report an issue"
-msgstr ""
+msgstr "Een probleem melden"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Report copied to clipboard"
-msgstr ""
+msgstr "Rapport naar het klembord gekopieerd"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Version and environment"
-msgstr ""
+msgstr "Versie en omgeving"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "Working tree"
-msgstr ""
+msgstr "Werkmap"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "clean"
-msgstr ""
+msgstr "schoon"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "modified (uncommitted changes)"
-msgstr ""
+msgstr "gewijzigd (niet-gecommitte wijzigingen)"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
+#, fuzzy
 msgid "not a git checkout (packaged or exported build)"
-msgstr ""
+msgstr "geen Git-checkout (verpakte of geëxporteerde versie)"
 
 #: fpdb_3_legacy/MergeSummary.py
 msgid "MergeSummary.determineGameType: HORSE found, unsupported"
@@ -2349,8 +2829,9 @@ msgid "MergeSummary.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/MergeSummary.py
+#, fuzzy
 msgid "The tournament was not found or is invalid"
-msgstr ""
+msgstr "Het toernooi is niet gevonden of ongeldig"
 
 #: fpdb_3_legacy/MicrogamingToFpdb.py
 #, python-format
@@ -2367,74 +2848,91 @@ msgid "0"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Players</b>"
-msgstr ""
+msgstr "<b>Spelers</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Seat</b>"
-msgstr ""
+msgstr "<b>Stoel</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "<b>Visual Selection</b>"
-msgstr ""
+msgstr "<b>Visuele keuze</b>"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Auto-save changes"
-msgstr ""
+msgstr "Wijzigingen automatisch opslaan"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py fpdb_3_legacy/ThemeCreatorDialog.py
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cancel"
-msgstr ""
+msgstr "Annuleren"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Configure your favorite seats for each table size"
-msgstr ""
+msgstr "Stel uw favoriete stoelen in voor elke tafelgrootte"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Export Settings"
-msgstr ""
+msgstr "Instellingen exporteren"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Import Settings"
-msgstr ""
+msgstr "Instellingen importeren"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Reset to Default"
-msgstr ""
+msgstr "Standaard herstellen"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Save Changes"
-msgstr ""
+msgstr "Wijzigingen opslaan"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Search sites..."
-msgstr ""
+msgstr "Sites zoeken..."
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Seat Preferences"
-msgstr ""
+msgstr "Stoelvoorkeuren"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "Show:"
-msgstr ""
+msgstr "Tonen:"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "✓ Enabled"
-msgstr ""
+msgstr "✓ Ingeschakeld"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "✗ Disabled"
-msgstr ""
+msgstr "✗ Uitgeschakeld"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
+#, fuzzy
 msgid "💡 Set to 0 to disable favorite seat for a table size"
 msgstr ""
+"💡 Zet op 0 om de favoriete stoel voor een tafelgrootte uit te schakelen"
 
 #: fpdb_3_legacy/ModernSeatPreferences.py
 #: fpdb_3_legacy/ModernSitePreferences.py
@@ -2442,73 +2940,91 @@ msgid "🔍"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s hero aliases:"
-msgstr ""
+msgstr "%s hero-aliassen:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "(search in enabled sites only)"
-msgstr ""
+msgstr "(alleen zoeken in ingeschakelde sites)"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid ""
 "A data source such as PHH is not a poker room: it has no screen name. Name "
 "the players that are you in its hands, and the reports read them as one "
 "hero, as a room's aliases are."
 msgstr ""
+"Een gegevensbron zoals PHH is geen pokerroom: er is geen schermnaam. Noem de "
+"spelers die u bent in de handen ervan, en de rapporten lezen ze als één "
+"hero, zoals de aliassen van een room."
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Add link"
-msgstr ""
+msgstr "Koppeling toevoegen"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Browse"
-msgstr ""
+msgstr "Bladeren"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Configure your poker sites and usernames"
-msgstr ""
+msgstr "Stel uw pokersites en gebruikersnamen in"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Data Sources"
-msgstr ""
+msgstr "Gegevensbronnen"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Default profile"
-msgstr ""
+msgstr "Standaardprofiel"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Enter your username"
-msgstr ""
+msgstr "Voer uw gebruikersnaam in"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Hand History:"
-msgstr ""
+msgstr "Handgeschiedenis:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Hero Profiles"
-msgstr ""
+msgstr "Heroprofielen"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "New"
-msgstr ""
+msgstr "Nieuw"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Old nicknames / extra accounts, comma separated"
-msgstr ""
+msgstr "Oude nicknames / extra accounts, gescheiden door komma's"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Other Aliases:"
-msgstr ""
+msgstr "Andere aliassen:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Path to hand history files"
-msgstr ""
+msgstr "Pad naar de handgeschiedenissen"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Path to tournament summaries"
-msgstr ""
+msgstr "Pad naar de toernooisamenvattingen"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
@@ -2516,24 +3032,29 @@ msgid "Profile name"
 msgstr "Gebruikersnaam"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Remove link"
-msgstr ""
+msgstr "Koppeling verwijderen"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Screen Name:"
-msgstr ""
+msgstr "Schermnaam:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Site Preferences"
-msgstr ""
+msgstr "Sitevoorkeuren"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Tournament:"
-msgstr ""
+msgstr "Toernooi:"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "Your names in these hands, one per line"
-msgstr ""
+msgstr "Uw namen in deze handen, één per regel"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🎭"
@@ -2552,21 +3073,24 @@ msgid "📁"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "🔍 Auto-Detect All Visible Sites"
-msgstr ""
+msgstr "🔍 Alle zichtbare sites automatisch detecteren"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+#, fuzzy
 msgid "🔍 Auto-Detect Paths"
-msgstr ""
+msgstr "🔍 Paden automatisch detecteren"
 
 #: fpdb_3_legacy/OnGameToFpdb.py
-#, python-format
+#, fuzzy, python-format
 msgid "DATETIME not matched: '%s'"
-msgstr ""
+msgstr "DATETIME niet herkend: '%s'"
 
 #: fpdb_3_legacy/OnGameToFpdb.py
+#, fuzzy
 msgid "No small blinds found."
-msgstr ""
+msgstr "Geen small blinds gevonden."
 
 #: fpdb_3_legacy/OnGameToFpdb.py
 #, python-format
@@ -2600,20 +3124,24 @@ msgid "PkrToFpdb.readHandInfo: '%s'"
 msgstr ""
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Brief description of your theme"
-msgstr ""
+msgstr "Korte beschrijving van uw thema"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Create Custom Theme"
-msgstr ""
+msgstr "Eigen thema maken"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Create Theme"
-msgstr ""
+msgstr "Thema maken"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "Update Preview"
-msgstr ""
+msgstr "Voorbeeld bijwerken"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
 #, fuzzy
@@ -2621,116 +3149,146 @@ msgid "Your name"
 msgstr "Gebruikersnaam"
 
 #: fpdb_3_legacy/ThemeCreatorDialog.py
+#, fuzzy
 msgid "e.g., my_custom_theme"
-msgstr ""
+msgstr "bijv. mijn_eigen_thema"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Back up and upgrade"
-msgstr ""
+msgstr "Back-up maken en bijwerken"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Clear All"
-msgstr ""
+msgstr "Alles wissen"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Configuration needs attention"
-msgstr ""
+msgstr "De configuratie vraagt aandacht"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Confirm recreating HUD cache"
-msgstr ""
+msgstr "Opnieuw maken van de HUD-cache bevestigen"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Database Statistics"
-msgstr ""
+msgstr "Databasestatistieken"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Deselect All"
-msgstr ""
+msgstr "Alles deselecteren"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Enable or disable sites for HUD display"
-msgstr ""
+msgstr "Sites voor HUD-weergave in- of uitschakelen"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Free Poker DB 3"
-msgstr ""
+msgstr "Free Poker DB 3"
 
 #: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Manage HUD Sites"
-msgstr ""
+msgstr "HUD-sites beheren"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "PT4 HUD imported"
-msgstr ""
+msgstr "PT4-HUD geïmporteerd"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "PT4 stats import"
-msgstr ""
+msgstr "Import van PT4-statistieken"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Please confirm that you want to re-create the HUD cache."
-msgstr ""
+msgstr "Bevestig dat u de HUD-cache opnieuw wilt maken."
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Search:"
-msgstr ""
+msgstr "Zoeken:"
 
 #: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Select All"
-msgstr ""
+msgstr "Alles selecteren"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Skip these games when importing"
-msgstr ""
+msgstr "Deze spellen overslaan bij het importeren"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Unknown Site"
-msgstr ""
+msgstr "Onbekende site"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "Unsaved Changes"
-msgstr ""
+msgstr "Niet-opgeslagen wijzigingen"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, fuzzy
 msgid "You have unsaved configuration changes."
-msgstr ""
+msgstr "U hebt niet-opgeslagen configuratiewijzigingen."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "Check the hero selected in the Heroes filter and make sure hands for that "
 "player were imported for the selected site."
 msgstr ""
+"Controleer de hero die in het Hero-filter is gekozen en of handen van die "
+"speler voor de gekozen site zijn geïmporteerd."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No currency is selected in the filters."
-msgstr ""
+msgstr "In de filters is geen valuta geselecteerd."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No data to display"
-msgstr ""
+msgstr "Geen gegevens om te tonen"
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No game type is selected in the filters."
-msgstr ""
+msgstr "In de filters is geen speltype geselecteerd."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No hand matches the selected filters."
-msgstr ""
+msgstr "Geen hand past bij de gekozen filters."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No limit is selected in the filters."
-msgstr ""
+msgstr "In de filters is geen limiet geselecteerd."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No player matches the selected site and hero."
-msgstr ""
+msgstr "Geen speler past bij de gekozen site en hero."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "No site is selected in the filters."
-msgstr ""
+msgstr "In de filters is geen site geselecteerd."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "Nothing has been imported into this database — that is normal right after "
 "creating or recreating the tables.\n"
@@ -2738,42 +3296,58 @@ msgid ""
 "Import hand histories first (Import > Bulk Import, or start the auto-"
 "import), then refresh this tab."
 msgstr ""
+"In deze database is nog niets geïmporteerd — dat is normaal vlak na het "
+"(opnieuw) maken van de tabellen.\n"
+"\n"
+"Importeer eerst handgeschiedenissen (Importeren > Bulkimport, of start het "
+"automatisch importeren) en vernieuw dan dit tabblad."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid ""
 "The database holds hands, but none of them match this selection.\n"
 "\n"
 "Widen the filters (dates, limits, games, seats) and refresh."
 msgstr ""
+"De database bevat handen, maar geen enkele past bij deze selectie.\n"
+"\n"
+"Verruim de filters (datums, limieten, spellen, stoelen) en vernieuw."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one currency on the left, then refresh."
-msgstr ""
+msgstr "Vink links minstens één valuta aan en vernieuw dan."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one game on the left, then refresh."
-msgstr ""
+msgstr "Vink links minstens één spel aan en vernieuw dan."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one limit (stake) on the left, then refresh."
-msgstr ""
+msgstr "Vink links minstens één limiet (inzet) aan en vernieuw dan."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Tick at least one site in the Sites section on the left, then refresh."
 msgstr ""
+"Vink links in het onderdeel Sites minstens één site aan en vernieuw dan."
 
 #: fpdb_3_legacy/gui_empty_state.py
+#, fuzzy
 msgid "Your database contains no hands yet."
-msgstr ""
+msgstr "Uw database bevat nog geen handen."
 
 #: fpdb_3_legacy/hand_review_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "%s is not a program that can be started."
-msgstr ""
+msgstr "%s is geen programma dat kan worden gestart."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Copy JSON"
-msgstr ""
+msgstr "JSON kopiëren"
 
 #: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy, python-format
@@ -2783,87 +3357,111 @@ msgid ""
 msgstr "Kan bestand %s niet vinden"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Every hero decision of the hand"
-msgstr ""
+msgstr "Elke herobeslissing van de hand"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Hand review (*.json)"
-msgstr ""
+msgstr "Handreview (*.json)"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Locate PreflopAdvisor"
-msgstr ""
+msgstr "PreflopAdvisor zoeken"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Open in PreflopAdvisor"
-msgstr ""
+msgstr "Openen in PreflopAdvisor"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid ""
 "Open it in PreflopAdvisor, or save the file and load it there with Review "
 "Hands > Load a hand review."
 msgstr ""
+"Open het in PreflopAdvisor, of sla het bestand op en laad het daar met "
+"Review Hands > Load a hand review."
 
 #: fpdb_3_legacy/hand_review_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "PreflopAdvisor could not be started:\n"
 "%s\n"
 "\n"
 "Locate it?"
 msgstr ""
+"PreflopAdvisor kon niet worden gestart:\n"
+"%s\n"
+"\n"
+"Zoeken?"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Review:"
-msgstr ""
+msgstr "Review:"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Save for PreflopAdvisor..."
-msgstr ""
+msgstr "Opslaan voor PreflopAdvisor..."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Save hand review"
-msgstr ""
+msgstr "Handreview opslaan"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Solver review"
-msgstr ""
+msgstr "Solver-review"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "Solver review (PreflopAdvisor)..."
-msgstr ""
+msgstr "Solver-review (PreflopAdvisor)..."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "This decision"
-msgstr ""
+msgstr "Deze beslissing"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy
 msgid "This hand cannot be sent to PreflopAdvisor."
-msgstr ""
+msgstr "Deze hand kan niet naar PreflopAdvisor worden gestuurd."
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Amounts"
-msgstr ""
+msgstr "Bedragen"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Big blinds"
-msgstr ""
+msgstr "Big blinds"
 
 #: fpdb_3_legacy/hand_share_dialog.py fpdb_3_legacy/table_export.py
+#, fuzzy
 msgid "Copy"
-msgstr ""
+msgstr "Kopiëren"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as Markdown"
-msgstr ""
+msgstr "Kopiëren als Markdown"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as Markdown in BB"
-msgstr ""
+msgstr "Kopiëren als Markdown in BB"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Copy as text"
-msgstr ""
+msgstr "Kopiëren als tekst"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy, python-format
@@ -2873,78 +3471,94 @@ msgid ""
 msgstr "Kan bestand %s niet vinden"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Date and time"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "EV cashout"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Forum (BBCode)"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Hand number"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Hide every name (Hero, Villain 1 ...)"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Include"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Keep every name"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Keep my name, hide opponents"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Markdown"
-msgstr ""
-
-#: fpdb_3_legacy/hand_share_dialog.py
-msgid "Money / chips"
-msgstr ""
+msgstr "Datum en tijd"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
-#| msgid "Name"
+msgid "EV cashout"
+msgstr "EV-cashout"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Forum (BBCode)"
+msgstr "Forum (BBCode)"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Hand number"
+msgstr "Handnummer"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Hide every name (Hero, Villain 1 ...)"
+msgstr "Alle namen verbergen (Hero, Villain 1 ...)"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Include"
+msgstr "Opnemen"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Keep every name"
+msgstr "Alle namen houden"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Keep my name, hide opponents"
+msgstr "Mijn naam houden, tegenstanders verbergen"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Markdown"
+msgstr "Markdown"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Money / chips"
+msgstr "Geld / fiches"
+
+#: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Names"
-msgstr "Naam"
+msgstr "Namen"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Plain text"
-msgstr ""
+msgstr "Platte tekst"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Rake"
-msgstr ""
+msgstr "Rake"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Save hand"
-msgstr ""
+msgstr "Hand opslaan"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Save..."
-msgstr ""
+msgstr "Opslaan..."
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Share hand"
-msgstr ""
+msgstr "Hand delen"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Showdown and results"
-msgstr ""
+msgstr "Showdown en resultaten"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "Stacks"
-msgstr ""
+msgstr "Stacks"
 
 #: fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
@@ -2952,318 +3566,401 @@ msgid "Table name"
 msgstr "Gebruikersnaam"
 
 #: fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
 msgid "This game has no big blind to count in."
-msgstr ""
+msgstr "Dit spel heeft geen big blind om in te tellen."
 
 #: fpdb_3_legacy/hand_share_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "This hand could not be rendered:\n"
 "%s"
 msgstr ""
+"Deze hand kon niet worden weergegeven:\n"
+"%s"
 
 #: fpdb_3_legacy/i18n.py
+#, fuzzy
 msgid "Stack"
-msgstr ""
+msgstr "Stack"
 
 #: fpdb_3_legacy/i18n.py
+#, fuzzy
 msgid "Stack (bb)"
-msgstr ""
+msgstr "Stack (bb)"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "About"
-msgstr ""
+msgstr "Over"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "About the program"
-msgstr ""
+msgstr "Over het programma"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)"
 msgstr ""
+"De database toevoegen, bewerken, testen en kiezen (SQLite / PostgreSQL / "
+"MySQL)"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Advanced logger manager"
-msgstr ""
+msgstr "Geavanceerd logbeheer"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid ""
 "Alerts for the session being played: loss, win, duration, hands, drawdown"
 msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Auto Note Rules"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Auto Notes Workbench"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Cash"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "CoinPoker Live Capture"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Configure"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Create or Recreate Tables"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Databases…"
-msgstr ""
+"Waarschuwingen voor de lopende sessie: verlies, winst, duur, handen, drawdown"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Database creation failed"
+msgid "Auto Note Rules"
+msgstr "Regels voor automatische notities"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Auto Notes Workbench"
+msgstr "Werkbank voor automatische notities"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Cash"
+msgstr "Cash"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "CoinPoker Live Capture"
+msgstr "Live-opname van CoinPoker"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Configure"
+msgstr "Configureren"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Create or Recreate Tables"
+msgstr "Tabellen (opnieuw) maken"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Databases…"
+msgstr "Databases…"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Dump Database to Textfile"
-msgstr "Database-aanmaak mislukt"
+msgstr "Database naar tekstbestand dumpen"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Edit automatic player-note rules"
-msgstr ""
+msgstr "Regels voor automatische spelernotities bewerken"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Edit your preferences"
-msgstr ""
+msgstr "Uw voorkeuren bewerken"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Export the whole database to a text file (slow)"
-msgstr ""
+msgstr "De hele database naar een tekstbestand exporteren (traag)"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Graphs"
-msgstr ""
+msgstr "Grafieken"
 
 #: fpdb_3_legacy/menu_layout.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Preferences"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "HUD and Auto Import"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Hand Viewer"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Help"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Help Tab"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import PT4 HUD (.pt4hud)"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import PT4 Stats (.pt4stat)"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import PokerTracker 4 custom statistics as declarative stat descriptors"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import a PokerTracker 4 HUD layout (stats + range charts)"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import filters"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Import, enable, disable, uninstall and export declarative stat packs"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Language"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Launch SwC HTTP Capture"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Log Messages"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Log and debug messages"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Logger Dev Tool"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Opponents Report"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Preferences"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Quit"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Quit the program"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid ""
-"Re-derive the situations and hand states the Research Browser and HUD read"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Rebuild Analytics Data"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Rebuild DB Indexes"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Rebuild HUD Cache"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Research Browser"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Research Browser for Omaha"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Seat Settings"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/session_guard_dialog.py
-msgid "Session Guard"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Session Stats"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Site Settings"
-msgstr ""
+msgstr "HUD-voorkeuren"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-#| msgid "Status"
+msgid "HUD and Auto Import"
+msgstr "HUD en automatisch importeren"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Hand Viewer"
+msgstr "Handweergave"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Help"
+msgstr "Help"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Help Tab"
+msgstr "Help-tabblad"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import PT4 HUD (.pt4hud)"
+msgstr "PT4-HUD importeren (.pt4hud)"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import PT4 Stats (.pt4stat)"
+msgstr "PT4-statistieken importeren (.pt4stat)"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import PokerTracker 4 custom statistics as declarative stat descriptors"
+msgstr ""
+"Eigen PokerTracker 4-statistieken importeren als declaratieve "
+"statbeschrijvingen"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import a PokerTracker 4 HUD layout (stats + range charts)"
+msgstr ""
+"Een PokerTracker 4-HUD-indeling importeren (statistieken + range-grafieken)"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import filters"
+msgstr "Importfilters"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Import, enable, disable, uninstall and export declarative stat packs"
+msgstr ""
+"Declaratieve statpakketten importeren, inschakelen, uitschakelen, "
+"verwijderen en exporteren"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Language"
+msgstr "Taal"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Launch SwC HTTP Capture"
+msgstr "SwC HTTP-opname starten"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Log Messages"
+msgstr "Logberichten"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Log and debug messages"
+msgstr "Log- en debugberichten"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Logger Dev Tool"
+msgstr "Ontwikkelaarstool voor logs"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Opponents Report"
+msgstr "Tegenstandersrapport"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Preferences"
+msgstr "Voorkeuren"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Quit"
+msgstr "Afsluiten"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Quit the program"
+msgstr "Het programma afsluiten"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid ""
+"Re-derive the situations and hand states the Research Browser and HUD read"
+msgstr ""
+"De situaties en handtoestanden opnieuw afleiden die de Research Browser en "
+"de HUD lezen"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Rebuild Analytics Data"
+msgstr "Analysegegevens opnieuw opbouwen"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Rebuild DB Indexes"
+msgstr "DB-indexen opnieuw opbouwen"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Rebuild HUD Cache"
+msgstr "HUD-cache opnieuw opbouwen"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Research Browser"
+msgstr "Research Browser"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Research Browser for Omaha"
+msgstr "Research Browser voor Omaha"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Seat Settings"
+msgstr "Stoelinstellingen"
+
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Session Guard"
+msgstr "Session Guard"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Session Stats"
+msgstr "Sessiestatistieken"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Site Settings"
+msgstr "Site-instellingen"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Stat Packs"
-msgstr "Status"
+msgstr "Statpakketten"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Statistics"
-msgstr ""
+msgstr "Statistieken"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Stats Guide"
-msgstr ""
+msgstr "Statistiekengids"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Study Explorer"
-msgstr ""
+msgstr "Study Explorer"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Themes"
-msgstr ""
+msgstr "Thema's"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tools"
-msgstr ""
+msgstr "Gereedschap"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Tournament"
-msgstr ""
+msgstr "Toernooi"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tourney Graphs"
-msgstr ""
+msgstr "Toernooigrafieken"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tourney Hand Viewer"
-msgstr ""
+msgstr "Toernooi-handweergave"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Tourney Stats"
-msgstr ""
+msgstr "Toernooistatistieken"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Version"
-msgstr ""
+msgstr "Versie"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "Version, packaging and runtime environment details"
-msgstr ""
+msgstr "Gegevens over versie, verpakking en runtime-omgeving"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "View database statistics"
-msgstr ""
+msgstr "Databasestatistieken bekijken"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
 msgid "What every filter is for in a four-card game, and the two that are not"
 msgstr ""
+"Waarvoor elk filter dient in een spel met vier kaarten, en de twee die dat "
+"niet doen"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "+"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
 msgid "Add an item to this row"
-msgstr ""
+msgstr "Een item aan deze rij toevoegen"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
 msgid "Remove the last item of this row"
-msgstr ""
+msgstr "Het laatste item van deze rij verwijderen"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "−"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Add/Edit Statistic"
-msgstr ""
+msgstr "Statistiek toevoegen/bewerken"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Block Properties"
-msgstr ""
+msgstr "Blokeigenschappen"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Click Action:"
-msgstr ""
+msgstr "Klikactie:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Column:"
-msgstr ""
+msgstr "Kolom:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Edit Popup Statistic"
-msgstr ""
+msgstr "Pop-upstatistiek bewerken"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Edit Popup Window"
-msgstr ""
+msgstr "Pop-upvenster bewerken"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Export Layout Coordinates"
-msgstr ""
+msgstr "Indelingscoördinaten exporteren"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -3271,217 +3968,271 @@ msgid "Grid Position:"
 msgstr "Toon Positie Stats"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "High Range:"
-msgstr ""
+msgstr "Hoog bereik:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Low Range:"
-msgstr ""
+msgstr "Laag bereik:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Middle color:"
-msgstr ""
+msgstr "Middenkleur:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid ""
 "Minimum width of each statistic cell; Automatic keeps the legacy default"
 msgstr ""
+"Minimale breedte van elke statcel; Automatisch behoudt de oude standaard"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Optional: Action when stat is clicked"
-msgstr ""
+msgstr "Optioneel: actie bij klikken op de stat"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Optional: Popup to show on hover"
-msgstr ""
+msgstr "Optioneel: pop-up bij aanwijzen"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Optional: Submenu name for hierarchical popups"
-msgstr ""
+msgstr "Optioneel: submenunaam voor hiërarchische pop-ups"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Override the automatic section used by ModernSubmenu"
-msgstr ""
+msgstr "De automatische sectie van ModernSubmenu overschrijven"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Popup:"
-msgstr ""
+msgstr "Pop-up:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Preview shows how statistic colors will change based on values"
-msgstr ""
+msgstr "Het voorbeeld laat zien hoe de statkleuren met de waarden veranderen"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Row:"
-msgstr ""
+msgstr "Rij:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Select None"
-msgstr ""
+msgstr "Niets selecteren"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid ""
 "Select the site layout coordinates you want to include in the package.\n"
 "This will let other users position the HUD boxes exactly like yours."
 msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Show this panel only for a villain in this position (blank = always)"
-msgstr ""
+"Kies de indelingscoördinaten van de sites die u in het pakket wilt opnemen.\n"
+"Zo kunnen anderen de HUD-vakken precies zoals de uwe plaatsen."
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-#| msgid "Status"
+msgid "Show this panel only for a villain in this position (blank = always)"
+msgstr ""
+"Dit paneel alleen tonen voor een tegenstander op deze positie (leeg = altijd)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Statistic:"
-msgstr "Status"
+msgstr "Statistiek:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Use middle color for values between thresholds"
-msgstr ""
+msgstr "Middenkleur gebruiken voor waarden tussen de drempels"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Values above"
-msgstr ""
+msgstr "Waarden boven"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Values below"
-msgstr ""
+msgstr "Waarden onder"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "show as"
-msgstr ""
+msgstr "tonen als"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "➕ Add Stat"
-msgstr ""
+msgstr "➕ Stat toevoegen"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "➖ Remove Stat"
-msgstr ""
+msgstr "➖ Stat verwijderen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "(none)"
-msgstr ""
+msgstr "(geen)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "A panel rule with these conditions and this profile already exists."
-msgstr ""
+msgstr "Er bestaat al een paneelregel met deze voorwaarden en dit profiel."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "A profile definition with these selectors already exists."
-msgstr ""
+msgstr "Er bestaat al een profieldefinitie met deze selectoren."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "ANY"
-msgstr ""
+msgstr "ELK"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "ANY table"
-msgstr ""
+msgstr "ELKE tafel"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Active Profile Definitions"
-msgstr ""
+msgstr "Actieve profieldefinities"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Active Profile:"
-msgstr ""
+msgstr "Actief profiel:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add"
 msgstr "VoegToe"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add Block"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add Label"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add Line"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add Profile Definition"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add Stat"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add a new panel (block) to a multi-panel HUD"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add a text label (column/row header or caption) to a panel"
-msgstr ""
+msgstr "Blok toevoegen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-#| msgid "AddDB starting"
+msgid "Add Label"
+msgstr "Label toevoegen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add Line"
+msgstr "Lijn toevoegen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add Profile Definition"
+msgstr "Profieldefinitie toevoegen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add Stat"
+msgstr "Stat toevoegen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
+msgstr ""
+"Een horizontale scheidingslijn (PT4 'Horz Line') aan een paneel toevoegen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add a new panel (block) to a multi-panel HUD"
+msgstr "Een nieuw paneel (blok) aan een HUD met meerdere panelen toevoegen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add a text label (column/row header or caption) to a panel"
+msgstr "Een tekstlabel (kolom-/rijkop of bijschrift) aan een paneel toevoegen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add stat"
-msgstr "Starten AddDB"
+msgstr "Stat toevoegen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add to block"
-msgstr ""
+msgstr "Aan blok toevoegen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Analytics-backed stats"
-msgstr ""
+msgstr "Statistieken uit de analyse"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Append the profile emoji (e.g. 🐟, 🐌, 🎯) and color the player's name in "
 "the HUD."
 msgstr ""
+"De profielemoji (bijv. 🐟, 🐌, 🎯) toevoegen en de naam van de speler in de "
+"HUD kleuren."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr ""
+"Onder dit aantal handen wordt het paneel achtergehouden en verschijnt de "
+"terugval."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Block Props"
-msgstr ""
+msgstr "Blokeig."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot add this rule"
-msgstr ""
+msgstr "Deze regel kan niet worden toegevoegd"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot export"
-msgstr ""
+msgstr "Exporteren niet mogelijk"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot import"
-msgstr ""
+msgstr "Importeren niet mogelijk"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot update this rule"
-msgstr ""
+msgstr "Deze regel kan niet worden bijgewerkt"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Class:"
-msgstr ""
+msgstr "Klasse:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Color Ranges"
-msgstr ""
+msgstr "Kleurbereiken"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3489,200 +4240,252 @@ msgid "Conditions"
 msgstr "Toon Positie Stats"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Design"
-msgstr ""
+msgstr "Ontwerp"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Disabled: this rule never matches."
-msgstr ""
+msgstr "Uitgeschakeld: deze regel past nooit."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Duplicate rule"
-msgstr ""
+msgstr "Dubbele regel"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Edit"
-msgstr ""
+msgstr "Bewerken"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Edit the selected panel's title/border colours, position and label"
-msgstr ""
+msgstr "Titel, randkleuren, positie en label van het gekozen paneel bewerken"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Effective profile for these selectors"
-msgstr ""
+msgstr "Effectief profiel voor deze selectoren"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Enable Player Profiling (Categorization)"
-msgstr ""
+msgstr "Spelerprofilering (categorisering) inschakelen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Enable auto-classification of players into Nit, Calling Station, Fish, "
 "Maniac, LAG, Reg, TAG."
 msgstr ""
+"Automatische indeling van spelers als Nit, Calling Station, Fish, Maniac, "
+"LAG, Reg, TAG inschakelen."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Export panel rules"
-msgstr ""
+msgstr "Paneelregels exporteren"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Export…"
-msgstr ""
+msgstr "Exporteren…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Fallback"
-msgstr ""
+msgstr "Terugval"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Game"
-msgstr ""
+msgstr "Spel"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "General HUD and Profiling Settings"
-msgstr ""
+msgstr "Algemene HUD- en profileringsinstellingen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Preview"
-msgstr ""
+msgstr "HUD-voorbeeld"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Profile"
-msgstr ""
+msgstr "HUD-profiel"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Profile Configuration"
-msgstr ""
+msgstr "Configuratie van HUD-profielen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD imported — refresh required"
-msgstr ""
+msgstr "HUD geïmporteerd — vernieuwen vereist"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD profile"
-msgstr ""
+msgstr "HUD-profiel"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Hands for this seat"
-msgstr ""
+msgstr "Handen voor deze stoel"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Horz Line"
-msgstr ""
+msgstr "Horizontale lijn"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Icons:"
-msgstr ""
+msgstr "Pictogrammen:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Import panel rules"
-msgstr ""
+msgstr "Paneelregels importeren"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Imported {count} rule(s)."
-msgstr ""
+msgstr "{count} regel(s) geïmporteerd."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Import…"
-msgstr ""
+msgstr "Importeren…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Issues"
-msgstr ""
+msgstr "Problemen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Item Properties"
-msgstr ""
+msgstr "Itemeigenschappen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Items"
-msgstr ""
+msgstr "Items"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Layout Conflict"
-msgstr ""
+msgstr "Indelingsconflict"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Min sample"
-msgstr ""
+msgstr "Min. steekproef"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Minimum hands required for profiling:"
-msgstr ""
+msgstr "Minimum aantal handen voor profilering:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Move down"
-msgstr ""
+msgstr "Omlaag"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Move up"
-msgstr ""
+msgstr "Omhoog"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "New Profile"
-msgstr ""
+msgstr "Nieuw profiel"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "No HUD profile of this name exists; the game default will be used instead."
 msgstr ""
+"Er bestaat geen HUD-profiel met deze naam; in plaats daarvan wordt de "
+"spelstandaard gebruikt."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "No HUD profile of this name exists; this rule will be ignored."
-msgstr ""
+msgstr "Er bestaat geen HUD-profiel met deze naam; deze regel wordt genegeerd."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "Off by default. When it is on, the panels a rule names are shown and every "
 "other block keeps the position rule it has always had."
 msgstr ""
+"Standaard uit. Wanneer aan, worden de panelen getoond die een regel noemt en "
+"houdt elk ander blok de positieregel die het altijd had."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Open preview at 100% real size in a new window"
-msgstr ""
+msgstr "Het voorbeeld op 100% werkelijke grootte in een nieuw venster openen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Open the Dynamic HUD guide"
-msgstr ""
+msgstr "De gids voor de dynamische HUD openen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel"
-msgstr ""
+msgstr "Paneel"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel documents (*.json)"
-msgstr ""
+msgstr "Paneeldocumenten (*.json)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel rules"
-msgstr ""
+msgstr "Paneelregels"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panels"
-msgstr ""
+msgstr "Panelen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
-msgstr ""
+msgstr "Kies een spel (en formaat) om de standaard te zien die zou gelden."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a HUD profile first."
-msgstr ""
+msgstr "Kies eerst een HUD-profiel."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Players"
-msgstr ""
+msgstr "Spelers"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Popup Conflict"
-msgstr ""
+msgstr "Pop-upconflict"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Popup Preview"
-msgstr ""
+msgstr "Pop-upvoorbeeld"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3690,16 +4493,19 @@ msgid "Positional panels:"
 msgstr "Toon Positie Stats"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Preview, by the same resolver the HUD uses"
-msgstr ""
+msgstr "Voorbeeld, met dezelfde resolver als de HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Priority"
-msgstr ""
+msgstr "Prioriteit"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Profile Conflict"
-msgstr ""
+msgstr "Profielconflict"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3707,8 +4513,9 @@ msgid "Profile actions"
 msgstr "Toon Positie Stats"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Remove"
-msgstr ""
+msgstr "Verwijderen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -3716,533 +4523,676 @@ msgid "Rule name"
 msgstr "Gebruikersnaam"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Sample column"
-msgstr ""
+msgstr "Steekproefkolom"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Seats"
-msgstr ""
+msgstr "Stoelen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Select Popup:"
-msgstr ""
+msgstr "Pop-up kiezen:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Select a rule to update first."
-msgstr ""
+msgstr "Kies eerst een regel om bij te werken."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show hero HUD"
-msgstr ""
+msgstr "Hero-HUD tonen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show profile emoji and color code directly on player name labels"
-msgstr ""
+msgstr "Profielemoji en kleurcode direct op de spelersnamen tonen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show the panels that fit the hand"
-msgstr ""
+msgstr "De panelen tonen die bij de hand passen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Speed"
-msgstr ""
+msgstr "Snelheid"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stats whose value comes from the analytics layer rather than a column."
 msgstr ""
+"Statistieken waarvan de waarde uit de analyselaag komt in plaats van uit een "
+"kolom."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Text"
-msgstr ""
+msgstr "Tekst"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Text label (header / caption) — not a stat"
-msgstr ""
+msgstr "Tekstlabel (kop / bijschrift) — geen stat"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The HUD profile was imported and saved, but the application could not "
 "refresh its configuration. Restart fpdb to apply it. You do not need to "
 "import the file again."
 msgstr ""
+"Het HUD-profiel is geïmporteerd en opgeslagen, maar de toepassing kon de "
+"configuratie niet vernieuwen. Start fpdb opnieuw om het toe te passen. U "
+"hoeft het bestand niet opnieuw te importeren."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The HUDs fpdb ships, as a seat would see them. Pick a context to watch the "
 "Dynamic package change panel, and read the popup paths to find where a "
 "number lives before you go looking for it at a table."
 msgstr ""
+"De HUD's die fpdb meelevert, zoals een stoel ze zou zien. Kies een context "
+"om het Dynamic-pakket van paneel te zien wisselen, en lees de pop-uppaden om "
+"te weten waar een getal staat voordat u het aan tafel gaat zoeken."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The minimum number of hands tracked on an opponent before profiling is "
 "computed."
 msgstr ""
+"Het minimum aantal gevolgde handen van een tegenstander voordat het profiel "
+"wordt berekend."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "The preview uses the same compact label grid as the in-game HUD.\n"
 "Spacing, font, colors and HUD cell values come from the selected profile."
 msgstr ""
+"Het voorbeeld gebruikt hetzelfde compacte labelraster als de HUD in het "
+"spel.\n"
+"Afstand, lettertype, kleuren en celwaarden komen uit het gekozen profiel."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Theme:"
-msgstr ""
+msgstr "Thema:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Then show"
-msgstr ""
+msgstr "Dan tonen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Update rule"
-msgstr ""
+msgstr "Regel bijwerken"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Update selected"
-msgstr ""
+msgstr "Selectie bijwerken"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "When this is the spot"
-msgstr ""
+msgstr "Als dit de situatie is"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Wrote {path}"
-msgstr ""
+msgstr "{path} geschreven"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "all profiles"
-msgstr ""
+msgstr "alle profielen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "always"
-msgstr ""
+msgstr "altijd"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "optional name"
-msgstr ""
+msgstr "optionele naam"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "the profile grid"
-msgstr ""
+msgstr "het profielraster"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{profile} — from the rule {selectors}"
-msgstr ""
+msgstr "{profile} — volgens de regel {selectors}"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{profile} — no rule matches, so the game default applies"
-msgstr ""
+msgstr "{profile} — geen regel past, dus geldt de spelstandaard"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "—"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "↑ Up"
-msgstr ""
+msgstr "↑ Omhoog"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "↓ Down"
-msgstr ""
+msgstr "↓ Omlaag"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "⚙️ General Settings"
-msgstr ""
+msgstr "⚙️ Algemene instellingen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➕ Add"
-msgstr ""
+msgstr "➕ Toevoegen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➕ New Popup"
-msgstr ""
+msgstr "➕ Nieuwe pop-up"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➕ New Profile"
-msgstr ""
+msgstr "➕ Nieuw profiel"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "➖ Remove"
-msgstr ""
+msgstr "➖ Verwijderen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🃏 Reference HUDs"
-msgstr ""
+msgstr "🃏 Referentie-HUD's"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🎯 Profile Select"
-msgstr ""
+msgstr "🎯 Profielkeuze"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "💬 Popup Windows"
-msgstr ""
+msgstr "💬 Pop-upvensters"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📊 Statistics"
-msgstr ""
+msgstr "📊 Statistieken"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📝 Edit"
-msgstr ""
+msgstr "📝 Bewerken"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📤 Export HUD"
-msgstr ""
+msgstr "📤 HUD exporteren"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "📥 Import HUD"
-msgstr ""
+msgstr "📥 HUD importeren"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🔍 Real Size"
-msgstr ""
+msgstr "🔍 Werkelijke grootte"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "🧩 Dynamic Panels"
-msgstr ""
+msgstr "🧩 Dynamische panelen"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "100% Reset"
-msgstr ""
+msgstr "100% herstellen"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Close"
-msgstr ""
+msgstr "Sluiten"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Natural Size: {w} × {h} px  (Scale: {scale}%)"
-msgstr ""
+msgstr "Natuurlijke grootte: {w} × {h} px  (schaal: {scale}%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Reset to 100% natural size"
-msgstr ""
+msgstr "Terug naar 100% natuurlijke grootte"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Zoom in (+25%)"
-msgstr ""
+msgstr "Inzoomen (+25%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "Zoom out (-25%)"
-msgstr ""
+msgstr "Uitzoomen (-25%)"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "🔍 Popup Preview — {name} (Real Size)"
-msgstr ""
+msgstr "🔍 Pop-upvoorbeeld — {name} (werkelijke grootte)"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid "Context"
-msgstr ""
+msgstr "Context"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid ""
 "Every popup a cell of this package opens, and everything those popups "
 "navigate to. A row ending in an arrow leaves the package for the shipped "
 "popup library."
 msgstr ""
+"Elke pop-up die een cel van dit pakket opent, en alles waar die pop-ups "
+"naartoe leiden. Een rij die op een pijl eindigt, verlaat het pakket richting "
+"de meegeleverde pop-upbibliotheek."
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
 msgid "Reference HUD"
-msgstr ""
+msgstr "Referentie-HUD"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "% of pot"
-msgstr ""
+msgstr "% van de pot"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "A family of situations, such as postflop defence."
-msgstr ""
+msgstr "Een familie van situaties, zoals postflopverdediging."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "A legacy PT4 stat column the decision feeds."
-msgstr ""
+msgstr "Een oude PT4-statkolom die de beslissing voedt."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Action"
-msgstr ""
+msgstr "Actie"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Action faced"
-msgstr ""
+msgstr "Tegenover staande actie"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Action taken"
-msgstr ""
+msgstr "Uitgevoerde actie"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Aggressor, defender or passive."
-msgstr ""
+msgstr "Agressor, verdediger of passief."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "All-in"
-msgstr ""
+msgstr "All-in"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Amount to call"
-msgstr ""
+msgstr "Te callen bedrag"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "BB"
-msgstr ""
+msgstr "BB"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Beats how much of the range"
-msgstr ""
+msgstr "Welk deel van de range het verslaat"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size"
-msgstr ""
+msgstr "Betgrootte"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size (% of pot)"
-msgstr ""
+msgstr "Betgrootte (% van de pot)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size (basis points)"
-msgstr ""
+msgstr "Betgrootte (basispunten)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size bucket"
-msgstr ""
+msgstr "Betgrootteklasse"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced"
-msgstr ""
+msgstr "Betgrootte waar tegenover"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced (% of pot)"
-msgstr ""
+msgstr "Betgrootte waar tegenover (% van de pot)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced (basis points)"
-msgstr ""
+msgstr "Betgrootte waar tegenover (basispunten)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet size faced bucket"
-msgstr ""
+msgstr "Klasse van betgrootte waar tegenover"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Bet sizing"
-msgstr ""
+msgstr "Betgroottes"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Big blind (chips)"
-msgstr ""
+msgstr "Big blind (fiches)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blocker (all of)"
-msgstr ""
+msgstr "Blocker (alle)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blocker (any of)"
-msgstr ""
+msgstr "Blocker (een van)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blocker (none of)"
-msgstr ""
+msgstr "Blocker (geen van)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blockers the actor held (any of them)."
-msgstr ""
+msgstr "Blockers van de handelende speler (een ervan)."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Blockers the actor must have all of."
-msgstr ""
+msgstr "Blockers die de handelende speler allemaal moet hebben."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board"
-msgstr ""
+msgstr "Board"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board connectivity"
-msgstr ""
+msgstr "Samenhang van het board"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board dealt"
-msgstr ""
+msgstr "Board gedeeld"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board high card"
-msgstr ""
+msgstr "Hoogste boardkaart"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board pairing"
-msgstr ""
+msgstr "Board gepaard"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board street"
-msgstr ""
+msgstr "Boardstreet"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board suit structure"
-msgstr ""
+msgstr "Kleurstructuur van het board"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture"
-msgstr ""
+msgstr "Boardtextuur"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture (all of)"
-msgstr ""
+msgstr "Boardtextuur (alle)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Board texture flags the board must have all of."
-msgstr ""
+msgstr "Textuurkenmerken die het board allemaal moet hebben."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Cards discarded at the draw; zero means stand pat and unknown discard counts "
 "stay unclassified."
 msgstr ""
+"Bij de draw afgegooide kaarten; nul betekent stand pat, en onbekende "
+"discards blijven ongeclassificeerd."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Cards drawn"
-msgstr ""
+msgstr "Getrokken kaarten"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Cards drawn (0 = stand pat)"
-msgstr ""
+msgstr "Getrokken kaarten (0 = stand pat)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw (all of)"
-msgstr ""
+msgstr "Draw (alle)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw (any of)"
-msgstr ""
+msgstr "Draw (een van)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw (none of)"
-msgstr ""
+msgstr "Draw (geen van)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draw number"
-msgstr ""
+msgstr "Drawnummer"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draws the actor had: flush draws, gutshots and the rest (any of them)."
 msgstr ""
+"Draws van de handelende speler: flushdraws, gutshots en de rest (een ervan)."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Draws the actor must have all of."
-msgstr ""
+msgstr "Draws die de handelende speler allemaal moet hebben."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "EV-adjusted result (all-in EV)"
-msgstr ""
+msgstr "EV-gecorrigeerd resultaat (all-in-EV)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "EV-adjusted result per decision"
-msgstr ""
+msgstr "EV-gecorrigeerd resultaat per beslissing"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack"
-msgstr ""
+msgstr "Effectieve stack"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack (chips)"
-msgstr ""
+msgstr "Effectieve stack (fiches)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Effective stack in the bands a tournament is played in."
-msgstr ""
+msgstr "Effectieve stack in de banden waarin een toernooi wordt gespeeld."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Every situation the decision matched, not only the most specific one. Use "
 "this to ask how often an opportunity was taken: raising an open makes the "
 "decision a 3-bet, so only this keeps it among the opens faced."
 msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Facing an all-in"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Fixed limit, no limit and the other betting structures."
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Game and stake"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Game family"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Hand"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Hand state known"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Hand strength"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Hand-classified street"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Hands after"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Hands before"
-msgstr ""
+"Elke situatie waarbij de beslissing paste, niet alleen de meest specifieke. "
+"Hiermee vraagt u hoe vaak een kans werd benut: een raise op een open maakt "
+"de beslissing een 3-bet, en alleen dit filter houdt haar bij de opens waar "
+"men tegenover stond."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Hero:"
-msgid "Hero"
-msgstr "Held:"
+msgid "Facing an all-in"
+msgstr "Tegen een all-in"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Fixed limit, no limit and the other betting structures."
+msgstr "Fixed limit, no limit en de andere inzetstructuren."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Game and stake"
+msgstr "Spel en inzet"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Game family"
+msgstr "Spelfamilie"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand"
+msgstr "Hand"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand state known"
+msgstr "Handtoestand bekend"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand strength"
+msgstr "Handsterkte"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hand-classified street"
+msgstr "Street van de handclassificatie"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hands after"
+msgstr "Handen na"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hands before"
+msgstr "Handen voor"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Hero"
+msgstr "Hero"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hero's own decisions, or everyone except hero. Any keeps both."
 msgstr ""
+"De eigen beslissingen van de hero, of iedereen behalve de hero. "
+"'Willekeurig' houdt beide."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hole cards"
-msgstr ""
+msgstr "Hole cards"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Hole cards known"
-msgstr ""
+msgstr "Hole cards bekend"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many holdings the holding beats."
-msgstr ""
+msgstr "Hoeveel combinaties de hand verslaat."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many players were dealt into the hand."
-msgstr ""
+msgstr "Hoeveel spelers kaarten kregen in de hand."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many players were still in the hand."
-msgstr ""
+msgstr "Hoeveel spelers nog in de hand zaten."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How many raises came before this decision."
-msgstr ""
+msgstr "Hoeveel raises er voor deze beslissing kwamen."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How much the actor had to call."
-msgstr ""
+msgstr "Hoeveel de handelende speler moest callen."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "How strong the holding is: nuts, near nuts, strong, medium or weak."
-msgstr ""
+msgstr "Hoe sterk de hand is: nuts, bijna nuts, sterk, gemiddeld of zwak."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -4250,96 +5200,119 @@ msgid "In position"
 msgstr "Toon Positie Stats"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "In position versus the bettor"
-msgstr ""
+msgstr "In positie tegen de bettor"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "In position versus the previous aggressor"
-msgstr ""
+msgstr "In positie tegen de vorige agressor"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Is the aggressor"
-msgstr ""
+msgstr "Is de agressor"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Is the preflop aggressor"
-msgstr ""
+msgstr "Is de preflopagressor"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat column"
-msgstr ""
+msgstr "Oude statkolom"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat response"
-msgstr ""
+msgstr "Oud statantwoord"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Linked player identity"
-msgstr ""
+msgstr "Gekoppelde spelersidentiteit"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Made hand"
-msgstr ""
+msgstr "Gemaakte hand"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Made hand rank"
-msgstr ""
+msgstr "Rang van de gemaakte hand"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Multiway"
-msgstr ""
+msgstr "Multiway"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Named texture flags such as monotone or connected (any of them)."
-msgstr ""
+msgstr "Benoemde textuurkenmerken zoals monotone of verbonden (een ervan)."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One import session."
-msgstr ""
+msgstr "Eén importsessie."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One specific hand."
-msgstr ""
+msgstr "Eén specifieke hand."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "One specific tournament."
-msgstr ""
+msgstr "Eén specifiek toernooi."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions played on or after this date."
-msgstr ""
+msgstr "Alleen beslissingen gespeeld op of na deze datum."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions played on or before this date."
-msgstr ""
+msgstr "Alleen beslissingen gespeeld op of voor deze datum."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions with none of the named blockers."
-msgstr ""
+msgstr "Alleen beslissingen zonder een van de genoemde blockers."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only decisions with none of the named draws."
-msgstr ""
+msgstr "Alleen beslissingen zonder een van de genoemde draws."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only hands imported after this hand id."
-msgstr ""
+msgstr "Alleen handen geïmporteerd na deze hand-id."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Only hands imported before this hand id."
-msgstr ""
+msgstr "Alleen handen geïmporteerd voor deze hand-id."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Opponent position"
-msgstr ""
+msgstr "Positie van de tegenstander"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Other"
-msgstr ""
+msgstr "Overig"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pair detail"
-msgstr ""
+msgstr "Paardetail"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -4357,12 +5330,14 @@ msgid "Players in the hand"
 msgstr "Gebruikersnaam"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Poker room"
-msgstr ""
+msgstr "Pokerroom"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Position"
-msgstr ""
+msgstr "Positie"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -4370,625 +5345,781 @@ msgid "Position and stack"
 msgstr "Toon Positie Stats"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pot before the action"
-msgstr ""
+msgstr "Pot voor de actie"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pot odds"
-msgstr ""
+msgstr "Pot odds"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Pot type"
-msgstr ""
+msgstr "Pottype"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Preflop, flop, turn or river."
-msgstr ""
+msgstr "Preflop, flop, turn of river."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Rainbow, two-tone, monotone and the deeper flush boards."
-msgstr ""
+msgstr "Rainbow, two-tone, monotone en de diepere flushboards."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Raises before"
-msgstr ""
+msgstr "Raises vooraf"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Range holdings"
-msgstr ""
+msgstr "Combinaties in de range"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Relative position"
-msgstr ""
+msgstr "Relatieve positie"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Response"
-msgstr ""
+msgstr "Antwoord"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Restrict the population to a set of players."
-msgstr ""
+msgstr "De populatie beperken tot een groep spelers."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Restrict the population to one player."
-msgstr ""
+msgstr "De populatie beperken tot één speler."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Restrict to a linked (site, alias) identity."
-msgstr ""
+msgstr "Beperken tot een gekoppelde identiteit (site, alias)."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Role"
-msgstr ""
+msgstr "Rol"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Runout"
-msgstr ""
+msgstr "Runout"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "SPR"
-msgstr ""
+msgstr "SPR"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "SPR band"
-msgstr ""
+msgstr "SPR-band"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Seats between the actor and the button."
-msgstr ""
+msgstr "Stoelen tussen de handelende speler en de button."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Seats dealt in"
-msgstr ""
+msgstr "Gedeelde stoelen"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Short, medium, deep or very deep stacks."
-msgstr ""
+msgstr "Korte, middelgrote, diepe of zeer diepe stacks."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Situation"
-msgstr ""
+msgstr "Situatie"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Situation family"
-msgstr ""
+msgstr "Situatiefamilie"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Situation, including the ones it led to"
-msgstr ""
+msgstr "Situatie, inclusief de situaties waartoe ze leidde"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stack depth"
-msgstr ""
+msgstr "Stackdiepte"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stack depth band"
-msgstr ""
+msgstr "Stackdiepteband"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stack-to-pot ratio before the action."
-msgstr ""
+msgstr "Stack-tot-potverhouding voor de actie."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Stake (big blinds)"
-msgstr ""
+msgstr "Inzet (big blinds)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Starting hand"
-msgstr ""
+msgstr "Starthand"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Street"
-msgstr ""
+msgstr "Street"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Street and pot"
-msgstr ""
+msgstr "Street en pot"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Street number"
-msgstr ""
+msgstr "Streetnummer"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Table size"
-msgstr ""
+msgstr "Tafelgrootte"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The 169 Hold'em starting-hand classes."
-msgstr ""
+msgstr "De 169 Hold'em-starthandklassen."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The bet size faced, in the configured sizing buckets."
 msgstr ""
+"De betgrootte waar men tegenover stond, in de ingestelde grootteklassen."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The bet size made, in the configured sizing buckets."
-msgstr ""
+msgstr "De gemaakte betgrootte, in de ingestelde grootteklassen."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The big blind in chips, for mixed stakes."
-msgstr ""
+msgstr "De big blind in fiches, voor gemengde inzetten."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The board street as a number, the flop being one."
-msgstr ""
+msgstr "De boardstreet als getal, waarbij de flop één is."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The currency the game was played in."
-msgstr ""
+msgstr "De valuta waarin is gespeeld."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The decision, normalized: fold, check, call, bet or raise."
-msgstr ""
+msgstr "De beslissing, genormaliseerd: fold, check, call, bet of raise."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The game family: hold'em/omaha, stud or draw."
-msgstr ""
+msgstr "De spelfamilie: hold'em/omaha, stud of draw."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The game variant, such as Hold'em or Omaha."
-msgstr ""
+msgstr "De spelvariant, zoals Hold'em of Omaha."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The highest card of the board."
-msgstr ""
+msgstr "De hoogste kaart van het board."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The letter a legacy PT4 stat column records."
-msgstr ""
+msgstr "De letter die een oude PT4-statkolom vastlegt."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The made hand the actor held: pairs, sets, straights and so on."
 msgstr ""
+"De gemaakte hand van de handelende speler: paren, trips, straights enzovoort."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The most specific situation the decision matched."
-msgstr ""
+msgstr "De meest specifieke situatie waarbij de beslissing paste."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The pot odds offered, in basis points."
-msgstr ""
+msgstr "De geboden pot odds, in basispunten."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The pot size before the action, in chips."
-msgstr ""
+msgstr "De potgrootte voor de actie, in fiches."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The same ratio as the bands a player thinks in."
-msgstr ""
+msgstr "Dezelfde verhouding in de banden waarin een speler denkt."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The seat of the player the action was against."
-msgstr ""
+msgstr "De stoel van de speler tegen wie de actie was."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The seat of the player who acted."
-msgstr ""
+msgstr "De stoel van de speler die handelde."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The shape of the pot: unopened, limped, single-raised, 3-bet, 4-bet."
 msgstr ""
+"De vorm van de pot: ongeopend, gelimpt, één keer geraised, 3-bet, 4-bet."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The share of the range the holding beats."
-msgstr ""
+msgstr "Het deel van de range dat de hand verslaat."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The size of the bet faced, as a percentage of the pot."
 msgstr ""
+"De grootte van de bet waar men tegenover stond, als percentage van de pot."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The size of the bet faced, in basis points of the pot."
 msgstr ""
+"De grootte van de bet waar men tegenover stond, in basispunten van de pot."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The size of the bet made, as a percentage of the pot."
-msgstr ""
+msgstr "De grootte van de gemaakte bet, als percentage van de pot."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The size of the bet made, in basis points of the pot."
-msgstr ""
+msgstr "De grootte van de gemaakte bet, in basispunten van de pot."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The size of the game, expressed in big blinds."
-msgstr ""
+msgstr "De grootte van het spel, uitgedrukt in big blinds."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The smaller of the two stacks, in big blinds."
-msgstr ""
+msgstr "De kleinste van de twee stacks, in big blinds."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The smaller of the two stacks, in chips."
-msgstr ""
+msgstr "De kleinste van de twee stacks, in fiches."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The street as a number, preflop being zero."
-msgstr ""
+msgstr "De street als getal, waarbij preflop nul is."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The street the hand state was classified on."
-msgstr ""
+msgstr "De street waarop de handtoestand is geclassificeerd."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The strength of the made hand, as a number."
-msgstr ""
+msgstr "De sterkte van de gemaakte hand, als getal."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "The table size, such as 6-max or full ring."
-msgstr ""
+msgstr "De tafelgrootte, zoals 6-max of full ring."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Three or more players saw the decision."
-msgstr ""
+msgstr "Drie of meer spelers zagen de beslissing."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Tournament or cash"
-msgstr ""
+msgstr "Toernooi of cash"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Was the previous aggressor"
-msgstr ""
+msgstr "Was de vorige agressor"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "What the actor did, including draw-game discards and stand-pat decisions."
 msgstr ""
+"Wat de handelende speler deed, inclusief discards en stand-pat-beslissingen "
+"in drawspellen."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "What the actor was facing."
-msgstr ""
+msgstr "Waar de handelende speler tegenover stond."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "What the turn or river card changed."
-msgstr ""
+msgstr "Wat de turn- of riverkaart veranderde."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the action in front of the actor was an all-in."
-msgstr ""
+msgstr "Of de actie voor de handelende speler een all-in was."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the action put the player all-in."
-msgstr ""
+msgstr "Of de actie de speler all-in zette."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor has position on the bettor."
-msgstr ""
+msgstr "Of de handelende speler positie heeft op de bettor."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor has position on the previous aggressor."
-msgstr ""
+msgstr "Of de handelende speler positie heeft op de vorige agressor."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor raised preflop."
-msgstr ""
+msgstr "Of de handelende speler preflop raisede."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was in position."
-msgstr ""
+msgstr "Of de handelende speler in positie was."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was the aggressor on the previous street."
-msgstr ""
+msgstr "Of de handelende speler op de vorige street de agressor was."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the actor was the aggressor on this street."
-msgstr ""
+msgstr "Of de handelende speler op deze street de agressor was."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the board is connected, semi-connected or disconnected."
-msgstr ""
+msgstr "Of het board verbonden, half verbonden of onverbonden is."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Whether the board is unpaired, paired, or more."
-msgstr ""
+msgstr "Of het board ongepaard, gepaard of meer is."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid ""
 "Which draw round the player reached; only recorded discard or stand-pat "
 "actions count."
 msgstr ""
+"Welke drawronde de speler bereikte; alleen vastgelegde discards of stand-pat-"
+"acties tellen."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Which pair the actor held: overpair, top pair, set and so on."
-msgstr ""
+msgstr "Welk paar de handelende speler had: overpair, top pair, set enzovoort."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Which poker room the hands were played on."
-msgstr ""
+msgstr "In welke pokerroom de handen zijn gespeeld."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes for tournament hands, No for cash game hands."
-msgstr ""
+msgstr "Ja voor toernooihanden, Nee voor cashgamehanden."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes on the flop and later, No before the flop."
-msgstr ""
+msgstr "Ja op de flop en later, Nee voor de flop."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes only for decisions whose cards were shown."
-msgstr ""
+msgstr "Ja alleen voor beslissingen waarvan de kaarten zijn getoond."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Yes only where the cards were known and classified."
-msgstr ""
+msgstr "Ja alleen waar de kaarten bekend en geclassificeerd waren."
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "all-in frequency"
-msgstr ""
+msgstr "all-infrequentie"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average SPR"
-msgstr ""
+msgstr "gemiddelde SPR"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average bet size (basis points of the pot)"
-msgstr ""
+msgstr "gemiddelde betgrootte (basispunten van de pot)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average bet size faced (basis points of the pot)"
-msgstr ""
+msgstr "gemiddelde betgrootte waar tegenover (basispunten van de pot)"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "average pot size"
-msgstr ""
+msgstr "gemiddelde potgrootte"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "bet frequency"
-msgstr ""
+msgstr "betfrequentie"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "bp"
-msgstr ""
+msgstr "bp"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "call frequency"
-msgstr ""
+msgstr "callfrequentie"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "check frequency"
-msgstr ""
+msgstr "checkfrequentie"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "chips"
-msgstr ""
+msgstr "fiches"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "fold frequency"
-msgstr ""
+msgstr "foldfrequentie"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "holdings"
-msgstr ""
+msgstr "combinaties"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many actions"
-msgstr ""
+msgstr "aantal acties"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many decisions"
-msgstr ""
+msgstr "aantal beslissingen"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how many hands"
-msgstr ""
+msgstr "aantal handen"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
-#| msgid "Show Number of Players"
 msgid "how many players"
-msgstr "Toon aantal spelers"
+msgstr "aantal spelers"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "how often the decision is taken"
-msgstr ""
+msgstr "hoe vaak de beslissing wordt genomen"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "id"
-msgstr ""
+msgstr "id"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "per-hand frequency"
-msgstr ""
+msgstr "frequentie per hand"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "raise frequency"
-msgstr ""
+msgstr "raisefrequentie"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "realized profit"
-msgstr ""
+msgstr "gerealiseerde winst"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "realized profit per decision"
-msgstr ""
+msgstr "gerealiseerde winst per beslissing"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "seats"
-msgstr ""
+msgstr "stoelen"
 
 #: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "street"
-msgstr ""
+msgstr "street"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Column Configuration"
-msgstr ""
+msgstr "Kolomconfiguratie"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Columns"
-msgstr ""
+msgstr "Kolommen"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Dashboard"
-msgstr ""
+msgstr "Dashboard"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Detailed Filters"
-msgstr ""
+msgstr "Gedetailleerde filters"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Hand Filters:"
-msgstr ""
+msgstr "Handfilters:"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 #, fuzzy
-#| msgid "Show Position Stats"
 msgid "Position Heatmap"
-msgstr "Toon Positie Stats"
+msgstr "Heatmap per positie"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Restrict to hand types:"
-msgstr ""
+msgstr "Beperken tot handtypes:"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Starting Hands"
-msgstr ""
+msgstr "Starthanden"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "Stats Tables"
-msgstr ""
+msgstr "Stattabellen"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "and"
-msgstr ""
+msgstr "en"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
+#, fuzzy
 msgid "between"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Big Blind fold to steal"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Call Raise preflop"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Continuation Bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Flop 3-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Flop 4-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Flop open bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Flops seen"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Fold to preflop 3-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Fold to preflop 4-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Preflop 3-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Preflop 4-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Raise First In"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Re-steal"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% River 3-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% River 4-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% River open bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Showdowns seen"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Small Blind fold to steal"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Steal attempt"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Steal success"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Turn 3-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Turn 4-bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Turn open bet"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Went to showdown after seeing flop"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Won money after seeing flop"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "% Won money at showdown"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Big Blinds won per 100 hands"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Big Blinds won per 100 hands excluding rake"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Flop aggression frequency"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Game type (Hold'em, Omaha, etc.)"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
-msgid "Measure of uncertainty"
-msgstr ""
+msgstr "tussen"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
-#| msgid "Number of Players:"
-msgid "Number of hands played"
-msgstr "Spelersaantal:"
+msgid "% Big Blind fold to steal"
+msgstr "% big blind fold op steal"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Call Raise preflop"
+msgstr "% call op raise preflop"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Continuation Bet"
+msgstr "% continuation bet"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Flop 3-bet"
+msgstr "% flop 3-bet"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Flop 4-bet"
+msgstr "% flop 4-bet"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Flop open bet"
+msgstr "% openingsbet op de flop"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Flops seen"
+msgstr "% geziene flops"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Fold to preflop 3-bet"
+msgstr "% fold op preflop 3-bet"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Fold to preflop 4-bet"
+msgstr "% fold op preflop 4-bet"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Preflop 3-bet"
+msgstr "% preflop 3-bet"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Preflop 4-bet"
+msgstr "% preflop 4-bet"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Raise First In"
+msgstr "% raise first in"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Re-steal"
+msgstr "% re-steal"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% River 3-bet"
+msgstr "% river 3-bet"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% River 4-bet"
+msgstr "% river 4-bet"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% River open bet"
+msgstr "% openingsbet op de river"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Showdowns seen"
+msgstr "% geziene showdowns"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Small Blind fold to steal"
+msgstr "% small blind fold op steal"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Steal attempt"
+msgstr "% steal-poging"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Steal success"
+msgstr "% geslaagde steal"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Turn 3-bet"
+msgstr "% turn 3-bet"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Turn 4-bet"
+msgstr "% turn 4-bet"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Turn open bet"
+msgstr "% openingsbet op de turn"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Went to showdown after seeing flop"
+msgstr "% naar showdown na het zien van de flop"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Won money after seeing flop"
+msgstr "% geld gewonnen na het zien van de flop"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "% Won money at showdown"
+msgstr "% geld gewonnen op showdown"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Big Blinds won per 100 hands"
+msgstr "Gewonnen big blinds per 100 handen"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Big Blinds won per 100 hands excluding rake"
+msgstr "Gewonnen big blinds per 100 handen zonder rake"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Flop aggression frequency"
+msgstr "Flop-agressiefrequentie"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Game type (Hold'em, Omaha, etc.)"
+msgstr "Speltype (Hold'em, Omaha, enz.)"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Measure of uncertainty"
+msgstr "Maat van onzekerheid"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
+msgid "Number of hands played"
+msgstr "Aantal gespeelde handen"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Number of seats at the table"
-msgstr ""
+msgstr "Aantal stoelen aan tafel"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -4996,142 +6127,178 @@ msgid "Player name"
 msgstr "Gebruikersnaam"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Position at the table"
-msgstr ""
+msgstr "Positie aan tafel"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Postflop aggression factor"
-msgstr ""
+msgstr "Postflop-agressiefactor"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Postflop aggression frequency"
-msgstr ""
+msgstr "Postflop-agressiefrequentie"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Preflop raise"
-msgstr ""
+msgstr "Preflopraise"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Profit per hand"
-msgstr ""
+msgstr "Winst per hand"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Profit per hand excluding rake"
-msgstr ""
+msgstr "Winst per hand zonder rake"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Rake paid"
-msgstr ""
+msgstr "Betaalde rake"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "River aggression frequency"
-msgstr ""
+msgstr "River-agressiefrequentie"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Starting cards (Hole cards)"
-msgstr ""
+msgstr "Startkaarten (hole cards)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Total net profit"
-msgstr ""
+msgstr "Totale nettowinst"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Turn aggression frequency"
-msgstr ""
+msgstr "Turn-agressiefrequentie"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Voluntarily put money in pot preflop"
-msgstr ""
+msgstr "Vrijwillig geld in de pot gelegd preflop"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
-msgstr ""
+msgstr "Preflopprofiel (VPIP vs PFR)"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "<b>Hand: {0}</b><br/>Hands: {1}<br/>VPIP: {2}%<br/>Profit: {3}"
-msgstr ""
+msgstr "<b>Hand: {0}</b><br/>Handen: {1}<br/>VPIP: {2}%<br/>Winst: {3}"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Color the grid by:"
-msgstr ""
+msgstr "Het raster kleuren op:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Filtered range:"
-msgstr ""
+msgstr "Gefilterde range:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Hand: {0}\n"
 "No statistics available"
 msgstr ""
+"Hand: {0}\n"
+"Geen statistieken beschikbaar"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Hold'em Starting Hand Grid"
-msgstr ""
+msgstr "Hold'em-starthandraster"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 4-Card Texture Analysis"
-msgstr ""
+msgstr "Textuuranalyse Omaha 4 kaarten"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 5-Card Texture Analysis"
-msgstr ""
+msgstr "Textuuranalyse Omaha 5 kaarten"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha 6-Card Texture Analysis"
-msgstr ""
+msgstr "Textuuranalyse Omaha 6 kaarten"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Omaha Texture Analysis"
-msgstr ""
+msgstr "Omaha-textuuranalyse"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "Starting Hands Analysis"
-msgstr ""
+msgstr "Starthandanalyse"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "min sample:"
-msgstr ""
+msgstr "min. steekproef:"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "{0} decisions in this selection have no known hole cards and are not in the "
 "grid"
 msgstr ""
+"{0} beslissingen in deze selectie hebben geen bekende hole cards en staan "
+"niet in het raster"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
 msgid "Hand Breakdown"
-msgstr ""
+msgstr "Handuitsplitsing"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
 msgid "Statistics group:"
-msgstr ""
+msgstr "Statistiekgroep:"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "A Session Guard limit has been reached."
-msgstr ""
+msgstr "Een Session Guard-limiet is bereikt."
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Acknowledge"
-msgstr ""
+msgstr "Begrepen"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid ""
 "Alerts only: fpdb never closes, sits out or otherwise touches a poker "
 "client. The session is the Session Viewer's: cash hands, ended by a 30-"
 "minute pause."
 msgstr ""
+"Alleen waarschuwingen: fpdb sluit, pauzeert of raakt nooit een pokerclient "
+"aan. De sessie is die van de sessieweergave: cashhanden, beëindigd door een "
+"pauze van 30 minuten."
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Apply"
-msgstr ""
+msgstr "Toepassen"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Choose at least one limit to watch."
-msgstr ""
+msgstr "Kies minstens één limiet om te bewaken."
 
 #: fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy, python-format
@@ -5141,160 +6308,189 @@ msgid ""
 msgstr "Kan bestand %s niet vinden"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Drawdown from peak (BB)"
-msgstr ""
+msgstr "Drawdown vanaf de piek (BB)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Drawdown from peak (money)"
-msgstr ""
+msgstr "Drawdown vanaf de piek (geld)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Later"
-msgstr ""
+msgstr "Later"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Limits for this session"
-msgstr ""
+msgstr "Limieten voor deze sessie"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Loss (BB)"
-msgstr ""
+msgstr "Verlies (BB)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Loss (money)"
-msgstr ""
+msgstr "Verlies (geld)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Not running."
-msgstr ""
+msgstr "Niet actief."
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Reset alerts"
-msgstr ""
+msgstr "Waarschuwingen herstellen"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Save as defaults"
-msgstr ""
+msgstr "Opslaan als standaard"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Session Guard: click to see or change the limits"
-msgstr ""
+msgstr "Session Guard: klik om de limieten te zien of te wijzigen"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Session Guard: no session in progress"
-msgstr ""
+msgstr "Session Guard: geen lopende sessie"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Session Guard: {result} · {duration} · {hands} hands"
-msgstr ""
+msgstr "Session Guard: {result} · {duration} · {hands} handen"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Session duration"
-msgstr ""
+msgstr "Sessieduur"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Win (BB)"
-msgstr ""
+msgstr "Winst (BB)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
 msgid "Win (money)"
-msgstr ""
+msgstr "Winst (geld)"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{count} limit(s) reached"
-msgstr ""
+msgstr "{count} limiet(en) bereikt"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{label}: unavailable (a hand has no big blind) / {threshold}"
 msgstr ""
+"{label}: niet beschikbaar (een hand heeft geen big blind) / {threshold}"
 
 #: fpdb_3_legacy/session_guard_dialog.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{value} BB"
-msgstr ""
+msgstr "{value} BB"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid ""
 "A stat pack adds declarative stats, and optionally Research presets, without "
 "changing fpdb. Packs are data only: no Python, no SQL."
 msgstr ""
+"Een statpakket voegt declaratieve statistieken en eventueel Research-"
+"voorinstellingen toe zonder fpdb te wijzigen. Pakketten zijn alleen "
+"gegevens: geen Python, geen SQL."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "All Players"
 msgid "All files"
-msgstr "Alle spelers"
+msgstr "Alle bestanden"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Author"
-msgstr ""
+msgstr "Auteur"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Built-in"
-msgstr ""
+msgstr "Ingebouwd"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy, python-format
-#| msgid "Could not find file %s"
 msgid ""
 "Could not read the pack:\n"
 "%s"
-msgstr "Kan bestand %s niet vinden"
+msgstr ""
+"Het pakket kon niet worden gelezen:\n"
+"%s"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Disable"
-msgstr ""
+msgstr "Uitschakelen"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Disabled"
-msgstr ""
+msgstr "Uitgeschakeld"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Disabled %s."
-msgstr ""
+msgstr "%s uitgeschakeld."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Enable"
-msgstr ""
+msgstr "Inschakelen"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Enabled %s."
-msgstr ""
+msgstr "%s ingeschakeld."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Export stat pack"
-msgstr ""
+msgstr "Statpakket exporteren"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Export..."
-msgstr ""
+msgstr "Exporteren..."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Exported to %s."
-msgstr ""
+msgstr "Geëxporteerd naar %s."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Import pack..."
-msgstr ""
+msgstr "Pakket importeren..."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Import stat pack"
-msgstr ""
+msgstr "Statpakket importeren"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid "Installed %s."
-msgstr ""
+msgstr "%s geïnstalleerd."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Invalid"
-msgstr ""
+msgstr "Ongeldig"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
@@ -5302,81 +6498,87 @@ msgid "Location:"
 msgstr "Toon Positie Stats"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Pack"
-msgstr ""
+msgstr "Pakket"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Restart fpdb and the HUD to use the change everywhere."
-msgstr ""
+msgstr "Start fpdb en de HUD opnieuw om de wijziging overal te gebruiken."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "Stat pack"
-msgstr ""
+msgstr "Statpakket"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Status"
 msgid "Stat packs"
-msgstr "Status"
+msgstr "Statpakketten"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Status"
 msgid "Stats"
-msgstr "Status"
+msgstr "Statistieken"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Status"
 msgid "Stats:"
-msgstr "Status"
+msgstr "Statistieken:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 msgid "Status"
 msgstr "Status"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "The pack state was not changed:\n"
 "%s"
 msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "This pack cannot be installed:"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "This pack is already installed. Replace it with this version?"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "This pack is not loaded:"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Uninstall"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
-msgid "Uninstall %s?"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Uninstall stat pack"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
-msgid "Uninstalled %s."
-msgstr ""
+"De pakketstatus is niet gewijzigd:\n"
+"%s"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-#| msgid "Username"
+msgid "This pack cannot be installed:"
+msgstr "Dit pakket kan niet worden geïnstalleerd:"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "This pack is already installed. Replace it with this version?"
+msgstr "Dit pakket is al geïnstalleerd. Vervangen door deze versie?"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "This pack is not loaded:"
+msgstr "Dit pakket is niet geladen:"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Uninstall"
+msgstr "Verwijderen"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Uninstall %s?"
+msgstr "%s verwijderen?"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Uninstall stat pack"
+msgstr "Statpakket verwijderen"
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Uninstalled %s."
+msgstr "%s verwijderd."
+
+#: fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
 msgid "User installed"
-msgstr "Gebruikersnaam"
+msgstr "Door gebruiker geïnstalleerd"
 
 #: fpdb_3_legacy/swc_poker_console.py
 msgid "<"
@@ -5395,50 +6597,59 @@ msgid ">>"
 msgstr ""
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "BOTTOM :"
-msgstr ""
-
-#: fpdb_3_legacy/swc_poker_console.py
-msgid "Capture Console (Logs):"
-msgstr ""
-
-#: fpdb_3_legacy/swc_poker_console.py
-msgid "Captured Hand History:"
-msgstr ""
+msgstr "BOTTOM:"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
-#| msgid "cards ="
+msgid "Capture Console (Logs):"
+msgstr "Opnameconsole (logs):"
+
+#: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
+msgid "Captured Hand History:"
+msgstr "Opgenomen handgeschiedenis:"
+
+#: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Cards:"
-msgstr "Kaarten ="
+msgstr "Kaarten:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Hands Captured: 0"
-msgstr ""
+msgstr "Opgenomen handen: 0"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Import All OFC"
-msgstr ""
+msgstr "Alle OFC importeren"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Import OFC to DB"
-msgstr ""
+msgstr "OFC in de DB importeren"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "In Hand:"
-msgstr ""
+msgstr "In de hand:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "MIDDLE :"
-msgstr ""
+msgstr "MIDDLE:"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Open DB Replayer"
-msgstr ""
+msgstr "DB-replayer openen"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Open Hand Folder"
-msgstr ""
+msgstr "Handmap openen"
 
 #: fpdb_3_legacy/swc_poker_console.py
 #, fuzzy
@@ -5446,79 +6657,95 @@ msgid "Refresh Hands"
 msgstr "Ververs"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Select a hand to start replay"
-msgstr ""
+msgstr "Kies een hand om de replay te starten"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Start Capture"
-msgstr ""
+msgstr "Opname starten"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Status: 🔴 Stopped"
-msgstr ""
+msgstr "Status: 🔴 Gestopt"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Statut : 🔴 Arrêté"
-msgstr ""
+msgstr "Status: 🔴 Gestopt"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Statut : 🟢 En Cours"
-msgstr ""
+msgstr "Status: 🟢 Bezig"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "Step 0 / 0"
-msgstr ""
+msgstr "Stap 0 / 0"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "SwC"
-msgstr ""
+msgstr "SwC"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "SwC Poker - Capture Console & Replayer"
-msgstr ""
+msgstr "SwC Poker - Opnameconsole en replayer"
 
 #: fpdb_3_legacy/swc_poker_console.py
+#, fuzzy
 msgid "TOP :"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Confirm overwrite"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Copy entire table"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Copy entire table with headers"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Copy with headers"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-msgid "Export displayed values"
-msgstr ""
-
-#: fpdb_3_legacy/table_export.py
-#, python-format
-msgid "Export displayed values as %s…"
-msgstr ""
+msgstr "TOP:"
 
 #: fpdb_3_legacy/table_export.py
 #, fuzzy
-#| msgid "commit failed"
-msgid "Export failed"
-msgstr "Binding mislukt"
+msgid "Confirm overwrite"
+msgstr "Overschrijven bevestigen"
 
 #: fpdb_3_legacy/table_export.py
-#, python-format
+#, fuzzy
+msgid "Copy entire table"
+msgstr "Hele tabel kopiëren"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Copy entire table with headers"
+msgstr "Hele tabel met koppen kopiëren"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Copy with headers"
+msgstr "Kopiëren met koppen"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Export displayed values"
+msgstr "Getoonde waarden exporteren"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy, python-format
+msgid "Export displayed values as %s…"
+msgstr "Getoonde waarden exporteren als %s…"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy
+msgid "Export failed"
+msgstr "Exporteren mislukt"
+
+#: fpdb_3_legacy/table_export.py
+#, fuzzy, python-format
 msgid ""
 "The file already exists:\n"
 "%s\n"
 "Do you want to replace it?"
 msgstr ""
+"Het bestand bestaat al:\n"
+"%s\n"
+"Wilt u het vervangen?"
 
 #~ msgid "*** Database get_last_insert_id error: "
 #~ msgstr "*** Databasefout get_last_insert_id"
