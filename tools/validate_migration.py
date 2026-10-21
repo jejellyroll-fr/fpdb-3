@@ -244,7 +244,7 @@ def main():
     all_ok &= check_version("PySide6", "6.8.1", "PySide6")
     all_ok &= check_version("pyqtgraph", "0.13.0", "pyqtgraph")
     all_ok &= check_version("pandas", "2.2.2", "pandas")
-    all_ok &= check_version("aiohttp", "3.13.2", "aiohttp")
+    all_ok &= check_version("aiohttp", "3.14.4", "aiohttp")
 
     # Test imports
     imports_ok = check_imports()
