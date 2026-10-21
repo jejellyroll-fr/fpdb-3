@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 13:33+0200\n"
+"POT-Creation-Date: 2026-10-21 20:37+0200\n"
 "PO-Revision-Date: 2011-12-03 21:57+0000\n"
 "Last-Translator: LimburgCwboy <hdps.een@gmail.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.net/projects/p/fpdb/"
@@ -3159,6 +3159,10 @@ msgid "Back up and upgrade"
 msgstr "Back-up maken en bijwerken"
 
 #: fpdb_3_legacy/fpdb.pyw
+msgid "Checking for updates…"
+msgstr ""
+
+#: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
 msgid "Clear All"
 msgstr "Alles wissen"
@@ -3619,6 +3623,10 @@ msgstr ""
 "Waarschuwingen voor de lopende sessie: verlies, winst, duur, handen, drawdown"
 
 #: fpdb_3_legacy/menu_layout.py
+msgid "Ask GitHub whether a newer fpdb release is out"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
 #, fuzzy
 msgid "Auto Note Rules"
 msgstr "Regels voor automatische notities"
@@ -3632,6 +3640,10 @@ msgstr "Werkbank voor automatische notities"
 #, fuzzy
 msgid "Cash"
 msgstr "Cash"
+
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/update_notice.py
+msgid "Check for updates"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -6746,6 +6758,49 @@ msgstr ""
 "Het bestand bestaat al:\n"
 "%s\n"
 "Wilt u het vervangen?"
+
+#: fpdb_3_legacy/update_notice.py
+#, python-format
+msgid "Download %s"
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+msgid "GitHub could not be reached. Check your connection and try again later."
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+msgid "Hide this notice"
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+#, fuzzy
+msgid "Release notes"
+msgstr "Gebruikersnaam"
+
+#: fpdb_3_legacy/update_notice.py
+#, python-format
+msgid "fpdb %(new)s is available (you have %(current)s)."
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+#, python-format
+msgid "fpdb %s is the latest release."
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+msgid ""
+"fpdb can check once a day whether a newer release is available on GitHub, "
+"and tell you in the status bar.\n"
+"\n"
+"The check is a single anonymous request to the GitHub releases page: it "
+"sends nothing about you or your hands, and fpdb never downloads or installs "
+"anything by itself.\n"
+"\n"
+"You can change this later in File > Preferences (general: "
+"check_for_updates), and check by hand with Help > Check for updates.\n"
+"\n"
+"Check for updates automatically?"
+msgstr ""
 
 #~ msgid "*** Database get_last_insert_id error: "
 #~ msgstr "*** Databasefout get_last_insert_id"

@@ -168,6 +168,24 @@ release artifacts are Developer ID signed and notarized only when the repository
 credentials are configured; otherwise the workflow publishes an ad-hoc artifact with the limitations
 described there.
 
+### Update notice
+
+On first start fpdb asks whether it may check for new releases. If you agree, it checks at most once a
+day and shows a line in the status bar when a newer release is out. The line links to the release notes
+and to the archive built like yours (same packager, OS and architecture). *Help ▸ Check for updates*
+checks right away, whatever the setting.
+
+What the check does, and does not do:
+
+- It sends a single anonymous `GET` to `api.github.com/repos/jejellyroll-fr/fpdb-3/releases/latest`
+  from a background thread, so startup never waits on it.
+- It sends no identifier, no cookie and nothing about you or your hands. fpdb has no telemetry.
+- It never downloads or installs anything. Replacing the build stays your decision.
+- When you are offline, rate-limited or behind a proxy that blocks GitHub, nothing is shown.
+- The setting is `check_for_updates` on `<general>` in `HUD_config.xml`, editable in
+  *File ▸ Preferences*. Pre-releases are only announced with `update_prereleases="True"`.
+- The time of the last automatic check is kept in `update_check.json`, next to `HUD_config.xml`.
+
 ## 🌍 Help translate fpdb
 
 fpdb speaks 14 languages, most of them only partly: *View ▸ Language* shows how much of the

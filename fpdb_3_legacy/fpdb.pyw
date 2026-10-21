@@ -2051,6 +2051,64 @@ class fpdb(QMainWindow):
 
         self.open_tab("Version", build, allow_multiple=False, module="fpdb_3_legacy.GuiVersionInfo")
 
+    def _update_checker(self):
+        """The window's one update checker (#445), created on first use."""
+        checker = getattr(self, "_update_checker_instance", None)
+        if checker is None:
+            from fpdb_3_legacy.update_notice import UpdateChecker
+
+            checker = UpdateChecker(self)
+            checker.finished.connect(self._on_update_check_finished)
+            self._update_checker_instance = checker
+        return checker
+
+    def _start_update_check(self, *, manual: bool) -> None:
+        from fpdb_3_legacy import version_info
+
+        # The declared version, not git describe: a checkout's "3.9.1-12-gabc" is no release number.
+        self._update_checker().start(
+            PACKAGE_VERSION,
+            version_info.detect_packaging(),
+            include_prereleases=self.config.get_update_prereleases(),
+            manual=manual,
+        )
+
+    def _startup_update_check(self) -> None:
+        """Look for a newer release once a day, after asking the first time (#445)."""
+        from pathlib import Path
+
+        from fpdb_3_legacy import update_check
+
+        try:
+            enabled = self.config.get_check_for_updates()
+            if enabled is None:
+                if not self.visible:
+                    return  # nobody to ask; the next visible start will
+                from fpdb_3_legacy.update_notice import ask_to_check_for_updates
+
+                enabled = ask_to_check_for_updates(self)
+                self.config.set_check_for_updates(enabled)
+            if not enabled:
+                return
+            state_file = Path(self.config.file).parent / "update_check.json"
+            if not update_check.check_due(state_file):
+                return
+            update_check.record_check(state_file)
+            self._start_update_check(manual=False)
+        except Exception:
+            # Never let the update check get in the way of starting fpdb.
+            log.exception("Update check could not start")
+
+    def check_for_updates(self, widget=None, data=None) -> None:
+        """Help > Check for updates: ask GitHub now, whatever the setting (#445)."""
+        self.statusBar().showMessage(_("Checking for updates…"), 3000)
+        self._start_update_check(manual=True)
+
+    def _on_update_check_finished(self, reached: bool, release, manual: bool) -> None:
+        from fpdb_3_legacy.update_notice import present_result
+
+        present_result(self, reached, release, manual, PACKAGE_VERSION)
+
     def tab_main_help(self, widget, data=None) -> None:
         """Displays a tab with the main fpdb help screen.
 
@@ -2349,6 +2407,11 @@ class fpdb(QMainWindow):
 
         if options.autoimport:
             self.tab_auto_import(None)
+
+        # After the event loop starts, so the window is up before any first-run question.
+        from PySide6.QtCore import QTimer
+
+        QTimer.singleShot(0, self._startup_update_check)
 
     def _register_gui_observer(self) -> None:
         """Registers the GUI observer with the ConfigurationManager."""

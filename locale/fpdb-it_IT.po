@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 13:33+0200\n"
+"POT-Creation-Date: 2026-10-21 20:37+0200\n"
 "PO-Revision-Date: 2012-02-17 20:03+0000\n"
 "Last-Translator: seppone1991 <seppone1991@gmail.com>\n"
 "Language-Team: Italian (Italy) (http://www.transifex.net/projects/p/fpdb/"
@@ -3088,6 +3088,10 @@ msgid "Back up and upgrade"
 msgstr "Esegui backup e aggiorna"
 
 #: fpdb_3_legacy/fpdb.pyw
+msgid "Checking for updates…"
+msgstr ""
+
+#: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
 msgid "Clear All"
 msgstr "Cancella tutto"
@@ -3548,6 +3552,10 @@ msgstr ""
 "Avvisi per la sessione in corso: perdita, vincita, durata, mani, drawdown"
 
 #: fpdb_3_legacy/menu_layout.py
+msgid "Ask GitHub whether a newer fpdb release is out"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
 #, fuzzy
 msgid "Auto Note Rules"
 msgstr "Regole delle note automatiche"
@@ -3561,6 +3569,10 @@ msgstr "Banco di lavoro delle note automatiche"
 #, fuzzy
 msgid "Cash"
 msgstr "Cash"
+
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/update_notice.py
+msgid "Check for updates"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -6661,6 +6673,49 @@ msgstr ""
 "Il file esiste già:\n"
 "%s\n"
 "Vuoi sostituirlo?"
+
+#: fpdb_3_legacy/update_notice.py
+#, python-format
+msgid "Download %s"
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+msgid "GitHub could not be reached. Check your connection and try again later."
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+msgid "Hide this notice"
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+#, fuzzy
+msgid "Release notes"
+msgstr "Note sui giocatori"
+
+#: fpdb_3_legacy/update_notice.py
+#, python-format
+msgid "fpdb %(new)s is available (you have %(current)s)."
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+#, python-format
+msgid "fpdb %s is the latest release."
+msgstr ""
+
+#: fpdb_3_legacy/update_notice.py
+msgid ""
+"fpdb can check once a day whether a newer release is available on GitHub, "
+"and tell you in the status bar.\n"
+"\n"
+"The check is a single anonymous request to the GitHub releases page: it "
+"sends nothing about you or your hands, and fpdb never downloads or installs "
+"anything by itself.\n"
+"\n"
+"You can change this later in File > Preferences (general: "
+"check_for_updates), and check by hand with Help > Check for updates.\n"
+"\n"
+"Check for updates automatically?"
+msgstr ""
 
 #~ msgid "    drop index failed: "
 #~ msgstr "    drop indice fallito: "

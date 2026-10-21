@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 13:33+0200\n"
+"POT-Creation-Date: 2026-10-21 20:37+0200\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -2714,6 +2714,10 @@ msgid "Back up and upgrade"
 msgstr "Sauvegarder et mettre à jour"
 
 #: fpdb_3_legacy/fpdb.pyw
+msgid "Checking for updates…"
+msgstr "Recherche de mises à jour…"
+
+#: fpdb_3_legacy/fpdb.pyw
 msgid "Clear All"
 msgstr "Tout effacer"
 
@@ -3100,6 +3104,10 @@ msgid ""
 msgstr "Alertes pour la session en cours : perte, gain, durée, mains, drawdown"
 
 #: fpdb_3_legacy/menu_layout.py
+msgid "Ask GitHub whether a newer fpdb release is out"
+msgstr "Demander à GitHub si une version plus récente de fpdb est sortie"
+
+#: fpdb_3_legacy/menu_layout.py
 msgid "Auto Note Rules"
 msgstr "Règles de notes automatiques"
 
@@ -3110,6 +3118,10 @@ msgstr "Atelier de notes automatiques"
 #: fpdb_3_legacy/menu_layout.py
 msgid "Cash"
 msgstr "Cash"
+
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/update_notice.py
+msgid "Check for updates"
+msgstr "Rechercher des mises à jour"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "CoinPoker Live Capture"
@@ -5675,6 +5687,61 @@ msgstr ""
 "Le fichier existe déjà :\n"
 "%s\n"
 "Voulez-vous le remplacer ?"
+
+#: fpdb_3_legacy/update_notice.py
+#, python-format
+msgid "Download %s"
+msgstr "Télécharger %s"
+
+#: fpdb_3_legacy/update_notice.py
+msgid "GitHub could not be reached. Check your connection and try again later."
+msgstr ""
+"GitHub est injoignable. Vérifiez votre connexion et réessayez plus tard."
+
+#: fpdb_3_legacy/update_notice.py
+msgid "Hide this notice"
+msgstr "Masquer cet avis"
+
+#: fpdb_3_legacy/update_notice.py
+msgid "Release notes"
+msgstr "Notes de version"
+
+#: fpdb_3_legacy/update_notice.py
+#, python-format
+msgid "fpdb %(new)s is available (you have %(current)s)."
+msgstr "fpdb %(new)s est disponible (vous avez %(current)s)."
+
+#: fpdb_3_legacy/update_notice.py
+#, python-format
+msgid "fpdb %s is the latest release."
+msgstr "fpdb %s est la dernière version."
+
+#: fpdb_3_legacy/update_notice.py
+msgid ""
+"fpdb can check once a day whether a newer release is available on GitHub, "
+"and tell you in the status bar.\n"
+"\n"
+"The check is a single anonymous request to the GitHub releases page: it "
+"sends nothing about you or your hands, and fpdb never downloads or installs "
+"anything by itself.\n"
+"\n"
+"You can change this later in File > Preferences (general: "
+"check_for_updates), and check by hand with Help > Check for updates.\n"
+"\n"
+"Check for updates automatically?"
+msgstr ""
+"fpdb peut vérifier une fois par jour si une version plus récente est "
+"disponible sur GitHub, et vous le signaler dans la barre d'état.\n"
+"\n"
+"La vérification est une simple requête anonyme vers la page des versions de "
+"GitHub : elle n'envoie rien sur vous ni sur vos mains, et fpdb ne télécharge "
+"ni n'installe jamais rien de lui-même.\n"
+"\n"
+"Vous pourrez changer ce choix plus tard dans Fichier > Préférences "
+"(general : check_for_updates), et vérifier à la main avec Aide > Rechercher "
+"des mises à jour.\n"
+"\n"
+"Rechercher les mises à jour automatiquement ?"
 
 #, fuzzy
 #~ msgid "    drop index failed: "
