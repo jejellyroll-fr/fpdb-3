@@ -121,7 +121,12 @@ def _room(found: Any, path: str) -> str | None:
     match = PokerTracker.re_Site.search(head)
     if match is None:
         return name
-    room = PokerTracker.sites[match.group("SITE")][0]
+    # re_Site takes any whitespace (a tab, two spaces) where the table's keys have
+    # one space: an odd header keeps the identified name instead of stopping the scan.
+    entry = PokerTracker.sites.get(match.group("SITE"))
+    if entry is None:
+        return name
+    room = entry[0]
     # The parser too keeps the iPoker skin IdentifySite found; any other room is the header's.
     return name if room == "iPoker" else room
 

@@ -211,3 +211,16 @@ def test_every_tracker_says_where_its_hand_histories_are() -> None:
     for tracker in TRACKERS:
         assert len(tracker.steps) == 3
         assert "archive" in tracker.steps[0]
+
+
+def test_an_odd_pokertracker_header_does_not_stop_the_scan(config, tmp_path) -> None:
+    """re_Site accepts any whitespace; a header the room table does not know keeps the identified room."""
+    merge = next(p for p in sorted((CASH / "PokerTracker").rglob("*Merge.txt")) if p.stat().st_size)
+    text = merge.read_text(encoding="utf-8", errors="replace").replace("MERGE_GAME #", "Merge\tGame #", 1)
+    (tmp_path / "odd.txt").write_text(text, encoding="utf-8")
+    shutil.copy(next(p for p in sorted((CASH / "Winamax").rglob("*.txt")) if p.stat().st_size), tmp_path)
+
+    scan = scan_folder(config, str(tmp_path))
+
+    assert "Winamax" in scan.rooms  # the rest of the folder was still read
+    assert scan.file_count + len(scan.unsupported) == 2
