@@ -24,7 +24,7 @@ import multiprocessing
 import os
 import tempfile
 from concurrent.futures import Future, ProcessPoolExecutor
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -47,6 +47,8 @@ class PrefetchJob:
     filter_name: str
     sitename: str
     archive: bool
+    # Its place in the import, set on submission.
+    order: int = 0
 
 
 def worker_count(threads: int | None) -> int:
@@ -59,8 +61,8 @@ def worker_count(threads: int | None) -> int:
 
 
 _worker_config: Any = None
-# Where a worker reports the files it starts: a queued job is not one yet.
-_worker_started: Any = None
+# The place of the file the import has reached; a worker skips any file up to it.
+_worker_reached: Any = None
 
 
 class _PlaceholderIds:
@@ -86,9 +88,9 @@ class _PlaceholderIds:
         return {}
 
 
-def _start_worker(config_file: str, started: Any = None) -> None:
-    global _worker_config, _worker_started
-    _worker_started = started
+def _start_worker(config_file: str, reached: Any = None) -> None:
+    global _worker_config, _worker_reached
+    _worker_reached = reached
     logging.disable(logging.CRITICAL)
     from fpdb_3_legacy.Configuration import Config
 
@@ -96,9 +98,13 @@ def _start_worker(config_file: str, started: Any = None) -> None:
 
 
 def exact_equities(job: PrefetchJob) -> dict[equity.ExactKey, equity.EquityResult]:
-    """Parse and derive one file; return the exact equities that computed. Never raises."""
-    if _worker_started is not None:
-        _worker_started.put(job.path)
+    """Parse and derive one file; return the exact equities that computed. Never raises.
+
+    A file the import has already reached is skipped: the import computes it
+    itself, and the worker moves on to the files ahead of it.
+    """
+    if _worker_reached is not None and job.order <= _worker_reached.value:
+        return {}
     try:
         from fpdb_3_legacy.iPoker.dispatcher import get_parser_class_for_path
         from fpdb_3_legacy.parser_registry import get_parser_class
@@ -137,34 +143,37 @@ class EquityPrefetch:
         config_file = Path(self._directory.name) / "HUD_config.xml"
         config_file.write_text(config.doc.toxml(), encoding="utf-8")
         context = multiprocessing.get_context("spawn")
-        self._started_queue = context.SimpleQueue()
-        self._started: set[str] = set()
+        self._reached = context.Value("i", -1)
+        self._order: dict[str, int] = {}
         self._pool = ProcessPoolExecutor(
             max_workers=workers,
             mp_context=context,
             initializer=_start_worker,
-            initargs=(str(config_file), self._started_queue),
+            initargs=(str(config_file), self._reached),
         )
         self._futures: dict[str, Future[dict[equity.ExactKey, equity.EquityResult]]] = {}
 
     def submit(self, jobs: list[PrefetchJob]) -> None:
         for job in jobs:
-            self._futures[job.path] = self._pool.submit(exact_equities, job)
+            order = len(self._order)
+            self._order[job.path] = order
+            self._futures[job.path] = self._pool.submit(exact_equities, replace(job, order=order))
 
     def before_import(self, path: str) -> None:
-        """Make the file's equities available if a worker has them or has started on them.
+        """Make the file's equities available if a worker has finished it; never wait.
 
-        Only a file a worker reported starting is waited for: the rest of its
-        work is less than all of it. A queued file is left to the import, which
-        computes its equities as before; the pool marks a queued job running
-        before any worker has it, so its state cannot tell the two apart.
+        A file not finished yet is left to the import, which computes its
+        equities as before. Waiting would rarely pay: the import parses and
+        derives the file again anyway, so for a file without an expensive
+        all-in the wait is pure loss, and the pool cannot even tell a job a
+        worker is on from one merely queued. Workers skip every file up to
+        this one from now on.
         """
         future = self._futures.pop(path, None)
         if future is None:
             return
-        while not self._started_queue.empty():
-            self._started.add(self._started_queue.get())
-        if not future.done() and path not in self._started:
+        self._reached.value = self._order[path]
+        if not future.done():
             future.cancel()
             return
         if future.cancelled() or future.exception() is not None:
@@ -173,8 +182,14 @@ class EquityPrefetch:
         equity.remember_exact(future.result())
 
     def close(self) -> None:
+        """Stop the workers without waiting for them to exit.
+
+        Every file has been reached by now, so a job still queued only skips:
+        no equity is computed after the import is over, and waiting for the
+        processes to end would only delay the import's result.
+        """
+        self._reached.value = len(self._order)
         self._pool.shutdown(wait=False, cancel_futures=True)
-        self._started_queue.close()
         self._futures.clear()
         equity.forget_exact()
         self._directory.cleanup()

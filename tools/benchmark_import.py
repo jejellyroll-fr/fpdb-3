@@ -15,8 +15,8 @@ The phases:
 * parse  -- the converter reading the file into hands (HandHistoryConverter.start);
 * derive -- player and gametype lookups and the derived statistics, all-in
   equity included (Hand.prepInsert and Hand.assembleHand);
-* workers -- with ``--workers``: starting them, handing them the files, and
-  waiting for a file one of them has started (EquityPrefetch);
+* workers -- with ``--workers``: starting them, handing them the files and
+  collecting their results (EquityPrefetch);
 * write  -- everything else: the inserts, the caches, auto notes.
 
 With ``--workers N`` the import starts N worker processes that compute the

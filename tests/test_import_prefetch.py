@@ -75,6 +75,17 @@ def test_a_parallel_import_writes_the_same_database(tmp_path, monkeypatch) -> No
     received: list[int] = []
     remember = equity.remember_exact
     monkeypatch.setattr(equity, "remember_exact", lambda results: (received.append(len(results)), remember(results)))
+    # The import never waits for a worker; here it does, so that the workers'
+    # results are used whatever the runner's speed, which is what is compared.
+    before_import = import_prefetch.EquityPrefetch.before_import
+
+    def after_the_worker(self, path):
+        future = self._futures.get(path)
+        if future is not None:
+            future.exception()
+        before_import(self, path)
+
+    monkeypatch.setattr(import_prefetch.EquityPrefetch, "before_import", after_the_worker)
 
     sequential = _tables(_import(tmp_path / "sequential", threads=1))
     assert not received, "a sequential import started workers"
@@ -164,3 +175,15 @@ def test_a_packaged_build_starts_no_worker(importer, monkeypatch) -> None:
 
 def test_no_writer_connection_is_opened_for_the_threads(importer) -> None:
     assert importer.writerdbs == []
+
+
+def test_a_worker_skips_a_file_the_import_has_reached(monkeypatch) -> None:
+    """The import computes such a file itself; the worker must not do it a second time."""
+    import multiprocessing
+
+    reached = multiprocessing.get_context("spawn").Value("i", 3)
+    monkeypatch.setattr(import_prefetch, "_worker_reached", reached)
+    monkeypatch.setattr(import_prefetch, "_worker_config", object())  # parsing would fail on it
+    job = import_prefetch.PrefetchJob(str(FILES[0]), "PokerStars", "PokerStars", False, order=3)
+
+    assert import_prefetch.exact_equities(job) == {}

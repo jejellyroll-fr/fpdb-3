@@ -16,7 +16,7 @@ splits the time into three phases:
 | --- | --- |
 | parse | the converter reading the file into hands (`HandHistoryConverter.start`) |
 | derive | player and gametype lookups and the derived statistics, all-in equity included (`Hand.prepInsert`, `Hand.assembleHand`) |
-| workers | with `--workers`: starting them, handing them the files, waiting for a file one of them has started |
+| workers | with `--workers`: starting them, handing them the files, collecting their results |
 | write | everything else: the inserts, the caches, auto notes |
 
 The default corpus is the cash hand histories of six rooms in
@@ -31,7 +31,7 @@ Apple M-series, 10 cores, SQLite, best of two runs:
 | --- | --- | --- | --- | --- | --- |
 | before #443 | 14.85 s | 48.7 | 1.27 s | 8.72 s | 4.86 s |
 | auto-notes lookup fixed | 10.72 s | 67.5 | 1.18 s | 8.23 s | 1.30 s |
-| + 4 equity workers | 6.20 s | 116.6 | 1.35 s | 2.83 s | 1.61 s (+ 0.40 s workers) |
+| + 4 equity workers | 6.66 s | 108.6 | 1.39 s | 3.74 s | 1.49 s (+ 0.04 s workers) |
 
 ## Where the time went
 
@@ -59,11 +59,13 @@ batching. When it reaches a hand, the equity is usually known already.
 - **Output.** Exhaustive enumeration is deterministic, so the database is the
   same with or without workers; `tests/test_import_prefetch.py` imports the
   same files both ways and compares every table, timestamps aside.
-- **Waiting.** Workers report each file they start. The import waits only for
-  a file a worker has started, whose remaining work is less than all of it; a
-  file still queued is cancelled and imported as before. The pool's own state
-  cannot tell the two apart: it marks a queued job running before any worker
-  has it.
+- **No waiting.** The import uses a worker's result only if the worker has
+  finished the file; otherwise it computes the file as before. Waiting rarely
+  pays: the import parses and derives the file again anyway, so for a file
+  without an expensive all-in the wait is pure loss (measured: waiting for the
+  files a worker had started was no faster, within noise). The import publishes
+  the place of the file it has reached, and workers skip every file up to it:
+  they never compute a file twice, and nothing is computed after the import.
 - **The setting.** `threads` sets the number of workers: 1 is none, -1 every
   core but one, up to four (more cost more in start-up and memory than they
   save here). The bulk import window and its command line
