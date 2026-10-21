@@ -67,6 +67,18 @@ def language_options(available: list[str], current: str | None) -> list[tuple[st
     return options
 
 
+def language_label(name: str, completion: tuple[int, int] | None) -> str:
+    """A language's menu label, with how much of the interface it translates (#444).
+
+    ``completion`` is ``(translated, total)``; None (English, System default)
+    leaves the name alone.
+    """
+    if not completion or not completion[1]:
+        return name
+    translated, total = completion
+    return f"{name} ({translated * 100 // total} %)"
+
+
 def menu_layout() -> tuple[Menu, ...]:
     """Return the menu bar grouped by user intent (File / Import / analysis / DB…)."""
     return (

@@ -158,9 +158,14 @@ Handle these when an opportunity arises; there is nothing to do until then.
 
 ## 7. Translations
 
-Thirteen of the 14 shipped locales are untranslated — only French is complete.
-The gettext pipeline, language selector and extraction work; only catalogue
-content is missing. This is a translation task, not a development task.
+The catalogues had not been merged with the source for years: French looked
+complete, but two thirds of its entries were for strings that no longer exist.
+Since #444 every `.po` is merged against a committed `locale/fpdb.pot` (1,275
+strings), CI checks they stay so, and *View ▸ Language* shows each language's
+completion. French covers 48 % after a review of its fuzzy entries; every
+other language is under 14 %. What remains is translation, not development:
+hosting the catalogues on a translation platform (Weblate or Crowdin) is the
+next step.
 
 Since 3.4.2, note that #198 fixed language resolution itself: a configuration
 without `ui_language` falls back to `system`, not English, so old

@@ -143,11 +143,14 @@ class GuiVersionInfo(QWidget):
                 (_("Report an issue"), version_info.ISSUES_URL),
             )
         )
+        # Outside the f-strings: xgettext before 0.22 does not see a call in one (#444).
+        version_heading = _escape(_("Version and environment"))
+        links_heading = _escape(_("Links"))
         return (
             '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Helvetica, Arial, sans-serif;">'
-            f"<h3>{_escape(_('Version and environment'))}</h3>"
+            f"<h3>{version_heading}</h3>"
             f'<table style="border-collapse: collapse;">{rows}</table>'
-            f"<h3>{_escape(_('Links'))}</h3>"
+            f"<h3>{links_heading}</h3>"
             f"<ul>{links}</ul>"
             "</div>"
         )

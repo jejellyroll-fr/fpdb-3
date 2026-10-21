@@ -54,6 +54,12 @@ jobs:
         run: ruff check fpdb_3_legacy fpdb test tests tools
       - name: Prepare compiled translation resources
         run: python tools/prepare_briefcase_resources.py
+      - name: Check translations are merged with the source
+        # Prints each language's completion; fails when locale/fpdb.pot or a
+        # catalogue lags the source (fix: python tools/update_pot.py --merge).
+        run: |
+          sudo apt-get install -y gettext
+          python tools/update_pot.py --check
       - name: Verify technical-debt inventory
         run: python tools/todo_inventory.py --check
       - name: Type-check modernized core

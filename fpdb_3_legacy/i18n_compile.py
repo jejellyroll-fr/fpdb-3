@@ -12,6 +12,7 @@ from __future__ import annotations
 import array
 import re
 import struct
+from dataclasses import dataclass
 from pathlib import Path
 
 DOMAIN = "fpdb"
@@ -36,34 +37,47 @@ def _unescape(text: str) -> str:
     return "".join(out)
 
 
-def parse_po(path: Path) -> dict[str, str]:
-    """Parse a .po file into a ``{msgid: msgstr}`` map (singular entries only)."""
-    messages: dict[str, str] = {}
+@dataclass(frozen=True)
+class PoEntry:
+    """One active entry of a .po file; obsolete (``#~``) entries are not read."""
+
+    msgid: str
+    msgstr: str
+    fuzzy: bool = False
+    plural: bool = False
+
+
+def _is_fuzzy_flag(line: str) -> bool:
+    """A ``#, fuzzy, python-format`` flags line that includes fuzzy."""
+    return line.startswith("#,") and "fuzzy" in line[2:].replace(" ", "").split(",")
+
+
+def read_entries(path: Path) -> list[PoEntry]:
+    """Every active entry of a .po or .pot file, the header (msgid "") included."""
+    entries: list[PoEntry] = []
     key = val = None
     target = None  # which buffer continuation lines append to
-    skip_plural = False
+    fuzzy = plural = flagged_fuzzy = False
 
     def flush() -> None:
-        # Skip entries with an empty translation (like GNU msgfmt) so gettext
-        # falls back to the source string instead of returning "" — an empty
-        # menu/label. The header entry (msgid "") has a non-empty msgstr carrying
-        # the charset, so it is kept (required for UTF-8 decoding). Plurals ignored.
-        if key is not None and val and not skip_plural:
-            messages[key] = val
+        if key is not None:
+            entries.append(PoEntry(key, val or "", fuzzy, plural))
 
     with path.open(encoding="utf-8") as handle:
         for raw in handle:
             line = raw.rstrip("\n")
             if line.startswith("#") or not line.strip():
+                flagged_fuzzy = flagged_fuzzy or _is_fuzzy_flag(line)
                 continue
             match = _LINE.match(line)
             if match:
                 kind, body = match.group(1), _unescape(match.group(2))
                 if kind == "msgid":
                     flush()
-                    key, val, target, skip_plural = body, None, "id", False
+                    key, val, target, plural = body, None, "id", False
+                    fuzzy, flagged_fuzzy = flagged_fuzzy, False
                 elif kind == "msgid_plural":
-                    skip_plural = True  # plural entries are ignored for now
+                    plural = True  # plural entries are ignored for now
                     target = None
                 else:  # msgstr
                     val, target = body, "str"
@@ -74,7 +88,30 @@ def parse_po(path: Path) -> dict[str, str]:
             elif cont and target == "str" and val is not None:
                 val += _unescape(cont.group(1))
     flush()
-    return messages
+    return entries
+
+
+def parse_po(path: Path) -> dict[str, str]:
+    """Parse a .po file into a ``{msgid: msgstr}`` map of what gettext should show.
+
+    Like GNU msgfmt, an empty translation is left out, so gettext falls back to
+    the source string instead of an empty label, and so is a fuzzy one: msgmerge
+    marks a guess from a similar string fuzzy until a translator checks it
+    (#444). The header entry (msgid "") is kept for its charset. Plurals are
+    ignored.
+    """
+    return {
+        entry.msgid: entry.msgstr
+        for entry in read_entries(path)
+        if entry.msgstr and not entry.fuzzy and not entry.plural
+    }
+
+
+def completion(path: Path) -> tuple[int, int]:
+    """``(translated, total)`` messages of a catalogue, as gettext would show them."""
+    messages = [entry for entry in read_entries(path) if entry.msgid and not entry.plural]
+    translated = sum(1 for entry in messages if entry.msgstr and not entry.fuzzy)
+    return translated, len(messages)
 
 
 def generate_mo(messages: dict[str, str]) -> bytes:
