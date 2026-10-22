@@ -2647,19 +2647,9 @@ class ModernHudPreferences(QDialog):
             QMessageBox.critical(self, "Import Error", f"Could not import {filename}:\n{e}")
             return
 
-        lines = [
-            f"Imported '{summary['name']}'.",
-            f"• {summary['stats']} stats mapped"
-            + (f" across {summary['blocks']} position panels." if summary.get("blocks") else "."),
-        ]
-        if summary["charts"]:
-            lines.append(
-                f"• {len(summary['charts'])} range chart(s) "
-                f"({', '.join(summary['charts'])}) → popup '{summary['popup']}'."
-            )
-        if summary["unmapped"]:
-            lines.append(f"• {len(summary['unmapped'])} custom formula stat(s) could not be mapped.")
-        QMessageBox.information(self, "PT4 HUD imported", "\n".join(lines))
+        from fpdb_3_legacy.pt4hud_dialogs import show_import_summary
+
+        show_import_summary(self, summary, filename)
 
     def reload_parent_config(self) -> None:
         """Ask the host to apply an import that has already been saved.

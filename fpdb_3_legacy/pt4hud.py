@@ -1120,26 +1120,14 @@ def _flow_items(items: list[Cell], cols: int):
     return placed, max(total, 1)
 
 
-def import_to_config(
-    source: str | bytes,
-    config,
-    name: str | None = None,
-    charts_path: str | None = None,
-    multiblock: bool = True,
-) -> dict:
-    """Insert a parsed ``.pt4hud`` layout into an fpdb ``Configuration`` document.
+def _build_stat_set(doc, layout: Layout, name: str, multiblock: bool = True):
+    """The ``<ss>`` for ``layout``, built in ``doc``: ``(ss, mapped stats, panels)``.
 
-    Appends a ``<ss>`` stat-set to ``<stat_sets>`` — with one ``<block>`` per PT4
-    panel (SB/BB/BU/info) when ``multiblock`` (the default) so the HUD shows
-    stacked panels per seat; otherwise a single grouped grid. When the layout has
-    range charts, also writes a JSON sidecar and appends a ``RangeChartPopup``
-    ``<pu>`` to ``<popup_windows>``. Caller is expected to ``config.save()``.
+    One ``<block>`` per PT4 panel (SB/BB/BU/info) when ``multiblock`` and the
+    layout has panels, so the HUD shows stacked panels per seat; otherwise a
+    single grouped grid. Shared by :func:`import_to_config` and :func:`to_package`.
     """
-    layout = parse(source)
-    doc = config.doc
-    name = (name or layout.name or "pt4_import")[:40]
     cols = 4
-
     # Place stat cells and (PT4-style) text-label items together.
     place_cells = [c for c in layout.cells if c.kind == "text" or c.fpdb_stat]
     n_stats = sum(1 for c in place_cells if c.fpdb_stat)
@@ -1184,6 +1172,28 @@ def import_to_config(
         ss.setAttribute("rows", str(rows))
         for c, r, col in placements:
             ss.appendChild(_stat_el(doc, c, r, col))
+    return ss, n_stats, n_blocks
+
+
+def import_to_config(
+    source: str | bytes,
+    config,
+    name: str | None = None,
+    charts_path: str | None = None,
+    multiblock: bool = True,
+) -> dict:
+    """Insert a parsed ``.pt4hud`` layout into an fpdb ``Configuration`` document.
+
+    Appends a ``<ss>`` stat-set to ``<stat_sets>`` — with one ``<block>`` per PT4
+    panel (SB/BB/BU/info) when ``multiblock`` (the default) so the HUD shows
+    stacked panels per seat; otherwise a single grouped grid. When the layout has
+    range charts, also writes a JSON sidecar and appends a ``RangeChartPopup``
+    ``<pu>`` to ``<popup_windows>``. Caller is expected to ``config.save()``.
+    """
+    layout = parse(source)
+    doc = config.doc
+    name = (name or layout.name or "pt4_import")[:40]
+    ss, n_stats, n_blocks = _build_stat_set(doc, layout, name, multiblock)
     ss_parent = doc.getElementsByTagName("stat_sets")
     if ss_parent:
         # Re-importing the same layout should replace its stat-set, not pile up
@@ -1246,7 +1256,73 @@ def import_to_config(
         "popup": popup_name,
         "popup_groups": popup_group_names,
         "unmapped": [c.formula for c in layout.unsupported if c.formula],
+        "untranslated": untranslated(layout),
     }
+
+
+def untranslated(layout: Layout) -> list[dict[str, str]]:
+    """Every PT4 stat cell with no fpdb equivalent (#614), as ``label`` / ``section`` / ``pt4_name`` / ``formula``.
+
+    Text labels and separator lines are layout, not stats, and are not listed.
+    """
+    return [
+        {
+            "label": c.label.strip(),
+            "section": c.section,
+            "pt4_name": c.pt4_name,
+            # A formula stat's name is its formula; say it once.
+            "formula": c.formula if c.formula and c.formula != c.pt4_name else "",
+        }
+        for c in layout.cells
+        if c.kind == "stat" and not c.fpdb_stat
+    ]
+
+
+def to_package(source: str | bytes, name: str | None = None, multiblock: bool = True) -> tuple[str, dict]:
+    """A ``.pt4hud`` layout as an ``.fpdbhud`` package: ``(xml, summary)`` (#614).
+
+    The package holds the translated stat-set, which re-imports through HUD
+    Preferences like any other package, and an ``<untranslated>`` list naming
+    each PT4 stat left out, so whoever installs it knows what is missing. The
+    stats point at the default popup, so the package stands alone. Range charts
+    and info popups are not in it: they live in JSON files beside a configuration,
+    and only importing the ``.pt4hud`` itself writes them.
+    """
+    from xml.dom.minidom import getDOMImplementation
+
+    layout = parse(source)
+    name = (name or layout.name or "pt4_import")[:40]
+    impl = getDOMImplementation()
+    assert impl is not None
+    doc = impl.createDocument(None, "fpdb_hud_package", None)
+    root = doc.documentElement
+    assert root is not None
+    root.setAttribute("version", "1.0")
+    root.setAttribute("source", "pt4hud")
+    ss, n_stats, n_blocks = _build_stat_set(doc, layout, name, multiblock)
+    root.appendChild(ss)
+
+    missing = untranslated(layout)
+    if missing:
+        listing = doc.createElement("untranslated")
+        listing.setAttribute("count", str(len(missing)))
+        for stat in missing:
+            node = doc.createElement("pt4_stat")
+            for key, value in stat.items():
+                if value:
+                    node.setAttribute(key, value)
+            listing.appendChild(node)
+        root.appendChild(listing)
+
+    summary = {
+        "name": name,
+        "stats": n_stats,
+        "blocks": n_blocks,
+        "untranslated": missing,
+        # A push/fold chart is both a range chart and a popup group: name it once.
+        "left_out": list(dict.fromkeys([c.name for c in layout.charts] + [g.name for g in layout.popup_groups])),
+    }
+    return doc.toprettyxml(indent="    "), summary
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1256,7 +1332,17 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--json", action="store_true", help="dump the full layout (stats + charts) as JSON")
     ap.add_argument("--name", default=None, help="name for the generated stat-set")
     ap.add_argument("--cols", type=int, default=4, help="columns in the generated grid")
+    ap.add_argument("--package", metavar="OUT", help="write an .fpdbhud package to OUT and list untranslated stats")
     args = ap.parse_args(argv)
+
+    if args.package:
+        xml, summary = to_package(args.path, name=args.name)
+        with open(args.package, "w", encoding="utf-8") as fh:
+            fh.write(xml)
+        print(f"Wrote {args.package}: {summary['stats']} stats in '{summary['name']}'.")
+        for stat in summary["untranslated"]:
+            print(f"  untranslated [{stat['section']}] {stat['label'] or stat['pt4_name']}")
+        return 0
 
     layout = parse(args.path)
     if args.json:

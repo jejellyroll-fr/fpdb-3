@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 21:40+0200\n"
+"POT-Creation-Date: 2026-10-22 09:11+0200\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -2914,11 +2914,6 @@ msgstr "Free Poker DB 3"
 msgid "Manage HUD Sites"
 msgstr "Gérer les sites du HUD"
 
-# --- Vague 2: main window dialogs ---
-#: fpdb_3_legacy/fpdb.pyw
-msgid "PT4 HUD imported"
-msgstr "HUD PT4 importé"
-
 #: fpdb_3_legacy/fpdb.pyw
 msgid "PT4 stats import"
 msgstr "Import des stats PT4"
@@ -4284,6 +4279,81 @@ msgstr ""
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
 msgid "Reference HUD"
 msgstr "HUD de référence"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "%(stats)d stats translated, in %(blocks)d panels."
+msgstr "%(stats)d stats traduites, dans %(blocks)d panneaux."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "%d PT4 stats have no fpdb equivalent and were left out (see Details)."
+msgstr ""
+"%d stats PT4 n'ont pas d'équivalent fpdb et ont été laissées de côté (voir "
+"Détails)."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "Assign the new HUD profile to a game in HUD Preferences."
+msgstr "Associez le nouveau profil HUD à un jeu dans les Préférences HUD."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid ""
+"Could not save the package:\n"
+"%s"
+msgstr ""
+"Impossible d'enregistrer le paquet :\n"
+"%s"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "Every PT4 stat was translated."
+msgstr "Toutes les stats PT4 ont été traduites."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "FPDB HUD package (*.fpdbhud)"
+msgstr "Paquet HUD FPDB (*.fpdbhud)"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "Imported '%s'."
+msgstr "« %s » importé."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid ""
+"Not in the package: %s. Import the .pt4hud itself to get the range charts "
+"and info popups."
+msgstr ""
+"Absent du paquet : %s. Importez le .pt4hud lui-même pour obtenir les range "
+"charts et les popups d'info."
+
+# --- Vague 2: main window dialogs ---
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "PT4 HUD imported"
+msgstr "HUD PT4 importé"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "Range charts %(charts)s are in the popup '%(popup)s'."
+msgstr "Les range charts %(charts)s sont dans la popup « %(popup)s »."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "Save as .fpdbhud package"
+msgstr "Enregistrer comme paquet .fpdbhud"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "Save as .fpdbhud package…"
+msgstr "Enregistrer comme paquet .fpdbhud…"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "Saved %s."
+msgstr "%s enregistré."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "The package lists the %d PT4 stats it leaves out."
+msgstr "Le paquet liste les %d stats PT4 qu'il laisse de côté."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "% of pot"

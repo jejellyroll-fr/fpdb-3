@@ -466,19 +466,9 @@ class fpdb(QMainWindow):
             QMessageBox.critical(self, "Import failed", f"Could not import {path}:\n{e}")
             return
 
-        lines = [
-            f"Imported layout '{summary['name']}'.",
-            f"• {summary['stats']} stats mapped to a new HUD stat-set.",
-        ]
-        if summary["charts"]:
-            lines.append(
-                f"• {len(summary['charts'])} range chart(s) ({', '.join(summary['charts'])}) "
-                f"→ popup '{summary['popup']}'."
-            )
-        if summary["unmapped"]:
-            lines.append(f"• {len(summary['unmapped'])} custom formula stat(s) could not be mapped.")
-        lines.append("\nAssign the new stat-set / popup to a game in HUD Preferences.")
-        QMessageBox.information(self, _("PT4 HUD imported"), "\n".join(lines))
+        from fpdb_3_legacy.pt4hud_dialogs import show_import_summary
+
+        show_import_summary(self, summary, path)
 
     def dia_stat_packs(self, widget=None, data=None) -> None:
         """Manage user-installed declarative stat packs (#403)."""
