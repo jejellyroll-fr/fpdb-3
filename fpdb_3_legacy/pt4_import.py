@@ -25,6 +25,7 @@ from __future__ import annotations
 import json
 import re
 import struct
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -77,6 +78,25 @@ def load_column_map() -> dict[str, tuple[str, float]]:
 
 
 PT4_COLUMN_MAP: dict[str, tuple[str, float]] = load_column_map()
+
+
+def _load_section(section: str) -> dict[str, dict[str, str]]:
+    """One of the mapping file's other sections (#613), documentation keys dropped."""
+    try:
+        doc = json.loads(_legacy_mapping_path().read_text(encoding="utf-8"))
+    except Exception:  # pragma: no cover - corrupt/missing file: no extra idioms
+        log.exception("could not read the %s section of the PT4 mapping", section)
+        return {}
+    entries = doc.get(section, {})
+    return {key: spec for key, spec in entries.items() if not key.startswith("_") and isinstance(spec, dict)}
+
+
+# sum(if[<condition>, 1, 0]) with a condition richer than one flag -> FPDB column or sum of columns.
+PT4_CONDITION_MAP: dict[str, dict[str, str]] = _load_section("conditions")
+# PT4 column name -> FPDB column under another definition, used when its SQL does not translate.
+PT4_NAMED_COLUMNS: dict[str, dict[str, str]] = _load_section("named_columns")
+# PT4 sub-expression of a value expression -> FPDB column under another definition.
+PT4_EXPRESSION_ALIASES: dict[str, dict[str, str]] = _load_section("expressions")
 
 # PT4 aggregate column SQL -> FPDB context input supplied by the query.
 PT4_CONTEXT_MAP: dict[str, str] = {
@@ -166,6 +186,7 @@ class DecodedStat:
     label: str = ""
     description: str = ""
     strings: list[str] = field(default_factory=list)
+    category: str = ""  # PT4's stat category, e.g. "Cash Player", when known
 
 
 def decode_pt4stat(path: str | Path) -> DecodedStat:
@@ -203,6 +224,71 @@ def decode_pt4stat(path: str | Path) -> DecodedStat:
         decoded.description = max(non_sql, key=len).split("\n")[0].strip()
 
     return decoded
+
+
+# The stat categories PT4 groups its definitions under; a stat of a player category
+# is computed per player, which is what an FPDB descriptor is.
+PLAYER_CATEGORIES = ("Cash Player", "Tournament Player")
+_DEFINITION_CATEGORIES = frozenset(
+    {*PLAYER_CATEGORIES, "Cash Hand", "Tournament Hand", "Cash Sessions", "Tournament Tournaments"}
+)
+# How PT4 aggregates a column definition; a stat record has a title where a column has one of these.
+_COLUMN_AGGREGATIONS = frozenset({"Sum", "Count", "Count Unique", "Average", "Copy", "Max", "Min", "Append"})
+
+
+def _decimals(display: str) -> int:
+    """Decimal places of a PT4 display expression (``/%.2f`` or ``format_number(x, 2, ...)``)."""
+    fn = re.search(r"format_number\s*\(.+?,\s*(\d+)\s*,", display, re.DOTALL)
+    if fn:
+        return int(fn.group(1))
+    printf = re.search(r"%[#0\- +]*\.(\d+)[feEgG]", display)
+    return int(printf.group(1)) if printf else 2
+
+
+def read_stat_definitions(path: str | Path) -> list[DecodedStat]:
+    """The stats PokerTracker 4 ships, read from its ``StatDefinitions.pt4`` (#613).
+
+    The file sits in the PT4 install (``Data/Stats/StatDefinitions.pt4``, inside
+    ``PokerTracker 4.app/Contents/Resources`` on macOS). It is the same
+    length-prefixed UTF-16 container as a ``.pt4stat``, holding every column
+    definition -- category, name, SQL, aggregation, description -- and every
+    stat -- category, title, long title, short title, value expression, display
+    expression, description. Each player stat comes back as a
+    :class:`DecodedStat` whose columns are the definitions it references.
+    """
+    path = Path(path)
+    strings = _extract_strings(path.read_bytes(), max_len=20000)
+    columns: dict[str, dict[str, str]] = {}
+    records: list[int] = []
+    for i in range(len(strings) - 7):
+        category, name = strings[i], strings[i + 1]
+        if category not in _DEFINITION_CATEGORIES:
+            continue
+        if _is_identifier(name) and strings[i + 3] in _COLUMN_AGGREGATIONS:
+            columns.setdefault(category, {}).setdefault(name, strings[i + 2])
+        elif category in PLAYER_CATEGORIES and not _is_identifier(name) and name not in _DEFINITION_CATEGORIES:
+            records.append(i)
+
+    stats = []
+    for i in records:
+        category, title, value_expr, display = strings[i], strings[i + 1], strings[i + 4], strings[i + 5]
+        defined = columns.get(category, {})
+        referenced = {n: defined[n] for n in _IDENTIFIER_RE.findall(value_expr) if n in defined}
+        description = next(
+            (text for text in strings[i + 6 : i + 9] if text not in (display, value_expr) and len(text) > 20), ""
+        )
+        stats.append(
+            DecodedStat(
+                path=path,
+                columns=referenced,
+                value_expr=value_expr.strip(),
+                decimals=_decimals(display),
+                label=title,
+                description=description.split("\n")[0].strip(),
+                category=category,
+            )
+        )
+    return stats
 
 
 def _title_before(strings: list[str], format_idx: int) -> str:
@@ -254,6 +340,28 @@ _SUM_IF_FLAG_RE = re.compile(
 )
 # sum(<t>.<col>)
 _SUM_RE = re.compile(r"sum\(\s*\w+\.(\w+)\s*\)", re.IGNORECASE)
+# sum(if[<condition>, 1, 0]) — a count over any condition (#613).
+_SUM_IF_COND_RE = re.compile(
+    r"^\s*sum\(\s*if\[\s*(?P<cond>.+?)\s*,\s*1\s*,\s*0\s*\]\s*\)\s*$", re.IGNORECASE | re.DOTALL
+)
+_IDENTIFIER_RE = re.compile(r"[A-Za-z_]\w*")
+
+
+def _normalise_condition(condition: str) -> str:
+    """A condition as the mapping keys it: table prefixes dropped, single spaces around comparisons."""
+    text = re.sub(r"\b[A-Za-z_]\w*\.(?=[A-Za-z_])", "", condition)
+    text = re.sub(r"\s*(<=|>=|!=|=|<|>)\s*", r" \1 ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _inputs_of(fpdb_expr: str) -> list[str]:
+    """The FPDB columns an FPDB target names, in order (a column, or a sum such as ``a + b``)."""
+    return list(dict.fromkeys(_IDENTIFIER_RE.findall(fpdb_expr)))
+
+
+def _is_count(col_sql: str) -> bool:
+    """Whether the column counts hands (``sum(if[..., 1, 0])``), so its FPDB inputs are booleans."""
+    return bool(_SUM_IF_COND_RE.match(col_sql))
 
 
 @dataclass
@@ -262,6 +370,8 @@ class TranslatedStat:
 
     descriptor: dict[str, Any] | None = None
     warnings: list[str] = field(default_factory=list)
+    # Where the FPDB stat is defined differently from PT4's: translated, but not identical.
+    notes: list[str] = field(default_factory=list)
 
     @property
     def supported(self) -> bool:
@@ -292,6 +402,14 @@ def _resolve_fact(col_sql: str) -> tuple[str, dict[str, Any] | None, float]:
         fpdb_col, scale = PT4_COLUMN_MAP[pt4_col]
         return fpdb_col, None, scale
 
+    m = _SUM_IF_COND_RE.match(col_sql)
+    if m:
+        condition = _normalise_condition(m.group("cond"))
+        spec = PT4_CONDITION_MAP.get(condition)
+        if spec is None:
+            raise PT4TranslationError(f"unmapped PT4 condition {condition!r}")
+        return spec["fpdb"], None, 1.0
+
     m = _SUM_RE.search(col_sql)
     if m:
         pt4_col = m.group(1)
@@ -303,6 +421,56 @@ def _resolve_fact(col_sql: str) -> tuple[str, dict[str, Any] | None, float]:
     raise PT4TranslationError(f"unsupported column SQL: {col_sql.strip()[:80]}")
 
 
+def _apply_expression_aliases(expr: str) -> tuple[str, list[str], list[str]]:
+    """Replace the PT4 sub-expressions FPDB answers with one column: ``(expr, fpdb inputs, notes)``."""
+    inputs: list[str] = []
+    notes: list[str] = []
+    for alias, spec in PT4_EXPRESSION_ALIASES.items():
+        pattern = r"\s*".join(re.escape(token) for token in alias.split())
+        if re.search(pattern, expr):
+            expr = re.sub(pattern, spec["fpdb"], expr)
+            inputs.extend(_inputs_of(spec["fpdb"]))
+            if spec.get("note"):
+                notes.append(spec["note"])
+    return expr, inputs, notes
+
+
+@dataclass
+class _Resolved:
+    """The referenced PT4 columns of an expression, resolved to FPDB inputs."""
+
+    facts: dict[str, tuple[str, dict[str, Any] | None, float]] = field(default_factory=dict)
+    context: dict[str, str] = field(default_factory=dict)
+    counts: set[str] = field(default_factory=set)  # columns whose FPDB inputs are booleans
+    failures: list[str] = field(default_factory=list)
+    notes: list[str] = field(default_factory=list)
+
+
+def _resolve_columns(decoded: DecodedStat, referenced: list[str]) -> _Resolved:
+    """Resolve each referenced column by its SQL, else by its PT4 name; collect what blocks it."""
+    resolved = _Resolved()
+    for col in referenced:
+        col_sql = decoded.columns[col]
+        ctx = PT4_CONTEXT_MAP.get(col_sql.strip().lower())
+        if ctx:
+            resolved.context[col] = ctx
+            continue
+        try:
+            resolved.facts[col] = _resolve_fact(col_sql)
+            if _is_count(col_sql):
+                resolved.counts.add(col)
+        except PT4TranslationError as exc:
+            named = PT4_NAMED_COLUMNS.get(col)
+            if named is None:
+                resolved.failures.append(f"{col} ({exc})")
+                continue
+            resolved.facts[col] = (named["fpdb"], None, 1.0)
+            resolved.counts.add(col)
+            if named.get("note"):
+                resolved.notes.append(named["note"])
+    return resolved
+
+
 def _translate_arithmetic(decoded: DecodedStat, expr: str) -> TranslatedStat:
     """Translate a general arithmetic/ratio value expression into a descriptor.
 
@@ -312,72 +480,86 @@ def _translate_arithmetic(decoded: DecodedStat, expr: str) -> TranslatedStat:
     context aggregate); otherwise the precise blocker is reported. Each column
     name is rewritten to its FPDB column (with any x100 scaling folded in), so
     the resulting descriptor value is evaluable by the registry.
+
+    A sub-expression FPDB answers with a column of its own (``cnt_hands -
+    cnt_walks``) and a column known by name (``cnt_pfr_opp``) translate too,
+    under FPDB's definition: their notes say how it differs from PT4's (#613).
     """
     result = TranslatedStat()
+    expr, alias_inputs, alias_notes = _apply_expression_aliases(expr)
     referenced = [c for c in decoded.columns if re.search(rf"\b{re.escape(c)}\b", expr)]
+    resolved = _resolve_columns(decoded, referenced)
 
-    context_inputs: dict[str, str] = {}
-    facts: dict[str, tuple[str, dict[str, Any] | None, float]] = {}
-    failures: list[str] = []
-    for col in referenced:
-        col_sql = decoded.columns[col]
-        ctx = PT4_CONTEXT_MAP.get(col_sql.strip().lower())
-        if ctx:
-            context_inputs[col] = ctx
-            continue
-        try:
-            facts[col] = _resolve_fact(col_sql)
-        except PT4TranslationError as exc:
-            failures.append(f"{col} ({exc})")
-
-    if failures:
-        result.warnings.append("value expression needs PT4 columns with no FPDB mapping: " + "; ".join(failures))
+    if resolved.failures:
+        result.warnings.append(
+            "value expression needs PT4 columns with no FPDB mapping: " + "; ".join(resolved.failures)
+        )
         return result
-    if not facts:
+    if not resolved.facts and not alias_inputs:
         result.warnings.append(f"unrecognized value expression: {expr[:80]}")
         return result
-    if any(dim is not None for _, dim, _ in facts.values()):
+    if any(dim is not None for _, dim, _ in resolved.facts.values()):
         result.warnings.append(f"dimensioned columns cannot be combined in an expression: {expr[:80]}")
         return result
 
     rewritten = expr
-    inputs: list[str] = []
-    boolean_inputs: list[str] = []
-    col_sqls: list[str] = []
-    for col, (fpdb_col, _dim, scale) in facts.items():
-        token = f"({fpdb_col} / {scale:g})" if scale != 1.0 else fpdb_col
+    inputs: list[str] = list(alias_inputs)
+    boolean_inputs: list[str] = list(alias_inputs)
+    for col, (fpdb_expr, _dim, scale) in resolved.facts.items():
+        token = fpdb_expr if _IDENTIFIER_RE.fullmatch(fpdb_expr) else f"({fpdb_expr})"
+        if scale != 1.0:
+            token = f"({token} / {scale:g})"
         rewritten = re.sub(rf"\b{re.escape(col)}\b", token, rewritten)
-        inputs.append(fpdb_col)
-        if _SUM_IF_FLAG_RE.search(decoded.columns[col]):
-            boolean_inputs.append(fpdb_col)
-        col_sqls.append(decoded.columns[col])
-    context_list: list[str] = []
-    for col, ctx_input in context_inputs.items():
+        inputs.extend(_inputs_of(fpdb_expr))
+        if col in resolved.counts:
+            boolean_inputs.extend(_inputs_of(fpdb_expr))
+    for col, ctx_input in resolved.context.items():
         rewritten = re.sub(rf"\b{re.escape(col)}\b", ctx_input, rewritten)
         inputs.append(ctx_input)
-        context_list.append(ctx_input)
-        col_sqls.append(decoded.columns[col])
 
-    scope = ["tour"] if any(any(t in s for t in TOURNAMENT_TABLES) for s in col_sqls) else ["ring", "tour"]
+    col_sqls = [decoded.columns[col] for col in [*resolved.facts, *resolved.context]]
+    notes = list(dict.fromkeys(alias_notes + resolved.notes))
+    result.descriptor = _ratio_descriptor(
+        decoded, rewritten.strip(), inputs, boolean_inputs, list(resolved.context.values()), col_sqls, notes
+    )
+    result.notes = notes
+    return result
+
+
+def _ratio_descriptor(
+    decoded: DecodedStat,
+    value: str,
+    inputs: list[str],
+    boolean_inputs: list[str],
+    context: list[str],
+    col_sqls: list[str],
+    notes: list[str],
+) -> dict[str, Any]:
+    """The descriptor of a translated ratio stat; ``notes`` say where FPDB's definition differs."""
+    tournament = decoded.category.startswith("Tournament") or any(
+        any(t in sql for t in TOURNAMENT_TABLES) for sql in col_sqls
+    )
     name = _slugify(decoded.label) or "pt4_stat"
     descriptor: dict[str, Any] = {
         "name": name,
         "label": decoded.label or name,
         "category": "Imported (PT4)",
-        "scope": scope,
-        "inputs": inputs,
-        "value": rewritten.strip(),
+        "scope": ["tour"] if tournament else ["ring", "tour"],
+        "inputs": list(dict.fromkeys(inputs)),
+        "value": value,
         "aggregate": "ratio",
         "format": f"%0.{decoded.decimals}f",
     }
-    if context_list:
-        descriptor["context"] = context_list
+    if context:
+        descriptor["context"] = context
     if boolean_inputs:
-        descriptor["boolean_inputs"] = boolean_inputs
-    if decoded.description:
-        descriptor["description"] = decoded.description
-    result.descriptor = descriptor
-    return result
+        descriptor["boolean_inputs"] = list(dict.fromkeys(boolean_inputs))
+    description = decoded.description
+    if notes:
+        description = " ".join([description, "Differs from PT4:", *notes]).strip()
+    if description:
+        descriptor["description"] = description
+    return descriptor
 
 
 def translate(decoded: DecodedStat) -> TranslatedStat:
@@ -417,15 +599,18 @@ def translate(decoded: DecodedStat) -> TranslatedStat:
         result.warnings.append(str(exc))
         return result
 
-    # Build the descriptor value expression with the x100 scaling folded in.
-    inputs = [fpdb_col]
-    value = f"{fpdb_col} / {scale:g}" if scale != 1.0 else fpdb_col
+    # Build the descriptor value expression with the x100 scaling folded in. The
+    # FPDB side may be a sum of columns (both blinds' steal defences, #613).
+    inputs = _inputs_of(fpdb_col)
+    term = fpdb_col if _IDENTIFIER_RE.fullmatch(fpdb_col) else f"({fpdb_col})"
+    value = f"{term} / {scale:g}" if scale != 1.0 else term
     if context_input:
         inputs.append(context_input)
         value = f"{value} / {context_input}"
 
-    # Tournament scope is implied by the referenced PT4 tables.
-    scope = ["tour"] if any(t in col_sql for t in TOURNAMENT_TABLES) else ["ring", "tour"]
+    # Tournament scope is implied by the referenced PT4 tables, or by the stat's PT4 category.
+    tournament = decoded.category.startswith("Tournament") or any(t in col_sql for t in TOURNAMENT_TABLES)
+    scope = ["tour"] if tournament else ["ring", "tour"]
 
     name = _slugify(decoded.label) or _slugify(primary_col)
     fmt = f"%0.{decoded.decimals}f"
@@ -445,8 +630,8 @@ def translate(decoded: DecodedStat) -> TranslatedStat:
         descriptor["series"] = "cumulative"
     if context_input:
         descriptor["context"] = [context_input]
-    if _SUM_IF_FLAG_RE.search(col_sql):
-        descriptor["boolean_inputs"] = [fpdb_col]
+    if _is_count(col_sql):
+        descriptor["boolean_inputs"] = _inputs_of(fpdb_col)
     if decoded.description:
         descriptor["description"] = decoded.description
 
@@ -504,11 +689,17 @@ class ImportReport:
     imported: list[str] = field(default_factory=list)
     skipped: dict[str, list[str]] = field(default_factory=dict)
     output: Path | None = None
+    # Imported under FPDB's own definition (#613): stat name -> how it differs from PT4's.
+    differs: dict[str, list[str]] = field(default_factory=dict)
 
     def summary(self) -> str:
         lines = [f"Imported {len(self.imported)} stat(s): {', '.join(self.imported) or '-'}"]
         if self.output:
             lines.append(f"  -> {self.output}")
+        if self.differs:
+            lines.append(f"Imported under FPDB's definition, which differs from PT4's ({len(self.differs)}):")
+            for name, notes in self.differs.items():
+                lines.append(f"  - {name}: {' '.join(notes)}")
         if self.skipped:
             lines.append(f"Skipped {len(self.skipped)} stat(s) (need new derived data / unsupported):")
             for fname, warns in self.skipped.items():
@@ -547,6 +738,8 @@ def import_files(paths: list[str | Path], dest_file: str | Path) -> ImportReport
         if descriptor is not None:
             merged[descriptor["name"]] = descriptor
             report.imported.append(descriptor["name"])
+            if translated.notes:
+                report.differs[descriptor["name"]] = translated.notes
         else:
             report.skipped[path.name] = translated.warnings or ["unsupported"]
 
@@ -566,14 +759,120 @@ def import_directory(src: str | Path, dest_file: str | Path) -> ImportReport:
     return import_files(list(Path(src).glob("*.pt4stat")), dest_file)
 
 
+# The common cash stats #613 set out to translate, by their PT4 titles.
+COMMON_CASH_STATS = (
+    "VPIP",
+    "PFR",
+    "3Bet Preflop",
+    "Fold to PF 3Bet",
+    "CBet Flop",
+    "Fold to F CBet",
+    "WTSD",
+    "WSD",
+    "Flop AF",
+    "Total AF",
+    "Flop AFq",
+    "Total AFq",
+    "Att To Steal",
+    "Fold to Steal",
+)
+# A blocker as the translator words it: "unmapped PT4 column 'x'", "unmapped PT4 condition "..."".
+_BLOCKER_RE = re.compile(r"unmapped PT4 (column|condition|position code) (['\"])(.*?)\2(?=[);]|$)")
+_BLOCKER_SHOWN = 70
+
+
+def _blocker_label(kind: str, detail: str) -> str:
+    """A blocker for the report: its kind and the start of what PT4 wrote."""
+    detail = " ".join(detail.split())
+    if len(detail) > _BLOCKER_SHOWN:
+        detail = detail[: _BLOCKER_SHOWN - 1] + "…"
+    return f"unmapped {kind}: `{detail}`"
+
+
+@dataclass
+class CoverageReport:
+    """How much of PT4's stock stat set translates (#613)."""
+
+    results: list[tuple[DecodedStat, TranslatedStat]] = field(default_factory=list)
+
+    def count(self, category: str, *, supported: bool, noted: bool = False) -> int:
+        return sum(
+            1
+            for stat, result in self.results
+            if stat.category == category and result.supported == supported and bool(result.notes) == noted
+        )
+
+    def blockers(self, top: int = 15) -> list[tuple[str, int]]:
+        """What stops the most stats, each blocker counted once per stat it stops."""
+        counter: Counter[str] = Counter()
+        for _stat, result in self.results:
+            if result.supported:
+                continue
+            text = "; ".join(result.warnings)
+            found = {_blocker_label(kind, detail) for kind, _quote, detail in _BLOCKER_RE.findall(text)}
+            if "unsupported column SQL" in text:
+                found.add("unsupported column SQL (a construct the translator does not parse)")
+            if not found:
+                found = {result.warnings[0].split(":")[0] if result.warnings else "unsupported"}
+            counter.update(found)
+        return counter.most_common(top)
+
+    def markdown(self, source: str) -> str:
+        lines = [
+            "# PT4 stock stat coverage",
+            "",
+            f"Generated by `python -m fpdb_3_legacy.pt4_import --coverage` from `{source}` (#613).",
+            "A stat translates when every column it reads maps onto FPDB data; one that maps under a",
+            "different definition says how. Nothing that does not translate is approximated silently.",
+            "",
+            "| Category | Translated | of which as PT4 defines it | of which under FPDB's definition | Not translated |",
+            "|---|---:|---:|---:|---:|",
+        ]
+        for category in PLAYER_CATEGORIES:
+            same = self.count(category, supported=True)
+            differs = self.count(category, supported=True, noted=True)
+            lines.append(
+                f"| {category} | {same + differs} | {same} | {differs} | {self.count(category, supported=False)} |"
+            )
+        lines += ["", "## The common cash stats", "", "| PT4 stat | FPDB value | Status |", "|---|---|---|"]
+        by_title = {stat.label: result for stat, result in self.results if stat.category == "Cash Player"}
+        for title in COMMON_CASH_STATS:
+            result = by_title.get(title)
+            if result is None:
+                lines.append(f"| {title} | | not in this PT4 version |")
+            elif result.supported:
+                status = "translated" + (": " + " ".join(result.notes) if result.notes else "")
+                lines.append(f"| {title} | `{result.descriptor['value']}` | {status} |")
+            else:
+                lines.append(f"| {title} | | not translated: {'; '.join(result.warnings)} |")
+        lines += ["", "## What blocks the rest", "", "| Blocker | Stats it stops |", "|---|---:|"]
+        lines += [f"| {blocker} | {count} |" for blocker, count in self.blockers()]
+        return "\n".join(lines) + "\n"
+
+
+def coverage(path: str | Path) -> CoverageReport:
+    """Translate every player stat of a PT4 ``StatDefinitions.pt4`` and report the outcome."""
+    return CoverageReport([(stat, translate(stat)) for stat in read_stat_definitions(path)])
+
+
 def main(argv: list[str] | None = None) -> int:
     import argparse
 
     parser = argparse.ArgumentParser(description="Import PT4 .pt4stat files into FPDB stat descriptors.")
-    parser.add_argument("src", help="directory containing .pt4stat files")
-    parser.add_argument("dest", help="output .toml descriptor file")
+    parser.add_argument("src", help="directory containing .pt4stat files, or StatDefinitions.pt4 with --coverage")
+    parser.add_argument("dest", nargs="?", help="output .toml descriptor file (a Markdown report with --coverage)")
+    parser.add_argument("--coverage", action="store_true", help="report how much of PT4's stock stat set translates")
     args = parser.parse_args(argv)
 
+    if args.coverage:
+        text = coverage(args.src).markdown(Path(args.src).name)
+        if args.dest:
+            Path(args.dest).write_text(text, encoding="utf-8")
+        else:
+            print(text)
+        return 0
+    if not args.dest:
+        parser.error("dest is required unless --coverage is given")
     report = import_directory(args.src, args.dest)
     print(report.summary())
     return 0
