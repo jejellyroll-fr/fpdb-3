@@ -1288,15 +1288,13 @@ def to_package(source: str | bytes, name: str | None = None, multiblock: bool = 
     and info popups are not in it: they live in JSON files beside a configuration,
     and only importing the ``.pt4hud`` itself writes them.
     """
-    from xml.dom.minidom import getDOMImplementation
+    import defusedxml.minidom
 
     layout = parse(source)
     name = (name or layout.name or "pt4_import")[:40]
-    impl = getDOMImplementation()
-    assert impl is not None
-    doc = impl.createDocument(None, "fpdb_hud_package", None)
+    # A minidom document from a fixed skeleton, through defusedxml like every XML in the project.
+    doc = defusedxml.minidom.parseString("<fpdb_hud_package/>")
     root = doc.documentElement
-    assert root is not None
     root.setAttribute("version", "1.0")
     root.setAttribute("source", "pt4hud")
     ss, n_stats, n_blocks = _build_stat_set(doc, layout, name, multiblock)
