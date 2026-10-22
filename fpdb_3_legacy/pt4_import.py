@@ -22,6 +22,7 @@ pack are supported today; everything else is returned as an unsupported report.
 
 from __future__ import annotations
 
+import functools
 import json
 import re
 import struct
@@ -359,9 +360,25 @@ def _inputs_of(fpdb_expr: str) -> list[str]:
     return list(dict.fromkeys(_IDENTIFIER_RE.findall(fpdb_expr)))
 
 
-def _is_count(col_sql: str) -> bool:
-    """Whether the column counts hands (``sum(if[..., 1, 0])``), so its FPDB inputs are booleans."""
-    return bool(_SUM_IF_COND_RE.match(col_sql))
+@functools.lru_cache(maxsize=1)
+def _boolean_columns() -> frozenset[str]:
+    """HandsPlayers columns stored as SQL booleans, read from the PostgreSQL DDL.
+
+    Whether an input is boolean follows how FPDB stores it, not the shape of the
+    PT4 SQL: a PT4 count of flagged hands can land on an integer FPDB count
+    (street1Bets), and summing a boolean needs ``CASE WHEN`` on PostgreSQL while
+    ``CASE WHEN`` on an integer is an error there.
+    """
+    from fpdb_3_legacy.sql_schema_hand_player import hand_player_schema_queries
+
+    ddl = hand_player_schema_queries("postgresql")["createHandsPlayersTable"]
+    return frozenset(re.findall(r"^\s*(\w+)\s+BOOLEAN\b", ddl, re.MULTILINE))
+
+
+def _booleans(inputs: list[str]) -> list[str]:
+    """The inputs FPDB stores as booleans, in order."""
+    booleans = _boolean_columns()
+    return [name for name in dict.fromkeys(inputs) if name in booleans]
 
 
 @dataclass
@@ -441,7 +458,6 @@ class _Resolved:
 
     facts: dict[str, tuple[str, dict[str, Any] | None, float]] = field(default_factory=dict)
     context: dict[str, str] = field(default_factory=dict)
-    counts: set[str] = field(default_factory=set)  # columns whose FPDB inputs are booleans
     failures: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
 
@@ -457,15 +473,12 @@ def _resolve_columns(decoded: DecodedStat, referenced: list[str]) -> _Resolved:
             continue
         try:
             resolved.facts[col] = _resolve_fact(col_sql)
-            if _is_count(col_sql):
-                resolved.counts.add(col)
         except PT4TranslationError as exc:
             named = PT4_NAMED_COLUMNS.get(col)
             if named is None:
                 resolved.failures.append(f"{col} ({exc})")
                 continue
             resolved.facts[col] = (named["fpdb"], None, 1.0)
-            resolved.counts.add(col)
             if named.get("note"):
                 resolved.notes.append(named["note"])
     return resolved
@@ -504,15 +517,12 @@ def _translate_arithmetic(decoded: DecodedStat, expr: str) -> TranslatedStat:
 
     rewritten = expr
     inputs: list[str] = list(alias_inputs)
-    boolean_inputs: list[str] = list(alias_inputs)
     for col, (fpdb_expr, _dim, scale) in resolved.facts.items():
         token = fpdb_expr if _IDENTIFIER_RE.fullmatch(fpdb_expr) else f"({fpdb_expr})"
         if scale != 1.0:
             token = f"({token} / {scale:g})"
         rewritten = re.sub(rf"\b{re.escape(col)}\b", token, rewritten)
         inputs.extend(_inputs_of(fpdb_expr))
-        if col in resolved.counts:
-            boolean_inputs.extend(_inputs_of(fpdb_expr))
     for col, ctx_input in resolved.context.items():
         rewritten = re.sub(rf"\b{re.escape(col)}\b", ctx_input, rewritten)
         inputs.append(ctx_input)
@@ -520,7 +530,7 @@ def _translate_arithmetic(decoded: DecodedStat, expr: str) -> TranslatedStat:
     col_sqls = [decoded.columns[col] for col in [*resolved.facts, *resolved.context]]
     notes = list(dict.fromkeys(alias_notes + resolved.notes))
     result.descriptor = _ratio_descriptor(
-        decoded, rewritten.strip(), inputs, boolean_inputs, list(resolved.context.values()), col_sqls, notes
+        decoded, rewritten.strip(), inputs, list(resolved.context.values()), col_sqls, notes
     )
     result.notes = notes
     return result
@@ -530,7 +540,6 @@ def _ratio_descriptor(
     decoded: DecodedStat,
     value: str,
     inputs: list[str],
-    boolean_inputs: list[str],
     context: list[str],
     col_sqls: list[str],
     notes: list[str],
@@ -552,8 +561,9 @@ def _ratio_descriptor(
     }
     if context:
         descriptor["context"] = context
+    boolean_inputs = _booleans(inputs)
     if boolean_inputs:
-        descriptor["boolean_inputs"] = list(dict.fromkeys(boolean_inputs))
+        descriptor["boolean_inputs"] = boolean_inputs
     description = decoded.description
     if notes:
         description = " ".join([description, "Differs from PT4:", *notes]).strip()
@@ -630,8 +640,8 @@ def translate(decoded: DecodedStat) -> TranslatedStat:
         descriptor["series"] = "cumulative"
     if context_input:
         descriptor["context"] = [context_input]
-    if _is_count(col_sql):
-        descriptor["boolean_inputs"] = _inputs_of(fpdb_col)
+    if _booleans(inputs):
+        descriptor["boolean_inputs"] = _booleans(inputs)
     if decoded.description:
         descriptor["description"] = decoded.description
 

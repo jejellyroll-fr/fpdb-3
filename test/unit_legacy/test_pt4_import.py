@@ -415,20 +415,48 @@ class TestCommonCashIdioms:
         assert len(result.notes) == 1 and note in result.notes[0]
         assert "Differs from PT4:" in result.descriptor["description"]
 
-    def test_afq_names_the_fold_counts_fpdb_lacks(self):
+    def test_afq_translates_through_fpdb_s_own_fold_flags(self):
         result = pt4.translate(
             _stock(
                 "Flop AFq", "((cnt_f_bet + cnt_f_raise) / (cnt_f_call + cnt_f_fold + cnt_f_bet + cnt_f_raise)) * 100"
             )
         )
 
-        assert not result.supported
-        assert any("flg_f_fold" in warning for warning in result.warnings)
+        assert result.supported, result.warnings
+        assert result.descriptor["value"] == (
+            "((street1Bets + street1Raises) / (street1Calls + flg_f_fold + street1Bets + street1Raises)) * 100"
+        )
+        assert result.descriptor["boolean_inputs"] == ["flg_f_fold"]
 
-    def test_a_count_column_is_a_boolean_input_and_an_action_count_is_not(self):
+    def test_integer_action_counts_are_never_boolean_inputs(self):
+        """street1Bets & co. are SMALLINT: CASE WHEN on them is an error on PostgreSQL (Codex, #622)."""
         result = pt4.translate(_stock("Flop AF", "(cnt_f_bet + cnt_f_raise) / cnt_f_call"))
 
-        assert result.descriptor["boolean_inputs"] == ["street1Bets"]
+        assert result.supported
+        assert "boolean_inputs" not in result.descriptor
+
+    @pytest.mark.parametrize("title", pt4.COMMON_CASH_STATS)
+    def test_boolean_inputs_are_exactly_the_boolean_columns(self, title):
+        stock = {
+            "VPIP": "(cnt_vpip / (cnt_hands - cnt_walks)) * 100",
+            "PFR": "(cnt_pfr / cnt_pfr_opp) * 100",
+            "3Bet Preflop": "(cnt_p_3bet / cnt_p_3bet_opp) * 100",
+            "Fold to PF 3Bet": "(cnt_p_3bet_def_action_fold / cnt_p_3bet_def_opp) * 100",
+            "CBet Flop": "(cnt_f_cbet / cnt_f_cbet_opp) * 100",
+            "Fold to F CBet": "(cnt_f_cbet_def_action_fold / cnt_f_cbet_def_opp) * 100",
+            "WTSD": "(cnt_wtsd / cnt_f_saw) * 100",
+            "WSD": "(cnt_wtsd_won / cnt_wtsd) * 100",
+            "Flop AF": "(cnt_f_bet + cnt_f_raise) / cnt_f_call",
+            "Total AF": "(cnt_f_bet + cnt_f_raise) / cnt_f_call",
+            "Flop AFq": "((cnt_f_bet + cnt_f_raise) / (cnt_f_call + cnt_f_fold + cnt_f_bet + cnt_f_raise)) * 100",
+            "Total AFq": "((cnt_f_bet + cnt_f_raise) / (cnt_f_call + cnt_f_fold + cnt_f_bet + cnt_f_raise)) * 100",
+            "Att To Steal": "(cnt_steal_att / cnt_steal_opp) * 100",
+            "Fold to Steal": "(cnt_steal_def_action_fold / cnt_steal_def_opp) * 100",
+        }
+        descriptor = pt4.translate(_stock(title, stock[title])).descriptor
+        booleans = pt4._boolean_columns()
+
+        assert set(descriptor.get("boolean_inputs", [])) == {name for name in descriptor["inputs"] if name in booleans}
 
     def test_both_blinds_steal_columns_are_inputs(self):
         result = pt4.translate(_stock("Fold to Steal", "(cnt_steal_def_action_fold / cnt_steal_def_opp) * 100"))
@@ -538,7 +566,7 @@ class TestCoverageReport:
         results = [
             (_stock("3Bet Preflop", "(cnt_p_3bet / cnt_p_3bet_opp) * 100"), None),
             (_stock("VPIP", "(cnt_vpip / (cnt_hands - cnt_walks)) * 100"), None),
-            (_stock("Flop AFq", "(cnt_f_bet + cnt_f_raise) / (cnt_f_call + cnt_f_fold)"), None),
+            (_stock("VPIP - Legacy Edition", "(cnt_vpip / cnt_hands) * 100"), None),
         ]
         report = pt4.CoverageReport([(stat, pt4.translate(stat)) for stat, _ in results])
 
@@ -548,7 +576,7 @@ class TestCoverageReport:
         assert "| 3Bet Preflop | `(street0_3BDone / street0_3BChance) * 100` | translated |" in text
         assert "| VPIP | `(street0VPI / (street0VPIChance)) * 100` | translated: PT4's VPIP" in text
         assert "| PFR | | not in this PT4 version |" in text
-        assert report.blockers() == [("unmapped column: `flg_f_fold`", 1)]
+        assert report.blockers() == [("unmapped condition: `id_hand > 0`", 1)]
 
     def test_the_command_line_writes_the_report(self, tmp_path):
         path = tmp_path / "StatDefinitions.pt4"
@@ -585,11 +613,11 @@ STOCK_FILE = Path("/Applications/PokerTracker 4.app/Contents/Resources/Data/Stat
 
 @pytest.mark.skipif(not STOCK_FILE.exists(), reason="PokerTracker 4 is not installed here")
 class TestInstalledPT4:
-    def test_the_common_cash_stats_translate_but_afq(self):
+    def test_every_common_cash_stat_translates(self):
         stats = {s.label: s for s in pt4.read_stat_definitions(STOCK_FILE) if s.category == "Cash Player"}
         outcome = {title: pt4.translate(stats[title]).supported for title in pt4.COMMON_CASH_STATS}
 
-        assert outcome == {title: title not in ("Flop AFq", "Total AFq") for title in pt4.COMMON_CASH_STATS}
+        assert outcome == dict.fromkeys(pt4.COMMON_CASH_STATS, True)
 
 
 def test_an_import_report_says_which_stats_differ_from_pt4(tmp_path):
@@ -597,3 +625,21 @@ def test_an_import_report_says_which_stats_differ_from_pt4(tmp_path):
 
     assert "Imported under FPDB's definition, which differs from PT4's (1):" in report.summary()
     assert "  - vpip: PT4's VPIP opportunity is every hand but a walk." in report.summary()
+
+
+def test_the_report_grid_sums_action_counts_and_counts_flags(tmp_path):
+    """What PostgreSQL receives: SUM(int) for street1Bets, SUM(CASE WHEN bool ...) for flg_f_fold."""
+    from fpdb_3_legacy.stat_adapters import GridAdapter
+
+    afq = pt4.translate(
+        _stock("Flop AFq", "((cnt_f_bet + cnt_f_raise) / (cnt_f_call + cnt_f_fold + cnt_f_bet + cnt_f_raise)) * 100")
+    ).descriptor
+    (tmp_path / "afq.toml").write_text(pt4.emit_toml(afq), encoding="utf-8")
+    reg = sr.StatRegistry()
+    reg.load_directory(tmp_path)
+
+    sql = " ".join(GridAdapter().select_fragments(reg.get("flop_afq")))
+
+    assert "SUM(hp.street1Bets)" in sql and "SUM(hp.street1Calls)" in sql
+    assert "CASE WHEN hp.street1Bets" not in sql
+    assert "SUM(CASE WHEN hp.flg_f_fold THEN 1 ELSE 0 END)" in sql

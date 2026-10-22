@@ -34,7 +34,10 @@
     "flg_t_bet":         { "fpdb": "street2Bets", "scale": 1 },
     "flg_r_bet":         { "fpdb": "street3Bets", "scale": 1 },
 
-    "_note_postflop": "Flags and per-street action counts behind the stock cash stats (#613): c-bet, fold to c-bet, saw flop, and the bets/raises/calls of AF. fpdb has no per-street fold count matching PT4's flg_f_fold, so AFq stays untranslated.",
+    "_note_postflop": "Flags and per-street action counts behind the stock cash stats (#613): c-bet, fold to c-bet, saw flop, the folds, bets, raises and calls of AF and AFq. fpdb stores PT4's flg_x_fold under the same names.",
+    "flg_f_fold":         { "fpdb": "flg_f_fold", "scale": 1 },
+    "flg_t_fold":         { "fpdb": "flg_t_fold", "scale": 1 },
+    "flg_r_fold":         { "fpdb": "flg_r_fold", "scale": 1 },
     "flg_f_saw":          { "fpdb": "street1Seen", "scale": 1 },
     "flg_f_cbet":         { "fpdb": "street1CBDone", "scale": 1 },
     "flg_f_cbet_opp":     { "fpdb": "street1CBChance", "scale": 1 },

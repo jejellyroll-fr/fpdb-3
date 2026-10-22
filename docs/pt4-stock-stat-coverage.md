@@ -6,8 +6,8 @@ different definition says how. Nothing that does not translate is approximated s
 
 | Category | Translated | of which as PT4 defines it | of which under FPDB's definition | Not translated |
 |---|---:|---:|---:|---:|
-| Cash Player | 21 | 19 | 2 | 420 |
-| Tournament Player | 21 | 19 | 2 | 428 |
+| Cash Player | 25 | 23 | 2 | 416 |
+| Tournament Player | 25 | 23 | 2 | 424 |
 
 ## The common cash stats
 
@@ -23,8 +23,8 @@ different definition says how. Nothing that does not translate is approximated s
 | WSD | `(wonAtSD / sawShowdown) * 100` | translated |
 | Flop AF | `(street1Bets + street1Raises) / street1Calls` | translated |
 | Total AF | `(street1Bets + street1Raises + street2Bets + street2Raises + street3Bets + street3Raises) / (street1Calls + street2Calls + street3Calls)` | translated |
-| Flop AFq | | not translated: value expression needs PT4 columns with no FPDB mapping: cnt_f_fold (unmapped PT4 column 'flg_f_fold') |
-| Total AFq | | not translated: value expression needs PT4 columns with no FPDB mapping: cnt_f_fold (unmapped PT4 column 'flg_f_fold'); cnt_t_fold (unmapped PT4 column 'flg_t_fold'); cnt_r_fold (unmapped PT4 column 'flg_r_fold') |
+| Flop AFq | `((street1Bets + street1Raises) / (street1Calls + flg_f_fold + street1Bets + street1Raises)) * 100` | translated |
+| Total AFq | `((street1Bets + street1Raises + street2Bets + street2Raises + street3Bets + street3Raises) / (street1Calls + flg_f_fold + street2Calls + flg_t_fold + street3Calls + flg_r_fold + street1Bets + street1Raises + street2Bets + street2Raises + street3Bets + street3Raises)) * 100` | translated |
 | Att To Steal | `(stealDone / stealChance) * 100` | translated |
 | Fold to Steal | `((foldedSbToSteal + foldedBbToSteal) / (foldSbToStealChance + foldBbToStealChance)) * 100` | translated |
 
@@ -41,9 +41,9 @@ different definition says how. Nothing that does not translate is approximated s
 | unmapped condition: `(flg_p_3bet_def_opp OR flg_p_4bet_def_opp) AND enum_t_cbet_action = '…` | 12 |
 | unmapped condition: `flg_t_bet AND action LIKE 'X' AND action NOT LIKE '%R' AND flg_p_face…` | 10 |
 | unmapped context divisor '60' () | 9 |
+| unmapped column: `flg_f_3bet_def_opp` | 8 |
 | unmapped column: `flg_r_3bet_def_opp` | 8 |
 | unmapped column: `flg_t_3bet_def_opp` | 8 |
-| unmapped column: `flg_f_3bet_def_opp` | 8 |
 | unmapped column: `flg_f_4bet_def_opp` | 8 |
-| unmapped column: `flg_t_4bet_def_opp` | 8 |
 | unmapped column: `flg_r_4bet_def_opp` | 8 |
+| unmapped column: `flg_t_4bet_def_opp` | 8 |
