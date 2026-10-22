@@ -17,6 +17,9 @@ These converters have file-by-file semantic snapshots in
 - PacificPoker/888
 - PartyPoker
 - PokerStars
+- PokerTracker (its own export format, cash and tournaments: Everest, iPoker,
+  Merge and Microgaming hands, each filed under the room in its header -- pinned
+  by `tests/test_pokertracker_rooms.py`)
 - SealsWithClubs
 - Unibet
 - Winamax
@@ -27,7 +30,7 @@ These converters have file-by-file semantic snapshots in
 Kept for importing historical archives, without a current-format support claim:
 
 - Absolute, Betfair, Boss, Enet, Entraction, Everest, Everleaf
-- Full Tilt, Merge, Microgaming, OnGame, PKR, PokerTracker
+- Full Tilt, Merge, Microgaming, OnGame, PKR
 
 Moving a converter out of this tier requires a representative fixture and a
 golden snapshot covering identity, gametype, players, board, actions, winnings,

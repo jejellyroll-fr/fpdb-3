@@ -143,6 +143,46 @@
     "hand_count": 1,
     "sha256": "a18a3d086ed0bb5c383c79b639a884865da96e19f64cc51c8ff1164aec8072fb"
   },
+  "regression-tour/PokerTracker/Flop/LHE-EUR-SNG-201111.Everest.txt": {
+    "hand_count": 67,
+    "sha256": "c3544f4eaf44e9926db4fde8642d0d79f120e62e1785d25c6c41d0e696367b54"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-10max-MTT-USD-5.00-202104.iPoker.txt": {
+    "hand_count": 1,
+    "sha256": "630ff0c1088adec8929144a04fd9554a118e019368fb3f4f0a91677e63b6c43b"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-2max-USD-0-STT-201307.Microgaming.allin.blind.txt": {
+    "hand_count": 1,
+    "sha256": "366afbfc53a6fafec8fe33189851c46225c27cf1716c4a3ccbb8fe3d04c36d70"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-2max-USD-0-STT-201307.Microgaming.txt": {
+    "hand_count": 6,
+    "sha256": "060b1e586425985b581e6ba68e23c0da0f88495239aa3f10fb62730f0335d2e3"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-9max-USD-MTT-16.50-201307.Microgaming.antes.txt": {
+    "hand_count": 1,
+    "sha256": "42c6b73a4e9cba61c6ff0fa5642da545415dbf762fb779d38542f792d20af920"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-EUR-200-MTT-201901.iPoker.txt": {
+    "hand_count": 1,
+    "sha256": "938c319d811415431d7fc8e2cc60b525b5464c208b207b52d401d1f508f1cb65"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-MTT-EUR-22.25-22.25-202104.KO.iPoker.txt": {
+    "hand_count": 1,
+    "sha256": "940aa8994dba8fe46c1a96c8b251052ff7fd97f1079a27c1094c9fa589e0077a"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-USD-SNG-2-201106.iPoker.txt": {
+    "hand_count": 240,
+    "sha256": "6fd227dc1a9214dae5161d1d909cc3e693d6cc4e63baa82c6efea8c3a69ac0e2"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-USD-SNG-2-201111.Merge.txt": {
+    "hand_count": 17,
+    "sha256": "dcd14183b151ea514ba2fabd849396f33a0572085b97df2bca5c504000c68b97"
+  },
+  "regression-tour/PokerTracker/Flop/PLO-USD-5-201202.Merge.all.in.blind.txt": {
+    "hand_count": 1,
+    "sha256": "ad433a50ac154995021804a638cc581308e8c30cdafbf73d0acfa18ee9e78427"
+  },
   "regression/Absolute/Flop/IHH20090610 Chile Way - Hold'em No Limit $0.02(Real Money) Table 9339866.txt": {
     "hand_count": 1,
     "sha256": "344de6ee17208060e003889aca7684de289d82018011802447e557a4b5b36cce"

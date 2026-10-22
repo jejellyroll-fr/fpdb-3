@@ -41,6 +41,7 @@ from tests.helpers.parser_regression import file_snapshot, snapshot_digest
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures" / "hands"
 REGRESSION_FILES = ROOT / "regression-test-files" / "cash"
+TOUR_REGRESSION_FILES = ROOT / "regression-test-files" / "tour"
 MANIFEST_PATH = FIXTURES / "live_parser_snapshots.json"
 
 ROOMS = {
@@ -113,6 +114,22 @@ CASES += [
     for path in sorted(
         candidate
         for candidate in (REGRESSION_FILES / site).rglob("*")
+        if candidate.is_file() and candidate.suffix.lower() in {".txt", ".xml"}
+    )
+]
+
+# Tournament hands, so far for the converters whose support claim depends on
+# them. PokerTracker's own export format carries Everest, iPoker, Merge and
+# Microgaming tournaments as well as cash games (#617).
+TOUR_REGRESSION_SITES = {
+    "PokerTracker": PokerTracker,
+}
+CASES += [
+    (f"regression-tour/{site}/{path.relative_to(TOUR_REGRESSION_FILES / site).as_posix()}", parser_class, path)
+    for site, parser_class in TOUR_REGRESSION_SITES.items()
+    for path in sorted(
+        candidate
+        for candidate in (TOUR_REGRESSION_FILES / site).rglob("*")
         if candidate.is_file() and candidate.suffix.lower() in {".txt", ".xml"}
     )
 ]
