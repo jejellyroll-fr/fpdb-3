@@ -8,7 +8,7 @@ files as they are, so moving over amounts to one import of the right folder.
 |---|---|---|
 | Hands | Yes, with this guide | #612 |
 | Custom stats (`.pt4stat`) | ChipEV idioms only; common cash idioms in progress | #613 |
-| HUD layout (`.pt4hud`) | Yes: *Configure ▸ Import PT4 HUD*. Stats with no fpdb equivalent are listed | #614 |
+| HUD layout (`.pt4hud`) | Yes: *Configure ▸ Import PT4 HUD*. Stats with no fpdb equivalent are listed; *Convert PT4 HUD to .fpdbhud* makes a shareable package | #614 |
 | Reading the tracker's database directly | Being evaluated | #615 |
 | Player notes | Not yet | #618 |
 
@@ -54,7 +54,12 @@ not stored again.
 
 - **Stats**: fpdb computes its own stats from the imported hands. Definitions can differ slightly from
   your tracker's. `docs/stat-definitions.md` documents the differences as they are measured (#616).
-- **HUD**: import a PT4 layout with *Configure ▸ Import PT4 HUD (.pt4hud)*.
+- **HUD**: import a PT4 layout with *Configure ▸ Import PT4 HUD (.pt4hud)*. The report lists every
+  PT4 stat that has no fpdb equivalent. *Configure ▸ Convert PT4 HUD to .fpdbhud…* writes a layout as a
+  package. You can share that package or re-import it in *HUD Preferences* without the PT4 file, and
+  whoever imports it is told which stats it is missing. Range charts and info popups stay out of the
+  package: import the `.pt4hud` itself to get them. From the command line:
+  `python -m fpdb_3_legacy.pt4hud layout.pt4hud --package out.fpdbhud`.
 - **Large archives**: a few hundred thousand hands take a while. Bulk import runs its equity workers
   in parallel, and PostgreSQL is faster than SQLite for very large databases.
 

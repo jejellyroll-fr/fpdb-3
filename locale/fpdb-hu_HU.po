@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 21:40+0200\n"
+"POT-Creation-Date: 2026-10-22 12:48+0200\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -2788,7 +2788,7 @@ msgstr ""
 msgid "not set"
 msgstr "Nem exportálható"
 
-#: fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
 msgid "… and %d more"
 msgstr ""
@@ -3290,11 +3290,6 @@ msgstr "HUD termek kezelése"
 
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
-msgid "PT4 HUD imported"
-msgstr "PT4 HUD importálva"
-
-#: fpdb_3_legacy/fpdb.pyw
-#, fuzzy
 msgid "PT4 stats import"
 msgstr "PT4 statisztikák importálása"
 
@@ -3751,6 +3746,11 @@ msgid "Configure"
 msgstr "HUD beállítása"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Convert PT4 HUD to .fpdbhud…"
+msgstr "PT4 HUD importálása (.pt4hud)"
+
+#: fpdb_3_legacy/menu_layout.py
 msgid "Create or Recreate Tables"
 msgstr "Táblák (újra) létrehozása"
 
@@ -3919,6 +3919,13 @@ msgstr "Research Browser"
 #, fuzzy
 msgid "Research Browser for Omaha"
 msgstr "Research Browser Omahához"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid ""
+"Save a PokerTracker 4 HUD layout as a package you can share or re-import"
+msgstr ""
+"PokerTracker 4 HUD-elrendezés importálása (statisztikák + tartománydiagramok)"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -4922,6 +4929,99 @@ msgstr ""
 #, fuzzy
 msgid "Reference HUD"
 msgstr "HUD beállítások"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "%(stats)d stats translated, in %(blocks)d panels."
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "%d PT4 stats have no fpdb equivalent and were left out:"
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "Assign the new HUD profile to a game in HUD Preferences."
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, fuzzy
+msgid "Convert PT4 HUD to .fpdbhud"
+msgstr "PT4 HUD importálása (.pt4hud)"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, fuzzy, python-format
+msgid ""
+"Could not save the package:\n"
+"%s"
+msgstr ""
+"A leosztás mentése nem sikerült:\n"
+"%s"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "Every PT4 stat was translated."
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "FPDB HUD package (*.fpdbhud)"
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "HUD profile '%s' successfully imported!"
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, fuzzy
+msgid "Import Successful"
+msgstr "Beállítások importálása"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, fuzzy, python-format
+msgid "Imported '%s'."
+msgstr "Exportálva ide: %s."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid ""
+"Not in the package: %s. Import the .pt4hud itself to get the range charts "
+"and info popups."
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, fuzzy
+msgid "PT4 HUD imported"
+msgstr "PT4 HUD importálva"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "PT4 HUD layout (*.pt4hud);;All files (*)"
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "Range charts %(charts)s are in the popup '%(popup)s'."
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "Save as .fpdbhud package"
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, fuzzy, python-format
+msgid "Saved %s."
+msgstr "Mentve"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "The package lists the %d PT4 stats it leaves out."
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid ""
+"This package was converted from PokerTracker 4: %d of its stats have no fpdb "
+"equivalent and are not in it:"
+msgstr ""
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy

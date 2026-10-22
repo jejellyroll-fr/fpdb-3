@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 21:40+0200\n"
+"POT-Creation-Date: 2026-10-22 12:48+0200\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -2483,7 +2483,7 @@ msgstr ""
 msgid "not set"
 msgstr "non défini"
 
-#: fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
 msgid "… and %d more"
 msgstr "… et %d de plus"
@@ -2914,11 +2914,6 @@ msgstr "Free Poker DB 3"
 msgid "Manage HUD Sites"
 msgstr "Gérer les sites du HUD"
 
-# --- Vague 2: main window dialogs ---
-#: fpdb_3_legacy/fpdb.pyw
-msgid "PT4 HUD imported"
-msgstr "HUD PT4 importé"
-
 #: fpdb_3_legacy/fpdb.pyw
 msgid "PT4 stats import"
 msgstr "Import des stats PT4"
@@ -3301,6 +3296,10 @@ msgid "Configure"
 msgstr "Configurer"
 
 #: fpdb_3_legacy/menu_layout.py
+msgid "Convert PT4 HUD to .fpdbhud…"
+msgstr "Convertir un HUD PT4 en .fpdbhud…"
+
+#: fpdb_3_legacy/menu_layout.py
 msgid "Create or Recreate Tables"
 msgstr "Créer ou Recréer les Tables"
 
@@ -3444,6 +3443,13 @@ msgstr "Research Browser"
 #: fpdb_3_legacy/menu_layout.py
 msgid "Research Browser for Omaha"
 msgstr "Research Browser pour l'Omaha"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid ""
+"Save a PokerTracker 4 HUD layout as a package you can share or re-import"
+msgstr ""
+"Enregistrer une disposition HUD PokerTracker 4 comme paquet à partager ou "
+"réimporter"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Seat Settings"
@@ -4284,6 +4290,101 @@ msgstr ""
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
 msgid "Reference HUD"
 msgstr "HUD de référence"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "%(stats)d stats translated, in %(blocks)d panels."
+msgstr "%(stats)d stats traduites, dans %(blocks)d panneaux."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "%d PT4 stats have no fpdb equivalent and were left out:"
+msgstr "%d stats PT4 n'ont pas d'équivalent fpdb et ont été laissées de côté :"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "Assign the new HUD profile to a game in HUD Preferences."
+msgstr "Associez le nouveau profil HUD à un jeu dans les Préférences HUD."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "Convert PT4 HUD to .fpdbhud"
+msgstr "Convertir un HUD PT4 en .fpdbhud"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid ""
+"Could not save the package:\n"
+"%s"
+msgstr ""
+"Impossible d'enregistrer le paquet :\n"
+"%s"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "Every PT4 stat was translated."
+msgstr "Toutes les stats PT4 ont été traduites."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "FPDB HUD package (*.fpdbhud)"
+msgstr "Paquet HUD FPDB (*.fpdbhud)"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "HUD profile '%s' successfully imported!"
+msgstr "Profil HUD « %s » importé avec succès !"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "Import Successful"
+msgstr "Import réussi"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "Imported '%s'."
+msgstr "« %s » importé."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid ""
+"Not in the package: %s. Import the .pt4hud itself to get the range charts "
+"and info popups."
+msgstr ""
+"Absent du paquet : %s. Importez le .pt4hud lui-même pour obtenir les range "
+"charts et les popups d'info."
+
+# --- Vague 2: main window dialogs ---
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "PT4 HUD imported"
+msgstr "HUD PT4 importé"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "PT4 HUD layout (*.pt4hud);;All files (*)"
+msgstr "Disposition HUD PT4 (*.pt4hud);;Tous les fichiers (*)"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "Range charts %(charts)s are in the popup '%(popup)s'."
+msgstr "Les range charts %(charts)s sont dans la popup « %(popup)s »."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "Save as .fpdbhud package"
+msgstr "Enregistrer comme paquet .fpdbhud"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "Saved %s."
+msgstr "%s enregistré."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "The package lists the %d PT4 stats it leaves out."
+msgstr "Le paquet liste les %d stats PT4 qu'il laisse de côté."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid ""
+"This package was converted from PokerTracker 4: %d of its stats have no fpdb "
+"equivalent and are not in it:"
+msgstr ""
+"Ce paquet a été converti depuis PokerTracker 4 : %d de ses stats n'ont pas "
+"d'équivalent fpdb et n'y figurent pas :"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "% of pot"
@@ -7033,9 +7134,6 @@ msgstr ""
 #~ msgid "Import Complete"
 #~ msgstr "Importation terminée"
 
-#~ msgid "Import clicked"
-#~ msgstr "Importation sélectionnée"
-
 #~ msgid "Import through eMail/IMAP"
 #~ msgstr "Importation via eMail/IMAP"
 
@@ -7591,6 +7689,9 @@ msgstr ""
 
 #~ msgid "Save HUD Layout"
 #~ msgstr "Sauvegarder Composition HUD"
+
+#~ msgid "Save as .fpdbhud package…"
+#~ msgstr "Enregistrer comme paquet .fpdbhud…"
 
 #~ msgid "Saw Showdown / River"
 #~ msgstr "Étalages vus / Rivière"

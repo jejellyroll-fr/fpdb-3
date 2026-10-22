@@ -115,6 +115,11 @@ def menu_layout() -> tuple[Menu, ...]:
                     separator_before=True,
                 ),
                 MenuItem(
+                    N_("Convert PT4 HUD to .fpdbhud…"),
+                    "dia_convert_pt4hud",
+                    tip=N_("Save a PokerTracker 4 HUD layout as a package you can share or re-import"),
+                ),
+                MenuItem(
                     N_("Import PT4 Stats (.pt4stat)"),
                     "dia_import_pt4stat",
                     tip=N_("Import PokerTracker 4 custom statistics as declarative stat descriptors"),

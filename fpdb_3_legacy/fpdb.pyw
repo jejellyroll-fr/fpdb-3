@@ -466,25 +466,21 @@ class fpdb(QMainWindow):
             QMessageBox.critical(self, "Import failed", f"Could not import {path}:\n{e}")
             return
 
-        lines = [
-            f"Imported layout '{summary['name']}'.",
-            f"• {summary['stats']} stats mapped to a new HUD stat-set.",
-        ]
-        if summary["charts"]:
-            lines.append(
-                f"• {len(summary['charts'])} range chart(s) ({', '.join(summary['charts'])}) "
-                f"→ popup '{summary['popup']}'."
-            )
-        if summary["unmapped"]:
-            lines.append(f"• {len(summary['unmapped'])} custom formula stat(s) could not be mapped.")
-        lines.append("\nAssign the new stat-set / popup to a game in HUD Preferences.")
-        QMessageBox.information(self, _("PT4 HUD imported"), "\n".join(lines))
+        from fpdb_3_legacy.pt4hud_dialogs import show_import_summary
+
+        show_import_summary(self, summary)
 
     def dia_stat_packs(self, widget=None, data=None) -> None:
         """Manage user-installed declarative stat packs (#403)."""
         from fpdb_3_legacy.stat_packs_dialog import open_stat_packs
 
         open_stat_packs(self)
+
+    def dia_convert_pt4hud(self, widget=None, data=None) -> None:
+        """Configure ▸ Convert PT4 HUD to .fpdbhud: a layout as a package, untranslated stats listed (#614)."""
+        from fpdb_3_legacy.pt4hud_dialogs import convert_to_package
+
+        convert_to_package(self)
 
     def dia_import_pt4stat(self, widget, data=None) -> None:
         """Import PokerTracker 4 .pt4stat custom-statistic definitions.
