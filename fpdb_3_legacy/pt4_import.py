@@ -48,7 +48,7 @@ log = get_logger("pt4_import")
 # --------------------------------------------------------------------------- #
 
 # PT4 fact column -> (FPDB legacy HandsPlayers column, scale factor). The bulk
-# is data-driven from docs/pt4_legacy_mapping.json (a dedicated PT4 -> legacy
+# is data-driven from pt4_mapping.d/pt4_legacy_mapping.json (a dedicated PT4 -> legacy
 # table, distinct from the modern/Rust pt4_statistics_mapping.json); this
 # built-in entry is the always-present fallback. FPDB stores money/chips as
 # integer * 100, hence scale 100.
@@ -58,7 +58,9 @@ _BUILTIN_COLUMN_MAP: dict[str, tuple[str, float]] = {
 
 
 def _legacy_mapping_path() -> Path:
-    return Path(__file__).resolve().parents[1] / "docs" / "pt4_legacy_mapping.json"
+    # Inside the package, like every shipped definition library (*.d): docs/ is in
+    # no release artifact, and a missing map leaves every stat unsupported (#622).
+    return Path(__file__).resolve().parent / "pt4_mapping.d" / "pt4_legacy_mapping.json"
 
 
 def load_column_map() -> dict[str, tuple[str, float]]:

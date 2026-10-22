@@ -84,7 +84,7 @@ class TestUnsupportedReported:
         assert any("amt_does_not_exist" in w for w in d.warnings)
 
     def test_mapped_money_column_translates(self):
-        # amt_rake is in docs/pt4_legacy_mapping.json -> rake (scale 100).
+        # amt_rake is in pt4_mapping.d/pt4_legacy_mapping.json -> rake (scale 100).
         decoded = _decoded("c", {"c": "sum(t.amt_rake)"})
         d = pt4.translate(decoded)
         assert d.supported
@@ -206,12 +206,21 @@ class TestLegacyMappingFile:
         mapping = pt4.load_column_map()
         # Built-in fallback always present.
         assert mapping["amt_expected_won"] == ("allInEV", 100.0)
-        # Loaded from docs/pt4_legacy_mapping.json.
+        # Loaded from pt4_mapping.d/pt4_legacy_mapping.json.
         assert mapping["flg_showdown"] == ("sawShowdown", 1.0)
         assert mapping["amt_won"] == ("winnings", 100.0)
 
-    def test_mapping_path_points_at_docs(self):
-        assert pt4._legacy_mapping_path().name == "pt4_legacy_mapping.json"
+    def test_mapping_ships_inside_the_package(self):
+        """docs/ is in no release artifact; the map must sit in the package (#622)."""
+        path = pt4._legacy_mapping_path()
+
+        assert path.name == "pt4_legacy_mapping.json"
+        assert path.parent.parent == Path(pt4.__file__).resolve().parent
+        assert path.exists()
+
+    def test_every_mapping_section_loads(self):
+        assert pt4.PT4_CONDITION_MAP and pt4.PT4_NAMED_COLUMNS and pt4.PT4_EXPRESSION_ALIASES
+        assert pt4.PT4_COLUMN_MAP["flg_f_fold"] == ("flg_f_fold", 1.0)
 
     def test_documentation_keys_are_skipped(self):
         # "_note..." keys inside columns must not crash the loader or appear.
