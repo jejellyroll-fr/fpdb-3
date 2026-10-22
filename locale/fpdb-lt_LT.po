@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 09:11+0200\n"
+"POT-Creation-Date: 2026-10-22 09:26+0200\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -5011,6 +5011,16 @@ msgid "FPDB HUD package (*.fpdbhud)"
 msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "HUD profile '%s' successfully imported!"
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, fuzzy
+msgid "Import Successful"
+msgstr "Nustatymai"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
 #, fuzzy, python-format
 msgid "Imported '%s'."
 msgstr "Eksportuota į %s."
@@ -5048,6 +5058,13 @@ msgstr "Įrašyta"
 #: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
 msgid "The package lists the %d PT4 stats it leaves out."
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid ""
+"This package was converted from PokerTracker 4: %d of its stats have no fpdb "
+"equivalent and are not in it (see Details)."
 msgstr ""
 
 #: fpdb_3_legacy/research_labels.py

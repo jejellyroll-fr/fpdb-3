@@ -19,7 +19,7 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("pt4hud")
 
-__all__ = ["save_package", "show_import_summary", "untranslated_lines"]
+__all__ = ["save_package", "show_import_summary", "show_package_import", "untranslated_lines"]
 
 # A PT4 formula can run to hundreds of characters; the list shows its start.
 _FORMULA_SHOWN = 120
@@ -99,3 +99,20 @@ def save_package(parent: Any, source: str, name: str | None = None) -> str | Non
         )
     QMessageBox.information(parent, _("Save as .fpdbhud package"), "\n".join(note))
     return path
+
+
+def show_package_import(parent: Any, profile: str, package_root: Any) -> None:
+    """Confirm a package import, naming the PT4 stats a converted package left out."""
+    missing = pt4hud.package_untranslated(package_root)
+    text = _("HUD profile '%s' successfully imported!") % profile
+    box = QMessageBox(parent)
+    box.setWindowTitle(_("Import Successful"))
+    box.setIcon(QMessageBox.Icon.Information)
+    if missing:
+        text += "\n\n" + _(
+            "This package was converted from PokerTracker 4: %d of its stats have no fpdb equivalent "
+            "and are not in it (see Details)."
+        ) % len(missing)
+        box.setDetailedText("\n".join(untranslated_lines(missing)))
+    box.setText(text)
+    box.exec()

@@ -60,12 +60,49 @@ def test_every_untranslated_pt4_stat_is_listed_in_the_package(package) -> None:
 
     (listing,) = root.getElementsByTagName("untranslated")
     listed = listing.getElementsByTagName("pt4_stat")
-    assert listing.getAttribute("count") == str(len(listed)) == "2"
-    assert len(summary["untranslated"]) == 2
-    for node in listed:
-        assert node.getAttribute("section") == "Villain Info 3H"
-        assert node.getAttribute("pt4_name").startswith("sum(if[tourney_hand_player_statistics")
-        assert not node.hasAttribute("formula")  # a formula stat's name is its formula, said once
+    assert listing.getAttribute("count") == str(len(listed)) == str(len(summary["untranslated"])) == "19"
+    built_in = [n for n in listed if not n.getAttribute("pt4_name").startswith("sum(")]
+    formulas = [n for n in listed if n.getAttribute("pt4_name").startswith("sum(")]
+    # Seventeen built-in PT4 stats fpdb has no equivalent for, each with its panel and column label...
+    assert len(built_in) == 17
+    assert {n.getAttribute("section") for n in built_in} == {"SB 3h", "BB 3h", "BU 3h"}
+    assert ("BU 3h", "T FvPROBE", "Fold to T Probe Bet") in {
+        (n.getAttribute("section"), n.getAttribute("label"), n.getAttribute("pt4_name")) for n in built_in
+    }
+    # ... and the two custom formulas, whose name is their formula, said once.
+    assert len(formulas) == 2
+    assert all(n.getAttribute("section") == "Villain Info 3H" and not n.hasAttribute("formula") for n in formulas)
+
+
+def test_a_built_in_stat_without_an_fpdb_equivalent_is_reported_not_blanked_silently(monkeypatch) -> None:
+    """PT4 stats missing from PT4_TO_FPDB used to become anonymous blank cells, absent from every report."""
+    monkeypatch.delitem(pt4hud.PT4_TO_FPDB, "PFR")
+    layout = pt4hud.parse(str(FIXTURE))
+
+    missing = [s for s in pt4hud.untranslated(layout) if s["pt4_name"] == "PFR"]
+
+    assert missing
+    assert all(s["section"] for s in missing)
+    _xml, summary = pt4hud.to_package(str(FIXTURE))
+    assert summary["stats"] == 30 - len(missing)  # the rest still translates
+
+
+def test_an_untranslated_stat_keeps_its_slot_in_the_hud(monkeypatch) -> None:
+    """The stat-set draws a blank cell where the untranslated stat was, so the grid does not shift."""
+    with_pfr, _ = pt4hud.to_package(str(FIXTURE))
+    monkeypatch.delitem(pt4hud.PT4_TO_FPDB, "PFR")
+    without_pfr, _ = pt4hud.to_package(str(FIXTURE))
+
+    def slots(xml: str) -> list[str]:
+        (stat_set,) = defusedxml.minidom.parseString(xml).getElementsByTagName("ss")
+        return sorted(
+            f"{block.getAttribute('id')}{node.getAttribute('_rowcol')}"
+            for block in stat_set.getElementsByTagName("block")
+            for node in block.childNodes
+            if node.nodeType == node.ELEMENT_NODE
+        )
+
+    assert slots(with_pfr) == slots(without_pfr)
 
 
 def test_only_stats_are_reported_as_untranslated_not_labels_or_lines() -> None:
@@ -125,3 +162,16 @@ def test_the_command_line_writes_a_package(tmp_path, capsys) -> None:
     printed = capsys.readouterr().out
     assert "30 stats" in printed
     assert printed.count("untranslated [Villain Info 3H]") == 2
+
+
+def test_the_untranslated_list_reads_back_from_the_package(package) -> None:
+    path, summary = package
+    root = defusedxml.minidom.parse(str(path)).documentElement
+
+    assert pt4hud.package_untranslated(root) == summary["untranslated"]
+
+
+def test_a_package_not_converted_from_pt4_lists_nothing() -> None:
+    root = defusedxml.minidom.parseString('<fpdb_hud_package version="1.0"><ss name="mine"/></fpdb_hud_package>')
+
+    assert pt4hud.package_untranslated(root.documentElement) == []

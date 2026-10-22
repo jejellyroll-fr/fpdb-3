@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 09:11+0200\n"
+"POT-Creation-Date: 2026-10-22 09:26+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4110,6 +4110,22 @@ msgstr ""
 msgid ""
 "Not in the package: %s. Import the .pt4hud itself to get the range charts "
 "and info popups."
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid "HUD profile '%s' successfully imported!"
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "Import Successful"
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid ""
+"This package was converted from PokerTracker 4: %d of its stats have no fpdb "
+"equivalent and are not in it (see Details)."
 msgstr ""
 
 #: fpdb_3_legacy/research_labels.py

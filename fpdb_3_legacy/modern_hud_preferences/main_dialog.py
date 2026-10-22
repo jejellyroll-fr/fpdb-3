@@ -2618,9 +2618,10 @@ class ModernHudPreferences(QDialog):
             # Reload parent config to apply changes live
             self.reload_parent_config()
 
-            QMessageBox.information(
-                self, "Import Successful", f"HUD profile '{new_profile_name}' successfully imported!"
-            )
+            from fpdb_3_legacy.pt4hud_dialogs import show_package_import
+
+            # A package converted from PT4 names the stats it left out (#614).
+            show_package_import(self, new_profile_name, root)
 
         except Exception as e:  # intentional broad catch
             QMessageBox.critical(self, "Import Error", f"An error occurred while importing HUD profile:\n{e}")

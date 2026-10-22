@@ -649,7 +649,9 @@ def extract_hud_groups(data: bytes) -> list[Group]:
                             col=col,
                         )
                     )
-                else:
+                elif _FORMULA_RE.search(stat_name) or _CODE_RE.match(stat_name):
+                    # A custom formula: the flat scan in parse() maps or reports
+                    # it. Its slot here stays a blank cell.
                     cells.append(
                         Cell(
                             pt4_name="",
@@ -657,6 +659,24 @@ def extract_hud_groups(data: bytes) -> list[Group]:
                             section=name,
                             street=street,
                             kind="text",
+                            hudcolor=r["fg"],
+                            hudbgcolor=r["bg"],
+                            row=row,
+                            col=col,
+                        )
+                    )
+                else:
+                    # A built-in PT4 stat fpdb has no equivalent for: kept as a stat
+                    # with no fpdb_stat, so the import report names it (#614); the
+                    # stat-set still draws its slot blank.
+                    cells.append(
+                        Cell(
+                            pt4_name=stat_name,
+                            label="",
+                            section=name,
+                            street=street,
+                            fpdb_stat=None,
+                            kind="stat",
                             hudcolor=r["fg"],
                             hudbgcolor=r["bg"],
                             row=row,
@@ -1061,6 +1081,19 @@ def _stat_el(doc, c: Cell, r: int, col: int):
     return st
 
 
+def _blank_el(doc, c: Cell, r: int, col: int):
+    """The empty, coloured slot of a stat fpdb cannot compute, as PT4 laid it out."""
+    t = doc.createElement("text")
+    t.setAttribute("_rowcol", f"({r + 1},{col + 1})")
+    t.setAttribute("label", "")
+    fg = _legible_fg(c.hudcolor, c.hudbgcolor)
+    if fg:
+        t.setAttribute("fgcolor", fg)
+    if c.hudbgcolor:
+        t.setAttribute("bgcolor", c.hudbgcolor)
+    return t
+
+
 def _legible_fg(fg: str, bg: str) -> str:
     """Keep ``fg`` unless it is invisible against ``bg`` (identical colours).
 
@@ -1158,8 +1191,10 @@ def _build_stat_set(doc, layout: Layout, name: str, multiblock: bool = True):
                     blk.appendChild(_text_el(doc, c, r, col, span))
                 elif c.kind == "hline":
                     blk.appendChild(_hline_el(doc, c, r, col))
-                else:
+                elif c.fpdb_stat:
                     blk.appendChild(_stat_el(doc, c, r, col))
+                else:
+                    blk.appendChild(_blank_el(doc, c, r, col))  # an untranslated stat keeps its slot
             ss.appendChild(blk)
             total_rows += g.rows
             max_cols = max(max_cols, g.cols)
@@ -1275,6 +1310,15 @@ def untranslated(layout: Layout) -> list[dict[str, str]]:
         }
         for c in layout.cells
         if c.kind == "stat" and not c.fpdb_stat
+    ]
+
+
+def package_untranslated(package_root) -> list[dict[str, str]]:
+    """The untranslated PT4 stats an ``.fpdbhud`` package lists (from :func:`to_package`); empty for others."""
+    return [
+        {key: node.getAttribute(key) for key in ("label", "section", "pt4_name", "formula")}
+        for listing in package_root.getElementsByTagName("untranslated")
+        for node in listing.getElementsByTagName("pt4_stat")
     ]
 
 

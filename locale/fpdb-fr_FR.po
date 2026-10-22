@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 09:11+0200\n"
+"POT-Creation-Date: 2026-10-22 09:26+0200\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -4315,6 +4315,15 @@ msgstr "Paquet HUD FPDB (*.fpdbhud)"
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
+msgid "HUD profile '%s' successfully imported!"
+msgstr "Profil HUD « %s » importé avec succès !"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "Import Successful"
+msgstr "Import réussi"
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
 msgid "Imported '%s'."
 msgstr "« %s » importé."
 
@@ -4354,6 +4363,15 @@ msgstr "%s enregistré."
 #, python-format
 msgid "The package lists the %d PT4 stats it leaves out."
 msgstr "Le paquet liste les %d stats PT4 qu'il laisse de côté."
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, python-format
+msgid ""
+"This package was converted from PokerTracker 4: %d of its stats have no fpdb "
+"equivalent and are not in it (see Details)."
+msgstr ""
+"Ce paquet a été converti depuis PokerTracker 4 : %d de ses stats n'ont pas "
+"d'équivalent fpdb et n'y figurent pas (voir Détails)."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "% of pot"
@@ -7102,9 +7120,6 @@ msgstr ""
 
 #~ msgid "Import Complete"
 #~ msgstr "Importation terminée"
-
-#~ msgid "Import clicked"
-#~ msgstr "Importation sélectionnée"
 
 #~ msgid "Import through eMail/IMAP"
 #~ msgstr "Importation via eMail/IMAP"
