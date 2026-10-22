@@ -2650,7 +2650,7 @@ class ModernHudPreferences(QDialog):
 
         from fpdb_3_legacy.pt4hud_dialogs import show_import_summary
 
-        show_import_summary(self, summary, filename)
+        show_import_summary(self, summary)
 
     def reload_parent_config(self) -> None:
         """Ask the host to apply an import that has already been saved.

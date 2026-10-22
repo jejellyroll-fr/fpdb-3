@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 09:26+0200\n"
+"POT-Creation-Date: 2026-10-22 12:48+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2272,7 +2272,7 @@ msgstr ""
 msgid "%d files are not hand histories fpdb can read; they will be left out:"
 msgstr ""
 
-#: fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
 msgid "… and %d more"
 msgstr ""
@@ -3121,6 +3121,15 @@ msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Import a PokerTracker 4 HUD layout (stats + range charts)"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Convert PT4 HUD to .fpdbhud…"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
+msgid ""
+"Save a PokerTracker 4 HUD layout as a package you can share or re-import"
 msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
@@ -4061,7 +4070,7 @@ msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
-msgid "%d PT4 stats have no fpdb equivalent and were left out (see Details)."
+msgid "%d PT4 stats have no fpdb equivalent and were left out:"
 msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
@@ -4077,7 +4086,11 @@ msgid "PT4 HUD imported"
 msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
-msgid "Save as .fpdbhud package…"
+msgid "Convert PT4 HUD to .fpdbhud"
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "PT4 HUD layout (*.pt4hud);;All files (*)"
 msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
@@ -4118,14 +4131,14 @@ msgid "HUD profile '%s' successfully imported!"
 msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
-msgid "Import Successful"
-msgstr ""
-
-#: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
 msgid ""
 "This package was converted from PokerTracker 4: %d of its stats have no fpdb "
-"equivalent and are not in it (see Details)."
+"equivalent and are not in it:"
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "Import Successful"
 msgstr ""
 
 #: fpdb_3_legacy/research_labels.py

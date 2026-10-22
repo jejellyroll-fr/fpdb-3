@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 09:26+0200\n"
+"POT-Creation-Date: 2026-10-22 12:48+0200\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -2783,7 +2783,7 @@ msgstr ""
 msgid "not set"
 msgstr "Export nicht möglich"
 
-#: fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
 msgid "… and %d more"
 msgstr ""
@@ -3742,6 +3742,11 @@ msgid "Configure"
 msgstr "HUD-Konfigurator"
 
 #: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Convert PT4 HUD to .fpdbhud…"
+msgstr "PT4-HUD importieren (.pt4hud)"
+
+#: fpdb_3_legacy/menu_layout.py
 msgid "Create or Recreate Tables"
 msgstr "Tabellen erstellen oder neu erstellen"
 
@@ -3908,6 +3913,12 @@ msgstr "Research Browser"
 #, fuzzy
 msgid "Research Browser for Omaha"
 msgstr "Research Browser für Omaha"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid ""
+"Save a PokerTracker 4 HUD layout as a package you can share or re-import"
+msgstr "Ein PokerTracker 4-HUD-Layout importieren (Statistiken + Range-Charts)"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -4918,12 +4929,17 @@ msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
-msgid "%d PT4 stats have no fpdb equivalent and were left out (see Details)."
+msgid "%d PT4 stats have no fpdb equivalent and were left out:"
 msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 msgid "Assign the new HUD profile to a game in HUD Preferences."
 msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
+#, fuzzy
+msgid "Convert PT4 HUD to .fpdbhud"
+msgstr "PT4-HUD importieren (.pt4hud)"
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 #, fuzzy, python-format
@@ -4970,16 +4986,16 @@ msgid "PT4 HUD imported"
 msgstr "PT4-HUD importiert"
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
+msgid "PT4 HUD layout (*.pt4hud);;All files (*)"
+msgstr ""
+
+#: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
 msgid "Range charts %(charts)s are in the popup '%(popup)s'."
 msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 msgid "Save as .fpdbhud package"
-msgstr ""
-
-#: fpdb_3_legacy/pt4hud_dialogs.py
-msgid "Save as .fpdbhud package…"
 msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
@@ -4996,7 +5012,7 @@ msgstr ""
 #, python-format
 msgid ""
 "This package was converted from PokerTracker 4: %d of its stats have no fpdb "
-"equivalent and are not in it (see Details)."
+"equivalent and are not in it:"
 msgstr ""
 
 #: fpdb_3_legacy/research_labels.py

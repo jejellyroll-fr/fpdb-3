@@ -468,13 +468,19 @@ class fpdb(QMainWindow):
 
         from fpdb_3_legacy.pt4hud_dialogs import show_import_summary
 
-        show_import_summary(self, summary, path)
+        show_import_summary(self, summary)
 
     def dia_stat_packs(self, widget=None, data=None) -> None:
         """Manage user-installed declarative stat packs (#403)."""
         from fpdb_3_legacy.stat_packs_dialog import open_stat_packs
 
         open_stat_packs(self)
+
+    def dia_convert_pt4hud(self, widget=None, data=None) -> None:
+        """Configure ▸ Convert PT4 HUD to .fpdbhud: a layout as a package, untranslated stats listed (#614)."""
+        from fpdb_3_legacy.pt4hud_dialogs import convert_to_package
+
+        convert_to_package(self)
 
     def dia_import_pt4stat(self, widget, data=None) -> None:
         """Import PokerTracker 4 .pt4stat custom-statistic definitions.

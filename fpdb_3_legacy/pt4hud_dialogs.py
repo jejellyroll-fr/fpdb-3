@@ -1,9 +1,10 @@
 """What a PT4 HUD import tells the user, and saving it as an ``.fpdbhud`` package (#614).
 
 Both places that import a ``.pt4hud`` -- the Configure menu and HUD
-Preferences -- end on the same report: what was translated, every PT4 stat
-that was not, and an offer to save the result as a package that can be shared
-or re-imported without the PT4 file.
+Preferences -- end on the same report: what was translated and every PT4 stat
+that was not. *Configure ▸ Convert PT4 HUD to .fpdbhud* saves a layout as a
+package that can be shared or re-imported without the PT4 file. Every box here
+is a static ``QMessageBox`` call, as elsewhere in the application.
 """
 
 from __future__ import annotations
@@ -19,10 +20,19 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("pt4hud")
 
-__all__ = ["save_package", "show_import_summary", "show_package_import", "untranslated_lines"]
+__all__ = [
+    "convert_to_package",
+    "listed",
+    "save_package",
+    "show_import_summary",
+    "show_package_import",
+    "untranslated_lines",
+]
 
 # A PT4 formula can run to hundreds of characters; the list shows its start.
 _FORMULA_SHOWN = 120
+# How many untranslated stats a message names before saying how many more there are.
+_LISTED = 25
 
 
 def untranslated_lines(stats: list[dict[str, str]]) -> list[str]:
@@ -38,15 +48,25 @@ def untranslated_lines(stats: list[dict[str, str]]) -> list[str]:
     return lines
 
 
-def show_import_summary(parent: Any, summary: dict, source: str) -> None:
-    """Report an import and offer to save it as a package."""
+def listed(stats: list[dict[str, str]]) -> str:
+    """The untranslated stats as message text, the first few in full."""
+    lines = untranslated_lines(stats[:_LISTED])
+    if len(stats) > _LISTED:
+        lines.append(_("… and %d more") % (len(stats) - _LISTED))
+    return "\n".join(lines)
+
+
+def show_import_summary(parent: Any, summary: dict) -> None:
+    """Report an import: what was translated, and every PT4 stat that was not.
+
+    One static ``QMessageBox.information``, like every other report in the
+    application, so a modal box never waits on a click nothing can give. Saving
+    the result as a package is *Configure ▸ Convert PT4 HUD to .fpdbhud*.
+    """
     lines = [
         _("Imported '%s'.") % summary["name"],
         _("%(stats)d stats translated, in %(blocks)d panels.")
-        % {
-            "stats": summary["stats"],
-            "blocks": summary.get("blocks", 0),
-        },
+        % {"stats": summary["stats"], "blocks": summary.get("blocks", 0)},
     ]
     if summary.get("charts"):
         lines.append(
@@ -55,22 +75,20 @@ def show_import_summary(parent: Any, summary: dict, source: str) -> None:
         )
     missing = summary.get("untranslated", [])
     if missing:
-        lines.append(_("%d PT4 stats have no fpdb equivalent and were left out (see Details).") % len(missing))
+        lines.append(_("%d PT4 stats have no fpdb equivalent and were left out:") % len(missing))
+        lines.append(listed(missing))
     else:
         lines.append(_("Every PT4 stat was translated."))
     lines.append(_("Assign the new HUD profile to a game in HUD Preferences."))
+    QMessageBox.information(parent, _("PT4 HUD imported"), "\n".join(lines))
 
-    box = QMessageBox(parent)
-    box.setWindowTitle(_("PT4 HUD imported"))
-    box.setIcon(QMessageBox.Icon.Information)
-    box.setText("\n".join(lines))
-    if missing:
-        box.setDetailedText("\n".join(untranslated_lines(missing)))
-    save = box.addButton(_("Save as .fpdbhud package…"), QMessageBox.ButtonRole.ActionRole)
-    box.addButton(QMessageBox.StandardButton.Ok)
-    box.exec()
-    if box.clickedButton() is save:
-        save_package(parent, source, summary["name"])
+
+def convert_to_package(parent: Any) -> str | None:
+    """Configure ▸ Convert PT4 HUD to .fpdbhud: pick a ``.pt4hud``, then save it as a package."""
+    source, _filter = QFileDialog.getOpenFileName(
+        parent, _("Convert PT4 HUD to .fpdbhud"), "", _("PT4 HUD layout (*.pt4hud);;All files (*)")
+    )
+    return save_package(parent, source) if source else None
 
 
 def save_package(parent: Any, source: str, name: str | None = None) -> str | None:
@@ -103,16 +121,11 @@ def save_package(parent: Any, source: str, name: str | None = None) -> str | Non
 
 def show_package_import(parent: Any, profile: str, package_root: Any) -> None:
     """Confirm a package import, naming the PT4 stats a converted package left out."""
-    missing = pt4hud.package_untranslated(package_root)
     text = _("HUD profile '%s' successfully imported!") % profile
-    box = QMessageBox(parent)
-    box.setWindowTitle(_("Import Successful"))
-    box.setIcon(QMessageBox.Icon.Information)
+    missing = pt4hud.package_untranslated(package_root)
     if missing:
         text += "\n\n" + _(
-            "This package was converted from PokerTracker 4: %d of its stats have no fpdb equivalent "
-            "and are not in it (see Details)."
+            "This package was converted from PokerTracker 4: %d of its stats have no fpdb equivalent and are not in it:"
         ) % len(missing)
-        box.setDetailedText("\n".join(untranslated_lines(missing)))
-    box.setText(text)
-    box.exec()
+        text += "\n" + listed(missing)
+    QMessageBox.information(parent, _("Import Successful"), text)
