@@ -23,6 +23,7 @@ import re
 import shutil
 import sys
 from collections.abc import Callable
+from dataclasses import dataclass
 from time import process_time, time
 from typing import Any
 
@@ -225,6 +226,127 @@ class ZMQSender:
                 self.context.term()
 
 
+
+@dataclass(frozen=True)
+class FileImportResult:
+    """What one file of the last bulk import gave, kept for per-room summaries (#612)."""
+
+    site: str | None
+    stored: int = 0
+    duplicates: int = 0
+    partial: int = 0
+    skipped: int = 0
+    errors: int = 0
+
+
+def _site_name(fpdbfile: Any) -> str | None:
+    site = getattr(fpdbfile, "site", None)
+    return getattr(site, "name", None)
+
+
+def is_valid_import_file(filepath: str) -> bool:
+    """Check if a file is a valid candidate for import.
+
+    Checks for:
+    1. Hidden files (starting with .)
+    2. Common system files
+    3. Known binary/ignored extensions
+
+    Args:
+        filepath: The full path to the file.
+
+    Returns:
+        bool: True if the file seems valid, False otherwise.
+    """
+    filename = os.path.basename(filepath)
+
+    # 1. Skip hidden files and common system files
+    if filename.startswith("."):
+        return False
+
+    if filename.lower() in ("desktop.ini", "thumbs.db"):
+        return False
+
+    # 2. Check extension blacklist
+    ext = os.path.splitext(filename)[1].lower()
+
+    # List of extensions to explicitly ignore
+    ignored_extensions = {
+        # Images
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".bmp",
+        ".ico",
+        ".tiff",
+        ".webp",
+        ".svg",
+        ".psd",
+        # Archives
+        ".zip",
+        ".rar",
+        ".7z",
+        ".tar",
+        ".gz",
+        ".bz2",
+        ".xz",
+        ".iso",
+        # Executables and Libraries
+        ".exe",
+        ".dll",
+        ".so",
+        ".dylib",
+        ".bin",
+        ".msi",
+        ".app",
+        ".bat",
+        ".sh",
+        ".cmd",
+        # Media
+        ".mp3",
+        ".wav",
+        ".mp4",
+        ".avi",
+        ".mkv",
+        ".mov",
+        ".flv",
+        ".wmv",
+        # Documents/Office (excluding xls/xlsx which are supported)
+        ".pdf",
+        ".doc",
+        ".docx",
+        ".ppt",
+        ".pptx",
+        ".odt",
+        ".rtf",
+        # Database
+        ".db",
+        ".db-wal",
+        ".db-shm",
+        ".sqlite",
+        ".sqlite-wal",
+        ".sqlite-shm",
+        ".sqlite3",
+        ".sqlite3-wal",
+        ".sqlite3-shm",
+        ".mdb",
+        # Code/Compiled
+        ".pyc",
+        ".class",
+        ".o",
+        ".obj",
+        ".py",
+        # Test & sidecar reference data (shared with IdentifySite)
+        *SIDECAR_EXTENSIONS,
+    }
+
+    if ext in ignored_extensions:
+        return False
+
+    return True
+
+
 class Importer:
     """Importer class for handling file imports and processing."""
 
@@ -252,6 +374,7 @@ class Importer:
         self.idsite = IdentifySite.IdentifySite(config)
 
         self.filelist: dict[str, IdentifySite.FPDBFile] = {}
+        self.file_results: dict[str, FileImportResult] = {}
         self.failed_files = FailureCache()
         self.dirlist: dict[Any, list[Any]] = {}
         self.siteIds: dict[str, int] = {}
@@ -641,106 +764,7 @@ class Importer:
         return True
 
     def _is_valid_import_file(self, filepath: str) -> bool:
-        """Check if a file is a valid candidate for import.
-
-        Checks for:
-        1. Hidden files (starting with .)
-        2. Common system files
-        3. Known binary/ignored extensions
-
-        Args:
-            filepath: The full path to the file.
-
-        Returns:
-            bool: True if the file seems valid, False otherwise.
-        """
-        filename = os.path.basename(filepath)
-
-        # 1. Skip hidden files and common system files
-        if filename.startswith("."):
-            return False
-
-        if filename.lower() in ("desktop.ini", "thumbs.db"):
-            return False
-
-        # 2. Check extension blacklist
-        ext = os.path.splitext(filename)[1].lower()
-
-        # List of extensions to explicitly ignore
-        ignored_extensions = {
-            # Images
-            ".jpg",
-            ".jpeg",
-            ".png",
-            ".gif",
-            ".bmp",
-            ".ico",
-            ".tiff",
-            ".webp",
-            ".svg",
-            ".psd",
-            # Archives
-            ".zip",
-            ".rar",
-            ".7z",
-            ".tar",
-            ".gz",
-            ".bz2",
-            ".xz",
-            ".iso",
-            # Executables and Libraries
-            ".exe",
-            ".dll",
-            ".so",
-            ".dylib",
-            ".bin",
-            ".msi",
-            ".app",
-            ".bat",
-            ".sh",
-            ".cmd",
-            # Media
-            ".mp3",
-            ".wav",
-            ".mp4",
-            ".avi",
-            ".mkv",
-            ".mov",
-            ".flv",
-            ".wmv",
-            # Documents/Office (excluding xls/xlsx which are supported)
-            ".pdf",
-            ".doc",
-            ".docx",
-            ".ppt",
-            ".pptx",
-            ".odt",
-            ".rtf",
-            # Database
-            ".db",
-            ".db-wal",
-            ".db-shm",
-            ".sqlite",
-            ".sqlite-wal",
-            ".sqlite-shm",
-            ".sqlite3",
-            ".sqlite3-wal",
-            ".sqlite3-shm",
-            ".mdb",
-            # Code/Compiled
-            ".pyc",
-            ".class",
-            ".o",
-            ".obj",
-            ".py",
-            # Test & sidecar reference data (shared with IdentifySite)
-            *SIDECAR_EXTENSIONS,
-        }
-
-        if ext in ignored_extensions:
-            return False
-
-        return True
+        return is_valid_import_file(filepath)
 
     # Called from GuiBulkImport to add a file or directory. Bulk import never monitors
     def addBulkImportImportFileOrDir(self, inputPath, site="auto"):
@@ -966,6 +990,7 @@ class Importer:
         totpartial = 0
         totskipped = 0
         toterrors = 0
+        self.file_results = {}
 
         # prepare progress popup window
         has_callbacks = all(
@@ -993,7 +1018,13 @@ class Importer:
                     prefetch.before_import(f)
 
                 try:
-                    (stored, duplicates, partial, skipped, errors, ttime, _) = self._import_despatch(self.filelist[f])
+                    (stored, duplicates, partial, skipped, errors, ttime, detected) = self._import_despatch(
+                        self.filelist[f]
+                    )
+                    # The parser's room when it found one: a PokerTracker-format file is
+                    # identified as "PokerTracker" and only parsing tells Merge from Everest.
+                    room = detected if isinstance(detected, str) and detected else _site_name(self.filelist[f])
+                    self.file_results[f] = FileImportResult(room, stored, duplicates, partial, skipped, errors)
                     totstored += stored
                     totdups += duplicates
                     totpartial += partial
@@ -1014,6 +1045,7 @@ class Importer:
                 except Exception as e:  # intentional broad catch: file import must isolate per-file failures.
                     self.database.rollback()
                     log.exception(f"A fatal error occurred while processing file: {f}. Error: {e}")
+                    self.file_results[f] = FileImportResult(_site_name(self.filelist[f]), errors=1)
                     toterrors += 1
                     self._relocate_processed_file(f, failed=True)
                     continue

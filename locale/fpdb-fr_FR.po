@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 20:37+0200\n"
+"POT-Creation-Date: 2026-10-21 21:40+0200\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -793,7 +793,7 @@ msgstr "Écrire les notes (base)"
 msgid "Write Notes"
 msgstr "Écrire les notes"
 
-#: fpdb_3_legacy/GuiBulkImport.py
+#: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Browse..."
 msgstr "Parcourir..."
 
@@ -1329,7 +1329,7 @@ msgid "FPDB 3 info"
 msgstr "Infos FPDB 3"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/session_guard_dialog.py
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/session_guard_dialog.py
 msgid "Hands"
 msgstr "Mains"
 
@@ -2323,6 +2323,171 @@ msgstr "Charger les mains"
 msgid "Refresh Stats"
 msgstr "Rafraîchir Stats"
 
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid "%(files)d files from %(rooms)d rooms will be imported."
+msgstr "%(files)d fichiers de %(rooms)d rooms seront importés."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid "%(hands)d hands imported from %(rooms)d rooms."
+msgstr "%(hands)d mains importées depuis %(rooms)d rooms."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid "%d files are not hand histories fpdb can read; they will be left out:"
+msgstr ""
+"%d fichiers ne sont pas des historiques lisibles par fpdb ; ils seront "
+"ignorés :"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid "%d files were left out: fpdb cannot read them."
+msgstr "%d fichiers ont été ignorés : fpdb ne sait pas les lire."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Another import is running. Try again once it has finished."
+msgstr "Un autre import est en cours. Réessayez quand il sera terminé."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Choose the folder holding the hand histories"
+msgstr "Choisir le dossier contenant les historiques de mains"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Duplicates"
+msgstr "Doublons"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Errors"
+msgstr "Erreurs"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Files"
+msgstr "Fichiers"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Find the hand histories"
+msgstr "Trouver les historiques de mains"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Folder holding the hand histories"
+msgstr "Dossier contenant les historiques de mains"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/research_labels.py
+msgid "Hero"
+msgstr "Héros"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Hero in fpdb"
+msgstr "Héros dans fpdb"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Hero in the files"
+msgstr "Héros dans les fichiers"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Import finished."
+msgstr "Import terminé."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Import from another tracker"
+msgstr "Importer depuis un autre tracker"
+
+# --- Vague 2: bulk import panel ---
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Importing"
+msgstr "Import en cours"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Large archives take a while. The tracker's files are read, never moved."
+msgstr ""
+"Les grosses archives prennent du temps. Les fichiers du tracker sont lus, "
+"jamais déplacés."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "No hand history fpdb can read was found in this folder."
+msgstr "Aucun historique de mains lisible par fpdb dans ce dossier."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Nothing is imported yet."
+msgstr "Rien n'est encore importé."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Partial"
+msgstr "Partielles"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Reading the folder…"
+msgstr "Lecture du dossier…"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Room"
+msgstr "Room"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid ""
+"Set your screen name for %s in Configure > Site Settings before importing, "
+"or your own stats will not be told apart from your opponents'."
+msgstr ""
+"Renseignez votre pseudo pour %s dans Configurer > Paramètres des sites avant "
+"d'importer, sinon vos propres stats ne seront pas distinguées de celles de "
+"vos adversaires."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid ""
+"Stats, the HUD and player notes are not part of this import; see the "
+"migration guide in the docs."
+msgstr ""
+"Les stats, le HUD et les notes ne font pas partie de cet import ; voir le "
+"guide de migration dans la documentation."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid ""
+"The folder could not be read:\n"
+"%s"
+msgstr ""
+"Le dossier n'a pas pu être lu :\n"
+"%s"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid ""
+"The import stopped on an error:\n"
+"%s"
+msgstr ""
+"L'import s'est arrêté sur une erreur :\n"
+"%s"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "What came over"
+msgstr "Ce qui a été importé"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "What the folder holds"
+msgstr "Contenu du dossier"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Which tracker are you coming from?"
+msgstr "De quel tracker venez-vous ?"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid ""
+"fpdb imports the hands it kept. Stats, HUD and notes come over separately."
+msgstr ""
+"fpdb importe les mains que le tracker a conservées. Stats, HUD et notes se "
+"migrent à part."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "not set"
+msgstr "non défini"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid "… and %d more"
+msgstr "… et %d de plus"
+
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Clipboard unavailable"
 msgstr "Presse-papiers indisponible"
@@ -3116,6 +3281,10 @@ msgid "Auto Notes Workbench"
 msgstr "Atelier de notes automatiques"
 
 #: fpdb_3_legacy/menu_layout.py
+msgid "Bring your hands over from PokerTracker 4 or Holdem Manager 3"
+msgstr "Récupérer vos mains depuis PokerTracker 4 ou Holdem Manager 3"
+
+#: fpdb_3_legacy/menu_layout.py
 msgid "Cash"
 msgstr "Cash"
 
@@ -3154,6 +3323,10 @@ msgstr "Modifier vos préférences"
 #: fpdb_3_legacy/menu_layout.py
 msgid "Export the whole database to a text file (slow)"
 msgstr "Exporter toute la base de données dans un fichier texte (lent)"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "From Another Tracker…"
+msgstr "Depuis un autre tracker…"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Graphs"
@@ -4373,10 +4546,6 @@ msgstr "Mains après"
 #: fpdb_3_legacy/research_labels.py
 msgid "Hands before"
 msgstr "Mains avant"
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Hero"
-msgstr "Héros"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Hero's own decisions, or everyone except hero. Any keeps both."
@@ -5688,6 +5857,49 @@ msgstr ""
 "%s\n"
 "Voulez-vous le remplacer ?"
 
+#: fpdb_3_legacy/tracker_migration.py
+msgid ""
+"Choose that folder below: fpdb reads those files as they are, room by room."
+msgstr ""
+"Choisissez ce dossier ci-dessous : fpdb lit ces fichiers tels quels, room "
+"par room."
+
+#: fpdb_3_legacy/tracker_migration.py
+msgid ""
+"Holdem Manager 3 can move the hand histories it imports to an archive "
+"folder, in the room's own format. Its import settings show where that folder "
+"is."
+msgstr ""
+"Holdem Manager 3 peut déplacer les historiques qu'il importe vers un dossier "
+"d'archive, dans le format d'origine de la room. Ses réglages d'import "
+"indiquent où se trouve ce dossier."
+
+#: fpdb_3_legacy/tracker_migration.py
+msgid ""
+"PokerTracker 4 archives every hand history it imports, in the room's own "
+"format. Its archive folder is set in Configure > Site & Import Options > "
+"Preferences."
+msgstr ""
+"PokerTracker 4 archive chaque historique qu'il importe, dans le format "
+"d'origine de la room. Son dossier d'archive se règle dans Configure > Site & "
+"Import Options > Preferences."
+
+#: fpdb_3_legacy/tracker_migration.py
+msgid ""
+"Without the archive, Database > Export Hands writes the hands out again. "
+"Check the summary afterwards for any file fpdb could not read."
+msgstr ""
+"Sans archive, Database > Export Hands réécrit les mains. Vérifiez ensuite "
+"dans le bilan les fichiers que fpdb n'a pas su lire."
+
+#: fpdb_3_legacy/tracker_migration.py
+msgid ""
+"Without the archive, export the hands from Holdem Manager 3 to a folder. "
+"Check the summary afterwards for any file fpdb could not read."
+msgstr ""
+"Sans archive, exportez les mains depuis Holdem Manager 3 vers un dossier. "
+"Vérifiez ensuite dans le bilan les fichiers que fpdb n'a pas su lire."
+
 #: fpdb_3_legacy/update_notice.py
 #, python-format
 msgid "Download %s"
@@ -6476,10 +6688,6 @@ msgstr ""
 #~ msgstr "Erreur de mise à jour du HUD pour la main %s."
 
 #~ msgid "Error:"
-#~ msgstr "Erreur:"
-
-#, fuzzy
-#~ msgid "Errors:"
 #~ msgstr "Erreur:"
 
 #~ msgid "Errors: %s"
@@ -7860,9 +8068,6 @@ msgstr ""
 
 #~ msgid "enter table name to find: "
 #~ msgstr "saisir le nom de table à trouver: "
-
-#~ msgid "finished."
-#~ msgstr "terminé."
 
 #~ msgid "fpdb starting ..."
 #~ msgstr "fpdb démarre ..."

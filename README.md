@@ -138,6 +138,7 @@ them:
 
 | Guide | For |
 | --- | --- |
+| [Moving from PokerTracker 4 or Holdem Manager 3](docs/migrate-from-pt4-hm3.md) | bring your hand history over: where the files are, the import wizard, what comes next |
 | [Study Explorer quick start](docs/study-explorer-quick-start.md) | spot → compare → visualize → hands, in five minutes |
 | [Reading differences responsibly](docs/reading-differences.md) | what a Hero-vs-Field gap is, and is not |
 | [Reading the visualizations](docs/study-visualizations.md) | sizing, matrices, heatmaps, range grid, strength, EV |

@@ -1898,6 +1898,14 @@ class fpdb(QMainWindow):
             lambda: GuiBulkImport.GuiBulkImport(self.settings, self.config, self.sql, self),
         )
 
+    def dia_tracker_migration(self, widget=None, data=None) -> None:
+        """Import ▸ From Another Tracker: bring PT4 / HM3 hands over (#612)."""
+        from fpdb_3_legacy.GuiTrackerMigration import GuiTrackerMigration
+
+        self.load_profile()
+        wizard = GuiTrackerMigration(self.settings, self.config, self.sql, self)
+        wizard.exec()
+
     def tab_coinpoker_capture(self, widget, data=None) -> None:
         """Open the CoinPoker live packet-capture tab."""
         if is_site_disabled("CoinPoker"):
