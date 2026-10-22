@@ -84,7 +84,7 @@ class TestUnsupportedReported:
         assert any("amt_does_not_exist" in w for w in d.warnings)
 
     def test_mapped_money_column_translates(self):
-        # amt_rake is in docs/pt4_legacy_mapping.json -> rake (scale 100).
+        # amt_rake is in pt4_mapping.d/pt4_legacy_mapping.json -> rake (scale 100).
         decoded = _decoded("c", {"c": "sum(t.amt_rake)"})
         d = pt4.translate(decoded)
         assert d.supported
@@ -206,12 +206,21 @@ class TestLegacyMappingFile:
         mapping = pt4.load_column_map()
         # Built-in fallback always present.
         assert mapping["amt_expected_won"] == ("allInEV", 100.0)
-        # Loaded from docs/pt4_legacy_mapping.json.
+        # Loaded from pt4_mapping.d/pt4_legacy_mapping.json.
         assert mapping["flg_showdown"] == ("sawShowdown", 1.0)
         assert mapping["amt_won"] == ("winnings", 100.0)
 
-    def test_mapping_path_points_at_docs(self):
-        assert pt4._legacy_mapping_path().name == "pt4_legacy_mapping.json"
+    def test_mapping_ships_inside_the_package(self):
+        """docs/ is in no release artifact; the map must sit in the package (#622)."""
+        path = pt4._legacy_mapping_path()
+
+        assert path.name == "pt4_legacy_mapping.json"
+        assert path.parent.parent == Path(pt4.__file__).resolve().parent
+        assert path.exists()
+
+    def test_every_mapping_section_loads(self):
+        assert pt4.PT4_CONDITION_MAP and pt4.PT4_NAMED_COLUMNS and pt4.PT4_EXPRESSION_ALIASES
+        assert pt4.PT4_COLUMN_MAP["flg_f_fold"] == ("flg_f_fold", 1.0)
 
     def test_documentation_keys_are_skipped(self):
         # "_note..." keys inside columns must not crash the loader or appear.
@@ -318,3 +327,328 @@ class TestImportFilesMerge:
 
         assert reg.load_directory(tmp_path) == 2
         assert "chipev_a" in reg and "chipev_b" in reg
+
+
+# --------------------------------------------------------------------------- #
+# The common cash idioms of PT4's stock stats (#613). The SQL below is PT4's own
+# column definitions, as its StatDefinitions.pt4 states them for "Cash Player".
+# --------------------------------------------------------------------------- #
+
+T = "cash_hand_player_statistics"
+STOCK_COLUMNS = {
+    "cnt_vpip": f"sum(if[{T}.flg_vpip, 1, 0])",
+    "cnt_hands": f"sum(if[{T}.id_hand > 0, 1, 0])",
+    "cnt_walks": "sum(if[lookup_actions_p.action = '', 1, 0])",
+    "cnt_pfr": f"sum(if[{T}.cnt_p_raise > 0, 1, 0])",
+    "cnt_pfr_opp": "sum(if[ lookup_actions_p.action LIKE '__%' OR (lookup_actions_p.action LIKE '_' AND ...), 1, 0])",
+    "cnt_p_3bet": f"sum(if[{T}.flg_p_3bet, 1, 0])",
+    "cnt_p_3bet_opp": f"sum(if[{T}.flg_p_3bet_opp, 1, 0])",
+    "cnt_p_3bet_def_action_fold": f"sum(if[{T}.enum_p_3bet_action='F', 1, 0])",
+    "cnt_p_3bet_def_opp": f"sum(if[{T}.flg_p_3bet_def_opp, 1, 0])",
+    "cnt_f_cbet": f"sum(if[{T}.flg_f_cbet, 1, 0])",
+    "cnt_f_cbet_opp": f"sum(if[{T}.flg_f_cbet_opp, 1, 0])",
+    "cnt_f_cbet_def_action_fold": f"sum(if[{T}.enum_f_cbet_action='F', 1, 0])",
+    "cnt_f_cbet_def_opp": f"sum(if[{T}.flg_f_cbet_def_opp, 1, 0])",
+    "cnt_wtsd": f"sum(if[{T}.flg_showdown, 1, 0])",
+    "cnt_wtsd_won": f"sum(if[{T}.flg_showdown AND {T}.flg_won_hand, 1, 0])",
+    "cnt_f_saw": f"sum(if[{T}.flg_f_saw, 1, 0])",
+    "cnt_f_bet": f"sum(if[{T}.flg_f_bet, 1, 0])",
+    "cnt_f_raise": f"sum({T}.cnt_f_raise)",
+    "cnt_f_call": f"sum({T}.cnt_f_call )",
+    "cnt_f_fold": f"sum(if[{T}.flg_f_fold, 1, 0])",
+    "cnt_steal_att": f"sum(if[{T}.flg_steal_att, 1, 0])",
+    "cnt_steal_opp": f"sum(if[{T}.flg_steal_opp, 1, 0])",
+    "cnt_steal_def_action_fold": f"sum(if[{T}.flg_blind_def_opp AND lookup_actions_p.action = 'F', 1, 0])",
+    "cnt_steal_def_opp": f"sum(if[{T}.flg_blind_def_opp, 1, 0])",
+}
+
+
+def _stock(label, value_expr):
+    referenced = {name: sql for name, sql in STOCK_COLUMNS.items() if name in value_expr}
+    return pt4.DecodedStat(
+        path=Path("StatDefinitions.pt4"),
+        columns=referenced,
+        value_expr=value_expr,
+        label=label,
+        category="Cash Player",
+    )
+
+
+class TestCommonCashIdioms:
+    @pytest.mark.parametrize(
+        ("label", "value_expr", "fpdb_value"),
+        [
+            ("3Bet Preflop", "(cnt_p_3bet / cnt_p_3bet_opp) * 100", "(street0_3BDone / street0_3BChance) * 100"),
+            (
+                "Fold to PF 3Bet",
+                "(cnt_p_3bet_def_action_fold / cnt_p_3bet_def_opp) * 100",
+                "(street0_FoldTo3BDone / street0_FoldTo3BChance) * 100",
+            ),
+            ("CBet Flop", "(cnt_f_cbet / cnt_f_cbet_opp) * 100", "(street1CBDone / street1CBChance) * 100"),
+            (
+                "Fold to F CBet",
+                "(cnt_f_cbet_def_action_fold / cnt_f_cbet_def_opp) * 100",
+                "(foldToStreet1CBDone / foldToStreet1CBChance) * 100",
+            ),
+            ("WTSD", "(cnt_wtsd / cnt_f_saw) * 100", "(sawShowdown / street1Seen) * 100"),
+            ("WSD", "(cnt_wtsd_won / cnt_wtsd) * 100", "(wonAtSD / sawShowdown) * 100"),
+            ("Att To Steal", "(cnt_steal_att / cnt_steal_opp) * 100", "(stealDone / stealChance) * 100"),
+            (
+                "Fold to Steal",
+                "(cnt_steal_def_action_fold / cnt_steal_def_opp) * 100",
+                "((foldedSbToSteal + foldedBbToSteal) / (foldSbToStealChance + foldBbToStealChance)) * 100",
+            ),
+            ("Flop AF", "(cnt_f_bet + cnt_f_raise) / cnt_f_call", "(street1Bets + street1Raises) / street1Calls"),
+        ],
+    )
+    def test_translates_as_pt4_defines_it(self, label, value_expr, fpdb_value):
+        result = pt4.translate(_stock(label, value_expr))
+
+        assert result.supported, result.warnings
+        assert result.descriptor["value"] == fpdb_value
+        assert result.notes == []
+        assert result.descriptor["scope"] == ["ring", "tour"]
+
+    @pytest.mark.parametrize(
+        ("label", "value_expr", "fpdb_value", "note"),
+        [
+            ("VPIP", "(cnt_vpip / (cnt_hands - cnt_walks)) * 100", "(street0VPI / (street0VPIChance)) * 100", "walk"),
+            ("PFR", "(cnt_pfr / cnt_pfr_opp) * 100", "(street0Aggr / street0AggrChance) * 100", "raise"),
+        ],
+    )
+    def test_translates_under_fpdb_s_definition_and_says_so(self, label, value_expr, fpdb_value, note):
+        result = pt4.translate(_stock(label, value_expr))
+
+        assert result.supported, result.warnings
+        assert result.descriptor["value"] == fpdb_value
+        assert len(result.notes) == 1 and note in result.notes[0]
+        assert "Differs from PT4:" in result.descriptor["description"]
+
+    def test_afq_translates_through_fpdb_s_own_fold_flags(self):
+        result = pt4.translate(
+            _stock(
+                "Flop AFq", "((cnt_f_bet + cnt_f_raise) / (cnt_f_call + cnt_f_fold + cnt_f_bet + cnt_f_raise)) * 100"
+            )
+        )
+
+        assert result.supported, result.warnings
+        assert result.descriptor["value"] == (
+            "((street1Bets + street1Raises) / (street1Calls + flg_f_fold + street1Bets + street1Raises)) * 100"
+        )
+        assert result.descriptor["boolean_inputs"] == ["flg_f_fold"]
+
+    def test_integer_action_counts_are_never_boolean_inputs(self):
+        """street1Bets & co. are SMALLINT: CASE WHEN on them is an error on PostgreSQL (Codex, #622)."""
+        result = pt4.translate(_stock("Flop AF", "(cnt_f_bet + cnt_f_raise) / cnt_f_call"))
+
+        assert result.supported
+        assert "boolean_inputs" not in result.descriptor
+
+    @pytest.mark.parametrize("title", pt4.COMMON_CASH_STATS)
+    def test_boolean_inputs_are_exactly_the_boolean_columns(self, title):
+        stock = {
+            "VPIP": "(cnt_vpip / (cnt_hands - cnt_walks)) * 100",
+            "PFR": "(cnt_pfr / cnt_pfr_opp) * 100",
+            "3Bet Preflop": "(cnt_p_3bet / cnt_p_3bet_opp) * 100",
+            "Fold to PF 3Bet": "(cnt_p_3bet_def_action_fold / cnt_p_3bet_def_opp) * 100",
+            "CBet Flop": "(cnt_f_cbet / cnt_f_cbet_opp) * 100",
+            "Fold to F CBet": "(cnt_f_cbet_def_action_fold / cnt_f_cbet_def_opp) * 100",
+            "WTSD": "(cnt_wtsd / cnt_f_saw) * 100",
+            "WSD": "(cnt_wtsd_won / cnt_wtsd) * 100",
+            "Flop AF": "(cnt_f_bet + cnt_f_raise) / cnt_f_call",
+            "Total AF": "(cnt_f_bet + cnt_f_raise) / cnt_f_call",
+            "Flop AFq": "((cnt_f_bet + cnt_f_raise) / (cnt_f_call + cnt_f_fold + cnt_f_bet + cnt_f_raise)) * 100",
+            "Total AFq": "((cnt_f_bet + cnt_f_raise) / (cnt_f_call + cnt_f_fold + cnt_f_bet + cnt_f_raise)) * 100",
+            "Att To Steal": "(cnt_steal_att / cnt_steal_opp) * 100",
+            "Fold to Steal": "(cnt_steal_def_action_fold / cnt_steal_def_opp) * 100",
+        }
+        descriptor = pt4.translate(_stock(title, stock[title])).descriptor
+        booleans = pt4._boolean_columns()
+
+        assert set(descriptor.get("boolean_inputs", [])) == {name for name in descriptor["inputs"] if name in booleans}
+
+    def test_both_blinds_steal_columns_are_inputs(self):
+        result = pt4.translate(_stock("Fold to Steal", "(cnt_steal_def_action_fold / cnt_steal_def_opp) * 100"))
+
+        assert set(result.descriptor["inputs"]) == {
+            "foldedSbToSteal",
+            "foldedBbToSteal",
+            "foldSbToStealChance",
+            "foldBbToStealChance",
+        }
+
+    def test_a_tournament_category_scopes_the_stat_to_tournaments(self):
+        decoded = _stock("WTSD", "(cnt_wtsd / cnt_f_saw) * 100")
+        decoded.category = "Tournament Player"
+
+        assert pt4.translate(decoded).descriptor["scope"] == ["tour"]
+
+    @pytest.mark.parametrize(
+        ("condition", "normalised"),
+        [
+            ("cash_hand_player_statistics.enum_p_3bet_action='F'", "enum_p_3bet_action = 'F'"),
+            ("t.flg_blind_def_opp AND lookup_actions_p.action  =  'F'", "flg_blind_def_opp AND action = 'F'"),
+            ("t.cnt_p_raise>0", "cnt_p_raise > 0"),
+        ],
+    )
+    def test_conditions_are_normalised_before_lookup(self, condition, normalised):
+        assert pt4._normalise_condition(condition) == normalised
+
+    def test_every_translated_idiom_loads_and_computes_in_the_registry(self, tmp_path):
+        stats = [
+            _stock("VPIP", "(cnt_vpip / (cnt_hands - cnt_walks)) * 100"),
+            _stock("Fold to Steal", "(cnt_steal_def_action_fold / cnt_steal_def_opp) * 100"),
+            _stock("Flop AF", "(cnt_f_bet + cnt_f_raise) / cnt_f_call"),
+        ]
+        body = "\n".join(pt4.emit_toml(pt4.translate(stat).descriptor) for stat in stats)
+        (tmp_path / "stock.toml").write_text(body, encoding="utf-8")
+
+        reg = sr.StatRegistry()
+        assert reg.load_directory(tmp_path) == 3
+        assert reg.get("vpip").compute({"street0VPI": 3, "street0VPIChance": 12}) == 25.0
+        folded = {"foldedSbToSteal": 1, "foldedBbToSteal": 2, "foldSbToStealChance": 2, "foldBbToStealChance": 2}
+        assert reg.get("fold_to_steal").compute(folded) == 75.0
+        assert reg.get("flop_af").compute({"street1Bets": 2, "street1Raises": 1, "street1Calls": 2}) == 1.5
+
+
+def _container(*strings: str) -> bytes:
+    """A PT4 container: big-endian length-prefixed UTF-16 strings."""
+    import struct
+
+    return b"".join(struct.pack(">I", len(text)) + text.encode("utf-16-be") for text in strings)
+
+
+class TestStatDefinitions:
+    def test_reads_the_player_stats_with_the_columns_they_reference(self, tmp_path):
+        path = tmp_path / "StatDefinitions.pt4"
+        path.write_bytes(
+            _container(
+                "Cash Player",
+                "cnt_p_3bet",
+                STOCK_COLUMNS["cnt_p_3bet"],
+                "Sum",
+                "Number of times the player 3bet.",
+                "Cash Player",
+                "cnt_p_3bet_opp",
+                STOCK_COLUMNS["cnt_p_3bet_opp"],
+                "Sum",
+                "Number of 3bet chances.",
+                "Cash Player",
+                "3Bet Preflop",
+                "Preflop 3Bet %",
+                "3Bet PF",
+                "(cnt_p_3bet / cnt_p_3bet_opp) * 100",
+                "/%.1f",
+                "/%.1f",
+                "Percentage of the time the player 3bet preflop.\n\nFormula: ...",
+                "Preflop",
+                "Cash Hand",
+                "amt_bb",
+                "cash_limit.amt_bb",
+                "Count Unique",
+                "Amount of the big blind.",
+            )
+        )
+
+        (stat,) = pt4.read_stat_definitions(path)
+
+        assert stat.label == "3Bet Preflop"
+        assert stat.category == "Cash Player"
+        assert stat.value_expr == "(cnt_p_3bet / cnt_p_3bet_opp) * 100"
+        assert stat.columns == {
+            "cnt_p_3bet": STOCK_COLUMNS["cnt_p_3bet"],
+            "cnt_p_3bet_opp": STOCK_COLUMNS["cnt_p_3bet_opp"],
+        }
+        assert stat.decimals == 1
+        assert stat.description == "Percentage of the time the player 3bet preflop."
+        assert pt4.translate(stat).supported
+
+    @pytest.mark.parametrize(
+        ("display", "decimals"), [("/%.2f", 2), ("format_number(x / y, 1, false, false)", 1), ("tourney_no", 2)]
+    )
+    def test_decimals_come_from_the_display_expression(self, display, decimals):
+        assert pt4._decimals(display) == decimals
+
+
+class TestCoverageReport:
+    def test_counts_names_and_blockers(self):
+        results = [
+            (_stock("3Bet Preflop", "(cnt_p_3bet / cnt_p_3bet_opp) * 100"), None),
+            (_stock("VPIP", "(cnt_vpip / (cnt_hands - cnt_walks)) * 100"), None),
+            (_stock("VPIP - Legacy Edition", "(cnt_vpip / cnt_hands) * 100"), None),
+        ]
+        report = pt4.CoverageReport([(stat, pt4.translate(stat)) for stat, _ in results])
+
+        text = report.markdown("StatDefinitions.pt4")
+
+        assert "| Cash Player | 2 | 1 | 1 | 1 |" in text
+        assert "| 3Bet Preflop | `(street0_3BDone / street0_3BChance) * 100` | translated |" in text
+        assert "| VPIP | `(street0VPI / (street0VPIChance)) * 100` | translated: PT4's VPIP" in text
+        assert "| PFR | | not in this PT4 version |" in text
+        assert report.blockers() == [("unmapped condition: `id_hand > 0`", 1)]
+
+    def test_the_command_line_writes_the_report(self, tmp_path):
+        path = tmp_path / "StatDefinitions.pt4"
+        path.write_bytes(
+            _container(
+                "Cash Player",
+                "cnt_wtsd",
+                STOCK_COLUMNS["cnt_wtsd"],
+                "Sum",
+                "Went to showdown.",
+                "Cash Player",
+                "cnt_f_saw",
+                STOCK_COLUMNS["cnt_f_saw"],
+                "Sum",
+                "Saw the flop.",
+                "Cash Player",
+                "WTSD",
+                "Went to Showdown %",
+                "WTSD %",
+                "(cnt_wtsd / cnt_f_saw) * 100",
+                "/%.2f",
+                "/%.2f",
+                "Percentage of the time the player went to showdown.",
+                "Showdown",
+            )
+        )
+
+        assert pt4.main([str(path), str(tmp_path / "coverage.md"), "--coverage"]) == 0
+        assert "| WTSD | `(sawShowdown / street1Seen) * 100` | translated |" in (tmp_path / "coverage.md").read_text()
+
+
+STOCK_FILE = Path("/Applications/PokerTracker 4.app/Contents/Resources/Data/Stats/StatDefinitions.pt4")
+
+
+@pytest.mark.skipif(not STOCK_FILE.exists(), reason="PokerTracker 4 is not installed here")
+class TestInstalledPT4:
+    def test_every_common_cash_stat_translates(self):
+        stats = {s.label: s for s in pt4.read_stat_definitions(STOCK_FILE) if s.category == "Cash Player"}
+        outcome = {title: pt4.translate(stats[title]).supported for title in pt4.COMMON_CASH_STATS}
+
+        assert outcome == dict.fromkeys(pt4.COMMON_CASH_STATS, True)
+
+
+def test_an_import_report_says_which_stats_differ_from_pt4(tmp_path):
+    report = pt4.ImportReport(imported=["vpip"], differs={"vpip": ["PT4's VPIP opportunity is every hand but a walk."]})
+
+    assert "Imported under FPDB's definition, which differs from PT4's (1):" in report.summary()
+    assert "  - vpip: PT4's VPIP opportunity is every hand but a walk." in report.summary()
+
+
+def test_the_report_grid_sums_action_counts_and_counts_flags(tmp_path):
+    """What PostgreSQL receives: SUM(int) for street1Bets, SUM(CASE WHEN bool ...) for flg_f_fold."""
+    from fpdb_3_legacy.stat_adapters import GridAdapter
+
+    afq = pt4.translate(
+        _stock("Flop AFq", "((cnt_f_bet + cnt_f_raise) / (cnt_f_call + cnt_f_fold + cnt_f_bet + cnt_f_raise)) * 100")
+    ).descriptor
+    (tmp_path / "afq.toml").write_text(pt4.emit_toml(afq), encoding="utf-8")
+    reg = sr.StatRegistry()
+    reg.load_directory(tmp_path)
+
+    sql = " ".join(GridAdapter().select_fragments(reg.get("flop_afq")))
+
+    assert "SUM(hp.street1Bets)" in sql and "SUM(hp.street1Calls)" in sql
+    assert "CASE WHEN hp.street1Bets" not in sql
+    assert "SUM(CASE WHEN hp.flg_f_fold THEN 1 ELSE 0 END)" in sql

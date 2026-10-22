@@ -7,7 +7,7 @@ files as they are, so moving over amounts to one import of the right folder.
 | What | Comes over today | Tracked in |
 |---|---|---|
 | Hands | Yes, with this guide | #612 |
-| Custom stats (`.pt4stat`) | ChipEV idioms only; common cash idioms in progress | #613 |
+| Stats (`.pt4stat`) | ChipEV and the common cash stats (VPIP, PFR, 3-bet, c-bet, WTSD, W$SD, AF, steal and the folds to them); see [the coverage of PT4's stock stats](pt4-stock-stat-coverage.md) | #613 |
 | HUD layout (`.pt4hud`) | Yes: *Configure ▸ Import PT4 HUD*. Stats with no fpdb equivalent are listed; *Convert PT4 HUD to .fpdbhud* makes a shareable package | #614 |
 | Reading the tracker's database directly | Being evaluated | #615 |
 | Player notes | Not yet | #618 |
