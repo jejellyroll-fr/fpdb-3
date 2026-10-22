@@ -39,10 +39,13 @@ log = get_logger("pokertracker_parser")
 class PokerTracker(HandHistoryConverter):
     # Class Variables
     Structures = None
-    sitename = "iPoker"  # Default to iPoker, will be overridden by site detection
+    # Placeholders only: determineGameType reads each hand's room from its header
+    # (the ``sites`` table below) and raises FpdbParseError when it knows none,
+    # so no hand is ever filed under these (#617, tests/test_pokertracker_rooms.py).
+    sitename = "iPoker"
     filetype = "text"
     codepage = ("utf8", "cp1252")
-    site_id = 14  # Default to iPoker, will be overridden by site detection
+    site_id = 14
     obs: str
     whole_file: str
     mixes: ClassVar[dict[str, str]] = {
