@@ -850,7 +850,7 @@ class CoverageReport:
             result = by_title.get(title)
             if result is None:
                 lines.append(f"| {title} | | not in this PT4 version |")
-            elif result.supported:
+            elif result.descriptor is not None:
                 status = "translated" + (": " + " ".join(result.notes) if result.notes else "")
                 lines.append(f"| {title} | `{result.descriptor['value']}` | {status} |")
             else:
