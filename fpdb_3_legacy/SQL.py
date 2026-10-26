@@ -57,6 +57,7 @@ from fpdb_3_legacy.sql_schema_session_cache import session_cache_schema_queries
 from fpdb_3_legacy.sql_schema_time import time_schema_queries
 from fpdb_3_legacy.sql_schema_tournament import tournament_schema_queries
 from fpdb_3_legacy.sql_schema_tournament_cache import tournament_cache_schema_queries
+from fpdb_3_legacy.sql_schema_tourney_payouts import tourney_payout_queries
 
 #    Copyright 2008-2011, Ray E. Barker
 #
@@ -108,6 +109,7 @@ class Sql:
         self.query.update(raw_schema_queries(db_server))
         self.query.update(session_cache_schema_queries(db_server))
         self.query.update(tournament_schema_queries(db_server))
+        self.query.update(tourney_payout_queries(db_server))
         self.query.update(tournament_cache_schema_queries(db_server))
         self.query.update(time_schema_queries(db_server))
         self.query.update(index_queries(db_server))

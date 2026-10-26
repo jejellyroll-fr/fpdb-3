@@ -1173,6 +1173,7 @@ class DatabaseSchemaMixin:
             "createAofDecisionAnalysesTable",
             "createHandsSituationsTable",
             "createHandStatesTable",
+            "createTourneyPayoutsTable",
         ):
             try:
                 c = self.get_cursor()
@@ -1468,6 +1469,7 @@ class DatabaseSchemaMixin:
         c.execute(self.sql.query["createTourneyTypesTable"])
         c.execute(self.sql.query["createTourneysTable"])
         c.execute(self.sql.query["createTourneysPlayersTable"])
+        c.execute(self.sql.query["createTourneyPayoutsTable"])
         c.execute(self.sql.query["createSessionsCacheTable"])
         c.execute(self.sql.query["createTourneysCacheTable"])
         c.execute(self.sql.query["createHandsTable"])
