@@ -263,6 +263,7 @@ jobs:
           fpdb_3_legacy/stat_registry.py
           fpdb_3_legacy/pt4_import.py
           fpdb_3_legacy/pt4hud.py
+          fpdb_3_legacy/icm.py
           tests/test_draw_starting_hand.py
           tests/qt/test_empty_data_popups.py
           tests/test_leak_detector.py
