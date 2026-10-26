@@ -22,6 +22,7 @@ from fpdb_3_legacy.icm import (
     allin_icm_ev,
     bubble_factor,
     icm_equities,
+    outcome_equities,
     state_count,
 )
 
@@ -229,3 +230,65 @@ def test_a_player_cannot_be_all_in_against_themself_or_without_chips() -> None:
         bubble_factor({"h": 1000, "v": 1000}, [100], "h", "h")
     with pytest.raises(ICMError):
         bubble_factor({"h": 0, "v": 1000, "o": 500}, [60, 40], "h", "v")
+
+
+# --- prizes won by busting in the hand (#623) -------------------------------------------
+
+
+def test_a_heads_up_coinflip_is_neutral_because_the_loser_still_takes_second_prize() -> None:
+    # Codex's example: losing earns 40, so the flip is worth 0, and its bubble factor 1.
+    before = {"hero": 5000, "villain": 5000}
+    outcomes = [
+        AllInOutcome(0.5, {"hero": 10000, "villain": 0}),
+        AllInOutcome(0.5, {"hero": 0, "villain": 10000}),
+    ]
+
+    assert allin_icm_ev(before, outcomes, [60, 40], "hero") == pytest.approx(0.0)
+    assert bubble_factor(before, [60, 40], "hero", "villain") == pytest.approx(1.0)
+
+
+def test_a_player_busted_in_the_hand_takes_the_place_below_the_survivors() -> None:
+    equities = outcome_equities({"a": 4000, "b": 3500, "c": 2500}, {"a": 10000, "b": 0, "c": 0}, [50, 30, 20])
+
+    assert equities == pytest.approx({"a": 50.0, "b": 30.0, "c": 20.0})  # b started bigger, finishes higher
+
+
+def test_players_who_bust_together_from_equal_stacks_share_their_places() -> None:
+    equities = outcome_equities({"a": 4000, "b": 3000, "c": 3000}, {"a": 10000, "b": 0, "c": 0}, [50, 30, 20])
+
+    assert equities == pytest.approx({"a": 50.0, "b": 25.0, "c": 25.0})
+
+
+def test_busting_outside_the_paid_places_wins_nothing() -> None:
+    equities = outcome_equities(
+        {"a": 3000, "b": 3000, "c": 2000, "d": 2000}, {"a": 6000, "b": 0, "c": 2000, "d": 2000}, [50, 30, 20]
+    )
+
+    assert equities["b"] == 0.0
+    assert sum(equities.values()) == pytest.approx(100.0)
+
+
+def test_a_player_already_out_before_the_hand_stays_at_nothing() -> None:
+    equities = outcome_equities({"a": 5000, "b": 5000, "gone": 0}, {"a": 10000, "b": 0, "gone": 0}, [50, 30, 20])
+
+    assert equities == pytest.approx({"a": 50.0, "b": 30.0, "gone": 0.0})
+
+
+@settings(max_examples=150, deadline=None)
+@given(
+    stacks=st.lists(st.integers(min_value=1, max_value=50_000), min_size=2, max_size=7),
+    payouts=payouts_strategy,
+    pair=st.tuples(st.integers(0, 6), st.integers(0, 6)),
+)
+def test_an_all_in_neither_creates_nor_destroys_prize_money(stacks, payouts, pair) -> None:
+    winner, loser = (index % len(stacks) for index in pair)
+    if winner == loser:
+        return
+    names = [f"p{i}" for i in range(len(stacks))]
+    before = dict(zip(names, stacks, strict=True))
+    after = dict(before)
+    moved = min(before[names[winner]], before[names[loser]])
+    after[names[winner]] += moved
+    after[names[loser]] -= moved
+
+    assert sum(outcome_equities(before, after, payouts).values()) == pytest.approx(sum(payouts[: len(stacks)]))

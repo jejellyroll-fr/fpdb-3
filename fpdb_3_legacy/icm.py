@@ -24,6 +24,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from itertools import groupby
 from math import comb
 
 __all__ = [
@@ -34,6 +35,7 @@ __all__ = [
     "allin_icm_ev",
     "bubble_factor",
     "icm_equities",
+    "outcome_equities",
     "state_count",
 ]
 
@@ -148,12 +150,34 @@ def allin_icm_ev(
         raise ICMError(f"{player!r} is not among the stacks")
     index = names.index(player)
     now = icm_equities([before[name] for name in names], payouts)[index]
-    after = 0.0
-    for outcome in outcomes:
-        if set(outcome.stacks) != set(names):
-            raise ICMError("every outcome must give a stack to the same players")
-        after += outcome.probability * icm_equities([outcome.stacks[name] for name in names], payouts)[index]
+    after = sum(outcome.probability * outcome_equities(before, outcome.stacks, payouts)[player] for outcome in outcomes)
     return after - now
+
+
+def outcome_equities(
+    before: Mapping[str, float], after: Mapping[str, float], payouts: Sequence[float]
+) -> dict[str, float]:
+    """Each player's prize equity once a hand has ended, prizes won by busting in it included.
+
+    A survivor is worth their ICM equity on ``after``. A player the hand busts
+    has finished: they take the place right below the survivors, the larger
+    starting stack finishing higher, and players who started equal share their
+    places' prizes. Without this, busting in a paid place would count as nothing
+    (#623). A player already out before the hand stays at nothing.
+    """
+    names = list(before)
+    if set(after) != set(names):
+        raise ICMError("every outcome must give a stack to the same players")
+    equities = dict(zip(names, icm_equities([after[name] for name in names], payouts), strict=True))
+    place = sum(1 for name in names if after[name] > 0)
+    busted = sorted((name for name in names if before[name] > 0 and after[name] <= 0), key=lambda n: -before[n])
+    for _start, tied in groupby(busted, key=lambda name: before[name]):
+        group = list(tied)
+        prizes = [payouts[slot] if slot < len(payouts) else 0.0 for slot in range(place, place + len(group))]
+        for name in group:
+            equities[name] = float(sum(prizes)) / len(group)
+        place += len(group)
+    return equities
 
 
 def bubble_factor(stacks: Mapping[str, float], payouts: Sequence[float], player: str, opponent: str) -> float:
@@ -178,10 +202,7 @@ def bubble_factor(stacks: Mapping[str, float], payouts: Sequence[float], player:
     lost[player] -= at_risk
     lost[opponent] += at_risk
 
-    def equity(table: Mapping[str, float]) -> float:
-        return icm_equities([table[name] for name in names], payouts)[names.index(player)]
-
-    now = equity(stacks)
-    gain = equity(won) - now
-    loss = now - equity(lost)
+    now = icm_equities([stacks[name] for name in names], payouts)[names.index(player)]
+    gain = outcome_equities(stacks, won, payouts)[player] - now
+    loss = now - outcome_equities(stacks, lost, payouts)[player]
     return float("inf") if gain <= 0 else loss / gain

@@ -12,6 +12,7 @@ tournament graph.
 | Function | Answers |
 |---|---|
 | `icm_equities(stacks, payouts)` | Each player's prize equity, in the payout's unit, in the order of `stacks`. `payouts[0]` is first prize. A player with no chips has finished and wins nothing more. |
+| `outcome_equities(before, after, payouts)` | Each player's equity once a hand has ended. A player who busts in it takes the place right below the survivors, and collects that place's prize. The larger starting stack finishes higher, and equal starting stacks share their places' prizes. |
 | `allin_icm_ev(before, outcomes, payouts, player)` | A player's ICM $EV for an all-in: expected equity after it (over its outcomes and their probabilities, from the equity engine) minus equity before. |
 | `bubble_factor(stacks, payouts, player, opponent)` | Equity lost on losing an all-in against `opponent`, divided by equity gained on winning it. 1.0 is a chip-EV spot. A call needs `BF / (1 + BF)` equity. |
 
@@ -31,6 +32,8 @@ currency, or in fractions of the prize pool.
   - more chips never means less equity;
   - neither the chip unit nor the seat order changes anything;
   - nobody is worth more than first prize, or less than the last prize they are sure of.
+- **Prize money is conserved**: after any all-in, survivors' equity plus the prizes of the players it busted add up to
+  the prizes left before it. That is why a heads-up coinflip is worth exactly 0.
 - **Winner-take-all is the chip share**, so its ICM $EV is the chip EV in prize terms, and
   its bubble factor is exactly 1.
 
