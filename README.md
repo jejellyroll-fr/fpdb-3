@@ -150,7 +150,7 @@ them:
 | [Dynamic HUD guide](docs/hud-dynamic-guide.md) | panels, thresholds, what is truly live |
 | [Reference HUD design system](docs/hud-design-system.md) | what each colour means, samples, panel titles |
 | [Screenshots](docs/screenshots.md) | what each picture shows and how to regenerate it |
-| [research-browser.md](docs/research-browser.md), [query-engine.md](docs/query-engine.md), [dynamic-panels.md](docs/dynamic-panels.md), [stat-definitions.md](docs/stat-definitions.md) | implementation reference |
+| [research-browser.md](docs/research-browser.md), [query-engine.md](docs/query-engine.md), [dynamic-panels.md](docs/dynamic-panels.md), [stat-definitions.md](docs/stat-definitions.md), [icm.md](docs/icm.md) | implementation reference |
 
 Every screenshot above is generated from a **deterministic demo workspace** of
 invented players — no private hand history is ever needed:
