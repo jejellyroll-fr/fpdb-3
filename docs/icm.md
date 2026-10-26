@@ -47,7 +47,10 @@ under its summary as soon as the hero is all-in. For each of the two players, it
 
 A hand is only priced when its numbers are sound; otherwise the replayer says why:
 
-- **heads-up only**: a multiway all-in has side pots and more outcomes than this prices yet;
+- **heads-up only**: a multiway all-in has side pots and more outcomes than this prices yet, and so does a side pot
+  one of the two cannot win (a short stack all-in, then a deeper player folding);
+- **flop games, one winner per pot**: stud and draw are outside the equity engine, and hi/lo
+  split pots are not priced yet;
 - **both hands shown**;
 - **a payout structure known** for the tournament (see above);
 - **every remaining player's stack**: the players at the table must be the whole field.

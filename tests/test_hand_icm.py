@@ -259,3 +259,63 @@ def test_a_hand_that_is_not_stored_cannot_find_its_payouts(tmp_path) -> None:
     hand, _ = parse(tmp_path)
 
     assert "not stored" in icm_for_replay(None, hand, None).reason
+
+
+# Codex (#628): Short all-in for 1000 preflop, Villain folds the flop after putting in 2000.
+# Two contenders remain, but 2000 of the pot is a side pot Short cannot win.
+SIDE_POT = """PokerStars Hand #200000000002: Tournament #3000000001, $10+$1 USD Hold'em No Limit - Level V (100/200) - 2026/10/26 12:05:00 ET
+Table '3000000001 1' 9-max Seat #1 is the button
+Seat 1: Hero (4000 in chips)
+Seat 3: Villain (3000 in chips)
+Seat 5: Short (1000 in chips)
+Villain: posts small blind 100
+Short: posts big blind 200
+*** HOLE CARDS ***
+Dealt to Hero [As Ks]
+Hero: raises 1800 to 2000
+Villain: calls 1900
+Short: calls 800 and is all-in
+*** FLOP *** [2c 7d 9h]
+Villain: checks
+Hero: bets 1000
+Villain: folds
+Uncalled bet (1000) returned to Hero
+*** TURN *** [2c 7d 9h] [Jc]
+*** RIVER *** [2c 7d 9h Jc] [3s]
+*** SHOW DOWN ***
+Hero: shows [As Ks] (high card Ace)
+Short: shows [Qh Qd] (a pair of Queens)
+Hero collected 2000 from side pot
+Short collected 3000 from main pot
+*** SUMMARY ***
+Total pot 5000 Main pot 3000. Side pot 2000. | Rake 0
+Board [2c 7d 9h Jc 3s]
+Seat 1: Hero (button) showed [As Ks] and won (2000) with high card Ace
+Seat 3: Villain (small blind) folded on the Flop
+Seat 5: Short (big blind) showed [Qh Qd] and won (3000) with a pair of Queens
+
+
+
+"""
+
+
+def test_a_side_pot_one_contender_cannot_win_is_not_priced(tmp_path) -> None:
+    hand, _ = parse(tmp_path, SIDE_POT)
+
+    priced = hand_allin_icm(hand, PAYOUTS, equity_fn=fixed_equity(46, 54))
+
+    assert priced.allin is None and "side pot" in priced.reason
+
+
+@pytest.mark.parametrize(
+    ("category", "why"),
+    [("omahahilo", "hi/lo"), ("studhi", "flop games"), ("5_studhi", "flop games"), ("27_3draw", "flop games")],
+)
+def test_games_the_pricing_cannot_take_are_refused(tmp_path, category, why) -> None:
+    # Codex (#628): hi/lo wins overlap, and stud pockets are not a flop game's.
+    hand, _ = parse(tmp_path)
+    hand.gametype["category"] = category
+
+    priced = hand_allin_icm(hand, PAYOUTS, equity_fn=fixed_equity(46, 54))
+
+    assert priced.allin is None and why in priced.reason

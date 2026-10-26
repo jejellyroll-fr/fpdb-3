@@ -14,8 +14,11 @@ confrontation, and gives each of the two players:
 
 Limits, said rather than guessed at:
 
-- heads-up only: a multiway all-in has side pots and more outcomes than this
-  prices yet;
+- heads-up only: a multiway all-in, or a side pot one of the two cannot win
+  (a short stack all-in, then a deeper player folding), has more outcomes
+  than this prices yet;
+- flop games with one winner per pot: stud and draw are outside the equity
+  engine, and a hi/lo split is not a scoop each half of the time;
 - both hands shown;
 - every remaining player's stack: the players at the table must be the whole
   field. A single-table tournament is; a field larger than the table is
@@ -95,12 +98,46 @@ def _board_until(hand: Any, street: str) -> list[str]:
     return board
 
 
-def _game(hand: Any) -> str:
+def _game(hand: Any) -> tuple[str | None, str]:
+    """The equity engine's name for the hand's game, or None with why it is not priced."""
     from fpdb_3_legacy import Card
+    from fpdb_3_legacy.equity import COMMUNITY_CARD_GAMES
 
     category = hand.gametype.get("category", "")
     info = Card.games.get(category)
-    return (info[1] if info else None) or category
+    if not info or info[0] != "hold" or info[1] not in COMMUNITY_CARD_GAMES:
+        # 5-card stud borrows hold'em's evaluator, but its cards are not a flop game's.
+        return None, "only flop games are priced"
+    if info[2] == "s":
+        # Codex (#628): hi and lo wins overlap; a certain split is not two half-scoops.
+        return None, "hi/lo split pots are not priced yet"
+    return info[1], ""
+
+
+def _side_pot(contenders: Sequence[str], committed: Mapping[str, Decimal]) -> bool:
+    """Whether some chips in the pot are out of one contender's reach.
+
+    Codex (#628): a short stack all-in, then a deeper player folding, leaves
+    two contenders and a side pot only the deeper one can win.
+    """
+    return any(sum(max(Decimal(0), put - committed[name]) for put in committed.values()) > 0 for name in contenders)
+
+
+def _contenders(hand: Any) -> tuple[list[str], str]:
+    """The two players still in, sharing a single pot; or none, with why."""
+    folded = {
+        action[0]
+        for actions in hand.actions.values()
+        for action in actions
+        if isinstance(action, (list, tuple)) and len(action) > 1 and action[1] == "folds"
+    }
+    seated = [player[1] for player in hand.players]
+    contenders = [name for name in seated if name not in folded]
+    if len(contenders) != 2:
+        return [], "multiway all-in: ICM $EV is priced heads-up only"
+    if _side_pot(contenders, {name: Decimal(hand.pot.committed.get(name, 0)) for name in seated}):
+        return [], "side pot: ICM $EV is priced for a single pot only"
+    return contenders, ""
 
 
 def hand_allin_icm(
@@ -113,19 +150,19 @@ def hand_allin_icm(
     """Price ``hand``'s heads-up all-in under ICM with ``payouts`` (first place first, money)."""
     if hand.gametype.get("type") != "tour":
         return HandIcm(None, "not a tournament hand")
+    game, unpriced = _game(hand)
+    if game is None:
+        return HandIcm(None, unpriced)
     street = _allin_street(hand)
     if street is None:
         return HandIcm(None, "no all-in in this hand")
-    folded = {
-        action[0]
-        for actions in hand.actions.values()
-        for action in actions
-        if isinstance(action, (list, tuple)) and len(action) > 1 and action[1] == "folds"
-    }
+    contenders, unpriced = _contenders(hand)
+    if not contenders:
+        return HandIcm(None, unpriced)
     seated = [player[1] for player in hand.players]
-    contenders = [name for name in seated if name not in folded]
-    if len(contenders) != 2:
-        return HandIcm(None, "multiway all-in: ICM $EV is priced heads-up only")
+    committed = {
+        name: Decimal(hand.pot.committed.get(name, 0)) + Decimal(hand.pot.common.get(name, 0)) for name in seated
+    }
     pockets = [_hole_cards(hand, name) for name in contenders]
     if not all(_known(cards) for cards in pockets):
         return HandIcm(None, "both hands must be shown to price the all-in")
@@ -135,14 +172,11 @@ def hand_allin_icm(
 
         equity_fn = calculate_equity
     try:
-        result = equity_fn(_game(hand), pockets, _board_until(hand, street), iterations=_ITERATIONS)
+        result = equity_fn(game, pockets, _board_until(hand, street), iterations=_ITERATIONS)
     except (RuntimeError, ValueError) as exc:
         return HandIcm(None, f"equity unavailable: {exc}")
 
     start = {player[1]: Decimal(str(player[2])) for player in hand.players}
-    committed = {
-        name: Decimal(hand.pot.committed.get(name, 0)) + Decimal(hand.pot.common.get(name, 0)) for name in seated
-    }
     pot = Decimal(hand.totalpot)
     a, b = contenders
     samples = result.samples or 1
