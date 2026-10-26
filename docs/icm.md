@@ -4,8 +4,32 @@ The Independent Chip Model turns tournament chips into prize equity. fpdb uses t
 Malmuth-Harville form: a player finishes first with probability *their stack / all chips
 in play*, and each later place is drawn the same way among the players still in. The
 engine is `fpdb_3_legacy/icm.py`. Showing ICM in the application is the rest of #446:
-payout structures, ICM $EV in the replayer and the AoF analysis, and an ICM line in the
-tournament graph.
+ICM $EV in the replayer and the AoF analysis, and an ICM line in the tournament graph.
+
+## Where a tournament's payouts come from
+
+ICM needs what each place pays. `fpdb_3_legacy/tourney_payouts.py` answers
+`payouts_for_tourney(db, tourney_id)` and `payouts_for_hand(db, hand_id)` from three
+sources, in this order:
+
+1. **A structure stored for the tournament**, in the `TourneyPayouts` table: one entered
+   by hand (`store_payouts`), or a preset applied to its prize pool (`apply_preset`).
+   Presets: `winner_take_all` (heads-up, most Spins), `sng_6max` 65/35, `sng_9max` and
+   `sng_10max` 50/30/20, `sng_18max` 40/30/20/10, and `double_or_nothing`. The prize
+   pool is split to the hundredth, so the amounts always add up to it.
+2. **The tournament's results**, when an imported summary settles every paid place:
+   the winnings of places 1..k, and proof that place k+1 pays nothing (a known place
+   k+1 that won nothing, or a field of exactly k entries). A summary of the hero alone
+   settles nothing. Knockout tournaments are never read this way, because their
+   winnings include bounties.
+3. **Otherwise, nothing**, and the lookup says why. No structure is ever guessed.
+
+`TourneyPayouts` is a feature table: databases from before it get it on connection,
+with no `DB_VERSION` bump. Amounts are in hundredths, like fpdb's winnings.
+
+Two summary-import bugs currently keep some results from settling a structure: dollar
+winnings read as 0 (#624), and a PokerStars.EU SnG stored with the wrong buy-in and
+prize pool (#625).
 
 ## What the engine computes
 
