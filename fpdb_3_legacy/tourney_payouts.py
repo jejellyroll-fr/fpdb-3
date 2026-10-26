@@ -86,6 +86,8 @@ PRESETS: dict[str, Callable[[int], tuple[Fraction, ...]]] = {
     "sng_18max": _fixed("40/100", "30/100", "20/100", "10/100"),
     "double_or_nothing": _double_or_nothing,
 }
+# Presets whose paid places depend on the field: refused when its size is unknown.
+FIELD_SIZED_PRESETS = frozenset({"double_or_nothing"})
 
 
 def split_prize_pool(prize_pool: int, shares: Sequence[Fraction]) -> tuple[int, ...]:
@@ -115,12 +117,16 @@ def from_results(results: Sequence[tuple[int, int]], entries: int | None = None)
     them is known and something shows that place k+1 pays nothing -- a known
     place k+1 that won nothing, or a field of exactly k entries. Results of
     only some finishers (a summary that lists the hero alone) settle nothing.
+
+    Winnings that are not known -- NULL, or the -1 the importer keeps for a
+    prize it could not read -- are no result at all: such a place neither pays
+    nor proves the next one unpaid (#626).
     """
     winnings: dict[int, int] = {}
     for place, won in results:
-        if place is None or place < 1:
+        if place is None or place < 1 or won is None or int(won) < 0:
             continue
-        winnings[int(place)] = max(winnings.get(int(place), 0), int(won or 0))
+        winnings[int(place)] = max(winnings.get(int(place), 0), int(won))
     paid = [place for place, won in winnings.items() if won > 0]
     if not paid:
         return None
@@ -149,7 +155,9 @@ def stored_payouts(db: Any, tourney_id: int) -> Payouts | None:
     places = {int(place): (int(amount), str(source)) for place, amount, source in rows}
     if sorted(places) != list(range(1, len(places) + 1)):
         return None  # a gap: not a structure fpdb wrote
-    return Payouts(tuple(places[p][0] for p in range(1, len(places) + 1)), places[1][1], _facts(db, tourney_id)[3])
+    return Payouts(
+        tuple(places[p][0] for p in range(1, len(places) + 1)), places[1][1], _facts(db, tourney_id).currency
+    )
 
 
 def store_payouts(db: Any, tourney_id: int, amounts: Sequence[int], source: str = SOURCE_MANUAL) -> None:
@@ -169,33 +177,58 @@ def clear_payouts(db: Any, tourney_id: int) -> None:
     db.commit()
 
 
-def _facts(db: Any, tourney_id: int) -> tuple[int | None, int | None, int | None, str | None, bool]:
+@dataclass(frozen=True)
+class _Facts:
+    entries: int | None = None
+    prize_pool: int | None = None
+    buy_in: int | None = None
+    currency: str | None = None
+    knockout: bool = False
+    bounty: int | None = None
+
+
+def _facts(db: Any, tourney_id: int) -> _Facts:
     rows = _query(db, "selectTourneyFacts", (tourney_id,))
     if not rows:
-        return None, None, None, None, False
-    entries, prize_pool, buy_in, currency, knockout = rows[0]
-    return (
+        return _Facts()
+    entries, prize_pool, buy_in, currency, knockout, bounty = rows[0]
+    return _Facts(
         int(entries) if entries else None,
         int(prize_pool) if prize_pool else None,
         int(buy_in) if buy_in else None,
         currency,
         bool(knockout),
+        int(bounty) if bounty else None,
     )
+
+
+def _prize_pool(facts: _Facts) -> int:
+    """The pool the places share: the known one, else buy-ins less any bounty they carry."""
+    if facts.prize_pool is not None:
+        return facts.prize_pool
+    if facts.buy_in is None or not facts.entries:
+        raise ValueError("the tournament has no known prize pool, nor buy-in and entries to make one")
+    buy_in = facts.buy_in
+    if facts.knockout:
+        # The stored buy-in includes the bounty, which goes to whoever knocks a
+        # player out, not to the places (#626).
+        if not facts.bounty:
+            raise ValueError("a knockout buy-in includes a bounty of unknown size: enter the prize pool")
+        buy_in -= facts.bounty
+    return buy_in * facts.entries
 
 
 def apply_preset(db: Any, tourney_id: int, preset: str) -> Payouts:
     """Store ``preset`` applied to the tournament's prize pool (or buy-in x entries when none is known)."""
     if preset not in PRESETS:
         raise ValueError(f"unknown preset {preset!r}; known: {sorted(PRESETS)}")
-    entries, prize_pool, buy_in, currency, _knockout = _facts(db, tourney_id)
-    if prize_pool is None and buy_in is not None and entries:
-        prize_pool = buy_in * entries
-    if prize_pool is None:
-        raise ValueError("the tournament has no known prize pool, nor buy-in and entries to make one")
-    amounts = split_prize_pool(prize_pool, PRESETS[preset](entries or 0))
+    facts = _facts(db, tourney_id)
+    if preset in FIELD_SIZED_PRESETS and not facts.entries:
+        raise ValueError(f"{preset} pays by field size, and the tournament's field size is unknown")
+    amounts = split_prize_pool(_prize_pool(facts), PRESETS[preset](facts.entries or 0))
     source = f"{SOURCE_PRESET}:{preset}"
     store_payouts(db, tourney_id, amounts, source)
-    return Payouts(amounts, source, currency)
+    return Payouts(amounts, source, facts.currency)
 
 
 def payouts_for_tourney(db: Any, tourney_id: int) -> PayoutsLookup:
@@ -203,13 +236,14 @@ def payouts_for_tourney(db: Any, tourney_id: int) -> PayoutsLookup:
     stored = stored_payouts(db, tourney_id)
     if stored is not None:
         return PayoutsLookup(stored)
-    entries, _prize_pool, _buy_in, currency, knockout = _facts(db, tourney_id)
-    if knockout:
+    facts = _facts(db, tourney_id)
+    if facts.knockout:
         return PayoutsLookup(None, "knockout winnings include bounties: enter the payout structure")
-    settled = from_results([(place, won) for place, won in _query(db, "selectTourneyResults", (tourney_id,))], entries)
+    results = [(place, won) for place, won in _query(db, "selectTourneyResults", (tourney_id,))]
+    settled = from_results(results, facts.entries)
     if settled is None:
         return PayoutsLookup(None, "no payout structure known: import the summary, enter one or apply a preset")
-    return PayoutsLookup(Payouts(settled, SOURCE_SUMMARY, currency))
+    return PayoutsLookup(Payouts(settled, SOURCE_SUMMARY, facts.currency))
 
 
 def payouts_for_hand(db: Any, hand_id: int) -> PayoutsLookup:

@@ -79,6 +79,20 @@ def test_results_that_do_not_settle_every_paid_place_settle_nothing(results) -> 
     assert from_results(results, entries=9) is None
 
 
+@pytest.mark.parametrize(
+    "results",
+    [
+        [(1, 600), (2, None)],  # Codex (#626): an unknown second prize is no proof of an unpaid place
+        [(1, 600), (2, -1)],  # -1: a prize the importer could not read
+        [(1, None), (2, 0)],
+        [(1, 600), (2, None), (3, 0)],  # an unknown place inside what might be paid
+    ],
+    ids=["null-next", "sentinel-next", "null-winner", "null-inside"],
+)
+def test_unknown_winnings_neither_pay_nor_prove_a_place_unpaid(results) -> None:
+    assert from_results(results, entries=9) is None
+
+
 # --- the database ------------------------------------------------------------------
 #
 # Tournaments are written directly rather than imported: what the summary
@@ -86,8 +100,8 @@ def test_results_that_do_not_settle_every_paid_place_settle_nothing(results) -> 
 # here the question is what fpdb makes of a tournament's rows.
 
 INSERT_TYPE = (
-    "INSERT INTO TourneyTypes (siteId, currency, buyIn, fee, category, limitType, knockout)"
-    " VALUES (?, ?, ?, ?, 'holdem', 'nl', ?)"
+    "INSERT INTO TourneyTypes (siteId, currency, buyIn, fee, category, limitType, knockout, koBounty)"
+    " VALUES (?, ?, ?, ?, 'holdem', 'nl', ?, ?)"
 )
 INSERT_TOURNEY = "INSERT INTO Tourneys (tourneyTypeId, siteTourneyNo, entries, prizepool) VALUES (?, ?, ?, ?)"
 INSERT_PLAYER = "INSERT INTO Players (name, siteId) VALUES (?, ?)"
@@ -96,10 +110,12 @@ INSERT_RESULT = (
 )
 
 
-def add_tourney(db, number, results, *, entries, prize_pool, buy_in=1000, currency="USD", knockout=False) -> int:
+def add_tourney(
+    db, number, results, *, entries, prize_pool, buy_in=1000, currency="USD", knockout=False, bounty=None
+) -> int:
     """A tournament with ``results`` as (place, winnings in hundredths); returns its id."""
     cursor = db.get_cursor()
-    cursor.execute(INSERT_TYPE, (2, currency, buy_in, buy_in // 10, knockout))
+    cursor.execute(INSERT_TYPE, (2, currency, buy_in, buy_in // 10, knockout, bounty))
     cursor.execute(INSERT_TOURNEY, (cursor.lastrowid, number, entries, prize_pool))
     tourney = cursor.lastrowid
     for place, won in results:
@@ -168,6 +184,30 @@ def test_a_preset_falls_back_on_buy_in_times_entries(fresh_db) -> None:
     tourney = add_tourney(fresh_db, 1006, [], entries=10, prize_pool=None, buy_in=500)
 
     assert payouts.apply_preset(fresh_db, tourney, "double_or_nothing").amounts == (1000,) * 5
+
+
+def test_a_knockout_fallback_pool_leaves_the_bounties_out(fresh_db) -> None:
+    # Codex (#626): a $5+$5 knockout stores a $10 buy-in; only $5 of each feeds the places.
+    tourney = add_tourney(fresh_db, 1009, [], entries=9, prize_pool=None, buy_in=1000, knockout=True, bounty=500)
+
+    assert payouts.apply_preset(fresh_db, tourney, "winner_take_all").amounts == (4500,)
+
+
+def test_a_knockout_with_no_prize_pool_nor_bounty_size_is_refused(fresh_db) -> None:
+    tourney = add_tourney(fresh_db, 1010, [], entries=9, prize_pool=None, buy_in=1000, knockout=True)
+
+    with pytest.raises(ValueError, match="bounty"):
+        payouts.apply_preset(fresh_db, tourney, "sng_9max")
+    assert payouts.stored_payouts(fresh_db, tourney) is None
+
+
+def test_double_or_nothing_needs_the_field_size(fresh_db) -> None:
+    # Codex (#626): without entries it used to store a winner-take-all structure.
+    tourney = add_tourney(fresh_db, 1011, [], entries=None, prize_pool=10000)
+
+    with pytest.raises(ValueError, match="field size"):
+        payouts.apply_preset(fresh_db, tourney, "double_or_nothing")
+    assert payouts.stored_payouts(fresh_db, tourney) is None
 
 
 def test_an_unknown_preset_or_a_bad_structure_is_refused(fresh_db) -> None:
