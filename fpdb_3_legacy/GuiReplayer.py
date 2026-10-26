@@ -2375,13 +2375,48 @@ class GuiReplayer(QWidget):
             parts.append(f"{label} {push_pct}%")
         return " · ".join(parts)
 
+    def _price_hand_icm(self, hand):
+        """The hand's all-in in prize equity (#446), or None; never in the way of the replay."""
+        try:
+            from fpdb_3_legacy.hand_icm import icm_for_replay
+
+            return icm_for_replay(getattr(self, "db", None), hand, self.shared_hand_id)
+        except Exception:  # intentional broad catch: a pricing failure must not stop the replay
+            log.exception("ICM pricing failed for hand %s", self.shared_hand_id)
+            return None
+
+    def _icm_line(self, frame: ReplayFrame) -> tuple[str, str] | None:
+        """The summary's ICM line once the hero is all-in in a tournament: (text, colour)."""
+        priced = getattr(self, "hand_icm", None)
+        if priced is None or not any(player.allin for player in frame.players if player.action != "folds"):
+            return None
+        hero = next((player for player in frame.players if player.name == self.Heroes), None)
+        if hero is None or hero.action == "folds":
+            return None
+        allin = priced.allin
+        if allin is None:
+            quiet = {"not a tournament hand", "no all-in in this hand"}
+            return None if priced.reason in quiet else (_("ICM: %s") % priced.reason, "#9aa5ad")
+        if self.Heroes not in allin.players:
+            return None
+        ev = allin.icm_ev[self.Heroes]
+        text = _("ICM $EV %(ev)s · result %(result)s · chip EV %(chips)s") % {
+            "ev": format_number(ev, 2, show_plus=True),
+            "result": format_number(allin.icm_result[self.Heroes], 2, show_plus=True),
+            "chips": format_number(allin.chip_ev[self.Heroes], 0, show_plus=True),
+        }
+        if allin.table_only:
+            text += " " + _("(this table taken as the whole field)")
+        return text, "#4ade80" if ev >= 0 else "#ff6b6b"
+
     def _draw_summary(self, painter: QPainter, frame: ReplayFrame, layout: ReplayLayout, current_index: int) -> None:
         metrics = self._hero_decision_metrics(frame, current_index)
         has_metrics = bool(
             metrics.get("is_hero_turn")
             and (metrics.get("facing_call") or metrics.get("push_equity_pct") is not None)
         )
-        box_height = 78 if has_metrics else 56
+        icm_line = self._icm_line(frame)
+        box_height = (78 if has_metrics else 56) + (22 if icm_line else 0)
         summary_width = min(640, max(320, layout.table_rect.width() * 0.48))
         if layout.timeline_rect.isNull():
             x = self.width() - summary_width - 28
@@ -2401,6 +2436,16 @@ class GuiReplayer(QWidget):
             Qt.AlignmentFlag.AlignLeft,
             self._current_action_summary(frame),
         )
+
+        if icm_line:
+            # Last line of the box: prize equity next to the chip figures (#446).
+            painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
+            painter.setPen(QColor(icm_line[1]))
+            painter.drawText(
+                QRectF(rect.x() + 12, rect.y() + box_height - 26, rect.width() - 24, 20),
+                Qt.AlignmentFlag.AlignLeft,
+                icm_line[0],
+            )
 
         if not has_metrics:
             painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
@@ -2528,6 +2573,7 @@ class GuiReplayer(QWidget):
         self.shared_hand = None
         self.shared_hero = None
         self.shared_hand_id = None
+        self.hand_icm = None
         self.shareButton.setEnabled(False)
         self.reviewButton.setEnabled(False)
         is_ofc = self._is_ofc_replay_entry(entry)
@@ -2549,6 +2595,7 @@ class GuiReplayer(QWidget):
             self.currency_code = str(hand.gametype.get("currency", "USD"))
             self.Heroes = hand.hero or self._resolve_hero(hand.sitename)
             self.replay_model = self._build_replay_model(hand)
+            self.hand_icm = self._price_hand_icm(hand)
             # Legacy hands without a hero seat: share them from the same point
             # of view the replayer shows, without writing it into the hand.
             if not hand.hero and self.Heroes in {player[1] for player in hand.players}:
@@ -2746,36 +2793,6 @@ class GuiReplayer(QWidget):
                 break
 
 
-# ICM code originally grabbed from http://svn.gna.org/svn/pokersource/trunk/icm-calculator/icm-webservice.py
-# Copyright (c) 2008 Thomas Johnson <tomfmason@gmail.com>
-
-
-class ICM:
-    def __init__(self, stacks, payouts) -> None:
-        self.stacks = stacks
-        self.payouts = payouts
-        self.equities: list[Decimal] = []
-        self.prepare()
-
-    def prepare(self) -> None:
-        total = sum(self.stacks)
-        for k in self.stacks:
-            self.equities.append(round(Decimal(str(self.getEquities(total, k, 0))), 4))
-
-    def getEquities(self, total, player, depth):
-        D = Decimal
-        eq = D(self.stacks[player]) / total * D(str(self.payouts[depth]))
-        if depth + 1 < len(self.payouts):
-            i = 0
-            for stack in self.stacks:
-                if i != player and stack > 0.0:
-                    self.stacks[i] = 0.0
-                    eq += self.getEquities((total - stack), player, (depth + 1)) * ((stack) // (D(total)))
-                    self.stacks[i] = stack
-                i += 1
-        return eq
-
-
 class TableState:
     def __init__(self, hand) -> None:
         self.pot = Decimal(0)
@@ -2790,9 +2807,6 @@ class TableState:
         self.allinThisStreet = False
         self.ended = False
         self.newpot = Decimal()
-        # NOTE: Need a useful way to grab payouts
-        # self.icm = ICM(stacks,payouts)
-        # print icm.equities
 
         self.players = {}
         # print ('hand.players', hand.players)

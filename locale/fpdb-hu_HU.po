@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 12:48+0200\n"
+"POT-Creation-Date: 2026-10-26 19:35+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -2011,6 +2011,10 @@ msgid "Window"
 msgstr "Ablak"
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "(this table taken as the whole field)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
 msgid "Card deck"
 msgstr "Kártyapakli"
@@ -2045,6 +2049,16 @@ msgstr "FPDB leosztás-visszajátszó"
 #, fuzzy
 msgid "Hide Cards"
 msgstr "Osztott lapok"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "ICM $EV %(ev)s · result %(result)s · chip EV %(chips)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "ICM: %s"
+msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy

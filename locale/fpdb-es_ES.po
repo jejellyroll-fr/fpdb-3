@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 12:48+0200\n"
+"POT-Creation-Date: 2026-10-26 19:35+0100\n"
 "PO-Revision-Date: 2011-11-13 01:00+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Spanish (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -2017,6 +2017,10 @@ msgid "Window"
 msgstr "Ventana"
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "(this table taken as the whole field)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
 msgid "Card deck"
 msgstr "Baraja de cartas"
@@ -2050,6 +2054,16 @@ msgstr "Reproductor de manos FPDB"
 #, fuzzy
 msgid "Hide Cards"
 msgstr "Cartas huecas"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "ICM $EV %(ev)s · result %(result)s · chip EV %(chips)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "ICM: %s"
+msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
