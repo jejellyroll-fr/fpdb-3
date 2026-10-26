@@ -39,14 +39,19 @@ currency, or in fractions of the prize pool.
 
 ## Cost, and the limit
 
-The exact model visits every set of players that can still be in the running when a prize
-is awarded. With *n* players and *k* paid places, that is C(n, 0) + … + C(n, k) sets.
+The exact model works through every set of players still in the running when a prize is
+awarded. With *n* players and *k* paid places, these are the sets with fewer than *k*
+players gone. Each costs up to *n²* steps and is cached as *n* values. Sets past the last
+paid place award nothing, so they are neither walked nor cached.
 
-- A SNG, a Spin or a final table costs nothing: 10 players paying all 10 places take about
-  2 ms, and 45 players paying 3 take about 50 ms.
-- A deep MTT field does not fit. Beyond about 1.1 million sets (`MAX_STATES`), the engine
-  raises `ICMTooLarge` rather than answer slowly or approximately. A caller then shows
-  "ICM not computed" for that spot, never a made-up number.
+- A SNG, a Spin, a final table, or a large field paying few places is quick: 10 players
+  paying all 10 places take about 2 ms, 45 players paying 3 take about 50 ms, and 1,000
+  players paying 2 take about 0.1 s.
+- A large field paying deep is not. `exact_cost(n, k)` gives the steps and cached values in
+  advance. Beyond `MAX_WORK` (30 million steps, about a second) or `MAX_CELLS` (2 million
+  values, about 64 MB), the engine raises `ICMTooLarge` before allocating anything, rather
+  than answer slowly, approximately, or out of memory. A caller then shows "ICM not
+  computed" for that spot, never a made-up number.
 
 An approximation for large fields, such as Monte Carlo finishing orders or the top places
 only, can come later behind the same functions, if a report needs one.

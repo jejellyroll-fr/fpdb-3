@@ -16,14 +16,16 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from fpdb_3_legacy.icm import (
+    MAX_CELLS,
+    MAX_WORK,
     AllInOutcome,
     ICMError,
     ICMTooLarge,
     allin_icm_ev,
     bubble_factor,
+    exact_cost,
     icm_equities,
     outcome_equities,
-    state_count,
 )
 
 
@@ -161,10 +163,35 @@ def test_stacks_and_payouts_that_make_no_sense_are_refused(stacks, payouts) -> N
 
 
 def test_a_whole_field_paying_deep_is_refused_rather_than_slow() -> None:
-    assert state_count(30, 15) > 1_100_000
+    steps, cells = exact_cost(30, 15)
+    assert steps > MAX_WORK and cells > MAX_CELLS
 
     with pytest.raises(ICMTooLarge):
         icm_equities([1000] * 30, list(range(15, 0, -1)))
+
+
+def test_a_large_field_paying_few_places_is_computed_without_caching_unpaid_sets() -> None:
+    # Codex (#623): 1000 players for [60, 40] used to pass the guard and cache
+    # 500,501 sets of 1000 values (~4 GB). Sets past the last paid place are now
+    # neither walked nor cached: 1001 sets, about a million values.
+    steps, cells = exact_cost(1000, 2)
+    assert (steps, cells) == (1_999_000, 1_001_000)
+
+    equities = icm_equities([1000] * 1000, [60, 40])
+
+    assert equities == pytest.approx([0.1] * 1000)
+
+
+@pytest.mark.parametrize(
+    ("players", "paid", "expected"),
+    [
+        (3, 3, (3**2 + 3 * 2**2 + 3 * 1, 7 * 3)),  # 1 + 3 + 3 sets still awarding, of 3 values
+        (4, 1, (4, 4)),  # winner-take-all: only the full table, one step per winner
+        (5, 2, (25 + 5 * 4, 6 * 5)),
+    ],
+)
+def test_the_cost_counts_only_the_sets_that_still_award_a_prize(players, paid, expected) -> None:
+    assert exact_cost(players, paid) == expected
 
 
 def test_a_final_table_paying_every_place_is_computed() -> None:

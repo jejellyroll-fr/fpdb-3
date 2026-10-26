@@ -12,12 +12,14 @@ any chip unit, payouts in any currency, finishing places counted from 1. Where
 the payout structure of a hand comes from, and showing ICM $EV in the replayer
 and the graphs, are the rest of #446.
 
-Cost. The exact model visits every set of players that can still be in the
-running when a prize is awarded: with ``n`` players and ``k`` paid places that
-is C(n, 0) + ... + C(n, k) sets, each costing ``n``. A final table (9-10 players)
-or a SNG is instant; a whole MTT field is not, and :func:`icm_equities` raises
-:class:`ICMTooLarge` rather than answering slowly or approximately. Callers
-show "ICM not computed" for such spots.
+Cost. The exact model works through every set of players still in the running
+when a prize is awarded: with ``n`` players and ``k`` paid places, the sets with
+fewer than ``k`` players gone, each costing up to ``n**2``, and each cached as
+``n`` values. Sets past the last paid place award nothing and are neither
+walked nor cached. A final table, a SNG or a field paying few places is quick; a
+large field paying deep is not, and :func:`icm_equities` raises
+:class:`ICMTooLarge` -- before allocating anything -- rather than answering
+slowly, approximately, or out of memory. Callers show "ICM not computed".
 """
 
 from __future__ import annotations
@@ -28,20 +30,22 @@ from itertools import groupby
 from math import comb
 
 __all__ = [
-    "MAX_STATES",
+    "MAX_CELLS",
+    "MAX_WORK",
     "AllInOutcome",
     "ICMError",
     "ICMTooLarge",
     "allin_icm_ev",
     "bubble_factor",
     "icm_equities",
+    "exact_cost",
     "outcome_equities",
-    "state_count",
 ]
 
-# Above this many player sets the exact model is refused: about a second of pure
-# Python, enough for a 10-handed final table paying every place.
-MAX_STATES = 1_100_000
+# The exact model is refused beyond either bound, before it allocates anything:
+# about a second of pure Python, and about 64 MB of cached equities (#623).
+MAX_WORK = 30_000_000
+MAX_CELLS = 2_000_000
 
 
 class ICMError(ValueError):
@@ -49,13 +53,21 @@ class ICMError(ValueError):
 
 
 class ICMTooLarge(ICMError):
-    """The exact model would visit more than :data:`MAX_STATES` player sets."""
+    """The exact model would cost more than :data:`MAX_WORK` steps or :data:`MAX_CELLS` cached values."""
 
 
-def state_count(players: int, paid_places: int) -> int:
-    """How many player sets the exact model visits for ``players`` and ``paid_places``."""
+def exact_cost(players: int, paid_places: int) -> tuple[int, int]:
+    """``(steps, cached values)`` the exact model needs for ``players`` and ``paid_places``.
+
+    A set that still awards a prize -- fewer than ``paid_places`` players gone --
+    is cached as one value per player, and costs one step per winner and pair of
+    survivors, unless its children award nothing, in which case it costs one per
+    winner.
+    """
     places = min(players, paid_places)
-    return sum(comb(players, taken) for taken in range(places + 1))
+    cells = sum(comb(players, gone) for gone in range(places)) * players
+    steps = sum(comb(players, gone) * (players - gone) ** (2 if gone < places - 1 else 1) for gone in range(places))
+    return steps, cells
 
 
 def icm_equities(stacks: Sequence[float], payouts: Sequence[float]) -> list[float]:
@@ -78,7 +90,8 @@ def icm_equities(stacks: Sequence[float], payouts: Sequence[float]) -> list[floa
         prizes.pop()  # unpaid places change nothing and only cost time
     if not prizes:
         return equities
-    if state_count(len(alive), len(prizes)) > MAX_STATES:
+    steps, cells = exact_cost(len(alive), len(prizes))
+    if steps > MAX_WORK or cells > MAX_CELLS:
         raise ICMTooLarge(f"{len(alive)} players and {len(prizes)} paid places are more than the exact model computes")
     for slot, value in zip(alive, _harville([float(stacks[index]) for index in alive], prizes), strict=True):
         equities[slot] = value
@@ -93,8 +106,13 @@ def _validate(stacks: Sequence[float], payouts: Sequence[float]) -> None:
 
 
 def _harville(chips: list[float], prizes: list[float]) -> list[float]:
-    """Malmuth-Harville over players who all have chips: their expected prizes, in order."""
+    """Malmuth-Harville over players who all have chips: their expected prizes, in order.
+
+    Only sets that still award a prize are computed and cached; past the last
+    paid place everyone left is worth nothing more, so those sets are skipped.
+    """
     players = len(chips)
+    last_place = len(prizes) - 1
     # remaining-set bitmask -> expected prize of each player in it, from the place now awarded on
     memo: dict[int, list[float]] = {}
 
@@ -104,16 +122,17 @@ def _harville(chips: list[float], prizes: list[float]) -> list[float]:
             return found
         place = players - remaining.bit_count()
         result = [0.0] * players
-        if place < len(prizes):
-            members = [i for i in range(players) if remaining >> i & 1]
-            total = sum(chips[i] for i in members)
-            for winner in members:
-                share = chips[winner] / total
-                result[winner] += share * prizes[place]
-                rest = expected(remaining & ~(1 << winner))
-                for i in members:
-                    if i != winner:
-                        result[i] += share * rest[i]
+        members = [i for i in range(players) if remaining >> i & 1]
+        total = sum(chips[i] for i in members)
+        for winner in members:
+            share = chips[winner] / total
+            result[winner] += share * prizes[place]
+            if place == last_place:
+                continue  # the places below pay nothing
+            rest = expected(remaining & ~(1 << winner))
+            for i in members:
+                if i != winner:
+                    result[i] += share * rest[i]
         memo[remaining] = result
         return result
 
