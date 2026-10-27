@@ -3,8 +3,12 @@
 The Independent Chip Model turns tournament chips into prize equity. fpdb uses the
 Malmuth-Harville form: a player finishes first with probability *their stack / all chips
 in play*, and each later place is drawn the same way among the players still in. The
-engine is `fpdb_3_legacy/icm.py`. What remains of #446 is the AoF analysis, an ICM line in
-the tournament graph and a bubble factor column in the MTT study pack.
+engine is `fpdb_3_legacy/icm.py`. What remains of #446 is a bubble factor column in the MTT
+study pack.
+
+The AoF analysis gets no ICM: All-in or Fold is a cash format in every room fpdb reads it
+from (GGPoker's AFO tables, CoinPoker's and KingsClub's AoF games), so its hands carry no
+prize equity to price.
 
 ## Where a tournament's payouts come from
 
@@ -45,9 +49,9 @@ The hand is priced again as soon as the structure changes.
 `TourneyPayouts` is a feature table: databases from before it get it on connection,
 with no `DB_VERSION` bump. Amounts are in hundredths, like fpdb's winnings.
 
-Two summary-import bugs currently keep some results from settling a structure: dollar
-winnings read as 0 (#624), and a PokerStars.EU SnG stored with the wrong buy-in and
-prize pool (#625).
+One summary-import bug keeps some results from settling a structure: a PokerStars.EU SnG
+stored with the wrong buy-in and prize pool (#625). Dollar winnings read as 0 (#624) are
+fixed; summaries imported before the fix need importing again.
 
 ## A hand's all-in, in the replayer
 
@@ -76,6 +80,23 @@ A hand is only priced when its numbers are sound; otherwise the replayer says wh
   - A field larger than the table is refused, because the other tables' stacks are unknown.
   - When the field size is unknown (no summary imported), the hand is priced and the line
     says that this table was taken as the whole field.
+
+## The tournament graph's ICM line
+
+The tournament graph's **ICM $EV-adjusted line** option (`fpdb_3_legacy/tourney_icm_line.py`)
+draws the results with the all-in luck taken out. For each hand where the hero saw a
+showdown after someone was all-in, the luck is the prize equity the hand actually moved
+less its ICM $EV, priced as the replayer prices it. The line is the profit less that luck,
+tournament after tournament.
+
+It adjusts only what is priced. A tournament with no known payout structure, and an all-in
+the pricing refuses, keep their actual result. The legend says how many of the hero's
+all-ins were priced: a line that priced 3 all-ins out of 40 is mostly the profit line.
+
+The option is off by default, because it rebuilds and prices every all-in hand of the
+graph's tournaments. Each hand is priced once per payout structure while the tab is open.
+Equity is the replayer's Monte Carlo estimate (20,000 boards), so the line can move by a
+few cents between two runs.
 
 ## What the engine computes
 

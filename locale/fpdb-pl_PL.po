@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 08:48+0100\n"
+"POT-Creation-Date: 2026-10-27 18:15+0100\n"
 "PO-Revision-Date: 2011-10-08 08:58+0000\n"
 "Last-Translator: greg20 <greg20@hushmail.com>\n"
 "Language-Team: Polish (Poland) (http://www.transifex.net/projects/p/fpdb/"
@@ -2642,6 +2642,21 @@ msgstr "{minutes} min"
 #, fuzzy
 msgid "Load Hands"
 msgstr "Rozdania"
+
+#: fpdb_3_legacy/GuiTourneyGraphViewer.py
+msgid "ICM $EV-adjusted line"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, python-format
+msgid "ICM $EV-adjusted: %(total)s | %(priced)s of %(allins)s all-ins priced"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTourneyGraphViewer.py
+msgid ""
+"The results with the luck of every priced all-in taken out, in prize equity. "
+"Slower: each all-in hand is rebuilt and priced."
+msgstr ""
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Refresh Stats"

@@ -47,6 +47,13 @@ _QUERIES = {
                         FROM Tourneys t JOIN TourneyTypes tt ON tt.id = t.tourneyTypeId
                         WHERE t.id = %s""",
     "selectHandTourneyId": "SELECT tourneyId FROM Hands WHERE id = %s",
+    # The tournament graph's ICM line: the player's hands that went to showdown after someone was all-in.
+    "selectTourneyAllInHands": """SELECT h.tourneyId, h.id, pl.name FROM HandsPlayers hp
+                        JOIN Hands h ON h.id = hp.handId
+                        JOIN Players pl ON pl.id = hp.playerId
+                        WHERE hp.playerId = %s AND h.tourneyId IS NOT NULL AND hp.sawShowdown
+                        AND EXISTS (SELECT 1 FROM HandsPlayers ai WHERE ai.handId = h.id AND ai.wentAllIn)
+                        ORDER BY h.startTime, h.id""",
 }
 
 
