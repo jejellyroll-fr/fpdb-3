@@ -818,6 +818,15 @@ class GuiReplayer(QWidget):
         self.reviewButton.clicked.connect(self.review_clicked)
         self.buttonBox2.addWidget(self.reviewButton)
 
+        # The payout structure ICM prices the hand with (#446), for a stored tournament hand.
+        self.shared_tourney_id: int | None = None
+        self.payoutsButton = QPushButton(_("Payouts..."))
+        self.payoutsButton.setToolTip(_("Enter or apply this tournament's payout structure, for ICM"))
+        self.payoutsButton.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.payoutsButton.setEnabled(False)
+        self.payoutsButton.clicked.connect(self.payouts_clicked)
+        self.buttonBox2.addWidget(self.payoutsButton)
+
         self.stateSlider = QSlider(Qt.Orientation.Horizontal)
         self.stateSlider.valueChanged.connect(self.slider_changed)
         self.stateSlider.setFocusPolicy(Qt.FocusPolicy.NoFocus)
@@ -2375,6 +2384,33 @@ class GuiReplayer(QWidget):
             parts.append(f"{label} {push_pct}%")
         return " · ".join(parts)
 
+    def _hand_tourney_id(self, hand) -> int | None:
+        """The stored tournament of the hand, whose payouts the dialog edits; None otherwise."""
+        if self.shared_hand_id is None or hand.gametype.get("type") != "tour":
+            return None
+        try:
+            from fpdb_3_legacy.tourney_payouts import tourney_for_hand
+
+            return tourney_for_hand(self.db, self.shared_hand_id)
+        except Exception:  # noqa: BLE001 - a lookup failure only leaves the button off.
+            log.exception("Could not find the tournament of hand %s", self.shared_hand_id)
+            return None
+
+    def payouts_clicked(self) -> None:
+        if self.shared_tourney_id is None:
+            return
+        from fpdb_3_legacy.tourney_payouts_dialog import TourneyPayoutsDialog
+
+        dialog = TourneyPayoutsDialog(self.db, self.shared_tourney_id, self)
+        dialog.exec()
+        self.payouts_changed(dialog.changed)
+
+    def payouts_changed(self, changed: bool) -> None:
+        """Price the hand again with the structure just stored or cleared."""
+        if changed and self.shared_hand is not None:
+            self.hand_icm = self._price_hand_icm(self.shared_hand)
+            self.update()
+
     def _price_hand_icm(self, hand):
         """The hand's all-in in prize equity (#446), or None; never in the way of the replay."""
         try:
@@ -2574,8 +2610,10 @@ class GuiReplayer(QWidget):
         self.shared_hero = None
         self.shared_hand_id = None
         self.hand_icm = None
+        self.shared_tourney_id = None
         self.shareButton.setEnabled(False)
         self.reviewButton.setEnabled(False)
+        self.payoutsButton.setEnabled(False)
         is_ofc = self._is_ofc_replay_entry(entry)
         self.replay_mode = "ofc" if is_ofc else "hand"
         if is_ofc:
@@ -2596,6 +2634,7 @@ class GuiReplayer(QWidget):
             self.Heroes = hand.hero or self._resolve_hero(hand.sitename)
             self.replay_model = self._build_replay_model(hand)
             self.hand_icm = self._price_hand_icm(hand)
+            self.shared_tourney_id = self._hand_tourney_id(hand)
             # Legacy hands without a hero seat: share them from the same point
             # of view the replayer shows, without writing it into the hand.
             if not hand.hero and self.Heroes in {player[1] for player in hand.players}:
@@ -2604,6 +2643,7 @@ class GuiReplayer(QWidget):
         self.states = self.replay_model.states
         self.shareButton.setEnabled(self.shared_hand is not None)
         self.reviewButton.setEnabled(self.shared_hand is not None)
+        self.payoutsButton.setEnabled(self.shared_tourney_id is not None)
 
         for idx in reversed(list(range(self.buttonBox.count()))):
             item = self.buttonBox.takeAt(idx)

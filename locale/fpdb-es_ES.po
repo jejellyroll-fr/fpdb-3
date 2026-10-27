@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-26 19:35+0100\n"
+"POT-Creation-Date: 2026-10-27 08:48+0100\n"
 "PO-Revision-Date: 2011-11-13 01:00+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Spanish (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -2046,6 +2046,10 @@ msgid "End"
 msgstr "Fin"
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "Enter or apply this tournament's payout structure, for ICM"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
 msgid "FPDB Hand Replayer"
 msgstr "Reproductor de manos FPDB"
@@ -2074,6 +2078,10 @@ msgstr "Siguiente"
 #, fuzzy
 msgid "Next action"
 msgstr "Acción siguiente"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "Payouts..."
+msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
@@ -2370,7 +2378,7 @@ msgstr ""
 msgid "Running…"
 msgstr "Ejecutando…"
 
-#: fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/tourney_payouts_dialog.py
 msgid "Save"
 msgstr "Guardar"
 
@@ -3989,6 +3997,7 @@ msgid "Tools"
 msgstr "Herramientas"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/tourney_payouts_dialog.py
 #, fuzzy
 msgid "Tournament"
 msgstr "Torneos"
@@ -6950,6 +6959,104 @@ msgstr ""
 "%s\n"
 "¿Desea sustituirlo?"
 
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "%(title)s · %(entries)s entries · prize pool %(pool)s"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "10-max sit-and-go: 50 / 30 / 20"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "18-player sit-and-go: 40 / 30 / 20 / 10"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "6-max sit-and-go: 65 / 35"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "9-max sit-and-go: 50 / 30 / 20"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Apply to the prize pool"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Double or nothing: half the field paid"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+msgid "Forget the stored structure"
+msgstr "Estructura de palos del board"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Go back to the imported results, when they settle the payouts"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "In use: %(places)s %(currency)s (%(source)s)"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "No structure in use: %s"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy, python-format
+msgid "Not saved: %s"
+msgstr "Guardado"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid ""
+"One place per line (\"1st  $45.00\", \"2: 30%\"), or on one line: 45, 27, 18 "
+"or 50% 30% 20%"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Or paste the lobby's payouts, first place first:"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy, python-format
+msgid "Tournament #%s"
+msgstr "Torneos"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+#| msgid "Tournament Results"
+msgid "Tournament payouts"
+msgstr "Resultados de torneos"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Winner takes all (heads-up, Spin & Go)"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "entered"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+msgid "from the imported results"
+msgstr "Mover los archivos importados a:"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "preset: %s"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+#| msgid "Unknown Site"
+msgid "unknown"
+msgstr "Sitio desconocido"
+
 #: fpdb_3_legacy/tracker_migration.py
 msgid ""
 "Choose that folder below: fpdb reads those files as they are, room by room."
@@ -8583,9 +8690,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Para configurar aspectos como los colores debes usar el dialogo de "
 #~ "Preferencias Avanzadas o editar manualmente HUD_config.xml."
-
-#~ msgid "Tournament Results"
-#~ msgstr "Resultados de torneos"
 
 #~ msgid "Tournament Results Import"
 #~ msgstr "Imporatación de los Resultados del Torneo"

@@ -259,3 +259,70 @@ def test_a_database_from_before_the_table_gets_it_on_connection(fresh_db) -> Non
 
     cursor.execute("SELECT COUNT(*) FROM TourneyPayouts")
     assert cursor.fetchone()[0] == 0
+
+
+# --- a structure typed or pasted by the user ------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("text", "amounts"),
+    [
+        ("45, 27, 18", (4500, 2700, 1800)),
+        ("45;27;18", (4500, 2700, 1800)),
+        ("1st  $1,250.00\n2nd  $750.00\n", (125000, 75000)),  # a lobby's table, thousands separator
+        ("1: 45,50\n2: 27,30", (4550, 2730)),  # a decimal comma, one place per line
+        ("1 250\n750", (125000, 75000)),
+    ],
+    ids=["commas", "semicolons", "lobby-lines", "decimal-comma", "space-thousands"],
+)
+def test_pasted_prizes_are_read_in_hundredths(text, amounts) -> None:
+    assert payouts.parse_structure(text) == payouts.EnteredStructure(amounts=amounts)
+
+
+def test_pasted_percentages_are_shares_of_the_pool() -> None:
+    entered = payouts.parse_structure("1st 50%\n2nd 30%\n3rd 20%")
+
+    assert entered.shares == (Fraction(1, 2), Fraction(3, 10), Fraction(1, 5))
+    assert payouts.parse_structure("33.33% 33.33% 33.34%").shares[2] == Fraction(3334, 10000)
+
+
+@pytest.mark.parametrize(
+    ("text", "why"),
+    [
+        ("", "at least one"),
+        ("50% 30", "not both"),
+        ("60% 30%", "90"),
+        ("45.555", "two decimals"),
+        ("0 0", "pays anything"),
+        ("first\nsecond", "no amount"),
+    ],
+    ids=["empty", "mixed", "percent-sum", "decimals", "nothing-paid", "no-number"],
+)
+def test_what_is_not_a_structure_is_refused_with_why(text, why) -> None:
+    with pytest.raises(ValueError, match=why):
+        payouts.parse_structure(text)
+
+
+def test_entered_prizes_are_stored_as_they_are(fresh_db) -> None:
+    tourney = add_tourney(fresh_db, 1012, [(8, 0)], entries=9, prize_pool=8136)
+
+    stored = payouts.store_entered(fresh_db, tourney, payouts.parse_structure("40.68, 24.41, 16.27"))
+
+    assert stored == payouts.Payouts((4068, 2441, 1627), "manual", "USD")
+    assert payouts.payouts_for_tourney(fresh_db, tourney).payouts == stored
+
+
+def test_entered_percentages_split_the_prize_pool(fresh_db) -> None:
+    tourney = add_tourney(fresh_db, 1013, [(8, 0)], entries=9, prize_pool=8136)
+
+    stored = payouts.store_entered(fresh_db, tourney, payouts.parse_structure("50% 30% 20%"))
+
+    assert stored.amounts == (4068, 2441, 1627) and stored.source == "manual"
+
+
+def test_a_tournament_s_facts_carry_its_number(fresh_db) -> None:
+    tourney = add_tourney(fresh_db, 1014, [], entries=9, prize_pool=9000, currency="EUR")
+
+    facts = payouts.tourney_facts(fresh_db, tourney)
+
+    assert (facts.number, facts.entries, facts.prize_pool, facts.currency) == (1014, 9, 9000, "EUR")

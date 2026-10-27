@@ -42,7 +42,8 @@ _QUERIES = {
     "insertTourneyPayout": "INSERT INTO TourneyPayouts (tourneyId, place, amount, source) VALUES (%s, %s, %s, %s)",
     "selectTourneyResults": """SELECT tp.rank, tp.winnings FROM TourneysPlayers tp
                         WHERE tp.tourneyId = %s AND tp.rank IS NOT NULL ORDER BY tp.rank""",
-    "selectTourneyFacts": """SELECT t.entries, t.prizepool, tt.buyIn, tt.currency, tt.knockout, tt.koBounty
+    "selectTourneyFacts": """SELECT t.entries, t.prizepool, tt.buyIn, tt.currency, tt.knockout, tt.koBounty,
+                        t.siteTourneyNo
                         FROM Tourneys t JOIN TourneyTypes tt ON tt.id = t.tourneyTypeId
                         WHERE t.id = %s""",
     "selectHandTourneyId": "SELECT tourneyId FROM Hands WHERE id = %s",
