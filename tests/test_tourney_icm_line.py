@@ -85,6 +85,25 @@ def test_a_priced_all_in_gives_its_luck_back(stored) -> None:
     assert (line.priced, line.allins) == (1, 1)
 
 
+def test_two_players_in_one_tournament_have_its_luck_taken_out_once(stored) -> None:
+    # Codex (#630): Hero and Villain both selected, one result row each, both all-ins priced.
+    db, config, hand, tourney, players = stored
+    tourney_payouts.store_payouts(db, tourney, [5000, 3000, 2000])
+
+    line = icm_line(
+        db,
+        [(tourney, -11.0), (tourney, 20.0)],
+        allin_hands(db, [players["Hero"], players["Villain"]]),
+        loader(db, config),
+        equity_fn=fixed_equity(46, 54),
+    )
+
+    allin = hand_allin_icm(hand, PAYOUTS, table_only=True, equity_fn=fixed_equity(46, 54)).allin
+    luck = sum(allin.icm_result[name] - allin.icm_ev[name] for name in ("Hero", "Villain"))
+    assert line.values == pytest.approx((-11.0 - luck, 9.0 - luck))
+    assert (line.priced, line.allins) == (2, 2)
+
+
 def test_a_hand_is_priced_once_per_structure(stored) -> None:
     db, config, _hand, tourney, players = stored
     tourney_payouts.store_payouts(db, tourney, [5000, 3000, 2000])

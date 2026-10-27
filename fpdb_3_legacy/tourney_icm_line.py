@@ -108,8 +108,12 @@ def icm_line(
     cache = {} if cache is None else cache
     values: list[float] = []
     total, priced, allins = 0.0, 0, 0
+    seen: set[int] = set()
     for tourney_id, profit in results:
-        tourney_hands = hands.get(tourney_id, ())
+        # Codex (#630): two selected players in one tournament give it two result rows, while
+        # ``hands`` holds both players' all-ins: its luck is taken out once, on its first row.
+        tourney_hands = () if tourney_id in seen else hands.get(tourney_id, ())
+        seen.add(tourney_id)
         luck, tourney_priced = 0.0, 0
         if tourney_hands:
             try:
