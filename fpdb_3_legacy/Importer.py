@@ -374,6 +374,7 @@ class Importer:
         self.idsite = IdentifySite.IdentifySite(config)
 
         self.filelist: dict[str, IdentifySite.FPDBFile] = {}
+        self._touched_tourneys: set[int] = set()  # their bubble factors are refreshed after the import (#446)
         self.file_results: dict[str, FileImportResult] = {}
         self.failed_files = FailureCache()
         self.dirlist: dict[Any, list[Any]] = {}
@@ -973,6 +974,21 @@ class Importer:
         self.database.cleanUpTourneyTypes()
         self.database.cleanUpWeeksMonths()
         self.database.resetClean()
+        self._refresh_bubble_factors()
+
+    def _note_tourney(self, tourney_id: Any) -> None:
+        """Remember a tournament this import touched: its bubble factors are refreshed afterwards (#446)."""
+        if tourney_id is not None:
+            # getattr: some callers build an Importer without __init__.
+            self._touched_tourneys = getattr(self, "_touched_tourneys", set()) | {int(tourney_id)}
+
+    def _refresh_bubble_factors(self) -> None:
+        touched: set[int] = getattr(self, "_touched_tourneys", set())
+        self._touched_tourneys = set()
+        if touched:
+            from fpdb_3_legacy import bubble_factors
+
+            bubble_factors.refresh_tourneys(self.database, touched)
 
     def importFiles(self, q):
         """Import all files in the file list and aggregate import statistics.
@@ -1516,6 +1532,7 @@ class Importer:
                             hand.updatePositionsCache(self.database, None, doinsert)
                             hand.updateHudCache(self.database, doinsert)
                             hand.updateTourneyResults(self.database)
+                            self._note_tourney(hand.tourneyId)
                             ihands.append(hand)
                             to_hud.append(hand.dbid_hands)
                             log.info(f"Hand {hand.dbid_hands} added to HUD queue")
@@ -1803,6 +1820,7 @@ class Importer:
                         )
                         self.database.resetBulkCache(False)
                         conv.insertOrUpdate(printtest=self.settings["testData"])
+                        self._note_tourney(conv.tourneyId)
                     except FpdbSummaryNotFound as exc:
                         # Page furniture, not a half-imported tournament: an
                         # archive page splits into its head, its column headers

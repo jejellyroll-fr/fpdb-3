@@ -69,14 +69,32 @@ tournament decision this is, and the SPR says whether this particular pot can
 still be played. Board suit and pairing, bet sizing and the size faced are
 there too, as they are in the cash packs.
 
+## Bubble factor: sit-and-gos and Spins only
+
+The two all-in studies (*facing an all-in* and *shove spots*) have a **By bubble
+factor** panel. A bubble factor says how much more prize equity an all-in risks
+than it wins: 1 is a chip-EV spot, and a call at a factor of 2 needs two-thirds
+equity rather than half.
+
+fpdb can only compute it where it knows every remaining stack and what each place
+pays:
+
+- a sit-and-go or a Spin, whose field fits at one table;
+- with its payout structure known, from its results or entered in the replayer.
+
+A multi-table tournament's other tables are not in its hand history, so its
+decisions sit in the *not known* band rather than being guessed from one table.
+[ICM in fpdb](icm.md) explains how the factor is computed and how to fill it for an
+older database.
+
 ## What fpdb does not know about your tournament
 
-fpdb stores hands, blinds, stacks and results. It does not store payouts, field
-size at the time of a hand, or how close a table was to a pay jump — so nothing
-in this pack reports bubble, final-table or ICM context, and no study infers a
-stage from a stack. Twelve big blinds late in a slow structure and twelve big
-blinds in a turbo are the same row here, because they are the same row in the
-database.
+fpdb stores hands, blinds, stacks and results. It does not know the field size at the
+time of a hand in a multi-table tournament, or how close a table was to a pay jump.
+So, apart from the bubble factor above, nothing in this pack reports bubble,
+final-table or ICM context, and no study infers a stage from a stack. Twelve big
+blinds late in a slow structure and twelve big blinds in a turbo are the same row
+here, because they are the same row in the database.
 
 Observed shove and call frequencies are a record of what happened, not a
 push/fold solution. A band where you shove 38% of the time is telling you what

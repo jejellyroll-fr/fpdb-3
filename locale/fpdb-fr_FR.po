@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 18:15+0100\n"
+"POT-Creation-Date: 2026-10-28 00:34+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -2348,7 +2348,8 @@ msgstr "Courbe ajustée à l'ICM $EV"
 #: fpdb_3_legacy/GuiTourneyGraphViewer.py
 #, python-format
 msgid "ICM $EV-adjusted: %(total)s | %(priced)s of %(allins)s all-ins priced"
-msgstr "Ajusté à l'ICM $EV : %(total)s | %(priced)s all-ins chiffrés sur %(allins)s"
+msgstr ""
+"Ajusté à l'ICM $EV : %(total)s | %(priced)s all-ins chiffrés sur %(allins)s"
 
 #: fpdb_3_legacy/GuiTourneyGraphViewer.py
 msgid ""
@@ -4571,6 +4572,10 @@ msgid "Board texture flags the board must have all of."
 msgstr "Indicateurs de texture que le board doit tous avoir."
 
 #: fpdb_3_legacy/research_labels.py
+msgid "Bubble factor band"
+msgstr "Tranche de bubble factor"
+
+#: fpdb_3_legacy/research_labels.py
 msgid ""
 "Cards discarded at the draw; zero means stand pat and unknown discard counts "
 "stay unclassified."
@@ -4717,6 +4722,14 @@ msgstr "Nombre de joueurs encore dans la main."
 #: fpdb_3_legacy/research_labels.py
 msgid "How many raises came before this decision."
 msgstr "Combien de relances ont précédé cette décision."
+
+#: fpdb_3_legacy/research_labels.py
+msgid ""
+"How much more prize equity an all-in risks than it wins (sit-and-gos and "
+"Spins with a known payout structure)."
+msgstr ""
+"Combien d'équité de prix un all-in risque de plus qu'il ne rapporte "
+"(sit-and-go et Spins dont la structure des gains est connue)."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "How much the actor had to call."

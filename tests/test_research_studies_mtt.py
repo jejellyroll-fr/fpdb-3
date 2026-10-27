@@ -25,6 +25,7 @@ MTT_STUDIES = tuple(
     study for study in builtin_studies().studies if study.tournament is True
 )
 STACK_DIMENSION = "effective_stack_bucket"
+BUBBLE_DIMENSION = "bubble_factor_bucket"
 
 
 @pytest.fixture(scope="module")
@@ -195,15 +196,25 @@ def test_postflop_mtt_studies_expose_spr_as_well_as_stack() -> None:
 
 
 def test_no_mtt_study_claims_stage_or_payout_context() -> None:
-    """fpdb stores stacks, blinds and results -- not what a chip was worth."""
+    """fpdb stores stacks, blinds and results -- not the stage of a tournament.
+
+    What a chip was worth is known only where the bubble factor panel reads it
+    (#446): its band says "not known" wherever the payouts or the field are not.
+    """
     forbidden = ("icm", "bubble", "final table", "payout", "pay jump", "stage")
     for study in MTT_STUDIES:
         haystack = " ".join(
             (study.title, study.description, *study.tags, *study.aliases,
-             *(panel.title for panel in study.panels)),
+             *(panel.title for panel in study.panels if BUBBLE_DIMENSION not in panel.group_by)),
         ).casefold()
         for word in forbidden:
             assert word not in haystack, f"{study.id} implies {word!r}"
+
+
+def test_the_all_in_studies_read_the_bubble_factor() -> None:
+    with_bubble = {study.id for study in MTT_STUDIES if any(BUBBLE_DIMENSION in p.group_by for p in study.panels)}
+
+    assert with_bubble == {"mtt_facing_all_in", "mtt_shove_spots"}
 
 
 # -- the panels, executed ------------------------------------------------------

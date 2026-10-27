@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from fpdb_3_legacy import tourney_payouts
+from fpdb_3_legacy import bubble_factors, tourney_payouts
 from fpdb_3_legacy.i18n import N_
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_number
@@ -144,8 +144,7 @@ class TourneyPayoutsDialog(QDialog):
             self.errorLabel.setText(_("Not saved: %s") % exc)
             return False
         self.errorLabel.clear()
-        self.changed = True
-        self.refresh()
+        self._changed()
         return True
 
     def apply_preset(self) -> bool:
@@ -163,6 +162,11 @@ class TourneyPayoutsDialog(QDialog):
 
     def clear(self) -> None:
         tourney_payouts.clear_payouts(self.db, self.tourney_id)
-        self.changed = True
         self.errorLabel.clear()
+        self._changed()
+
+    def _changed(self) -> None:
+        """A new structure: the replayer prices the hand again, and the study pack's bubble factors follow."""
+        self.changed = True
+        bubble_factors.refresh_tourneys(self.db, [self.tourney_id])
         self.refresh()

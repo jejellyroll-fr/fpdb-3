@@ -2,7 +2,7 @@
   "schema_version": 1,
   "pack": "mtt",
   "label": "Tournaments \u00b7 Multi-table",
-  "description": "Spot-first studies for multi-table tournaments, organised around effective stack depth rather than treating a tournament hand as a cash hand with one more filter. Nothing here knows the stage of a tournament or what a chip was worth: fpdb stores stacks, blinds and results, not payouts, so no study claims bubble, final-table or ICM context.",
+  "description": "Spot-first studies for multi-table tournaments, organised around effective stack depth rather than treating a tournament hand as a cash hand with one more filter. Nothing here knows the stage of a tournament: fpdb stores stacks, blinds and results. The all-in studies add a bubble factor band where a chip's worth is known, in sit-and-gos and Spins with a payout structure; a multi-table field's other tables are not in the hand history, so its decisions read 'not known'.",
   "studies": [
     {
       "id": "mtt_preflop_rfi",
@@ -581,6 +581,7 @@
         "opponent_position",
         "max_seats",
         "effective_stack_bucket",
+        "bubble_factor_bucket",
         "site",
         "date_from",
         "date_to"
@@ -631,6 +632,21 @@
             "stack",
             "depth",
             "mtt"
+          ]
+        },
+        {
+          "id": "bubble",
+          "title": "By bubble factor",
+          "kind": "frequency",
+          "metric": "call_frequency",
+          "group_by": [
+            "bubble_factor_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "bubble factor",
+            "icm",
+            "sng"
           ]
         },
         {
@@ -721,6 +737,7 @@
         "opponent_position",
         "max_seats",
         "effective_stack_bucket",
+        "bubble_factor_bucket",
         "site",
         "date_from",
         "date_to"
@@ -772,6 +789,21 @@
             "stack",
             "depth",
             "mtt"
+          ]
+        },
+        {
+          "id": "bubble",
+          "title": "By bubble factor",
+          "kind": "frequency",
+          "metric": "all_in_frequency",
+          "group_by": [
+            "bubble_factor_bucket"
+          ],
+          "recommended_view": "summary",
+          "tags": [
+            "bubble factor",
+            "icm",
+            "sng"
           ]
         },
         {

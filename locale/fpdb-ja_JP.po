@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 18:15+0100\n"
+"POT-Creation-Date: 2026-10-28 00:34+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -5199,6 +5199,10 @@ msgid "Board texture flags the board must have all of."
 msgstr "ボードがすべて持つ必要のあるテクスチャフラグ。"
 
 #: fpdb_3_legacy/research_labels.py
+msgid "Bubble factor band"
+msgstr ""
+
+#: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid ""
 "Cards discarded at the draw; zero means stand pat and unknown discard counts "
@@ -5375,6 +5379,12 @@ msgstr "ハンドにまだ残っていたプレイヤー数。"
 #, fuzzy
 msgid "How many raises came before this decision."
 msgstr "この判断の前に何回レイズがあったか。"
+
+#: fpdb_3_legacy/research_labels.py
+msgid ""
+"How much more prize equity an all-in risks than it wins (sit-and-gos and "
+"Spins with a known payout structure)."
+msgstr ""
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy

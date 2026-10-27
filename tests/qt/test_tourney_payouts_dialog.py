@@ -102,3 +102,19 @@ def test_only_a_stored_tournament_hand_offers_the_dialog(qtbot) -> None:
 
     assert GuiReplayer._hand_tourney_id(SimpleNamespace(shared_hand_id=None), tour) is None
     assert GuiReplayer._hand_tourney_id(SimpleNamespace(shared_hand_id=7), cash) is None
+
+
+@pytest.mark.qt
+def test_a_new_structure_refreshes_the_tournament_s_bubble_factors(dialog, tourney, monkeypatch) -> None:
+    from fpdb_3_legacy import bubble_factors
+
+    refreshed = []
+    monkeypatch.setattr(bubble_factors, "refresh_tourneys", lambda _db, ids: refreshed.append(list(ids)) or 0)
+
+    dialog.presetCombo.setCurrentIndex(dialog.presetCombo.findData("sng_9max"))
+    assert dialog.apply_preset()
+    dialog.entry.setPlainText("60% 30%")
+    assert not dialog.save_entry()  # refused: nothing changed, nothing to refresh
+    dialog.clear()
+
+    assert refreshed == [[tourney], [tourney]]
