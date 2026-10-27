@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-26 19:35+0100\n"
+"POT-Creation-Date: 2026-10-27 08:48+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -2040,6 +2040,10 @@ msgid "End"
 msgstr "最後"
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "Enter or apply this tournament's payout structure, for ICM"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
 msgid "FPDB Hand Replayer"
 msgstr "FPDB ハンドリプレイヤー"
@@ -2068,6 +2072,10 @@ msgstr "次"
 #, fuzzy
 msgid "Next action"
 msgstr "次のアクション"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "Payouts..."
+msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
@@ -2361,7 +2369,7 @@ msgstr "同じ質問を 2 回実行します — あなたとフィールド —
 msgid "Running…"
 msgstr "実行中…"
 
-#: fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/tourney_payouts_dialog.py
 msgid "Save"
 msgstr "保存"
 
@@ -3964,6 +3972,7 @@ msgid "Tools"
 msgstr "ツール"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/tourney_payouts_dialog.py
 msgid "Tournament"
 msgstr "トーナメント"
 
@@ -6906,6 +6915,105 @@ msgstr ""
 "%s\n"
 "置き換えますか?"
 
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "%(title)s · %(entries)s entries · prize pool %(pool)s"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "10-max sit-and-go: 50 / 30 / 20"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "18-player sit-and-go: 40 / 30 / 20 / 10"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "6-max sit-and-go: 65 / 35"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "9-max sit-and-go: 50 / 30 / 20"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Apply to the prize pool"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Double or nothing: half the field paid"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+msgid "Forget the stored structure"
+msgstr "ボードのスート構成"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Go back to the imported results, when they settle the payouts"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "In use: %(places)s %(currency)s (%(source)s)"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "No structure in use: %s"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy, python-format
+msgid "Not saved: %s"
+msgstr "保存しました"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid ""
+"One place per line (\"1st  $45.00\", \"2: 30%\"), or on one line: 45, 27, 18 "
+"or 50% 30% 20%"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Or paste the lobby's payouts, first place first:"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy, python-format
+#| msgid "Tournament"
+msgid "Tournament #%s"
+msgstr "トーナメント"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+#| msgid "Tournament Results"
+msgid "Tournament payouts"
+msgstr "トーナメント結果"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Winner takes all (heads-up, Spin & Go)"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "entered"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+msgid "from the imported results"
+msgstr "インポートしたファイルの移動先:"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "preset: %s"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+#| msgid "Unknown Site"
+msgid "unknown"
+msgstr "不明なポーカーサイト"
+
 #: fpdb_3_legacy/tracker_migration.py
 msgid ""
 "Choose that folder below: fpdb reads those files as they are, room by room."
@@ -8472,9 +8580,6 @@ msgstr ""
 
 #~ msgid "To keep existing personal settings, you must edit the local file."
 #~ msgstr "個人的設定を残すには、ファイルを編集する必要があります。"
-
-#~ msgid "Tournament Results"
-#~ msgstr "トーナメント結果"
 
 #~ msgid "Tournament Results Import"
 #~ msgstr "トーナメント結果インポート"

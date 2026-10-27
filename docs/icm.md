@@ -3,8 +3,8 @@
 The Independent Chip Model turns tournament chips into prize equity. fpdb uses the
 Malmuth-Harville form: a player finishes first with probability *their stack / all chips
 in play*, and each later place is drawn the same way among the players still in. The
-engine is `fpdb_3_legacy/icm.py`. What remains of #446 is the AoF analysis and an ICM line in
-the tournament graph.
+engine is `fpdb_3_legacy/icm.py`. What remains of #446 is the AoF analysis, an ICM line in
+the tournament graph and a bubble factor column in the MTT study pack.
 
 ## Where a tournament's payouts come from
 
@@ -23,6 +23,24 @@ sources, in this order:
    settles nothing. Knockout tournaments are never read this way, because their
    winnings include bounties.
 3. **Otherwise, nothing**, and the lookup says why. No structure is ever guessed.
+
+### Entering a structure
+
+The replayer's **Payouts...** button, on a stored tournament hand, opens the tournament's
+structure (`fpdb_3_legacy/tourney_payouts_dialog.py`). It shows the field, the prize pool,
+the structure in use and where it comes from. From there you can:
+
+- **apply a preset** to the prize pool. When the pool is unknown, the preset applies to
+  buy-in × entries, with any knockout bounty taken out;
+- **paste the lobby's payouts**, first place first. Put one place per line, in which case
+  a leading rank (`1`, `#1`, `1st`, `1.`) is skipped and the last number of each line is read,
+  so `1st  $1,250.00`, `1 500.00` or `2: 30%` all work and a decimal comma is fine. A single
+  labelled line such as `1st $45.00` is one paid place. Or put them on one line separated by spaces, commas or semicolons,
+  with decimal points. The places are either all prizes in currency units, or all
+  percentages of the prize pool adding up to 100 (`parse_structure`, `store_entered`);
+- **forget the stored structure**, to go back to the imported results.
+
+The hand is priced again as soon as the structure changes.
 
 `TourneyPayouts` is a feature table: databases from before it get it on connection,
 with no `DB_VERSION` bump. Amounts are in hundredths, like fpdb's winnings.

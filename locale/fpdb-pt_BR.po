@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-26 19:35+0100\n"
+"POT-Creation-Date: 2026-10-27 08:48+0100\n"
 "PO-Revision-Date: 2011-07-27 15:17+0000\n"
 "Last-Translator: pkpkpkdo <ofelipedbzgt@hotmail.com>\n"
 "Language-Team: Portuguese (Brazilian) (http://www.transifex.net/projects/p/"
@@ -2090,6 +2090,10 @@ msgid "End"
 msgstr "Fim"
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "Enter or apply this tournament's payout structure, for ICM"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
 msgid "FPDB Hand Replayer"
 msgstr "Replayer de mãos FPDB"
@@ -2118,6 +2122,10 @@ msgstr "Próximo"
 #, fuzzy
 msgid "Next action"
 msgstr "Próxima ação"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "Payouts..."
+msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
@@ -2415,7 +2423,7 @@ msgstr "Faz a mesma pergunta duas vezes -- a sua e a do field -- lado a lado."
 msgid "Running…"
 msgstr "Executando…"
 
-#: fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/tourney_payouts_dialog.py
 msgid "Save"
 msgstr "Salvar"
 
@@ -4041,6 +4049,7 @@ msgid "Tools"
 msgstr "Ferramentas"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/tourney_payouts_dialog.py
 #, fuzzy
 msgid "Tournament"
 msgstr "Torneios"
@@ -6990,6 +6999,103 @@ msgstr ""
 "%s\n"
 "Deseja substituí-lo?"
 
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "%(title)s · %(entries)s entries · prize pool %(pool)s"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "10-max sit-and-go: 50 / 30 / 20"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "18-player sit-and-go: 40 / 30 / 20 / 10"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "6-max sit-and-go: 65 / 35"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "9-max sit-and-go: 50 / 30 / 20"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Apply to the prize pool"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Double or nothing: half the field paid"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+msgid "Forget the stored structure"
+msgstr "Estrutura de naipes do board"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Go back to the imported results, when they settle the payouts"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "In use: %(places)s %(currency)s (%(source)s)"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "No structure in use: %s"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy, python-format
+msgid "Not saved: %s"
+msgstr "Salvo"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid ""
+"One place per line (\"1st  $45.00\", \"2: 30%\"), or on one line: 45, 27, 18 "
+"or 50% 30% 20%"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Or paste the lobby's payouts, first place first:"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy, python-format
+msgid "Tournament #%s"
+msgstr "Torneios"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+#| msgid "Tournament Results"
+msgid "Tournament payouts"
+msgstr "Resultados de Torneios"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Winner takes all (heads-up, Spin & Go)"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "entered"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+msgid "from the imported results"
+msgstr "Mover os arquivos importados para:"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "preset: %s"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+msgid "unknown"
+msgstr "Sala desconhecida"
+
 #: fpdb_3_legacy/tracker_migration.py
 msgid ""
 "Choose that folder below: fpdb reads those files as they are, room by room."
@@ -8157,9 +8263,6 @@ msgstr ""
 
 #~ msgid "To cancel just close this tab."
 #~ msgstr "Para cancelar apenas feche esta aba"
-
-#~ msgid "Tournament Results"
-#~ msgstr "Resultados de Torneios"
 
 #~ msgid "Tournament Results Import"
 #~ msgstr "Importar Tournament Results"

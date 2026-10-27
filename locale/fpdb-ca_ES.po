@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-26 19:35+0100\n"
+"POT-Creation-Date: 2026-10-27 08:48+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -2109,6 +2109,10 @@ msgid "End"
 msgstr "Final"
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "Enter or apply this tournament's payout structure, for ICM"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
 msgid "FPDB Hand Replayer"
 msgstr "Reproductor de mans FPDB"
@@ -2137,6 +2141,10 @@ msgstr "Següent"
 #, fuzzy
 msgid "Next action"
 msgstr "Acció següent"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "Payouts..."
+msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
@@ -2439,7 +2447,7 @@ msgstr ""
 msgid "Running…"
 msgstr "Executant…"
 
-#: fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/tourney_payouts_dialog.py
 #, fuzzy
 msgid "Save"
 msgstr "Desa"
@@ -4071,6 +4079,7 @@ msgid "Tools"
 msgstr "Eines"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/tourney_payouts_dialog.py
 #, fuzzy
 msgid "Tournament"
 msgstr "Tornei"
@@ -7046,6 +7055,102 @@ msgstr ""
 "El fitxer ja existeix:\n"
 "%s\n"
 "Voleu substituir-lo?"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "%(title)s · %(entries)s entries · prize pool %(pool)s"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "10-max sit-and-go: 50 / 30 / 20"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "18-player sit-and-go: 40 / 30 / 20 / 10"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "6-max sit-and-go: 65 / 35"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "9-max sit-and-go: 50 / 30 / 20"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Apply to the prize pool"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Double or nothing: half the field paid"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+msgid "Forget the stored structure"
+msgstr "Estructura de pals del board"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Go back to the imported results, when they settle the payouts"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "In use: %(places)s %(currency)s (%(source)s)"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "No structure in use: %s"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy, python-format
+msgid "Not saved: %s"
+msgstr "Desat"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid ""
+"One place per line (\"1st  $45.00\", \"2: 30%\"), or on one line: 45, 27, 18 "
+"or 50% 30% 20%"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Or paste the lobby's payouts, first place first:"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy, python-format
+msgid "Tournament #%s"
+msgstr "Tornei"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+msgid "Tournament payouts"
+msgstr "Tornei"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Winner takes all (heads-up, Spin & Go)"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "entered"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+msgid "from the imported results"
+msgstr "Mou els fitxers importats a:"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "preset: %s"
+msgstr ""
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, fuzzy
+msgid "unknown"
+msgstr "Sala desconeguda"
 
 #: fpdb_3_legacy/tracker_migration.py
 msgid ""

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-26 19:35+0100\n"
+"POT-Creation-Date: 2026-10-27 08:48+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -1808,6 +1808,10 @@ msgstr "Jeu de cartes :"
 msgid "End"
 msgstr "Fin"
 
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "Enter or apply this tournament's payout structure, for ICM"
+msgstr "Saisir ou appliquer la structure de gains de ce tournoi, pour l'ICM"
+
 # --- Vague 2: replayer, auto-notes workbench, HUD popups ---
 #: fpdb_3_legacy/GuiReplayer.py
 msgid "FPDB Hand Replayer"
@@ -1834,6 +1838,10 @@ msgstr "Suiv."
 #: fpdb_3_legacy/GuiReplayer.py
 msgid "Next action"
 msgstr "Action suivante"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "Payouts..."
+msgstr "Gains..."
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid "Play"
@@ -2086,7 +2094,7 @@ msgstr ""
 msgid "Running…"
 msgstr "En cours…"
 
-#: fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/tourney_payouts_dialog.py
 msgid "Save"
 msgstr "Enregistrer"
 
@@ -3506,6 +3514,7 @@ msgid "Tools"
 msgstr "Outils"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/tourney_payouts_dialog.py
 msgid "Tournament"
 msgstr "Tournoi"
 
@@ -5972,6 +5981,98 @@ msgstr ""
 "%s\n"
 "Voulez-vous le remplacer ?"
 
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "%(title)s · %(entries)s entries · prize pool %(pool)s"
+msgstr "%(title)s · %(entries)s inscrits · prize pool %(pool)s"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "10-max sit-and-go: 50 / 30 / 20"
+msgstr "Sit-and-go 10 joueurs : 50 / 30 / 20"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "18-player sit-and-go: 40 / 30 / 20 / 10"
+msgstr "Sit-and-go 18 joueurs : 40 / 30 / 20 / 10"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "6-max sit-and-go: 65 / 35"
+msgstr "Sit-and-go 6 joueurs : 65 / 35"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "9-max sit-and-go: 50 / 30 / 20"
+msgstr "Sit-and-go 9 joueurs : 50 / 30 / 20"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Apply to the prize pool"
+msgstr "Appliquer au prize pool"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Double or nothing: half the field paid"
+msgstr "Double or nothing : la moitié du field payée"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Forget the stored structure"
+msgstr "Oublier la structure enregistrée"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Go back to the imported results, when they settle the payouts"
+msgstr "Revenir aux résultats importés, quand ils fixent les gains"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "In use: %(places)s %(currency)s (%(source)s)"
+msgstr "Utilisée : %(places)s %(currency)s (%(source)s)"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "No structure in use: %s"
+msgstr "Aucune structure utilisée : %s"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "Not saved: %s"
+msgstr "Non enregistré : %s"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid ""
+"One place per line (\"1st  $45.00\", \"2: 30%\"), or on one line: 45, 27, 18 "
+"or 50% 30% 20%"
+msgstr "Une place par ligne (« 1st  45,00 $ », « 2: 30% »), ou sur une ligne : 45, 27, 18 ou 50% 30% 20%"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Or paste the lobby's payouts, first place first:"
+msgstr "Ou collez les gains du lobby, première place en premier :"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "Tournament #%s"
+msgstr "Tournoi n°%s"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Tournament payouts"
+msgstr "Gains du tournoi"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "Winner takes all (heads-up, Spin & Go)"
+msgstr "Le vainqueur prend tout (heads-up, Spin & Go)"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "entered"
+msgstr "saisie"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "from the imported results"
+msgstr "d'après les résultats importés"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+#, python-format
+msgid "preset: %s"
+msgstr "préréglage : %s"
+
+#: fpdb_3_legacy/tourney_payouts_dialog.py
+msgid "unknown"
+msgstr "inconnu"
+
 #: fpdb_3_legacy/tracker_migration.py
 msgid ""
 "Choose that folder below: fpdb reads those files as they are, room by room."
@@ -6804,9 +6905,6 @@ msgstr ""
 
 #~ msgid "Error:"
 #~ msgstr "Erreur:"
-
-#~ msgid "Errors: %s"
-#~ msgstr "Erreurs: %s"
 
 #, fuzzy
 #~ msgid ""
@@ -7914,9 +8012,6 @@ msgstr ""
 
 #~ msgid "Too many deadlocks - failed to store hand"
 #~ msgstr "Trop de deadlocks - échec du stockage de la main"
-
-#~ msgid "Tournament Results"
-#~ msgstr "Résultats de tournois"
 
 #~ msgid "Tournament Results Import"
 #~ msgstr "Importation des Résultats de tournois"
