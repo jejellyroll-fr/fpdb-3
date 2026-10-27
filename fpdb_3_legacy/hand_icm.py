@@ -35,7 +35,7 @@ from typing import Any
 from fpdb_3_legacy import icm
 from fpdb_3_legacy.icm import AllInOutcome, ICMError
 
-__all__ = ["AllInIcm", "HandIcm", "hand_allin_icm", "icm_for_replay"]
+__all__ = ["AllInIcm", "HandIcm", "hand_allin_icm", "icm_for_replay", "icm_with_payouts"]
 
 # Monte Carlo samples when the engine does not enumerate; as the replayer's own equity.
 _ITERATIONS = 20_000
@@ -240,8 +240,18 @@ def icm_for_replay(db: Any, hand: Any, hand_id: int | None) -> HandIcm:
     lookup = tourney_payouts.payouts_for_hand(db, hand_id)
     if lookup.payouts is None:
         return HandIcm(None, lookup.reason)
-    field_size = tourney_payouts.field_size_for_hand(db, hand_id)
+    return icm_with_payouts(hand, lookup.payouts.as_money(), tourney_payouts.field_size_for_hand(db, hand_id))
+
+
+def icm_with_payouts(
+    hand: Any,
+    payouts: Sequence[float],
+    field_size: int | None,
+    *,
+    equity_fn: Callable[..., Any] | None = None,
+) -> HandIcm:
+    """Price ``hand`` with its tournament's ``payouts`` (money) once the field is known to fit the table."""
     max_seats = int(getattr(hand, "maxseats", 0) or 0)
     if field_size is not None and max_seats and field_size > max_seats:
         return HandIcm(None, "multi-table tournament: the other tables' stacks are unknown")
-    return hand_allin_icm(hand, lookup.payouts.as_money(), table_only=field_size is None)
+    return hand_allin_icm(hand, payouts, table_only=field_size is None, equity_fn=equity_fn)

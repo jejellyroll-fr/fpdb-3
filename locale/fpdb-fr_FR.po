@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 08:48+0100\n"
+"POT-Creation-Date: 2026-10-27 18:15+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -2340,6 +2340,23 @@ msgstr "{minutes} min"
 #: fpdb_3_legacy/GuiTourHandViewer.py
 msgid "Load Hands"
 msgstr "Charger les mains"
+
+#: fpdb_3_legacy/GuiTourneyGraphViewer.py
+msgid "ICM $EV-adjusted line"
+msgstr "Courbe ajustée à l'ICM $EV"
+
+#: fpdb_3_legacy/GuiTourneyGraphViewer.py
+#, python-format
+msgid "ICM $EV-adjusted: %(total)s | %(priced)s of %(allins)s all-ins priced"
+msgstr "Ajusté à l'ICM $EV : %(total)s | %(priced)s all-ins chiffrés sur %(allins)s"
+
+#: fpdb_3_legacy/GuiTourneyGraphViewer.py
+msgid ""
+"The results with the luck of every priced all-in taken out, in prize equity. "
+"Slower: each all-in hand is rebuilt and priced."
+msgstr ""
+"Les résultats sans la chance de chaque all-in chiffré, en équité de prix. "
+"Plus lent : chaque main à tapis est reconstruite et chiffrée."
 
 #: fpdb_3_legacy/GuiTourneyPlayerStats.py
 msgid "Refresh Stats"
@@ -6037,7 +6054,9 @@ msgstr "Non enregistré : %s"
 msgid ""
 "One place per line (\"1st  $45.00\", \"2: 30%\"), or on one line: 45, 27, 18 "
 "or 50% 30% 20%"
-msgstr "Une place par ligne (« 1st  45,00 $ », « 2: 30% »), ou sur une ligne : 45, 27, 18 ou 50% 30% 20%"
+msgstr ""
+"Une place par ligne (« 1st  45,00 $ », « 2: 30% »), ou sur une ligne : 45, "
+"27, 18 ou 50% 30% 20%"
 
 #: fpdb_3_legacy/tourney_payouts_dialog.py
 msgid "Or paste the lobby's payouts, first place first:"
