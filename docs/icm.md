@@ -33,8 +33,9 @@ the structure in use and where it comes from. From there you can:
 - **apply a preset** to the prize pool. When the pool is unknown, the preset applies to
   buy-in × entries, with any knockout bounty taken out;
 - **paste the lobby's payouts**, first place first. Put one place per line, in which case
-  the last number of each line is read, so `1st  $1,250.00` or `2: 30%` both work and a
-  decimal comma is fine. Or put them on one line separated by spaces, commas or semicolons,
+  a leading rank (`1`, `#1`, `1st`, `1.`) is skipped and the last number of each line is read,
+  so `1st  $1,250.00`, `1 500.00` or `2: 30%` all work and a decimal comma is fine. A single
+  labelled line such as `1st $45.00` is one paid place. Or put them on one line separated by spaces, commas or semicolons,
   with decimal points. The places are either all prizes in currency units, or all
   percentages of the prize pool adding up to 100 (`parse_structure`, `store_entered`);
 - **forget the stored structure**, to go back to the imported results.

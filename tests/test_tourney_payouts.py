@@ -272,8 +272,24 @@ def test_a_database_from_before_the_table_gets_it_on_connection(fresh_db) -> Non
         ("1st  $1,250.00\n2nd  $750.00\n", (125000, 75000)),  # a lobby's table, thousands separator
         ("1: 45,50\n2: 27,30", (4550, 2730)),  # a decimal comma, one place per line
         ("1 250\n750", (125000, 75000)),
+        # Codex (#629): bare ranks before three-digit prizes are ranks, not thousands.
+        ("1 500.00\n2 300.00\n3 200.00", (50000, 30000, 20000)),
+        ("1. 1 250,00 €\n2. 750,00 €", (125000, 75000)),
+        # Codex (#629): one labelled place is a winner-take-all, not two places.
+        ("1st $45.00", (4500,)),
+        ("1er 45 €", (4500,)),
     ],
-    ids=["commas", "semicolons", "lobby-lines", "decimal-comma", "space-thousands"],
+    ids=[
+        "commas",
+        "semicolons",
+        "lobby-lines",
+        "decimal-comma",
+        "space-thousands",
+        "bare-ranks",
+        "ranks-and-thousands",
+        "one-labelled-place",
+        "one-french-place",
+    ],
 )
 def test_pasted_prizes_are_read_in_hundredths(text, amounts) -> None:
     assert payouts.parse_structure(text) == payouts.EnteredStructure(amounts=amounts)
@@ -295,8 +311,9 @@ def test_pasted_percentages_are_shares_of_the_pool() -> None:
         ("45.555", "two decimals"),
         ("0 0", "pays anything"),
         ("first\nsecond", "no amount"),
+        ("1st 50% 2nd 30% 3rd 20%", "one place per line"),
     ],
-    ids=["empty", "mixed", "percent-sum", "decimals", "nothing-paid", "no-number"],
+    ids=["empty", "mixed", "percent-sum", "decimals", "nothing-paid", "no-number", "labels-on-one-line"],
 )
 def test_what_is_not_a_structure_is_refused_with_why(text, why) -> None:
     with pytest.raises(ValueError, match=why):

@@ -262,13 +262,43 @@ _NUMBER = re.compile(r"(\d+(?:[.,]\d+)?)\s*(%?)")
 _THOUSANDS = re.compile(r"(?<=\d)[, \u00a0\u202f](?=\d{3}(?!\d))")
 
 
+# A line's leading rank: "1", "#1", "1st", "1er", "1.", "1:", "1)", followed by more digits.
+_RANK = re.compile(r"^\s*(#?)(\d+)(?![\d.,]\d)\s*(st|nd|rd|th|er|re|ème|e|º|°|[.:)\-–])?\s*(?=\D*\d)", re.IGNORECASE)
+
+
+def _rank(line: str) -> tuple[int, str, bool] | None:
+    """The line's leading rank, what follows it, and whether a label ("#", "st", ":") marks it as one."""
+    match = _RANK.match(line)
+    if match is None:
+        return None
+    return int(match.group(2)), line[match.end() :], bool(match.group(1) or match.group(3))
+
+
+def _without_ranks(lines: list[str]) -> list[str]:
+    """The lines without their ranks, when every line starts with its own: 1, 2, 3...
+
+    Codex (#629): the rank goes first, or the thousands cleanup reads "1 500.00"
+    as 1500.
+    """
+    ranks = [_rank(line) for line in lines]
+    if any(rank is None for rank in ranks) or [rank[0] for rank in ranks if rank] != list(range(1, len(lines) + 1)):
+        return lines
+    return [rank[1] for rank in ranks if rank]
+
+
 def _places(text: str) -> list[tuple[str, str]]:
     """Each place's number and percent sign, as typed: one place per line, or all on one line."""
     lines = [line for line in text.splitlines() if line.strip()]
-    if len(lines) == 1:
+    first = _rank(lines[0]) if len(lines) == 1 else None
+    if first is not None and first[2] and first[0] == 1:
+        # Codex (#629): "1st $45.00" is one place that pays, not two.
+        if len(_NUMBER.findall(_THOUSANDS.sub("", first[1]))) > 1:
+            raise ValueError("put one place per line when places are labelled")
+        items = [_THOUSANDS.sub("", first[1])]
+    elif len(lines) == 1:
         items = [item for item in re.split(r"[;,\s]+", lines[0]) if item]
     else:
-        items = [_THOUSANDS.sub("", line) for line in lines]
+        items = [_THOUSANDS.sub("", line) for line in _without_ranks(lines)]
     found = []
     for item in items:
         numbers = _NUMBER.findall(item)
