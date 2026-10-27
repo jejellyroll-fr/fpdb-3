@@ -206,12 +206,12 @@ class PokerStarsSummary(TourneySummary):
     re_xls_tourney_info["Qualified"] = re.compile(r"(?P<WONTICKET>\*\\\/\*)?")
 
     re_player_stars = re.compile(
-        r"""(?P<RANK>[,.0-9]+):\s(?P<NAME>.+?)(\s\[(?P<ENTRYID>\d+)\])?\s\(.+?\),(\s)?((?P<CUR>\[{LS}]?)(?P<WINNINGS>[,.0-9]+)(\s(?P<CUR1>(FPP|SC)))?)?(?P<STILLPLAYING>still\splaying)?((?P<TICKET>Tournament\sTicket)\s\(WSOP\sStep\s(?P<LEVEL>\d)\))?(?P<QUALIFIED>\s\(qualified\sfor\sthe\starget\stournament\)|Sunday\sMillion\s(ticket|biļete))?(\s+)?""".format(
+        r"""(?P<RANK>[,.0-9]+):\s(?P<NAME>.+?)(\s\[(?P<ENTRYID>\d+)\])?\s\(.+?\),(\s)?((?P<CUR>(?:{LS})?)(?P<WINNINGS>[,.0-9]+)(\s(?P<CUR1>(FPP|SC)))?)?(?P<STILLPLAYING>still\splaying)?((?P<TICKET>Tournament\sTicket)\s\(WSOP\sStep\s(?P<LEVEL>\d)\))?(?P<QUALIFIED>\s\(qualified\sfor\sthe\starget\stournament\)|Sunday\sMillion\s(ticket|biļete))?(\s+)?""".format(
             **substitutions,
         ),
     )
     re_player_rio = re.compile(
-        r"""(?P<RANK>[,.0-9]+):\s(?P<NAME>[^,]+?)(,\s(?P<CUR>\[{LS}])(?P<WINNINGS>[,.0-9]+))?(\s+)?$""".format(
+        r"""(?P<RANK>[,.0-9]+):\s(?P<NAME>[^,]+?)(,\s(?P<CUR>(?:{LS}))(?P<WINNINGS>[,.0-9]+))?(\s+)?$""".format(
             **substitutions,
         ),
         re.MULTILINE,
