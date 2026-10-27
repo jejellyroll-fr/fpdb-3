@@ -27,6 +27,7 @@ __all__ = [
     "PayoutsLookup",
     "apply_preset",
     "clear_payouts",
+    "field_size_for_hand",
     "from_results",
     "payouts_for_hand",
     "payouts_for_tourney",
@@ -252,6 +253,14 @@ def payouts_for_hand(db: Any, hand_id: int) -> PayoutsLookup:
     if not rows or rows[0][0] is None:
         return PayoutsLookup(None, "not a tournament hand")
     return payouts_for_tourney(db, int(rows[0][0]))
+
+
+def field_size_for_hand(db: Any, hand_id: int) -> int | None:
+    """How many entered the tournament ``hand_id`` was played in, when known."""
+    rows = _query(db, "selectHandTourneyId", (hand_id,))
+    if not rows or rows[0][0] is None:
+        return None
+    return _facts(db, int(rows[0][0])).entries
 
 
 def preset_shares(preset: str, entries: int) -> Mapping[int, Fraction]:

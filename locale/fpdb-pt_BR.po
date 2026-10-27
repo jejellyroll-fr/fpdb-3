@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 12:48+0200\n"
+"POT-Creation-Date: 2026-10-26 19:35+0100\n"
 "PO-Revision-Date: 2011-07-27 15:17+0000\n"
 "Last-Translator: pkpkpkdo <ofelipedbzgt@hotmail.com>\n"
 "Language-Team: Portuguese (Brazilian) (http://www.transifex.net/projects/p/"
@@ -2061,6 +2061,10 @@ msgid "Window"
 msgstr "Janela"
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "(this table taken as the whole field)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
 msgid "Card deck"
 msgstr "Baralho"
@@ -2094,6 +2098,16 @@ msgstr "Replayer de mãos FPDB"
 #, fuzzy
 msgid "Hide Cards"
 msgstr "Cartas Escondidas"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "ICM $EV %(ev)s · result %(result)s · chip EV %(chips)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "ICM: %s"
+msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy

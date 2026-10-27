@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 12:48+0200\n"
+"POT-Creation-Date: 2026-10-26 19:35+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -2011,6 +2011,10 @@ msgid "Window"
 msgstr "ウィンドウ"
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "(this table taken as the whole field)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
 msgid "Card deck"
 msgstr "カードデッキ"
@@ -2044,6 +2048,16 @@ msgstr "FPDB ハンドリプレイヤー"
 #, fuzzy
 msgid "Hide Cards"
 msgstr "カードを隠す"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "ICM $EV %(ev)s · result %(result)s · chip EV %(chips)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "ICM: %s"
+msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy

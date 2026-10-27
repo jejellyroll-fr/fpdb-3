@@ -266,6 +266,7 @@ jobs:
           fpdb_3_legacy/icm.py
           fpdb_3_legacy/tourney_payouts.py
           fpdb_3_legacy/sql_schema_tourney_payouts.py
+          fpdb_3_legacy/hand_icm.py
           tests/test_draw_starting_hand.py
           tests/qt/test_empty_data_popups.py
           tests/test_leak_detector.py

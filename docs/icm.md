@@ -3,8 +3,8 @@
 The Independent Chip Model turns tournament chips into prize equity. fpdb uses the
 Malmuth-Harville form: a player finishes first with probability *their stack / all chips
 in play*, and each later place is drawn the same way among the players still in. The
-engine is `fpdb_3_legacy/icm.py`. Showing ICM in the application is the rest of #446:
-ICM $EV in the replayer and the AoF analysis, and an ICM line in the tournament graph.
+engine is `fpdb_3_legacy/icm.py`. What remains of #446 is the AoF analysis and an ICM line in
+the tournament graph.
 
 ## Where a tournament's payouts come from
 
@@ -30,6 +30,34 @@ with no `DB_VERSION` bump. Amounts are in hundredths, like fpdb's winnings.
 Two summary-import bugs currently keep some results from settling a structure: dollar
 winnings read as 0 (#624), and a PokerStars.EU SnG stored with the wrong buy-in and
 prize pool (#625).
+
+## A hand's all-in, in the replayer
+
+`fpdb_3_legacy/hand_icm.py` prices a tournament hand's all-in. The replayer shows the result
+under its summary as soon as the hero is all-in. For each of the two players, it computes:
+
+- **equity** when the money went in, on the board known at that street: wins, losses and
+  ties, with a split pot as its own outcome;
+- **chip EV**: that equity's share of the pot, less what the player put in, as the import's
+  `allInEV` computes it;
+- **ICM $EV**: the prize equity expected after the hand, less the prize equity the stacks
+  held when it began;
+- **ICM result**: the prize equity the hand actually moved. $EV and result therefore read
+  side by side, like chip EV and winnings.
+
+A hand is only priced when its numbers are sound; otherwise the replayer says why:
+
+- **heads-up only**: a multiway all-in has side pots and more outcomes than this prices yet, and so does a side pot
+  one of the two cannot win (a short stack all-in, then a deeper player folding);
+- **flop games, one winner per pot**: stud and draw are outside the equity engine, and hi/lo
+  split pots are not priced yet;
+- **both hands shown**;
+- **a payout structure known** for the tournament (see above);
+- **every remaining player's stack**: the players at the table must be the whole field.
+  - A single-table tournament is priced as is.
+  - A field larger than the table is refused, because the other tables' stacks are unknown.
+  - When the field size is unknown (no summary imported), the hand is priced and the line
+    says that this table was taken as the whole field.
 
 ## What the engine computes
 
