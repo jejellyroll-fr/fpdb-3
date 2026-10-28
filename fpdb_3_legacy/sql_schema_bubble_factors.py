@@ -55,7 +55,8 @@ _QUERIES = {
                         JOIN Hands h ON h.id = hp.handId
                         JOIN Players pl ON pl.id = hp.playerId
                         WHERE h.tourneyId = %s""",
-    "selectTourneyPreflopDecisions": """SELECT si.handId, si.actionNo, pl.name, si.facingPlayer FROM HandsSituations si
+    "selectTourneyPreflopDecisions": """SELECT si.handId, si.actionNo, pl.name, si.facingPlayer, si.response
+                        FROM HandsSituations si
                         JOIN Hands h ON h.id = si.handId
                         JOIN Players pl ON pl.id = si.playerId
                         WHERE h.tourneyId = %s AND si.streetName = 'preflop'

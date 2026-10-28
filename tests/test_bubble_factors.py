@@ -26,24 +26,40 @@ STACKS = {"Hero": 4000.0, "Villain": 3000.0, "Short": 1000.0}
 
 
 def test_a_decision_facing_an_action_is_priced_against_its_author() -> None:
-    priced = decision_bubble_factors(STACKS, [(1, "Hero", None), (2, "Villain", "Hero")], PAYOUTS)
+    priced = decision_bubble_factors(STACKS, [(1, "Hero", None, "raise"), (2, "Villain", "Hero", "call")], PAYOUTS)
 
     action_no, opponent, stored = priced[1]
     assert (action_no, opponent) == (2, "Hero")
     assert stored == round(icm.bubble_factor(STACKS, PAYOUTS, "Villain", "Hero") * 100)
 
 
-def test_first_in_is_priced_against_the_most_expensive_player_left_to_act() -> None:
-    priced = decision_bubble_factors(STACKS, [(1, "Hero", None), (2, "Villain", "Hero"), (3, "Short", "Hero")], PAYOUTS)
+def test_first_in_is_priced_against_the_most_expensive_live_player() -> None:
+    decisions = [(1, "Hero", None, "raise"), (2, "Villain", "Hero", "call"), (3, "Short", "Hero", "fold")]
+
+    priced = decision_bubble_factors(STACKS, decisions, PAYOUTS)
 
     factors = {name: icm.bubble_factor(STACKS, PAYOUTS, "Hero", name) for name in ("Villain", "Short")}
     worst = max(factors, key=factors.__getitem__)
     assert priced[0] == (1, worst, round(factors[worst] * 100))
 
 
+def test_a_shove_over_a_limp_is_priced_against_the_limper() -> None:
+    # Codex (#631): the small blind limps, the big blind shoves; the limper can still call.
+    stacks = {"SB": 3000.0, "BB": 4000.0, "Short": 1000.0}
+    decisions = [(1, "Short", None, "fold"), (2, "SB", None, "call"), (3, "BB", None, "raise"), (4, "SB", "BB", "fold")]
+
+    priced = {
+        action_no: (opponent, stored)
+        for action_no, opponent, stored in decision_bubble_factors(stacks, decisions, PAYOUTS)
+    }
+
+    assert priced[3] == ("SB", round(icm.bubble_factor(stacks, PAYOUTS, "BB", "SB") * 100))  # Short folded first
+    assert priced[2] == ("BB", round(icm.bubble_factor(stacks, PAYOUTS, "SB", "BB") * 100))
+
+
 def test_a_decision_with_nobody_left_or_no_chips_is_not_priced() -> None:
     priced = decision_bubble_factors(
-        {"Hero": 4000.0, "Villain": 0.0}, [(1, "Hero", None), (2, "Villain", "Hero")], PAYOUTS
+        {"Hero": 4000.0, "Villain": 0.0}, [(1, "Hero", None, "raise"), (2, "Villain", "Hero", "fold")], PAYOUTS
     )
 
     assert priced == []  # Hero has no opponent with chips, Villain has none to put in
@@ -51,7 +67,9 @@ def test_a_decision_with_nobody_left_or_no_chips_is_not_priced() -> None:
 
 def test_an_all_in_that_gains_nothing_is_stored_at_the_cap() -> None:
     # Two left, both paid the same: winning gains nothing, the factor is infinite.
-    priced = decision_bubble_factors({"A": 1000.0, "B": 1000.0}, [(1, "A", None), (2, "B", "A")], [10.0, 10.0])
+    priced = decision_bubble_factors(
+        {"A": 1000.0, "B": 1000.0}, [(1, "A", None, "raise"), (2, "B", "A", "call")], [10.0, 10.0]
+    )
 
     assert [stored for _no, _opponent, stored in priced] == [BUBBLE_FACTOR_CAP, BUBBLE_FACTOR_CAP]
 

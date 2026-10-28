@@ -107,8 +107,9 @@ an all-in risks than it wins. It comes from the stacks at the start of the hand,
 priced against one opponent:
 
 - **facing an action**: the player who made it (the shover, the opener);
-- **first in**: whoever is still to act and makes the all-in most expensive, that is,
-  the highest factor among them.
+- **otherwise** (first in, or over limpers): the live player who makes the all-in most
+  expensive, that is, the highest factor among everyone who has not folded yet, limpers
+  included.
 
 The bands are: 1.2 or less (close to chip EV), 1.2–1.5, 1.5–2, 2–3, 3 and over, and
 *not known*.

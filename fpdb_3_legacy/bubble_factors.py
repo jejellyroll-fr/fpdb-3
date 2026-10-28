@@ -15,8 +15,9 @@ Each preflop decision is priced against one opponent, from the stacks at the
 start of the hand:
 
 - facing an action, the player who made it (the shover, the opener...);
-- first in, the player still to act who makes the all-in most expensive: the
-  highest factor among them.
+- otherwise (first in, or over limpers), the live player who makes the all-in
+  most expensive: the highest factor among everyone dealt in who has not
+  folded yet, limpers included.
 
 The rows are derived data, replaced a tournament at a time by
 :func:`refresh_tourney` whenever its hands, its results or its structure change.
@@ -35,14 +36,31 @@ __all__ = ["decision_bubble_factors", "refresh_all", "refresh_tourney", "refresh
 
 log = get_logger("bubble_factors")
 
-# (action number, player, the player they faced or None)
-Decision = tuple[int, str, str | None]
+# (action number, player, the player they faced or None, their response: "fold", "call"...)
+Decision = tuple[int, str, str | None, str]
 
 
 def _stored(factor: float) -> int:
     if factor != factor or factor * BUBBLE_FACTOR_SCALE >= BUBBLE_FACTOR_CAP:  # NaN, inf or huge
         return BUBBLE_FACTOR_CAP
     return max(1, round(factor * BUBBLE_FACTOR_SCALE))
+
+
+def _worst_opponent(
+    stacks: Mapping[str, float], payouts: Sequence[float], player: str, opponents: Iterable[str]
+) -> tuple[float, str] | None:
+    """The opponent against whom an all-in costs ``player`` the most, and that factor."""
+    worst: tuple[float, str] | None = None
+    for opponent in opponents:
+        if opponent == player or stacks.get(opponent, 0) <= 0:
+            continue
+        try:
+            factor = icm.bubble_factor(stacks, payouts, player, opponent)
+        except icm.ICMError:
+            continue
+        if worst is None or factor > worst[0]:
+            worst = (factor, opponent)
+    return worst
 
 
 def decision_bubble_factors(
@@ -54,29 +72,19 @@ def decision_bubble_factors(
 
     ``decisions`` are in action order. A decision without a priceable opponent is left out.
     """
-    first_act: dict[str, int] = {}
-    for action_no, player, _faced in decisions:
-        first_act.setdefault(player, action_no)
+    folded_at: dict[str, int] = {}
+    for action_no, player, _faced, response in decisions:
+        if response == "fold":
+            folded_at.setdefault(player, action_no)
     priced = []
-    for action_no, player, faced in decisions:
+    for action_no, player, faced, _response in decisions:
         if stacks.get(player, 0) <= 0:
             continue
-        if faced:
-            opponents = [faced]
-        else:
-            opponents = [name for name, first in first_act.items() if first > action_no and name != player]
-        best: tuple[float, str] | None = None
-        for opponent in opponents:
-            if opponent == player or stacks.get(opponent, 0) <= 0:
-                continue
-            try:
-                factor = icm.bubble_factor(stacks, payouts, player, opponent)
-            except icm.ICMError:
-                continue
-            if best is None or factor > best[0]:
-                best = (factor, opponent)
-        if best is not None:
-            priced.append((action_no, best[1], _stored(best[0])))
+        # Codex (#631): unraised, a limper has acted already and can still call a shove.
+        live = [name for name in stacks if folded_at.get(name, action_no + 1) > action_no]
+        worst = _worst_opponent(stacks, payouts, player, [faced] if faced else live)
+        if worst is not None:
+            priced.append((action_no, worst[1], _stored(worst[0])))
     return priced
 
 
@@ -110,8 +118,10 @@ def refresh_tourney(db: Any, tourney_id: int) -> int:
         for hand_id, name, start in _rows(db, "selectTourneyStartStacks", (tourney_id,)):
             stacks.setdefault(int(hand_id), {})[str(name)] = float(start or 0)
         decisions: dict[int, list[Decision]] = {}
-        for hand_id, action_no, name, faced in _rows(db, "selectTourneyPreflopDecisions", (tourney_id,)):
-            decisions.setdefault(int(hand_id), []).append((int(action_no), str(name), str(faced) if faced else None))
+        for hand_id, action_no, name, faced, response in _rows(db, "selectTourneyPreflopDecisions", (tourney_id,)):
+            decisions.setdefault(int(hand_id), []).append(
+                (int(action_no), str(name), str(faced) if faced else None, str(response or ""))
+            )
         insert = db.sql.query["insertActionBubbleFactor"]
         for hand_id, hand_decisions in decisions.items():
             for action_no, opponent, factor in decision_bubble_factors(
