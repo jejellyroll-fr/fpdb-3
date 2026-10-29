@@ -1220,6 +1220,7 @@ class DatabaseSchemaMixin:
         self.ensure_hudcache_columns()
         self.ensure_handsplayers_columns()
         self.ensure_hands_columns()
+        self.ensure_tourneysplayers_columns()
         self.ensure_handsactions_columns()
 
     def _get_table_columns(self, table: str) -> set[str]:
@@ -1261,6 +1262,10 @@ class DatabaseSchemaMixin:
             "splashPot": "INT DEFAULT 0",
         }
         self._ensure_table_columns("Hands", definitions)
+
+    def ensure_tourneysplayers_columns(self) -> None:
+        """Add the bounty money column (#447) to TourneysPlayers of databases created by older code."""
+        self._ensure_table_columns("TourneysPlayers", {"koWinnings": "BIGINT"})
 
     def ensure_handsactions_columns(self) -> None:
         """Add missing normalized action-event columns for databases created by older code.

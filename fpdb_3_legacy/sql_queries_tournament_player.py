@@ -31,15 +31,16 @@ def tournament_player_detailed_queries(db_server: str) -> dict[str, str]:
                         ,SUM(CASE WHEN tp.`rank` = 1 THEN 1 ELSE 0 END)                         AS _1st
                         ,SUM(CASE WHEN tp.`rank` = 2 THEN 1 ELSE 0 END)                         AS _2nd
                         ,SUM(CASE WHEN tp.`rank` = 3 THEN 1 ELSE 0 END)                         AS _3rd
-                        ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0))/100.0              AS won
+                        ,SUM(tp.winnings+COALESCE(tp.koWinnings,tp.koCount*tt.koBounty,0))/100.0              AS won
+                        ,SUM(COALESCE(tp.koWinnings,tp.koCount*tt.koBounty,0))/100.0              AS bounties
                         ,SUM(CASE
                                WHEN tt.currency = 'play' THEN tt.buyIn
                                ELSE (tt.buyIn+tt.fee)/100.0
                              END)                                                               AS spent
-                        ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS net
-                        ,100.0 * SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee)
+                        ,SUM(tp.winnings+COALESCE(tp.koWinnings,tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS net
+                        ,100.0 * SUM(tp.winnings+COALESCE(tp.koWinnings,tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee)
                          / NULLIF(SUM(tt.buyin+tt.fee), 0)                                  AS roi
-                        ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0
+                        ,SUM(tp.winnings+COALESCE(tp.koWinnings,tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0
                          / NULLIF(COUNT(1)-SUM(CASE WHEN tp.`rank` > 0 THEN 0 ELSE 1 END), 0) AS profitPerTourney
                   from TourneysPlayers tp
                        inner join Tourneys t        on  (t.id = tp.tourneyId)
@@ -78,15 +79,16 @@ def tournament_player_detailed_queries(db_server: str) -> dict[str, str]:
                         ,SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END)                              AS "_1st"
                         ,SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END)                              AS "_2nd"
                         ,SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END)                              AS "_3rd"
-                        ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0))/100.0              AS "won"
+                        ,SUM(tp.winnings+COALESCE(tp.koWinnings,tp.koCount*tt.koBounty,0))/100.0              AS "won"
+                        ,SUM(COALESCE(tp.koWinnings,tp.koCount*tt.koBounty,0))/100.0              AS "bounties"
                         ,SUM(CASE
                                WHEN tt.currency = 'play' THEN tt.buyIn
                                ELSE (tt.buyIn+tt.fee)/100.0
                              END)                                                               AS "spent"
-                        ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS "net"
-                        ,100.0 * SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee)
+                        ,SUM(tp.winnings+COALESCE(tp.koWinnings,tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS "net"
+                        ,100.0 * SUM(tp.winnings+COALESCE(tp.koWinnings,tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee)
                          / NULLIF(SUM(tt.buyin+tt.fee), 0)                                  AS "roi"
-                        ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0
+                        ,SUM(tp.winnings+COALESCE(tp.koWinnings,tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0
                          / NULLIF(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END), 0)  AS "profitPerTourney"
                   from TourneysPlayers tp
                        inner join Tourneys t        on  (t.id = tp.tourneyId)
@@ -126,15 +128,16 @@ def tournament_player_detailed_queries(db_server: str) -> dict[str, str]:
                         ,SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END)                              AS _1st
                         ,SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END)                              AS _2nd
                         ,SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END)                              AS _3rd
-                        ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0))/100.0              AS won
+                        ,SUM(tp.winnings+COALESCE(tp.koWinnings,tp.koCount*tt.koBounty,0))/100.0              AS won
+                        ,SUM(COALESCE(tp.koWinnings,tp.koCount*tt.koBounty,0))/100.0              AS bounties
                         ,SUM(CASE
                                WHEN tt.currency = 'play' THEN tt.buyIn
                                ELSE (tt.buyIn+tt.fee)/100.0
                              END)                                                               AS spent
-                        ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS net
-                        ,100.0 * SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee)
+                        ,SUM(tp.winnings+COALESCE(tp.koWinnings,tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS net
+                        ,100.0 * SUM(tp.winnings+COALESCE(tp.koWinnings,tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee)
                          / NULLIF(SUM(tt.buyin+tt.fee), 0)                                  AS roi
-                        ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0
+                        ,SUM(tp.winnings+COALESCE(tp.koWinnings,tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0
                          / NULLIF(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END), 0)  AS profitPerTourney
                   from TourneysPlayers tp
                        inner join Tourneys t        on  (t.id = tp.tourneyId)
