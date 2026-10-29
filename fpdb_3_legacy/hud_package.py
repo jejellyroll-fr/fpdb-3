@@ -197,10 +197,7 @@ def merge_package_panel_rules(
     # A user-created global section governs every profile. Adding a package's
     # scoped rules beside it would silently change the global panel behavior.
     # Preserve it; package-scoped sections may still coexist with each other.
-    if any(
-        not node.getAttribute("profile").strip() and not _is_panel_rule_placeholder(node)
-        for node in existing
-    ):
+    if any(not node.getAttribute("profile").strip() and not _is_panel_rule_placeholder(node) for node in existing):
         return False
     changed = False
     names = profile_names or {}
@@ -209,7 +206,8 @@ def merge_package_panel_rules(
         _repoint_panel_rule_profile(imported, names)
         imported_scope = imported.getAttribute("profile").strip().casefold()
         matching = [
-            node for node in existing
+            node
+            for node in existing
             if node.getAttribute("profile").strip().casefold() == imported_scope
             and not _is_panel_rule_placeholder(node)
         ]
@@ -382,3 +380,60 @@ def upgrade_legacy_popup_presentation(
     if _direct_children(target, "pu_stat"):
         target.appendChild(config_doc.createTextNode("\n    "))
     return True
+
+
+def package_problems(root: Any) -> list[str]:
+    """Why the ``<fpdb_hud_package>`` element *root* cannot be installed, or ``[]`` (#449).
+
+    The checks a shared package must pass before anything is written: it is a
+    package, every profile has a name, every grid has one cell per position,
+    every stat it names exists, and every popup it opens is defined in it or
+    in the shipped library. A stat or a popup that does not resolve would be a
+    permanently empty cell, so the package is refused with the names instead.
+    """
+    if getattr(root, "tagName", "") != "fpdb_hud_package":
+        return ["the root element must be <fpdb_hud_package>"]
+    profiles = _direct_children(root, "ss")
+    if not profiles:
+        return ["the package holds no HUD profile (<ss>)"]
+    problems = [
+        f"profile {position} has no name"
+        for position, profile in enumerate(profiles, 1)
+        if not profile.getAttribute("name")
+    ]
+    for profile in profiles:
+        for grid in _direct_children(profile, "block") or [profile]:
+            where = grid.getAttribute("name") or grid.getAttribute("label") or profile.getAttribute("name")
+            try:
+                rows, cols = int(grid.getAttribute("rows")), int(grid.getAttribute("cols"))
+            except ValueError:
+                problems.append(f"{where}: rows and cols must be numbers")
+                continue
+            cells = grid.getElementsByTagName("stat")
+            if len(cells) != rows * cols:
+                problems.append(f"{where}: {len(cells)} cells for a {rows}x{cols} grid")
+
+    from fpdb_3_legacy import Stats, popup_packs  # noqa: PLC0415 - the stat catalogue is heavy
+
+    known = frozenset(Stats.get_valid_stats())
+    named = {cell.getAttribute("_stat_name") for cell in root.getElementsByTagName("stat")}
+    named |= {
+        row.getAttribute("pu_stat_name")
+        for row in root.getElementsByTagName("pu_stat")
+        # A navigation row's "stat" is the text it shows, not a statistic.
+        if not row.getAttribute("pu_stat_submenu")
+    }
+    unknown = sorted(name for name in named if name not in known)
+    if unknown:
+        problems.append(f"unknown stat(s): {', '.join(unknown)}")
+
+    library = popup_packs.load_default_registry()
+    available = {node.getAttribute("pu_name") for node in root.getElementsByTagName("pu")}
+    for pack in library.names():
+        available |= set(library.packs[pack].nodes)
+    opened = {cell.getAttribute("popup") for cell in root.getElementsByTagName("stat") if cell.getAttribute("popup")}
+    opened |= {row.getAttribute("pu_stat_submenu") for row in root.getElementsByTagName("pu_stat")} - {""}
+    missing = sorted(opened - available)
+    if missing:
+        problems.append(f"popup(s) neither in the package nor in the shipped library: {', '.join(missing)}")
+    return problems
