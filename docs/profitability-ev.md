@@ -139,7 +139,8 @@ than its chip EV. When the hero is all-in heads-up in a knockout tournament hand
 replayer adds a **bounty line** above the ICM line (`fpdb_3_legacy/hand_bounty.py`).
 
 - **The bounty at stake.** A player collects the opponent's bounty by winning only if that
-  busts the opponent: the player covers them, and the opponent has put in every chip. A
+  busts the opponent, that is when the opponent has put in every chip, antes and blinds
+  included. The pot is a single one, so its winner takes everything they had left. A
   split pot busts nobody. An all-in that cannot bust the opponent reads "winning does not
   bust your opponent".
 - **How it is paid.**

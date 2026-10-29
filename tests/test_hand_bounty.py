@@ -46,6 +46,50 @@ def test_a_progressive_bounty_is_half_cash_half_added_to_the_winner_s_own(tmp_pa
     assert allin.bounty_ev["Villain"] == 0
 
 
+# Codex (#633): Villain starts with 3000, posts a 200 ante, then puts the other 2800 in
+# against Hero's 2800. Hero's stack is the smaller one, yet winning busts Villain.
+ANTE = """PokerStars Hand #200000000301: Tournament #3000000301, $4.40+$5.00+$0.60 USD Hold'em No Limit - Level V (100/200) - 2026/10/26 12:00:00 ET
+Table '3000000301 1' 9-max Seat #1 is the button
+Seat 1: Hero (2800 in chips, $5 bounty)
+Seat 3: Villain (3000 in chips, $7.50 bounty)
+Seat 5: Short (1000 in chips, $5 bounty)
+Villain: posts the ante 200
+Villain: posts small blind 100
+Short: posts big blind 200
+*** HOLE CARDS ***
+Dealt to Hero [As Ks]
+Hero: raises 2600 to 2800 and is all-in
+Villain: calls 2700 and is all-in
+Short: folds
+*** FLOP *** [2c 7d 9h]
+*** TURN *** [2c 7d 9h] [Jc]
+*** RIVER *** [2c 7d 9h Jc] [3s]
+*** SHOW DOWN ***
+Hero: shows [As Ks] (high card Ace)
+Villain: shows [Qh Qd] (a pair of Queens)
+Villain collected 6000 from pot
+*** SUMMARY ***
+Total pot 6000 | Rake 0
+Board [2c 7d 9h Jc 3s]
+Seat 1: Hero (button) showed [As Ks] and lost with high card Ace
+Seat 3: Villain (small blind) showed [Qh Qd] and won (6000) with a pair of Queens
+Seat 5: Short (big blind) folded before Flop
+
+
+
+"""
+
+
+def test_a_shorter_stack_still_busts_an_opponent_whose_ante_left_them_all_in(tmp_path) -> None:
+    hand, _ = parse(tmp_path, ANTE)
+
+    allin = hand_allin_bounty(hand, BountyRules(), equity_fn=EQUITY).allin
+
+    assert allin is not None
+    assert allin.collects["Hero"] == Decimal("7.50")  # Villain's whole stack is in the pot
+    assert allin.collects["Villain"] == Decimal("5")  # and so is Hero's
+
+
 def test_a_regular_knockout_pays_its_fixed_bounty_in_cash(tmp_path) -> None:
     hand, _ = parse(tmp_path, KNOCKOUT)
 

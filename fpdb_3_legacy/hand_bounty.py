@@ -3,9 +3,10 @@
 In a knockout tournament, busting a player pays their bounty, so an all-in's
 value is not only its chip EV. For a heads-up all-in this gives each player:
 
-- the bounty they collect by winning: the opponent's, if winning busts them
-  (the player covers the opponent, who has put in every chip). A split pot
-  busts nobody;
+- the bounty they collect by winning: the opponent's, if winning busts them,
+  that is when the opponent has put every chip in, antes and blinds included.
+  The pot is a single one (a side pot is refused), so whoever wins it then
+  takes all the opponent has left. A split pot busts nobody;
 - how it is paid. A regular knockout pays it all in cash. A progressive one
   (PKO) pays half in cash and adds the other half to the winner's own bounty,
   as PokerStars does. PokerStars prints each seat's bounty only in progressive
@@ -99,7 +100,9 @@ def hand_allin_bounty(
     win = {a: allin.win[0], b: allin.win[1]}
     collects: dict[str, Decimal] = {}
     for player, opponent in ((a, b), (b, a)):
-        busts = allin.committed[opponent] >= allin.start[opponent] and allin.start[player] >= allin.start[opponent]
+        # Codex (#633): coverage is what the opponent put in, forced bets included, not the
+        # starting stacks: a 3,000 stack posting a 200 ante is busted by a 2,800 one.
+        busts = allin.committed[opponent] >= allin.start[opponent]
         if not busts:
             collects[player] = Decimal(0)
             continue
