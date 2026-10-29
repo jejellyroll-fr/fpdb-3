@@ -164,6 +164,7 @@ _KIND_OF_ENGINE_KIND: Final = {
     "range_pct": "range",
     "bool": "bool",
     "hero": "bool",
+    "bool_lenient": "bool",  # Codex (#635): the knockout filter is a yes/no choice, not free text
     "null_check": "bool",
     "label": "set",
     "flagset": "flags",

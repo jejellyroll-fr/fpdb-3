@@ -702,7 +702,9 @@ DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
     "game_base": ("G.base", ("G",)),
     "limit": ("G.limitType", ("G",)),
     "tournament": ("H.tourneyId", ("H",)),
-    "knockout": ("TT.knockout", ("TT",)),
+    # Codex (#635): the same two groups as the lenient filter, so a drill-down opens the hands
+    # it counted: 1 for a knockout, 0 for everything else, an unset flag and cash included.
+    "knockout": ("CASE WHEN TT.knockout THEN 1 ELSE 0 END", ("TT",)),
     "session": ("H.sessionId", ("H",)),
     # Qualified with the fact alias: ``facingSizingBp`` exists on the situation
     # table too, so an unqualified reference is ambiguous once it is joined.

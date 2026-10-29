@@ -80,3 +80,27 @@ def test_the_player_report_keeps_one_format(two_sngs) -> None:
     (knockout,) = report("knockout")
     (freezeout,) = report("freezeout")
     assert knockout["knockout"] and not freezeout["knockout"]
+
+
+def test_the_research_browser_offers_a_yes_or_no_choice() -> None:
+    # Codex (#635): a free-text field turned "No" into a truthy string, selecting knockouts.
+    from fpdb_3_legacy.research_browser import FILTER_SPECS
+
+    (spec,) = (spec for spec in FILTER_SPECS if spec.name == "knockout")
+    assert spec.value_kind == "bool"
+
+
+def test_each_breakdown_group_drills_into_the_hands_it_counts(two_sngs) -> None:
+    # Codex (#635): a type whose knockout flag was never read is not a knockout, in the
+    # breakdown as in the filter, so its hands sit in one group and come back with it.
+    two_sngs.get_cursor().execute("UPDATE TourneyTypes SET knockout = NULL WHERE knockout = 0")
+    two_sngs.commit()
+    from fpdb_3_legacy.research_browser import drill_query
+
+    grouped = Query(metric="opportunities", filters={"tournament": True}, group_by=["knockout"])
+    rows = run_query(two_sngs, grouped).rows
+
+    assert sorted(row.group["knockout"] for row in rows) == [0, 1]
+    for row in rows:
+        drilled = drill_query(grouped, row.group, numerator_only=False)
+        assert decisions(two_sngs, **drilled.filters) == row.opportunities
