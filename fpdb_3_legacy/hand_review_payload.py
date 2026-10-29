@@ -291,12 +291,10 @@ class HandReview:
             }
             for street in self.streets
         ]
-        entry["hero_decisions"] = [
-            {"street": street.name, "index": action.index}
-            for street in self.streets
-            for action in street.actions
-            if action.is_hero
-        ]
+        # Each hero decision with its spot, which a study tool solves (#448).
+        from fpdb_3_legacy.hand_review_spots import decision_spots
+
+        entry["hero_decisions"] = decision_spots(self)
         return entry
 
     def _action_payload(self, action: ReviewAction) -> dict[str, Any]:
@@ -873,12 +871,16 @@ def full_review_document(
     generated_at: str = "",
     skipped: Sequence[dict[str, Any]] = (),
 ) -> dict[str, Any]:
-    """The whole-hand document (version 2, #448), for one hand or many."""
+    """The whole-hand document (version 2, #448), for one hand or many, its decisions grouped by spot."""
+    from fpdb_3_legacy.hand_review_spots import spot_groups
+
+    reviews = list(reviews)
     document: dict[str, Any] = {
         "version": FULL_VERSION,
         "schema": FULL_SCHEMA,
         "source": SOURCE,
         "hands": [review.to_full_payload() for review in reviews],
+        "spots": spot_groups(reviews),
     }
     if skipped:
         document["skipped"] = list(skipped)

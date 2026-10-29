@@ -170,6 +170,7 @@ third-party tool can read:
   "schema": "fpdb-3/hand-review",
   "source": "fpdb-3",
   "hands": [ { ... one hand ... } ],
+  "spots": [ {"spot", "count", "decisions"} ],
   "skipped": [ {"hand", "code", "message"} ]
 }
 ```
@@ -191,7 +192,7 @@ A hand keeps every version 1 field except the preflop-only `actions`,
 | --- | --- |
 | `board` | Every board card dealt, concatenated (`Kc7h2sJd`). |
 | `streets` | One entry per street played, `PREFLOP` first; a street dealt with nobody left to act (after an all-in) is listed with no actions. |
-| `hero_decisions` | The hero's turns, as `{"street", "index"}` into that street's `actions`. |
+| `hero_decisions` | The hero's turns, as `{"street", "index", "spot"}`: `index` into that street's `actions`, `spot` as below. |
 
 Each street:
 
@@ -209,6 +210,27 @@ PreflopAdvisor's spelling, where a bet is a `Raise` and an all-in raise is `AllI
 Each action also has `size_pct_pot`: a bet as a share of the pot it went into, a
 raise's increment over the bet it faced as a share of the pot once that bet is
 called (so a pot-sized raise is 100), `null` for folds, checks and calls.
+
+### Spots
+
+A study tool solves a spot, not a hand. Each hero decision names its spot
+(`fpdb_3_legacy/hand_review_spots.py`), read from the document itself, so a hand
+parsed from a file and one read back from the database name it the same:
+
+| Field | Meaning |
+| --- | --- |
+| `game`, `table_size` | The game (`NL`, `PLO`…) and the players dealt in: a solver solves one game at one table size, so these are never mixed in a spot. |
+| `street` | The decision's street. |
+| `pot_type` | `unopened`, `limped`, `single_raised`, `three_bet` or `four_bet_plus`: preflop, from the actions before the decision; later, from the whole preflop. These are the situation model's words. |
+| `hero`, `aggressor` | The hero's seat and the last preflop raiser's (`null` in a limped or unopened pot). |
+| `players` | Players still in as the street began. |
+| `spr` | The stack-to-pot band as the street began: the hero's stack capped by the deepest opponent's, over the pot (`under_1`, `1_to_2`, `2_to_4`, `4_to_7`, `7_to_13`, `13_plus`). `null` preflop. |
+| `board_rank`, `board_suits`, `board_pairing` | The board so far, in the research studies' board words (`king-high`, `rainbow`, `unpaired`…). `null` preflop. |
+
+The document's `spots` groups the hero decisions of every hand by spot, most
+frequent first: `{"spot", "count", "decisions"}`, each decision being
+`{"hand_id", "street", "index"}`. "My big blind against the button,
+single-raised, on the turn" is one entry, however many hands it comes from.
 
 Version 2 refuses everything version 1 refuses, and also:
 
