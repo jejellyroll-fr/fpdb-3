@@ -37,6 +37,7 @@ from dataclasses import dataclass, field
 from typing import Any, Final
 
 from .board_features import FLAG_BITS
+from .bubble_factor_buckets import bubble_factor_bucket_expression
 from .hand_state import BLOCKER_BITS, DRAW_BITS
 from .holdem_classes import class_ids as holdem_class_ids
 from .holdem_classes import holdem_class_expression
@@ -104,6 +105,15 @@ SOURCES: Final[dict[str, _Source]] = {
         "LEFT JOIN BoardFeatures BF ON BF.handId = A.handId AND BF.boardId = 1"
         " AND BF.streetName = SI.streetName",
         ("SI",),
+    ),
+    # A preflop tournament decision's bubble factor (#446), on the situation's key.
+    # Only decisions fpdb could price have a row: the join is LEFT and a missing
+    # row is the "not known" band, never a factor of 1.
+    "IB": _Source(
+        "IB",
+        "ActionBubbleFactors",
+        "LEFT JOIN ActionBubbleFactors IB ON IB.handId = A.handId AND IB.actionNo = A.actionNo",
+        ("A",),
     ),
 }
 
@@ -324,6 +334,8 @@ FILTERS: Final[dict[str, _Filter]] = {
     # The banded form of the same column: a panel groups by bands, a query
     # narrows by them, and both read the one CASE expression (#368).
     "spr_bucket": _Filter(spr_bucket_expression("A."), ("A",), "set"),
+    # What an all-in risks in prize equity, banded (#446): sit-and-go and Spin decisions only.
+    "bubble_factor_bucket": _Filter(bubble_factor_bucket_expression("IB."), ("IB",), "set"),
     "players_in_hand": _Filter("A.playersInHand", ("A",), "range"),
     "multiway": _Filter("SI.multiway", ("SI",), "bool"),
     # -- street / pot ------------------------------------------------------
@@ -671,6 +683,7 @@ DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
     "effective_stack_bucket": (stack_bucket_expression("A."), ("A",)),
     "spr": ("A.sprBefore", ("A",)),
     "spr_bucket": (spr_bucket_expression("A."), ("A",)),
+    "bubble_factor_bucket": (bubble_factor_bucket_expression("IB."), ("IB",)),
     "pot_type": ("SI.potType", ("SI",)),
     "role": ("SI.role", ("SI",)),
     "response": ("SI.response", ("SI",)),

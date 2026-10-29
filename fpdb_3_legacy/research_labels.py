@@ -45,6 +45,7 @@ from .board_features import (
     SUIT_STRUCTURES,
     TEXTURE_FLAGS,
 )
+from .bubble_factor_buckets import BUBBLE_FACTOR_BUCKETS, BUBBLE_FACTOR_LABELS
 from .hand_state import (
     BLOCKER_CATEGORIES,
     DRAW_CATEGORIES,
@@ -119,6 +120,7 @@ FILTER_LABELS: Final[dict[str, str]] = {
     "spr": N_("SPR"),
     "spr_bucket": N_("SPR band"),
     "effective_stack_bucket": N_("Stack depth band"),
+    "bubble_factor_bucket": N_("Bubble factor band"),
     "players_in_hand": N_("Players in the hand"),
     "multiway": N_("Multiway"),
     # -- street / pot -------------------------------------------------------
@@ -219,6 +221,9 @@ FILTER_DESCRIPTIONS: Final[dict[str, str]] = {
     "spr": N_("Stack-to-pot ratio before the action."),
     "spr_bucket": N_("The same ratio as the bands a player thinks in."),
     "effective_stack_bucket": N_("Effective stack in the bands a tournament is played in."),
+    "bubble_factor_bucket": N_(
+        "How much more prize equity an all-in risks than it wins (sit-and-gos and Spins with a known payout structure)."
+    ),
     "players_in_hand": N_("How many players were still in the hand."),
     "multiway": N_("Three or more players saw the decision."),
     "street": N_("Preflop, flop, turn or river."),
@@ -414,6 +419,11 @@ def _stack_depth_choices() -> tuple[Choice, ...]:
     return tuple(Choice(name, N_(STACK_DEPTH_LABELS[name])) for name in STACK_DEPTH_BUCKETS)
 
 
+def _bubble_factor_choices() -> tuple[Choice, ...]:
+    """The bubble factor bands, named from the module that also writes their SQL."""
+    return tuple(Choice(name, N_(BUBBLE_FACTOR_LABELS[name])) for name in BUBBLE_FACTOR_BUCKETS)
+
+
 def _spr_bucket_choices() -> tuple[Choice, ...]:
     """The SPR bands, named from the module that also writes their SQL."""
     return tuple(Choice(name, N_(SPR_BUCKET_LABELS[name])) for name in SPR_BUCKETS)
@@ -521,6 +531,7 @@ FILTER_CHOICES: Final[dict[str, tuple[Choice, ...]]] = {
     "facing_sizing_bucket": _bucket_choices(),
     "spr_bucket": _spr_bucket_choices(),
     "effective_stack_bucket": _stack_depth_choices(),
+    "bubble_factor_bucket": _bubble_factor_choices(),
 }
 
 # The human name of each engine filter group (``research_browser.FILTER_GROUPS``).
@@ -585,6 +596,7 @@ DIMENSION_LABELS: Final[dict[str, str]] = {
     "spr": N_("SPR"),
     "spr_bucket": N_("SPR band"),
     "effective_stack_bucket": N_("Stack depth band"),
+    "bubble_factor_bucket": N_("Bubble factor band"),
     "pot_type": N_("Pot type"),
     "role": N_("Role"),
     "response": N_("Response"),
@@ -652,6 +664,7 @@ DIMENSION_CHOICES: Final[dict[str, tuple[Choice, ...]]] = {
     "facing_sizing_bucket": _bucket_choices(),
     "spr_bucket": _spr_bucket_choices(),
     "effective_stack_bucket": _stack_depth_choices(),
+    "bubble_factor_bucket": _bubble_factor_choices(),
 }
 
 

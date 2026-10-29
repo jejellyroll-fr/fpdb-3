@@ -1174,6 +1174,7 @@ class DatabaseSchemaMixin:
             "createHandsSituationsTable",
             "createHandStatesTable",
             "createTourneyPayoutsTable",
+            "createActionBubbleFactorsTable",
         ):
             try:
                 c = self.get_cursor()
@@ -1193,6 +1194,7 @@ class DatabaseSchemaMixin:
             "addAofDecisionsRangeIndex",
             "addAofAnalysesDecisionIndex",
             "addAofAnalysesStatusIndex",
+            "addActionBubbleFactorsTourneyIndex",
             # The analytics fact-table indexes (#304). Best-effort like the
             # rest: a database that already has them rolls back and moves on.
             *ANALYTICS_INDEX_NAMES,
@@ -1470,6 +1472,7 @@ class DatabaseSchemaMixin:
         c.execute(self.sql.query["createTourneysTable"])
         c.execute(self.sql.query["createTourneysPlayersTable"])
         c.execute(self.sql.query["createTourneyPayoutsTable"])
+        c.execute(self.sql.query["createActionBubbleFactorsTable"])
         c.execute(self.sql.query["createSessionsCacheTable"])
         c.execute(self.sql.query["createTourneysCacheTable"])
         c.execute(self.sql.query["createHandsTable"])
@@ -1522,6 +1525,8 @@ class DatabaseSchemaMixin:
         c.execute(self.sql.query["addAofDecisionsRangeIndex"])
         c.execute(self.sql.query["addAofAnalysesDecisionIndex"])
         c.execute(self.sql.query["addAofAnalysesStatusIndex"])
+        if "addActionBubbleFactorsTourneyIndex" in self.sql.query:  # MySQL declares it in the table
+            c.execute(self.sql.query["addActionBubbleFactorsTourneyIndex"])
         c.execute(self.sql.query["addFilesIndex"])
         c.execute(self.sql.query["addTableNameIndex"])
         c.execute(self.sql.query["addPlayerNameIndex"])

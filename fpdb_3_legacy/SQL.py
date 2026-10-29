@@ -41,6 +41,7 @@ from fpdb_3_legacy.sql_queries_tournament_player import tournament_player_detail
 from fpdb_3_legacy.sql_queries_utility import utility_queries
 from fpdb_3_legacy.sql_query_placeholders import finalize_query_placeholders
 from fpdb_3_legacy.sql_schema_aof import aof_schema_queries
+from fpdb_3_legacy.sql_schema_bubble_factors import bubble_factor_queries
 from fpdb_3_legacy.sql_schema_cards_cache import cards_cache_schema_queries
 from fpdb_3_legacy.sql_schema_core import core_schema_queries
 from fpdb_3_legacy.sql_schema_game import game_schema_queries
@@ -110,6 +111,7 @@ class Sql:
         self.query.update(session_cache_schema_queries(db_server))
         self.query.update(tournament_schema_queries(db_server))
         self.query.update(tourney_payout_queries(db_server))
+        self.query.update(bubble_factor_queries(db_server))
         self.query.update(tournament_cache_schema_queries(db_server))
         self.query.update(time_schema_queries(db_server))
         self.query.update(index_queries(db_server))

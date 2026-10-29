@@ -3,8 +3,8 @@
 The Independent Chip Model turns tournament chips into prize equity. fpdb uses the
 Malmuth-Harville form: a player finishes first with probability *their stack / all chips
 in play*, and each later place is drawn the same way among the players still in. The
-engine is `fpdb_3_legacy/icm.py`. What remains of #446 is a bubble factor column in the MTT
-study pack.
+engine is `fpdb_3_legacy/icm.py`. It prices a hand's all-in in the replayer, adds an ICM line to
+the tournament graph, and gives the tournament study pack a bubble factor band.
 
 The AoF analysis gets no ICM: All-in or Fold is a cash format in every room fpdb reads it
 from (GGPoker's AFO tables, CoinPoker's and KingsClub's AoF games), so its hands carry no
@@ -97,6 +97,41 @@ The option is off by default, because it rebuilds and prices every all-in hand o
 graph's tournaments. Each hand is priced once per payout structure while the tab is open.
 Equity is the replayer's Monte Carlo estimate (20,000 boards), so the line can move by a
 few cents between two runs.
+
+## Bubble factors in the study pack
+
+The tournament study pack's two all-in studies (facing an all-in, shove spots) have a
+**By bubble factor** panel, and `bubble_factor_bucket` is a filter and breakdown in the
+Research Browser. A preflop decision's bubble factor says how much more prize equity
+an all-in risks than it wins. It comes from the stacks at the start of the hand,
+priced against one opponent:
+
+- **facing an action**: the player who made it (the shover, the opener);
+- **otherwise** (first in, or over limpers): the live player who makes the all-in most
+  expensive, that is, the highest factor among everyone who has not folded yet, limpers
+  included.
+
+The bands are: 1.2 or less (close to chip EV), 1.2–1.5, 1.5–2, 2–3, 3 and over, and
+*not known*.
+
+Factors are stored only where fpdb knows every remaining stack and the structure:
+
+- the tournament's payout structure is known (see above);
+- its field size is known and fits at one table, as in a sit-and-go or a Spin.
+
+A multi-table tournament's other tables are not in the hand history, so its decisions
+read *not known*, as do postflop decisions and tournaments whose field size is unknown.
+In a knockout tournament the factor prices the prize pool only. A bounty won by busting
+a player is not counted, so the factor overstates what that all-in risks.
+
+`ActionBubbleFactors` holds the factors, keyed like `HandsSituations`. It is a feature
+table with derived rows, replaced a tournament at a time (`fpdb_3_legacy/bubble_factors.py`)
+whenever:
+
+- an import touches the tournament (hands or a summary);
+- the replayer's payouts dialog changes its structure;
+- `python tools/backfill_bubble_factors.py` runs. Run it once on a database imported before
+  this feature.
 
 ## What the engine computes
 
