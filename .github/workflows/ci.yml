@@ -270,6 +270,7 @@ jobs:
           fpdb_3_legacy/hand_bounty.py
           fpdb_3_legacy/tourney_format.py
           fpdb_3_legacy/stats_knockout.py
+          fpdb_3_legacy/hand_review_payload.py
           fpdb_3_legacy/tourney_payouts_dialog.py
           fpdb_3_legacy/tourney_icm_line.py
           fpdb_3_legacy/bubble_factors.py

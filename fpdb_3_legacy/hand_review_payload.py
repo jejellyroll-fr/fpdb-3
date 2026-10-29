@@ -85,6 +85,16 @@ AMBIGUOUS_POSITION: Final = "ambiguous_position"
 MISSING_PREFLOP: Final = "missing_preflop"
 UNSUPPORTED_ACTION: Final = "unsupported_action"
 NO_HERO_DECISION: Final = "no_hero_decision"
+UNSUPPORTED_BOARD: Final = "unsupported_board"
+
+#: The whole-hand document (#448): every street, for postflop study tools. Its
+#: own schema, so PreflopAdvisor's version 1 reader never meets it.
+FULL_SCHEMA: Final = "fpdb-3/hand-review"
+FULL_VERSION: Final = 2
+_POSTFLOP: Final = ("FLOP", "TURN", "RIVER")
+#: Version 2 names an action as it was played: PreflopAdvisor's version 1 calls a bet a raise,
+#: which preflop it always is, and an all-in its own action, which version 2 says in ``all_in``.
+_FULL_ACTION_NAMES: Final = {"folds": "Fold", "checks": "Check", "calls": "Call", "bets": "Bet", "raises": "Raise"}
 
 
 class HandReviewError(ValueError):
@@ -127,6 +137,8 @@ class ReviewAction:
     to_call: Decimal
     effective_stack: Decimal
     is_hero: bool
+    street: str = "PREFLOP"
+    raise_size: Decimal | None = None  # a raise's increment over the bet it faced (#448)
 
     @property
     def action(self) -> str:
@@ -138,6 +150,18 @@ class ReviewAction:
     @property
     def is_raise(self) -> bool:
         return self.kind in ("bets", "raises")
+
+
+@dataclass(frozen=True)
+class ReviewStreet:
+    """One street of the whole-hand document: what was dealt, what was in front of whom, what they did."""
+
+    name: str
+    cards: tuple[str, ...]  # dealt on this street
+    board: tuple[str, ...]  # the whole board so far
+    pot_start: Decimal
+    stacks_start: tuple[tuple[str, Decimal], ...]  # (position, behind) of each player still in
+    actions: tuple[ReviewAction, ...]
 
 
 @dataclass(frozen=True)
@@ -166,6 +190,7 @@ class HandReview:
     actions: tuple[ReviewAction, ...]
     selected_decision: int | None = None
     tournament: dict[str, Any] = field(default_factory=dict)
+    streets: tuple[ReviewStreet, ...] = ()  # the whole hand, for the version 2 document only
 
     @property
     def table_size(self) -> int:
@@ -244,6 +269,36 @@ class HandReview:
             "selected_decision": self.selected_decision,
         }
 
+    def to_full_payload(self) -> dict[str, Any]:
+        """The hand as one entry of the whole-hand (version 2) document's ``hands`` list."""
+        entry = self.to_payload()
+        for preflop_only in ("actions", "hero_decisions", "selected_decision"):
+            entry.pop(preflop_only)
+        board = self.streets[-1].board if self.streets else ()
+        entry["board"] = "".join(board)
+        entry["streets"] = [
+            {
+                "street": street.name,
+                "cards": "".join(street.cards),
+                "board": "".join(street.board),
+                "pot_start": _number(street.pot_start),
+                "pot_start_bb": self.bb(street.pot_start),
+                "stacks": [
+                    {"seat": position, "stack": _number(stack), "stack_bb": self.bb(stack)}
+                    for position, stack in street.stacks_start
+                ],
+                "actions": [self._action_payload(action) for action in street.actions],
+            }
+            for street in self.streets
+        ]
+        entry["hero_decisions"] = [
+            {"street": street.name, "index": action.index}
+            for street in self.streets
+            for action in street.actions
+            if action.is_hero
+        ]
+        return entry
+
     def _action_payload(self, action: ReviewAction) -> dict[str, Any]:
         entry: dict[str, Any] = {"seat": action.position, "action": action.action}
         # Given for calls too: PreflopAdvisor reads ``amount_bb`` as ``to_bb``
@@ -253,7 +308,7 @@ class HandReview:
         entry.update(
             {
                 "index": action.index,
-                "street": "PREFLOP",
+                "street": action.street,
                 "seat_no": action.seat_no,
                 "is_hero": action.is_hero,
                 "fpdb_action": action.kind,
@@ -269,6 +324,9 @@ class HandReview:
                 "effective_stack_bb": self.bb(action.effective_stack),
             }
         )
+        if self.streets:
+            entry["action"] = _FULL_ACTION_NAMES[action.kind]
+            entry["size_pct_pot"] = _size_pct_pot(action)
         return entry
 
 
@@ -382,6 +440,57 @@ def build_hand_review(
     return review.with_selected_decision(selected_decision) if selected_decision is not None else review
 
 
+def build_full_review(hand: Any, *, hero: str | None = None, fpdb_hand_id: int | None = None) -> HandReview:
+    """Describe the whole of *hand*, every street, for a postflop study tool (#448).
+
+    The preflop is :func:`build_hand_review`'s, with all its refusals; the later
+    streets are walked on from where it left the pot and the stacks. A board
+    the document cannot say as one board (run it twice), or a street whose
+    cards are missing, is refused rather than described approximately.
+
+    :raises HandReviewError: when the hand cannot be described reliably.
+    """
+    review = build_hand_review(hand, hero=hero, fpdb_hand_id=fpdb_hand_id)
+    if int(getattr(hand, "runItTimes", 0) or 0) >= 2:
+        raise HandReviewError(UNSUPPORTED_BOARD, "The board was run more than once; a review describes one board")
+    names = {int(player[0]): player[1] for player in hand.players}
+    position = {names[seat.seat_no]: seat.position for seat in review.seats}
+    seat_no = {names[seat.seat_no]: seat.seat_no for seat in review.seats}
+    stacks = {names[seat.seat_no]: seat.stack for seat in review.seats}
+    table = _Table(position, seat_no, review.hero_name, stacks)
+    table.post(list(hand.actions.get("BLINDSANTES", []) or []))
+    streets = [_street(table, "PREFLOP", (), (), [action for action in hand.actions.get("PREFLOP", []) or []])]
+    board: tuple[str, ...] = ()
+    for name in _POSTFLOP:
+        cards = tuple(str(card) for card in (getattr(hand, "board", {}) or {}).get(name, []) or [])
+        actions = list(hand.actions.get(name, []) or [])
+        if not cards and not actions:
+            break
+        if not cards:
+            raise HandReviewError(UNSUPPORTED_BOARD, f"Actions are recorded on the {name.lower()} but not its cards")
+        board += cards
+        table.new_street()
+        streets.append(_street(table, name, cards, board, actions))
+    return replace(review, streets=tuple(streets))
+
+
+def _street(table: _Table, name: str, cards: tuple[str, ...], board: tuple[str, ...], raw: list) -> ReviewStreet:
+    pot_start = table.pot
+    stacks = tuple((table.position[player], table.behind[player]) for player in table.in_hand())
+    # An EV cash-out (read back from the database on the street of the all-in) is not a decision.
+    actions = tuple(table.act(action, index, name) for index, action in enumerate(a for a in raw if a[1] != "cashout"))
+    return ReviewStreet(name, cards, board, pot_start, stacks, actions)
+
+
+def _size_pct_pot(action: ReviewAction) -> float | None:
+    """A bet as a share of the pot it went into; a raise's increment as a share of the pot after calling."""
+    if action.kind == "bets" and action.pot_before > 0:
+        return float(action.amount / action.pot_before * 100)
+    if action.kind == "raises" and action.raise_size is not None and action.pot_before + action.to_call > 0:
+        return float(action.raise_size / (action.pot_before + action.to_call) * 100)
+    return None
+
+
 def _game_of(category: str, limit_type: str) -> str:
     game = _GAMES.get((category, limit_type))
     if game is None:
@@ -480,6 +589,95 @@ def _acting_order(hand: Any, dealt: list[Any], small_blind: str, big_blind: str)
     return order
 
 
+class _Table:
+    """Who is in for what, what is behind and what the pot is, as a hand is walked through."""
+
+    def __init__(self, position: dict[str, str], seat_no: dict[str, int], hero: str, stacks: dict[str, Decimal]):
+        self.position = position
+        self.seat_no = seat_no
+        self.hero = hero
+        self.contributed: dict[str, Decimal] = dict.fromkeys(position, Decimal(0))
+        self.behind: dict[str, Decimal] = {player: stacks[player] for player in position}
+        self.folded: set[str] = set()
+        self.pot = Decimal(0)
+        self.level = Decimal(0)
+
+    def post(self, posts: Sequence[tuple]) -> None:
+        """The blinds and antes, before anyone acts."""
+        for post in posts:
+            if post[0] not in self.position:
+                # A tournament player sitting out still antes; counting them as
+                # dealt in or not would shift every position, so neither is done.
+                raise HandReviewError(AMBIGUOUS_POSITION, f"{post[0]} posts a {post[1]} but was not dealt in")
+            amount = _decimal(post[2])
+            self.pot += amount
+            self.behind[post[0]] -= amount
+            if post[1] != "ante":
+                self.contributed[post[0]] += amount
+        self.level = max(self.contributed.values(), default=Decimal(0))
+
+    def new_street(self) -> None:
+        """Bets start again from nothing; the pot and the stacks behind carry over.
+
+        A bet nobody matched (an all-in covered by a deeper stack, say) is returned
+        first: the next street's pot holds only what was matched.
+        """
+        contributions = sorted(self.contributed.values(), reverse=True)
+        if len(contributions) > 1 and contributions[0] > contributions[1]:
+            excess = contributions[0] - contributions[1]
+            top = max(self.contributed, key=self.contributed.__getitem__)
+            self.behind[top] += excess
+            self.pot -= excess
+        self.contributed = dict.fromkeys(self.position, Decimal(0))
+        self.level = Decimal(0)
+
+    def in_hand(self) -> list[str]:
+        return [player for player in self.position if player not in self.folded]
+
+    def act(self, raw: tuple, index: int, street: str) -> ReviewAction:
+        player, kind = raw[0], raw[1]
+        where = "preflop" if street == "PREFLOP" else f"on the {street.lower()}"
+        if player not in self.position:
+            raise HandReviewError(AMBIGUOUS_POSITION, f"{player} acts {where} but was not dealt in")
+        if player in self.folded:
+            raise HandReviewError(AMBIGUOUS_POSITION, f"{player} acts {where} after folding")
+        if kind not in _ACTIONS:
+            raise HandReviewError(UNSUPPORTED_ACTION, f"{player} {kind} {where}, which a review cannot describe")
+        before = self.contributed[player]
+        to_call = max(Decimal(0), self.level - before)
+        level = self.level
+        amount, to, all_in = _put_in(raw, before)
+        if amount < 0 or amount > self.behind[player]:
+            raise HandReviewError(
+                MISSING_STACKS, f"{player}'s action {where} puts in {amount}, which their stack does not cover"
+            )
+        opponents = [self.behind[other] for other in self.position if other != player and other not in self.folded]
+        effective = min(self.behind[player], max(opponents, default=self.behind[player]))
+        action = ReviewAction(
+            index=index,
+            position=self.position[player],
+            seat_no=self.seat_no[player],
+            kind=kind,
+            amount=amount,
+            to=to,
+            all_in=all_in,
+            pot_before=self.pot,
+            to_call=to_call,
+            effective_stack=effective,
+            is_hero=player == self.hero,
+            street=street,
+            raise_size=(to - level) if kind == "raises" and to is not None else None,
+        )
+        if to is not None:
+            self.contributed[player] = to
+            self.level = max(self.level, to)
+        if kind == "folds":
+            self.folded.add(player)
+        self.behind[player] -= amount
+        self.pot += amount
+        return action
+
+
 def _review_actions(
     preflop: Sequence[tuple],
     posts: Sequence[tuple],
@@ -489,61 +687,9 @@ def _review_actions(
     stacks: dict[str, Decimal],
 ) -> tuple[ReviewAction, ...]:
     """Walk the preflop, tracking who is in for what, what is behind and what the pot is."""
-    contributed: dict[str, Decimal] = dict.fromkeys(position, Decimal(0))
-    behind: dict[str, Decimal] = {player: stacks[player] for player in position}
-    folded: set[str] = set()
-    pot = Decimal(0)
-    for post in posts:
-        if post[0] not in position:
-            # A tournament player sitting out still antes; counting them as
-            # dealt in or not would shift every position, so neither is done.
-            raise HandReviewError(AMBIGUOUS_POSITION, f"{post[0]} posts a {post[1]} but was not dealt in")
-        amount = _decimal(post[2])
-        pot += amount
-        behind[post[0]] -= amount
-        if post[1] != "ante":
-            contributed[post[0]] += amount
-    level = max(contributed.values(), default=Decimal(0))
-
-    actions: list[ReviewAction] = []
-    for index, raw in enumerate(preflop):
-        player, kind = raw[0], raw[1]
-        if player not in position:
-            raise HandReviewError(AMBIGUOUS_POSITION, f"{player} acts preflop but was not dealt in")
-        if kind not in _ACTIONS:
-            raise HandReviewError(UNSUPPORTED_ACTION, f"{player} {kind} preflop, which a review cannot describe")
-        before = contributed[player]
-        to_call = max(Decimal(0), level - before)
-        amount, to, all_in = _put_in(raw, before)
-        if amount < 0 or amount > behind[player]:
-            raise HandReviewError(
-                MISSING_STACKS, f"{player}'s preflop action puts in {amount}, which their stack does not cover"
-            )
-        opponents = [behind[other] for other in position if other != player and other not in folded]
-        effective = min(behind[player], max(opponents, default=behind[player]))
-        actions.append(
-            ReviewAction(
-                index=index,
-                position=position[player],
-                seat_no=seat_no[player],
-                kind=kind,
-                amount=amount,
-                to=to,
-                all_in=all_in,
-                pot_before=pot,
-                to_call=to_call,
-                effective_stack=effective,
-                is_hero=player == hero,
-            )
-        )
-        if to is not None:
-            contributed[player] = to
-            level = max(level, to)
-        if kind == "folds":
-            folded.add(player)
-        behind[player] -= amount
-        pot += amount
-    return tuple(actions)
+    table = _Table(position, seat_no, hero, stacks)
+    table.post(posts)
+    return tuple(table.act(raw, index, "PREFLOP") for index, raw in enumerate(preflop))
 
 
 def _put_in(raw: tuple, before: Decimal) -> tuple[Decimal, Decimal | None, bool]:
@@ -678,17 +824,20 @@ def summary_lines(review: HandReview) -> list[str]:
     return lines
 
 
-def review_hands(hands: Iterable[Any], *, hero: str | None = None) -> tuple[list[HandReview], list[dict[str, Any]]]:
+def review_hands(
+    hands: Iterable[Any], *, hero: str | None = None, full: bool = False
+) -> tuple[list[HandReview], list[dict[str, Any]]]:
     """Describe many hands for a batch review; the ones refused say why.
 
     A refused hand is a ``{"hand", "code", "message"}`` entry rather than a
-    failure of the whole batch.
+    failure of the whole batch. *full* describes every street (#448).
     """
+    build = build_full_review if full else build_hand_review
     reviews: list[HandReview] = []
     skipped: list[dict[str, Any]] = []
     for hand in hands:
         try:
-            reviews.append(build_hand_review(hand, hero=hero))
+            reviews.append(build(hand, hero=hero))
         except HandReviewError as exc:
             ident = _stored_id(hand)
             label = (
@@ -710,6 +859,26 @@ def review_document(
         "schema": SCHEMA,
         "source": SOURCE,
         "hands": [review.to_payload() for review in reviews],
+    }
+    if skipped:
+        document["skipped"] = list(skipped)
+    if generated_at:
+        document["generated_at"] = generated_at
+    return document
+
+
+def full_review_document(
+    reviews: Iterable[HandReview],
+    *,
+    generated_at: str = "",
+    skipped: Sequence[dict[str, Any]] = (),
+) -> dict[str, Any]:
+    """The whole-hand document (version 2, #448), for one hand or many."""
+    document: dict[str, Any] = {
+        "version": FULL_VERSION,
+        "schema": FULL_SCHEMA,
+        "source": SOURCE,
+        "hands": [review.to_full_payload() for review in reviews],
     }
     if skipped:
         document["skipped"] = list(skipped)

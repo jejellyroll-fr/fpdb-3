@@ -157,6 +157,59 @@ sent with invented values (`HandReviewError.code`):
 | `missing_preflop`, `unsupported_action` | No preflop action recorded, or one a review cannot describe. |
 | `no_hero_decision` | The hero never acted preflop (a walk). |
 
+## The whole-hand document (version 2)
+
+Version 1 stops at the flop: it is what PreflopAdvisor reviews. Version 2 describes
+every street, for postflop study tools (#448). It is its own document, with its
+own schema, so a version 1 reader never meets it, and it is the stable format a
+third-party tool can read:
+
+```json
+{
+  "version": 2,
+  "schema": "fpdb-3/hand-review",
+  "source": "fpdb-3",
+  "hands": [ { ... one hand ... } ],
+  "skipped": [ {"hand", "code", "message"} ]
+}
+```
+
+Code: `build_full_review(hand)` describes one hand, `review_hands(hands, full=True)`
+many, and `full_review_document(reviews, skipped=...)` writes the document.
+
+A hand keeps every version 1 field except the preflop-only `actions`,
+`hero_decisions` and `selected_decision`, which are replaced by:
+
+| Field | Meaning |
+| --- | --- |
+| `board` | Every board card dealt, concatenated (`Kc7h2sJd`). |
+| `streets` | One entry per street played, `PREFLOP` first; a street dealt with nobody left to act (after an all-in) is listed with no actions. |
+| `hero_decisions` | The hero's turns, as `{"street", "index"}` into that street's `actions`. |
+
+Each street:
+
+| Field | Meaning |
+| --- | --- |
+| `street` | `PREFLOP`, `FLOP`, `TURN` or `RIVER`. |
+| `cards`, `board` | The cards dealt on this street, and the whole board so far. |
+| `pot_start`, `pot_start_bb` | The pot as the street begins: blinds and antes preflop. A bet nobody matched (an all-in covered by a deeper stack) has been returned. |
+| `stacks` | Each player still in: `{"seat", "stack", "stack_bb"}`, what they had behind as the street began. |
+| `actions` | The street's actions, each as in version 1 (`index`, `seat`, `amount`, `to`, `all_in`, `pot_before`, `to_call`, `effective_stack`…). |
+
+In version 2 an action is named as it was played: `Fold`, `Check`, `Call`, `Bet` or
+`Raise`, with `all_in` saying whether it put the seat all in. Version 1 keeps
+PreflopAdvisor's spelling, where a bet is a `Raise` and an all-in raise is `AllIn`.
+Each action also has `size_pct_pot`: a bet as a share of the pot it went into, a
+raise's increment over the bet it faced as a share of the pot once that bet is
+called (so a pot-sized raise is 100), `null` for folds, checks and calls.
+
+Version 2 refuses everything version 1 refuses, and also:
+
+| Code | When |
+| --- | --- |
+| `unsupported_board` | The board was run more than once, or a street records actions but not its cards. |
+| `ambiguous_position` | A player acts after folding. |
+
 ## Transport
 
 The document goes through a `HandReviewTransport` (`send(document) -> str`):
