@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 19:56+0100\n"
+"POT-Creation-Date: 2026-10-30 00:23+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1600,6 +1600,7 @@ msgid "Filter by Module:"
 msgstr ""
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
+#: fpdb_3_legacy/pack_gallery_dialog.py
 msgid "Refresh"
 msgstr ""
 
@@ -1631,7 +1632,7 @@ msgstr ""
 msgid "Import"
 msgstr ""
 
-#: fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/pack_gallery_dialog.py
 msgid "HUD"
 msgstr ""
 
@@ -3356,6 +3357,14 @@ msgstr ""
 msgid "Auto Notes Workbench"
 msgstr ""
 
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Get packs"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Install HUDs and stat packs shared by other players"
+msgstr ""
+
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/session_guard_dialog.py
 msgid "Session Guard"
 msgstr ""
@@ -3393,7 +3402,8 @@ msgstr ""
 msgid "Help Tab"
 msgstr ""
 
-#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/stat_packs_dialog.py
 msgid "Version"
 msgstr ""
 
@@ -4154,6 +4164,124 @@ msgid ""
 "Every popup a cell of this package opens, and everything those popups "
 "navigate to. A row ending in an arrow leaves the package for the shipped "
 "popup library."
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Installed"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Kind"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+msgid "Pack"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+msgid "Status"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+msgid "Stat pack"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+msgid "Restart fpdb and the HUD to use the change everywhere."
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Not installed"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Update available"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Needs a newer fpdb"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Install"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+msgid "Uninstall"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, python-format
+msgid "Gallery: %s"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, python-format
+msgid "The gallery could not be read: %s"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "The gallery could not be reached; showing the copy from the last visit."
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, python-format
+msgid "%d listed pack(s) are not shown because their entry is invalid."
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Update"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, python-format
+msgid "Author: %(author)s - Licence: %(license)s"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+msgid "Stats:"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Update HUD"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid ""
+"Updating replaces the profiles and popups this pack installed, with any "
+"change you made to them. Continue?"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+msgid "This pack cannot be installed:"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, python-format
+msgid "Installed %s."
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, python-format
+msgid "Updated %s."
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, python-format
+msgid "Uninstall %s?"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Uninstall pack"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "This pack cannot be uninstalled:"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, python-format
+msgid "Uninstalled %s."
 msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
@@ -5532,19 +5660,7 @@ msgid "Author"
 msgstr ""
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Pack"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
 msgid "Stats"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Status"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Restart fpdb and the HUD to use the change everywhere."
 msgstr ""
 
 #: fpdb_3_legacy/stat_packs_dialog.py
@@ -5566,10 +5682,6 @@ msgid "Disable"
 msgstr ""
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Uninstall"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
 msgid "Export..."
 msgstr ""
 
@@ -5579,10 +5691,6 @@ msgstr ""
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 msgid "This pack is not loaded:"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Stats:"
 msgstr ""
 
 #: fpdb_3_legacy/stat_packs_dialog.py
@@ -5598,10 +5706,6 @@ msgid "All files"
 msgstr ""
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Stat pack"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
 msgid "This pack is already installed. Replace it with this version?"
 msgstr ""
 
@@ -5610,15 +5714,6 @@ msgstr ""
 msgid ""
 "Could not read the pack:\n"
 "%s"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
-msgid "Installed %s."
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "This pack cannot be installed:"
 msgstr ""
 
 #: fpdb_3_legacy/stat_packs_dialog.py
@@ -5639,17 +5734,7 @@ msgid "Enabled %s."
 msgstr ""
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
-msgid "Uninstall %s?"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
 msgid "Uninstall stat pack"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, python-format
-msgid "Uninstalled %s."
 msgstr ""
 
 #: fpdb_3_legacy/stat_packs_dialog.py

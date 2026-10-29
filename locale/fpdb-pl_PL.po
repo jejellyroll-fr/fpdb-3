@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 19:56+0100\n"
+"POT-Creation-Date: 2026-10-30 00:23+0100\n"
 "PO-Revision-Date: 2011-10-08 08:58+0000\n"
 "Last-Translator: greg20 <greg20@hushmail.com>\n"
 "Language-Team: Polish (Poland) (http://www.transifex.net/projects/p/fpdb/"
@@ -1911,6 +1911,7 @@ msgid "Log Viewer"
 msgstr "Przeglądarka logów"
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
+#: fpdb_3_legacy/pack_gallery_dialog.py
 msgid "Refresh"
 msgstr "Odśwież"
 
@@ -1956,7 +1957,7 @@ msgstr "Typ pola"
 msgid "General"
 msgstr "Ogólne"
 
-#: fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/pack_gallery_dialog.py
 msgid "HUD"
 msgstr "HUD"
 
@@ -3879,6 +3880,11 @@ msgstr "Eksportuj całą bazę danych do pliku tekstowego (wolne)"
 msgid "From Another Tracker…"
 msgstr ""
 
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Get packs"
+msgstr "Pakiety statystyk"
+
 #: fpdb_3_legacy/menu_layout.py
 msgid "Graphs"
 msgstr "Wykresy"
@@ -3939,6 +3945,10 @@ msgid "Import, enable, disable, uninstall and export declarative stat packs"
 msgstr ""
 "Importuj, włączaj, wyłączaj, odinstalowuj i eksportuj deklaratywne pakiety "
 "statystyk"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Install HUDs and stat packs shared by other players"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -4087,7 +4097,8 @@ msgstr "Przeglądarka rozdań turniejowych"
 msgid "Tourney Stats"
 msgstr "Statystyki turniejów"
 
-#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Version"
 msgstr "Wersja"
@@ -5011,6 +5022,140 @@ msgstr ""
 #, fuzzy
 msgid "Reference HUD"
 msgstr "Ustawienia HUD-a"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, python-format
+msgid "%d listed pack(s) are not shown because their entry is invalid."
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, python-format
+msgid "Author: %(author)s - Licence: %(license)s"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, python-format
+msgid "Gallery: %s"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Install"
+msgstr "Odinstaluj"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Installed"
+msgstr "Zainstalowano %s."
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Installed %s."
+msgstr "Zainstalowano %s."
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Kind"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Needs a newer fpdb"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Not installed"
+msgstr "Zainstalowany przez użytkownika"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Pack"
+msgstr "Pakiet"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Restart fpdb and the HUD to use the change everywhere."
+msgstr "Uruchom ponownie fpdb i HUD, aby zmiana działała wszędzie."
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Stat pack"
+msgstr "Pakiet statystyk"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Stats:"
+msgstr "Statystyki:"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+msgid "Status"
+msgstr "Status"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "The gallery could not be reached; showing the copy from the last visit."
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy, python-format
+msgid "The gallery could not be read: %s"
+msgstr ""
+"Nie udało się wyświetlić tego rozdania:\n"
+"%s"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "This pack cannot be installed:"
+msgstr "Tego pakietu nie można zainstalować:"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "This pack cannot be uninstalled:"
+msgstr "Tego pakietu nie można zainstalować:"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Uninstall"
+msgstr "Odinstaluj"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Uninstall %s?"
+msgstr "Odinstalować %s?"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Uninstall pack"
+msgstr "Odinstaluj pakiet statystyk"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Uninstalled %s."
+msgstr "Odinstalowano %s."
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Update"
+msgstr "Zaktualizuj regułę"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Update HUD"
+msgstr "Zaktualizuj regułę"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Update available"
+msgstr "Odśwież podgląd"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy, python-format
+msgid "Updated %s."
+msgstr "Zapisano"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid ""
+"Updating replaces the profiles and popups this pack installed, with any "
+"change you made to them. Continue?"
+msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
@@ -6765,11 +6910,6 @@ msgid "Import stat pack"
 msgstr "Importuj pakiet statystyk"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy, python-format
-msgid "Installed %s."
-msgstr "Zainstalowano %s."
-
-#: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Invalid"
 msgstr "Nieprawidłowy"
@@ -6778,21 +6918,6 @@ msgstr "Nieprawidłowy"
 #, fuzzy
 msgid "Location:"
 msgstr "Pozycja"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "Pack"
-msgstr "Pakiet"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "Restart fpdb and the HUD to use the change everywhere."
-msgstr "Uruchom ponownie fpdb i HUD, aby zmiana działała wszędzie."
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "Stat pack"
-msgstr "Pakiet statystyk"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
@@ -6805,15 +6930,6 @@ msgid "Stats"
 msgstr "Statystyki"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "Stats:"
-msgstr "Statystyki:"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Status"
-msgstr "Status"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy, python-format
 msgid ""
 "The pack state was not changed:\n"
@@ -6821,11 +6937,6 @@ msgid ""
 msgstr ""
 "Stan pakietu nie został zmieniony:\n"
 "%s"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "This pack cannot be installed:"
-msgstr "Tego pakietu nie można zainstalować:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
@@ -6839,23 +6950,8 @@ msgstr "Ten pakiet nie jest wczytany:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-msgid "Uninstall"
-msgstr "Odinstaluj"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy, python-format
-msgid "Uninstall %s?"
-msgstr "Odinstalować %s?"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
 msgid "Uninstall stat pack"
 msgstr "Odinstaluj pakiet statystyk"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy, python-format
-msgid "Uninstalled %s."
-msgstr "Odinstalowano %s."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy

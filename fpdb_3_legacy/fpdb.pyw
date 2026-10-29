@@ -476,6 +476,12 @@ class fpdb(QMainWindow):
 
         open_stat_packs(self)
 
+    def dia_get_packs(self, widget=None, data=None) -> None:
+        """Tools ▸ Get packs: install HUDs and stat packs from the pack gallery (#449)."""
+        from fpdb_3_legacy.pack_gallery_dialog import open_pack_gallery
+
+        open_pack_gallery(self.config, self)
+
     def dia_convert_pt4hud(self, widget=None, data=None) -> None:
         """Configure ▸ Convert PT4 HUD to .fpdbhud: a layout as a package, untranslated stats listed (#614)."""
         from fpdb_3_legacy.pt4hud_dialogs import convert_to_package

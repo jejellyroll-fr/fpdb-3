@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 19:56+0100\n"
+"POT-Creation-Date: 2026-10-30 00:23+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -1912,6 +1912,7 @@ msgid "Log Viewer"
 msgstr "Napló böngésző"
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
+#: fpdb_3_legacy/pack_gallery_dialog.py
 msgid "Refresh"
 msgstr "Frissítés"
 
@@ -1955,7 +1956,7 @@ msgstr "Mező típusa"
 msgid "General"
 msgstr "Általános"
 
-#: fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/pack_gallery_dialog.py
 msgid "HUD"
 msgstr "HUD"
 
@@ -3889,6 +3890,11 @@ msgstr "A teljes adatbázis exportálása szövegfájlba (lassú)"
 msgid "From Another Tracker…"
 msgstr ""
 
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Get packs"
+msgstr "Statisztikacsomagok"
+
 #: fpdb_3_legacy/menu_layout.py
 msgid "Graphs"
 msgstr "Grafikonok"
@@ -3951,6 +3957,10 @@ msgid "Import, enable, disable, uninstall and export declarative stat packs"
 msgstr ""
 "Deklaratív statisztikacsomagok importálása, engedélyezése, letiltása, "
 "eltávolítása és exportálása"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Install HUDs and stat packs shared by other players"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -4100,7 +4110,8 @@ msgstr "Versenyleosztás-néző"
 msgid "Tourney Stats"
 msgstr "Versenystatisztikák"
 
-#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Version"
 msgstr "Verzió"
@@ -5036,6 +5047,142 @@ msgstr ""
 #, fuzzy
 msgid "Reference HUD"
 msgstr "HUD beállítások"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, python-format
+msgid "%d listed pack(s) are not shown because their entry is invalid."
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, python-format
+msgid "Author: %(author)s - Licence: %(license)s"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, python-format
+msgid "Gallery: %s"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Install"
+msgstr "Eltávolítás"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Installed"
+msgstr "%s telepítve."
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Installed %s."
+msgstr "%s telepítve."
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Kind"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Needs a newer fpdb"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Not installed"
+msgstr "Felhasználó telepítette"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Pack"
+msgstr "Csomag"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Restart fpdb and the HUD to use the change everywhere."
+msgstr ""
+"Indítsa újra az fpdb-t és a HUD-ot, hogy a változás mindenhol érvényes "
+"legyen."
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Stat pack"
+msgstr "Statisztikacsomag"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Stats:"
+msgstr "Statisztikák:"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+msgid "Status"
+msgstr "Állapot"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "The gallery could not be reached; showing the copy from the last visit."
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy, python-format
+msgid "The gallery could not be read: %s"
+msgstr ""
+"A leosztás nem jeleníthető meg:\n"
+"%s"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "This pack cannot be installed:"
+msgstr "Ez a csomag nem telepíthető:"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "This pack cannot be uninstalled:"
+msgstr "Ez a csomag nem telepíthető:"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Uninstall"
+msgstr "Eltávolítás"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Uninstall %s?"
+msgstr "Eltávolítja: %s?"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Uninstall pack"
+msgstr "Statisztikacsomag eltávolítása"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy, python-format
+msgid "Uninstalled %s."
+msgstr "%s eltávolítva."
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Update"
+msgstr "Szabály frissítése"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Update HUD"
+msgstr "Szabály frissítése"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy
+msgid "Update available"
+msgstr "Előnézet frissítése"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+#, fuzzy, python-format
+msgid "Updated %s."
+msgstr "Mentve"
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid ""
+"Updating replaces the profiles and popups this pack installed, with any "
+"change you made to them. Continue?"
+msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
@@ -6794,11 +6941,6 @@ msgid "Import stat pack"
 msgstr "Statisztikacsomag importálása"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy, python-format
-msgid "Installed %s."
-msgstr "%s telepítve."
-
-#: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Invalid"
 msgstr "Érvénytelen"
@@ -6807,23 +6949,6 @@ msgstr "Érvénytelen"
 #, fuzzy
 msgid "Location:"
 msgstr "Pozíció"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "Pack"
-msgstr "Csomag"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "Restart fpdb and the HUD to use the change everywhere."
-msgstr ""
-"Indítsa újra az fpdb-t és a HUD-ot, hogy a változás mindenhol érvényes "
-"legyen."
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "Stat pack"
-msgstr "Statisztikacsomag"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
@@ -6836,15 +6961,6 @@ msgid "Stats"
 msgstr "Statisztikák"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "Stats:"
-msgstr "Statisztikák:"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Status"
-msgstr "Állapot"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy, python-format
 msgid ""
 "The pack state was not changed:\n"
@@ -6852,11 +6968,6 @@ msgid ""
 msgstr ""
 "A csomag állapota nem változott:\n"
 "%s"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
-msgid "This pack cannot be installed:"
-msgstr "Ez a csomag nem telepíthető:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
@@ -6870,23 +6981,8 @@ msgstr "Ez a csomag nincs betöltve:"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-msgid "Uninstall"
-msgstr "Eltávolítás"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy, python-format
-msgid "Uninstall %s?"
-msgstr "Eltávolítja: %s?"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
 msgid "Uninstall stat pack"
 msgstr "Statisztikacsomag eltávolítása"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy, python-format
-msgid "Uninstalled %s."
-msgstr "%s eltávolítva."
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy

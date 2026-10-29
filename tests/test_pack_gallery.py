@@ -10,10 +10,9 @@ is detected.
 from __future__ import annotations
 
 import json
-import shutil
 import urllib.request
-import zipfile
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import defusedxml.minidom
@@ -29,66 +28,23 @@ from fpdb_3_legacy.pack_gallery import (
     fetch_package,
     incompatibility,
     index_entry,
+    install_entry,
+    installed_versions,
     load_index,
     main,
     parse_index,
     read_location,
+    read_record,
+    uninstall_entry,
     updates,
     validate_repository,
 )
-
-ROOT = Path(__file__).resolve().parents[1]
-HUDS = ("nlhe_6max_basic", "nlhe_6max_advanced", "nlhe_6max_dynamic")
-EXAMPLE_PACK = ROOT / "docs" / "examples" / "example-preflop-pack"
-LICENSE = "AGPL-3.0-or-later"
-
-
-def stat_pack(target: Path, pack_id: str, version: str = "1.0.0") -> Path:
-    """The example stat pack as a ``.fpdbstats`` archive, renamed to *pack_id*."""
-    manifest = json.loads((EXAMPLE_PACK / "manifest.json").read_text(encoding="utf-8"))
-    old = manifest["id"]
-    archive = target / f"{pack_id}{stat_packs.PACK_SUFFIX}"
-    with zipfile.ZipFile(archive, "w") as out:
-        for path in sorted(EXAMPLE_PACK.rglob("*")):
-            name = path.relative_to(EXAMPLE_PACK).as_posix()
-            if path.is_file() and name != "manifest.json":
-                # Every name the pack adds is namespaced by its id.
-                out.writestr(name, path.read_text(encoding="utf-8").replace(old, pack_id))
-        manifest_text = json.dumps({**json.loads(json.dumps(manifest).replace(old, pack_id)), "pack_version": version})
-        out.writestr("manifest.json", manifest_text)
-    return archive
-
-
-def write_index(root: Path, entries: list[dict[str, Any]]) -> None:
-    (root / INDEX_NAME).write_text(
-        json.dumps({"schema": INDEX_SCHEMA, "version": 1, "packs": entries}), encoding="utf-8"
-    )
+from tests.helpers.pack_gallery import HUDS, LICENSE, ROOT, build_gallery, library_popups, stat_pack, write_index
 
 
 @pytest.fixture
 def gallery(tmp_path: Path) -> Path:
-    """A packs repository holding the three reference HUDs and two stat packs."""
-    root = tmp_path / "gallery"
-    (root / "hud").mkdir(parents=True)
-    (root / "stats").mkdir()
-    entries = []
-    for hud in HUDS:
-        path = root / "hud" / f"{hud}.fpdbhud"
-        shutil.copy(ROOT / "hud-packages" / path.name, path)
-        entries.append(
-            index_entry(
-                path, pack_id=f"fpdb-3.{hud}", kind="hud", name=hud, version="1.0.0", author="fpdb-3", license=LICENSE
-            )
-        )
-    for pack_id in ("example.steals", "example.blinds"):
-        path = stat_pack(root / "stats", pack_id)
-        entries.append(
-            index_entry(
-                path, pack_id=pack_id, kind="stats", name=pack_id, version="1.0.0", author="example", license=LICENSE
-            )
-        )
-    write_index(root, entries)
-    return root
+    return build_gallery(tmp_path / "gallery")
 
 
 def entries_of(root: Path) -> list[dict[str, Any]]:
@@ -113,6 +69,11 @@ def test_the_reference_huds_and_two_stat_packs_install_into_a_fresh_profile(gall
 
     profiles = {node.getAttribute("name") for node in config.getElementsByTagName("ss")}
     assert set(HUDS) <= profiles
+    # Their popups come with them: a cell whose popup is missing opens nothing.
+    opened = {node.getAttribute("popup") for node in config.getElementsByTagName("stat")} - {""}
+    defined = {node.getAttribute("pu_name") for node in config.getElementsByTagName("pu")}
+    assert "nlhe6_advanced_core" in defined
+    assert opened <= defined | library_popups()
     installed = {status.id: status.status for status in stat_packs.list_packs(packs_dir)}
     assert installed["example.steals"] == installed["example.blinds"] == stat_packs.ENABLED
 
@@ -473,3 +434,129 @@ def test_a_pt4_layout_converted_to_a_package_passes(multiblock) -> None:
 
     assert root.getElementsByTagName("text") or not multiblock
     assert package_problems(root) == []
+
+
+# -- installing from the gallery ----------------------------------------------------------------
+
+
+def fresh_config() -> Any:
+    return defusedxml.minidom.parseString(
+        "<FreePokerToolsConfig><stat_sets>"
+        '<ss name="mine" rows="1" cols="1"><stat _rowcol="(1,1)" _stat_name="vpip" popup="my_popup"/></ss>'
+        '</stat_sets><popup_windows><pu pu_name="my_popup"><pu_stat pu_stat_name="pfr"/></pu></popup_windows>'
+        '<supported_games><game game_name="holdem"><game_stat_set game_type="ring" stat_set="mine"/></game>'
+        "</supported_games></FreePokerToolsConfig>"
+    )
+
+
+def names(config: Any, tag: str, attribute: str) -> set[str]:
+    return {node.getAttribute(attribute) for node in config.getElementsByTagName(tag)}
+
+
+@pytest.fixture
+def installer(gallery, tmp_path):
+    index = load_index(str(gallery), tmp_path / "cache")
+    record = tmp_path / "profile" / "pack-gallery.json"
+    packs_dir = tmp_path / "profile" / "stat-definitions.d"
+
+    def install(pack_id: str, config: Any, *, replace: bool = False) -> bool:
+        entry = index.get(pack_id)
+        package = fetch_package(entry, str(gallery), tmp_path / "cache")
+        return install_entry(entry, package, config_doc=config, record=record, packs_dir=packs_dir, replace=replace)
+
+    return SimpleNamespace(index=index, record=record, packs_dir=packs_dir, install=install)
+
+
+def test_a_hud_from_the_gallery_is_added_beside_the_users_own(installer) -> None:
+    config = fresh_config()
+
+    assert installer.install("fpdb-3.nlhe_6max_advanced", config) is True
+
+    assert {"mine", "nlhe_6max_advanced"} <= names(config, "ss", "name")
+    assert installed_versions(installer.record, installer.packs_dir)["fpdb-3.nlhe_6max_advanced"] == "1.0.0"
+    recorded = read_record(installer.record)["fpdb-3.nlhe_6max_advanced"]
+    assert recorded["profiles"] == ["nlhe_6max_advanced"]
+
+
+def test_a_hud_never_replaces_a_profile_of_the_users_with_its_name(installer) -> None:
+    config = fresh_config()
+    config.getElementsByTagName("ss")[0].setAttribute("name", "nlhe_6max_basic")
+
+    with pytest.raises(GalleryError, match="you already have a HUD profile named nlhe_6max_basic"):
+        installer.install("fpdb-3.nlhe_6max_basic", config)
+    with pytest.raises(GalleryError):
+        installer.install("fpdb-3.nlhe_6max_basic", config, replace=True)
+    assert read_record(installer.record) == {}
+
+
+def test_an_update_replaces_the_packs_own_profile_and_nothing_else(installer) -> None:
+    config = fresh_config()
+    installer.install("fpdb-3.nlhe_6max_basic", config)
+    profile = next(node for node in config.getElementsByTagName("ss") if node.getAttribute("name") == "nlhe_6max_basic")
+    profile.setAttribute("rows", "99")  # edited since
+
+    installer.install("fpdb-3.nlhe_6max_basic", config, replace=True)
+
+    profiles = [node for node in config.getElementsByTagName("ss") if node.getAttribute("name") == "nlhe_6max_basic"]
+    assert len(profiles) == 1 and profiles[0].getAttribute("rows") != "99"
+    assert "mine" in names(config, "ss", "name") and "my_popup" in names(config, "pu", "pu_name")
+
+
+def test_uninstalling_a_hud_removes_what_it_added_and_keeps_what_is_yours(installer) -> None:
+    config = fresh_config()
+    installer.install("fpdb-3.nlhe_6max_advanced", config)
+    added = set(read_record(installer.record)["fpdb-3.nlhe_6max_advanced"]["popups"])
+    assert added and "my_popup" not in added
+
+    assert uninstall_entry("fpdb-3.nlhe_6max_advanced", config_doc=config, record=installer.record) is True
+
+    assert names(config, "ss", "name") == {"mine"}
+    assert names(config, "pu", "pu_name") == {"my_popup"}
+    assert read_record(installer.record) == {}
+
+
+def test_a_hud_a_game_still_uses_is_not_uninstalled(installer) -> None:
+    config = fresh_config()
+    installer.install("fpdb-3.nlhe_6max_basic", config)
+    config.getElementsByTagName("game_stat_set")[0].setAttribute("stat_set", "nlhe_6max_basic")
+
+    with pytest.raises(GalleryError, match=r"in use for holdem \(ring\)"):
+        uninstall_entry("fpdb-3.nlhe_6max_basic", config_doc=config, record=installer.record)
+
+    assert "nlhe_6max_basic" in names(config, "ss", "name")
+    assert "fpdb-3.nlhe_6max_basic" in read_record(installer.record)
+
+
+def test_a_stat_pack_installs_updates_and_uninstalls_through_the_pack_directory(installer) -> None:
+    config = fresh_config()
+
+    assert installer.install("example.steals", config) is False  # the HUD configuration is untouched
+    assert installed_versions(installer.record, installer.packs_dir)["example.steals"] == "1.0.0"
+    installer.install("example.steals", config, replace=True)
+    uninstall_entry("example.steals", config_doc=config, record=installer.record, packs_dir=installer.packs_dir)
+
+    assert "example.steals" not in installed_versions(installer.record, installer.packs_dir)
+
+
+def test_a_pack_not_installed_from_the_gallery_cannot_be_uninstalled_from_it(installer) -> None:
+    with pytest.raises(GalleryError, match="was not installed from the gallery"):
+        uninstall_entry("fpdb-3.nlhe_6max_basic", config_doc=fresh_config(), record=installer.record)
+
+
+def test_a_damaged_record_reads_as_nothing_installed(tmp_path) -> None:
+    record = tmp_path / "pack-gallery.json"
+    record.write_text("{not json", encoding="utf-8")
+
+    assert read_record(record) == {}
+
+
+def test_a_popup_the_pack_added_stays_while_something_of_yours_opens_it(installer) -> None:
+    config = fresh_config()
+    installer.install("fpdb-3.nlhe_6max_advanced", config)
+    # The user's own profile now opens the pack's core popup, which opens its "opens" popup.
+    config.getElementsByTagName("stat")[0].setAttribute("popup", "nlhe6_advanced_core")
+
+    uninstall_entry("fpdb-3.nlhe_6max_advanced", config_doc=config, record=installer.record)
+
+    assert {"nlhe6_advanced_core", "nlhe6_advanced_opens"} <= names(config, "pu", "pu_name")
+    assert "nlhe_6max_advanced" not in names(config, "ss", "name")
