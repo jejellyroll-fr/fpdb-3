@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-28 00:34+0100\n"
+"POT-Creation-Date: 2026-10-29 12:58+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -1785,8 +1785,28 @@ msgid "Window"
 msgstr "Fenetre"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "(%(head)s to your own bounty)"
+msgstr "(%(head)s ajoutés à votre propre prime)"
+
+#: fpdb_3_legacy/GuiReplayer.py
 msgid "(this table taken as the whole field)"
 msgstr "(cette table prise pour tout le field)"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "Bounty EV %(ev)s"
+msgstr "EV de prime %(ev)s"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "Bounty EV %(ev)s: winning does not bust your opponent"
+msgstr "EV de prime %(ev)s : gagner n'élimine pas votre adversaire"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "Bounty: %s"
+msgstr "Prime : %s"
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid "Card deck"
@@ -1870,6 +1890,11 @@ msgstr "Revue solver..."
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/session_guard_dialog.py
 msgid "Start"
 msgstr "Début"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "bounty-adjusted chip EV %(chips)s"
+msgstr "chip EV ajustée des primes %(chips)s"
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "-- built-in presets --"
@@ -4728,8 +4753,8 @@ msgid ""
 "How much more prize equity an all-in risks than it wins (sit-and-gos and "
 "Spins with a known payout structure)."
 msgstr ""
-"Combien d'équité de prix un all-in risque de plus qu'il ne rapporte "
-"(sit-and-go et Spins dont la structure des gains est connue)."
+"Combien d'équité de prix un all-in risque de plus qu'il ne rapporte (sit-and-"
+"go et Spins dont la structure des gains est connue)."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "How much the actor had to call."

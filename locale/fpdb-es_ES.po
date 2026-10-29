@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-28 00:34+0100\n"
+"POT-Creation-Date: 2026-10-29 12:58+0100\n"
 "PO-Revision-Date: 2011-11-13 01:00+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Spanish (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -2017,7 +2017,27 @@ msgid "Window"
 msgstr "Ventana"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "(%(head)s to your own bounty)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 msgid "(this table taken as the whole field)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "Bounty EV %(ev)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "Bounty EV %(ev)s: winning does not bust your opponent"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "Bounty: %s"
 msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
@@ -2117,6 +2137,11 @@ msgstr "Revisión con solver..."
 #, fuzzy
 msgid "Start"
 msgstr "Inicio"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "bounty-adjusted chip EV %(chips)s"
+msgstr ""
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy

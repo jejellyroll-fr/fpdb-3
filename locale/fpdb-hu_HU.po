@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-28 00:34+0100\n"
+"POT-Creation-Date: 2026-10-29 12:58+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -2011,7 +2011,27 @@ msgid "Window"
 msgstr "Ablak"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "(%(head)s to your own bounty)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 msgid "(this table taken as the whole field)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "Bounty EV %(ev)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "Bounty EV %(ev)s: winning does not bust your opponent"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "Bounty: %s"
 msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
@@ -2112,6 +2132,11 @@ msgstr "Solveres elemzés..."
 #, fuzzy
 msgid "Start"
 msgstr "Eleje"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "bounty-adjusted chip EV %(chips)s"
+msgstr ""
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, fuzzy

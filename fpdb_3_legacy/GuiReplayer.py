@@ -2421,6 +2421,47 @@ class GuiReplayer(QWidget):
             log.exception("ICM pricing failed for hand %s", self.shared_hand_id)
             return None
 
+    def _price_hand_bounty(self, hand):
+        """The hand's all-in with the bounty it can win (#447), or None; never in the way of the replay."""
+        try:
+            from fpdb_3_legacy.hand_bounty import bounty_for_replay
+
+            return bounty_for_replay(getattr(self, "db", None), hand, self.shared_hand_id)
+        except Exception:  # intentional broad catch: a pricing failure must not stop the replay
+            log.exception("Bounty pricing failed for hand %s", self.shared_hand_id)
+            return None
+
+    def _bounty_line(self, frame: ReplayFrame) -> tuple[str, str] | None:
+        """The summary's bounty line once the hero is all-in in a knockout tournament: (text, colour)."""
+        priced = getattr(self, "hand_bounty", None)
+        if priced is None or not any(player.allin for player in frame.players if player.action != "folds"):
+            return None
+        hero = next((player for player in frame.players if player.name == self.Heroes), None)
+        if hero is None or hero.action == "folds":
+            return None
+        allin = priced.allin
+        if allin is None:
+            quiet = {"not a tournament hand", "not a knockout tournament", "no all-in in this hand"}
+            return None if priced.reason in quiet else (_("Bounty: %s") % priced.reason, "#9aa5ad")
+        if self.Heroes not in allin.players:
+            return None
+
+        def money(value) -> str:
+            sign = "+" if value >= 0 else ""
+            return sign + (format_currency(value, allin.currency) if allin.currency else format_number(value, 2))
+
+        if not allin.collects[self.Heroes]:
+            text = _("Bounty EV %(ev)s: winning does not bust your opponent") % {"ev": money(0)}
+            return text, "#9aa5ad"
+        text = _("Bounty EV %(ev)s") % {"ev": money(allin.bounty_ev[self.Heroes])}
+        if allin.head_ev[self.Heroes]:
+            text += " " + _("(%(head)s to your own bounty)") % {"head": money(allin.head_ev[self.Heroes])}
+        if allin.adjusted_chip_ev is not None:
+            text += " · " + _("bounty-adjusted chip EV %(chips)s") % {
+                "chips": format_number(allin.adjusted_chip_ev[self.Heroes], 0, show_plus=True)
+            }
+        return text, "#4ade80"
+
     def _icm_line(self, frame: ReplayFrame) -> tuple[str, str] | None:
         """The summary's ICM line once the hero is all-in in a tournament: (text, colour)."""
         priced = getattr(self, "hand_icm", None)
@@ -2452,7 +2493,8 @@ class GuiReplayer(QWidget):
             and (metrics.get("facing_call") or metrics.get("push_equity_pct") is not None)
         )
         icm_line = self._icm_line(frame)
-        box_height = (78 if has_metrics else 56) + (22 if icm_line else 0)
+        bounty_line = self._bounty_line(frame)
+        box_height = (78 if has_metrics else 56) + (22 if icm_line else 0) + (22 if bounty_line else 0)
         summary_width = min(640, max(320, layout.table_rect.width() * 0.48))
         if layout.timeline_rect.isNull():
             x = self.width() - summary_width - 28
@@ -2472,6 +2514,16 @@ class GuiReplayer(QWidget):
             Qt.AlignmentFlag.AlignLeft,
             self._current_action_summary(frame),
         )
+
+        if bounty_line:
+            # Above the ICM line, or last: the bounty a knockout all-in can win (#447).
+            painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
+            painter.setPen(QColor(bounty_line[1]))
+            painter.drawText(
+                QRectF(rect.x() + 12, rect.y() + box_height - (48 if icm_line else 26), rect.width() - 24, 20),
+                Qt.AlignmentFlag.AlignLeft,
+                bounty_line[0],
+            )
 
         if icm_line:
             # Last line of the box: prize equity next to the chip figures (#446).
@@ -2610,6 +2662,7 @@ class GuiReplayer(QWidget):
         self.shared_hero = None
         self.shared_hand_id = None
         self.hand_icm = None
+        self.hand_bounty = None
         self.shared_tourney_id = None
         self.shareButton.setEnabled(False)
         self.reviewButton.setEnabled(False)
@@ -2634,6 +2687,7 @@ class GuiReplayer(QWidget):
             self.Heroes = hand.hero or self._resolve_hero(hand.sitename)
             self.replay_model = self._build_replay_model(hand)
             self.hand_icm = self._price_hand_icm(hand)
+            self.hand_bounty = self._price_hand_bounty(hand)
             self.shared_tourney_id = self._hand_tourney_id(hand)
             # Legacy hands without a hero seat: share them from the same point
             # of view the replayer shows, without writing it into the hand.
