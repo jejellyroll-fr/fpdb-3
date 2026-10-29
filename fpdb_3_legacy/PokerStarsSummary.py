@@ -258,7 +258,10 @@ class PokerStarsSummary(TourneySummary):
         r"A\s+(?P<CUR>[A-Z]{3})\s+(?P<WINNINGS>[.,0-9]+)\s+award\s+has\sbeen\scredited",
     )
 
-    codepage: ClassVar[list[str]] = ["cp1252", "utf8", "latin1", "iso-8859-1"]
+    # UTF-8 first (#625): cp1252 decodes almost any bytes, so trying it first read a UTF-8
+    # summary's "€9.04" as "â‚¬9.04" and stored buy-in 400, fee 9600, USD and prize pool 0.
+    # A genuine cp1252 file is not valid UTF-8 as soon as it holds an accent or a euro sign.
+    codepage: ClassVar[list[str]] = ["utf8", "cp1252", "latin1"]
 
     # Constants for tournament structure lookup
     MAX_9_PLAYER_ENTRIES = 45

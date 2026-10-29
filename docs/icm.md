@@ -49,9 +49,10 @@ The hand is priced again as soon as the structure changes.
 `TourneyPayouts` is a feature table: databases from before it get it on connection,
 with no `DB_VERSION` bump. Amounts are in hundredths, like fpdb's winnings.
 
-One summary-import bug keeps some results from settling a structure: a PokerStars.EU SnG
-stored with the wrong buy-in and prize pool (#625). Dollar winnings read as 0 (#624) are
-fixed; summaries imported before the fix need importing again.
+Two summary-import bugs kept some results from settling a structure; both are fixed:
+dollar winnings read as 0 (#624), and UTF-8 PokerStars summaries decoded as cp1252, which
+stored a euro sit-and-go with the wrong buy-in, currency and prize pool (#625). Summaries
+imported before these fixes need importing again.
 
 ## A hand's all-in, in the replayer
 
