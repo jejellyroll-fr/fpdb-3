@@ -71,12 +71,13 @@ def test_a_3bet_pot_is_described_to_the_flop_fold(legacy_config) -> None:
         {"seat": "BU", "stack": 72, "stack_bb": 72.0},
     ]
     assert line(flop) == [("CO", "Check", 0), ("BU", "Bet", 6), ("CO", "Fold", 0)]
-    assert entry["hero_decisions"] == [
-        {"street": "PREFLOP", "index": 2},
-        {"street": "PREFLOP", "index": 6},
-        {"street": "FLOP", "index": 0},
-        {"street": "FLOP", "index": 2},
+    assert [(decision["street"], decision["index"]) for decision in entry["hero_decisions"]] == [
+        ("PREFLOP", 2),
+        ("PREFLOP", 6),
+        ("FLOP", 0),
+        ("FLOP", 2),
     ]
+    assert entry["hero_decisions"][2]["spot"]["pot_type"] == "three_bet"
 
 
 def test_sizes_are_shares_of_the_pot(legacy_config) -> None:
@@ -154,6 +155,7 @@ def test_version_2_is_its_own_document_and_version_1_is_unchanged(legacy_config)
     preflop = review_document([build_hand_review(hand)])
 
     assert (whole["schema"], whole["version"]) == (FULL_SCHEMA, FULL_VERSION)
+    assert sum(group["count"] for group in whole["spots"]) == 4  # the hero's four decisions, by spot
     assert preflop["schema"] == SCHEMA and preflop["version"] == 1
     assert "streets" not in preflop["hands"][0] and "actions" not in whole["hands"][0]
     # PreflopAdvisor's spelling stays in version 1: the 3-bet is a "Raise" there too.
