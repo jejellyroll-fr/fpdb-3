@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 12:58+0100\n"
+"POT-Creation-Date: 2026-10-29 16:16+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -361,6 +361,12 @@ msgstr ""
 msgid "Category"
 msgstr ""
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Format"
+msgstr ""
+
 #: fpdb_3_legacy/Filters.py
 msgid "Limits:"
 msgstr ""
@@ -407,6 +413,18 @@ msgstr ""
 
 #: fpdb_3_legacy/Filters.py
 msgid "Ring"
+msgstr ""
+
+#: fpdb_3_legacy/Filters.py
+msgid "All tournaments"
+msgstr ""
+
+#: fpdb_3_legacy/Filters.py
+msgid "Knockouts only"
+msgstr ""
+
+#: fpdb_3_legacy/Filters.py
+msgid "Freezeouts only"
 msgstr ""
 
 #: fpdb_3_legacy/Filters.py
@@ -1676,11 +1694,6 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Show in Position Stats"
-msgstr ""
-
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Format"
 msgstr ""
 
 #: fpdb_3_legacy/GuiPrefs.py
@@ -4221,6 +4234,10 @@ msgid "Tournament or cash"
 msgstr ""
 
 #: fpdb_3_legacy/research_labels.py
+msgid "Knockout tournament"
+msgstr ""
+
+#: fpdb_3_legacy/research_labels.py
 msgid "Big blind (chips)"
 msgstr ""
 
@@ -4554,6 +4571,10 @@ msgstr ""
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Yes for tournament hands, No for cash game hands."
+msgstr ""
+
+#: fpdb_3_legacy/research_labels.py
+msgid "Yes for knockout tournaments, No for every other hand."
 msgstr ""
 
 #: fpdb_3_legacy/research_labels.py

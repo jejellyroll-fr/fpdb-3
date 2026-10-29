@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 12:58+0100\n"
+"POT-Creation-Date: 2026-10-29 16:16+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -256,6 +256,10 @@ msgid "All Players"
 msgstr "Tous les joueurs"
 
 #: fpdb_3_legacy/Filters.py
+msgid "All tournaments"
+msgstr "Tous les tournois"
+
+#: fpdb_3_legacy/Filters.py
 msgid "And:"
 msgstr "Et:"
 
@@ -328,6 +332,16 @@ msgstr "EV"
 msgid "Euro"
 msgstr "Euro"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Format"
+msgstr "Format"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Freezeouts only"
+msgstr "Freezeouts uniquement"
+
 #: fpdb_3_legacy/Filters.py
 msgid "From:"
 msgstr "De:"
@@ -359,6 +373,10 @@ msgstr "Cartes privatives"
 #: fpdb_3_legacy/Filters.py
 msgid "Irish"
 msgstr "Irish"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Knockouts only"
+msgstr "Knockouts uniquement"
 
 #: fpdb_3_legacy/Filters.py
 msgid "Limit Type"
@@ -1704,11 +1722,6 @@ msgstr "Base de données"
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Field Type"
 msgstr "Type de champ"
-
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Format"
-msgstr "Format"
 
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "General"
@@ -4785,6 +4798,10 @@ msgid "Is the preflop aggressor"
 msgstr "Est l'agresseur préflop"
 
 #: fpdb_3_legacy/research_labels.py
+msgid "Knockout tournament"
+msgstr "Tournoi à élimination (knockout)"
+
+#: fpdb_3_legacy/research_labels.py
 msgid "Legacy stat column"
 msgstr "Colonne de stat historique"
 
@@ -5216,6 +5233,10 @@ msgstr "La paire de l'acteur : overpair, top pair, brelan, etc."
 #: fpdb_3_legacy/research_labels.py
 msgid "Which poker room the hands were played on."
 msgstr "La salle de poker où les mains ont été jouées."
+
+#: fpdb_3_legacy/research_labels.py
+msgid "Yes for knockout tournaments, No for every other hand."
+msgstr "Oui pour les tournois à élimination, Non pour toutes les autres mains."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Yes for tournament hands, No for cash game hands."
@@ -6479,10 +6500,6 @@ msgstr ""
 
 #~ msgid "Add New Database"
 #~ msgstr "Ajouter Nouvelle Base De Données"
-
-#, fuzzy
-#~ msgid "Add Tournament"
-#~ msgstr "Tournois"
 
 #, fuzzy
 #~ msgid "Add player: rank: %s name: %s winnings: %s"

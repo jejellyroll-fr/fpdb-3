@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 12:58+0100\n"
+"POT-Creation-Date: 2026-10-29 16:16+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -262,6 +262,11 @@ msgid "All Players"
 msgstr "Visi Žaidėjai"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
+msgid "All tournaments"
+msgstr "Turnyrai"
+
+#: fpdb_3_legacy/Filters.py
 msgid "And:"
 msgstr "Ir:"
 
@@ -347,6 +352,17 @@ msgstr "EV"
 msgid "Euro"
 msgstr "Euras"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Format"
+msgstr "Formatas"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Freezeouts only"
+msgstr ""
+
 #: fpdb_3_legacy/Filters.py
 msgid "From:"
 msgstr "Nuo:"
@@ -383,6 +399,10 @@ msgstr "Turimos kortos"
 #, fuzzy
 msgid "Irish"
 msgstr "Irish"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Knockouts only"
+msgstr ""
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -1968,12 +1988,6 @@ msgstr "Duomenų bazės"
 #, fuzzy
 msgid "Field Type"
 msgstr "Lauko tipas"
-
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Format"
-msgstr "Formatas"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #, fuzzy
@@ -5549,6 +5563,11 @@ msgstr "Yra preflopo agresorius"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
+msgid "Knockout tournament"
+msgstr "Turnyrai"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat column"
 msgstr "Senasis statistikos stulpelis"
 
@@ -6083,6 +6102,11 @@ msgstr "Kokią porą veikėjas turėjo: overpair, top pair, setą ir t. t."
 #, fuzzy
 msgid "Which poker room the hands were played on."
 msgstr "Kuriame pokerio kambaryje rankos buvo žaistos."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Yes for knockout tournaments, No for every other hand."
+msgstr "Taip – turnyrų rankoms, Ne – cash žaidimų rankoms."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -7328,10 +7352,6 @@ msgstr ""
 
 #~ msgid "ALL STREETS"
 #~ msgstr "VISOS GATVĖS"
-
-#, fuzzy
-#~ msgid "Add Tournament"
-#~ msgstr "Turnyrai"
 
 #, fuzzy
 #~ msgid "All Levels"

@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 12:58+0100\n"
+"POT-Creation-Date: 2026-10-29 16:16+0100\n"
 "PO-Revision-Date: 2011-10-08 08:58+0000\n"
 "Last-Translator: greg20 <greg20@hushmail.com>\n"
 "Language-Team: Polish (Poland) (http://www.transifex.net/projects/p/fpdb/"
@@ -261,6 +261,12 @@ msgid "All Players"
 msgstr "Wszyscy gracze"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
+#| msgid "Add Tournament"
+msgid "All tournaments"
+msgstr "Dodaj turniej"
+
+#: fpdb_3_legacy/Filters.py
 msgid "And:"
 msgstr "Do:"
 
@@ -342,6 +348,16 @@ msgstr "EV (wartość oczekiwana)"
 msgid "Euro"
 msgstr "euro"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Format"
+msgstr "Format"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Freezeouts only"
+msgstr ""
+
 #: fpdb_3_legacy/Filters.py
 msgid "From:"
 msgstr "Od:"
@@ -376,6 +392,10 @@ msgstr "Karty własne"
 #, fuzzy
 msgid "Irish"
 msgstr "Irish"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Knockouts only"
+msgstr ""
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -1931,11 +1951,6 @@ msgstr "Bazy danych"
 #, fuzzy
 msgid "Field Type"
 msgstr "Typ pola"
-
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Format"
-msgstr "Format"
 
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "General"
@@ -5462,6 +5477,11 @@ msgstr "Jest agresorem preflop"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
+msgid "Knockout tournament"
+msgstr "Turnieje"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat column"
 msgstr "Dawna kolumna statystyki"
 
@@ -5996,6 +6016,11 @@ msgstr "Jaką parę miał działający: overpair, top pair, set i tak dalej."
 #, fuzzy
 msgid "Which poker room the hands were played on."
 msgstr "W której sali pokerowej rozegrano rozdania."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Yes for knockout tournaments, No for every other hand."
+msgstr "Tak dla rozdań turniejowych, Nie dla rozdań cash."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -7419,9 +7444,6 @@ msgstr ""
 #~ msgid ""
 #~ "AbsoluteToFpdb.readHandInfo: File name didn't match re_*InfoFromFilename"
 #~ msgstr "Nazwa pliku nie pasowała re_*InfoFromFilename"
-
-#~ msgid "Add Tournament"
-#~ msgstr "Dodaj turniej"
 
 #~ msgid "Aggression factor"
 #~ msgstr "Współczynnik agresji"

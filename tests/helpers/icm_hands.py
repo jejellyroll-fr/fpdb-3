@@ -66,3 +66,16 @@ def fixed_equity(wins_a: int, wins_b: int, ties: int = 0):
         )
 
     return engine
+
+
+# The same hand as a PokerStars progressive knockout (#447): Hero ($5) covers Villain ($7.50).
+PKO = (
+    SNG_ALLIN.replace(
+        "200000000001: Tournament #3000000001, $10+$1 USD",
+        "200000000101: Tournament #3000000101, $4.40+$5.00+$0.60 USD",
+    )
+    .replace("Table '3000000001 1'", "Table '3000000101 1'")
+    .replace("Hero (4000 in chips)", "Hero (4000 in chips, $5 bounty)")
+    .replace("Villain (3000 in chips)", "Villain (3000 in chips, $7.50 bounty)")
+    .replace("Short (1000 in chips)", "Short (1000 in chips, $5 bounty)")
+)

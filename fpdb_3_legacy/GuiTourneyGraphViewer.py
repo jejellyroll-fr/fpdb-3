@@ -61,6 +61,7 @@ class GuiTourneyGraphViewer(QSplitter):
             "TourneyCat": True,
             "TourneyLim": True,
             "TourneyBuyin": True,
+            "TourneyFormat": True,
             "Currencies": True,
             "Limits": False,
             "LimitSep": True,
@@ -336,6 +337,12 @@ class GuiTourneyGraphViewer(QSplitter):
 
         currency_values = make_in_clause_sql(currencies, "str")
         currencytest = f"AND tt.currency in {currency_values}" if currency_values else ""
+        # Knockouts or freezeouts (#447): every query this fills joins TourneyTypes as tt.
+        from fpdb_3_legacy.tourney_format import format_condition
+
+        currencytest = " ".join(
+            (currencytest, format_condition(self.filters.getTourneyFormat(), self.db.backend == self.db.SQLITE))
+        )
         tourneysCattest = make_in_clause_sql(tourneysCat, "str")
         tourneysLimtest = make_in_clause_sql(tourneysLim, "str")
 

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 12:58+0100\n"
+"POT-Creation-Date: 2026-10-29 16:16+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -256,6 +256,12 @@ msgid "All Players"
 msgstr "Minden játékos"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
+#| msgid "Add Tournament"
+msgid "All tournaments"
+msgstr "Verseny hozzáadása"
+
+#: fpdb_3_legacy/Filters.py
 msgid "And:"
 msgstr "Max:"
 
@@ -337,6 +343,16 @@ msgstr "EV"
 msgid "Euro"
 msgstr "Euro"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Format"
+msgstr "Formátum"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Freezeouts only"
+msgstr ""
+
 #: fpdb_3_legacy/Filters.py
 msgid "From:"
 msgstr "Ettől:"
@@ -371,6 +387,10 @@ msgstr "Osztott lapok"
 #, fuzzy
 msgid "Irish"
 msgstr "Irish"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Knockouts only"
+msgstr ""
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -1930,11 +1950,6 @@ msgstr "Adatbázisok"
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Field Type"
 msgstr "Mező típusa"
-
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Format"
-msgstr "Formátum"
 
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "General"
@@ -5490,6 +5505,11 @@ msgstr "Ő a preflop agresszor"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
+msgid "Knockout tournament"
+msgstr "Versenyek"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat column"
 msgstr "Régi statisztikaoszlop"
 
@@ -6023,6 +6043,11 @@ msgstr "Milyen pár volt a lépőnél: overpair, top pair, szett és így továb
 #, fuzzy
 msgid "Which poker room the hands were played on."
 msgstr "Melyik pókerteremben játszották a leosztásokat."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Yes for knockout tournaments, No for every other hand."
+msgstr "Igen versenyleosztásoknál, Nem cash leosztásoknál."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -7762,9 +7787,6 @@ msgstr ""
 
 #~ msgid "Add %s import directory %s"
 #~ msgstr "%s terem %s import könyvtárának hozzáadása"
-
-#~ msgid "Add Tournament"
-#~ msgstr "Verseny hozzáadása"
 
 #, fuzzy
 #~ msgid "Add player: rank: %s name: %s winnings: %s"

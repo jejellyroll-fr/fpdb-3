@@ -293,6 +293,7 @@ class Filters(QWidget):
         self.cbTourney: dict[str, QCheckBox] = {}
         self.cbTourneyCat: dict[str, QCheckBox] = {}
         self.cbTourneyLim: dict[str, QCheckBox] = {}
+        self.tourneyFormat: QComboBox | None = None  # knockout or freezeout (#447)
         self.cbTourneyBuyin: dict[str, QCheckBox] = {}
 
         self.gameName = {
@@ -351,6 +352,7 @@ class Filters(QWidget):
             "gamestitle": (_("Games") + ":"),
             "tourneytitle": (_("Tourney") + ":"),
             "tourneycat": (_("Category") + ":"),
+            "tourneyformat": (_("Format") + ":"),
             "limitstitle": _("Limits:"),
             "positionstitle": _("Positions:"),
             "seatstitle": _("Number of Players:"),
@@ -441,6 +443,8 @@ class Filters(QWidget):
             layout.addWidget(self.create_tourney_lim_frame())
         if self.display.get("TourneyBuyin", False):
             layout.addWidget(self.create_tourney_buyin_frame())
+        if self.display.get("TourneyFormat", False):
+            layout.addWidget(self.create_tourney_format_frame())
         if self.display.get("Currencies", False):
             layout.addWidget(self.create_currencies_frame())
         if self.display.get("Limits", False):
@@ -494,6 +498,7 @@ class Filters(QWidget):
         self._clear_layout(self.layout())
 
         self.heroList = None
+        self.tourneyFormat = None
         for name in (
             "cbSites",
             "cbGames",
@@ -594,6 +599,28 @@ class Filters(QWidget):
         """Create the tournament category selection frame."""
         self.cbTourneyCat = {}
         return self._create_card_container(self.filterText["tourneycat"], self.fillTourneyCatFrame)
+
+    def create_tourney_format_frame(self) -> QWidget:
+        """Create the knockout / freezeout selection frame (#447)."""
+        return self._create_card_container(self.filterText["tourneyformat"], self.fillTourneyFormatFrame)
+
+    def fillTourneyFormatFrame(self, frame: QGroupBox) -> None:
+        """Fill the tournament format frame: every tournament, knockouts only or freezeouts only."""
+        from fpdb_3_legacy.tourney_format import FORMAT_ALL, FORMAT_FREEZEOUT, FORMAT_KNOCKOUT
+
+        vbox = QVBoxLayout()
+        frame.setLayout(vbox)
+        self.tourneyFormat = QComboBox()
+        self.tourneyFormat.addItem(_("All tournaments"), FORMAT_ALL)
+        self.tourneyFormat.addItem(_("Knockouts only"), FORMAT_KNOCKOUT)
+        self.tourneyFormat.addItem(_("Freezeouts only"), FORMAT_FREEZEOUT)
+        vbox.addWidget(self.tourneyFormat)
+
+    def getTourneyFormat(self) -> str:
+        """The selected tournament format: ``all``, ``knockout`` or ``freezeout``."""
+        if self.tourneyFormat is None:
+            return "all"
+        return str(self.tourneyFormat.currentData() or "all")
 
     def create_tourney_lim_frame(self) -> QWidget:
         """Create the tournament limit selection frame."""

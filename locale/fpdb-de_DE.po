@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 12:58+0100\n"
+"POT-Creation-Date: 2026-10-29 16:16+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -255,6 +255,12 @@ msgid "All Players"
 msgstr "Alle Spieler"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
+#| msgid "Add Tournament"
+msgid "All tournaments"
+msgstr "Tournament Hinzufügen"
+
+#: fpdb_3_legacy/Filters.py
 msgid "And:"
 msgstr "Und:"
 
@@ -336,6 +342,16 @@ msgstr "EV"
 msgid "Euro"
 msgstr "Euro"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Format"
+msgstr "Format"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Freezeouts only"
+msgstr ""
+
 #: fpdb_3_legacy/Filters.py
 msgid "From:"
 msgstr "Von:"
@@ -369,6 +385,10 @@ msgstr "Verdeckte Karten"
 #, fuzzy
 msgid "Irish"
 msgstr "Irish"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Knockouts only"
+msgstr ""
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -1927,11 +1947,6 @@ msgstr "Datenbanken"
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Field Type"
 msgstr "Feldtyp"
-
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Format"
-msgstr "Format"
 
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "General"
@@ -5482,6 +5497,11 @@ msgstr "Ist der Preflop-Aggressor"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
+msgid "Knockout tournament"
+msgstr "Tournamente"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat column"
 msgstr "Alte Statistikspalte"
 
@@ -6017,6 +6037,11 @@ msgstr ""
 #, fuzzy
 msgid "Which poker room the hands were played on."
 msgstr "In welchem Pokerraum die Hände gespielt wurden."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Yes for knockout tournaments, No for every other hand."
+msgstr "Ja für Turnierhände, Nein für Cash-Game-Hände."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -7595,9 +7620,6 @@ msgstr ""
 
 #~ msgid "Add %s import directory %s"
 #~ msgstr "Füge für %s Import-Verzeichnis %s hinzu"
-
-#~ msgid "Add Tournament"
-#~ msgstr "Tournament Hinzufügen"
 
 #~ msgid "After import took %s seconds"
 #~ msgstr "Bearbeitung nach Import dauerte %s Sekunden:"

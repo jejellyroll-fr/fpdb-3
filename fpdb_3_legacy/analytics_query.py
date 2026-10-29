@@ -74,6 +74,9 @@ SOURCES: Final[dict[str, _Source]] = {
     "G": _Source("G", "Gametypes", "JOIN Gametypes G ON G.id = H.gametypeId", ("H",)),
     "S": _Source("S", "Sites", "JOIN Sites S ON S.id = G.siteId", ("G",)),
     "P": _Source("P", "Players", "JOIN Players P ON P.id = A.playerId", ("A",)),
+    # A hand's tournament and its type (#447): LEFT, since a cash hand has neither.
+    "T": _Source("T", "Tourneys", "LEFT JOIN Tourneys T ON T.id = H.tourneyId", ("H",)),
+    "TT": _Source("TT", "TourneyTypes", "LEFT JOIN TourneyTypes TT ON TT.id = T.tourneyTypeId", ("T",)),
     "HP": _Source(
         "HP",
         "HandsPlayers",
@@ -297,6 +300,8 @@ FILTERS: Final[dict[str, _Filter]] = {
     "currency": _Filter("G.currency", ("G",), "set"),
     "tournament": _Filter("H.tourneyId", ("H",), "null_check"),
     "tournament_id": _Filter("H.tourneyId", ("H",), "set"),
+    # Knockout tournaments (#447). "Not a knockout" keeps the hands whose type does not say.
+    "knockout": _Filter("TT.knockout", ("TT",), "bool_lenient"),
     "big_blind": _Filter("G.bigBlind", ("G",), "range"),
     "stake_bb": _Filter("G.bigBlind", ("G",), "range"),
     "seats": _Filter("H.seats", ("H",), "range"),
@@ -603,8 +608,8 @@ def _compile_condition_filter(
 ) -> tuple[list[str], list[Any]]:
     """The condition-shaped filter kinds, not the set or range shapes."""
     column = spec.column
-    if spec.kind in ("bool", "hero"):
-        return _boolean_fragment(column, bool(value), spec.kind == "hero", backend)
+    if spec.kind in ("bool", "hero", "bool_lenient"):
+        return _boolean_fragment(column, bool(value), spec.kind in ("hero", "bool_lenient"), backend)
     if spec.kind == "null_check":
         return ([f"{column} IS NOT NULL"] if value else [f"{column} IS NULL"]), []
     if spec.kind in _FLAG_KINDS:
@@ -697,6 +702,7 @@ DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
     "game_base": ("G.base", ("G",)),
     "limit": ("G.limitType", ("G",)),
     "tournament": ("H.tourneyId", ("H",)),
+    "knockout": ("TT.knockout", ("TT",)),
     "session": ("H.sessionId", ("H",)),
     # Qualified with the fact alias: ``facingSizingBp`` exists on the situation
     # table too, so an unqualified reference is ambiguous once it is joined.
