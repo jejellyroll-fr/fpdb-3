@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 16:16+0100\n"
+"POT-Creation-Date: 2026-10-29 19:56+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -3107,6 +3107,16 @@ msgstr "Votre base de données ne contient encore aucune main."
 
 #: fpdb_3_legacy/hand_review_dialog.py
 #, python-format
+msgid "%(count)d hands exported to %(path)s."
+msgstr "%(count)d mains exportées vers %(path)s."
+
+#: fpdb_3_legacy/hand_review_dialog.py
+#, python-format
+msgid "%d hands could not be described exactly and were left out:"
+msgstr "%d mains n'ont pas pu être décrites exactement et ont été laissées de côté :"
+
+#: fpdb_3_legacy/hand_review_dialog.py
+#, python-format
 msgid "%s is not a program that can be started."
 msgstr "%s n'est pas un programme qui peut être démarré."
 
@@ -3128,12 +3138,24 @@ msgid "Every hero decision of the hand"
 msgstr "Toutes les décisions du héros dans la main"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+msgid "Export hands for solver review"
+msgstr "Exporter les mains pour une revue solveur"
+
+#: fpdb_3_legacy/hand_review_dialog.py
+msgid "Export the hands in view for solver review..."
+msgstr "Exporter les mains affichées pour une revue solveur..."
+
+#: fpdb_3_legacy/hand_review_dialog.py
 msgid "Hand review (*.json)"
-msgstr "Revue de main (*.json)"
+msgstr "Revue de mains (*.json)"
 
 #: fpdb_3_legacy/hand_review_dialog.py
 msgid "Locate PreflopAdvisor"
 msgstr "Localiser PreflopAdvisor"
+
+#: fpdb_3_legacy/hand_review_dialog.py
+msgid "No hands are in view to export."
+msgstr "Aucune main affichée à exporter."
 
 #: fpdb_3_legacy/hand_review_dialog.py
 msgid "Open in PreflopAdvisor"
@@ -3179,6 +3201,11 @@ msgstr "Revue solver"
 #: fpdb_3_legacy/hand_review_dialog.py
 msgid "Solver review (PreflopAdvisor)..."
 msgstr "Revue solver (PreflopAdvisor)..."
+
+#: fpdb_3_legacy/hand_review_dialog.py
+#, python-format
+msgid "The hands could not be saved: %s"
+msgstr "Les mains n'ont pas pu être enregistrées : %s"
 
 #: fpdb_3_legacy/hand_review_dialog.py
 msgid "This decision"

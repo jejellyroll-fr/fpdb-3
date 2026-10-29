@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 16:16+0100\n"
+"POT-Creation-Date: 2026-10-29 19:56+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -3502,6 +3502,16 @@ msgid "Your database contains no hands yet."
 msgstr "Az adatbázisa még nem tartalmaz leosztásokat."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, python-format
+msgid "%(count)d hands exported to %(path)s."
+msgstr ""
+
+#: fpdb_3_legacy/hand_review_dialog.py
+#, python-format
+msgid "%d hands could not be described exactly and were left out:"
+msgstr ""
+
+#: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy, python-format
 msgid "%s is not a program that can be started."
 msgstr "A(z) %s nem indítható program."
@@ -3526,6 +3536,14 @@ msgid "Every hero decision of the hand"
 msgstr "A hős minden döntése a leosztásban"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+msgid "Export hands for solver review"
+msgstr ""
+
+#: fpdb_3_legacy/hand_review_dialog.py
+msgid "Export the hands in view for solver review..."
+msgstr ""
+
+#: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy
 msgid "Hand review (*.json)"
 msgstr "Leosztáselemzés (*.json)"
@@ -3534,6 +3552,10 @@ msgstr "Leosztáselemzés (*.json)"
 #, fuzzy
 msgid "Locate PreflopAdvisor"
 msgstr "PreflopAdvisor megkeresése"
+
+#: fpdb_3_legacy/hand_review_dialog.py
+msgid "No hands are in view to export."
+msgstr ""
 
 #: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy
@@ -3586,6 +3608,13 @@ msgstr "Solveres elemzés"
 #, fuzzy
 msgid "Solver review (PreflopAdvisor)..."
 msgstr "Solveres elemzés (PreflopAdvisor)..."
+
+#: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy, python-format
+msgid "The hands could not be saved: %s"
+msgstr ""
+"A leosztás nem jeleníthető meg:\n"
+"%s"
 
 #: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy

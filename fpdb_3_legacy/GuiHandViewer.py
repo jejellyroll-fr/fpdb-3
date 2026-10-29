@@ -60,7 +60,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Filters, GuiReplayer, Hand, gui_empty_state
 from fpdb_3_legacy.analytics_query import escape_literal_percent
-from fpdb_3_legacy.hand_review_dialog import add_review_action
+from fpdb_3_legacy.hand_review_dialog import add_batch_review_action, add_review_action
 from fpdb_3_legacy.hand_share_dialog import add_share_actions
 from fpdb_3_legacy.hand_viewer_filters import build_filter_clauses, required_analytics_subsystems
 from fpdb_3_legacy.holdem_classes import RANKS, grid_labels
@@ -1030,8 +1030,19 @@ class GuiHandViewer(QSplitter):
         add_share_actions(m, hand, self)
         m.addSeparator()
         add_review_action(m, hand, self, fpdb_hand_id=hand_id, config=self.config)
+        add_batch_review_action(m, self.hands_in_view, self)
         m.move(event.globalPosition().toPoint())
         m.exec()
+
+    def hands_in_view(self) -> list[Any]:
+        """The hands the filters leave on screen, in the order shown (#448)."""
+        column = self.colnum["HandId"]
+        hands = []
+        for row in range(self.filterModel.rowCount()):
+            hand = self.hands.get(int(self.filterModel.index(row, column).data()))
+            if hand is not None:
+                hands.append(hand)
+        return hands
 
     def filter_cards_cb(self, card) -> None:
         if hasattr(self, "hands"):
