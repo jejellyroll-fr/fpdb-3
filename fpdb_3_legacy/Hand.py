@@ -730,6 +730,10 @@ class Hand:
                 row["sitout"],
                 str(row["bounty"]),
             )
+            # A progressive bounty the hand raised (#447): the HUD shows it at its new value.
+            # In hundredths, as the parsers keep endBounty.
+            if row.get("endbounty") is not None and row["endbounty"] != row["bounty"]:
+                self.endBounty[row["name"]] = Decimal(str(row["endbounty"])) * 100
             cardlist = [Card.valueSuitFromCard(row[f"card{i}"]) for i in range(1, 21)]
             # mucked/shown/dealt is not in the database, use mucked for villain and dealt for hero
             if row["seatno"] == heroSeat:
