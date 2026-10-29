@@ -9,6 +9,8 @@ and groups the decisions of many hands by it.
 
 A spot is:
 
+- ``game`` and ``table_size``: a solver solves one game at one table size, so
+  NL and PLO, or six- and nine-handed, are never the same spot;
 - ``street``;
 - ``pot_type``: from the raises before the decision preflop, and from the whole
   preflop on later streets, in the situation model's words (``unopened``,
@@ -33,6 +35,8 @@ from fpdb_3_legacy.spr_buckets import SPR_SCALE, spr_bucket_of
 __all__ = ["SPOT_FIELDS", "decision_spots", "spot_groups"]
 
 SPOT_FIELDS = (
+    "game",
+    "table_size",
     "street",
     "pot_type",
     "hero",
@@ -84,6 +88,9 @@ def decision_spots(review: Any) -> list[dict[str, Any]]:
             first_street = street.name == "PREFLOP"
             before = action.index if first_street else None
             spot: dict[str, Any] = {
+                # Codex (#639): a mixed batch must not merge NL and PLO, or six- and nine-handed, spots.
+                "game": review.game,
+                "table_size": review.table_size,
                 "street": street.name,
                 "pot_type": _pot_type(preflop, before),
                 "hero": review.hero_position,

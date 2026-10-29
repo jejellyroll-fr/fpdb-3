@@ -24,6 +24,8 @@ def test_a_flop_decision_in_a_3bet_pot_names_its_spot(legacy_config) -> None:
     assert [decision["index"] for decision in flop] == [0, 2]
     # Hero (CO, 112 behind) against the button's 3-bet (72 behind): 72 over a pot of 17.50 is 4.1.
     assert flop[0]["spot"] == {
+        "game": "NL",
+        "table_size": 6,
         "street": "FLOP",
         "pot_type": "three_bet",
         "hero": "CO",
@@ -67,3 +69,14 @@ def test_decisions_are_grouped_by_spot_most_frequent_first(legacy_config) -> Non
     assert flop["count"] == 4
     assert {decision["index"] for decision in flop["decisions"]} == {0, 2}
     assert sum(counts) == 2 * len(decision_spots(three_bet)) + len(decision_spots(heads_up))
+
+
+def test_the_same_seats_in_another_game_are_another_spot(legacy_config) -> None:
+    # Codex (#639): six-handed NL and PLO, the same seats, the same line: two spots, not one.
+    nl = review(legacy_config, "nl_3bet_6max.txt")
+    plo = review(legacy_config, "plo_3bet_6max.txt")
+
+    groups = spot_groups([nl, plo])
+
+    assert {group["spot"]["game"] for group in groups} == {"NL", "PLO"}
+    assert all(len({decision["hand_id"] for decision in group["decisions"]}) == 1 for group in groups)

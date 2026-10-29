@@ -219,6 +219,7 @@ parsed from a file and one read back from the database name it the same:
 
 | Field | Meaning |
 | --- | --- |
+| `game`, `table_size` | The game (`NL`, `PLO`…) and the players dealt in: a solver solves one game at one table size, so these are never mixed in a spot. |
 | `street` | The decision's street. |
 | `pot_type` | `unopened`, `limped`, `single_raised`, `three_bet` or `four_bet_plus`: preflop, from the actions before the decision; later, from the whole preflop. These are the situation model's words. |
 | `hero`, `aggressor` | The hero's seat and the last preflop raiser's (`null` in a limped or unopened pot). |
