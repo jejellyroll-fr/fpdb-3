@@ -131,3 +131,43 @@ value, which is why every reportable dimension has a filter of the same name
 opened as hands). A dimension without a filter is refused by name instead of
 silently returning the whole population. `--hand-ids` prints the ids at the shell;
 the hand viewer is the consumer.
+
+## Knockout tournaments: bounty EV (#447)
+
+In a knockout tournament, busting a player pays their bounty, so an all-in is worth more
+than its chip EV. When the hero is all-in heads-up in a knockout tournament hand, the
+replayer adds a **bounty line** above the ICM line (`fpdb_3_legacy/hand_bounty.py`).
+
+- **The bounty at stake.** A player collects the opponent's bounty by winning only if that
+  busts the opponent: the player covers them, and the opponent has put in every chip. A
+  split pot busts nobody. An all-in that cannot bust the opponent reads "winning does not
+  bust your opponent".
+- **How it is paid.**
+  - A regular knockout pays the tournament's fixed bounty in cash.
+  - A progressive one (PKO) pays half in cash and adds the other half to the winner's own
+    bounty, as PokerStars does.
+  - PokerStars prints each seat's bounty only in progressive knockouts, so a hand that
+    prints them is read as progressive whatever its stored tournament type says. That flag
+    is set only when an imported hand contains an elimination.
+- **Bounty EV** is the probability of winning the whole pot times the cash part. The half
+  added to the winner's own bounty is shown apart ("to your own bounty"), because it is
+  only paid when someone busts them in turn.
+- **Bounty-adjusted chip EV** is chip EV plus the bounty EV converted to chips, a chip
+  being worth the prize part of the buy-in divided by the starting stack. This is the usual
+  approximation, and it ignores how a chip's worth changes as the field shrinks. It is shown
+  only when the tournament's starting stack (`TourneyTypes.buyInChips`) is known; a hand
+  history does not print it.
+
+The all-in itself is priced as the ICM line prices it (`hand_icm.heads_up_allin`), with the
+same limits: heads-up, a single pot, flop games, both hands shown.
+
+What each room prints:
+
+| Room | Seat bounties | Elimination lines |
+| --- | --- | --- |
+| PokerStars, progressive | yes | "wins $x for eliminating … and their own bounty increases …" |
+| PokerStars, regular | no: every head is worth the fixed bounty | "wins the $x bounty for eliminating …" |
+| GGPoker | no | no: bounties are not in the hand history at all |
+
+A GGPoker knockout hand is therefore not priced: its bounties can only come from the
+tournament's results.

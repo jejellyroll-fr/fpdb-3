@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-28 00:34+0100\n"
+"POT-Creation-Date: 2026-10-29 12:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1765,6 +1765,31 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid "Enter or apply this tournament's payout structure, for ICM"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "Bounty: %s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "Bounty EV %(ev)s: winning does not bust your opponent"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "Bounty EV %(ev)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "(%(head)s to your own bounty)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "bounty-adjusted chip EV %(chips)s"
 msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py

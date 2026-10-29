@@ -47,6 +47,12 @@ _QUERIES = {
                         FROM Tourneys t JOIN TourneyTypes tt ON tt.id = t.tourneyTypeId
                         WHERE t.id = %s""",
     "selectHandTourneyId": "SELECT tourneyId FROM Hands WHERE id = %s",
+    # A knockout hand's bounty rules (#447): bounty, progressive or not, buy-in, starting stack, currency.
+    "selectHandKnockoutRules": """SELECT tt.knockout, tt.koBounty, tt.progressive, tt.buyIn, tt.buyInChips,
+                        tt.currency
+                        FROM Hands h JOIN Tourneys t ON t.id = h.tourneyId
+                        JOIN TourneyTypes tt ON tt.id = t.tourneyTypeId
+                        WHERE h.id = %s""",
     # The tournament graph's ICM line: the player's hands that went to showdown after someone was all-in.
     "selectTourneyAllInHands": """SELECT h.tourneyId, h.id, pl.name FROM HandsPlayers hp
                         JOIN Hands h ON h.id = hp.handId

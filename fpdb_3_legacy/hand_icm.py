@@ -35,7 +35,15 @@ from typing import Any
 from fpdb_3_legacy import icm
 from fpdb_3_legacy.icm import AllInOutcome, ICMError
 
-__all__ = ["AllInIcm", "HandIcm", "hand_allin_icm", "icm_for_replay", "icm_with_payouts"]
+__all__ = [
+    "AllInIcm",
+    "HandIcm",
+    "HeadsUpAllIn",
+    "hand_allin_icm",
+    "heads_up_allin",
+    "icm_for_replay",
+    "icm_with_payouts",
+]
 
 # Monte Carlo samples when the engine does not enumerate; as the replayer's own equity.
 _ITERATIONS = 20_000
@@ -140,6 +148,82 @@ def _contenders(hand: Any) -> tuple[list[str], str]:
     return contenders, ""
 
 
+@dataclass(frozen=True)
+class HeadsUpAllIn:
+    """A hand's heads-up all-in: who, on which street, and how often each one wins.
+
+    Shared by the ICM pricing here and the bounty pricing of :mod:`fpdb_3_legacy.hand_bounty`.
+    """
+
+    street: str
+    players: tuple[str, str]
+    win: tuple[float, float]  # each player's probability of winning the whole pot
+    tie: float  # the probability of a split pot
+    pot: Decimal  # chips
+    start: Mapping[str, Decimal]  # every seated player's stack at the start of the hand
+    committed: Mapping[str, Decimal]  # what each seated player put in the pot
+
+    @property
+    def equity(self) -> dict[str, float]:
+        a, b = self.players
+        return {a: self.win[0] + self.tie / 2, b: self.win[1] + self.tie / 2}
+
+    @property
+    def chip_ev(self) -> dict[str, Decimal]:
+        """Each player's equity share of the pot, less what they put in: the import's ``allInEV``."""
+        return {name: Decimal(str(share)) * self.pot - self.committed[name] for name, share in self.equity.items()}
+
+
+def heads_up_allin(hand: Any, equity_fn: Callable[..., Any] | None = None) -> tuple[HeadsUpAllIn | None, str]:
+    """``hand``'s heads-up all-in priced in equity, or None with why it cannot be."""
+    game, unpriced = _game(hand)
+    if game is None:
+        return None, unpriced
+    street = _allin_street(hand)
+    if street is None:
+        return None, "no all-in in this hand"
+    contenders, unpriced = _contenders(hand)
+    if not contenders:
+        return None, unpriced
+    seated = [player[1] for player in hand.players]
+    committed = {
+        name: Decimal(hand.pot.committed.get(name, 0)) + Decimal(hand.pot.common.get(name, 0)) for name in seated
+    }
+    pockets = [_hole_cards(hand, name) for name in contenders]
+    if not all(_known(cards) for cards in pockets):
+        return None, "both hands must be shown to price the all-in"
+
+    if equity_fn is None:
+        from fpdb_3_legacy.equity import calculate_equity
+
+        equity_fn = calculate_equity
+    try:
+        result = equity_fn(game, pockets, _board_until(hand, street), iterations=_ITERATIONS)
+    except (RuntimeError, ValueError) as exc:
+        return None, f"equity unavailable: {exc}"
+
+    samples = result.samples or 1
+    win_a, win_b, tie = (
+        result.players[0].wins / samples,
+        result.players[1].wins / samples,
+        result.players[0].ties / samples,
+    )
+    total = win_a + win_b + tie or 1.0
+    a, b = contenders
+    return (
+        HeadsUpAllIn(
+            street=street,
+            players=(a, b),
+            win=(win_a / total, win_b / total),
+            tie=tie / total,
+            pot=Decimal(hand.totalpot),
+            start={player[1]: Decimal(str(player[2])) for player in hand.players},
+            committed=committed,
+        ),
+        "",
+    )
+
+
 def hand_allin_icm(
     hand: Any,
     payouts: Sequence[float],
@@ -150,43 +234,13 @@ def hand_allin_icm(
     """Price ``hand``'s heads-up all-in under ICM with ``payouts`` (first place first, money)."""
     if hand.gametype.get("type") != "tour":
         return HandIcm(None, "not a tournament hand")
-    game, unpriced = _game(hand)
-    if game is None:
+    allin, unpriced = heads_up_allin(hand, equity_fn)
+    if allin is None:
         return HandIcm(None, unpriced)
-    street = _allin_street(hand)
-    if street is None:
-        return HandIcm(None, "no all-in in this hand")
-    contenders, unpriced = _contenders(hand)
-    if not contenders:
-        return HandIcm(None, unpriced)
+    a, b = allin.players
+    (win_a, win_b), tie, pot = allin.win, allin.tie, allin.pot
+    start, committed = allin.start, allin.committed
     seated = [player[1] for player in hand.players]
-    committed = {
-        name: Decimal(hand.pot.committed.get(name, 0)) + Decimal(hand.pot.common.get(name, 0)) for name in seated
-    }
-    pockets = [_hole_cards(hand, name) for name in contenders]
-    if not all(_known(cards) for cards in pockets):
-        return HandIcm(None, "both hands must be shown to price the all-in")
-
-    if equity_fn is None:
-        from fpdb_3_legacy.equity import calculate_equity
-
-        equity_fn = calculate_equity
-    try:
-        result = equity_fn(game, pockets, _board_until(hand, street), iterations=_ITERATIONS)
-    except (RuntimeError, ValueError) as exc:
-        return HandIcm(None, f"equity unavailable: {exc}")
-
-    start = {player[1]: Decimal(str(player[2])) for player in hand.players}
-    pot = Decimal(hand.totalpot)
-    a, b = contenders
-    samples = result.samples or 1
-    win_a, win_b, tie = (
-        result.players[0].wins / samples,
-        result.players[1].wins / samples,
-        result.players[0].ties / samples,
-    )
-    total = win_a + win_b + tie or 1.0
-    win_a, win_b, tie = win_a / total, win_b / total, tie / total
 
     def after(share_a: Decimal, share_b: Decimal) -> dict[str, float]:
         stacks = {name: float(start[name] - committed[name]) for name in seated}
@@ -206,23 +260,21 @@ def hand_allin_icm(
     before = {name: float(start[name]) for name in seated}
     actual = {name: float(start[name] - committed[name] + Decimal(hand.collectees.get(name, 0))) for name in seated}
     try:
-        icm_ev = {name: icm.allin_icm_ev(before, outcomes, payouts, name) for name in contenders}
+        icm_ev = {name: icm.allin_icm_ev(before, outcomes, payouts, name) for name in allin.players}
         now = dict(zip(seated, icm.icm_equities([before[n] for n in seated], payouts), strict=True))
         settled = icm.outcome_equities(before, actual, payouts)
     except ICMError as exc:
         return HandIcm(None, f"ICM not computed: {exc}")
 
-    equity = {a: win_a + tie / 2, b: win_b + tie / 2}
-    chip_ev = {name: Decimal(str(equity[name])) * pot - committed[name] for name in contenders}
     notes = ("priced as if this table were the whole field",) if table_only else ()
     return HandIcm(
         AllInIcm(
-            street=street,
-            players=(a, b),
-            equity=equity,
-            chip_ev=chip_ev,
+            street=allin.street,
+            players=allin.players,
+            equity=allin.equity,
+            chip_ev=allin.chip_ev,
             icm_ev=icm_ev,
-            icm_result={name: settled[name] - now[name] for name in contenders},
+            icm_result={name: settled[name] - now[name] for name in allin.players},
             table_only=table_only,
         ),
         notes=notes,
