@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 16:16+0100\n"
+"POT-Creation-Date: 2026-10-29 19:56+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -3499,6 +3499,16 @@ msgid "Your database contains no hands yet."
 msgstr "Ihre Datenbank enthält noch keine Hände."
 
 #: fpdb_3_legacy/hand_review_dialog.py
+#, python-format
+msgid "%(count)d hands exported to %(path)s."
+msgstr ""
+
+#: fpdb_3_legacy/hand_review_dialog.py
+#, python-format
+msgid "%d hands could not be described exactly and were left out:"
+msgstr ""
+
+#: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy, python-format
 msgid "%s is not a program that can be started."
 msgstr "%s ist kein startbares Programm."
@@ -3523,6 +3533,14 @@ msgid "Every hero decision of the hand"
 msgstr "Jede Hero-Entscheidung der Hand"
 
 #: fpdb_3_legacy/hand_review_dialog.py
+msgid "Export hands for solver review"
+msgstr ""
+
+#: fpdb_3_legacy/hand_review_dialog.py
+msgid "Export the hands in view for solver review..."
+msgstr ""
+
+#: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy
 msgid "Hand review (*.json)"
 msgstr "Hand-Review (*.json)"
@@ -3531,6 +3549,10 @@ msgstr "Hand-Review (*.json)"
 #, fuzzy
 msgid "Locate PreflopAdvisor"
 msgstr "PreflopAdvisor suchen"
+
+#: fpdb_3_legacy/hand_review_dialog.py
+msgid "No hands are in view to export."
+msgstr ""
 
 #: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy
@@ -3583,6 +3605,13 @@ msgstr "Solver-Review"
 #, fuzzy
 msgid "Solver review (PreflopAdvisor)..."
 msgstr "Solver-Review (PreflopAdvisor)..."
+
+#: fpdb_3_legacy/hand_review_dialog.py
+#, fuzzy, python-format
+msgid "The hands could not be saved: %s"
+msgstr ""
+"Diese Hand konnte nicht dargestellt werden:\n"
+"%s"
 
 #: fpdb_3_legacy/hand_review_dialog.py
 #, fuzzy

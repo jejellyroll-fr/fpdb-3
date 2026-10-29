@@ -36,6 +36,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy.hand_review_payload import (
+    BatchExport,
     HandReview,
     HandReviewError,
     JsonFileTransport,
@@ -44,6 +45,7 @@ from fpdb_3_legacy.hand_review_payload import (
     build_hand_review,
     decision_at,
     dumps,
+    export_hands,
     preflop_advisor_command,
     review_document,
     summary_lines,
@@ -76,6 +78,45 @@ def add_review_action(
     menu.addAction(_("Solver review (PreflopAdvisor)...")).triggered.connect(
         lambda: HandReviewDialog(hand, parent, fpdb_hand_id=fpdb_hand_id, config=config).exec()
     )
+
+
+def add_batch_review_action(menu: QMenu, hands: Callable[[], list[Any]], parent: QWidget | None = None) -> None:
+    """Append the batch export of the hands in view (#448): *hands* gives them when it is chosen."""
+    menu.addAction(_("Export the hands in view for solver review...")).triggered.connect(
+        lambda: export_hands_dialog(hands(), parent)
+    )
+
+
+def batch_report(export: BatchExport) -> str:
+    """What a batch export did, for a person: how many hands, and why the others were refused."""
+    lines = [_("%(count)d hands exported to %(path)s.") % {"count": export.exported, "path": export.path}]
+    if export.refused:
+        lines.append(_("%d hands could not be described exactly and were left out:") % export.refused_total)
+        lines.extend(f"  {code}: {count}" for code, count in export.refused.items())
+    return "\n".join(lines)
+
+
+def export_hands_dialog(hands: list[Any], parent: QWidget | None = None) -> BatchExport | None:
+    """Ask where to save the whole-hand document of *hands*, write it, and say what it holds."""
+    if not hands:
+        QMessageBox.information(parent, _("Solver review"), _("No hands are in view to export."))
+        return None
+    path, _filter = QFileDialog.getSaveFileName(
+        parent,
+        _("Export hands for solver review"),
+        "fpdb-hand-review.json",
+        _("Hand review (*.json)"),
+    )
+    if not path:
+        return None
+    generated_at = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+    try:
+        export = export_hands(hands, Path(path), generated_at=generated_at)
+    except OSError as exc:
+        QMessageBox.warning(parent, _("Solver review"), _("The hands could not be saved: %s") % exc)
+        return None
+    QMessageBox.information(parent, _("Solver review"), batch_report(export))
+    return export
 
 
 class HandReviewDialog(QDialog):

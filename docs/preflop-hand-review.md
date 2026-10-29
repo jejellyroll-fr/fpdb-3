@@ -177,6 +177,13 @@ third-party tool can read:
 Code: `build_full_review(hand)` describes one hand, `review_hands(hands, full=True)`
 many, and `full_review_document(reviews, skipped=...)` writes the document.
 
+**Exporting a batch.** In the Hand Viewer, right-click any hand and choose
+*Export the hands in view for solver review...*. Every hand the filters leave on
+screen is written as one version 2 document, in the order shown. A message then
+says how many hands were exported and how many were left out, counted by
+refusal code; the document lists each refused hand under `skipped`. In code,
+`export_hands(hands, path)` does the same and returns the counts.
+
 A hand keeps every version 1 field except the preflop-only `actions`,
 `hero_decisions` and `selected_decision`, which are replaced by:
 

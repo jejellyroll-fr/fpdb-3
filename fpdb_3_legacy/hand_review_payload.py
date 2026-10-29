@@ -887,6 +887,35 @@ def full_review_document(
     return document
 
 
+@dataclass(frozen=True)
+class BatchExport:
+    """What a batch export wrote: how many hands, and the refused ones by reason (#448)."""
+
+    path: str
+    exported: int
+    refused: dict[str, int]  # refusal code -> hands refused for it
+
+    @property
+    def refused_total(self) -> int:
+        return sum(self.refused.values())
+
+
+def refusal_counts(skipped: Iterable[dict[str, Any]]) -> dict[str, int]:
+    """The refused hands of a batch, counted by refusal code, most frequent first."""
+    counts: dict[str, int] = {}
+    for entry in skipped:
+        counts[entry["code"]] = counts.get(entry["code"], 0) + 1
+    return dict(sorted(counts.items(), key=lambda item: (-item[1], item[0])))
+
+
+def export_hands(hands: Iterable[Any], path: Path, *, generated_at: str = "") -> BatchExport:
+    """Write the whole-hand document of *hands* to *path*: one document, its refusals listed (#448)."""
+    reviews, skipped = review_hands(hands, full=True)
+    document = full_review_document(reviews, generated_at=generated_at, skipped=skipped)
+    written = JsonFileTransport(path).send(document)
+    return BatchExport(written, len(reviews), refusal_counts(skipped))
+
+
 def dumps(document: dict[str, Any]) -> str:
     return json.dumps(document, indent=2, ensure_ascii=False) + "\n"
 

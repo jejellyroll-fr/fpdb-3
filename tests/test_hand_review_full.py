@@ -24,7 +24,9 @@ from fpdb_3_legacy.hand_review_payload import (
     HandReviewError,
     build_full_review,
     build_hand_review,
+    export_hands,
     full_review_document,
+    refusal_counts,
     review_document,
     review_hands,
 )
@@ -185,3 +187,30 @@ def test_a_hand_read_back_from_the_database_says_the_same(importer, fresh_db, le
         assert stored[key] == parsed[key], key
     assert [line(item) for item in stored["streets"]] == [line(item) for item in parsed["streets"]]
     assert [item["pot_start"] for item in stored["streets"]] == [item["pot_start"] for item in parsed["streets"]]
+
+
+# -- the batch export -------------------------------------------------------------------
+
+
+def test_refusals_are_counted_by_reason_most_frequent_first() -> None:
+    skipped = [{"code": "b"}, {"code": "a"}, {"code": "b"}, {"code": "c"}, {"code": "a"}, {"code": "b"}]
+
+    assert list(refusal_counts(skipped).items()) == [("b", 3), ("a", 2), ("c", 1)]
+
+
+def test_a_batch_of_500_hands_is_one_document_that_says_what_it_left_out(legacy_config, tmp_path) -> None:
+    import copy
+    import json
+
+    good = parse(legacy_config, "nl_3bet_6max.txt")
+    twice = copy.copy(good)
+    twice.runItTimes = 2
+    hands = [good] * 480 + [twice] * 20
+
+    export = export_hands(hands, tmp_path / "batch.json", generated_at="2026-10-29T18:00:00+00:00")
+
+    assert (export.exported, export.refused, export.refused_total) == (480, {UNSUPPORTED_BOARD: 20}, 20)
+    document = json.loads((tmp_path / "batch.json").read_text(encoding="utf-8"))
+    assert (document["schema"], document["version"]) == (FULL_SCHEMA, FULL_VERSION)
+    assert len(document["hands"]) == 480 and len(document["skipped"]) == 20
+    assert document["generated_at"] == "2026-10-29T18:00:00+00:00"
