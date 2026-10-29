@@ -198,3 +198,13 @@ collected are paid on top, so a profit that counts only the prize leaves them ou
 
 `koWinnings` is added to `TourneysPlayers` on connection for databases from before it. A
 summary imported before this change needs importing again to fill it.
+
+### Knockouts only, or freezeouts only
+
+The tournament graph and the tournament player report have a **Format** filter: every
+tournament, knockouts only, or freezeouts only (`fpdb_3_legacy/tourney_format.py`). It
+reads `TourneyTypes.knockout`. "Freezeouts only" keeps every tournament not known to be a
+knockout, including types stored before the flag was read.
+
+The Research Browser and the tournament study pack have the same choice as the
+`knockout` filter and breakdown.

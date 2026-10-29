@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 12:58+0100\n"
+"POT-Creation-Date: 2026-10-29 16:16+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -259,6 +259,12 @@ msgid "All Players"
 msgstr "すべてのプレイヤー"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
+#| msgid "Add Tournament"
+msgid "All tournaments"
+msgstr "トーナメントを追加"
+
+#: fpdb_3_legacy/Filters.py
 msgid "And:"
 msgstr "から:"
 
@@ -337,6 +343,16 @@ msgstr "EV"
 msgid "Euro"
 msgstr "ユーロ"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Format"
+msgstr "書式"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Freezeouts only"
+msgstr ""
+
 #: fpdb_3_legacy/Filters.py
 msgid "From:"
 msgstr "開始日:"
@@ -370,6 +386,10 @@ msgstr "ホールカード"
 #: fpdb_3_legacy/Filters.py
 msgid "Irish"
 msgstr "アイリッシュ"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Knockouts only"
+msgstr ""
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -1927,11 +1947,6 @@ msgstr "データベース"
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Field Type"
 msgstr "フィールドのデータ型"
-
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Format"
-msgstr "書式"
 
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "General"
@@ -5448,6 +5463,12 @@ msgstr "プリフロップのアグレッサーである"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
+#| msgid "Tournament"
+msgid "Knockout tournament"
+msgstr "トーナメント"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat column"
 msgstr "従来の統計列"
 
@@ -5983,6 +6004,11 @@ msgstr ""
 #, fuzzy
 msgid "Which poker room the hands were played on."
 msgstr "ハンドがプレイされたポーカールーム。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Yes for knockout tournaments, No for every other hand."
+msgstr "トーナメントのハンドは「はい」、キャッシュゲームのハンドは「いいえ」。"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -7401,9 +7427,6 @@ msgstr ""
 
 #~ msgid "Add %s import directory %s"
 #~ msgstr "%s インポート対象ディレクトリに %s を追加"
-
-#~ msgid "Add Tournament"
-#~ msgstr "トーナメントを追加"
 
 #~ msgid "Aggression factor"
 #~ msgstr "アグレッシブ係数(AF)"

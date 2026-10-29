@@ -114,7 +114,7 @@ class FilterSpec:
 
 _GROUP_OF: Final = {
     "site": "game", "game": "game", "game_base": "game", "limit": "game", "currency": "game",
-    "tournament": "game", "big_blind": "game", "stake_bb": "game",
+    "tournament": "game", "knockout": "game", "big_blind": "game", "stake_bb": "game",
     "seats": "game", "max_seats": "game", "session": "game",
     "hand_id": "game", "hand_id_from": "game", "hand_id_to": "game", "tournament_id": "game",
     "date_from": "game", "date_to": "game",
@@ -164,6 +164,7 @@ _KIND_OF_ENGINE_KIND: Final = {
     "range_pct": "range",
     "bool": "bool",
     "hero": "bool",
+    "bool_lenient": "bool",  # Codex (#635): the knockout filter is a yes/no choice, not free text
     "null_check": "bool",
     "label": "set",
     "flagset": "flags",

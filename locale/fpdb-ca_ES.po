@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 12:58+0100\n"
+"POT-Creation-Date: 2026-10-29 16:16+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -264,6 +264,11 @@ msgid "All Players"
 msgstr "Tots els Jugadors"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
+msgid "All tournaments"
+msgstr "Tornei"
+
+#: fpdb_3_legacy/Filters.py
 msgid "And:"
 msgstr "I:"
 
@@ -349,6 +354,17 @@ msgstr "EV"
 msgid "Euro"
 msgstr "Euro"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Format"
+msgstr "Format"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Freezeouts only"
+msgstr ""
+
 #: fpdb_3_legacy/Filters.py
 msgid "From:"
 msgstr "Des de:"
@@ -385,6 +401,10 @@ msgstr "Cartes pròpies"
 #, fuzzy
 msgid "Irish"
 msgstr "Irish"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Knockouts only"
+msgstr ""
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -1981,12 +2001,6 @@ msgstr "Bases de dades"
 #, fuzzy
 msgid "Field Type"
 msgstr "Tipus de camp"
-
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Format"
-msgstr "Format"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #, fuzzy
@@ -5581,6 +5595,11 @@ msgstr "És l'agressor preflop"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
+msgid "Knockout tournament"
+msgstr "Tornei"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat column"
 msgstr "Columna d'estadística antiga"
 
@@ -6118,6 +6137,11 @@ msgstr "Quina parella tenia qui actuava: overpair, top pair, set, etc."
 #, fuzzy
 msgid "Which poker room the hands were played on."
 msgstr "A quina sala de pòquer es van jugar les mans."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Yes for knockout tournaments, No for every other hand."
+msgstr "Sí per a les mans de torneig, No per a les mans de cash."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy

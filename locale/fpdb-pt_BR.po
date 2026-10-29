@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 12:58+0100\n"
+"POT-Creation-Date: 2026-10-29 16:16+0100\n"
 "PO-Revision-Date: 2011-07-27 15:17+0000\n"
 "Last-Translator: pkpkpkdo <ofelipedbzgt@hotmail.com>\n"
 "Language-Team: Portuguese (Brazilian) (http://www.transifex.net/projects/p/"
@@ -262,6 +262,11 @@ msgid "All Players"
 msgstr "Todos Jogadores"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
+msgid "All tournaments"
+msgstr "Torneios"
+
+#: fpdb_3_legacy/Filters.py
 msgid "And:"
 msgstr "E:"
 
@@ -347,6 +352,17 @@ msgstr "EV"
 msgid "Euro"
 msgstr "Euro"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Format"
+msgstr "Formato"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Freezeouts only"
+msgstr ""
+
 #: fpdb_3_legacy/Filters.py
 msgid "From:"
 msgstr "De:"
@@ -383,6 +399,10 @@ msgstr "Cartas Escondidas"
 #, fuzzy
 msgid "Irish"
 msgstr "Irish"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Knockouts only"
+msgstr ""
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -1965,12 +1985,6 @@ msgstr "Bancos de dados"
 #, fuzzy
 msgid "Field Type"
 msgstr "Tipo de campo"
-
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Format"
-msgstr "Formato"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #, fuzzy
@@ -5532,6 +5546,11 @@ msgstr "É o agressor pré-flop"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
+msgid "Knockout tournament"
+msgstr "Torneios"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat column"
 msgstr "Coluna de estatística antiga"
 
@@ -6067,6 +6086,11 @@ msgstr "Qual par quem agiu tinha: overpair, top pair, set e assim por diante."
 #, fuzzy
 msgid "Which poker room the hands were played on."
 msgstr "Em qual sala de pôquer as mãos foram jogadas."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Yes for knockout tournaments, No for every other hand."
+msgstr "Sim para mãos de torneio, Não para mãos de cash."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -7371,10 +7395,6 @@ msgstr ""
 
 #~ msgid "ALL STREETS"
 #~ msgstr "TODAS STREETS"
-
-#, fuzzy
-#~ msgid "Add Tournament"
-#~ msgstr "Torneios"
 
 #, fuzzy
 #~ msgid "Add player: rank: %s name: %s winnings: %s"

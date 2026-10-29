@@ -56,6 +56,7 @@ class GuiTourneyPlayerStats(QSplitter):
             "Sites": True,
             "Seats": True,
             "Dates": True,
+            "TourneyFormat": True,
             "UseType": "tour",
             "Button2": True,
         }
@@ -448,6 +449,12 @@ class GuiTourneyPlayerStats(QSplitter):
             sitetest = f"and tt.siteId in {sitetest}"
         else:
             sitetest = "and tt.siteId IS NULL"
+        # Knockouts or freezeouts (#447), on the TourneyTypes tt every query here joins.
+        from fpdb_3_legacy.tourney_format import format_condition
+
+        get_format = getattr(self.filters, "getTourneyFormat", None)
+        tourney_format = get_format() if callable(get_format) else "all"
+        sitetest = " ".join((sitetest, format_condition(tourney_format, self.db.backend == self.db.SQLITE)))
         query = query.replace("<sitetest>", sitetest)
 
         if seats:

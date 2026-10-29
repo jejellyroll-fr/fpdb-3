@@ -93,6 +93,7 @@ FILTER_LABELS: Final[dict[str, str]] = {
     "limit": N_("Limit"),
     "currency": N_("Currency"),
     "tournament": N_("Tournament or cash"),
+    "knockout": N_("Knockout tournament"),
     "tournament_id": N_("Tournament"),
     "big_blind": N_("Big blind (chips)"),
     "stake_bb": N_("Stake (big blinds)"),
@@ -196,6 +197,7 @@ FILTER_DESCRIPTIONS: Final[dict[str, str]] = {
     "limit": N_("Fixed limit, no limit and the other betting structures."),
     "currency": N_("The currency the game was played in."),
     "tournament": N_("Yes for tournament hands, No for cash game hands."),
+    "knockout": N_("Yes for knockout tournaments, No for every other hand."),
     "tournament_id": N_("One specific tournament."),
     "big_blind": N_("The big blind in chips, for mixed stakes."),
     "stake_bb": N_("The size of the game, expressed in big blinds."),
@@ -610,6 +612,7 @@ DIMENSION_LABELS: Final[dict[str, str]] = {
     "game_base": N_("Game family"),
     "limit": N_("Limit"),
     "tournament": N_("Tournament"),
+    "knockout": N_("Knockout tournament"),
     "session": N_("Session"),
     "sizing_bucket": N_("Bet size"),
     "facing_sizing_bucket": N_("Bet size faced"),
@@ -823,6 +826,7 @@ _BOOL_CLAUSES: Final[dict[str, tuple[str, str]]] = {
     "in_position_vs_facing": ("in position on the bettor", "out of position against the bettor"),
     "facing_all_in": ("facing an all-in", "not facing an all-in"),
     "tournament": ("in tournaments", "in cash games"),
+    "knockout": ("in knockout tournaments", "outside knockout tournaments"),
     "hole_cards_known": ("with known hole cards", "with unknown hole cards"),
     "board_present": ("on the flop or later", "preflop"),
     "hand_state_known": ("with a classified hand state", "without a classified hand state"),
@@ -835,7 +839,7 @@ _BOOL_CLAUSES: Final[dict[str, tuple[str, str]]] = {
 _CLAUSE_ORDER: Final[tuple[str, ...]] = (
     # -- game ---------------------------------------------------------------
     "site", "game", "limit", "currency", "max_seats", "seats", "stake_bb",
-    "big_blind", "tournament", "date_from", "date_to",
+    "big_blind", "tournament", "knockout", "date_from", "date_to",
     # -- who ----------------------------------------------------------------
     "player", "players", "identity",
     # -- seat and stack ------------------------------------------------------

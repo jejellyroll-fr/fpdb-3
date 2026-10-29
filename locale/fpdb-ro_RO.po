@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 12:58+0100\n"
+"POT-Creation-Date: 2026-10-29 16:16+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -262,6 +262,11 @@ msgid "All Players"
 msgstr "Toti jucatorii"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
+msgid "All tournaments"
+msgstr "Turnee"
+
+#: fpdb_3_legacy/Filters.py
 msgid "And:"
 msgstr "Si:"
 
@@ -347,6 +352,16 @@ msgstr "EV"
 msgid "Euro"
 msgstr "Euro"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Format"
+msgstr "Format"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Freezeouts only"
+msgstr ""
+
 #: fpdb_3_legacy/Filters.py
 msgid "From:"
 msgstr "De la:"
@@ -382,6 +397,10 @@ msgstr "Cartile comune"
 #, fuzzy
 msgid "Irish"
 msgstr "Irish"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Knockouts only"
+msgstr ""
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -1948,11 +1967,6 @@ msgstr "Baze de date"
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "Field Type"
 msgstr "Tipul cimpului"
-
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Format"
-msgstr "Format"
 
 #: fpdb_3_legacy/GuiPrefs.py
 msgid "General"
@@ -5502,6 +5516,11 @@ msgstr "Este agresorul preflop"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
+msgid "Knockout tournament"
+msgstr "Turnee"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat column"
 msgstr ""
 "\n"
@@ -6044,6 +6063,11 @@ msgstr ""
 #, fuzzy
 msgid "Which poker room the hands were played on."
 msgstr "În ce cameră de poker s-au jucat mâinile."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Yes for knockout tournaments, No for every other hand."
+msgstr "Nu s-au gasit sumare de turnee"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -7623,10 +7647,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "Add %s import directory %s"
 #~ msgstr "Creare director '%s'"
-
-#, fuzzy
-#~ msgid "Add Tournament"
-#~ msgstr "Turnee"
 
 #, fuzzy
 #~ msgid "Add player: rank: %s name: %s winnings: %s"

@@ -22,7 +22,8 @@ the Hold'em packs are not offered for an Omaha database.
 | **Single-Raised Pots** | the raiser in and out of position, the defender facing the bet, and the turn |
 
 Every one of them opens in Hero-versus-Field, keeps its source hands, and can
-be narrowed by seat, opposing seat, table size, stake, site and date.
+be narrowed by seat, opposing seat, table size, stake, site and date, and to
+knockout tournaments or the others.
 
 ## Effective stack is the axis, not a filter
 

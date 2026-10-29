@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 12:58+0100\n"
+"POT-Creation-Date: 2026-10-29 16:16+0100\n"
 "PO-Revision-Date: 2011-06-16 13:21+0000\n"
 "Last-Translator: Lexej <alexej@glyvin.com>\n"
 "Language-Team: Russian (Russia) (http://www.transifex.net/projects/p/fpdb/"
@@ -263,6 +263,11 @@ msgid "All Players"
 msgstr "Все игроки"
 
 #: fpdb_3_legacy/Filters.py
+#, fuzzy
+msgid "All tournaments"
+msgstr "Турниры"
+
+#: fpdb_3_legacy/Filters.py
 msgid "And:"
 msgstr "И еще:"
 
@@ -348,6 +353,17 @@ msgstr "EV"
 msgid "Euro"
 msgstr "Евро"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Format"
+msgstr "Формат"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Freezeouts only"
+msgstr ""
+
 #: fpdb_3_legacy/Filters.py
 msgid "From:"
 msgstr "От:"
@@ -384,6 +400,10 @@ msgstr "Карманные карты"
 #, fuzzy
 msgid "Irish"
 msgstr "Irish"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Knockouts only"
+msgstr ""
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -1957,12 +1977,6 @@ msgstr "Базы данных"
 #, fuzzy
 msgid "Field Type"
 msgstr "Тип поля"
-
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Format"
-msgstr "Формат"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #, fuzzy
@@ -5511,6 +5525,11 @@ msgstr "Является агрессором на префлопе"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
+msgid "Knockout tournament"
+msgstr "Турниры"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat column"
 msgstr "Старый столбец стата"
 
@@ -6043,6 +6062,11 @@ msgstr "Какая пара была у действующего: оверпар
 #, fuzzy
 msgid "Which poker room the hands were played on."
 msgstr "В каком покер-руме сыграны раздачи."
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Yes for knockout tournaments, No for every other hand."
+msgstr "Да для турнирных раздач, Нет для кэш-раздач."
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -7307,10 +7331,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "Add %s import directory %s"
 #~ msgstr "Создание каталога: '%s'"
-
-#, fuzzy
-#~ msgid "Add Tournament"
-#~ msgstr "Турниры"
 
 #~ msgid "An invalid DB version or missing tables have been detected."
 #~ msgstr "Неверная версия БД или отсутствуют таблицы."

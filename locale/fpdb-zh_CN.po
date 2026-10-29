@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 12:58+0100\n"
+"POT-Creation-Date: 2026-10-29 16:16+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -264,6 +264,11 @@ msgstr "所有玩家"
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
+msgid "All tournaments"
+msgstr "文件%s无法找到"
+
+#: fpdb_3_legacy/Filters.py
+#, fuzzy
 msgid "And:"
 msgstr "和:"
 
@@ -352,6 +357,17 @@ msgstr "EV"
 msgid "Euro"
 msgstr "欧元"
 
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/GuiPrefs.py
+#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Format"
+msgstr "格式"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Freezeouts only"
+msgstr ""
+
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
 msgid "From:"
@@ -391,6 +407,10 @@ msgstr "底牌"
 #, fuzzy
 msgid "Irish"
 msgstr "Irish"
+
+#: fpdb_3_legacy/Filters.py
+msgid "Knockouts only"
+msgstr ""
 
 #: fpdb_3_legacy/Filters.py
 #, fuzzy
@@ -1973,12 +1993,6 @@ msgstr "数据库"
 #, fuzzy
 msgid "Field Type"
 msgstr "字段类型"
-
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/hand_share_dialog.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Format"
-msgstr "格式"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #, fuzzy
@@ -5496,6 +5510,11 @@ msgstr "是翻牌前进攻者"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
+msgid "Knockout tournament"
+msgstr "文件%s无法找到"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
 msgid "Legacy stat column"
 msgstr "旧版统计列"
 
@@ -6026,6 +6045,11 @@ msgstr "行动者持有的对子: 超对、顶对、暗三等。"
 #, fuzzy
 msgid "Which poker room the hands were played on."
 msgstr "手牌所在的扑克室。"
+
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Yes for knockout tournaments, No for every other hand."
+msgstr "锦标赛手牌为“是”，现金局手牌为“否”。"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy

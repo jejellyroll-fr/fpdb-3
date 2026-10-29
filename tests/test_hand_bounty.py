@@ -14,18 +14,8 @@ import pytest
 
 from fpdb_3_legacy import Hand
 from fpdb_3_legacy.hand_bounty import BountyRules, bounty_for_replay, hand_allin_bounty
-from tests.helpers.icm_hands import SNG_ALLIN, fixed_equity, parse
+from tests.helpers.icm_hands import PKO, SNG_ALLIN, fixed_equity, parse
 
-PKO = (
-    SNG_ALLIN.replace(
-        "200000000001: Tournament #3000000001, $10+$1 USD",
-        "200000000101: Tournament #3000000101, $4.40+$5.00+$0.60 USD",
-    )
-    .replace("Table '3000000001 1'", "Table '3000000101 1'")
-    .replace("Hero (4000 in chips)", "Hero (4000 in chips, $5 bounty)")
-    .replace("Villain (3000 in chips)", "Villain (3000 in chips, $7.50 bounty)")
-    .replace("Short (1000 in chips)", "Short (1000 in chips, $5 bounty)")
-)
 # A regular knockout: PokerStars prints no seat bounty, every head is worth the same $0.50.
 KNOCKOUT = SNG_ALLIN.replace(
     "200000000001: Tournament #3000000001, $10+$1 USD", "200000000201: Tournament #3000000201, $4.40+$0.50+$0.60 USD"
