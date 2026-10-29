@@ -83,6 +83,7 @@ def replayer_queries() -> dict[str, str]:
                     hp.card16,hp.card17,hp.card18,hp.card19,hp.card20,
                     hp.position,
                     round(hp.startBounty / 100.0,2) as bounty,
+                    round(hp.endBounty / 100.0,2) as endbounty,
                     hp.sitout,
                     hp.isCashOut
                 FROM

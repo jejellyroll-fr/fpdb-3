@@ -336,6 +336,12 @@ from fpdb_3_legacy.stats_formatting import (
 from fpdb_3_legacy.stats_formatting import (
     stat_override as __stat_override,
 )
+from fpdb_3_legacy.stats_knockout import (
+    bounty as bounty,
+)
+from fpdb_3_legacy.stats_knockout import (
+    covers as covers,
+)
 from fpdb_3_legacy.stats_postflop import (
     WMsF as WMsF,
 )

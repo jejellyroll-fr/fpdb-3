@@ -208,3 +208,16 @@ knockout, including types stored before the flag was read.
 
 The Research Browser and the tournament study pack have the same choice as the
 `knockout` filter and breakdown.
+
+### In the HUD
+
+Two HUD statistics read the last imported hand, like the stack statistics
+(`fpdb_3_legacy/stats_knockout.py`):
+
+| Stat | Shows |
+| --- | --- |
+| `bounty` | The bounty on the player's head after that hand. In a progressive knockout, a bounty the hand raised by an elimination is shown at its new value. A regular knockout prints no seat bounty, so the statistic shows `-`. |
+| `covers` | `you cover` when the hero's stack is the larger one, so winning an all-in against the player busts them and collects their bounty; `covers you` the other way round; `even` for equal stacks. It compares end-of-hand stacks, and shows `-` on the hero's own label. |
+
+A hand rebuilt from the database now also carries each seat's end bounty, which the
+`bounty` statistic needs.
