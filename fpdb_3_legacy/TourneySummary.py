@@ -203,6 +203,8 @@ class TourneySummary:
         self.rebuyCounts: dict[str, list[int | None]] = {}
         self.addOnCounts: dict[str, list[int | None]] = {}
         self.koCounts: dict[str, list[int | None]] = {}
+        # Bounty money won, in hundredths (#447): the rank lines' winnings are prize money only.
+        self.koWinnings: dict[str, list[int | None]] = {}
 
         if builtFrom == "IMAP":
             # Fix line endings?
@@ -285,6 +287,7 @@ class TourneySummary:
             (("COUNT REBUYS"), self.rebuyCounts),
             (("COUNT ADDONS"), self.addOnCounts),
             (("COUNT KO"), self.koCounts),
+            (("BOUNTY MONEY"), self.koWinnings),
         )
         str = ""
         for name, var in vars:
@@ -368,6 +371,7 @@ class TourneySummary:
         addOnCount,
         koCount,
         entryId=None,
+        koWinnings=None,
     ) -> None:
         """Adds a player to the tourney, and initialises data structures indexed by player.
         rank        (int) indicating the finishing rank (can be -1 if unknown)
@@ -375,6 +379,8 @@ class TourneySummary:
         winnings    (int) the money the player ended the tourney with (can be 0, or -1 if unknown).
         """
         log.debug(f"addPlayer: rank:{rank} - name : '{name}' - Winnings ({winnings})")
+        # setdefault: some callers build a summary without __init__ (#447 added the field).
+        ko_winnings = self.__dict__.setdefault("koWinnings", {})
         if self.players.get(name) is not None:
             if entryId is None:
                 entries = self.players[name][-1]
@@ -394,6 +400,7 @@ class TourneySummary:
             self.rebuyCounts[name].append(None)
             self.addOnCounts[name].append(None)
             self.koCounts[name].append(None)
+            ko_winnings.setdefault(name, []).append(koWinnings)
         else:
             self.players[name] = [entryId if entryId is not None else 1]
             if rank is not None:
@@ -407,6 +414,7 @@ class TourneySummary:
             self.rebuyCounts.update({name: [rebuyCount]})
             self.addOnCounts.update({name: [addOnCount]})
             self.koCounts.update({name: [koCount]})
+            ko_winnings[name] = [koWinnings]
 
     # end def addPlayer
 

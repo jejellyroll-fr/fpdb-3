@@ -10,7 +10,7 @@ def tournament_graph_queries() -> dict[str, str]:
     # Tourney Results query
     ####################################
     query["tourneyResults"] = """
-        SELECT tp.tourneyId, (coalesce(tp.winnings,0) - coalesce(tt.buyIn,0) - coalesce(tt.fee,0)) as profit, tp.koCount, tp.rebuyCount, tp.addOnCount, tt.buyIn, tt.fee, t.siteTourneyNo
+        SELECT tp.tourneyId, (coalesce(tp.winnings,0) + coalesce(tp.koWinnings,tp.koCount*tt.koBounty,0) - coalesce(tt.buyIn,0) - coalesce(tt.fee,0)) as profit, tp.koCount, tp.rebuyCount, tp.addOnCount, tt.buyIn, tt.fee, t.siteTourneyNo
         FROM TourneysPlayers tp
         INNER JOIN Players pl      ON  (pl.id = tp.playerId)
         INNER JOIN Tourneys t         ON  (t.id  = tp.tourneyId)
@@ -20,7 +20,7 @@ def tournament_graph_queries() -> dict[str, str]:
         AND   ((t.startTime > '<startdate_test>' AND t.startTime < '<enddate_test>')
                 OR t.startTime is NULL)
         GROUP BY t.startTime, tp.tourneyId, tp.winningsCurrency,
-                 tp.winnings, tp.koCount,
+                 tp.winnings, tp.koCount, tp.koWinnings, tt.koBounty,
                  tp.rebuyCount, tp.addOnCount,
                  tt.buyIn, tt.fee, t.siteTourneyNo
         ORDER BY t.startTime"""
@@ -33,7 +33,7 @@ def tournament_graph_queries() -> dict[str, str]:
     # belongs to the selected time window. The results table above remains
     # able to display summary-only imports whose start time is unknown.
     query["tourneyGraph"] = """
-        SELECT tp.tourneyId, (coalesce(tp.winnings,0) - coalesce(tt.buyIn,0) - coalesce(tt.fee,0)) as profit, tp.koCount, tp.rebuyCount, tp.addOnCount, tt.buyIn, tt.fee, t.siteTourneyNo
+        SELECT tp.tourneyId, (coalesce(tp.winnings,0) + coalesce(tp.koWinnings,tp.koCount*tt.koBounty,0) - coalesce(tt.buyIn,0) - coalesce(tt.fee,0)) as profit, tp.koCount, tp.rebuyCount, tp.addOnCount, tt.buyIn, tt.fee, t.siteTourneyNo
         FROM TourneysPlayers tp
         INNER JOIN Players pl      ON  (pl.id = tp.playerId)
         INNER JOIN Tourneys t         ON  (t.id  = tp.tourneyId)
@@ -43,7 +43,7 @@ def tournament_graph_queries() -> dict[str, str]:
         AND   (t.startTime > '<startdate_test>' AND t.startTime < '<enddate_test>')
              <currency_test>
         GROUP BY t.startTime, tp.tourneyId, tp.winningsCurrency,
-                 tp.winnings, tp.koCount,
+                 tp.winnings, tp.koCount, tp.koWinnings, tt.koBounty,
                  tp.rebuyCount, tp.addOnCount,
                  tt.buyIn, tt.fee, t.siteTourneyNo
         ORDER BY t.startTime"""
@@ -53,7 +53,7 @@ def tournament_graph_queries() -> dict[str, str]:
     # <game_test>
     # Same dated-tournament contract, with tournament-type filters.
     query["tourneyGraphType"] = """
-        SELECT tp.tourneyId, (coalesce(tp.winnings,0) - coalesce(tt.buyIn,0) - coalesce(tt.fee,0)) as profit, tp.koCount, tp.rebuyCount, tp.addOnCount, tt.buyIn, tt.fee, t.siteTourneyNo
+        SELECT tp.tourneyId, (coalesce(tp.winnings,0) + coalesce(tp.koWinnings,tp.koCount*tt.koBounty,0) - coalesce(tt.buyIn,0) - coalesce(tt.fee,0)) as profit, tp.koCount, tp.rebuyCount, tp.addOnCount, tt.buyIn, tt.fee, t.siteTourneyNo
         FROM TourneysPlayers tp
         INNER JOIN Players pl      ON  (pl.id = tp.playerId)
         INNER JOIN Tourneys t         ON  (t.id  = tp.tourneyId)
@@ -66,7 +66,7 @@ def tournament_graph_queries() -> dict[str, str]:
         AND   (t.startTime > '<startdate_test>' AND t.startTime < '<enddate_test>')
              <currency_test>
         GROUP BY t.startTime, tp.tourneyId, tp.winningsCurrency,
-                 tp.winnings, tp.koCount,
+                 tp.winnings, tp.koCount, tp.koWinnings, tt.koBounty,
                  tp.rebuyCount, tp.addOnCount,
                  tt.buyIn, tt.fee, t.siteTourneyNo
         ORDER BY t.startTime"""

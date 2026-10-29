@@ -84,7 +84,8 @@ def tournament_persistence_queries(db_server: str = "") -> dict[str, str]:
                                                  winningsCurrency = %s,
                                                  rebuyCount = %s,
                                                  addOnCount = %s,
-                                                 koCount = %s
+                                                 koCount = %s,
+                                                 koWinnings = %s
                                              WHERE id=%s
     """
 
@@ -109,10 +110,11 @@ def tournament_persistence_queries(db_server: str = "") -> dict[str, str]:
                                                 winningsCurrency,
                                                 rebuyCount,
                                                 addOnCount,
-                                                koCount
+                                                koCount,
+                                                koWinnings
                                             )
                                             values (%s, %s, %s, %s, %s,
-                                                    %s, %s, %s, %s)
+                                                    %s, %s, %s, %s, %s)
     """
 
     query["selectHandsPlayersWithWrongTTypeId"] = """SELECT id

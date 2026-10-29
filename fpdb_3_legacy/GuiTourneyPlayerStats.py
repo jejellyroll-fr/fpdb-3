@@ -33,7 +33,7 @@ log = get_logger("gui_tourney_player_stats")
 _TOURNEY_TABLES = ("Hands", "Tourneys")
 
 colalias, colshow, colheading, colxalign, colformat, coltype = 0, 1, 2, 3, 4, 5
-_MONEY_COLUMNS = {"buyIn", "fee", "spent", "won", "net", "profitPerTourney"}
+_MONEY_COLUMNS = {"buyIn", "fee", "spent", "won", "bounties", "net", "profitPerTourney"}
 _PERCENT_COLUMNS = {"itm", "roi"}
 _COUNT_COLUMNS = {"tourneyCount", "_1st", "_2nd", "_3rd", "unknownRank"}
 
@@ -92,6 +92,8 @@ class GuiTourneyPlayerStats(QSplitter):
             ["unknownRank", True, "Rank?", 1.0, "%1.0f", "str"],
             ["spent", True, "Spent", 1.0, "%3.2f", "str"],
             ["won", True, "Won", 1.0, "%3.2f", "str"],
+            # The part of Won paid as bounties (#447): prize money is Won less this.
+            ["bounties", True, "Bounties", 1.0, "%3.2f", "str"],
             ["net", True, "Net", 1.0, "%3.2f", "str"],
             ["roi", True, "ROI%", 1.0, "%3.2f", "str"],
             ["profitPerTourney", True, "$/Tour", 1.0, "%3.2f", "str"],
@@ -261,12 +263,13 @@ class GuiTourneyPlayerStats(QSplitter):
     def _fetch_tournaments(self, tourney_type_id, player_id):
         """Return the hero's tournaments for a tourney type, with hand counts.
 
-        Each row: (tourneyId, siteTourneyNo, startTime, rank, winnings, handCount, currency).
+        Each row: (tourneyId, siteTourneyNo, startTime, rank, winnings, handCount, currency, bounties).
         """
         ph = self.sql.query.get("placeholder", "%s")
         q = (
             "SELECT t.id, t.siteTourneyNo, t.startTime, tp.rank, tp.winnings/100.0, "
-            "(SELECT COUNT(*) FROM Hands h WHERE h.tourneyId = t.id), COALESCE(tp.winningsCurrency, tt.currency) "
+            "(SELECT COUNT(*) FROM Hands h WHERE h.tourneyId = t.id), COALESCE(tp.winningsCurrency, tt.currency), "
+            "COALESCE(tp.koWinnings, tp.koCount * tt.koBounty)/100.0 "
             "FROM TourneysPlayers tp "
             "JOIN Tourneys t ON t.id = tp.tourneyId "
             "JOIN TourneyTypes tt ON tt.id = t.tourneyTypeId "
@@ -284,19 +287,20 @@ class GuiTourneyPlayerStats(QSplitter):
         dialog.resize(560, 420)
         layout = QVBoxLayout(dialog)
 
-        headers = ["Tourney No", "Date", "Rank", "Winnings", "Hands"]
+        headers = ["Tourney No", "Date", "Rank", "Winnings", "Bounties", "Hands"]
         table = QTableWidget(len(tournaments), len(headers))
         table.setHorizontalHeaderLabels(headers)
         table.verticalHeader().hide()
         table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-        for r, (tid, tno, start, rank, winnings, hands, currency) in enumerate(tournaments):
+        for r, (tid, tno, start, rank, winnings, hands, currency, bounties) in enumerate(tournaments):
             display_start = format_datetime(start) if hasattr(start, "year") else str(start or "")
             cells = [
                 str(tno) if tno is not None else "",
                 display_start,
                 format_number(rank, 0) if rank not in (None, 0) else "",
                 format_currency(winnings, str(currency or "USD")) if winnings is not None else "",
+                format_currency(bounties, str(currency or "USD")) if bounties else "",
                 format_number(hands, 0),
             ]
             for col, text in enumerate(cells):

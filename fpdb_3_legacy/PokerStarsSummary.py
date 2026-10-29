@@ -152,7 +152,7 @@ class PokerStarsSummary(TourneySummary):
     # You collected 5 bounties for a total of USD 875.00.
     re_ko_bounties = re.compile(
         r"""
-                        You\scollected\s(?P<KOCOUNT>\d+)\sbounties\sfor\sa\stotal\sof\s({LEGAL_ISO})\s(?P<KOBOUNTY>[,.0-9]+)
+                        You\scollected\s(?P<KOCOUNT>\d+)\sbounties\sfor\sa\stotal\sof\s({LEGAL_ISO})\s(?P<KOBOUNTY>[0-9][,0-9]*(?:\.[0-9]+)?)
                                """.format(**substitutions),
         re.VERBOSE | re.MULTILINE,
     )
@@ -782,6 +782,11 @@ class PokerStarsSummary(TourneySummary):
         else:
             rebuy_count_hero = None
 
+        # The bounties are not in the rank lines' winnings (#447): only this line says what they paid.
+        # The count stays out of koCount, which the hand import keeps in units of the fixed bounty.
+        ko = self.re_ko_bounties.search(self.summaryText)
+        ko_winnings_hero = self._money_to_cents(ko.group("KOBOUNTY")) if ko else None
+
         if "PRIZEPOOL" in mg and mg["PRIZEPOOL"] is not None:
             if "Sunday Million" in mg["PRIZEPOOL"]:
                 self.isSatellite = True
@@ -911,10 +916,14 @@ class PokerStarsSummary(TourneySummary):
                 entry_id = int(mg["ENTRYID"])
                 self.isReEntry = True
 
+            ko_winnings = None
             if hero_rank == rank and entry_id == 1:
                 rebuy_count = rebuy_count_hero
                 add_on_count = None
                 ko_count = None
+            if hero_rank and hero_rank == rank:
+                # The entry that finished where the hero did, a re-entry included: the total is the hero's.
+                ko_winnings = ko_winnings_hero
 
             # print "DEBUG: addPlayer(%s, %s, %s, %s, None, None, None)" %(rank, name, winnings, self.currency)
             # print "DEBUG: self.buyin: %s self.fee %s" %(self.buyin, self.fee)
@@ -927,6 +936,7 @@ class PokerStarsSummary(TourneySummary):
                 add_on_count,
                 ko_count,
                 entry_id,
+                koWinnings=ko_winnings,
             )
 
         if not registered:

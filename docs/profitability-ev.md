@@ -172,3 +172,26 @@ What each room prints:
 
 A GGPoker knockout hand is therefore not priced: its bounties can only come from the
 tournament's results.
+
+### Bounty money in the tournament reports
+
+A tournament's rank lines show prize money only. In a knockout, the bounties a player
+collected are paid on top, so a profit that counts only the prize leaves them out.
+
+- **Where the money comes from.** A PokerStars summary ends with "You collected 5 bounties
+  for a total of USD 875.00". That total is stored as the hero's `TourneysPlayers.koWinnings`,
+  in hundredths, on the entry that finished where the hero did, a re-entry included. Other
+  players' bounties are not in the summary.
+- **What the reports read.** The bounty money is `koWinnings` when a summary gave it.
+  Otherwise it falls back to `koCount × koBounty`, the estimate the reports already used:
+  the hand import keeps `koCount` in units of the fixed bounty, so the product is the cash
+  the hand histories show. The summary's count of bounties is not written into `koCount`,
+  because for a progressive knockout it is a number of heads, not of fixed bounties.
+- **Where it shows.**
+  - The tournament results and the tournament graph count it in each tournament's profit.
+  - The tournament player report's **Won** includes it, and a **Bounties** column gives the
+    part of Won paid as bounties.
+  - The list of a player's tournaments shows each one's bounties.
+
+`koWinnings` is added to `TourneysPlayers` on connection for databases from before it. A
+summary imported before this change needs importing again to fill it.

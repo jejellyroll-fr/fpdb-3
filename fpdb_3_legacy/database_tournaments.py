@@ -525,7 +525,7 @@ class DatabaseTournamentsMixin:
                     "%s",
                     self.sql.query["placeholder"],
                 ),
-                (tourneyId, playerId, entryId, None, None, None, None, None, None),
+                (tourneyId, playerId, entryId, None, None, None, None, None, None, None),
             )
             # Get last id might be faster here.
             # c.execute ("SELECT id FROM Players WHERE name=%s", (name,))
@@ -629,6 +629,7 @@ class DatabaseTournamentsMixin:
                             ("rebuyCount", "rebuycount"),
                             ("addOnCount", "addoncount"),
                             ("koCount", "kocount"),
+                            ("koWinnings", "kowinnings"),
                         )
                     else:
                         expectedValues = (
@@ -638,13 +639,14 @@ class DatabaseTournamentsMixin:
                             ("rebuyCount", "rebuyCount"),
                             ("addOnCount", "addOnCount"),
                             ("koCount", "koCount"),
+                            ("koWinnings", "koWinnings"),
                         )
                     updateDb = False
                     resultDict = dict(list(zip(columnNames, result, strict=False)))
                     tourneysPlayersIds[(player, entryId)] = result[0]
                     for ev in expectedValues:
                         summaryAttribute = ev[0]
-                        if ev[0] != "winnings" and ev[0] != "winningsCurrency":
+                        if ev[0] not in ("winnings", "winningsCurrency", "koWinnings"):
                             summaryAttribute += "s"
                         summaryDict = getattr(summary, summaryAttribute)
                         if (
@@ -668,6 +670,7 @@ class DatabaseTournamentsMixin:
                             summary.rebuyCounts[player][entryIdx],
                             summary.addOnCounts[player][entryIdx],
                             summary.koCounts[player][entryIdx],
+                            summary.koWinnings[player][entryIdx],
                             tourneysPlayersIds[(player, entryId)],
                         )
                         # print q
@@ -686,6 +689,7 @@ class DatabaseTournamentsMixin:
                             summary.rebuyCounts[player][entryIdx],
                             summary.addOnCounts[player][entryIdx],
                             summary.koCounts[player][entryIdx],
+                            summary.koWinnings[player][entryIdx],
                         ),
                     )
         if inserts:
