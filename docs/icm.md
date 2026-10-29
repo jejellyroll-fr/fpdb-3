@@ -121,6 +121,8 @@ Factors are stored only where fpdb knows every remaining stack and the structure
 
 A multi-table tournament's other tables are not in the hand history, so its decisions
 read *not known*, as do postflop decisions and tournaments whose field size is unknown.
+In a knockout tournament the factor prices the prize pool only. A bounty won by busting
+a player is not counted, so the factor overstates what that all-in risks.
 
 `ActionBubbleFactors` holds the factors, keyed like `HandsSituations`. It is a feature
 table with derived rows, replaced a tournament at a time (`fpdb_3_legacy/bubble_factors.py`)
