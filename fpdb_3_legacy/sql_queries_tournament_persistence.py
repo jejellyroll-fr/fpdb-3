@@ -94,6 +94,17 @@ def tournament_persistence_queries(db_server: str = "") -> dict[str, str]:
                                              WHERE id=%s
     """
 
+    # A summary's bounty total covers the player's whole tournament (#447): once one entry has
+    # it, their other entries hold no bounty money of their own, so koCount x koBounty is not
+    # added on top. Two statements because MySQL cannot select from the table it updates.
+    query["countTourneyPlayerKoWinnings"] = """SELECT COUNT(*) FROM TourneysPlayers
+                                             WHERE tourneyId = %s AND playerId = %s AND koWinnings IS NOT NULL
+    """
+
+    query["settleTourneyPlayerKoWinnings"] = """UPDATE TourneysPlayers SET koWinnings = 0
+                                             WHERE tourneyId = %s AND playerId = %s AND koWinnings IS NULL
+    """
+
     query["updateTourneysPlayerResults"] = f"""UPDATE TourneysPlayers
                                              SET {rank} = COALESCE(%s, {rank}),
                                                  winnings = COALESCE(%s, winnings),

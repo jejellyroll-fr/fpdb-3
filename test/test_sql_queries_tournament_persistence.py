@@ -7,7 +7,7 @@ from fpdb_3_legacy.sql_queries_tournament_persistence import tournament_persiste
 def test_tournament_persistence_queries_are_installed_with_sqlite_placeholders() -> None:
     for backend in ("mysql", "postgresql"):
         expected = tournament_persistence_queries(backend)
-        assert len(expected) == 18
+        assert len(expected) == 20
         assert expected.items() <= Sql(db_server=backend).query.items()
     expected = tournament_persistence_queries("sqlite")
     sqlite_expected = {key: value.replace("%s", "?") for key, value in expected.items()}

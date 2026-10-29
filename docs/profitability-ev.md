@@ -182,6 +182,9 @@ collected are paid on top, so a profit that counts only the prize leaves them ou
   for a total of USD 875.00". That total is stored as the hero's `TourneysPlayers.koWinnings`,
   in hundredths, on the entry that finished where the hero did, a re-entry included. Other
   players' bounties are not in the summary.
+- **Counted once.** The total covers the whole tournament, while the hand import keeps
+  adding KOs to entry 1. So once one of a player's entries has a total, their other entries
+  get 0 bounty money, whichever of the hands and the summary is imported first.
 - **What the reports read.** The bounty money is `koWinnings` when a summary gave it.
   Otherwise it falls back to `koCount × koBounty`, the estimate the reports already used:
   the hand import keeps `koCount` in units of the fixed bounty, so the product is the cash

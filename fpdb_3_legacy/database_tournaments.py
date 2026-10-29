@@ -560,6 +560,17 @@ class DatabaseTournamentsMixin:
         self.get_cursor().execute(query, (rank, winnings, winnings_currency, row[names.index("id")]))
         return True
 
+    def _settle_bounty_money(self, cursor, tourney_id, player_id) -> None:
+        """Count a summary's bounty total once: the player's other entries get none of their own (#447).
+
+        The total is tournament-wide and sits on the entry that finished; the hand import keeps
+        adding koCount to entry 1, which the reports would otherwise turn into bounty money again.
+        """
+        ph = self.sql.query["placeholder"]
+        cursor.execute(self.sql.query["countTourneyPlayerKoWinnings"].replace("%s", ph), (tourney_id, player_id))
+        if cursor.fetchone()[0]:
+            cursor.execute(self.sql.query["settleTourneyPlayerKoWinnings"].replace("%s", ph), (tourney_id, player_id))
+
     def updateTourneyPlayerBounties(self, hand) -> None:
         updateDb = False
         cursor = self.get_cursor()
@@ -577,6 +588,8 @@ class DatabaseTournamentsMixin:
                     bounty_query,
                     (hand.koCounts[player], hand.koCounts[player], tourneysPlayersId),
                 )
+                if hand.tourneyId is not None and player in hand.playerIds:
+                    self._settle_bounty_money(cursor, hand.tourneyId, hand.playerIds[player])
                 updateDb = True
             if player in getattr(hand, "tourneyRanks", {}):
                 winnings = getattr(hand, "tourneyWinnings", {}).get(player)
@@ -701,3 +714,6 @@ class DatabaseTournamentsMixin:
                 ),
                 inserts,
             )
+        for player, totals in getattr(summary, "koWinnings", {}).items():
+            if any(total is not None for total in totals):
+                self._settle_bounty_money(cursor, summary.tourneyId, summary.playerIds[player])

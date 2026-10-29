@@ -32,14 +32,17 @@ def bounty_rows(db) -> list[tuple]:
         "SELECT p.name, tp.rank, tp.entryId, tp.winnings, tp.koCount, tp.koWinnings FROM TourneysPlayers tp "
         "JOIN Players p ON p.id = tp.playerId WHERE tp.koCount IS NOT NULL OR tp.koWinnings IS NOT NULL"
     )
-    return cursor.fetchall()
+    return sorted(cursor.fetchall(), key=lambda row: row[2])
 
 
 def test_the_hero_s_bounties_are_stored_next_to_their_prize(tmp_path, fresh_db, legacy_config) -> None:
     # "You finished in 72nd place" on a re-entry, "You collected 5 bounties for a total of USD 875.00."
     _importer = importer_of([REENTRY_KO], tmp_path, fresh_db, legacy_config)
 
-    assert bounty_rows(fresh_db) == [("joiso", 72, 2, 82717, None, 87500)]
+    assert bounty_rows(fresh_db) == [
+        ("joiso", 1042, 1, 0, None, 0),  # the first entry: the total is the tournament's, held once
+        ("joiso", 72, 2, 82717, None, 87500),
+    ]
 
 
 def test_a_summary_without_the_bounty_line_stores_no_bounty_money(tmp_path, fresh_db, legacy_config) -> None:
@@ -51,7 +54,10 @@ def test_a_summary_without_the_bounty_line_stores_no_bounty_money(tmp_path, fres
 def test_importing_the_summary_again_keeps_one_bounty_total(tmp_path, fresh_db, legacy_config) -> None:
     _importer = importer_of([REENTRY_KO, REENTRY_KO], tmp_path, fresh_db, legacy_config)
 
-    assert bounty_rows(fresh_db) == [("joiso", 72, 2, 82717, None, 87500)]
+    assert bounty_rows(fresh_db) == [
+        ("joiso", 1042, 1, 0, None, 0),  # the first entry: the total is the tournament's, held once
+        ("joiso", 72, 2, 82717, None, 87500),
+    ]
 
 
 def test_the_tournament_results_count_the_bounties_in_the_profit(tmp_path, fresh_db, legacy_config) -> None:
@@ -74,17 +80,64 @@ def test_the_tournament_results_count_the_bounties_in_the_profit(tmp_path, fresh
 
 def test_the_player_report_shows_the_bounties_apart_and_inside_won(tmp_path, fresh_db, legacy_config) -> None:
     _importer = importer_of([REENTRY_KO], tmp_path, fresh_db, legacy_config)
+
+    report = player_report(fresh_db)
+
+    assert report["bounties"] == 875.0
+    assert report["won"] == 827.17 + 875.0
+
+
+def player_report(db) -> dict:
     query = (
-        fresh_db.sql.query["tourneyPlayerDetailedStats"]
+        db.sql.query["tourneyPlayerDetailedStats"]
         .replace("<nametest>", "(SELECT id FROM Players WHERE name = 'joiso')")
         .replace("<sitetest>", "")
         .replace("<startdate_test>", "1970-01-01")
         .replace("<enddate_test>", "2100-01-01")
     )
-    cursor = fresh_db.get_cursor()
+    cursor = db.get_cursor()
     cursor.execute(query)
     columns = [description[0].lower() for description in cursor.description]
-
     (row,) = (dict(zip(columns, values, strict=True)) for values in cursor.fetchall())
-    assert row["bounties"] == 875.0
-    assert row["won"] == 827.17 + 875.0
+    return row
+
+
+def joiso_entries(db) -> dict[int, tuple]:
+    cursor = db.get_cursor()
+    cursor.execute(
+        "SELECT tp.entryId, tp.id, tp.tourneyId, tp.playerId, tp.koCount, tp.koWinnings FROM TourneysPlayers tp "
+        "JOIN Players p ON p.id = tp.playerId WHERE p.name = 'joiso'"
+    )
+    return {row[0]: row[1:] for row in cursor.fetchall()}
+
+
+def test_a_ko_from_the_hands_after_the_summary_is_not_counted_twice(tmp_path, fresh_db, legacy_config) -> None:
+    # Codex (#634): hands carry entry 1, and the hand import adds their KOs there.
+    from types import SimpleNamespace
+
+    _importer = importer_of([REENTRY_KO], tmp_path, fresh_db, legacy_config)
+    entry_id, tourney, player, _count, _money = joiso_entries(fresh_db)[1]
+    hand = SimpleNamespace(
+        tourneysPlayersIds={"joiso": entry_id}, koCounts={"joiso": 1}, tourneyId=tourney, playerIds={"joiso": player}
+    )
+
+    fresh_db.updateTourneyPlayerBounties(hand)
+
+    assert joiso_entries(fresh_db)[1][3:] == (1, 0)  # the KO is kept, its money is the summary's
+    report = player_report(fresh_db)
+    assert report["bounties"] == 875.0 and report["won"] == 827.17 + 875.0
+
+
+def test_a_ko_from_the_hands_before_the_summary_is_not_counted_twice(tmp_path, fresh_db, legacy_config) -> None:
+    _importer = importer_of([REENTRY_KO], tmp_path, fresh_db, legacy_config)
+    entry_id = joiso_entries(fresh_db)[1][0]
+    # As a hand import before the summary leaves it: a KO on entry 1, no bounty money anywhere.
+    fresh_db.get_cursor().execute("UPDATE TourneysPlayers SET koWinnings = NULL")
+    fresh_db.get_cursor().execute("UPDATE TourneysPlayers SET koCount = 1 WHERE id = ?", (entry_id,))
+    fresh_db.commit()
+
+    (tmp_path / "again").mkdir()
+    _again = importer_of([REENTRY_KO], tmp_path / "again", fresh_db, legacy_config)
+
+    report = player_report(fresh_db)
+    assert report["bounties"] == 875.0 and report["won"] == 827.17 + 875.0
