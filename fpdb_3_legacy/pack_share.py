@@ -45,14 +45,109 @@ def profile_names(config_doc: Any) -> list[str]:
     return [node.getAttribute("name") for node in config_doc.getElementsByTagName("ss") if node.getAttribute("name")]
 
 
+def _stock_popup_nodes() -> dict[str, Any]:
+    """The popups every configuration has, as the shipped template defines them."""
+    from fpdb_3_legacy.Configuration import _find_example_config, _parse_example_config  # noqa: PLC0415
+
+    template = _parse_example_config(_find_example_config("HUD_config.xml"))
+    if template is None:
+        return {name: None for name in _stock_popups()}
+    return {node.getAttribute("pu_name"): node for node in template.getElementsByTagName("pu")}
+
+
+def _canonical(node: Any) -> Any:
+    """A node as data: its tag, attributes and children, layout whitespace aside."""
+    if node.nodeType == node.TEXT_NODE:
+        return node.data.strip()
+    if node.nodeType != node.ELEMENT_NODE:
+        return ""
+    children = tuple(child for child in (_canonical(child) for child in node.childNodes) if child)
+    return (node.tagName, tuple(sorted(node.attributes.items())), children)
+
+
+def _popups(document: Any, config_doc: Any, profile_node: Any, profile: str) -> Any | None:
+    """The popups *profile_node* opens, and the ones those open, as a ``<popup_windows>``.
+
+    A stock popup (``default``, ...) is left out while it is the stock one, since every
+    configuration has it. One customised under its stock name goes in under a name of
+    the profile's own, so it never meets the recipient's stock popup (Codex, #643);
+    every reference to it, from the profile and from the other popups, follows.
+    """
+    popups = {node.getAttribute("pu_name"): node for node in config_doc.getElementsByTagName("pu")}
+    stock = _stock_popup_nodes()
+    renamed: dict[str, str] = {}
+    wanted = [cell.getAttribute("popup") for cell in profile_node.getElementsByTagName("stat")]
+    chosen: dict[str, Any] = {}
+    while wanted:
+        name = wanted.pop()
+        if name in chosen or name not in popups:
+            continue
+        if name in stock:
+            if stock[name] is None or _canonical(popups[name]) == _canonical(stock[name]):
+                continue
+            renamed[name] = _free_name(f"{name} ({profile})", popups)
+        chosen[name] = popups[name]
+        wanted.extend(row.getAttribute("pu_stat_submenu") for row in popups[name].getElementsByTagName("pu_stat"))
+    _rename(profile_node.getElementsByTagName("stat"), "popup", renamed)
+    if not chosen:
+        return None
+    container = document.createElement("popup_windows")
+    for name in sorted(chosen):
+        node = document.importNode(chosen[name], True)
+        node.setAttribute("pu_name", renamed.get(name, name))
+        _rename(node.getElementsByTagName("pu_stat"), "pu_stat_submenu", renamed)
+        container.appendChild(document.createTextNode("\n  "))
+        container.appendChild(node)
+    container.appendChild(document.createTextNode("\n"))
+    return container
+
+
+def _rename(nodes: Any, attribute: str, renamed: Mapping[str, str]) -> None:
+    for node in nodes:
+        if node.getAttribute(attribute) in renamed:
+            node.setAttribute(attribute, renamed[node.getAttribute(attribute)])
+
+
+def _free_name(name: str, taken: Mapping[str, Any]) -> str:
+    candidate, number = name, 2
+    while candidate in taken:
+        candidate, number = f"{name} {number}", number + 1
+    return candidate
+
+
+def _panel_rules(document: Any, config_doc: Any, profile: str) -> list[Any]:
+    """The panel-rule sections that apply to *profile*, each scoped to it.
+
+    A section scoped to the profile goes in as it is. A section for every profile --
+    the one Preferences writes, its rules naming their profile one by one -- goes in
+    with only the rules that apply to this profile, and scoped to it, so it changes
+    nothing for the recipient's other profiles (Codex, #643).
+    """
+    from fpdb_3_legacy.hud_situation import profile_matches  # noqa: PLC0415
+
+    wanted = profile.strip().casefold()
+    sections = []
+    for section in config_doc.getElementsByTagName("hud_panel_rules"):
+        scope = section.getAttribute("profile").strip()
+        if _is_panel_rule_placeholder(section) or (scope and scope.casefold() not in ("all", wanted)):
+            continue
+        copy = document.importNode(section, True)
+        if scope.casefold() != wanted:
+            for rule in list(copy.getElementsByTagName("hud_panel_rule")):
+                if not profile_matches(rule.getAttribute("profile").strip(), profile):
+                    rule.parentNode.removeChild(rule)
+            if not copy.getElementsByTagName("hud_panel_rule") and not copy.getAttribute("source").strip():
+                continue
+            copy.setAttribute("profile", profile)
+        sections.append(copy)
+    return sections
+
+
 def hud_package(config_doc: Any, profile: str) -> bytes:
     """The ``.fpdbhud`` package of *profile*: the profile, the popups it opens, and its panel rules.
 
-    The popups are the ones of this configuration the profile's cells open,
-    and the ones those open in turn; a stock popup (``default``, ...) is left
-    out, since every configuration has it. The panel rules are the sections
-    scoped to the profile. Game bindings and table layouts are the sharer's
-    own, and are not shared: a gallery HUD never binds itself to a game.
+    Game bindings and table layouts are the sharer's own, and are not shared: a
+    gallery HUD never binds itself to a game.
     """
     source = next(
         (node for node in config_doc.getElementsByTagName("ss") if node.getAttribute("name") == profile), None
@@ -62,32 +157,9 @@ def hud_package(config_doc: Any, profile: str) -> bytes:
     document = config_doc.implementation.createDocument(None, "fpdb_hud_package", None)
     root = document.documentElement
     root.setAttribute("version", "1.0")
-    parts = [document.importNode(source, True)]
-
-    popups = {node.getAttribute("pu_name"): node for node in config_doc.getElementsByTagName("pu")}
-    stock = _stock_popups()
-    wanted = [cell.getAttribute("popup") for cell in source.getElementsByTagName("stat")]
-    chosen: dict[str, Any] = {}
-    while wanted:
-        name = wanted.pop()
-        if name in chosen or name in stock or name not in popups:
-            continue
-        chosen[name] = popups[name]
-        wanted.extend(row.getAttribute("pu_stat_submenu") for row in popups[name].getElementsByTagName("pu_stat"))
-    if chosen:
-        container = document.createElement("popup_windows")
-        for name in sorted(chosen):
-            container.appendChild(document.createTextNode("\n  "))
-            container.appendChild(document.importNode(chosen[name], True))
-        container.appendChild(document.createTextNode("\n"))
-        parts.append(container)
-
-    parts.extend(
-        document.importNode(section, True)
-        for section in config_doc.getElementsByTagName("hud_panel_rules")
-        if section.getAttribute("profile").strip().casefold() == profile.strip().casefold()
-        and not _is_panel_rule_placeholder(section)
-    )
+    profile_node = document.importNode(source, True)
+    popups = _popups(document, config_doc, profile_node, profile)
+    parts = [profile_node, *([popups] if popups is not None else []), *_panel_rules(document, config_doc, profile)]
     for part in parts:
         root.appendChild(document.createTextNode("\n"))
         root.appendChild(part)

@@ -74,8 +74,11 @@ yourname.topic/
 ```
 
 A HUD package holds the profile, the popups it opens (and those they open),
-except the stock ones every configuration has, and the panel rules scoped to
-it. Your game bindings and table layouts stay yours.
+and the panel rules that apply to it. A stock popup every configuration has
+(`default`, ...) is left out while it is unchanged; one you customised goes in
+under a name of the profile's own, so it never meets the recipient's stock
+one. Panel rules written for every profile go in with only the rules for this
+profile, scoped to it. Your game bindings and table layouts stay yours.
 
 The entry and the package go through the checks an install runs (below)
 before anything is written, so what fpdb writes is something the gallery

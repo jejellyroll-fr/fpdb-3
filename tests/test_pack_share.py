@@ -20,7 +20,14 @@ import pytest
 from fpdb_3_legacy import stat_packs
 from fpdb_3_legacy.hud_package import install_missing_hud_package
 from fpdb_3_legacy.pack_gallery import GalleryError, validate_repository
-from fpdb_3_legacy.pack_share import ENTRY_NAME, hud_package, profile_names, share_hud, share_stat_pack
+from fpdb_3_legacy.pack_share import (
+    ENTRY_NAME,
+    _stock_popup_nodes,
+    hud_package,
+    profile_names,
+    share_hud,
+    share_stat_pack,
+)
 from tests.helpers.pack_gallery import LICENSE, ROOT, stat_pack, write_index
 
 HUD = {"pack_id": "me.mine", "name": "Mine", "version": "1.0.0", "author": "me", "license": LICENSE}
@@ -37,6 +44,13 @@ def config_with(extra: str = "", stat: str = "vpip") -> Any:
         '<supported_games><game game_name="holdem"><game_stat_set game_type="ring" stat_set="mine"/></game>'
         f"</supported_games>{extra}</FreePokerToolsConfig>"
     )
+
+
+def without_default(config: Any) -> Any:
+    """*config* without the base ``default`` popup, so a test can give its own."""
+    first = next(node for node in config.getElementsByTagName("pu") if node.getAttribute("pu_name") == "default")
+    first.parentNode.removeChild(first)
+    return config
 
 
 def as_gallery(folder: Path) -> list[str]:
@@ -177,3 +191,56 @@ def test_a_shared_stat_pack_is_its_sources_and_the_archive_the_repository_builds
 def test_a_stat_pack_that_is_not_installed_is_said_so(tmp_path) -> None:
     with pytest.raises(stat_packs.PackError, match="not installed"):
         share_stat_pack("example.nowhere", tmp_path, license=LICENSE, packs_dir=tmp_path / "packs")
+
+
+def test_the_profiles_rules_in_a_section_for_every_profile_are_shared_scoped_to_it(tmp_path) -> None:
+    # Preferences write one section for every profile, each rule naming its own profile.
+    config = config_with(
+        '<hud_panel_rules enabled="true" fallback="core">'
+        '<hud_panel_rule panel="facing_open" profile="mine"/>'
+        '<hud_panel_rule panel="short_stack" profile="other"/>'
+        '<hud_panel_rule panel="facing_cbet"/>'
+        "</hud_panel_rules>"
+    )
+
+    package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
+
+    # Codex (#643): only sections scoped to the profile were shared, so these rules were lost.
+    (section,) = package.getElementsByTagName("hud_panel_rules")
+    assert section.getAttribute("profile") == "mine"  # it changes nothing for the recipient's other profiles
+    panels = [rule.getAttribute("panel") for rule in section.getElementsByTagName("hud_panel_rule")]
+    assert panels == ["facing_open", "facing_cbet"]
+    assert as_gallery(share_hud(config, "mine", tmp_path, **HUD)) == []
+
+
+def test_a_stock_popup_the_sharer_customised_is_shared_under_a_name_of_its_own(tmp_path) -> None:
+    config = without_default(
+        config_with(
+            "<popup_windows>"
+            '<pu pu_name="default"><pu_stat pu_stat_name="vpip" pu_stat_submenu="deeper"/></pu>'
+            '<pu pu_name="deeper"><pu_stat pu_stat_name="pfr"/></pu>'
+            "</popup_windows>"
+        )
+    )
+    for cell in config.getElementsByTagName("stat"):
+        cell.setAttribute("popup", "default")
+
+    package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
+
+    # Codex (#643): the customised "default" was left out, and the recipient's stock one opened instead.
+    names = sorted(node.getAttribute("pu_name") for node in package.getElementsByTagName("pu"))
+    assert names == ["deeper", "default (mine)"]
+    assert {cell.getAttribute("popup") for cell in package.getElementsByTagName("stat")} == {"default (mine)"}
+    assert as_gallery(share_hud(config, "mine", tmp_path, **HUD)) == []
+
+
+def test_a_stock_popup_as_shipped_is_left_to_the_recipients_own() -> None:
+    stock = _stock_popup_nodes()["default"]
+    config = without_default(config_with(f"<popup_windows>{stock.toxml()}</popup_windows>"))
+    for cell in config.getElementsByTagName("stat"):
+        cell.setAttribute("popup", "default")
+
+    package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
+
+    assert "default" not in {node.getAttribute("pu_name") for node in package.getElementsByTagName("pu")}
+    assert {cell.getAttribute("popup") for cell in package.getElementsByTagName("stat")} == {"default"}
