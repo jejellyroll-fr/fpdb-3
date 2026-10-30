@@ -177,7 +177,7 @@ def test_a_table_with_no_hand_falls_back_to_its_pool() -> None:
     database = _database_stub(pool_gametype=77)
     request = FastFoldStatsRequest(
         temp_key="Bucarest 3 #61825",
-        seat_map={4: "jejellyroll"},
+        seat_map={4: "kokolantern"},
         hand_id=None,
         site_name="Winamax",
         pool_name="Bucarest",
@@ -194,7 +194,7 @@ def test_a_table_with_a_hand_does_not_query_the_pool() -> None:
     database = _database_stub(gameinfo={"gametypeId": 42}, pool_gametype=77)
     request = FastFoldStatsRequest(
         temp_key="Bucarest 3 #61825",
-        seat_map={4: "jejellyroll"},
+        seat_map={4: "kokolantern"},
         hand_id=939,
         site_name="Winamax",
         pool_name="Bucarest",
@@ -211,7 +211,7 @@ def test_a_hand_not_committed_yet_falls_back_to_the_pool() -> None:
     database = _database_stub(gameinfo=None, pool_gametype=77)
     request = FastFoldStatsRequest(
         temp_key="Bucarest 3 #61825",
-        seat_map={4: "jejellyroll"},
+        seat_map={4: "kokolantern"},
         hand_id=939,
         site_name="Winamax",
         pool_name="Bucarest",
@@ -233,7 +233,7 @@ def test_an_unidentified_table_is_not_guessed_at(site_name: str, pool_name: str)
     database = _database_stub(pool_gametype=77)
     request = FastFoldStatsRequest(
         temp_key="Winamax Escape 1",
-        seat_map={4: "jejellyroll"},
+        seat_map={4: "kokolantern"},
         hand_id=None,
         site_name=site_name,
         pool_name=pool_name,
@@ -251,7 +251,7 @@ def test_a_failing_fallback_does_not_take_the_read_down() -> None:
     database.get_last_gametype_id_for_table.side_effect = RuntimeError("no such column")
     request = FastFoldStatsRequest(
         temp_key="Bucarest 3 #61825",
-        seat_map={4: "jejellyroll"},
+        seat_map={4: "kokolantern"},
         hand_id=None,
         site_name="Winamax",
         pool_name="Bucarest",
@@ -276,16 +276,16 @@ def test_a_gametype_of_none_yields_no_statistics() -> None:
     """
     connection = MagicMock()
     engine = FastFoldEngine(db_connection=connection)
-    engine._resolve_player_ids = MagicMock(return_value={"jejellyroll": 1, "Slevink888": 2})
+    engine._resolve_player_ids = MagicMock(return_value={"kokolantern": 1, "Slevink888": 2})
 
     stat_dict = engine.get_player_stats_for_seat_map(
-        {4: "jejellyroll", 5: "Slevink888"},
+        {4: "kokolantern", 5: "Slevink888"},
         db_conn=connection,
         gametype_id=None,
     )
 
     connection.get_stats_for_players.assert_not_called()
-    assert sorted(row["screen_name"] for row in stat_dict.values()) == ["Slevink888", "jejellyroll"]
+    assert sorted(row["screen_name"] for row in stat_dict.values()) == ["Slevink888", "kokolantern"]
     assert all(row["n"] == 0 for row in stat_dict.values())
 
 
@@ -312,7 +312,7 @@ def test_the_request_carries_the_site_and_pool() -> None:
         hud_main,
         temp_key="Bucarest 3 #61825",
         hud=hud,
-        seat_map={4: "jejellyroll"},
+        seat_map={4: "kokolantern"},
         hand_id="live:1",
     )
 

@@ -103,16 +103,16 @@ def test_profiles_tab_create_returns_changes(qtbot) -> None:
     s0, s1 = sites[0], sites[1]
 
     dia.add_profile("Me")
-    dia.add_link_row(s0, "jeje")
-    dia.add_link_row(s1, "jeje76")
-    dia.add_link_row(s0, "jeje")  # duplicate dropped on read
+    dia.add_link_row(s0, "koko")
+    dia.add_link_row(s1, "koko76")
+    dia.add_link_row(s0, "koko")  # duplicate dropped on read
     dia.profile_default_cb.setChecked(True)
 
     working, deleted = dia.get_profile_changes()
     assert deleted == set()
     assert "Me" in working
     assert working["Me"]["default"] is True
-    assert working["Me"]["links"] == [(s0, "jeje"), (s1, "jeje76")]
+    assert working["Me"]["links"] == [(s0, "koko"), (s1, "koko76")]
 
 
 @pytest.mark.qt
@@ -147,11 +147,11 @@ def test_a_profile_link_can_name_the_phh_source(qtbot) -> None:
 
     assert "PHH" in dia._all_site_names()
     dia.add_profile("Me")
-    dia.add_link_row(room, "jeje")
-    dia.add_link_row("PHH", "jeje_phh")
+    dia.add_link_row(room, "koko")
+    dia.add_link_row("PHH", "koko_phh")
 
     working, _deleted = dia.get_profile_changes()
-    assert working["Me"]["links"] == [(room, "jeje"), ("PHH", "jeje_phh")]
+    assert working["Me"]["links"] == [(room, "koko"), ("PHH", "koko_phh")]
 
 
 @pytest.mark.qt
@@ -160,14 +160,14 @@ def test_the_data_sources_tab_edits_the_phh_hero_aliases(qtbot) -> None:
     from fpdb_3_legacy.ModernSitePreferences import ModernSitePreferencesDialog
 
     cfg = Config(file="HUD_config.xml")
-    cfg.set_data_source_hero_aliases("PHH", ["jeje"])  # in memory only: never saved here
+    cfg.set_data_source_hero_aliases("PHH", ["koko"])  # in memory only: never saved here
     dia = ModernSitePreferencesDialog(cfg)
     qtbot.addWidget(dia)
 
     tabs = [dia.tabs.tabText(i) for i in range(dia.tabs.count())]
     assert "Data Sources" in tabs
-    assert dia.data_source_inputs["PHH"].toPlainText() == "jeje"
+    assert dia.data_source_inputs["PHH"].toPlainText() == "koko"
 
     # One name per line: a PHH name is any string, a comma included, matched exactly.
-    dia.data_source_inputs["PHH"].setPlainText("jeje\n\nSmith, John\n jeje76 \njeje")
-    assert dia.get_data_source_changes() == {"PHH": ["jeje", "Smith, John", "jeje76"]}
+    dia.data_source_inputs["PHH"].setPlainText("koko\n\nSmith, John\n koko76 \nkoko")
+    assert dia.get_data_source_changes() == {"PHH": ["koko", "Smith, John", "koko76"]}

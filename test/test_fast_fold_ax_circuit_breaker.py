@@ -78,7 +78,7 @@ def test_a_reader_that_works_is_never_given_up_on() -> None:
     Slot 0 is the bottom-centre chair the hero is always drawn in; a read
     holding it, with enough players, is one the caller can act on.
     """
-    app = _hud_main([{0: "jejellyroll", 1: "Bussy67"}] * (GIVE_UP_AT + 5))
+    app = _hud_main([{0: "kokolantern", 1: "Bussy67"}] * (GIVE_UP_AT + 5))
 
     for hand in range(GIVE_UP_AT + 2):
         _read(app, f"hand-{hand}")
@@ -89,7 +89,7 @@ def test_a_reader_that_works_is_never_given_up_on() -> None:
 
 def test_one_good_read_forgives_the_empty_ones_before_it() -> None:
     """A table being redrawn is not a client that publishes nothing."""
-    app = _hud_main([{}] * (GIVE_UP_AT - 1) + [{0: "jejellyroll", 1: "Bussy67"}] + [{}] * 5)
+    app = _hud_main([{}] * (GIVE_UP_AT - 1) + [{0: "kokolantern", 1: "Bussy67"}] + [{}] * 5)
 
     for hand in range(GIVE_UP_AT + 4):
         _read(app, f"hand-{hand}")
@@ -121,14 +121,14 @@ def test_one_table_giving_up_does_not_silence_another() -> None:
 def test_reads_that_never_seat_anyone_are_given_up_on() -> None:
     """Measured on a live session, every read of every hand, on both tables:
 
-        window-read ... 172ms read#1 players=2 slots={1: 'jejellyroll', 2: 'cr-scot'}
+        window-read ... 172ms read#1 players=2 slots={1: 'kokolantern', 2: 'cr-scot'}
 
     Non-empty, so the old counter reset on every one of them and the breaker
     never tripped -- but slot 0 is missing, so the caller cannot place the hero
     and throws the answer away. Six reads a hand at 94-172ms, on two tables,
     for nothing. "Fruitless" has to mean "could not be acted on".
     """
-    app = _hud_main([{1: "jejellyroll", 2: "cr-scot"}] * (GIVE_UP_AT + 5))
+    app = _hud_main([{1: "kokolantern", 2: "cr-scot"}] * (GIVE_UP_AT + 5))
 
     for hand in range(GIVE_UP_AT):
         _read(app, f"hand-{hand}")
@@ -138,7 +138,7 @@ def test_reads_that_never_seat_anyone_are_given_up_on() -> None:
 
 def test_a_read_holding_the_hero_but_too_few_players_is_fruitless() -> None:
     """The caller needs MIN_PLAYERS_TO_SHOW as well as the hero's chair."""
-    app = _hud_main([{0: "jejellyroll"}] * (GIVE_UP_AT + 5))
+    app = _hud_main([{0: "kokolantern"}] * (GIVE_UP_AT + 5))
 
     for hand in range(GIVE_UP_AT):
         _read(app, f"hand-{hand}")
@@ -148,9 +148,9 @@ def test_a_read_holding_the_hero_but_too_few_players_is_fruitless() -> None:
 
 def test_one_usable_read_forgives_the_useless_ones_before_it() -> None:
     app = _hud_main(
-        [{1: "jejellyroll", 2: "x"}] * (GIVE_UP_AT - 1)
-        + [{0: "jejellyroll", 1: "x"}]
-        + [{1: "jejellyroll", 2: "x"}] * 5,
+        [{1: "kokolantern", 2: "x"}] * (GIVE_UP_AT - 1)
+        + [{0: "kokolantern", 1: "x"}]
+        + [{1: "kokolantern", 2: "x"}] * 5,
     )
 
     for hand in range(GIVE_UP_AT + 4):
@@ -161,7 +161,7 @@ def test_one_usable_read_forgives_the_useless_ones_before_it() -> None:
 
 def test_the_reader_can_be_switched_off_outright() -> None:
     """A player whose client never publishes its felt should not pay two hands a session."""
-    app = _hud_main([{0: "jejellyroll", 1: "Bussy67"}] * 5)
+    app = _hud_main([{0: "kokolantern", 1: "Bussy67"}] * 5)
     app._ax_reader_enabled = False
 
     assert _read(app, "hand-1") == {}
@@ -171,7 +171,7 @@ def test_the_reader_can_be_switched_off_outright() -> None:
 def _sweeper(gave_up: bool = False, enabled: bool = True):
     """A HudMain stub carrying only what _read_window_slots touches."""
     reader = MagicMock()
-    reader.read_window.return_value = {0: "jejellyroll", 1: "Bussy67"}
+    reader.read_window.return_value = {0: "kokolantern", 1: "Bussy67"}
     table = SimpleNamespace(title="Winamax Colorado 11", key="Colorado 11 #3477872", number=3477872)
     return (
         SimpleNamespace(
@@ -186,7 +186,7 @@ def _sweeper(gave_up: bool = False, enabled: bool = True):
 def test_the_idle_sweep_reads_a_table_that_still_answers() -> None:
     app, hud = _sweeper()
 
-    assert HUD_main.HudMain._read_window_slots(app, hud) == {0: "jejellyroll", 1: "Bussy67"}
+    assert HUD_main.HudMain._read_window_slots(app, hud) == {0: "kokolantern", 1: "Bussy67"}
 
 
 def test_the_idle_sweep_stops_reading_a_table_given_up_on() -> None:

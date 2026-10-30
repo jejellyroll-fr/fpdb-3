@@ -1314,11 +1314,11 @@ Player2, Player3 split the $10.00 bounty for eliminating Player4"""
         hand_text = """PokerStars Hand #261044408646: Tournament #4006174726, €0.91+€0.09 EUR Hold'em No Limit - Level VII (100/200) - 2026/06/05 22:51:42 CET
 Table '4006174726 1' 3-max Seat #2 is the button
 Seat 2: PeraLimones (705 in chips)
-Seat 3: jeje_sat (795 in chips)
+Seat 3: koko_sat (795 in chips)
 PeraLimones finished the tournament in 2nd place
 *** SUMMARY ***
 Seat 2: PeraLimones (button) showed [Jc Kh] and lost with a pair of Aces
-Seat 3: jeje_sat showed [6s 4d] and won (1500) with two pair, Aces and Sixes"""
+Seat 3: koko_sat showed [6s 4d] and won (1500) with two pair, Aces and Sixes"""
 
         hand = Mock()
         hand.handText = hand_text
@@ -1326,15 +1326,15 @@ Seat 3: jeje_sat showed [6s 4d] and won (1500) with two pair, Aces and Sixes"""
         hand.tourneyRanks = {}
         hand.tourneyWinnings = {}
         hand.tourneyWinningsCurrency = {}
-        hand.players = [(2, "PeraLimones", 705), (3, "jeje_sat", 795)]
+        hand.players = [(2, "PeraLimones", 705), (3, "koko_sat", 795)]
         hand.gametype = {"currency": "EUR"}
         hand.koBounty = 0
 
         self.parser.readTourneyResults(hand)
 
         self.assertEqual(hand.tourneyRanks["PeraLimones"], 2)
-        self.assertEqual(hand.tourneyRanks["jeje_sat"], 1)
-        self.assertNotIn("jeje_sat", hand.tourneyWinnings)
+        self.assertEqual(hand.tourneyRanks["koko_sat"], 1)
+        self.assertNotIn("koko_sat", hand.tourneyWinnings)
 
     def test_read_collect_pot_basic(self) -> None:
         """Test readCollectPot basic functionality."""

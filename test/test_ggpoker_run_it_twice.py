@@ -17,12 +17,11 @@ import pytest
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.GGPokerToFpdb import GGPoker
 
-HAND_FILE = Path.home().joinpath(
-    "Documents/github/fpdb-new/SortedHands/GGpoker/2026/cg/plo-session/"
-    "GG20260118-2024 - PLOYellow8 - 0.02 - 0.05 - 7max.txt",
+# The hand, anonymised, from a GGPoker session.
+HAND_FILE = (
+    Path(__file__).resolve().parents[1]
+    / "regression-test-files/cash/GGPoker/Flop/PLO-7max-USD-0.02-0.05-202601.run.it.twice.first.streets.txt"
 )
-
-pytestmark = pytest.mark.skipif(not HAND_FILE.exists(), reason="local GGPoker history not present")
 
 
 @pytest.fixture(scope="module")
@@ -42,7 +41,7 @@ def test_players_are_charged_what_they_put_in(run_twice_hand) -> None:
     committed = run_twice_hand.pot.committed
 
     assert committed["Hero"] == Decimal("4.72")  # was 0.22, the pre-flop call alone
-    assert committed["fcc56e17"] == Decimal("4.72")
+    assert committed["a0000004"] == Decimal("4.72")
 
 
 def test_the_hand_balances(run_twice_hand) -> None:

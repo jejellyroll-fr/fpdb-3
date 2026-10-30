@@ -660,7 +660,7 @@ def is_hud_label(text: str) -> bool:
     if not t:
         return True
 
-    # Truncated HUD headers, e.g. "jejel.", "almar.", "fishk.", "Lexyn.", "Zibit.", "HERGI.", "Stun_.", "anton."
+    # Truncated HUD headers, e.g. "kokol.", "almar.", "fishk.", "Lexyn.", "Zibit.", "HERGI.", "Stun_.", "anton."
     if len(t) <= 6 and t.endswith("."):
         return True
 
@@ -686,7 +686,7 @@ def _table_centre(
     one direction from it, and the whole ring collapses into a single slot:
 
         centre from the window rect : {2: 'CTroPinJust'}
-        centre from the players     : {0: 'jejellyroll', 1: 'depor81', ...}
+        centre from the players     : {0: 'kokolantern', 1: 'depor81', ...}
 
     But the ring's own bounding box is only the table's centre when the ring is
     complete. Read the hero and the two chairs beside them and that box is a

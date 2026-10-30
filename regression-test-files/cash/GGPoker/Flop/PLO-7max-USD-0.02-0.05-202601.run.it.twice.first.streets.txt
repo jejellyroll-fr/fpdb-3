@@ -1,0 +1,56 @@
+Poker Hand #OM537421857: PLO ($0.02/$0.05) - 2026/01/18 21:47:41
+Table 'PLOYellow8' 7-max Seat #4 is the button
+Seat 1: a0000001 ($5.62 in chips)
+Seat 2: a0000002 ($5 in chips)
+Seat 3: a0000003 ($6.03 in chips)
+Seat 4: a0000004 ($4.72 in chips)
+Seat 5: Hero ($6.54 in chips)
+Seat 6: a0000005 ($7.58 in chips)
+Hero: posts small blind $0.02
+a0000005: posts big blind $0.05
+*** HOLE CARDS ***
+Dealt to a0000001 
+Dealt to a0000002 
+Dealt to a0000003 
+Dealt to a0000004 
+Dealt to Hero [As Jc Ts 9d]
+Dealt to a0000005 
+a0000001: calls $0.05
+a0000002: folds
+a0000003: folds
+a0000004: raises $0.17 to $0.22
+Hero: calls $0.2
+a0000005: folds
+a0000001: calls $0.17
+*** FIRST FLOP *** [Qd 7s 9h]
+Hero: checks
+a0000001: checks
+a0000004: bets $0.71
+Hero: raises $2.13 to $2.84
+a0000001: folds
+a0000004: calls $2.13
+*** FIRST TURN *** [Qd 7s 9h] [4d]
+Hero: bets $3.48 and is all-in
+a0000004: calls $1.66 and is all-in
+Uncalled bet ($1.82) returned to Hero
+Hero: shows [As Jc Ts 9d] (a pair of Nines)
+a0000004: shows [3d Ah Td Qs] (a pair of Queens)
+*** FIRST RIVER *** [Qd 7s 9h 4d] [Ac]
+*** SECOND RIVER *** [Qd 7s 9h 4d] [3h]
+*** FIRST SHOWDOWN ***
+a0000004 collected $4.71 from pot
+*** SECOND SHOWDOWN ***
+a0000004 collected $4.71 from pot
+*** SUMMARY ***
+Total pot $9.71 | Rake $0.24 | Jackpot $0.05 | Bingo $0 | Fortune $0 | Tax $0
+Hand was run two times
+FIRST Board [Qd 7s 9h 4d Ac]
+SECOND Board [3h]
+Seat 1: a0000001 folded on the Flop
+Seat 2: a0000002 folded before Flop (didn't bet)
+Seat 3: a0000003 folded before Flop (didn't bet)
+Seat 4: a0000004 (button) showed [3d Ah Td Qs] and won ($4.71) with two pair, Aces and Queens, and won ($4.71) with a pair of Threes
+Seat 5: Hero (small blind) showed [As Jc Ts 9d] and lost with two pair, Aces and Nines, and lost with Ace high
+Seat 6: a0000005 (big blind) folded before Flop
+
+

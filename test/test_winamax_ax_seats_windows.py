@@ -105,7 +105,7 @@ def seated_table(players: dict[str, tuple[float, float]]) -> list[UIAElement]:
 
 #: Six chairs of a 776x606 table, matching the macOS fixture.
 SIX_MAX = {
-    "jejellyroll": (350, 520),
+    "kokolantern": (350, 520),
     "villain_bl": (60, 470),
     "villain_tl": (50, 150),
     "villain_tc": (350, 90),
@@ -140,7 +140,7 @@ def test_seats_are_read_clockwise_from_the_hero(windows, monkeypatch) -> None:
     slots = WinamaxAXSeatReader()._read_window_windows(61825)
 
     assert slots == {
-        0: "jejellyroll",
+        0: "kokolantern",
         1: "villain_bl",
         2: "villain_tl",
         3: "villain_tc",
@@ -151,31 +151,31 @@ def test_seats_are_read_clockwise_from_the_hero(windows, monkeypatch) -> None:
 
 def test_the_hud_overlay_is_not_read_back_as_players(windows, monkeypatch) -> None:
     """The HUD's own labels sit over the table on Windows too."""
-    nodes = seated_table({"jejellyroll": (350, 520)})
-    nodes += [UIAElement("jejel.", Rect(340, 430)), UIAElement("100 BB", Rect(340, 450))]
+    nodes = seated_table({"kokolantern": (350, 520)})
+    nodes += [UIAElement("kokol.", Rect(340, 430)), UIAElement("100 BB", Rect(340, 450))]
     install_uia(monkeypatch, window=UIAElement("table", TABLE_WINDOW), descendants=nodes)
 
-    assert list(WinamaxAXSeatReader()._read_window_windows(61825).values()) == ["jejellyroll"]
+    assert list(WinamaxAXSeatReader()._read_window_windows(61825).values()) == ["kokolantern"]
 
 
 def test_non_breaking_spaces_are_normalised(windows, monkeypatch) -> None:
     """As on macOS, the client separates words with \\xa0."""
-    nodes = [UIAElement("Pot total\xa0:\xa01,5\xa0BB", Rect(300, 300)), *seated_table({"jejellyroll": (350, 520)})]
+    nodes = [UIAElement("Pot total\xa0:\xa01,5\xa0BB", Rect(300, 300)), *seated_table({"kokolantern": (350, 520)})]
     install_uia(monkeypatch, window=UIAElement("table", TABLE_WINDOW), descendants=nodes)
 
-    assert list(WinamaxAXSeatReader()._read_window_windows(61825).values()) == ["jejellyroll"]
+    assert list(WinamaxAXSeatReader()._read_window_windows(61825).values()) == ["kokolantern"]
 
 
 @pytest.mark.parametrize(
     ("name", "rect"),
-    [(None, Rect(1, 1)), (12345, Rect(1, 1)), ("x" * 41, Rect(1, 1)), ("jejellyroll", None)],
+    [(None, Rect(1, 1)), (12345, Rect(1, 1)), ("x" * 41, Rect(1, 1)), ("kokolantern", None)],
     ids=["no-name", "not-text", "too-long", "no-rectangle"],
 )
 def test_a_node_that_cannot_be_a_label_is_dropped(windows, monkeypatch, name, rect) -> None:
-    nodes = [UIAElement(name, rect), *seated_table({"jejellyroll": (350, 520)})]
+    nodes = [UIAElement(name, rect), *seated_table({"kokolantern": (350, 520)})]
     install_uia(monkeypatch, window=UIAElement("table", TABLE_WINDOW), descendants=nodes)
 
-    assert list(WinamaxAXSeatReader()._read_window_windows(61825).values()) == ["jejellyroll"]
+    assert list(WinamaxAXSeatReader()._read_window_windows(61825).values()) == ["kokolantern"]
 
 
 def test_the_walk_stops_once_it_has_more_labels_than_a_table_can_hold(windows, monkeypatch) -> None:
@@ -301,9 +301,9 @@ def test_the_title_is_matched_literally_not_as_a_pattern(windows, monkeypatch) -
 def test_the_only_window_is_read(windows, monkeypatch) -> None:
     reader = WinamaxAXSeatReader(table_detector=MagicMock())
     reader._table_detector.find_tables.return_value = [detected("Winamax Bucarest 3", 61825)]
-    reader._read_window_windows = MagicMock(return_value={0: "jejellyroll"})
+    reader._read_window_windows = MagicMock(return_value={0: "kokolantern"})
 
-    assert reader._read_window_windows_by_title("Winamax Bucarest 3") == {0: "jejellyroll"}
+    assert reader._read_window_windows_by_title("Winamax Bucarest 3") == {0: "kokolantern"}
     reader._read_window_windows.assert_called_once_with(61825, 6)
 
 
@@ -385,9 +385,9 @@ def test_read_window_on_windows_never_touches_the_macos_api(windows) -> None:
     """
     reader = WinamaxAXSeatReader()
     reader._application = MagicMock(side_effect=AssertionError("macOS path taken on Windows"))
-    reader._read_window_windows_by_title = MagicMock(return_value={0: "jejellyroll"})
+    reader._read_window_windows_by_title = MagicMock(return_value={0: "kokolantern"})
 
-    assert reader.read_window("Winamax Bucarest 3", 6, table_pos=(1.0, 2.0)) == {0: "jejellyroll"}
+    assert reader.read_window("Winamax Bucarest 3", 6, table_pos=(1.0, 2.0)) == {0: "kokolantern"}
     reader._read_window_windows_by_title.assert_called_once_with("Winamax Bucarest 3", 6, table_pos=(1.0, 2.0))
 
 
@@ -398,10 +398,10 @@ def test_a_known_handle_is_read_without_searching_the_desktop(windows) -> None:
     would otherwise pay for on each of the six reads it makes per hand.
     """
     reader = WinamaxAXSeatReader()
-    reader._read_window_windows = MagicMock(return_value={0: "jejellyroll"})
+    reader._read_window_windows = MagicMock(return_value={0: "kokolantern"})
     reader._read_window_windows_by_title = MagicMock(side_effect=AssertionError("searched by title"))
 
-    assert reader.read_window("Winamax Bucarest 3", 6, window_id=61825) == {0: "jejellyroll"}
+    assert reader.read_window("Winamax Bucarest 3", 6, window_id=61825) == {0: "kokolantern"}
     reader._read_window_windows.assert_called_once_with(61825, 6)
 
 
@@ -417,7 +417,7 @@ def test_a_partial_ring_off_frame_is_refused_until_a_full_one_is_seen(monkeypatc
     ax.reset_windows_uia()
     # A window at 3840..4800 whose players report at 1767..2259, as measured.
     window = UIAElement("Winamax Colorado 1", Rect(3840, 0, 4800, 739))
-    partial = seated_table({"jejellyroll": (2000, 365), "depor81": (1783, 329)})
+    partial = seated_table({"kokolantern": (2000, 365), "depor81": (1783, 329)})
     install_uia(monkeypatch, window=window, descendants=partial)
 
     assert ax.WinamaxAXSeatReader()._read_window_windows(1234, 6) == {}

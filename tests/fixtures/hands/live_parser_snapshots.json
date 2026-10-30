@@ -847,6 +847,10 @@
     "hand_count": 1,
     "sha256": "068dca2f413fa524c6ddc0f1d783dabf50076bc68fb647ed34e657debfbba5ea"
   },
+  "regression/GGPoker/Flop/PLO-7max-USD-0.02-0.05-202601.run.it.twice.first.streets.txt": {
+    "hand_count": 1,
+    "sha256": "c78d9f3a551ab357e3e615c9c08f66235d55bbc62a8a7fca2205080cea318931"
+  },
   "regression/GGPoker/Flop/PLO5-6max-USD-0.1-0.25-202104.over.straddle.txt": {
     "hand_count": 1,
     "sha256": "9b91d9f03e961bff0ba7958380ad9aa5b56ad4ea037072ee59393bddc2a23758"
@@ -2398,6 +2402,10 @@
   "regression/Winning/Stud/7Stud-8max-USD-0.04-0.08-201907.CASHID-TN-Gorham GAMETYPE.txt": {
     "hand_count": 1,
     "sha256": "888f6e42f419ddff6e2c80a325866bec4603335c963769c59fb40fb3be3cd011"
+  },
+  "regression/Winning/Stud/7StudHL-8max-USD-0.10-0.20-202607.six.card.showdown.CASHID-TN-Braselton GAMETYPE.txt": {
+    "hand_count": 1,
+    "sha256": "a438dee49cf21cf6eaa874edaa9062fe76f55fb8d41293637be33054f7b4a0ba"
   },
   "regression/iPoker/Flop/5CPLO-EUR-0.05-0.10-202105.new.date.format.txt": {
     "hand_count": 1,

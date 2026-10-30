@@ -43,12 +43,14 @@ def test_ipoker_file(file_path) -> None:
 
 def test_pmu_poker_tablesize() -> None:
     """Test that PMU Poker tablesize is correctly parsed as 6-max instead of falling back to 10-max."""
-    import os
+    from pathlib import Path
 
-    file_path = os.path.expanduser(
-        "~/Library/Containers/fr.pmu.poker.macos/Data/Library/Application Support/PMU PLAY/tripsfountain99/History/Data/Tables/5858157850.xml"
+    # In the player's own history folder, whatever their screen name.
+    found = Path.home().glob(
+        "Library/Containers/fr.pmu.poker.macos/Data/Library/Application Support/PMU PLAY/*/History/Data/Tables/5858157850.xml"
     )
-    if not os.path.exists(file_path):
+    file_path = str(next(found, ""))
+    if not file_path:
         pytest.skip("PMU Poker table history file not found")
 
     from fpdb_3_legacy.Configuration import Config

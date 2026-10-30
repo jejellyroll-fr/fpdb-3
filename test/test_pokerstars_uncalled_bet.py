@@ -21,9 +21,13 @@ import pytest
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
-HAND_FILE = Path.home().joinpath(
-    "Library/Application Support/PokerStarsFR/HandHistory/jeje_sat/HH20260717 T4016724563 Hold'em No Limit Varié.txt",
-)
+# In the player's own history folder, named after them, whatever their screen name. Each
+# folder is asked for the file by name: macOS keeps "Varié" decomposed, so a glob on the
+# whole name would not match it.
+_NAME = "HH20260717 T4016724563 Hold'em No Limit Varié.txt"
+_FOLDERS = Path.home().glob("Library/Application Support/PokerStarsFR/HandHistory/*")
+HAND_FILE = next((folder / _NAME for folder in _FOLDERS if (folder / _NAME).exists()), Path.home() / "missing")
+HERO = HAND_FILE.parent.name
 
 pytestmark = pytest.mark.skipif(not HAND_FILE.exists(), reason="local PokerStars history not present")
 
@@ -42,11 +46,11 @@ def balance(hand) -> Decimal:
 
 
 def test_a_shove_everyone_folds_to_costs_only_the_blinds(hands) -> None:
-    # jeje_sat raises 1790 to 1850 all-in, all fold, 1790 comes back, 150 won.
+    # The hero raises 1790 to 1850 all-in, all fold, 1790 comes back, 150 won.
     hand = hands["261462025102"]
 
-    assert hand.pot.committed["jeje_sat"] == Decimal("60")  # was 1850
-    assert hand.pot.returned["jeje_sat"] == Decimal("1790")  # was absent
+    assert hand.pot.committed[HERO] == Decimal("60")  # was 1850
+    assert hand.pot.returned[HERO] == Decimal("1790")  # was absent
     assert balance(hand) == 0
 
 

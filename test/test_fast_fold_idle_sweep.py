@@ -57,7 +57,7 @@ def _make_idle(hud_main: HUD_main.HudMain, temp_key: str, seconds: float) -> Non
 def test_an_abandoned_table_is_cleared() -> None:
     """Hero alone on the felt, and the log silent: the blocks come down."""
     hud = _hud()
-    hud_main = _hud_main({"Bucarest 3": hud}, {HERO_SLOT: "jejellyroll"})
+    hud_main = _hud_main({"Bucarest 3": hud}, {HERO_SLOT: "kokolantern"})
     _make_idle(hud_main, "Bucarest 3", IDLE + 5)
 
     hud_main._sweep_stale_fast_fold_tables()
@@ -72,7 +72,7 @@ def test_an_abandoned_table_is_cleared() -> None:
 def test_an_empty_window_is_cleared() -> None:
     """The hero drawn and nobody else is the same answer as nobody at all."""
     hud = _hud()
-    hud_main = _hud_main({"Bucarest 3": hud}, {HERO_SLOT: "jejellyroll"})
+    hud_main = _hud_main({"Bucarest 3": hud}, {HERO_SLOT: "kokolantern"})
     _make_idle(hud_main, "Bucarest 3", IDLE * 3)
 
     hud_main._sweep_stale_fast_fold_tables()
@@ -85,7 +85,7 @@ def test_a_table_still_being_played_is_left_alone() -> None:
     hud = _hud()
     hud_main = _hud_main(
         {"Bucarest 3": hud},
-        {HERO_SLOT: "jejellyroll", 1: "villain", 2: "other"},
+        {HERO_SLOT: "kokolantern", 1: "villain", 2: "other"},
     )
     _make_idle(hud_main, "Bucarest 3", IDLE + 5)
 
@@ -97,7 +97,7 @@ def test_a_table_still_being_played_is_left_alone() -> None:
 def test_a_table_the_log_just_spoke_about_is_not_even_read() -> None:
     """Recent activity settles it without walking the accessibility tree."""
     hud = _hud()
-    hud_main = _hud_main({"Bucarest 3": hud}, {HERO_SLOT: "jejellyroll"})
+    hud_main = _hud_main({"Bucarest 3": hud}, {HERO_SLOT: "kokolantern"})
     _make_idle(hud_main, "Bucarest 3", IDLE / 2)
 
     hud_main._sweep_stale_fast_fold_tables()
@@ -109,7 +109,7 @@ def test_a_table_the_log_just_spoke_about_is_not_even_read() -> None:
 def test_a_table_showing_nothing_is_not_read_either() -> None:
     """Already down: there is nothing to take down."""
     hud = _hud(showing=False)
-    hud_main = _hud_main({"Bucarest 3": hud}, {HERO_SLOT: "jejellyroll"})
+    hud_main = _hud_main({"Bucarest 3": hud}, {HERO_SLOT: "kokolantern"})
     _make_idle(hud_main, "Bucarest 3", IDLE * 5)
 
     hud_main._sweep_stale_fast_fold_tables()
@@ -122,7 +122,7 @@ def test_an_ordinary_table_is_never_swept() -> None:
     """A cash-table HUD is driven by imports and has no log to go quiet."""
     hud = _hud()
     hud.is_fast_fold = False
-    hud_main = _hud_main({"Some Cash Table": hud}, {HERO_SLOT: "jejellyroll"})
+    hud_main = _hud_main({"Some Cash Table": hud}, {HERO_SLOT: "kokolantern"})
     _make_idle(hud_main, "Some Cash Table", IDLE * 5)
 
     hud_main._sweep_stale_fast_fold_tables()
@@ -170,7 +170,7 @@ def test_the_window_is_not_re_read_every_tick() -> None:
 def test_a_table_never_heard_from_is_given_its_idle_period() -> None:
     """A HUD created this instant is not swept before it can be updated."""
     hud = _hud()
-    hud_main = _hud_main({"Bucarest 3": hud}, {HERO_SLOT: "jejellyroll"})
+    hud_main = _hud_main({"Bucarest 3": hud}, {HERO_SLOT: "kokolantern"})
     # No _ff_last_activity entry at all, as just after create_HUD.
 
     hud_main._sweep_stale_fast_fold_tables()
@@ -182,7 +182,7 @@ def test_a_table_never_heard_from_is_given_its_idle_period() -> None:
 def test_only_the_idle_table_is_cleared() -> None:
     """Two tables, one abandoned: the other keeps its blocks."""
     abandoned, live = _hud(), _hud(title="Winamax Bucarest 4")
-    hud_main = _hud_main({"Bucarest 3": abandoned, "Bucarest 4 #61826": live}, {HERO_SLOT: "jejellyroll"})
+    hud_main = _hud_main({"Bucarest 3": abandoned, "Bucarest 4 #61826": live}, {HERO_SLOT: "kokolantern"})
     _make_idle(hud_main, "Bucarest 3", IDLE + 5)
     _make_idle(hud_main, "Bucarest 4 #61826", 1.0)
 
@@ -207,7 +207,7 @@ def test_no_resolver_means_no_sweep() -> None:
 def test_a_live_update_resets_the_idle_clock() -> None:
     """A log line about a table is what keeps its blocks alive."""
     hud = _hud()
-    hud_main = _hud_main({"Bucarest 3": hud}, {HERO_SLOT: "jejellyroll"})
+    hud_main = _hud_main({"Bucarest 3": hud}, {HERO_SLOT: "kokolantern"})
     hud_main._ff_started = {}
     hud_main._ff_trace = MagicMock()
     hud_main._find_fast_fold_hud = MagicMock(return_value=("Bucarest 3", hud))

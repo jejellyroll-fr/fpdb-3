@@ -49,7 +49,7 @@ def test_unknown_player_is_not_a_bool():
 def test_known_player_returns_its_id():
     db = _db_returning(row=(4242,), rows=[])
 
-    assert db.get_player_id(MagicMock(), "Bwin.fr Poker", "jejesat76") == 4242
+    assert db.get_player_id(MagicMock(), "Bwin.fr Poker", "kokosat76") == 4242
 
 
 if __name__ == "__main__":

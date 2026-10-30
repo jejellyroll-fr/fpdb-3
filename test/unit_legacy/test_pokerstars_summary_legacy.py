@@ -135,7 +135,7 @@ Buy-In: €0.91/€0.09 EUR
 Total Prize Pool: €9.50 EUR
 Tournament started 2026/06/05 22:43:55 CET [2026/06/05 16:43:55 ET]
 Tournament finished 2026/06/05 22:52:21 CET [2026/06/05 16:52:21 ET]
-  1: jeje_sat (France), €9.50 (100%)
+  1: koko_sat (France), €9.50 (100%)
   2: PeraLimones (Spain),
   3: krubiis (Spain),
 
@@ -143,7 +143,7 @@ You finished in 1st place.
 """
     summary = make_summary(text)
     summary.in_path = (
-        "/Users/alice/Library/Application Support/PokerStarsFR/HandHistory/jeje_sat/"
+        "/Users/alice/Library/Application Support/PokerStarsFR/HandHistory/koko_sat/"
         "TS20260605 T4006174726 No Limit Hold'em.txt"
     )
 
@@ -155,9 +155,9 @@ You finished in 1st place.
     assert summary.currency == "EUR"
     assert summary.buyinCurrency == "EUR"
     assert summary.prizepool == 950
-    assert summary.ranks["jeje_sat"] == [1]
-    assert summary.winnings["jeje_sat"] == [950]
-    assert summary.winningsCurrency["jeje_sat"] == ["EUR"]
+    assert summary.ranks["koko_sat"] == [1]
+    assert summary.winnings["koko_sat"] == [950]
+    assert summary.winningsCurrency["koko_sat"] == ["EUR"]
 
 
 def test_pokerstars_fr_summary_with_ticket_prizepool_stays_eur() -> None:
@@ -175,14 +175,14 @@ Total Prize Pool: €1 Step 2 MTT Power Path ticket
 Tournament started 2026/06/05 22:42:58 CET [2026/06/05 16:42:58 ET]
 Tournament finished 2026/06/05 22:52:41 CET [2026/06/05 16:52:41 ET]
   1: currican83 (Spain), €1 Step 2 MTT Power Path ticket
-  2: jeje_sat (France),
+  2: koko_sat (France),
   3: mikolaiv26 (Portugal),
 
 You finished in 2nd place.
 """
     summary = make_summary(text)
     summary.in_path = (
-        "/Users/alice/Library/Application Support/PokerStarsFR/HandHistory/jeje_sat/"
+        "/Users/alice/Library/Application Support/PokerStarsFR/HandHistory/koko_sat/"
         "TS20260605 T4006175219 No Limit Hold'em.txt"
     )
 
@@ -193,7 +193,7 @@ You finished in 2nd place.
     assert summary.fee == 4
     assert summary.currency == "EUR"
     assert summary.buyinCurrency == "EUR"
-    assert summary.ranks["jeje_sat"] == [2]
+    assert summary.ranks["koko_sat"] == [2]
 
 
 def test_pokerstars_kick_off_summary_variant_parses() -> None:
@@ -204,7 +204,7 @@ Tournament finished 2026/06/05 22:58:56 CET [2026/06/05 16:58:56 ET]
   1: rouxyrox (France),
   2: Moninp (France),
   3: ManuelRialdo (France),
-  4: jeje_sat (France),
+  4: koko_sat (France),
 
 You finished in 4th place.You started with a value of €0.88 and finished with no value.
 """
@@ -215,8 +215,8 @@ You finished in 4th place.You started with a value of €0.88 and finished with 
 
     assert summary.tourNo == "4006178830"
     assert summary.entries == 4
-    assert summary.ranks["jeje_sat"] == [4]
-    assert summary.winnings["jeje_sat"] == [0]
+    assert summary.ranks["koko_sat"] == [4]
+    assert summary.winnings["koko_sat"] == [0]
 
 
 def test_reentry_ko_summary() -> None:

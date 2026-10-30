@@ -217,9 +217,9 @@ def _collect(root: AXElement) -> list[AXSeat]:
 
 
 def test_static_text_is_collected_with_its_position() -> None:
-    root = AXElement("AXWindow", children=[text("jejellyroll", 100, 200)])
+    root = AXElement("AXWindow", children=[text("kokolantern", 100, 200)])
 
-    assert _collect(root) == [AXSeat("jejellyroll", 100, 200)]
+    assert _collect(root) == [AXSeat("kokolantern", 100, 200)]
 
 
 def test_the_tree_is_walked_depth_first() -> None:
@@ -243,11 +243,11 @@ def test_buttons_and_their_contents_are_skipped() -> None:
         children=[
             AXElement("AXButton", children=[text("POT", 300, 690)]),
             button("ALL-IN", 400, 690),
-            text("jejellyroll", 100, 200),
+            text("kokolantern", 100, 200),
         ],
     )
 
-    assert _collect(root) == [AXSeat("jejellyroll", 100, 200)]
+    assert _collect(root) == [AXSeat("kokolantern", 100, 200)]
 
 
 def test_non_breaking_spaces_are_normalised() -> None:
@@ -277,7 +277,7 @@ def test_values_that_cannot_be_a_label_are_dropped(value, why) -> None:
 
 def test_a_label_with_no_position_is_dropped() -> None:
     """Without coordinates a label cannot be paired with a stack or a slot."""
-    root = AXElement("AXWindow", children=[AXElement("AXStaticText", value="jejellyroll")])
+    root = AXElement("AXWindow", children=[AXElement("AXStaticText", value="kokolantern")])
 
     assert _collect(root) == []
 
@@ -489,7 +489,7 @@ def test_the_header_is_the_first_text_the_client_draws(darwin) -> None:
             AXElement(
                 "AXWindow",
                 title="Winamax Bucarest 3",
-                children=[text("ESCAPE - 0,01-0,02 EUR - Pot Limit Omaha", 10, 10), text("jejellyroll", 20, 20)],
+                children=[text("ESCAPE - 0,01-0,02 EUR - Pot Limit Omaha", 10, 10), text("kokolantern", 20, 20)],
             ),
         ],
     )
@@ -560,7 +560,7 @@ def _seated_window(title: str, *, origin=(0, 0), size=(776, 606), players=None) 
 
 #: Six chairs of a 776x606 table, positioned as the client draws them.
 SIX_MAX = {
-    "jejellyroll": (350, 520),  # bottom centre  -> slot 0
+    "kokolantern": (350, 520),  # bottom centre  -> slot 0
     "villain_bl": (60, 470),  # bottom left    -> slot 1
     "villain_tl": (50, 150),  # top left       -> slot 2
     "villain_tc": (350, 90),  # top centre     -> slot 3
@@ -585,7 +585,7 @@ def test_seats_are_read_clockwise_from_the_hero(darwin) -> None:
     slots = _read(fake, "Winamax Bucarest 3")
 
     assert slots == {
-        0: "jejellyroll",
+        0: "kokolantern",
         1: "villain_bl",
         2: "villain_tl",
         3: "villain_tc",
@@ -612,14 +612,14 @@ def test_an_empty_chair_leaves_its_slot_empty(darwin) -> None:
 
 def test_the_hud_overlay_is_not_read_back_as_players(darwin) -> None:
     """The HUD draws its own labels over the table; they must not seat anyone."""
-    window = _seated_window("Winamax Bucarest 3", players={"jejellyroll": (350, 520)})
+    window = _seated_window("Winamax Bucarest 3", players={"kokolantern": (350, 520)})
     window.attrs["AXChildren"].extend(
-        [text("jejel.", 340, 430), text("100 BB", 340, 450), text("VP 50.9", 400, 430), text("100 BB", 400, 450)],
+        [text("kokol.", 340, 430), text("100 BB", 340, 450), text("VP 50.9", 400, 430), text("100 BB", 400, 450)],
     )
     fake = FakeAX()
     fake.app_element = AXElement("AXApplication", windows=[window])
 
-    assert list(_read(fake, "Winamax Bucarest 3").values()) == ["jejellyroll"]
+    assert list(_read(fake, "Winamax Bucarest 3").values()) == ["kokolantern"]
 
 
 def test_a_window_id_suffix_in_the_key_is_ignored(darwin) -> None:
@@ -684,7 +684,7 @@ def test_the_first_window_is_used_when_no_position_is_given(darwin) -> None:
 
 def test_a_window_without_geometry_is_skipped(darwin) -> None:
     """Seats are placed relative to the window's centre; without it, there is none."""
-    unplaced = AXElement("AXWindow", title="Winamax Bucarest 3", children=[text("jejellyroll", 1, 1)])
+    unplaced = AXElement("AXWindow", title="Winamax Bucarest 3", children=[text("kokolantern", 1, 1)])
     fake = FakeAX()
     fake.app_element = AXElement("AXApplication", windows=[unplaced])
 
@@ -801,4 +801,4 @@ def test_titles_that_differ_but_share_an_index_are_the_same_table(darwin) -> Non
         windows=[_seated_window("Winamax Bucarest Escape 3", players=SIX_MAX)],
     )
 
-    assert _read(fake, "Winamax Bucarest 3")[0] == "jejellyroll"
+    assert _read(fake, "Winamax Bucarest 3")[0] == "kokolantern"

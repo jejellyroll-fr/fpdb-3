@@ -11,31 +11,31 @@ Seat 3: kermen56 (€0.44 in chips)
 Seat 5: maresdelsur (€0.70 in chips)
 Seat 6: trooperbold15 (€0.50 in chips)  DEALER
 Seat 8: louisaf55 (€2.11 in chips)
-Seat 10: jejellyroll (€2.00 in chips)
+Seat 10: kokolantern (€2.00 in chips)
 louisaf55: Post SB €0.01
-jejellyroll: Post BB €0.02
+kokolantern: Post BB €0.02
 *** HOLE CARDS ***
-Dealt to jejellyroll [C9 H5 H9 S9]
+Dealt to kokolantern [C9 H5 H9 S9]
 kermen56: Call €0.02
 maresdelsur: Call €0.02
 trooperbold15: Call €0.02
 louisaf55: Call €0.01
-jejellyroll: Check
+kokolantern: Check
 *** FLOP *** [C6 CA D10]
 louisaf55: Check
-jejellyroll: Check
+kokolantern: Check
 kermen56: Check
 maresdelsur: Check
 trooperbold15: Check
 *** TURN *** [CJ]
 louisaf55: Check
-jejellyroll: Check
+kokolantern: Check
 kermen56: Check
 maresdelsur: Check
 trooperbold15: Check
 *** RIVER *** [H8]
 louisaf55: Bet €0.05
-jejellyroll: Fold
+kokolantern: Fold
 kermen56: Fold
 maresdelsur: Raise (NF) €0.25
 trooperbold15: Fold

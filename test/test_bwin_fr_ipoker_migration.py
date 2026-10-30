@@ -43,7 +43,7 @@ STALE_CONFIG = """<FreePokerToolsConfig>
 </FreePokerToolsConfig>"""
 
 BWIN_WINDOWS_PATH = (
-    r"C:\Users\jd\AppData\Local\bwin Poker France\data\jejesat76\History\Data\Tables\5869857694.xml"
+    r"C:\Users\al\AppData\Local\bwin Poker France\data\kokosat76\History\Data\Tables\5869857694.xml"
 )
 
 
@@ -61,7 +61,7 @@ def _make_bwin_data_dir(root: Path, account: str = "accountdir") -> Path:
 
 class TestConfigMigration:
     def test_stale_partypoker_entry_is_migrated(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        tables = _make_bwin_data_dir(tmp_path, account="jejesat76")
+        tables = _make_bwin_data_dir(tmp_path, account="kokosat76")
         monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
 
         doc = xml.dom.minidom.parseString(STALE_CONFIG)
@@ -72,7 +72,7 @@ class TestConfigMigration:
         assert site.getAttribute("network") == "iPoker"
         assert site.getAttribute("HH_path") == str(tables)
         assert site.getAttribute("TS_path") == str(tables.parent / "Tournaments")
-        assert site.getAttribute("screen_name") == "jejesat76"
+        assert site.getAttribute("screen_name") == "kokosat76"
         assert site.getAttribute("enabled") == "True"  # user choice preserved
 
         hhc = next(n for n in doc.getElementsByTagName("hhc") if n.getAttribute("site") == "Bwin.fr Poker")
@@ -167,7 +167,7 @@ class TestDispatcherPathDetection:
 
 class TestInstalledSiteDetection:
     def test_detect_skin_uses_windows_folder_alias(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        _make_bwin_data_dir(tmp_path, account="jejesat76")
+        _make_bwin_data_dir(tmp_path, account="kokosat76")
         monkeypatch.setattr(
             "fpdb_3_legacy.DetectInstalledSites.get_windows_paths",
             lambda: {"local_appdata": str(tmp_path), "appdata": str(tmp_path / "roaming")},
@@ -178,7 +178,7 @@ class TestInstalledSiteDetection:
         result = detector._detect_skin("Bwin.fr Poker")
 
         assert result["detected"] is True
-        assert result["heroname"] == "jejesat76"
+        assert result["heroname"] == "kokosat76"
         assert result["hhpath"].endswith("Tables")
         assert "bwin Poker France" in result["hhpath"]
 

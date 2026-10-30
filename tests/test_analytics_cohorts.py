@@ -201,16 +201,16 @@ class TestPopulationSources:
 
     def test_linked_identities_read_the_hero_profile(self) -> None:
         config = FakeConfig(
-            {"Me": FakeHeroProfile("Me", [("PokerStars", "jeje"), ("Winamax", "jeje76")])},
+            {"Me": FakeHeroProfile("Me", [("PokerStars", "koko"), ("Winamax", "koko76")])},
             default="Me",
         )
         cohort = cohorts.linked_identities(config)
-        assert cohort.filters["identity"] == [("PokerStars", "jeje"), ("Winamax", "jeje76")]
+        assert cohort.filters["identity"] == [("PokerStars", "koko"), ("Winamax", "koko76")]
         assert cohort.exclude_hero is False
-        assert "PokerStars:jeje" in cohort.description
+        assert "PokerStars:koko" in cohort.description
 
     def test_an_unknown_profile_is_refused(self) -> None:
-        config = FakeConfig({"Me": FakeHeroProfile("Me", [("PokerStars", "jeje")])})
+        config = FakeConfig({"Me": FakeHeroProfile("Me", [("PokerStars", "koko")])})
         with pytest.raises(ValueError, match="Unknown hero profile 'Nope'"):
             cohorts.linked_identities(config, profile="Nope")
 
@@ -227,25 +227,25 @@ class TestPopulationSources:
 
 class TestIdentityFilter:
     def test_a_pair_is_two_bound_parameters(self) -> None:
-        compiled = compile_query(Query(metric="opportunities", filters={"identity": [("PokerStars", "jeje")]}))
+        compiled = compile_query(Query(metric="opportunities", filters={"identity": [("PokerStars", "koko")]}))
         assert "DROP" not in compiled.sql
-        assert "jeje" not in compiled.sql
-        assert compiled.params == ("PokerStars", "jeje")
+        assert "koko" not in compiled.sql
+        assert compiled.params == ("PokerStars", "koko")
         assert compiled.sql.count("%s") == 2
 
     def test_strings_maps_and_pairs_all_land_on_the_same_plan(self) -> None:
-        from_pairs = compile_query(Query(metric="opportunities", filters={"identity": [("PokerStars", "jeje")]}))
-        from_string = compile_query(Query(metric="opportunities", filters={"identity": ["PokerStars:jeje"]}))
-        from_mapping = compile_query(Query(metric="opportunities", filters={"identity": {"PokerStars": "jeje"}}))
+        from_pairs = compile_query(Query(metric="opportunities", filters={"identity": [("PokerStars", "koko")]}))
+        from_string = compile_query(Query(metric="opportunities", filters={"identity": ["PokerStars:koko"]}))
+        from_mapping = compile_query(Query(metric="opportunities", filters={"identity": {"PokerStars": "koko"}}))
         assert from_pairs.sql == from_string.sql == from_mapping.sql
         assert from_pairs.params == from_string.params == from_mapping.params
 
     def test_several_identities_are_an_or_of_pairs(self) -> None:
         compiled = compile_query(
-            Query(metric="opportunities", filters={"identity": [("PokerStars", "jeje"), ("Winamax", "jeje76")]}),
+            Query(metric="opportunities", filters={"identity": [("PokerStars", "koko"), ("Winamax", "koko76")]}),
         )
         assert " OR " in compiled.sql
-        assert compiled.params == ("PokerStars", "jeje", "Winamax", "jeje76")
+        assert compiled.params == ("PokerStars", "koko", "Winamax", "koko76")
 
     def test_a_malformed_identity_is_refused(self) -> None:
         with pytest.raises(ValueError, match="must read 'Site:alias'"):
@@ -258,7 +258,7 @@ class TestIdentityFilter:
         assert "1=0" in compiled.sql
 
     def test_a_hostile_alias_stays_a_parameter(self, query_db: Database) -> None:
-        hostile = "PokerStars:jeje'); DROP TABLE Hands; --"
+        hostile = "PokerStars:koko'); DROP TABLE Hands; --"
         compiled = compile_query(Query(metric="opportunities", filters={"identity": [hostile]}))
         assert "DROP TABLE" not in compiled.sql
         assert run_query(query_db, Query(metric="opportunities", filters={"identity": [hostile]})).total_opportunities == 0

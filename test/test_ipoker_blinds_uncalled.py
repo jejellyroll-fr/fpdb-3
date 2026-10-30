@@ -33,7 +33,7 @@ WALK_AT_A_RAISED_LEVEL = """<?xml version="1.0" encoding="utf-8"?>
   <gamecount>1</gamecount>
   <startdate>2026-07-11 16:17:00</startdate>
   <currency>EUR</currency>
-  <nickname>jejesat76</nickname>
+  <nickname>kokosat76</nickname>
   <tournamentcode>5867402178</tournamentcode>
   <tournamentname>Twister</tournamentname>
   <place>2</place>
@@ -49,17 +49,17 @@ WALK_AT_A_RAISED_LEVEL = """<?xml version="1.0" encoding="utf-8"?>
    <bigblind>30</bigblind>
    <players>
     <player bet="30" chips="1060" dealer="0" name="GTS64" seat="3" win="30"/>
-    <player bet="15" chips="440" dealer="1" name="jejesat76" seat="6" win="0"/>
+    <player bet="15" chips="440" dealer="1" name="kokosat76" seat="6" win="0"/>
    </players>
   </general>
   <round no="0">
-   <action no="1" player="jejesat76" sum="15" type="1"/>
+   <action no="1" player="kokosat76" sum="15" type="1"/>
    <action no="2" player="GTS64" sum="30" type="2"/>
   </round>
   <round no="1">
    <cards player="GTS64" type="Pocket">X X</cards>
-   <cards player="jejesat76" type="Pocket">S9 H4</cards>
-   <action no="3" player="jejesat76" sum="0" type="0"/>
+   <cards player="kokosat76" type="Pocket">S9 H4</cards>
+   <action no="3" player="kokosat76" sum="0" type="0"/>
   </round>
  </game>
 </session>"""

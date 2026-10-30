@@ -95,7 +95,7 @@ def test_detection_returns_none_when_nothing_is_installed(monkeypatch, tmp_path)
 # ── Americas Cardroom / WPN JSON config detection ──
 
 
-def _acr_config(screen_name="edinapoker"):
+def _acr_config(screen_name="rivercat42"):
     """Minimal Config stub for an ACR Poker site."""
     cfg = Configuration.Config.__new__(Configuration.Config)
     site = MagicMock()
@@ -115,7 +115,7 @@ def acr_json_tree(tmp_path, monkeypatch):
     storage.mkdir(parents=True)
 
     hh_base = tmp_path / "Downloads" / "AmericasCardroom" / "handHistory"
-    (hh_base / "edinapoker").mkdir(parents=True)
+    (hh_base / "rivercat42").mkdir(parents=True)
 
     ts_base = tmp_path / "Downloads" / "AmericasCardroom" / "TournamentSummary"
     ts_base.mkdir(parents=True)
@@ -155,10 +155,10 @@ def acr_json_tree(tmp_path, monkeypatch):
 
 
 def test_acr_detect_hh_path_reads_json_config(acr_json_tree):
-    cfg = _acr_config(screen_name="edinapoker")
+    cfg = _acr_config(screen_name="rivercat42")
     result = cfg.detect_hh_path("ACR Poker")
     assert result is not None
-    assert result.endswith("edinapoker")
+    assert result.endswith("rivercat42")
     # str(Path) uses the OS separator, so build the expected fragment the same way.
     assert os.path.join("AmericasCardroom", "handHistory") in result
 
@@ -171,7 +171,7 @@ def test_acr_detect_hh_path_falls_back_to_base_if_no_account_folder(acr_json_tre
 
 
 def test_acr_detect_ts_path_reads_json_config(acr_json_tree):
-    cfg = _acr_config(screen_name="edinapoker")
+    cfg = _acr_config(screen_name="rivercat42")
     result = cfg.detect_ts_path("ACR Poker")
     assert result is not None
     assert "TournamentSummary" in result

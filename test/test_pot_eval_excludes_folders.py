@@ -26,15 +26,15 @@ pytestmark = pytest.mark.skipif(
     reason="requires the native poker-eval engine (pypoker-eval)",
 )
 
-# Unibet hand 1615946806, Pot Limit Omaha. jejesat folds on the flop holding the
+# Unibet hand 1615946806, Pot Limit Omaha. kokosat folds on the flop holding the
 # best hand at the river; ASC2 wins €0.23 of a €0.25 pot, rake €0.02.
 _BOARD = ["6h", "Kd", "3d", "As", "8s"]
 _CARDS = {
     "ASC2": ["3s", "4d", "8d", "Kc"],
-    "jejesat": ["9s", "8c", "Ac", "5d"],  # folded, yet beats ASC2 at showdown
+    "kokosat": ["9s", "8c", "Ac", "5d"],  # folded, yet beats ASC2 at showdown
     "papaetla": ["Ks", "Qc", "Jc", "Qh"],
 }
-_SAW_SHOWDOWN = {"ASC2": True, "papaetla": True, "jejesat": False}
+_SAW_SHOWDOWN = {"ASC2": True, "papaetla": True, "kokosat": False}
 
 
 def _hand():
@@ -49,7 +49,7 @@ def _hand():
     hand.players = [[i, name, "500"] for i, name in enumerate(_CARDS, start=1)]
     hand.playerIds = {name: i for i, name in enumerate(_CARDS, start=1)}
     hand.pot.pots = [
-        (Decimal("0.15"), ["ASC2", "jejesat", "papaetla"]),  # jejesat paid in, then folded
+        (Decimal("0.15"), ["ASC2", "kokosat", "papaetla"]),  # kokosat paid in, then folded
         (Decimal("0.10"), ["ASC2", "papaetla"]),
     ]
     hand.pot.common = {}
@@ -69,7 +69,7 @@ def _stats(hand):
     for name in _CARDS:
         stats.handsplayers[name] = {
             "sawShowdown": _SAW_SHOWDOWN[name],
-            "position": {"ASC2": 0, "papaetla": "B", "jejesat": "S"}[name],
+            "position": {"ASC2": 0, "papaetla": "B", "kokosat": "S"}[name],
             "winnings": 0,
             "rake": 0,
         }
@@ -82,7 +82,7 @@ def test_the_folded_player_wins_no_pot():
 
     winners = {row[4] for row in stats.getHandsPots()}
 
-    assert 2 not in winners  # playerId 2 is jejesat, who folded on the flop
+    assert 2 not in winners  # playerId 2 is kokosat, who folded on the flop
 
 
 def test_the_showdown_winner_takes_both_pots():

@@ -1101,9 +1101,9 @@ def _winner(rank: int, name: str, prize: str = "Ticket") -> dict:
 
 
 def test_the_finishing_places_are_read() -> None:
-    events = [_winner_event(_winner(1, "jeje1976"), _winner(2, "Alisey"))]
+    events = [_winner_event(_winner(1, "koko1976"), _winner(2, "Alisey"))]
 
-    assert [(r["player"], r["rank"]) for r in tournament_results(events)] == [("jeje1976", 1), ("Alisey", 2)]
+    assert [(r["player"], r["rank"]) for r in tournament_results(events)] == [("koko1976", 1), ("Alisey", 2)]
 
 
 def test_what_was_won_is_named_rather_than_valued() -> None:
@@ -1113,16 +1113,16 @@ def test_what_was_won_is_named_rather_than_valued() -> None:
     and nothing in the capture says what a number here would be denominated
     in. A wrong unit reads as a real result; no number reads as no number.
     """
-    (ticket,) = tournament_results([_winner_event(_winner(1, "jeje1976", prize="Ticket"))])
-    (money,) = tournament_results([_winner_event(_winner(1, "jeje1976", prize="565.50"))])
+    (ticket,) = tournament_results([_winner_event(_winner(1, "koko1976", prize="Ticket"))])
+    (money,) = tournament_results([_winner_event(_winner(1, "koko1976", prize="565.50"))])
 
-    assert ticket == {"player": "jeje1976", "rank": 1, "prize": "Ticket"}
-    assert money == {"player": "jeje1976", "rank": 1, "prize": "565.50"}
+    assert ticket == {"player": "koko1976", "rank": 1, "prize": "Ticket"}
+    assert money == {"player": "koko1976", "rank": 1, "prize": "565.50"}
     assert "winnings" not in ticket
 
 
 def test_an_entry_without_a_place_is_skipped() -> None:
-    events = [_winner_event({"name": "jeje1976"}, _winner(2, "Alisey"))]
+    events = [_winner_event({"name": "koko1976"}, _winner(2, "Alisey"))]
 
     assert [r["player"] for r in tournament_results(events)] == ["Alisey"]
 
@@ -1139,7 +1139,7 @@ def test_a_stream_that_never_announces_anything_reports_nothing() -> None:
 
 def test_hands_and_places_are_read_from_the_same_stream() -> None:
     # The announcement carries no hand id, so it must not disturb the hands.
-    events = [*_load_straddle_events(), _winner_event(_winner(1, "jeje1976"))]
+    events = [*_load_straddle_events(), _winner_event(_winner(1, "koko1976"))]
 
     assert len(build_hands(events, "PLO4")) == 1
     assert len(tournament_results(events)) == 1

@@ -26,12 +26,12 @@ def player(db, name: str, site: str, hero: bool = False) -> int:
 
 
 def test_configured_phh_aliases_are_its_hero(db) -> None:
-    jeje = player(db, "jeje", PHH_SITE_NAME)
-    jeje76 = player(db, "jeje76", PHH_SITE_NAME)
+    koko = player(db, "koko", PHH_SITE_NAME)
+    koko76 = player(db, "koko76", PHH_SITE_NAME)
     player(db, "villain", PHH_SITE_NAME)
-    db.config.set_data_source_hero_aliases(PHH_SITE_NAME, ["jeje", "jeje76", "never_imported"])
+    db.config.set_data_source_hero_aliases(PHH_SITE_NAME, ["koko", "koko76", "never_imported"])
 
-    assert db.get_hero_player_ids(PHH_SITE_NAME) == sorted([jeje, jeje76])
+    assert db.get_hero_player_ids(PHH_SITE_NAME) == sorted([koko, koko76])
 
 
 def test_without_aliases_the_files_heroes_are_not_one_hero(db) -> None:
@@ -44,36 +44,36 @@ def test_without_aliases_the_files_heroes_are_not_one_hero(db) -> None:
 
 def test_aliases_name_players_exactly(db) -> None:
     """Names compare byte for byte (#417): an alias is not a case-folded pattern."""
-    player(db, "Jeje", PHH_SITE_NAME)
-    db.config.set_data_source_hero_aliases(PHH_SITE_NAME, ["jeje"])
+    player(db, "Koko", PHH_SITE_NAME)
+    db.config.set_data_source_hero_aliases(PHH_SITE_NAME, ["koko"])
 
     assert db.get_hero_player_ids(PHH_SITE_NAME) == []
 
 
 def test_a_profile_groups_a_phh_name_with_a_room_name(db) -> None:
-    stars = player(db, "jeje", "PokerStars")
-    phh = player(db, "jeje_phh", PHH_SITE_NAME)
-    player(db, "jeje", "Winamax")  # same name elsewhere, not linked
-    db.config.save_hero_profile("Me", [("PokerStars", "jeje"), (PHH_SITE_NAME, "jeje_phh")])
+    stars = player(db, "koko", "PokerStars")
+    phh = player(db, "koko_phh", PHH_SITE_NAME)
+    player(db, "koko", "Winamax")  # same name elsewhere, not linked
+    db.config.save_hero_profile("Me", [("PokerStars", "koko"), (PHH_SITE_NAME, "koko_phh")])
 
     assert db.get_hero_player_ids(profile="Me") == sorted([stars, phh])
 
 
 def test_a_report_reads_every_phh_alias_for_one_selected(db) -> None:
     """Graphs, sessions, opponents and tourney views resolve through this (#423)."""
-    jeje = player(db, "jeje", PHH_SITE_NAME)
-    jeje76 = player(db, "jeje76", PHH_SITE_NAME)
+    koko = player(db, "koko", PHH_SITE_NAME)
+    koko76 = player(db, "koko76", PHH_SITE_NAME)
     villain = player(db, "villain", PHH_SITE_NAME)
-    db.config.set_data_source_hero_aliases(PHH_SITE_NAME, ["jeje", "jeje76"])
+    db.config.set_data_source_hero_aliases(PHH_SITE_NAME, ["koko", "koko76"])
 
-    assert db.get_selected_player_ids(PHH_SITE_NAME, "jeje76") == sorted([jeje, jeje76])
+    assert db.get_selected_player_ids(PHH_SITE_NAME, "koko76") == sorted([koko, koko76])
     # Any other PHH player is that player alone.
     assert db.get_selected_player_ids(PHH_SITE_NAME, "villain") == [villain]
 
 
 def test_a_report_on_a_room_still_reads_the_name_selected(db) -> None:
     """A room's reports are unchanged: the alias selected, not the whole group."""
-    stars = player(db, "jeje", "PokerStars")
-    player(db, "jeje_old", "PokerStars")
+    stars = player(db, "koko", "PokerStars")
+    player(db, "koko_old", "PokerStars")
 
-    assert db.get_selected_player_ids("PokerStars", "jeje") == [stars]
+    assert db.get_selected_player_ids("PokerStars", "koko") == [stars]

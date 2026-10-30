@@ -155,7 +155,7 @@ re_ButtonPos = re.compile(
 
 
 def test_re_ButtonPos() -> None:
-    text = """\ufeffSwCPoker Hand #183411639:  Hold'em No Limit (0.02/0.04) - 2023/06/27 14:47:48 UTC\nTable 'No-Rake Micro Stakes #1'(28248) 9-max (Real Money) Seat #7 is the button\nSeat 7: cheapsmack (4.75 in chips)\nSeat 8: edinapoker (4 in chips)\ncheapsmack: posts small blind 0.02\nedinapoker: posts big blind 0.04\n*** HOLE CARDS ***\nDealt to edinapoker [3c 9d]\ncheapsmack: raises 0.06 to 0.08\nedinapoker: folds\nUncalled bet (0.04) returned to cheapsmack\n*** SHOW DOWN ***\ncheapsmack: doesn't show hand\ncheapsmack collected 0.08 from pot\n*** SUMMARY ***\nTotal pot 0.08 | Rake 0 \nSeat 7: cheapsmack (button) (small blind) collected (0.08)\nSeat 8: edinapoker (big blind) folded before Flop"""
+    text = """\ufeffSwCPoker Hand #183411639:  Hold'em No Limit (0.02/0.04) - 2023/06/27 14:47:48 UTC\nTable 'No-Rake Micro Stakes #1'(28248) 9-max (Real Money) Seat #7 is the button\nSeat 7: cheapsmack (4.75 in chips)\nSeat 8: rivercat42 (4 in chips)\ncheapsmack: posts small blind 0.02\nrivercat42: posts big blind 0.04\n*** HOLE CARDS ***\nDealt to rivercat42 [3c 9d]\ncheapsmack: raises 0.06 to 0.08\nrivercat42: folds\nUncalled bet (0.04) returned to cheapsmack\n*** SHOW DOWN ***\ncheapsmack: doesn't show hand\ncheapsmack collected 0.08 from pot\n*** SUMMARY ***\nTotal pot 0.08 | Rake 0 \nSeat 7: cheapsmack (button) (small blind) collected (0.08)\nSeat 8: rivercat42 (big blind) folded before Flop"""
     match = re_ButtonPos.search(text)
     assert match is not None
     assert match.group("BUTTON") == "7"
@@ -213,13 +213,13 @@ def test_re_CollectPot4() -> None:
 
 
 def test_re_CollectPot5() -> None:
-    text = """Seat 6: edinapoker (big blind) showed [9h 5d 7c 4d] and won (0.42) with a flush, Ace high"""
+    text = """Seat 6: rivercat42 (big blind) showed [9h 5d 7c 4d] and won (0.42) with a flush, Ace high"""
     match = re_CollectPot2.search(text)
     assert match is not None
     assert match.group("POT") == "0.42"
     assert match.group("POT2") is None
     assert match.group("SEAT") == "6"
-    assert match.group("PNAME") == "edinapoker"
+    assert match.group("PNAME") == "rivercat42"
     assert match.group("SHOWED") == "showed"
     assert match.group("CARDS") == "9h 5d 7c 4d"
     assert match.group("STRING") == "a flush, Ace high"
@@ -239,13 +239,13 @@ def test_re_CollectPot6() -> None:
 
 
 def test_re_CollectPot7() -> None:
-    text = """Seat 6: edinapoker (small blind) folded before Flop """
+    text = """Seat 6: rivercat42 (small blind) folded before Flop """
     match = re_CollectPot2.search(text)
     assert match is not None
     assert match.group("POT") is None
     assert match.group("POT2") is None
     assert match.group("SEAT") == "6"
-    assert match.group("PNAME") == "edinapoker"
+    assert match.group("PNAME") == "rivercat42"
     assert match.group("SHOWED") is None
     assert match.group("CARDS") is None
     assert match.group("STRING") is None
@@ -319,11 +319,11 @@ def test_re_Action_checks() -> None:
 
 
 def test_re_Action_call() -> None:
-    text = """edinapoker: calls 0.02"""
+    text = """rivercat42: calls 0.02"""
     match = re_Action.search(text)
     assert match is not None
     assert match.group("ATYPE") == " calls"
-    assert match.group("PNAME") == "edinapoker"
+    assert match.group("PNAME") == "rivercat42"
     assert match.group("BET") == "0.02"
 
 

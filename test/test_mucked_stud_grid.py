@@ -43,7 +43,7 @@ def test_empty_seats_are_blank_not_card_backs(qapp) -> None:
     seat4 = tuple(Card.encodeCard(c) for c in ("7h", "4s", "Jc", "As", "2d", "9h", "Kc"))
     stat_dict = {
         10: {"seat": 1, "screen_name": "Nikolay780"},
-        40: {"seat": 4, "screen_name": "edinapoker"},
+        40: {"seat": 4, "screen_name": "rivercat42"},
     }
     sc = _make_stud_cards({1: seat1, 4: seat4}, stat_dict, images)
     sc.create(QVBoxLayout())

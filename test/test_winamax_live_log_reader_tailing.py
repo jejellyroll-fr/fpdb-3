@@ -405,13 +405,13 @@ def test_the_hero_is_learned_from_their_own_cards_once() -> None:
     seen: list = []
     reader = WinamaxLiveLogReader(on_table_update=seen.append)
     reader.process_line(HAND_START)
-    cards = '1786488467000 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 cards login="jejellyroll"\n'
+    cards = '1786488467000 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 cards login="kokolantern"\n'
 
     reader.process_line(cards)
     before = len(seen)
     reader.process_line(cards)
 
-    assert reader.get_table("gf.cgmatchmaker.gf_1.t22754010.3").hero == "jejellyroll"
+    assert reader.get_table("gf.cgmatchmaker.gf_1.t22754010.3").hero == "kokolantern"
     assert len(seen) == before
 
 
@@ -466,9 +466,9 @@ def test_the_hero_folding_ends_the_table_for_them() -> None:
     """Fast-Fold moves the hero on at once; the overlay must stop describing it."""
     reader = WinamaxLiveLogReader()
     reader.process_line(HAND_START)
-    reader.process_line('1786488467000 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 cards login="jejellyroll"\n')
+    reader.process_line('1786488467000 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 cards login="kokolantern"\n')
 
-    reader.process_line('1786488468000 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 action fold login="jejellyroll"\n')
+    reader.process_line('1786488468000 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 action fold login="kokolantern"\n')
 
     table = reader.get_table("gf.cgmatchmaker.gf_1.t22754010.3")
     assert table.hero_left is True
@@ -478,7 +478,7 @@ def test_the_hero_folding_ends_the_table_for_them() -> None:
 def test_an_opponent_folding_leaves_the_table_running() -> None:
     reader = WinamaxLiveLogReader()
     reader.process_line(HAND_START)
-    reader.process_line('1786488467000 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 cards login="jejellyroll"\n')
+    reader.process_line('1786488467000 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 cards login="kokolantern"\n')
 
     reader.process_line('1786488468000 [table] 4 gf.cgmatchmaker.gf_1.t22754010.3 action fold login="villain"\n')
 
