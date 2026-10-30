@@ -142,74 +142,89 @@ def _free_name(name: str, taken: Iterable[str]) -> str:
     return candidate
 
 
-def _applies(section: Any, profile: str) -> bool:
-    """Whether *section* has rules for *profile*: scoped to it or to every profile, and not empty.
+def _carries(section: Any) -> bool:
+    """Whether *section* has anything to read: rules of its own or a ``source``.
 
-    A section with a ``source`` and no rule of its own is not empty, whether or not it
-    says ``enabled``: the configuration reads an unstated ``enabled`` as on (Codex, #643).
+    One with a ``source`` and no rule of its own counts, whether or not it says
+    ``enabled``: the configuration reads an unstated ``enabled`` as on (Codex, #643).
     """
-    scope = section.getAttribute("profile").strip().casefold()
-    carries = bool(section.getElementsByTagName("hud_panel_rule")) or bool(section.getAttribute("source").strip())
-    return carries and scope in ("", "all", profile.strip().casefold())
+    return bool(section.getElementsByTagName("hud_panel_rule")) or bool(section.getAttribute("source").strip())
 
 
-def _rules_for(section: Any, profile: str) -> list[Any]:
-    """A section's rules that apply to *profile*: the ones naming no profile, or naming it.
+def _rules_for(section: Any, profile: str, scope: str) -> list[Any]:
+    """The rules of *section* that belong to *profile*, read as the configuration reads them.
 
-    Even in a section scoped to the profile, a rule naming another one keeps its own
-    scope, as ``hud_situation.scope_rules`` reads it, and stays out (Codex, #643).
+    A rule's own profile wins; a rule naming none takes its section's *scope*, as
+    ``hud_situation.scope_rules`` gives it. Whatever section it sits in, a rule
+    belongs to the profile when that comes out as the profile or as every profile
+    (Codex, #643). Both sides are normalised as the resolver normalises them:
+    Preferences save "My HUD" as "my hud".
     """
     from fpdb_3_legacy.hud_situation import _text, profile_matches  # noqa: PLC0415
 
-    # Both sides as the resolver reads them: Preferences save "My HUD" as "my hud" (Codex, #643).
-    wanted = _text(profile, "all")
-    rules = section.getElementsByTagName("hud_panel_rule")
-    return [rule for rule in rules if profile_matches(_text(rule.getAttribute("profile"), "all"), wanted)]
+    wanted, default = _text(profile, "all"), _text(scope, "all")
+    kept = []
+    for rule in section.getElementsByTagName("hud_panel_rule"):
+        own = _text(rule.getAttribute("profile"), "all")
+        if profile_matches(default if own == "all" else own, wanted):
+            kept.append(rule)
+    return kept
 
 
 def _panel_rules(document: Any, config_doc: Any, profile: str) -> list[Any]:
     """The panel rules that apply to *profile*, as one section scoped to it.
 
-    A section for every profile -- the one Preferences writes, its rules naming
-    their profile one by one -- gives only the rules that apply to this profile,
-    so the package changes nothing for the recipient's other profiles. Several
-    sections become one, in the order the configuration reads them: an install
-    keeps a single section per profile, and would drop the others (Codex, #643).
+    Each rule goes in when it belongs to the profile, whichever section holds it, so
+    the package changes nothing for the recipient's other profiles. Several sections
+    become one, in the order the configuration reads them: an install keeps a single
+    section per profile, and would drop the others (Codex, #643).
     """
-    sections = [section for section in config_doc.getElementsByTagName("hud_panel_rules") if _applies(section, profile)]
+    sections = [section for section in config_doc.getElementsByTagName("hud_panel_rules") if _carries(section)]
     if len(sections) > 1:
-        # A disabled section is not read; the shipped library is written out too,
-        # so its rules keep their place among the others.
-        sections = [section for section in sections if _enabled(section)]
-    if not sections:
-        return []
-    merged = document.importNode(sections[0], False)
+        sections = [section for section in sections if _enabled(section)]  # a disabled one is not read
+    wanted = profile.strip().casefold()
+    prepared = []
     for section in sections:
+        scope = section.getAttribute("profile").strip()
+        foreign = scope.casefold() not in ("", "all", wanted)
         copy = document.importNode(section, True)
-        _materialise_source(document, copy, shipped=len(sections) > 1)
-        _carry_attributes(merged, copy)
-        for rule in _rules_for(copy, profile):
+        # Another profile's library is not this one's: only its rules naming this profile can come.
+        _materialise_source(document, copy, shipped=foreign)
+        prepared.append((copy, scope))
+    contributing = [
+        (copy, scope)
+        for copy, scope in prepared
+        if _rules_for(copy, profile, scope) or copy.getAttribute("source").strip()
+    ]
+    if not contributing:
+        return []
+    if len(contributing) > 1:
+        # The shipped library is written out too, so its rules keep their place among the others.
+        for copy, _scope in contributing:
+            _materialise_source(document, copy, shipped=True)
+    merged = document.createElement("hud_panel_rules")
+    merged.setAttribute("enabled", "true")
+    own_scope = next((scope for _copy, scope in contributing if scope.casefold() == wanted), profile)
+    merged.setAttribute("profile", own_scope)
+    for copy, _scope in prepared:
+        _carry_attributes(merged, copy, source=False)
+    for copy, scope in contributing:
+        _carry_attributes(merged, copy, source=True)
+        for rule in _rules_for(copy, profile, scope):
             merged.appendChild(document.createTextNode("\n  "))
             merged.appendChild(rule)
-    if not merged.getElementsByTagName("hud_panel_rule") and not merged.getAttribute("source").strip():
-        return []
-    if merged.getAttribute("profile").strip().casefold() != profile.strip().casefold():
-        merged.setAttribute("profile", profile)
-    # Said outright: an install takes a section with no "enabled" for the stock placeholder.
-    if not merged.getAttribute("enabled").strip():
-        merged.setAttribute("enabled", "true")
     merged.appendChild(document.createTextNode("\n"))
     return [merged]
 
 
-def _carry_attributes(merged: Any, section: Any) -> None:
-    """The first fallback read, and the shipped library a lone section still names."""
-    if not merged.getAttribute("fallback").strip() and section.getAttribute("fallback").strip():
-        merged.setAttribute("fallback", section.getAttribute("fallback").strip())
+def _carry_attributes(merged: Any, section: Any, *, source: bool) -> None:
+    """The first fallback read, or the shipped library a lone section still names."""
+    if not source:
+        if not merged.getAttribute("fallback").strip() and section.getAttribute("fallback").strip():
+            merged.setAttribute("fallback", section.getAttribute("fallback").strip())
+        return
     if section.getAttribute("source").strip():
         merged.setAttribute("source", section.getAttribute("source").strip())
-    elif merged.hasAttribute("source"):
-        merged.removeAttribute("source")
 
 
 def _enabled(section: Any) -> bool:

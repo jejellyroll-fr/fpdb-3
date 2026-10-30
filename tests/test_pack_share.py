@@ -365,3 +365,25 @@ def test_a_rule_naming_another_profile_stays_out_even_in_the_profiles_own_sectio
 
     # Codex (#643): the rule kept its own scope, and installing it changed the recipient's "other".
     assert [rule.getAttribute("panel") for rule in package.getElementsByTagName("hud_panel_rule")] == ["facing_open"]
+
+
+def test_a_rule_naming_the_profile_in_another_profiles_section_is_shared(tmp_path) -> None:
+    rules = tmp_path / "other_rules.json"
+    rules.write_text(json.dumps({"rules": [{"panel": "from_file", "profile": "mine"}, {"panel": "theirs"}]}))
+    config = config_with(
+        '<hud_panel_rules enabled="true" profile="other">'
+        '<hud_panel_rule panel="facing_open" profile="mine"/><hud_panel_rule panel="not_mine"/>'
+        "</hud_panel_rules>"
+        f'<hud_panel_rules enabled="true" profile="other" source="{rules}"/>'
+        '<hud_panel_rules enabled="true" profile="other" source="builtin"/>'
+    )
+
+    package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
+
+    # Codex (#643): a rule keeps its own profile in another's section, and still drives "mine".
+    (section,) = package.getElementsByTagName("hud_panel_rules")
+    assert (section.getAttribute("profile"), section.getAttribute("source")) == ("mine", "")
+    assert [rule.getAttribute("panel") for rule in section.getElementsByTagName("hud_panel_rule")] == [
+        "facing_open",
+        "from_file",
+    ]
