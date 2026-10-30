@@ -244,8 +244,8 @@ def test_folding_the_file_does_not_change_what_it_says(indented) -> None:
 
 
 def test_the_previous_file_is_kept_as_a_backup(indented) -> None:
-    # Saving moves the old file aside first, so a write that goes wrong does
-    # not take the configuration with it.
+    # Saving copies the old file aside first; the write itself goes through a
+    # temporary file, so a write that goes wrong leaves both in place (#642).
     config = indented()
     before = Path(config.file).read_text(encoding="utf-8")
 
@@ -276,7 +276,14 @@ def test_a_backup_that_cannot_be_taken_does_not_stop_the_save(indented, monkeypa
         msg = "read-only directory"
         raise OSError(msg)
 
-    monkeypatch.setattr(config_module.shutil, "move", refuse)
+    real_replace = config_module._replace_with
+
+    def refuse_backup(path, data, **kwargs):
+        if path.endswith(".backup"):
+            refuse()
+        real_replace(path, data, **kwargs)
+
+    monkeypatch.setattr(config_module, "_replace_with", refuse_backup)
 
     config.save()
 
