@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping
 from typing import Any
 
@@ -392,42 +393,72 @@ def _stock_popups() -> set[str]:
     return {node.getAttribute("pu_name") for node in template.getElementsByTagName("pu")}
 
 
-def _grid_number(node: Any, attribute: str, default: int) -> int | None:
-    """A positive whole number attribute, *default* when absent, ``None`` when unreadable."""
+# The most rows or columns a grid may have. No HUD panel comes near it, and it bounds what a
+# package can make the checker and the HUD lay out: a colspan of a billion is refused, not
+# expanded (Codex, #640).
+_MAX_GRID = 100
+
+# The numbers the configuration loader reads with int() or float(), by element: one it cannot
+# read stops the whole configuration from loading (Codex, #640).
+_LOADER_NUMBERS: dict[str, dict[str, type]] = {
+    "ss": {"xpad": int, "ypad": int},
+    "block": {"cell_width": int, "x": int, "y": int, "title_font_scale": float, "heading_font_scale": float},
+}
+
+
+def _grid_number(node: Any, attribute: str, default: int, minimum: int = 1) -> int | None:
+    """A whole number attribute from *minimum* to ``_MAX_GRID``, *default* when absent, ``None`` otherwise."""
     text = node.getAttribute(attribute)
     if not text:
         return default
-    return int(text) if text.isdigit() and int(text) > 0 else None
+    return int(text) if re.fullmatch("[0-9]{1,3}", text) and minimum <= int(text) <= _MAX_GRID else None
+
+
+def _number_problems(node: Any) -> list[str]:
+    """The attributes of *node* the configuration loader converts to a number and could not."""
+    problems = []
+    for attribute, convert in _LOADER_NUMBERS.get(node.tagName, {}).items():
+        text = node.getAttribute(attribute)
+        try:
+            if text:
+                convert(text)
+        except ValueError:
+            problems.append(f"{attribute} {text!r} is not a number")
+    return problems
 
 
 def _rowcol(text: str) -> tuple[int, int] | None:
-    """``"(r,c)"``, both from 1, as numbers; ``None`` when it is not one."""
-    parts = text[1:-1].split(",") if text.startswith("(") and text.endswith(")") else []
-    if len(parts) != 2 or not all(part.strip().isdigit() and int(part) > 0 for part in parts):
+    """``"(r,c)"``, both from 1 to ``_MAX_GRID``, as numbers; ``None`` when it is not one."""
+    parts = [part.strip() for part in text[1:-1].split(",")] if text.startswith("(") and text.endswith(")") else []
+    if len(parts) != 2 or not all(re.fullmatch("[0-9]{1,3}", part) and 0 < int(part) <= _MAX_GRID for part in parts):
         return None
     return int(parts[0]), int(parts[1])
 
 
-def _grid_problems(grid: Any) -> list[str]:  # noqa: C901, PLR0912 - one rule per item kind, each with its reason
+_SIZE_PROBLEM = f"rows and cols must be whole numbers up to {_MAX_GRID}"
+
+
+def _grid_problems(grid: Any) -> list[str]:  # noqa: C901 - one rule per item kind, each with its reason
     """Why the items of one grid would not load as placed (Codex, #640).
 
     The rules are the configuration loader's: a stat must say where it sits, as
     ``(row,col)`` from 1 -- it fails to load otherwise -- and two items on one
     cell overwrite each other. ``<text>`` headers and ``<hline>`` separators may
-    span columns. A grid that states its size keeps its items inside it; one
-    that does not takes its size from its items. Empty cells are allowed.
+    span columns, and sit on the first cell when they do not say where. A grid
+    that states its size keeps its items inside it; one that does not (or says
+    0) takes its size from its items. Empty cells are allowed.
     """
-    problems = []
-    rows, cols = _grid_number(grid, "rows", 0), _grid_number(grid, "cols", 0)
+    rows, cols = _grid_number(grid, "rows", 0, minimum=0), _grid_number(grid, "cols", 0, minimum=0)
     if rows is None or cols is None:
-        return ["rows and cols must be positive whole numbers"]
+        return [_SIZE_PROBLEM]
+    problems = []
     occupied: dict[tuple[int, int], str] = {}
     items = [node for node in grid.getElementsByTagName("*") if node.tagName in ("stat", "text", "hline")]
     for item in items:
         name = item.getAttribute("_stat_name") or item.getAttribute("label") or item.tagName
         text = item.getAttribute("_rowcol")
         if not text and item.tagName != "stat":
-            continue  # a header or separator without a cell: the loader places it first
+            text = "(1,1)"  # where the loader places a header or separator that does not say
         position = _rowcol(text)
         if position is None:
             found = f"an invalid _rowcol {text!r}" if text else "no _rowcol"
@@ -435,11 +466,12 @@ def _grid_problems(grid: Any) -> list[str]:  # noqa: C901, PLR0912 - one rule pe
             continue
         span = _grid_number(item, "colspan", 1 if item.tagName != "hline" else cols or 1)
         if span is None:
-            problems.append(f"{name} at {text}: colspan must be a positive whole number")
+            problems.append(f"{name} at {text}: colspan must be a whole number from 1 to {_MAX_GRID}")
             continue
         row, col = position
-        if (rows and row > rows) or (cols and col + span - 1 > cols):
+        if (rows and row > rows) or col + span - 1 > (cols or _MAX_GRID):
             problems.append(f"{name} at {text} is outside the {rows or '?'}x{cols or '?'} grid")
+            continue
         if item.tagName == "hline":
             continue  # a separator draws between rows rather than filling cells
         for column in range(col, col + span):
@@ -471,9 +503,20 @@ def package_problems(root: Any) -> list[str]:
         if not profile.getAttribute("name")
     ]
     for profile in profiles:
-        for grid in _direct_children(profile, "block") or [profile]:
-            where = grid.getAttribute("name") or grid.getAttribute("label") or profile.getAttribute("name")
-            problems.extend(f"{where}: {problem}" for problem in _grid_problems(grid))
+        name = profile.getAttribute("name")
+        # The loader reads a profile's own size whether or not it has blocks (Codex, #640).
+        if not (profile.getAttribute("rows") and profile.getAttribute("cols")):
+            problems.append(f"{name}: a profile needs rows and cols")
+        # As the loader finds them: blocks at any depth.
+        blocks = profile.getElementsByTagName("block")
+        size = [_grid_number(profile, attribute, 0, minimum=0) for attribute in ("rows", "cols")]
+        if blocks and None in size:
+            problems.append(f"{name}: {_SIZE_PROBLEM}")  # without blocks, the profile is the grid checked below
+        problems.extend(f"{name}: {problem}" for problem in _number_problems(profile))
+        for grid in blocks or [profile]:
+            where = grid.getAttribute("name") or grid.getAttribute("label") or name
+            found = (_number_problems(grid) if grid is not profile else []) + _grid_problems(grid)
+            problems.extend(f"{where}: {problem}" for problem in found)
 
     from fpdb_3_legacy import Stats, popup_packs  # noqa: PLC0415 - the stat catalogue is heavy
     from fpdb_3_legacy.stats_table import TABLE_STAT_FUNCTIONS  # noqa: PLC0415

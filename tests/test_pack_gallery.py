@@ -335,19 +335,52 @@ def test_every_shipped_hud_package_passes_the_install_check(path) -> None:
             "p: vpip at (2,1) is outside the 1x2 grid",
         ),
         (
-            '<fpdb_hud_package><ss name="p"><block label="b" rows="1" cols="2"><text _rowcol="(1,1)" label="Pre" colspan="2"/>'
+            '<fpdb_hud_package><ss name="p" rows="1" cols="1"><block label="b" rows="1" cols="2"><text _rowcol="(1,1)" label="Pre" colspan="2"/>'
             '<stat _rowcol="(1,2)" _stat_name="vpip"/></block></ss></fpdb_hud_package>',
             "b: vpip at (1,2) overlaps Pre at (1,1)",
         ),
         (
-            '<fpdb_hud_package><ss name="p"><block label="b" rows="1" cols="2">'
+            '<fpdb_hud_package><ss name="p" rows="1" cols="1"><block label="b" rows="1" cols="2">'
             '<text _rowcol="(1,1)" label="Pre" colspan="3"/></block></ss></fpdb_hud_package>',
             "b: Pre at (1,1) is outside the 1x2 grid",
         ),
         (
             '<fpdb_hud_package><ss name="p" rows="1" cols="2"><stat _rowcol="(1,1)" _stat_name="vpip" colspan="x"/>'
             "</ss></fpdb_hud_package>",
-            "p: vpip at (1,1): colspan must be a positive whole number",
+            "p: vpip at (1,1): colspan must be a whole number from 1 to 100",
+        ),
+        # Codex (#640), second round: a span is bounded before it is expanded...
+        (
+            '<fpdb_hud_package><ss name="p" rows="1" cols="1"><block label="b">'
+            '<stat _rowcol="(1,1)" _stat_name="vpip" colspan="1000000000"/></block></ss></fpdb_hud_package>',
+            "b: vpip at (1,1): colspan must be a whole number from 1 to 100",
+        ),
+        # ... a profile with blocks still needs the size the loader reads...
+        (
+            '<fpdb_hud_package><ss name="p"><block label="b" rows="1" cols="1">'
+            '<stat _rowcol="(1,1)" _stat_name="vpip"/></block></ss></fpdb_hud_package>',
+            "p: a profile needs rows and cols",
+        ),
+        (
+            '<fpdb_hud_package><ss name="p" rows="two" cols="1"><block label="b" rows="1" cols="1">'
+            '<stat _rowcol="(1,1)" _stat_name="vpip"/></block></ss></fpdb_hud_package>',
+            "p: rows and cols must be whole numbers up to 100",
+        ),
+        (
+            '<fpdb_hud_package><ss name="p" rows="1" cols="1"><block label="b" x="left">'
+            '<stat _rowcol="(1,1)" _stat_name="vpip"/></block></ss></fpdb_hud_package>',
+            "b: x 'left' is not a number",
+        ),
+        # ... and a header that does not say where it sits is checked on the first cell.
+        (
+            '<fpdb_hud_package><ss name="p" rows="1" cols="1"><block label="b">'
+            '<text label="Header" colspan="bad"/></block></ss></fpdb_hud_package>',
+            "b: Header at (1,1): colspan must be a whole number from 1 to 100",
+        ),
+        (
+            '<fpdb_hud_package><ss name="p" rows="1" cols="1"><block label="b" rows="1" cols="1">'
+            '<text label="Header"/><stat _rowcol="(1,1)" _stat_name="vpip"/></block></ss></fpdb_hud_package>',
+            "b: vpip at (1,1) overlaps Header at (1,1)",
         ),
         (
             '<fpdb_hud_package><ss name="p" rows="1" cols="1">'
@@ -364,13 +397,13 @@ def test_a_broken_hud_package_says_what_is_wrong(xml, problem) -> None:
     "xml",
     [
         # Codex (#640): a header above a stat, as a PT4 layout converts it.
-        '<fpdb_hud_package><ss name="p"><block label="b" rows="2" cols="1"><text _rowcol="(1,1)" label="Preflop"/>'
+        '<fpdb_hud_package><ss name="p" rows="1" cols="1"><block label="b" rows="2" cols="1"><text _rowcol="(1,1)" label="Preflop"/>'
         '<stat _rowcol="(2,1)" _stat_name="vpip"/></block></ss></fpdb_hud_package>',
         # A header spanning the block, a separator, and an empty cell.
-        '<fpdb_hud_package><ss name="p"><block label="b" rows="3" cols="2"><text _rowcol="(1,1)" label="Pre" colspan="2"/>'
+        '<fpdb_hud_package><ss name="p" rows="1" cols="1"><block label="b" rows="3" cols="2"><text _rowcol="(1,1)" label="Pre" colspan="2"/>'
         '<hline _rowcol="(2,1)"/><stat _rowcol="(3,1)" _stat_name="vpip"/></block></ss></fpdb_hud_package>',
         # A block that does not state its size takes it from its items.
-        '<fpdb_hud_package><ss name="p"><block label="b"><stat _rowcol="(1,3)" _stat_name="vpip"/></block></ss>'
+        '<fpdb_hud_package><ss name="p" rows="1" cols="1"><block label="b"><stat _rowcol="(1,3)" _stat_name="vpip"/></block></ss>'
         "</fpdb_hud_package>",
         # A table stat, and the popup every configuration has.
         '<fpdb_hud_package><ss name="p" rows="1" cols="2"><stat _rowcol="(1,1)" _stat_name="live_min_stack_bb"/>'
