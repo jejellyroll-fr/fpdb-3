@@ -458,8 +458,17 @@ def _write_record(path: Path, installed: Mapping[str, Mapping[str, Any]]) -> Non
 
 
 def installed_versions(record: Path, packs_dir: Path | None = None) -> dict[str, str]:
-    """The installed version of every pack the gallery may know: stat packs as installed, HUDs as recorded."""
-    versions = {pack_id: str(entry.get("version", "")) for pack_id, entry in read_record(record).items()}
+    """The installed version of every pack the gallery may know: stat packs as installed, HUDs as recorded.
+
+    A stat pack's record is not its state: the pack directory is. A record left
+    behind by a removal that could not be recorded names nothing, and must not
+    keep the pack from being installed again (Codex, #641).
+    """
+    versions = {
+        pack_id: str(entry.get("version", ""))
+        for pack_id, entry in read_record(record).items()
+        if entry.get("kind") != "stats"
+    }
     for status in stat_packs.list_packs(packs_dir):
         if status.status in (stat_packs.ENABLED, stat_packs.DISABLED):
             versions[status.id] = status.pack_version
@@ -679,9 +688,16 @@ def uninstall_entry(
     if entry is None:
         raise GalleryError(["was not installed from the gallery"], pack_id)
     if entry.get("kind") == "stats":
-        stat_packs.uninstall_pack(pack_id, packs_dir)
-        del installed[pack_id]
-        _write_record(record, installed)
+        # Recorded first, so a record that cannot be written leaves the pack in
+        # place; a removal that then fails puts the record back (Codex, #641).
+        remaining = {key: value for key, value in installed.items() if key != pack_id}
+        _write_record(record, remaining)
+        if pack_id in {status.id for status in stat_packs.list_packs(packs_dir)}:
+            try:
+                stat_packs.uninstall_pack(pack_id, packs_dir)
+            except BaseException:
+                _write_record(record, installed)
+                raise
         return False
     profiles = set(entry.get("profiles") or [])
     bound = _bound_games(config_doc, profiles)

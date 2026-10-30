@@ -10,6 +10,7 @@ is detected.
 from __future__ import annotations
 
 import json
+import shutil
 import urllib.request
 from pathlib import Path
 from types import SimpleNamespace
@@ -787,3 +788,29 @@ def test_a_new_stat_pack_whose_record_cannot_be_written_is_taken_back_out(instal
         installer.install("example.steals", fresh_config())
 
     assert "example.steals" not in installed_versions(installer.record, installer.packs_dir)
+
+
+def test_a_stat_pack_whose_removal_cannot_be_recorded_stays_installed(installer, monkeypatch) -> None:
+    # Codex (#641): the folder was deleted first, leaving a record of a pack that no longer existed.
+    config = fresh_config()
+    installer.install("example.steals", config)
+    unwritable_record(monkeypatch)
+
+    with pytest.raises(OSError, match="read-only profile"):
+        uninstall_entry("example.steals", config_doc=config, record=installer.record, packs_dir=installer.packs_dir)
+
+    assert (installer.packs_dir / "example.steals").is_dir()
+    assert installed_versions(installer.record, installer.packs_dir)["example.steals"] == "1.0.0"
+    assert "example.steals" in read_record(installer.record)
+
+
+def test_a_stale_stat_pack_record_does_not_block_reinstalling_it(installer) -> None:
+    config = fresh_config()
+    installer.install("example.steals", config)
+    shutil.rmtree(installer.packs_dir / "example.steals")  # gone, though the record still names it
+
+    assert "example.steals" not in installed_versions(installer.record, installer.packs_dir)
+    uninstall_entry("example.steals", config_doc=config, record=installer.record, packs_dir=installer.packs_dir)
+    assert read_record(installer.record) == {}
+    installer.install("example.steals", config)
+    assert installed_versions(installer.record, installer.packs_dir)["example.steals"] == "1.0.0"
