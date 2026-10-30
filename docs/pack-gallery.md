@@ -5,9 +5,51 @@ packs ([stat-packs.md](stat-packs.md)). The pack gallery is how players share
 them: a public repository holds the packages and an `index.json` listing them,
 and fpdb installs from it (#449).
 
-This page describes the index format and what fpdb checks before a package can
-install. The code is `fpdb_3_legacy/pack_gallery.py`. The in-app browser
-(*Tools ▸ Get packs*) and the public repository come next.
+This page describes *Tools ▸ Get packs*, the index format, and what fpdb checks
+before a package can install. The code is `fpdb_3_legacy/pack_gallery.py`, and
+the window is `pack_gallery_dialog.py`.
+
+## Get packs
+
+*Tools ▸ Get packs* lists the gallery's packs. For each one it shows:
+
+- its kind, version, and the version you have;
+- whether it is not installed, installed, has an update, or needs a newer fpdb;
+- its description, author, licence and stats, and its screenshot when it has one.
+
+- **Install** checks the package (see below), then:
+  - a **stat pack** goes into your pack directory, as *Configure ▸ Stat Packs*
+    would install it;
+  - a **HUD package** adds its profiles and popups to your HUD configuration,
+    which is saved. It never replaces anything of yours. If you already have a
+    profile with the same name, the install is refused and asks you to rename
+    yours. A HUD from the gallery never binds itself to a game, even when its
+    package lists game bindings: choose its profile for your tables in
+    *Preferences ▸ HUD*.
+- **Update** installs the newer version. For a HUD, it replaces the profiles,
+  popups and panel rules the pack installed, with any change you made to them,
+  so it asks first. Panel rules of yours, for your own profiles, stay.
+  - It is refused when the new version drops a profile one of your games
+    uses, and it names the games.
+  - A popup the new version drops stays while something of yours still opens
+    it.
+- **Uninstall** removes a pack installed from the gallery. For a HUD, it removes
+  the profiles and panel rules it added, and the popups it added that nothing
+  of yours still opens. It is refused while a game still uses one of its profiles, and names
+  the games.
+
+fpdb remembers what it installed from the gallery, and at which version, in
+`pack-gallery.json` beside your configuration. The HUD configuration is saved
+before that record is written, and the two go together: when either cannot be
+written, the change is undone (the configuration saved back as it was) and the
+pack keeps its previous state. Packages, the index and
+screenshots are cached in `pack-gallery-cache/`. Restart fpdb and the HUD to
+use a change everywhere.
+
+The gallery read is the project's
+(`https://raw.githubusercontent.com/jejellyroll-fr/fpdb-3-packs/main`).
+Another one, an https URL or a local folder, can be set with the
+`pack_gallery` attribute of `<general>` in `HUD_config.xml`.
 
 ## The index
 

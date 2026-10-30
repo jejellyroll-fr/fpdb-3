@@ -13,6 +13,19 @@ def _direct_children(node: Any, tag_name: str) -> list[Any]:
     return [child for child in node.childNodes if child.nodeType == child.ELEMENT_NODE and child.tagName == tag_name]
 
 
+def package_popups(package_root: Any) -> list[Any]:
+    """The popups a package defines: directly under its root, or in its ``<popup_windows>``.
+
+    A package built in memory (the AoF migration) carries its popups directly;
+    a saved ``.fpdbhud`` (the reference HUDs, an export) keeps them in a
+    ``<popup_windows>`` section, as the configuration itself does.
+    """
+    popups = _direct_children(package_root, "pu")
+    for section in _direct_children(package_root, "popup_windows"):
+        popups.extend(_direct_children(section, "pu"))
+    return popups
+
+
 def _container(doc: Any, tag_name: str) -> Any:
     """Return a top-level config container, creating it when absent."""
     nodes = doc.getElementsByTagName(tag_name)
@@ -243,11 +256,13 @@ def _repoint_panel_rule_profile(section: Any, names: Mapping[str, str]) -> None:
             rule.setAttribute("profile", names[target])
 
 
-def install_missing_hud_package(config_doc: Any, package_root: Any) -> bool:
+def install_missing_hud_package(config_doc: Any, package_root: Any, *, bind_games: bool = True) -> bool:
     """Install missing profiles, popups, bindings and panel rules.
 
     Additive by construction: an existing profile, popup, binding or panel-rule
-    section is the user's, and stays.
+    section is the user's, and stays. With ``bind_games=False`` the package's
+    ``<game>`` bindings are left out, so its profiles install without being put
+    to use on any table (a pack from the gallery, #449).
     """
     changed = False
     stat_sets = _container(config_doc, "stat_sets")
@@ -259,21 +274,19 @@ def install_missing_hud_package(config_doc: Any, package_root: Any) -> bool:
             changed = True
 
     popup_windows = _container(config_doc, "popup_windows")
-    for source_popup in _direct_children(package_root, "pu"):
+    for source_popup in package_popups(package_root):
         popup_name = source_popup.getAttribute("pu_name")
         if popup_name and _named_node(config_doc, "pu", "pu_name", popup_name) is None:
             _append_imported(config_doc, popup_windows, source_popup)
             changed = True
 
-    return (
-        merge_package_game_bindings(
-            config_doc,
-            package_root,
-            overwrite=False,
-        )
-        or merge_package_panel_rules(config_doc, package_root, overwrite=False)
-        or changed
-    )
+    # Each merge runs whatever the one before returned: chained with ``or``, a
+    # package that added a game binding never had its panel rules merged.
+    if bind_games and merge_package_game_bindings(config_doc, package_root, overwrite=False):
+        changed = True
+    if merge_package_panel_rules(config_doc, package_root, overwrite=False):
+        changed = True
+    return changed
 
 
 def merge_missing_profile_stats(

@@ -196,6 +196,11 @@ def menu_layout() -> tuple[Menu, ...]:
             (
                 MenuItem(N_("Auto Notes Workbench"), "tab_auto_notes_workbench"),
                 MenuItem(
+                    N_("Get packs"),
+                    "dia_get_packs",
+                    tip=N_("Install HUDs and stat packs shared by other players"),
+                ),
+                MenuItem(
                     N_("Session Guard"),
                     "dia_session_guard",
                     tip=N_("Alerts for the session being played: loss, win, duration, hands, drawdown"),

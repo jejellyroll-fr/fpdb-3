@@ -486,3 +486,14 @@ def test_each_package_documents_itself_in_a_comment() -> None:
         head = path.read_text(encoding="utf-8")[:4000]
         assert "Who it is for" in head or "Who it is for:" in head or "How it works" in head
         assert "Known limitations" in head or "Known limitation" in head or "deliberately does not use" in head
+
+
+@pytest.mark.parametrize("path", PACKAGES, ids=lambda p: p.name)
+def test_an_import_brings_the_popups_the_package_defines(path: Path) -> None:
+    """A saved package keeps its popups in <popup_windows>; the merge must find them there (#449)."""
+    doc = _absent_config()
+
+    install_missing_hud_package(doc, _root(path))
+
+    installed = {node.getAttribute("pu_name") for node in doc.getElementsByTagName("pu")}
+    assert _defined_popups(_root(path)) <= installed
