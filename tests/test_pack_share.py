@@ -410,3 +410,14 @@ def test_the_fallback_of_a_section_with_nothing_else_is_kept() -> None:
 
     # Codex (#643): the fallback-only section was set aside before its fallback was read.
     assert package.getElementsByTagName("hud_panel_rules")[0].getAttribute("fallback") == "core"
+
+
+def test_the_shipped_librarys_own_fallback_is_read_in_its_turn() -> None:
+    config = config_with('<hud_panel_rules source="builtin" profile="mine"/><hud_panel_rules fallback="different"/>')
+
+    package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
+
+    # Codex (#643): the library's fallback comes first, as the configuration reads it.
+    section = package.getElementsByTagName("hud_panel_rules")[0]
+    assert section.getAttribute("source") == "builtin"
+    assert section.getAttribute("fallback") == hud_situation.load_source("builtin")[1]

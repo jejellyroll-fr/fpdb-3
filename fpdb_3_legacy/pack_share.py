@@ -223,8 +223,16 @@ def _panel_rules(document: Any, config_doc: Any, profile: str) -> list[Any]:
 def _carry_attributes(merged: Any, section: Any, *, source: bool) -> None:
     """The first fallback read, or the shipped library a lone section still names."""
     if not source:
-        if not merged.getAttribute("fallback").strip() and section.getAttribute("fallback").strip():
-            merged.setAttribute("fallback", section.getAttribute("fallback").strip())
+        if merged.getAttribute("fallback").strip():
+            return
+        fallback = section.getAttribute("fallback").strip()
+        if not fallback and section.getAttribute("source").strip():
+            # A library still named by its source brings its own fallback, read in its turn (Codex, #643).
+            from fpdb_3_legacy import hud_situation  # noqa: PLC0415
+
+            fallback = hud_situation.load_source(section.getAttribute("source").strip())[1]
+        if fallback:
+            merged.setAttribute("fallback", fallback)
         return
     if section.getAttribute("source").strip():
         merged.setAttribute("source", section.getAttribute("source").strip())
