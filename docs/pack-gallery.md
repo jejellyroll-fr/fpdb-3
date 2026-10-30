@@ -73,9 +73,11 @@ Before a package installs:
      - every stat, header (`<text>`) and separator (`<hline>`) sits where the
        configuration loader expects it: a valid `_rowcol` (`(row,col)`,
        counted from 1; a header or separator without one sits on `(1,1)`),
-       inside the grid, its `colspan` included, and not on a cell another
-       item already takes. Empty cells are allowed;
-     - every stat it names exists, table stats included;
+       inside the grid, its `colspan` included (`0` makes a separator cross
+       the block), and not on a cell another item already takes. Empty cells
+       are allowed;
+     - every stat it names exists, table stats included, with or without a
+       decimal-places suffix (`vpip_0`);
      - every popup it opens is in the package, the shipped library, or the
        stock configuration (`default`, ...).
 
@@ -84,7 +86,7 @@ Before a package installs:
 
 Packages are data. Nothing in them is imported or run.
 
-The gallery is read over https only. A package or index larger than its limit
+The gallery is read over https only, and a redirect to anything else is refused. A package or index larger than its limit
 (5 MB per package, 2 MB for the index) is not read whole.
 
 ## Offline

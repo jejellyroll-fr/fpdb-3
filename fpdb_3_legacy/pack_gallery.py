@@ -337,13 +337,30 @@ def _is_url(source: str) -> bool:
     return urllib.parse.urlsplit(source).scheme in ("https", "http")
 
 
+class _HttpsOnlyRedirects(urllib.request.HTTPRedirectHandler):
+    """Follows a redirect only to another https URL (Codex, #640).
+
+    The index carries the packages' checksums, so it is only as trustworthy as
+    the connection it came over: a redirect to plain http is refused, not
+    followed.
+    """
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[no-untyped-def]  # noqa: ANN001, ANN201, PLR0913 - urllib's signature
+        if urllib.parse.urlsplit(newurl).scheme != "https":
+            raise OSError(f"{req.full_url}: redirected to {newurl}; the gallery is only read over https")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+_OPENER = urllib.request.build_opener(_HttpsOnlyRedirects)
+
+
 def read_location(where: str, limit: int) -> bytes:
     """Read *where*, an https URL or a local file, refusing anything past *limit* bytes."""
     if _is_url(where):
         if urllib.parse.urlsplit(where).scheme != "https":
             raise OSError(f"{where}: the gallery is only read over https")
         request = urllib.request.Request(where, headers={"User-Agent": "fpdb-3 pack gallery"})  # noqa: S310 - https only, checked above
-        with urllib.request.urlopen(request, timeout=20) as response:  # noqa: S310  # nosec B310 - https only, checked above
+        with _OPENER.open(request, timeout=20) as response:  # https only, redirects included
             data = response.read(limit + 1)
     else:
         with Path(where).open("rb") as handle:

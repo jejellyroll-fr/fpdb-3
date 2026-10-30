@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import urllib.request
 import zipfile
 from pathlib import Path
 from typing import Any
@@ -24,6 +25,7 @@ from fpdb_3_legacy.pack_gallery import (
     INDEX_NAME,
     INDEX_SCHEMA,
     GalleryError,
+    _HttpsOnlyRedirects,
     fetch_package,
     incompatibility,
     index_entry,
@@ -295,6 +297,18 @@ def test_the_gallery_is_only_read_over_https() -> None:
         read_location("http://example.invalid/packs/index.json", 100)
 
 
+def test_a_redirect_away_from_https_is_refused() -> None:
+    # Codex (#640): the index carries the checksums, so its transport must stay https end to end.
+    handler = _HttpsOnlyRedirects()
+    request = urllib.request.Request("https://example.invalid/packs/index.json")
+
+    with pytest.raises(OSError, match="only read over https"):
+        handler.redirect_request(request, None, 302, "Found", {}, "http://example.invalid/packs/index.json")
+    followed = handler.redirect_request(request, None, 302, "Found", {}, "https://mirror.invalid/packs/index.json")
+    assert followed is not None
+    assert followed.full_url == "https://mirror.invalid/packs/index.json"
+
+
 def test_a_file_larger_than_allowed_is_not_read_whole(tmp_path) -> None:
     big = tmp_path / "big.fpdbhud"
     big.write_bytes(b"x" * 101)
@@ -408,6 +422,9 @@ def test_a_broken_hud_package_says_what_is_wrong(xml, problem) -> None:
         # A table stat, and the popup every configuration has.
         '<fpdb_hud_package><ss name="p" rows="1" cols="2"><stat _rowcol="(1,1)" _stat_name="live_min_stack_bb"/>'
         '<stat _rowcol="(1,2)" _stat_name="vpip" popup="default"/></ss></fpdb_hud_package>',
+        # Codex (#640): a stat with its decimal places (vpip_0), and a separator whose span of 0 crosses the block.
+        '<fpdb_hud_package><ss name="p" rows="2" cols="2"><block label="b" rows="2" cols="2">'
+        '<stat _rowcol="(1,1)" _stat_name="vpip_0"/><hline _rowcol="(2,1)" colspan="0"/></block></ss></fpdb_hud_package>',
     ],
 )
 def test_a_well_formed_hud_package_passes(xml) -> None:

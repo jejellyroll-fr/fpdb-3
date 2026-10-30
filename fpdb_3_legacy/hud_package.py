@@ -464,7 +464,10 @@ def _grid_problems(grid: Any) -> list[str]:  # noqa: C901 - one rule per item ki
             found = f"an invalid _rowcol {text!r}" if text else "no _rowcol"
             problems.append(f"{name} has {found}; write where it sits as (row,col), counted from 1")
             continue
-        span = _grid_number(item, "colspan", 1 if item.tagName != "hline" else cols or 1)
+        separator = item.tagName == "hline"
+        span = _grid_number(item, "colspan", 0 if separator else 1, minimum=0 if separator else 1)
+        if separator and span == 0:
+            span = cols or 1  # a separator with no span, or a span of 0, crosses the whole block (Codex, #640)
         if span is None:
             problems.append(f"{name} at {text}: colspan must be a whole number from 1 to {_MAX_GRID}")
             continue
@@ -472,7 +475,7 @@ def _grid_problems(grid: Any) -> list[str]:  # noqa: C901 - one rule per item ki
         if (rows and row > rows) or col + span - 1 > (cols or _MAX_GRID):
             problems.append(f"{name} at {text} is outside the {rows or '?'}x{cols or '?'} grid")
             continue
-        if item.tagName == "hline":
+        if separator:
             continue  # a separator draws between rows rather than filling cells
         for column in range(col, col + span):
             other = occupied.get((row, column))
@@ -530,7 +533,8 @@ def package_problems(root: Any) -> list[str]:
         # A navigation row's "stat" is the text it shows, not a statistic.
         if not row.getAttribute("pu_stat_submenu")
     }
-    unknown = sorted(name for name in named if name not in known)
+    # A trailing _<digit> asks for that many decimal places (vpip_0), as Stats.do_stat reads it (Codex, #640).
+    unknown = sorted(name for name in named if name not in known and re.sub("_[0-9]$", "", name) not in known)
     if unknown:
         problems.append(f"unknown stat(s): {', '.join(unknown)}")
 
