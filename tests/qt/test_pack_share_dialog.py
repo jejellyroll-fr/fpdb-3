@@ -34,7 +34,8 @@ def window(qtbot, tmp_path):
     config = SimpleNamespace(
         doc=defusedxml.minidom.parseString(
             '<FreePokerToolsConfig><stat_sets><ss name="My HUD" rows="1" cols="1">'
-            '<stat _rowcol="(1,1)" _stat_name="vpip"/></ss></stat_sets></FreePokerToolsConfig>'
+            '<stat _rowcol="(1,1)" _stat_name="vpip"/></ss><ss name="Second" rows="1" cols="1">'
+            '<stat _rowcol="(1,1)" _stat_name="pfr"/></ss></stat_sets></FreePokerToolsConfig>'
         )
     )
     packs_dir = tmp_path / "packs"
@@ -59,6 +60,16 @@ def test_an_id_is_suggested_from_the_author_and_the_profile_until_one_is_typed(w
     window.pack_id.setText("alice.special")
     window.author.textEdited.emit("bob")
     assert window.pack_id.text() == "alice.special"
+
+
+def test_a_suggested_id_follows_the_profile_chosen(window) -> None:
+    window.source.setCurrentIndex(window.source.findData("Second"))
+    assert window.pack_id.text() == "yourname.second"
+
+    # Codex (#643): the suggestion for the first profile was taken for a typed id, and never followed again.
+    window.author.setText("alice")
+    window.author.textEdited.emit("alice")
+    assert window.pack_id.text() == "alice.second"
 
 
 def test_a_stat_pack_is_shared_under_its_own_id_and_version(window, tmp_path, messages) -> None:

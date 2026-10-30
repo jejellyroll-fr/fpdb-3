@@ -133,7 +133,7 @@ class SharePackDialog(QDialog):
                 self.author.setText(chosen.author)
             return
         self.name.setText(chosen)
-        self._suggested = ""
+        # The previous suggestion stays known, so an id fpdb suggested still follows the profile (Codex, #643).
         self._suggest_id()
 
     def _suggest_id(self) -> None:
