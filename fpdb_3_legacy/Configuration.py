@@ -19,7 +19,6 @@ from __future__ import annotations
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
 #    Standard Library modules
-import codecs
 import inspect
 import json
 import locale
@@ -29,6 +28,7 @@ import re
 import shutil
 import sys
 import traceback
+import uuid
 import xml.parsers.expat
 from pathlib import Path
 from typing import Any
@@ -1742,6 +1742,27 @@ def parse_hud_panel_rules(doc: Any) -> tuple[list[Any], str, bool]:
     return hud_situation.number_rules(rules), fallback, enabled
 
 
+def _replace_with(path: str, data: bytes) -> None:
+    """Make ``path`` hold ``data``, or leave it exactly as it was if anything fails."""
+    # A configuration linked from elsewhere is written where the link points,
+    # so the link itself survives.
+    target = Path(os.path.realpath(path))
+    temporary = target.with_name(f".{target.name}.{uuid.uuid4().hex[:12]}.tmp")
+    # Created as open() would create it (the umask decides), not owner-only as
+    # mkstemp would: a file saved under a new name keeps the usual permissions.
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0), 0o666)
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(data)
+            stream.flush()
+            os.fsync(stream.fileno())
+        if target.exists():
+            shutil.copymode(target, temporary)
+        os.replace(temporary, target)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
+
+
 class Config:
     def __init__(
         self,
@@ -2558,16 +2579,20 @@ class Config:
         return True
 
     def save(self, file=None) -> None:
+        """Write the configuration so that a failed save leaves the previous file whole (#642).
+
+        The new content goes to a temporary file beside the target, reaches the
+        disk, and only then replaces the target in one step. Saving fpdb's own
+        file first copies it to ``.backup``; the file itself is never moved away.
+        """
         if file is None:
             file = self.file
             try:
-                shutil.move(file, f"{file}.backup")
+                _replace_with(f"{file}.backup", Path(file).read_bytes())
             except OSError as e:
-                log.exception(f"Failed to move file {file} to backup. Exception: {e}")
+                log.exception(f"Failed to copy file {file} to backup. Exception: {e}")
 
-        with codecs.open(file, "w", "utf-8") as f:
-            # self.doc.writexml(f)
-            f.write(self.wrap_long_lines(self.doc.toxml()))
+        _replace_with(file, self.wrap_long_lines(self.doc.toxml()).encode("utf-8"))
 
     def wrap_long_lines(self, s):
         lines = [self.wrap_long_line(line) for line in s.splitlines()]
