@@ -244,3 +244,32 @@ def test_a_stock_popup_as_shipped_is_left_to_the_recipients_own() -> None:
 
     assert "default" not in {node.getAttribute("pu_name") for node in package.getElementsByTagName("pu")}
     assert {cell.getAttribute("popup") for cell in package.getElementsByTagName("stat")} == {"default"}
+
+
+def test_rules_read_from_a_file_of_the_sharers_are_written_into_the_package(tmp_path) -> None:
+    rules = tmp_path / "my_rules.json"
+    rules.write_text(json.dumps({"fallback": "core", "rules": [{"panel": "facing_open", "profile": "mine"}]}))
+    config = config_with(f'<hud_panel_rules enabled="true" source="{rules}" profile="mine"/>')
+
+    package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
+
+    # Codex (#643): the package named the sharer's file, which no recipient has.
+    (section,) = package.getElementsByTagName("hud_panel_rules")
+    assert not section.getAttribute("source")
+    assert section.getAttribute("fallback") == "core"
+    assert [rule.getAttribute("panel") for rule in section.getElementsByTagName("hud_panel_rule")] == ["facing_open"]
+
+
+def test_a_rules_file_that_cannot_be_read_refuses_the_share(tmp_path) -> None:
+    config = config_with(f'<hud_panel_rules enabled="true" source="{tmp_path / "gone.json"}" profile="mine"/>')
+
+    with pytest.raises(GalleryError, match="cannot be read"):
+        hud_package(config, "mine")
+
+
+def test_the_shipped_rule_library_stays_named() -> None:
+    config = config_with('<hud_panel_rules enabled="true" source="builtin" profile="mine"/>')
+
+    package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
+
+    assert package.getElementsByTagName("hud_panel_rules")[0].getAttribute("source") == "builtin"

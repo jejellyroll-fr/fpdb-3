@@ -132,6 +132,7 @@ def _panel_rules(document: Any, config_doc: Any, profile: str) -> list[Any]:
         if _is_panel_rule_placeholder(section) or (scope and scope.casefold() not in ("all", wanted)):
             continue
         copy = document.importNode(section, True)
+        _materialise_source(document, copy)
         if scope.casefold() != wanted:
             for rule in list(copy.getElementsByTagName("hud_panel_rule")):
                 if not profile_matches(rule.getAttribute("profile").strip(), profile):
@@ -141,6 +142,35 @@ def _panel_rules(document: Any, config_doc: Any, profile: str) -> list[Any]:
             copy.setAttribute("profile", profile)
         sections.append(copy)
     return sections
+
+
+def _materialise_source(document: Any, section: Any) -> None:
+    """Write the rules of a section's file or folder ``source`` into it, path removed.
+
+    The path is the sharer's own: a recipient without it could not load the
+    configuration at all (Codex, #643). The shipped libraries (``builtin``,
+    ``builtin_plo``) are in every fpdb and stay named. A source that cannot be
+    read refuses the share rather than writing a package without its rules.
+    """
+    from fpdb_3_legacy import hud_situation  # noqa: PLC0415
+
+    source = section.getAttribute("source").strip()
+    if not source or source.casefold() in (hud_situation.BUILTIN_SOURCE, hud_situation.PLO_BUILTIN_SOURCE):
+        return
+    try:
+        rules, fallback = hud_situation.load_source(source)
+    except (OSError, ValueError) as exc:
+        raise GalleryError([f"the panel rules in {source} cannot be read: {exc}"]) from exc
+    section.removeAttribute("source")
+    if fallback and not section.getAttribute("fallback").strip():
+        section.setAttribute("fallback", fallback)
+    # The source's rules come before the section's own, as the configuration reads them.
+    first = section.firstChild
+    for rule in rules:
+        node = document.createElement("hud_panel_rule")
+        for name, value in rule.as_xml_attributes().items():
+            node.setAttribute(name, value)
+        section.insertBefore(node, first)
 
 
 def hud_package(config_doc: Any, profile: str) -> bytes:
