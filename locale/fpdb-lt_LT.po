@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 00:23+0100\n"
+"POT-Creation-Date: 2026-10-30 15:51+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -1398,7 +1398,7 @@ msgstr "Perkelti į..."
 msgid "Migrating database"
 msgstr "Perkeliama duomenų bazė"
 
-#: fpdb_3_legacy/GuiDatabase.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/pack_share_dialog.py
 msgid "Name"
 msgstr "Pavadinimas"
 
@@ -2662,7 +2662,7 @@ msgstr ""
 "Realizuota {realized} per {hands} rankų; EV koreguota {ev} (iš jų {luck} — "
 "sėkmė)."
 
-#: fpdb_3_legacy/GuiResearchViews.py
+#: fpdb_3_legacy/GuiResearchViews.py fpdb_3_legacy/pack_share_dialog.py
 #, fuzzy
 msgid "Share"
 msgstr "Dalis"
@@ -4116,6 +4116,10 @@ msgstr "Sesijos"
 msgid "Session Stats"
 msgstr "Sesijų statistika"
 
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_share_dialog.py
+msgid "Share a HUD or pack"
+msgstr ""
+
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
 msgid "Site Settings"
@@ -4173,7 +4177,7 @@ msgid "Tourney Stats"
 msgstr "Turnyrų statistika"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
-#: fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Version"
 msgstr "Sesijos"
@@ -4193,6 +4197,10 @@ msgstr "Peržiūrėti duomenų bazės statistiką"
 msgid "What every filter is for in a four-card game, and the two that are not"
 msgstr ""
 "Kam skirtas kiekvienas filtras keturių kortų žaidime, ir du, kurie netinka"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "+"
@@ -4617,6 +4625,7 @@ msgid "HUD imported — refresh required"
 msgstr "HUD importuotas — reikia atnaujinti"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/pack_share_dialog.py
 #, fuzzy
 msgid "HUD profile"
 msgstr "HUD profilis"
@@ -5163,7 +5172,12 @@ msgstr "Paketas"
 msgid "Restart fpdb and the HUD to use the change everywhere."
 msgstr "Paleiskite fpdb ir HUD iš naujo, kad pakeitimas veiktų visur."
 
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Share yours…"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/pack_share_dialog.py
+#: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Stat pack"
 msgstr "Statistikos paketas"
@@ -5242,6 +5256,63 @@ msgstr "Įrašyta"
 msgid ""
 "Updating replaces the profiles and popups this pack installed, with any "
 "change you made to them. Continue?"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Write a HUD profile or a stat pack ready to submit to the gallery"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "An SPDX licence identifier; the gallery requires one."
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Author"
+msgstr "Autorius"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Description"
+msgstr "Apibūdinimas"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "For example CC-BY-4.0 or AGPL-3.0-or-later"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, fuzzy
+msgid "Id"
+msgstr "Neaktyvus"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Licence"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, fuzzy
+msgid "This cannot be shared:"
+msgstr "Šio paketo negalima įdiegti:"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Which"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Write package…"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Write the package in"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, python-format
+msgid ""
+"Written to %(folder)s.\n"
+"\n"
+"To submit it, copy the folder's content into your copy of the packs "
+"repository (%(repository)s), add the entry in %(entry)s to index.json, and "
+"open a pull request."
 msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
@@ -6931,11 +7002,6 @@ msgstr "Visą laiką"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-msgid "Author"
-msgstr "Autorius"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
 msgid "Built-in"
 msgstr "Integruotas"
 
@@ -7561,9 +7627,6 @@ msgstr ""
 
 #~ msgid "DISCARDS"
 #~ msgstr "NUMESTOS KORTOS"
-
-#~ msgid "Description"
-#~ msgstr "Apibūdinimas"
 
 #~ msgid "Detect Directories"
 #~ msgstr "Aptikti direktorijas"

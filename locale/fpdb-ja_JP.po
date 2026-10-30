@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 00:23+0100\n"
+"POT-Creation-Date: 2026-10-30 15:51+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -1369,7 +1369,7 @@ msgstr "移行先..."
 msgid "Migrating database"
 msgstr "データベースを移行中"
 
-#: fpdb_3_legacy/GuiDatabase.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/pack_share_dialog.py
 #, fuzzy
 msgid "Name"
 msgstr "名前"
@@ -2600,7 +2600,7 @@ msgid ""
 "Realized {realized} over {hands} hands; EV-adjusted {ev} ({luck} of it luck)."
 msgstr "{hands} ハンドで実現値 {realized}、EV 調整後 {ev} (うち {luck} は運)。"
 
-#: fpdb_3_legacy/GuiResearchViews.py
+#: fpdb_3_legacy/GuiResearchViews.py fpdb_3_legacy/pack_share_dialog.py
 #, fuzzy
 msgid "Share"
 msgstr "割合"
@@ -4032,6 +4032,10 @@ msgstr "セッションガード"
 msgid "Session Stats"
 msgstr "セッション統計"
 
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_share_dialog.py
+msgid "Share a HUD or pack"
+msgstr ""
+
 #: fpdb_3_legacy/menu_layout.py
 msgid "Site Settings"
 msgstr "ポーカーサイト設定"
@@ -4084,7 +4088,7 @@ msgid "Tourney Stats"
 msgstr "トーナメント統計"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
-#: fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Version"
 msgstr "バージョン"
@@ -4105,6 +4109,10 @@ msgid "What every filter is for in a four-card game, and the two that are not"
 msgstr ""
 "4 枚カードのゲームで各フィルターが何のためにあるか、そして使えない 2 つについ"
 "て"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "+"
@@ -4522,6 +4530,7 @@ msgid "HUD imported — refresh required"
 msgstr "HUD をインポートしました — 更新が必要です"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/pack_share_dialog.py
 #, fuzzy
 msgid "HUD profile"
 msgstr "HUD プロフィール"
@@ -5059,7 +5068,12 @@ msgstr "パック"
 msgid "Restart fpdb and the HUD to use the change everywhere."
 msgstr "変更をすべての場所で使うには、fpdb と HUD を再起動してください。"
 
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Share yours…"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/pack_share_dialog.py
+#: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Stat pack"
 msgstr "統計パック"
@@ -5139,6 +5153,63 @@ msgstr "保存しました"
 msgid ""
 "Updating replaces the profiles and popups this pack installed, with any "
 "change you made to them. Continue?"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Write a HUD profile or a stat pack ready to submit to the gallery"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "An SPDX licence identifier; the gallery requires one."
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Author"
+msgstr "作成者"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Description"
+msgstr "詳細"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "For example CC-BY-4.0 or AGPL-3.0-or-later"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, fuzzy
+msgid "Id"
+msgstr "待機中"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Licence"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, fuzzy
+msgid "This cannot be shared:"
+msgstr "このパックはインストールできません:"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Which"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Write package…"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Write the package in"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, python-format
+msgid ""
+"Written to %(folder)s.\n"
+"\n"
+"To submit it, copy the folder's content into your copy of the packs "
+"repository (%(repository)s), add the entry in %(entry)s to index.json, and "
+"open a pull request."
 msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
@@ -6832,11 +6903,6 @@ msgstr "すべてのファイル"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-msgid "Author"
-msgstr "作成者"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
 msgid "Built-in"
 msgstr "組み込み"
 
@@ -7802,9 +7868,6 @@ msgstr ""
 
 #~ msgid "Default encoding set to US-ASCII, defaulting to CP1252 instead."
 #~ msgstr "既定の文字エンコーディングをUS-ASCIIからCP1252に変更します。"
-
-#~ msgid "Description"
-#~ msgstr "詳細"
 
 #~ msgid "Detect"
 #~ msgstr "自動判別"

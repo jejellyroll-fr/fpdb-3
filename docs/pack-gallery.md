@@ -5,9 +5,10 @@ packs ([stat-packs.md](stat-packs.md)). The pack gallery is how players share
 them: a public repository holds the packages and an `index.json` listing them,
 and fpdb installs from it (#449).
 
-This page describes *Tools ▸ Get packs*, the index format, and what fpdb checks
-before a package can install. The code is `fpdb_3_legacy/pack_gallery.py`, and
-the window is `pack_gallery_dialog.py`.
+This page describes *Tools ▸ Get packs*, *Tools ▸ Share a HUD or pack*, the
+index format, and what fpdb checks before a package can install. The code is
+`fpdb_3_legacy/pack_gallery.py` and `pack_share.py`, and the windows are
+`pack_gallery_dialog.py` and `pack_share_dialog.py`.
 
 ## Get packs
 
@@ -50,6 +51,38 @@ The gallery read is the project's
 (`https://raw.githubusercontent.com/jejellyroll-fr/fpdb-3-packs/main`).
 Another one, an https URL or a local folder, can be set with the
 `pack_gallery` attribute of `<general>` in `HUD_config.xml`.
+
+## Share a HUD or pack
+
+*Tools ▸ Share a HUD or pack* (also *Share yours…* in *Get packs*) writes one of
+yours ready to submit to the gallery. Choose:
+
+- a **HUD profile** of your configuration, with an id (`yourname.topic`), a
+  name and a version;
+- or an installed **stat pack**, which keeps its own id and version.
+
+Then give it an author, a licence (an SPDX identifier, such as `CC-BY-4.0`;
+the gallery requires one) and a description, and pick a folder. fpdb writes a
+folder named after the id, laid out as the packs repository is:
+
+```text
+yourname.topic/
+  hud/yourname.topic.fpdbhud        a HUD profile
+  stats/yourname.topic.fpdbstats    or a stat pack, as the repository's build writes it,
+  sources/stats/yourname.topic/     with its readable files
+  index-entry.json                  its entry for index.json, size and checksum filled in
+```
+
+A HUD package holds the profile, the popups it opens (and those they open),
+except the stock ones every configuration has, and the panel rules scoped to
+it. Your game bindings and table layouts stay yours.
+
+The entry and the package go through the checks an install runs (below)
+before anything is written, so what fpdb writes is something the gallery
+accepts. A folder of that name already there is never written over.
+
+To submit it, copy the folder's content into your copy of the packs
+repository, add the entry to `index.json`, and open a pull request.
 
 ## The index
 

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 00:23+0100\n"
+"POT-Creation-Date: 2026-10-30 15:51+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -1369,7 +1369,7 @@ msgstr "Átköltöztetés ide..."
 msgid "Migrating database"
 msgstr "Adatbázis átköltöztetése folyamatban"
 
-#: fpdb_3_legacy/GuiDatabase.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/pack_share_dialog.py
 msgid "Name"
 msgstr "Név"
 
@@ -2613,7 +2613,7 @@ msgstr ""
 "Realizált {realized} {hands} leosztás alatt; EV-korrigált {ev} (ebből {luck} "
 "szerencse)."
 
-#: fpdb_3_legacy/GuiResearchViews.py
+#: fpdb_3_legacy/GuiResearchViews.py fpdb_3_legacy/pack_share_dialog.py
 #, fuzzy
 msgid "Share"
 msgstr "Arány"
@@ -4057,6 +4057,10 @@ msgstr "Session Guard"
 msgid "Session Stats"
 msgstr "Session statisztikák"
 
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_share_dialog.py
+msgid "Share a HUD or pack"
+msgstr ""
+
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
 msgid "Site Settings"
@@ -4111,7 +4115,7 @@ msgid "Tourney Stats"
 msgstr "Versenystatisztikák"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
-#: fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Version"
 msgstr "Verzió"
@@ -4131,6 +4135,10 @@ msgstr "Adatbázis-statisztikák megtekintése"
 msgid "What every filter is for in a four-card game, and the two that are not"
 msgstr ""
 "Mire való az egyes szűrők egy négylapos játékban, és a kettő, amelyik nem"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "+"
@@ -4554,6 +4562,7 @@ msgid "HUD imported — refresh required"
 msgstr "HUD importálva — frissítés szükséges"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/pack_share_dialog.py
 #, fuzzy
 msgid "HUD profile"
 msgstr "HUD-profil"
@@ -5103,7 +5112,12 @@ msgstr ""
 "Indítsa újra az fpdb-t és a HUD-ot, hogy a változás mindenhol érvényes "
 "legyen."
 
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Share yours…"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/pack_share_dialog.py
+#: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Stat pack"
 msgstr "Statisztikacsomag"
@@ -5182,6 +5196,63 @@ msgstr "Mentve"
 msgid ""
 "Updating replaces the profiles and popups this pack installed, with any "
 "change you made to them. Continue?"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Write a HUD profile or a stat pack ready to submit to the gallery"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "An SPDX licence identifier; the gallery requires one."
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Author"
+msgstr "Szerző"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Description"
+msgstr "Leírás"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "For example CC-BY-4.0 or AGPL-3.0-or-later"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, fuzzy
+msgid "Id"
+msgstr "Tétlen"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Licence"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, fuzzy
+msgid "This cannot be shared:"
+msgstr "Ez a csomag nem telepíthető:"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Which"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Write package…"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Write the package in"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, python-format
+msgid ""
+"Written to %(folder)s.\n"
+"\n"
+"To submit it, copy the folder's content into your copy of the packs "
+"repository (%(repository)s), add the entry in %(entry)s to index.json, and "
+"open a pull request."
 msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
@@ -6873,11 +6944,6 @@ msgstr "Minden fájl"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-msgid "Author"
-msgstr "Szerző"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
 msgid "Built-in"
 msgstr "Beépített"
 
@@ -8370,9 +8436,6 @@ msgstr ""
 
 #~ msgid "Default logger intialised for "
 #~ msgstr "Alapértelmezett naplózó előkészítve ehhez: "
-
-#~ msgid "Description"
-#~ msgstr "Leírás"
 
 #~ msgid "Detect"
 #~ msgstr "Felismerés"

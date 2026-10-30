@@ -201,6 +201,11 @@ def menu_layout() -> tuple[Menu, ...]:
                     tip=N_("Install HUDs and stat packs shared by other players"),
                 ),
                 MenuItem(
+                    N_("Share a HUD or pack"),
+                    "dia_share_pack",
+                    tip=N_("Write a HUD profile or a stat pack ready to submit to the pack gallery"),
+                ),
+                MenuItem(
                     N_("Session Guard"),
                     "dia_session_guard",
                     tip=N_("Alerts for the session being played: loss, win, duration, hands, drawdown"),
