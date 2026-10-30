@@ -322,3 +322,33 @@ def test_every_section_that_applies_becomes_one_in_the_order_it_is_read(tmp_path
     library = [rule.panel for rule in hud_situation.load_source("builtin")[0]]
     assert panels == ["facing_open", *library, "facing_cbet"]
     assert as_gallery(share_hud(config, "mine", tmp_path, **HUD)) == []
+
+
+def test_rules_saved_for_a_mixed_case_profile_are_shared() -> None:
+    config = config_with(
+        '<hud_panel_rules enabled="true"><hud_panel_rule panel="facing_open" profile="mine"/></hud_panel_rules>'
+    )
+    config.getElementsByTagName("ss")[0].setAttribute("name", "My HUD")
+    # Codex (#643): Preferences save the rule's profile as "my hud"; the case-sensitive match dropped it.
+    config.getElementsByTagName("hud_panel_rule")[0].setAttribute("profile", "my hud")
+
+    package = defusedxml.minidom.parseString(hud_package(config, "My HUD")).documentElement
+    assert [rule.getAttribute("panel") for rule in package.getElementsByTagName("hud_panel_rule")] == ["facing_open"]
+
+
+def test_a_source_section_that_does_not_say_enabled_is_shared() -> None:
+    config = config_with('<hud_panel_rules source="builtin" profile="mine"/>')
+
+    package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
+
+    # Codex (#643): no "enabled" was taken for the empty stock section, and the library dropped.
+    (section,) = package.getElementsByTagName("hud_panel_rules")
+    assert (section.getAttribute("source"), section.getAttribute("enabled")) == ("builtin", "true")
+
+
+def test_an_empty_section_is_not_shared() -> None:
+    config = config_with('<hud_panel_rules enabled="false"/>')
+
+    package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
+
+    assert not package.getElementsByTagName("hud_panel_rules")

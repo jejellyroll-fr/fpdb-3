@@ -33,7 +33,7 @@ from typing import Any, Final
 import defusedxml.minidom
 
 from fpdb_3_legacy import pack_gallery, stat_packs
-from fpdb_3_legacy.hud_package import _is_panel_rule_placeholder, _stock_popups
+from fpdb_3_legacy.hud_package import _stock_popups
 from fpdb_3_legacy.pack_gallery import GalleryError
 
 #: The file beside the package that holds its index entry.
@@ -143,18 +143,26 @@ def _free_name(name: str, taken: Iterable[str]) -> str:
 
 
 def _applies(section: Any, profile: str) -> bool:
+    """Whether *section* has rules for *profile*: scoped to it or to every profile, and not empty.
+
+    A section with a ``source`` and no rule of its own is not empty, whether or not it
+    says ``enabled``: the configuration reads an unstated ``enabled`` as on (Codex, #643).
+    """
     scope = section.getAttribute("profile").strip().casefold()
-    return not _is_panel_rule_placeholder(section) and scope in ("", "all", profile.strip().casefold())
+    carries = bool(section.getElementsByTagName("hud_panel_rule")) or bool(section.getAttribute("source").strip())
+    return carries and scope in ("", "all", profile.strip().casefold())
 
 
 def _rules_for(section: Any, profile: str) -> list[Any]:
     """A section's rules that apply to *profile*: all of a section scoped to it, else the matching ones."""
-    from fpdb_3_legacy.hud_situation import profile_matches  # noqa: PLC0415
+    from fpdb_3_legacy.hud_situation import _text, profile_matches  # noqa: PLC0415
 
     rules = list(section.getElementsByTagName("hud_panel_rule"))
     if section.getAttribute("profile").strip().casefold() == profile.strip().casefold():
         return rules
-    return [rule for rule in rules if profile_matches(rule.getAttribute("profile").strip(), profile)]
+    # Both sides as the resolver reads them: Preferences save "My HUD" as "my hud" (Codex, #643).
+    wanted = _text(profile, "all")
+    return [rule for rule in rules if profile_matches(_text(rule.getAttribute("profile"), "all"), wanted)]
 
 
 def _panel_rules(document: Any, config_doc: Any, profile: str) -> list[Any]:
@@ -177,12 +185,7 @@ def _panel_rules(document: Any, config_doc: Any, profile: str) -> list[Any]:
     for section in sections:
         copy = document.importNode(section, True)
         _materialise_source(document, copy, shipped=len(sections) > 1)
-        if not merged.getAttribute("fallback").strip() and copy.getAttribute("fallback").strip():
-            merged.setAttribute("fallback", copy.getAttribute("fallback").strip())
-        if copy.getAttribute("source").strip():
-            merged.setAttribute("source", copy.getAttribute("source").strip())
-        elif merged.hasAttribute("source"):
-            merged.removeAttribute("source")
+        _carry_attributes(merged, copy)
         for rule in _rules_for(copy, profile):
             merged.appendChild(document.createTextNode("\n  "))
             merged.appendChild(rule)
@@ -190,8 +193,21 @@ def _panel_rules(document: Any, config_doc: Any, profile: str) -> list[Any]:
         return []
     if merged.getAttribute("profile").strip().casefold() != profile.strip().casefold():
         merged.setAttribute("profile", profile)
+    # Said outright: an install takes a section with no "enabled" for the stock placeholder.
+    if not merged.getAttribute("enabled").strip():
+        merged.setAttribute("enabled", "true")
     merged.appendChild(document.createTextNode("\n"))
     return [merged]
+
+
+def _carry_attributes(merged: Any, section: Any) -> None:
+    """The first fallback read, and the shipped library a lone section still names."""
+    if not merged.getAttribute("fallback").strip() and section.getAttribute("fallback").strip():
+        merged.setAttribute("fallback", section.getAttribute("fallback").strip())
+    if section.getAttribute("source").strip():
+        merged.setAttribute("source", section.getAttribute("source").strip())
+    elif merged.hasAttribute("source"):
+        merged.removeAttribute("source")
 
 
 def _enabled(section: Any) -> bool:
