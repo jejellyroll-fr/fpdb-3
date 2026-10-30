@@ -298,13 +298,18 @@ def updates(index: PackIndex, installed: Mapping[str, str]) -> list[tuple[Galler
 def package_problems_for(entry: GalleryEntry, data: bytes, *, fpdb_version: str | None = None) -> list[str]:
     """Why *data* is not the package *entry* promises, or ``[]``.
 
-    The bytes are checked against the index first, then read by the validator a
-    manual import uses for that kind of package.
+    The bytes are checked against the index first, then against the index's
+    ``min_fpdb_version``, then read by the validator a manual import uses for
+    that kind of package.
     """
     if len(data) != entry.size:
         return [f"is {len(data)} bytes, the index says {entry.size}"]
     if hashlib.sha256(data).hexdigest() != entry.sha256:
         return ["does not match the checksum in the index"]
+    # The index's minimum holds for every kind, and may be stricter than a stat pack's own (Codex, #640).
+    too_new = incompatibility(entry, fpdb_version)
+    if too_new:
+        return [too_new]
     if entry.kind == "hud":
         try:
             root = defusedxml.minidom.parseString(data).documentElement

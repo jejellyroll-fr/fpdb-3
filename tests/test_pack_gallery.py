@@ -262,6 +262,13 @@ def test_a_pack_for_a_newer_fpdb_says_so(gallery, tmp_path) -> None:
 
     assert incompatibility(entry, "3.9.1") == "needs fpdb 99.0 or newer (this is 3.9.1)"
     assert incompatibility(entry, "99.0") == ""
+    # Codex (#640): the package checks refuse it too, for every kind, fetched or cached.
+    with pytest.raises(GalleryError, match=r"needs fpdb 99\.0 or newer"):
+        fetch_package(entry, str(gallery), tmp_path / "cache", fpdb_version="3.9.1")
+    assert validate_repository(gallery, fpdb_version="3.9.1") == [
+        f"{entry.id}: needs fpdb 99.0 or newer (this is 3.9.1)"
+    ]
+    assert validate_repository(gallery, fpdb_version="99.0") == []
 
 
 # -- offline ------------------------------------------------------------------------------------
