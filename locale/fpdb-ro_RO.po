@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 15:51+0100\n"
+"POT-Creation-Date: 2026-10-30 21:01+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -656,6 +656,17 @@ msgstr ""
 "fișierelor SwC funcționează în continuare."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, fuzzy
+msgid ""
+"\n"
+"SwC live capture is off: it loads code into the SwC client. Turn it on in "
+"Tools ▸ Live capture… after reading what it does. Importing SwC hand history "
+"files still works."
+msgstr ""
+"Captura live SwC nu s-a putut conecta: {reason}. Importul istoricelor de "
+"mâini SwC funcționează în continuare."
+
+#: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy, python-brace-format
 msgid ""
 "\n"
@@ -1002,6 +1013,10 @@ msgstr ""
 #, fuzzy
 msgid "Capture failed to start — see the log above."
 msgstr "Captura nu a putut porni — vedeți jurnalul de mai sus."
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+msgid "Capture not started: it is off until you turn it on."
+msgstr ""
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 #, fuzzy
@@ -3801,6 +3816,88 @@ msgstr "Stack"
 msgid "Stack (bb)"
 msgstr "Stack (bb)"
 
+#: fpdb_3_legacy/live_capture_consent.py
+msgid ""
+"Anti-cheat systems look for software that loads into a poker client or reads "
+"its traffic. A room may treat it as a breach of its terms and restrict or "
+"close the account, whatever fpdb does with the data."
+msgstr ""
+
+#: fpdb_3_legacy/live_capture_consent.py
+#, fuzzy
+msgid "CoinPoker packet capture"
+msgstr "Captură live CoinPoker"
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid ""
+"Not turned on: run this command from a terminal to answer, or use Tools ▸ "
+"Live capture…"
+msgstr ""
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid "SwC client tap (Seals with Clubs)"
+msgstr ""
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid "Type yes to turn it on: "
+msgstr ""
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid ""
+"Your room's terms prevail. Read them, and turn this on only if they allow "
+"it. fpdb never shows a recommended action and never acts in the client."
+msgstr ""
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid ""
+"fpdb loads a small library of its own into the SwC Poker client: injected "
+"into the running client on Windows, preloaded when fpdb launches the client "
+"on macOS and Linux. Inside the client, it reads the table traffic after the "
+"client has decrypted it, and writes it to a file fpdb imports. It stays "
+"loaded until the client exits."
+msgstr ""
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid ""
+"fpdb records the network packets exchanged by the CoinPoker client, with "
+"administrator rights (tcpdump, pkexec or a UAC prompt), and rebuilds the "
+"hands from them. It reads the traffic only; it loads nothing into the client."
+msgstr ""
+
+#: fpdb_3_legacy/live_capture_consent.py
+#, fuzzy
+#| msgid "Yes"
+msgid "yes"
+msgstr "Da"
+
+#: fpdb_3_legacy/live_capture_consent.py
+#, python-brace-format
+msgid ""
+"{title} is off. Turn it on in Tools ▸ Live capture… after reading what it "
+"does."
+msgstr ""
+
+#: fpdb_3_legacy/live_capture_dialog.py
+msgid "I understand, turn it on"
+msgstr ""
+
+#: fpdb_3_legacy/live_capture_dialog.py
+#, fuzzy
+msgid "Live capture"
+msgstr "Captură live CoinPoker"
+
+#: fpdb_3_legacy/live_capture_dialog.py
+#, fuzzy
+msgid "Turn on live capture?"
+msgstr "Captură live CoinPoker"
+
+#: fpdb_3_legacy/live_capture_dialog.py
+msgid ""
+"fpdb imports the hand histories your rooms write. For a room that writes "
+"none, these captures read the hands from the client itself. Each is off "
+"until you turn it on."
+msgstr ""
+
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
 msgid "About"
@@ -3988,6 +4085,10 @@ msgid "Launch SwC HTTP Capture"
 msgstr "Pornește captura HTTP SwC"
 
 #: fpdb_3_legacy/menu_layout.py
+msgid "Live capture…"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
 msgid "Log Messages"
 msgstr "Jurnalizare Mesaje"
 
@@ -4127,6 +4228,10 @@ msgstr "Vizualizator de mâini de turneu"
 #: fpdb_3_legacy/menu_layout.py
 msgid "Tourney Stats"
 msgstr "Statistici Turneu"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Turn on or off the captures that read hands from a poker client itself"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
 #: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py

@@ -488,6 +488,12 @@ class fpdb(QMainWindow):
 
         open_share_pack(self.config, self)
 
+    def dia_live_capture(self, widget=None, data=None) -> None:
+        """Tools ▸ Live capture: turn on, or off, a capture that reaches into a client (#451)."""
+        from fpdb_3_legacy.live_capture_dialog import open_live_capture
+
+        open_live_capture(self.config, self)
+
     def dia_convert_pt4hud(self, widget=None, data=None) -> None:
         """Configure ▸ Convert PT4 HUD to .fpdbhud: a layout as a package, untranslated stats listed (#614)."""
         from fpdb_3_legacy.pt4hud_dialogs import convert_to_package

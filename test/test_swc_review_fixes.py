@@ -21,14 +21,22 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from fpdb_3_legacy.live_capture_consent import SWC_NATIVE
 from fpdb_3_legacy.swc_native_capture import (
     NativeCaptureRecord,
     iter_capture_records,
     iter_protocol_messages,
 )
+from tests.helpers.live_capture import turned_on
 
 HEADER = struct.Struct("=IHBBHHIQ")
 
+
+
+@pytest.fixture(autouse=True)
+def _swc_tap_turned_on(monkeypatch, tmp_path_factory) -> None:
+    # About what the capture does once the user turned the tap on (#451).
+    turned_on(monkeypatch, tmp_path_factory.mktemp("consent"), SWC_NATIVE)
 
 def _record(payload: bytes, *, source_id: int = 0, connection_id: int = 0, port: int = 20013) -> bytes:
     """One capture record; source_id/connection_id are the stream identity."""
@@ -2430,7 +2438,7 @@ def test_the_worker_passes_its_cancellation_through(monkeypatch) -> None:
     thread = SwCWindowsAttachThread()
     asked: list[bool] = []
 
-    def attach(*, should_cancel=None) -> str:
+    def attach(*, should_cancel=None, consent=None) -> str:
         asked.append(should_cancel())
         return "ok"
 

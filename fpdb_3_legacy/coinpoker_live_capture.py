@@ -1189,6 +1189,24 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _require_consent(config_file: str | None) -> None:
+    """Exit unless the user turned the packet capture on (#451).
+
+    The tab asks before it launches this. The answers sit beside the
+    configuration, which an elevated run still names through --config-file.
+    """
+    from fpdb_3_legacy import live_capture_consent
+
+    try:
+        live_capture_consent.require(
+            live_capture_consent.COINPOKER_PACKETS,
+            live_capture_consent.consent_path(config_file or _resolve_config_file()),
+        )
+    except live_capture_consent.LiveCaptureNotAccepted as exc:
+        print(f"[ERROR] {exc}")
+        sys.exit(1)
+
+
 def main() -> None:  # noqa: C901
     args = _build_arg_parser().parse_args()
 
@@ -1211,6 +1229,9 @@ def main() -> None:  # noqa: C901
 
     from fpdb_3_legacy.coinpoker_pcap import capture_live, open_offline
 
+    if args.live:
+        _require_consent(args.config_file)
+
     stop = (lambda: bool(args.stop_file) and os.path.exists(args.stop_file)) if args.stop_file else None
 
     # Keep the handle alive for the whole capture.  The OS releases the lock on
@@ -1222,10 +1243,6 @@ def main() -> None:  # noqa: C901
         except RuntimeError as exc:
             print(f"[ERROR] {exc}")
             sys.exit(1)
-
-    if args.replay_archive:
-        _replay_archives(args)
-        return
 
     if args.live:
         events = _events_from_segments(capture_live(args.iface, BPF_FILTER, stop=stop))

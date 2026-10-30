@@ -38,7 +38,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from fpdb_3_legacy import Configuration, Importer
+from fpdb_3_legacy import Configuration, Importer, live_capture_consent
 from fpdb_3_legacy.hud_diagnostics import session_id
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.interlocks import (
@@ -150,9 +150,10 @@ class SwCWindowsAttachThread(QThread):
 
     attached = Signal(str)
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, parent: QWidget | None = None, consent: Path | None = None) -> None:
         super().__init__(parent)
         self._cancel_requested = False
+        self._consent = consent
 
     def cancel(self) -> None:
         """Abandon the attach if the tap has not been injected yet.
@@ -176,7 +177,9 @@ class SwCWindowsAttachThread(QThread):
         from fpdb_3_legacy.swc_native_capture import CaptureAttachCancelled, attach_to_windows_client
 
         try:
-            self.attached.emit(attach_to_windows_client(should_cancel=lambda: self._cancel_requested))
+            self.attached.emit(
+                attach_to_windows_client(should_cancel=lambda: self._cancel_requested, consent=self._consent),
+            )
         except CaptureAttachCancelled as exc:
             # Nothing was injected and nothing is wrong: the user stopped the
             # capture. Reported to the log, never to the user as a failure.
@@ -968,9 +971,27 @@ class GuiAutoImport(QWidget):
         if thread is not None and thread.isRunning():
             self._retiring_attach_threads.append(thread)
 
+    def _swc_capture_consent(self) -> Path:
+        """The live capture answers kept beside this configuration (#451)."""
+        return live_capture_consent.consent_path(getattr(self.config, "file", None))
+
     def start_swc_native_capture(self) -> None:
         """Launch SwC native TLS capture and start live raw tailing thread."""
         if not self._swc_capture_wanted():
+            return
+        consent = self._swc_capture_consent()
+        if not live_capture_consent.is_accepted(live_capture_consent.SWC_NATIVE, consent):
+            # Off until the user turns it on after reading what it does: Start
+            # imports the SwC files, and loads nothing into the client.
+            log.info("SwC live capture is off: not turned on in Tools > Live capture")
+            self.addText(
+                _(
+                    "\nSwC live capture is off: it loads code into the SwC client. "
+                    "Turn it on in Tools ▸ Live capture… after reading what it does. "
+                    "Importing SwC hand history files still works."
+                ),
+                "info",
+            )
             return
         try:
             import platform as _platform
@@ -1005,7 +1026,7 @@ class GuiAutoImport(QWidget):
                     # No parent: GuiAutoImport skips QWidget.__init__ in CLI mode,
                     # and parenting to a half-built widget fails outright. The
                     # attribute below is what keeps this alive.
-                    self.swc_attach_thread = SwCWindowsAttachThread()
+                    self.swc_attach_thread = SwCWindowsAttachThread(consent=consent)
                     self.swc_attach_thread.attached.connect(self._on_swc_tap_attached)
                     self.swc_attach_thread.start()
             else:

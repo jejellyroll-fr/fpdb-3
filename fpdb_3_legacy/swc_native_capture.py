@@ -25,6 +25,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import BinaryIO
 
+from fpdb_3_legacy import live_capture_consent
 from fpdb_3_legacy.http_capture_diff import diff_snapshot_steps
 from fpdb_3_legacy.http_capture_models import SWC_GAME_DEFINITIONS, CapturedGameDefinition
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -165,6 +166,7 @@ def attach_to_windows_client(
     port: int = 0,
     include_outbound: bool = False,
     should_cancel: Callable[[], bool] | None = None,
+    consent: Path | None = None,
 ) -> str:
     """Build the tap, inject it into the running SwC client, and report the result.
 
@@ -181,6 +183,10 @@ def attach_to_windows_client(
     that stops capture gets the guarantee that matters instead: no further tap
     is loaded into a client after the stop.
 
+    Nothing is built or injected unless the user turned the tap on (#451):
+    ``consent`` is the answers file, fpdb's own when None, and
+    ``LiveCaptureNotAccepted`` -- a RuntimeError -- says how to turn it on.
+
     Returns a short human-readable status. Raises RuntimeError when the client
     is not running or no injection succeeded, so the caller can surface why.
     """
@@ -188,6 +194,7 @@ def attach_to_windows_client(
     if platform.system() != "Windows":
         msg = "attach_to_windows_client is only valid on Windows"
         raise RuntimeError(msg)
+    live_capture_consent.require(live_capture_consent.SWC_NATIVE, consent)
     if not 0 <= port <= 65535:
         raise ValueError("capture port must be 0 (auto) or between 1 and 65535")
 
@@ -3881,7 +3888,11 @@ def native_client_environment(archive: Path, tap: Path, *, port: int, include_ou
     return env
 
 
-def launch_client(archive: Path, *, port: int = 0, include_outbound: bool = False) -> subprocess.Popen[bytes]:
+def launch_client(
+    archive: Path, *, port: int = 0, include_outbound: bool = False, consent: Path | None = None
+) -> subprocess.Popen[bytes]:
+    # The tap is preloaded into the client: only once the user turned it on (#451).
+    live_capture_consent.require(live_capture_consent.SWC_NATIVE, consent)
     if not 0 <= port <= 65535:
         raise ValueError("capture port must be 0 (auto) or between 1 and 65535")
     active_pids = running_client_pids()
@@ -4191,6 +4202,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.build or args.force_build:
         print(build_tap(force=args.force_build))
         return 0
+    # Asked here, on the terminal, the way Tools > Live capture asks (#451).
+    if not live_capture_consent.confirm_on_terminal(live_capture_consent.SWC_NATIVE):
+        return 2
 
     # Windows injects the tap into the running client rather than launching it
     # with an interposition environment, so it has no process to wait on: inject,

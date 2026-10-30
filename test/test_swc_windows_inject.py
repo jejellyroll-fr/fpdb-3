@@ -16,7 +16,14 @@ from unittest.mock import patch
 import pytest
 
 from fpdb_3_legacy import swc_windows_inject as inj
+from fpdb_3_legacy.live_capture_consent import SWC_NATIVE
+from tests.helpers.live_capture import turned_on
 
+
+@pytest.fixture(autouse=True)
+def _swc_tap_turned_on(monkeypatch, tmp_path_factory) -> None:
+    # About what the capture does once the user turned the tap on (#451).
+    turned_on(monkeypatch, tmp_path_factory.mktemp("consent"), SWC_NATIVE)
 
 def _completed(returncode: int, stderr: str = ""):
     """What inject_into_pid reads back from the injector.

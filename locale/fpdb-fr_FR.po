@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 15:51+0100\n"
+"POT-Creation-Date: 2026-10-30 21:01+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -614,6 +614,18 @@ msgstr ""
 "des fichiers SwC fonctionne toujours."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+msgid ""
+"\n"
+"SwC live capture is off: it loads code into the SwC client. Turn it on in "
+"Tools ▸ Live capture… after reading what it does. Importing SwC hand history "
+"files still works."
+msgstr ""
+"\n"
+"La capture en direct SwC est désactivée : elle charge du code dans le client "
+"SwC. Activez-la dans Outils ▸ Capture en direct… après avoir lu ce qu'elle "
+"fait. L'import des fichiers d'historique SwC fonctionne toujours."
+
+#: fpdb_3_legacy/GuiAutoImport.py
 #, python-brace-format
 msgid ""
 "\n"
@@ -916,6 +928,11 @@ msgstr ""
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 msgid "Capture failed to start — see the log above."
 msgstr "La capture n'a pas pu démarrer — voir le journal ci-dessus."
+
+#: fpdb_3_legacy/GuiCoinPokerCapture.py
+msgid "Capture not started: it is off until you turn it on."
+msgstr ""
+"Capture non démarrée : elle reste désactivée tant que vous ne l'activez pas."
 
 #: fpdb_3_legacy/GuiCoinPokerCapture.py
 msgid "Default game:"
@@ -3347,6 +3364,106 @@ msgstr "Tapis"
 msgid "Stack (bb)"
 msgstr "Tapis (bb)"
 
+#: fpdb_3_legacy/live_capture_consent.py
+msgid ""
+"Anti-cheat systems look for software that loads into a poker client or reads "
+"its traffic. A room may treat it as a breach of its terms and restrict or "
+"close the account, whatever fpdb does with the data."
+msgstr ""
+"Les systèmes anti-triche recherchent les logiciels qui se chargent dans un "
+"client de poker ou lisent son trafic. Une room peut y voir une violation de "
+"ses conditions et restreindre ou fermer le compte, quoi que fpdb fasse des "
+"données."
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid "CoinPoker packet capture"
+msgstr "Capture de paquets CoinPoker"
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid ""
+"Not turned on: run this command from a terminal to answer, or use Tools ▸ "
+"Live capture…"
+msgstr ""
+"Non activée : lancez cette commande depuis un terminal pour répondre, ou "
+"utilisez Outils ▸ Capture en direct…"
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid "SwC client tap (Seals with Clubs)"
+msgstr "Sonde du client SwC (Seals with Clubs)"
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid "Type yes to turn it on: "
+msgstr "Tapez oui pour l'activer : "
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid ""
+"Your room's terms prevail. Read them, and turn this on only if they allow "
+"it. fpdb never shows a recommended action and never acts in the client."
+msgstr ""
+"Les conditions de votre room priment. Lisez-les, et n'activez ceci que si "
+"elles le permettent. fpdb n'affiche jamais d'action recommandée et n'agit "
+"jamais dans le client."
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid ""
+"fpdb loads a small library of its own into the SwC Poker client: injected "
+"into the running client on Windows, preloaded when fpdb launches the client "
+"on macOS and Linux. Inside the client, it reads the table traffic after the "
+"client has decrypted it, and writes it to a file fpdb imports. It stays "
+"loaded until the client exits."
+msgstr ""
+"fpdb charge une petite bibliothèque à lui dans le client SwC Poker : "
+"injectée dans le client en cours d'exécution sous Windows, préchargée quand "
+"fpdb lance le client sous macOS et Linux. Dans le client, elle lit le trafic "
+"des tables une fois déchiffré par le client et l'écrit dans un fichier que "
+"fpdb importe. Elle reste chargée jusqu'à la fermeture du client."
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid ""
+"fpdb records the network packets exchanged by the CoinPoker client, with "
+"administrator rights (tcpdump, pkexec or a UAC prompt), and rebuilds the "
+"hands from them. It reads the traffic only; it loads nothing into the client."
+msgstr ""
+"fpdb enregistre les paquets réseau échangés par le client CoinPoker, avec "
+"les droits administrateur (tcpdump, pkexec ou une invite UAC), et en "
+"reconstitue les mains. Il lit seulement le trafic ; il ne charge rien dans "
+"le client."
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid "yes"
+msgstr "oui"
+
+#: fpdb_3_legacy/live_capture_consent.py
+#, python-brace-format
+msgid ""
+"{title} is off. Turn it on in Tools ▸ Live capture… after reading what it "
+"does."
+msgstr ""
+"{title} est désactivée. Activez-la dans Outils ▸ Capture en direct… après "
+"avoir lu ce qu'elle fait."
+
+#: fpdb_3_legacy/live_capture_dialog.py
+msgid "I understand, turn it on"
+msgstr "J'ai compris, l'activer"
+
+#: fpdb_3_legacy/live_capture_dialog.py
+msgid "Live capture"
+msgstr "Capture en direct"
+
+#: fpdb_3_legacy/live_capture_dialog.py
+msgid "Turn on live capture?"
+msgstr "Activer la capture en direct ?"
+
+#: fpdb_3_legacy/live_capture_dialog.py
+msgid ""
+"fpdb imports the hand histories your rooms write. For a room that writes "
+"none, these captures read the hands from the client itself. Each is off "
+"until you turn it on."
+msgstr ""
+"fpdb importe les historiques de mains que vos rooms écrivent. Pour une room "
+"qui n'en écrit pas, ces captures lisent les mains dans le client lui-même. "
+"Chacune reste désactivée tant que vous ne l'activez pas."
+
 #: fpdb_3_legacy/menu_layout.py
 msgid "About"
 msgstr "À propos"
@@ -3505,6 +3622,10 @@ msgid "Launch SwC HTTP Capture"
 msgstr "Lancer la capture HTTP SwC"
 
 #: fpdb_3_legacy/menu_layout.py
+msgid "Live capture…"
+msgstr "Capture en direct…"
+
+#: fpdb_3_legacy/menu_layout.py
 msgid "Log Messages"
 msgstr "Historique des Messages"
 
@@ -3627,6 +3748,12 @@ msgstr "Visionneuse de mains de tournoi"
 msgid "Tourney Stats"
 msgstr "Stats de Tournoi"
 
+#: fpdb_3_legacy/menu_layout.py
+msgid "Turn on or off the captures that read hands from a poker client itself"
+msgstr ""
+"Activer ou désactiver les captures qui lisent les mains dans un client de "
+"poker"
+
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
 #: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
 msgid "Version"
@@ -3649,7 +3776,8 @@ msgstr ""
 #: fpdb_3_legacy/menu_layout.py
 msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"
 msgstr ""
-"Écrire un profil de HUD ou un pack de stats prêt à proposer à la galerie de packs"
+"Écrire un profil de HUD ou un pack de stats prêt à proposer à la galerie de "
+"packs"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "+"
@@ -4600,7 +4728,9 @@ msgid ""
 msgstr ""
 "Écrit dans %(folder)s.\n"
 "\n"
-"Pour le proposer, copiez le contenu du dossier dans votre copie du dépôt de packs (%(repository)s), ajoutez l'entrée de %(entry)s à index.json, puis ouvrez une pull request."
+"Pour le proposer, copiez le contenu du dossier dans votre copie du dépôt de "
+"packs (%(repository)s), ajoutez l'entrée de %(entry)s à index.json, puis "
+"ouvrez une pull request."
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
