@@ -66,9 +66,13 @@ Before a package installs:
      code. Its id and `pack_version` must be the index's.
    - A HUD package is checked by `hud_package.package_problems`:
      - every profile has a name;
-     - every grid has one cell per position;
-     - every stat it names exists;
-     - every popup it opens is in the package or the shipped library.
+     - every stat, header (`<text>`) and separator (`<hline>`) sits where the
+       configuration loader expects it: a valid `_rowcol` (`(row,col)`,
+       counted from 1), inside the grid, its `colspan` included, and not on a
+       cell another item already takes. Empty cells are allowed;
+     - every stat it names exists, table stats included;
+     - every popup it opens is in the package, the shipped library, or the
+       stock configuration (`default`, ...).
 
    A package that fails is refused with the names at fault (for example
    `unknown stat(s): no_such_stat`), and nothing is written.

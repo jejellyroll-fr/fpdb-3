@@ -18,7 +18,7 @@ from typing import Any
 import defusedxml.minidom
 import pytest
 
-from fpdb_3_legacy import stat_packs
+from fpdb_3_legacy import pt4hud, stat_packs
 from fpdb_3_legacy.hud_package import install_missing_hud_package, package_problems
 from fpdb_3_legacy.pack_gallery import (
     INDEX_NAME,
@@ -316,9 +316,38 @@ def test_every_shipped_hud_package_passes_the_install_check(path) -> None:
     [
         ("<other/>", "the root element must be <fpdb_hud_package>"),
         ("<fpdb_hud_package/>", "the package holds no HUD profile (<ss>)"),
+        # Codex (#640): what the configuration loader would fail on, or silently overwrite.
         (
-            '<fpdb_hud_package><ss name="p" rows="1" cols="2"><stat _rowcol="(1,1)" _stat_name="vpip"/></ss></fpdb_hud_package>',
-            "p: 1 cells for a 1x2 grid",
+            '<fpdb_hud_package><ss name="p" rows="1" cols="1"><stat _stat_name="vpip"/></ss></fpdb_hud_package>',
+            "p: vpip has no _rowcol; write where it sits as (row,col), counted from 1",
+        ),
+        (
+            '<fpdb_hud_package><ss name="p" rows="1" cols="1"><stat _rowcol="1,1" _stat_name="vpip"/></ss></fpdb_hud_package>',
+            "p: vpip has an invalid _rowcol '1,1'; write where it sits as (row,col), counted from 1",
+        ),
+        (
+            '<fpdb_hud_package><ss name="p" rows="1" cols="2"><stat _rowcol="(1,1)" _stat_name="vpip"/>'
+            '<stat _rowcol="(1,1)" _stat_name="pfr"/></ss></fpdb_hud_package>',
+            "p: pfr at (1,1) overlaps vpip at (1,1)",
+        ),
+        (
+            '<fpdb_hud_package><ss name="p" rows="1" cols="2"><stat _rowcol="(2,1)" _stat_name="vpip"/></ss></fpdb_hud_package>',
+            "p: vpip at (2,1) is outside the 1x2 grid",
+        ),
+        (
+            '<fpdb_hud_package><ss name="p"><block label="b" rows="1" cols="2"><text _rowcol="(1,1)" label="Pre" colspan="2"/>'
+            '<stat _rowcol="(1,2)" _stat_name="vpip"/></block></ss></fpdb_hud_package>',
+            "b: vpip at (1,2) overlaps Pre at (1,1)",
+        ),
+        (
+            '<fpdb_hud_package><ss name="p"><block label="b" rows="1" cols="2">'
+            '<text _rowcol="(1,1)" label="Pre" colspan="3"/></block></ss></fpdb_hud_package>',
+            "b: Pre at (1,1) is outside the 1x2 grid",
+        ),
+        (
+            '<fpdb_hud_package><ss name="p" rows="1" cols="2"><stat _rowcol="(1,1)" _stat_name="vpip" colspan="x"/>'
+            "</ss></fpdb_hud_package>",
+            "p: vpip at (1,1): colspan must be a positive whole number",
         ),
         (
             '<fpdb_hud_package><ss name="p" rows="1" cols="1">'
@@ -329,3 +358,36 @@ def test_every_shipped_hud_package_passes_the_install_check(path) -> None:
 )
 def test_a_broken_hud_package_says_what_is_wrong(xml, problem) -> None:
     assert problem in package_problems(defusedxml.minidom.parseString(xml).documentElement)
+
+
+@pytest.mark.parametrize(
+    "xml",
+    [
+        # Codex (#640): a header above a stat, as a PT4 layout converts it.
+        '<fpdb_hud_package><ss name="p"><block label="b" rows="2" cols="1"><text _rowcol="(1,1)" label="Preflop"/>'
+        '<stat _rowcol="(2,1)" _stat_name="vpip"/></block></ss></fpdb_hud_package>',
+        # A header spanning the block, a separator, and an empty cell.
+        '<fpdb_hud_package><ss name="p"><block label="b" rows="3" cols="2"><text _rowcol="(1,1)" label="Pre" colspan="2"/>'
+        '<hline _rowcol="(2,1)"/><stat _rowcol="(3,1)" _stat_name="vpip"/></block></ss></fpdb_hud_package>',
+        # A block that does not state its size takes it from its items.
+        '<fpdb_hud_package><ss name="p"><block label="b"><stat _rowcol="(1,3)" _stat_name="vpip"/></block></ss>'
+        "</fpdb_hud_package>",
+        # A table stat, and the popup every configuration has.
+        '<fpdb_hud_package><ss name="p" rows="1" cols="2"><stat _rowcol="(1,1)" _stat_name="live_min_stack_bb"/>'
+        '<stat _rowcol="(1,2)" _stat_name="vpip" popup="default"/></ss></fpdb_hud_package>',
+    ],
+)
+def test_a_well_formed_hud_package_passes(xml) -> None:
+    assert package_problems(defusedxml.minidom.parseString(xml).documentElement) == []
+
+
+@pytest.mark.parametrize("multiblock", [True, False], ids=["blocks", "flat"])
+def test_a_pt4_layout_converted_to_a_package_passes(multiblock) -> None:
+    xml, _summary = pt4hud.to_package(
+        str(ROOT / "test" / "fixtures" / "generationpoker_3h.pt4hud"), multiblock=multiblock
+    )
+
+    root = defusedxml.minidom.parseString(xml).documentElement
+
+    assert root.getElementsByTagName("text") or not multiblock
+    assert package_problems(root) == []

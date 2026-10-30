@@ -382,13 +382,82 @@ def upgrade_legacy_popup_presentation(
     return True
 
 
+def _stock_popups() -> set[str]:
+    """The popups every configuration has: the ones the shipped template defines (``default``, ...)."""
+    from fpdb_3_legacy.Configuration import _find_example_config, _parse_example_config  # noqa: PLC0415
+
+    template = _parse_example_config(_find_example_config("HUD_config.xml"))
+    if template is None:
+        return set()
+    return {node.getAttribute("pu_name") for node in template.getElementsByTagName("pu")}
+
+
+def _grid_number(node: Any, attribute: str, default: int) -> int | None:
+    """A positive whole number attribute, *default* when absent, ``None`` when unreadable."""
+    text = node.getAttribute(attribute)
+    if not text:
+        return default
+    return int(text) if text.isdigit() and int(text) > 0 else None
+
+
+def _rowcol(text: str) -> tuple[int, int] | None:
+    """``"(r,c)"``, both from 1, as numbers; ``None`` when it is not one."""
+    parts = text[1:-1].split(",") if text.startswith("(") and text.endswith(")") else []
+    if len(parts) != 2 or not all(part.strip().isdigit() and int(part) > 0 for part in parts):
+        return None
+    return int(parts[0]), int(parts[1])
+
+
+def _grid_problems(grid: Any) -> list[str]:  # noqa: C901, PLR0912 - one rule per item kind, each with its reason
+    """Why the items of one grid would not load as placed (Codex, #640).
+
+    The rules are the configuration loader's: a stat must say where it sits, as
+    ``(row,col)`` from 1 -- it fails to load otherwise -- and two items on one
+    cell overwrite each other. ``<text>`` headers and ``<hline>`` separators may
+    span columns. A grid that states its size keeps its items inside it; one
+    that does not takes its size from its items. Empty cells are allowed.
+    """
+    problems = []
+    rows, cols = _grid_number(grid, "rows", 0), _grid_number(grid, "cols", 0)
+    if rows is None or cols is None:
+        return ["rows and cols must be positive whole numbers"]
+    occupied: dict[tuple[int, int], str] = {}
+    items = [node for node in grid.getElementsByTagName("*") if node.tagName in ("stat", "text", "hline")]
+    for item in items:
+        name = item.getAttribute("_stat_name") or item.getAttribute("label") or item.tagName
+        text = item.getAttribute("_rowcol")
+        if not text and item.tagName != "stat":
+            continue  # a header or separator without a cell: the loader places it first
+        position = _rowcol(text)
+        if position is None:
+            found = f"an invalid _rowcol {text!r}" if text else "no _rowcol"
+            problems.append(f"{name} has {found}; write where it sits as (row,col), counted from 1")
+            continue
+        span = _grid_number(item, "colspan", 1 if item.tagName != "hline" else cols or 1)
+        if span is None:
+            problems.append(f"{name} at {text}: colspan must be a positive whole number")
+            continue
+        row, col = position
+        if (rows and row > rows) or (cols and col + span - 1 > cols):
+            problems.append(f"{name} at {text} is outside the {rows or '?'}x{cols or '?'} grid")
+        if item.tagName == "hline":
+            continue  # a separator draws between rows rather than filling cells
+        for column in range(col, col + span):
+            other = occupied.get((row, column))
+            if other is not None:
+                problems.append(f"{name} at {text} overlaps {other}")
+                break
+            occupied[(row, column)] = f"{name} at {text}"
+    return problems
+
+
 def package_problems(root: Any) -> list[str]:
     """Why the ``<fpdb_hud_package>`` element *root* cannot be installed, or ``[]`` (#449).
 
     The checks a shared package must pass before anything is written: it is a
-    package, every profile has a name, every grid has one cell per position,
-    every stat it names exists, and every popup it opens is defined in it or
-    in the shipped library. A stat or a popup that does not resolve would be a
+    package, every profile has a name, every item of every grid sits on a
+    cell of its own inside the grid, every stat it names exists, and every popup it opens is defined in it or
+    in the shipped library or the stock configuration. A stat or a popup that does not resolve would be a
     permanently empty cell, so the package is refused with the names instead.
     """
     if getattr(root, "tagName", "") != "fpdb_hud_package":
@@ -404,18 +473,13 @@ def package_problems(root: Any) -> list[str]:
     for profile in profiles:
         for grid in _direct_children(profile, "block") or [profile]:
             where = grid.getAttribute("name") or grid.getAttribute("label") or profile.getAttribute("name")
-            try:
-                rows, cols = int(grid.getAttribute("rows")), int(grid.getAttribute("cols"))
-            except ValueError:
-                problems.append(f"{where}: rows and cols must be numbers")
-                continue
-            cells = grid.getElementsByTagName("stat")
-            if len(cells) != rows * cols:
-                problems.append(f"{where}: {len(cells)} cells for a {rows}x{cols} grid")
+            problems.extend(f"{where}: {problem}" for problem in _grid_problems(grid))
 
     from fpdb_3_legacy import Stats, popup_packs  # noqa: PLC0415 - the stat catalogue is heavy
+    from fpdb_3_legacy.stats_table import TABLE_STAT_FUNCTIONS  # noqa: PLC0415
 
-    known = frozenset(Stats.get_valid_stats())
+    # Player stats, and the table stats a cell may show too (the table's smallest stack).
+    known = frozenset(Stats.get_valid_stats()) | frozenset(TABLE_STAT_FUNCTIONS)
     named = {cell.getAttribute("_stat_name") for cell in root.getElementsByTagName("stat")}
     named |= {
         row.getAttribute("pu_stat_name")
@@ -431,6 +495,7 @@ def package_problems(root: Any) -> list[str]:
     available = {node.getAttribute("pu_name") for node in root.getElementsByTagName("pu")}
     for pack in library.names():
         available |= set(library.packs[pack].nodes)
+    available |= _stock_popups()
     opened = {cell.getAttribute("popup") for cell in root.getElementsByTagName("stat") if cell.getAttribute("popup")}
     opened |= {row.getAttribute("pu_stat_submenu") for row in root.getElementsByTagName("pu_stat")} - {""}
     missing = sorted(opened - available)
