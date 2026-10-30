@@ -86,6 +86,24 @@ def test_a_stat_pack_is_shared_under_its_own_id_and_version(window, tmp_path, me
     assert messages[0][0] == "information" and "pull request" in messages[0][1]
 
 
+def test_the_author_follows_the_stat_pack_chosen_until_one_is_typed(window, monkeypatch) -> None:
+    packs = [
+        stat_packs.PackStatus(id="first.pack", name="First", status=stat_packs.ENABLED, author="alice"),
+        stat_packs.PackStatus(id="second.pack", name="Second", status=stat_packs.ENABLED, author="bob"),
+    ]
+    monkeypatch.setattr(window, "_stat_packs", lambda: packs)
+    choose(window, STATS)
+    assert window.author.text() == "alice"
+
+    # Codex (#643): the first pack's author stayed, and was written as the second's.
+    window.source.setCurrentIndex(1)
+    assert window.author.text() == "bob"
+
+    window.author.setText("carol")
+    window.source.setCurrentIndex(0)
+    assert window.author.text() == "carol"
+
+
 def test_a_hud_is_written_with_what_the_window_says(window, tmp_path, messages) -> None:
     choose(window, HUD)
     window.pack_id.setText("alice.my_hud")

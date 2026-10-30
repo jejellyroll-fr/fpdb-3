@@ -56,6 +56,7 @@ class SharePackDialog(QDialog):
         self.packs_dir = packs_dir
         self.written: Path | None = None
         self._suggested = ""  # the id last suggested for a HUD, replaced only while it is untouched
+        self._pack_author = ""  # the author last taken from a stat pack, replaced the same way
         self.setWindowTitle(_("Share a HUD or pack"))
         self.resize(560, 440)
 
@@ -129,8 +130,10 @@ class SharePackDialog(QDialog):
             self.version.setText(chosen.pack_version)
             self.name.setText(chosen.name)
             self.description.setPlainText(chosen.description)
-            if chosen.author and not self.author.text():
+            # The pack's own author, unless one was typed (Codex, #643).
+            if self.author.text() in ("", self._pack_author):
                 self.author.setText(chosen.author)
+                self._pack_author = chosen.author
             return
         self.name.setText(chosen)
         # The previous suggestion stays known, so an id fpdb suggested still follows the profile (Codex, #643).
