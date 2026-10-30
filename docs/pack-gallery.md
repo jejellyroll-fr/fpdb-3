@@ -23,11 +23,16 @@ the window is `pack_gallery_dialog.py`.
   - a **HUD package** adds its profiles and popups to your HUD configuration,
     which is saved. It never replaces anything of yours. If you already have a
     profile with the same name, the install is refused and asks you to rename
-    yours. A HUD package does not bind itself to a game: choose its profile for
-    your tables in *Preferences ▸ HUD*.
+    yours. A HUD from the gallery never binds itself to a game, even when its
+    package lists game bindings: choose its profile for your tables in
+    *Preferences ▸ HUD*.
 - **Update** installs the newer version. For a HUD, it replaces the profiles
   and popups the pack installed, with any change you made to them, so it asks
   first.
+  - It is refused when the new version drops a profile one of your games
+    uses, and it names the games.
+  - A popup the new version drops stays while something of yours still opens
+    it.
 - **Uninstall** removes a pack installed from the gallery. For a HUD, it removes
   the profiles it added, and the popups it added that nothing of yours still
   opens. It is refused while a game still uses one of its profiles, and names

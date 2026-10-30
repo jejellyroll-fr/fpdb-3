@@ -497,10 +497,12 @@ def install_entry(
     """Install the verified *package* of *entry*; whether the HUD configuration changed.
 
     A stat pack goes into the user pack directory. A HUD package is merged into
-    *config_doc* the way the reference HUDs are: its profiles and popups are
-    added and nothing of the user's is touched, unless *replace* (an update)
-    first removes the package's own profiles and popups by name. The caller
-    saves the configuration.
+    *config_doc* the way the reference HUDs are: its profiles, popups and panel
+    rules are added, nothing of the user's is touched, and no game is bound to
+    it. An update (*replace*) first removes what the pack installed. It is
+    refused when the new version drops a profile a game still uses, and a
+    popup it drops stays while something of the user's still opens it. The
+    caller saves the configuration.
     """
     record = Path(record)
     installed = read_record(record)
@@ -524,19 +526,32 @@ def install_entry(
                 [f"you already have a HUD profile named {', '.join(taken)}; rename yours to install this pack"],
                 entry.id,
             )
+        # Codex (#641): a profile the new version drops must not leave a game pointing nowhere.
+        bound = _bound_games(config_doc, ours_profiles - set(profiles))
+        if bound:
+            raise GalleryError(
+                [
+                    f"this version drops a HUD profile used for {', '.join(bound)}; "
+                    "choose another profile for these games first"
+                ],
+                entry.id,
+            )
+        new_popups = {popup.getAttribute("pu_name") for popup in package_popups(root)}
         _remove_named(config_doc, "ss", "name", ours_profiles)
-        _remove_named(config_doc, "pu", "pu_name", ours_popups)
-        added_popups = [
-            name
-            for name in (popup.getAttribute("pu_name") for popup in package_popups(root))
-            if not _exists(config_doc, "pu", "pu_name", name)
-        ]
-        changed = install_missing_hud_package(config_doc, root) or bool(ours_profiles or ours_popups)
+        # A popup the new version still has is replaced; one it drops goes only
+        # when nothing of the user's still opens it (Codex, #641).
+        # Only the user's own profiles and popups count as opening it: the
+        # pack's previous popups are all about to be removed or replaced.
+        kept = (ours_popups - new_popups) - _unused_popups(config_doc, ours_popups)
+        _remove_named(config_doc, "pu", "pu_name", ours_popups - kept)
+        added_popups = [name for name in sorted(new_popups) if not _exists(config_doc, "pu", "pu_name", name)]
+        # No <game> binding: a pack's profile is put to use by the user, in Preferences (Codex, #641).
+        changed = install_missing_hud_package(config_doc, root, bind_games=False) or bool(ours_profiles or ours_popups)
         installed[entry.id] = {
             "kind": entry.kind,
             "version": entry.version,
             "profiles": profiles,
-            "popups": added_popups,
+            "popups": added_popups + sorted(kept),
         }
     _write_record(record, installed)
     return changed
@@ -561,6 +576,17 @@ def _unused_popups(config_doc: Any, candidates: set[str]) -> set[str]:
         kept |= reached
 
 
+def _bound_games(config_doc: Any, profiles: set[str]) -> list[str]:
+    """The games, as ``game (type)``, whose HUD is one of *profiles*."""
+    return sorted(
+        {
+            f"{node.parentNode.getAttribute('game_name')} ({node.getAttribute('game_type')})"
+            for node in config_doc.getElementsByTagName("game_stat_set")
+            if node.getAttribute("stat_set") in profiles
+        }
+    )
+
+
 def _exists(config_doc: Any, tag: str, attribute: str, name: str) -> bool:
     return any(node.getAttribute(attribute) == name for node in config_doc.getElementsByTagName(tag))
 
@@ -581,13 +607,7 @@ def uninstall_entry(pack_id: str, *, config_doc: Any, record: Path, packs_dir: P
         stat_packs.uninstall_pack(pack_id, packs_dir)
     else:
         profiles = set(entry.get("profiles") or [])
-        bound = sorted(
-            {
-                f"{node.parentNode.getAttribute('game_name')} ({node.getAttribute('game_type')})"
-                for node in config_doc.getElementsByTagName("game_stat_set")
-                if node.getAttribute("stat_set") in profiles
-            }
-        )
+        bound = _bound_games(config_doc, profiles)
         if bound:
             raise GalleryError(
                 [f"its HUD profile is in use for {', '.join(bound)}; choose another profile for these games first"],

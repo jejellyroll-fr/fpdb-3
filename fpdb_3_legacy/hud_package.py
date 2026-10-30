@@ -256,11 +256,13 @@ def _repoint_panel_rule_profile(section: Any, names: Mapping[str, str]) -> None:
             rule.setAttribute("profile", names[target])
 
 
-def install_missing_hud_package(config_doc: Any, package_root: Any) -> bool:
+def install_missing_hud_package(config_doc: Any, package_root: Any, *, bind_games: bool = True) -> bool:
     """Install missing profiles, popups, bindings and panel rules.
 
     Additive by construction: an existing profile, popup, binding or panel-rule
-    section is the user's, and stays.
+    section is the user's, and stays. With ``bind_games=False`` the package's
+    ``<game>`` bindings are left out, so its profiles install without being put
+    to use on any table (a pack from the gallery, #449).
     """
     changed = False
     stat_sets = _container(config_doc, "stat_sets")
@@ -278,15 +280,13 @@ def install_missing_hud_package(config_doc: Any, package_root: Any) -> bool:
             _append_imported(config_doc, popup_windows, source_popup)
             changed = True
 
-    return (
-        merge_package_game_bindings(
-            config_doc,
-            package_root,
-            overwrite=False,
-        )
-        or merge_package_panel_rules(config_doc, package_root, overwrite=False)
-        or changed
-    )
+    # Each merge runs whatever the one before returned: chained with ``or``, a
+    # package that added a game binding never had its panel rules merged.
+    if bind_games and merge_package_game_bindings(config_doc, package_root, overwrite=False):
+        changed = True
+    if merge_package_panel_rules(config_doc, package_root, overwrite=False):
+        changed = True
+    return changed
 
 
 def merge_missing_profile_stats(

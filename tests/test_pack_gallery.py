@@ -560,3 +560,108 @@ def test_a_popup_the_pack_added_stays_while_something_of_yours_opens_it(installe
 
     assert {"nlhe6_advanced_core", "nlhe6_advanced_opens"} <= names(config, "pu", "pu_name")
     assert "nlhe_6max_advanced" not in names(config, "ss", "name")
+
+
+# -- updates and installs that must not break the user's configuration (Codex, #641) -----------
+
+
+def republish(gallery: Path, pack_id: str, edit) -> None:
+    """Publish version 2.0.0 of a HUD pack in *gallery*, its XML changed by *edit*."""
+    entries = entries_of(gallery)
+    entry = next(item for item in entries if item["id"] == pack_id)
+    path = gallery / entry["file"]
+    path.write_text(edit(path.read_text(encoding="utf-8")), encoding="utf-8")
+    entry.update(
+        index_entry(path, pack_id=pack_id, kind="hud", name=entry["name"], version="2.0.0", author="a", license=LICENSE)
+    )
+    write_index(gallery, entries)
+
+
+def drop_opens_popup(xml: str) -> str:
+    """Version 2 of the Advanced HUD: its "opens" popup gone, and every link to it pointed at the core popup."""
+    start = xml.index('<pu pu_name="nlhe6_advanced_opens"')
+    without = xml[:start] + xml[xml.index("</pu>", start) + len("</pu>") :]
+    return without.replace('"nlhe6_advanced_opens"', '"nlhe6_advanced_core"')
+
+
+def install_from(gallery: Path, tmp_path: Path, pack_id: str, config: Any, *, replace: bool = False) -> bool:
+    entry = load_index(str(gallery), tmp_path / "cache").get(pack_id)
+    package = fetch_package(entry, str(gallery), tmp_path / "cache")
+    return install_entry(entry, package, config_doc=config, record=tmp_path / "record.json", replace=replace)
+
+
+def test_an_update_that_drops_a_profile_a_game_uses_is_refused(gallery, tmp_path) -> None:
+    config = fresh_config()
+    install_from(gallery, tmp_path, "fpdb-3.nlhe_6max_basic", config)
+    config.getElementsByTagName("game_stat_set")[0].setAttribute("stat_set", "nlhe_6max_basic")
+    republish(
+        gallery, "fpdb-3.nlhe_6max_basic", lambda xml: xml.replace('name="nlhe_6max_basic"', 'name="basic_v2"', 1)
+    )
+    before = config.toxml()
+
+    with pytest.raises(GalleryError, match=r"drops a HUD profile used for holdem \(ring\)"):
+        install_from(gallery, tmp_path, "fpdb-3.nlhe_6max_basic", config, replace=True)
+
+    assert config.toxml() == before
+    assert read_record(tmp_path / "record.json")["fpdb-3.nlhe_6max_basic"]["version"] == "1.0.0"
+
+
+def test_an_update_keeps_a_dropped_popup_that_something_of_yours_opens(gallery, tmp_path) -> None:
+    config = fresh_config()
+    install_from(gallery, tmp_path, "fpdb-3.nlhe_6max_advanced", config)
+    # The user's own profile opens the pack's "opens" popup; version 2 no longer has it.
+    config.getElementsByTagName("stat")[0].setAttribute("popup", "nlhe6_advanced_opens")
+
+    republish(gallery, "fpdb-3.nlhe_6max_advanced", drop_opens_popup)
+
+    install_from(gallery, tmp_path, "fpdb-3.nlhe_6max_advanced", config, replace=True)
+
+    assert {"nlhe6_advanced_core", "nlhe6_advanced_opens"} <= names(config, "pu", "pu_name")
+    recorded = read_record(tmp_path / "record.json")["fpdb-3.nlhe_6max_advanced"]
+    assert recorded["version"] == "2.0.0" and "nlhe6_advanced_opens" in recorded["popups"]
+    # Once nothing opens it, uninstalling the pack removes it.
+    config.getElementsByTagName("stat")[0].setAttribute("popup", "my_popup")
+    uninstall_entry("fpdb-3.nlhe_6max_advanced", config_doc=config, record=tmp_path / "record.json")
+    assert names(config, "pu", "pu_name") == {"my_popup"}
+
+
+def test_an_update_drops_a_popup_nothing_opens_any_more(gallery, tmp_path) -> None:
+    config = fresh_config()
+    install_from(gallery, tmp_path, "fpdb-3.nlhe_6max_advanced", config)
+
+    republish(gallery, "fpdb-3.nlhe_6max_advanced", drop_opens_popup)
+
+    install_from(gallery, tmp_path, "fpdb-3.nlhe_6max_advanced", config, replace=True)
+
+    assert "nlhe6_advanced_opens" not in names(config, "pu", "pu_name")
+    assert "nlhe6_advanced_opens" not in read_record(tmp_path / "record.json")["fpdb-3.nlhe_6max_advanced"]["popups"]
+
+
+def test_a_gallery_hud_never_binds_itself_to_a_game(gallery, tmp_path) -> None:
+    binding = '<game game_name="omahahi"><game_stat_set game_type="ring" stat_set="nlhe_6max_basic"/></game>'
+    republish(
+        gallery,
+        "fpdb-3.nlhe_6max_basic",
+        lambda xml: xml.replace("</fpdb_hud_package>", binding + "</fpdb_hud_package>"),
+    )
+    config = fresh_config()
+
+    install_from(gallery, tmp_path, "fpdb-3.nlhe_6max_basic", config)
+
+    assert "nlhe_6max_basic" in names(config, "ss", "name")
+    assert names(config, "game", "game_name") == {"holdem"}
+    assert names(config, "game_stat_set", "stat_set") == {"mine"}
+
+
+def test_a_package_with_game_bindings_still_brings_its_panel_rules() -> None:
+    package = defusedxml.minidom.parse(str(ROOT / "hud-packages" / "nlhe_6max_dynamic.fpdbhud")).documentElement
+    binding = defusedxml.minidom.parseString(
+        '<game game_name="holdem"><game_stat_set game_type="ring" stat_set="nlhe_6max_dynamic"/></game>'
+    ).documentElement
+    package.appendChild(binding)
+    config = defusedxml.minidom.parseString("<FreePokerToolsConfig/>")
+
+    assert install_missing_hud_package(config, package) is True
+
+    # Chained with `or`, the binding's True skipped the panel rules entirely.
+    assert config.getElementsByTagName("game_stat_set") and config.getElementsByTagName("hud_panel_rules")
