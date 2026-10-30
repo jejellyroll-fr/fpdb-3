@@ -352,3 +352,16 @@ def test_an_empty_section_is_not_shared() -> None:
     package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
 
     assert not package.getElementsByTagName("hud_panel_rules")
+
+
+def test_a_rule_naming_another_profile_stays_out_even_in_the_profiles_own_section() -> None:
+    config = config_with(
+        '<hud_panel_rules enabled="true" profile="mine">'
+        '<hud_panel_rule panel="facing_open"/><hud_panel_rule panel="foreign" profile="other"/>'
+        "</hud_panel_rules>"
+    )
+
+    package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
+
+    # Codex (#643): the rule kept its own scope, and installing it changed the recipient's "other".
+    assert [rule.getAttribute("panel") for rule in package.getElementsByTagName("hud_panel_rule")] == ["facing_open"]

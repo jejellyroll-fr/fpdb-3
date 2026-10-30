@@ -154,14 +154,16 @@ def _applies(section: Any, profile: str) -> bool:
 
 
 def _rules_for(section: Any, profile: str) -> list[Any]:
-    """A section's rules that apply to *profile*: all of a section scoped to it, else the matching ones."""
+    """A section's rules that apply to *profile*: the ones naming no profile, or naming it.
+
+    Even in a section scoped to the profile, a rule naming another one keeps its own
+    scope, as ``hud_situation.scope_rules`` reads it, and stays out (Codex, #643).
+    """
     from fpdb_3_legacy.hud_situation import _text, profile_matches  # noqa: PLC0415
 
-    rules = list(section.getElementsByTagName("hud_panel_rule"))
-    if section.getAttribute("profile").strip().casefold() == profile.strip().casefold():
-        return rules
     # Both sides as the resolver reads them: Preferences save "My HUD" as "my hud" (Codex, #643).
     wanted = _text(profile, "all")
+    rules = section.getElementsByTagName("hud_panel_rule")
     return [rule for rule in rules if profile_matches(_text(rule.getAttribute("profile"), "all"), wanted)]
 
 
