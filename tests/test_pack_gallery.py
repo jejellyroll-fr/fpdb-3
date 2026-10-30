@@ -385,6 +385,12 @@ def test_every_shipped_hud_package_passes_the_install_check(path) -> None:
             '<stat _rowcol="(1,1)" _stat_name="vpip"/></block></ss></fpdb_hud_package>',
             "b: x 'left' is not a number",
         ),
+        # Codex (#640): float() reads nan, but the HUD cannot round a font size scaled by it.
+        (
+            '<fpdb_hud_package><ss name="p" rows="1" cols="1"><block label="b" heading_font_scale="nan">'
+            '<stat _rowcol="(1,1)" _stat_name="vpip"/></block></ss></fpdb_hud_package>',
+            "b: heading_font_scale 'nan' is not a number",
+        ),
         # ... and a header that does not say where it sits is checked on the first cell.
         (
             '<fpdb_hud_package><ss name="p" rows="1" cols="1"><block label="b">'
@@ -425,6 +431,9 @@ def test_a_broken_hud_package_says_what_is_wrong(xml, problem) -> None:
         # Codex (#640): a stat with its decimal places (vpip_0), and a separator whose span of 0 crosses the block.
         '<fpdb_hud_package><ss name="p" rows="2" cols="2"><block label="b" rows="2" cols="2">'
         '<stat _rowcol="(1,1)" _stat_name="vpip_0"/><hline _rowcol="(2,1)" colspan="0"/></block></ss></fpdb_hud_package>',
+        # Codex (#640): a declarative stat from stats.d, which Stats.do_stat dispatches through the registry.
+        '<fpdb_hud_package><ss name="p" rows="1" cols="1"><stat _rowcol="(1,1)" _stat_name="chipev_3h_btn"/></ss>'
+        "</fpdb_hud_package>",
     ],
 )
 def test_a_well_formed_hud_package_passes(xml) -> None:

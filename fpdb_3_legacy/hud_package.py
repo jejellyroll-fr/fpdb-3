@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import math
 import re
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any
 
 
@@ -398,11 +399,20 @@ def _stock_popups() -> set[str]:
 # expanded (Codex, #640).
 _MAX_GRID = 100
 
+
+def _finite(text: str) -> float:
+    """``float(text)``, refusing nan and infinities: the HUD rounds a font size scaled by it (Codex, #640)."""
+    value = float(text)
+    if not math.isfinite(value):
+        raise ValueError(text)
+    return value
+
+
 # The numbers the configuration loader reads with int() or float(), by element: one it cannot
 # read stops the whole configuration from loading (Codex, #640).
-_LOADER_NUMBERS: dict[str, dict[str, type]] = {
+_LOADER_NUMBERS: dict[str, dict[str, Callable[[str], object]]] = {
     "ss": {"xpad": int, "ypad": int},
-    "block": {"cell_width": int, "x": int, "y": int, "title_font_scale": float, "heading_font_scale": float},
+    "block": {"cell_width": int, "x": int, "y": int, "title_font_scale": _finite, "heading_font_scale": _finite},
 }
 
 
@@ -522,10 +532,12 @@ def package_problems(root: Any) -> list[str]:
             problems.extend(f"{where}: {problem}" for problem in found)
 
     from fpdb_3_legacy import Stats, popup_packs  # noqa: PLC0415 - the stat catalogue is heavy
+    from fpdb_3_legacy.stat_registry import get_registry  # noqa: PLC0415
     from fpdb_3_legacy.stats_table import TABLE_STAT_FUNCTIONS  # noqa: PLC0415
 
-    # Player stats, and the table stats a cell may show too (the table's smallest stack).
-    known = frozenset(Stats.get_valid_stats()) | frozenset(TABLE_STAT_FUNCTIONS)
+    # Player stats, the declarative ones Stats.do_stat falls back to (stats.d, Codex #640),
+    # and the table stats a cell may show too (the table's smallest stack).
+    known = frozenset(Stats.get_valid_stats()) | frozenset(get_registry().names()) | frozenset(TABLE_STAT_FUNCTIONS)
     named = {cell.getAttribute("_stat_name") for cell in root.getElementsByTagName("stat")}
     named |= {
         row.getAttribute("pu_stat_name")

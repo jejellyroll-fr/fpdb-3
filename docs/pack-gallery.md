@@ -69,15 +69,17 @@ Before a package installs:
        made of blocks;
      - every grid is at most 100 rows by 100 columns, and every number the
        configuration loader reads (sizes, spans, a block's `x`, `y`,
-       `cell_width` and font scales, a profile's padding) is one;
+       `cell_width` and font scales, a profile's padding) is one, and a
+       finite one;
      - every stat, header (`<text>`) and separator (`<hline>`) sits where the
        configuration loader expects it: a valid `_rowcol` (`(row,col)`,
        counted from 1; a header or separator without one sits on `(1,1)`),
        inside the grid, its `colspan` included (`0` makes a separator cross
        the block), and not on a cell another item already takes. Empty cells
        are allowed;
-     - every stat it names exists, table stats included, with or without a
-       decimal-places suffix (`vpip_0`);
+     - every stat it names exists, declarative stats from `stats.d` and
+       table stats included, with or without a decimal-places suffix
+       (`vpip_0`);
      - every popup it opens is in the package, the shipped library, or the
        stock configuration (`default`, ...).
 
