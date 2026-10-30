@@ -166,6 +166,46 @@ def test_a_save_keeps_the_file_permissions(config) -> None:
 
 
 @posix_only
+def test_a_private_configuration_gets_a_private_backup(config) -> None:
+    # The file holds database passwords: its first backup must not be readable
+    # by others because the umask would allow it.
+    Path(config.file).chmod(0o600)
+
+    config.save()
+
+    assert Path(f"{config.file}.backup").stat().st_mode & 0o777 == 0o600
+
+
+@posix_only
+def test_an_older_readable_backup_takes_the_configurations_permissions(config) -> None:
+    Path(config.file).chmod(0o600)
+    backup = Path(f"{config.file}.backup")
+    backup.write_bytes(b"older")
+    backup.chmod(0o644)
+
+    config.save()
+
+    assert backup.stat().st_mode & 0o777 == 0o600
+
+
+@posix_only
+def test_nothing_is_written_while_the_file_is_more_open_than_the_configuration(config, monkeypatch) -> None:
+    Path(config.file).chmod(0o600)
+    seen: list[int] = []
+    real_fdopen = os.fdopen
+
+    def watch(fd, *args, **kwargs):
+        seen.append(os.fstat(fd).st_mode & 0o777)
+        return real_fdopen(fd, *args, **kwargs)
+
+    monkeypatch.setattr(config_module.os, "fdopen", watch)
+
+    config.save()
+
+    assert seen == [0o600, 0o600]  # the backup, then the configuration
+
+
+@posix_only
 def test_a_file_saved_under_a_new_name_gets_the_usual_permissions(config, tmp_path) -> None:
     mask = os.umask(0)
     os.umask(mask)

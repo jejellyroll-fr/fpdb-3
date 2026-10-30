@@ -31,6 +31,7 @@ import traceback
 import uuid
 import xml.parsers.expat
 from pathlib import Path
+from stat import S_IMODE
 from typing import Any
 
 import defusedxml.minidom
@@ -1742,22 +1743,34 @@ def parse_hud_panel_rules(doc: Any) -> tuple[list[Any], str, bool]:
     return hud_situation.number_rules(rules), fallback, enabled
 
 
-def _replace_with(path: str, data: bytes) -> None:
-    """Make ``path`` hold ``data``, or leave it exactly as it was if anything fails."""
+def _replace_with(path: str, data: bytes, *, permissions_of: str | None = None) -> None:
+    """Make ``path`` hold ``data``, or leave it exactly as it was if anything fails.
+
+    The file gets the permissions of ``permissions_of`` (``path`` itself when
+    None) if that file exists, and the umask's otherwise. They are set before a
+    byte is written: a configuration holds database passwords, and a 0600 one
+    must not pass through a readable copy -- its backup included.
+    """
     # A configuration linked from elsewhere is written where the link points,
     # so the link itself survives.
     target = Path(os.path.realpath(path))
+    model = Path(os.path.realpath(permissions_of)) if permissions_of else target
+    mode = S_IMODE(model.stat().st_mode) if model.exists() else None
     temporary = target.with_name(f".{target.name}.{uuid.uuid4().hex[:12]}.tmp")
-    # Created as open() would create it (the umask decides), not owner-only as
-    # mkstemp would: a file saved under a new name keeps the usual permissions.
-    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0), 0o666)
+    # Without a model, created as open() would create it (the umask decides),
+    # not owner-only as mkstemp would: a file saved under a new name keeps the
+    # usual permissions.
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0)
+    descriptor = os.open(temporary, flags, 0o600 if mode is not None else 0o666)
     try:
+        if mode is not None and hasattr(os, "fchmod"):
+            os.fchmod(descriptor, mode)
         with os.fdopen(descriptor, "wb") as stream:
             stream.write(data)
             stream.flush()
             os.fsync(stream.fileno())
-        if target.exists():
-            shutil.copymode(target, temporary)
+        if mode is not None and not hasattr(os, "fchmod"):
+            os.chmod(temporary, mode)  # Windows: only the read-only flag
         os.replace(temporary, target)
     finally:
         Path(temporary).unlink(missing_ok=True)
@@ -2588,7 +2601,7 @@ class Config:
         if file is None:
             file = self.file
             try:
-                _replace_with(f"{file}.backup", Path(file).read_bytes())
+                _replace_with(f"{file}.backup", Path(file).read_bytes(), permissions_of=file)
             except OSError as e:
                 log.exception(f"Failed to copy file {file} to backup. Exception: {e}")
 

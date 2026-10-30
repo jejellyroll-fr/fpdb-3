@@ -278,10 +278,10 @@ def test_a_backup_that_cannot_be_taken_does_not_stop_the_save(indented, monkeypa
 
     real_replace = config_module._replace_with
 
-    def refuse_backup(path, data):
+    def refuse_backup(path, data, **kwargs):
         if path.endswith(".backup"):
             refuse()
-        real_replace(path, data)
+        real_replace(path, data, **kwargs)
 
     monkeypatch.setattr(config_module, "_replace_with", refuse_backup)
 
