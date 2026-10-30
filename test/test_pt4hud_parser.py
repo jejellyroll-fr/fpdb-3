@@ -23,11 +23,14 @@ import pytest
 from fpdb_3_legacy import pt4hud
 
 FIXTURE = os.path.join(os.path.dirname(__file__), "fixtures", "generationpoker_3h.pt4hud")
-LOCAL_GP2H = os.path.expanduser("~/Downloads/tournament_-_generationpoker_2h_free_generationpoker.pt_.pt4hud")
-LOCAL_SPIN_BASIC = os.path.expanduser("~/Downloads/spin_and_go_master_-_basic.pt4hud")
-LOCAL_SPIN_NEW = os.path.expanduser("~/Downloads/tournament_-_spin_new.pt4hud")
-LOCAL_HU_CASH = os.path.expanduser("~/Downloads/cash_-_ev_hu_cash_enthusiast_v.1.00.pt4hud")
-LOCAL_GP_CASH = os.path.expanduser("~/Downloads/cash_-_genarationpoker_cash_free_generationpoker.pt_.pt4hud")
+# Synthetic layouts, each shaped as one real export the parser was tuned on
+# (tests/helpers/pt4hud_layouts.py writes them).
+PT4HUD_FIXTURES = os.path.join(os.path.dirname(__file__), "fixtures", "pt4hud")
+LOCAL_GP2H = os.path.join(PT4HUD_FIXTURES, "generationpoker_2h.pt4hud")
+LOCAL_SPIN_BASIC = os.path.join(PT4HUD_FIXTURES, "spin_basic.pt4hud")
+LOCAL_SPIN_NEW = os.path.join(PT4HUD_FIXTURES, "spin_new.pt4hud")
+LOCAL_HU_CASH = os.path.join(PT4HUD_FIXTURES, "hu_cash.pt4hud")
+LOCAL_GP_CASH = os.path.join(PT4HUD_FIXTURES, "generationpoker_cash.pt4hud")
 
 
 def _be_str(s: str) -> bytes:
@@ -148,6 +151,15 @@ class TestRealLayout:
         assert len(push["cells"]) == 169
 
 
+def test_the_synthetic_layouts_are_the_ones_the_builder_writes(tmp_path):
+    from tests.helpers.pt4hud_layouts import write_all
+
+    write_all(tmp_path)
+    for name in sorted(os.listdir(tmp_path)):
+        with open(tmp_path / name, "rb") as built, open(os.path.join(PT4HUD_FIXTURES, name), "rb") as kept:
+            assert built.read() == kept.read(), name
+
+
 def test_argb_to_hex():
     assert pt4hud.argb_to_hex(0xFF009393) == "#009393"
     assert pt4hud.argb_to_hex(0xFFFFFFFF) == "#ffffff"
@@ -185,7 +197,6 @@ def test_real_layout_panels_are_position_panels():
     assert "Winnings 3H" not in panels  # a stat, not a panel
 
 
-@pytest.mark.skipif(not os.path.exists(LOCAL_GP2H), reason="local 2H pt4hud fixture missing")
 def test_generationpoker_2h_visual_panels_are_detected():
     layout = pt4hud.parse(LOCAL_GP2H)
     panels = {c.section for c in layout.supported}
@@ -203,7 +214,6 @@ def test_generationpoker_2h_visual_panels_are_detected():
     assert by_panel_stat[("Villain 2h", "pfr")].label == "PFR"
 
 
-@pytest.mark.skipif(not os.path.exists(LOCAL_SPIN_BASIC), reason="local Spin Basic pt4hud fixture missing")
 def test_spin_basic_short_position_panels_and_charts_are_detected():
     layout = pt4hud.parse(LOCAL_SPIN_BASIC)
     panels = {c.section for c in layout.supported}
@@ -218,7 +228,6 @@ def test_spin_basic_short_position_panels_and_charts_are_detected():
     assert by_panel_stat[("Villain info", "squeeze", "Preflop Squeeze")].label == "Sq"
 
 
-@pytest.mark.skipif(not os.path.exists(LOCAL_SPIN_NEW), reason="local Spin New pt4hud fixture missing")
 def test_spin_new_generic_table_layout_is_not_misread_as_seat_panels():
     layout = pt4hud.parse(LOCAL_SPIN_NEW)
     # This file is a generic Tools/Preflop/Flop/PT4 matrix export rather than a
@@ -227,7 +236,6 @@ def test_spin_new_generic_table_layout_is_not_misread_as_seat_panels():
     assert {c.section for c in layout.supported} == {""}
 
 
-@pytest.mark.skipif(not os.path.exists(LOCAL_HU_CASH), reason="local HU cash pt4hud fixture missing")
 def test_hu_cash_named_panels_are_detected():
     layout = pt4hud.parse(LOCAL_HU_CASH)
     panels = {c.section for c in layout.supported}
@@ -239,14 +247,13 @@ def test_hu_cash_named_panels_are_detected():
     assert by_panel_stat[("SRP OOP", "probe_bet_turn", "Probe Turn in non-3Bet+ Pot")].label
 
 
-@pytest.mark.skipif(not os.path.exists(LOCAL_GP_CASH), reason="local GenerationPoker cash pt4hud fixture missing")
 def test_generationpoker_cash_custom_visual_stats_are_mapped():
     layout = pt4hud.parse(LOCAL_GP_CASH)
     panels = {c.section for c in layout.supported}
     assert {"Main Panel", "Pre Flop", "Post Flop", "RFI", "Main Panel2"} <= panels
-    # The file maps ~113 visual stat cells; the old >=200 target predated the
-    # switch to deduplicated per-panel extraction (it counted the flat scan's
-    # duplicates/definitions). 100 still proves the custom stats are mapped.
+    # The real export maps ~113 visual stat cells, as the synthetic one does; the old
+    # >=200 target predated the switch to deduplicated per-panel extraction (it counted
+    # the flat scan's duplicates/definitions). 100 still proves the custom stats are mapped.
     assert len(layout.supported) >= 100
     by_panel_stat = {(c.section, c.fpdb_stat, c.pt4_name): c for c in layout.supported}
     assert by_panel_stat[("Main Panel", "vpip", "GenPoker_C/M VPIP")].label == "VP"

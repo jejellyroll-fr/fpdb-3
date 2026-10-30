@@ -21,15 +21,12 @@ import pytest
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
-# In the player's own history folder, named after them, whatever their screen name. Each
-# folder is asked for the file by name: macOS keeps "Varié" decomposed, so a glob on the
-# whole name would not match it.
-_NAME = "HH20260717 T4016724563 Hold'em No Limit Varié.txt"
-_FOLDERS = Path.home().glob("Library/Application Support/PokerStarsFR/HandHistory/*")
-HAND_FILE = next((folder / _NAME for folder in _FOLDERS if (folder / _NAME).exists()), Path.home() / "missing")
-HERO = HAND_FILE.parent.name
-
-pytestmark = pytest.mark.skipif(not HAND_FILE.exists(), reason="local PokerStars history not present")
+# Synthetic, shaped as the tournament's PokerStars.FR history: one hand of each shape.
+HAND_FILE = (
+    Path(__file__).resolve().parents[1]
+    / "regression-test-files/tour/Stars/Flop/NLHE-6max-MTT-EUR-4.50-0.50-202607.uncalled.shove.and.walk.txt"
+)
+HERO = "Hero"
 
 
 @pytest.fixture(scope="module")
@@ -55,14 +52,15 @@ def test_a_shove_everyone_folds_to_costs_only_the_blinds(hands) -> None:
 
 
 def test_a_real_walk_still_balances(hands) -> None:
-    # MONSAWI35 posts the big blind 50, everyone folds, 25 back, 50 collected.
+    # Villain1 posts the big blind 50, everyone folds, 25 back, 50 collected.
     hand = hands["261462002611"]
 
-    assert hand.pot.returned["MONSAWI35"] == Decimal("25")
+    assert hand.pot.returned["Villain1"] == Decimal("25")
     assert balance(hand) == 0
 
 
 def test_every_hand_of_the_tournament_balances(hands) -> None:
     unbalanced = {hid: balance(h) for hid, h in hands.items() if balance(h)}
 
-    assert unbalanced == {}  # 5 of the 22 hands were off before the fix
+    assert len(hands) == 2
+    assert unbalanced == {}  # 5 of the real tournament's 22 hands were off before the fix

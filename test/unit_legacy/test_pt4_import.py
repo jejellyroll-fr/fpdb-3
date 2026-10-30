@@ -14,7 +14,9 @@ import pytest
 from fpdb_3_legacy import pt4_import as pt4
 from fpdb_3_legacy import stat_registry as sr
 
-SAMPLE_DIR = Path.home().joinpath("Documents/github/fpdb-new/658225d6b920e_5-courbes-chips-ev-par-position")
+# Six synthetic .pt4stat files shaped as PT4's "ChipEV by position" custom stats: five
+# position/table-size curves and ChipEV per tournament (stats.d/chipev_by_position.toml).
+SAMPLE_DIR = Path(__file__).resolve().parents[1] / "fixtures" / "pt4stat" / "chipev_by_position"
 
 
 def _decoded(value_expr, columns, label="ChipEV X", decimals=2):
@@ -273,7 +275,6 @@ class TestRoundTripThroughRegistry:
         assert d.compute({"allInEV": 5000}) == 50.0
 
 
-@pytest.mark.skipif(not SAMPLE_DIR.is_dir(), reason="PT4 sample directory not present")
 class TestDecodeRealFiles:
     def test_all_six_translate(self):
         results = {}

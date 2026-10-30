@@ -2,6 +2,7 @@
 """Test script for the iPoker parser."""
 
 import logging
+from pathlib import Path
 
 import pytest
 
@@ -42,16 +43,15 @@ def test_ipoker_file(file_path) -> None:
 
 
 def test_pmu_poker_tablesize() -> None:
-    """Test that PMU Poker tablesize is correctly parsed as 6-max instead of falling back to 10-max."""
-    from pathlib import Path
+    """A PMU / iPoker FR table's size is only in the session header: it must still read 6-max, not 10.
 
-    # In the player's own history folder, whatever their screen name.
-    found = Path.home().glob(
-        "Library/Containers/fr.pmu.poker.macos/Data/Library/Application Support/PMU PLAY/*/History/Data/Tables/5858157850.xml"
+    The file is synthetic, shaped as PMU writes a session: ``<tablesize>`` sits in the
+    session's ``<general>``, which splitting the file into hands leaves behind.
+    """
+    file_path = str(
+        Path(__file__).resolve().parents[1]
+        / "regression-test-files/cash/iPoker/Flop/NLHE-6max-EUR-0.01-0.02-202607.tablesize.in.session.header.xml"
     )
-    file_path = str(next(found, ""))
-    if not file_path:
-        pytest.skip("PMU Poker table history file not found")
 
     from fpdb_3_legacy.Configuration import Config
     from fpdb_3_legacy.iPoker.base import iPoker
@@ -76,15 +76,15 @@ def test_pmu_poker_tablesize() -> None:
     hands = parser.allHandsAsList()
     assert len(hands) > 0
 
-    # Parse the first hand
-    hand_text = hands[0]
+    # Every hand, not only the first: the first fragment of the split still carries the
+    # session header, the others do not.
     from fpdb_3_legacy.Hand import HoldemOmahaHand
 
-    hand = HoldemOmahaHand(config, parser, parser.sitename, gametype, hand_text)
-
-    parser.readHandInfo(hand)
-    # The maxseats should be correctly parsed as 6
-    assert hand.maxseats == 6
+    assert len(hands) == 2
+    for hand_text in hands:
+        hand = HoldemOmahaHand(config, parser, parser.sitename, gametype, hand_text)
+        parser.readHandInfo(hand)
+        assert hand.maxseats == 6
 
 
 def test_first_hand_of_a_session_takes_its_own_gamecode_as_hand_id() -> None:

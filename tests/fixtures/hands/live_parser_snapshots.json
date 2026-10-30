@@ -2443,6 +2443,10 @@
     "hand_count": 1,
     "sha256": "c5ff62992409eb09906a44ee768f5df9ad6d24bd5b3f5ecb97643f678528d75d"
   },
+  "regression/iPoker/Flop/NLHE-6max-EUR-0.01-0.02-202607.tablesize.in.session.header.xml": {
+    "hand_count": 2,
+    "sha256": "9297c88d82cb66898de65c5b4ba3d1597c5585ccba95f37bd335cb5d19a5f420"
+  },
   "regression/iPoker/Flop/NLHE-6max-USD-0.01-0.02-201111.Spanish.sample.xml": {
     "hand_count": 1,
     "sha256": "e3d458e865db87918e31bd49d54c3150b097757391de4baf8544af02cb0705c9"
