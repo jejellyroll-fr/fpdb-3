@@ -387,3 +387,26 @@ def test_a_rule_naming_the_profile_in_another_profiles_section_is_shared(tmp_pat
         "facing_open",
         "from_file",
     ]
+
+
+def test_a_disabled_section_is_not_shared_even_alone() -> None:
+    config = config_with(
+        '<hud_panel_rules enabled="false" profile="mine"><hud_panel_rule panel="facing_open"/></hud_panel_rules>'
+    )
+
+    package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
+
+    # Codex (#643): a lone disabled section went in as enabled, turning on what the sharer turned off.
+    assert not package.getElementsByTagName("hud_panel_rules")
+
+
+def test_the_fallback_of_a_section_with_nothing_else_is_kept() -> None:
+    config = config_with(
+        '<hud_panel_rules enabled="true" fallback="core"/>'
+        '<hud_panel_rules enabled="true" profile="mine"><hud_panel_rule panel="facing_open"/></hud_panel_rules>'
+    )
+
+    package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
+
+    # Codex (#643): the fallback-only section was set aside before its fallback was read.
+    assert package.getElementsByTagName("hud_panel_rules")[0].getAttribute("fallback") == "core"

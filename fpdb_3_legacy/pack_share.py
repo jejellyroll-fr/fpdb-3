@@ -179,9 +179,9 @@ def _panel_rules(document: Any, config_doc: Any, profile: str) -> list[Any]:
     become one, in the order the configuration reads them: an install keeps a single
     section per profile, and would drop the others (Codex, #643).
     """
-    sections = [section for section in config_doc.getElementsByTagName("hud_panel_rules") if _carries(section)]
-    if len(sections) > 1:
-        sections = [section for section in sections if _enabled(section)]  # a disabled one is not read
+    # A disabled section is not read, however many there are (Codex, #643).
+    enabled = [section for section in config_doc.getElementsByTagName("hud_panel_rules") if _enabled(section)]
+    sections = [section for section in enabled if _carries(section)]
     wanted = profile.strip().casefold()
     prepared = []
     for section in sections:
@@ -206,8 +206,11 @@ def _panel_rules(document: Any, config_doc: Any, profile: str) -> list[Any]:
     merged.setAttribute("enabled", "true")
     own_scope = next((scope for _copy, scope in contributing if scope.casefold() == wanted), profile)
     merged.setAttribute("profile", own_scope)
-    for copy, _scope in prepared:
-        _carry_attributes(merged, copy, source=False)
+    # The fallback is the first one read, from any enabled section, one with nothing
+    # else in it included (Codex, #643); a section's file source gave it its own.
+    copies = {id(section): copy for section, (copy, _scope) in zip(sections, prepared, strict=True)}
+    for section in enabled:
+        _carry_attributes(merged, copies.get(id(section), section), source=False)
     for copy, scope in contributing:
         _carry_attributes(merged, copy, source=True)
         for rule in _rules_for(copy, profile, scope):
