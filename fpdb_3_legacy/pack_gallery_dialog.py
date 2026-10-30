@@ -233,9 +233,9 @@ class PackGalleryDialog(QDialog):
                 image.scaled(360, 220, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
             )
 
-    def _changed(self, message: str, select: str | None, hud_changed: bool) -> None:
-        if hud_changed:
-            self.config.save()
+    def _changed(self, message: str, select: str | None) -> None:
+        # The HUD configuration is already saved: install_entry and uninstall_entry
+        # save it before they record the change (Codex, #641).
         self.refresh(select)
         self.notice.setText(f"{message} {_(_RESTART_NOTICE)}")
 
@@ -261,13 +261,14 @@ class PackGalleryDialog(QDialog):
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         try:
             package = pack_gallery.fetch_package(entry, self.source, self.cache_dir, read=self.read)
-            hud_changed = pack_gallery.install_entry(
+            pack_gallery.install_entry(
                 entry,
                 package,
                 config_doc=self.config.doc,
                 record=self.record,
                 packs_dir=self.packs_dir,
                 replace=update,
+                save=self.config.save,
             )
         except (pack_gallery.GalleryError, stat_packs.PackError) as exc:
             QApplication.restoreOverrideCursor()
@@ -278,7 +279,7 @@ class PackGalleryDialog(QDialog):
             self._refuse(_("This pack cannot be installed:"), [str(exc)])
             return False
         QApplication.restoreOverrideCursor()
-        self._changed((_("Updated %s.") if update else _("Installed %s.")) % entry.name, entry.id, hud_changed)
+        self._changed((_("Updated %s.") if update else _("Installed %s.")) % entry.name, entry.id)
         return True
 
     def uninstall_selected(self, *, confirm: bool = True) -> bool:
@@ -291,8 +292,12 @@ class PackGalleryDialog(QDialog):
             if answer != QMessageBox.StandardButton.Yes:
                 return False
         try:
-            hud_changed = pack_gallery.uninstall_entry(
-                entry.id, config_doc=self.config.doc, record=self.record, packs_dir=self.packs_dir
+            pack_gallery.uninstall_entry(
+                entry.id,
+                config_doc=self.config.doc,
+                record=self.record,
+                packs_dir=self.packs_dir,
+                save=self.config.save,
             )
         except (pack_gallery.GalleryError, stat_packs.PackError) as exc:
             self._refuse(_("This pack cannot be uninstalled:"), exc.messages)
@@ -300,7 +305,7 @@ class PackGalleryDialog(QDialog):
         except OSError as exc:
             self._refuse(_("This pack cannot be uninstalled:"), [str(exc)])
             return False
-        self._changed(_("Uninstalled %s.") % entry.name, entry.id, hud_changed)
+        self._changed(_("Uninstalled %s.") % entry.name, entry.id)
         return True
 
     def _refuse(self, heading: str, messages: list[str]) -> None:

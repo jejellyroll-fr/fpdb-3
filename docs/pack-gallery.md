@@ -26,20 +26,22 @@ the window is `pack_gallery_dialog.py`.
     yours. A HUD from the gallery never binds itself to a game, even when its
     package lists game bindings: choose its profile for your tables in
     *Preferences ▸ HUD*.
-- **Update** installs the newer version. For a HUD, it replaces the profiles
-  and popups the pack installed, with any change you made to them, so it asks
-  first.
+- **Update** installs the newer version. For a HUD, it replaces the profiles,
+  popups and panel rules the pack installed, with any change you made to them,
+  so it asks first. Panel rules of yours, for your own profiles, stay.
   - It is refused when the new version drops a profile one of your games
     uses, and it names the games.
   - A popup the new version drops stays while something of yours still opens
     it.
 - **Uninstall** removes a pack installed from the gallery. For a HUD, it removes
-  the profiles it added, and the popups it added that nothing of yours still
-  opens. It is refused while a game still uses one of its profiles, and names
+  the profiles and panel rules it added, and the popups it added that nothing
+  of yours still opens. It is refused while a game still uses one of its profiles, and names
   the games.
 
 fpdb remembers what it installed from the gallery, and at which version, in
-`pack-gallery.json` beside your configuration. Packages, the index and
+`pack-gallery.json` beside your configuration. The HUD configuration is saved
+before that record is written: when it cannot be saved, the change is undone
+and the pack keeps its previous state. Packages, the index and
 screenshots are cached in `pack-gallery-cache/`. Restart fpdb and the HUD to
 use a change everywhere.
 

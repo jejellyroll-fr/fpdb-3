@@ -119,6 +119,26 @@ def test_a_refused_package_is_reported_and_nothing_is_saved(dialog, tmp_path, mo
     assert config.saved == 0 and "checksum" in shown[0]
 
 
+def test_a_configuration_that_cannot_be_saved_leaves_the_pack_not_installed(dialog, monkeypatch) -> None:
+    # Codex (#641): the save comes before the record, inside the action's error handling.
+    shown = []
+    monkeypatch.setattr(pack_gallery_dialog.QMessageBox, "warning", lambda _p, _t, text: shown.append(text))
+    config = fake_config()
+
+    def full_disk() -> None:
+        raise OSError("disk full")
+
+    config.save = full_disk
+    window = dialog(config)
+    select(window, "fpdb-3.nlhe_6max_basic")
+
+    assert window.install_selected() is False
+
+    assert "disk full" in shown[0]
+    assert statuses(window)["fpdb-3.nlhe_6max_basic"] == NOT_INSTALLED
+    assert not config.doc.getElementsByTagName("ss")
+
+
 def test_uninstalling_from_the_gallery(dialog, monkeypatch) -> None:
     config = fake_config()
     window = dialog(config)

@@ -665,3 +665,68 @@ def test_a_package_with_game_bindings_still_brings_its_panel_rules() -> None:
 
     # Chained with `or`, the binding's True skipped the panel rules entirely.
     assert config.getElementsByTagName("game_stat_set") and config.getElementsByTagName("hud_panel_rules")
+
+
+def panel_sections(config: Any) -> dict[str, str]:
+    """Each panel-rule section's profile and fallback."""
+    return {
+        node.getAttribute("profile"): node.getAttribute("fallback")
+        for node in config.getElementsByTagName("hud_panel_rules")
+    }
+
+
+def test_an_update_replaces_the_panel_rules_the_pack_added_and_keeps_yours(gallery, tmp_path) -> None:
+    # Codex (#641): the old version's section stayed, selecting panels the new one may no longer have.
+    config = fresh_config()
+    mine = defusedxml.minidom.parseString(
+        '<hud_panel_rules enabled="true" source="builtin" fallback="my_core" profile="mine"/>'
+    ).documentElement
+    config.documentElement.appendChild(config.importNode(mine, True))
+    install_from(gallery, tmp_path, "fpdb-3.nlhe_6max_dynamic", config)
+    assert panel_sections(config) == {"mine": "my_core", "nlhe_6max_dynamic": "core"}
+    republish(
+        gallery,
+        "fpdb-3.nlhe_6max_dynamic",
+        lambda xml: xml.replace(
+            'fallback="core" profile="nlhe_6max_dynamic"', 'fallback="core_v2" profile="nlhe_6max_dynamic"'
+        ),
+    )
+
+    install_from(gallery, tmp_path, "fpdb-3.nlhe_6max_dynamic", config, replace=True)
+
+    assert panel_sections(config) == {"mine": "my_core", "nlhe_6max_dynamic": "core_v2"}
+    assert read_record(tmp_path / "record.json")["fpdb-3.nlhe_6max_dynamic"]["panel_rules"] == ["nlhe_6max_dynamic"]
+    uninstall_entry("fpdb-3.nlhe_6max_dynamic", config_doc=config, record=tmp_path / "record.json")
+    assert panel_sections(config) == {"mine": "my_core"}
+
+
+def failing_save() -> None:
+    raise OSError("disk full")
+
+
+def test_a_hud_whose_configuration_cannot_be_saved_is_not_recorded(gallery, tmp_path) -> None:
+    # Codex (#641): the record said installed while HUD_config.xml never received the pack.
+    config = fresh_config()
+    before = config.toxml()
+    entry = load_index(str(gallery), tmp_path / "cache").get("fpdb-3.nlhe_6max_dynamic")
+    package = fetch_package(entry, str(gallery), tmp_path / "cache")
+
+    with pytest.raises(OSError, match="disk full"):
+        install_entry(entry, package, config_doc=config, record=tmp_path / "record.json", save=failing_save)
+
+    assert config.toxml() == before
+    assert read_record(tmp_path / "record.json") == {}
+
+
+def test_a_hud_whose_removal_cannot_be_saved_stays_recorded(gallery, tmp_path) -> None:
+    config = fresh_config()
+    install_from(gallery, tmp_path, "fpdb-3.nlhe_6max_dynamic", config)
+    before = config.toxml()
+
+    with pytest.raises(OSError, match="disk full"):
+        uninstall_entry(
+            "fpdb-3.nlhe_6max_dynamic", config_doc=config, record=tmp_path / "record.json", save=failing_save
+        )
+
+    assert config.toxml() == before
+    assert read_record(tmp_path / "record.json")["fpdb-3.nlhe_6max_dynamic"]["version"] == "1.0.0"
