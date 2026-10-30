@@ -17,12 +17,13 @@ from typing import Any
 import defusedxml.minidom
 import pytest
 
-from fpdb_3_legacy import stat_packs
+from fpdb_3_legacy import hud_situation, stat_packs
 from fpdb_3_legacy.hud_package import install_missing_hud_package
 from fpdb_3_legacy.pack_gallery import GalleryError, validate_repository
 from fpdb_3_legacy.pack_share import (
     ENTRY_NAME,
     _stock_popup_nodes,
+    _submenus,
     hud_package,
     profile_names,
     share_hud,
@@ -273,3 +274,51 @@ def test_the_shipped_rule_library_stays_named() -> None:
     package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
 
     assert package.getElementsByTagName("hud_panel_rules")[0].getAttribute("source") == "builtin"
+
+
+def test_a_stock_popup_leading_to_a_customised_one_goes_in_too() -> None:
+    stock = _stock_popup_nodes()
+    config = without_default(
+        config_with(
+            "<popup_windows>"
+            + stock["holdring_main"].toxml()
+            + '<pu pu_name="default"><pu_stat pu_stat_name="vpip"/></pu>'
+            + "".join(stock[name].toxml() for name in _submenus(stock["holdring_main"]) if name not in ("", "default"))
+            + "</popup_windows>"
+        )
+    )
+    for cell in config.getElementsByTagName("stat"):
+        cell.setAttribute("popup", "holdring_main")
+
+    package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
+
+    # Codex (#643): holdring_main is as shipped, so the customised default under it was never reached.
+    popups = {node.getAttribute("pu_name"): node for node in package.getElementsByTagName("pu")}
+    assert sorted(popups) == ["default (mine)", "holdring_main (mine)"]
+    assert "default (mine)" in _submenus(popups["holdring_main (mine)"])
+    assert "default" not in _submenus(popups["holdring_main (mine)"])
+    assert {cell.getAttribute("popup") for cell in package.getElementsByTagName("stat")} == {"holdring_main (mine)"}
+
+
+def test_every_section_that_applies_becomes_one_in_the_order_it_is_read(tmp_path) -> None:
+    config = config_with(
+        '<hud_panel_rules enabled="true" fallback="core">'
+        '<hud_panel_rule panel="facing_open" profile="mine"/>'
+        '<hud_panel_rule panel="short_stack" profile="other"/>'
+        "</hud_panel_rules>"
+        '<hud_panel_rules enabled="false"><hud_panel_rule panel="never_read"/></hud_panel_rules>'
+        '<hud_panel_rules enabled="true" profile="mine" source="builtin">'
+        '<hud_panel_rule panel="facing_cbet"/>'
+        "</hud_panel_rules>"
+    )
+
+    package = defusedxml.minidom.parseString(hud_package(config, "mine")).documentElement
+
+    # Codex (#643): two sections scoped to "mine" went in, and an install keeps only the first.
+    (section,) = package.getElementsByTagName("hud_panel_rules")
+    assert (section.getAttribute("profile"), section.getAttribute("fallback")) == ("mine", "core")
+    assert not section.getAttribute("source")  # the library's rules are written out, in their place
+    panels = [rule.getAttribute("panel") for rule in section.getElementsByTagName("hud_panel_rule")]
+    library = [rule.panel for rule in hud_situation.load_source("builtin")[0]]
+    assert panels == ["facing_open", *library, "facing_cbet"]
+    assert as_gallery(share_hud(config, "mine", tmp_path, **HUD)) == []

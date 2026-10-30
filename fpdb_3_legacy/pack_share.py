@@ -26,7 +26,7 @@ import hashlib
 import json
 import shutil
 import tempfile
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any, Final
 
@@ -65,35 +65,61 @@ def _canonical(node: Any) -> Any:
     return (node.tagName, tuple(sorted(node.attributes.items())), children)
 
 
+def _submenus(popup: Any) -> list[str]:
+    return [row.getAttribute("pu_stat_submenu") for row in popup.getElementsByTagName("pu_stat")]
+
+
+def _needed(popups: Mapping[str, Any], stock: Mapping[str, Any]) -> set[str]:
+    """The popups a package must carry: the sharer's own, and every one leading to them.
+
+    A popup of the sharer's own is one the stock template lacks, or a stock one they
+    customised. A stock popup left as shipped still has to go in when one of its
+    submenus does, since its copy must open the package's version (Codex, #643).
+    Worked out to a fixed point, so a cycle of submenus is no trouble.
+    """
+    needed = {
+        name
+        for name, node in popups.items()
+        if name not in stock or (stock[name] is not None and _canonical(node) != _canonical(stock[name]))
+    }
+    grew = True
+    while grew:
+        grew = False
+        for name, node in popups.items():
+            if name not in needed and any(child in needed for child in _submenus(node)):
+                needed.add(name)
+                grew = True
+    return needed
+
+
 def _popups(document: Any, config_doc: Any, profile_node: Any, profile: str) -> Any | None:
     """The popups *profile_node* opens, and the ones those open, as a ``<popup_windows>``.
 
-    A stock popup (``default``, ...) is left out while it is the stock one, since every
-    configuration has it. One customised under its stock name goes in under a name of
-    the profile's own, so it never meets the recipient's stock popup (Codex, #643);
-    every reference to it, from the profile and from the other popups, follows.
+    A stock popup (``default``, ...) is left out while it and everything it opens
+    are as shipped, since every configuration has it. One that has to go in goes
+    under a name of the profile's own, so it never meets the recipient's stock
+    popup (Codex, #643); every reference to it, from the profile and from the other
+    popups, follows.
     """
     popups = {node.getAttribute("pu_name"): node for node in config_doc.getElementsByTagName("pu")}
     stock = _stock_popup_nodes()
-    renamed: dict[str, str] = {}
+    needed = _needed(popups, stock)
     wanted = [cell.getAttribute("popup") for cell in profile_node.getElementsByTagName("stat")]
-    chosen: dict[str, Any] = {}
+    chosen: list[str] = []
     while wanted:
         name = wanted.pop()
-        if name in chosen or name not in popups:
-            continue
-        if name in stock:
-            if stock[name] is None or _canonical(popups[name]) == _canonical(stock[name]):
-                continue
-            renamed[name] = _free_name(f"{name} ({profile})", popups)
-        chosen[name] = popups[name]
-        wanted.extend(row.getAttribute("pu_stat_submenu") for row in popups[name].getElementsByTagName("pu_stat"))
+        if name in needed and name not in chosen:
+            chosen.append(name)
+            wanted.extend(_submenus(popups[name]))
+    renamed: dict[str, str] = {}
+    for name in sorted(name for name in chosen if name in stock):
+        renamed[name] = _free_name(f"{name} ({profile})", {*popups, *renamed.values()})
     _rename(profile_node.getElementsByTagName("stat"), "popup", renamed)
     if not chosen:
         return None
     container = document.createElement("popup_windows")
     for name in sorted(chosen):
-        node = document.importNode(chosen[name], True)
+        node = document.importNode(popups[name], True)
         node.setAttribute("pu_name", renamed.get(name, name))
         _rename(node.getElementsByTagName("pu_stat"), "pu_stat_submenu", renamed)
         container.appendChild(document.createTextNode("\n  "))
@@ -108,54 +134,84 @@ def _rename(nodes: Any, attribute: str, renamed: Mapping[str, str]) -> None:
             node.setAttribute(attribute, renamed[node.getAttribute(attribute)])
 
 
-def _free_name(name: str, taken: Mapping[str, Any]) -> str:
+def _free_name(name: str, taken: Iterable[str]) -> str:
+    taken = set(taken)
     candidate, number = name, 2
     while candidate in taken:
         candidate, number = f"{name} {number}", number + 1
     return candidate
 
 
-def _panel_rules(document: Any, config_doc: Any, profile: str) -> list[Any]:
-    """The panel-rule sections that apply to *profile*, each scoped to it.
+def _applies(section: Any, profile: str) -> bool:
+    scope = section.getAttribute("profile").strip().casefold()
+    return not _is_panel_rule_placeholder(section) and scope in ("", "all", profile.strip().casefold())
 
-    A section scoped to the profile goes in as it is. A section for every profile --
-    the one Preferences writes, its rules naming their profile one by one -- goes in
-    with only the rules that apply to this profile, and scoped to it, so it changes
-    nothing for the recipient's other profiles (Codex, #643).
-    """
+
+def _rules_for(section: Any, profile: str) -> list[Any]:
+    """A section's rules that apply to *profile*: all of a section scoped to it, else the matching ones."""
     from fpdb_3_legacy.hud_situation import profile_matches  # noqa: PLC0415
 
-    wanted = profile.strip().casefold()
-    sections = []
-    for section in config_doc.getElementsByTagName("hud_panel_rules"):
-        scope = section.getAttribute("profile").strip()
-        if _is_panel_rule_placeholder(section) or (scope and scope.casefold() not in ("all", wanted)):
-            continue
+    rules = list(section.getElementsByTagName("hud_panel_rule"))
+    if section.getAttribute("profile").strip().casefold() == profile.strip().casefold():
+        return rules
+    return [rule for rule in rules if profile_matches(rule.getAttribute("profile").strip(), profile)]
+
+
+def _panel_rules(document: Any, config_doc: Any, profile: str) -> list[Any]:
+    """The panel rules that apply to *profile*, as one section scoped to it.
+
+    A section for every profile -- the one Preferences writes, its rules naming
+    their profile one by one -- gives only the rules that apply to this profile,
+    so the package changes nothing for the recipient's other profiles. Several
+    sections become one, in the order the configuration reads them: an install
+    keeps a single section per profile, and would drop the others (Codex, #643).
+    """
+    sections = [section for section in config_doc.getElementsByTagName("hud_panel_rules") if _applies(section, profile)]
+    if len(sections) > 1:
+        # A disabled section is not read; the shipped library is written out too,
+        # so its rules keep their place among the others.
+        sections = [section for section in sections if _enabled(section)]
+    if not sections:
+        return []
+    merged = document.importNode(sections[0], False)
+    for section in sections:
         copy = document.importNode(section, True)
-        _materialise_source(document, copy)
-        if scope.casefold() != wanted:
-            for rule in list(copy.getElementsByTagName("hud_panel_rule")):
-                if not profile_matches(rule.getAttribute("profile").strip(), profile):
-                    rule.parentNode.removeChild(rule)
-            if not copy.getElementsByTagName("hud_panel_rule") and not copy.getAttribute("source").strip():
-                continue
-            copy.setAttribute("profile", profile)
-        sections.append(copy)
-    return sections
+        _materialise_source(document, copy, shipped=len(sections) > 1)
+        if not merged.getAttribute("fallback").strip() and copy.getAttribute("fallback").strip():
+            merged.setAttribute("fallback", copy.getAttribute("fallback").strip())
+        if copy.getAttribute("source").strip():
+            merged.setAttribute("source", copy.getAttribute("source").strip())
+        elif merged.hasAttribute("source"):
+            merged.removeAttribute("source")
+        for rule in _rules_for(copy, profile):
+            merged.appendChild(document.createTextNode("\n  "))
+            merged.appendChild(rule)
+    if not merged.getElementsByTagName("hud_panel_rule") and not merged.getAttribute("source").strip():
+        return []
+    if merged.getAttribute("profile").strip().casefold() != profile.strip().casefold():
+        merged.setAttribute("profile", profile)
+    merged.appendChild(document.createTextNode("\n"))
+    return [merged]
 
 
-def _materialise_source(document: Any, section: Any) -> None:
+def _enabled(section: Any) -> bool:
+    return section.getAttribute("enabled").strip().lower() not in ("false", "no", "0", "off")
+
+
+def _materialise_source(document: Any, section: Any, *, shipped: bool = False) -> None:
     """Write the rules of a section's file or folder ``source`` into it, path removed.
 
     The path is the sharer's own: a recipient without it could not load the
     configuration at all (Codex, #643). The shipped libraries (``builtin``,
-    ``builtin_plo``) are in every fpdb and stay named. A source that cannot be
-    read refuses the share rather than writing a package without its rules.
+    ``builtin_plo``) are in every fpdb and stay named, unless *shipped* asks for
+    their rules too. A source that cannot be read refuses the share rather than
+    writing a package without its rules.
     """
     from fpdb_3_legacy import hud_situation  # noqa: PLC0415
 
     source = section.getAttribute("source").strip()
-    if not source or source.casefold() in (hud_situation.BUILTIN_SOURCE, hud_situation.PLO_BUILTIN_SOURCE):
+    library = source.casefold() in (hud_situation.BUILTIN_SOURCE, hud_situation.PLO_BUILTIN_SOURCE)
+    if not source or (library and not shipped):
         return
     try:
         rules, fallback = hud_situation.load_source(source)

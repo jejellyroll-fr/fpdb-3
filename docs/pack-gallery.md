@@ -75,10 +75,12 @@ yourname.topic/
 
 A HUD package holds the profile, the popups it opens (and those they open),
 and the panel rules that apply to it. A stock popup every configuration has
-(`default`, ...) is left out while it is unchanged; one you customised goes in
-under a name of the profile's own, so it never meets the recipient's stock
-one. Panel rules written for every profile go in with only the rules for this
-profile, scoped to it. Your game bindings and table layouts stay yours.
+(`default`, ...) is left out while it, and everything it opens, is unchanged;
+one you customised, or one leading to it, goes in under a name of the
+profile's own, so it never meets the recipient's stock one. The panel rules
+go in as one section scoped to the profile, in the order fpdb reads them:
+from a section for every profile, only the rules for this one; from a file of
+yours, the rules themselves. Your game bindings and table layouts stay yours.
 
 The entry and the package go through the checks an install runs (below)
 before anything is written, so what fpdb writes is something the gallery
