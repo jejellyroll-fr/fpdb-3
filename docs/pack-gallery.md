@@ -79,7 +79,8 @@ Before a package installs:
        are allowed;
      - every stat it names exists, declarative stats from `stats.d` and
        table stats included, with or without a decimal-places suffix
-       (`vpip_0`);
+       (`vpip_0`), and every analytics definition a cell is bound to
+       (`data_source="analytics"`) is one fpdb ships;
      - every popup it opens is in the package, the shipped library, or the
        stock configuration (`default`, ...).
 
@@ -100,7 +101,7 @@ the packages already cached, after checking them again.
 ## Updates
 
 A pack is an update when the index has a newer `version` than the one
-installed. An installed version that cannot be read counts as older, so a pack
+installed; `1.0` and `1.0.0` are the same version. An installed version that cannot be read counts as older, so a pack
 installed by hand can still be updated from the gallery.
 
 ## For the packs repository

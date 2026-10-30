@@ -134,6 +134,13 @@ def test_a_newer_version_in_the_index_is_an_update(gallery, tmp_path) -> None:
     ]
 
 
+def test_the_same_version_written_shorter_is_not_an_update(gallery, tmp_path) -> None:
+    index = load_index(str(gallery), tmp_path / "cache")
+
+    # Codex (#640): 1.0 and 1.0.0 are one release.
+    assert updates(index, {"example.steals": "1.0", "example.blinds": "1"}) == []
+
+
 # -- what is refused, and why ---------------------------------------------------------------
 
 
@@ -414,6 +421,11 @@ def test_every_shipped_hud_package_passes_the_install_check(path) -> None:
             '<stat _rowcol="(1,1)" _stat_name="vpip" popup="nowhere"/></ss></fpdb_hud_package>',
             "popup(s) neither in the package nor in the shipped library: nowhere",
         ),
+        (
+            '<fpdb_hud_package><ss name="p" rows="1" cols="1"><stat _rowcol="(1,1)" _stat_name="x" '
+            'data_source="analytics" data_definition="no_such_definition"/></ss></fpdb_hud_package>',
+            "unknown analytics definition(s): no_such_definition",
+        ),
     ],
 )
 def test_a_broken_hud_package_says_what_is_wrong(xml, problem) -> None:
@@ -441,6 +453,10 @@ def test_a_broken_hud_package_says_what_is_wrong(xml, problem) -> None:
         # Codex (#640): a declarative stat from stats.d, which Stats.do_stat dispatches through the registry.
         '<fpdb_hud_package><ss name="p" rows="1" cols="1"><stat _rowcol="(1,1)" _stat_name="chipev_3h_btn"/></ss>'
         "</fpdb_hud_package>",
+        # Codex (#640): a cell the HUD editor bound to an analytics definition, by its definition or by its name.
+        '<fpdb_hud_package><ss name="p" rows="1" cols="2"><stat _rowcol="(1,1)" _stat_name="f3b" data_source="analytics"'
+        ' data_definition="fold_to_3bet_preflop"/><stat _rowcol="(1,2)" _stat_name="fold_to_cbet_flop"'
+        ' data_source="analytics"/></ss></fpdb_hud_package>',
     ],
 )
 def test_a_well_formed_hud_package_passes(xml) -> None:
