@@ -8,6 +8,10 @@ import re
 from pathlib import Path
 
 TEMPLATES = ("HUD_config.xml", "HUD_config.xml.example", "fpdb_3_legacy/HUD_config.xml.example")
+# A site's folders are a starting point for one machine. An upgrade never carries them to
+# an existing configuration -- it only adds the sites one lacks -- so changing them in a
+# template needs no new version.
+_SITE_PATHS = re.compile(r"\b(site_path|HH_path|TS_path)=\"[^\"]*\"")
 
 
 def version(xml: str) -> int:
@@ -15,6 +19,11 @@ def version(xml: str) -> int:
     if match is None:
         raise ValueError("Configuration template is missing its general version")
     return int(match.group(1))
+
+
+def _schema(xml: str) -> str:
+    """The template as an upgrade sees it: everything but the sites' folders."""
+    return _SITE_PATHS.sub(r'\1=""', xml)
 
 
 def check(base_dir: Path, root: Path) -> None:
@@ -30,7 +39,7 @@ def check(base_dir: Path, root: Path) -> None:
         if version(xml) != current:
             raise ValueError(f"{name}: version must equal CONFIG_VERSION ({current})")
         old = (base_dir / name).read_text(encoding="utf-8")
-        if xml != old and version(xml) <= version(old):
+        if _schema(xml) != _schema(old) and version(xml) <= version(old):
             raise ValueError(f"{name} changed: increment CONFIG_VERSION and both template versions")
 
 
