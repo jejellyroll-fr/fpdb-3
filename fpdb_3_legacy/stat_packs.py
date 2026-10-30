@@ -611,7 +611,9 @@ def _unique_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
 
 
 def _version_tuple(version: str) -> tuple[int, ...]:
-    """The first three components of a version, as numbers.
+    """The first three components of a version, as numbers, missing ones as 0.
+
+    "1.0" and "1.0.0" are the same version (Codex, #640).
 
     A component longer than ``MAX_VERSION_DIGITS`` digits raises ValueError:
     past Python's integer-string limit ``int()`` cannot read it at all, and
@@ -621,7 +623,7 @@ def _version_tuple(version: str) -> tuple[int, ...]:
     numbers = re.findall(r"\d+", version)
     if any(len(number) > MAX_VERSION_DIGITS for number in numbers):
         raise ValueError(f"has a component longer than {MAX_VERSION_DIGITS} digits")
-    return tuple(int(number) for number in numbers[:3])
+    return tuple(int(number) for number in (numbers + ["0", "0", "0"])[:3])
 
 
 def _fpdb_version() -> str:
