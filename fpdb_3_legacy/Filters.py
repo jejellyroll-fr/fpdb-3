@@ -1897,7 +1897,7 @@ class Filters(QWidget):
         # Prefer the hero's own site checkbox when it exists. Prefix matching is
         # only a fallback for when the hero plays a skin that has no checkbox of
         # its own (e.g. data under "PokerStars.FR" but only "PokerStars" enabled).
-        # Without the exact-match shortcut, selecting "jeje_sat on PokerStars.FR"
+        # Without the exact-match shortcut, selecting "koko_sat on PokerStars.FR"
         # matched the "PokerStars" checkbox first (".FR" startswith "PokerStars"),
         # checking the wrong site so getSites() no longer matched the hero's key.
         if site in self.cbSites:

@@ -1618,17 +1618,18 @@ def test_complete_swc_event_fixture_imports_into_sqlite_memory_db():
     assert cursor.fetchone()[0] == sum(len(actions) for actions in hand.actions.values())
 
 
-def test_real_swc_capture_importable_hands_build_hand_py_when_capture_is_present():
-    capture_path = Path("/Users/jde/Documents/SwC Poker/Capture/raw_messages.jsonl")
-    if not capture_path.exists():
-        pytest.skip("local SwC capture corpus is not present")
+def test_real_swc_capture_importable_hands_build_hand_py():
+    # A real capture's GameState frames for 24 hands, eight of each game, players and ids
+    # anonymised; the rest of the capture (authentication, account, chat) is left out.
+    capture_path = Path(__file__).parent / "fixtures" / "http_capture" / "swc" / "raw_messages_sample.jsonl"
 
     with TemporaryDirectory() as output_dir:
         written = replay_swc_raw_archive(capture_path, Path(output_dir), include_active=False)
         hands = [json.loads(path.read_text(encoding="utf-8")) for path in written]
 
     importable = [hand for hand in hands if hand.get("metadata", {}).get("importability", {}).get("importable")]
-    assert len(importable) >= 80
+    games = sorted(hand.get("game", {}).get("category") for hand in importable)
+    assert games == ["5_omahahi"] * 8 + ["6_omahahi"] * 8 + ["holdem"] * 8
     failures = []
     for hand_data in importable:
         try:

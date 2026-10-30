@@ -21,12 +21,12 @@ import pytest
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
-HAND_FILE = Path(
-    "/Users/jde/Library/Application Support/PokerStarsFR/HandHistory/jeje_sat/"
-    "HH20260717 T4016724563 Hold'em No Limit Varié.txt",
+# Synthetic, shaped as the tournament's PokerStars.FR history: one hand of each shape.
+HAND_FILE = (
+    Path(__file__).resolve().parents[1]
+    / "regression-test-files/tour/Stars/Flop/NLHE-6max-MTT-EUR-4.50-0.50-202607.uncalled.shove.and.walk.txt"
 )
-
-pytestmark = pytest.mark.skipif(not HAND_FILE.exists(), reason="local PokerStars history not present")
+HERO = "Hero"
 
 
 @pytest.fixture(scope="module")
@@ -43,23 +43,24 @@ def balance(hand) -> Decimal:
 
 
 def test_a_shove_everyone_folds_to_costs_only_the_blinds(hands) -> None:
-    # jeje_sat raises 1790 to 1850 all-in, all fold, 1790 comes back, 150 won.
+    # The hero raises 1790 to 1850 all-in, all fold, 1790 comes back, 150 won.
     hand = hands["261462025102"]
 
-    assert hand.pot.committed["jeje_sat"] == Decimal("60")  # was 1850
-    assert hand.pot.returned["jeje_sat"] == Decimal("1790")  # was absent
+    assert hand.pot.committed[HERO] == Decimal("60")  # was 1850
+    assert hand.pot.returned[HERO] == Decimal("1790")  # was absent
     assert balance(hand) == 0
 
 
 def test_a_real_walk_still_balances(hands) -> None:
-    # MONSAWI35 posts the big blind 50, everyone folds, 25 back, 50 collected.
+    # Villain1 posts the big blind 50, everyone folds, 25 back, 50 collected.
     hand = hands["261462002611"]
 
-    assert hand.pot.returned["MONSAWI35"] == Decimal("25")
+    assert hand.pot.returned["Villain1"] == Decimal("25")
     assert balance(hand) == 0
 
 
 def test_every_hand_of_the_tournament_balances(hands) -> None:
     unbalanced = {hid: balance(h) for hid, h in hands.items() if balance(h)}
 
-    assert unbalanced == {}  # 5 of the 22 hands were off before the fix
+    assert len(hands) == 2
+    assert unbalanced == {}  # 5 of the real tournament's 22 hands were off before the fix

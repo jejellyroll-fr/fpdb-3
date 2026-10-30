@@ -17,7 +17,7 @@ _ARGV_A = (
     "roomName=PLO 0.01-0.02 EV-INRIT-ANTE (A) 922564 isSuspectedFraud=false "
     "tableSize=6 lobbyId=1 pipeName=PLO 0.01-0.02 EV-INRIT-ANTE (A) 922564 "
     "mode=prod buildName=CoinPoker -screen-fullscreen 0 -screen-width 1640 "
-    "-screen-height 1200 -logFile /Users/jde/Library/Logs/CoinPoker/table_922564.log"
+    "-screen-height 1200 -logFile /Users/alice/Library/Logs/CoinPoker/table_922564.log"
 )
 
 _ARGV_B = (
@@ -25,7 +25,7 @@ _ARGV_B = (
     "serverIp=poker-nlb.coinpoker.ai:7001 "
     "roomName=PLO 0.01-0.02 EV-INRIT-BPR-RC-TB (B) 921973 tableSize=6 "
     "pipeName=PLO 0.01-0.02 EV-INRIT-BPR-RC-TB (B) 921973 "
-    "-logFile /Users/jde/Library/Logs/CoinPoker/table_921973.log"
+    "-logFile /Users/alice/Library/Logs/CoinPoker/table_921973.log"
 )
 
 

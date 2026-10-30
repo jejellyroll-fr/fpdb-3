@@ -38,7 +38,7 @@ def _add_player_ops(operations: list[dict]) -> list[dict]:
 class TestSeatNumbering:
     def test_the_first_player_is_not_seated_at_zero(self) -> None:
         """Seat 0 is what the HUD read as an empty chair."""
-        operations = build_hand_operations(_hand_data("v8guy", "RezaG", "edinapoker"))
+        operations = build_hand_operations(_hand_data("v8guy", "RezaG", "rivercat42"))
 
         seats = [op["args"][0] for op in _add_player_ops(operations)]
 
@@ -46,11 +46,11 @@ class TestSeatNumbering:
         assert seats == [1, 2, 3]
 
     def test_every_player_keeps_their_own_seat(self) -> None:
-        operations = build_hand_operations(_hand_data("v8guy", "RezaG", "edinapoker"))
+        operations = build_hand_operations(_hand_data("v8guy", "RezaG", "rivercat42"))
 
         seated = [(op["args"][0], op["args"][1]) for op in _add_player_ops(operations)]
 
-        assert seated == [(1, "v8guy"), (2, "RezaG"), (3, "edinapoker")]
+        assert seated == [(1, "v8guy"), (2, "RezaG"), (3, "rivercat42")]
 
     def test_a_missing_seat_index_is_passed_through_untouched(self) -> None:
         data = _hand_data("v8guy")

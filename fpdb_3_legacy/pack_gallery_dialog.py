@@ -106,16 +106,7 @@ class PackGalleryDialog(QDialog):
         preview.addWidget(self.details, 1)
         preview.addWidget(self.screenshot, 1)
 
-        self.install_button = QPushButton(_("Install"))
-        self.uninstall_button = QPushButton(_("Uninstall"))
-        self.refresh_button = QPushButton(_("Refresh"))
-        self.install_button.clicked.connect(self.install_selected)
-        self.uninstall_button.clicked.connect(self.uninstall_selected)
-        self.refresh_button.clicked.connect(self.load)
-        actions = QHBoxLayout()
-        for button in (self.install_button, self.uninstall_button, self.refresh_button):
-            actions.addWidget(button)
-        actions.addStretch(1)
+        actions = self._actions()
 
         self.notice = QLabel("")
         self.notice.setWordWrap(True)
@@ -130,6 +121,23 @@ class PackGalleryDialog(QDialog):
         layout.addWidget(self.notice)
         layout.addWidget(close)
         self.load()
+
+    def _actions(self) -> QHBoxLayout:
+        self.install_button = QPushButton(_("Install"))
+        self.uninstall_button = QPushButton(_("Uninstall"))
+        self.refresh_button = QPushButton(_("Refresh"))
+        self.share_button = QPushButton(_("Share yours…"))
+        self.share_button.setToolTip(_("Write a HUD profile or a stat pack ready to submit to the gallery"))
+        self.install_button.clicked.connect(self.install_selected)
+        self.uninstall_button.clicked.connect(self.uninstall_selected)
+        self.refresh_button.clicked.connect(self.load)
+        self.share_button.clicked.connect(self.share)
+        actions = QHBoxLayout()
+        for button in (self.install_button, self.uninstall_button, self.refresh_button):
+            actions.addWidget(button)
+        actions.addStretch(1)
+        actions.addWidget(self.share_button)
+        return actions
 
     # -- state ------------------------------------------------------------------
 
@@ -307,6 +315,12 @@ class PackGalleryDialog(QDialog):
             return False
         self._changed(_("Uninstalled %s.") % entry.name, entry.id)
         return True
+
+    def share(self) -> None:
+        """Share a HUD or pack of yours, for the gallery (#449)."""
+        from fpdb_3_legacy.pack_share_dialog import SharePackDialog  # noqa: PLC0415
+
+        SharePackDialog(self.config, self, packs_dir=self.packs_dir).exec()
 
     def _refuse(self, heading: str, messages: list[str]) -> None:
         log.info("Pack gallery refused: %s", messages)

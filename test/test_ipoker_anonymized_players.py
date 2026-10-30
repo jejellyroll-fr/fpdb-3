@@ -2,7 +2,7 @@
 
 Confirmed on real bwin files (session 5870214435, 2026-07-22): hands the hero
 did not play list only "Player 3/5/6/8/10" (== seat numbers), while the hands
-the hero played carry real names (jejesat76 @ seat 1, CR7012 @ 3, Moula42 @ 5,
+the hero played carry real names (kokosat76 @ seat 1, CR7012 @ 3, Moula42 @ 5,
 TheDarkRaise @ 8, confusius5 @ 10). No pocket cards are revealed in either.
 
 So there is never an anonymous hero to recover: the anonymous hands are exactly
@@ -22,7 +22,7 @@ from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial
 from fpdb_3_legacy.iPoker.base import iPoker
 
-NICK = "jejesat76"
+NICK = "kokosat76"
 SESSION_CODE = "5870214435"
 
 # Anonymous hand: hero not dealt -> every seat is "Player <seat>".
@@ -51,7 +51,7 @@ NAMED_GAME = """ <game gamecode="9026877611">
   <general>
    <startdate>2026-07-22 23:30:58</startdate>
    <players>
-    <player seat="1" name="jejesat76" chips="1,90€" dealer="0" win="0€" bet="0,02€"/>
+    <player seat="1" name="kokosat76" chips="1,90€" dealer="0" win="0€" bet="0,02€"/>
     <player seat="3" name="CR7012" chips="2,23€" dealer="0" win="0€" bet="0€"/>
     <player seat="5" name="Moula42" chips="2,00€" dealer="1" win="0€" bet="0€"/>
     <player seat="8" name="TheDarkRaise" chips="1,42€" dealer="0" win="0€" bet="0,04€"/>
@@ -59,7 +59,7 @@ NAMED_GAME = """ <game gamecode="9026877611">
    </players>
   </general>
   <round no="0">
-   <action no="1" player="jejesat76" sum="0,01€" type="1"/>
+   <action no="1" player="kokosat76" sum="0,01€" type="1"/>
    <action no="2" player="CR7012" sum="0,02€" type="2"/>
   </round>
  </game>"""
@@ -102,7 +102,7 @@ def _parser(config: Config, whole_file: str, hero: str = NICK) -> iPoker:
 def test_session_seat_names_learned_from_named_hands(config: Config) -> None:
     parser = _parser(config, SESSION_FILE)
     assert parser._session_seat_names() == {
-        1: "jejesat76",
+        1: "kokosat76",
         3: "CR7012",
         5: "Moula42",
         8: "TheDarkRaise",

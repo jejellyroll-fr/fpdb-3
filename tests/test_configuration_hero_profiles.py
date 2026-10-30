@@ -61,17 +61,17 @@ def saved_profiles(config: Any) -> list[str]:
 
 
 def test_a_profile_is_remembered_by_name(config) -> None:
-    config.save_hero_profile("Me", [("PokerStars", "jeje"), ("Winamax", "jeje76")])
+    config.save_hero_profile("Me", [("PokerStars", "koko"), ("Winamax", "koko76")])
 
     profile = config.hero_profiles["Me"]
-    assert profile.links == [("PokerStars", "jeje"), ("Winamax", "jeje76")]
+    assert profile.links == [("PokerStars", "koko"), ("Winamax", "koko76")]
     assert profile.sites() == ["PokerStars", "Winamax"]
 
 
 def test_the_profile_reaches_the_document_too(config) -> None:
     # The dictionary is what fpdb reads now; the document is what it reads
     # next time.
-    config.save_hero_profile("Me", [("PokerStars", "jeje")])
+    config.save_hero_profile("Me", [("PokerStars", "koko")])
 
     assert saved_profiles(config) == ["Me"]
 
@@ -79,19 +79,19 @@ def test_the_profile_reaches_the_document_too(config) -> None:
 def test_a_configuration_with_no_profiles_section_gains_one(config) -> None:
     assert config.doc.getElementsByTagName("hero_profiles") == []
 
-    config.save_hero_profile("Me", [("PokerStars", "jeje")])
+    config.save_hero_profile("Me", [("PokerStars", "koko")])
 
     assert len(config.doc.getElementsByTagName("hero_profiles")) == 1
 
 
 def test_a_profile_is_not_the_default_unless_asked(config) -> None:
-    config.save_hero_profile("Me", [("PokerStars", "jeje")])
+    config.save_hero_profile("Me", [("PokerStars", "koko")])
 
     assert config.hero_profiles["Me"].default is False
 
 
 def test_a_profile_can_be_made_the_default(config) -> None:
-    config.save_hero_profile("Me", [("PokerStars", "jeje")], default=True)
+    config.save_hero_profile("Me", [("PokerStars", "koko")], default=True)
 
     assert config.hero_profiles["Me"].default is True
 
@@ -107,9 +107,9 @@ def test_the_order_the_rooms_were_given_in_is_kept(config) -> None:
 
 
 def test_the_same_pair_given_twice_is_stored_once(config) -> None:
-    config.save_hero_profile("Me", [("PokerStars", "jeje"), ("PokerStars", "jeje")])
+    config.save_hero_profile("Me", [("PokerStars", "koko"), ("PokerStars", "koko")])
 
-    assert config.hero_profiles["Me"].links == [("PokerStars", "jeje")]
+    assert config.hero_profiles["Me"].links == [("PokerStars", "koko")]
 
 
 def test_two_names_on_one_room_are_both_kept(config) -> None:
@@ -122,7 +122,7 @@ def test_two_names_on_one_room_are_both_kept(config) -> None:
 
 @pytest.mark.parametrize(
     "incomplete",
-    [("", "jeje"), ("PokerStars", ""), ("", "")],
+    [("", "koko"), ("PokerStars", ""), ("", "")],
     ids=["no site", "no alias", "neither"],
 )
 def test_a_link_missing_half_of_itself_is_dropped(config, incomplete) -> None:
@@ -158,7 +158,7 @@ def test_saving_under_the_same_name_replaces_rather_than_adds(config) -> None:
 
 
 def test_replacing_one_profile_leaves_the_others_alone(config) -> None:
-    config.save_hero_profile("Me", [("PokerStars", "jeje")])
+    config.save_hero_profile("Me", [("PokerStars", "koko")])
     config.save_hero_profile("Someone else", [("Winamax", "other")])
 
     config.save_hero_profile("Me", [("PokerStars", "renamed")])
@@ -185,13 +185,13 @@ def test_a_profile_saved_over_an_existing_file_replaces_that_one(build) -> None:
 
 
 def test_a_saved_profile_is_read_back_from_the_file(config) -> None:
-    config.save_hero_profile("Me", [("PokerStars", "jeje"), ("Winamax", "jeje76")], default=True)
+    config.save_hero_profile("Me", [("PokerStars", "koko"), ("Winamax", "koko76")], default=True)
     config.save()
 
     assert config.reload() is True
 
     profile = config.hero_profiles["Me"]
-    assert profile.links == [("PokerStars", "jeje"), ("Winamax", "jeje76")]
+    assert profile.links == [("PokerStars", "koko"), ("Winamax", "koko76")]
     assert profile.default is True
 
 
@@ -201,7 +201,7 @@ def test_a_saved_profile_is_read_back_from_the_file(config) -> None:
 
 
 def test_a_profile_can_be_removed(config) -> None:
-    config.save_hero_profile("Me", [("PokerStars", "jeje")])
+    config.save_hero_profile("Me", [("PokerStars", "koko")])
 
     config.delete_hero_profile("Me")
 
@@ -210,7 +210,7 @@ def test_a_profile_can_be_removed(config) -> None:
 
 
 def test_removing_one_profile_leaves_the_others(config) -> None:
-    config.save_hero_profile("Me", [("PokerStars", "jeje")])
+    config.save_hero_profile("Me", [("PokerStars", "koko")])
     config.save_hero_profile("Someone else", [("Winamax", "other")])
 
     config.delete_hero_profile("Me")
@@ -219,7 +219,7 @@ def test_removing_one_profile_leaves_the_others(config) -> None:
 
 
 def test_removing_a_profile_that_is_not_there_is_quiet(config) -> None:
-    config.save_hero_profile("Me", [("PokerStars", "jeje")])
+    config.save_hero_profile("Me", [("PokerStars", "koko")])
 
     config.delete_hero_profile("no such profile")
 
@@ -237,7 +237,7 @@ def test_removing_from_a_configuration_that_has_no_profiles_is_quiet(config) -> 
 
 
 def test_a_removal_survives_being_saved(config) -> None:
-    config.save_hero_profile("Me", [("PokerStars", "jeje")])
+    config.save_hero_profile("Me", [("PokerStars", "koko")])
     config.save_hero_profile("Someone else", [("Winamax", "other")])
     config.save()
 

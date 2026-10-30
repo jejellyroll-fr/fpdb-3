@@ -274,6 +274,8 @@ jobs:
           fpdb_3_legacy/hand_review_spots.py
           fpdb_3_legacy/pack_gallery.py
           fpdb_3_legacy/pack_gallery_dialog.py
+          fpdb_3_legacy/pack_share.py
+          fpdb_3_legacy/pack_share_dialog.py
           fpdb_3_legacy/hud_package.py
           fpdb_3_legacy/tourney_payouts_dialog.py
           fpdb_3_legacy/tourney_icm_line.py

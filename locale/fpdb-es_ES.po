@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 00:23+0100\n"
+"POT-Creation-Date: 2026-10-30 15:51+0100\n"
 "PO-Revision-Date: 2011-11-13 01:00+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Spanish (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -1372,7 +1372,7 @@ msgstr "Migrar a..."
 msgid "Migrating database"
 msgstr "Migrando base de datos"
 
-#: fpdb_3_legacy/GuiDatabase.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/pack_share_dialog.py
 msgid "Name"
 msgstr "Nombre"
 
@@ -2614,7 +2614,7 @@ msgstr ""
 "Realizado {realized} en {hands} manos; ajustado por EV {ev} ({luck} de "
 "suerte)."
 
-#: fpdb_3_legacy/GuiResearchViews.py
+#: fpdb_3_legacy/GuiResearchViews.py fpdb_3_legacy/pack_share_dialog.py
 #, fuzzy
 msgid "Share"
 msgstr "Proporción"
@@ -4056,6 +4056,10 @@ msgstr "Session Guard"
 msgid "Session Stats"
 msgstr "Estadísticas de la sesión"
 
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_share_dialog.py
+msgid "Share a HUD or pack"
+msgstr ""
+
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
 msgid "Site Settings"
@@ -4110,7 +4114,7 @@ msgid "Tourney Stats"
 msgstr " Estadisticas del Torneo"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
-#: fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Version"
 msgstr "Versión"
@@ -4130,6 +4134,10 @@ msgstr "Ver estadísticas de la base de datos"
 msgid "What every filter is for in a four-card game, and the two that are not"
 msgstr ""
 "Para qué sirve cada filtro en un juego de cuatro cartas, y los dos que no"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "+"
@@ -4558,6 +4566,7 @@ msgid "HUD imported — refresh required"
 msgstr "HUD importado — hace falta actualizar"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/pack_share_dialog.py
 #, fuzzy
 msgid "HUD profile"
 msgstr "Perfil de HUD"
@@ -5107,7 +5116,12 @@ msgstr "Paquete"
 msgid "Restart fpdb and the HUD to use the change everywhere."
 msgstr "Reinicie fpdb y el HUD para usar el cambio en todas partes."
 
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Share yours…"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/pack_share_dialog.py
+#: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Stat pack"
 msgstr "Paquete de estadísticas"
@@ -5186,6 +5200,63 @@ msgstr "Guardado"
 msgid ""
 "Updating replaces the profiles and popups this pack installed, with any "
 "change you made to them. Continue?"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Write a HUD profile or a stat pack ready to submit to the gallery"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "An SPDX licence identifier; the gallery requires one."
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Author"
+msgstr "Autor"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Description"
+msgstr "Descripción"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "For example CC-BY-4.0 or AGPL-3.0-or-later"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, fuzzy
+msgid "Id"
+msgstr "Inactivo"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Licence"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, fuzzy
+msgid "This cannot be shared:"
+msgstr "Este paquete no se puede instalar:"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Which"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Write package…"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Write the package in"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, python-format
+msgid ""
+"Written to %(folder)s.\n"
+"\n"
+"To submit it, copy the folder's content into your copy of the packs "
+"repository (%(repository)s), add the entry in %(entry)s to index.json, and "
+"open a pull request."
 msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
@@ -6876,11 +6947,6 @@ msgstr "Todos los archivos"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-msgid "Author"
-msgstr "Autor"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
 msgid "Built-in"
 msgstr "Integrado"
 
@@ -7788,9 +7854,6 @@ msgstr ""
 
 #~ msgid "Debug Statistics Windows"
 #~ msgstr "Limpiar Ventana de Estadísticas"
-
-#~ msgid "Description"
-#~ msgstr "Descripción"
 
 #~ msgid "Detect"
 #~ msgstr "Detectar"

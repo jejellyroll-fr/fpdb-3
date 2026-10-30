@@ -20,7 +20,7 @@ _WIN_ARGV = (
     r'C:\Program Files\CoinPoker\resources\unity-resources-win-x64\CoinPoker Game\CoinPoker.exe '
     "serverIp=poker-nlb.coinpoker.ai:7003 roomName=NL 0.01-0.02 EV-INRIT-(A) 930357 "
     "isSuspectedFraud=false tableSize=6 lobbyId=1 pipeName=NL 0.01-0.02 EV-INRIT-(A) 930357 "
-    r"-logFile C:\Users\jd\AppData\Roaming\CoinPoker\logs\table_930357.log"
+    r"-logFile C:\Users\al\AppData\Roaming\CoinPoker\logs\table_930357.log"
 )
 
 

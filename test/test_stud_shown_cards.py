@@ -16,13 +16,13 @@ import pytest
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.WinningToFpdb import Winning
 
-HAND_FILE = Path(
-    "/Users/jde/Downloads/AmericasCardroom/handHistory/edinapoker/"
-    "HH20260717 CASHID-G35414311T295 TN-Braselton GAMETYPE-7 Stud H{BACKSLASH}L "
-    "LIMIT-fixed CUR-REAL OND-F BUYIN-0 MIN-10 MAX-20.txt",
+# The hand, anonymised, from an Americas Cardroom session; the hero is rivercat42.
+HAND_FILE = (
+    Path(__file__).resolve().parents[1]
+    / "regression-test-files/cash/Winning/Stud"
+    / "7StudHL-8max-USD-0.10-0.20-202607.six.card.showdown.CASHID-TN-Braselton GAMETYPE.txt"
 )
-
-pytestmark = pytest.mark.skipif(not HAND_FILE.exists(), reason="local ACR hand history not present")
+HERO = "rivercat42"
 
 
 @pytest.fixture(scope="module")
@@ -32,26 +32,26 @@ def stud_hand():
 
 
 def test_a_six_card_showdown_is_recorded(stud_hand) -> None:
-    # "Seat 6: Montlebon showed [7h 6s 8h 4c 5c 5s]" -- six cards, not seven.
-    assert "Montlebon" in stud_hand.shown
+    # "Seat 6: Villain3 showed [7h 6s 8h 4c 5c 5s]" -- six cards, not seven.
+    assert "Villain3" in stud_hand.shown
 
 
 def test_down_cards_reach_third_street(stud_hand) -> None:
-    open_cards, closed_cards = stud_hand.holecards["THIRD"]["Montlebon"]
+    open_cards, closed_cards = stud_hand.holecards["THIRD"]["Villain3"]
 
     assert closed_cards == ["7h", "6s"]  # was [] -- never recorded
     assert open_cards == ["8h"]
 
 
 def test_the_hand_is_seven_distinct_cards(stud_hand) -> None:
-    cards = stud_hand.join_holecards("Montlebon", asList=True)
+    cards = stud_hand.join_holecards("Villain3", asList=True)
 
     assert cards == ["7h", "6s", "8h", "4c", "5c", "5s", "6d"]
     assert len(cards) == len(set(cards))  # was 8 entries, each duplicated
 
 
 def test_the_hero_is_unaffected(stud_hand) -> None:
-    cards = stud_hand.join_holecards("edinapoker", asList=True)
+    cards = stud_hand.join_holecards(HERO, asList=True)
 
     assert cards == ["Kd", "6h", "Ah", "Kc", "2s", "3h", "2h"]
 
@@ -71,6 +71,6 @@ def test_a_boardless_game_still_builds_its_pots(stud_hand) -> None:
     players = stud_hand.stats.getHandsPlayers()
 
     assert stud_hand.stats.getBoardsList(stud_hand) == []  # no community cards
-    assert players["Montlebon"]["rake"] == 6  # the rake survives, in cents
+    assert players["Villain3"]["rake"] == 6  # the rake survives, in cents
     total = sum(v["totalProfit"] for v in players.values()) + sum(v["rake"] for v in players.values())
     assert total == 0, "money in must equal money out"

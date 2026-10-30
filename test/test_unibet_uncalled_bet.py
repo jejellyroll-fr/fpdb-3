@@ -26,15 +26,15 @@ def test_reads_the_returned_bet_and_its_owner():
 
 
 def test_a_bracketed_account_name_is_kept_whole():
-    line = "Uncalled bet returned to jejesat[Unibet_28204e083c0fb55a]: €0.29"
+    line = "Uncalled bet returned to kokosat[Unibet_28204e083c0fb55a]: €0.29"
 
-    assert _uncalled(line) == ("jejesat[Unibet_28204e083c0fb55a]", "0.29")
+    assert _uncalled(line) == ("kokosat[Unibet_28204e083c0fb55a]", "0.29")
 
 
 def test_tournament_chips_have_no_currency_symbol():
-    line = "Uncalled bet returned to jejesat[Unibet_28204e083c0fb55a]: 690"
+    line = "Uncalled bet returned to kokosat[Unibet_28204e083c0fb55a]: 690"
 
-    assert _uncalled(line) == ("jejesat[Unibet_28204e083c0fb55a]", "690")
+    assert _uncalled(line) == ("kokosat[Unibet_28204e083c0fb55a]", "690")
 
 
 def test_the_pokerstars_shape_is_not_what_unibet_writes():

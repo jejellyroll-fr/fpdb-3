@@ -68,10 +68,10 @@ def test_the_hero_s_own_folder_is_preferred(home) -> None:
     # The client files each account under its own name, and the hero's hands
     # are the ones fpdb wants rather than every account on the machine.
     hands = home / "ACR" / "handHistory"
-    (hands / "jeje").mkdir(parents=True)
+    (hands / "koko").mkdir(parents=True)
     client_says(home, "hh", hands)
 
-    assert read("hh", "jeje") == str(hands / "jeje")
+    assert read("hh", "koko") == str(hands / "koko")
 
 
 def test_the_recorded_folder_stands_in_when_the_hero_has_none(home) -> None:
@@ -160,7 +160,7 @@ def config(home) -> Any:
         f'<general version="{CONFIG_VERSION}"/>\n'
         f"<supported_databases>{DATABASE}</supported_databases>\n"
         "<supported_sites>"
-        f'<site site_name="{ACR_SITE}" enabled="True" screen_name="jeje"'
+        f'<site site_name="{ACR_SITE}" enabled="True" screen_name="koko"'
         ' HH_path="" TS_path="" converter="WinningToFpdb"/>'
         "</supported_sites>\n</FreePokerToolsConfig>\n",
         encoding="utf-8",
@@ -175,10 +175,10 @@ def on_macos(monkeypatch) -> None:
 def test_the_hand_folder_comes_from_the_client_on_macos(config, home, monkeypatch) -> None:
     on_macos(monkeypatch)
     hands = home / "ACR" / "handHistory"
-    (hands / "jeje").mkdir(parents=True)
+    (hands / "koko").mkdir(parents=True)
     client_says(home, "hh", hands)
 
-    assert config.detect_hh_path(ACR_SITE) == str(hands / "jeje")
+    assert config.detect_hh_path(ACR_SITE) == str(hands / "koko")
 
 
 def test_the_summary_folder_comes_from_the_client_on_macos(config, home, monkeypatch) -> None:
@@ -244,10 +244,10 @@ def test_the_usual_place_is_tried_when_the_client_recorded_nothing(config, home,
 def test_the_hero_s_folder_in_the_usual_place_is_preferred(config, home, monkeypatch) -> None:
     on_macos(monkeypatch)
     usual = home / "Downloads" / "AmericasCardroom" / "handHistory"
-    (usual / "jeje").mkdir(parents=True)
+    (usual / "koko").mkdir(parents=True)
     monkeypatch.setitem(config_module.HH_PATH_CANDIDATES, ACR_SITE, {"Darwin": (str(usual),)})
 
-    assert config.detect_hh_path(ACR_SITE) == str(usual / "jeje")
+    assert config.detect_hh_path(ACR_SITE) == str(usual / "koko")
 
 
 def test_the_first_of_the_usual_places_that_exists_wins(config, home, monkeypatch) -> None:

@@ -3,7 +3,7 @@
 The capture reads the table's seat snapshot, so every occupied seat was turned
 into an addPlayer operation whether or not that seat was dealt in. On CoinPoker
 this made the hero a participant in every hand played while they were sitting
-out: on 2026-07-23 the database held 19 hands for jeje1976, of which 10 had no
+out: on 2026-07-23 the database held 19 hands for koko1976, of which 10 had no
 hole cards, no action and no winnings for them -- real hands at the table, but
 not hands they played. The hand count (and every per-hand stat) was inflated.
 """

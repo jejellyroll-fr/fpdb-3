@@ -214,7 +214,7 @@ class Unibet(HandHistoryConverter):
         r"|Unibet\sHand\s\#\d+(\s-\s|,\sTournament\s\#)",
     )
     # The 2026 client appends a per-session token to the hero's name, e.g.
-    # "jejesat[Unibet_28204e083c0fb55a]". Strip it so the hero name is stable
+    # "kokosat[Unibet_28204e083c0fb55a]". Strip it so the hero name is stable
     # and matches the configured screen name. re_HeroName captures the hero's
     # name from that token (the token also identifies who the hero is).
     re_HeroToken = re.compile(r"\[Unibet_[^\]]+\]")
@@ -275,7 +275,7 @@ class Unibet(HandHistoryConverter):
                         (and\shas\sreached\sthe\s[{LSC}\d\.,]+\scap)?
                         (\son|\scards?)?
                         # Unibet appends why the site acted for the player:
-                        # "jejesat[...] folds  (timed out)", and "(disconnect)".
+                        # "kokosat[...] folds  (timed out)", and "(disconnect)".
                         # Only the latter was allowed for, so a timed-out fold went
                         # unread: the player stayed in the hand, was counted at a
                         # showdown he never reached, and could be handed the pot.
@@ -310,7 +310,7 @@ class Unibet(HandHistoryConverter):
     # Three shapes occur, and currency is absent from tournament chip counts:
     #   "ASC2 wins €0.23"                          / "DrikC79 wins 380"
     #   "cla17 wins €0.07 from main pot"           (split pots)
-    #   "jejesat[...] wins side pot #1, 660"       (tournaments)
+    #   "kokosat[...] wins side pot #1, 660"       (tournaments)
     # Anchored at both ends so "X wins the tournament and receives €4" and
     # "X wins $19.90 for eliminating Y" -- which are not pots -- stay out.
     re_CollectPot = re.compile(

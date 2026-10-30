@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 00:23+0100\n"
+"POT-Creation-Date: 2026-10-30 15:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1145,7 +1145,7 @@ msgstr ""
 msgid "Host / Path"
 msgstr ""
 
-#: fpdb_3_legacy/GuiDatabase.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/pack_share_dialog.py
 msgid "Name"
 msgstr ""
 
@@ -2185,7 +2185,7 @@ msgid ""
 "in the grid; {share} of the decisions are drawn."
 msgstr ""
 
-#: fpdb_3_legacy/GuiResearchViews.py
+#: fpdb_3_legacy/GuiResearchViews.py fpdb_3_legacy/pack_share_dialog.py
 msgid "Share"
 msgstr ""
 
@@ -3365,6 +3365,14 @@ msgstr ""
 msgid "Install HUDs and stat packs shared by other players"
 msgstr ""
 
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_share_dialog.py
+msgid "Share a HUD or pack"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"
+msgstr ""
+
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/session_guard_dialog.py
 msgid "Session Guard"
 msgstr ""
@@ -3403,7 +3411,7 @@ msgid "Help Tab"
 msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
-#: fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
 msgid "Version"
 msgstr ""
 
@@ -3968,6 +3976,7 @@ msgid "Panel"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/pack_share_dialog.py
 msgid "HUD profile"
 msgstr ""
 
@@ -4182,7 +4191,8 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/pack_share_dialog.py
+#: fpdb_3_legacy/stat_packs_dialog.py
 msgid "Stat pack"
 msgstr ""
 
@@ -4208,6 +4218,14 @@ msgstr ""
 
 #: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
 msgid "Uninstall"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Share yours…"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Write a HUD profile or a stat pack ready to submit to the gallery"
 msgstr ""
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
@@ -4282,6 +4300,56 @@ msgstr ""
 #: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
 #, python-format
 msgid "Uninstalled %s."
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "For example CC-BY-4.0 or AGPL-3.0-or-later"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "An SPDX licence identifier; the gallery requires one."
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Which"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Id"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+msgid "Author"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Licence"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Description"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Write package…"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Write the package in"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, python-format
+msgid ""
+"Written to %(folder)s.\n"
+"\n"
+"To submit it, copy the folder's content into your copy of the packs "
+"repository (%(repository)s), add the entry in %(entry)s to index.json, and "
+"open a pull request."
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "This cannot be shared:"
 msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
@@ -5653,10 +5721,6 @@ msgstr ""
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 msgid "Invalid"
-msgstr ""
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-msgid "Author"
 msgstr ""
 
 #: fpdb_3_legacy/stat_packs_dialog.py

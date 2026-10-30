@@ -42,11 +42,11 @@ def test_a_table_with_no_name_and_no_game_type_is_not_fast_fold(title) -> None:
 
 def test_a_connection_that_cannot_look_players_up_yields_nothing() -> None:
     """The GUI thread's replay facade has no player lookup."""
-    assert FastFoldEngine._resolve_player_ids(object(), ["jejellyroll"]) == {}
+    assert FastFoldEngine._resolve_player_ids(object(), ["kokolantern"]) == {}
 
 
 def test_no_connection_at_all_yields_nothing() -> None:
-    assert FastFoldEngine._resolve_player_ids(None, ["jejellyroll"]) == {}
+    assert FastFoldEngine._resolve_player_ids(None, ["kokolantern"]) == {}
 
 
 def test_a_lookup_that_fails_drops_only_that_player() -> None:
@@ -91,9 +91,9 @@ def test_a_failing_statistics_query_still_seats_everyone() -> None:
     conn.get_stats_for_players.side_effect = RuntimeError("server closed the connection")
     engine = FastFoldEngine(db_connection=conn)
 
-    stat_dict = engine.get_player_stats_for_seat_map({4: "jejellyroll", 5: "villain"}, gametype_id=9)
+    stat_dict = engine.get_player_stats_for_seat_map({4: "kokolantern", 5: "villain"}, gametype_id=9)
 
-    assert sorted(row["screen_name"] for row in stat_dict.values()) == ["jejellyroll", "villain"]
+    assert sorted(row["screen_name"] for row in stat_dict.values()) == ["kokolantern", "villain"]
     assert all(row["n"] == 0 for row in stat_dict.values())
 
 
@@ -154,7 +154,7 @@ def test_one_failing_aux_window_does_not_stop_the_others_updating() -> None:
     broken.refresh_stats.side_effect = RuntimeError("window already destroyed")
     hud = MagicMock(aux_windows=[broken, working], is_loading=False)
 
-    applied = FastFoldEngine.apply_seats(hud, {4: "jejellyroll"}, {1: {"screen_name": "jejellyroll", "seat": 4}})
+    applied = FastFoldEngine.apply_seats(hud, {4: "kokolantern"}, {1: {"screen_name": "kokolantern", "seat": 4}})
 
     assert applied is True
     working.refresh_stats.assert_called_once()
@@ -164,10 +164,10 @@ def test_a_loading_placeholder_keeps_the_seats_without_redrawing() -> None:
     """It has no seat windows yet; the real HUD that replaces it will draw them."""
     hud = MagicMock(aux_windows=[MagicMock()], is_loading=True)
 
-    applied = FastFoldEngine.apply_seats(hud, {4: "jejellyroll"}, {1: {"screen_name": "jejellyroll", "seat": 4}})
+    applied = FastFoldEngine.apply_seats(hud, {4: "kokolantern"}, {1: {"screen_name": "kokolantern", "seat": 4}})
 
     assert applied is True
-    assert hud.fast_fold_seats == {4: "jejellyroll"}
+    assert hud.fast_fold_seats == {4: "kokolantern"}
     hud.aux_windows[0].refresh_stats.assert_not_called()
 
 
@@ -194,8 +194,8 @@ def test_a_player_the_query_gave_no_seat_is_not_seated() -> None:
 
     FastFoldEngine.apply_seats(
         hud,
-        {4: "jejellyroll"},
-        {1: {"screen_name": "jejellyroll", "seat": 4}, 2: {"screen_name": "ghost", "seat": None}},
+        {4: "kokolantern"},
+        {1: {"screen_name": "kokolantern", "seat": 4}, 2: {"screen_name": "ghost", "seat": None}},
     )
 
     assert sorted(hud.fast_fold_seat_players) == [4]

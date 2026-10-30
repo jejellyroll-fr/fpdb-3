@@ -895,7 +895,7 @@ class SealsWithClubs(HandHistoryConverter):
 
         Observed on a real "Double Board Bomb Pots" table (hand 301461492): three
         antes of 0.12 make a 0.36 pot, one board ``[3d 2h 9c 6d Ah]`` is written,
-        and on it Folded74Dice's two pair beats edinapoker's pair outright -- yet
+        and on it Folded74Dice's two pair beats rivercat42's pair outright -- yet
         the room pays 0.27 and 0.09. That split only resolves as two boards of
         0.18: the written one won outright (0.18), and a *second, unwritten* one
         chopped (0.09 each). So the SwC text history drops the second board of a

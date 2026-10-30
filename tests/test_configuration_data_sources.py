@@ -17,7 +17,7 @@ from fpdb_3_legacy.Configuration import CONFIG_VERSION, DATA_SOURCES, Config
 from fpdb_3_legacy.phh_import import PHH_SITE_NAME
 
 DATABASE = '<database db_name="fpdb" db_server="sqlite" db_ip="" db_user="" db_pass="" db_desc="test"/>'
-ROOM = '<supported_sites><site site_name="PokerStars" screen_name="jeje" enabled="True"/></supported_sites>'
+ROOM = '<supported_sites><site site_name="PokerStars" screen_name="koko" enabled="True"/></supported_sites>'
 
 
 def config_xml(sources: str = "") -> str:
@@ -45,7 +45,7 @@ def build(tmp_path, monkeypatch) -> Any:
 
 PHH_ALIASES = (
     '<data_sources><data_source name="PHH">'
-    '<hero_alias name="jeje"/><hero_alias name="jeje76"/><hero_alias name="jeje"/>'
+    '<hero_alias name="koko"/><hero_alias name="koko76"/><hero_alias name="koko"/>'
     "</data_source></data_sources>"
 )
 
@@ -57,10 +57,10 @@ def test_the_built_in_source_is_the_one_phh_hands_are_stored_under() -> None:
 def test_a_data_source_names_its_hero_aliases(build) -> None:
     config = build(PHH_ALIASES)
 
-    assert config.get_data_source_hero_aliases("PHH") == ["jeje", "jeje76"]
+    assert config.get_data_source_hero_aliases("PHH") == ["koko", "koko76"]
     # The question every hero resolver asks a room, answered for the source.
-    assert config.get_hero_aliases("PHH") == ["jeje", "jeje76"]
-    assert config.is_hero_name("PHH", "JEJE76")
+    assert config.get_hero_aliases("PHH") == ["koko", "koko76"]
+    assert config.is_hero_name("PHH", "KOKO76")
 
 
 def test_a_source_without_an_entry_has_no_hero(build) -> None:
@@ -76,17 +76,17 @@ def test_a_room_is_not_a_data_source_and_keeps_its_own_aliases(build) -> None:
 
     assert not config.is_data_source("PokerStars")
     assert not config.is_data_source("Unknown room")
-    assert config.get_hero_aliases("PokerStars") == ["jeje"]
+    assert config.get_hero_aliases("PokerStars") == ["koko"]
 
 
 def test_aliases_are_saved_and_read_back(build) -> None:
     config = build()
 
-    config.set_data_source_hero_aliases("PHH", ["jeje", "", "jeje76", "jeje"])
+    config.set_data_source_hero_aliases("PHH", ["koko", "", "koko76", "koko"])
     config.save()
     reloaded = Config(file=str(build.path))
 
-    assert reloaded.get_hero_aliases("PHH") == ["jeje", "jeje76"]
+    assert reloaded.get_hero_aliases("PHH") == ["koko", "koko76"]
     assert len(reloaded.doc.getElementsByTagName("data_source")) == 1
 
 
@@ -121,13 +121,13 @@ def test_a_reload_reads_the_aliases_and_profiles_the_file_now_holds(build) -> No
     config = build(PHH_ALIASES)
     edited = Config(file=str(build.path))
     edited.set_data_source_hero_aliases("PHH", ["other"])
-    edited.save_hero_profile("Me", [("PokerStars", "jeje"), ("PHH", "other")])
+    edited.save_hero_profile("Me", [("PokerStars", "koko"), ("PHH", "other")])
     edited.save()
 
     assert config.reload() is True
 
     assert config.get_hero_aliases("PHH") == ["other"]
-    assert config.hero_profiles["Me"].links == [("PokerStars", "jeje"), ("PHH", "other")]
+    assert config.hero_profiles["Me"].links == [("PokerStars", "koko"), ("PHH", "other")]
 
 
 def test_the_manager_sees_an_identity_edit_as_a_change(build) -> None:
@@ -136,14 +136,14 @@ def test_the_manager_sees_an_identity_edit_as_a_change(build) -> None:
 
     old = build(PHH_ALIASES)
     new = Config(file=str(build.path))
-    new.set_data_source_hero_aliases("PHH", ["jeje"])
-    new.save_hero_profile("Me", [("PHH", "jeje")])
+    new.set_data_source_hero_aliases("PHH", ["koko"])
+    new.save_hero_profile("Me", [("PHH", "koko")])
 
     changes = ConfigurationManager._identity_changes(old, new)
 
     assert [(change.path, change.old_value, change.new_value) for change in changes] == [
-        ("data_sources.PHH", ["jeje", "jeje76"], ["jeje"]),
-        ("hero_profiles.Me", None, (False, [("PHH", "jeje")])),
+        ("data_sources.PHH", ["koko", "koko76"], ["koko"]),
+        ("hero_profiles.Me", None, (False, [("PHH", "koko")])),
     ]
     assert not any(ConfigurationManager()._requires_restart(change) for change in changes)
     assert ConfigurationManager._identity_changes(old, old) == []

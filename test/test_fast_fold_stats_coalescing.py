@@ -4,7 +4,7 @@ The client log names a player only once they have acted, so a six-handed
 Fast-Fold table grows its ring a name at a time. Every growth was its own stats
 request, round trip and redraw. Measured on a real session, two tables:
 
-    stats-requested ... request=1   seats={4: 'jejellyroll', 5: 'ded40'}
+    stats-requested ... request=1   seats={4: 'kokolantern', 5: 'ded40'}
     stats-requested ... request=2   seats={1: ..., 2: ..., 3: ..., 4: ..., 5: ..., 6: ...}
     ... fourteen of them in one hand
 
@@ -92,10 +92,10 @@ def _ask(app, seats, hand_id="hand-1", key="Colorado 11", hud=None):
 
 
 def test_the_first_map_of_a_burst_is_sent_at_once(app) -> None:
-    _ask(app, {4: "jejellyroll", 5: "ded40"})
+    _ask(app, {4: "kokolantern", 5: "ded40"})
 
     assert len(app.sent) == 1
-    assert app.sent[0][1] == {4: "jejellyroll", 5: "ded40"}
+    assert app.sent[0][1] == {4: "kokolantern", 5: "ded40"}
 
 
 def test_maps_chasing_it_are_held_back(app) -> None:

@@ -50,6 +50,7 @@ the manager asks for a restart rather than refreshing half the app.
 
 from __future__ import annotations
 
+import io
 import json
 import math
 import os
@@ -1695,13 +1696,20 @@ def export_pack(pack_id: str, destination: str | Path, packs_dir: str | Path | N
     target = Path(destination)
     if target.is_dir():
         target = target / f"{pack.id}{PACK_SUFFIX}"
-    with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+    target.write_bytes(pack_archive(pack))
+    return target
+
+
+def pack_archive(pack: StatPack) -> bytes:
+    """The ``.fpdbstats`` archive of *pack*, the same bytes every time (#449)."""
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         for name in sorted(pack.files):
             info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
             info.external_attr = 0o644 << 16
             info.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(info, pack.files[name])
-    return target
+    return buffer.getvalue()
 
 
 # ---------------------------------------------------------------------------
@@ -1746,6 +1754,7 @@ __all__ = [
     "StatPack",
     "enabled_packs",
     "export_pack",
+    "pack_archive",
     "install_pack",
     "installed_definitions",
     "installed_presets",

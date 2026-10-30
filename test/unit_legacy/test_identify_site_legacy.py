@@ -49,7 +49,7 @@ Total Prize Pool: €9.50 EUR
 
     with patch.object(identifier, "_select_pokerstars_skin_site", return_value=fr_site) as select_skin:
         fobj = identifier.idSite(
-            "/Users/jde/Library/Application Support/PokerStarsFR/HandHistory/jeje_sat/"
+            "/Users/alice/Library/Application Support/PokerStarsFR/HandHistory/koko_sat/"
             "TS20260605 T4006174726 No Limit Hold'em.txt",
             text,
             "utf8",
@@ -82,7 +82,7 @@ Total Prize Pool: €9.50 EUR
     with patch("fpdb_3_legacy.PokerStarsToFpdb.PokerStars") as pokerstars_cls:
         pokerstars_cls.return_value.detectPokerStarsSkin.return_value = ("PokerStars.FR", 33)
         fobj = identifier.idSite(
-            "/Users/jde/Library/Application Support/PokerStarsFR/HandHistory/jeje_sat/"
+            "/Users/alice/Library/Application Support/PokerStarsFR/HandHistory/koko_sat/"
             "TS20260605 T4006174726 No Limit Hold'em.txt",
             text,
             "utf8",

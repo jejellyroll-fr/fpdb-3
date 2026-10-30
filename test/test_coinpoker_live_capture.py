@@ -502,7 +502,7 @@ def _join(table: str, tournament: str, name: str = "Step [3] to 565 Main Event [
     )
 
 
-_REGULARS = ("jeje1976", "Alisey", "a", "b", "c", "boom")
+_REGULARS = ("koko1976", "Alisey", "a", "b", "c", "boom")
 
 
 def _pump_that_knows_a_tournament(db, *joins: tuple, seated: dict[str, tuple[str, ...]] | None = None) -> HandPump:
@@ -531,10 +531,10 @@ def test_the_places_reach_the_tournament_players() -> None:
     db.updateTourneyPlayerResult.return_value = True
     pump = _pump_that_knows_a_tournament(db)
 
-    recorded = pump.record_tournament_results([_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"))])
+    recorded = pump.record_tournament_results([_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"))])
 
     assert recorded == 2
-    db.updateTourneyPlayerResult.assert_any_call("CoinPoker", "1160377", "jeje1976", 1)
+    db.updateTourneyPlayerResult.assert_any_call("CoinPoker", "1160377", "koko1976", 1)
     assert db.commit.call_count == 2
 
 
@@ -548,9 +548,9 @@ def test_only_the_place_is_written(capsys) -> None:
     db.updateTourneyPlayerResult.return_value = True
     pump = _pump_that_knows_a_tournament(db)
 
-    pump.record_tournament_results([_winner_event((1, "jeje1976", "565.50"), (2, "Alisey", "282.75"))])
+    pump.record_tournament_results([_winner_event((1, "koko1976", "565.50"), (2, "Alisey", "282.75"))])
 
-    db.updateTourneyPlayerResult.assert_any_call("CoinPoker", "1160377", "jeje1976", 1)
+    db.updateTourneyPlayerResult.assert_any_call("CoinPoker", "1160377", "koko1976", 1)
     assert all(len(c.args) == 4 for c in db.updateTourneyPlayerResult.call_args_list)
 
 
@@ -559,7 +559,7 @@ def test_the_places_are_written_once_however_many_sweeps_see_them() -> None:
     db = Mock()
     db.updateTourneyPlayerResult.return_value = True
     pump = _pump_that_knows_a_tournament(db)
-    events = [_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"))]
+    events = [_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"))]
 
     assert pump.record_tournament_results(events) == 2
     assert pump.record_tournament_results(events) == 0
@@ -572,7 +572,7 @@ def test_a_player_the_database_does_not_know_is_stepped_over() -> None:
     pump = _pump_that_knows_a_tournament(db)
 
     recorded = pump.record_tournament_results(
-        [_winner_event((1, "a stranger", "Ticket"), (2, "jeje1976", "Ticket"), (3, "Alisey", "Ticket"))],
+        [_winner_event((1, "a stranger", "Ticket"), (2, "koko1976", "Ticket"), (3, "Alisey", "Ticket"))],
     )
 
     assert recorded == 2
@@ -583,7 +583,7 @@ def test_one_failing_player_does_not_cost_the_others_their_place(capsys) -> None
     db.updateTourneyPlayerResult.side_effect = [RuntimeError("gone"), True]
     pump = _pump_that_knows_a_tournament(db)
 
-    recorded = pump.record_tournament_results([_winner_event((1, "boom", "Ticket"), (2, "jeje1976", "Ticket"))])
+    recorded = pump.record_tournament_results([_winner_event((1, "boom", "Ticket"), (2, "koko1976", "Ticket"))])
 
     assert recorded == 1
     assert "could not record boom" in capsys.readouterr().out
@@ -594,7 +594,7 @@ def test_places_announced_without_a_tournament_are_reported(capsys) -> None:
     config = HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
     pump = HandPump(db=db, config=config, table_category="PLO4")
 
-    assert pump.record_tournament_results([_winner_event((1, "jeje1976", "Ticket"))]) == 0
+    assert pump.record_tournament_results([_winner_event((1, "koko1976", "Ticket"))]) == 0
     assert "seen in no tournament" in capsys.readouterr().out
     assert not db.updateTourneyPlayerResult.called
 
@@ -614,7 +614,7 @@ def test_places_announced_matching_two_tournaments_are_refused(capsys) -> None:
         _join("1161142", "81498", name="Step [2] to 565 Main Event [1E]"),
     )
 
-    assert pump.record_tournament_results([_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"))]) == 0
+    assert pump.record_tournament_results([_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"))]) == 0
     assert "too close to tell them apart" in capsys.readouterr().out
     assert not db.updateTourneyPlayerResult.called
 
@@ -633,12 +633,12 @@ def test_a_regular_seen_in_both_does_not_make_the_announcement_ambiguous() -> No
         db,
         _join("1160391", "81499"),
         _join("1161142", "81498", name="Step [2] to 565 Main Event [1E]"),
-        seated={"81499": ("jeje1976", "Alisey", "Silwin"), "81498": ("jeje1976", "Kandinsky")},
+        seated={"81499": ("koko1976", "Alisey", "Silwin"), "81498": ("koko1976", "Kandinsky")},
     )
 
     # Announced: the three of 81499, of whom one also played 81498.
     places = pump.record_tournament_results(
-        [_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"), (3, "Silwin", "Ticket"))],
+        [_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"), (3, "Silwin", "Ticket"))],
     )
 
     assert places == 3
@@ -657,11 +657,11 @@ def test_a_lead_of_one_player_is_not_a_correlation(capsys) -> None:
         db,
         _join("1160391", "81499"),
         _join("1161142", "81498", name="Step [2] to 565 Main Event [1E]"),
-        seated={"81499": ("jeje1976", "Alisey", "Silwin"), "81498": ("jeje1976", "Alisey", "Mirek")},
+        seated={"81499": ("koko1976", "Alisey", "Silwin"), "81498": ("koko1976", "Alisey", "Mirek")},
     )
 
     places = pump.record_tournament_results(
-        [_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"), (3, "Silwin", "Ticket"))],
+        [_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"), (3, "Silwin", "Ticket"))],
     )
 
     assert places == 0
@@ -673,10 +673,10 @@ def test_a_single_shared_player_is_not_a_correlation(capsys) -> None:
     # One regular in common with the only tournament on the books says nothing
     # about whose announcement this is.
     db = Mock()
-    pump = _pump_that_knows_a_tournament(db, seated={"1160377": ("jeje1976", "Alisey")})
+    pump = _pump_that_knows_a_tournament(db, seated={"1160377": ("koko1976", "Alisey")})
 
     places = pump.record_tournament_results(
-        [_winner_event((1, "jeje1976", "Ticket"), (2, "Kandinsky", "Ticket"), (3, "Mirek", "Ticket"))],
+        [_winner_event((1, "koko1976", "Ticket"), (2, "Kandinsky", "Ticket"), (3, "Mirek", "Ticket"))],
     )
 
     assert places == 0
@@ -693,15 +693,15 @@ def test_a_clear_lead_over_a_shared_regular_is_filed() -> None:
         _join("1160391", "81499"),
         _join("1161142", "81498", name="Step [2] to 565 Main Event [1E]"),
         seated={
-            "81499": ("jeje1976", "Alisey", "Silwin", "Mirek", "Kandinsky"),
-            "81498": ("jeje1976", "Alisey"),
+            "81499": ("koko1976", "Alisey", "Silwin", "Mirek", "Kandinsky"),
+            "81498": ("koko1976", "Alisey"),
         },
     )
 
     places = pump.record_tournament_results(
         [
             _winner_event(
-                (1, "jeje1976", "Ticket"),
+                (1, "koko1976", "Ticket"),
                 (2, "Alisey", "Ticket"),
                 (3, "Silwin", "Ticket"),
                 (4, "Mirek", "Ticket"),
@@ -721,10 +721,10 @@ def test_two_tournaments_sharing_the_lead_are_refused(capsys) -> None:
         db,
         _join("1160391", "81499"),
         _join("1161142", "81498", name="Step [2] to 565 Main Event [1E]"),
-        seated={"81499": ("jeje1976", "Alisey"), "81498": ("jeje1976", "Alisey")},
+        seated={"81499": ("koko1976", "Alisey"), "81498": ("koko1976", "Alisey")},
     )
 
-    assert pump.record_tournament_results([_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"))]) == 0
+    assert pump.record_tournament_results([_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"))]) == 0
     assert "too close to tell them apart" in capsys.readouterr().out
     assert not db.updateTourneyPlayerResult.called
 
@@ -741,19 +741,19 @@ def test_two_announcements_in_one_sweep_are_answered_separately() -> None:
         db,
         _join("1160391", "81499"),
         _join("1161142", "81498", name="Step [2] to 565 Main Event [1E]"),
-        seated={"81499": ("jeje1976", "Alisey"), "81498": ("Kandinsky", "Mirek")},
+        seated={"81499": ("koko1976", "Alisey"), "81498": ("Kandinsky", "Mirek")},
     )
 
     places = pump.record_tournament_results(
         [
-            _winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket")),
+            _winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket")),
             _winner_event((1, "Kandinsky", "Ticket"), (2, "Mirek", "Ticket")),
         ],
     )
 
     assert places == 4
     assert db.updateTourneyPlayerResult.call_args_list == [
-        call("CoinPoker", "81499", "jeje1976", 1),
+        call("CoinPoker", "81499", "koko1976", 1),
         call("CoinPoker", "81499", "Alisey", 2),
         call("CoinPoker", "81498", "Kandinsky", 1),
         call("CoinPoker", "81498", "Mirek", 2),
@@ -769,10 +769,10 @@ def test_a_better_correlation_later_does_not_move_a_filed_announcement() -> None
     """
     db = Mock()
     db.updateTourneyPlayerResult.side_effect = [True, True, False]
-    pump = _pump_that_knows_a_tournament(db, seated={"1160377": ("jeje1976", "Alisey")})
+    pump = _pump_that_knows_a_tournament(db, seated={"1160377": ("koko1976", "Alisey")})
     announcement = [
         _winner_event(
-            (1, "jeje1976", "Ticket"),
+            (1, "koko1976", "Ticket"),
             (2, "Alisey", "Ticket"),
             (3, "Silwin", "Ticket"),
             (4, "Mirek", "Ticket"),
@@ -788,7 +788,7 @@ def test_a_better_correlation_later_does_not_move_a_filed_announcement() -> None
     pump._remember_tournament_players(
         {
             "tournament": {"tour_no": "81498", "table_id": "1161142"},
-            "players": [{"name": n} for n in ("jeje1976", "Alisey", "Silwin", "Mirek", "Kandinsky")],
+            "players": [{"name": n} for n in ("koko1976", "Alisey", "Silwin", "Mirek", "Kandinsky")],
         },
     )
 
@@ -804,7 +804,7 @@ def test_an_answered_announcement_stops_being_work() -> None:
     db = Mock()
     db.updateTourneyPlayerResult.return_value = True
     pump = _pump_that_knows_a_tournament(db)
-    filed = [_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"))]
+    filed = [_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"))]
     foreign = [_winner_event((1, "carol", "Ticket"), (2, "dave", "Ticket"))]
 
     assert pump.record_tournament_results(filed) == 2
@@ -828,7 +828,7 @@ def test_a_refused_announcement_is_never_claimed_by_a_later_tournament() -> None
     """
     db = Mock()
     db.updateTourneyPlayerResult.return_value = True
-    pump = _pump_that_knows_a_tournament(db, seated={"1160377": ("jeje1976", "Alisey")})
+    pump = _pump_that_knows_a_tournament(db, seated={"1160377": ("koko1976", "Alisey")})
     foreign = [_winner_event((1, "carol", "Ticket"), (2, "dave", "Ticket"))]
 
     for _ in range(MAX_RESULT_ATTEMPTS):
@@ -856,8 +856,8 @@ def test_an_announcement_keeps_the_tournament_it_was_first_filed_on() -> None:
     """
     db = Mock()
     db.updateTourneyPlayerResult.side_effect = [True, False]
-    pump = _pump_that_knows_a_tournament(db, _join("1160391", "81499"), seated={"81499": ("jeje1976", "Alisey")})
-    announcement = [_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"))]
+    pump = _pump_that_knows_a_tournament(db, _join("1160391", "81499"), seated={"81499": ("koko1976", "Alisey")})
+    announcement = [_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"))]
 
     assert pump.record_tournament_results(announcement) == 1
 
@@ -867,7 +867,7 @@ def test_an_announcement_keeps_the_tournament_it_was_first_filed_on() -> None:
     pump._remember_tournament_players(
         {
             "tournament": {"tour_no": "81498", "table_id": "1161142"},
-            "players": [{"name": "jeje1976"}, {"name": "Alisey"}],
+            "players": [{"name": "koko1976"}, {"name": "Alisey"}],
         },
     )
 
@@ -1038,7 +1038,7 @@ def test_the_buffer_keeps_only_hands_still_being_assembled() -> None:
     pump.imported.add("98127900001")
     events = [
         _join("1160391", "81499"),
-        _winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket")),
+        _winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket")),
         ("game.seat", "98127900001", {"seatId": 1}),
         ("game.seat", "98127900002", {"seatId": 1}),
     ]
@@ -1056,7 +1056,7 @@ def test_an_announcement_outlives_the_events_it_arrived_on() -> None:
     db = Mock()
     db.updateTourneyPlayerResult.side_effect = [True, False]
     pump = _pump_that_knows_a_tournament(db)
-    announcement = [_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"))]
+    announcement = [_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"))]
 
     assert pump.record_tournament_results(announcement) == 1
 
@@ -1082,9 +1082,9 @@ def test_successive_announcements_stay_separate_under_the_real_loop() -> None:
         db,
         _join("1160391", "81499"),
         _join("1161142", "81498", name="Step [2] to 565 Main Event [1E]"),
-        seated={"81499": ("jeje1976", "Alisey"), "81498": ("Kandinsky", "Mirek")},
+        seated={"81499": ("koko1976", "Alisey"), "81498": ("Kandinsky", "Mirek")},
     )
-    first = _winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"))
+    first = _winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"))
     second = _winner_event((1, "Kandinsky", "Ticket"), (2, "Mirek", "Ticket"))
 
     # The buffer the loop actually carries: pruned, then appended to.
@@ -1094,7 +1094,7 @@ def test_successive_announcements_stay_separate_under_the_real_loop() -> None:
     assert pump.record_tournament_results(accumulated) == 2
 
     assert db.updateTourneyPlayerResult.call_args_list == [
-        call("CoinPoker", "81499", "jeje1976", 1),
+        call("CoinPoker", "81499", "koko1976", 1),
         call("CoinPoker", "81499", "Alisey", 2),
         call("CoinPoker", "81498", "Kandinsky", 1),
         call("CoinPoker", "81498", "Mirek", 2),
@@ -1115,17 +1115,17 @@ def test_a_second_tournament_does_not_claim_the_first_one_s_places() -> None:
         db,
         _join("1160391", "81499"),
         _join("1161142", "81498", name="Step [2] to 565 Main Event [1E]"),
-        seated={"81499": ("jeje1976", "Alisey"), "81498": ("Kandinsky", "Mirek")},
+        seated={"81499": ("koko1976", "Alisey"), "81498": ("Kandinsky", "Mirek")},
     )
 
-    first = [_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"))]
+    first = [_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"))]
     second = [_winner_event((1, "Kandinsky", "Ticket"), (2, "Mirek", "Ticket"))]
 
     assert pump.record_tournament_results(first) == 2
     assert pump.record_tournament_results(second) == 2
 
     assert db.updateTourneyPlayerResult.call_args_list == [
-        call("CoinPoker", "81499", "jeje1976", 1),
+        call("CoinPoker", "81499", "koko1976", 1),
         call("CoinPoker", "81499", "Alisey", 2),
         call("CoinPoker", "81498", "Kandinsky", 1),
         call("CoinPoker", "81498", "Mirek", 2),
@@ -1138,7 +1138,7 @@ def test_the_same_tournament_at_two_tables_is_still_one_tournament() -> None:
     db.updateTourneyPlayerResult.return_value = True
     pump = _pump_that_knows_a_tournament(db, _join("1160391", "81499"), _join("1160377", "81499"))
 
-    places = pump.record_tournament_results([_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"))])
+    places = pump.record_tournament_results([_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"))])
 
     assert places == 2
     assert {c.args[1] for c in db.updateTourneyPlayerResult.call_args_list} == {"81499"}
@@ -1158,7 +1158,7 @@ def test_a_dry_run_writes_nothing(tmp_path) -> None:
     pump = HandPump(db=db, config=config, table_category="PLO4", dry_run=True, archive_dir=str(tmp_path))
     pump._tour_no = "1160377"
 
-    assert pump.record_tournament_results([_winner_event((1, "jeje1976", "Ticket"))]) == 0
+    assert pump.record_tournament_results([_winner_event((1, "koko1976", "Ticket"))]) == 0
     assert not db.updateTourneyPlayerResult.called
 
 
@@ -1171,7 +1171,7 @@ def test_a_place_that_could_not_be_filed_is_tried_again() -> None:
     db = Mock()
     db.updateTourneyPlayerResult.side_effect = [True, False]
     pump = _pump_that_knows_a_tournament(db)
-    events = [_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"))]
+    events = [_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"))]
 
     assert pump.record_tournament_results(events) == 1
 
@@ -1184,7 +1184,7 @@ def test_a_place_already_filed_is_not_written_again() -> None:
     db = Mock()
     db.updateTourneyPlayerResult.return_value = True
     pump = _pump_that_knows_a_tournament(db)
-    events = [_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"))]
+    events = [_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"))]
 
     assert pump.record_tournament_results(events) == 2
     assert pump.record_tournament_results(events) == 0
@@ -1196,10 +1196,10 @@ def test_a_player_that_keeps_failing_is_reported_each_sweep(capsys) -> None:
     db.updateTourneyPlayerResult.side_effect = RuntimeError("gone")
     pump = _pump_that_knows_a_tournament(db)
 
-    pump.record_tournament_results([_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"))])
+    pump.record_tournament_results([_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"))])
 
     printed = capsys.readouterr().out
-    assert "could not record jeje1976" in printed
+    assert "could not record koko1976" in printed
     assert "2 place(s) still unfiled" in printed
 
 
@@ -1214,16 +1214,16 @@ def test_a_commit_that_fails_files_nobody(capsys) -> None:
     db.updateTourneyPlayerResult.return_value = True
     db.commit.side_effect = [RuntimeError("connection lost"), None, None]
     pump = _pump_that_knows_a_tournament(db)
-    events = [_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"))]
+    events = [_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"))]
 
     # The first player's commit fails; the second is unaffected.
     assert pump.record_tournament_results(events) == 1
     db.rollback.assert_called_once_with()
-    assert "could not record jeje1976" in capsys.readouterr().out
+    assert "could not record koko1976" in capsys.readouterr().out
 
     # The next sweep offers the place that did not land, and it does.
     assert pump.record_tournament_results(events) == 1
-    assert db.updateTourneyPlayerResult.call_args_list[-1] == call("CoinPoker", "1160377", "jeje1976", 1)
+    assert db.updateTourneyPlayerResult.call_args_list[-1] == call("CoinPoker", "1160377", "koko1976", 1)
 
 
 def test_a_failing_statement_does_not_poison_the_rest_of_the_sweep() -> None:
@@ -1239,13 +1239,13 @@ def test_a_failing_statement_does_not_poison_the_rest_of_the_sweep() -> None:
     pump = _pump_that_knows_a_tournament(db)
 
     recorded = pump.record_tournament_results(
-        [_winner_event((1, "boom", "Ticket"), (2, "jeje1976", "Ticket"), (3, "Alisey", "Ticket"))],
+        [_winner_event((1, "boom", "Ticket"), (2, "koko1976", "Ticket"), (3, "Alisey", "Ticket"))],
     )
 
     assert recorded == 2
     # Rolled back before the next statement, not left open behind it.
     assert db.method_calls.index(call.rollback()) < db.method_calls.index(
-        call.updateTourneyPlayerResult("CoinPoker", "1160377", "jeje1976", 2),
+        call.updateTourneyPlayerResult("CoinPoker", "1160377", "koko1976", 2),
     )
 
 
@@ -1261,7 +1261,7 @@ def test_a_player_with_no_entry_stops_being_retried(capsys) -> None:
     # The regular has an entry; the stranger, never dealt in, has none.
     db.updateTourneyPlayerResult.side_effect = lambda _s, _t, player, _r: player != "a stranger"
     pump = _pump_that_knows_a_tournament(db)
-    events = [_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"), (3, "a stranger", "Ticket"))]
+    events = [_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"), (3, "a stranger", "Ticket"))]
 
     assert pump.record_tournament_results(events) == 2
     for _ in range(5):
@@ -1279,7 +1279,7 @@ def test_a_player_whose_entry_arrives_before_the_limit_is_still_filed() -> None:
     db = Mock()
     db.updateTourneyPlayerResult.side_effect = [False, False, True, True]
     pump = _pump_that_knows_a_tournament(db)
-    events = [_winner_event((1, "jeje1976", "Ticket"), (2, "Alisey", "Ticket"))]
+    events = [_winner_event((1, "koko1976", "Ticket"), (2, "Alisey", "Ticket"))]
 
     assert pump.record_tournament_results(events) == 0
     assert pump.record_tournament_results(events) == 2

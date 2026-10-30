@@ -24,12 +24,12 @@ from fpdb_3_legacy.SealsWithClubsToFpdb import SealsWithClubs
 # SwC hand 298240022, cut short the moment the hero left the table.
 _UNFINISHED = """SwCPoker Hand #298240022:  Omaha Pot Limit (0.02/0.04) - 2026/07/17 11:43:12 UTC
 Table 'No-Rake Micro Stakes PLO'(24812) 9-max (Real Money) Seat #4 is the button
-Seat 3: edinapoker (1.97 in chips)
+Seat 3: rivercat42 (1.97 in chips)
 Seat 5: Slimcry (3.11 in chips)
 Slimcry: posts small blind 0.02
 *** HOLE CARDS ***
-Dealt to edinapoker [Jc 8h 7d Qd]
-edinapoker leaves the table
+Dealt to rivercat42 [Jc 8h 7d Qd]
+rivercat42 leaves the table
 """
 
 _TWO_SUMMARIES = _UNFINISHED + "*** SUMMARY ***\nTotal pot 0.06\n*** SUMMARY ***\nTotal pot 0.06\n"

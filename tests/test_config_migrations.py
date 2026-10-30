@@ -182,6 +182,28 @@ def test_ci_rejects_unversioned_changes_and_version_mismatch(tmp_path):
     check(base_dir, tmp_path)
 
 
+def test_a_sites_folders_change_without_a_new_version(tmp_path):
+    from tools.check_config_version import check
+
+    (tmp_path / "fpdb_3_legacy").mkdir()
+    (tmp_path / "fpdb_3_legacy/Configuration.py").write_text("CONFIG_VERSION = 84", encoding="utf-8")
+    base_dir = tmp_path / "base"
+    (base_dir / "fpdb_3_legacy").mkdir(parents=True)
+    site = '<config><general version="84"/><site site_name="S" HH_path="{}" TS_path="{}" site_path="{}" {}/></config>'
+    names = ("HUD_config.xml", "HUD_config.xml.example", "fpdb_3_legacy/HUD_config.xml.example")
+    for name in names:
+        (base_dir / name).write_text(site.format("C:/a", "C:/b", "C:/c", ""), encoding="utf-8")
+        (tmp_path / name).write_text(site.format("C:/x", "C:/y", "C:/z", ""), encoding="utf-8")
+
+    # An upgrade never carries a site's folders to an existing configuration.
+    check(base_dir, tmp_path)
+
+    # Any other change to the site still needs one.
+    (tmp_path / "HUD_config.xml").write_text(site.format("C:/x", "C:/y", "C:/z", 'enabled="True"'), encoding="utf-8")
+    with pytest.raises(ValueError, match="increment"):
+        check(base_dir, tmp_path)
+
+
 def test_adding_general_defaults_does_not_hide_missing_version(tmp_path, monkeypatch):
     import fpdb_3_legacy.Configuration as configuration
 

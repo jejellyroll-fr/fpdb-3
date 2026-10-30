@@ -680,12 +680,12 @@ class HeroProfile:
     """A logical hero identity spanning one or more rooms.
 
     Links a set of ``(site_name, alias)`` pairs so stats/reports can aggregate a
-    player's identity across rooms (e.g. ``jeje`` on Stars + ``jeje76`` on
+    player's identity across rooms (e.g. ``koko`` on Stars + ``koko76`` on
     Winamax). Parsed from::
 
         <hero_profile name="Me" default="True">
-            <link site_name="PokerStars" alias="jeje"/>
-            <link site_name="Winamax"    alias="jeje76"/>
+            <link site_name="PokerStars" alias="koko"/>
+            <link site_name="Winamax"    alias="koko76"/>
         </hero_profile>
     """
 
@@ -734,8 +734,8 @@ class DataSource:
 
         <data_sources>
             <data_source name="PHH">
-                <hero_alias name="jeje"/>
-                <hero_alias name="jeje76"/>
+                <hero_alias name="koko"/>
+                <hero_alias name="koko76"/>
             </data_source>
         </data_sources>
     """

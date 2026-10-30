@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 00:23+0100\n"
+"POT-Creation-Date: 2026-10-30 15:51+0100\n"
 "PO-Revision-Date: 2011-12-03 21:57+0000\n"
 "Last-Translator: LimburgCwboy <hdps.een@gmail.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.net/projects/p/fpdb/"
@@ -1408,7 +1408,7 @@ msgstr "Migreren naar..."
 msgid "Migrating database"
 msgstr "Database wordt gemigreerd"
 
-#: fpdb_3_legacy/GuiDatabase.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/pack_share_dialog.py
 msgid "Name"
 msgstr "Naam"
 
@@ -2682,7 +2682,7 @@ msgstr ""
 "Gerealiseerd {realized} over {hands} handen; EV-gecorrigeerd {ev} ({luck} "
 "daarvan geluk)."
 
-#: fpdb_3_legacy/GuiResearchViews.py
+#: fpdb_3_legacy/GuiResearchViews.py fpdb_3_legacy/pack_share_dialog.py
 #, fuzzy
 msgid "Share"
 msgstr "Aandeel"
@@ -4136,6 +4136,10 @@ msgstr "Session Guard"
 msgid "Session Stats"
 msgstr "Sessiestatistieken"
 
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_share_dialog.py
+msgid "Share a HUD or pack"
+msgstr ""
+
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
 msgid "Site Settings"
@@ -4193,7 +4197,7 @@ msgid "Tourney Stats"
 msgstr "Toernooistatistieken"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/pack_gallery_dialog.py
-#: fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Version"
 msgstr "Versie"
@@ -4214,6 +4218,10 @@ msgid "What every filter is for in a four-card game, and the two that are not"
 msgstr ""
 "Waarvoor elk filter dient in een spel met vier kaarten, en de twee die dat "
 "niet doen"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "+"
@@ -4636,6 +4644,7 @@ msgid "HUD imported — refresh required"
 msgstr "HUD geïmporteerd — vernieuwen vereist"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/pack_share_dialog.py
 #, fuzzy
 msgid "HUD profile"
 msgstr "HUD-profiel"
@@ -5179,7 +5188,12 @@ msgstr "Pakket"
 msgid "Restart fpdb and the HUD to use the change everywhere."
 msgstr "Start fpdb en de HUD opnieuw om de wijziging overal te gebruiken."
 
-#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Share yours…"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py fpdb_3_legacy/pack_share_dialog.py
+#: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
 msgid "Stat pack"
 msgstr "Statpakket"
@@ -5258,6 +5272,63 @@ msgstr "Opgeslagen"
 msgid ""
 "Updating replaces the profiles and popups this pack installed, with any "
 "change you made to them. Continue?"
+msgstr ""
+
+#: fpdb_3_legacy/pack_gallery_dialog.py
+msgid "Write a HUD profile or a stat pack ready to submit to the gallery"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "An SPDX licence identifier; the gallery requires one."
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
+#, fuzzy
+msgid "Author"
+msgstr "Auteur"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Description"
+msgstr "Omschrijving"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "For example CC-BY-4.0 or AGPL-3.0-or-later"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, fuzzy
+msgid "Id"
+msgstr "Inactief"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Licence"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, fuzzy
+msgid "This cannot be shared:"
+msgstr "Dit pakket kan niet worden geïnstalleerd:"
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Which"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Write package…"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Write the package in"
+msgstr ""
+
+#: fpdb_3_legacy/pack_share_dialog.py
+#, python-format
+msgid ""
+"Written to %(folder)s.\n"
+"\n"
+"To submit it, copy the folder's content into your copy of the packs "
+"repository (%(repository)s), add the entry in %(entry)s to index.json, and "
+"open a pull request."
 msgstr ""
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
@@ -6961,11 +7032,6 @@ msgstr "Alle bestanden"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 #, fuzzy
-msgid "Author"
-msgstr "Auteur"
-
-#: fpdb_3_legacy/stat_packs_dialog.py
-#, fuzzy
 msgid "Built-in"
 msgstr "Ingebouwd"
 
@@ -7446,9 +7512,6 @@ msgstr ""
 
 #~ msgid "DB Type"
 #~ msgstr "DB type"
-
-#~ msgid "Description"
-#~ msgstr "Omschrijving"
 
 #~ msgid "ERROR: query %s result does not have player_id as first column"
 #~ msgstr "FOUT: resultaat op vraag %s heeft geen speler_id als eerste kolom"

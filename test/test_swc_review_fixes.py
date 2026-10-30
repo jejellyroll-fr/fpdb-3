@@ -1885,11 +1885,11 @@ def _bomb_pot_evidence() -> list[dict]:
     """
     return [
         {"action": "ante", "player": "Perombo", "street": "BLINDSANTES", "funds_byte": 12},
-        {"action": "ante", "player": "edinapoker", "street": "BLINDSANTES", "funds_byte": 12},
+        {"action": "ante", "player": "rivercat42", "street": "BLINDSANTES", "funds_byte": 12},
         # A check or a fold is given its zero up front, as the pipeline does.
-        {"action": "check", "player": "edinapoker", "street": "BLINDSANTES", "funds_byte": 0, "amount_native": 0},
+        {"action": "check", "player": "rivercat42", "street": "BLINDSANTES", "funds_byte": 0, "amount_native": 0},
         {"action": "check", "player": "Perombo", "street": "PREFLOP", "funds_byte": 0, "amount_native": 0},
-        {"action": "bet", "player": "edinapoker", "street": "FLOP", "funds_byte": 4},
+        {"action": "bet", "player": "rivercat42", "street": "FLOP", "funds_byte": 4},
         {"action": "fold", "player": "Perombo", "street": "FLOP", "funds_byte": 0, "amount_native": 0},
     ]
 
@@ -1901,8 +1901,8 @@ def test_a_bomb_pot_conserves_settlement_once_its_antes_are_counted() -> None:
     actions = _bomb_pot_evidence()
     conserved = add_native_funds_byte_amounts_if_conserved(
         actions,
-        [{"player": "edinapoker", "amount_native": 24}],
-        [{"player": "edinapoker", "amount_native": 4}],
+        [{"player": "rivercat42", "amount_native": 24}],
+        [{"player": "rivercat42", "amount_native": 4}],
     )
 
     assert conserved is True
@@ -1919,8 +1919,8 @@ def test_the_ante_total_is_what_the_bomb_pot_reports() -> None:
     actions = _bomb_pot_evidence()
     add_native_funds_byte_amounts_if_conserved(
         actions,
-        [{"player": "edinapoker", "amount_native": 24}],
-        [{"player": "edinapoker", "amount_native": 4}],
+        [{"player": "rivercat42", "amount_native": 24}],
+        [{"player": "rivercat42", "amount_native": 4}],
     )
 
     assert _native_board_output((("2c", "7h", "Ad", "9s", "4h"),), actions)["bomb_pot"] == 24
@@ -1938,11 +1938,11 @@ def test_an_ante_reaches_hand_py_as_an_ante() -> None:
     actions = _bomb_pot_evidence()
     add_native_funds_byte_amounts_if_conserved(
         actions,
-        [{"player": "edinapoker", "amount_native": 24}],
-        [{"player": "edinapoker", "amount_native": 4}],
+        [{"player": "rivercat42", "amount_native": 24}],
+        [{"player": "rivercat42", "amount_native": 4}],
     )
 
-    canonical = build_native_canonical_actions(actions, [{"player": "edinapoker", "amount_native": 4}])
+    canonical = build_native_canonical_actions(actions, [{"player": "rivercat42", "amount_native": 4}])
 
     antes = [a for a in canonical if a["type"] == "ante"]
     assert [a["amount"] for a in antes] == [12, 12]

@@ -2979,7 +2979,7 @@
         <database db_server="sqlite" db_name="fpdb.db3" db_ip="localhost" db_user="fpdb" db_pass="fpdb" db_path="" default="True"/>
     </supported_databases>
     <supported_sites>
-        <site site_name="PokerStars.COM" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\jd\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
+        <site site_name="PokerStars.COM" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="ring" ls="ps_default"/>
             <layout_set game_type="tour" ls="ps_default"/>
@@ -2993,7 +2993,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PokerStars.FR" enabled="True" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\jd\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
+        <site site_name="PokerStars.FR" enabled="True" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="ring" ls="ps_default"/>
             <layout_set game_type="tour" ls="ps_default"/>
@@ -3007,7 +3007,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PokerStars.IT" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\jd\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
+        <site site_name="PokerStars.IT" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="ring" ls="ps_default"/>
             <layout_set game_type="tour" ls="ps_default"/>
@@ -3021,7 +3021,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PokerStars.ES" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\jd\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
+        <site site_name="PokerStars.ES" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="ring" ls="ps_default"/>
             <layout_set game_type="tour" ls="ps_default"/>
@@ -3035,7 +3035,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PokerStars.PT" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\jd\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
+        <site site_name="PokerStars.PT" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="ring" ls="ps_default"/>
             <layout_set game_type="tour" ls="ps_default"/>
@@ -3049,7 +3049,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PokerStars.EU" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\jd\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
+        <site site_name="PokerStars.EU" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="ring" ls="ps_default"/>
             <layout_set game_type="tour" ls="ps_default"/>
@@ -3063,7 +3063,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PokerStars.DE" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.DE\HandHistory\" TS_path="C:\Users\jd\AppData\Local\PokerStars.DE\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
+        <site site_name="PokerStars.DE" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\PokerStars.DE\HandHistory\" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\PokerStars.DE\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="ring" ls="ps_default"/>
             <layout_set game_type="tour" ls="ps_default"/>
@@ -3077,7 +3077,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PartyPoker" enabled="True" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="PartyPoker" enabled="True" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3089,7 +3089,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Party Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="Party Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3101,7 +3101,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Bwin Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="Bwin Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3113,7 +3113,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Bwin.fr Poker" enabled="False" screen_name="" site_path="C:/Program Files/iPoker/" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Bwin.fr Poker" enabled="False" screen_name="" site_path="C:/Program Files/iPoker/" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3125,7 +3125,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Bwin.it Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="Bwin.it Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3137,7 +3137,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Bwin.es Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="Bwin.es Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3149,7 +3149,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Bwin.de Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="Bwin.de Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3161,7 +3161,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PartyPoker.fr" enabled="False" screen_name="" site_path="C:/Program Files/iPoker/" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="PartyPoker.fr" enabled="False" screen_name="" site_path="C:/Program Files/iPoker/" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3173,7 +3173,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PartyPoker.it" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="PartyPoker.it" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3185,7 +3185,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PartyPoker.es" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="PartyPoker.es" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3197,7 +3197,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PartyPoker.de" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="PartyPoker.de" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3209,7 +3209,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Empire Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="Empire Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3221,7 +3221,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Gamebookers Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="Gamebookers Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3233,7 +3233,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Intertops Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="Intertops Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3245,7 +3245,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="MultiPoker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="MultiPoker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3257,7 +3257,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PokerRoom" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="PokerRoom" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3269,7 +3269,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PartyPoker NJ" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="PartyPoker NJ" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3281,7 +3281,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="BorgataPoker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="BorgataPoker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3293,7 +3293,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Borgata Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="Borgata Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3305,7 +3305,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="WPT Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="WPT Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3317,7 +3317,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="WPTPoker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="WPTPoker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3329,7 +3329,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PartyPoker.pt" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="PartyPoker.pt" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3341,7 +3341,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PartyPoker.com" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="PartyPoker.com" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3353,7 +3353,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PartyPoker.eu" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="PartyPoker.eu" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3365,7 +3365,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="partycasino" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="partycasino" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3377,7 +3377,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PartyCasino" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="PartyCasino" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3389,7 +3389,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="partypoker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="partypoker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3401,7 +3401,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="bwin" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="bwin" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3413,7 +3413,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PMU Poker (PartyPoker)" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+        <site site_name="PMU Poker (PartyPoker)" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
@@ -3437,7 +3437,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Winamax" enabled="True" HH_path="/home/jd/.config/winamax/documents/accounts/YOUR_SCREEN_NAME/history" screen_name="YOUR_SCREEN_NAME" site_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Winamax" layout_set_ring="winamax_default" layout_set_tour="winamax_default">
+        <site site_name="Winamax" enabled="True" HH_path="/home/YOUR_OS_USER/.config/winamax/documents/accounts/YOUR_SCREEN_NAME/history" screen_name="YOUR_SCREEN_NAME" site_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Winamax" layout_set_ring="winamax_default" layout_set_tour="winamax_default">
             <layout_set game_type="all" ls="winamax_default"/>
             <fav max="2" fav_seat="2"/>
             <fav max="3" fav_seat="3"/>
@@ -3461,7 +3461,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Everygame Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="Everygame Poker" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3473,7 +3473,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Everygame" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="Everygame" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3485,7 +3485,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Cake Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="Cake Poker" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3497,7 +3497,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Cake" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="Cake" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3509,7 +3509,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Juicy Stakes" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="Juicy Stakes" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3521,7 +3521,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Juicy Stakes Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="Juicy Stakes Poker" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3533,7 +3533,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="JuicyStakes" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="JuicyStakes" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3545,7 +3545,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="RedStar Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="RedStar Poker" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3557,7 +3557,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="RedStar" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="RedStar" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3569,7 +3569,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Sportsbetting.ag Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="Sportsbetting.ag Poker" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3581,7 +3581,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Sportsbetting Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="Sportsbetting Poker" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3593,7 +3593,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="SportsBetting.ag" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="SportsBetting.ag" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3605,7 +3605,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="BetOnline Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="BetOnline Poker" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3617,7 +3617,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="BetOnline.ag" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="BetOnline.ag" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3629,7 +3629,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Tiger Gaming" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="Tiger Gaming" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3641,7 +3641,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="TigerGaming" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="TigerGaming" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3653,7 +3653,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Doyles Room" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="Doyles Room" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3665,7 +3665,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="DoylesRoom" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="DoylesRoom" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3677,7 +3677,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Poker4Ever" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="Poker4Ever" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3689,7 +3689,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Poker 4 Ever" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="Poker 4 Ever" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3701,7 +3701,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PlayersOnly" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="PlayersOnly" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3713,7 +3713,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Players Only" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="Players Only" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3725,7 +3725,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="SunPoker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="SunPoker" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3737,7 +3737,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Sun Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+        <site site_name="Sun Poker" enabled="False" HH_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\YOUR_OS_USER\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
             <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3749,7 +3749,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PMU Poker" enabled="True" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="PMU Poker" enabled="True" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3761,7 +3761,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="FDJ Poker" enabled="True" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="FDJ Poker" enabled="True" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="ring" ls="ipoker_default"/>
             <layout_set game_type="tour" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
@@ -3774,7 +3774,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Betclic Poker" enabled="True" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Betclic Poker" enabled="True" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="ring" ls="ipoker_default"/>
             <layout_set game_type="tour" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
@@ -3787,7 +3787,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Poker770" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Poker770" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3799,7 +3799,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="NetBet Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="NetBet Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3811,7 +3811,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Barrière Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Barrière Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3823,7 +3823,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Red Star Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Red Star Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3835,7 +3835,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Titan Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Titan Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3847,7 +3847,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Bet365 Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Bet365 Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3859,7 +3859,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="William Hill Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="William Hill Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3871,7 +3871,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Paddy Power Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Paddy Power Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3883,7 +3883,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Betfair Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Betfair Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3895,7 +3895,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Coral Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Coral Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3907,7 +3907,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Genting Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Genting Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3919,7 +3919,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Mansion Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Mansion Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3931,7 +3931,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Winner Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Winner Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3943,7 +3943,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Ladbrokes Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Ladbrokes Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3955,7 +3955,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Sky Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Sky Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3967,7 +3967,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Sisal Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Sisal Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3979,7 +3979,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Lottomatica Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Lottomatica Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -3991,7 +3991,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Eurobet Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Eurobet Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4003,7 +4003,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Snai Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Snai Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4015,7 +4015,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Goldbet Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Goldbet Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4027,7 +4027,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Casino Barcelona Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Casino Barcelona Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4039,7 +4039,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Sportium Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Sportium Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4051,7 +4051,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Marca Apuestas Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Marca Apuestas Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4063,7 +4063,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Everest Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Everest Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4075,7 +4075,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Bet-at-home Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Bet-at-home Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4087,7 +4087,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Mybet Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Mybet Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4099,7 +4099,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Betsson Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Betsson Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4111,7 +4111,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Betsafe Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Betsafe Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4123,7 +4123,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="NordicBet Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="NordicBet Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4135,7 +4135,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Unibet Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Unibet Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4147,7 +4147,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Maria Casino Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Maria Casino Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4159,7 +4159,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="LeoVegas Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="LeoVegas Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4171,7 +4171,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Mr Green Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Mr Green Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4183,7 +4183,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Redbet Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+        <site site_name="Redbet Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -4312,7 +4312,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="GGPoker" enabled="True" screen_name="Hero" site_path="C:/AmericasCardroom/" HH_path="C:\Users\jd\Documents\GGpoker\85" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0" network="GGPoker">
+        <site site_name="GGPoker" enabled="True" screen_name="Hero" site_path="C:/AmericasCardroom/" HH_path="C:\Users\YOUR_OS_USER\Documents\GGpoker\85" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0" network="GGPoker">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="all" ls="GGPoker_default"/>
             <fav max="2" fav_seat="0"/>

@@ -1083,11 +1083,11 @@ def test_the_splash_is_shared_in_proportion_to_what_was_taken() -> None:
     """
     from fpdb_3_legacy.coinpoker_hand_builder import _extract_splash_winnings
 
-    events = _splash_events(2.0, [("jeje1976", 4.76, True), ("lilOmaha", 1.59, True)])
+    events = _splash_events(2.0, [("koko1976", 4.76, True), ("lilOmaha", 1.59, True)])
 
     paid = {entry["player"]: entry["amount"] for entry in _extract_splash_winnings(events)}
 
-    assert paid == {"jeje1976": "1.50", "lilOmaha": "0.50"}
+    assert paid == {"koko1976": "1.50", "lilOmaha": "0.50"}
 
 
 def test_a_lone_marked_player_takes_the_whole_splash() -> None:

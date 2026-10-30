@@ -345,7 +345,7 @@ class GuiTourneyPlayerStats(QSplitter):
         # Reveal the same hero/alias chosen in this stats tab before loading, so
         # the viewer doesn't fall back to its default alias and show every hand
         # face-down when the tournament was recorded under another alias
-        # (e.g. "Hero" vs the configured screen name "jeje_sat").
+        # (e.g. "Hero" vs the configured screen name "koko_sat").
         self._sync_viewer_hero(viewer)
         self.main_window.threads.append(viewer)
         self.main_window.add_and_display_tab(viewer, f"Tourney #{tourney_no}")

@@ -101,7 +101,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         # Mock filters and getRingProfitGraph
         viewer.filters = MagicMock()
         viewer.filters.getSites.return_value = ["PokerStars"]
-        viewer.filters.getHeroes.return_value = {"PokerStars": "jeje_sat"}
+        viewer.filters.getHeroes.return_value = {"PokerStars": "koko_sat"}
         viewer.filters.getSiteIds.return_value = {"PokerStars": 2}
         viewer.filters.getLimits.return_value = ["All"]
         viewer.filters.getGames.return_value = []
@@ -126,7 +126,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         # Mock filters and getData
         viewer.filters = MagicMock()
         viewer.filters.getSites.return_value = ["PokerStars"]
-        viewer.filters.getHeroes.return_value = {"PokerStars": "jeje_sat"}
+        viewer.filters.getHeroes.return_value = {"PokerStars": "koko_sat"}
         viewer.filters.getSiteIds.return_value = {"PokerStars": 2}
         viewer.filters.getGames.return_value = []
 
@@ -174,7 +174,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         # Mock filters
         viewer.filters = MagicMock()
         viewer.filters.getSites.return_value = ["PokerStars"]
-        viewer.filters.getHeroes.return_value = {"PokerStars": "jeje_sat"}
+        viewer.filters.getHeroes.return_value = {"PokerStars": "koko_sat"}
         viewer.filters.getSiteIds.return_value = {"PokerStars": 2}
         viewer.filters.getLimits.return_value = ["All"]
         viewer.filters.getSeats.return_value = None
@@ -215,7 +215,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         # Mock filters
         viewer.filters = MagicMock()
         viewer.filters.getSites.return_value = ["PokerStars"]
-        viewer.filters.getHeroes.return_value = {"PokerStars": "jeje_sat"}
+        viewer.filters.getHeroes.return_value = {"PokerStars": "koko_sat"}
         viewer.filters.getSiteIds.return_value = {"PokerStars": 2}
         viewer.filters.getSeats.return_value = None
         viewer.filters.getDates.return_value = ("2000-01-01", "2030-01-01")
@@ -288,13 +288,13 @@ class TestEmptyDataPopups(unittest.TestCase):
         filters = Filters(self.mock_db)
 
         # Mock site variants
-        heroes = {"PokerStars": "jeje_sat"}
+        heroes = {"PokerStars": "koko_sat"}
 
         # Call get_hero_ids
         hero_ids = filters.get_hero_ids(heroes)
 
         # Assert get_player_id was called with site variant logic and resolved correct ID
-        self.mock_db.get_player_id.assert_called_once_with(self.mock_db.config, "PokerStars", "jeje_sat")
+        self.mock_db.get_player_id.assert_called_once_with(self.mock_db.config, "PokerStars", "koko_sat")
         self.assertEqual(hero_ids, [8])
 
     def test_filters_get_actual_site_id(self):
@@ -305,7 +305,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         filters.siteid = {"PokerStars": 2}
 
         # Test fallback works and maps to site 33 (e.g. PokerStars.FR)
-        actual_id = filters.get_actual_site_id("PokerStars", "jeje_sat")
+        actual_id = filters.get_actual_site_id("PokerStars", "koko_sat")
         self.assertEqual(actual_id, 2)  # Since mock returns 2 (mock site variant)
 
     def test_filters_get_hero_for_site(self):
@@ -316,20 +316,20 @@ class TestEmptyDataPopups(unittest.TestCase):
 
         # Mock getHeroes return value
         filters.getHeroes = MagicMock(  # type: ignore[method-assign]
-            return_value={"PokerStars": "jeje_sat", "Unibet Poker": "jejesat"},
+            return_value={"PokerStars": "koko_sat", "Unibet Poker": "kokosat"},
         )
 
         # Test exact match
-        self.assertEqual(filters.get_hero_for_site("PokerStars"), "jeje_sat")
+        self.assertEqual(filters.get_hero_for_site("PokerStars"), "koko_sat")
         # Test variant prefix match
-        self.assertEqual(filters.get_hero_for_site("PokerStars.FR"), "jeje_sat")
-        self.assertEqual(filters.get_hero_for_site("PokerStars.EU"), "jeje_sat")
+        self.assertEqual(filters.get_hero_for_site("PokerStars.FR"), "koko_sat")
+        self.assertEqual(filters.get_hero_for_site("PokerStars.EU"), "koko_sat")
         # Test parent matching variant
-        self.assertEqual(filters.get_hero_for_site("Unibet"), "jejesat")
+        self.assertEqual(filters.get_hero_for_site("Unibet"), "kokosat")
         # Test non-existent site returns None
-        filters.getHeroes = MagicMock(return_value={"PokerStars": "jeje_sat"})  # type: ignore[method-assign]
+        filters.getHeroes = MagicMock(return_value={"PokerStars": "koko_sat"})  # type: ignore[method-assign]
         self.assertEqual(
-            filters.get_hero_for_site("Winamax"), "jeje_sat"
+            filters.get_hero_for_site("Winamax"), "koko_sat"
         )  # Since only one hero is configured, returns it as fallback
 
     def test_filters_update_sites_for_hero(self):
@@ -346,7 +346,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         filters.cbSites = {"PokerStars": cb_ps, "Unibet": cb_ub}
 
         # Call with variant PokerStars.FR
-        filters.update_sites_for_hero("jeje_sat", "PokerStars.FR")
+        filters.update_sites_for_hero("koko_sat", "PokerStars.FR")
 
         self.assertTrue(cb_ps.isChecked())
         self.assertFalse(cb_ub.isChecked())

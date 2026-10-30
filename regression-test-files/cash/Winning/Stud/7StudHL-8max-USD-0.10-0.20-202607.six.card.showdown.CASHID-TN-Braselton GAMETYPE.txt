@@ -1,0 +1,54 @@
+Hand #2780605304 - 7Stud H/L (Fixed Limit) - $0.10/$0.20 - 2026/07/17 16:29:57 UTC
+Braselton 8-max
+Seat 1: Villain1 ($7.33)
+Seat 2: Villain2 ($7.11) is sitting out
+Seat 4: rivercat42 ($8.22)
+Seat 6: Villain3 ($0.74)
+Villain3 posts ante $0.02
+rivercat42 posts ante $0.02
+Villain1 posts ante $0.02
+*** 3rd STREET ***
+Main pot $0.06 | Rake $0.00
+Dealt to Villain1 [7c]
+Dealt to rivercat42 [Kd 6h Ah]
+Dealt to Villain3 [8h]
+Villain1 brings in $0.05
+rivercat42 calls $0.05
+Villain3 calls $0.05
+*** 4th STREET ***
+Main pot $0.21 | Rake $0.00
+Dealt to Villain1 [7c] [3c]
+Dealt to rivercat42 [Kd 6h Ah] [Kc]
+Dealt to Villain3 [8h] [4c]
+rivercat42 bets $0.10
+Villain3 calls $0.10
+Villain1 folds
+*** 5th STREET ***
+Main pot $0.40 | Rake $0.01
+Dealt to rivercat42 [Kd 6h Ah Kc] [2s]
+Dealt to Villain3 [8h 4c] [5c]
+rivercat42 bets $0.20
+Villain3 raises $0.40 to $0.40
+rivercat42 calls $0.20
+*** 6th STREET ***
+Main pot $1.16 | Rake $0.05
+Dealt to rivercat42 [Kd 6h Ah Kc 2s] [3h]
+Dealt to Villain3 [8h 4c 5c] [5s]
+Villain3 bets $0.17 and is all-in
+rivercat42 calls $0.17
+*** 7th STREET ***
+Main pot $1.49 | Rake $0.06
+Dealt to rivercat42 [Kd 6h Ah Kc 2s 3h] [2h]
+Dealt to Villain3 [8h 4c 5c 5s] [6d]
+*** SHOW DOWN ***
+Main pot $1.49 | Rake $0.06
+rivercat42 shows [Kd 6h Ah Kc 2s 3h] (HI - two pair, Kings and Deuces [Kd Kc 2s 2h Ah])
+Villain3 shows [7h 6s 8h 4c 5c 5s] (HI - a straight, Eight high [8h 7h 6s 5s 4c] | LO - [8,7,6,5,4])
+Villain3 collected $1.49 from main pot
+*** SUMMARY ***
+Total pot $1.49 | Rake $0.04 | JP Fee $0.02
+Seat 1: Villain1 folded on the 4th Street
+Seat 4: rivercat42 showed [Kd 6h Ah Kc 2s 3h] and lost with HI - two pair, Kings and Deuces [Kd Kc 2s 2h Ah]
+Seat 6: Villain3 showed [7h 6s 8h 4c 5c 5s] and won $1.49 with HI - a straight, Eight high [8h 7h 6s 5s 4c] | LO - [8,7,6,5,4]
+
+

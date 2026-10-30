@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Regression tests for actions Unibet annotates with a reason.
 
-Unibet appends why the site acted for a player: "jejesat[...] folds  (timed out)".
+Unibet appends why the site acted for a player: "kokosat[...] folds  (timed out)".
 re_Action allowed for "(disconnect)" and nothing else, so a timed-out fold was
 not read at all. The consequences ran deep: the player stayed in the hand, was
 counted among those reaching a showdown that never happened, and -- his cards
@@ -24,13 +24,13 @@ def _action(line: str) -> tuple[str, str] | None:
 
 def test_a_timed_out_fold_is_read():
     # Two spaces before the note, as Unibet writes it.
-    line = "jejesat[Unibet_28204e083c0fb55a] folds  (timed out)"
+    line = "kokosat[Unibet_28204e083c0fb55a] folds  (timed out)"
 
-    assert _action(line) == ("jejesat[Unibet_28204e083c0fb55a]", "folds")
+    assert _action(line) == ("kokosat[Unibet_28204e083c0fb55a]", "folds")
 
 
 def test_a_disconnected_fold_is_still_read():
-    assert _action("jejesat folds (disconnect)") == ("jejesat", "folds")
+    assert _action("kokosat folds (disconnect)") == ("kokosat", "folds")
 
 
 def test_an_unannotated_action_is_unaffected():

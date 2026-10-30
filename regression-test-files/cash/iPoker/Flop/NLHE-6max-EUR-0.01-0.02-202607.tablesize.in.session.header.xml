@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<session sessioncode="7300000001">
+ <general>
+  <client_version>26.1.1.31</client_version>
+  <mode>real</mode>
+  <gametype>Holdem NL 0,01€/0,02€</gametype>
+  <tablename>Synthetic, 900000001</tablename>
+  <tablecurrency>EUR</tablecurrency>
+  <smallblind>0,01€</smallblind>
+  <bigblind>0,02€</bigblind>
+  <duration>00:01:02</duration>
+  <gamecount>2</gamecount>
+  <startdate>2026-07-20 21:00:00</startdate>
+  <currency>EUR</currency>
+  <nickname>Player4</nickname>
+  <tablesize>6</tablesize>
+ </general>
+ <game gamecode="5858157850">
+  <general>
+   <startdate>2026-07-20 21:00:05</startdate>
+   <players>
+    <player seat="1" name="Player0" chips="2,00€" dealer="0" win="0,02€" bet="0,02€"/>
+    <player seat="2" name="Player1" chips="1,84€" dealer="0" win="0€" bet="0€"/>
+    <player seat="3" name="Player2" chips="2,37€" dealer="0" win="0€" bet="0€"/>
+    <player seat="4" name="Player3" chips="1,50€" dealer="1" win="0€" bet="0€"/>
+    <player seat="5" name="Player4" chips="2,12€" dealer="0" win="0€" bet="0,01€"/>
+   </players>
+  </general>
+  <round no="0">
+   <action no="1" player="Player4" sum="0,01€" type="1"/>
+   <action no="2" player="Player0" sum="0,02€" type="2"/>
+  </round>
+  <round no="1">
+   <cards type="Pocket" player="Player4">S9 D4</cards>
+   <action no="3" player="Player1" sum="0€" type="0"/>
+   <action no="4" player="Player2" sum="0€" type="0"/>
+   <action no="5" player="Player3" sum="0€" type="0"/>
+   <action no="6" player="Player4" sum="0€" type="0"/>
+  </round>
+ </game>
+ <game gamecode="5858157851">
+  <general>
+   <startdate>2026-07-20 21:00:41</startdate>
+   <players>
+    <player seat="1" name="Player0" chips="2,01€" dealer="0" win="0€" bet="0,01€"/>
+    <player seat="2" name="Player1" chips="1,84€" dealer="0" win="0,02€" bet="0,02€"/>
+    <player seat="3" name="Player2" chips="2,37€" dealer="0" win="0€" bet="0€"/>
+    <player seat="4" name="Player3" chips="1,50€" dealer="0" win="0€" bet="0€"/>
+    <player seat="5" name="Player4" chips="2,11€" dealer="1" win="0€" bet="0€"/>
+    <player seat="6" name="Player5" chips="1,96€" dealer="0" win="0€" bet="0€"/>
+   </players>
+  </general>
+  <round no="0">
+   <action no="1" player="Player0" sum="0,01€" type="1"/>
+   <action no="2" player="Player1" sum="0,02€" type="2"/>
+  </round>
+  <round no="1">
+   <cards type="Pocket" player="Player4">HK C7</cards>
+   <action no="3" player="Player2" sum="0€" type="0"/>
+   <action no="4" player="Player3" sum="0€" type="0"/>
+   <action no="5" player="Player4" sum="0€" type="0"/>
+   <action no="6" player="Player5" sum="0€" type="0"/>
+  </round>
+ </game>
+</session>

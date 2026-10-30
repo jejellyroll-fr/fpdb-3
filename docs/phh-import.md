@@ -41,8 +41,8 @@ not carry it):
 ```xml
 <data_sources>
     <data_source name="PHH">
-        <hero_alias name="jeje"/>
-        <hero_alias name="jeje76"/>
+        <hero_alias name="koko"/>
+        <hero_alias name="koko76"/>
     </data_source>
 </data_sources>
 ```
@@ -60,8 +60,8 @@ Those aliases are resolved exactly as a room's `<hero_alias>` entries are:
 * Without aliases a PHH hero is no one. The hero-flagged players a room falls back
   to are, for PHH, each file's own `_hero`, which are not one player, so they are
   never read as the hero.
-* A **hero profile** may link a PHH name with a room's (`PokerStars:jeje` and
-  `PHH:jeje`). The filters and the Hand Viewer then read their hands as one
+* A **hero profile** may link a PHH name with a room's (`PokerStars:koko` and
+  `PHH:koko`). The filters and the Hand Viewer then read their hands as one
   player's, as for two rooms. The reports listed above do not read profiles, for
   rooms either: they resolve the site and name selected.
 

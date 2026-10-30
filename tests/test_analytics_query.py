@@ -549,9 +549,9 @@ class TestExplainability:
         assert run_query(query_db, Query(metric="fold_frequency")).rows[0].opportunities == 341
 
     def test_an_identity_filter_needs_the_site_join(self) -> None:
-        _conditions, params, aliases = compile_filters({"identity": [("PokerStars", "jeje")]})
+        _conditions, params, aliases = compile_filters({"identity": [("PokerStars", "koko")]})
         assert aliases == {"P", "S"}
-        assert params == ["PokerStars", "jeje"]
+        assert params == ["PokerStars", "koko"]
 
     def test_hero_exclusion_keeps_decisions_with_no_situation(self, query_db: Database) -> None:
         # Every decision is either a known hero decision or a non-hero one: the

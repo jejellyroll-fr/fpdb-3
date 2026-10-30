@@ -5,7 +5,7 @@ The check flags a parsed hand that holds no action outside the blinds, on the
 assumption that a hold'em hand always has one. A blind posted all-in breaks that
 assumption: the short stack is already covered, nobody has anything left to act
 on, and the board just runs out. Winamax hand 4933326270864822 is such a hand --
-jejellyroll posts a big blind of 20 all-in against a small blind of 40 -- and
+kokolantern posts a big blind of 20 all-in against a small blind of 40 -- and
 warning about it reported a parser failure that had not happened.
 """
 
@@ -32,7 +32,7 @@ def _hand(blind_actions, other_actions=None):
     hand.handid = "4933326270864822"
     hand.gametype = {"base": "hold", "type": "tour", "sb": "40", "bb": "80"}
     hand.tourNo = "1148629531"
-    hand.players = [[1, "Benjouille__", "880"], [3, "jejellyroll", "20"]]
+    hand.players = [[1, "Benjouille__", "880"], [3, "kokolantern", "20"]]
     hand.actionStreets = ["BLINDSANTES", "PREFLOP", "FLOP", "TURN", "RIVER"]
     hand.actions = {"BLINDSANTES": blind_actions, "PREFLOP": other_actions or []}
     hand.handText = ""
@@ -46,14 +46,14 @@ def _issues(hand) -> list[str]:
     return converter.parsing_issues
 
 
-# jejellyroll's 20-chip big blind leaves him with nothing: the fourth element is True.
+# kokolantern's 20-chip big blind leaves him with nothing: the fourth element is True.
 _BLIND_ALL_IN = [
     ("Benjouille__", "small blind", Decimal("40"), False),
-    ("jejellyroll", "big blind", Decimal("20"), True),
+    ("kokolantern", "big blind", Decimal("20"), True),
 ]
 _BLIND_NORMAL = [
     ("Benjouille__", "small blind", Decimal("40"), False),
-    ("jejellyroll", "big blind", Decimal("80"), False),
+    ("kokolantern", "big blind", Decimal("80"), False),
 ]
 
 

@@ -20,13 +20,13 @@ from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.WinningToFpdb import Winning
 
 SPINZ_PATH = (
-    r"C:\ACR Poker\handHistory\edinapoker"
+    r"C:\ACR Poker\handHistory\rivercat42"
     r"\HH20260721 SPINZID-G35539941T1 TN-$0{FULLSTOP}25 Spinz Holdem"
     r" GAMETYPE-Hold'em LIMIT-no CUR-REAL OND-F BUYIN-25.txt"
 )
 
 MTT_PATH = (
-    r"C:\ACR Poker\handHistory\edinapoker"
+    r"C:\ACR Poker\handHistory\rivercat42"
     r"\HH20260721 SCHEDULEDID-G35528538T3 TN-Lightning PKO - $6 GTD"
     r" GAMETYPE-Hold'em LIMIT-no CUR-REAL OND-F BUYIN-0.txt"
 )
@@ -137,7 +137,7 @@ class TestSpinzTableTitle:
             "Lightning PKO - $6 GTD, Table 3 - No Limit Holdem - (35528538)",  # another tournament
             "$0.25 - No Limit - 10 / 20 Hold'em (35548425)",  # another Spinz, same stake
             "ACR Poker",  # client main window
-            "ACR Poker Lobby Logged in as edinapoker",  # real lobby title
+            "ACR Poker Lobby Logged in as rivercat42",  # real lobby title
             "Arimo - Omaha PL - $0.01/$0.02",  # cash table
         ],
         ids=["other-tournament", "other-spinz-same-stake", "client-window", "lobby", "cash-table"],

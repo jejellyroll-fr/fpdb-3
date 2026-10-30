@@ -30,7 +30,7 @@ def config_xml(sites: str) -> str:
     )
 
 
-def site(name: str = "PokerStars", screen_name: str = "jeje", aliases: str = "") -> str:
+def site(name: str = "PokerStars", screen_name: str = "koko", aliases: str = "") -> str:
     return (
         f'<site site_name="{name}" enabled="True" screen_name="{screen_name}"'
         f' HH_path="" TS_path="" converter="PokerStarsToFpdb">{aliases}</site>'
@@ -89,16 +89,16 @@ def test_the_order_given_is_the_order_kept(config) -> None:
 
 
 def test_a_name_given_twice_is_written_once(config) -> None:
-    config.set_hero_aliases("PokerStars", ["jeje", "other", "jeje"])
+    config.set_hero_aliases("PokerStars", ["koko", "other", "koko"])
 
-    assert stored(config) == ("jeje", ["other"])
+    assert stored(config) == ("koko", ["other"])
 
 
 def test_an_empty_name_is_dropped(config) -> None:
     # The preferences window sends a blank row for anything not filled in.
-    config.set_hero_aliases("PokerStars", ["jeje", "", "other"])
+    config.set_hero_aliases("PokerStars", ["koko", "", "other"])
 
-    assert stored(config) == ("jeje", ["other"])
+    assert stored(config) == ("koko", ["other"])
 
 
 def test_giving_no_name_at_all_clears_the_hero(config) -> None:
@@ -122,11 +122,11 @@ def test_writing_again_replaces_the_previous_aliases(config) -> None:
 
 def test_aliases_already_in_the_file_are_replaced_too(build) -> None:
     config = build(site(aliases='<hero_alias name="from-the-file"/>'))
-    assert config.get_hero_aliases("PokerStars") == ["jeje", "from-the-file"]
+    assert config.get_hero_aliases("PokerStars") == ["koko", "from-the-file"]
 
-    config.set_hero_aliases("PokerStars", ["jeje"])
+    config.set_hero_aliases("PokerStars", ["koko"])
 
-    assert stored(config) == ("jeje", [])
+    assert stored(config) == ("koko", [])
 
 
 def test_the_site_in_use_is_kept_in_step(config) -> None:
@@ -165,7 +165,7 @@ def test_a_room_that_is_not_configured_cannot_be_given_names(config) -> None:
 def test_a_room_with_no_aliases_answers_to_its_screen_name(config) -> None:
     # Configurations written before aliases existed have only the one name,
     # and must keep working unchanged.
-    assert config.get_hero_aliases("PokerStars") == ["jeje"]
+    assert config.get_hero_aliases("PokerStars") == ["koko"]
 
 
 def test_a_room_with_no_hero_answers_to_nobody(build) -> None:
@@ -177,8 +177,8 @@ def test_a_room_with_no_hero_answers_to_nobody(build) -> None:
 def test_the_room_can_be_named_in_any_case(config) -> None:
     # Site names reach this from hand histories and from window titles, which
     # do not agree with the configuration on capitalisation.
-    assert config.get_hero_aliases("pokerstars") == ["jeje"]
-    assert config.get_hero_aliases("POKERSTARS") == ["jeje"]
+    assert config.get_hero_aliases("pokerstars") == ["koko"]
+    assert config.get_hero_aliases("POKERSTARS") == ["koko"]
 
 
 def test_the_exact_name_is_preferred_over_one_differing_in_case(build) -> None:

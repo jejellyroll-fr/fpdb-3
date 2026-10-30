@@ -41,8 +41,8 @@ def test_a_split_pot_names_the_pot_it_came_from():
 @pytest.mark.parametrize(
     ("line", "expected"),
     [
-        ("jejesat[Unibet_28204e083c0fb55a] wins main pot, 150", ("jejesat[Unibet_28204e083c0fb55a]", "150")),
-        ("jejesat[Unibet_28204e083c0fb55a] wins side pot #1, 660", ("jejesat[Unibet_28204e083c0fb55a]", "660")),
+        ("kokosat[Unibet_28204e083c0fb55a] wins main pot, 150", ("kokosat[Unibet_28204e083c0fb55a]", "150")),
+        ("kokosat[Unibet_28204e083c0fb55a] wins side pot #1, 660", ("kokosat[Unibet_28204e083c0fb55a]", "660")),
     ],
 )
 def test_tournament_side_pots_put_the_amount_last(line, expected):
@@ -56,7 +56,7 @@ def test_tournament_side_pots_put_the_amount_last(line, expected):
         "Hero wins the tournament and receives €12.50 - congratulations!",
         "APTEM-89 wins the $0.27 bounty for eliminating Hero",
         "Amsterdam71 wins $19.90 for eliminating MuKoJla and their own bounty increases by $19.89 to $155.32",
-        "jejesat[Unibet_28204e083c0fb55a] finished the tournament in 1st place, and won €4",
+        "kokosat[Unibet_28204e083c0fb55a] finished the tournament in 1st place, and won €4",
         # The summary line itself: its "won" is the figure that broke the rake.
         "Seat 3: venomjr: bet €0.20 and won €0.43, net result: €0.23",
     ],

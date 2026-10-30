@@ -341,7 +341,7 @@ FULL_RING = [
     winamax_ax_seats.AXSeat("CTroPinJust", 1990, 81),
     winamax_ax_seats.AXSeat("MuckEtMousse", 2200, 117),
     winamax_ax_seats.AXSeat("ayuga1312", 2213, 329),
-    winamax_ax_seats.AXSeat("jejellyroll", 2000, 365),
+    winamax_ax_seats.AXSeat("kokolantern", 2000, 365),
     winamax_ax_seats.AXSeat("depor81", 1783, 329),
     winamax_ax_seats.AXSeat("BluffTesMots", 1767, 117),
 ]
@@ -396,7 +396,7 @@ def test_each_window_learns_its_own_centre() -> None:
 
 def test_the_frame_is_used_when_the_players_are_inside_it() -> None:
     """A client reporting one consistent space needs none of this."""
-    players = [winamax_ax_seats.AXSeat("jejellyroll", 400, 300)]
+    players = [winamax_ax_seats.AXSeat("kokolantern", 400, 300)]
 
     centre = winamax_ax_seats._table_centre(players, _Rect(0, 0, 960, 740), 6, hwnd=1)
 
@@ -413,11 +413,11 @@ def test_read_window_for_reads_by_handle(monkeypatch) -> None:
 
     def _read(self, title, max_seats, table_pos=None, window_id=None):
         seen.update(title=title, max_seats=max_seats, window_id=window_id)
-        return {0: "jejellyroll"}
+        return {0: "kokolantern"}
 
     monkeypatch.setattr(winamax_ax_seats.WinamaxAXSeatReader, "read_window", _read)
 
-    assert winamax_ax_seats.read_window_for(1234, "Winamax Colorado 1") == {0: "jejellyroll"}
+    assert winamax_ax_seats.read_window_for(1234, "Winamax Colorado 1") == {0: "kokolantern"}
     assert seen == {"title": "Winamax Colorado 1", "max_seats": 6, "window_id": 1234}
 
 
