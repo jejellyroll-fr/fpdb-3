@@ -16,8 +16,8 @@ import pytest
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.WinningToFpdb import Winning
 
-HAND_FILE = Path(
-    "/Users/jde/Downloads/AmericasCardroom/handHistory/edinapoker/"
+HAND_FILE = Path.home().joinpath(
+    "Downloads/AmericasCardroom/handHistory/edinapoker/"
     "HH20260717 CASHID-G35414311T295 TN-Braselton GAMETYPE-7 Stud H{BACKSLASH}L "
     "LIMIT-fixed CUR-REAL OND-F BUYIN-0 MIN-10 MAX-20.txt",
 )

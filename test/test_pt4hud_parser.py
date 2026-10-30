@@ -23,11 +23,11 @@ import pytest
 from fpdb_3_legacy import pt4hud
 
 FIXTURE = os.path.join(os.path.dirname(__file__), "fixtures", "generationpoker_3h.pt4hud")
-LOCAL_GP2H = "/Users/jde/Downloads/tournament_-_generationpoker_2h_free_generationpoker.pt_.pt4hud"
-LOCAL_SPIN_BASIC = "/Users/jde/Downloads/spin_and_go_master_-_basic.pt4hud"
-LOCAL_SPIN_NEW = "/Users/jde/Downloads/tournament_-_spin_new.pt4hud"
-LOCAL_HU_CASH = "/Users/jde/Downloads/cash_-_ev_hu_cash_enthusiast_v.1.00.pt4hud"
-LOCAL_GP_CASH = "/Users/jde/Downloads/cash_-_genarationpoker_cash_free_generationpoker.pt_.pt4hud"
+LOCAL_GP2H = os.path.expanduser("~/Downloads/tournament_-_generationpoker_2h_free_generationpoker.pt_.pt4hud")
+LOCAL_SPIN_BASIC = os.path.expanduser("~/Downloads/spin_and_go_master_-_basic.pt4hud")
+LOCAL_SPIN_NEW = os.path.expanduser("~/Downloads/tournament_-_spin_new.pt4hud")
+LOCAL_HU_CASH = os.path.expanduser("~/Downloads/cash_-_ev_hu_cash_enthusiast_v.1.00.pt4hud")
+LOCAL_GP_CASH = os.path.expanduser("~/Downloads/cash_-_genarationpoker_cash_free_generationpoker.pt_.pt4hud")
 
 
 def _be_str(s: str) -> bytes:

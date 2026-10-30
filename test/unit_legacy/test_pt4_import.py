@@ -14,7 +14,7 @@ import pytest
 from fpdb_3_legacy import pt4_import as pt4
 from fpdb_3_legacy import stat_registry as sr
 
-SAMPLE_DIR = Path("/Users/jde/Documents/github/fpdb-new/658225d6b920e_5-courbes-chips-ev-par-position")
+SAMPLE_DIR = Path.home().joinpath("Documents/github/fpdb-new/658225d6b920e_5-courbes-chips-ev-par-position")
 
 
 def _decoded(value_expr, columns, label="ChipEV X", decimals=2):

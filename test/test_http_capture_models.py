@@ -1619,7 +1619,7 @@ def test_complete_swc_event_fixture_imports_into_sqlite_memory_db():
 
 
 def test_real_swc_capture_importable_hands_build_hand_py_when_capture_is_present():
-    capture_path = Path("/Users/jde/Documents/SwC Poker/Capture/raw_messages.jsonl")
+    capture_path = Path.home().joinpath("Documents/SwC Poker/Capture/raw_messages.jsonl")
     if not capture_path.exists():
         pytest.skip("local SwC capture corpus is not present")
 

@@ -17,8 +17,8 @@ import pytest
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.GGPokerToFpdb import GGPoker
 
-HAND_FILE = Path(
-    "/Users/jde/Documents/github/fpdb-new/SortedHands/GGpoker/2026/cg/plo-session/"
+HAND_FILE = Path.home().joinpath(
+    "Documents/github/fpdb-new/SortedHands/GGpoker/2026/cg/plo-session/"
     "GG20260118-2024 - PLOYellow8 - 0.02 - 0.05 - 7max.txt",
 )
 

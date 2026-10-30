@@ -21,9 +21,8 @@ import pytest
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
-HAND_FILE = Path(
-    "/Users/jde/Library/Application Support/PokerStarsFR/HandHistory/jeje_sat/"
-    "HH20260717 T4016724563 Hold'em No Limit Varié.txt",
+HAND_FILE = Path.home().joinpath(
+    "Library/Application Support/PokerStarsFR/HandHistory/jeje_sat/HH20260717 T4016724563 Hold'em No Limit Varié.txt",
 )
 
 pytestmark = pytest.mark.skipif(not HAND_FILE.exists(), reason="local PokerStars history not present")

@@ -143,7 +143,7 @@ You finished in 1st place.
 """
     summary = make_summary(text)
     summary.in_path = (
-        "/Users/jde/Library/Application Support/PokerStarsFR/HandHistory/jeje_sat/"
+        "/Users/alice/Library/Application Support/PokerStarsFR/HandHistory/jeje_sat/"
         "TS20260605 T4006174726 No Limit Hold'em.txt"
     )
 
@@ -182,7 +182,7 @@ You finished in 2nd place.
 """
     summary = make_summary(text)
     summary.in_path = (
-        "/Users/jde/Library/Application Support/PokerStarsFR/HandHistory/jeje_sat/"
+        "/Users/alice/Library/Application Support/PokerStarsFR/HandHistory/jeje_sat/"
         "TS20260605 T4006175219 No Limit Hold'em.txt"
     )
 
