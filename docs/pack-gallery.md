@@ -40,8 +40,9 @@ the window is `pack_gallery_dialog.py`.
 
 fpdb remembers what it installed from the gallery, and at which version, in
 `pack-gallery.json` beside your configuration. The HUD configuration is saved
-before that record is written: when it cannot be saved, the change is undone
-and the pack keeps its previous state. Packages, the index and
+before that record is written, and the two go together: when either cannot be
+written, the change is undone (the configuration saved back as it was) and the
+pack keeps its previous state. Packages, the index and
 screenshots are cached in `pack-gallery-cache/`. Restart fpdb and the HUD to
 use a change everywhere.
 

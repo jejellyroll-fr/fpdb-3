@@ -18,7 +18,7 @@ from typing import Any
 import defusedxml.minidom
 import pytest
 
-from fpdb_3_legacy import pt4hud, stat_packs
+from fpdb_3_legacy import pack_gallery, pt4hud, stat_packs
 from fpdb_3_legacy.hud_package import install_missing_hud_package, package_problems
 from fpdb_3_legacy.pack_gallery import (
     INDEX_NAME,
@@ -730,3 +730,60 @@ def test_a_hud_whose_removal_cannot_be_saved_stays_recorded(gallery, tmp_path) -
 
     assert config.toxml() == before
     assert read_record(tmp_path / "record.json")["fpdb-3.nlhe_6max_dynamic"]["version"] == "1.0.0"
+
+
+class Saves:
+    """A configuration save that remembers what it wrote."""
+
+    def __init__(self, config: Any) -> None:
+        self.config, self.written = config, []
+
+    def __call__(self) -> None:
+        self.written.append(self.config.toxml())
+
+
+def unwritable_record(monkeypatch) -> None:
+    def refuse(_path, _installed) -> None:
+        raise OSError("read-only profile")
+
+    monkeypatch.setattr(pack_gallery, "_write_record", refuse)
+
+
+def test_a_hud_whose_record_cannot_be_written_is_taken_back_out(gallery, tmp_path, monkeypatch) -> None:
+    # Codex (#641): saved but unrecorded, the profile then blocked its own reinstall as a name of the user's.
+    config = fresh_config()
+    before = config.toxml()
+    saves = Saves(config)
+    entry = load_index(str(gallery), tmp_path / "cache").get("fpdb-3.nlhe_6max_basic")
+    package = fetch_package(entry, str(gallery), tmp_path / "cache")
+    unwritable_record(monkeypatch)
+
+    with pytest.raises(OSError, match="read-only profile"):
+        install_entry(entry, package, config_doc=config, record=tmp_path / "record.json", save=saves)
+
+    assert config.toxml() == before
+    assert len(saves.written) == 2 and saves.written[-1] == before  # saved, then saved back as it was
+    assert read_record(tmp_path / "record.json") == {}
+
+
+def test_a_hud_whose_record_cannot_be_updated_on_uninstall_stays(gallery, tmp_path, monkeypatch) -> None:
+    config = fresh_config()
+    install_from(gallery, tmp_path, "fpdb-3.nlhe_6max_basic", config)
+    before = config.toxml()
+    saves = Saves(config)
+    unwritable_record(monkeypatch)
+
+    with pytest.raises(OSError, match="read-only profile"):
+        uninstall_entry("fpdb-3.nlhe_6max_basic", config_doc=config, record=tmp_path / "record.json", save=saves)
+
+    assert config.toxml() == before and saves.written[-1] == before
+    assert "fpdb-3.nlhe_6max_basic" in read_record(tmp_path / "record.json")
+
+
+def test_a_new_stat_pack_whose_record_cannot_be_written_is_taken_back_out(installer, monkeypatch) -> None:
+    unwritable_record(monkeypatch)
+
+    with pytest.raises(OSError, match="read-only profile"):
+        installer.install("example.steals", fresh_config())
+
+    assert "example.steals" not in installed_versions(installer.record, installer.packs_dir)

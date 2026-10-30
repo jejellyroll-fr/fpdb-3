@@ -502,19 +502,28 @@ def _remove_panel_rules(config_doc: Any, scopes: Iterable[str]) -> None:
             section.parentNode.removeChild(section)
 
 
-def _saved(config_doc: Any, save: Callable[[], None] | None, change: Callable[[], bool]) -> bool:
-    """Run *change* on *config_doc*, then *save* it if it changed; on any failure, *config_doc* is as it was.
+def _committed(
+    config_doc: Any, save: Callable[[], None] | None, change: Callable[[], bool], commit: Callable[[], None]
+) -> bool:
+    """Run *change* on *config_doc*, *save* it if it changed, then *commit* the record: all of it, or none.
 
-    The record is written only after this returns, so a configuration that
-    could not be saved is never recorded as installed or uninstalled (Codex, #641).
+    On any failure *config_doc* is restored, and saved again if it already
+    was, so the configuration and the record never disagree. There is no
+    record of a pack the configuration never received, and no pack in the
+    configuration the record does not know (Codex, #641).
     """
     snapshot = config_doc.documentElement.cloneNode(True)
+    saved = False
     try:
         changed = change()
         if changed and save is not None:
             save()
+            saved = True
+        commit()
     except BaseException:
         config_doc.replaceChild(snapshot, config_doc.documentElement)
+        if saved and save is not None:
+            save()
         raise
     return changed
 
@@ -539,67 +548,70 @@ def install_entry(
     popup it drops stays while something of the user's still opens it.
 
     When the HUD configuration changed, *save* is called before the record is
-    written; if it fails, *config_doc* is restored and the record is left as
-    it was.
+    written. If either fails, *config_doc* (and the saved file) is restored
+    and the record is left as it was.
     """
     record = Path(record)
     installed = read_record(record)
-    changed = False
     if entry.kind == "stats":
         stat_packs.install_pack(package, packs_dir, replace=replace)
         installed[entry.id] = {"kind": entry.kind, "version": entry.version}
-    else:
-        from fpdb_3_legacy.hud_package import install_missing_hud_package, package_popups  # noqa: PLC0415
+        try:
+            _write_record(record, installed)
+        except OSError:
+            if not replace:  # a new pack the record cannot hold is taken back out
+                stat_packs.uninstall_pack(entry.id, packs_dir)
+            raise
+        return False
+    from fpdb_3_legacy.hud_package import install_missing_hud_package, package_popups  # noqa: PLC0415
 
-        root = _hud_root(package)
-        previous = installed.get(entry.id, {}) if replace else {}
-        # Only what the gallery added is the pack's: a profile or popup of the
-        # user's that shares a name is theirs, and is never replaced or removed.
-        ours_profiles = set(previous.get("profiles") or [])
-        ours_popups = set(previous.get("popups") or [])
-        profiles = _named_children(root, "ss", "name")
-        taken = [name for name in profiles if name not in ours_profiles and _exists(config_doc, "ss", "name", name)]
-        if taken:
-            raise GalleryError(
-                [f"you already have a HUD profile named {', '.join(taken)}; rename yours to install this pack"],
-                entry.id,
-            )
-        # Codex (#641): a profile the new version drops must not leave a game pointing nowhere.
-        bound = _bound_games(config_doc, ours_profiles - set(profiles))
-        if bound:
-            raise GalleryError(
-                [
-                    f"this version drops a HUD profile used for {', '.join(bound)}; "
-                    "choose another profile for these games first"
-                ],
-                entry.id,
-            )
-        new_popups = {popup.getAttribute("pu_name") for popup in package_popups(root)}
-        ours_rules = set(previous.get("panel_rules") or [])
-        added: dict[str, list[str]] = {}
+    root = _hud_root(package)
+    previous = installed.get(entry.id, {}) if replace else {}
+    # Only what the gallery added is the pack's: a profile or popup of the
+    # user's that shares a name is theirs, and is never replaced or removed.
+    ours_profiles = set(previous.get("profiles") or [])
+    ours_popups = set(previous.get("popups") or [])
+    profiles = _named_children(root, "ss", "name")
+    taken = [name for name in profiles if name not in ours_profiles and _exists(config_doc, "ss", "name", name)]
+    if taken:
+        raise GalleryError(
+            [f"you already have a HUD profile named {', '.join(taken)}; rename yours to install this pack"],
+            entry.id,
+        )
+    # Codex (#641): a profile the new version drops must not leave a game pointing nowhere.
+    bound = _bound_games(config_doc, ours_profiles - set(profiles))
+    if bound:
+        raise GalleryError(
+            [
+                f"this version drops a HUD profile used for {', '.join(bound)}; "
+                "choose another profile for these games first"
+            ],
+            entry.id,
+        )
+    new_popups = {popup.getAttribute("pu_name") for popup in package_popups(root)}
+    ours_rules = set(previous.get("panel_rules") or [])
+    added: dict[str, list[str]] = {}
 
-        def change() -> bool:
-            _remove_named(config_doc, "ss", "name", ours_profiles)
-            # A popup the new version still has is replaced; one it drops goes only
-            # when nothing of the user's still opens it (Codex, #641).
-            # Only the user's own profiles and popups count as opening it: the
-            # pack's previous popups are all about to be removed or replaced.
-            kept = (ours_popups - new_popups) - _unused_popups(config_doc, ours_popups)
-            _remove_named(config_doc, "pu", "pu_name", ours_popups - kept)
-            # The panel-rule sections the pack added are its own too, and are
-            # replaced rather than left selecting the old version's panels (Codex, #641).
-            _remove_panel_rules(config_doc, ours_rules)
-            rules_before = {_panel_scope(section) for section in _panel_rules(config_doc)}
-            added["popups"] = [name for name in sorted(new_popups) if not _exists(config_doc, "pu", "pu_name", name)]
-            # No <game> binding: a pack's profile is put to use by the user, in Preferences (Codex, #641).
-            changed = install_missing_hud_package(config_doc, root, bind_games=False)
-            added["popups"] += sorted(kept)
-            added["panel_rules"] = sorted(
-                {_panel_scope(section) for section in _panel_rules(config_doc)} - rules_before
-            )
-            return changed or bool(ours_profiles or ours_popups or ours_rules)
+    def change() -> bool:
+        _remove_named(config_doc, "ss", "name", ours_profiles)
+        # A popup the new version still has is replaced; one it drops goes only
+        # when nothing of the user's still opens it (Codex, #641).
+        # Only the user's own profiles and popups count as opening it: the
+        # pack's previous popups are all about to be removed or replaced.
+        kept = (ours_popups - new_popups) - _unused_popups(config_doc, ours_popups)
+        _remove_named(config_doc, "pu", "pu_name", ours_popups - kept)
+        # The panel-rule sections the pack added are its own too, and are
+        # replaced rather than left selecting the old version's panels (Codex, #641).
+        _remove_panel_rules(config_doc, ours_rules)
+        rules_before = {_panel_scope(section) for section in _panel_rules(config_doc)}
+        added["popups"] = [name for name in sorted(new_popups) if not _exists(config_doc, "pu", "pu_name", name)]
+        # No <game> binding: a pack's profile is put to use by the user, in Preferences (Codex, #641).
+        changed = install_missing_hud_package(config_doc, root, bind_games=False)
+        added["popups"] += sorted(kept)
+        added["panel_rules"] = sorted({_panel_scope(section) for section in _panel_rules(config_doc)} - rules_before)
+        return changed or bool(ours_profiles or ours_popups or ours_rules)
 
-        changed = _saved(config_doc, save, change)
+    def commit() -> None:
         installed[entry.id] = {
             "kind": entry.kind,
             "version": entry.version,
@@ -607,8 +619,9 @@ def install_entry(
             "popups": added["popups"],
             "panel_rules": added["panel_rules"],
         }
-    _write_record(record, installed)
-    return changed
+        _write_record(record, installed)
+
+    return _committed(config_doc, save, change, commit)
 
 
 def _unused_popups(config_doc: Any, candidates: set[str]) -> set[str]:
@@ -665,29 +678,31 @@ def uninstall_entry(
     entry = installed.get(pack_id)
     if entry is None:
         raise GalleryError(["was not installed from the gallery"], pack_id)
-    changed = False
     if entry.get("kind") == "stats":
         stat_packs.uninstall_pack(pack_id, packs_dir)
-    else:
-        profiles = set(entry.get("profiles") or [])
-        bound = _bound_games(config_doc, profiles)
-        if bound:
-            raise GalleryError(
-                [f"its HUD profile is in use for {', '.join(bound)}; choose another profile for these games first"],
-                pack_id,
-            )
-        rules = set(entry.get("panel_rules") or [])
+        del installed[pack_id]
+        _write_record(record, installed)
+        return False
+    profiles = set(entry.get("profiles") or [])
+    bound = _bound_games(config_doc, profiles)
+    if bound:
+        raise GalleryError(
+            [f"its HUD profile is in use for {', '.join(bound)}; choose another profile for these games first"],
+            pack_id,
+        )
+    rules = set(entry.get("panel_rules") or [])
 
-        def change() -> bool:
-            _remove_named(config_doc, "ss", "name", profiles)
-            _remove_named(config_doc, "pu", "pu_name", _unused_popups(config_doc, set(entry.get("popups") or [])))
-            _remove_panel_rules(config_doc, rules)
-            return bool(profiles or entry.get("popups") or rules)
+    def change() -> bool:
+        _remove_named(config_doc, "ss", "name", profiles)
+        _remove_named(config_doc, "pu", "pu_name", _unused_popups(config_doc, set(entry.get("popups") or [])))
+        _remove_panel_rules(config_doc, rules)
+        return bool(profiles or entry.get("popups") or rules)
 
-        changed = _saved(config_doc, save, change)
-    del installed[pack_id]
-    _write_record(record, installed)
-    return changed
+    def commit() -> None:
+        del installed[pack_id]
+        _write_record(record, installed)
+
+    return _committed(config_doc, save, change, commit)
 
 
 # ---------------------------------------------------------------------------
