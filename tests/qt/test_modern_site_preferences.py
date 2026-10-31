@@ -81,6 +81,78 @@ def test_site_card_get_values_returns_deduped_hero_aliases(qtbot) -> None:
     assert values["hero_aliases"] == ["newmain", "old", "second"]
 
 
+BWIN_FR = "/Containers/com.entainpt.bwinpokerfr.app/Data/Library/Application Support/Bwin.fr Online Poker"
+
+
+def _bwin_card_detecting(qtbot, monkeypatch, skins, protected):
+    """A Bwin.fr card whose detector finds ``skins`` and could not list ``protected``.
+
+    Returns the card, the names the detector was given, and the warnings shown.
+    """
+    from fpdb_3_legacy import DetectInstalledSites, ModernSitePreferences
+    from fpdb_3_legacy.ModernSitePreferences import ModernSiteCard
+
+    given: list[list[str]] = []
+    warnings: list[str] = []
+
+    class FakeDetector:
+        def __init__(self, sitename, hero_names=()):
+            given.append(list(hero_names))
+
+        def get_all_ipoker_skins(self):
+            return skins
+
+        def get_protected_ipoker_skins(self):
+            return protected
+
+    monkeypatch.setattr(DetectInstalledSites, "DetectInstalledSites", FakeDetector)
+    monkeypatch.setattr(
+        ModernSitePreferences.QMessageBox, "warning", lambda _parent, _title, text: warnings.append(text)
+    )
+
+    site_config = types.SimpleNamespace(enabled=True, screen_name="", hero_aliases=[], HH_path="", TS_path="")
+    card = ModernSiteCard("Bwin.fr Poker", site_config)
+    qtbot.addWidget(card)
+    card.screen_name_input.setText("alice")
+    card.aliases_input.setText("Hero, ")
+    card.detect_clicked()
+    return card, given, warnings
+
+
+@pytest.mark.qt
+def test_a_bwin_fr_folder_found_behind_macos_protection_fills_the_card_and_says_why(qtbot, monkeypatch) -> None:
+    hhpath = f"{BWIN_FR}/alice/History/Data/Tables"
+    found = {
+        "detected": True,
+        "skin": "Bwin.fr Poker",
+        "heroname": "alice",
+        "hhpath": hhpath,
+        "tspath": f"{BWIN_FR}/alice/History/Data/Tournaments",
+        "listing_denied": True,
+    }
+
+    card, given, warnings = _bwin_card_detecting(qtbot, monkeypatch, [found], {"Bwin.fr Poker": BWIN_FR})
+
+    # The names typed in the card reach the detector: it cannot list the folder to find them.
+    assert given == [["alice", "Hero"]]
+    assert card.hh_path_input.text() == hhpath
+    # Import lists that folder too, so the player must hear about Full Disk Access.
+    [warning] = warnings
+    assert hhpath in warning
+    assert "Full Disk Access" in warning
+
+
+@pytest.mark.qt
+def test_a_protected_bwin_fr_folder_does_not_take_another_skins_paths(qtbot, monkeypatch) -> None:
+    pmu = {"detected": True, "skin": "PMU Poker", "heroname": "bob", "hhpath": "/pmu/bob", "tspath": ""}
+
+    card, _given, warnings = _bwin_card_detecting(qtbot, monkeypatch, [pmu], {"Bwin.fr Poker": BWIN_FR})
+
+    assert card.hh_path_input.text() == ""
+    [warning] = warnings
+    assert BWIN_FR in warning
+
+
 # --------------------------------------------------------------------------- #
 # Hero Profiles tab                                                            #
 # --------------------------------------------------------------------------- #

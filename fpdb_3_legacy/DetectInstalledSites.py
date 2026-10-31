@@ -39,6 +39,7 @@ from __future__ import annotations
 
 import os
 import platform
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
@@ -327,6 +328,10 @@ class WinamaxDetector(SiteDetector):
         return None
 
 
+# Folders of an iPoker data directory that hold no player's hand histories.
+IPOKER_NON_PLAYER_FOLDERS = ("cache", "logs", "plugins", "qml", "missions")
+
+
 # Skins whose Windows data directory is not named after the skin itself.
 # Detection probes %LOCALAPPDATA%/<skin>/data by default; these are the extra
 # directory names to try for a given skin.
@@ -339,10 +344,17 @@ WINDOWS_IPOKER_DATA_DIR_ALIASES: dict[str, tuple[str, ...]] = {
 class iPokerDetector(SiteDetector):  # noqa: N801
     """iPoker network detector supporting all major skins including French, Italian, Spanish."""
 
-    def __init__(self, config: Any) -> None:
-        """Initialize iPoker detector."""
+    def __init__(self, config: Any, hero_names: Iterable[str] = ()) -> None:
+        """Initialize iPoker detector.
+
+        ``hero_names`` are screen names to try first when a skin's folder can
+        be checked but not listed (see :meth:`_probe_known_heroes`).
+        """
         super().__init__(config)
         self.all_detected_skins: list[dict[str, Any]] = []  # Store all detected skins
+        self.hero_names = [name for name in hero_names if name]
+        # Skins whose data folder exists but that macOS refused to list, with that folder.
+        self.protected_skins: dict[str, str] = {}
 
     def detect(self) -> dict[str, Any]:
         """Detect iPoker installations."""
@@ -446,6 +458,7 @@ class iPokerDetector(SiteDetector):  # noqa: N801
 
         # Detect all iPoker skins
         self.all_detected_skins = []
+        self.protected_skins = {}
 
         # First try individual skin folders
         for skin in ipoker_skins:
@@ -593,34 +606,21 @@ class iPokerDetector(SiteDetector):  # noqa: N801
             try:
                 # Look for player folders (can be numeric or alphanumeric)
                 for item in os.listdir(base_path):
-                    item_path = str(Path(base_path) / item)
                     # Skip common non-player folders
-                    if item in ["cache", "logs", "plugins", "qml", "missions"]:
+                    if item in IPOKER_NON_PLAYER_FOLDERS:
                         continue
-
-                    if Path(item_path).is_dir():
-                        # Check for History/Data structure
-                        hhpath = str(Path(item_path) / "History" / "Data" / "Tables")
-                        tspath = str(Path(item_path) / "History" / "Data" / "Tournaments")
-
-                        if Path(hhpath).exists() or Path(hhpath).parent.exists():
-                            # Detected even if Tables folder doesn't exist yet
-                            # but that the History/Data structure exists
-                            return {
-                                "detected": True,
-                                "hhpath": hhpath,
-                                "heroname": item,
-                                "tspath": tspath if Path(tspath).exists() else "",
-                                "skin": skin,
-                                "has_hands": Path(hhpath).exists() and len(os.listdir(hhpath)) > 0
-                                if Path(hhpath).exists()
-                                else False,
-                            }
+                    result = self._player_folder_result(skin, Path(base_path) / item)
+                    if result:
+                        return self._found(skin, base_path, result)
             except PermissionError:
                 # Not a fault of fpdb: on macOS 14+ another app's sandbox
                 # container can be stat'ed but not listed until the user lets
                 # the app running fpdb "access data from other apps". Say what
                 # to do instead of dumping a traceback.
+                self.protected_skins[skin] = base_path
+                result = self._probe_known_heroes(skin, base_path)
+                if result:
+                    return self._found(skin, base_path, result)
                 log.warning(
                     "Cannot read the %s folder %s: permission denied. On macOS, allow the app that "
                     "launches fpdb (your terminal, or fpdb itself) in System Settings > Privacy & "
@@ -632,6 +632,76 @@ class iPokerDetector(SiteDetector):  # noqa: N801
                 log.exception("Error detecting iPoker (%s)", skin)
 
         return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
+
+    def _found(self, skin: str, base_path: str, result: dict[str, Any]) -> dict[str, Any]:
+        """Return a detected hero folder, recording ``skin`` as protected if its hands cannot be listed."""
+        if result.get("listing_denied"):
+            self.protected_skins[skin] = base_path
+            log.warning(
+                "Found the %s hands of %s in %s, but macOS does not let fpdb list that folder, so "
+                "it cannot import them yet: allow the app that launches fpdb (your terminal, or "
+                "fpdb itself) in System Settings > Privacy & Security > Full Disk Access.",
+                skin,
+                result["heroname"],
+                result["hhpath"],
+            )
+        return result
+
+    def _player_folder_result(self, skin: str, folder: Path) -> dict[str, Any] | None:
+        """Describe ``folder`` as the hero folder of ``skin``, or None if it is not one.
+
+        The result says ``listing_denied`` when its Tables folder exists but
+        cannot be listed: the importer lists it too, so it will not read those
+        hands until access is given.
+        """
+        if not folder.is_dir():
+            return None
+        hhpath = folder / "History" / "Data" / "Tables"
+        tspath = folder / "History" / "Data" / "Tournaments"
+        # Detected even if Tables folder doesn't exist yet
+        # but that the History/Data structure exists
+        if not hhpath.parent.exists():
+            return None
+        result = {
+            "detected": True,
+            "hhpath": str(hhpath),
+            "heroname": folder.name,
+            "tspath": str(tspath) if tspath.exists() else "",
+            "skin": skin,
+            "has_hands": False,
+        }
+        try:
+            result["has_hands"] = len(os.listdir(hhpath)) > 0
+        except PermissionError:
+            # A folder macOS lets fpdb stat but not list.
+            result["listing_denied"] = True
+        except OSError:
+            pass  # Not created yet: the client makes it with the first hand.
+        return result
+
+    def _probe_known_heroes(self, skin: str, base_path: str) -> dict[str, Any] | None:
+        """Find the hero folder of ``skin`` by name when ``base_path`` cannot be listed.
+
+        macOS lets fpdb stat a path inside another app's sandbox container
+        (Bwin.fr, PMU...) even when it refuses to list it, so a hero folder
+        cannot be discovered there, only checked. Try the screen names fpdb
+        already knows.
+        """
+        for name in self._known_hero_names(skin):
+            result = self._player_folder_result(skin, Path(base_path) / name)
+            if result:
+                return result
+        return None
+
+    def _known_hero_names(self, skin: str) -> list[str]:
+        """Screen names to try for ``skin``: the given ones, then this skin's aliases, then every site's."""
+        sites = getattr(self.config, "supported_sites", None)
+        sites = sites if isinstance(sites, dict) else {}
+        names = [*self.hero_names, *getattr(sites.get(skin), "hero_aliases", ())]
+        for site in sites.values():
+            names.extend(getattr(site, "hero_aliases", ()))
+        # A name is joined to a path: keep only those that stay one folder deep.
+        return [name for name in dict.fromkeys(names) if name and name not in {".", ".."} and Path(name).name == name]
 
     def _detect_pokerclient(self) -> dict[str, Any]:  # noqa: C901
         """Detect iPoker skins in PokerClient folder structure."""
@@ -1327,8 +1397,12 @@ def is_network_detectable(network_name: str) -> bool:
 class DetectInstalledSites:
     """Main class for detecting installed poker sites."""
 
-    def __init__(self, sitename: str = "All") -> None:
-        """Initialize site detector."""
+    def __init__(self, sitename: str = "All", hero_names: Iterable[str] = ()) -> None:
+        """Initialize site detector.
+
+        ``hero_names`` are screen names to try in a folder that can be checked
+        but not listed, such as a macOS sandbox container.
+        """
         self.config = Configuration.Config()
         self.sitestatusdict = {}
         self.sitename = sitename
@@ -1344,7 +1418,7 @@ class DetectInstalledSites:
         self.detectors = {
             "PokerStars": PokerStarsDetector(self.config),
             "Winamax": WinamaxDetector(self.config),
-            "iPoker": iPokerDetector(self.config),
+            "iPoker": iPokerDetector(self.config, hero_names),
             "ACR": ACRDetector(self.config),
             "SealsWithClubs": SealsWithClubsDetector(self.config),
             "PartyGaming": PartyGamingDetector(self.config),
@@ -1415,6 +1489,12 @@ class DetectInstalledSites:
             if hasattr(detector, "all_detected_skins"):
                 return detector.all_detected_skins
         return []
+
+    def get_protected_ipoker_skins(self) -> dict[str, str]:
+        """Get the iPoker skins whose folder macOS refused to list, with that folder."""
+        if "iPoker" in self.detectors:
+            return dict(getattr(self.detectors["iPoker"], "protected_skins", {}))
+        return {}
 
     def get_all_partypoker_skins(self) -> list[dict[str, Any]]:
         """Get all detected PartyPoker skins."""

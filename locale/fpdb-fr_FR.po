@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 21:36+0100\n"
+"POT-Creation-Date: 2026-10-31 22:00+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -2779,6 +2779,10 @@ msgid "Enter your username"
 msgstr "Saisissez votre pseudo"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+msgid "Folder access needed"
+msgstr "Accès au dossier requis"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Hand History:"
 msgstr "Historique des mains :"
 
@@ -2830,6 +2834,24 @@ msgstr "Tournoi :"
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Your names in these hands, one per line"
 msgstr "Vos noms dans ces mains, un par ligne"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, python-format
+msgid ""
+"macOS does not let fpdb read this folder:\n"
+"%s\n"
+"\n"
+"Allow the app that launches fpdb (your terminal, or fpdb itself) in System "
+"Settings > Privacy & Security > Full Disk Access, then restart fpdb. Until "
+"then, its hands cannot be imported."
+msgstr ""
+"macOS ne permet pas à fpdb de lire ce dossier :\n"
+"%s\n"
+"\n"
+"Autorisez l'application qui lance fpdb (votre terminal, ou fpdb lui-même) "
+"dans Réglages Système > Confidentialité et sécurité > Accès complet au "
+"disque, puis redémarrez fpdb. D'ici là, ses mains ne peuvent pas être "
+"importées."
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🎭"
