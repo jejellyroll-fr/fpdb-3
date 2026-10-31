@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fpdb_3_legacy.swc_poker_console import clean_game_name
+from fpdb_3_legacy.capture.swc_poker_console import clean_game_name
 
 
 def test_clean_game_name_maps_captured_swc_game() -> None:

@@ -41,7 +41,7 @@ program.
 | **Dynamic HUD panels** — off until you turn them on, never at PokerStars tables | The current hand as fpdb knows it (see below) | Which group of a player's historical statistics shows, chosen by the situation: preflop, single-raised pot, facing a c-bet… |
 | **Winamax live context** | Winamax's own client log, and the table's accessibility tree (the request a screen reader makes) | Seats and the current street, used to place the HUD and pick dynamic panels |
 | **Session Guard** | Your imported hands | Your session's result, duration and hands, and an alert when a limit you set is reached. Informational only ([session-guard.md](session-guard.md)) |
-| **Live capture** (SwC client tap, CoinPoker packets) — off until you turn it on | The client's own traffic | Nothing at the table: it turns the traffic into hands to import ([live-capture.md](live-capture.md)) |
+| **Live capture** (SwC client tap, CoinPoker packets) — off until you turn it on, and kept in its own package | The client's own traffic | Nothing at the table: it turns the traffic into hands to import ([live-capture.md](live-capture.md)) |
 
 Everything a HUD shows is a player's *history*: what they did in the hands your
 database holds. Dynamic panels choose which part of that history to show, but

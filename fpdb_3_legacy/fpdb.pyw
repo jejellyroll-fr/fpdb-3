@@ -86,7 +86,6 @@ from fpdb_3_legacy import (
     GuiAutoNoteRules,
     GuiAutoNotesWorkbench,
     GuiBulkImport,
-    GuiCoinPokerCapture,
     GuiDatabase,
     GuiHandViewer,
     GuiLogView,
@@ -1224,9 +1223,20 @@ class fpdb(QMainWindow):
         dialog.raise_()
         dialog.activateWindow()
 
+    def _capture_missing(self) -> bool:
+        """Say so, and answer True, when this install carries no capture package (#451)."""
+        from fpdb_3_legacy import live_capture_consent
+
+        if live_capture_consent.capture_installed():
+            return False
+        self.info_box(_("Live capture"), str(live_capture_consent.CaptureNotInstalled()))
+        return True
+
     def launch_swc_capture(self, widget=None, data=None) -> None:
         """Launch the SwC Poker Console & Replayer."""
-        from fpdb_3_legacy.swc_poker_console import SwCPokerConsoleDialog
+        if self._capture_missing():
+            return
+        from fpdb_3_legacy.capture.swc_poker_console import SwCPokerConsoleDialog
 
         try:
             dialog = SwCPokerConsoleDialog(self.config, self)
@@ -1935,7 +1945,13 @@ class fpdb(QMainWindow):
         if is_site_disabled("CoinPoker"):
             log.info("CoinPoker support is disabled; not opening the live capture tab")
             return
-        self.open_tab("CoinPoker Capture", lambda: GuiCoinPokerCapture.GuiCoinPokerCapture(self.config, self))
+        if self._capture_missing():
+            return
+        self.open_tab(
+            "CoinPoker Capture",
+            lambda module: module.GuiCoinPokerCapture(self.config, self),
+            module="fpdb_3_legacy.capture.GuiCoinPokerCapture",
+        )
 
     def tab_auto_notes_workbench(self, widget, data=None) -> None:
         """Open the automatic notes workbench tab."""

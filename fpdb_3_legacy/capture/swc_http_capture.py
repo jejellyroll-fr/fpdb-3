@@ -23,7 +23,7 @@ try:
 except ImportError:
     # Printed rather than logged: the SwC console shows this process's output.
     print("[ERROR] The SwC Poker HTTP capture needs Playwright, an optional dependency.")
-    print("[ERROR] From the fpdb source directory: pip install -e '.[swc]' && playwright install chromium")
+    print("[ERROR] From the fpdb source directory: pip install -e '.[capture]' && playwright install chromium")
     sys.exit(1)
 
 

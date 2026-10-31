@@ -54,7 +54,9 @@ def confirm(mechanism: Mechanism, parent: QWidget | None = None, path: Path | No
 
 
 def available_mechanisms() -> list[Mechanism]:
-    """The mechanisms whose room fpdb supports."""
+    """The mechanisms whose room fpdb supports, in an install that carries the captures."""
+    if not live_capture_consent.capture_installed():
+        return []
     return [
         mechanism
         for mechanism in live_capture_consent.MECHANISMS.values()
@@ -80,6 +82,10 @@ class LiveCaptureDialog(QDialog):
         layout.addWidget(intro)
 
         self.boxes: dict[str, QCheckBox] = {}
+        if not live_capture_consent.capture_installed():
+            missing = QLabel(str(live_capture_consent.CaptureNotInstalled()))
+            missing.setWordWrap(True)
+            layout.addWidget(missing)
         for mechanism in available_mechanisms():
             box = QCheckBox(_(mechanism.title))
             box.setChecked(live_capture_consent.is_accepted(mechanism, self.path))

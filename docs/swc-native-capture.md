@@ -30,8 +30,8 @@ the client. How it gets in front of OpenSSL depends on the platform:
   You therefore start the SwC client normally, then attach:
 
   ```bash
-  uv run python fpdb_3_legacy/swc_native_capture.py --build   # first time only
-  uv run python fpdb_3_legacy/swc_native_capture.py           # inject + follow
+  uv run python -m fpdb_3_legacy.capture.swc_client --build   # first time only
+  uv run python -m fpdb_3_legacy.capture.swc_client           # inject + follow
   ```
 
   Once the tap is turned on, starting Auto Import in the GUI does the same thing
@@ -72,8 +72,8 @@ values. This mirrors the environment used when the application starts from
 Finder.
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py --build
-uv run python fpdb_3_legacy/swc_native_capture.py
+uv run python -m fpdb_3_legacy.capture.swc_client --build
+uv run python -m fpdb_3_legacy.capture.swc_client
 ```
 
 New native dealer messages are printed live with an `[SWC]` prefix. Qt window
@@ -82,7 +82,7 @@ diagnostics may still appear on stderr; they are unrelated to the capture.
 Play one complete hand, close SwC normally, then validate the archive:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --inspect ~/.fpdb/swc-native-capture/swc-native.raw
 ```
 
@@ -90,7 +90,7 @@ Dealer messages can be rendered separately while native state-snapshot decoding
 is being developed:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --dealer-history ~/.fpdb/swc-native-capture/swc-native.raw
 ```
 
@@ -98,7 +98,7 @@ Stable table ids, hand ids, round numbers, player identities, and snapshot
 counts can be inspected without guessing undecoded action fields:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --session-summary ~/.fpdb/swc-native-capture/swc-native.raw
 ```
 
@@ -107,7 +107,7 @@ They are useful for correlating a seat with a player, but they are not monetary
 amounts and must not be used as bets, stacks, or collections:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --stack-history ~/.fpdb/swc-native-capture/swc-native.raw
 ```
 
@@ -116,7 +116,7 @@ useful evidence for action decoding, but they are still reported as native
 fields rather than FPDB actions:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --animation-events ~/.fpdb/swc-native-capture/swc-native.raw
 ```
 
@@ -125,7 +125,7 @@ They include raw payload hashes, snapshot diffs, and per-snapshot native
 animation events, but remain explicitly `capture_only`:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --normalized-json ~/.fpdb/swc-native-capture/swc-native.raw
 ```
 
@@ -272,7 +272,7 @@ complete for the entire hand.
 An evidence audit can be printed without expanding the full normalized JSON:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --importability-audit ~/.fpdb/swc-native-capture/test3.raw
 ```
 
@@ -312,7 +312,7 @@ actions or monetary collections.
 A compact JSON-lines export avoids parsing the full snapshot envelope:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --ofc-summary ~/.fpdb/swc-native-capture/test3.raw
 ```
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 14:03+0100\n"
+"POT-Creation-Date: 2026-10-31 17:08+0100\n"
 "PO-Revision-Date: 2011-06-16 13:21+0000\n"
 "Last-Translator: Lexej <alexej@glyvin.com>\n"
 "Language-Team: Russian (Russia) (http://www.transifex.net/projects/p/fpdb/"
@@ -707,6 +707,10 @@ msgid "Import cycle is taking longer than usual..."
 msgstr "Цикл импорта занимает больше времени, чем обычно..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+msgid "Importing SwC files still works."
+msgstr ""
+
+#: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
 msgid "Log"
 msgstr "Журнал"
@@ -1008,77 +1012,6 @@ msgstr "Путь"
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Please choose the path that you want to Auto Import"
 msgstr "Пожалуйста, выберите путь, который вы хотите добавить в автоимпорт"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
-msgstr ""
-"Также запустить HUD_main (снимите флажок, если HUD/автоимпорт уже запущен)."
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Capture failed to start — see the log above."
-msgstr "Не удалось начать захват — см. журнал выше."
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Capture not started: it is off until you turn it on."
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Default game:"
-msgstr "Игра по умолчанию:"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Dry run (no DB insert)"
-msgstr "Пробный прогон (без записи в БД)"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Finishing previous capture…"
-msgstr "Завершение предыдущего захвата…"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Idle."
-msgstr "Бездействует."
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Interface:"
-msgstr "Интерфейс:"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Launch HUD"
-msgstr "Запустить HUD"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Refresh interfaces"
-msgstr "Обновить интерфейсы"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
-msgstr "Запрос привилегий… подтвердите запрос, затем играйте в CoinPoker."
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Start capture"
-msgstr "Начать захват"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py fpdb_3_legacy/session_guard_dialog.py
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Stop"
-msgstr "Стоп"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Stopping…"
-msgstr "Остановка…"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
@@ -1564,7 +1497,7 @@ msgid "Refresh Graph"
 msgstr "Обновить График"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
-#: fpdb_3_legacy/swc_poker_console.py
+#: fpdb_3_legacy/capture/swc_poker_console.py
 #, fuzzy
 msgid "Showdown"
 msgstr "Шоудаун"
@@ -3369,6 +3302,199 @@ msgstr "Турниры"
 msgid "e.g., my_custom_theme"
 msgstr "напр., my_custom_theme"
 
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
+msgstr ""
+"Также запустить HUD_main (снимите флажок, если HUD/автоимпорт уже запущен)."
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Capture failed to start — see the log above."
+msgstr "Не удалось начать захват — см. журнал выше."
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+msgid "Capture not started: it is off until you turn it on."
+msgstr ""
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Default game:"
+msgstr "Игра по умолчанию:"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Dry run (no DB insert)"
+msgstr "Пробный прогон (без записи в БД)"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Finishing previous capture…"
+msgstr "Завершение предыдущего захвата…"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Idle."
+msgstr "Бездействует."
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Interface:"
+msgstr "Интерфейс:"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Launch HUD"
+msgstr "Запустить HUD"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Refresh interfaces"
+msgstr "Обновить интерфейсы"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
+msgstr "Запрос привилегий… подтвердите запрос, затем играйте в CoinPoker."
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Start capture"
+msgstr "Начать захват"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Stop"
+msgstr "Стоп"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Stopping…"
+msgstr "Остановка…"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+msgid "<"
+msgstr ""
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+msgid "<<"
+msgstr ""
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+msgid ">"
+msgstr ""
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+msgid ">>"
+msgstr ""
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "BOTTOM :"
+msgstr "BOTTOM:"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Capture Console (Logs):"
+msgstr "Консоль захвата (журналы):"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Captured Hand History:"
+msgstr "Захваченная история раздачи:"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Cards:"
+msgstr "Карманные карты"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Hands Captured: 0"
+msgstr "Захвачено раздач: 0"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Import All OFC"
+msgstr "Импортировать весь OFC"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Import OFC to DB"
+msgstr "Импортировать OFC в БД"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "In Hand:"
+msgstr "В раздаче:"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "MIDDLE :"
+msgstr "MIDDLE:"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Open DB Replayer"
+msgstr "Открыть проигрыватель БД"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Open Hand Folder"
+msgstr "Открыть папку раздач"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Refresh Hands"
+msgstr "Обновить раздачи"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Select a hand to start replay"
+msgstr "Выберите раздачу, чтобы начать воспроизведение"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Start Capture"
+msgstr "Начать захват"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Status: 🔴 Stopped"
+msgstr "Статус: 🔴 Остановлено"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Statut : 🔴 Arrêté"
+msgstr "Статус: 🔴 Остановлено"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Statut : 🟢 En Cours"
+msgstr "Статус: 🟢 Работает"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Step 0 / 0"
+msgstr "Шаг 0 / 0"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "SwC"
+msgstr "SwC"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "SwC Poker - Capture Console & Replayer"
+msgstr "SwC Poker - Консоль захвата и проигрыватель"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "TOP :"
+msgstr "TOP:"
+
 #: fpdb_3_legacy/dynamic_panels_consent.py
 #, fuzzy
 msgid "Dynamic HUD panels"
@@ -3438,6 +3564,11 @@ msgstr "Включить или выключить румы для показа 
 #, fuzzy
 msgid "Free Poker DB 3"
 msgstr "Free Poker DB 3"
+
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/live_capture_dialog.py
+#, fuzzy
+msgid "Live capture"
+msgstr "Захват CoinPoker в реальном времени"
 
 #: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -3879,6 +4010,12 @@ msgstr "Захват CoinPoker в реальном времени"
 
 #: fpdb_3_legacy/live_capture_consent.py
 msgid ""
+"Live capture is not part of this install. From a source install: pip install "
+"-e '.[capture]'."
+msgstr ""
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid ""
 "Not turned on: run this command from a terminal to answer, or use Tools ▸ "
 "Live capture…"
 msgstr ""
@@ -3929,11 +4066,6 @@ msgstr ""
 #: fpdb_3_legacy/live_capture_dialog.py
 msgid "I understand, turn it on"
 msgstr ""
-
-#: fpdb_3_legacy/live_capture_dialog.py
-#, fuzzy
-msgid "Live capture"
-msgstr "Захват CoinPoker в реальном времени"
 
 #: fpdb_3_legacy/live_capture_dialog.py
 #, fuzzy
@@ -7233,127 +7365,6 @@ msgstr "Удаление пакета статов"
 #, fuzzy
 msgid "User installed"
 msgstr "Установлен пользователем"
-
-#: fpdb_3_legacy/swc_poker_console.py
-msgid "<"
-msgstr ""
-
-#: fpdb_3_legacy/swc_poker_console.py
-msgid "<<"
-msgstr ""
-
-#: fpdb_3_legacy/swc_poker_console.py
-msgid ">"
-msgstr ""
-
-#: fpdb_3_legacy/swc_poker_console.py
-msgid ">>"
-msgstr ""
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "BOTTOM :"
-msgstr "BOTTOM:"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Capture Console (Logs):"
-msgstr "Консоль захвата (журналы):"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Captured Hand History:"
-msgstr "Захваченная история раздачи:"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Cards:"
-msgstr "Карманные карты"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Hands Captured: 0"
-msgstr "Захвачено раздач: 0"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Import All OFC"
-msgstr "Импортировать весь OFC"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Import OFC to DB"
-msgstr "Импортировать OFC в БД"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "In Hand:"
-msgstr "В раздаче:"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "MIDDLE :"
-msgstr "MIDDLE:"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Open DB Replayer"
-msgstr "Открыть проигрыватель БД"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Open Hand Folder"
-msgstr "Открыть папку раздач"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Refresh Hands"
-msgstr "Обновить раздачи"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Select a hand to start replay"
-msgstr "Выберите раздачу, чтобы начать воспроизведение"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Start Capture"
-msgstr "Начать захват"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Status: 🔴 Stopped"
-msgstr "Статус: 🔴 Остановлено"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Statut : 🔴 Arrêté"
-msgstr "Статус: 🔴 Остановлено"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Statut : 🟢 En Cours"
-msgstr "Статус: 🟢 Работает"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Step 0 / 0"
-msgstr "Шаг 0 / 0"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "SwC"
-msgstr "SwC"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "SwC Poker - Capture Console & Replayer"
-msgstr "SwC Poker - Консоль захвата и проигрыватель"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "TOP :"
-msgstr "TOP:"
 
 #: fpdb_3_legacy/table_export.py
 #, fuzzy

@@ -14,8 +14,7 @@ from unittest.mock import Mock, call
 
 import pytest
 
-from fpdb_3_legacy.coinpoker_hand_builder import _build_one, _table_from_hand_id, build_hands
-from fpdb_3_legacy.coinpoker_live_capture import (
+from fpdb_3_legacy.capture.coinpoker_live_capture import (
     COINPOKER_SITE_ID,
     MAX_RESULT_ATTEMPTS,
     HandPump,
@@ -31,6 +30,7 @@ from fpdb_3_legacy.coinpoker_live_capture import (
     _Tee,
     run,
 )
+from fpdb_3_legacy.coinpoker_hand_builder import _build_one, _table_from_hand_id, build_hands
 from fpdb_3_legacy.Exceptions import FpdbHandDuplicate
 from fpdb_3_legacy.http_capture_hand_builder import HttpCaptureHandConfig
 
@@ -44,7 +44,7 @@ FRAME_B = b"\x80\x00\x02\xaa\xbb"  # flags 0x80, len 2, body "\xaa\xbb"
 def _isolate_hand_archive(tmp_path, monkeypatch):
     """Keep the captured-hand archive out of the real ~/.fpdb during tests."""
     monkeypatch.setattr(
-        "fpdb_3_legacy.coinpoker_live_capture._default_archive_dir",
+        "fpdb_3_legacy.capture.coinpoker_live_capture._default_archive_dir",
         lambda: str(tmp_path / "capture-archive"),
     )
 
@@ -109,7 +109,7 @@ def test_raw_event_archive_preserves_event_payload(tmp_path) -> None:
 
 def test_reassembler_keeps_non_game_tournament_envelope(monkeypatch) -> None:
     monkeypatch.setattr(
-        "fpdb_3_legacy.coinpoker_live_capture.decode_frame",
+        "fpdb_3_legacy.capture.coinpoker_live_capture.decode_frame",
         lambda _flags, _body: {"decoded": True},
     )
     reassembler = StreamReassembler()
@@ -205,7 +205,7 @@ def test_tournament_ports_are_captured() -> None:
 
 def test_tournament_port_is_attached_to_decoded_event(monkeypatch) -> None:
     monkeypatch.setattr(
-        "fpdb_3_legacy.coinpoker_live_capture.decode_frame",
+        "fpdb_3_legacy.capture.coinpoker_live_capture.decode_frame",
         lambda _flags, _body: {"decoded": True},
     )
     reassembler = StreamReassembler()
@@ -269,7 +269,7 @@ def test_pump_stamps_capture_time_instead_of_epoch(monkeypatch, tmp_path) -> Non
         seen["timestamp"] = hand_data.get("timestamp")
         raise CaptureNotImportableError  # stop after capturing the stamped value
 
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture.build_fpdb_hand", spy)
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_live_capture.build_fpdb_hand", spy)
     config = HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
     pump = HandPump(db=None, config=config, table_category="PLO4", dry_run=True, archive_dir=str(tmp_path))
 
@@ -342,7 +342,7 @@ def test_open_db_commits_sequence_repairs(monkeypatch) -> None:
     config = Mock()
     monkeypatch.setattr("fpdb_3_legacy.Configuration.Config", Mock(return_value=config))
     monkeypatch.setattr("fpdb_3_legacy.Database.Database", Mock(return_value=db))
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture.ensure_coinpoker_site", Mock())
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_live_capture.ensure_coinpoker_site", Mock())
 
     assert _open_db() == (db, config)
     db.repair_sequences.assert_called_once_with()
@@ -360,7 +360,7 @@ def test_hand_pump_treats_database_duplicate_as_skipped(monkeypatch, capsys) -> 
     def duplicate(*_args, **_kwargs):
         raise FpdbHandDuplicate("140-existing")
 
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture.import_fpdb_hand", duplicate)
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_live_capture.import_fpdb_hand", duplicate)
     config = HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
     pump = HandPump(db=Database(), config=config, table_category="PLO4")
 
@@ -386,7 +386,7 @@ def test_live_hand_is_notified_before_its_equity_job_is_queued(monkeypatch) -> N
         built_hand.aof_decisions = ("decision",)
         built_hand.aof_decision_ids = (7,)
 
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture.import_fpdb_hand", imported)
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_live_capture.import_fpdb_hand", imported)
     pump = HandPump(
         db,
         Mock(),
@@ -410,11 +410,11 @@ def test_live_worker_enables_range_and_action_models_without_a_second_service(mo
         return object()
 
     monkeypatch.setattr(
-        "fpdb_3_legacy.coinpoker_live_capture.AsyncEquityService",
+        "fpdb_3_legacy.capture.coinpoker_live_capture.AsyncEquityService",
         lambda: service,
     )
     monkeypatch.setattr(
-        "fpdb_3_legacy.coinpoker_live_capture.KnownCardsAnalysisCoordinator",
+        "fpdb_3_legacy.capture.coinpoker_live_capture.KnownCardsAnalysisCoordinator",
         coordinator,
     )
     notify = Mock()
@@ -432,7 +432,7 @@ def test_an_equity_queue_failure_never_marks_a_committed_hand_failed(monkeypatch
     hand = Mock(players=[(1, "hero", 2)], dbid_hands=42, aof_decisions=(), aof_decision_ids=())
     coordinator = Mock()
     coordinator.submit_hand.side_effect = RuntimeError("worker unavailable")
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture.import_fpdb_hand", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_live_capture.import_fpdb_hand", lambda *_args, **_kwargs: None)
     pump = HandPump(db, Mock(), equity_coordinator=coordinator)
 
     pump._insert_hand(hand, "site-42")
@@ -1012,12 +1012,14 @@ def test_live_run_hydrates_the_new_pump_with_known_aof_tables(monkeypatch) -> No
         def record_tournament_results(self, _events) -> int:
             return 0
 
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture._open_db", lambda _path: (db, config))
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture._ensure_capture_file", lambda _db: 7)
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture._known_aof_tables", lambda _db: {"124115": 2})
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture._make_hud_notifier", lambda: None)
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture._make_equity_coordinator", lambda *_args: coordinator)
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture.HandPump", RecordingPump)
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_live_capture._open_db", lambda _path: (db, config))
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_live_capture._ensure_capture_file", lambda _db: 7)
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_live_capture._known_aof_tables", lambda _db: {"124115": 2})
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_live_capture._make_hud_notifier", lambda: None)
+    monkeypatch.setattr(
+        "fpdb_3_legacy.capture.coinpoker_live_capture._make_equity_coordinator", lambda *_args: coordinator
+    )
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_live_capture.HandPump", RecordingPump)
 
     run([], dry_run=False, table_category="PLO4")
 

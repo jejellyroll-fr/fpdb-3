@@ -107,7 +107,7 @@ jobs:
           fpdb_3_legacy/http_capture_refresh.py
           fpdb_3_legacy/http_capture_replay.py
           fpdb_3_legacy/http_capture_analyze.py
-          fpdb_3_legacy/swc_http_capture.py
+          fpdb_3_legacy/capture/swc_http_capture.py
           fpdb_3_legacy/stat_adapters.py
           fpdb_3_legacy/action_enum_stats.py
           fpdb_3_legacy/action_events.py
@@ -257,7 +257,7 @@ jobs:
           fpdb_3_legacy/backfill_autonotes.py
           fpdb_3_legacy/card_path.py
           fpdb_3_legacy/legacy_launcher.py
-          fpdb_3_legacy/swc_poker_console.py
+          fpdb_3_legacy/capture/swc_poker_console.py
           fpdb_3_legacy/AutoNotePlo.py
           fpdb_3_legacy/MergeStructures.py
           fpdb_3_legacy/stat_registry.py
@@ -278,6 +278,8 @@ jobs:
           fpdb_3_legacy/pack_share_dialog.py
           fpdb_3_legacy/live_capture_consent.py
           fpdb_3_legacy/live_capture_dialog.py
+          fpdb_3_legacy/capture/__init__.py
+          fpdb_3_legacy/capture/swc_client.py
           fpdb_3_legacy/dynamic_panels_consent.py
           fpdb_3_legacy/hud_package.py
           fpdb_3_legacy/tourney_payouts_dialog.py
@@ -400,7 +402,7 @@ jobs:
           }
           clang --version
       - name: Compile the tap
-        run: python -m fpdb_3_legacy.swc_tap_build --build
+        run: python -m fpdb_3_legacy.capture.swc_tap_build --build
 
   test:
     runs-on: ${{ matrix.os }}
@@ -715,11 +717,11 @@ jobs:
           # distribution still exposes numpy's compiled sub-packages, and
           # "import numpy" then yields an empty namespace package.
           if [ "${{ runner.os }}" = "Windows" ]; then
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import comtypes --hidden-import comtypes.client --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/fpdb.pyw"
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import comtypes --hidden-import comtypes.client --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/HUD_main.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import comtypes --hidden-import comtypes.client --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/fpdb.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import comtypes --hidden-import comtypes.client --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/HUD_main.pyw"
           else
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/fpdb.pyw"
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/HUD_main.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/fpdb.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/HUD_main.pyw"
           fi
       - name: Bundle HUD inside fpdb
         run: python tools/bundle_pyinstaller_hud.py dist

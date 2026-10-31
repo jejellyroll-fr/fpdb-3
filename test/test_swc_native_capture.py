@@ -11,6 +11,7 @@ import pytest
 
 UTC = timezone.utc  # datetime.UTC is 3.11+; the packaged builds embed 3.10
 
+from fpdb_3_legacy.capture.swc_client import native_client_environment, parse_args
 from fpdb_3_legacy.swc_native_capture import (
     NativeAnimationEvent,
     NativeCaptureRecord,
@@ -58,9 +59,7 @@ from fpdb_3_legacy.swc_native_capture import (
     match_native_previous_active_action,
     match_native_return_seat_evidence,
     native_action_street,
-    native_client_environment,
     normalize_native_hands,
-    parse_args,
     parse_native_card_mnemonic,
     parse_native_dealer_draw,
     parse_native_dealer_return,
@@ -1700,8 +1699,8 @@ def test_build_tap_cross_platform(tmp_path, monkeypatch):
     machine *should* get is covered by
     test_swc_tap_build_reports_a_missing_compiler.
     """
-    from fpdb_3_legacy import swc_native_capture, swc_tap_build
-    from fpdb_3_legacy.swc_tap_build import COMPILERS
+    from fpdb_3_legacy.capture import swc_client, swc_tap_build
+    from fpdb_3_legacy.capture.swc_tap_build import COMPILERS
 
     system_name = platform.system()
     if not any(shutil.which(name) for name in COMPILERS.get(system_name, ())):
@@ -1712,7 +1711,7 @@ def test_build_tap_cross_platform(tmp_path, monkeypatch):
     # the global that actually redirects the output (and avoids colliding with a
     # tap DLL that may be loaded -- and therefore locked -- in a live client).
     monkeypatch.setattr(swc_tap_build, "BUILD_DIR", tmp_path)
-    tap_path = swc_native_capture.build_tap(force=True)
+    tap_path = swc_client.build_tap(force=True)
     assert tap_path.exists()
     assert tap_path.name in ("libswc_native_tap.dylib", "libswc_native_tap.so", "swc_native_tap.dll")
     if system_name == "Windows":

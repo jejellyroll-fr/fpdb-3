@@ -77,11 +77,13 @@ linux = ["xcffib==1.5.0", "PySide6>=6.8.1"]
 macos = ["PySide6>=6.8.1"]
 postgresql = ["psycopg[binary]>=3.1.0"]
 mysql = ["mysqlclient==2.2.4"]
-# The SwC Poker HTTP capture drives a browser through Playwright. It is the only
-# consumer, it runs from a source install only (it is launched as
-# `sys.executable swc_http_capture.py`), and it also needs
+# The captures that reach into a client live in fpdb_3_legacy.capture (#451).
+# Of them, only the SwC Poker HTTP capture needs a library: it drives a browser
+# through Playwright, runs from a source install only (it is launched as
+# `sys.executable swc_http_capture.py`), and also needs
 # `playwright install chromium`, so the library stays out of every other install
-# and out of the packaged builds (#439).
+# and out of the packaged builds (#439). `swc` is the extra's earlier name.
+capture = ["playwright>=1.40.0"]
 swc = ["playwright>=1.40.0"]
 
 [project.scripts]
@@ -244,8 +246,8 @@ ignore = [
 "fpdb_3_legacy/stat_registry.py" = ["C901", "PLR0912"]
 "fpdb_3_legacy/stats_tournament.py" = ["C901"]
 "fpdb_3_legacy/swc_http_adapter.py" = ["C901", "PLR0912", "PLR0915"]
-"fpdb_3_legacy/swc_http_capture.py" = ["C901", "PLR0915"]
-"fpdb_3_legacy/swc_poker_console.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/capture/swc_http_capture.py" = ["C901", "PLR0915"]
+"fpdb_3_legacy/capture/swc_poker_console.py" = ["C901", "PLR0912", "PLR0915"]
 "test/test_hand.py" = ["C901", "PLR0912", "PLR0915"]
 "test/test_pt4hud_import.py" = ["PLR0915"]
 "tests/helpers/mock_hand.py" = ["PLR0915"]
@@ -289,6 +291,8 @@ fpdb_3_legacy = [
     "research_presets.d/*.json",
     "research_studies.d/*.json",
     "stats.d/*.toml",
+    # The SwC tap is compiled on the user's machine from these sources (#451).
+    "capture/*.c",
 ]
 
 [tool.coverage.run]

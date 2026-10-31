@@ -40,7 +40,7 @@ from fpdb_3_legacy.subprocess_launch import hud_main_command, python_module_comm
 
 log = get_logger("coinpoker_capture_gui")
 
-_MODULE = "fpdb_3_legacy.coinpoker_live_capture"
+_MODULE = "fpdb_3_legacy.capture.coinpoker_live_capture"
 _GAMES = ["PLO4", "PLO5", "PLO6", "NLHE", "Shortdeck"]
 
 
@@ -138,7 +138,7 @@ class GuiCoinPokerCapture(QWidget):
         self.iface_combo.clear()
         self.iface_combo.addItem("(auto-detect)", None)
         try:
-            from fpdb_3_legacy.coinpoker_pcap import list_devices
+            from fpdb_3_legacy.capture.coinpoker_pcap import list_devices
 
             for name, desc, _flags in list_devices():
                 label = f"{name}  {desc}".strip()
@@ -188,7 +188,7 @@ class GuiCoinPokerCapture(QWidget):
         # a chance to take this lock after tcpdump opens the FIFO; without this
         # preflight a duplicate click/session starts unnecessary helper processes.
         if not self.dry_run.isChecked():
-            from fpdb_3_legacy.coinpoker_live_capture import _acquire_instance_lock
+            from fpdb_3_legacy.capture.coinpoker_live_capture import _acquire_instance_lock
 
             try:
                 probe = _acquire_instance_lock()
@@ -379,7 +379,7 @@ class GuiCoinPokerCapture(QWidget):
         # (which touches only /dev/bpf, not Documents) runs elevated and pipes
         # packets through a FIFO to the unprivileged importer, which keeps the
         # user's Documents/venv access.
-        from fpdb_3_legacy.coinpoker_pcap import default_device
+        from fpdb_3_legacy.capture.coinpoker_pcap import default_device
 
         root = _repo_root()
         log = shlex.quote(str(self.log_file))
@@ -399,7 +399,7 @@ class GuiCoinPokerCapture(QWidget):
             ],
         )
 
-        from fpdb_3_legacy.coinpoker_live_capture import BPF_FILTER
+        from fpdb_3_legacy.capture.coinpoker_live_capture import BPF_FILTER
 
         tcpdump = f"/usr/sbin/tcpdump -i {shlex.quote(iface)} -l -n -S -x {shlex.quote(BPF_FILTER)} > {shlex.quote(fifo)} 2>> {log} &"
         applescript = 'do shell script "{}" with administrator privileges'.format(

@@ -122,3 +122,14 @@ def test_unticking_turns_it_off(qtbot, config, answers) -> None:
     window.boxes[SWC_NATIVE.key].setChecked(False)
 
     assert not live_capture_consent.is_accepted(SWC_NATIVE, answers)
+
+
+def test_an_install_without_the_capture_package_offers_nothing_to_tick(qtbot, config, monkeypatch) -> None:
+    from PySide6.QtWidgets import QLabel
+
+    monkeypatch.setattr(live_capture_consent, "capture_installed", lambda: False)
+    window = LiveCaptureDialog(config)
+    qtbot.addWidget(window)
+
+    assert window.boxes == {}
+    assert any("not part of this install" in label.text() for label in window.findChildren(QLabel))
