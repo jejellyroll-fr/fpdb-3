@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 14:03+0100\n"
+"POT-Creation-Date: 2026-10-31 17:08+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -709,6 +709,10 @@ msgid "Import cycle is taking longer than usual..."
 msgstr "Importo ciklas trunka ilgiau nei įprastai..."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+msgid "Importing SwC files still works."
+msgstr ""
+
+#: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
 msgid "Log"
 msgstr "Žurnalas"
@@ -1013,78 +1017,6 @@ msgstr "Kelias"
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Please choose the path that you want to Auto Import"
 msgstr "Pasirinkite vietą kurią norite automatiškai importuoti"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
-msgstr ""
-"Taip pat paleisti HUD_main (nužymėkite, jei HUD/automatinis importas jau "
-"veikia)."
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Capture failed to start — see the log above."
-msgstr "Fiksavimas nepasileido — žr. žurnalą aukščiau."
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-msgid "Capture not started: it is off until you turn it on."
-msgstr ""
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Default game:"
-msgstr "Numatytasis žaidimas:"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Dry run (no DB insert)"
-msgstr "Bandomasis vykdymas (be įrašymo į DB)"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Finishing previous capture…"
-msgstr "Baigiamas ankstesnis fiksavimas…"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Idle."
-msgstr "Neaktyvus."
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Interface:"
-msgstr "Sąsaja:"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Launch HUD"
-msgstr "Paleisti HUD"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Refresh interfaces"
-msgstr "Atnaujinti sąsajas"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
-msgstr "Prašoma teisių… patvirtinkite užklausą, tada žaiskite CoinPoker."
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Start capture"
-msgstr "Pradėti fiksavimą"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py fpdb_3_legacy/session_guard_dialog.py
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Stop"
-msgstr "Stabdyti"
-
-#: fpdb_3_legacy/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Stopping…"
-msgstr "Stabdoma…"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
@@ -1573,7 +1505,7 @@ msgid "Refresh Graph"
 msgstr "Atnaujinti grafiką"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
-#: fpdb_3_legacy/swc_poker_console.py
+#: fpdb_3_legacy/capture/swc_poker_console.py
 #, fuzzy
 msgid "Showdown"
 msgstr "Showdown"
@@ -3384,6 +3316,200 @@ msgstr "Turnyrai"
 msgid "e.g., my_custom_theme"
 msgstr "pvz., mano_tema"
 
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
+msgstr ""
+"Taip pat paleisti HUD_main (nužymėkite, jei HUD/automatinis importas jau "
+"veikia)."
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Capture failed to start — see the log above."
+msgstr "Fiksavimas nepasileido — žr. žurnalą aukščiau."
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+msgid "Capture not started: it is off until you turn it on."
+msgstr ""
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Default game:"
+msgstr "Numatytasis žaidimas:"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Dry run (no DB insert)"
+msgstr "Bandomasis vykdymas (be įrašymo į DB)"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Finishing previous capture…"
+msgstr "Baigiamas ankstesnis fiksavimas…"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Idle."
+msgstr "Neaktyvus."
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Interface:"
+msgstr "Sąsaja:"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Launch HUD"
+msgstr "Paleisti HUD"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Refresh interfaces"
+msgstr "Atnaujinti sąsajas"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
+msgstr "Prašoma teisių… patvirtinkite užklausą, tada žaiskite CoinPoker."
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Start capture"
+msgstr "Pradėti fiksavimą"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Stop"
+msgstr "Stabdyti"
+
+#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#, fuzzy
+msgid "Stopping…"
+msgstr "Stabdoma…"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+msgid "<"
+msgstr ""
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+msgid "<<"
+msgstr ""
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+msgid ">"
+msgstr ""
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+msgid ">>"
+msgstr ""
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "BOTTOM :"
+msgstr "APAČIA:"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Capture Console (Logs):"
+msgstr "Fiksavimo konsolė (žurnalai):"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Captured Hand History:"
+msgstr "Užfiksuota rankų istorija:"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Cards:"
+msgstr "Turimos kortos"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Hands Captured: 0"
+msgstr "Užfiksuota rankų: 0"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Import All OFC"
+msgstr "Importuoti visus OFC"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Import OFC to DB"
+msgstr "Importuoti OFC į DB"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "In Hand:"
+msgstr "Rankoje:"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "MIDDLE :"
+msgstr "VIDURYS:"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Open DB Replayer"
+msgstr "Atidaryti DB grotuvą"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Open Hand Folder"
+msgstr "Atidaryti rankų aplanką"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Refresh Hands"
+msgstr "Atnaujinti rankas"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Select a hand to start replay"
+msgstr "Pasirinkite ranką, kad pradėtumėte peržiūrą"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Start Capture"
+msgstr "Pradėti fiksavimą"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Status: 🔴 Stopped"
+msgstr "Būsena: 🔴 Sustabdyta"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Statut : 🔴 Arrêté"
+msgstr "Būsena: 🔴 Sustabdyta"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Statut : 🟢 En Cours"
+msgstr "Būsena: 🟢 Vyksta"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "Step 0 / 0"
+msgstr "Žingsnis 0 / 0"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "SwC"
+msgstr "SwC"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "SwC Poker - Capture Console & Replayer"
+msgstr "SwC Poker - fiksavimo konsolė ir grotuvas"
+
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#, fuzzy
+msgid "TOP :"
+msgstr "VIRŠUS:"
+
 #: fpdb_3_legacy/dynamic_panels_consent.py
 #, fuzzy
 msgid "Dynamic HUD panels"
@@ -3454,6 +3580,11 @@ msgstr "Įjungti arba išjungti svetaines HUD rodymui"
 #, fuzzy
 msgid "Free Poker DB 3"
 msgstr "Free Poker DB 3"
+
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/live_capture_dialog.py
+#, fuzzy
+msgid "Live capture"
+msgstr "CoinPoker tiesioginis fiksavimas"
 
 #: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -3900,6 +4031,12 @@ msgstr "CoinPoker tiesioginis fiksavimas"
 
 #: fpdb_3_legacy/live_capture_consent.py
 msgid ""
+"Live capture is not part of this install. From a source install: pip install "
+"-e '.[capture]'."
+msgstr ""
+
+#: fpdb_3_legacy/live_capture_consent.py
+msgid ""
 "Not turned on: run this command from a terminal to answer, or use Tools ▸ "
 "Live capture…"
 msgstr ""
@@ -3950,11 +4087,6 @@ msgstr ""
 #: fpdb_3_legacy/live_capture_dialog.py
 msgid "I understand, turn it on"
 msgstr ""
-
-#: fpdb_3_legacy/live_capture_dialog.py
-#, fuzzy
-msgid "Live capture"
-msgstr "CoinPoker tiesioginis fiksavimas"
 
 #: fpdb_3_legacy/live_capture_dialog.py
 #, fuzzy
@@ -7274,127 +7406,6 @@ msgstr "Pašalinti statistikos paketą"
 #, fuzzy
 msgid "User installed"
 msgstr "Naudotojo įdiegtas"
-
-#: fpdb_3_legacy/swc_poker_console.py
-msgid "<"
-msgstr ""
-
-#: fpdb_3_legacy/swc_poker_console.py
-msgid "<<"
-msgstr ""
-
-#: fpdb_3_legacy/swc_poker_console.py
-msgid ">"
-msgstr ""
-
-#: fpdb_3_legacy/swc_poker_console.py
-msgid ">>"
-msgstr ""
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "BOTTOM :"
-msgstr "APAČIA:"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Capture Console (Logs):"
-msgstr "Fiksavimo konsolė (žurnalai):"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Captured Hand History:"
-msgstr "Užfiksuota rankų istorija:"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Cards:"
-msgstr "Turimos kortos"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Hands Captured: 0"
-msgstr "Užfiksuota rankų: 0"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Import All OFC"
-msgstr "Importuoti visus OFC"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Import OFC to DB"
-msgstr "Importuoti OFC į DB"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "In Hand:"
-msgstr "Rankoje:"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "MIDDLE :"
-msgstr "VIDURYS:"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Open DB Replayer"
-msgstr "Atidaryti DB grotuvą"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Open Hand Folder"
-msgstr "Atidaryti rankų aplanką"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Refresh Hands"
-msgstr "Atnaujinti rankas"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Select a hand to start replay"
-msgstr "Pasirinkite ranką, kad pradėtumėte peržiūrą"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Start Capture"
-msgstr "Pradėti fiksavimą"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Status: 🔴 Stopped"
-msgstr "Būsena: 🔴 Sustabdyta"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Statut : 🔴 Arrêté"
-msgstr "Būsena: 🔴 Sustabdyta"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Statut : 🟢 En Cours"
-msgstr "Būsena: 🟢 Vyksta"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "Step 0 / 0"
-msgstr "Žingsnis 0 / 0"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "SwC"
-msgstr "SwC"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "SwC Poker - Capture Console & Replayer"
-msgstr "SwC Poker - fiksavimo konsolė ir grotuvas"
-
-#: fpdb_3_legacy/swc_poker_console.py
-#, fuzzy
-msgid "TOP :"
-msgstr "VIRŠUS:"
 
 #: fpdb_3_legacy/table_export.py
 #, fuzzy

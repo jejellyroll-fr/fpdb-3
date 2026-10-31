@@ -78,13 +78,14 @@ def _start_capture(config, *, supported=True):
     ``attach_to_windows_client`` (building and injecting) off the GUI thread.
     Returns the mocks so a test can assert which path ran.
     """
-    from fpdb_3_legacy import GuiAutoImport, swc_native_capture
+    from fpdb_3_legacy import GuiAutoImport
+    from fpdb_3_legacy.capture import swc_client
 
     gui = _make_gui(config)
     with (
-        patch.object(swc_native_capture, "build_tap") as build_tap,
-        patch.object(swc_native_capture, "attach_to_windows_client", return_value="mock status") as attach,
-        patch.object(swc_native_capture, "native_capture_supported", return_value=supported),
+        patch.object(swc_client, "build_tap") as build_tap,
+        patch.object(swc_client, "attach_to_windows_client", return_value="mock status") as attach,
+        patch.object(swc_client, "native_capture_supported", return_value=supported),
         patch.object(GuiAutoImport, "SwCNativeTailingThread") as thread,
         patch.object(GuiAutoImport, "SwCWindowsAttachThread") as attach_thread,
     ):
@@ -133,15 +134,16 @@ def test_the_capture_still_starts_for_a_swc_player() -> None:
 
 def test_a_swc_player_who_has_not_turned_it_on_gets_nothing_loaded(monkeypatch, tmp_path) -> None:
     """A fresh install never injects anything (#451): Start imports files and says why."""
-    from fpdb_3_legacy import GuiAutoImport, swc_native_capture
+    from fpdb_3_legacy import GuiAutoImport
+    from fpdb_3_legacy.capture import swc_client
 
     turned_on(monkeypatch, tmp_path)  # an answers file that says yes to nothing
     gui = _make_gui(_make_config({"enabled": True}))
     said: list[str] = []
     monkeypatch.setattr(gui, "addText", lambda text, *_a: said.append(text))
     with (
-        patch.object(swc_native_capture, "build_tap") as build_tap,
-        patch.object(swc_native_capture, "attach_to_windows_client") as attach,
+        patch.object(swc_client, "build_tap") as build_tap,
+        patch.object(swc_client, "attach_to_windows_client") as attach,
         patch.object(GuiAutoImport, "SwCNativeTailingThread") as thread,
         patch.object(GuiAutoImport, "SwCWindowsAttachThread") as attach_thread,
     ):
@@ -165,7 +167,7 @@ def test_nothing_is_built_on_an_unsupported_platform() -> None:
 
 def test_the_three_desktop_platforms_can_capture() -> None:
     """macOS/Linux interpose at launch; Windows injects into the running client."""
-    from fpdb_3_legacy.swc_native_capture import native_capture_supported
+    from fpdb_3_legacy.capture.swc_client import native_capture_supported
 
     assert native_capture_supported("Darwin") is True
     assert native_capture_supported("Linux") is True
@@ -173,7 +175,7 @@ def test_the_three_desktop_platforms_can_capture() -> None:
 
 
 def test_swc_tap_build_uses_the_first_compiler_on_the_path(monkeypatch) -> None:
-    from fpdb_3_legacy import swc_tap_build
+    from fpdb_3_legacy.capture import swc_tap_build
 
     monkeypatch.setattr(swc_tap_build.shutil, "which", lambda name: name == "gcc")
 
@@ -185,7 +187,7 @@ def test_swc_tap_build_reports_a_missing_compiler(monkeypatch) -> None:
 
         SwC Native Capture warning: [WinError 2] Le fichier specifie est introuvable
     """
-    from fpdb_3_legacy import swc_tap_build
+    from fpdb_3_legacy.capture import swc_tap_build
 
     monkeypatch.setattr(swc_tap_build.shutil, "which", lambda _name: None)
 
@@ -200,7 +202,7 @@ def test_swc_tap_build_reports_a_missing_compiler(monkeypatch) -> None:
 
 def test_the_compiler_is_checked_before_it_is_run(monkeypatch, tmp_path) -> None:
     """No compiler must fail with our message, not with subprocess's."""
-    from fpdb_3_legacy import swc_tap_build
+    from fpdb_3_legacy.capture import swc_tap_build
 
     monkeypatch.setattr(swc_tap_build, "BUILD_DIR", tmp_path)
     monkeypatch.setattr(swc_tap_build.shutil, "which", lambda _name: None)
@@ -214,7 +216,7 @@ def test_the_compiler_is_checked_before_it_is_run(monkeypatch, tmp_path) -> None
 
 
 def test_windows_injector_links_shell32_for_wide_argv(monkeypatch, tmp_path) -> None:
-    from fpdb_3_legacy import swc_tap_build
+    from fpdb_3_legacy.capture import swc_tap_build
 
     source = tmp_path / "swc_inject.c"
     source.write_text("int main(void) { return 0; }\n", encoding="utf-8")
@@ -229,3 +231,22 @@ def test_windows_injector_links_shell32_for_wide_argv(monkeypatch, tmp_path) -> 
 
     command = run.call_args.args[0]
     assert "-lshell32" in command
+
+
+def test_an_install_without_the_capture_package_says_so_and_imports_files(monkeypatch) -> None:
+    """Turned on, but the build left fpdb_3_legacy.capture out (#451)."""
+    from fpdb_3_legacy import GuiAutoImport, live_capture_consent
+
+    monkeypatch.setattr(live_capture_consent, "capture_installed", lambda: False)
+    gui = _make_gui(_make_config({"enabled": True}))
+    said: list[str] = []
+    monkeypatch.setattr(gui, "addText", lambda text, *_a: said.append(text))
+    with (
+        patch.object(GuiAutoImport, "SwCNativeTailingThread") as thread,
+        patch.object(GuiAutoImport, "SwCWindowsAttachThread") as attach_thread,
+    ):
+        gui.start_swc_native_capture()
+
+    thread.assert_not_called()
+    attach_thread.assert_not_called()
+    assert any("not part of this install" in text for text in said)

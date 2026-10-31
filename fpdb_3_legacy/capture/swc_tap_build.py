@@ -7,7 +7,7 @@ compile on three runners — making each of them install the whole project first
 just to invoke a compiler, would be minutes of work for nothing.
 
 Only the standard library is imported here, so
-``python -m fpdb_3_legacy.swc_tap_build --build`` runs on a bare checkout.
+``python -m fpdb_3_legacy.capture.swc_tap_build --build`` runs on a bare checkout.
 """
 
 from __future__ import annotations

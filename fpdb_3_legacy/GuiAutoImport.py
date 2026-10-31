@@ -174,7 +174,7 @@ class SwCWindowsAttachThread(QThread):
         return self._cancel_requested
 
     def run(self) -> None:
-        from fpdb_3_legacy.swc_native_capture import CaptureAttachCancelled, attach_to_windows_client
+        from fpdb_3_legacy.capture.swc_client import CaptureAttachCancelled, attach_to_windows_client
 
         try:
             self.attached.emit(
@@ -993,14 +993,19 @@ class GuiAutoImport(QWidget):
                 "info",
             )
             return
+        if not live_capture_consent.capture_installed():
+            # Turned on, but this install carries no capture package (#451).
+            log.info("SwC live capture is on but the capture package is not installed")
+            self.addText(
+                "\n" + str(live_capture_consent.CaptureNotInstalled()) + " " + _("Importing SwC files still works."),
+                "info",
+            )
+            return
         try:
             import platform as _platform
 
-            from fpdb_3_legacy.swc_native_capture import (
-                DEFAULT_ARCHIVE,
-                build_tap,
-                native_capture_supported,
-            )
+            from fpdb_3_legacy.capture.swc_client import build_tap, native_capture_supported
+            from fpdb_3_legacy.swc_native_capture import DEFAULT_ARCHIVE
 
             if not native_capture_supported():
                 log.info("SwC live capture is not available on %s.", _platform.system())

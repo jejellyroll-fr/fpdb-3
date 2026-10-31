@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 import pytest
 
-from fpdb_3_legacy import swc_windows_inject as inj
+from fpdb_3_legacy.capture import swc_windows_inject as inj
 from fpdb_3_legacy.live_capture_consent import SWC_NATIVE
 from tests.helpers.live_capture import turned_on
 
@@ -161,24 +161,25 @@ def test_every_named_injector_error_has_a_message(code: int) -> None:
 
 def test_attach_requires_a_running_client(monkeypatch) -> None:
     """attach_to_windows_client raises a clear error when the client is absent."""
-    from fpdb_3_legacy import swc_native_capture, swc_tap_build
+    from fpdb_3_legacy.capture import swc_client, swc_tap_build
 
-    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
-    monkeypatch.setattr(swc_native_capture, "build_tap", lambda **_: Path("tap.dll"))
+    monkeypatch.setattr(swc_client.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_client, "build_tap", lambda **_: Path("tap.dll"))
     monkeypatch.setattr(swc_tap_build, "build_injector", lambda **_: Path("inj.exe"))
     monkeypatch.setattr(inj, "write_capture_config", lambda *_a, **_k: Path("swc-native.cfg"))
     monkeypatch.setattr(inj, "find_client_pids", lambda *_a, **_k: [])
 
     with pytest.raises(RuntimeError, match="not running"):
-        swc_native_capture.attach_to_windows_client()
+        swc_client.attach_to_windows_client()
 
 
 def _attach_with_statuses(tmp_path: Path, monkeypatch, statuses: dict[int, str], pids=(100, 200)) -> str:
     """Run attach_to_windows_client with the build, injection and status wait mocked out."""
-    from fpdb_3_legacy import swc_native_capture, swc_tap_build
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.capture import swc_client, swc_tap_build
 
-    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
-    monkeypatch.setattr(swc_native_capture, "build_tap", lambda **_: Path("tap.dll"))
+    monkeypatch.setattr(swc_client.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_client, "build_tap", lambda **_: Path("tap.dll"))
     monkeypatch.setattr(swc_native_capture, "DEFAULT_ARCHIVE", tmp_path / "swc-native.raw")
     monkeypatch.setattr(swc_tap_build, "build_injector", lambda **_: Path("inj.exe"))
     monkeypatch.setattr(inj, "write_capture_config", lambda *_a, **_k: Path("swc-native.cfg"))
@@ -192,7 +193,7 @@ def _attach_with_statuses(tmp_path: Path, monkeypatch, statuses: dict[int, str],
         inj, "wait_for_hooks", lambda _p, injected, **_k: {pid: statuses.get(pid, "") for pid in injected}
     )
 
-    return swc_native_capture.attach_to_windows_client()
+    return swc_client.attach_to_windows_client()
 
 
 def test_attach_reports_capture_active_when_every_client_hooked(tmp_path: Path, monkeypatch) -> None:

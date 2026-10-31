@@ -13,23 +13,23 @@ Modes
 -----
 Live capture (needs root / Administrator, like any sniffer)::
 
-    sudo python -m fpdb_3_legacy.coinpoker_live_capture --live
+    sudo python -m fpdb_3_legacy.capture.coinpoker_live_capture --live
     # Windows (elevated shell, Npcap installed):
-    python -m fpdb_3_legacy.coinpoker_live_capture --live --iface "\\Device\\NPF_{...}"
+    python -m fpdb_3_legacy.capture.coinpoker_live_capture --live --iface "\\Device\\NPF_{...}"
 
 List capture devices::
 
-    python -m fpdb_3_legacy.coinpoker_live_capture --list-ifaces
+    python -m fpdb_3_legacy.capture.coinpoker_live_capture --list-ifaces
 
 Replay a saved pcap/pcapng file (no privileges; for testing)::
 
-    python -m fpdb_3_legacy.coinpoker_live_capture --replay capture.pcap --dry-run
+    python -m fpdb_3_legacy.capture.coinpoker_live_capture --replay capture.pcap --dry-run
 
 Portable fallback if native capture is unavailable, pipe any sniffer's
 ``-S -x`` text (tcpdump/tshark) into stdin::
 
     sudo tcpdump -i any -l -n -S -x 'tcp port 9000 or tcp port 7002' \
-        | python -m fpdb_3_legacy.coinpoker_live_capture --stdin
+        | python -m fpdb_3_legacy.capture.coinpoker_live_capture --stdin
 
 ``--dry-run`` builds and validates hands without writing to the database.
 """
@@ -1082,7 +1082,7 @@ def run(
 
 
 def _print_devices() -> None:
-    from fpdb_3_legacy.coinpoker_pcap import list_devices
+    from fpdb_3_legacy.capture.coinpoker_pcap import list_devices
 
     print("Available capture devices:")
     for name, desc, flags in list_devices():
@@ -1227,7 +1227,7 @@ def main() -> None:  # noqa: C901
 
     import os
 
-    from fpdb_3_legacy.coinpoker_pcap import capture_live, open_offline
+    from fpdb_3_legacy.capture.coinpoker_pcap import capture_live, open_offline
 
     if args.live:
         _require_consent(args.config_file)

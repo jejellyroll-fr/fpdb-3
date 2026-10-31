@@ -39,7 +39,7 @@ $SECOND_SCRIPT = "$LEGACY_PACKAGE_DIR/HUD_main.pyw"
 # have acted -- so the stat blocks appear one at a time. The hooks directory
 # carries the same rule for anything reached through runpy; see
 # tools/pyinstaller_hooks.
-$PYINSTALLER_OPTIONS = "--noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import=numpy --hidden-import=comtypes --hidden-import=comtypes.client --hidden-import=fpdb_3_legacy.coinpoker_live_capture --hidden-import=fpdb_3_legacy.Aux_Hud --hidden-import=fpdb_3_legacy.Aux_Classic_Hud --hidden-import=fpdb_3_legacy.Mucked"
+$PYINSTALLER_OPTIONS = "--noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import=numpy --hidden-import=comtypes --hidden-import=comtypes.client --hidden-import=fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import=fpdb_3_legacy.Aux_Hud --hidden-import=fpdb_3_legacy.Aux_Classic_Hud --hidden-import=fpdb_3_legacy.Mucked"
 
 # List of all files
 # ("FILES=@(" without the sigil is a command name to PowerShell, so this script

@@ -404,7 +404,7 @@ def test_the_load_repair_lifts_blocks_back_onto_the_table() -> None:
 
 
 def test_stream_ids_are_distinct_per_client(tmp_path) -> None:
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     assignment = inj.write_stream_ids(tmp_path, [1024, 4])
 
@@ -418,11 +418,12 @@ def test_stream_ids_are_distinct_per_client(tmp_path) -> None:
 
 def test_a_partly_injected_client_set_says_which_client_was_missed(monkeypatch, tmp_path) -> None:
     """Otherwise "capture active" hides a client whose hands never arrive."""
-    from fpdb_3_legacy import swc_native_capture, swc_tap_build
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.capture import swc_client, swc_tap_build
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
-    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
-    monkeypatch.setattr(swc_native_capture, "build_tap", lambda **_: tmp_path / "tap.dll")
+    monkeypatch.setattr(swc_client.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_client, "build_tap", lambda **_: tmp_path / "tap.dll")
     monkeypatch.setattr(swc_tap_build, "build_injector", lambda **_: tmp_path / "inj.exe")
     monkeypatch.setattr(swc_native_capture, "BUILD_DIR", tmp_path, raising=False)
     monkeypatch.setattr(inj, "write_capture_config", lambda *_a, **_k: tmp_path / "c.cfg")
@@ -435,7 +436,7 @@ def test_a_partly_injected_client_set_says_which_client_was_missed(monkeypatch, 
     )
     monkeypatch.setattr(inj, "wait_for_hooks", lambda _p, pids, **_k: dict.fromkeys(pids, "tap-hooked"))
 
-    status = swc_native_capture.attach_to_windows_client()
+    status = swc_client.attach_to_windows_client()
 
     assert "22" in status, "the client that was not injected must be named"
     assert "access denied" in status
@@ -554,7 +555,7 @@ def test_nothing_is_pushed_when_the_hud_is_switched_off() -> None:
 
 def test_a_reattach_keeps_the_id_an_injected_client_already_holds(tmp_path) -> None:
     """LoadLibraryW does not re-run DllMain, so that client keeps its old id."""
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     first = inj.write_stream_ids(tmp_path, [100, 200])
     # 100 exits; a new client appears. 200 is still injected and still in memory.
@@ -565,7 +566,7 @@ def test_a_reattach_keeps_the_id_an_injected_client_already_holds(tmp_path) -> N
 
 
 def test_stream_ids_survive_a_repeated_attach(tmp_path) -> None:
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     first = inj.write_stream_ids(tmp_path, [7, 9])
     assert inj.write_stream_ids(tmp_path, [7, 9]) == first
@@ -688,7 +689,7 @@ def test_a_zero_reference_with_no_positive_coordinate_is_still_repaired() -> Non
 
 
 def test_changed_capture_options_are_reported_as_needing_a_restart(tmp_path) -> None:
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     assert inj.capture_config_changed(tmp_path, port=0, include_outbound=False) is False
 
@@ -742,7 +743,7 @@ def test_reading_a_finished_archive_still_reports_a_bad_length() -> None:
 
 def test_an_id_is_not_reused_after_its_client_exits(tmp_path) -> None:
     """The archive is append-only: the departed client's records still hold it."""
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     first = inj.write_stream_ids(tmp_path, [100])
     second = inj.write_stream_ids(tmp_path, [200])  # 100 has exited
@@ -751,7 +752,7 @@ def test_an_id_is_not_reused_after_its_client_exits(tmp_path) -> None:
 
 
 def test_a_fresh_archive_releases_the_id_pool(tmp_path) -> None:
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     first = inj.write_stream_ids(tmp_path, [100])
     assert inj.reset_stream_ids(tmp_path) == 1
@@ -851,7 +852,7 @@ def test_a_transient_retry_is_re_offered_after_the_budget(tmp_path, monkeypatch)
 
 def test_a_running_client_keeps_its_id_through_a_pool_reset(tmp_path) -> None:
     """Its DLL is resident and goes on stamping the id it read at load time."""
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     assigned = inj.write_stream_ids(tmp_path, [100, 200])
     inj.reset_stream_ids(tmp_path, keep_pids=[200])  # 100 exited, 200 still runs
@@ -862,7 +863,7 @@ def test_a_running_client_keeps_its_id_through_a_pool_reset(tmp_path) -> None:
 
 
 def test_a_reset_with_no_client_running_frees_everything(tmp_path) -> None:
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     inj.write_stream_ids(tmp_path, [100, 200])
     assert inj.reset_stream_ids(tmp_path) == 2
@@ -1008,7 +1009,7 @@ def test_evidence_breaks_a_tie_before_snapshot_count() -> None:
 
 def test_a_recycled_pid_does_not_inherit_an_id(tmp_path, monkeypatch) -> None:
     """Windows reuses pids, and a sidecar outlives the process it was written for."""
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     monkeypatch.setattr(inj, "process_start_time", lambda _pid: 1000.0)
     first = inj.write_stream_ids(tmp_path, [4242])
@@ -1021,7 +1022,7 @@ def test_a_recycled_pid_does_not_inherit_an_id(tmp_path, monkeypatch) -> None:
 
 
 def test_the_same_run_keeps_its_id(tmp_path, monkeypatch) -> None:
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     monkeypatch.setattr(inj, "process_start_time", lambda _pid: 1000.0)
     first = inj.write_stream_ids(tmp_path, [4242])
@@ -1031,7 +1032,7 @@ def test_the_same_run_keeps_its_id(tmp_path, monkeypatch) -> None:
 
 def test_a_sidecar_without_a_start_time_keeps_its_id(tmp_path, monkeypatch) -> None:
     """Written before start times were recorded; renumbering a resident DLL is worse."""
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     (tmp_path / "swc-native-4242.cfg").write_text("stream=7\n", encoding="ascii")
     monkeypatch.setattr(inj, "process_start_time", lambda _pid: 1000.0)
@@ -1206,7 +1207,7 @@ def test_a_kept_copy_is_not_offered_twice_in_one_poll(tmp_path, monkeypatch) -> 
 
 def test_an_id_left_behind_by_pid_reuse_is_never_handed_out_again(tmp_path, monkeypatch) -> None:
     """Its records are still in the append-only archive, under that id."""
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     monkeypatch.setattr(inj, "process_start_time", lambda _pid: 1000.0)
     first = inj.write_stream_ids(tmp_path, [4242])
@@ -1223,7 +1224,7 @@ def test_an_id_left_behind_by_pid_reuse_is_never_handed_out_again(tmp_path, monk
 
 
 def test_the_reservation_ledger_is_released_with_the_archive(tmp_path, monkeypatch) -> None:
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     monkeypatch.setattr(inj, "process_start_time", lambda _pid: 1000.0)
     first = inj.write_stream_ids(tmp_path, [100])
@@ -1233,7 +1234,7 @@ def test_the_reservation_ledger_is_released_with_the_archive(tmp_path, monkeypat
 
 
 def test_a_kept_client_keeps_its_reservation_through_a_reset(tmp_path, monkeypatch) -> None:
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     monkeypatch.setattr(inj, "process_start_time", lambda _pid: 1000.0)
     assigned = inj.write_stream_ids(tmp_path, [100, 200])
@@ -1251,7 +1252,7 @@ def test_a_kept_client_keeps_its_reservation_through_a_reset(tmp_path, monkeypat
 
 def test_a_previous_process_status_does_not_satisfy_the_wait(tmp_path) -> None:
     """Windows reuses pids, and the status file is append-only."""
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     status = tmp_path / "swc-native.status"
     status.write_text("4242 tap-hooked\n", encoding="ascii")
@@ -1262,7 +1263,7 @@ def test_a_previous_process_status_does_not_satisfy_the_wait(tmp_path) -> None:
 
 
 def test_a_status_written_after_the_mark_is_accepted(tmp_path) -> None:
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     status = tmp_path / "swc-native.status"
     status.write_text("4242 tap-hooked\n", encoding="ascii")
@@ -1274,7 +1275,7 @@ def test_a_status_written_after_the_mark_is_accepted(tmp_path) -> None:
 
 
 def test_reading_without_a_mark_still_sees_everything(tmp_path) -> None:
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     status = tmp_path / "swc-native.status"
     status.write_text("100 tap-loaded\n200 tap-hooked\n", encoding="ascii")
@@ -1461,12 +1462,13 @@ def test_the_double_board_copy_is_the_one_normalization_returns(monkeypatch) -> 
 
 def test_a_lock_warning_is_surfaced_even_though_a_hook_status_follows_it(tmp_path, monkeypatch) -> None:
     """wait_for_hooks follows the latest line, which buries the warning."""
-    from fpdb_3_legacy import swc_native_capture, swc_tap_build
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.capture import swc_client, swc_tap_build
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     status = tmp_path / "swc-native.status"
-    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
-    monkeypatch.setattr(swc_native_capture, "build_tap", lambda **_: tmp_path / "tap.dll")
+    monkeypatch.setattr(swc_client.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_client, "build_tap", lambda **_: tmp_path / "tap.dll")
     monkeypatch.setattr(swc_tap_build, "build_injector", lambda **_: tmp_path / "inj.exe")
     monkeypatch.setattr(swc_native_capture, "BUILD_DIR", tmp_path, raising=False)
     monkeypatch.setattr(swc_native_capture, "DEFAULT_ARCHIVE", tmp_path / "swc-native.raw", raising=False)
@@ -1488,7 +1490,7 @@ def test_a_lock_warning_is_surfaced_even_though_a_hook_status_follows_it(tmp_pat
 
     monkeypatch.setattr(inj, "wait_for_hooks", fake_wait)
 
-    message = swc_native_capture.attach_to_windows_client()
+    message = swc_client.attach_to_windows_client()
 
     assert "could not take the shared-archive lock" in message
     assert "100" in message
@@ -1496,7 +1498,7 @@ def test_a_lock_warning_is_surfaced_even_though_a_hook_status_follows_it(tmp_pat
 
 
 def test_read_status_markers_keeps_every_line_per_client(tmp_path) -> None:
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     status = tmp_path / "swc-native.status"
     status.write_text("100 tap-loaded\n100 tap-cross-process-lock-unavailable\n100 tap-hooked\n", encoding="ascii")
@@ -2266,10 +2268,10 @@ def test_a_connection_that_cannot_be_cached_is_simply_not_cached() -> None:
 
 
 def test_the_attach_thread_reports_what_it_found(monkeypatch) -> None:
-    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.capture import swc_client
     from fpdb_3_legacy.GuiAutoImport import SwCWindowsAttachThread
 
-    monkeypatch.setattr(swc_native_capture, "attach_to_windows_client", lambda **_: "SwC tap attached to 1 client")
+    monkeypatch.setattr(swc_client, "attach_to_windows_client", lambda **_: "SwC tap attached to 1 client")
     thread = SwCWindowsAttachThread()
     reported: list[str] = []
     thread.attached.connect(reported.append)
@@ -2281,14 +2283,14 @@ def test_the_attach_thread_reports_what_it_found(monkeypatch) -> None:
 
 def test_a_failed_attach_reaches_the_user_rather_than_qt(monkeypatch) -> None:
     """run() is called by Qt itself: an exception out of it has nowhere to go."""
-    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.capture import swc_client
     from fpdb_3_legacy.GuiAutoImport import SwCWindowsAttachThread
 
     def explode(**_kwargs) -> None:
         msg = "no compiler on PATH"
         raise OSError(msg)
 
-    monkeypatch.setattr(swc_native_capture, "attach_to_windows_client", explode)
+    monkeypatch.setattr(swc_client, "attach_to_windows_client", explode)
     thread = SwCWindowsAttachThread()
     reported: list[str] = []
     thread.attached.connect(reported.append)
@@ -2302,11 +2304,12 @@ def test_a_failed_attach_reaches_the_user_rather_than_qt(monkeypatch) -> None:
 
 def test_a_cancelled_attach_never_injects_the_tap(tmp_path, monkeypatch) -> None:
     """The tap has no unload path, so an injection outlives the stop that raced it."""
-    from fpdb_3_legacy import swc_native_capture, swc_tap_build
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.capture import swc_client, swc_tap_build
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
-    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
-    monkeypatch.setattr(swc_native_capture, "build_tap", lambda **_: tmp_path / "tap.dll")
+    monkeypatch.setattr(swc_client.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_client, "build_tap", lambda **_: tmp_path / "tap.dll")
     monkeypatch.setattr(swc_native_capture, "DEFAULT_ARCHIVE", tmp_path / "swc-native.raw")
     monkeypatch.setattr(swc_tap_build, "build_injector", lambda **_: tmp_path / "inj.exe")
     monkeypatch.setattr(inj, "write_capture_config", lambda *_a, **_k: tmp_path / "c.cfg")
@@ -2322,8 +2325,8 @@ def test_a_cancelled_attach_never_injects_the_tap(tmp_path, monkeypatch) -> None
         lambda _i, _d, pid: injected.append(pid) or inj.InjectionResult(pid=pid, ok=True, detail="ok"),
     )
 
-    with pytest.raises(swc_native_capture.CaptureAttachCancelled):
-        swc_native_capture.attach_to_windows_client(should_cancel=lambda: True)
+    with pytest.raises(swc_client.CaptureAttachCancelled):
+        swc_client.attach_to_windows_client(should_cancel=lambda: True)
 
     assert injected == [], "nothing was loaded into the client"
 
@@ -2335,11 +2338,12 @@ def test_a_stop_during_one_injection_spares_the_clients_behind_it(tmp_path, monk
     injection still loaded the tap into every client behind it -- minutes later,
     and permanently, because the tap has no unload path.
     """
-    from fpdb_3_legacy import swc_native_capture, swc_tap_build
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.capture import swc_client, swc_tap_build
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
-    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
-    monkeypatch.setattr(swc_native_capture, "build_tap", lambda **_: tmp_path / "tap.dll")
+    monkeypatch.setattr(swc_client.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_client, "build_tap", lambda **_: tmp_path / "tap.dll")
     monkeypatch.setattr(swc_native_capture, "DEFAULT_ARCHIVE", tmp_path / "swc-native.raw")
     monkeypatch.setattr(swc_tap_build, "build_injector", lambda **_: tmp_path / "inj.exe")
     monkeypatch.setattr(inj, "write_capture_config", lambda *_a, **_k: tmp_path / "c.cfg")
@@ -2359,16 +2363,16 @@ def test_a_stop_during_one_injection_spares_the_clients_behind_it(tmp_path, monk
 
     monkeypatch.setattr(inj, "inject_into_pid", inject)
 
-    with pytest.raises(swc_native_capture.CaptureAttachCancelled, match="pid 200"):
-        swc_native_capture.attach_to_windows_client(should_cancel=lambda: stopped[0])
+    with pytest.raises(swc_client.CaptureAttachCancelled, match="pid 200"):
+        swc_client.attach_to_windows_client(should_cancel=lambda: stopped[0])
 
     assert injected == [100], "the two clients behind the stop were spared"
 
 
 def test_an_abandoned_injection_names_the_clients_already_tapped() -> None:
     """Nothing can unload them, so the least the message can do is say who they are."""
-    from fpdb_3_legacy import swc_native_capture
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy.capture import swc_client
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
     injector_mod = SimpleNamespace(
         inject_into_pid=lambda _i, _d, pid: inj.InjectionResult(pid=pid, ok=True, detail="ok"),
@@ -2380,8 +2384,8 @@ def test_an_abandoned_injection_names_the_clients_already_tapped() -> None:
         calls.append(1)
         return len(calls) > 1
 
-    with pytest.raises(swc_native_capture.CaptureAttachCancelled) as caught:
-        swc_native_capture._inject_into_each_client(
+    with pytest.raises(swc_client.CaptureAttachCancelled) as caught:
+        swc_client._inject_into_each_client(
             injector_mod, Path("inj.exe"), Path("tap.dll"), [100, 200], cancel_after_one
         )
 
@@ -2390,11 +2394,12 @@ def test_an_abandoned_injection_names_the_clients_already_tapped() -> None:
 
 def test_an_attach_that_is_not_cancelled_still_injects(tmp_path, monkeypatch) -> None:
     """The cancellation check must not become a way to never attach at all."""
-    from fpdb_3_legacy import swc_native_capture, swc_tap_build
-    from fpdb_3_legacy import swc_windows_inject as inj
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.capture import swc_client, swc_tap_build
+    from fpdb_3_legacy.capture import swc_windows_inject as inj
 
-    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
-    monkeypatch.setattr(swc_native_capture, "build_tap", lambda **_: tmp_path / "tap.dll")
+    monkeypatch.setattr(swc_client.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_client, "build_tap", lambda **_: tmp_path / "tap.dll")
     monkeypatch.setattr(swc_native_capture, "DEFAULT_ARCHIVE", tmp_path / "swc-native.raw")
     monkeypatch.setattr(swc_tap_build, "build_injector", lambda **_: tmp_path / "inj.exe")
     monkeypatch.setattr(inj, "write_capture_config", lambda *_a, **_k: tmp_path / "c.cfg")
@@ -2407,20 +2412,20 @@ def test_an_attach_that_is_not_cancelled_still_injects(tmp_path, monkeypatch) ->
     )
     monkeypatch.setattr(inj, "wait_for_hooks", lambda _p, pids, **_k: dict.fromkeys(pids, "tap-hooked"))
 
-    message = swc_native_capture.attach_to_windows_client(should_cancel=lambda: False)
+    message = swc_client.attach_to_windows_client(should_cancel=lambda: False)
 
     assert "capture active" in message
 
 
 def test_a_cancelled_attach_reports_nothing_to_the_user(monkeypatch) -> None:
     """A stop the user asked for is not a failure to tell them about."""
-    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.capture import swc_client
     from fpdb_3_legacy.GuiAutoImport import SwCWindowsAttachThread
 
     def cancelled(**_kwargs) -> None:
-        raise swc_native_capture.CaptureAttachCancelled("cancelled before injecting")
+        raise swc_client.CaptureAttachCancelled("cancelled before injecting")
 
-    monkeypatch.setattr(swc_native_capture, "attach_to_windows_client", cancelled)
+    monkeypatch.setattr(swc_client, "attach_to_windows_client", cancelled)
     thread = SwCWindowsAttachThread()
     reported: list[str] = []
     thread.attached.connect(reported.append)
@@ -2432,7 +2437,7 @@ def test_a_cancelled_attach_reports_nothing_to_the_user(monkeypatch) -> None:
 
 def test_the_worker_passes_its_cancellation_through(monkeypatch) -> None:
     """The flag is only worth setting if the attach can actually read it."""
-    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.capture import swc_client
     from fpdb_3_legacy.GuiAutoImport import SwCWindowsAttachThread
 
     thread = SwCWindowsAttachThread()
@@ -2442,7 +2447,7 @@ def test_the_worker_passes_its_cancellation_through(monkeypatch) -> None:
         asked.append(should_cancel())
         return "ok"
 
-    monkeypatch.setattr(swc_native_capture, "attach_to_windows_client", attach)
+    monkeypatch.setattr(swc_client, "attach_to_windows_client", attach)
 
     thread.cancel()
     assert thread.cancelled is True

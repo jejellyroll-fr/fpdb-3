@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 
 from fpdb_3_legacy import live_capture_consent as consent
-from fpdb_3_legacy import swc_native_capture
+from fpdb_3_legacy.capture import swc_client
 from fpdb_3_legacy.live_capture_consent import COINPOKER_PACKETS, SWC_NATIVE, LiveCaptureNotAccepted
 
 
@@ -130,46 +130,46 @@ def test_a_mechanism_already_on_is_not_asked_again(answers) -> None:
 
 def test_the_windows_attach_builds_and_injects_nothing_without_a_yes(answers, monkeypatch) -> None:
     built = []
-    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
-    monkeypatch.setattr(swc_native_capture, "build_tap", lambda **_: built.append("tap"))
+    monkeypatch.setattr(swc_client.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_client, "build_tap", lambda **_: built.append("tap"))
 
     with pytest.raises(LiveCaptureNotAccepted):
-        swc_native_capture.attach_to_windows_client(consent=answers)
+        swc_client.attach_to_windows_client(consent=answers)
 
     assert built == []
 
 
 def test_turning_it_off_during_the_build_injects_nothing(answers, monkeypatch) -> None:
     # The Windows attach builds off the GUI thread: unticking meanwhile must stop it.
-    from fpdb_3_legacy import swc_tap_build, swc_windows_inject
+    from fpdb_3_legacy.capture import swc_tap_build, swc_windows_inject
 
     consent.accept(SWC_NATIVE, answers)
     injected = []
-    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_client.platform, "system", lambda: "Windows")
 
     def build_then_untick(**_):
         consent.withdraw(SWC_NATIVE, answers)
         return Path("tap.dll")
 
-    monkeypatch.setattr(swc_native_capture, "build_tap", build_then_untick)
+    monkeypatch.setattr(swc_client, "build_tap", build_then_untick)
     monkeypatch.setattr(swc_tap_build, "build_injector", lambda **_: Path("inj.exe"))
     monkeypatch.setattr(swc_windows_inject, "find_client_pids", lambda *_a, **_k: [100])
     monkeypatch.setattr(swc_windows_inject, "inject_into_pid", lambda *a: injected.append(a))
 
-    with pytest.raises(swc_native_capture.CaptureAttachCancelled):
-        swc_native_capture.attach_to_windows_client(consent=answers)
+    with pytest.raises(swc_client.CaptureAttachCancelled):
+        swc_client.attach_to_windows_client(consent=answers)
 
     assert injected == []
 
 
 def test_the_launch_preloads_nothing_without_a_yes(answers, monkeypatch, tmp_path) -> None:
     launched = []
-    monkeypatch.setattr(swc_native_capture, "running_client_pids", list)
-    monkeypatch.setattr(swc_native_capture, "build_tap", lambda **_: launched.append("tap"))
-    monkeypatch.setattr(swc_native_capture.subprocess, "Popen", lambda *a, **k: launched.append(a))
+    monkeypatch.setattr(swc_client, "running_client_pids", list)
+    monkeypatch.setattr(swc_client, "build_tap", lambda **_: launched.append("tap"))
+    monkeypatch.setattr(swc_client.subprocess, "Popen", lambda *a, **k: launched.append(a))
 
     with pytest.raises(LiveCaptureNotAccepted):
-        swc_native_capture.launch_client(tmp_path / "swc.raw", consent=answers)
+        swc_client.launch_client(tmp_path / "swc.raw", consent=answers)
 
     assert launched == []
 
@@ -178,31 +178,31 @@ def test_turning_it_off_during_the_build_launches_nothing(answers, monkeypatch, 
     # macOS and Linux preload the tap at launch: unticking while it compiles must stop it.
     consent.accept(SWC_NATIVE, answers)
     launched = []
-    monkeypatch.setattr(swc_native_capture, "running_client_pids", list)
+    monkeypatch.setattr(swc_client, "running_client_pids", list)
 
     def build_then_untick(**_):
         consent.withdraw(SWC_NATIVE, answers)
         return tmp_path / "tap.dylib"
 
-    monkeypatch.setattr(swc_native_capture, "build_tap", build_then_untick)
-    monkeypatch.setattr(swc_native_capture.subprocess, "Popen", lambda *a, **k: launched.append(a))
+    monkeypatch.setattr(swc_client, "build_tap", build_then_untick)
+    monkeypatch.setattr(swc_client.subprocess, "Popen", lambda *a, **k: launched.append(a))
 
     with pytest.raises(LiveCaptureNotAccepted):
-        swc_native_capture.launch_client(tmp_path / "swc.raw", consent=answers)
+        swc_client.launch_client(tmp_path / "swc.raw", consent=answers)
 
     assert launched == []
 
 
 def test_the_swc_command_stops_when_the_answer_is_no(monkeypatch) -> None:
     monkeypatch.setattr(consent, "confirm_on_terminal", lambda *_a, **_k: False)
-    monkeypatch.setattr(swc_native_capture, "launch_client", lambda *_a, **_k: pytest.fail("launched"))
-    monkeypatch.setattr(swc_native_capture, "attach_to_windows_client", lambda **_k: pytest.fail("attached"))
+    monkeypatch.setattr(swc_client, "launch_client", lambda *_a, **_k: pytest.fail("launched"))
+    monkeypatch.setattr(swc_client, "attach_to_windows_client", lambda **_k: pytest.fail("attached"))
 
-    assert swc_native_capture.main([]) == 2
+    assert swc_client.main([]) == 2
 
 
 def test_the_coinpoker_live_command_stops_without_a_yes(tmp_path, monkeypatch, capsys) -> None:
-    from fpdb_3_legacy import coinpoker_live_capture, coinpoker_pcap
+    from fpdb_3_legacy.capture import coinpoker_live_capture, coinpoker_pcap
 
     config = tmp_path / "HUD_config.xml"
     monkeypatch.setattr(sys, "argv", ["coinpoker_live_capture", "--live", "--config-file", str(config)])
@@ -217,14 +217,38 @@ def test_the_coinpoker_live_command_stops_without_a_yes(tmp_path, monkeypatch, c
 
 def test_the_coinpoker_replay_needs_no_yes(tmp_path, monkeypatch) -> None:
     # Reading a capture file back records nothing from the client.
-    from fpdb_3_legacy import coinpoker_live_capture
+    from fpdb_3_legacy.capture import coinpoker_live_capture
 
     monkeypatch.setattr(sys, "argv", ["coinpoker_live_capture", "--replay", str(tmp_path / "x.pcap"), "--dry-run"])
     monkeypatch.setattr(coinpoker_live_capture, "_events_from_segments", lambda _s: [])
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_pcap.open_offline", lambda *_a: [])
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_pcap.open_offline", lambda *_a: [])
     ran = []
     monkeypatch.setattr(coinpoker_live_capture, "run", lambda *a, **k: ran.append(k))
 
     coinpoker_live_capture.main()
 
     assert ran
+
+
+def test_the_client_is_looked_for_with_a_resolved_pgrep(monkeypatch) -> None:
+    from fpdb_3_legacy.capture import swc_client
+
+    calls = []
+    monkeypatch.setattr(swc_client.shutil, "which", lambda name: f"/usr/bin/{name}")
+    monkeypatch.setattr(
+        swc_client.subprocess,
+        "run",
+        lambda argv, **_k: calls.append(argv) or type("Done", (), {"stdout": "41\n42\nnot-a-pid\n"})(),
+    )
+
+    assert swc_client.running_client_pids() == [41, 42]
+    assert calls[0][0] == "/usr/bin/pgrep"
+
+
+def test_no_pgrep_is_said_rather_than_taken_for_no_client(monkeypatch) -> None:
+    from fpdb_3_legacy.capture import swc_client
+
+    monkeypatch.setattr(swc_client.shutil, "which", lambda _name: None)
+
+    with pytest.raises(FileNotFoundError, match="pgrep"):
+        swc_client.running_client_pids()

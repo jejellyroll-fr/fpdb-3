@@ -83,6 +83,22 @@ class LiveCaptureNotAccepted(RuntimeError):
         )
 
 
+def capture_installed() -> bool:
+    """Whether the capture package is in this install: a build may leave it out (#451)."""
+    import importlib.util  # noqa: PLC0415 - only asked by the actions that start a capture
+
+    return importlib.util.find_spec("fpdb_3_legacy.capture") is not None
+
+
+class CaptureNotInstalled(RuntimeError):
+    """A capture was started in an install that does not carry the capture package."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            _("Live capture is not part of this install. From a source install: pip install -e '.[capture]'.")
+        )
+
+
 def consent_path(config_file: str | os.PathLike[str] | None = None) -> Path:
     """The answers file beside ``config_file``, or in fpdb's configuration folder."""
     if config_file:

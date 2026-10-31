@@ -30,10 +30,34 @@ the account risk and that the room's terms prevail, and turns it on only when
 you choose **I understand, turn it on**. Untick it to turn it off again.
 Starting the CoinPoker capture from its tab asks the same question.
 
-The command-line capture (`python -m fpdb_3_legacy.swc_native_capture`) asks
+The command-line capture (`python -m fpdb_3_legacy.capture.swc_client`) asks
 on the terminal and turns the tap on only when you type `yes`. Run from
 something that is not a terminal, it refuses rather than assuming a yes.
 `--build` only compiles the tap and needs no answer.
+
+## Where the capture code lives
+
+Everything that reaches into a client is in its own package,
+`fpdb_3_legacy/capture/`:
+
+- the SwC tap: its C sources, the build, the Windows injector and the command
+  above (`swc_client`);
+- the SwC web capture (`swc_http_capture`, `swc_poker_console`);
+- the CoinPoker packet capture and its tab.
+
+fpdb's core never imports it when it starts. It decodes what a capture wrote
+(`swc_native_capture`, `http_capture_*`), and reaches into the package only
+from the action that starts a capture. An install without the package still
+starts, imports hand histories and runs the HUD; starting a capture then says
+it is not part of this install. A test (`tests/test_capture_isolation.py`)
+keeps it that way.
+
+The SwC web capture needs Playwright, which only the `capture` extra brings:
+
+```sh
+pip install -e '.[capture]'
+playwright install chromium
+```
 
 ## Where the answer is kept
 

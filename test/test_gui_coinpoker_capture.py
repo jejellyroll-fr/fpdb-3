@@ -9,7 +9,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from fpdb_3_legacy.GuiCoinPokerCapture import GuiCoinPokerCapture
+from fpdb_3_legacy.capture.GuiCoinPokerCapture import GuiCoinPokerCapture
 
 pytestmark = pytest.mark.qt
 
@@ -28,7 +28,7 @@ def test_start_asks_first_and_a_no_launches_nothing(qtbot, monkeypatch) -> None:
     launch = Mock()
     lock = Mock()
     monkeypatch.setattr(widget, "_launch_elevated", launch)
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture._acquire_instance_lock", lock)
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_live_capture._acquire_instance_lock", lock)
 
     widget._start()
 
@@ -43,7 +43,7 @@ def test_start_rejects_existing_capture_before_launching_helpers(qtbot, monkeypa
     launch = Mock()
     monkeypatch.setattr(widget, "_launch_elevated", launch)
     monkeypatch.setattr(
-        "fpdb_3_legacy.coinpoker_live_capture._acquire_instance_lock",
+        "fpdb_3_legacy.capture.coinpoker_live_capture._acquire_instance_lock",
         Mock(side_effect=RuntimeError("another CoinPoker live capture is already running (PID 123)")),
     )
 
@@ -60,12 +60,12 @@ def test_start_recovers_stopped_orphaned_macos_reader(qtbot, monkeypatch, tmp_pa
     widget.stop_file.write_text("stop")
     kill = Mock()
     retry = Mock()
-    monkeypatch.setattr("fpdb_3_legacy.GuiCoinPokerCapture.platform.system", lambda: "Darwin")
-    monkeypatch.setattr("fpdb_3_legacy.GuiCoinPokerCapture.os.kill", kill)
-    monkeypatch.setattr("fpdb_3_legacy.GuiCoinPokerCapture.QTimer.singleShot", retry)
+    monkeypatch.setattr("fpdb_3_legacy.capture.GuiCoinPokerCapture.platform.system", lambda: "Darwin")
+    monkeypatch.setattr("fpdb_3_legacy.capture.GuiCoinPokerCapture.os.kill", kill)
+    monkeypatch.setattr("fpdb_3_legacy.capture.GuiCoinPokerCapture.QTimer.singleShot", retry)
     monkeypatch.setattr("pathlib.Path.read_text", lambda self: "5869")
     monkeypatch.setattr(
-        "fpdb_3_legacy.coinpoker_live_capture._acquire_instance_lock",
+        "fpdb_3_legacy.capture.coinpoker_live_capture._acquire_instance_lock",
         Mock(side_effect=RuntimeError("another CoinPoker live capture is already running (PID 5869)")),
     )
 
@@ -121,7 +121,7 @@ def test_windows_uac_launch_returns_no_fake_process(qtbot, monkeypatch) -> None:
     fake_windll = SimpleNamespace(shell32=SimpleNamespace(ShellExecuteW=shell_execute))
     monkeypatch.setattr(ctypes, "windll", fake_windll, raising=False)
     popen = Mock()
-    monkeypatch.setattr("fpdb_3_legacy.GuiCoinPokerCapture.subprocess.Popen", popen)
+    monkeypatch.setattr("fpdb_3_legacy.capture.GuiCoinPokerCapture.subprocess.Popen", popen)
 
     assert widget._launch_windows() is None
 

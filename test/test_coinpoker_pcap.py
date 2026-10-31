@@ -9,7 +9,7 @@ from __future__ import annotations
 import struct
 from types import SimpleNamespace
 
-from fpdb_3_legacy.coinpoker_pcap import (
+from fpdb_3_legacy.capture.coinpoker_pcap import (
     _PCAP_IF_LOOPBACK,
     _PCAP_IF_RUNNING,
     _PCAP_IF_UP,
@@ -104,8 +104,8 @@ _WINDOWS_DEVICES = [
 def test_windows_auto_detect_skips_virtual_adapters(monkeypatch) -> None:
     # No route resolution available -> heuristic must pick the physical NIC.
     monkeypatch.setattr("sys.platform", "win32")
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_pcap.list_devices", lambda: _WINDOWS_DEVICES)
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_pcap._windows_route_device_name", lambda: None)
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_pcap.list_devices", lambda: _WINDOWS_DEVICES)
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_pcap._windows_route_device_name", lambda: None)
     assert default_device() == r"\Device\NPF_{DDD}"  # the physical Realtek NIC
 
 
@@ -113,9 +113,9 @@ def test_windows_prefers_route_device_over_heuristic(monkeypatch) -> None:
     # Behind a VPN full-tunnel the internet route is on the WireGuard adapter,
     # which the description heuristic would (wrongly) skip. Route wins.
     monkeypatch.setattr("sys.platform", "win32")
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_pcap.list_devices", lambda: _WINDOWS_DEVICES)
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_pcap.list_devices", lambda: _WINDOWS_DEVICES)
     monkeypatch.setattr(
-        "fpdb_3_legacy.coinpoker_pcap._windows_route_device_name",
+        "fpdb_3_legacy.capture.coinpoker_pcap._windows_route_device_name",
         lambda: r"\Device\NPF_{EEE}",  # the WireGuard tunnel carries the route
     )
     assert default_device() == r"\Device\NPF_{EEE}"
@@ -124,15 +124,15 @@ def test_windows_prefers_route_device_over_heuristic(monkeypatch) -> None:
 def test_macos_prefers_vpn_route_device(monkeypatch) -> None:
     devices = [("en0", "Wi-Fi", _CONNECTED), ("utun7", "", _CONNECTED)]
     monkeypatch.setattr("sys.platform", "darwin")
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_pcap.list_devices", lambda: devices)
-    monkeypatch.setattr("fpdb_3_legacy.coinpoker_pcap._macos_route_device_name", lambda: "utun7")
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_pcap.list_devices", lambda: devices)
+    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_pcap._macos_route_device_name", lambda: "utun7")
     assert default_device() == "utun7"
 
 
 def test_macos_route_device_parses_route_output(monkeypatch) -> None:
     monkeypatch.setattr("sys.platform", "darwin")
     monkeypatch.setattr(
-        "fpdb_3_legacy.coinpoker_pcap.subprocess.run",
+        "fpdb_3_legacy.capture.coinpoker_pcap.subprocess.run",
         lambda *_args, **_kwargs: SimpleNamespace(stdout="route to: default\n interface: utun7\n"),
     )
     assert _macos_route_device_name() == "utun7"

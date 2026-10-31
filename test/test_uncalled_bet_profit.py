@@ -19,8 +19,8 @@ from pathlib import Path
 
 import pytest
 
+from fpdb_3_legacy.capture.coinpoker_live_capture import COINPOKER_SITE_ID
 from fpdb_3_legacy.coinpoker_hand_builder import build_hands
-from fpdb_3_legacy.coinpoker_live_capture import COINPOKER_SITE_ID
 from fpdb_3_legacy.http_capture_hand_builder import HttpCaptureHandConfig, build_fpdb_hand
 
 FIXTURE = Path(__file__).parent / "data" / "coinpoker_hand_events.json"
