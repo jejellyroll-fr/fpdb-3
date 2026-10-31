@@ -247,6 +247,11 @@ def menu_layout() -> tuple[Menu, ...]:
                 ),
                 MenuItem(N_("Stats Guide"), "tabStatsInfo"),
                 MenuItem(
+                    N_("What fpdb does while you play"),
+                    "help_fair_play",
+                    tip=N_("What runs during play, what only runs afterwards, and where rooms draw the line"),
+                ),
+                MenuItem(
                     N_("Research Browser for Omaha"),
                     "help_research_omaha",
                     tip=N_("What every filter is for in a four-card game, and the two that are not"),

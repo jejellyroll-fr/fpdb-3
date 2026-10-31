@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 21:01+0100\n"
+"POT-Creation-Date: 2026-10-31 13:35+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -3480,6 +3480,11 @@ msgid "Skip these games when importing"
 msgstr "Omet aquests jocs en importar"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, python-brace-format
+msgid "The guide is published at {url}"
+msgstr ""
+
+#: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
 msgid "Unknown Site"
 msgstr "Sala desconeguda"
@@ -3488,6 +3493,10 @@ msgstr "Sala desconeguda"
 #, fuzzy
 msgid "Unsaved Changes"
 msgstr "Canvis sense desar"
+
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
+msgid "What fpdb does while you play"
+msgstr ""
 
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
@@ -4321,6 +4330,12 @@ msgstr "Mostra les estadístiques de la base de dades"
 msgid "What every filter is for in a four-card game, and the two that are not"
 msgstr ""
 "Per a què serveix cada filtre en un joc de quatre cartes, i els dos que no"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid ""
+"What runs during play, what only runs afterwards, and where rooms draw the "
+"line"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"

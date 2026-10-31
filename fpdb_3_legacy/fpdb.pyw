@@ -1056,6 +1056,16 @@ class fpdb(QMainWindow):
                 f"The guide is published at {help_links.DOCS_URL}/research-omaha.md",
             )
 
+    def help_fair_play(self, widget, data=None) -> None:
+        """Open what fpdb does during play, and what rooms say about it (#450)."""
+        from fpdb_3_legacy import help_links
+
+        if not help_links.open_help("fair-play"):
+            self.info_box(
+                _("What fpdb does while you play"),
+                _("The guide is published at {url}").format(url=f"{help_links.DOCS_URL}/fair-play.md"),
+            )
+
     def dia_rebuild_analytics(self, widget, data=None) -> None:
         """Re-derive the analytics rows this database is missing (#351).
 
@@ -2144,6 +2154,9 @@ class fpdb(QMainWindow):
                         Welcome to Fpdb {VERSION}!
 
                         Open Help > Version for the full version, packaging and environment report.
+
+                        Before using the HUD at a table, read Help > What fpdb does while you play:
+                        fpdb never recommends an action or acts in a poker client, and your room's terms prevail.
 
                         This program is currently in an alpha-state, so our database format is still sometimes changed.
                         You should therefore always keep your hand history files so that you can re-import

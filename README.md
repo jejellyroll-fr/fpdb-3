@@ -11,7 +11,7 @@ The original FPDB-3 Python application: hand-history parsers, PySide6 GUI, stati
 
 - **Hand-History Import & Analysis** from 26 poker rooms. See [PARSER_SUPPORT.md](PARSER_SUPPORT.md) for which converters are covered by golden snapshots and which are kept only for historical archives.
 - **Live capture** for rooms that write no hand-history files: SwC Poker (HTTP and native desktop), iPoker. The captures that reach into a client are off until you turn them on ([docs/live-capture.md](docs/live-capture.md)).
-- **Real-Time HUD** overlay with draggable multiblock stats, positional panels, and a per-profile hero toggle.
+- **Real-Time HUD** overlay with draggable multiblock stats, positional panels, and a per-profile hero toggle. It shows players' history, never a recommended action, and never acts in the client: see [what fpdb does while you play](docs/fair-play.md) and check your room's rules first.
 - **FastHUD for fast-fold tables** with deterministic seat rotation, single-renderer ownership,
   duplicate-HUD interlocks, and platform contracts for macOS and Windows.
 - **Auto Notes**: rule-driven player notes with a visual workbench and card miniatures.
@@ -138,6 +138,7 @@ them:
 
 | Guide | For |
 | --- | --- |
+| [What fpdb does while you play](docs/fair-play.md) | what runs at the table, what only runs afterwards, and what rooms say about it |
 | [Moving from PokerTracker 4 or Holdem Manager 3](docs/migrate-from-pt4-hm3.md) | bring your hand history over: where the files are, the import wizard, what comes next |
 | [Study Explorer quick start](docs/study-explorer-quick-start.md) | spot → compare → visualize → hands, in five minutes |
 | [Reading differences responsibly](docs/reading-differences.md) | what a Hero-vs-Field gap is, and is not |

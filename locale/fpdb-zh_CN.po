@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 21:01+0100\n"
+"POT-Creation-Date: 2026-10-31 13:35+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -3451,6 +3451,11 @@ msgid "Skip these games when importing"
 msgstr "导入时跳过这些游戏"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, python-brace-format
+msgid "The guide is published at {url}"
+msgstr ""
+
+#: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
 msgid "Unknown Site"
 msgstr "未知站点"
@@ -3459,6 +3464,10 @@ msgstr "未知站点"
 #, fuzzy
 msgid "Unsaved Changes"
 msgstr "未保存的更改"
+
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
+msgid "What fpdb does while you play"
+msgstr ""
 
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
@@ -4273,6 +4282,12 @@ msgstr "查看数据库统计"
 #, fuzzy
 msgid "What every filter is for in a four-card game, and the two that are not"
 msgstr "在四张牌游戏中每个筛选的用途，以及不适用的两个"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid ""
+"What runs during play, what only runs afterwards, and where rooms draw the "
+"line"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"

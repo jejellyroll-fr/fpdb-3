@@ -127,3 +127,17 @@ def test_the_quick_start_sends_omaha_readers_to_their_own_guide() -> None:
     quick_start = (help_links.DOCS_DIR / "research-quick-start.md").read_text()
 
     assert "research-omaha.md" in quick_start
+
+
+def test_what_fpdb_does_during_play_is_in_the_help_menu() -> None:
+    # A room's rules decide what may run at its tables; the page that says what
+    # fpdb does there must be one click away, not only in the repository (#450).
+    from fpdb_3_legacy import menu_layout
+
+    help_menu = next(menu for menu in menu_layout.menu_layout() if "Help" in menu.title)
+
+    assert "help_fair_play" in {item.handler for item in help_menu.items}
+    topic = help_links.help_topic("fair-play")
+    assert topic is not None
+    assert topic.exists()
+    assert "never shows a recommended action" in topic.path.read_text(encoding="utf-8")
