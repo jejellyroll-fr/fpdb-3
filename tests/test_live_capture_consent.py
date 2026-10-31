@@ -139,6 +139,29 @@ def test_the_windows_attach_builds_and_injects_nothing_without_a_yes(answers, mo
     assert built == []
 
 
+def test_turning_it_off_during_the_build_injects_nothing(answers, monkeypatch) -> None:
+    # The Windows attach builds off the GUI thread: unticking meanwhile must stop it.
+    from fpdb_3_legacy import swc_tap_build, swc_windows_inject
+
+    consent.accept(SWC_NATIVE, answers)
+    injected = []
+    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
+
+    def build_then_untick(**_):
+        consent.withdraw(SWC_NATIVE, answers)
+        return Path("tap.dll")
+
+    monkeypatch.setattr(swc_native_capture, "build_tap", build_then_untick)
+    monkeypatch.setattr(swc_tap_build, "build_injector", lambda **_: Path("inj.exe"))
+    monkeypatch.setattr(swc_windows_inject, "find_client_pids", lambda *_a, **_k: [100])
+    monkeypatch.setattr(swc_windows_inject, "inject_into_pid", lambda *a: injected.append(a))
+
+    with pytest.raises(swc_native_capture.CaptureAttachCancelled):
+        swc_native_capture.attach_to_windows_client(consent=answers)
+
+    assert injected == []
+
+
 def test_the_launch_preloads_nothing_without_a_yes(answers, monkeypatch, tmp_path) -> None:
     launched = []
     monkeypatch.setattr(swc_native_capture, "running_client_pids", list)

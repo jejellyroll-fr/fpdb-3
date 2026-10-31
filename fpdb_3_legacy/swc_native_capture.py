@@ -128,6 +128,17 @@ def _abort_attach_if_cancelled(should_cancel: Callable[[], bool] | None, stage: 
     raise CaptureAttachCancelled(msg)
 
 
+def _stopped_or_turned_off(should_cancel: Callable[[], bool] | None, consent: Path | None) -> Callable[[], bool]:
+    """``should_cancel``, also answering True once the user has turned the tap off (#451)."""
+
+    def stopped() -> bool:
+        if not live_capture_consent.is_accepted(live_capture_consent.SWC_NATIVE, consent):
+            return True
+        return should_cancel is not None and should_cancel()
+
+    return stopped
+
+
 def _inject_into_each_client(
     injector_mod,
     injector: Path,
@@ -186,6 +197,8 @@ def attach_to_windows_client(
     Nothing is built or injected unless the user turned the tap on (#451):
     ``consent`` is the answers file, fpdb's own when None, and
     ``LiveCaptureNotAccepted`` -- a RuntimeError -- says how to turn it on.
+    The answer is read again wherever ``should_cancel`` is, so turning the tap
+    off while it builds stops it before it reaches a client.
 
     Returns a short human-readable status. Raises RuntimeError when the client
     is not running or no injection succeeded, so the caller can surface why.
@@ -195,6 +208,7 @@ def attach_to_windows_client(
         msg = "attach_to_windows_client is only valid on Windows"
         raise RuntimeError(msg)
     live_capture_consent.require(live_capture_consent.SWC_NATIVE, consent)
+    stopped = _stopped_or_turned_off(should_cancel, consent)
     if not 0 <= port <= 65535:
         raise ValueError("capture port must be 0 (auto) or between 1 and 65535")
 
@@ -205,7 +219,7 @@ def attach_to_windows_client(
     injector = build_injector()
     # The compiler is the long pole -- on a cold build it is most of the attach,
     # and it is where a Stop is most likely to land.
-    _abort_attach_if_cancelled(should_cancel, "after building the tap")
+    _abort_attach_if_cancelled(stopped, "after building the tap")
     # Checked before the write: a client already holding the tap read its
     # configuration once, in DllMain, and injecting again only bumps the module
     # reference count -- it keeps the old port/outbound filtering until restarted.
@@ -244,7 +258,7 @@ def attach_to_windows_client(
     status_path = DEFAULT_ARCHIVE.with_suffix(".status")
     status_mark = injector_mod.status_file_size(status_path)
 
-    results = _inject_into_each_client(injector_mod, injector, tap, pids, should_cancel)
+    results = _inject_into_each_client(injector_mod, injector, tap, pids, stopped)
     ok = [r for r in results if r.ok]
     if not ok:
         detail = "; ".join(f"pid {r.pid}: {r.detail}" for r in results)
