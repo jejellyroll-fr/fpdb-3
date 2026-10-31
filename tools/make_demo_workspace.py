@@ -230,6 +230,11 @@ def stage_reference_huds(config_path: Path) -> list[str]:
         merge_package_panel_rules(config.doc, root, overwrite=True)
         installed.append(variant.profile)
     config.save(file=str(config_path))
+    # The panels run only once their user said yes (#647). The demo's invented
+    # user has, so the screenshots show the editor and panels as they are used.
+    from fpdb_3_legacy import dynamic_panels_consent
+
+    dynamic_panels_consent.confirm(dynamic_panels_consent.consent_path(config_path))
     return installed
 
 
