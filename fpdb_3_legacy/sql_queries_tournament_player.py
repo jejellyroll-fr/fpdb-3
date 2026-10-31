@@ -48,6 +48,9 @@ def tournament_player_detailed_queries(db_server: str) -> dict[str, str]:
                        inner join Sites s           on  (s.Id = tt.siteId)
                        inner join Players p         on  (p.Id = tp.playerId)
                   where tp.playerId in <nametest> <sitetest>
+                  -- The Number of Players filter, on the table size the Seats column shows (#651);
+                  -- a size the room did not give (0 or NULL) cannot be ruled out.
+                  AND   (tt.maxSeats <seats_test> OR COALESCE(tt.maxSeats, 0) = 0)
                   AND   ((t.startTime > '<startdate_test>' AND t.startTime < '<enddate_test>')
                                     OR t.startTime is NULL)
                   group by tourneyTypeId, playerName
@@ -96,6 +99,9 @@ def tournament_player_detailed_queries(db_server: str) -> dict[str, str]:
                        inner join Sites s           on  (s.Id = tt.siteId)
                        inner join Players p         on  (p.Id = tp.playerId)
                   where tp.playerId in <nametest> <sitetest>
+                  -- The Number of Players filter, on the table size the Seats column shows (#651);
+                  -- a size the room did not give (0 or NULL) cannot be ruled out.
+                  AND   (tt.maxSeats <seats_test> OR COALESCE(tt.maxSeats, 0) = 0)
                   AND   ((t.startTime > '<startdate_test>' AND t.startTime < '<enddate_test>')
                                     OR t.startTime is NULL)
                   group by t.tourneyTypeId, s.name, p.name, tt.currency, tt.buyin, tt.fee
@@ -145,6 +151,9 @@ def tournament_player_detailed_queries(db_server: str) -> dict[str, str]:
                        inner join Sites s           on  (s.Id = tt.siteId)
                        inner join Players p         on  (p.Id = tp.playerId)
                   where tp.playerId in <nametest> <sitetest>
+                  -- The Number of Players filter, on the table size the Seats column shows (#651);
+                  -- a size the room did not give (0 or NULL) cannot be ruled out.
+                  AND   (tt.maxSeats <seats_test> OR COALESCE(tt.maxSeats, 0) = 0)
                   AND   ((t.startTime > '<startdate_test>' AND t.startTime < '<enddate_test>')
                                     OR t.startTime is NULL)
                   group by tourneyTypeId, playerName

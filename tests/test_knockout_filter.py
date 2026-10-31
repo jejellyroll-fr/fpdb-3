@@ -68,6 +68,7 @@ def test_the_player_report_keeps_one_format(two_sngs) -> None:
             two_sngs.sql.query["tourneyPlayerDetailedStats"]
             .replace("<nametest>", "(SELECT id FROM Players WHERE name = 'Hero')")
             .replace("<sitetest>", format_condition(tourney_format, sqlite=True))
+            .replace("<seats_test>", "between 0 and 100")
             .replace("<startdate_test>", "1970-01-01")
             .replace("<enddate_test>", "2100-01-01")
         )
@@ -104,3 +105,37 @@ def test_each_breakdown_group_drills_into_the_hands_it_counts(two_sngs) -> None:
     for row in rows:
         drilled = drill_query(grouped, row.group, numerator_only=False)
         assert decisions(two_sngs, **drilled.filters) == row.opportunities
+
+
+def test_the_player_report_keeps_the_tables_within_the_number_of_players(two_sngs) -> None:
+    """#651: a 6-max tournament stayed in the report with the maximum set to 3."""
+    from types import SimpleNamespace
+
+    from fpdb_3_legacy.GuiTourneyPlayerStats import GuiTourneyPlayerStats
+
+    hero_ids = [row[0] for row in two_sngs.get_cursor().execute("SELECT id FROM Players WHERE name = 'Hero'")]
+    type_ids = [row[0] for row in two_sngs.get_cursor().execute("SELECT id FROM TourneyTypes ORDER BY id")]
+    site_ids = [row[0] for row in two_sngs.get_cursor().execute("SELECT DISTINCT siteId FROM TourneyTypes")]
+    tab = SimpleNamespace(
+        db=two_sngs,
+        detailFilters=[],
+        filters=SimpleNamespace(getDates=lambda: ("1970-01-01", "2100-01-01"), getTourneyFormat=lambda: "all"),
+    )
+
+    def seat_counts_shown(sizes, seats) -> list[int]:
+        for type_id, size in zip(type_ids, sizes, strict=True):
+            two_sngs.get_cursor().execute("UPDATE TourneyTypes SET maxSeats = ? WHERE id = ?", (size, type_id))
+        query = GuiTourneyPlayerStats.refineQuery(
+            tab, two_sngs.sql.query["tourneyPlayerDetailedStats"], 0, [], hero_ids, site_ids, seats
+        )
+        cursor = two_sngs.get_cursor()
+        cursor.execute(query)
+        columns = [description[0].lower() for description in cursor.description]
+        return sorted(dict(zip(columns, row, strict=True))["maxseats"] for row in cursor.fetchall())
+
+    assert seat_counts_shown((3, 6), {"from": 2, "to": 3}) == [3]
+    assert seat_counts_shown((2, 8), {"from": 2, "to": 3}) == [2]
+    assert seat_counts_shown((6, 8), {"from": 2, "to": 3}) == []
+    assert seat_counts_shown((6, 8), {"from": 6, "to": 10}) == [6, 8]
+    # A size the room did not give cannot be ruled out.
+    assert seat_counts_shown((0, 8), {"from": 2, "to": 3}) == [0]
