@@ -366,6 +366,29 @@ def test_an_ipoker_skin_that_is_not_installed_is_reported_as_absent(config, tmp_
         assert detector._detect_skin("NetBet")["detected"] is False
 
 
+def test_a_protected_macos_container_is_a_warning_not_a_traceback(config, tmp_path, caplog) -> None:
+    # macOS 14+ lets the PMU container be stat'ed but refuses to list it until
+    # the app running fpdb may "access data from other apps" (#659).
+    container = tree(
+        tmp_path, "Library", "Containers", "fr.pmu.poker.macos", "Data", "Library", "Application Support", "PMU PLAY"
+    )
+    detector = iPokerDetector(config)
+    detector.platform = "Darwin"
+
+    with (
+        on_platform("Darwin", tmp_path),
+        patch.object(Path, "home", return_value=tmp_path),
+        patch("os.listdir", side_effect=PermissionError(1, "Operation not permitted", str(container))),
+        caplog.at_level("WARNING"),
+    ):
+        assert detector._detect_skin("PMU Poker") == NOT_DETECTED
+
+    [record] = [r for r in caplog.records if str(container) in r.getMessage()]
+    assert record.levelname == "WARNING"
+    assert record.exc_info is None
+    assert "Full Disk Access" in record.getMessage()
+
+
 # --------------------------------------------------------------------------
 # The shared PokerClient folder, where several iPoker skins install together
 # --------------------------------------------------------------------------

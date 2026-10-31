@@ -616,7 +616,19 @@ class iPokerDetector(SiteDetector):  # noqa: N801
                                 if Path(hhpath).exists()
                                 else False,
                             }
-            except (OSError, PermissionError):
+            except PermissionError:
+                # Not a fault of fpdb: on macOS 14+ another app's sandbox
+                # container can be stat'ed but not listed until the user lets
+                # the app running fpdb "access data from other apps". Say what
+                # to do instead of dumping a traceback.
+                log.warning(
+                    "Cannot read the %s folder %s: permission denied. On macOS, allow the app that "
+                    "launches fpdb (your terminal, or fpdb itself) in System Settings > Privacy & "
+                    "Security > Full Disk Access, then detect the sites again.",
+                    skin,
+                    base_path,
+                )
+            except OSError:
                 log.exception("Error detecting iPoker (%s)", skin)
 
         return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
