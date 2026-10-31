@@ -16,7 +16,10 @@ from __future__ import annotations
 import argparse
 import os
 import platform
-import subprocess
+import shutil
+
+# Runs two fixed programs, pgrep and the SwC client, never anything a user typed.
+import subprocess  # nosec B404
 import sys
 import threading
 import time
@@ -309,8 +312,14 @@ def attach_to_windows_client(
 
 
 def running_client_pids() -> list[int]:
-    result = subprocess.run(
-        ["pgrep", "-f", f"^{SWC_EXECUTABLE}$"],
+    """The pids of a running SwC client, found by its executable's full path."""
+    pgrep = shutil.which("pgrep")
+    if pgrep is None:
+        msg = "pgrep was not found on the PATH, so a running SwC client cannot be detected"
+        raise FileNotFoundError(msg)
+    # A resolved pgrep and the client's fixed path: no shell, no user input.
+    result = subprocess.run(  # nosec B603  # nosemgrep
+        [pgrep, "-f", f"^{SWC_EXECUTABLE}$"],
         check=False,
         capture_output=True,
         text=True,
@@ -368,7 +377,8 @@ def launch_client(
     env = native_client_environment(archive, tap, port=port, include_outbound=include_outbound)
     # Asked again: the user may have turned the tap off while it compiled.
     live_capture_consent.require(live_capture_consent.SWC_NATIVE, consent)
-    return subprocess.Popen([str(SWC_EXECUTABLE)], env=env, cwd=str(Path.home()))
+    # The SwC client's fixed install path (SWC_EXECUTABLE), started without a shell.
+    return subprocess.Popen([str(SWC_EXECUTABLE)], env=env, cwd=str(Path.home()))  # nosec B603  # nosemgrep
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:

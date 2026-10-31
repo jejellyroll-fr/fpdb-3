@@ -228,3 +228,27 @@ def test_the_coinpoker_replay_needs_no_yes(tmp_path, monkeypatch) -> None:
     coinpoker_live_capture.main()
 
     assert ran
+
+
+def test_the_client_is_looked_for_with_a_resolved_pgrep(monkeypatch) -> None:
+    from fpdb_3_legacy.capture import swc_client
+
+    calls = []
+    monkeypatch.setattr(swc_client.shutil, "which", lambda name: f"/usr/bin/{name}")
+    monkeypatch.setattr(
+        swc_client.subprocess,
+        "run",
+        lambda argv, **_k: calls.append(argv) or type("Done", (), {"stdout": "41\n42\nnot-a-pid\n"})(),
+    )
+
+    assert swc_client.running_client_pids() == [41, 42]
+    assert calls[0][0] == "/usr/bin/pgrep"
+
+
+def test_no_pgrep_is_said_rather_than_taken_for_no_client(monkeypatch) -> None:
+    from fpdb_3_legacy.capture import swc_client
+
+    monkeypatch.setattr(swc_client.shutil, "which", lambda _name: None)
+
+    with pytest.raises(FileNotFoundError, match="pgrep"):
+        swc_client.running_client_pids()
