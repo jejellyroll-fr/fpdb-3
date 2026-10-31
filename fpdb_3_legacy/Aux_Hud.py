@@ -302,6 +302,11 @@ class SimpleHUD(Aux_Base.AuxSeats):
         static path it always did: turning dynamic panels on is what changes
         behaviour, and turning them off is indistinguishable from not having
         them, which is what the issue asks for.
+
+        Configured rules are still None here until the user said yes after
+        reading what rooms say about them, and always at a table of a room
+        that forbids them (#647): whatever wrote the rules, this is the one
+        place every table asks.
         """
         resolver = getattr(self, "_panel_resolver_cache", None)
         cached_profile = getattr(self, "_panel_resolver_profile", None)
@@ -309,10 +314,23 @@ class SimpleHUD(Aux_Base.AuxSeats):
         if resolver is not None and cached_profile == profile:
             return resolver
         try:
-            from fpdb_3_legacy import hud_situation
+            from fpdb_3_legacy import dynamic_panels_consent, hud_situation
 
             configured = self.config.get_hud_panel_rules()
-            if not configured:
+            refused = (
+                dynamic_panels_consent.why_not_at(
+                    getattr(self.hud, "site", None),
+                    dynamic_panels_consent.consent_path(getattr(self.config, "file", None)),
+                )
+                if configured
+                else None
+            )
+            if refused and refused != getattr(self, "_panel_refusal_logged", None):
+                # Asked again on every update, so a yes given meanwhile applies;
+                # said once, not on every redraw.
+                log.info("Dynamic HUD panels kept off at this %s table: %s", getattr(self.hud, "site", ""), refused)
+            self._panel_refusal_logged = refused
+            if not configured or refused:
                 resolver = None
             else:
                 resolver = hud_situation.HudSituationResolver(

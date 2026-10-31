@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 13:35+0100\n"
+"POT-Creation-Date: 2026-10-31 14:03+0100\n"
 "PO-Revision-Date: 2011-12-03 21:57+0000\n"
 "Last-Translator: LimburgCwboy <hdps.een@gmail.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.net/projects/p/fpdb/"
@@ -3407,6 +3407,33 @@ msgstr "Gebruikersnaam"
 msgid "e.g., my_custom_theme"
 msgstr "bijv. mijn_eigen_thema"
 
+#: fpdb_3_legacy/dynamic_panels_consent.py
+#, fuzzy
+msgid "Dynamic HUD panels"
+msgstr "🧩 Dynamische panelen"
+
+#: fpdb_3_legacy/dynamic_panels_consent.py
+msgid ""
+"PokerStars forbids in-game statistics that change automatically with the "
+"game state: fpdb never shows dynamic panels at PokerStars tables. Winamax "
+"lists dynamic range software and certain dynamic features of Hand2Note as "
+"prohibited: ask its integrity team before using them there."
+msgstr ""
+
+#: fpdb_3_legacy/dynamic_panels_consent.py
+msgid ""
+"With dynamic panels on, the HUD changes which of a player's statistics it "
+"shows with the hand being played: preflop panels preflop, c-bet panels when "
+"a c-bet is made. The statistics are still the player's history; fpdb never "
+"shows a recommended action."
+msgstr ""
+
+#: fpdb_3_legacy/dynamic_panels_consent.py
+msgid ""
+"Your room's terms prevail. Read them, and turn this on only if they allow "
+"it. Help ▸ What fpdb does while you play says what each room's page says."
+msgstr ""
+
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
 msgid "Back up and upgrade"
@@ -4779,6 +4806,10 @@ msgid "Horz Line"
 msgstr "Horizontale lijn"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "I understand, turn them on"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Icons:"
 msgstr "Pictogrammen:"
@@ -4992,6 +5023,12 @@ msgid "Show the panels that fit the hand"
 msgstr "De panelen tonen die bij de hand passen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Some rooms forbid statistics that change with the hand: fpdb asks once "
+"before turning them on, and never shows them at PokerStars tables."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Speed"
 msgstr "Snelheid"
@@ -5063,6 +5100,11 @@ msgstr "Thema:"
 #, fuzzy
 msgid "Then show"
 msgstr "Dan tonen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Turn on dynamic panels?"
+msgstr "🧩 Dynamische panelen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
