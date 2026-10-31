@@ -212,6 +212,11 @@ def menu_layout() -> tuple[Menu, ...]:
                 ),
                 MenuItem(N_("Launch SwC HTTP Capture"), "launch_swc_capture"),
                 MenuItem(
+                    N_("Live capture…"),
+                    "dia_live_capture",
+                    tip=N_("Turn on or off the captures that read hands from a poker client itself"),
+                ),
+                MenuItem(
                     N_("Logger Dev Tool"),
                     "show_logger_dev_tool",
                     tip=N_("Advanced logger manager"),

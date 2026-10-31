@@ -14,11 +14,28 @@ from fpdb_3_legacy.GuiCoinPokerCapture import GuiCoinPokerCapture
 pytestmark = pytest.mark.qt
 
 
-def _widget(qtbot, monkeypatch):
+def _widget(qtbot, monkeypatch, *, turned_on: bool = True):
     monkeypatch.setattr(GuiCoinPokerCapture, "_populate_ifaces", lambda self: None)
+    # The capture asks before it starts (#451); these tests are about what follows.
+    monkeypatch.setattr("fpdb_3_legacy.live_capture_dialog.confirm", lambda *_a, **_k: turned_on)
     widget = GuiCoinPokerCapture(SimpleNamespace(file=None))
     qtbot.addWidget(widget)
     return widget
+
+
+def test_start_asks_first_and_a_no_launches_nothing(qtbot, monkeypatch) -> None:
+    widget = _widget(qtbot, monkeypatch, turned_on=False)
+    launch = Mock()
+    lock = Mock()
+    monkeypatch.setattr(widget, "_launch_elevated", launch)
+    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture._acquire_instance_lock", lock)
+
+    widget._start()
+
+    launch.assert_not_called()
+    lock.assert_not_called()
+    assert "off until you turn it on" in widget.status.text()
+    assert widget.start_button.isEnabled()
 
 
 def test_start_rejects_existing_capture_before_launching_helpers(qtbot, monkeypatch) -> None:

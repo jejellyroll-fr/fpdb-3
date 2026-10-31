@@ -21,10 +21,19 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from fpdb_3_legacy.live_capture_consent import SWC_NATIVE
+from tests.helpers.live_capture import turned_on
+
 # GuiAutoImport uses legacy-style bare imports, so the package directory itself
 # must be importable (same as test_guiautoimport_headless).
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "fpdb_3_legacy")))
 
+
+
+@pytest.fixture(autouse=True)
+def _swc_tap_turned_on(monkeypatch, tmp_path_factory) -> None:
+    # About what the capture does once the user turned the tap on (#451).
+    turned_on(monkeypatch, tmp_path_factory.mktemp("consent"), SWC_NATIVE)
 
 def _make_config(swc_parameters):
     """A config whose get_site_parameters answers for SealsWithClubs only.
@@ -120,6 +129,29 @@ def test_the_capture_still_starts_for_a_swc_player() -> None:
         build_tap.assert_called_once()
         attach.assert_not_called()
         attach_thread.assert_not_called()
+
+
+def test_a_swc_player_who_has_not_turned_it_on_gets_nothing_loaded(monkeypatch, tmp_path) -> None:
+    """A fresh install never injects anything (#451): Start imports files and says why."""
+    from fpdb_3_legacy import GuiAutoImport, swc_native_capture
+
+    turned_on(monkeypatch, tmp_path)  # an answers file that says yes to nothing
+    gui = _make_gui(_make_config({"enabled": True}))
+    said: list[str] = []
+    monkeypatch.setattr(gui, "addText", lambda text, *_a: said.append(text))
+    with (
+        patch.object(swc_native_capture, "build_tap") as build_tap,
+        patch.object(swc_native_capture, "attach_to_windows_client") as attach,
+        patch.object(GuiAutoImport, "SwCNativeTailingThread") as thread,
+        patch.object(GuiAutoImport, "SwCWindowsAttachThread") as attach_thread,
+    ):
+        gui.start_swc_native_capture()
+
+    build_tap.assert_not_called()
+    attach.assert_not_called()
+    thread.assert_not_called()
+    attach_thread.assert_not_called()
+    assert any("Tools ▸ Live capture" in text for text in said)
 
 
 def test_nothing_is_built_on_an_unsupported_platform() -> None:

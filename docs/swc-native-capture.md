@@ -9,6 +9,10 @@ directory. This works on macOS, Linux, and Windows; the mechanism differs by
 platform (see "Loading the tap" below) but the archive format and decoder are
 shared.
 
+The tap is off until you turn it on in **Tools ▸ Live capture…**, after reading
+what it does and the account risk; the capture command asks on the terminal.
+See [live-capture.md](live-capture.md).
+
 ## Loading the tap
 
 The tap is a small C library that records the plaintext OpenSSL hands back to
@@ -30,8 +34,9 @@ the client. How it gets in front of OpenSSL depends on the platform:
   uv run python fpdb_3_legacy/swc_native_capture.py           # inject + follow
   ```
 
-  Starting Auto Import in the GUI does the same thing for an enabled SwC site:
-  it builds the tap and injector and injects into the running client. The
+  Once the tap is turned on, starting Auto Import in the GUI does the same thing
+  for an enabled SwC site: it builds the tap and injector and injects into the
+  running client. The
   `swc-native.status` file records `tap-loaded` when the DLL is in and
   `tap-hooked` once SSL is hooked; capture begins on the client's next secure
   read. Both artifacts are 32-bit to match the client, built with clang (or a

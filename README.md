@@ -10,7 +10,7 @@ The original FPDB-3 Python application: hand-history parsers, PySide6 GUI, stati
 ## ✨ Highlights
 
 - **Hand-History Import & Analysis** from 26 poker rooms. See [PARSER_SUPPORT.md](PARSER_SUPPORT.md) for which converters are covered by golden snapshots and which are kept only for historical archives.
-- **Live capture** for rooms that write no hand-history files: SwC Poker (HTTP and native desktop), iPoker.
+- **Live capture** for rooms that write no hand-history files: SwC Poker (HTTP and native desktop), iPoker. The captures that reach into a client are off until you turn them on ([docs/live-capture.md](docs/live-capture.md)).
 - **Real-Time HUD** overlay with draggable multiblock stats, positional panels, and a per-profile hero toggle.
 - **FastHUD for fast-fold tables** with deterministic seat rotation, single-renderer ownership,
   duplicate-HUD interlocks, and platform contracts for macOS and Windows.

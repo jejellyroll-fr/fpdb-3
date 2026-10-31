@@ -175,6 +175,15 @@ class GuiCoinPokerCapture(QWidget):
     def _start(self) -> None:
         if self.proc is not None and self.proc.poll() is None:
             return
+        # Recording the client's packets is off until the user says yes (#451);
+        # a dry run captures too, it only skips the database.
+        from fpdb_3_legacy import live_capture_consent
+        from fpdb_3_legacy.live_capture_dialog import confirm
+
+        consent = live_capture_consent.consent_path(getattr(self.config, "file", None))
+        if not confirm(live_capture_consent.COINPOKER_PACKETS, self, consent):
+            self.status.setText(_("Capture not started: it is off until you turn it on."))
+            return
         # Check before starting tcpdump or HUD.  On macOS the importer only gets
         # a chance to take this lock after tcpdump opens the FIFO; without this
         # preflight a duplicate click/session starts unnecessary helper processes.
