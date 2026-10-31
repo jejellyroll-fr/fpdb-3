@@ -429,3 +429,41 @@ def test_missing_default_path_is_not_imported_as_a_folder(qtbot, monkeypatch, tm
     assert widget.importer.run_called is False
     assert widget.settings["global_lock"].released is True
     assert "Select at least one configured directory" in told["message"]
+
+
+@pytest.mark.qt
+def test_a_folder_macos_refuses_to_list_asks_for_access(qtbot, monkeypatch, tmp_path):
+    """#662: a protected folder (Bwin.fr's Tables) is not reported as empty."""
+    from fpdb_3_legacy import GuiBulkImport
+
+    warnings = []
+    widget = _widget_with_sites(qtbot, monkeypatch, tmp_path)
+    monkeypatch.setattr(GuiBulkImport, "_cannot_list", lambda path: path == str(tmp_path / "cash"))
+    monkeypatch.setattr(
+        GuiBulkImport.QMessageBox, "warning", lambda parent, title, message: warnings.append((title, message))
+    )
+
+    class EmptyImporter(FakeImporter):
+        def addBulkImportImportFileOrDir(self, path, site="auto"):
+            self.files.append((path, site))
+
+    widget.importer = EmptyImporter()
+    widget.import_tree.topLevelItem(0).setSelected(True)
+    widget.load_clicked()
+    qtbot.waitUntil(lambda: widget.load_button.isEnabled(), timeout=10_000)
+
+    assert [title for title, _ in warnings] == ["Folder access needed"]
+    assert str(tmp_path / "cash") in warnings[0][1]
+
+
+def test_cannot_list_tells_a_refused_folder_from_an_empty_one(tmp_path, monkeypatch):
+    from fpdb_3_legacy import GuiBulkImport
+
+    assert GuiBulkImport._cannot_list(str(tmp_path)) is False
+    assert GuiBulkImport._cannot_list(str(tmp_path / "missing")) is False
+
+    def refuse(path):
+        raise PermissionError(1, "Operation not permitted")
+
+    monkeypatch.setattr(GuiBulkImport.os, "listdir", refuse)
+    assert GuiBulkImport._cannot_list(str(tmp_path)) is True

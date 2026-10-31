@@ -64,6 +64,17 @@ log = get_logger("gui_bulk_import")
 STOP_WAIT_MS = 5000
 
 
+def _cannot_list(path: str) -> bool:
+    """Whether ``path`` is a folder the system refuses to list, as macOS does an app's container."""
+    if not os.path.isdir(path):
+        return False
+    try:
+        os.listdir(path)
+    except PermissionError:
+        return True
+    return False
+
+
 class BulkImportThread(QThread):
     """Worker thread to run bulk import off the main GUI thread."""
     # Signal emitted when the import is complete, returning (file_count, results tuple)
@@ -85,6 +96,11 @@ class BulkImportThread(QThread):
             self.importer.clearFileList()
             for import_dir, site in self.import_sources:
                 self.importer.addBulkImportImportFileOrDir(import_dir, site=site)
+            # os.walk swallows a refused listing, so a folder macOS keeps fpdb
+            # out of looks empty (#662). Name those apart from empty ones.
+            unreadable = [src for src, _ in self.import_sources if _cannot_list(src)]
+            if unreadable:
+                log.warning("Bulk import cannot list these folders (permission denied): %s", unreadable)
 
             # Number of importable files actually discovered in the selected
             # sources. When this is 0 the directories were empty (or only held
@@ -106,7 +122,7 @@ class BulkImportThread(QThread):
 
             # Run the actual import
             res = self.importer.runImport()
-            self.finished.emit((file_count, res))
+            self.finished.emit((file_count, res, unreadable))
         except Exception as e:  # intentional broad catch: Qt worker thread surfaces any failure via the error signal
             log.exception("Bulk import background thread failed")
             self.error.emit(str(e))
@@ -195,7 +211,7 @@ class GuiBulkImport(QWidget):
 
     def import_finished(self, payload: tuple) -> None:
         """Handle successful import completion in background thread."""
-        file_count, results = payload
+        file_count, results, unreadable = payload
         stored, dups, partial, skipped, errs, ttime = results
         elapsed = time() - self.starttime
         if elapsed == 0:
@@ -220,7 +236,21 @@ class GuiBulkImport(QWidget):
         # Always give the user explicit feedback. Without this, a run that finds
         # no importable files (empty history folders, archives only, etc.) looks
         # identical to a broken importer.
-        if file_count == 0:
+        if unreadable:
+            # Same words as the site preferences use for the same refusal (#661).
+            QMessageBox.warning(
+                self,
+                _("Folder access needed"),
+                _(
+                    "macOS does not let fpdb read this folder:\n%s\n\n"
+                    "Allow the app that launches fpdb (your terminal, or fpdb itself) in System Settings > "
+                    "Privacy & Security > Full Disk Access, then restart fpdb. Until then, its hands cannot be imported."
+                )
+                % "\n".join(unreadable),
+            )
+        if file_count == 0 and unreadable:
+            pass  # the folders are out of reach, not empty: said above
+        elif file_count == 0:
             QMessageBox.warning(
                 self,
                 _("Bulk Import"),
