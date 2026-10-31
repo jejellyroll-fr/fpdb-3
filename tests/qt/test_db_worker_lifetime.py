@@ -65,3 +65,33 @@ def test_finished_workers_are_let_go_at_the_next_start(qtbot) -> None:
     assert first not in DbWorker._started
     assert second in DbWorker._started
     qtbot.waitUntil(second.isFinished, timeout=10_000)
+
+
+def test_a_refresh_of_cash_player_stats_keeps_the_queries_it_supersedes(qtbot) -> None:
+    """#655: refreshing with position stats while their queries ran closed fpdb.
+
+    ``refresh_all`` starts with ``shutdown_workers``, which empties the
+    controller's list of workers whatever their state.
+    """
+    from types import SimpleNamespace
+
+    from fpdb_3_legacy.ring_stats.controller import RingStatsController
+
+    cursor = BlockingCursor()
+    config = SimpleNamespace(get_gui_cash_stat_params=list)
+    controller = RingStatsController(SimpleNamespace(cursor=cursor), config, sql=None, async_mode=True)
+    controller._run_query("positions", "SELECT 1", lambda *_args: None)
+    (worker,) = controller._workers
+    worker_id = id(worker)
+    del worker
+
+    controller.shutdown_workers()
+    gc.collect()
+
+    try:
+        assert controller._workers == []
+        assert worker_id in {id(running) for running in DbWorker._started}
+    finally:
+        cursor.release.set()
+    kept = next(running for running in DbWorker._started if id(running) == worker_id)
+    qtbot.waitUntil(kept.isFinished, timeout=10_000)
