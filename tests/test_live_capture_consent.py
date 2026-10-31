@@ -174,6 +174,25 @@ def test_the_launch_preloads_nothing_without_a_yes(answers, monkeypatch, tmp_pat
     assert launched == []
 
 
+def test_turning_it_off_during_the_build_launches_nothing(answers, monkeypatch, tmp_path) -> None:
+    # macOS and Linux preload the tap at launch: unticking while it compiles must stop it.
+    consent.accept(SWC_NATIVE, answers)
+    launched = []
+    monkeypatch.setattr(swc_native_capture, "running_client_pids", list)
+
+    def build_then_untick(**_):
+        consent.withdraw(SWC_NATIVE, answers)
+        return tmp_path / "tap.dylib"
+
+    monkeypatch.setattr(swc_native_capture, "build_tap", build_then_untick)
+    monkeypatch.setattr(swc_native_capture.subprocess, "Popen", lambda *a, **k: launched.append(a))
+
+    with pytest.raises(LiveCaptureNotAccepted):
+        swc_native_capture.launch_client(tmp_path / "swc.raw", consent=answers)
+
+    assert launched == []
+
+
 def test_the_swc_command_stops_when_the_answer_is_no(monkeypatch) -> None:
     monkeypatch.setattr(consent, "confirm_on_terminal", lambda *_a, **_k: False)
     monkeypatch.setattr(swc_native_capture, "launch_client", lambda *_a, **_k: pytest.fail("launched"))

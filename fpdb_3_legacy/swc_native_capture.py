@@ -3924,6 +3924,8 @@ def launch_client(
     status_path.unlink(missing_ok=True)
 
     env = native_client_environment(archive, tap, port=port, include_outbound=include_outbound)
+    # Asked again: the user may have turned the tap off while it compiled.
+    live_capture_consent.require(live_capture_consent.SWC_NATIVE, consent)
     return subprocess.Popen([str(SWC_EXECUTABLE)], env=env, cwd=str(Path.home()))
 
 
