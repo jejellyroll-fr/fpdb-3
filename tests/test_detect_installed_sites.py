@@ -457,6 +457,29 @@ def test_a_protected_container_with_no_known_screen_name_is_remembered(config, t
     assert detector.protected_skins == {"Bwin.fr Poker": str(container)}
 
 
+def test_a_tables_folder_that_cannot_be_listed_is_flagged_even_when_its_parent_can(config, tmp_path) -> None:
+    container = bwin_fr_container(tmp_path)
+    tables = tree(container, "alice", "History", "Data", "Tables")
+    real_listdir = os.listdir
+
+    def deny_tables(path):
+        if Path(path) == tables:
+            raise PermissionError(1, "Operation not permitted", str(path))
+        return real_listdir(path)
+
+    detector = iPokerDetector(config)
+    detector.platform = "Darwin"
+
+    with on_platform("Darwin", tmp_path), patch.object(Path, "home", return_value=tmp_path):
+        with patch("os.listdir", side_effect=deny_tables):
+            result = detector._detect_skin("Bwin.fr Poker")
+
+    # The importer walks that folder too: the card must ask for access, not report success.
+    assert result["heroname"] == "alice"
+    assert result["listing_denied"] is True
+    assert detector.protected_skins == {"Bwin.fr Poker": str(container)}
+
+
 def test_a_listable_bwin_container_still_finds_any_player(config, tmp_path) -> None:
     tables = tree(bwin_fr_container(tmp_path), "alice", "History", "Data", "Tables")
     (tables / "hand.xml").write_text("<session/>")

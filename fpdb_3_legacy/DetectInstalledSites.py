@@ -611,7 +611,7 @@ class iPokerDetector(SiteDetector):  # noqa: N801
                         continue
                     result = self._player_folder_result(skin, Path(base_path) / item)
                     if result:
-                        return result
+                        return self._found(skin, base_path, result)
             except PermissionError:
                 # Not a fault of fpdb: on macOS 14+ another app's sandbox
                 # container can be stat'ed but not listed until the user lets
@@ -620,15 +620,7 @@ class iPokerDetector(SiteDetector):  # noqa: N801
                 self.protected_skins[skin] = base_path
                 result = self._probe_known_heroes(skin, base_path)
                 if result:
-                    log.warning(
-                        "Found the %s hands of %s in %s, but macOS does not let fpdb list that folder, so "
-                        "it cannot import them yet: allow the app that launches fpdb (your terminal, or "
-                        "fpdb itself) in System Settings > Privacy & Security > Full Disk Access.",
-                        skin,
-                        result["heroname"],
-                        result["hhpath"],
-                    )
-                    return result
+                    return self._found(skin, base_path, result)
                 log.warning(
                     "Cannot read the %s folder %s: permission denied. On macOS, allow the app that "
                     "launches fpdb (your terminal, or fpdb itself) in System Settings > Privacy & "
@@ -641,8 +633,27 @@ class iPokerDetector(SiteDetector):  # noqa: N801
 
         return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
 
+    def _found(self, skin: str, base_path: str, result: dict[str, Any]) -> dict[str, Any]:
+        """Return a detected hero folder, recording ``skin`` as protected if its hands cannot be listed."""
+        if result.get("listing_denied"):
+            self.protected_skins[skin] = base_path
+            log.warning(
+                "Found the %s hands of %s in %s, but macOS does not let fpdb list that folder, so "
+                "it cannot import them yet: allow the app that launches fpdb (your terminal, or "
+                "fpdb itself) in System Settings > Privacy & Security > Full Disk Access.",
+                skin,
+                result["heroname"],
+                result["hhpath"],
+            )
+        return result
+
     def _player_folder_result(self, skin: str, folder: Path) -> dict[str, Any] | None:
-        """Describe ``folder`` as the hero folder of ``skin``, or None if it is not one."""
+        """Describe ``folder`` as the hero folder of ``skin``, or None if it is not one.
+
+        The result says ``listing_denied`` when its Tables folder exists but
+        cannot be listed: the importer lists it too, so it will not read those
+        hands until access is given.
+        """
         if not folder.is_dir():
             return None
         hhpath = folder / "History" / "Data" / "Tables"
@@ -651,19 +662,22 @@ class iPokerDetector(SiteDetector):  # noqa: N801
         # but that the History/Data structure exists
         if not hhpath.parent.exists():
             return None
-        try:
-            has_hands = len(os.listdir(hhpath)) > 0
-        except OSError:
-            # Missing yet, or a folder macOS lets fpdb stat but not list.
-            has_hands = False
-        return {
+        result = {
             "detected": True,
             "hhpath": str(hhpath),
             "heroname": folder.name,
             "tspath": str(tspath) if tspath.exists() else "",
             "skin": skin,
-            "has_hands": has_hands,
+            "has_hands": False,
         }
+        try:
+            result["has_hands"] = len(os.listdir(hhpath)) > 0
+        except PermissionError:
+            # A folder macOS lets fpdb stat but not list.
+            result["listing_denied"] = True
+        except OSError:
+            pass  # Not created yet: the client makes it with the first hand.
+        return result
 
     def _probe_known_heroes(self, skin: str, base_path: str) -> dict[str, Any] | None:
         """Find the hero folder of ``skin`` by name when ``base_path`` cannot be listed.
@@ -671,13 +685,11 @@ class iPokerDetector(SiteDetector):  # noqa: N801
         macOS lets fpdb stat a path inside another app's sandbox container
         (Bwin.fr, PMU...) even when it refuses to list it, so a hero folder
         cannot be discovered there, only checked. Try the screen names fpdb
-        already knows. The result says ``listing_denied``: the importer lists
-        the folder too, so it will not read those hands until access is given.
+        already knows.
         """
         for name in self._known_hero_names(skin):
             result = self._player_folder_result(skin, Path(base_path) / name)
             if result:
-                result["listing_denied"] = True
                 return result
         return None
 
