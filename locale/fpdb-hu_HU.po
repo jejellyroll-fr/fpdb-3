@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 21:01+0100\n"
+"POT-Creation-Date: 2026-10-31 13:35+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -3407,6 +3407,11 @@ msgid "Skip these games when importing"
 msgstr "Ezek a játékok kihagyása importáláskor"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, python-brace-format
+msgid "The guide is published at {url}"
+msgstr ""
+
+#: fpdb_3_legacy/fpdb.pyw
 msgid "Unknown Site"
 msgstr "Ismeretlen terem"
 
@@ -3414,6 +3419,10 @@ msgstr "Ismeretlen terem"
 #, fuzzy
 msgid "Unsaved Changes"
 msgstr "Nem mentett változások"
+
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
+msgid "What fpdb does while you play"
+msgstr ""
 
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
@@ -4240,6 +4249,12 @@ msgstr "Adatbázis-statisztikák megtekintése"
 msgid "What every filter is for in a four-card game, and the two that are not"
 msgstr ""
 "Mire való az egyes szűrők egy négylapos játékban, és a kettő, amelyik nem"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid ""
+"What runs during play, what only runs afterwards, and where rooms draw the "
+"line"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"

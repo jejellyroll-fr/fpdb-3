@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 21:01+0100\n"
+"POT-Creation-Date: 2026-10-31 13:35+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -3394,6 +3394,11 @@ msgid "Skip these games when importing"
 msgstr "インポート時にこれらのゲームをスキップ"
 
 #: fpdb_3_legacy/fpdb.pyw
+#, python-brace-format
+msgid "The guide is published at {url}"
+msgstr ""
+
+#: fpdb_3_legacy/fpdb.pyw
 msgid "Unknown Site"
 msgstr "不明なポーカーサイト"
 
@@ -3401,6 +3406,10 @@ msgstr "不明なポーカーサイト"
 #, fuzzy
 msgid "Unsaved Changes"
 msgstr "未保存の変更"
+
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/menu_layout.py
+msgid "What fpdb does while you play"
+msgstr ""
 
 #: fpdb_3_legacy/fpdb.pyw
 #, fuzzy
@@ -4214,6 +4223,12 @@ msgid "What every filter is for in a four-card game, and the two that are not"
 msgstr ""
 "4 枚カードのゲームで各フィルターが何のためにあるか、そして使えない 2 つについ"
 "て"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid ""
+"What runs during play, what only runs afterwards, and where rooms draw the "
+"line"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"

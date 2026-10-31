@@ -67,6 +67,7 @@ TOPICS: Final[tuple[HelpTopic, ...]] = (
     HelpTopic("research", "Research Browser", "research-quick-start.md"),
     HelpTopic("research-omaha", "Research Browser for Omaha", "research-omaha.md"),
     HelpTopic("hud-dynamic", "Dynamic HUD panels", "hud-dynamic-guide.md"),
+    HelpTopic("fair-play", "What fpdb does while you play", "fair-play.md"),
 )
 
 _BY_ID: Final[dict[str, HelpTopic]] = {topic.id: topic for topic in TOPICS}
