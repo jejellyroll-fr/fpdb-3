@@ -116,7 +116,9 @@ def _read(path: Path) -> dict[str, Any]:
     except (OSError, ValueError):
         return {}
     accepted = document.get("accepted") if isinstance(document, dict) else None
-    return {key: value for key, value in (accepted or {}).items() if isinstance(value, dict)}
+    if not isinstance(accepted, dict):
+        return {}
+    return {key: value for key, value in accepted.items() if isinstance(value, dict)}
 
 
 def _write(path: Path, accepted: dict[str, Any]) -> None:

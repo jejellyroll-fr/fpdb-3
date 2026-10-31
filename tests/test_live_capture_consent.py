@@ -70,11 +70,16 @@ def test_withdrawing_turns_it_off_and_keeps_the_others(answers) -> None:
     assert consent.is_accepted(COINPOKER_PACKETS, answers)
 
 
-@pytest.mark.parametrize("content", ["", "not json", "[]", '{"accepted": {"swc_native": 1}}'])
+@pytest.mark.parametrize(
+    "content",
+    ["", "not json", "[]", '{"accepted": {"swc_native": 1}}', '{"accepted": ["swc_native"]}', '{"accepted": "yes"}'],
+)
 def test_an_unreadable_answers_file_is_a_no(answers, content) -> None:
     answers.write_text(content, encoding="utf-8")
 
     assert not consent.is_accepted(SWC_NATIVE, answers)
+    consent.accept(SWC_NATIVE, answers)  # a yes replaces what could not be read
+    assert consent.is_accepted(SWC_NATIVE, answers)
 
 
 def test_the_answers_sit_beside_the_configuration(tmp_path) -> None:
