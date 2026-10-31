@@ -201,9 +201,9 @@ class QueryProfile:
                     f"{stats.queries_per_entry:>10.1f}{stats.seconds * 1000:>10.0f}",
                 )
         lines.append(f"  {'statement':<28}{'calls':>7}{'':>9}{'':>10}{'db ms':>10}")
-        for label, stats in statements:
+        for label, statement in statements:
             shown = label if len(label) <= 28 else label[:25] + "..."
-            lines.append(f"  {shown:<28}{stats.calls:>7}{'':>9}{'':>10}{stats.seconds * 1000:>10.0f}")
+            lines.append(f"  {shown:<28}{statement.calls:>7}{'':>9}{'':>10}{statement.seconds * 1000:>10.0f}")
         return "\n".join(lines)
 
     def log_report(self, header: str = "") -> None:

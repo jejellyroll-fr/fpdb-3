@@ -21,6 +21,7 @@ unless asked for.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field, replace
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any, Final
@@ -827,7 +828,7 @@ def _bb_escape(text: str) -> str:
     return text.replace("[", "&#91;").replace("]", "&#93;")
 
 
-_ESCAPES: Final = {
+_ESCAPES: Final[dict[str, Callable[[str], str]]] = {
     "text": lambda text: text,
     "markdown": _md_escape,
     "bbcode": _bb_escape,

@@ -156,7 +156,8 @@ class SafeExpression:
         legacy stat functions degrade.
         """
         try:
-            return self._eval(self._tree.body, variables)
+            # The parse admits arithmetic on numbers only, so the result is one.
+            return cast("float | None", self._eval(self._tree.body, variables))
         except ZeroDivisionError:
             return None
 

@@ -436,17 +436,17 @@ class WinamaxLiveLogReader:
                 self._mark_pending(table)
             return
 
-        table = self._tables.get(pool)
-        if table is None:
+        current = self._tables.get(pool)
+        if current is None:
             # Log tailing started mid-hand; wait for the next hand boundary so the
             # ring is anchored on the small blind rather than on a random actor.
             return
 
-        if self._apply_event(table, event, parsed):
+        if self._apply_event(current, event, parsed):
             if notify:
-                self._notify(table)
+                self._notify(current)
             else:
-                self._mark_pending(table)
+                self._mark_pending(current)
 
     def _mark_pending(self, table: WinamaxTableUpdate) -> None:
         if not hasattr(self, "_pending_updates"):

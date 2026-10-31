@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import contextlib
 import sys
+from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any
 
 from fpdb_3_legacy import Card
@@ -1110,7 +1111,7 @@ class DatabaseSchemaMixin:
     # end def recreate_tables
 
     @contextlib.contextmanager
-    def bounded_ddl_lock_wait(self):
+    def bounded_ddl_lock_wait(self) -> Iterator[None]:
         """Make every migration inside the block fail rather than block.
 
         A migration that cannot take its lock is a migration that has to wait
@@ -2151,7 +2152,7 @@ class DatabaseSchemaMixin:
 
     # end def fillDefaultData
 
-    def rebuild_indexes(self, start=None) -> None:
+    def rebuild_indexes(self, start: Any = None) -> None:
         self.dropAllIndexes()
         self.createAllIndexes()
         self.dropAllForeignKeys()

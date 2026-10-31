@@ -31,7 +31,7 @@ import time
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Final, cast
 
 from . import Card
 from .analytics_query import (
@@ -966,7 +966,7 @@ def run_comparison(db: Any, preset: Mapping[str, Any]) -> Comparison:
             return None
         if frequency:
             return None if row.frequency_bp is None else row.frequency_bp / 10000
-        return row.value
+        return cast("float | None", row.value)
 
     rows = []
     # Union, not intersection: a spot hero never reached is a fact about hero,

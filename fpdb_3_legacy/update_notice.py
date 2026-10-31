@@ -52,8 +52,10 @@ class UpdateChecker(QObject):
         ).start()
 
     def _run(self, current: str, packaging: str, include_prereleases: bool, manual: bool) -> None:
-        kwargs = {"reader": self._reader} if self._reader is not None else {}
-        data = update_check.fetch_release(include_prereleases=include_prereleases, **kwargs)
+        if self._reader is not None:
+            data = update_check.fetch_release(include_prereleases=include_prereleases, reader=self._reader)
+        else:
+            data = update_check.fetch_release(include_prereleases=include_prereleases)
         release = None if data is None else update_check.release_to_announce(data, current, packaging)
         self.finished.emit(data is not None, release, manual)
 

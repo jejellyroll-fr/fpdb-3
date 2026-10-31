@@ -19,10 +19,7 @@ import os
 import sys
 import uuid
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    import logging
+from typing import Any, Protocol
 
 # macOS runs a quarantined app from a read-only, randomly named mount instead
 # of where the user put it. The mount path is the only visible sign of it, and
@@ -119,8 +116,14 @@ def format_identity(identity: dict[str, Any]) -> str:
     return " ".join(f"{key}={value!r}" for key, value in identity.items())
 
 
+class _WarningLog(Protocol):
+    """What the banner needs of a logger: ``logging.Logger`` and fpdb's own both qualify."""
+
+    def warning(self, msg: object, *args: Any) -> None: ...
+
+
 def log_process_identity(
-    log: logging.Logger,
+    log: _WarningLog,
     role: str,
     command: list[str] | None = None,
 ) -> dict[str, Any]:

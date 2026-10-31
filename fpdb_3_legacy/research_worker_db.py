@@ -9,6 +9,7 @@ copy a context manager out of a GUI module.
 from __future__ import annotations
 
 import contextlib
+from collections.abc import Iterator
 from typing import Any
 
 
@@ -20,12 +21,12 @@ class WorkerDatabase:
         self.sql = owner.sql
         self._connection = connection
 
-    def get_cursor(self):
+    def get_cursor(self) -> Any:
         return self._connection.cursor()
 
 
 @contextlib.contextmanager
-def worker_database(db: Any):
+def worker_database(db: Any) -> Iterator[Any]:
     """Give research workers a dedicated connection when the DB supports it."""
     acquire = getattr(db, "worker_connection", None)
     if callable(acquire):

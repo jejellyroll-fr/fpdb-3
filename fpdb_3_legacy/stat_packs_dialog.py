@@ -112,7 +112,8 @@ class StatPacksDialog(QDialog):
 
     def refresh(self, select: str | None = None) -> None:
         """Re-read the pack directory and redraw the table."""
-        current = select or (self.selected().id if self.selected() else None)
+        chosen = self.selected()
+        current = select or (chosen.id if chosen else None)
         self.rows = stat_packs.list_packs(self.packs_dir)
         self.table.setRowCount(len(self.rows))
         for index, row in enumerate(self.rows):
@@ -142,9 +143,10 @@ class StatPacksDialog(QDialog):
     def _selection_changed(self) -> None:
         row = self.selected()
         user_pack = row is not None and row.status != stat_packs.BUILTIN
-        self.toggle_button.setEnabled(user_pack and row.status != stat_packs.INVALID)
+        usable = user_pack and row is not None and row.status != stat_packs.INVALID
+        self.toggle_button.setEnabled(usable)
         self.uninstall_button.setEnabled(user_pack)
-        self.export_button.setEnabled(user_pack and row.status != stat_packs.INVALID)
+        self.export_button.setEnabled(usable)
         if row is not None:
             self.toggle_button.setText(_("Enable") if row.status == stat_packs.DISABLED else _("Disable"))
         self.details.setPlainText(self._describe(row) if row else "")

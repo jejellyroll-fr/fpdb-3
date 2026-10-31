@@ -38,6 +38,11 @@ from typing import Any
 
 log = logging.getLogger(__name__)
 
+#: ctypes as the Windows calls below reach it: ``windll``, ``oledll`` and
+#: ``WINFUNCTYPE`` exist only there, so a type checker on any other platform
+#: sees them through ``Any`` (as ``fpdb.infrastructure.platform.windows`` does).
+_win_ctypes: Any = ctypes
+
 # A player's stack, e.g. "552,5 BB" or "7,64 €". The client draws it directly
 # under the name, and that pairing is what identifies a seat -- far steadier than
 # trying to blacklist every other label on the table (pot, buttons, promos,
@@ -350,7 +355,7 @@ def _window_pid(hwnd: int) -> int | None:  # pragma: no cover - Win32 call
         from ctypes import wintypes
 
         pid = wintypes.DWORD()
-        ctypes.windll.user32.GetWindowThreadProcessId(wintypes.HWND(hwnd), ctypes.byref(pid))
+        _win_ctypes.windll.user32.GetWindowThreadProcessId(wintypes.HWND(hwnd), ctypes.byref(pid))
     except Exception:
         log.debug("Could not read the process owning window %s", hwnd, exc_info=True)
         return None
@@ -497,10 +502,10 @@ def _send_get_object(hwnd: int) -> tuple[list[int], int]:  # pragma: no cover - 
     """
     from ctypes import wintypes
 
-    user32 = ctypes.windll.user32
+    user32 = _win_ctypes.windll.user32
     targets = [hwnd]
 
-    @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+    @_win_ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
     def _collect(child: int, _param: int) -> bool:
         targets.append(child)
         return True
@@ -568,7 +573,7 @@ def _ask_for_complete_tree(hwnd: int) -> bool:  # pragma: no cover - COM calls
         iid_accessible = GUID("{618736E0-3C3D-11CF-810C-00AA00389B71}")
         iid_accessible2 = GUID("{E89F726E-C4F4-4C19-BB19-B647D7FA8478}")
         accessible = POINTER(IUnknown)()
-        ctypes.oledll.oleacc.AccessibleObjectFromWindow(
+        _win_ctypes.oledll.oleacc.AccessibleObjectFromWindow(
             wintypes.HWND(hwnd),
             ctypes.c_ulong(_OBJID_CLIENT & 0xFFFFFFFF),
             byref(iid_accessible),

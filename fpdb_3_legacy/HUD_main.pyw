@@ -262,14 +262,15 @@ class HudReadWorker(QThread):
         super().__init__(parent)
         self.config = config
         self.db_factory = db_factory
-        self._requests: Queue[HudBatchReadRequest | None] = Queue()
+        # Batch reads and Fast-Fold reads share the one queue, and one thread.
+        self._requests: Queue[HudBatchReadRequest | FastFoldStatsRequest | None] = Queue()
         # Newest queued Fast-Fold request id per table, so the worker can drop
         # the ones already superseded instead of reading for them. See submit().
         self._latest_fast_fold: dict[str, int] = {}
         self._latest_lock = threading.Lock()
         self._stopping = threading.Event()
 
-    def submit(self, request: HudBatchReadRequest) -> None:
+    def submit(self, request: HudBatchReadRequest | FastFoldStatsRequest) -> None:
         """Queue one immutable request from the Qt thread.
 
         A Fast-Fold request also records itself as its table's newest. The ring
@@ -370,7 +371,7 @@ class HudReadWorker(QThread):
         """Connect, process one request at a time, and reconnect in this thread."""
         database: Database.Database | None = None
         service: HudReadService | None = None
-        pending: HudBatchReadRequest | None = None
+        pending: HudBatchReadRequest | FastFoldStatsRequest | None = None
         unavailable_announced = False
         while not self._stopping.is_set():
             if database is None:
@@ -399,8 +400,7 @@ class HudReadWorker(QThread):
                     break
 
             assert service is not None
-            fast_fold = isinstance(pending, FastFoldStatsRequest)
-            if fast_fold and self._is_superseded(pending):
+            if isinstance(pending, FastFoldStatsRequest) and self._is_superseded(pending):
                 # The table has moved on while this waited its turn. Reading for
                 # it would spend a round trip on an answer the GUI discards.
                 log.debug(
@@ -411,7 +411,7 @@ class HudReadWorker(QThread):
                 pending = None
                 continue
             try:
-                if fast_fold:
+                if isinstance(pending, FastFoldStatsRequest):
                     result = self._read_fast_fold_stats(database, pending)
                 else:
                     snapshot = service.read_batch(pending, progress_callback=self.snapshot_ready.emit)
@@ -424,14 +424,14 @@ class HudReadWorker(QThread):
                     database = None
                     service = None
                     continue
-                if fast_fold:
+                if isinstance(pending, FastFoldStatsRequest):
                     # Seats are refreshed on the next log line anyway, so a failed
                     # read is not worth the batch-retry machinery.
                     log.warning("Fast-Fold stats read failed for table %s: %s", pending.temp_key, exc)
                 else:
                     self.batch_failed.emit(pending, str(exc))
             else:
-                if fast_fold:
+                if isinstance(pending, FastFoldStatsRequest):
                     self.fast_fold_stats_ready.emit(result)
                 else:
                     self.snapshot_ready.emit(snapshot)
@@ -1550,9 +1550,9 @@ class HudMain(QObject):
                 if served is not None:
                     refreshed.add(served)
                     self._db_progress_refreshed.add(served)
-                    prepared = snapshot.hands.get(str(hand_id))
-                    if prepared is not None and prepared.table_info is not None:
-                        self._last_table_info[served] = prepared.table_info
+                    applied = snapshot.hands.get(str(hand_id))
+                    if applied is not None and applied.table_info is not None:
+                        self._last_table_info[served] = applied.table_info
 
         if not snapshot.final:
             return
@@ -3430,9 +3430,8 @@ class HudMain(QObject):
             if result := self.db_connection.get_site_id(site):
                 site_id = result[0][0]
                 self.hero[site_id] = self.config.supported_sites[site].screen_name
-                self.hero_ids[site_id] = self.db_connection.get_player_id(self.config, site, self.hero[site_id])
-                if self.hero_ids[site_id] is None:
-                    self.hero_ids[site_id] = -1
+                player_id = self.db_connection.get_player_id(self.config, site, self.hero[site_id])
+                self.hero_ids[site_id] = -1 if player_id is None else player_id
 
             for db_site in self._get_db_site_aliases(site):
                 if db_site == site:
@@ -3440,9 +3439,8 @@ class HudMain(QObject):
                 if result := self.db_connection.get_site_id(db_site):
                     site_id = result[0][0]
                     self.hero[site_id] = self.config.supported_sites[site].screen_name
-                    self.hero_ids[site_id] = self.db_connection.get_player_id(self.config, db_site, self.hero[site_id])
-                    if self.hero_ids[site_id] is None:
-                        self.hero_ids[site_id] = -1
+                    player_id = self.db_connection.get_player_id(self.config, db_site, self.hero[site_id])
+                    self.hero_ids[site_id] = -1 if player_id is None else player_id
 
     def _get_db_site_aliases(self, config_site: str) -> tuple[str, ...]:
         """Return database site names covered by one HUD config site."""
