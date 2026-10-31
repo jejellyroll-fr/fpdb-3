@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -387,6 +388,111 @@ def test_a_protected_macos_container_is_a_warning_not_a_traceback(config, tmp_pa
     assert record.levelname == "WARNING"
     assert record.exc_info is None
     assert "Full Disk Access" in record.getMessage()
+
+
+def bwin_fr_container(root: Path) -> Path:
+    return tree(
+        root,
+        "Library",
+        "Containers",
+        "com.entainpt.bwinpokerfr.app",
+        "Data",
+        "Library",
+        "Application Support",
+        "Bwin.fr Online Poker",
+    )
+
+
+def unlistable() -> Any:
+    """macOS 14+ on another app's container: every path can be stat'ed, no folder can be listed."""
+    return patch("os.listdir", side_effect=PermissionError(1, "Operation not permitted"))
+
+
+def test_a_protected_bwin_container_is_found_by_the_configured_screen_name(config, tmp_path, caplog) -> None:
+    hero = bwin_fr_container(tmp_path) / "alice"
+    tree(hero, "History", "Data", "Tables")
+    tree(hero, "History", "Data", "Tournaments")
+    config.supported_sites = {"Bwin.fr Poker": SimpleNamespace(hero_aliases=["alice"])}
+    detector = iPokerDetector(config)
+    detector.platform = "Darwin"
+
+    with on_platform("Darwin", tmp_path), patch.object(Path, "home", return_value=tmp_path), unlistable():
+        with caplog.at_level("WARNING"):
+            result = detector._detect_skin("Bwin.fr Poker")
+
+    assert result["detected"] is True
+    assert result["heroname"] == "alice"
+    assert result["skin"] == "Bwin.fr Poker"
+    assert path_ends_with(result["hhpath"], "Bwin.fr Online Poker/alice/History/Data/Tables")
+    assert path_ends_with(result["tspath"], "Bwin.fr Online Poker/alice/History/Data/Tournaments")
+    assert result["listing_denied"] is True
+    assert result["has_hands"] is False
+    # The importer lists that folder too: say so, or the hands silently never arrive.
+    [record] = [r for r in caplog.records if "alice" in r.getMessage()]
+    assert "Full Disk Access" in record.getMessage()
+
+
+def test_the_screen_name_typed_in_the_preferences_is_tried_first(config, tmp_path) -> None:
+    container = bwin_fr_container(tmp_path)
+    tree(container, "bob", "History", "Data")
+    tree(container, "alice", "History", "Data")
+    config.supported_sites = {"PMU Poker": SimpleNamespace(hero_aliases=["alice"])}
+    detector = iPokerDetector(config, hero_names=["bob"])
+    detector.platform = "Darwin"
+
+    with on_platform("Darwin", tmp_path), patch.object(Path, "home", return_value=tmp_path), unlistable():
+        assert detector._detect_skin("Bwin.fr Poker")["heroname"] == "bob"
+
+
+def test_a_protected_container_with_no_known_screen_name_is_remembered(config, tmp_path) -> None:
+    container = bwin_fr_container(tmp_path)
+    tree(container, "alice", "History", "Data")
+    detector = iPokerDetector(config, hero_names=["bob", "../alice", ""])
+    detector.platform = "Darwin"
+
+    with on_platform("Darwin", tmp_path), patch.object(Path, "home", return_value=tmp_path), unlistable():
+        assert detector._detect_skin("Bwin.fr Poker") == NOT_DETECTED
+
+    # The preferences tell the player to grant access instead of applying another skin's paths.
+    assert detector.protected_skins == {"Bwin.fr Poker": str(container)}
+
+
+def test_a_tables_folder_that_cannot_be_listed_is_flagged_even_when_its_parent_can(config, tmp_path) -> None:
+    container = bwin_fr_container(tmp_path)
+    tables = tree(container, "alice", "History", "Data", "Tables")
+    real_listdir = os.listdir
+
+    def deny_tables(path):
+        if Path(path) == tables:
+            raise PermissionError(1, "Operation not permitted", str(path))
+        return real_listdir(path)
+
+    detector = iPokerDetector(config)
+    detector.platform = "Darwin"
+
+    with on_platform("Darwin", tmp_path), patch.object(Path, "home", return_value=tmp_path):
+        with patch("os.listdir", side_effect=deny_tables):
+            result = detector._detect_skin("Bwin.fr Poker")
+
+    # The importer walks that folder too: the card must ask for access, not report success.
+    assert result["heroname"] == "alice"
+    assert result["listing_denied"] is True
+    assert detector.protected_skins == {"Bwin.fr Poker": str(container)}
+
+
+def test_a_listable_bwin_container_still_finds_any_player(config, tmp_path) -> None:
+    tables = tree(bwin_fr_container(tmp_path), "alice", "History", "Data", "Tables")
+    (tables / "hand.xml").write_text("<session/>")
+    detector = iPokerDetector(config)
+    detector.platform = "Darwin"
+
+    with on_platform("Darwin", tmp_path), patch.object(Path, "home", return_value=tmp_path):
+        result = detector._detect_skin("Bwin.fr Poker")
+
+    assert result["heroname"] == "alice"
+    assert result["has_hands"] is True
+    assert "listing_denied" not in result
+    assert detector.protected_skins == {}
 
 
 # --------------------------------------------------------------------------

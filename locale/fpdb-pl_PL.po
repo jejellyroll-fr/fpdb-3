@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 17:08+0100\n"
+"POT-Creation-Date: 2026-10-31 21:01+0100\n"
 "PO-Revision-Date: 2011-10-08 08:58+0000\n"
 "Last-Translator: greg20 <greg20@hushmail.com>\n"
 "Language-Team: Polish (Poland) (http://www.transifex.net/projects/p/fpdb/"
@@ -3102,6 +3102,10 @@ msgid "Enter your username"
 msgstr "Wpisz nazwę użytkownika"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
+msgid "Folder access needed"
+msgstr ""
+
+#: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
 msgid "Hand History:"
 msgstr "Ścieżka do historii rozdań"
@@ -3165,6 +3169,17 @@ msgstr "Turnieje"
 #, fuzzy
 msgid "Your names in these hands, one per line"
 msgstr "Twoje nazwy w tych rozdaniach, jedna na wiersz"
+
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, python-format
+msgid ""
+"macOS does not let fpdb read this folder:\n"
+"%s\n"
+"\n"
+"Allow the app that launches fpdb (your terminal, or fpdb itself) in System "
+"Settings > Privacy & Security > Full Disk Access, then restart fpdb. Until "
+"then, its hands cannot be imported."
+msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🎭"
