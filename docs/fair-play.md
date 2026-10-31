@@ -52,9 +52,10 @@ show you. How live each source is, and what fpdb refuses to guess, is in
 Turning dynamic panels on asks first, with what the rooms below say about them,
 and the HUD ignores panel rules until you have said yes, whatever wrote them: a
 HUD package, the pack gallery or a hand edit of `HUD_config.xml`. At PokerStars
-tables the HUD never shows them, yes or not. The answer is kept in
+tables, on every regional site (PokerStars.FR, .ES, .COM…), the HUD never shows
+them, yes or not. The answer is kept in
 `dynamic-panels-consent.json`, beside `HUD_config.xml`; deleting it turns them
-off again.
+off again, at the next update of a table already showing them.
 
 The All-in or Fold stat set includes averages of the equity and EV players had
 in their *past* all-ins (EqK, EqR and their EV stats). They describe finished

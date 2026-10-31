@@ -51,10 +51,30 @@ def test_withdrawing_turns_them_off(answers) -> None:
     assert not consent.is_confirmed(answers)
 
 
-def test_pokerstars_never_gets_them(answers) -> None:
+@pytest.mark.parametrize("site", ["PokerStars", "PokerStars.FR", "PokerStars.COM", "PokerStarsES", "pokerstars.it"])
+def test_pokerstars_never_gets_them_on_any_regional_site(answers, site) -> None:
     consent.confirm(answers)
 
-    assert "PokerStars" in consent.why_not_at("PokerStars", answers)
+    assert consent.forbids_them(site)
+    assert site in consent.why_not_at(site, answers)
+
+
+@pytest.mark.parametrize("site", ["Winamax", "GGPoker", "iPoker", "", None])
+def test_other_rooms_are_not_mistaken_for_it(site) -> None:
+    assert not consent.forbids_them(site)
+
+
+def test_a_rewritten_answer_file_is_read_again(answers) -> None:
+    # The answer is memoised per file state; a new answer must not be hidden by it.
+    consent.confirm(answers)
+    assert consent.is_confirmed(answers)
+
+    answers.unlink()
+    assert not consent.is_confirmed(answers)
+
+    consent.confirm(answers)
+    consent.withdraw(answers)
+    assert not consent.is_confirmed(answers)
 
 
 def test_the_question_names_the_rooms_and_their_terms() -> None:

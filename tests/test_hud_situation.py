@@ -1108,3 +1108,22 @@ def test_a_pokerstars_table_keeps_the_static_grid_even_after_a_yes(tmp_path, mon
     said = [call for call in log.info.call_args_list if "kept off" in call.args[0]]
     assert len(said) == 1, "said once, not on every update"
     assert "PokerStars" in said[0].args
+
+
+@pytest.mark.parametrize("site", ["PokerStars.FR", "PokerStars.COM"])
+def test_a_regional_pokerstars_table_keeps_the_static_grid_too(tmp_path, site) -> None:
+    # HUD_main keeps an enabled regional site's own name for the table.
+    aux = _hud_with_rules(_turned_on(tmp_path), site=site)
+
+    assert aux.dynamic_panel_selection(3, 7) is None
+
+
+def test_withdrawing_the_yes_stops_a_table_already_showing_panels(tmp_path) -> None:
+    config_file = _turned_on(tmp_path)
+    aux = _hud_with_rules(config_file)
+    assert aux.dynamic_panel_selection(3, 7) is not None
+
+    (tmp_path / "dynamic-panels-consent.json").unlink()
+
+    assert aux.dynamic_panel_selection(3, 7) is None
+    assert getattr(aux, "_panel_state_cache", None) is None, "its panel memory goes with it"

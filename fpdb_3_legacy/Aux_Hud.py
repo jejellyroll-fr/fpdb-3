@@ -308,15 +308,14 @@ class SimpleHUD(Aux_Base.AuxSeats):
         that forbids them (#647): whatever wrote the rules, this is the one
         place every table asks.
         """
-        resolver = getattr(self, "_panel_resolver_cache", None)
-        cached_profile = getattr(self, "_panel_resolver_profile", None)
         profile = getattr(self.game_params, "name", "default")
-        if resolver is not None and cached_profile == profile:
-            return resolver
         try:
             from fpdb_3_legacy import dynamic_panels_consent, hud_situation
 
             configured = self.config.get_hud_panel_rules()
+            # Asked before the cache, on every update: a yes given meanwhile
+            # applies, and a yes withdrawn -- the answer file deleted -- stops a
+            # table that already shows panels.
             refused = (
                 dynamic_panels_consent.why_not_at(
                     getattr(self.hud, "site", None),
@@ -326,12 +325,14 @@ class SimpleHUD(Aux_Base.AuxSeats):
                 else None
             )
             if refused and refused != getattr(self, "_panel_refusal_logged", None):
-                # Asked again on every update, so a yes given meanwhile applies;
-                # said once, not on every redraw.
+                # Said once, not on every redraw.
                 log.info("Dynamic HUD panels kept off at this %s table: %s", getattr(self.hud, "site", ""), refused)
             self._panel_refusal_logged = refused
+            cached = getattr(self, "_panel_resolver_cache", None)
             if not configured or refused:
                 resolver = None
+            elif cached is not None and getattr(self, "_panel_resolver_profile", None) == profile:
+                return cached
             else:
                 resolver = hud_situation.HudSituationResolver(
                     configured,
@@ -345,13 +346,18 @@ class SimpleHUD(Aux_Base.AuxSeats):
         return resolver
 
     def _panel_state(self) -> Any:
-        """This table's panel memory, created on first use."""
-        state = getattr(self, "_panel_state_cache", None)
-        if state is not None:
-            return state
+        """This table's panel memory, created on first use.
+
+        Kept only while the resolver it was made for is the one in force: when
+        panels are turned off or refused, the memory goes with them (#647).
+        """
         resolver = self._panel_resolver()
+        state = getattr(self, "_panel_state_cache", None)
         if resolver is None:
+            self._panel_state_cache = None
             return None
+        if state is not None and getattr(state, "resolver", None) is resolver:
+            return state
         from fpdb_3_legacy import hud_situation
 
         state = hud_situation.PanelState(resolver, getattr(self.game_params, "name", "default"))

@@ -42,8 +42,14 @@ DYNAMIC_PANELS: Final = Mechanism(
 )
 
 #: Rooms whose rules forbid statistics that change with the game state: the
-#: HUD never resolves panel rules at their tables, yes or not.
-ROOMS_THAT_FORBID_THEM: Final = frozenset({"PokerStars"})
+#: HUD never resolves panel rules at their tables, yes or not. Matched as a
+#: prefix, so every regional site counts: ``PokerStars.FR``, ``PokerStars.COM``,
+#: ``PokerStarsES``...
+ROOMS_THAT_FORBID_THEM: Final = ("PokerStars",)
+
+#: ``(path, version, mtime, size) -> answer``: the HUD asks on every update,
+#: and the file changes only when the user answers.
+_confirmed_cache: dict[tuple[str, int, int, int], bool] = {}
 
 
 def consent_path(config_file: str | os.PathLike[str] | None = None) -> Path:
@@ -72,7 +78,22 @@ def statement() -> str:
 
 def is_confirmed(path: Path | None = None) -> bool:
     """Whether the user said yes to this version of dynamic panels."""
-    return live_capture_consent.is_accepted(DYNAMIC_PANELS, path or consent_path())
+    target = path or consent_path()
+    try:
+        stat = target.stat()
+    except OSError:
+        return False
+    key = (str(target), DYNAMIC_PANELS.version, stat.st_mtime_ns, stat.st_size)
+    if key not in _confirmed_cache:
+        _confirmed_cache.clear()
+        _confirmed_cache[key] = live_capture_consent.is_accepted(DYNAMIC_PANELS, target)
+    return _confirmed_cache[key]
+
+
+def forbids_them(site: str | None) -> bool:
+    """Whether ``site`` is a room -- any regional site of it -- that forbids dynamic panels."""
+    name = str(site or "").strip().casefold()
+    return any(name.startswith(room.casefold()) for room in ROOMS_THAT_FORBID_THEM)
 
 
 def confirm(path: Path | None = None) -> None:
@@ -87,7 +108,7 @@ def withdraw(path: Path | None = None) -> None:
 
 def why_not_at(site: str | None, path: Path | None = None) -> str | None:
     """Why the HUD keeps the static grid at a table of ``site``, or None when it need not."""
-    if str(site or "") in ROOMS_THAT_FORBID_THEM:
+    if forbids_them(site):
         return f"{site}'s rules forbid statistics that change with the game state"
     if not is_confirmed(path):
         return "they were not turned on in Preferences ▸ HUD ▸ Dynamic Panels after reading what rooms say"

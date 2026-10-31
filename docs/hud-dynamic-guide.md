@@ -28,8 +28,8 @@ what they do and what rooms say about them: PokerStars forbids in-game
 statistics that change with the game state, and Winamax lists dynamic range
 tools as prohibited. Until you say yes, the HUD keeps its static grid whatever
 your configuration says, so a package or a hand-edited `HUD_config.xml` cannot
-turn them on behind your back. At **PokerStars tables they never show**, yes or
-not. Your room's terms prevail: see
+turn them on behind your back. At **PokerStars tables they never show**, on any
+of its regional sites, yes or not. Your room's terms prevail: see
 [what fpdb does while you play](fair-play.md#rooms).
 
 A table running any other profile resolves **no rule** and keeps the static grid
