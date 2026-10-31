@@ -372,6 +372,10 @@ def normalizePath(path):
 
 APPLICATION_NAME_SHORT = "fpdb"
 
+#: What get_default_paths() returns when the default site's hand-history path
+#: exists nowhere. It is a message, not a folder: never import from it (#662).
+MISSING_DEFAULT_PATH = "** ERROR DEFAULT PATH IN CONFIG DOES NOT EXIST **"
+
 DATABASE_TYPE_POSTGRESQL = "postgresql"
 DATABASE_TYPE_SQLITE = "sqlite"
 DATABASE_TYPE_MYSQL = "mysql"
@@ -4029,9 +4033,7 @@ class Config:
                     tspath = self.detect_ts_path(site) or self.detect_hh_path(site) or tspath
                 paths["hud-defaultTSPath"] = tspath
         except AssertionError:
-            paths["hud-defaultPath"] = paths["bulkImport-defaultPath"] = (
-                "** ERROR DEFAULT PATH IN CONFIG DOES NOT EXIST **"
-            )
+            paths["hud-defaultPath"] = paths["bulkImport-defaultPath"] = MISSING_DEFAULT_PATH
         return paths
 
     #    def get_frames(self, site = "PokerStars"):

@@ -28,6 +28,7 @@ from typing import Any
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QCheckBox,
     QFileDialog,
     QHBoxLayout,
@@ -131,13 +132,18 @@ class GuiBulkImport(QWidget):
                     path = item.text(1)  # Path is in the second column
                     import_sources.append((path, site_name))
 
-            custom_dir = self.importDir.text()
-            if custom_dir:
+            custom_dir = self.importDir.text().strip()
+            if custom_dir and custom_dir != Configuration.MISSING_DEFAULT_PATH:
                 import_sources.append((custom_dir, "auto"))
 
             if not import_sources:
                 log.warning("No import directories selected.")
                 self.settings["global_lock"].release()
+                QMessageBox.information(
+                    self,
+                    _("Bulk Import"),
+                    _("Select at least one configured directory, or choose a folder to import."),
+                )
                 return
 
             self.load_button.setEnabled(False)
@@ -310,6 +316,10 @@ class GuiBulkImport(QWidget):
         self.import_tree.setColumnCount(2)
         self.import_tree.setHeaderLabels([_("Site"), _("Path")])
         self.import_tree.setColumnWidth(0, 200)
+        # A click anywhere on a row picks it (#662). The check box alone was the
+        # only way in, and dark themes draw an unchecked one dark on dark: the
+        # row highlighted, looked picked, and was left out of the import.
+        self.import_tree.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
 
         # The project icons directory is located at the root of the project (parent of fpdb_3_legacy)
         icons_dir = Path(__file__).parent.parent / "icons"
@@ -320,23 +330,22 @@ class GuiBulkImport(QWidget):
                 icon = QIcon(str(icon_path)) if icon_path.exists() else QIcon()
 
                 if site.HH_path and site.HH_path not in ["", "0"]:
-                    item = QTreeWidgetItem(self.import_tree, [site_name, site.HH_path])
-                    item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-                    item.setCheckState(0, Qt.CheckState.Unchecked)
-                    item.setIcon(0, icon)
+                    self._add_import_row(site_name, site.HH_path, icon)
 
                 if site.TS_path and site.TS_path not in ["", "0"]:
-                    item = QTreeWidgetItem(self.import_tree, [f"{site_name} (Tourney)", site.TS_path])
-                    item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-                    item.setCheckState(0, Qt.CheckState.Unchecked)
-                    item.setIcon(0, icon)
+                    self._add_import_row(f"{site_name} (Tourney)", site.TS_path, icon)
+
+        self.import_tree.itemSelectionChanged.connect(self._check_selected_rows)
 
         self.main_layout.addWidget(QLabel(_("Configured Import Directories:")))
         self.main_layout.addWidget(self.import_tree)
 
         # Custom import directory
         custom_dir_layout = QHBoxLayout()
-        self.importDir = QLineEdit(self.settings.get("bulkImport-defaultPath", ""))
+        default_dir = self.settings.get("bulkImport-defaultPath", "")
+        if default_dir == Configuration.MISSING_DEFAULT_PATH:
+            default_dir = ""
+        self.importDir = QLineEdit(default_dir)
         custom_dir_layout.addWidget(self.importDir)
         self.chooseButton = QPushButton(_("Browse..."))
 
@@ -377,6 +386,25 @@ class GuiBulkImport(QWidget):
         tcursor.close()
         self.importer.database.rollback()
         self.n_hands_in_db = row[0]
+
+    def _add_import_row(self, label: str, path: str, icon: QIcon) -> None:
+        """Add a configured directory to the tree, unpicked.
+
+        The check box only shows the row's state: the selection sets it (see
+        _check_selected_rows), so the item is not user-checkable, or a click on
+        the box would toggle it a second time.
+        """
+        item = QTreeWidgetItem(self.import_tree, [label, path])
+        item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsUserCheckable)
+        item.setCheckState(0, Qt.CheckState.Unchecked)
+        item.setIcon(0, icon)
+
+    def _check_selected_rows(self) -> None:
+        """Tick exactly the selected rows: they are the ones load_clicked imports."""
+        root = self.import_tree.invisibleRootItem()
+        for i in range(root.childCount()):
+            item = root.child(i)
+            item.setCheckState(0, Qt.CheckState.Checked if item.isSelected() else Qt.CheckState.Unchecked)
 
     def browseClicked(self) -> None:
         """Handle browse button click to select import directory."""

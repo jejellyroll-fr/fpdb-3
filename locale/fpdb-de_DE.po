@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 17:08+0100\n"
+"POT-Creation-Date: 2026-10-31 21:36+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -987,6 +987,10 @@ msgstr "Pfad"
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Please choose the path that you want to Auto Import"
 msgstr "Bitte wähle den Pfad den Du automatisch importieren möchtest"
+
+#: fpdb_3_legacy/GuiBulkImport.py
+msgid "Select at least one configured directory, or choose a folder to import."
+msgstr ""
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, fuzzy
