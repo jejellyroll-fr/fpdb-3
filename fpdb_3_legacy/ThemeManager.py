@@ -369,6 +369,22 @@ class ThemeManager:
             QTableView::item:hover, QTableWidget::item:hover, QTreeView::item:hover, QTreeWidget::item:hover {{
                 background-color: {c["panel_alt"]};
             }}
+            /* qt_material styles table check boxes but not tree ones, and the
+               macOS style draws none under a stylesheet: a tree's boxes were
+               invisible there (#662). Same icons as qt_material's tables. */
+            QTreeView::indicator {{
+                width: 18px;
+                height: 18px;
+            }}
+            QTreeView::indicator:unchecked {{
+                image: url(icon:/primary/checkbox_unchecked.svg);
+            }}
+            QTreeView::indicator:checked {{
+                image: url(icon:/primary/checkbox_checked.svg);
+            }}
+            QTreeView::indicator:indeterminate {{
+                image: url(icon:/primary/checkbox_indeterminate.svg);
+            }}
             QHeaderView::section {{
                 background-color: {c["table_header"]};
                 color: {c["table_header_text"]};
