@@ -14,11 +14,7 @@ from __future__ import annotations
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
-import glob
-import json
-import os
-from collections import deque
-from datetime import datetime
+import sys
 from typing import Any
 
 from PySide6.QtCore import (
@@ -45,7 +41,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from fpdb_3_legacy import Configuration
+from fpdb_3_legacy import Configuration, log_view_model
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_datetime
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -55,13 +51,7 @@ if __name__ == "__main__":
 
 log = get_logger("gui_log_view")
 
-MAX_LOG_ENTRIES = 1000  # Adjust this number as needed
-
-# Only include "HUD Log" and "Fpdb Log" in the radio box
-LOGFILES = [
-    ["Fpdb Log", "fpdb-log.txt", True, "log"],
-    ["HUD Log", "HUD-log.txt", False, "log"],
-]
+MAX_LOG_ENTRIES = log_view_model.MAX_LOG_ENTRIES
 
 
 class LogTableModel(QAbstractTableModel):
@@ -98,18 +88,8 @@ class LogTableModel(QAbstractTableModel):
                 icon = style.standardIcon(QStyle.StandardPixmap.SP_MessageBoxCritical)
             return icon
         if role == Qt.ItemDataRole.ForegroundRole:
-            level = entry[0]
-            if level == "DEBUG":
-                color = QColor("green")
-            elif level == "INFO":
-                color = QColor("white")
-            elif level == "WARNING":
-                color = QColor("orange")
-            elif level == "ERROR":
-                color = QColor("red")
-            else:
-                color = QApplication.palette().color(QPalette.ColorRole.Text)
-            return color
+            colour = log_view_model.LEVEL_COLOURS.get(entry[0])
+            return QColor(colour) if colour else QApplication.palette().color(QPalette.ColorRole.Text)
         return None
 
     def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
@@ -123,7 +103,7 @@ class LogTableModel(QAbstractTableModel):
 class LogFilterProxyModel(QSortFilterProxyModel):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
-        self.selected_levels = {"DEBUG", "INFO", "WARNING", "ERROR"}
+        self.selected_levels = set(log_view_model.LEVELS)
         self.module_filter_text = ""
 
     def setLevelFilter(self, levels) -> None:
@@ -131,22 +111,14 @@ class LogFilterProxyModel(QSortFilterProxyModel):
         self.invalidateFilter()
 
     def setModuleFilter(self, text) -> None:
-        self.module_filter_text = text.lower()
+        self.module_filter_text = text
         self.invalidateFilter()
 
     def filterAcceptsRow(self, source_row, source_parent) -> bool:
         model = self.sourceModel()
-        level_index = model.index(source_row, 0, source_parent)
-        level = model.data(level_index, Qt.ItemDataRole.DisplayRole)
-        if level is None:
-            return False
-        level = level.strip().upper()
-        module_index = model.index(source_row, 2, source_parent)
-        module = model.data(module_index, Qt.ItemDataRole.DisplayRole)
-        module = "" if module is None else module.lower()
-        if level not in self.selected_levels:
-            return False
-        return not (self.module_filter_text and self.module_filter_text not in module)
+        level = model.data(model.index(source_row, 0, source_parent), Qt.ItemDataRole.DisplayRole)
+        module = model.data(model.index(source_row, 2, source_parent), Qt.ItemDataRole.DisplayRole)
+        return log_view_model.matches(level, module, self.selected_levels, self.module_filter_text)
 
 
 class LogLoaderThread(QThread):
@@ -158,27 +130,8 @@ class LogLoaderThread(QThread):
         self.max_entries = max_entries
 
     def run(self) -> None:
-        entries = []
-        if os.path.exists(self.logfile):
-            with open(self.logfile, encoding="utf-8") as log_file:
-                lines = deque(log_file, maxlen=self.max_entries)
-                for raw_line in lines:
-                    line = raw_line.strip()
-                    if not line:
-                        continue
-                    try:
-                        record_dict = json.loads(line)
-                        level = record_dict.get("levelname", "").strip().upper()
-                        date_time = record_dict.get("asctime", "").strip()
-                        module = record_dict.get("module", "").strip()
-                        function = record_dict.get("funcName", "").strip()
-                        message = record_dict.get("message", "").strip()
-                        entries.append([level, date_time, module, function, message])
-                    except json.JSONDecodeError:
-                        # Line is not valid JSON
-                        log.debug(f"Line is not valid JSON: {line}")
-                        continue
-        self.log_entries_loaded.emit(entries)
+        entries = log_view_model.read_tail(self.logfile, self.max_entries)
+        self.log_entries_loaded.emit([entry.as_row() for entry in entries])
 
 
 class GuiLogView(QWidget):
@@ -274,22 +227,15 @@ class GuiLogView(QWidget):
         self.show()
 
     def update_logfile_list(self) -> None:
-        log_dir = self.config.dir_log
-        log_pattern = os.path.join(log_dir, "fpdb-log*.txt")
-        log_files = glob.glob(log_pattern)
-        # Sort log files by modification time, newest first
-        log_files.sort(key=os.path.getmtime, reverse=True)
         self.logfile_combo.blockSignals(True)  # Prevent signals while updating
         current_selection = self.logfile_combo.currentText()
         self.logfile_combo.clear()
         self.logfile_paths = []
         selected_index = 0
-        for index, logfile in enumerate(log_files):
-            # Format display name with date
-            mod_time = datetime.fromtimestamp(os.path.getmtime(logfile))
-            display_name = f"{os.path.basename(logfile)} ({format_datetime(mod_time)})"
+        for index, logfile in enumerate(log_view_model.log_files(self.config.dir_log)):
+            display_name = f"{logfile.name} ({format_datetime(logfile.modified)})"
             self.logfile_combo.addItem(display_name)
-            self.logfile_paths.append(logfile)
+            self.logfile_paths.append(logfile.path)
             if display_name == current_selection:
                 selected_index = index
         self.logfile_combo.setCurrentIndex(selected_index)
@@ -300,36 +246,22 @@ class GuiLogView(QWidget):
             self.logfile = None
 
     def filter_log(self) -> None:
-        selected_levels = []
-        if self.filter_debug.isChecked():
-            selected_levels.append("DEBUG")
-        if self.filter_info.isChecked():
-            selected_levels.append("INFO")
-        if self.filter_warning.isChecked():
-            selected_levels.append("WARNING")
-        if self.filter_error.isChecked():
-            selected_levels.append("ERROR")
-
-        # Ensure levels are uppercase
-        selected_levels = [level.upper() for level in selected_levels]
+        boxes = (self.filter_debug, self.filter_info, self.filter_warning, self.filter_error)
+        selected_levels = [level for level, box in zip(log_view_model.LEVELS, boxes) if box.isChecked()]
 
         module_filter_text = self.module_filter_edit.text()
         self.proxy_model.setLevelFilter(selected_levels)
         self.proxy_model.setModuleFilter(module_filter_text)
 
     def copy_to_clipboard(self) -> None:
-        selected_indexes = self.listview.selectionModel().selectedRows()
-        text = ""
-        for index in selected_indexes:
-            row_data = []
-            for column in range(self.proxy_model.columnCount()):
-                data = self.proxy_model.data(
-                    self.proxy_model.index(index.row(), column),
-                    Qt.ItemDataRole.DisplayRole,
-                )
-                row_data.append(str(data))
-            text += "\t".join(row_data) + "\n"
-        QApplication.clipboard().setText(text)
+        rows = [
+            [
+                self.proxy_model.data(self.proxy_model.index(index.row(), column), Qt.ItemDataRole.DisplayRole)
+                for column in range(self.proxy_model.columnCount())
+            ]
+            for index in self.listview.selectionModel().selectedRows()
+        ]
+        QApplication.clipboard().setText(log_view_model.rows_as_text(rows))
 
     def __set_logfile(self, index) -> None:
         if index >= 0 and index < len(self.logfile_paths):
@@ -377,6 +309,4 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    import sys
-
     sys.exit(main())
