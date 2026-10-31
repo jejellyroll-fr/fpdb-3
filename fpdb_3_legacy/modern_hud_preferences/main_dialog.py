@@ -37,7 +37,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from fpdb_3_legacy import Configuration
+from fpdb_3_legacy import Configuration, dynamic_panels_consent
 from fpdb_3_legacy.hud_profiles import HudContext, HudProfileResolver, HudProfileRule
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.i18n import translate_hud_category
@@ -78,6 +78,25 @@ PANEL_FIELD_BREAKPOINTS = ((1000, 4), (840, 3), (600, 2))
 #: minimum width at 890 px, so the swap has to happen above that or the window
 #: could never be narrowed to the width that needs it.
 NARROW_HEADER_WIDTH = 900
+
+
+def confirm_dynamic_panels(parent: QWidget | None, path: Any) -> bool:
+    """Ask before dynamic panels are turned on (#647); record and return a yes."""
+    if dynamic_panels_consent.is_confirmed(path):
+        return True
+    box = QMessageBox(parent)
+    box.setIcon(QMessageBox.Icon.Warning)
+    box.setWindowTitle(_("Turn on dynamic panels?"))
+    box.setText(_(dynamic_panels_consent.DYNAMIC_PANELS.title))
+    box.setInformativeText(dynamic_panels_consent.statement())
+    turn_on = box.addButton(_("I understand, turn them on"), QMessageBox.ButtonRole.AcceptRole)
+    box.addButton(QMessageBox.StandardButton.Cancel)
+    box.setDefaultButton(QMessageBox.StandardButton.Cancel)
+    box.exec()
+    if box.clickedButton() is not turn_on:
+        return False
+    dynamic_panels_consent.confirm(path)
+    return True
 
 
 class ModernHudPreferences(QDialog):
@@ -3330,6 +3349,14 @@ class ModernHudPreferences(QDialog):
             )
         )
         outer.addWidget(self.panel_rules_enabled)
+        rooms_note = QLabel(
+            _(
+                "Some rooms forbid statistics that change with the hand: fpdb asks once before turning "
+                "them on, and never shows them at PokerStars tables."
+            )
+        )
+        rooms_note.setWordWrap(True)
+        outer.addWidget(rooms_note)
 
         selectors = QGroupBox(_("When this is the spot"))
         selectors_layout = QVBoxLayout(selectors)
@@ -3462,7 +3489,13 @@ class ModernHudPreferences(QDialog):
 
         self._create_panel_stat_picker(outer)
 
-        self.panel_rules_enabled.setChecked(bool(getattr(self.config, "hud_panel_rules_enabled", False)))
+        # Ticked only when the HUD would act on it: rules nobody said yes to are
+        # off at every table, so the box says so instead of asking on opening.
+        self.panel_rules_enabled.setChecked(
+            bool(getattr(self.config, "hud_panel_rules_enabled", False))
+            and dynamic_panels_consent.is_confirmed(self._dynamic_panels_answers())
+        )
+        self.panel_rules_enabled.toggled.connect(self._dynamic_panels_toggled)
         if self.panel_rules_fallback:
             index = self.panel_rule_fallback_combo.findText(self.panel_rules_fallback)
             if index >= 0:
@@ -4072,6 +4105,17 @@ class ModernHudPreferences(QDialog):
             container["rows"] = max(int(container.get("rows", 1) or 1), row + 1)
             container["cols"] = max(int(container.get("cols", 1) or 1), col + 1)
         self.on_profile_selected(self.profile_combo.currentIndex())
+
+    def _dynamic_panels_answers(self) -> Any:
+        return dynamic_panels_consent.consent_path(getattr(self.config, "file", None))
+
+    def _dynamic_panels_toggled(self, on: bool) -> None:
+        """Ticking -- or importing rules, which ticks -- asks first; a no unticks."""
+        if not on or confirm_dynamic_panels(self, self._dynamic_panels_answers()):
+            return
+        self.panel_rules_enabled.blockSignals(True)
+        self.panel_rules_enabled.setChecked(False)
+        self.panel_rules_enabled.blockSignals(False)
 
     def _persist_panel_rules(self) -> None:
         """Hand the rules to the configuration, or leave it exactly as it was.

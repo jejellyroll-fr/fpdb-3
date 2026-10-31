@@ -994,14 +994,25 @@ def test_a_profile_without_panel_rules_keeps_the_static_grid() -> None:
     assert aux.dynamic_panel_selection(3, 7) is None, "the caller then applies the position rule"
 
 
-def test_a_configured_profile_answers_with_the_seat_panels() -> None:
+def _turned_on(tmp_path) -> str:
+    """A configuration file whose user said yes to dynamic panels (#647)."""
+    from fpdb_3_legacy import dynamic_panels_consent
+
+    config_file = tmp_path / "HUD_config.xml"
+    dynamic_panels_consent.confirm(dynamic_panels_consent.consent_path(config_file))
+    return str(config_file)
+
+
+def test_a_configured_profile_answers_with_the_seat_panels(tmp_path) -> None:
     from types import SimpleNamespace
 
     from fpdb_3_legacy import Aux_Hud
 
     rules = hs.load_default_resolver().rules
     aux = Aux_Hud.SimpleHUD.__new__(Aux_Hud.SimpleHUD)
-    aux.config = SimpleNamespace(get_hud_panel_rules=lambda: rules, hud_panel_fallback="core")
+    aux.config = SimpleNamespace(
+        get_hud_panel_rules=lambda: rules, hud_panel_fallback="core", file=_turned_on(tmp_path)
+    )
     aux.game_params = SimpleNamespace(name="default")
     aux.hud = SimpleNamespace(
         stat_dict={7: {"live_position": "0", "street0Aggr": 1, "street1InPosition": 1, "n": 100}},
@@ -1015,7 +1026,7 @@ def test_a_configured_profile_answers_with_the_seat_panels() -> None:
     assert aux.dynamic_panel_selection(3, 99) is not None
 
 
-def test_plo_live_flop_replaces_preflop_panel_with_small_sample() -> None:
+def test_plo_live_flop_replaces_preflop_panel_with_small_sample(tmp_path) -> None:
     from dataclasses import replace
     from types import SimpleNamespace
 
@@ -1026,7 +1037,9 @@ def test_plo_live_flop_replaces_preflop_panel_with_small_sample() -> None:
     opener = {"screen_name": "Opener", "live_position": "0", "n": 5}
     caller = {"screen_name": "Caller", "live_position": "B", "n": 7}
     aux = Aux_Hud.SimpleHUD.__new__(Aux_Hud.SimpleHUD)
-    aux.config = SimpleNamespace(get_hud_panel_rules=lambda: scoped, hud_panel_fallback=fallback)
+    aux.config = SimpleNamespace(
+        get_hud_panel_rules=lambda: scoped, hud_panel_fallback=fallback, file=_turned_on(tmp_path)
+    )
     aux.game_params = SimpleNamespace(name="plo_6max_dynamic")
     aux.hud = SimpleNamespace(
         stat_dict={1: opener, 2: caller},
@@ -1040,3 +1053,77 @@ def test_plo_live_flop_replaces_preflop_panel_with_small_sample() -> None:
     }
     aux.forget_dynamic_panels()
     assert "srp_cbet_ip" in aux.dynamic_panel_selection(1, 1).panels
+
+
+def _hud_with_rules(config_file: str, site: str = "Winamax"):
+    from types import SimpleNamespace
+
+    from fpdb_3_legacy import Aux_Hud
+
+    rules = hs.load_default_resolver().rules
+    aux = Aux_Hud.SimpleHUD.__new__(Aux_Hud.SimpleHUD)
+    aux.config = SimpleNamespace(get_hud_panel_rules=lambda: rules, hud_panel_fallback="core", file=config_file)
+    aux.game_params = SimpleNamespace(name="default")
+    aux.hud = SimpleNamespace(
+        site=site,
+        stat_dict={7: {"live_position": "0", "street0Aggr": 1, "street1InPosition": 1, "n": 100}},
+        live_state={"street": "flop", "pot_type": "single_raised"},
+    )
+    return aux
+
+
+def test_rules_nobody_said_yes_to_keep_the_static_grid(tmp_path) -> None:
+    # A HUD package, the gallery or a hand edit can write rules; none of them
+    # asked the user what rooms say about them (#647).
+    aux = _hud_with_rules(str(tmp_path / "HUD_config.xml"))
+
+    assert aux.dynamic_panel_selection(3, 7) is None
+
+
+def test_a_yes_given_while_the_table_runs_applies_to_the_next_update(tmp_path) -> None:
+    from fpdb_3_legacy import dynamic_panels_consent
+
+    config_file = tmp_path / "HUD_config.xml"
+    aux = _hud_with_rules(str(config_file))
+    assert aux.dynamic_panel_selection(3, 7) is None
+
+    dynamic_panels_consent.confirm(dynamic_panels_consent.consent_path(config_file))
+
+    assert aux.dynamic_panel_selection(3, 7) is not None
+
+
+def test_a_pokerstars_table_keeps_the_static_grid_even_after_a_yes(tmp_path, monkeypatch) -> None:
+    # Its rules forbid in-game statistics that change with the game state.
+    from unittest.mock import Mock
+
+    from fpdb_3_legacy import Aux_Hud
+
+    log = Mock()
+    monkeypatch.setattr(Aux_Hud, "log", log)
+    aux = _hud_with_rules(_turned_on(tmp_path), site="PokerStars")
+
+    assert aux.dynamic_panel_selection(3, 7) is None
+    assert aux.dynamic_panel_selection(3, 7) is None
+
+    said = [call for call in log.info.call_args_list if "kept off" in call.args[0]]
+    assert len(said) == 1, "said once, not on every update"
+    assert "PokerStars" in said[0].args
+
+
+@pytest.mark.parametrize("site", ["PokerStars.FR", "PokerStars.COM"])
+def test_a_regional_pokerstars_table_keeps_the_static_grid_too(tmp_path, site) -> None:
+    # HUD_main keeps an enabled regional site's own name for the table.
+    aux = _hud_with_rules(_turned_on(tmp_path), site=site)
+
+    assert aux.dynamic_panel_selection(3, 7) is None
+
+
+def test_withdrawing_the_yes_stops_a_table_already_showing_panels(tmp_path) -> None:
+    config_file = _turned_on(tmp_path)
+    aux = _hud_with_rules(config_file)
+    assert aux.dynamic_panel_selection(3, 7) is not None
+
+    (tmp_path / "dynamic-panels-consent.json").unlink()
+
+    assert aux.dynamic_panel_selection(3, 7) is None
+    assert getattr(aux, "_panel_state_cache", None) is None, "its panel memory goes with it"

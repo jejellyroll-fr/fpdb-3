@@ -27,20 +27,53 @@ EXAMPLE = os.path.join(ROOT, "HUD_config.xml.example")
 pytestmark = [pytest.mark.qt, pytest.mark.skipif(not os.path.exists(EXAMPLE), reason="example config missing")]
 
 
-@pytest.fixture
-def dialog(tmp_path):
+def _open(tmp_path, *, said_yes: bool):
     from PySide6.QtWidgets import QApplication
 
     from fpdb_3_legacy import Configuration as Conf
     from fpdb_3_legacy import ModernHudPreferences as M
+    from fpdb_3_legacy import dynamic_panels_consent
 
     QApplication.instance() or QApplication([])
     config_path = tmp_path / "HUD_config.xml"
-    shutil.copy(EXAMPLE, config_path)
+    if not config_path.exists():
+        shutil.copy(EXAMPLE, config_path)
+    if said_yes:
+        dynamic_panels_consent.confirm(dynamic_panels_consent.consent_path(config_path))
     config = Conf.Config(file=str(config_path))
     dlg = M.ModernHudPreferences(config, None)
     dlg._config_path = config_path
     return dlg
+
+
+@pytest.fixture
+def dialog(tmp_path):
+    # The editor's own behaviour, once the user has said yes to dynamic panels (#647).
+    return _open(tmp_path, said_yes=True)
+
+
+@pytest.fixture
+def answer(monkeypatch):
+    """Click one of the confirmation's buttons instead of showing it."""
+    from fpdb_3_legacy.modern_hud_preferences import main_dialog
+
+    box_class = main_dialog.QMessageBox
+    shown: list[str] = []
+
+    def click(accept: bool) -> None:
+        def run(box) -> int:
+            shown.append(box.informativeText())
+            return 0
+
+        def clicked(box):
+            roles = {box.buttonRole(button): button for button in box.buttons()}
+            return roles[box_class.ButtonRole.AcceptRole if accept else box_class.ButtonRole.RejectRole]
+
+        monkeypatch.setattr(box_class, "exec", run)
+        monkeypatch.setattr(box_class, "clickedButton", clicked)
+
+    click.shown = shown  # type: ignore[attr-defined]
+    return click
 
 
 def _select(dialog, **values) -> None:
@@ -489,3 +522,67 @@ def test_the_stat_picker_does_not_disturb_the_profile_editor(dialog) -> None:
     dialog._add_panel_stat_to_block()
     after = profile.get("blocks") or []
     assert len(before) == len(after), "no block was added or removed"
+
+
+# --------------------------------------------------------------------------
+# Asking before turning them on (#647)
+# --------------------------------------------------------------------------
+
+
+def test_ticking_asks_what_rooms_say_and_a_yes_is_kept(tmp_path, answer) -> None:
+    from fpdb_3_legacy import dynamic_panels_consent
+
+    answer(True)
+    dlg = _open(tmp_path, said_yes=False)
+
+    dlg.panel_rules_enabled.setChecked(True)
+
+    assert dlg.panel_rules_enabled.isChecked()
+    assert "PokerStars" in answer.shown[0]
+    assert "terms prevail" in answer.shown[0]
+    assert dynamic_panels_consent.is_confirmed(dynamic_panels_consent.consent_path(tmp_path / "HUD_config.xml"))
+
+
+def test_cancelling_leaves_them_off(tmp_path, answer) -> None:
+    from fpdb_3_legacy import dynamic_panels_consent
+
+    answer(False)
+    dlg = _open(tmp_path, said_yes=False)
+
+    dlg.panel_rules_enabled.setChecked(True)
+
+    assert not dlg.panel_rules_enabled.isChecked()
+    assert not dynamic_panels_consent.is_confirmed(dynamic_panels_consent.consent_path(tmp_path / "HUD_config.xml"))
+
+
+def test_importing_a_dynamic_package_asks_too(tmp_path, answer) -> None:
+    answer(False)
+    dlg = _open(tmp_path, said_yes=False)
+    package = Path(ROOT) / "hud-packages" / "plo_6max_dynamic.fpdbhud"
+    with (
+        patch("PySide6.QtWidgets.QFileDialog.getOpenFileName", return_value=(str(package), "")),
+        patch("PySide6.QtWidgets.QMessageBox.information"),
+        patch("PySide6.QtWidgets.QMessageBox.critical"),
+    ):
+        dlg.import_profile()
+
+    assert answer.shown, "the package turned them on, so the question came"
+    assert not dlg.panel_rules_enabled.isChecked()
+
+
+def test_rules_turned_on_without_a_yes_open_unticked_and_unasked(tmp_path, answer) -> None:
+    # Written by a package, the gallery or a hand edit: the HUD ignores them,
+    # and the box says so rather than asking the moment the window opens.
+    answer(True)
+    first = _open(tmp_path, said_yes=True)
+    first.panel_rules_enabled.setChecked(True)
+    _fill(first, "srp_cbet_ip", street="flop")
+    first._persist_panel_rules()
+    first.config.save()
+    (tmp_path / "dynamic-panels-consent.json").unlink()
+
+    reopened = _open(tmp_path, said_yes=False)
+
+    assert reopened.config.hud_panel_rules_enabled
+    assert not reopened.panel_rules_enabled.isChecked()
+    assert answer.shown == []

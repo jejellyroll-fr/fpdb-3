@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 13:35+0100\n"
+"POT-Creation-Date: 2026-10-31 14:03+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -2970,6 +2970,44 @@ msgstr "Votre nom"
 msgid "e.g., my_custom_theme"
 msgstr "ex. mon_theme_perso"
 
+#: fpdb_3_legacy/dynamic_panels_consent.py
+msgid "Dynamic HUD panels"
+msgstr "Panneaux dynamiques du HUD"
+
+#: fpdb_3_legacy/dynamic_panels_consent.py
+msgid ""
+"PokerStars forbids in-game statistics that change automatically with the "
+"game state: fpdb never shows dynamic panels at PokerStars tables. Winamax "
+"lists dynamic range software and certain dynamic features of Hand2Note as "
+"prohibited: ask its integrity team before using them there."
+msgstr ""
+"PokerStars interdit les statistiques en jeu qui changent automatiquement "
+"avec l'état de la partie : fpdb n'affiche jamais de panneaux dynamiques aux "
+"tables PokerStars. Winamax classe parmi les interdits les logiciels de "
+"ranges dynamiques et certaines fonctionnalités dynamiques de Hand2Note : "
+"demandez à son service Intégrité du jeu avant de les y utiliser."
+
+#: fpdb_3_legacy/dynamic_panels_consent.py
+msgid ""
+"With dynamic panels on, the HUD changes which of a player's statistics it "
+"shows with the hand being played: preflop panels preflop, c-bet panels when "
+"a c-bet is made. The statistics are still the player's history; fpdb never "
+"shows a recommended action."
+msgstr ""
+"Avec les panneaux dynamiques, le HUD change les statistiques d'un joueur "
+"qu'il affiche selon la main en cours : panneaux préflop au préflop, panneaux "
+"de c-bet quand un c-bet est fait. Les statistiques restent l'historique du "
+"joueur ; fpdb n'affiche jamais d'action recommandée."
+
+#: fpdb_3_legacy/dynamic_panels_consent.py
+msgid ""
+"Your room's terms prevail. Read them, and turn this on only if they allow "
+"it. Help ▸ What fpdb does while you play says what each room's page says."
+msgstr ""
+"Les conditions de votre room priment. Lisez-les, et n'activez ceci que si "
+"elles le permettent. Aide ▸ Ce que fait fpdb pendant que vous jouez résume "
+"ce que dit la page de chaque room."
+
 #: fpdb_3_legacy/fpdb.pyw
 msgid "Back up and upgrade"
 msgstr "Sauvegarder et mettre à jour"
@@ -4162,6 +4200,10 @@ msgid "Horz Line"
 msgstr "Ligne horizontale"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "I understand, turn them on"
+msgstr "J'ai compris, les activer"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Icons:"
 msgstr "Icônes :"
 
@@ -4340,6 +4382,15 @@ msgid "Show the panels that fit the hand"
 msgstr "Afficher les panneaux adaptés à la main"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Some rooms forbid statistics that change with the hand: fpdb asks once "
+"before turning them on, and never shows them at PokerStars tables."
+msgstr ""
+"Certaines rooms interdisent les statistiques qui changent avec la main : "
+"fpdb demande une fois avant de les activer, et ne les affiche jamais aux "
+"tables PokerStars."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Speed"
 msgstr "Vitesse"
 
@@ -4401,6 +4452,10 @@ msgstr "Thème :"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Then show"
 msgstr "Puis afficher"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Turn on dynamic panels?"
+msgstr "Activer les panneaux dynamiques ?"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Update rule"
