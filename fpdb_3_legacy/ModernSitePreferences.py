@@ -300,7 +300,11 @@ class ModernSiteCard(QFrame):
         # Scope the sweep to the network this card is about: the default "All"
         # probes every supported network, and "Detect all sites" calls this once
         # per card, which made detection quadratic in the number of sites shown.
-        detector = DetectInstalledSites.DetectInstalledSites(sitename=detection_site)
+        # The names typed in this card come first: macOS lets fpdb check a
+        # hero folder inside another app's container but not list it.
+        detector = DetectInstalledSites.DetectInstalledSites(
+            sitename=detection_site, hero_names=self.typed_hero_names()
+        )
 
         if detection_site == "PokerStars":
             all_variants = detector.get_all_pokerstars_variants()
@@ -336,13 +340,21 @@ class ModernSiteCard(QFrame):
 
                 if matching_skin:
                     self.apply_detection_results(matching_skin)
-                    self.show_detection_success()
+                    if matching_skin.get("listing_denied"):
+                        self.show_folder_access_needed(matching_skin["hhpath"])
+                    else:
+                        self.show_detection_success()
                     return
-                if all_ipoker_skins:
-                    # No exact match, use the first detected iPoker skin
-                    self.apply_detection_results(all_ipoker_skins[0])
-                    self.show_detection_info_ipoker(all_ipoker_skins)
-                    return
+            protected_folder = detector.get_protected_ipoker_skins().get(self.site_name)
+            if protected_folder:
+                # This room is installed: another skin's paths would be wrong here.
+                self.show_folder_access_needed(protected_folder)
+                return
+            if all_ipoker_skins:
+                # No exact match, use the first detected iPoker skin
+                self.apply_detection_results(all_ipoker_skins[0])
+                self.show_detection_info_ipoker(all_ipoker_skins)
+                return
 
         elif detection_site == "PartyGaming":
             # Special handling for PartyGaming skins (including PMU Poker PartyPoker)
@@ -450,6 +462,24 @@ class ModernSiteCard(QFrame):
             "iPoker Detection",
             f"Detected iPoker skins: {', '.join(skin_names)}\nApplied configuration from the first skin found.",
         )
+
+    def show_folder_access_needed(self, folder: str) -> None:
+        """Explain that macOS keeps fpdb out of the client's folder."""
+        QMessageBox.warning(
+            self,
+            _("Folder access needed"),
+            _(
+                "macOS does not let fpdb read this folder:\n%s\n\n"
+                "Allow the app that launches fpdb (your terminal, or fpdb itself) in System Settings > "
+                "Privacy & Security > Full Disk Access, then restart fpdb. Until then, its hands cannot be imported."
+            )
+            % folder,
+        )
+
+    def typed_hero_names(self) -> list[str]:
+        """Screen name and aliases typed in this card, saved or not."""
+        names = [self.screen_name_input.text(), *self.aliases_input.text().split(",")]
+        return [name.strip() for name in names if name.strip()]
 
     def show_detection_info_party(self, skins) -> None:
         """Show information about detected PartyGaming skins."""
