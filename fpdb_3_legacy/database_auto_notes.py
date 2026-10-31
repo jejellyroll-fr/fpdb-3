@@ -7,6 +7,7 @@ holds the notes the rule engine generates about players, keyed by rule and hand.
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any
 
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -31,7 +32,7 @@ class DatabaseAutoNotesMixin:
 
         def rollback(self) -> None: ...
 
-    def storePlayerAutoNotes(self, notes, doinsert=False) -> None:
+    def storePlayerAutoNotes(self, notes: Iterable[Any] | None, doinsert: bool = False) -> None:
         """Persist generated player notes idempotently."""
         self.panbulk += list(notes or [])
         if not doinsert or not self.panbulk:

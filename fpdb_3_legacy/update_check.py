@@ -155,8 +155,8 @@ def fetch_release(
         if not isinstance(releases, list):
             return None
         published = [r for r in releases if isinstance(r, dict) and not r.get("draft") and r.get("tag_name")]
-        readable = [r for r in published if parse_version(str(r["tag_name"])) is not None]
-        return max(readable, key=lambda r: parse_version(str(r["tag_name"]))) if readable else None
+        keyed = [(key, r) for r in published if (key := parse_version(str(r["tag_name"]))) is not None]
+        return max(keyed, key=lambda pair: pair[0])[1] if keyed else None
     except Exception as exc:  # noqa: BLE001 - any failure means "no answer"
         log.debug(f"Update check failed: {exc}")
         return None

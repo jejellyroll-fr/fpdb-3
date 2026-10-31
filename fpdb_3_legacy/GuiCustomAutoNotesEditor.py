@@ -660,8 +660,10 @@ class GuiCustomAutoNotesEditor(QWidget):
                 cfg = Config()
 
             from fpdb_3_legacy.GGPokerToFpdb import GGPoker
+            from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter
             from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
+            parser: HandHistoryConverter
             if "PokerStars" in hh_text:
                 parser = PokerStars(config=cfg, in_path="-", out_path="-", autostart=False)
             else:

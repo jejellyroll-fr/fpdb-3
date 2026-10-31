@@ -328,7 +328,8 @@ def _parse_toml(text: str, source: str, line: int, label: str) -> dict[str, Any]
         msg = "reading PHH needs tomllib (Python 3.11+) or the tomli package"
         raise PHHImportError(UNSUPPORTED, msg, source=f"{source}:{line}", hand=label) from None
     try:
-        return toml.loads(text)
+        document: dict[str, Any] = toml.loads(text)
+        return document
     except toml.TOMLDecodeError as error:
         raise PHHImportError(MALFORMED, f"not valid TOML ({error})", source=f"{source}:{line}", hand=label) from None
 
@@ -1004,7 +1005,7 @@ class _Builder:
             return str(table)
         event = self.data.get("event")
         if event is not None:
-            return event
+            return str(event)
         return Path(self.document.source).stem
 
     def _check_lengths(self, count: int) -> None:

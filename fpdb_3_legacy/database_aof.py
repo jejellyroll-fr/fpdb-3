@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any
 
 from fpdb_3_legacy.aof_ranges import ActionObservation, RangeObservation
@@ -19,7 +20,7 @@ class DatabaseAofMixin:
 
         def get_last_insert_id(self, cursor: Any) -> int: ...
 
-    def storeAofDecisions(self, decisions, doinsert: bool = False) -> list[int]:
+    def storeAofDecisions(self, decisions: Iterable[Any] | None, doinsert: bool = False) -> list[int]:
         """Insert or refresh decisions, returning their persistent ids."""
         if not doinsert:
             return []
@@ -41,7 +42,7 @@ class DatabaseAofMixin:
             ids.append(decision_id)
         return ids
 
-    def storeAofDecisionAnalyses(self, analyses, doinsert: bool = False) -> list[int]:
+    def storeAofDecisionAnalyses(self, analyses: Iterable[Any] | None, doinsert: bool = False) -> list[int]:
         """Insert or refresh recalculable analysis rows."""
         if not doinsert:
             return []
@@ -149,7 +150,7 @@ class DatabaseAofMixin:
 
     def getAofProfileStats(
         self,
-        player_ids,
+        player_ids: Iterable[Any],
         category: str,
         classifier_version: int = AOF_CLASSIFIER_VERSION,
         backend_version: str = KNOWN_BACKEND_VERSION,

@@ -255,10 +255,91 @@ ignore = [
 
 [tool.mypy]
 python_version = "3.11"
+# What is type-checked is configuration, not a list in the CI workflow (#454):
+# CI runs a bare `mypy`. The whole application, and the tools and tests that
+# were checked by name before. The two .pyw entry points are checked by a run
+# each (`mypy fpdb_3_legacy/fpdb.pyw`): mypy names every script `__main__`, so
+# two of them in one run collide.
+files = [
+    "fpdb_3_legacy",
+    "fpdb",
+    "tools/coverage_ratchet.py",
+    "tools/fetch_pr_comments.py",
+    "tools/fetch_pr_reviews.py",
+    "tools/prepare_briefcase_resources.py",
+    "tools/todo_inventory.py",
+    "tools/validate_migration.py",
+    "tests/test_draw_starting_hand.py",
+    "tests/test_leak_detector.py",
+    "tests/test_numpy_migration.py",
+    "tests/test_opponents_report.py",
+    "tests/qt/test_empty_data_popups.py",
+]
 check_untyped_defs = true
-follow_imports = "skip"
+# Imports are followed: with "skip", every other fpdb module was Any, and a
+# call with the wrong arguments into it was invisible.
+follow_imports = "normal"
+# CI installs mypy alone (`uv tool install mypy`), without PySide6, NumPy or
+# the database drivers: their APIs are Any there rather than errors.
 ignore_missing_imports = true
 warn_unused_configs = true
+
+# Tier A (#454): the modern, non-GUI modules, held to full annotations. A
+# module of these groups that is not listed here is in STRICT_PENDING in
+# tests/test_mypy_config.py, which may only shrink.
+[[tool.mypy.overrides]]
+module = [
+    "fpdb_3_legacy.analytics_benchmark",
+    "fpdb_3_legacy.analytics_cache",
+    "fpdb_3_legacy.analytics_cohorts",
+    "fpdb_3_legacy.analytics_definitions",
+    "fpdb_3_legacy.analytics_lifecycle",
+    "fpdb_3_legacy.analytics_profiling",
+    "fpdb_3_legacy.analytics_profit",
+    "fpdb_3_legacy.analytics_query",
+    "fpdb_3_legacy.analytics_rebuild",
+    "fpdb_3_legacy.database_aof",
+    "fpdb_3_legacy.database_auto_notes",
+    "fpdb_3_legacy.database_lambda_dict",
+    "fpdb_3_legacy.database_schema",
+    "fpdb_3_legacy.dialects",
+    "fpdb_3_legacy.hand_review_payload",
+    "fpdb_3_legacy.hand_share",
+    "fpdb_3_legacy.phh_import",
+    "fpdb_3_legacy.research_browser",
+    "fpdb_3_legacy.research_differences",
+    "fpdb_3_legacy.research_distributions",
+    "fpdb_3_legacy.research_drilldown",
+    "fpdb_3_legacy.research_hand_strength",
+    "fpdb_3_legacy.research_labels",
+    "fpdb_3_legacy.research_matrices",
+    "fpdb_3_legacy.research_presets",
+    "fpdb_3_legacy.research_studies",
+    "fpdb_3_legacy.research_study_dashboard",
+    "fpdb_3_legacy.research_study_explorer",
+    "fpdb_3_legacy.research_views",
+    "fpdb_3_legacy.research_worker_db",
+    "fpdb_3_legacy.stat_packs",
+    "fpdb_3_legacy.stat_registry",
+    "fpdb_3_legacy.stats_action_enums",
+    "fpdb_3_legacy.stats_aof",
+    "fpdb_3_legacy.stats_context",
+    "fpdb_3_legacy.stats_display",
+    "fpdb_3_legacy.stats_financial",
+    "fpdb_3_legacy.stats_formatting",
+    "fpdb_3_legacy.stats_knockout",
+    "fpdb_3_legacy.stats_postflop",
+    "fpdb_3_legacy.stats_preflop",
+    "fpdb_3_legacy.stats_sizing",
+    "fpdb_3_legacy.stats_table",
+    "fpdb_3_legacy.stats_tournament",
+]
+disallow_untyped_defs = true
+warn_return_any = true
+
+# No module is excused from type checking (`ignore_errors = true`). Should one
+# ever need to be, it has to be listed in IGNORE_BASELINE in
+# tests/test_mypy_config.py, which fails otherwise.
 
 [tool.pyright]
 include = [

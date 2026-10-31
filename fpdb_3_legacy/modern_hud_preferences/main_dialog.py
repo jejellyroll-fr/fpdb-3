@@ -2621,7 +2621,7 @@ class ModernHudPreferences(QDialog):
             # next Save silently writes its old empty/disabled draft over the
             # newly imported source.
             if hasattr(self, "panel_rules_enabled"):
-                self.panel_rules = list(self.config.get_hud_panel_rules())
+                self.panel_rules: list[Any] = list(self.config.get_hud_panel_rules())
                 self.panel_rules_fallback = str(getattr(self.config, "hud_panel_fallback", "") or "")
                 self.panel_rules_enabled.setChecked(bool(self.config.hud_panel_rules_enabled))
                 self._refresh_panel_rules_table()
@@ -3321,7 +3321,7 @@ class ModernHudPreferences(QDialog):
 
         # The state first: the widget builders below ask for the known panels and
         # the stat choices, and both read it.
-        self.panel_rules: list[Any] = list(getattr(self.config, "get_hud_panel_rules", lambda: [])())
+        self.panel_rules = list(getattr(self.config, "get_hud_panel_rules", lambda: [])())
         self.panel_rules_fallback = str(getattr(self.config, "hud_panel_fallback", "") or "")
         self.panel_stat_choices: tuple[Any, ...] = ()
 
