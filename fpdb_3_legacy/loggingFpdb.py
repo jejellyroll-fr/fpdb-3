@@ -9,7 +9,9 @@ import json
 import logging
 import os
 import re
+import tempfile
 import time
+from contextlib import suppress
 from dataclasses import dataclass
 from logging.handlers import TimedRotatingFileHandler
 from typing import Any
@@ -482,6 +484,24 @@ def get_logger_registry() -> LoggerRegistry:
     return _logger_registry
 
 
+def _write_json_atomically(path: str, data: dict[str, Any]) -> None:
+    """Write ``data`` to ``path`` so a reader sees the old file or the new one, never an empty one.
+
+    Every fpdb process at startup reads this file and, applying it, writes it
+    back; an ``open(path, "w")`` truncated it under the others, which then
+    failed with "Expecting value: line 1 column 1 (char 0)".
+    """
+    fd, tmp_path = tempfile.mkstemp(dir=os.path.dirname(path) or ".", prefix=".logger_config.", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+        os.replace(tmp_path, path)
+    except BaseException:
+        with suppress(OSError):
+            os.remove(tmp_path)
+        raise
+
+
 class LogConfig:
     """Configuration manager for logger settings with JSON persistence."""
 
@@ -524,8 +544,7 @@ class LogConfig:
                     "original_level": info.original_level,
                 }
 
-            with open(self.config_file, "w", encoding="utf-8") as f:
-                json.dump(config_data, f, indent=2)
+            _write_json_atomically(self.config_file, config_data)
             return True
 
         except LOG_CONFIG_SAVE_ERRORS as e:

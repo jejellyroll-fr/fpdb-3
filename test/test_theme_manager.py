@@ -57,6 +57,18 @@ class TestThemeManager(unittest.TestCase):
 
         self.assertIs(manager1, manager2, "ThemeManager should be a singleton")
 
+    def test_tree_check_boxes_are_drawn(self):
+        """#662: qt_material styles table check boxes only, and the macOS style draws none in a tree."""
+        stylesheet = self.theme_manager.build_legacy_app_stylesheet()
+
+        for state, icon in (
+            ("unchecked", "checkbox_unchecked.svg"),
+            ("checked", "checkbox_checked.svg"),
+            ("indeterminate", "checkbox_indeterminate.svg"),
+        ):
+            self.assertIn(f"QTreeView::indicator:{state} {{", stylesheet)
+            self.assertIn(f"icon:/primary/{icon}", stylesheet)
+
     def test_initialization(self):
         """Test ThemeManager initialization."""
         self.theme_manager.initialize(config=self.mock_config, main_window=self.mock_main_window)
