@@ -23,6 +23,7 @@ from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QColor, QPainter, QPixmap
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import (
+    QButtonGroup,
     QHBoxLayout,
     QLabel,
     QPushButton,
@@ -307,6 +308,7 @@ class SourceHandsPane(QWidget):
         self.targets_row.setSpacing(4)
         layout.addLayout(self.targets_row)
         self._target_buttons: dict[str, QPushButton] = {}
+        self._target_group: QButtonGroup | None = None
 
         self.table = QTableWidget()
         self.table.setSortingEnabled(True)
@@ -451,6 +453,12 @@ class SourceHandsPane(QWidget):
                 widget.setParent(None)
                 widget.deleteLater()
         self._target_buttons = {}
+        if self._target_group is not None:
+            self._target_group.deleteLater()
+        # One set is open at a time, so the group is exclusive: the open one
+        # cannot be unchecked into "none open".
+        self._target_group = QButtonGroup(self)
+        self._target_group.setExclusive(True)
         labels = _target_labels()
         for target in self._targets:
             count = "" if target.count is None else f" ({target.count:,})"
@@ -460,16 +468,29 @@ class SourceHandsPane(QWidget):
             button.setToolTip(
                 _("These hands use the same filters as the other side; only the population differs."),
             )
-            button.clicked.connect(lambda _checked=False, chosen=target: self._choose(chosen))
+            # Toggled, not clicked (#654): the accessibility press macOS sends
+            # for a checkable button -- VoiceOver, an automated audit -- toggles
+            # it without a click, and the button changed while the hands stayed.
+            button.toggled.connect(lambda checked, chosen=target: self._toggled(chosen, checked))
+            self._target_group.addButton(button)
             self._target_buttons[target.id] = button
             self.targets_row.addWidget(button)
         self.targets_row.addStretch(1)
+
+    def _toggled(self, target: DrillTarget, checked: bool) -> None:
+        # The group unchecks the previous set as it checks this one; only the
+        # check opens a set.
+        if checked:
+            self._choose(target)
 
     def _choose(self, target: DrillTarget) -> None:
         self._target = target
         self._offset = 0
         for target_id, button in self._target_buttons.items():
+            # Signals blocked: checking the chosen button here would choose it again.
+            blocked = button.blockSignals(True)
             button.setChecked(target_id == target.id)
+            button.blockSignals(blocked)
         self._load()
 
     # -- loading -------------------------------------------------------------
