@@ -519,3 +519,45 @@ def test_the_hud_day_follows_the_hand_s_own_offset_on_the_live_server(backend: s
             cursor.execute(query, (start,))
             days.append(cursor.fetchone()[0])
     assert days == ["d260114", "d260715"]
+
+
+class _Checked:
+    def __init__(self, checked: bool) -> None:
+        self.checked = checked
+
+    def isChecked(self) -> bool:
+        return self.checked
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("backend", ["postgresql", "mysql"])
+def test_every_hand_viewer_flag_filter_runs(backend: str) -> None:
+    """#656: ``hp.wentAllIn = 1`` raised on PostgreSQL, so AI, SD and RIT left the list as it was.
+
+    The error is a type error the server raises while planning, so an empty
+    schema is enough to show it.
+    """
+    if backend not in _enabled_backends():
+        pytest.skip(f"live {backend} service not requested")
+    from types import SimpleNamespace
+
+    from fpdb_3_legacy.GuiHandViewer import QUICK_FLAG_CONDITIONS, GuiHandViewer
+
+    def no_other_filter(query: str) -> str:
+        for placeholder in ("<game_test>", "<limit_test>", "<player_test>", "<position_test>"):
+            query = query.replace(placeholder, "")
+        return query
+
+    with _connection(backend) as connection:
+        _create_schema(connection, backend)
+        sql = Sql(db_server=backend)
+        for flag, _condition in QUICK_FLAG_CONDITIONS:
+            viewer = SimpleNamespace(
+                db=SimpleNamespace(sql=sql, get_cursor=connection.cursor),
+                filters=SimpleNamespace(replace_placeholders_with_filter_values=no_other_filter),
+                _splash_filter_condition=lambda: None,
+                _analytics_filter_warning=lambda _filters: "",
+                **{name: _Checked(name == flag) for name, _ in QUICK_FLAG_CONDITIONS},
+            )
+            assert GuiHandViewer.get_hand_ids_from_date_range(viewer, "2026-01-01", "2026-12-31") == [], flag
+        connection.rollback()

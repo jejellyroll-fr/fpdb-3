@@ -70,6 +70,25 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_hand_viewer")
 
+#: The quick flag check boxes and the WHERE condition each one adds, in order.
+#: wentAllIn, sawShowdown and runItTwice are BOOLEAN on PostgreSQL, which
+#: rejects ``= 1`` ("operator does not exist: boolean = integer"), so the
+#: filter raised and the list stayed as it was (#656). ``IS TRUE`` reads them
+#: on every backend, as the review filters in hand_viewer_filters do.
+QUICK_FLAG_CONDITIONS = (
+    # RIT only: a bomb-pot double board also stores multiple boards but is
+    # not "run it twice", so exclude it here.
+    ("flagRunItTwice", "h.runItTwice IS TRUE AND h.bombPot = 0"),
+    ("flagAllIn", "hp.wentAllIn IS TRUE"),
+    ("flagShowdown", "hp.sawShowdown IS TRUE"),
+    ("flagCashout", "EXISTS (SELECT 1 FROM HandsCashout hco WHERE hco.handId = h.id)"),
+    ("flagBombPot", "h.bombPot > 0"),
+    # In FPDB a true double-board hand is a bomb pot with two stored boards.
+    # A shared-flop run-it-twice also has two Boards rows, but is deliberately
+    # excluded from this filter.
+    ("flagDoubleBoard", "h.bombPot > 0 AND (SELECT COUNT(*) FROM Boards b WHERE b.handId = h.id) >= 2"),
+)
+
 
 class StartingHandPickerDialog(QDialog):
     """A multi-select 13x13 Hold'em class picker with common shortcuts."""
@@ -571,24 +590,11 @@ class GuiHandViewer(QSplitter):
         q = self.filters.replace_placeholders_with_filter_values(q)
 
         # Flag filters (AI / SD / RIT) appended as extra WHERE conditions.
-        extra = []
-        if getattr(self, "flagRunItTwice", None) and self.flagRunItTwice.isChecked():
-            # RIT only: a bomb-pot double board also stores multiple boards but is
-            # not "run it twice", so exclude it here.
-            extra.append("h.runItTwice = 1 AND h.bombPot = 0")
-        if getattr(self, "flagAllIn", None) and self.flagAllIn.isChecked():
-            extra.append("hp.wentAllIn = 1")
-        if getattr(self, "flagShowdown", None) and self.flagShowdown.isChecked():
-            extra.append("hp.sawShowdown = 1")
-        if getattr(self, "flagCashout", None) and self.flagCashout.isChecked():
-            extra.append("EXISTS (SELECT 1 FROM HandsCashout hco WHERE hco.handId = h.id)")
-        if getattr(self, "flagBombPot", None) and self.flagBombPot.isChecked():
-            extra.append("h.bombPot > 0")
-        if getattr(self, "flagDoubleBoard", None) and self.flagDoubleBoard.isChecked():
-            # In FPDB a true double-board hand is a bomb pot with two stored
-            # boards. A shared-flop run-it-twice also has two Boards rows, but
-            # is deliberately excluded from this filter.
-            extra.append("h.bombPot > 0 AND (SELECT COUNT(*) FROM Boards b WHERE b.handId = h.id) >= 2")
+        extra = [
+            condition
+            for flag, condition in QUICK_FLAG_CONDITIONS
+            if getattr(self, flag, None) and getattr(self, flag).isChecked()
+        ]
         splash_condition = self._splash_filter_condition()
         if splash_condition:
             extra.append(splash_condition)
