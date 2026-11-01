@@ -375,6 +375,17 @@ def is_valid_import_file(filepath: str) -> bool:
     return True
 
 
+def cannot_list_directory(path: str) -> bool:
+    """Whether ``path`` is a folder the system refuses to list, as macOS does an app's container."""
+    if not os.path.isdir(path):
+        return False
+    try:
+        os.listdir(path)
+    except PermissionError:
+        return True
+    return False
+
+
 class Importer:
     """Importer class for handling file imports and processing."""
 
@@ -406,6 +417,7 @@ class Importer:
         self.file_results: dict[str, FileImportResult] = {}
         self.failed_files = FailureCache()
         self.dirlist: dict[Any, list[Any]] = {}
+        self.refused_dirs: set[str] = set()  # watched folders the system refused to list
         self.siteIds: dict[str, int] = {}
         self.removeFromFileList: dict[str, bool] = {}  # to remove deleted files
         self.monitor = False
@@ -857,8 +869,11 @@ class Importer:
                 self.monitor = True
                 self.dirlist[site] = [dir, filter]
 
-            # print "addImportDirectory: checking files in", dir
-            for subdir in os.walk(dir):
+            # os.walk drops a refused listing unless told otherwise, and a
+            # folder macOS keeps fpdb out of then reads as one with no new
+            # hands: auto-import ran, imported nothing and said nothing.
+            refusals: list[OSError] = []
+            for subdir in os.walk(dir, onerror=refusals.append):
                 for file in subdir[2]:
                     filename = os.path.join(subdir[0], file)
                     # ignore symbolic links (Linux & Mac)
@@ -880,10 +895,34 @@ class Importer:
                         # need long time because FTP in Win does not
                         # update the timestamp on the HH during session
                         self.addImportFile(filename, "auto")
+            self._report_refused_listing(dir, refusals)
         else:
             log.warning(
                 f"Attempted to add non-directory '{dir!s}' as an import directory",
             )
+
+    def _report_refused_listing(self, dir: str, refusals: list[OSError]) -> None:
+        """Warn once that ``dir`` could not be listed, and again only after it could be.
+
+        Auto-import walks every watched folder on each cycle; one warning per
+        refusal is enough to say why its hands stop arriving.
+        """
+        # Instances built without __init__ (tests) have no record yet.
+        refused = self.__dict__.setdefault("refused_dirs", set())
+        denied = [error for error in refusals if isinstance(error, PermissionError)]
+        if not denied:
+            refused.discard(dir)
+            return
+        if dir in refused:
+            return
+        refused.add(dir)
+        log.warning(
+            "Cannot list %s (%s): its new hands are not imported. On macOS, allow the app that "
+            "launches fpdb (your terminal, or fpdb itself) in System Settings > Privacy & Security > "
+            "Full Disk Access, then restart fpdb.",
+            denied[0].filename or dir,
+            denied[0].strerror,
+        )
 
     def removeImportDirectory(self, dir=None, site=None) -> None:
         """Remove monitored import directories and stale files below them.
