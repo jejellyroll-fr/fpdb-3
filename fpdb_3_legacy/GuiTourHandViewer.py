@@ -47,6 +47,31 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 log = get_logger("gui_tour_hand_viewer")
 
 
+def hands_in_tourney_selection(rows, *, categories, limits, buyins) -> list:
+    """The hand ids whose tournament matches the Category, Limit and Buy-In filters (#650).
+
+    ``rows`` are ``(hand id, category, limitType, buyin, fee, currency)`` from
+    ``tourneyHandsInRangeSessionFilter``. Each filter holds the keys its check
+    boxes were built from: the column value (``None`` for a NULL one), and for
+    buy-ins ``Filters.tourney_buyin_key`` or ``"None"``. An empty filter
+    restricts nothing, as in the other tournament views.
+    """
+    wanted_categories = set(categories)
+    wanted_limits = set(limits)
+    wanted_buyins = set(buyins)
+    hand_ids = []
+    for hand_id, category, limit_type, buyin, fee, currency in rows:
+        buyin_key = "None" if buyin is None and fee is None else Filters.tourney_buyin_key(buyin, fee, currency)
+        if wanted_categories and category not in wanted_categories:
+            continue
+        if wanted_limits and limit_type not in wanted_limits:
+            continue
+        if wanted_buyins and buyin_key not in wanted_buyins:
+            continue
+        hand_ids.append(hand_id)
+    return hand_ids
+
+
 class TourHandViewer(QSplitter):
     def __init__(self, config, querylist, mainwin) -> None:
         QSplitter.__init__(self, mainwin)
@@ -198,18 +223,20 @@ class TourHandViewer(QSplitter):
         self.reload_hands(hand_ids)
 
     def get_hand_ids_from_date_range(self, start, end):
-        q = self.db.sql.query["handsInRangeSessionFilter"]
+        q = self.db.sql.query["tourneyHandsInRangeSessionFilter"]
         q = q.replace("<datetest>", "between '" + start + "' and '" + end + "'")
 
         # Apply filters
         q = self.filters.replace_placeholders_with_filter_values(q)
 
-        # debug
-        # print("Filtered SQL query:", q)
-
         c = self.db.get_cursor()
         c.execute(q)
-        return [r[0] for r in c.fetchall()]
+        return hands_in_tourney_selection(
+            c.fetchall(),
+            categories=self.filters.getTourneyCat(),
+            limits=self.filters.getTourneyLim(),
+            buyins=self.filters.getTourneyBuyin(),
+        )
 
     def rankedhand(self, hand, game):
         ranks = {

@@ -45,6 +45,24 @@ def replayer_queries() -> dict[str, str]:
         <position_test>
     """
 
+    ####################################
+    # The same hands for the tournament viewer, each with its tournament's
+    # category, limit and buy-in, which GuiTourHandViewer filters on (#650)
+    ####################################
+    query["tourneyHandsInRangeSessionFilter"] = """
+        select distinct h.id, tt.category, tt.limitType, tt.buyin, tt.fee, tt.currency
+        from Hands h
+        join Gametypes gt on h.gametypeId = gt.id
+        join HandsPlayers hp on h.id = hp.handId
+        left join Tourneys t on h.tourneyId = t.id
+        left join TourneyTypes tt on t.tourneyTypeId = tt.id
+        where h.startTime <datetest>
+        <game_test>
+        <limit_test>
+        <player_test>
+        <position_test>
+    """
+
     query["getPlayerId"] = """
         SELECT id
         FROM Players
