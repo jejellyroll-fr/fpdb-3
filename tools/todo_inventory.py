@@ -32,7 +32,7 @@ def _category(path: str) -> str:
     name = Path(path).name
     if name.endswith("ToFpdb.py") or "Summary" in name:
         return "parser"
-    if name.startswith("sql_") or name in {"Database.py", "Configuration.py"}:
+    if name.startswith(("sql_", "config_")) or name in {"Database.py", "Configuration.py"}:
         return "database"
     if name in {"Hand.py", "DerivedStats.py"} or name.startswith("derived_stats_"):
         return "poker-domain"

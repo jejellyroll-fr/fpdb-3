@@ -165,6 +165,7 @@ GUARDED_MODULES: tuple[str, ...] = (
     "fpdb_3_legacy/stats_*.py",
     "fpdb_3_legacy/Importer.py",
     "fpdb_3_legacy/Configuration.py",
+    "fpdb_3_legacy/config_*.py",
 )
 
 
