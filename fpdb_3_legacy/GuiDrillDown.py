@@ -266,6 +266,15 @@ class SourceHandsPane(QWidget):
 
     hand_activated = Signal(int)
 
+    #: Every worker still running, whichever pane started it. A worker is no
+    #: child of its pane: Qt deletes a widget's children with it, and deleting
+    #: a QThread that is still running aborts the whole process ("QThread:
+    #: Destroyed while thread is still running"). A pane can go before its
+    #: query ends -- a tab closed, a widget collected -- so the worker is held
+    #: here until it finishes, as ``DbWorker`` is. Only the GUI thread starts
+    #: workers, so no lock is needed.
+    _running: list[QThread] = []
+
     def __init__(self, db: Any, parent: QWidget | None = None, *, page_size: int = DEFAULT_PAGE_SIZE) -> None:
         super().__init__(parent)
         self.db = db
@@ -277,10 +286,10 @@ class SourceHandsPane(QWidget):
         self._offset = 0
         self._serial = 0
         self._counts_serial = 0
-        # Every worker started, retired when Qt says it finished. A
+        # Every worker this pane started, retired when Qt says it finished. A
         # superseded one still runs to completion -- its result is dropped by
-        # the serial check -- and would otherwise stay a child of this pane
-        # for the tab's whole life.
+        # the serial check -- and would otherwise stay listed for the tab's
+        # whole life.
         self._workers: list[QThread] = []
         self._page: Any = None
         self._build_ui()
@@ -497,7 +506,7 @@ class SourceHandsPane(QWidget):
 
     def _start_counts(self, context: DrillContext) -> None:
         self._counts_serial += 1
-        worker = _CountsWorker(self.db, context, self._counts_serial, self)
+        worker = _CountsWorker(self.db, context, self._counts_serial)
         worker.finished_ok.connect(self._counts_done)
         worker.failed.connect(self._counts_failed)
         self._start(worker)
@@ -531,6 +540,10 @@ class SourceHandsPane(QWidget):
             running for running in live_workers(self._workers) if running.isRunning()
         ]
         self._workers.append(worker)
+        SourceHandsPane._running = [
+            running for running in live_workers(SourceHandsPane._running) if running.isRunning()
+        ]
+        SourceHandsPane._running.append(worker)
         worker.start()
 
     def _load(self) -> None:
@@ -547,7 +560,6 @@ class SourceHandsPane(QWidget):
             self._page_size,
             self._offset,
             self._serial,
-            self,
         )
         worker.finished_ok.connect(self._page_done)
         worker.failed.connect(self._page_failed)
@@ -639,6 +651,11 @@ class SourceHandsPane(QWidget):
             if worker.isRunning() and not worker.wait(self.SHUTDOWN_WAIT_MS):
                 worker.wait()
         self._workers.clear()
+
+    def closeEvent(self, event: Any) -> None:
+        """A pane closed on its own stops waiting, as its hosts make it when they close."""
+        self.stop()
+        super().closeEvent(event)
 
 
 __all__ = ["SourceHandsPane", "live_workers"]
