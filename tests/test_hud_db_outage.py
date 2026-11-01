@@ -22,6 +22,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from fpdb_3_legacy import hud_main_db, hud_workers
+
 pytestmark = pytest.mark.qt
 
 
@@ -159,12 +161,12 @@ def test_recovery_closes_the_breaker() -> None:
 def test_deferred_hands_are_deduplicated_and_bounded() -> None:
     hud = make_hud_main(_deferred_hands=["1", "2", "3"])
 
-    saved = HUD_main.MAX_DEFERRED_HANDS
-    HUD_main.MAX_DEFERRED_HANDS = 3
+    saved = hud_main_db.MAX_DEFERRED_HANDS
+    hud_main_db.MAX_DEFERRED_HANDS = 3
     try:
         hud._defer_hands(["2", "4"])
     finally:
-        HUD_main.MAX_DEFERRED_HANDS = saved
+        hud_main_db.MAX_DEFERRED_HANDS = saved
 
     assert hud._deferred_hands == ["3", "2", "4"]
 
@@ -217,11 +219,11 @@ def test_recovery_worker_stops_at_the_first_success() -> None:
     worker.recovered.connect(lambda: recovered.append(True))
 
     # Drive run() inline, without the retry interval.
-    HUD_main.DB_RECOVERY_INTERVAL_S, saved = 0.0, HUD_main.DB_RECOVERY_INTERVAL_S
+    hud_workers.DB_RECOVERY_INTERVAL_S, saved = 0.0, hud_workers.DB_RECOVERY_INTERVAL_S
     try:
         worker.run()
     finally:
-        HUD_main.DB_RECOVERY_INTERVAL_S = saved
+        hud_workers.DB_RECOVERY_INTERVAL_S = saved
 
     assert db.recover_connection.call_count == 3
     assert recovered == [True]
@@ -235,11 +237,11 @@ def test_recovery_worker_survives_an_unexpected_failure() -> None:
     recovered = []
     worker.recovered.connect(lambda: recovered.append(True))
 
-    HUD_main.DB_RECOVERY_INTERVAL_S, saved = 0.0, HUD_main.DB_RECOVERY_INTERVAL_S
+    hud_workers.DB_RECOVERY_INTERVAL_S, saved = 0.0, hud_workers.DB_RECOVERY_INTERVAL_S
     try:
         worker.run()
     finally:
-        HUD_main.DB_RECOVERY_INTERVAL_S = saved
+        hud_workers.DB_RECOVERY_INTERVAL_S = saved
 
     assert db.recover_connection.call_count == 2
     assert recovered == [True]

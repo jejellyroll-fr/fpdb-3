@@ -21,7 +21,7 @@ import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from fpdb_3_legacy import HUD_main  # noqa: E402
+from fpdb_3_legacy import HUD_main, hud_main_fast_fold  # noqa: E402
 
 COALESCE_MS = HUD_main.HudMain.FF_STATS_COALESCE_MS
 
@@ -78,7 +78,7 @@ class _Recorder(HUD_main.HudMain):
 def app(monkeypatch):
     clock = {"now": 1000.0}
     monkeypatch.setattr(HUD_main.time, "monotonic", lambda: clock["now"])
-    monkeypatch.setattr(HUD_main, "QTimer", _FakeTimer)
+    monkeypatch.setattr(hud_main_fast_fold, "QTimer", _FakeTimer)
     recorder = _Recorder()
     recorder._clock = clock
     return recorder

@@ -25,7 +25,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from fpdb_3_legacy import Configuration, HUD_main
+from fpdb_3_legacy import Configuration, HUD_main, hud_workers
 from fpdb_3_legacy.fast_fold_engine import FastFoldEngine, FastFoldStatsRequest
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -156,12 +156,12 @@ def _worker_stats(request: FastFoldStatsRequest, database) -> tuple[object, list
 
     engine = MagicMock()
     engine.get_player_stats_for_seat_map.side_effect = capture
-    original = HUD_main.FastFoldEngine
-    HUD_main.FastFoldEngine = MagicMock(return_value=engine)
+    original = hud_workers.FastFoldEngine
+    hud_workers.FastFoldEngine = MagicMock(return_value=engine)
     try:
         result = HUD_main.HudReadWorker._read_fast_fold_stats(database, request)
     finally:
-        HUD_main.FastFoldEngine = original
+        hud_workers.FastFoldEngine = original
     return result, used
 
 

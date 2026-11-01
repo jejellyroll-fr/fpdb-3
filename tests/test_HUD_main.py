@@ -17,6 +17,7 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QApplication
 
 from fpdb.infrastructure.platform import permissions as macos_permissions
+from fpdb_3_legacy import hud_ipc, hud_main_db, hud_workers
 
 # import zmq
 
@@ -408,7 +409,7 @@ def test_slow_database_worker_does_not_block_the_qt_event_loop(qtbot) -> None:
     heartbeat.timeout.connect(lambda: ticks.append(time.monotonic()))
 
     try:
-        with patch("HUD_main.HudReadService", SlowService):
+        with patch.object(hud_workers, "HudReadService", SlowService):
             with qtbot.waitSignal(worker.ready, timeout=1000):
                 worker.start()
             heartbeat.start()
@@ -625,13 +626,13 @@ def test_runtime_replay_error_cannot_start_the_legacy_recovery_worker(hud_main) 
 
 
 def test_pending_hand_queue_keeps_only_its_bounded_latest_tail(hud_main) -> None:
-    saved = HUD_main.MAX_PENDING_HANDS
-    HUD_main.MAX_PENDING_HANDS = 3
+    saved = hud_main_db.MAX_PENDING_HANDS
+    hud_main_db.MAX_PENDING_HANDS = 3
     try:
         for hand_id in ("1", "2", "3", "4"):
             hud_main._enqueue_hand(hand_id)
     finally:
-        HUD_main.MAX_PENDING_HANDS = saved
+        hud_main_db.MAX_PENDING_HANDS = saved
 
     assert hud_main._pending_hands == ["2", "3", "4"]
 
@@ -1699,7 +1700,7 @@ def test_process_message_enotsock_handling() -> None:
 
         mock_poller_cls.return_value.poll.side_effect = error
 
-        with patch("HUD_main.log") as mock_log:
+        with patch.object(hud_ipc, "log") as mock_log:
             receiver.process_message()
             mock_log.info.assert_any_call("ZMQ socket closed during poll")
             mock_log.exception.assert_not_called()
