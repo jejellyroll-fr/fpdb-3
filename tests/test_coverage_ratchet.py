@@ -184,14 +184,16 @@ def test_the_tracked_baseline_matches_the_declared_domains():
     )
 
 
-def test_every_module_split_out_of_derived_stats_is_guarded():
-    # DerivedStats.py's calculators live in derived_stats_*.py since #452; they
-    # keep the per-module floor the file had, not only its domain's.
-    split = sorted(path.relative_to(ROOT).as_posix() for path in (ROOT / "fpdb_3_legacy").glob("derived_stats_*.py"))
+@pytest.mark.parametrize(("pattern", "domain"), [("derived_stats_*.py", "poker-domain"), ("config_*.py", "other")])
+def test_every_module_split_out_of_a_guarded_module_is_guarded(pattern, domain):
+    # DerivedStats.py and Configuration.py were split by domain (#452); the
+    # modules that took their code keep the per-module floor the file had, not
+    # only its domain's.
+    split = sorted(path.relative_to(ROOT).as_posix() for path in (ROOT / "fpdb_3_legacy").glob(pattern))
 
     assert split
     for path in split:
-        assert coverage_ratchet.domain_of(path) == "poker-domain", path
+        assert coverage_ratchet.domain_of(path) == domain, path
         assert coverage_ratchet._matches(path, coverage_ratchet.GUARDED_MODULES), path
 
 
