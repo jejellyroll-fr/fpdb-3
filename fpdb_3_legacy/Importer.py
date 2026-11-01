@@ -189,6 +189,8 @@ class ZMQSender:
             port (str, optional): The port to connect to on localhost. Defaults to "5555".
         """
         self.context = zmq.Context()
+        # Either a real zmq socket or its stand-in; they share only what is used.
+        self.socket: Any
         if os.environ.get(HUD_NOTIFY_ENV) == "0":
             self.socket = _DiscardingSocket()
             log.info("HUD notifications disabled by %s=0", HUD_NOTIFY_ENV)
