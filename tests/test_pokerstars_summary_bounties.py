@@ -92,6 +92,7 @@ def player_report(db) -> dict:
         db.sql.query["tourneyPlayerDetailedStats"]
         .replace("<nametest>", "(SELECT id FROM Players WHERE name = 'joiso')")
         .replace("<sitetest>", "")
+        .replace("<seats_test>", "between 0 and 100")
         .replace("<startdate_test>", "1970-01-01")
         .replace("<enddate_test>", "2100-01-01")
     )
