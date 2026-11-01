@@ -137,6 +137,8 @@ def import_once(files: Sequence[Path], workdir: Path, workers: int = 1) -> Impor
     schema.close_connection()
 
     importer = Importer(caller=None, settings={"testData": False, "threads": workers}, config=config, sql=None)
+    # The throwaway database's ids mean nothing to a HUD that may be running.
+    importer.setCallHud(False)
     for path in files:
         importer.addImportFile(str(path), "auto")
 

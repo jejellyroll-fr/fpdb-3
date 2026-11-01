@@ -868,3 +868,47 @@ def test_the_first_scan_still_runs_with_no_cached_result() -> None:
     detector.find_tables_applescript("anything")
 
     detector._run_applescript_scan.assert_called_once()
+
+
+def test_a_table_that_is_not_open_costs_no_system_events_scan() -> None:
+    """Every on-screen poker table is titled and none matches: it is closed.
+
+    System Events reads the same windows Quartz just listed, so its scan --
+    seconds long, on the HUD's GUI thread -- could only say the same. It ran
+    for every hand of an absent table and froze the HUD while they arrived.
+    """
+    detector = _detector(
+        window_list=[_window(number=1, title="[FR] Aix-en-Provence 560237449 | NL Hold'em", owner="Bwin.fr Poker")],
+    )
+    with patch("fpdb.infrastructure.platform.macos.subprocess.run") as run:
+        tables = detector.find_tables(r"Winamax\s+.*Casablanca\ 03")
+
+    assert tables == []
+    run.assert_not_called()
+
+
+def test_an_untitled_poker_table_still_gets_the_system_events_scan() -> None:
+    # A blank title is what missing Screen Recording looks like: System Events
+    # is then the only way to read which table the window shows.
+    detector = _detector(window_list=[_window(number=1, title="", owner="Winamax")])
+    with patch(
+        "fpdb.infrastructure.platform.macos.subprocess.run",
+        return_value=Mock(returncode=0, stdout="Winamax|Winamax Casablanca 03|0|0|800|600", stderr=""),
+    ) as run:
+        tables = detector.find_tables(r"Winamax\s+.*Casablanca\ 03")
+
+    run.assert_called_once()
+    assert [t.title for t in tables] == ["Winamax Casablanca 03"]
+
+
+def test_a_failed_quartz_listing_still_falls_back_to_system_events() -> None:
+    # No window list means no evidence the table is absent.
+    detector = _detector()
+    detector._CGWindowListCopyWindowInfo = Mock(side_effect=RuntimeError("quartz down"))
+    with patch(
+        "fpdb.infrastructure.platform.macos.subprocess.run",
+        return_value=Mock(returncode=0, stdout="", stderr=""),
+    ) as run:
+        detector.find_tables(r"Winamax\s+.*Casablanca\ 03")
+
+    run.assert_called_once()

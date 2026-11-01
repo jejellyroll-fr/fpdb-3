@@ -157,6 +157,28 @@ LIVE_ACTION_PREFIX = "live:"
 _profile_reporter = db_profile.DeltaReporter("Auto-import round-trip profile:")
 
 
+HUD_NOTIFY_ENV = "FPDB_HUD_NOTIFY"
+"""Set to ``0`` to keep this process from notifying a running HUD.
+
+A HUD looks every id it is sent up in its own database. A process importing
+into a database of its own -- the test suite, a benchmark -- hands it ids that
+name unrelated hands there, and the HUD goes looking for their tables' windows.
+"""
+
+
+class _DiscardingSocket:
+    """Stands in for the PUSH socket when HUD notifications are switched off."""
+
+    def send_string(self, *_args: Any) -> None:
+        return None
+
+    def setsockopt(self, *_args: Any) -> None:
+        return None
+
+    def close(self) -> None:
+        return None
+
+
 class ZMQSender:
     """ZMQ sender for sending hand IDs to the HUD."""
 
@@ -167,6 +189,10 @@ class ZMQSender:
             port (str, optional): The port to connect to on localhost. Defaults to "5555".
         """
         self.context = zmq.Context()
+        if os.environ.get(HUD_NOTIFY_ENV) == "0":
+            self.socket = _DiscardingSocket()
+            log.info("HUD notifications disabled by %s=0", HUD_NOTIFY_ENV)
+            return
         self.socket = self.context.socket(zmq.PUSH)
         # Set high water mark to prevent memory issues
         self.socket.setsockopt(zmq.SNDHWM, 1000)
