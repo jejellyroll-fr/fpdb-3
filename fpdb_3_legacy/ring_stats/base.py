@@ -25,11 +25,24 @@ class DbWorker(QThread):
     # Arguments: (error_message)
     error = Signal(str)
 
+    #: Every started worker, held until its thread has finished (#652). Tabs
+    #: drop a superseded worker as soon as a new refresh starts; if that was
+    #: the last reference, Python deletes a QThread that is still running and
+    #: Qt aborts the whole process ("QThread: Destroyed while thread is still
+    #: running"). Only the GUI thread starts workers, so no lock is needed.
+    _started: list[DbWorker] = []
+
     def __init__(self, db_or_cursor, query_name: str, query_sql: str) -> None:
         super().__init__()
         self.db_or_cursor = db_or_cursor
         self.query_name = query_name
         self.query_sql = query_sql
+
+    def start(self, *args, **kwargs) -> None:
+        """Start the thread, and keep this worker alive until it has finished."""
+        DbWorker._started = [worker for worker in DbWorker._started if not worker.isFinished()]
+        DbWorker._started.append(self)
+        super().start(*args, **kwargs)
 
     def run(self) -> None:  # noqa: PLR0915
         import logging
