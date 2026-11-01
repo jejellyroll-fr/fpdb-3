@@ -18,7 +18,7 @@ from fpdb_3_legacy.hud_package import install_missing_hud_package
 from fpdb_3_legacy.hud_presentation import describe_package
 
 ROOT = Path(__file__).resolve().parents[1]
-FIXTURE = ROOT / "test" / "fixtures" / "generationpoker_3h.pt4hud"
+FIXTURE = ROOT / "tests" / "fixtures" / "generationpoker_3h.pt4hud"
 EXAMPLE = ROOT / "HUD_config.xml.example"
 
 

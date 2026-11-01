@@ -35,7 +35,7 @@ fi
 echo
 echo "Running GUI tests separately (may have warnings)..."
 echo "Note: GUI tests may show Qt warnings - this is normal"
-uv run pytest test/test_HUD_main.py -v --tb=short || {
+uv run pytest tests/test_HUD_main.py -v --tb=short || {
     GUI_EXIT_CODE=$?
     echo "GUI tests failed with exit code: $GUI_EXIT_CODE"
 }

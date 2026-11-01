@@ -248,8 +248,8 @@ ignore = [
 "fpdb_3_legacy/swc_http_adapter.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/capture/swc_http_capture.py" = ["C901", "PLR0915"]
 "fpdb_3_legacy/capture/swc_poker_console.py" = ["C901", "PLR0912", "PLR0915"]
-"test/test_hand.py" = ["C901", "PLR0912", "PLR0915"]
-"test/test_pt4hud_import.py" = ["PLR0915"]
+"tests/test_hand.py" = ["C901", "PLR0912", "PLR0915"]
+"tests/test_pt4hud_import.py" = ["PLR0915"]
 "tests/helpers/mock_hand.py" = ["PLR0915"]
 "tests/helpers/snapshot_io.py" = ["C901", "PLR0912"]
 
@@ -380,7 +380,6 @@ fpdb_3_legacy = [
 source = ["fpdb_3_legacy", "fpdb"]
 branch = true
 omit = [
-    "*/test/*",
     "*/tests/*",
     "*/__pycache__/*",
 ]

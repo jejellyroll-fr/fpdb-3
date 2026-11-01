@@ -10,7 +10,7 @@ from types import SimpleNamespace
 import pytest
 
 from fpdb_3_legacy.Database import Database
-from test.test_database_backend_integration import _connection, _enabled_backends
+from tests.test_database_backend_integration import _connection, _enabled_backends
 
 pytestmark = pytest.mark.integration
 

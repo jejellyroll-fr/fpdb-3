@@ -10,7 +10,7 @@ Each layout reproduces the structure of one real export the parser was tuned on:
 GenerationPoker's 2-handed and cash HUDs, Spin & Go Master's basic HUD with its
 Nash charts, a generic matrix export, and a heads-up cash HUD with named panels.
 
-    python -m tests.helpers.pt4hud_layouts   # rewrite test/fixtures/pt4hud/
+    python -m tests.helpers.pt4hud_layouts   # rewrite tests/fixtures/pt4hud/
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ from pathlib import Path
 
 from fpdb_3_legacy.pt4hud import MAGIC
 
-FIXTURES = Path(__file__).resolve().parents[2] / "test" / "fixtures" / "pt4hud"
+FIXTURES = Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "pt4hud"
 FG, BG = 0xFF000000, 0xFFFFFFFF
 PANEL, TEXT, STAT = 2, 4, 1
 

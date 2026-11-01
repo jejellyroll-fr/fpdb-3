@@ -386,9 +386,9 @@ fenêtre à l’ancien minimum ; un glissement réel ne saute jamais.
 
 Suites existantes vérifiées hors écran : `tests/qt` (195 tests, tous marqués
 `qt`), `tests/test_dynamic_panels_tab.py` et `tests/test_hud_panel_editor.py`
-(64 : 35 sans écran, 29 en `-m qt`), `test/test_aof_hud_package.py`,
-`test/test_modern_hud_preferences.py`, `test/test_plo4_hud_package.py`,
-`test/test_hud_profiles.py`, `test/test_pt4hud_import.py` (57 : 24 sans écran,
+(64 : 35 sans écran, 29 en `-m qt`), `tests/test_aof_hud_package.py`,
+`tests/test_modern_hud_preferences.py`, `tests/test_plo4_hud_package.py`,
+`tests/test_hud_profiles.py`, `tests/test_pt4hud_import.py` (57 : 24 sans écran,
 33 en `-m qt`).
 
 ### Reste à faire

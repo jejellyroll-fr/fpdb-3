@@ -29,7 +29,7 @@ uv pip install --python .venv/bin/python --no-build-isolation \
 Verify the native backend with:
 
 ```bash
-.venv/bin/pytest -q test/test_equity.py
+.venv/bin/pytest -q tests/test_equity.py
 ```
 
 Community-card streets shorter than five cards are padded with explicit

@@ -24,8 +24,7 @@ import pytest
 
 from fpdb_3_legacy import winamax_ax_seats as ax
 from fpdb_3_legacy.winamax_ax_seats import AXSeat, AXTableWindow, WinamaxAXSeatReader
-
-from .fastfold_ax_doubles import AXElement, FakeAX, RunningApplication, button, installed, text
+from tests.fastfold_ax_doubles import AXElement, FakeAX, RunningApplication, button, installed, text
 
 pytestmark = []
 
