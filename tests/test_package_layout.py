@@ -2,8 +2,8 @@
 
 Everything under ``fpdb_3_legacy/`` is installed by setuptools and bundled by
 PyInstaller and PyOxidizer. A test or a one-off script placed there ships to
-every user and is never collected by pytest, which only looks in ``tests/`` and
-``test/``. Tests belong in ``tests/``; developer scripts belong in ``tools/``.
+every user and is never collected by pytest, which only looks in ``tests/``
+(#455). Tests belong in ``tests/``; developer scripts belong in ``tools/``.
 """
 
 from __future__ import annotations

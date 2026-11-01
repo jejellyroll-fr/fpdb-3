@@ -14,7 +14,7 @@ from PySide6.QtWidgets import QFileDialog, QMessageBox  # noqa: E402 - after the
 from fpdb_3_legacy import pt4hud_dialogs  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
-FIXTURE = ROOT / "test" / "fixtures" / "generationpoker_3h.pt4hud"
+FIXTURE = ROOT / "tests" / "fixtures" / "generationpoker_3h.pt4hud"
 
 
 def test_each_untranslated_stat_is_one_readable_line() -> None:

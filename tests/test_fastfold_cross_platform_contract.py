@@ -184,7 +184,7 @@ def test_slot_zero_is_the_bottom_centre_chair_and_slots_run_clockwise() -> None:
 
 def test_the_macos_reader_produces_the_contract_mapping(monkeypatch) -> None:
     """macOS reaches the shared mapping through the accessibility tree."""
-    from .fastfold_ax_doubles import AXElement, FakeAX, installed, text
+    from tests.fastfold_ax_doubles import AXElement, FakeAX, installed, text
 
     monkeypatch.setattr(ax.platform, "system", lambda: "Darwin")
     labels = []
@@ -207,7 +207,7 @@ def test_the_windows_reader_produces_the_same_contract_mapping(monkeypatch) -> N
     Same table, same chairs, same answer. If this and the macOS test above
     ever disagree, one platform is seating players on the wrong chairs.
     """
-    from .test_winamax_ax_seats_windows import Rect, UIAArray, UIAElement
+    from tests.test_winamax_ax_seats_windows import Rect, UIAArray, UIAElement
 
     monkeypatch.setattr(ax.platform, "system", lambda: "Windows")
     nodes: list[UIAElement] = []

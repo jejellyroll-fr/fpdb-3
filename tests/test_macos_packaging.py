@@ -382,7 +382,7 @@ def test_fast_hud_qt_contracts_do_not_hang_windows_ci() -> None:
     step = test_job[start : test_job.index("\n      - name:", start + 1)]
 
     assert "if: runner.os != 'Windows'" in step
-    assert "test/test_HUD_main.py" in step
+    assert "tests/test_HUD_main.py" in step
 
 
 def test_fast_hud_platform_contract_command_is_powershell_safe() -> None:
