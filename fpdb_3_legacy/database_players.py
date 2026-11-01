@@ -18,6 +18,11 @@ log = get_logger("db")
 re_char = re.compile("[^a-zA-Z]")
 
 
+def _site_key(site_name: str) -> str:
+    """A site name compared loosely: "PokerStars.FR" and "pokerstars fr" are one key."""
+    return site_name.lower().replace(" ", "").replace(".", "").replace("-", "")
+
+
 class DatabasePlayersMixin:
     """Reads and writes player queries, hero profiles, and aliases.
 
@@ -158,9 +163,43 @@ class DatabasePlayersMixin:
             return {}
         by_site = {}
         for site_name, aliases in profile.aliases_by_site().items():
-            if site_ids := self._resolve_alias_ids(site_name, aliases):
+            site_ids = self._resolve_alias_ids(site_name, aliases)
+            # A link imported under a site skin only ("PokerStars" linked, hands under
+            # "PokerStars.FR"), as get_player_id resolves a hero selection.
+            for alias in aliases:
+                if not self._resolve_alias_ids(site_name, [alias]):
+                    site_ids.update(self._resolve_alias_skin_ids(site_name, alias))
+            if site_ids:
                 by_site[site_name] = sorted(site_ids)
         return by_site
+
+    def _resolve_alias_skin_ids(self, site_name, alias):
+        """The players named *alias* on a skin of *site_name*, or the room a skin belongs to.
+
+        Matched by site-name prefix, as ``get_player_id`` does -- but never on an
+        unrelated room: a name alone stands for no one there.
+        """
+        if not alias or not site_name:
+            return set()
+        ph = self.sql.query.get("placeholder", "%s")
+        q = "SELECT p.id, s.name FROM Players p JOIN Sites s ON s.id = p.siteId WHERE p.name = %s".replace("%s", ph)
+        c = self.get_cursor()
+        c.execute(q, (alias,))
+        wanted = _site_key(site_name)
+        return {
+            int(player_id)
+            for player_id, stored_site in c.fetchall()
+            if (key := _site_key(stored_site)) != wanted and (key.startswith(wanted) or wanted.startswith(key))
+        }
+
+    def get_player_identity(self, player_id):
+        """``(site name, player name)`` of a player, or ``None``: who the analytics filters name."""
+        ph = self.sql.query.get("placeholder", "%s")
+        q = "SELECT s.name, p.name FROM Players p JOIN Sites s ON s.id = p.siteId WHERE p.id = %s".replace("%s", ph)
+        c = self.get_cursor()
+        c.execute(q, (player_id,))
+        row = c.fetchone()
+        return (row[0], row[1]) if row else None
 
     def _is_data_source(self, site_name) -> bool:
         """Whether *site_name* is a data source (PHH) rather than a configured room."""

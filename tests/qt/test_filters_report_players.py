@@ -91,3 +91,49 @@ def test_a_profile_reads_only_the_sites_still_checked(qtbot, fresh_db, rooms) ->
     filters.cbSites[second].setChecked(False)
 
     assert filters.get_selected_players() == [(first, alice)]
+
+
+def test_the_hand_viewer_drops_a_profile_site_unchecked(qtbot, fresh_db, rooms) -> None:
+    first, second = rooms
+    alice = player(fresh_db, "alice", first)
+    player(fresh_db, "alice2", second)
+    fresh_db.config.save_hero_profile("Me", [(first, "alice"), (second, "alice2")])
+    filters = make_filters(qtbot, fresh_db)
+    select(filters, "[Profile] Me")
+
+    filters.cbSites[second].setChecked(False)
+
+    assert player_test_ids(filters) == {alice}
+
+
+def test_a_profile_lifts_the_previous_rooms_game_and_currency_limits(qtbot, fresh_db, rooms) -> None:
+    """The alias selected before restricted games and currencies to what it played."""
+    first, second = rooms
+    player(fresh_db, "alice", first)
+    player(fresh_db, "alice2", second)
+    fresh_db.config.set_hero_aliases(first, ["alice"])
+    fresh_db.config.save_hero_profile("Me", [(first, "alice"), (second, "alice2")])
+    filters = Filters(fresh_db, {"Heroes": True, "Sites": True, "Games": True, "Currencies": True, "Positions": True})
+    qtbot.addWidget(filters)
+    select(filters, f"alice on {first}")  # no hands: every game and currency unticked
+    assert filters.getGames() == []
+
+    select(filters, "[Profile] Me")
+
+    assert sorted(filters.getGames()) == sorted(filters.cbGames)
+    assert set(filters.getCurrencies()) >= set(filters.cbCurrencies) - {"T$"}
+    assert sorted(filters.getPositions()) == sorted(filters.cbPositions)
+
+
+def test_a_profile_link_to_a_skin_uses_its_rooms_checkbox(qtbot, fresh_db, rooms) -> None:
+    """A link naming a site the filters offer no checkbox for maps to the room it belongs to."""
+    first, _ = rooms
+    alice = player(fresh_db, "alice", first)
+    fresh_db.config.save_hero_profile("Me", [(f"{first}.ZZ", "alice")])
+    filters = make_filters(qtbot, fresh_db)
+
+    select(filters, "[Profile] Me")
+
+    assert filters.getSites() == [first]
+    assert filters.get_selected_players() == [(first, alice)]
+    assert filters.get_selected_identities() == [(first, "alice")]

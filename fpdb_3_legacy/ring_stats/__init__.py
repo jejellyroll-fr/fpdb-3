@@ -310,9 +310,12 @@ class GuiRingPlayerStats(QSplitter):
         dates = self.filters.getDates()
         if dates:
             filters["date_from"], filters["date_to"] = dates
-        heroes = [name for name in self.filters.getHeroes().values() if name]
-        if heroes:
-            filters["player"] = heroes
+        # The players the ring statistics read -- a room's whole alias group or a hero
+        # profile (#434) -- each on its own site: the same name on another room is
+        # someone else.
+        identities = self.filters.get_selected_identities()
+        if identities:
+            filters["identity"] = identities
         cards = self.filters.getCards()
         selected_cards = [hand for hand, enabled in cards.items() if enabled]
         if selected_cards:

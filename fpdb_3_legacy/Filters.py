@@ -816,17 +816,23 @@ class Filters(QWidget):
         A hero profile: every player it links, on each of its sites still checked. A
         room alias or a PHH player: the players ``Database.get_selected_player_ids``
         resolves on each site checked -- for a room, every hero alias configured there,
-        as the filters and the Hand Viewer read. A player is listed once.
+        as the filters and the Hand Viewer read. A player is listed once. A filter
+        that offers no sites restricts none.
         """
-        sites = self.getSites()
+        sites = self.getSites() if self.cbSites else None
         if (profile := self.get_selected_hero_profile()) is not None:
-            by_site = self.db.get_hero_player_ids_by_site(profile)
-            pairs = [(site, pid) for site in sites for pid in by_site.get(site, [])]
+            pairs = [
+                (self._offered_site(site) or site, pid)
+                for site, pids in self.db.get_hero_player_ids_by_site(profile).items()
+                for pid in pids
+            ]
+            if sites is not None:
+                pairs = [(site, pid) for site, pid in pairs if site in sites]
         else:
             heroes = self.getHeroes()
             pairs = [
                 (site, int(pid))
-                for site in sites
+                for site in (sites if sites is not None else list(heroes))
                 if heroes.get(site)
                 for pid in self.db.get_selected_player_ids(site, heroes[site])
             ]
@@ -837,6 +843,29 @@ class Filters(QWidget):
                 seen.add(pid)
                 players.append((site, pid))
         return players
+
+    def get_selected_identities(self) -> list[tuple[str, str]]:
+        """``(site, name)`` of every player the reports read, as the analytics filters name them.
+
+        Each player's own site -- "PokerStars.FR" for an account a "PokerStars"
+        selection resolves to -- so a name on another room is never read.
+        """
+        identities = []
+        for _site, pid in self.get_selected_players():
+            if (identity := self.db.get_player_identity(pid)) is not None:
+                identities.append(identity)
+        return identities
+
+    def _offered_site(self, site: str) -> str | None:
+        """The site checkbox standing for *site*: its own, else the room or skin it belongs to."""
+        if site in self.cbSites:
+            return site
+        wanted = site.lower().replace(" ", "").replace(".", "").replace("-", "")
+        for offered in self.cbSites:
+            key = offered.lower().replace(" ", "").replace(".", "").replace("-", "")
+            if wanted.startswith(key) or key.startswith(wanted):
+                return offered
+        return None
 
     def get_hero_for_site(self, sitename: str, hand: Any = None) -> str | None:
         """Resolve hero name for the given sitename, mapping site variants if needed.
@@ -1750,7 +1779,10 @@ class Filters(QWidget):
         if "<player_test>" in query:
             profile = self.get_selected_hero_profile()
             if profile is not None and hasattr(self.db, "get_hero_player_ids"):
-                hero_ids = self.db.get_hero_player_ids(profile=profile)
+                # The profile's players on the sites still checked, as the reports read
+                # them (#434); every one of them when no site is.
+                hero_ids = [pid for _site, pid in self.get_selected_players()]
+                hero_ids = hero_ids or self.db.get_hero_player_ids(profile=profile)
             else:
                 heroes = self.getHeroes()
                 hero_ids = self.get_hero_ids(heroes) if heroes else []
@@ -1951,17 +1983,35 @@ class Filters(QWidget):
             (checkbox.parentWidget() or checkbox).setVisible(is_match)
 
     def update_sites_for_profile(self, profile: Any) -> None:
-        """Offer exactly the sites a hero profile links (#434).
+        """Offer exactly the sites a hero profile links, and every value of the other filters (#434).
 
-        A room alias selected before leaves only its own site checked; a profile spans
-        several, and the reports read a profile's players on the sites checked.
+        A room alias selected before leaves only its own site checked, and only the
+        games, stakes, positions, currencies and tournaments played there; a profile
+        spans several rooms, and the reports read a profile's players on the sites
+        checked, through every other filter.
         """
-        linked = set(profile.sites())
+        linked = {offered for site in profile.sites() if (offered := self._offered_site(site)) is not None}
         for site, checkbox in self.cbSites.items():
             is_linked = site in linked
             checkbox.setChecked(is_linked)
             checkbox.setEnabled(is_linked)
             (checkbox.parentWidget() or checkbox).setVisible(is_linked)
+        for checkboxes in (
+            self.cbGames,
+            self.cbLimits,
+            self.cbPositions,
+            self.cbTourney,
+            self.cbTourneyCat,
+            self.cbTourneyLim,
+            self.cbTourneyBuyin,
+        ):
+            self._update_checkbox_set(checkboxes, set(checkboxes))
+        # T$ is play money for tournaments, never a ring currency (update_currencies_for_hero).
+        self._update_checkbox_set(
+            self.cbCurrencies,
+            {currency for currency in self.cbCurrencies if not (currency == "T$" and self.getType() == "ring")},
+        )
+        self.games = list(self.cbGames)
 
     def _player_ids_for(self, site: str, hero: str) -> list[int]:
         """The players a filter refresh reads for *hero* on *site*.
