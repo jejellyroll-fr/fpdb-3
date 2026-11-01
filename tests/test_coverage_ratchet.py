@@ -184,6 +184,25 @@ def test_the_tracked_baseline_matches_the_declared_domains():
     )
 
 
+def test_every_module_split_out_of_derived_stats_is_guarded():
+    # DerivedStats.py's calculators live in derived_stats_*.py since #452; they
+    # keep the per-module floor the file had, not only its domain's.
+    split = sorted(path.relative_to(ROOT).as_posix() for path in (ROOT / "fpdb_3_legacy").glob("derived_stats_*.py"))
+
+    assert split
+    for path in split:
+        assert coverage_ratchet.domain_of(path) == "poker-domain", path
+        assert coverage_ratchet._matches(path, coverage_ratchet.GUARDED_MODULES), path
+
+
+def test_no_coverage_pattern_is_listed_twice():
+    # A pattern pasted twice is usually one that missed the list it was meant for.
+    domain_patterns = [pattern for _, patterns in coverage_ratchet.DOMAINS for pattern in patterns]
+
+    assert len(domain_patterns) == len(set(domain_patterns))
+    assert len(coverage_ratchet.GUARDED_MODULES) == len(set(coverage_ratchet.GUARDED_MODULES))
+
+
 def test_check_and_update_are_mutually_exclusive(tmp_path):
     report = write_report(tmp_path / "coverage.json", BASE_FILES)
 

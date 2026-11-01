@@ -34,7 +34,7 @@ def _category(path: str) -> str:
         return "parser"
     if name.startswith("sql_") or name in {"Database.py", "Configuration.py"}:
         return "database"
-    if name in {"Hand.py", "DerivedStats.py"}:
+    if name in {"Hand.py", "DerivedStats.py"} or name.startswith("derived_stats_"):
         return "poker-domain"
     if name.startswith("Gui") or name in {"Mucked.py"}:
         return "ui"
