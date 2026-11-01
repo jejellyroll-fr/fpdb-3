@@ -64,15 +64,8 @@ log = get_logger("gui_bulk_import")
 STOP_WAIT_MS = 5000
 
 
-def _cannot_list(path: str) -> bool:
-    """Whether ``path`` is a folder the system refuses to list, as macOS does an app's container."""
-    if not os.path.isdir(path):
-        return False
-    try:
-        os.listdir(path)
-    except PermissionError:
-        return True
-    return False
+# Shared with auto-import, which watches the same folders.
+_cannot_list = Importer.cannot_list_directory
 
 
 class BulkImportThread(QThread):

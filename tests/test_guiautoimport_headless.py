@@ -233,6 +233,40 @@ def test_active_config_refresh_replaces_only_the_changed_watch(tmp_path):
     )
 
 
+def test_a_watched_folder_macos_refuses_to_list_is_reported_in_the_tab(tmp_path, monkeypatch):
+    """Bwin.fr's Tables folder, with fpdb launched from an app lacking Full Disk Access.
+
+    Auto-import watched it and imported nothing, with no word in the tab: the
+    hands and the HUD simply stopped.
+    """
+    from fpdb_3_legacy import GuiAutoImport
+
+    refused = tmp_path / "Bwin" / "Tables"
+    readable = tmp_path / "Winamax" / "history"
+    refused.mkdir(parents=True)
+    readable.mkdir(parents=True)
+    config = _make_config()
+    config.get_supported_sites.return_value = ["Bwin.fr Poker", "Winamax"]
+    config.get_site_parameters.return_value = {"enabled": True}
+    config.get_default_paths.side_effect = {
+        "Bwin.fr Poker": {"hud-defaultPath": str(refused)},
+        "Winamax": {"hud-defaultPath": str(readable)},
+    }.__getitem__
+    monkeypatch.setattr(GuiAutoImport.Importer, "cannot_list_directory", lambda path: path == str(refused))
+    gui = _make_gui(_make_settings(MagicMock()), config)
+    gui.importer.dirlist = {}
+    gui.addText = MagicMock()
+    gui.doAutoImportBool = True
+
+    gui.updatePaths()
+
+    errors = [entry.args[0] for entry in gui.addText.call_args_list if entry.args[1] == "error"]
+    assert len(errors) == 1
+    assert str(refused) in errors[0]
+    assert "Full Disk Access" in errors[0]
+    assert gui.importer.addImportDirectory.call_count == 2
+
+
 def test_standalone_main_does_not_resolve_paths_before_headless_start():
     """The standalone entry point must not auto-detect a default site path."""
     from fpdb_3_legacy import GuiAutoImport

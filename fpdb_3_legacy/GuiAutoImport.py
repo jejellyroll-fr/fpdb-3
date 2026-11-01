@@ -1683,6 +1683,21 @@ class GuiAutoImport(QWidget):
             self.importer.addImportDirectory(path, monitor=True, site=key)
             label = "hand history" if key[1] == "hh" else "tournament summary"
             self.addText(f"\n * Add {key[0]} {label} directory: {path}", "folder")
+            if Importer.cannot_list_directory(path):
+                # Watched, but nothing in it will ever be imported: say so here,
+                # where the user looks for imports, not only in the log (#662).
+                # Same words as bulk import and the site preferences use.
+                self.addText(
+                    "\n*** "
+                    + _(
+                        "macOS does not let fpdb read this folder:\n%s\n\n"
+                        "Allow the app that launches fpdb (your terminal, or fpdb itself) in System Settings > "
+                        "Privacy & Security > Full Disk Access, then restart fpdb. Until then, its hands cannot be "
+                        "imported."
+                    )
+                    % path,
+                    "error",
+                )
 
 
 def main(argv=None):
