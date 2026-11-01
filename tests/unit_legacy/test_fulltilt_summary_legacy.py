@@ -3,7 +3,7 @@
 Exercises FullTiltPokerSummary.parseSummary()/parseSummaryFile() against the
 real Full Tilt summary corpus under regression-test-files/summaries/FTP/.
 
-As in test/test_winamax_summary.py, TourneySummary.__init__ is patched out and
+As in tests/test_winamax_summary.py, TourneySummary.__init__ is patched out and
 the attributes it would set are seeded with the same defaults so the parser
 behaves as in the real pipeline.
 

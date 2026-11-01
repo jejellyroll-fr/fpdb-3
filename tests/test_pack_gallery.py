@@ -428,7 +428,7 @@ def test_a_well_formed_hud_package_passes(xml) -> None:
 @pytest.mark.parametrize("multiblock", [True, False], ids=["blocks", "flat"])
 def test_a_pt4_layout_converted_to_a_package_passes(multiblock) -> None:
     xml, _summary = pt4hud.to_package(
-        str(ROOT / "test" / "fixtures" / "generationpoker_3h.pt4hud"), multiblock=multiblock
+        str(ROOT / "tests" / "fixtures" / "generationpoker_3h.pt4hud"), multiblock=multiblock
     )
 
     root = defusedxml.minidom.parseString(xml).documentElement

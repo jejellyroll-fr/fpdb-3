@@ -6,7 +6,7 @@ describes test coverage, not a commercial room's availability in every region.
 ## Golden-covered
 
 These converters have file-by-file semantic snapshots in
-`test/test_live_parser_regression.py`:
+`tests/test_live_parser_regression.py`:
 
 - Bovada/Ignition
 - BetOnline

@@ -26,7 +26,7 @@ class BovadaRegressionTests(unittest.TestCase):
             self.fail(f"Python executable not found: {sys.executable}")
 
         # Validate test file exists
-        test_file = Path(__file__).parent.parent / "test" / "test_BovadaToFpdb.py"
+        test_file = Path(__file__).parent.parent / "tests" / "test_BovadaToFpdb.py"
         if not test_file.exists():
             self.skipTest(f"Test file not found: {test_file}")
 

@@ -3,7 +3,7 @@
 These exercise PokerStarsSummary.parseSummaryFile() against the real sample
 summaries under regression-test-files/summaries/Stars/, plus the error paths.
 
-The harness mirrors test/test_winamax_summary.py: TourneySummary.__init__ is
+The harness mirrors tests/test_winamax_summary.py: TourneySummary.__init__ is
 patched out, and the attributes that __init__ would normally set are seeded
 with the same defaults (see TourneySummary.__init__) so the parser behaves
 exactly as it does in the real pipeline.

@@ -743,7 +743,7 @@ def test_overcall_decision_ev_respects_hypothetical_side_pot_eligibility() -> No
 
 
 def test_the_real_capture_is_complete_because_both_pockets_were_shown() -> None:
-    from test.test_aof_hud import _real_aof_hand
+    from tests.test_aof_hud import _real_aof_hand
 
     hand = _real_aof_hand()
     hand.totalPot()

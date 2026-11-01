@@ -51,7 +51,7 @@ jobs:
       - name: Install Pyright
         run: uv tool install pyright
       - name: Lint repository
-        run: ruff check fpdb_3_legacy fpdb test tests tools
+        run: ruff check fpdb_3_legacy fpdb tests tools
       - name: Prepare compiled translation resources
         run: python tools/prepare_briefcase_resources.py
       - name: Check translations are merged with the source
@@ -79,10 +79,10 @@ jobs:
           ruff check
           fpdb_3_legacy/equity.py
           fpdb_3_legacy/PartyPokerSummary.py
-          test/test_equity.py
-          test/test_live_parser_regression.py
-          test/test_partypoker_summary.py
-          test/test_stats_known_hands.py
+          tests/test_equity.py
+          tests/test_live_parser_regression.py
+          tests/test_partypoker_summary.py
+          tests/test_stats_known_hands.py
           tests/helpers/parser_regression.py
 
   # The interposer carries a distinct #ifdef branch per platform -- dlsym on
@@ -166,7 +166,7 @@ jobs:
           # These tests use deterministic Winamax captures and mocked platform
           # APIs, so they exercise the macOS and Windows contracts on every
           # runner without requiring a live poker client.
-          python -m pytest -q -m "not qt" test/test_fast_fold_replay.py test/test_fast_fold_clockwise_mapping_and_cleanup.py test/test_fast_fold_display_optimization.py test/test_fast_fold_engine.py test/test_winamax_ax_seats.py test/test_windows_fast_fold_resolver.py
+          python -m pytest -q -m "not qt" tests/test_fast_fold_replay.py tests/test_fast_fold_clockwise_mapping_and_cleanup.py tests/test_fast_fold_display_optimization.py tests/test_fast_fold_engine.py tests/test_winamax_ax_seats.py tests/test_windows_fast_fold_resolver.py
 
       - name: Check FastHUD coverage has not dropped
         env:
@@ -188,7 +188,7 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          python -m pytest -q -m qt test/test_HUD_main.py
+          python -m pytest -q -m qt tests/test_HUD_main.py
       - name: Run Qt regression tests (offscreen)
         if: runner.os == 'Linux'
         env:
@@ -270,8 +270,8 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          native_tests=(test/test_equity.py)
-          for f in test/test_aof_equity.py test/test_aof_ranges.py; do
+          native_tests=(tests/test_equity.py)
+          for f in tests/test_aof_equity.py tests/test_aof_ranges.py; do
             if [[ -f "$f" ]]; then
               native_tests+=("$f")
             fi
@@ -384,8 +384,8 @@ jobs:
           FPDB_TEST_DATABASES: postgresql,mysql
         run: >-
           python -m pytest -q -p no:pytest-qt
-          test/test_database_backend_integration.py
-          test/test_hud_postgresql_integration.py
+          tests/test_database_backend_integration.py
+          tests/test_hud_postgresql_integration.py
 
   build:
     name: Build with PyInstaller (${{ matrix.label }})
