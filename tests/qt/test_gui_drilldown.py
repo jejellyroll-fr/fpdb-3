@@ -269,3 +269,38 @@ def test_choosing_a_set_in_code_loads_it_once(qtbot, drill_db: Database) -> None
     assert started == [(SIDE_FIELD, False)]
     assert pane._target_buttons["field_population"].isChecked()
     assert not pane._target_buttons["hero_population"].isChecked()
+    pane.stop()  # the page it started is still loading
+
+
+def test_a_pane_deleted_mid_query_does_not_take_the_process_down(qtbot, drill_db: Database, monkeypatch) -> None:
+    """The workers were children of the pane: deleting it deleted a running QThread.
+
+    Qt aborts the whole process then ("QThread: Destroyed while thread is still
+    running"). It struck the CI when the garbage collector freed a pane whose
+    page was still loading.
+    """
+    import threading
+
+    import shiboken6
+
+    from fpdb_3_legacy import GuiDrillDown
+
+    release = threading.Event()
+    entered = threading.Event()
+    real_drill = GuiDrillDown.run_side_drill
+
+    def blocking_drill(*args, **kwargs):
+        entered.set()
+        release.wait(10)
+        return real_drill(*args, **kwargs)
+
+    monkeypatch.setattr(GuiDrillDown, "run_side_drill", blocking_drill)
+    pane = SourceHandsPane(drill_db)
+    pane.set_context(_context(), _counts())
+    assert entered.wait(10)
+    worker = pane._workers[-1]
+
+    shiboken6.delete(pane)  # what Qt does to a closed tab's widgets, or the collector to a dropped pane
+    release.set()
+
+    qtbot.waitUntil(lambda: not shiboken6.isValid(worker) or worker.isFinished(), timeout=15000)

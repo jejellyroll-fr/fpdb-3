@@ -6,7 +6,7 @@ from fpdb_3_legacy.sql_queries_core import core_lookup_queries
 
 def test_core_lookup_queries_are_installed_exactly() -> None:
     expected = core_lookup_queries()
-    assert len(expected) == 9
+    assert len(expected) == 11
     for backend in ("mysql", "postgresql"):
         assert expected.items() <= Sql(db_server=backend).query.items()
     sqlite_expected = {key: value.replace("%s", "?") for key, value in expected.items()}
@@ -19,6 +19,8 @@ def test_core_lookup_queries_keep_expected_parameters_and_links() -> None:
     assert queries["get_last_hand"] == "select max(id) from Hands"
     assert queries["get_player_id"].count("%s") == 2
     assert queries["get_player_names"].count("%s") == 3
+    assert queries["get_players_and_sites_by_name"].count("%s") == 1
+    assert queries["get_player_identity"].count("%s") == 1
     gameinfo = queries["get_gameinfo_from_hid"]
     assert gameinfo.count("%s") == 1
     assert "h.gametypeId" in gameinfo

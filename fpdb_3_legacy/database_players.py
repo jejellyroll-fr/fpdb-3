@@ -18,6 +18,11 @@ log = get_logger("db")
 re_char = re.compile("[^a-zA-Z]")
 
 
+def _site_key(site_name: str) -> str:
+    """A site name compared loosely: "PokerStars.FR" and "pokerstars fr" are one key."""
+    return site_name.lower().replace(" ", "").replace(".", "").replace("-", "")
+
+
 class DatabasePlayersMixin:
     """Reads and writes player queries, hero profiles, and aliases.
 
@@ -140,15 +145,57 @@ class DatabasePlayersMixin:
 
     def get_hero_player_ids_for_profile(self, profile):
         """Return hero playerIds for a multiroom HeroProfile."""
+        ids = set()
+        for site_ids in self.get_hero_player_ids_by_site(profile).values():
+            ids.update(site_ids)
+        return sorted(ids)
+
+    def get_hero_player_ids_by_site(self, profile):
+        """Return ``{site_name: [playerId, ...]}`` for a multiroom HeroProfile.
+
+        Each site lists the players its links resolve to; a site none of them resolve
+        on is left out.
+        """
         if isinstance(profile, str):
             getter = getattr(self.config, "get_hero_profiles", None)
             profile = getter().get(profile) if callable(getter) else None
         if profile is None:
-            return []
-        ids = set()
+            return {}
+        by_site = {}
         for site_name, aliases in profile.aliases_by_site().items():
-            ids.update(self._resolve_alias_ids(site_name, aliases))
-        return sorted(ids)
+            site_ids = self._resolve_alias_ids(site_name, aliases)
+            # A link imported under a site skin only ("PokerStars" linked, hands under
+            # "PokerStars.FR"), as get_player_id resolves a hero selection.
+            for alias in aliases:
+                if not self._resolve_alias_ids(site_name, [alias]):
+                    site_ids.update(self._resolve_alias_skin_ids(site_name, alias))
+            if site_ids:
+                by_site[site_name] = sorted(site_ids)
+        return by_site
+
+    def _resolve_alias_skin_ids(self, site_name, alias):
+        """The players named *alias* on a skin of *site_name*, or the room a skin belongs to.
+
+        Matched by site-name prefix, as ``get_player_id`` does -- but never on an
+        unrelated room: a name alone stands for no one there.
+        """
+        if not alias or not site_name:
+            return set()
+        c = self.get_cursor()
+        c.execute(self.sql.query["get_players_and_sites_by_name"], (alias,))
+        wanted = _site_key(site_name)
+        return {
+            int(player_id)
+            for player_id, stored_site in c.fetchall()
+            if (key := _site_key(stored_site)) != wanted and (key.startswith(wanted) or wanted.startswith(key))
+        }
+
+    def get_player_identity(self, player_id):
+        """``(site name, player name)`` of a player, or ``None``: who the analytics filters name."""
+        c = self.get_cursor()
+        c.execute(self.sql.query["get_player_identity"], (player_id,))
+        row = c.fetchone()
+        return (row[0], row[1]) if row else None
 
     def _is_data_source(self, site_name) -> bool:
         """Whether *site_name* is a data source (PHH) rather than a configured room."""
@@ -184,18 +231,30 @@ class DatabasePlayersMixin:
     def get_selected_player_ids(self, site_name, name):
         """The players a report reads for *name* selected on *site_name*.
 
-        The name selected, resolved variant-aware -- ``get_player_id`` maps a
-        "PokerStars" selection to the hero's "PokerStars.FR" account, so data imported
-        under a site skin still shows -- and the site's hero players when it resolves to
-        no one. On a data source (PHH), one of its configured hero aliases stands for
-        all of them (#423), as it does in the report filters.
+        The same players the report filters read (#434). On a configured room the alias
+        selected stands for every hero alias configured there -- an old nickname, a
+        second account -- or, when none of them is imported yet, the room's
+        hero-flagged players. On a data source (PHH) one of its configured hero aliases
+        stands for all of them (#423), and any other of its players for that player
+        alone. When that resolves to no one, the name selected, resolved variant-aware:
+        ``get_player_id`` maps a "PokerStars" selection to the hero's "PokerStars.FR"
+        account, so data imported under a site skin still shows.
         """
-        if self._is_data_source(site_name) and name in self._hero_aliases(site_name):
-            ids = self.get_hero_player_ids(site_name)
-            if ids:
-                return ids
+        if self._stands_for_hero_aliases(site_name, name) and (ids := self.get_hero_player_ids(site_name)):
+            return ids
         result = self.get_player_id(self.config, site_name, name)
-        return [int(result)] if result is not None else self.get_hero_player_ids(site_name)
+        return [int(result)] if result is not None else []
+
+    def _stands_for_hero_aliases(self, site_name, name) -> bool:
+        """Whether *name* on *site_name* stands for every hero alias configured there.
+
+        Mirrors ``Filters._resolves_by_alias``: a configured room always, a data source
+        only for one of its configured hero aliases.
+        """
+        getter = getattr(self.config, "get_supported_sites", None)
+        if callable(getter) and site_name in getter():
+            return True
+        return self._is_data_source(site_name) and name in self._hero_aliases(site_name)
 
     def getHeroIds(self, pids, sitename):
         try:

@@ -155,6 +155,7 @@ def test_ring_profit_graph_reports_an_unticked_site(empty_db, monkeypatch) -> No
         filters=SimpleNamespace(
             getSites=list,
             getHeroes=dict,
+            get_selected_players=list,
             getSiteIds=dict,
             getLimits=list,
             getGames=list,
@@ -182,6 +183,7 @@ def test_ring_stats_controller_emits_the_reason(empty_db) -> None:
     filters = SimpleNamespace(
         getSites=lambda: ["Winamax"],
         getHeroes=dict,
+        get_selected_players=list,
         getSiteIds=dict,
         getLimits=list,
         getSeats=dict,

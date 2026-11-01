@@ -505,7 +505,6 @@ class GuiOpponentsReport(QSplitter):
     def fillStatsFrame(self) -> None:
         startTime = time()
         sites = self.filters.getSites()
-        heroes = self.filters.getHeroes()
         siteids = self.filters.getSiteIds()
         limits = self.filters.getLimits()
         dates = self.filters.getDates()
@@ -515,22 +514,15 @@ class GuiOpponentsReport(QSplitter):
         sitenos = []
         playerids = []
 
-        for site in sites:
-            hname = heroes.get(site, "")
-            if not hname:
-                log.info(f"fillStatsFrame: site '{site}' has no selected hero, skipping")
-                continue
-            # The hero selected, resolved variant-aware -- and on PHH every configured
-            # hero alias (#423): see Database.get_selected_player_ids.
-            pids = self.db.get_selected_player_ids(site, hname)
-            for pid in pids:
-                if pid not in playerids:
-                    playerids.append(pid)
-                    actual_site_id = self.db.get_player_site_id(pid)
-                    if actual_site_id is not None:
-                        sitenos.append(actual_site_id)
-                    else:
-                        sitenos.append(siteids[site])
+        # Every alias of the hero selected, or every player of a hero profile (#434):
+        # see Filters.get_selected_players.
+        for site, pid in self.filters.get_selected_players():
+            playerids.append(pid)
+            actual_site_id = self.db.get_player_site_id(pid)
+            if actual_site_id is not None:
+                sitenos.append(actual_site_id)
+            else:
+                sitenos.append(siteids[site])
 
         missing = gui_empty_state.missing_filter_reason(sites=sites, playerids=playerids, limits=limits)
         if missing is not None:
