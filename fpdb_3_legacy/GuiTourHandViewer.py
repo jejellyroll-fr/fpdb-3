@@ -318,8 +318,10 @@ class TourHandViewer(QSplitter):
             bet = hand.pot.committed[hero]
         log.debug(f"Hero committed (bet): {bet}")
 
-        net = won
-        log.debug(f"Net calculated (won): {net}")
+        # Same accounting as Hand.calculate_net_collected and the cash viewer:
+        # Pot.removeMoney already took uncalled bets out of committed (#653).
+        net = won - bet
+        log.debug(f"Net calculated (won - bet): {net}")
 
         pos = hand.get_player_position(hero)
         log.debug(f"Hero position: {pos}")
@@ -330,7 +332,8 @@ class TourHandViewer(QSplitter):
         totalpot = hand.totalpot
         log.debug(f"Total pot: {totalpot}")
 
-        rake = (totalpot / nbplayers) - net
+        # Hand.totalPot sets no per-hand rake for tournaments; what it holds is the rake.
+        rake = getattr(hand, "rake", None) or 0
         log.debug(f"Rake: {rake}")
 
         sitehandid = hand.handid
