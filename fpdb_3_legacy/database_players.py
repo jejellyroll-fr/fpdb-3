@@ -181,10 +181,8 @@ class DatabasePlayersMixin:
         """
         if not alias or not site_name:
             return set()
-        ph = self.sql.query.get("placeholder", "%s")
-        q = "SELECT p.id, s.name FROM Players p JOIN Sites s ON s.id = p.siteId WHERE p.name = %s".replace("%s", ph)
         c = self.get_cursor()
-        c.execute(q, (alias,))
+        c.execute(self.sql.query["get_players_and_sites_by_name"], (alias,))
         wanted = _site_key(site_name)
         return {
             int(player_id)
@@ -194,10 +192,8 @@ class DatabasePlayersMixin:
 
     def get_player_identity(self, player_id):
         """``(site name, player name)`` of a player, or ``None``: who the analytics filters name."""
-        ph = self.sql.query.get("placeholder", "%s")
-        q = "SELECT s.name, p.name FROM Players p JOIN Sites s ON s.id = p.siteId WHERE p.id = %s".replace("%s", ph)
         c = self.get_cursor()
-        c.execute(q, (player_id,))
+        c.execute(self.sql.query["get_player_identity"], (player_id,))
         row = c.fetchone()
         return (row[0], row[1]) if row else None
 
