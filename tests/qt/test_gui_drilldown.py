@@ -203,3 +203,69 @@ def test_clearing_the_row_drops_the_pending_page(qtbot, drill_db: Database) -> N
     assert pane.note_label.text() == "Pick a row."
     assert pane.current_target is None
     pane.stop()
+
+
+def _loads(pane: SourceHandsPane) -> list[tuple[str, bool]]:
+    """Record every page load the pane starts, as (side, numerator_only)."""
+    started: list[tuple[str, bool]] = []
+    load = pane._load
+
+    def recording_load() -> None:
+        if pane.current_target is not None:
+            started.append((pane.current_target.side, pane.current_target.numerator_only))
+        load()
+
+    pane._load = recording_load  # type: ignore[method-assign]
+    return started
+
+
+@pytest.mark.parametrize("press", ["click", "toggle"])
+def test_pressing_a_hand_set_button_loads_that_set(qtbot, drill_db: Database, press: str) -> None:
+    """#654: a press that toggles the button without a click left the hands unchanged.
+
+    ``toggle`` is what macOS's accessibility press does to a checkable button
+    (VoiceOver, an automated audit): the button changed, the page did not.
+    """
+    pane = SourceHandsPane(drill_db)
+    qtbot.addWidget(pane)
+    pane.set_context(_context(), _counts())
+    qtbot.waitUntil(lambda: pane.page is not None, timeout=15000)
+    started = _loads(pane)
+
+    getattr(pane._target_buttons["field_numerator"], press)()
+    qtbot.waitUntil(
+        lambda: pane.page is not None and pane.page.side == SIDE_FIELD and pane.page.numerator_only,
+        timeout=15000,
+    )
+
+    assert started == [(SIDE_FIELD, True)]
+    assert [target_id for target_id, button in pane._target_buttons.items() if button.isChecked()] == [
+        "field_numerator",
+    ]
+
+
+def test_the_open_hand_set_cannot_be_unchecked_into_none(qtbot, drill_db: Database) -> None:
+    pane = SourceHandsPane(drill_db)
+    qtbot.addWidget(pane)
+    pane.set_context(_context(), _counts())
+    qtbot.waitUntil(lambda: pane.page is not None, timeout=15000)
+    started = _loads(pane)
+
+    pane._target_buttons["hero_population"].toggle()
+
+    assert pane._target_buttons["hero_population"].isChecked()
+    assert started == []
+
+
+def test_choosing_a_set_in_code_loads_it_once(qtbot, drill_db: Database) -> None:
+    pane = SourceHandsPane(drill_db)
+    qtbot.addWidget(pane)
+    pane.set_context(_context(), _counts())
+    qtbot.waitUntil(lambda: pane.page is not None, timeout=15000)
+    started = _loads(pane)
+
+    pane.select_target(SIDE_FIELD)
+
+    assert started == [(SIDE_FIELD, False)]
+    assert pane._target_buttons["field_population"].isChecked()
+    assert not pane._target_buttons["hero_population"].isChecked()
