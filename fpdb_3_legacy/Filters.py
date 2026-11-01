@@ -810,6 +810,34 @@ class Filters(QWidget):
                 return getter().get(data[1])
         return None
 
+    def get_selected_players(self) -> list[tuple[str, int]]:
+        """``(site, playerId)`` for every player the reports read, in order (#434).
+
+        A hero profile: every player it links, on each of its sites still checked. A
+        room alias or a PHH player: the players ``Database.get_selected_player_ids``
+        resolves on each site checked -- for a room, every hero alias configured there,
+        as the filters and the Hand Viewer read. A player is listed once.
+        """
+        sites = self.getSites()
+        if (profile := self.get_selected_hero_profile()) is not None:
+            by_site = self.db.get_hero_player_ids_by_site(profile)
+            pairs = [(site, pid) for site in sites for pid in by_site.get(site, [])]
+        else:
+            heroes = self.getHeroes()
+            pairs = [
+                (site, int(pid))
+                for site in sites
+                if heroes.get(site)
+                for pid in self.db.get_selected_player_ids(site, heroes[site])
+            ]
+        seen: set[int] = set()
+        players = []
+        for site, pid in pairs:
+            if pid not in seen:
+                seen.add(pid)
+                players.append((site, pid))
+        return players
+
     def get_hero_for_site(self, sitename: str, hand: Any = None) -> str | None:
         """Resolve hero name for the given sitename, mapping site variants if needed.
 
@@ -1888,6 +1916,8 @@ class Filters(QWidget):
                 self.update_positions_for_hero(selected_hero, selected_site)
                 self.update_currencies_for_hero(selected_hero, selected_site)
                 self.update_tourney_filters_for_hero(selected_hero, selected_site)
+            elif (profile := self.get_selected_hero_profile()) is not None:
+                self.update_sites_for_profile(profile)
         # Reached on every hero change too, not just the first: the six updates
         # above each run their own queries, so the transaction reopens each time.
         self.end_read_transaction()
@@ -1919,6 +1949,19 @@ class Filters(QWidget):
             # otherwise the icons of inactive rooms keep showing. The checkbox is
             # parented to the row QWidget built in fillSitesFrame.
             (checkbox.parentWidget() or checkbox).setVisible(is_match)
+
+    def update_sites_for_profile(self, profile: Any) -> None:
+        """Offer exactly the sites a hero profile links (#434).
+
+        A room alias selected before leaves only its own site checked; a profile spans
+        several, and the reports read a profile's players on the sites checked.
+        """
+        linked = set(profile.sites())
+        for site, checkbox in self.cbSites.items():
+            is_linked = site in linked
+            checkbox.setChecked(is_linked)
+            checkbox.setEnabled(is_linked)
+            (checkbox.parentWidget() or checkbox).setVisible(is_linked)
 
     def _player_ids_for(self, site: str, hero: str) -> list[int]:
         """The players a filter refresh reads for *hero* on *site*.

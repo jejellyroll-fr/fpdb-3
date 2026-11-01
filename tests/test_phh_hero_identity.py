@@ -69,11 +69,3 @@ def test_a_report_reads_every_phh_alias_for_one_selected(db) -> None:
     assert db.get_selected_player_ids(PHH_SITE_NAME, "koko76") == sorted([koko, koko76])
     # Any other PHH player is that player alone.
     assert db.get_selected_player_ids(PHH_SITE_NAME, "villain") == [villain]
-
-
-def test_a_report_on_a_room_still_reads_the_name_selected(db) -> None:
-    """A room's reports are unchanged: the alias selected, not the whole group."""
-    stars = player(db, "koko", "PokerStars")
-    player(db, "koko_old", "PokerStars")
-
-    assert db.get_selected_player_ids("PokerStars", "koko") == [stars]

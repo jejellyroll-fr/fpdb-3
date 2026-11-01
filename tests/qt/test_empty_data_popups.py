@@ -102,6 +102,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer.filters = MagicMock()
         viewer.filters.getSites.return_value = ["PokerStars"]
         viewer.filters.getHeroes.return_value = {"PokerStars": "koko_sat"}
+        viewer.filters.get_selected_players.return_value = [("PokerStars", 8)]
         viewer.filters.getSiteIds.return_value = {"PokerStars": 2}
         viewer.filters.getLimits.return_value = ["All"]
         viewer.filters.getGames.return_value = []
@@ -127,6 +128,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer.filters = MagicMock()
         viewer.filters.getSites.return_value = ["PokerStars"]
         viewer.filters.getHeroes.return_value = {"PokerStars": "koko_sat"}
+        viewer.filters.get_selected_players.return_value = [("PokerStars", 8)]
         viewer.filters.getSiteIds.return_value = {"PokerStars": 2}
         viewer.filters.getGames.return_value = []
 
@@ -175,6 +177,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer.filters = MagicMock()
         viewer.filters.getSites.return_value = ["PokerStars"]
         viewer.filters.getHeroes.return_value = {"PokerStars": "koko_sat"}
+        viewer.filters.get_selected_players.return_value = [("PokerStars", 8)]
         viewer.filters.getSiteIds.return_value = {"PokerStars": 2}
         viewer.filters.getLimits.return_value = ["All"]
         viewer.filters.getSeats.return_value = None
@@ -216,6 +219,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer.filters = MagicMock()
         viewer.filters.getSites.return_value = ["PokerStars"]
         viewer.filters.getHeroes.return_value = {"PokerStars": "koko_sat"}
+        viewer.filters.get_selected_players.return_value = [("PokerStars", 8)]
         viewer.filters.getSiteIds.return_value = {"PokerStars": 2}
         viewer.filters.getSeats.return_value = None
         viewer.filters.getDates.return_value = ("2000-01-01", "2030-01-01")

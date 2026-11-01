@@ -216,21 +216,15 @@ class RingStatsController(QObject):
         # Résolution des ids de joueurs et sites
         sitenos = []
         playerids = []
-        for site in sites:
-            _hname = heroes.get(site, "")
-            if not _hname:
-                continue
-            # The hero selected, resolved variant-aware -- and on PHH every configured
-            # hero alias (#423): see Database.get_selected_player_ids.
-            pids = self.db.get_selected_player_ids(site, _hname)
-            for pid in pids:
-                if pid not in playerids:
-                    playerids.append(pid)
-                    actual_site_id = self.db.get_player_site_id(pid)
-                    if actual_site_id is not None:
-                        sitenos.append(actual_site_id)
-                    else:
-                        sitenos.append(siteids[site])
+        # Every alias of the hero selected, or every player of a hero profile (#434):
+        # see Filters.get_selected_players.
+        for site, pid in filter_widget.get_selected_players():
+            playerids.append(pid)
+            actual_site_id = self.db.get_player_site_id(pid)
+            if actual_site_id is not None:
+                sitenos.append(actual_site_id)
+            else:
+                sitenos.append(siteids[site])
 
         debug_log(f"Resolved playerids: {playerids}, sitenos: {sitenos}")
 

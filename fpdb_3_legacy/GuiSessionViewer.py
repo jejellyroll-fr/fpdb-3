@@ -188,24 +188,16 @@ class GuiSessionViewer(QSplitter):
             f"GuiSessionViewer.fillStatsFrame called. sites: {sites}, heroes: {heroes}, siteids: {siteids}, games: {games}, currencies: {currencies}, limits: {limits}, seats: {seats}"
         )
 
-        for site in sites:
-            _hname = heroes.get(site, "")
-            if not _hname:
-                continue
-            # The hero selected, resolved variant-aware -- and on PHH every configured
-            # hero alias (#423): see Database.get_selected_player_ids.
-            pids = self.db.get_selected_player_ids(site, _hname)
-            for pid in pids:
-                if pid not in playerids:
-                    playerids.append(pid)
-                    actual_site_id = self.db.get_player_site_id(pid)
-                    if actual_site_id is not None:
-                        sitenos.append(actual_site_id)
-                        log.warning(
-                            f"GuiSessionViewer.fillStatsFrame: Using resolved actual siteId {actual_site_id} for hero playerId {pid}"
-                        )
-                    else:
-                        sitenos.append(siteids[site])
+        # Every alias of the hero selected, or every player of a hero profile (#434):
+        # see Filters.get_selected_players.
+        for site, pid in self.filters.get_selected_players():
+            playerids.append(pid)
+            actual_site_id = self.db.get_player_site_id(pid)
+            if actual_site_id is not None:
+                sitenos.append(actual_site_id)
+                log.warning(f"GuiSessionViewer.fillStatsFrame: Using resolved actual siteId {actual_site_id} for hero playerId {pid}")
+            else:
+                sitenos.append(siteids[site])
 
         log.warning(f"GuiSessionViewer.fillStatsFrame resolved sitenos: {sitenos}, playerids: {playerids}")
 
@@ -466,27 +458,19 @@ class GuiSessionViewer(QSplitter):
 
         names = ""
 
-        for site in sites:
-            _hname = heroes.get(site, "")
-            if not _hname:
-                continue
-            # The hero selected, resolved variant-aware -- and on PHH every configured
-            # hero alias (#423): see Database.get_selected_player_ids.
-            pids = self.db.get_selected_player_ids(site, _hname)
-            for pid in pids:
-                if pid not in playerids:
-                    playerids.append(pid)
-                    pname = self.db.get_player_name_by_id(pid) or _hname
-                    names = names + "\n" + pname + " on " + site
+        # Every alias of the hero selected, or every player of a hero profile (#434):
+        # see Filters.get_selected_players.
+        for site, pid in self.filters.get_selected_players():
+            playerids.append(pid)
+            pname = self.db.get_player_name_by_id(pid) or str(pid)
+            names = names + "\n" + pname + " on " + site
 
-                    actual_site_id = self.db.get_player_site_id(pid)
-                    if actual_site_id is not None:
-                        sitenos.append(actual_site_id)
-                        log.warning(
-                            f"GuiSessionViewer.generateGraph: Using resolved actual siteId {actual_site_id} for hero '{pname}'"
-                        )
-                    else:
-                        sitenos.append(siteids[site])
+            actual_site_id = self.db.get_player_site_id(pid)
+            if actual_site_id is not None:
+                sitenos.append(actual_site_id)
+                log.warning(f"GuiSessionViewer.generateGraph: Using resolved actual siteId {actual_site_id} for hero '{pname}'")
+            else:
+                sitenos.append(siteids[site])
 
         log.warning(f"GuiSessionViewer.generateGraph resolved sitenos: {sitenos}, playerids: {playerids}")
 
