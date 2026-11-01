@@ -7,4 +7,5 @@ import os
 # machine reads those ids in its own database, where they name unrelated hands,
 # and freezes looking for their tables' windows. Set at collection, before any
 # test can build a sender, and inherited by the subprocesses some tests start.
-os.environ.setdefault("FPDB_HUD_NOTIFY", "0")
+# Assigned, not defaulted: a value inherited from the shell must not reopen it.
+os.environ["FPDB_HUD_NOTIFY"] = "0"
