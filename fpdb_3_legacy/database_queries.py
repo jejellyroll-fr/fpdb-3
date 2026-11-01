@@ -84,7 +84,7 @@ class DatabaseQueriesMixin:
         try:
             ph = self.sql.query.get("placeholder", "%s")
             # Only the backend's placeholder is formatted in; the value is bound.
-            q = f"SELECT tourneyName FROM Tourneys WHERE siteTourneyNo = {ph}"  # nosec B608  # nosemgrep
+            q = "SELECT tourneyName FROM Tourneys WHERE siteTourneyNo = %s".replace("%s", ph)  # nosec B608  # nosemgrep
             c.execute(q, (int(tour_no),))
             trow = c.fetchone()
             if trow:
