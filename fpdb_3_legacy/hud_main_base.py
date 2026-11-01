@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from types import ModuleType
 from typing import TYPE_CHECKING, Any
-
-from PySide6.QtCore import QEvent
 
 from fpdb_3_legacy import Configuration, Hud
 from fpdb_3_legacy.hud_profiles import HudContext
@@ -227,67 +226,37 @@ class HudMainBase:
 
     if TYPE_CHECKING:
         winamax_table_update: Any
-
-        def note_db_error(self, exc: BaseException) -> bool: ...
-
-        def _show_loading_hud(self, hand_id: str) -> str | None: ...
-
-        def _resolve_fast_fold_key(self, temp_key: str, table_no: str | None=None) -> str: ...
-
-        def _live_hud_key_for_table_no(self, table_no: str | None) -> str | None: ...
-
-        def destroy(self) -> None: ...
-
-        def _clear_fast_fold_table(self, temp_key: str, hud: Hud.Hud, hand_id: str, reason: str) -> None: ...
-
-        def _read_window_slots(self, hud: Hud.Hud) -> dict[int, str] | None: ...
-
-        def _ff_trace(self, hand_id: str, event: str, detail: str='') -> None: ...
-
-        def _request_fast_fold_stats_coalesced(self, temp_key: str, hud: Hud.Hud, seat_map: dict[int, str], hand_id: Any) -> None: ...
-
-        def _forget_window_seat_state(self, table_key: str, hwnd: int | None=None) -> None: ...
-
-        def _has_live_seat_source(self, site_name: str) -> bool: ...
-
-        def _hud_is_fast_fold(self, hud: Hud.Hud, temp_key: str='') -> bool: ...
-
-        def _find_fast_fold_hud(self, update: Any) -> tuple[str, Hud.Hud] | None: ...
-
-        def _log_table_not_found(self, temp_key: str, table_name: str, db_site: str, hud_site: str, tablewindow: Any) -> None: ...
-
-        def kill_hud(self, _event: QEvent | None, table: str) -> None: ...
-
-        def clear_table_stat_set_override(self, table: str) -> None: ...
-
-        def refresh_profiles_from_config(self) -> int: ...
-
-        @staticmethod
-        def _describe_overlay_win_ids(hud: Hud.Hud) -> str: ...
-
-        def _resolve_hud_config_site(self, db_site_name: str, enabled_sites: list[str]) -> str: ...
-
-        def _get_table_info(self, hand_id: str) -> tuple | None: ...
-
-        def _get_temp_key(self, game_type: str, tour_number: str, tab_number: str, table_name: str) -> str: ...
-
-        def _handle_tournament_table_changes(self, game_type: str, temp_key: str, tour_number: str) -> bool: ...
-
-        def _seat_players(self, hand_id: str) -> dict: ...
-
-        def _refresh_other_huds(self, updated_tables: set[str]) -> None: ...
-
-        def _create_new_hud(self, new_hand_id: str, temp_key: str, table_info: tuple, site_id: int, num_seats: int, hud_site_name: str | None=None, *, loading: bool=False, stats: dict | None=None, resolved_window: Any | None=None) -> None: ...
-
-        def read_stdin(self, new_hand_id: str) -> str | None: ...
-
-        def _set_table_stats(self, hud: Hud.Hud, hand_id: str) -> None: ...
-
-        def _merge_positions(self, stat_dict: dict, hand_id: str) -> None: ...
-
-        def idle_kill(self, table: str) -> None: ...
-
-        def idle_create(self, args: HUDCreationArgs) -> None: ...
-
-        @staticmethod
-        def _position_loading_indicator(hud: Hud.Hud) -> None: ...
+        # Methods one mixin calls on another. Declared as callables rather than
+        # stub methods: pylint reads a stub's empty body as a method that
+        # returns nothing, and flags every caller that uses the result.
+        note_db_error: Callable[..., bool]
+        _show_loading_hud: Callable[..., str | None]
+        _resolve_fast_fold_key: Callable[..., str]
+        _live_hud_key_for_table_no: Callable[..., str | None]
+        destroy: Callable[..., None]
+        _clear_fast_fold_table: Callable[..., None]
+        _read_window_slots: Callable[..., dict[int, str] | None]
+        _ff_trace: Callable[..., None]
+        _request_fast_fold_stats_coalesced: Callable[..., None]
+        _forget_window_seat_state: Callable[..., None]
+        _has_live_seat_source: Callable[..., bool]
+        _hud_is_fast_fold: Callable[..., bool]
+        _find_fast_fold_hud: Callable[..., tuple[str, Hud.Hud] | None]
+        _log_table_not_found: Callable[..., None]
+        kill_hud: Callable[..., None]
+        clear_table_stat_set_override: Callable[..., None]
+        refresh_profiles_from_config: Callable[..., int]
+        _describe_overlay_win_ids: Callable[..., str]
+        _resolve_hud_config_site: Callable[..., str]
+        _get_table_info: Callable[..., tuple | None]
+        _get_temp_key: Callable[..., str]
+        _handle_tournament_table_changes: Callable[..., bool]
+        _seat_players: Callable[..., dict]
+        _refresh_other_huds: Callable[..., None]
+        _create_new_hud: Callable[..., None]
+        read_stdin: Callable[..., str | None]
+        _set_table_stats: Callable[..., None]
+        _merge_positions: Callable[..., None]
+        idle_kill: Callable[..., None]
+        idle_create: Callable[..., None]
+        _position_loading_indicator: Callable[..., None]

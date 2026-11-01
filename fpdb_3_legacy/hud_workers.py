@@ -226,7 +226,8 @@ class HudReadWorker(QThread):
                 if pending is None:
                     break
 
-            assert service is not None
+            # service is set together with database above: this only narrows its type.
+            assert service is not None  # nosec B101
             if isinstance(pending, FastFoldStatsRequest) and self._is_superseded(pending):
                 # The table has moved on while this waited its turn. Reading for
                 # it would spend a round trip on an answer the GUI discards.
