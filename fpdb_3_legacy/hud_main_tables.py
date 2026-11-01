@@ -1,4 +1,8 @@
-"""Table window lifecycle: found, moved, resized, renamed, closed and stale tables."""
+"""Table window lifecycle: found, moved, resized, renamed, closed and stale tables.
+
+One of the mixins HudMain (HUD_main.pyw) is built from. What it calls on the
+other mixins is declared, for the type checker, on HudMainBase in hud_main_base.
+"""
 
 import contextlib
 import os

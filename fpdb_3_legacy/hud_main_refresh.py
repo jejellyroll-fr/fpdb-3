@@ -1,4 +1,8 @@
-"""Refreshing the stats of HUDs other than the one whose hand just arrived."""
+"""Refreshing the stats of HUDs other than the one whose hand just arrived.
+
+One of the mixins HudMain (HUD_main.pyw) is built from. What it calls on the
+other mixins is declared, for the type checker, on HudMainBase in hud_main_base.
+"""
 
 import contextlib
 

@@ -1,4 +1,8 @@
-"""Fast-Fold tables: pools, seat maps, coalesced stats requests and their HUD."""
+"""Fast-Fold tables: pools, seat maps, coalesced stats requests and their HUD.
+
+One of the mixins HudMain (HUD_main.pyw) is built from. What it calls on the
+other mixins is declared, for the type checker, on HudMainBase in hud_main_base.
+"""
 
 import contextlib
 import re

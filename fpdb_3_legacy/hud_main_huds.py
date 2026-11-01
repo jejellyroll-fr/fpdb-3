@@ -1,4 +1,8 @@
-"""Building, updating and reconfiguring a table's HUD, and its loading indicator."""
+"""Building, updating and reconfiguring a table's HUD, and its loading indicator.
+
+One of the mixins HudMain (HUD_main.pyw) is built from. What it calls on the
+other mixins is declared, for the type checker, on HudMainBase in hud_main_base.
+"""
 
 import contextlib
 import os
