@@ -68,6 +68,8 @@ DOMAINS: tuple[tuple[str, tuple[str, ...]], ...] = (
         (
             "fpdb_3_legacy/Hand.py",
             "fpdb_3_legacy/DerivedStats.py",
+    "fpdb_3_legacy/derived_stats_*.py",
+            "fpdb_3_legacy/derived_stats_*.py",
             "fpdb_3_legacy/Card.py",
             "fpdb_3_legacy/Deck.py",
             "fpdb_3_legacy/Stats.py",

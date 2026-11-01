@@ -395,7 +395,7 @@ def test_native_backend_supports_uniform_unknown_omaha_pockets() -> None:
 
 def test_derived_stats_stores_expected_all_in_profit_x100(monkeypatch) -> None:
     backend = FakePokerEval()
-    monkeypatch.setattr("fpdb_3_legacy.DerivedStats.pokereval", backend)
+    monkeypatch.setattr("fpdb_3_legacy.derived_stats_allin.pokereval", backend)
     stats = DerivedStats()
     stats.handsplayers = {
         "hero": {"sawShowdown": True, "wentAllIn": True, "allInEV": 0},
