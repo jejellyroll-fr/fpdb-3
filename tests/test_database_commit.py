@@ -11,7 +11,7 @@ import sqlite3
 
 import pytest
 
-from fpdb_3_legacy import Database as database_module
+from fpdb_3_legacy import database_connection
 from fpdb_3_legacy.Exceptions import FpdbError
 
 
@@ -19,7 +19,7 @@ from fpdb_3_legacy.Exceptions import FpdbError
 def pauses(monkeypatch) -> list[float]:
     """The pauses commit takes between attempts, recorded instead of slept."""
     taken: list[float] = []
-    monkeypatch.setattr(database_module, "sleep", taken.append)
+    monkeypatch.setattr(database_connection, "sleep", taken.append)
     return taken
 
 
