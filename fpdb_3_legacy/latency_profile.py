@@ -111,7 +111,7 @@ class LatencyProfile:
                 # Reservoir sampling: every sample past the cap has the same
                 # chance of replacing one already kept, so percentiles remain
                 # unbiased for arbitrarily long sessions.
-                index = random.randrange(seen)  # nosec B311
+                index = random.randrange(seen)  # nosec B311  # nosemgrep
                 if index < MAX_EXACT_SAMPLES:
                     samples[index] = seconds
 

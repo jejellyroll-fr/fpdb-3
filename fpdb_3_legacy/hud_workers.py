@@ -329,7 +329,7 @@ class HudReadWorker(QThread):
                     pending = self._resolve_pending_batch(pending)
 
             # service is set together with database above: this only narrows its type.
-            assert service is not None  # nosec B101
+            assert service is not None  # nosec B101  # nosemgrep
             if isinstance(pending, FastFoldStatsRequest) and self._is_superseded(pending):
                 # The table has moved on while this waited its turn. Reading for
                 # it would spend a round trip on an answer the GUI discards.

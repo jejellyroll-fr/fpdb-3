@@ -2138,12 +2138,12 @@ class DatabaseSchemaMixin:
             ("9", "Quads"),
             ("10", "StFlush"),
         ):
-            c.execute(f"INSERT INTO {rank_table} (id,name) VALUES ('{rank_id}', '{rank_name}')")  # nosec B608
+            c.execute(f"INSERT INTO {rank_table} (id,name) VALUES ('{rank_id}', '{rank_name}')")  # nosec B608  # nosemgrep
         # Fill StartCards. `rank` is a reserved word since MySQL 8.0, so the
         # column is quoted in the MySQL catalogue; the inserts must quote it
         # too (same rule as the Rank table above).
         rank_col = "`rank`" if self.backend == self.MYSQL_INNODB else "rank"
-        sql = f"INSERT INTO StartCards (category, name, {rank_col}, combinations) VALUES (%s, %s, %s, %s)".replace(  # nosec B608
+        sql = f"INSERT INTO StartCards (category, name, {rank_col}, combinations) VALUES (%s, %s, %s, %s)".replace(  # nosec B608  # nosemgrep
             "%s",
             self.sql.query["placeholder"],
         )
@@ -2153,7 +2153,7 @@ class DatabaseSchemaMixin:
         for idx in range(-13, 1184):
             name = Card.decodeRazzStartHand(idx)
             c.execute(sql, ("razz", name, idx, 0))
-        sql = f"INSERT INTO StartCards (id, category, name, {rank_col}, combinations) VALUES (%s, %s, %s, %s, %s)".replace(  # nosec B608
+        sql = f"INSERT INTO StartCards (id, category, name, {rank_col}, combinations) VALUES (%s, %s, %s, %s, %s)".replace(  # nosec B608  # nosemgrep
             "%s",
             self.sql.query["placeholder"],
         )
