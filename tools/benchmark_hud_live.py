@@ -73,22 +73,24 @@ def _create_bench_server_db(dsn: str, base_db: str) -> str:
     user, password = creds.split(":", 1)
     host_port = host.split(":", 1)
     port = int(host_port[1]) if len(host_port) > 1 else (5432 if flavor.startswith("postgres") else 3306)
-    bench_db = f"{base_db}_bench{os.getpid()}"
+    # bench_db is interpolated into DDL below: keep it strictly alphanumeric
+    safe_base = re.sub(r"[^A-Za-z0-9_]", "_", base_db)
+    bench_db = f"{safe_base}_bench{os.getpid()}"
     if flavor.startswith("postgres"):
         import psycopg
 
         admin = psycopg.connect(host=host_port[0], port=port, dbname="postgres", user=user, password=password)
         admin.autocommit = True
-        admin.execute(f'DROP DATABASE IF EXISTS "{bench_db}"')
-        admin.execute(f'CREATE DATABASE "{bench_db}" OWNER "{user}"')
+        admin.execute(f'DROP DATABASE IF EXISTS "{bench_db}"')  # nosec B608  # nosemgrep
+        admin.execute(f'CREATE DATABASE "{bench_db}" OWNER "{user}"')  # nosec B608  # nosemgrep
         admin.close()
     else:
         import pymysql
 
         admin = pymysql.connect(host=host_port[0], port=port, user=user, password=password)
         with admin.cursor() as cur:
-            cur.execute(f"DROP DATABASE IF EXISTS `{bench_db}`")
-            cur.execute(f"CREATE DATABASE `{bench_db}`")
+            cur.execute(f"DROP DATABASE IF EXISTS `{bench_db}`")  # nosec B608  # nosemgrep
+            cur.execute(f"CREATE DATABASE `{bench_db}`")  # nosec B608  # nosemgrep
         admin.commit()
         admin.close()
     _BENCH_SERVER_DBS.append((flavor, dsn, bench_db))
@@ -111,14 +113,14 @@ def drop_bench_server_dbs() -> None:
 
                 admin = psycopg.connect(host=host_port[0], port=port, dbname="postgres", user=user, password=password)
                 admin.autocommit = True
-                admin.execute(f'DROP DATABASE IF EXISTS "{bench_db}"')
+                admin.execute(f'DROP DATABASE IF EXISTS "{bench_db}"')  # nosec B608  # nosemgrep
                 admin.close()
             else:
                 import pymysql
 
                 admin = pymysql.connect(host=host_port[0], port=port, user=user, password=password)
                 with admin.cursor() as cur:
-                    cur.execute(f"DROP DATABASE IF EXISTS `{bench_db}`")
+                    cur.execute(f"DROP DATABASE IF EXISTS `{bench_db}`")  # nosec B608  # nosemgrep
                 admin.commit()
                 admin.close()
         except Exception:
