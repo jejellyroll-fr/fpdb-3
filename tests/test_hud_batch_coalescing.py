@@ -9,11 +9,10 @@ but the last answer.
 
 from __future__ import annotations
 
-import importlib
 import threading
 from queue import Queue
 
-HUD_main = importlib.import_module("fpdb_3_legacy.HUD_main")
+from fpdb_3_legacy import HUD_main  # pylint: disable=no-name-in-module
 from fpdb_3_legacy.hud_read_service import HudBatchReadRequest, HudTableReadContext
 from fpdb_3_legacy.hud_workers import _merge_batch_requests
 
