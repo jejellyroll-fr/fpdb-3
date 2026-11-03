@@ -221,7 +221,8 @@ def test_gauge_is_reported_in_the_latency_snapshot(monkeypatch) -> None:
 def _config_with_node(attrs: dict):
     from unittest.mock import MagicMock
 
-    from fpdb_3_legacy.config_databases import ConfigDatabasesMixin, Database as DbNode
+    from fpdb_3_legacy.config_databases import ConfigDatabasesMixin
+    from fpdb_3_legacy.config_databases import Database as DbNode
 
     node = MagicMock()
     node.getAttribute.side_effect = lambda name, default=None: attrs.get(name, default)

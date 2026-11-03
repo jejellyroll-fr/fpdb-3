@@ -78,12 +78,24 @@ to ~0 on the playing machine.
 * Multi-machine play on the *same* tables needs the server as arbiter (as
   above); single-machine play (the reported case) is trivially consistent.
 
-## POC status in this PR
+## Status in this PR (wired, off by default)
 
-`fpdb_3_legacy/local_first_sync.py` + `tests/test_local_first_sync.py`:
-push from local SQLite to a server SQLite file and to a **live PostgreSQL
-18.3** (integration-marked), covering referentials, FK-safe insert order,
-boolean casts, dedup/idempotence and the id mapping. Not yet wired into the
-Importer/HUD_main — that wiring (config switch `db-local-first`, outbox mark
-in the import commit hook, sync thread lifecycle in the auto-import process)
-is the follow-up once the reporter's RTT measurement confirms the trigger.
+* `fpdb_3_legacy/local_first_sync.py` + `tests/test_local_first_sync.py`:
+  push from local SQLite to a server SQLite file and to a **live PostgreSQL
+  18.3** (integration-marked), covering referentials, FK-safe insert order,
+  boolean casts, dedup/idempotence and the id mapping.
+* **Config switch**: `local_first="1"` + `local_path="..."` on the `<database>`
+  node (shipped in HUD_config.xml.example, default `0`). When on,
+  `get_db_parameters()` returns the local SQLite params (HUD and importer read
+  it, 0 RTT) and `get_server_db_parameters()` returns the server params used by
+  the push.
+* **Outbox hook**: `Importer._mark_outbox()` registers `database.hids` after
+  every successfully imported file, in the import process.
+* **Lifecycle**: the sync thread starts in `Importer.runImport()` and stops in
+  `Importer.close()`.
+* **Metrics** (in the `FPDB_LATENCY_PROFILE` report): `sync_outbox_pending`
+  (gauge), `sync_push_batch` (p50/p95/p99), `sync_push_errors` (counter); plus
+  `hud_queue_wait`, which should collapse on the playing machine.
+
+Activation rule: turn `local_first="1"` on only when the reporter's latency
+report shows LAN RTT > ~2-3 ms (see the simulated-RTT numbers above).
