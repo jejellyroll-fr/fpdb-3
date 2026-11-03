@@ -146,7 +146,7 @@ def _table_hands(db) -> dict[str, list[str]]:
     tables = [row[0] for row in c.fetchall()]
     result: dict[str, list[str]] = {}
     for table in tables:
-        c.execute(f"SELECT id FROM Hands WHERE tableName = {placeholder} ORDER BY id", (table,))
+        c.execute(f"SELECT id FROM Hands WHERE tableName = {placeholder} ORDER BY id", (table,))  # nosec B608 -- placeholders are bound, not interpolated
         result[table] = [str(row[0]) for row in c.fetchall()]
     c.close()
     return {table: hands for table, hands in result.items() if hands}

@@ -307,7 +307,7 @@ def _run_one_query(db, final_sql: str, params: list, dml: bool, repeats: int):
             try:
                 db.connection.rollback()
             except Exception:
-                pass
+                pass  # nosec B110 -- best-effort cleanup
     return status, rows_count, error, walls
 
 

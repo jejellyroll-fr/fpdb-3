@@ -153,7 +153,7 @@ class DatabaseQueriesMixin:
         tourney_names: dict[Any, str] = {}
         if tourney_nos:
             tin, tparams = self._in_tuple(sorted(tourney_nos))
-            c.execute(f"SELECT siteTourneyNo, tourneyName FROM Tourneys WHERE siteTourneyNo IN {tin}", tparams)
+            c.execute(f"SELECT siteTourneyNo, tourneyName FROM Tourneys WHERE siteTourneyNo IN {tin}", tparams)  # nosec B608 -- placeholders are bound, not interpolated
             for trow in c.fetchall():
                 tourney_names[trow[0]] = trow[1]
         for hand_id, row in rows_by_hand.items():
@@ -167,7 +167,7 @@ class DatabaseQueriesMixin:
         if not hand_ids:
             return {}
         in_sql, in_params = self._in_tuple(hand_ids)
-        q = f"SELECT id, siteHandNo FROM Hands WHERE id IN {in_sql}"
+        q = f"SELECT id, siteHandNo FROM Hands WHERE id IN {in_sql}"  # nosec B608 -- placeholders are bound, not interpolated
         c = self.connection.cursor()
         c.execute(q, in_params)
         return {row[0]: (str(row[1]) if row[1] is not None else None) for row in c.fetchall()}
