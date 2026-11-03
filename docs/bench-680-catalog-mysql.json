@@ -1,0 +1,3561 @@
+{
+  "backend": "mysql://fpdb:fpdb@127.0.0.1:3306/fpdb_bench",
+  "dataset_hands": 664,
+  "queries": {
+    "addAofAnalysesDecisionIndex": {
+      "status": "skipped_ddl"
+    },
+    "addAofAnalysesStatusIndex": {
+      "status": "skipped_ddl"
+    },
+    "addAofDecisionsHandIndex": {
+      "status": "skipped_ddl"
+    },
+    "addAofDecisionsPlayerIndex": {
+      "status": "skipped_ddl"
+    },
+    "addAofDecisionsRangeIndex": {
+      "status": "skipped_ddl"
+    },
+    "addBoardFeaturesHandIndex": {
+      "status": "skipped_ddl"
+    },
+    "addBoardFeaturesTextureIndex": {
+      "status": "skipped_ddl"
+    },
+    "addBombPotColumn": {
+      "status": "skipped_ddl"
+    },
+    "addBombPotIndex": {
+      "status": "skipped_ddl"
+    },
+    "addCardsCacheCompundIndex": {
+      "status": "skipped_ddl"
+    },
+    "addEffStackIndex": {
+      "status": "skipped_ddl"
+    },
+    "addFilesIndex": {
+      "status": "skipped_ddl"
+    },
+    "addFinalPotIndex": {
+      "status": "skipped_ddl"
+    },
+    "addHandsIndex": {
+      "status": "skipped_ddl"
+    },
+    "addHandsPlayersSeat": {
+      "status": "skipped_ddl"
+    },
+    "addHeroSeat": {
+      "status": "skipped_ddl"
+    },
+    "addHudCacheCompundIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayerAutoNotesHandIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayerAutoNotesPlayerIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayerAutoNotesRuleIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayerHeroesIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayerNameIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayersIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayersSeat": {
+      "status": "skipped_ddl"
+    },
+    "addPositionIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPositionsCacheCompundIndex": {
+      "status": "skipped_ddl"
+    },
+    "addSeatsIndex": {
+      "status": "skipped_ddl"
+    },
+    "addSessionsCacheCompundIndex": {
+      "status": "skipped_ddl"
+    },
+    "addSplashPotColumn": {
+      "status": "skipped_ddl"
+    },
+    "addSplashPotIndex": {
+      "status": "skipped_ddl"
+    },
+    "addStartCardsIndex": {
+      "status": "skipped_ddl"
+    },
+    "addStartCashIndex": {
+      "status": "skipped_ddl"
+    },
+    "addStreetIndex": {
+      "status": "skipped_ddl"
+    },
+    "addTPlayersIndex": {
+      "status": "skipped_ddl"
+    },
+    "addTableNameIndex": {
+      "status": "skipped_ddl"
+    },
+    "addTotalProfitIndex": {
+      "status": "skipped_ddl"
+    },
+    "addTourneyIndex": {
+      "status": "skipped_ddl"
+    },
+    "addTourneysCacheCompundIndex": {
+      "status": "skipped_ddl"
+    },
+    "addWinningsIndex": {
+      "status": "skipped_ddl"
+    },
+    "analyze": {
+      "status": "skipped_ddl"
+    },
+    "clearCardsCache": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0002877999795600772,
+        "mean": 0.0001974599901586771,
+        "p50": 0.0001753999968059361,
+        "p95": 0.00026577998651191594,
+        "p99": 0.00028339598095044493
+      }
+    },
+    "clearCardsCacheTourneyType": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00023440003860741854,
+        "mean": 0.00020958001259714366,
+        "p50": 0.00020320003386586905,
+        "p95": 0.00023014002945274112,
+        "p99": 0.00023354803677648307
+      }
+    },
+    "clearCardsCacheWeeksMonths": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00021329999435693026,
+        "mean": 0.00020587999606505036,
+        "p50": 0.00020380003843456507,
+        "p95": 0.00021187999518588186,
+        "p99": 0.00021301599452272057
+      }
+    },
+    "clearHudCache": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.14241480000782758,
+        "mean": 0.13975601999554782,
+        "p50": 0.14070200000423938,
+        "p95": 0.14224495999515058,
+        "p99": 0.14238083200529217
+      }
+    },
+    "clearHudCacheTourneyType": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0012106000212952495,
+        "mean": 0.0010776600101962686,
+        "p50": 0.0010867000091820955,
+        "p95": 0.0011969400220550597,
+        "p99": 0.0012078680214472116
+      }
+    },
+    "clearMonths": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005522999563254416,
+        "mean": 0.0002409999957308173,
+        "p50": 0.00016379996668547392,
+        "p95": 0.00047495997278019776,
+        "p99": 0.0005368319596163928
+      }
+    },
+    "clearPositionsCache": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005126000032760203,
+        "mean": 0.0002495800144970417,
+        "p50": 0.0001800000318326056,
+        "p95": 0.00045132000232115386,
+        "p99": 0.000500344003085047
+      }
+    },
+    "clearPositionsCacheTourneyType": {
+      "error": "(1292, \"Truncated incorrect DOUBLE value: 'B'\")",
+      "plan": "<explain failed: (1292, \"Truncated incorrect DOUBLE value: 'B'\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "clearPositionsCacheWeeksMonths": {
+      "error": "(1292, \"Truncated incorrect DOUBLE value: 'B'\")",
+      "plan": "<explain failed: (1292, \"Truncated incorrect DOUBLE value: 'B'\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "clearSessions": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00042990001384168863,
+        "mean": 0.00021972000831738114,
+        "p50": 0.00016629998572170734,
+        "p95": 0.00037844001781195397,
+        "p99": 0.0004196080146357417
+      }
+    },
+    "clearSessionsCache": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0003155000158585608,
+        "mean": 0.0002072000061161816,
+        "p50": 0.00017740001203492284,
+        "p95": 0.0002905000117607415,
+        "p99": 0.00031050001503899697
+      }
+    },
+    "clearTourneysCache": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00028709997422993183,
+        "mean": 0.00019669998437166214,
+        "p50": 0.00017419998766854405,
+        "p95": 0.00026471997844055293,
+        "p99": 0.00028262397507205605
+      }
+    },
+    "clearWeeks": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00048510002670809627,
+        "mean": 0.00023002001689746975,
+        "p50": 0.00016460003098472953,
+        "p95": 0.0004234000225551426,
+        "p99": 0.00047276002587750556
+      }
+    },
+    "clear_M_S": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0004029999836347997,
+        "mean": 0.0002588600036688149,
+        "p50": 0.00019599997904151678,
+        "p95": 0.0003908399841748178,
+        "p99": 0.0004005679837428033
+      }
+    },
+    "clear_S_H": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.002046799985691905,
+        "mean": 0.0019279600004665554,
+        "p50": 0.0018933999817818403,
+        "p95": 0.002027559990528971,
+        "p99": 0.0020429519866593184
+      }
+    },
+    "clear_S_SC": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00019369996152818203,
+        "mean": 0.00018563999328762292,
+        "p50": 0.00018430000636726618,
+        "p95": 0.00019189995946362616,
+        "p99": 0.00019333996111527087
+      }
+    },
+    "clear_S_T": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0002500000409781933,
+        "mean": 0.00020578001858666538,
+        "p50": 0.00019649998284876347,
+        "p95": 0.00024346003774553538,
+        "p99": 0.0002486920403316617
+      }
+    },
+    "clear_S_TC": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0002315999590791762,
+        "mean": 0.00019601999083533882,
+        "p50": 0.00019039999460801482,
+        "p95": 0.00022335996618494391,
+        "p99": 0.0002299519605003297
+      }
+    },
+    "clear_W_S": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00018810003530234098,
+        "mean": 0.0001739799976348877,
+        "p50": 0.00017119996482506394,
+        "p95": 0.00018536002608016133,
+        "p99": 0.00018755203345790505
+      }
+    },
+    "countTourneyPlayerKoWinnings": {
+      "error": "",
+      "plan": "-> Aggregate: count(0)  (cost=0.43 rows=1) (actual time=0.0065..0.0065 rows=1 loops=1)\n    -> Filter: (tourneysplayers.koWinnings is not null)  (cost=0.34 rows=0.9) (actual time=0.0056..0.0056 rows=0 loops=1)\n        -> Index lookup on TourneysPlayers using _tourneyId (tourneyId=71487580, playerId=393)  (cost=0.34 rows=1) (actual time=0.0053..0.0053 rows=0 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005230999668128788,
+        "mean": 0.00030491999350488184,
+        "p50": 0.00025099999038502574,
+        "p95": 0.00046869997167959805,
+        "p99": 0.0005122199677862226
+      }
+    },
+    "count_player_auto_notes": {
+      "error": "",
+      "plan": "-> Aggregate: count(0)  (cost=0.45 rows=1) (actual time=0.008..0.0081 rows=1 loops=1)\n    -> Covering index lookup on PlayerAutoNotes using player_auto_note_rule_hit (playerId=393)  (cost=0.35 rows=1) (actual time=0.0056..0.007 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00026299996534362435,
+        "mean": 0.000244340009521693,
+        "p50": 0.0002364999963901937,
+        "p95": 0.00026071997126564384,
+        "p99": 0.00026254396652802825
+      }
+    },
+    "createActionBubbleFactorsTable": {
+      "status": "skipped_ddl"
+    },
+    "createActionsTable": {
+      "status": "skipped_ddl"
+    },
+    "createAofDecisionAnalysesTable": {
+      "status": "skipped_ddl"
+    },
+    "createAofDecisionsTable": {
+      "status": "skipped_ddl"
+    },
+    "createAutoratesTable": {
+      "status": "skipped_ddl"
+    },
+    "createBackingsTable": {
+      "status": "skipped_ddl"
+    },
+    "createBoardFeaturesTable": {
+      "status": "skipped_ddl"
+    },
+    "createBoardsTable": {
+      "status": "skipped_ddl"
+    },
+    "createCardsCacheTable": {
+      "status": "skipped_ddl"
+    },
+    "createFilesTable": {
+      "status": "skipped_ddl"
+    },
+    "createGametypesTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandStatesTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsActionsTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsCashoutTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsPlayersTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsPotsTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsShowdownTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsSituationsTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsStoveTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsTable": {
+      "status": "skipped_ddl"
+    },
+    "createHudCacheTable": {
+      "status": "skipped_ddl"
+    },
+    "createLockTable": {
+      "status": "skipped_ddl"
+    },
+    "createMonthsTable": {
+      "status": "skipped_ddl"
+    },
+    "createPlayerAutoNotesTable": {
+      "status": "skipped_ddl"
+    },
+    "createPlayersTable": {
+      "status": "skipped_ddl"
+    },
+    "createPositionsCacheTable": {
+      "status": "skipped_ddl"
+    },
+    "createRankTable": {
+      "status": "skipped_ddl"
+    },
+    "createRawHands": {
+      "status": "skipped_ddl"
+    },
+    "createRawTourneys": {
+      "status": "skipped_ddl"
+    },
+    "createSessionsCacheTable": {
+      "status": "skipped_ddl"
+    },
+    "createSessionsTable": {
+      "status": "skipped_ddl"
+    },
+    "createSettingsTable": {
+      "status": "skipped_ddl"
+    },
+    "createSitesTable": {
+      "status": "skipped_ddl"
+    },
+    "createStartCardsTable": {
+      "status": "skipped_ddl"
+    },
+    "createTourneyPayoutsTable": {
+      "status": "skipped_ddl"
+    },
+    "createTourneyTypesTable": {
+      "status": "skipped_ddl"
+    },
+    "createTourneysCacheTable": {
+      "status": "skipped_ddl"
+    },
+    "createTourneysPlayersTable": {
+      "status": "skipped_ddl"
+    },
+    "createTourneysTable": {
+      "status": "skipped_ddl"
+    },
+    "createWeeksTable": {
+      "status": "skipped_ddl"
+    },
+    "deleteActionBubbleFactors": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0001922000083141029,
+        "mean": 0.0001829399960115552,
+        "p50": 0.00018039997667074203,
+        "p95": 0.00019042000640183686,
+        "p99": 0.00019184400793164968
+      }
+    },
+    "deleteMonthId": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0002794000320136547,
+        "mean": 0.00021082002203911542,
+        "p50": 0.00018750003073364496,
+        "p95": 0.00026730003301054237,
+        "p99": 0.00027698003221303223
+      }
+    },
+    "deleteTourneyPayouts": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0002769999555312097,
+        "mean": 0.00021769999293610453,
+        "p50": 0.00019649998284876347,
+        "p95": 0.0002700399607419967,
+        "p99": 0.00027560795657336715
+      }
+    },
+    "deleteTourneyTypeId": {
+      "error": "(1451, 'Cannot delete or update a parent row: a foreign key constraint fails (`fpdb_bench`.`hudcache`, CONSTRAINT `hudcache_ibfk_3` FOREIGN KEY (`tourneyTypeId`) REFERENCES `tourneytypes` (`id`))')",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "deleteWeekId": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00019300001440569758,
+        "mean": 0.00018826000159606339,
+        "p50": 0.00018880004063248634,
+        "p95": 0.00019256001105532052,
+        "p99": 0.00019291201373562218
+      }
+    },
+    "delete_S": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00019219995010644197,
+        "mean": 0.00018666000105440616,
+        "p50": 0.00018540001474320889,
+        "p95": 0.00019171995809301736,
+        "p99": 0.00019210395170375703
+      }
+    },
+    "delete_SC": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00020340003538876772,
+        "mean": 0.00019519999623298644,
+        "p50": 0.00019270001212134957,
+        "p95": 0.00020202002488076687,
+        "p99": 0.00020312403328716757
+      }
+    },
+    "drop_table": {
+      "status": "skipped_ddl"
+    },
+    "fetchNewCardsCacheTourneyTypeIds": {
+      "error": "",
+      "plan": "-> Filter: (cc.tourneyTypeId is null)  (cost=0.7 rows=1) (actual time=0.0142..0.0161 rows=1 loops=1)\n    -> Nested loop left join  (cost=0.7 rows=1) (actual time=0.0136..0.0155 rows=1 loops=1)\n        -> Covering index scan on TT using siteId  (cost=0.35 rows=1) (actual time=0.0073..0.009 rows=1 loops=1)\n        -> Covering index lookup on CC using tourneyTypeId (tourneyTypeId=tt.id)  (cost=0.35 rows=1) (actual time=0.0053..0.0053 rows=0 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005834000185132027,
+        "mean": 0.00038794000865891574,
+        "p50": 0.00031640002271160483,
+        "p95": 0.0005558200180530548,
+        "p99": 0.0005778840184211731
+      }
+    },
+    "fetchNewCardsCacheWeeksMonths": {
+      "error": "",
+      "plan": "1\n1\n2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0004939999780617654,
+        "mean": 0.00037934000138193367,
+        "p50": 0.0003776000230573118,
+        "p95": 0.0004751599859446287,
+        "p99": 0.000490231979638338
+      }
+    },
+    "fetchNewHudCacheTourneyTypeIds": {
+      "error": "",
+      "plan": "1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00039460003608837724,
+        "mean": 0.00028207999421283605,
+        "p50": 0.00024809996830299497,
+        "p95": 0.00037272002082318063,
+        "p99": 0.0003902240330353379
+      }
+    },
+    "fetchNewPositionsCacheTourneyTypeIds": {
+      "error": "",
+      "plan": "-> Filter: (pc.tourneyTypeId is null)  (cost=0.7 rows=1) (actual time=0.0132..0.0149 rows=1 loops=1)\n    -> Nested loop left join  (cost=0.7 rows=1) (actual time=0.0125..0.0141 rows=1 loops=1)\n        -> Covering index scan on TT using siteId  (cost=0.35 rows=1) (actual time=0.0069..0.0084 rows=1 loops=1)\n        -> Covering index lookup on PC using tourneyTypeId (tourneyTypeId=tt.id)  (cost=0.35 rows=1) (actual time=0.0047..0.0047 rows=0 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00029830000130459666,
+        "mean": 0.0002674000104889274,
+        "p50": 0.0002569000353105366,
+        "p95": 0.0002930000075139105,
+        "p99": 0.00029724000254645946
+      }
+    },
+    "fetchNewPositionsCacheWeeksMonths": {
+      "error": "",
+      "plan": "1\n1\n2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0003451000084169209,
+        "mean": 0.0003025599988177419,
+        "p50": 0.0002921000123023987,
+        "p95": 0.0003350200015120208,
+        "p99": 0.0003430840070359409
+      }
+    },
+    "find_aof_decision": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0002313000150024891,
+        "mean": 0.00021726000122725963,
+        "p50": 0.00021279999054968357,
+        "p95": 0.0002286400063894689,
+        "p99": 0.00023076801327988504
+      }
+    },
+    "find_aof_decision_analysis": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.000998399977106601,
+        "mean": 0.0005966400145553053,
+        "p50": 0.0005296000163070858,
+        "p95": 0.0009306199848651886,
+        "p99": 0.0009848439786583185
+      }
+    },
+    "find_player_auto_note": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00058230001013726,
+        "mean": 0.0003675999934785068,
+        "p50": 0.00031179998768493533,
+        "p95": 0.0005427200114354491,
+        "p99": 0.0005743840103968978
+      }
+    },
+    "getAutorates": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0007282000151462853,
+        "mean": 0.00035909999860450625,
+        "p50": 0.0002600999432615936,
+        "p95": 0.0006419200217351316,
+        "p99": 0.0007109440164640545
+      }
+    },
+    "getBackings": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0006638000486418605,
+        "mean": 0.00039239999605342744,
+        "p50": 0.00031289999606087804,
+        "p95": 0.0006175000336952508,
+        "p99": 0.0006545400456525385
+      }
+    },
+    "getCashLimits": {
+      "error": "",
+      "plan": "-> Sort: gt.limitType DESC, gt.bigBlind DESC  (actual time=0.207..0.21 rows=54 loops=1)\n    -> Table scan on <temporary>  (cost=19.5..22 rows=16.9) (actual time=0.175..0.18 rows=54 loops=1)\n        -> Temporary table with deduplication  (cost=19.3..19.3 rows=16.9) (actual time=0.175..0.175 rows=54 loops=1)\n            -> Filter: (gt.`type` = 'ring')  (cost=17.6 rows=16.9) (actual time=0.0201..0.116 rows=168 loops=1)\n                -> Table scan on gt  (cost=17.6 rows=169) (actual time=0.0188..0.0907 rows=169 loops=1)\n",
+      "rows": 54,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.001998000021558255,
+        "mean": 0.0013241000007838011,
+        "p50": 0.0010718000121414661,
+        "p95": 0.0019885600195266306,
+        "p99": 0.00199611202115193
+      }
+    },
+    "getCategoryBySiteAndPlayer": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '? AND p.name = ?' at line 6\")",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '? AND p.name = ?' at line 6\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getCategoryBySiteAndPlayerRing": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '? AND p.name = ? AND gt.type = 'ring'' at line 6\")",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '? AND p.name = ? AND gt.type = 'ring'' at line 6\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getCurrencies": {
+      "error": "",
+      "plan": "-> Sort: gametypes.currency  (actual time=0.122..0.122 rows=5 loops=1)\n    -> Table scan on <temporary>  (cost=34.6..39.2 rows=169) (actual time=0.115..0.115 rows=5 loops=1)\n        -> Temporary table with deduplication  (cost=34.6..34.6 rows=169) (actual time=0.114..0.114 rows=5 loops=1)\n            -> Table scan on Gametypes  (cost=17.7 rows=169) (actual time=0.0394..0.0613 rows=169 loops=1)\n",
+      "rows": 5,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0003961999900639057,
+        "mean": 0.0003600599942728877,
+        "p50": 0.0003505999920889735,
+        "p95": 0.0003877399954944849,
+        "p99": 0.00039450799115002154
+      }
+    },
+    "getCurrencyBySiteAndPlayer": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '? AND p.name = ?' at line 6\")",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '? AND p.name = ?' at line 6\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getGames": {
+      "error": "",
+      "plan": "-> Table scan on <temporary>  (cost=34.6..39.2 rows=169) (actual time=0.133..0.135 rows=19 loops=1)\n    -> Temporary table with deduplication  (cost=34.6..34.6 rows=169) (actual time=0.132..0.132 rows=19 loops=1)\n        -> Table scan on Gametypes  (cost=17.7 rows=169) (actual time=0.0164..0.0739 rows=169 loops=1)\n",
+      "rows": 19,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00045650004176422954,
+        "mean": 0.0004302200162783265,
+        "p50": 0.00042560003930702806,
+        "p95": 0.0004506200319156051,
+        "p99": 0.0004553240397945046
+      }
+    },
+    "getGametypeFL": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0007049000123515725,
+        "mean": 0.0005123599781654775,
+        "p50": 0.0005360999493859708,
+        "p95": 0.0006776600028388202,
+        "p99": 0.0006994520104490221
+      }
+    },
+    "getGametypeNL": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00041360000614076853,
+        "mean": 0.0004039399907924235,
+        "p50": 0.0004039999912492931,
+        "p95": 0.0004125399980694055,
+        "p99": 0.0004133880045264959
+      }
+    },
+    "getGametypes": {
+      "error": "",
+      "plan": "-> Table scan on Gametypes  (cost=17.7 rows=169) (actual time=0.057..0.604 rows=169 loops=1)\n",
+      "rows": 169,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.005977199994958937,
+        "mean": 0.004725760000292211,
+        "p50": 0.004057099984493107,
+        "p95": 0.005944639991503209,
+        "p99": 0.005970687994267792
+      }
+    },
+    "getHandCount": {
+      "error": "",
+      "plan": "-> Count rows in Hands  (actual time=0.165..0.165 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0018767999717965722,
+        "mean": 0.0009232600103132426,
+        "p50": 0.0007173000485636294,
+        "p95": 0.0017133599845692515,
+        "p99": 0.001844111974351108
+      }
+    },
+    "getHands": {
+      "error": "",
+      "plan": "-> Table scan on Hands  (cost=68.7 rows=664) (actual time=0.029..1.18 rows=664 loops=1)\n",
+      "rows": 664,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.04192310001235455,
+        "mean": 0.030880600004456936,
+        "p50": 0.02839220000896603,
+        "p95": 0.03934584001544863,
+        "p99": 0.041407648012973364
+      }
+    },
+    "getHandsActions": {
+      "error": "",
+      "plan": "-> Table scan on HandsActions  (cost=1033 rows=9930) (actual time=0.378..13.4 rows=9944 loops=1)\n",
+      "rows": 9944,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.2914100000052713,
+        "mean": 0.28385599999455735,
+        "p50": 0.2812516000121832,
+        "p95": 0.29022262000944465,
+        "p99": 0.291172524006106
+      }
+    },
+    "getHandsPlayers": {
+      "error": "",
+      "plan": "-> Table scan on HandsPlayers  (cost=415 rows=3591) (actual time=0.113..34.6 rows=3769 loops=1)\n",
+      "rows": 3769,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 1.0077866000356153,
+        "mean": 0.9839926400105469,
+        "p50": 0.9885001999791712,
+        "p95": 1.0041138600325212,
+        "p99": 1.0070520520349966
+      }
+    },
+    "getHudCache": {
+      "error": "",
+      "plan": "-> Table scan on HudCache  (cost=56.4 rows=1) (actual time=0.13..20.8 rows=2268 loops=1)\n",
+      "rows": 2268,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.6029429999762215,
+        "mean": 0.5830603400012478,
+        "p50": 0.5785478000179864,
+        "p95": 0.6023506199824624,
+        "p99": 0.6028245239774697
+      }
+    },
+    "getLimits": {
+      "error": "",
+      "plan": "-> Sort: gametypes.bigBlind DESC  (actual time=0.118..0.119 rows=27 loops=1)\n    -> Table scan on <temporary>  (cost=34.6..39.2 rows=169) (actual time=0.103..0.105 rows=27 loops=1)\n        -> Temporary table with deduplication  (cost=34.6..34.6 rows=169) (actual time=0.102..0.102 rows=27 loops=1)\n            -> Table scan on Gametypes  (cost=17.7 rows=169) (actual time=0.0168..0.0687 rows=169 loops=1)\n",
+      "rows": 27,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.004057199985254556,
+        "mean": 0.0013741199858486653,
+        "p50": 0.0006938999867998064,
+        "p95": 0.003397039987612515,
+        "p99": 0.003925167985726148
+      }
+    },
+    "getLimits2": {
+      "error": "",
+      "plan": "-> Sort: gametypes.`type`, gametypes.limitType DESC, gametypes.bigBlind DESC  (actual time=0.225..0.228 rows=55 loops=1)\n    -> Table scan on <temporary>  (cost=34.6..39.2 rows=169) (actual time=0.177..0.182 rows=55 loops=1)\n        -> Temporary table with deduplication  (cost=34.6..34.6 rows=169) (actual time=0.177..0.177 rows=55 loops=1)\n            -> Table scan on Gametypes  (cost=17.7 rows=169) (actual time=0.0338..0.106 rows=169 loops=1)\n",
+      "rows": 55,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.001479900034610182,
+        "mean": 0.0009348000166937709,
+        "p50": 0.0008154000388458371,
+        "p95": 0.0013501000357791781,
+        "p99": 0.0014539400348439811
+      }
+    },
+    "getLimits3": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'else buyin\\n-                                            ",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'else buyin\\n-                                            end as bb_or_buyin\\n     ' at line 5\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getPlayerId": {
+      "error": "",
+      "plan": "-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=100e-6..100e-6 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00043620000360533595,
+        "mean": 0.00033245999366045,
+        "p50": 0.0003065000055357814,
+        "p95": 0.00042733999434858556,
+        "p99": 0.0004344280017539859
+      }
+    },
+    "getPlayers": {
+      "error": "",
+      "plan": "-> Table scan on Players  (cost=43.5 rows=427) (actual time=0.0287..0.437 rows=427 loops=1)\n",
+      "rows": 427,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.006805700017139316,
+        "mean": 0.005895460001192987,
+        "p50": 0.005517199984751642,
+        "p95": 0.006745180010329932,
+        "p99": 0.006793596015777439
+      }
+    },
+    "getPositionByPlayerAndHandid": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '? AND h.siteHandNo LIKE ?' at line 5\")",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '? AND h.siteHandNo LIKE ?' at line 5\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getPositions": {
+      "error": "",
+      "plan": "-> Covering index skip scan for deduplication on gt using position_idx  (cost=5.1 rows=12) (actual time=0.0203..0.0843 rows=11 loops=1)\n",
+      "rows": 11,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00043240003287792206,
+        "mean": 0.0003318999893963337,
+        "p50": 0.0003086999640800059,
+        "p95": 0.0004079400212503969,
+        "p99": 0.00042750803055241704
+      }
+    },
+    "getRawHands": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00048020004760473967,
+        "mean": 0.0002720600226894021,
+        "p50": 0.00021840003319084644,
+        "p95": 0.0004300600383430719,
+        "p99": 0.00047017204575240613
+      }
+    },
+    "getRawTourneys": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00034989998675882816,
+        "mean": 0.000244399975053966,
+        "p50": 0.00021879997802898288,
+        "p95": 0.000323839986231178,
+        "p99": 0.0003446879866532981
+      }
+    },
+    "getRingProfitAllHandsPlayerIdSite": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   tt.siteId in \\n        AND   h.startTime > ''\\n    ",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   tt.siteId in \\n        AND   h.startTime > ''\\n        AND   h.startTime < '' at line 7\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getRingProfitAllHandsPlayerIdSiteInBB": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   pl.siteId in \\n        AND   h.startTime > ''\\n    ",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   pl.siteId in \\n        AND   h.startTime > ''\\n        AND   h.startTime < '' at line 7\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getRingProfitAllHandsPlayerIdSiteInDollars": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   pl.siteId in \\n        AND   h.startTime > ''\\n    ",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   pl.siteId in \\n        AND   h.startTime > ''\\n        AND   h.startTime < '' at line 7\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getSettings": {
+      "error": "",
+      "plan": "-> Table scan on Settings  (cost=0.35 rows=1) (actual time=0.0073..0.009 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0002620999584905803,
+        "mean": 0.0002214199979789555,
+        "p50": 0.00021159998141229153,
+        "p95": 0.00025463997153565284,
+        "p99": 0.00026060796109959487
+      }
+    },
+    "getSiteId": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0004737999988719821,
+        "mean": 0.0003522199927829206,
+        "p50": 0.0002905000001192093,
+        "p95": 0.00046800000127404927,
+        "p99": 0.00047263999935239555
+      }
+    },
+    "getSiteTourneyNos": {
+      "error": "",
+      "plan": "1\n1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0005675999564118683,
+        "mean": 0.00036393998889252546,
+        "p50": 0.00028330000350251794,
+        "p95": 0.0005376199609600007,
+        "p99": 0.0005616039573214948
+      }
+    },
+    "getSites": {
+      "error": "",
+      "plan": "-> Table scan on Sites  (cost=13.2 rows=130) (actual time=0.0142..0.0508 rows=130 loops=1)\n",
+      "rows": 130,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0011449999874457717,
+        "mean": 0.0011241400032304227,
+        "p50": 0.0011243000044487417,
+        "p95": 0.001141119992826134,
+        "p99": 0.0011442239885218442
+      }
+    },
+    "getTourneyByTourneyNo": {
+      "error": "",
+      "plan": "1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0007464000373147428,
+        "mean": 0.0004779799957759678,
+        "p50": 0.00040799996349960566,
+        "p95": 0.0006889800308272242,
+        "p99": 0.0007349160360172391
+      }
+    },
+    "getTourneyCount": {
+      "error": "",
+      "plan": "-> Count rows in Tourneys  (actual time=0.0079..0.008 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00032519997330382466,
+        "mean": 0.0002358000143431127,
+        "p50": 0.00021600001491606236,
+        "p95": 0.00030363998375833036,
+        "p99": 0.0003208879753947258
+      }
+    },
+    "getTourneyInfo": {
+      "error": "",
+      "plan": "1\n1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.001139200001489371,
+        "mean": 0.0009699799935333431,
+        "p50": 0.0009243999957107008,
+        "p95": 0.0011161600006744264,
+        "p99": 0.0011345920013263822
+      }
+    },
+    "getTourneyNames": {
+      "error": "",
+      "plan": "-> Table scan on Tourneys  (cost=0.35 rows=1) (actual time=0.007..0.0085 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00022710004122927785,
+        "mean": 0.0002113600028678775,
+        "p50": 0.0002093000221066177,
+        "p95": 0.0002244200324639678,
+        "p99": 0.00022656403947621584
+      }
+    },
+    "getTourneyPlayerInfo": {
+      "error": "",
+      "plan": "1\n1\n1\n1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00048420001985505223,
+        "mean": 0.00044139999663457276,
+        "p50": 0.0004336999845691025,
+        "p95": 0.0004746800172142684,
+        "p99": 0.00048229601932689545
+      }
+    },
+    "getTourneyTypeCount": {
+      "error": "",
+      "plan": "-> Count rows in TourneyTypes  (actual time=0.0078..0.0078 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0006054000114090741,
+        "mean": 0.0003624200006015599,
+        "p50": 0.0002457000082358718,
+        "p95": 0.0005899800104089082,
+        "p99": 0.0006023160112090408
+      }
+    },
+    "getTourneyTypeId": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0005032999906688929,
+        "mean": 0.00045425998978316785,
+        "p50": 0.0004572999896481633,
+        "p95": 0.0004948399844579398,
+        "p99": 0.0005016079894267023
+      }
+    },
+    "getTourneyTypeIdByTourneyNo": {
+      "error": "",
+      "plan": "1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0007955000037327409,
+        "mean": 0.0007515599951148033,
+        "p50": 0.0007651000050827861,
+        "p95": 0.0007943399948999285,
+        "p99": 0.0007952680019661783
+      }
+    },
+    "getTourneyTypes": {
+      "error": "",
+      "plan": "-> Table scan on TourneyTypes  (cost=0.35 rows=1) (actual time=0.0126..0.0142 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0006868999917060137,
+        "mean": 0.0006722400081343949,
+        "p50": 0.0006671999581158161,
+        "p95": 0.0006853000028058887,
+        "p99": 0.0006865799939259887
+      }
+    },
+    "getTourneyTypesIds": {
+      "error": "",
+      "plan": "-> Covering index scan on TourneyTypes using siteId  (cost=0.35 rows=1) (actual time=0.0068..0.0083 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0003863000310957432,
+        "mean": 0.00028478001477196815,
+        "p50": 0.0002911000046879053,
+        "p95": 0.00037042002659291027,
+        "p99": 0.0003831240301951766
+      }
+    },
+    "getTourneys": {
+      "error": "",
+      "plan": "-> Table scan on Tourneys  (cost=0.35 rows=1) (actual time=0.0131..0.0151 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00043050001841038465,
+        "mean": 0.00040097999153658747,
+        "p50": 0.00041229999624192715,
+        "p95": 0.0004282400128431618,
+        "p99": 0.00043004801729694007
+      }
+    },
+    "getTourneysPlayers": {
+      "error": "",
+      "plan": "-> Table scan on TourneysPlayers  (cost=1.25 rows=10) (actual time=0.008..0.018 rows=10 loops=1)\n",
+      "rows": 10,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0006457000272348523,
+        "mean": 0.0004950599977746606,
+        "p50": 0.0004512000014074147,
+        "p95": 0.00061728002037853,
+        "p99": 0.0006400160258635879
+      }
+    },
+    "getTourneysPlayersByIds": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00039300002390518785,
+        "mean": 0.0003447800176218152,
+        "p50": 0.0003321000258438289,
+        "p95": 0.0003842000267468393,
+        "p99": 0.0003912400244735181
+      }
+    },
+    "getTourneysPlayersByTourney": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0002528000040911138,
+        "mean": 0.00023929999442771078,
+        "p50": 0.00023389997659251094,
+        "p95": 0.00025190000887960197,
+        "p99": 0.0002526200050488114
+      }
+    },
+    "get_actual_seat": {
+      "error": "(1242, 'Subquery returns more than 1 row')",
+      "plan": "<explain failed: (1242, 'Subquery returns more than 1 row')>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_aof_action_observations": {
+      "error": "",
+      "plan": "1\n1\n1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0009457999840378761,
+        "mean": 0.0007343600038439036,
+        "p50": 0.0006884000031277537,
+        "p95": 0.0009011399932205677,
+        "p99": 0.0009368679858744144
+      }
+    },
+    "get_aof_decision_scope": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00045250001130625606,
+        "mean": 0.0003079200047068298,
+        "p50": 0.00026050000451505184,
+        "p95": 0.00042822001269087194,
+        "p99": 0.0004476440115831792
+      }
+    },
+    "get_aof_profile_stats": {
+      "error": "",
+      "plan": "1\n1\n1\n1\n1\n2\n2\n2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0017041999963112175,
+        "mean": 0.001226640003733337,
+        "p50": 0.0011024000123143196,
+        "p95": 0.0015964800026267766,
+        "p99": 0.0016826559975743295
+      }
+    },
+    "get_aof_range_observations": {
+      "error": "",
+      "plan": "1\n1\n1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.001178799953777343,
+        "mean": 0.0009631400112994015,
+        "p50": 0.0009464000468142331,
+        "p95": 0.001169779966585338,
+        "p99": 0.0011769959563389422
+      }
+    },
+    "get_auto_note_player_summary": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ''Player1'' at line 13\")",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ''Player1'' at line 13\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_auto_note_rule_summary": {
+      "error": "",
+      "plan": "-> Limit: 100 row(s)  (actual time=0.23..0.23 rows=6 loops=1)\n    -> Sort: noteCount DESC, pan.ruleId, limit input to 100 row(s) per chunk  (actual time=0.229..0.229 rows=6 loops=1)\n        -> Stream results  (cost=31.5 rows=1) (actual time=0.116..0.22 rows=6 loops=1)\n            -> Group aggregate: count(0)  (cost=31.5 rows=1) (actual time=0.114..0.217 rows=6 loops=1)\n                -> Nested loop left join  (cost=29 rows=25) (actual time=0.0381..0.207 rows=25 loops=1)\n                    -> Nested loop left join  (cost=20.2 rows=25) (actual time=0.0348..0.16 rows=25 loops=1)\n                        -> Nested loop inner join  (cost=11.5 rows=25) (actual time=0.0306..0.101 rows=25 loops=1)\n                            -> Index scan on pan using playerautonotes_rule_idx  (cost=2.75 rows=25) (actual time=0.0255..0.0486 rows=25 loops=1)\n                            -> Single-row covering index lookup on p using PRIMARY (id=pan.playerId)  (cost=0.254 rows=1) (actual time=0.00186..0.00189 rows=1 loops=25)\n                        -> Single-row index lookup on h using PRIMARY (id=pan.handId)  (cost=0.254 rows=1) (actual time=0.00226..0.0023 rows=1 loops=25)\n                    -> Single-row covering index lookup on g using PRIMARY (id=h.gametypeId)  (cost=0.254 rows=1) (actual time=0.00169..0.0017 rows=1 loops=25)\n",
+      "rows": 6,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0007732000085525215,
+        "mean": 0.0005978400004096329,
+        "p50": 0.0005632999818772078,
+        "p95": 0.0007334400084801018,
+        "p99": 0.0007652480085380375
+      }
+    },
+    "get_cards": {
+      "error": "",
+      "plan": "-> Index lookup on HandsPlayers using playerSeat_idx (handId=664)  (cost=0.7 rows=2) (actual time=0.034..0.0356 rows=2 loops=1)\n",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005713999853469431,
+        "mean": 0.0005192199838347733,
+        "p50": 0.000512800004798919,
+        "p95": 0.0005608399864286184,
+        "p99": 0.0005692879855632783
+      }
+    },
+    "get_common_cards": {
+      "error": "",
+      "plan": "-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=100e-6..200e-6 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0006621999782510102,
+        "mean": 0.0004729200038127601,
+        "p50": 0.00042589998338371515,
+        "p95": 0.0006557399872690439,
+        "p99": 0.0006609079800546169
+      }
+    },
+    "get_date_nhands_ago": {
+      "error": "unsupported format character 'Y' (0x59) at index 52",
+      "plan": "<explain failed: unsupported format character 'Y' (0x59) at index 60>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_first_date": {
+      "error": "",
+      "plan": "-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=100e-6..100e-6 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00024119997397065163,
+        "mean": 0.00021565998904407024,
+        "p50": 0.00020589999621734023,
+        "p95": 0.00023789997212588787,
+        "p99": 0.00024053997360169886
+      }
+    },
+    "get_gameinfo_from_hid": {
+      "error": "",
+      "plan": "-> Limit: 1 row(s)  (cost=1.85 rows=1) (actual time=0.0184..0.0185 rows=1 loops=1)\n    -> Nested loop inner join  (cost=1.85 rows=2) (actual time=0.0181..0.0181 rows=1 loops=1)\n        -> Nested loop inner join  (cost=1.15 rows=2) (actual time=0.0156..0.0156 rows=1 loops=1)\n            -> Covering index lookup on hp using handsplayers_hand_player_idx (handId=664)  (cost=0.451 rows=2) (actual time=0.0108..0.0108 rows=1 loops=1)\n            -> Single-row index lookup on p using PRIMARY (id=hp.playerId)  (cost=0.3 rows=1) (actual time=0.0039..0.0039 rows=1 loops=1)\n        -> Single-row index lookup on s using PRIMARY (id=p.siteId)  (cost=0.3 rows=1) (actual time=0.0024..0.0024 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0006226999685168266,
+        "mean": 0.0005141000030562282,
+        "p50": 0.0004896000027656555,
+        "p95": 0.0005963599774986505,
+        "p99": 0.0006174319703131914
+      }
+    },
+    "get_hand_1day_ago": {
+      "error": "",
+      "plan": "-> Aggregate: max(hands.id)  (cost=135 rows=1) (actual time=0.238..0.238 rows=1 loops=1)\n    -> Filter: (hands.startTime < <cache>((utc_timestamp() - interval '1' day)))  (cost=68.7 rows=664) (actual time=0.0164..0.204 rows=664 loops=1)\n        -> Covering index scan on Hands using hands_start_time_idx  (cost=68.7 rows=664) (actual time=0.015..0.157 rows=664 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005824000108987093,
+        "mean": 0.0005363199976272881,
+        "p50": 0.0005769999697804451,
+        "p95": 0.000581540004350245,
+        "p99": 0.0005822280095890165
+      }
+    },
+    "get_hands_cashout": {
+      "error": "",
+      "plan": "1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0005522000137716532,
+        "mean": 0.00045629999367520214,
+        "p50": 0.0004882999928668141,
+        "p95": 0.0005430800141766667,
+        "p99": 0.0005503760138526559
+      }
+    },
+    "get_hands_showdown": {
+      "error": "",
+      "plan": "-> Nested loop inner join  (cost=1.4 rows=2) (actual time=0.0184..0.0225 rows=2 loops=1)\n    -> Index lookup on hs using handId (handId=664)  (cost=0.7 rows=2) (actual time=0.0124..0.0137 rows=2 loops=1)\n    -> Single-row index lookup on p using PRIMARY (id=hs.playerId)  (cost=0.3 rows=1) (actual time=0.0035..0.0035 rows=1 loops=2)\n",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.000354300020262599,
+        "mean": 0.00032197999535128475,
+        "p50": 0.00031450000824406743,
+        "p95": 0.0003539200173690915,
+        "p99": 0.0003542240196838975
+      }
+    },
+    "get_hands_splash": {
+      "error": "",
+      "plan": "1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00034549995325505733,
+        "mean": 0.0002981600002385676,
+        "p50": 0.000285100017208606,
+        "p95": 0.00033549997024238113,
+        "p99": 0.0003434999566525221
+      }
+    },
+    "get_hero_hudcache_start": {
+      "error": "",
+      "plan": "<explain failed: not enough arguments for format string>",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0010687000467441976,
+        "mean": 0.0010338000254705548,
+        "p50": 0.0010238999966531992,
+        "p95": 0.0010614400380291045,
+        "p99": 0.0010672480450011788
+      }
+    },
+    "get_id": {
+      "error": "",
+      "plan": "-> Filter: (files.`file` = 1)  (cost=23.2 rows=22.2) (actual time=0.12..0.24 rows=2 loops=1)\n    -> Table scan on Files  (cost=23.2 rows=222) (actual time=0.0144..0.199 rows=222 loops=1)\n",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0008293999708257616,
+        "mean": 0.0004975599935278296,
+        "p50": 0.0004197999951429665,
+        "p95": 0.0007490999763831495,
+        "p99": 0.0008133399719372392
+      }
+    },
+    "get_last_date": {
+      "error": "",
+      "plan": "-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=0..0 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00039850000757724047,
+        "mean": 0.00025338000850752,
+        "p50": 0.00022350001381710172,
+        "p95": 0.0003637399990111589,
+        "p99": 0.00039154800586402414
+      }
+    },
+    "get_last_gametype_for_table": {
+      "error": "",
+      "plan": "1\n1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0003866000333800912,
+        "mean": 0.00031597999623045325,
+        "p50": 0.0003102999762631953,
+        "p95": 0.0003718400257639587,
+        "p99": 0.0003836480318568647
+      }
+    },
+    "get_last_hand": {
+      "error": "",
+      "plan": "-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=0..0 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00022059999173507094,
+        "mean": 0.00020149999763816596,
+        "p50": 0.00019720004638656974,
+        "p95": 0.00021607999224215746,
+        "p99": 0.00021969599183648824
+      }
+    },
+    "get_player_auto_notes": {
+      "error": "",
+      "plan": "1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0004317000275477767,
+        "mean": 0.0003779200022108853,
+        "p50": 0.00036689999978989363,
+        "p95": 0.0004230200196616352,
+        "p99": 0.00042996402597054843
+      }
+    },
+    "get_player_comment": {
+      "error": "",
+      "plan": "-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=200e-6..200e-6 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0002316000172868371,
+        "mean": 0.00022119999630376697,
+        "p50": 0.00021679996279999614,
+        "p95": 0.00023084001149982215,
+        "p99": 0.0002314480161294341
+      }
+    },
+    "get_player_id": {
+      "error": "",
+      "plan": "1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.000320300052408129,
+        "mean": 0.0002925200155004859,
+        "p50": 0.00028420001035556197,
+        "p95": 0.0003188800415955484,
+        "p99": 0.00032001605024561285
+      }
+    },
+    "get_player_id_by_name": {
+      "error": "",
+      "plan": "-> Covering index lookup on Players using index_playerName (name='Player1')  (cost=0.87 rows=6) (actual time=0.0075..0.0097 rows=6 loops=1)\n",
+      "rows": 6,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00036049995105713606,
+        "mean": 0.0003029799903742969,
+        "p50": 0.00027469999622553587,
+        "p95": 0.0003561199642717838,
+        "p99": 0.0003596239537000656
+      }
+    },
+    "get_player_identity": {
+      "error": "",
+      "plan": "-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=200e-6..200e-6 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0002685000072233379,
+        "mean": 0.000259900011587888,
+        "p50": 0.00025839998852461576,
+        "p95": 0.0002682000049389899,
+        "p99": 0.0002684400067664683
+      }
+    },
+    "get_player_name": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00023509998572990298,
+        "mean": 0.00021422000136226416,
+        "p50": 0.00021020002895966172,
+        "p95": 0.0002302799839526415,
+        "p99": 0.0002341359853744507
+      }
+    },
+    "get_player_names": {
+      "error": "",
+      "plan": "-> Filter: (lower(p.`name`) like <cache>(lower('Player1')))  (cost=9.45 rows=72) (actual time=0.0621..0.144 rows=2 loops=1)\n    -> Index lookup on p using siteId (siteId=1)  (cost=9.45 rows=72) (actual time=0.0582..0.133 rows=72 loops=1)\n",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.000424400030169636,
+        "mean": 0.00039950001519173384,
+        "p50": 0.0003932000254280865,
+        "p95": 0.00041874003363773227,
+        "p99": 0.00042326803086325523
+      }
+    },
+    "get_players_and_sites_by_name": {
+      "error": "",
+      "plan": "-> Nested loop inner join  (cost=2.97 rows=6) (actual time=0.0113..0.0228 rows=6 loops=1)\n    -> Covering index lookup on p using name (name='Player1')  (cost=0.87 rows=6) (actual time=0.0079..0.0108 rows=6 loops=1)\n    -> Single-row index lookup on s using PRIMARY (id=p.siteId)  (cost=0.267 rows=1) (actual time=0.00175..0.0018 rows=1 loops=6)\n",
+      "rows": 6,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0003220000071451068,
+        "mean": 0.0003164599882438779,
+        "p50": 0.0003149999538436532,
+        "p95": 0.00032160000409930944,
+        "p99": 0.00032192000653594736
+      }
+    },
+    "get_players_from_hand": {
+      "error": "",
+      "plan": "-> Nested loop inner join  (cost=1.4 rows=2) (actual time=0.0261..0.0298 rows=2 loops=1)\n    -> Index lookup on HandsPlayers using playerSeat_idx (handId=664)  (cost=0.7 rows=2) (actual time=0.0216..0.0229 rows=2 loops=1)\n    -> Single-row index lookup on Players using PRIMARY (id=handsplayers.playerId)  (cost=0.3 rows=1) (actual time=0.003..0.003 rows=1 loops=2)\n",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0003719999804161489,
+        "mean": 0.00032970000756904483,
+        "p50": 0.0003182000364176929,
+        "p95": 0.00036325998371466994,
+        "p99": 0.0003702519810758531
+      }
+    },
+    "get_recent_player_auto_notes": {
+      "error": "",
+      "plan": "-> Limit: 100 row(s)  (cost=29 rows=25) (actual time=0.0647..0.201 rows=25 loops=1)\n    -> Nested loop left join  (cost=29 rows=25) (actual time=0.0643..0.199 rows=25 loops=1)\n        -> Nested loop left join  (cost=20.2 rows=25) (actual time=0.061..0.164 rows=25 loops=1)\n            -> Nested loop inner join  (cost=11.5 rows=25) (actual time=0.0563..0.113 rows=25 loops=1)\n                -> Sort: pan.createdTs DESC, pan.id DESC  (cost=2.75 rows=25) (actual time=0.0506..0.061 rows=25 loops=1)\n                    -> Table scan on pan  (cost=2.75 rows=25) (actual time=0.0082..0.0342 rows=25 loops=1)\n                -> Single-row index lookup on p using PRIMARY (id=pan.playerId)  (cost=0.254 rows=1) (actual time=0.00192..0.00194 rows=1 loops=25)\n            -> Single-row index lookup on h using PRIMARY (id=pan.handId)  (cost=0.254 rows=1) (actual time=0.00189..0.00191 rows=1 loops=25)\n        -> Single-row covering index lookup on g using PRIMARY (id=h.gametypeId)  (cost=0.254 rows=1) (actual time=0.00126..0.00129 rows=1 loops=25)\n",
+      "rows": 25,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.001360399997793138,
+        "mean": 0.0012704200111329556,
+        "p50": 0.0012603000504896045,
+        "p95": 0.0013545199995860457,
+        "p99": 0.0013592239981517196
+      }
+    },
+    "get_site_hand_no": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00021790002938359976,
+        "mean": 0.00020946000004187226,
+        "p50": 0.00020769995171576738,
+        "p95": 0.00021590002579614518,
+        "p99": 0.00021750002866610885
+      }
+    },
+    "get_stats_from_hand": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'sum(hc.street4CheckRaiseDone)       AS cr_4\\n            ",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'sum(hc.street4CheckRaiseDone)       AS cr_4\\n                sum(hc.street0Calls)' at line 263\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_stats_from_hand_aggregated": {
+      "error": "",
+      "plan": "1\n1\n1\n1\n1\n3\n3\n2\n2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.006430800014641136,
+        "mean": 0.006148140016011894,
+        "p50": 0.006324100017081946,
+        "p95": 0.006413800013251602,
+        "p99": 0.006427400014363229
+      }
+    },
+    "get_stats_from_hand_session": {
+      "error": "",
+      "plan": "1\n1\n1\n1\n1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.003785200009588152,
+        "mean": 0.00327402000548318,
+        "p50": 0.003237200027797371,
+        "p95": 0.003682520007714629,
+        "p99": 0.0037646640092134477
+      }
+    },
+    "get_table_name": {
+      "error": "",
+      "plan": "-> Group aggregate: count(1)  (cost=0.651 rows=1) (actual time=0.0131..0.0131 rows=1 loops=1)\n    -> Covering index lookup on hp using playerSeat_idx (handId=664)  (cost=0.451 rows=2) (actual time=0.0103..0.0119 rows=2 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0007882000063546002,
+        "mean": 0.0005912199965678155,
+        "p50": 0.0005150999641045928,
+        "p95": 0.0007760200067423285,
+        "p99": 0.0007857640064321458
+      }
+    },
+    "get_winners_from_hand": {
+      "error": "",
+      "plan": "-> Nested loop inner join  (cost=0.675 rows=0.388) (actual time=0.0293..0.0334 rows=2 loops=1)\n    -> Filter: (handsplayers.winnings > 0)  (cost=0.539 rows=0.388) (actual time=0.024..0.0255 rows=2 loops=1)\n        -> Index lookup on HandsPlayers using playerSeat_idx (handId=664)  (cost=0.539 rows=2) (actual time=0.0234..0.0248 rows=2 loops=1)\n    -> Single-row index lookup on Players using PRIMARY (id=handsplayers.playerId)  (cost=0.508 rows=1) (actual time=0.00325..0.0033 rows=1 loops=2)\n",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00035280000884085894,
+        "mean": 0.00032584001310169696,
+        "p50": 0.00032029999420046806,
+        "p95": 0.0003479400067590177,
+        "p99": 0.0003518280084244907
+      }
+    },
+    "handActions": {
+      "error": "",
+      "plan": "-> Nested loop inner join  (cost=1.4 rows=2) (actual time=0.0262..0.0289 rows=2 loops=1)\n    -> Sort: ha.id  (cost=0.7 rows=2) (actual time=0.0212..0.0215 rows=2 loops=1)\n        -> Index lookup on ha using handactions_hand_idx (handId=664)  (cost=0.7 rows=2) (actual time=0.0129..0.0143 rows=2 loops=1)\n    -> Single-row index lookup on p using PRIMARY (id=ha.playerId)  (cost=0.3 rows=1) (actual time=0.0032..0.00325 rows=1 loops=2)\n",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005472999764606357,
+        "mean": 0.00046054000267758965,
+        "p50": 0.00043950002873316407,
+        "p95": 0.0005316599854268134,
+        "p99": 0.0005441719782538712
+      }
+    },
+    "handactions_action_street_idx": {
+      "status": "skipped_ddl"
+    },
+    "handactions_hand_idx": {
+      "status": "skipped_ddl"
+    },
+    "handactions_player_idx": {
+      "status": "skipped_ddl"
+    },
+    "handactions_sizing_idx": {
+      "status": "skipped_ddl"
+    },
+    "handactions_street_position_idx": {
+      "status": "skipped_ddl"
+    },
+    "handsInRange": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 6\")",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 6\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "handsInRangeSession": {
+      "error": "",
+      "plan": "-> Filter: (TIMESTAMP'0000-00-00 00:00:00' <> h.startTime)  (cost=68.7 rows=664) (actual time=0.0231..0.217 rows=664 loops=1)\n    -> Covering index scan on h using hands_start_time_idx  (cost=68.7 rows=664) (actual time=0.0213..0.167 rows=664 loops=1)\n",
+      "rows": 664,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0039006000151857734,
+        "mean": 0.0038028799928724764,
+        "p50": 0.003799600002821535,
+        "p95": 0.003890600008890033,
+        "p99": 0.0038986000139266254
+      }
+    },
+    "handsInRangeSessionFilter": {
+      "error": "",
+      "plan": "-> Table scan on <temporary>  (cost=427..438 rows=664) (actual time=3.03..3.08 rows=663 loops=1)\n    -> Temporary table with deduplication  (cost=427..427 rows=664) (actual time=3.03..3.03 rows=663 loops=1)\n        -> Nested loop inner join  (cost=361 rows=664) (actual time=0.0558..2.81 rows=663 loops=1)\n            -> Nested loop inner join  (cost=127 rows=664) (actual time=0.0404..0.831 rows=664 loops=1)\n                -> Covering index scan on gt using siteId  (cost=17.7 rows=169) (actual time=0.0301..0.0601 rows=169 loops=1)\n                -> Filter: (TIMESTAMP'0000-00-00 00:00:00' <> h.startTime)  (cost=0.254 rows=3.93) (actual time=0.002..0.00427 rows=3.93 loops=169)\n                    -> Covering index lookup on h using hands_gametype_time_idx (gametypeId=gt.id)  (cost=0.254 rows=3.93) (actual time=0.00178..0.00365 rows=3.93 loops=169)\n            -> Limit: 1 row(s)  (cost=0.253 rows=1) (actual time=0.00277..0.0028 rows=0.998 loops=664)\n                -> Covering index lookup on hp using playerSeat_idx (handId=h.id)  (cost=0.253 rows=5.42) (actual time=0.00268..0.00268 rows=0.998 loops=664)\n",
+      "rows": 663,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.006851900019682944,
+        "mean": 0.0065335200051777065,
+        "p50": 0.006491699954494834,
+        "p95": 0.0067858400172553955,
+        "p99": 0.006838688019197434
+      }
+    },
+    "handsPlayersTTypeId_joiner": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'OR TourneysPlayersId+0=' at line 1\")",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'OR TourneysPlayersId+0=' at line 1\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "handsPlayersTTypeId_joiner_id": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'OR id=' at line 1\")",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'OR id=' at line 1\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "hands_gametype_time_idx": {
+      "status": "skipped_ddl"
+    },
+    "hands_start_time_idx": {
+      "status": "skipped_ddl"
+    },
+    "handsplayers_hand_player_idx": {
+      "status": "skipped_ddl"
+    },
+    "handssituations_aggressor_idx": {
+      "status": "skipped_ddl"
+    },
+    "handssituations_hand_idx": {
+      "status": "skipped_ddl"
+    },
+    "handssituations_player_idx": {
+      "status": "skipped_ddl"
+    },
+    "handssituations_pot_role_idx": {
+      "status": "skipped_ddl"
+    },
+    "handssituations_street_response_idx": {
+      "status": "skipped_ddl"
+    },
+    "handstates_hand_idx": {
+      "status": "skipped_ddl"
+    },
+    "handstates_made_hand_idx": {
+      "status": "skipped_ddl"
+    },
+    "handstates_nutness_idx": {
+      "status": "skipped_ddl"
+    },
+    "handstates_player_idx": {
+      "status": "skipped_ddl"
+    },
+    "insertActionBubbleFactor": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00030720001086592674,
+        "mean": 0.0002675600349903107,
+        "p50": 0.0002652000403031707,
+        "p95": 0.0003038000199012458,
+        "p99": 0.00030652001267299055
+      }
+    },
+    "insertGameTypes": {
+      "error": "(1406, \"Data too long for column 'limitType' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insertTourney": {
+      "error": "(1292, \"Incorrect datetime value: '1' for column 'endTime' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insertTourneyPayout": {
+      "error": "(1452, 'Cannot add or update a child row: a foreign key constraint fails (`fpdb_bench`.`tourneypayouts`, CONSTRAINT `tourneypayouts_ibfk_1` FOREIGN KEY (`tourneyId`) REFERENCES `tourneys` (`id`))')",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insertTourneyType": {
+      "error": "(1406, \"Data too long for column 'limitType' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insertTourneysPlayer": {
+      "error": "(1452, 'Cannot add or update a child row: a foreign key constraint fails (`fpdb_bench`.`tourneysplayers`, CONSTRAINT `tourneysplayers_ibfk_1` FOREIGN KEY (`tourneyId`) REFERENCES `tourneys` (`id`))')",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_M": {
+      "error": "(1292, \"Incorrect datetime value: '1' for column 'monthStart' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_S": {
+      "error": "(1292, \"Incorrect datetime value: '1' for column 'sessionStart' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_SC": {
+      "error": "(1292, \"Incorrect datetime value: '1' for column 'endTime' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_TC": {
+      "error": "(1292, \"Incorrect datetime value: '1' for column 'endTime' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_W": {
+      "error": "(1292, \"Incorrect datetime value: '1' for column 'weekStart' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_cardscache": {
+      "error": "(1452, 'Cannot add or update a child row: a foreign key constraint fails (`fpdb_bench`.`cardscache`, CONSTRAINT `cardscache_ibfk_2` FOREIGN KEY (`monthId`) REFERENCES `months` (`id`))')",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_hudcache": {
+      "error": "(1406, \"Data too long for column 'styleKey' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_positionscache": {
+      "error": "(1366, \"Incorrect integer value: 'B' for column 'maxPosition' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "isAlreadyInDB": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0002818999928422272,
+        "mean": 0.00022384000476449728,
+        "p50": 0.0002080000122077763,
+        "p95": 0.0002687799977138638,
+        "p99": 0.00027927599381655455
+      }
+    },
+    "list_indexes": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1\")",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SHOW INDEXES' at line 1\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "list_tables": {
+      "error": "",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SHOW TABLES' at line 1\")>",
+      "rows": 40,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0018233000300824642,
+        "mean": 0.0014731200179085135,
+        "p50": 0.001422800007276237,
+        "p95": 0.0017815000261180102,
+        "p99": 0.0018149400292895733
+      }
+    },
+    "lockForInsert": {
+      "status": "skipped_ddl"
+    },
+    "opponentsReport": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')\\n                       inner join Players p           ",
+      "plan": "<explain failed: not enough arguments for format string>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "playerDetailedStats": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AS hgametypeid\\n                        ,                ",
+      "plan": "<explain failed: not enough arguments for format string>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "playerHand": {
+      "error": "",
+      "plan": "-> Nested loop inner join  (cost=1.4 rows=2) (actual time=0.0363..0.0405 rows=2 loops=1)\n    -> Index lookup on hp using playerSeat_idx (handId=664)  (cost=0.7 rows=2) (actual time=0.0305..0.0322 rows=2 loops=1)\n    -> Single-row index lookup on p using PRIMARY (id=hp.playerId)  (cost=0.3 rows=1) (actual time=0.00355..0.00355 rows=1 loops=2)\n",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0008857999928295612,
+        "mean": 0.0008106400026008486,
+        "p50": 0.0008126000175252557,
+        "p95": 0.0008730200002901255,
+        "p99": 0.0008832439943216741
+      }
+    },
+    "playerStats": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '<selectgt.bigBlind>                                      ",
+      "plan": "<explain failed: not enough arguments for format string>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "playerStatsByPosition": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '<selectgt.bigBlind>                                      ",
+      "plan": "<explain failed: not enough arguments for format string>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "player_has_any_notes": {
+      "error": "",
+      "plan": "-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=0..0 rows=1 loops=1)\n-> Select #2 (subquery in projection; run only once)\n    -> Zero rows (Impossible WHERE noticed after reading const tables)  (cost=0..0 rows=0) (actual time=0..0 rows=0 loops=1)\n-> Select #3 (subquery in projection; run only once)\n    -> Limit: 1 row(s)  (cost=0.35 rows=1) (actual time=0.0048..0.0048 rows=1 loops=1)\n        -> Covering index lookup on PlayerAutoNotes using player_auto_note_rule_hit (playerId=393)  (cost=0.35 rows=1) (actual time=0.0041..0.0041 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005044999998062849,
+        "mean": 0.0003806000226177275,
+        "p50": 0.00034870003582909703,
+        "p95": 0.00048129999777302146,
+        "p99": 0.0004998599993996322
+      }
+    },
+    "rebuildCache": {
+      "status": "skipped_template"
+    },
+    "search_players_with_auto_notes": {
+      "error": "",
+      "plan": "-> Limit: 50 row(s)  (actual time=0.0802..0.0803 rows=1 loops=1)\n    -> Sort: p.`name`, limit input to 50 row(s) per chunk  (actual time=0.0796..0.0796 rows=1 loops=1)\n        -> Table scan on <temporary>  (cost=14.1..16.8 rows=25) (actual time=0.0739..0.074 rows=1 loops=1)\n            -> Temporary table with deduplication  (cost=14..14 rows=25) (actual time=0.0732..0.0732 rows=1 loops=1)\n                -> Nested loop inner join  (cost=11.5 rows=25) (actual time=0.0645..0.0661 rows=1 loops=1)\n                    -> Covering index scan on pan using playerautonotes_player_idx  (cost=2.75 rows=25) (actual time=0.0097..0.015 rows=25 loops=1)\n                    -> Filter: (lower(p.`name`) like <cache>(lower('Player1')))  (cost=0.254 rows=1) (actual time=0.00193..0.00193 rows=0.04 loops=25)\n                        -> Single-row index lookup on p using PRIMARY (id=pan.playerId)  (cost=0.254 rows=1) (actual time=0.00154..0.00156 rows=1 loops=25)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0004363000043667853,
+        "mean": 0.0003836000105366111,
+        "p50": 0.00037209998117759824,
+        "p95": 0.00042590000666677954,
+        "p99": 0.00043422000482678413
+      }
+    },
+    "selectHandKnockoutRules": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0003120000474154949,
+        "mean": 0.0002989200293086469,
+        "p50": 0.00029799999902024865,
+        "p95": 0.00030990004306659104,
+        "p99": 0.00031158004654571416
+      }
+    },
+    "selectHandTourneyId": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00021130003733560443,
+        "mean": 0.00020722000626847148,
+        "p50": 0.00020730000687763095,
+        "p95": 0.0002105800318531692,
+        "p99": 0.0002111560362391174
+      }
+    },
+    "selectHandsPlayersWithWrongTTypeId": {
+      "error": "(1054, \"Unknown column 'tourneyTypeId' in 'where clause'\")",
+      "plan": "<explain failed: (1054, \"Unknown column 'tourneyTypeId' in 'where clause'\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "selectSessionWithMonthId": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0003541000187397003,
+        "mean": 0.0002794600208289921,
+        "p50": 0.0002479000249877572,
+        "p95": 0.0003503200248815119,
+        "p99": 0.0003533440199680626
+      }
+    },
+    "selectSessionWithWeekId": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00028520001797005534,
+        "mean": 0.0002455599955283105,
+        "p50": 0.0002429999876767397,
+        "p95": 0.00027688001282513144,
+        "p99": 0.0002835360169410706
+      }
+    },
+    "selectTourneyAllInHands": {
+      "error": "",
+      "plan": "1\n1\n1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0005775999743491411,
+        "mean": 0.00048273999709635973,
+        "p50": 0.0004632999771274626,
+        "p95": 0.00056681998539716,
+        "p99": 0.0005754439765587449
+      }
+    },
+    "selectTourneyFacts": {
+      "error": "",
+      "plan": "-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=100e-6..100e-6 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005246999789960682,
+        "mean": 0.0004480000003241003,
+        "p50": 0.000464899989310652,
+        "p95": 0.0005149399861693382,
+        "p99": 0.0005227479804307222
+      }
+    },
+    "selectTourneyMaxSeats": {
+      "error": "",
+      "plan": "-> Aggregate: max(g.maxSeats)  (cost=0.8 rows=1) (actual time=0.0081..0.0082 rows=1 loops=1)\n    -> Nested loop inner join  (cost=0.7 rows=1) (actual time=0.007..0.007 rows=0 loops=1)\n        -> Index lookup on h using tourneyId (tourneyId=71487580)  (cost=0.35 rows=1) (actual time=0.0064..0.0064 rows=0 loops=1)\n        -> Single-row index lookup on g using PRIMARY (id=h.gametypeId)  (cost=0.35 rows=1) (never executed)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00037260004319250584,
+        "mean": 0.00030194000573828815,
+        "p50": 0.00028360000578686595,
+        "p95": 0.0003575200331397355,
+        "p99": 0.0003695840411819518
+      }
+    },
+    "selectTourneyPayouts": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0005981000140309334,
+        "mean": 0.0004404200124554336,
+        "p50": 0.00040010001976042986,
+        "p95": 0.0005623800097964704,
+        "p99": 0.0005909560131840408
+      }
+    },
+    "selectTourneyPreflopDecisions": {
+      "error": "",
+      "plan": "1\n1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00048729998525232077,
+        "mean": 0.0004115400020964444,
+        "p50": 0.0003945000353269279,
+        "p95": 0.00047409998951479786,
+        "p99": 0.0004846599861048162
+      }
+    },
+    "selectTourneyResults": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00027860002592206,
+        "mean": 0.0002668000292032957,
+        "p50": 0.0002660000463947654,
+        "p95": 0.0002766400226391852,
+        "p99": 0.000278208025265485
+      }
+    },
+    "selectTourneyStartStacks": {
+      "error": "",
+      "plan": "1\n1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0003144000074826181,
+        "mean": 0.0002862799912691116,
+        "p50": 0.0002796000335365534,
+        "p95": 0.0003075400018133223,
+        "p99": 0.00031302800634875895
+      }
+    },
+    "selectTourneyWithTypeId": {
+      "error": "",
+      "plan": "-> Covering index lookup on Tourneys using tourneyTypeId (tourneyTypeId=1)  (cost=0.35 rows=1) (actual time=0.0056..0.007 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00023980002151802182,
+        "mean": 0.0002319200080819428,
+        "p50": 0.00023010000586509705,
+        "p95": 0.00023816002067178488,
+        "p99": 0.00023947202134877443
+      }
+    },
+    "selectTourneysWithHands": {
+      "error": "",
+      "plan": "-> Group (no aggregates)  (cost=0.56 rows=1) (actual time=0.0097..0.0098 rows=1 loops=1)\n    -> Filter: (hands.tourneyId is not null)  (cost=0.46 rows=1) (actual time=0.0069..0.0087 rows=1 loops=1)\n        -> Covering index range scan on Hands using tourneyId over (NULL < tourneyId)  (cost=0.46 rows=1) (actual time=0.0064..0.0081 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0002481999690644443,
+        "mean": 0.0002403399907052517,
+        "p50": 0.00024389999452978373,
+        "p95": 0.0002474599750712514,
+        "p99": 0.00024805197026580574
+      }
+    },
+    "select_M": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0005655999993905425,
+        "mean": 0.0003151999902911484,
+        "p50": 0.00023669999791309237,
+        "p95": 0.000515139999333769,
+        "p99": 0.0005555079993791878
+      }
+    },
+    "select_S": {
+      "error": "",
+      "plan": "1\n1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0003974999999627471,
+        "mean": 0.00034266001312062145,
+        "p50": 0.0003304000128991902,
+        "p95": 0.0003843800048343837,
+        "p99": 0.0003948760009370744
+      }
+    },
+    "select_SC": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0016212000045925379,
+        "mean": 0.0015667399973608553,
+        "p50": 0.0015611000126227736,
+        "p95": 0.0016118200030177832,
+        "p99": 0.001619324004277587
+      }
+    },
+    "select_S_all": {
+      "error": "",
+      "plan": "1\n1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0004956000484526157,
+        "mean": 0.0004220600123517215,
+        "p50": 0.0004296000115573406,
+        "p95": 0.0004861200461164117,
+        "p99": 0.0004937040479853749
+      }
+    },
+    "select_TC": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0002756000030785799,
+        "mean": 0.00025697998935356734,
+        "p50": 0.0002586999908089638,
+        "p95": 0.00027256000321358443,
+        "p99": 0.00027499200310558084
+      }
+    },
+    "select_W": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00026429997524246573,
+        "mean": 0.0002286400063894689,
+        "p50": 0.00022079999325796962,
+        "p95": 0.00025663998676463964,
+        "p99": 0.0002627679775469005
+      }
+    },
+    "select_cardscache_ring": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0003212000010535121,
+        "mean": 0.000289060000795871,
+        "p50": 0.0002820999943651259,
+        "p95": 0.00031474001007154585,
+        "p99": 0.0003199080028571189
+      }
+    },
+    "select_cardscache_tour": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00024189997930079699,
+        "mean": 0.00022949998965486883,
+        "p50": 0.00022739998530596495,
+        "p95": 0.00023919998202472925,
+        "p99": 0.00024135997984558343
+      }
+    },
+    "select_hudcache_ring": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00034639996010810137,
+        "mean": 0.0003122400026768446,
+        "p50": 0.0003000000142492354,
+        "p95": 0.0003409999771974981,
+        "p99": 0.0003453199635259807
+      }
+    },
+    "select_hudcache_ring_bulk": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0007492000004276633,
+        "mean": 0.00047574001364409925,
+        "p50": 0.0004577000509016216,
+        "p95": 0.0006911800010129809,
+        "p99": 0.0007375960005447269
+      }
+    },
+    "select_hudcache_tour": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0003320000250823796,
+        "mean": 0.00030282001243904234,
+        "p50": 0.00029990001348778605,
+        "p95": 0.00032678002025932074,
+        "p99": 0.00033095602411776777
+      }
+    },
+    "select_hudcache_tour_bulk": {
+      "error": "(1241, 'Operand should contain 6 column(s)')",
+      "plan": "<explain failed: (1241, 'Operand should contain 6 column(s)')>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "select_positionscache_ring": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00036390003515407443,
+        "mean": 0.0003090600133873522,
+        "p50": 0.0002946000313386321,
+        "p95": 0.00035326002398505807,
+        "p99": 0.00036177203292027117
+      }
+    },
+    "select_positionscache_tour": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0002481000265106559,
+        "mean": 0.00024516002740710975,
+        "p50": 0.0002447000006213784,
+        "p95": 0.00024786002468317746,
+        "p99": 0.0002480520261451602
+      }
+    },
+    "sessionGuardHands": {
+      "error": "",
+      "plan": "1\n1\n1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00046419998398050666,
+        "mean": 0.0003963800030760467,
+        "p50": 0.0003723000409081578,
+        "p95": 0.0004532599821686744,
+        "p99": 0.0004620119836181402
+      }
+    },
+    "sessionStats": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND  date_format(h.startTime, '%Y-%m-%d') \\n             ",
+      "plan": "<explain failed: not enough arguments for format string>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "set tx level": {
+      "status": "skipped_ddl"
+    },
+    "settleTourneyPlayerKoWinnings": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0004036999889649451,
+        "mean": 0.00033229998080059887,
+        "p50": 0.00035180000122636557,
+        "p95": 0.00039869998581707475,
+        "p99": 0.000402699988335371
+      }
+    },
+    "singleHand": {
+      "error": "",
+      "plan": "-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=0..100e-6 rows=1 loops=1)\n",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0008286999654956162,
+        "mean": 0.0007286799955181777,
+        "p50": 0.0007026999955996871,
+        "p95": 0.0008193599642254412,
+        "p99": 0.0008268319652415812
+      }
+    },
+    "singleHandBoards": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.000539699976798147,
+        "mean": 0.0003434400074183941,
+        "p50": 0.0002960000419989228,
+        "p95": 0.0004909799783490598,
+        "p99": 0.0005299559771083295
+      }
+    },
+    "store_aof_decision": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00046439998550340533,
+        "mean": 0.000397660001181066,
+        "p50": 0.0003869999782182276,
+        "p95": 0.00045389998704195025,
+        "p99": 0.0004622999858111143
+      }
+    },
+    "store_aof_decision_analysis": {
+      "error": "(1452, 'Cannot add or update a child row: a foreign key constraint fails (`fpdb_bench`.`aofdecisionanalyses`, CONSTRAINT `aofdecisionanalyses_ibfk_1` FOREIGN KEY (`decisionId`) REFERENCES `aofdecision",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "store_board_features": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0003576000453904271,
+        "mean": 0.00029250000370666384,
+        "p50": 0.00027520000003278255,
+        "p95": 0.00034906003857031463,
+        "p99": 0.00035589204402640466
+      }
+    },
+    "store_boards": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0008356000180356205,
+        "mean": 0.0005774800200015306,
+        "p50": 0.0006238000351004303,
+        "p95": 0.0007968600140884518,
+        "p99": 0.0008278520172461867
+      }
+    },
+    "store_file": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00047230004565790296,
+        "mean": 0.00040264003910124303,
+        "p50": 0.00041060004150494933,
+        "p95": 0.0004615200450643897,
+        "p99": 0.0004701440455392003
+      }
+    },
+    "store_hand": {
+      "error": "(1292, \"Incorrect datetime value: '1' for column 'importTime' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "store_hand_states": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00035829999251291156,
+        "mean": 0.00031525999074801805,
+        "p50": 0.0003294000052846968,
+        "p95": 0.0003544399864040315,
+        "p99": 0.00035752799129113556
+      }
+    },
+    "store_hands_actions": {
+      "error": "(1366, \"Incorrect integer value: 'B' for column 'position' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "store_hands_cashout": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005697000306099653,
+        "mean": 0.00041084000840783117,
+        "p50": 0.00034790002973750234,
+        "p95": 0.0005462200264446437,
+        "p99": 0.000565004029776901
+      }
+    },
+    "store_hands_players": {
+      "error": "(1366, \"Incorrect integer value: 'B' for column 'street0InPosition' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "store_hands_pots": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0004634999786503613,
+        "mean": 0.0003460599924437702,
+        "p50": 0.00031669996678829193,
+        "p95": 0.00045195998391136524,
+        "p99": 0.0004611919797025621
+      }
+    },
+    "store_hands_showdown": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00038350000977516174,
+        "mean": 0.0002959999837912619,
+        "p50": 0.0002706999657675624,
+        "p95": 0.00037640000227838754,
+        "p99": 0.0003820800082758069
+      }
+    },
+    "store_hands_situations": {
+      "error": "(1366, \"Incorrect integer value: 'B' for column 'position' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "store_hands_stove": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0006318000378087163,
+        "mean": 0.0003961199894547462,
+        "p50": 0.0003284999984316528,
+        "p95": 0.0005903800250962376,
+        "p99": 0.0006235160352662206
+      }
+    },
+    "store_player_auto_note": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0004379000165499747,
+        "mean": 0.00037058001616969706,
+        "p50": 0.00036479998379945755,
+        "p95": 0.0004287800169549883,
+        "p99": 0.0004360760166309774
+      }
+    },
+    "switchLockOff": {
+      "error": "(1146, \"Table 'fpdb_bench.insertlock' doesn't exist\")",
+      "plan": "<explain failed: (1146, \"Table 'fpdb_bench.insertlock' doesn't exist\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "switchLockOn": {
+      "error": "(1146, \"Table 'fpdb_bench.insertlock' doesn't exist\")",
+      "plan": "<explain failed: (1146, \"Table 'fpdb_bench.insertlock' doesn't exist\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyChipEVByPosition": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   pl.siteId in \\n        AND tt.category in \\n       ",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   pl.siteId in \\n        AND tt.category in \\n        AND tt.limitType in \\n   ' at line 8\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyChipEVByPositionGrid": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   ((h.startTime > '' AND h.startTime < '')\\n         ",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   ((h.startTime > '' AND h.startTime < '')\\n                    OR h.startTim' at line 10\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyGraph": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   pl.siteId in \\n        AND   (t.startTime > '' AND ",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   pl.siteId in \\n        AND   (t.startTime > '' AND t.startTime < '')\\n      ' at line 7\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyGraphType": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   pl.siteId in \\n        AND tt.category in \\n       ",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   pl.siteId in \\n        AND tt.category in \\n        AND tt.limitType in \\n   ' at line 7\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyHandsInRangeSessionFilter": {
+      "error": "",
+      "plan": "-> Table scan on <temporary>  (cost=350..361 rows=664) (actual time=4.77..4.84 rows=663 loops=1)\n    -> Temporary table with deduplication  (cost=350..350 rows=664) (actual time=4.77..4.77 rows=663 loops=1)\n        -> Nested loop inner join  (cost=284 rows=664) (actual time=0.0971..4.36 rows=663 loops=1)\n            -> Left hash join (tt.id = t.tourneyTypeId)  (cost=66.7 rows=664) (actual time=0.0819..2.37 rows=664 loops=1)\n                -> Nested loop left join  (cost=473 rows=664) (actual time=0.0632..2.24 rows=664 loops=1)\n                    -> Nested loop inner join  (cost=257 rows=664) (actual time=0.0611..2.08 rows=664 loops=1)\n                        -> Covering index scan on gt using siteId  (cost=17.7 rows=169) (actual time=0.0379..0.0681 rows=169 loops=1)\n                        -> Index lookup on h using hands_gametype_time_idx (gametypeId=gt.id), with index condition: (TIMESTAMP'0000-00-00 00:00:00' <> h.startTime)  (cost=0.984 rows=3.93) (actual time=0.00523..0.0116 rows=3.93 loops=169)\n                    -> Single-row index lookup on t using PRIMARY (id=h.tourneyId)  (cost=0.25 rows=1) (actual time=122e-6..122e-6 rows=0.00151 loops=664)\n                -> Hash\n                    -> Table scan on tt  (cost=615e-6 rows=1) (actual time=0.0061..0.0072 rows=1 loops=1)\n            -> Limit: 1 row(s)  (cost=0.253 rows=1) (actual time=0.00279..0.00282 rows=0.998 loops=664)\n                -> Covering index lookup on hp using playerSeat_idx (handId=h.id)  (cost=0.253 rows=5.42) (actual time=0.0027..0.0027 rows=0.998 loops=664)\n",
+      "rows": 663,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.010722100036218762,
+        "mean": 0.00977703999960795,
+        "p50": 0.009550700022373348,
+        "p95": 0.010489260021131486,
+        "p99": 0.010675532033201308
+      }
+    },
+    "tourneyPlayerDetailedStats": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   (tt.maxSeats  OR COALESCE(tt.maxSeats, 0) = 0)\\n   ",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   (tt.maxSeats  OR COALESCE(tt.maxSeats, 0) = 0)\\n                  AND   ((t' at line 43\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyResults": {
+      "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   pl.siteId in \\n        AND   ((t.startTime > '' AND",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND   pl.siteId in \\n        AND   ((t.startTime > '' AND t.startTime < '')\\n     ' at line 7\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "updateHandsPlayersForTTypeId": {
+      "error": "(1054, \"Unknown column 'tourneyTypeId' in 'field list'\")",
+      "plan": "<explain failed: (1054, \"Unknown column 'tourneyTypeId' in 'field list'\")>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "updateTourney": {
+      "error": "(1292, \"Incorrect datetime value: '1' for column 'endTime' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "updateTourneyEnd": {
+      "error": "(1292, \"Incorrect datetime value: '1' for column 'endTime' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "updateTourneyStart": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0006366000161506236,
+        "mean": 0.0005047600134275854,
+        "p50": 0.00046500004827976227,
+        "p95": 0.0006277200067415833,
+        "p99": 0.0006348240142688155
+      }
+    },
+    "updateTourneyTypeId": {
+      "error": "",
+      "plan": "1\n1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00036530004581436515,
+        "mean": 0.0002833400038070977,
+        "p50": 0.0002633999683894217,
+        "p95": 0.00034512003185227513,
+        "p99": 0.00036126404302194715
+      }
+    },
+    "updateTourneysPlayer": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0004798000445589423,
+        "mean": 0.00037778003606945274,
+        "p50": 0.00034790002973750234,
+        "p95": 0.0004760000389069319,
+        "p99": 0.00047904004342854024
+      }
+    },
+    "updateTourneysPlayerBounties": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0003155000158585608,
+        "mean": 0.00028725999873131515,
+        "p50": 0.00028550002025440335,
+        "p95": 0.0003107600030489266,
+        "p99": 0.000314552013296634
+      }
+    },
+    "updateTourneysPlayerResults": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005588000058196485,
+        "mean": 0.000438699999358505,
+        "p50": 0.0004685999592766166,
+        "p95": 0.0005480000050738453,
+        "p99": 0.0005566400056704879
+      }
+    },
+    "updateTourneysSessions": {
+      "error": "(1452, 'Cannot add or update a child row: a foreign key constraint fails (`fpdb_bench`.`tourneys`, CONSTRAINT `tourneys_ibfk_2` FOREIGN KEY (`sessionId`) REFERENCES `sessions` (`id`))')",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "update_RSC_H": {
+      "error": "(1265, \"Data truncated for column 'sessionId' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "update_S": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00022330001229420304,
+        "mean": 0.00020980000263080001,
+        "p50": 0.0002082999562844634,
+        "p95": 0.00022032001288607717,
+        "p99": 0.00022270401241257786
+      }
+    },
+    "update_SC": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.001722400018479675,
+        "mean": 0.001173140003811568,
+        "p50": 0.0011397000052966177,
+        "p95": 0.0016495800111442803,
+        "p99": 0.001707836017012596
+      }
+    },
+    "update_S_H": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00025859999004751444,
+        "mean": 0.00022848001681268214,
+        "p50": 0.00021770002786070108,
+        "p95": 0.00025327999610453845,
+        "p99": 0.0002575359912589192
+      }
+    },
+    "update_S_SC": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0002239999594166875,
+        "mean": 0.00022227999288588763,
+        "p50": 0.00022300001000985503,
+        "p95": 0.00022383996983990075,
+        "p99": 0.00022396796150133015
+      }
+    },
+    "update_S_T": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00021980004385113716,
+        "mean": 0.0002135199960321188,
+        "p50": 0.00021139997988939285,
+        "p95": 0.00021952004171907902,
+        "p99": 0.00021974404342472556
+      }
+    },
+    "update_S_TC": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00043750001350417733,
+        "mean": 0.00030590000096708536,
+        "p50": 0.00026679999427869916,
+        "p95": 0.00042296000756323335,
+        "p99": 0.00043459201231598854
+      }
+    },
+    "update_TC": {
+      "status": "skipped_template"
+    },
+    "update_WM_S": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00024889997439458966,
+        "mean": 0.00022565998369827867,
+        "p50": 0.0002367999986745417,
+        "p95": 0.000248699972871691,
+        "p99": 0.0002488599740900099
+      }
+    },
+    "update_aof_decision": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0002590999938547611,
+        "mean": 0.000233039993327111,
+        "p50": 0.0002239999594166875,
+        "p95": 0.0002548599964939058,
+        "p99": 0.0002582519943825901
+      }
+    },
+    "update_aof_decision_analysis": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00022580003133043647,
+        "mean": 0.00021476000547409057,
+        "p50": 0.00021249998826533556,
+        "p95": 0.00022392001701518894,
+        "p99": 0.00022542402846738695
+      }
+    },
+    "update_cardscache": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0009982999763451517,
+        "mean": 0.0008461199933663011,
+        "p50": 0.0008275000145658851,
+        "p95": 0.0009818599792197347,
+        "p99": 0.0009950119769200681
+      }
+    },
+    "update_file": {
+      "error": "(1406, \"Data too long for column 'type' at row 1\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "update_hudcache": {
+      "error": "(1292, \"Truncated incorrect DOUBLE value: '2026-11-03 12:52:13.852647'\")",
+      "plan": "1",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "update_player_auto_note": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0006240999791771173,
+        "mean": 0.0004610999836586416,
+        "p50": 0.0004556999774649739,
+        "p95": 0.0005924999830313028,
+        "p99": 0.0006177799799479544
+      }
+    },
+    "update_player_comment": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0006197000038810074,
+        "mean": 0.0004114799899980426,
+        "p50": 0.000375300005543977,
+        "p95": 0.0005860399920493363,
+        "p99": 0.0006129680015146732
+      }
+    },
+    "update_positionscache": {
+      "error": "",
+      "plan": "1",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0013270999770611525,
+        "mean": 0.0010537599911913276,
+        "p50": 0.0009756000363267958,
+        "p95": 0.001283179980237037,
+        "p99": 0.0013183159776963293
+      }
+    },
+    "vacuum": {
+      "error": "",
+      "plan": "<explain failed: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'optimize table Actions, Autorates, Backings, Boards, Files, Gametypes, Hands, Ha' at line 1\")>",
+      "rows": 40,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.0551759999943897,
+        "mean": 3.016992160002701,
+        "p50": 3.030941700038966,
+        "p95": 3.0510492599918506,
+        "p99": 3.054350651993882
+      }
+    }
+  },
+  "repeats": 5
+}

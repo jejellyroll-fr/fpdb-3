@@ -263,6 +263,47 @@ Findings and perf pistas (all verified against EXPLAIN, none change results):
   heap fetches (395 buffers for 56 rows on PostgreSQL here); deferred until a
   big-database plan shows it, since every index also taxes import writes.
 
+## Full SQL catalogue bench on the three backends (constant dataset)
+
+`tools/benchmark_all_queries.py` executes **every query in the SQL catalogue**
+(333 per backend; ~230 executed per backend — DDL skipped, run-time-assembled
+template queries reported as skipped, DML measured then rolled back) against
+the same populated database (664 hands, constant across backends), with
+parameters resolved from real rows and the EXPLAIN plan captured per query.
+Full JSON: `docs/bench-680-catalog-{sqlite,postgresql,mysql}.json`.
+
+Headline results (p95 ms, queries returning rows on >= 2 backends, excluding
+whole-table dump queries like getHands/getHudCache which are full scans by
+nature):
+
+| query | SQLite | PostgreSQL 18.3 | MySQL 8.4.3 |
+|---|---|---|---|
+| clearHudCache (DELETE all) | 0.8 | 5.3 | **142.2** |
+| clear_S_H | 1.9 | 29.1 | 2.0 |
+| tourneyHandsInRangeSessionFilter | 3.6 | - | 10.5 |
+| handsInRangeSessionFilter / handsInRangeSession | 0.9 / 0.4 | - | 6.8 / 3.9 |
+| getLimits / getCashLimits | 1.9 / 0.2 | 2.8 / 1.9 | 3.4 / 2.0 |
+| list_indexes / list_tables (catalogue introspection) | 0.1 / 0.1 | 3.4 / 1.9 | - / 1.8 |
+| store_hands_stove / store_hands_pots (import writes) | 0.07 / 0.16 | 2.9 / 1.5 | 0.6 / 0.5 |
+
+Findings:
+
+* **No point query seq-scans a big table on any backend** — the only Seq
+  Scan / Table scan hits in the captured plans are the whole-table dumps
+  (getHands*, getHudCache, getPositions, getHandCount) and the DELETE-all
+  maintenance queries, which are full scans by design.
+* **MySQL is the slowest on full-table writes and filtered range queries**
+  (clearHudCache 142 ms vs 5.3 ms PG; handsInRange* 4-7 ms vs <1 ms SQLite);
+  import-heavy maintenance should expect that gap, and on a LAN it multiplies
+  per round trip.
+* The live HUD path queries (aggregated/session/many-reads) are all in the
+  sub-10-ms p95 band on this dataset on every backend — consistent with the
+  earlier per-query bench; the multi-table cost is statement *count*, already
+  addressed by R4.
+* Remaining errors in the report are bench artifacts (run-time-assembled
+  report queries needing caller-built clauses, and type-strict params), not
+  product bugs; they are listed with their message in the JSON.
+
 ## Query-plan review (P1)
 
 Use the existing `tools/explain_hud_queries.py` against the production PostgreSQL

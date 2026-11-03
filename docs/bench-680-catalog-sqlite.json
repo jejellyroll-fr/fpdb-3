@@ -1,0 +1,3533 @@
+{
+  "backend": "sqlite",
+  "dataset_hands": 664,
+  "queries": {
+    "addActionBubbleFactorsTourneyIndex": {
+      "status": "skipped_ddl"
+    },
+    "addAofAnalysesDecisionIndex": {
+      "status": "skipped_ddl"
+    },
+    "addAofAnalysesStatusIndex": {
+      "status": "skipped_ddl"
+    },
+    "addAofDecisionsHandIndex": {
+      "status": "skipped_ddl"
+    },
+    "addAofDecisionsPlayerIndex": {
+      "status": "skipped_ddl"
+    },
+    "addAofDecisionsRangeIndex": {
+      "status": "skipped_ddl"
+    },
+    "addBoardFeaturesHandIndex": {
+      "status": "skipped_ddl"
+    },
+    "addBoardFeaturesTextureIndex": {
+      "status": "skipped_ddl"
+    },
+    "addBombPotColumn": {
+      "status": "skipped_ddl"
+    },
+    "addBombPotIndex": {
+      "status": "skipped_ddl"
+    },
+    "addCardsCacheCompundIndex": {
+      "status": "skipped_ddl"
+    },
+    "addEffStackIndex": {
+      "status": "skipped_ddl"
+    },
+    "addFilesIndex": {
+      "status": "skipped_ddl"
+    },
+    "addFinalPotIndex": {
+      "status": "skipped_ddl"
+    },
+    "addHandsIndex": {
+      "status": "skipped_ddl"
+    },
+    "addHandsPlayersSeat": {
+      "status": "skipped_ddl"
+    },
+    "addHeroSeat": {
+      "status": "skipped_ddl"
+    },
+    "addHudCacheCompundIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayerAutoNotesHandIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayerAutoNotesPlayerIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayerAutoNotesRuleIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayerHeroesIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayerNameIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayersIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayersSeat": {
+      "status": "skipped_ddl"
+    },
+    "addPositionIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPositionsCacheCompundIndex": {
+      "status": "skipped_ddl"
+    },
+    "addSeatsIndex": {
+      "status": "skipped_ddl"
+    },
+    "addSessionsCacheCompundIndex": {
+      "status": "skipped_ddl"
+    },
+    "addSplashPotColumn": {
+      "status": "skipped_ddl"
+    },
+    "addSplashPotIndex": {
+      "status": "skipped_ddl"
+    },
+    "addStartCardsIndex": {
+      "status": "skipped_ddl"
+    },
+    "addStartCashIndex": {
+      "status": "skipped_ddl"
+    },
+    "addStreetIndex": {
+      "status": "skipped_ddl"
+    },
+    "addTPlayersIndex": {
+      "status": "skipped_ddl"
+    },
+    "addTableNameIndex": {
+      "status": "skipped_ddl"
+    },
+    "addTotalProfitIndex": {
+      "status": "skipped_ddl"
+    },
+    "addTourneyIndex": {
+      "status": "skipped_ddl"
+    },
+    "addTourneysCacheCompundIndex": {
+      "status": "skipped_ddl"
+    },
+    "addWinningsIndex": {
+      "status": "skipped_ddl"
+    },
+    "analyze": {
+      "status": "skipped_ddl"
+    },
+    "clearCardsCache": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.120002267882228e-05,
+        "mean": 2.277999883517623e-05,
+        "p50": 1.8599967006593943e-05,
+        "p95": 3.7040014285594224e-05,
+        "p99": 4.0368021000176665e-05
+      }
+    },
+    "clearCardsCacheTourneyType": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.869994543492794e-05,
+        "mean": 1.7859984654933215e-05,
+        "p50": 1.2499978765845299e-05,
+        "p95": 3.375995438545942e-05,
+        "p99": 3.7711947225034234e-05
+      }
+    },
+    "clearCardsCacheWeeksMonths": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.789999755099416e-05,
+        "mean": 1.8499989528208972e-05,
+        "p50": 1.3499986380338669e-05,
+        "p95": 3.321999683976173e-05,
+        "p99": 3.6963997408747674e-05
+      }
+    },
+    "clearHudCache": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0009742000256665051,
+        "mean": 0.00027002000715583565,
+        "p50": 9.34000127017498e-05,
+        "p95": 0.0007996400236152111,
+        "p99": 0.0009392880252562464
+      }
+    },
+    "clearHudCacheTourneyType": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 7.020001066848636e-05,
+        "mean": 5.512000061571598e-05,
+        "p50": 5.089998012408614e-05,
+        "p95": 6.750000175088644e-05,
+        "p99": 6.966000888496636e-05
+      }
+    },
+    "clearMonths": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.2599957194179296e-05,
+        "mean": 1.5899993013590574e-05,
+        "p50": 1.1300027836114168e-05,
+        "p95": 2.8779963031411168e-05,
+        "p99": 3.183595836162567e-05
+      }
+    },
+    "clearPositionsCache": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0002961999853141606,
+        "mean": 7.365999044850469e-05,
+        "p50": 1.7599959392100573e-05,
+        "p95": 0.0002412999863736331,
+        "p99": 0.0002852199855260551
+      }
+    },
+    "clearPositionsCacheTourneyType": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.860000288113952e-05,
+        "mean": 1.8039997667074203e-05,
+        "p50": 1.279998105019331e-05,
+        "p95": 3.366000019013881e-05,
+        "p99": 3.761200234293938e-05
+      }
+    },
+    "clearPositionsCacheWeeksMonths": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.809999907389283e-05,
+        "mean": 1.8680014181882144e-05,
+        "p50": 1.3800046872347593e-05,
+        "p95": 3.3499998971819876e-05,
+        "p99": 3.717999905347824e-05
+      }
+    },
+    "clearSessions": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.5299977753311396e-05,
+        "mean": 1.6259995754808186e-05,
+        "p50": 1.1300027836114168e-05,
+        "p95": 3.073997795581817e-05,
+        "p99": 3.438797779381275e-05
+      }
+    },
+    "clearSessionsCache": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.7400051951408386e-05,
+        "mean": 1.702001318335533e-05,
+        "p50": 1.1700030881911516e-05,
+        "p95": 3.254003822803497e-05,
+        "p99": 3.64280492067337e-05
+      }
+    },
+    "clearTourneysCache": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.529999569058418e-05,
+        "mean": 1.8500012811273336e-05,
+        "p50": 1.1699972674250603e-05,
+        "p95": 3.8920005317777394e-05,
+        "p99": 4.4023997616022826e-05
+      }
+    },
+    "clearWeeks": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.290001768618822e-05,
+        "mean": 1.6660010442137718e-05,
+        "p50": 1.260003773495555e-05,
+        "p95": 2.916001249104738e-05,
+        "p99": 3.215201664716006e-05
+      }
+    },
+    "clear_M_S": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 9.599997429177165e-05,
+        "mean": 4.026000387966633e-05,
+        "p50": 1.479999627918005e-05,
+        "p95": 8.951998315751552e-05,
+        "p99": 9.470397606492042e-05
+      }
+    },
+    "clear_S_H": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0020147000323049724,
+        "mean": 0.0013236600207164884,
+        "p50": 0.0011665000347420573,
+        "p95": 0.0018487600260414182,
+        "p99": 0.001981512031052262
+      }
+    },
+    "clear_S_SC": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.749999450519681e-05,
+        "mean": 1.7079990357160568e-05,
+        "p50": 1.1700030881911516e-05,
+        "p95": 3.259999211877584e-05,
+        "p99": 3.6519994027912615e-05
+      }
+    },
+    "clear_S_T": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.20999713242054e-05,
+        "mean": 2.4119997397065164e-05,
+        "p50": 1.9900035113096237e-05,
+        "p95": 3.7799985148012634e-05,
+        "p99": 4.1239974088966846e-05
+      }
+    },
+    "clear_S_TC": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.1400006264448166e-05,
+        "mean": 1.5660002827644347e-05,
+        "p50": 1.190003240481019e-05,
+        "p95": 2.762000076472759e-05,
+        "p99": 3.064400516450405e-05
+      }
+    },
+    "clear_W_S": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 2.6300025638192892e-05,
+        "mean": 1.436000457033515e-05,
+        "p50": 1.1299969628453255e-05,
+        "p95": 2.342002699151635e-05,
+        "p99": 2.5724025908857585e-05
+      }
+    },
+    "countTourneyPlayerKoWinnings": {
+      "error": "",
+      "plan": "4",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 6.630003917962313e-05,
+        "mean": 2.5880010798573495e-05,
+        "p50": 1.5400000847876072e-05,
+        "p95": 5.656003486365079e-05,
+        "p99": 6.435203831642865e-05
+      }
+    },
+    "count_player_auto_notes": {
+      "error": "",
+      "plan": "3",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.569999873638153e-05,
+        "mean": 1.954002073034644e-05,
+        "p50": 1.2700038496404886e-05,
+        "p95": 3.9399997331202026e-05,
+        "p99": 4.443999845534563e-05
+      }
+    },
+    "createActionBubbleFactorsTable": {
+      "status": "skipped_ddl"
+    },
+    "createActionsTable": {
+      "status": "skipped_ddl"
+    },
+    "createAofDecisionAnalysesTable": {
+      "status": "skipped_ddl"
+    },
+    "createAofDecisionsTable": {
+      "status": "skipped_ddl"
+    },
+    "createAutoratesTable": {
+      "status": "skipped_ddl"
+    },
+    "createBackingsTable": {
+      "status": "skipped_ddl"
+    },
+    "createBoardFeaturesTable": {
+      "status": "skipped_ddl"
+    },
+    "createBoardsTable": {
+      "status": "skipped_ddl"
+    },
+    "createCardsCacheTable": {
+      "status": "skipped_ddl"
+    },
+    "createFilesTable": {
+      "status": "skipped_ddl"
+    },
+    "createGametypesTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandStatesTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsActionsTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsCashoutTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsPlayersTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsPotsTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsShowdownTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsSituationsTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsStoveTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsTable": {
+      "status": "skipped_ddl"
+    },
+    "createHudCacheTable": {
+      "status": "skipped_ddl"
+    },
+    "createMonthsTable": {
+      "status": "skipped_ddl"
+    },
+    "createPlayerAutoNotesTable": {
+      "status": "skipped_ddl"
+    },
+    "createPlayersTable": {
+      "status": "skipped_ddl"
+    },
+    "createPositionsCacheTable": {
+      "status": "skipped_ddl"
+    },
+    "createRankTable": {
+      "status": "skipped_ddl"
+    },
+    "createRawHands": {
+      "status": "skipped_ddl"
+    },
+    "createRawTourneys": {
+      "status": "skipped_ddl"
+    },
+    "createSessionsCacheTable": {
+      "status": "skipped_ddl"
+    },
+    "createSessionsTable": {
+      "status": "skipped_ddl"
+    },
+    "createSettingsTable": {
+      "status": "skipped_ddl"
+    },
+    "createSitesTable": {
+      "status": "skipped_ddl"
+    },
+    "createStartCardsTable": {
+      "status": "skipped_ddl"
+    },
+    "createTourneyPayoutsTable": {
+      "status": "skipped_ddl"
+    },
+    "createTourneyTypesTable": {
+      "status": "skipped_ddl"
+    },
+    "createTourneysCacheTable": {
+      "status": "skipped_ddl"
+    },
+    "createTourneysPlayersTable": {
+      "status": "skipped_ddl"
+    },
+    "createTourneysTable": {
+      "status": "skipped_ddl"
+    },
+    "createWeeksTable": {
+      "status": "skipped_ddl"
+    },
+    "deleteActionBubbleFactors": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.99000127799809e-05,
+        "mean": 1.8380011897534133e-05,
+        "p50": 1.2399978004395962e-05,
+        "p95": 3.5040010698139663e-05,
+        "p99": 3.892801236361265e-05
+      }
+    },
+    "deleteMonthId": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 2.6600027922540903e-05,
+        "mean": 1.4859996736049651e-05,
+        "p50": 1.209997572004795e-05,
+        "p95": 2.378001809120178e-05,
+        "p99": 2.6036025956273077e-05
+      }
+    },
+    "deleteTourneyPayouts": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.4899992644786835e-05,
+        "mean": 1.9079993944615125e-05,
+        "p50": 1.209997572004795e-05,
+        "p95": 3.8799992762506e-05,
+        "p99": 4.3679992668330666e-05
+      }
+    },
+    "deleteTourneyTypeId": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.860000288113952e-05,
+        "mean": 2.3620016872882842e-05,
+        "p50": 2.0000035874545574e-05,
+        "p95": 3.513999981805682e-05,
+        "p99": 3.790800226852298e-05
+      }
+    },
+    "deleteWeekId": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 2.3900007363408804e-05,
+        "mean": 1.4759995974600314e-05,
+        "p50": 1.2399978004395962e-05,
+        "p95": 2.1840014960616826e-05,
+        "p99": 2.3488008882850408e-05
+      }
+    },
+    "delete_S": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 2.4600012693554163e-05,
+        "mean": 1.4379993081092834e-05,
+        "p50": 1.1800031643360853e-05,
+        "p95": 2.2120005451142787e-05,
+        "p99": 2.410401124507189e-05
+      }
+    },
+    "delete_SC": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 2.4999957531690598e-05,
+        "mean": 1.4479993842542171e-05,
+        "p50": 1.179997343569994e-05,
+        "p95": 2.2519961930811405e-05,
+        "p99": 2.450395841151476e-05
+      }
+    },
+    "drop_table": {
+      "status": "skipped_ddl"
+    },
+    "fetchNewCardsCacheTourneyTypeIds": {
+      "error": "",
+      "plan": "3\n5",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 5.560001591220498e-05,
+        "mean": 2.6720005553215743e-05,
+        "p50": 1.6300007700920105e-05,
+        "p95": 5.048001185059547e-05,
+        "p99": 5.4576015099883075e-05
+      }
+    },
+    "fetchNewCardsCacheWeeksMonths": {
+      "error": "",
+      "plan": "2\n6\n16\n19\n22",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 8.430000161752105e-05,
+        "mean": 3.624000819399953e-05,
+        "p50": 2.3800006601959467e-05,
+        "p95": 7.268000626936554e-05,
+        "p99": 8.197600254788995e-05
+      }
+    },
+    "fetchNewHudCacheTourneyTypeIds": {
+      "error": "",
+      "plan": "3\n5",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 5.23999915458262e-05,
+        "mean": 2.3419992066919805e-05,
+        "p50": 1.5900004655122757e-05,
+        "p95": 4.54199849627912e-05,
+        "p99": 5.10039902292192e-05
+      }
+    },
+    "fetchNewPositionsCacheTourneyTypeIds": {
+      "error": "",
+      "plan": "3\n5",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.410004476085305e-05,
+        "mean": 2.1760014351457358e-05,
+        "p50": 1.6000005416572094e-05,
+        "p95": 3.8760039024055e-05,
+        "p99": 4.3032043613493436e-05
+      }
+    },
+    "fetchNewPositionsCacheWeeksMonths": {
+      "error": "",
+      "plan": "2\n6\n16\n19\n22",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 6.86999992467463e-05,
+        "mean": 3.261999227106571e-05,
+        "p50": 2.359994687139988e-05,
+        "p95": 5.99200022406876e-05,
+        "p99": 6.694399984553456e-05
+      }
+    },
+    "find_aof_decision": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 4.600000102072954e-05,
+        "mean": 1.984001137316227e-05,
+        "p50": 1.2999982573091984e-05,
+        "p95": 3.973999992012977e-05,
+        "p99": 4.4748000800609585e-05
+      }
+    },
+    "find_aof_decision_analysis": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 5.3800002206116915e-05,
+        "mean": 2.628000220283866e-05,
+        "p50": 1.71000137925148e-05,
+        "p95": 4.9000000581145285e-05,
+        "p99": 5.2840001881122586e-05
+      }
+    },
+    "find_player_auto_note": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 4.9200025387108326e-05,
+        "mean": 2.1080009173601865e-05,
+        "p50": 1.379998866468668e-05,
+        "p95": 4.244002047926187e-05,
+        "p99": 4.784802440553904e-05
+      }
+    },
+    "getAutorates": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 4.2600033339113e-05,
+        "mean": 1.8480035942047833e-05,
+        "p50": 1.2200034689158201e-05,
+        "p95": 3.686003619804978e-05,
+        "p99": 4.1452033910900355e-05
+      }
+    },
+    "getBackings": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 4.919996717944741e-05,
+        "mean": 1.9379984587430953e-05,
+        "p50": 1.1699972674250603e-05,
+        "p95": 4.201997071504592e-05,
+        "p99": 4.7763967886567114e-05
+      }
+    },
+    "getCashLimits": {
+      "error": "",
+      "plan": "4\n26\n27",
+      "rows": 54,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00023879995569586754,
+        "mean": 0.00019175998168066143,
+        "p50": 0.00018879998242482543,
+        "p95": 0.0002292999532073736,
+        "p99": 0.00023689995519816877
+      }
+    },
+    "getCategoryBySiteAndPlayer": {
+      "error": "",
+      "plan": "6\n10\n14\n20\n34",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 9.180000051856041e-05,
+        "mean": 3.836000105366111e-05,
+        "p50": 2.500001573935151e-05,
+        "p95": 7.879999466240404e-05,
+        "p99": 8.919999934732914e-05
+      }
+    },
+    "getCategoryBySiteAndPlayerRing": {
+      "error": "",
+      "plan": "7\n13\n18\n21\n35",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0005267999949865043,
+        "mean": 0.00016703999135643245,
+        "p50": 7.6299998909235e-05,
+        "p95": 0.0004378399928100406,
+        "p99": 0.0005090079945512116
+      }
+    },
+    "getCurrencies": {
+      "error": "",
+      "plan": "7\n9",
+      "rows": 5,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00011169997742399573,
+        "mean": 7.747998461127281e-05,
+        "p50": 7.000000914558768e-05,
+        "p95": 0.00010347997304052114,
+        "p99": 0.0001100559765473008
+      }
+    },
+    "getCurrencyBySiteAndPlayer": {
+      "error": "",
+      "plan": "7\n13\n18\n21\n33",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0001653000363148749,
+        "mean": 9.654000168666244e-05,
+        "p50": 7.71000050008297e-05,
+        "p95": 0.0001504000276327133,
+        "p99": 0.00016232003457844257
+      }
+    },
+    "getGames": {
+      "error": "",
+      "plan": "3\n11",
+      "rows": 19,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 7.499998901039362e-05,
+        "mean": 5.658000009134412e-05,
+        "p50": 5.229999078437686e-05,
+        "p95": 7.071999134495854e-05,
+        "p99": 7.41439894773066e-05
+      }
+    },
+    "getGametypeFL": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 8.549995254725218e-05,
+        "mean": 4.1019974742084744e-05,
+        "p50": 3.239995567128062e-05,
+        "p95": 7.663995493203401e-05,
+        "p99": 8.372795302420855e-05
+      }
+    },
+    "getGametypeNL": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 7.870001718401909e-05,
+        "mean": 3.8120034150779245e-05,
+        "p50": 2.7800037059932947e-05,
+        "p95": 6.880002329126e-05,
+        "p99": 7.672001840546728e-05
+      }
+    },
+    "getGametypes": {
+      "error": "",
+      "plan": "2",
+      "rows": 169,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0007367999642156065,
+        "mean": 0.0006467199884355069,
+        "p50": 0.000645299965981394,
+        "p95": 0.0007185799768194556,
+        "p99": 0.0007331559667363763
+      }
+    },
+    "getHandCount": {
+      "error": "",
+      "plan": "4",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00011790002463385463,
+        "mean": 3.352001076564193e-05,
+        "p50": 1.2299977242946625e-05,
+        "p95": 9.720001835376022e-05,
+        "p99": 0.00011376002337783575
+      }
+    },
+    "getHands": {
+      "error": "",
+      "plan": "2",
+      "rows": 664,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.010624199989251792,
+        "mean": 0.0069960600114427505,
+        "p50": 0.006080800027120858,
+        "p95": 0.00974469999782741,
+        "p99": 0.010448299990966916
+      }
+    },
+    "getHandsActions": {
+      "error": "",
+      "plan": "2",
+      "rows": 9952,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.06099859997630119,
+        "mean": 0.05566403998527676,
+        "p50": 0.055377200013026595,
+        "p95": 0.06011733997147531,
+        "p99": 0.06082234797533602
+      }
+    },
+    "getHandsPlayers": {
+      "error": "",
+      "plan": "2",
+      "rows": 3771,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.2561979999882169,
+        "mean": 0.23425175999291242,
+        "p50": 0.2301747999736108,
+        "p95": 0.2520390599966049,
+        "p99": 0.2553662119898945
+      }
+    },
+    "getHudCache": {
+      "error": "",
+      "plan": "2",
+      "rows": 2270,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.1770333000458777,
+        "mean": 0.15896918000653387,
+        "p50": 0.15589460002956912,
+        "p95": 0.1746069600339979,
+        "p99": 0.17654803204350172
+      }
+    },
+    "getLimits": {
+      "error": "",
+      "plan": "4\n14\n15",
+      "rows": 27,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.002326899964828044,
+        "mean": 0.0005282400059513747,
+        "p50": 6.290001329034567e-05,
+        "p95": 0.0018879399751313027,
+        "p99": 0.0022391079668886956
+      }
+    },
+    "getLimits2": {
+      "error": "",
+      "plan": "4\n18\n19",
+      "rows": 55,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00021329999435693026,
+        "mean": 0.00018017998663708568,
+        "p50": 0.00017139996634796262,
+        "p95": 0.00020625999895855783,
+        "p99": 0.00021189199527725576
+      }
+    },
+    "getLimits3": {
+      "error": "near \"else\": syntax error",
+      "plan": "<explain failed: near \"else\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getPlayerId": {
+      "error": "",
+      "plan": "2",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 8.169998181983829e-05,
+        "mean": 2.9619992710649966e-05,
+        "p50": 1.6700010746717453e-05,
+        "p95": 6.90799788571894e-05,
+        "p99": 7.917598122730851e-05
+      }
+    },
+    "getPlayers": {
+      "error": "",
+      "plan": "2",
+      "rows": 427,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0009413000079803169,
+        "mean": 0.000864820007700473,
+        "p50": 0.000887800008058548,
+        "p95": 0.0009323000092990696,
+        "p99": 0.0009395000082440673
+      }
+    },
+    "getPositionByPlayerAndHandid": {
+      "error": "",
+      "plan": "6\n12\n17\n30",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0002717000315897167,
+        "mean": 9.879999561235309e-05,
+        "p50": 5.589995998889208e-05,
+        "p95": 0.00022952002473175523,
+        "p99": 0.0002632640302181244
+      }
+    },
+    "getPositions": {
+      "error": "",
+      "plan": "7",
+      "rows": 11,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00013500003842636943,
+        "mean": 4.656000528484583e-05,
+        "p50": 2.4200009647756815e-05,
+        "p95": 0.00011348002590239047,
+        "p99": 0.00013069603592157363
+      }
+    },
+    "getRawHands": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 4.610000178217888e-05,
+        "mean": 1.9160029478371143e-05,
+        "p50": 1.2200034689158201e-05,
+        "p95": 3.972001140937208e-05,
+        "p99": 4.4824003707617516e-05
+      }
+    },
+    "getRawTourneys": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 3.789999755099416e-05,
+        "mean": 1.708000199869275e-05,
+        "p50": 1.1699972674250603e-05,
+        "p95": 3.2939994707703586e-05,
+        "p99": 3.690799698233604e-05
+      }
+    },
+    "getRingProfitAllHandsPlayerIdSite": {
+      "error": "near \"AND\": syntax error",
+      "plan": "<explain failed: near \"AND\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getRingProfitAllHandsPlayerIdSiteInBB": {
+      "error": "near \"AND\": syntax error",
+      "plan": "<explain failed: near \"AND\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getRingProfitAllHandsPlayerIdSiteInDollars": {
+      "error": "near \"AND\": syntax error",
+      "plan": "<explain failed: near \"AND\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getSettings": {
+      "error": "",
+      "plan": "2",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.460003063082695e-05,
+        "mean": 1.6260030679404736e-05,
+        "p50": 1.1700030881911516e-05,
+        "p95": 3.0200032051652665e-05,
+        "p99": 3.372003091499209e-05
+      }
+    },
+    "getSiteId": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 4.190002800896764e-05,
+        "mean": 2.472002524882555e-05,
+        "p50": 2.0400038920342922e-05,
+        "p95": 3.780002007260918e-05,
+        "p99": 4.1080026421695947e-05
+      }
+    },
+    "getSiteTourneyNos": {
+      "error": "",
+      "plan": "4\n10\n14",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 5.6500022765249014e-05,
+        "mean": 2.500001573935151e-05,
+        "p50": 1.7000013031065464e-05,
+        "p95": 4.88400226458907e-05,
+        "p99": 5.496802274137735e-05
+      }
+    },
+    "getSites": {
+      "error": "",
+      "plan": "2",
+      "rows": 130,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00014029996236786246,
+        "mean": 0.00012011999497190118,
+        "p50": 0.00011290004476904869,
+        "p95": 0.00013679997064173222,
+        "p99": 0.00013959996402263642
+      }
+    },
+    "getTourneyByTourneyNo": {
+      "error": "",
+      "plan": "3\n9",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 7.569999434053898e-05,
+        "mean": 3.0140008311718704e-05,
+        "p50": 1.850002445280552e-05,
+        "p95": 6.464000325649976e-05,
+        "p99": 7.348799612373113e-05
+      }
+    },
+    "getTourneyCount": {
+      "error": "",
+      "plan": "4",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.240003181621432e-05,
+        "mean": 1.780001912266016e-05,
+        "p50": 1.1400028597563505e-05,
+        "p95": 3.6560022272169585e-05,
+        "p99": 4.123202990740537e-05
+      }
+    },
+    "getTourneyInfo": {
+      "error": "",
+      "plan": "4\n8\n13",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00015129998791962862,
+        "mean": 5.521998973563313e-05,
+        "p50": 3.090000245720148e-05,
+        "p95": 0.00012759998207911846,
+        "p99": 0.0001465599867515266
+      }
+    },
+    "getTourneyNames": {
+      "error": "",
+      "plan": "2",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.070000093430281e-05,
+        "mean": 1.592002809047699e-05,
+        "p50": 1.260003773495555e-05,
+        "p95": 2.7120008599013087e-05,
+        "p99": 2.9984002467244863e-05
+      }
+    },
+    "getTourneyPlayerInfo": {
+      "error": "",
+      "plan": "7\n13\n18\n23\n29",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00011979998089373112,
+        "mean": 4.496000474318862e-05,
+        "p50": 2.5900022592395544e-05,
+        "p95": 0.00010151999304071067,
+        "p99": 0.00011614398332312703
+      }
+    },
+    "getTourneyTypeCount": {
+      "error": "",
+      "plan": "4",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.2100011594593525e-05,
+        "mean": 1.5400012489408255e-05,
+        "p50": 1.1100026313215494e-05,
+        "p95": 2.8100004419684405e-05,
+        "p99": 3.1300010159611706e-05
+      }
+    },
+    "getTourneyTypeId": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00015759997768327594,
+        "mean": 6.255998741835355e-05,
+        "p50": 3.840000135824084e-05,
+        "p95": 0.0001341999741271138,
+        "p99": 0.00015291997697204353
+      }
+    },
+    "getTourneyTypeIdByTourneyNo": {
+      "error": "",
+      "plan": "3\n9",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00014000001829117537,
+        "mean": 6.300000241026283e-05,
+        "p50": 4.3599982745945454e-05,
+        "p95": 0.00012094001285731792,
+        "p99": 0.00013618801720440387
+      }
+    },
+    "getTourneyTypes": {
+      "error": "",
+      "plan": "2",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 8.50000069476664e-05,
+        "mean": 3.968001110479236e-05,
+        "p50": 2.8099981136620045e-05,
+        "p95": 7.38800037652254e-05,
+        "p99": 8.27760063111782e-05
+      }
+    },
+    "getTourneyTypesIds": {
+      "error": "",
+      "plan": "2",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.149994881823659e-05,
+        "mean": 1.567997969686985e-05,
+        "p50": 1.1899974197149277e-05,
+        "p95": 2.7699954807758327e-05,
+        "p99": 3.0739950016140935e-05
+      }
+    },
+    "getTourneys": {
+      "error": "",
+      "plan": "2",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 6.389996269717813e-05,
+        "mean": 3.121998161077499e-05,
+        "p50": 2.2599997464567423e-05,
+        "p95": 5.611996166408061e-05,
+        "p99": 6.234396249055863e-05
+      }
+    },
+    "getTourneysPlayers": {
+      "error": "",
+      "plan": "2",
+      "rows": 10,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 8.460000390186906e-05,
+        "mean": 4.3599994387477634e-05,
+        "p50": 3.3599964808672667e-05,
+        "p95": 7.475999882444738e-05,
+        "p99": 8.263200288638471e-05
+      }
+    },
+    "getTourneysPlayersByIds": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 4.929996794089675e-05,
+        "mean": 2.2779975552111864e-05,
+        "p50": 1.6400008462369442e-05,
+        "p95": 4.28399653173983e-05,
+        "p99": 4.800796741619706e-05
+      }
+    },
+    "getTourneysPlayersByTourney": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 3.7299992982298136e-05,
+        "mean": 1.7979985568672418e-05,
+        "p50": 1.3199984095990658e-05,
+        "p95": 3.2719993032515046e-05,
+        "p99": 3.638399299234152e-05
+      }
+    },
+    "get_actual_seat": {
+      "error": "",
+      "plan": "3\n7\n11",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 6.260001100599766e-05,
+        "mean": 2.7020007837563754e-05,
+        "p50": 1.8000020645558834e-05,
+        "p95": 5.394001491367816e-05,
+        "p99": 6.086801178753376e-05
+      }
+    },
+    "get_aof_action_observations": {
+      "error": "",
+      "plan": "10\n13\n27\n32\n62",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0001805999781936407,
+        "mean": 6.601999048143626e-05,
+        "p50": 3.709999145939946e-05,
+        "p95": 0.00015251997392624612,
+        "p99": 0.0001749839773401618
+      }
+    },
+    "get_aof_decision_scope": {
+      "error": "",
+      "plan": "4\n7\n10",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 6.600003689527512e-05,
+        "mean": 2.6020011864602567e-05,
+        "p50": 1.610000617802143e-05,
+        "p95": 5.630003288388251e-05,
+        "p99": 6.406003609299659e-05
+      }
+    },
+    "get_aof_profile_stats": {
+      "error": "",
+      "plan": "3\n13\n32\n35\n103\n126\n141\n156\n175\n187",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0005152999656274915,
+        "mean": 0.00021919999271631242,
+        "p50": 0.0001446999958716333,
+        "p95": 0.00044193997746333474,
+        "p99": 0.0005006279679946601
+      }
+    },
+    "get_aof_range_observations": {
+      "error": "",
+      "plan": "10\n13\n30\n37\n67",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00014950003242120147,
+        "mean": 5.9640011750161646e-05,
+        "p50": 3.709999145939946e-05,
+        "p95": 0.0001274200272746384,
+        "p99": 0.00014508403139188884
+      }
+    },
+    "get_auto_note_player_summary": {
+      "error": "datatype mismatch",
+      "plan": "14\n17\n20\n25\n30\n86",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_auto_note_rule_summary": {
+      "error": "",
+      "plan": "14\n17\n20\n25\n68",
+      "rows": 6,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00015470001380890608,
+        "mean": 7.466000970453024e-05,
+        "p50": 5.43000060133636e-05,
+        "p95": 0.0001355200191028416,
+        "p99": 0.0001508640148676932
+      }
+    },
+    "get_cards": {
+      "error": "",
+      "plan": "6\n10\n13",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00018220004858449101,
+        "mean": 8.800000650808216e-05,
+        "p50": 6.310001481324434e-05,
+        "p95": 0.00016032003331929444,
+        "p99": 0.00017782404553145172
+      }
+    },
+    "get_common_cards": {
+      "error": "",
+      "plan": "2",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.240003181621432e-05,
+        "mean": 2.180000301450491e-05,
+        "p50": 1.650000922381878e-05,
+        "p95": 3.744002897292375e-05,
+        "p99": 4.1408031247556206e-05
+      }
+    },
+    "get_date_nhands_ago": {
+      "error": "no such function: greatest",
+      "plan": "<explain failed: no such function: greatest>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_first_date": {
+      "error": "",
+      "plan": "3",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.0700018871575594e-05,
+        "mean": 1.8439989071339367e-05,
+        "p50": 1.279998105019331e-05,
+        "p95": 3.5340012982487674e-05,
+        "p99": 3.962801769375801e-05
+      }
+    },
+    "get_gameinfo_from_hid": {
+      "error": "",
+      "plan": "7\n10\n13\n18\n21",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00012889999197795987,
+        "mean": 5.526000168174505e-05,
+        "p50": 3.689998993650079e-05,
+        "p95": 0.00011079999385401605,
+        "p99": 0.0001252799923531711
+      }
+    },
+    "get_hand_1day_ago": {
+      "error": "",
+      "plan": "3",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 5.449994932860136e-05,
+        "mean": 2.4179986212402582e-05,
+        "p50": 1.6400008462369442e-05,
+        "p95": 4.717996343970298e-05,
+        "p99": 5.3035952150821684e-05
+      }
+    },
+    "get_hands_cashout": {
+      "error": "",
+      "plan": "3\n7",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 5.859998054802418e-05,
+        "mean": 2.3939996026456356e-05,
+        "p50": 1.5199999324977398e-05,
+        "p95": 5.021997494623064e-05,
+        "p99": 5.6923979427665466e-05
+      }
+    },
+    "get_hands_showdown": {
+      "error": "",
+      "plan": "3\n7",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 9.649997809901834e-05,
+        "mean": 4.736002301797271e-05,
+        "p50": 3.450002986937761e-05,
+        "p95": 8.46399925649166e-05,
+        "p99": 9.412798099219798e-05
+      }
+    },
+    "get_hands_splash": {
+      "error": "",
+      "plan": "4\n13",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 5.4999953135848045e-05,
+        "mean": 2.4319987278431655e-05,
+        "p50": 1.6200006939470768e-05,
+        "p95": 4.7679967246949665e-05,
+        "p99": 5.353595595806837e-05
+      }
+    },
+    "get_hero_hudcache_start": {
+      "error": "",
+      "plan": "4",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00011769996490329504,
+        "mean": 6.561997579410673e-05,
+        "p50": 5.219999002292752e-05,
+        "p95": 0.00010515996254980562,
+        "p99": 0.00011519196443259715
+      }
+    },
+    "get_id": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 4.6900007873773575e-05,
+        "mean": 1.9440019968897104e-05,
+        "p50": 1.2300035450607538e-05,
+        "p95": 4.034000448882579e-05,
+        "p99": 4.558800719678402e-05
+      }
+    },
+    "get_last_date": {
+      "error": "",
+      "plan": "3",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.8100057281553745e-05,
+        "mean": 1.775999553501606e-05,
+        "p50": 1.2599979527294636e-05,
+        "p95": 3.322004340589046e-05,
+        "p99": 3.712405450642109e-05
+      }
+    },
+    "get_last_gametype_for_table": {
+      "error": "",
+      "plan": "7\n14\n17",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 8.590001380071044e-05,
+        "mean": 3.303999546915293e-05,
+        "p50": 1.950003206729889e-05,
+        "p95": 7.296000840142369e-05,
+        "p99": 8.331201272085309e-05
+      }
+    },
+    "get_last_hand": {
+      "error": "",
+      "plan": "3",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 5.189998773857951e-05,
+        "mean": 1.97799876332283e-05,
+        "p50": 1.1599971912801266e-05,
+        "p95": 4.4039986096322534e-05,
+        "p99": 5.0327987410128116e-05
+      }
+    },
+    "get_player_auto_notes": {
+      "error": "",
+      "plan": "5\n12\n33",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 7.690000347793102e-05,
+        "mean": 3.293999470770359e-05,
+        "p50": 2.19999928958714e-05,
+        "p95": 6.618000334128736e-05,
+        "p99": 7.475600345060229e-05
+      }
+    },
+    "get_player_comment": {
+      "error": "",
+      "plan": "2",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.330002073198557e-05,
+        "mean": 1.675998792052269e-05,
+        "p50": 1.2699980288743973e-05,
+        "p95": 2.9320013709366318e-05,
+        "p99": 3.250401932746172e-05
+      }
+    },
+    "get_player_id": {
+      "error": "",
+      "plan": "3\n9",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 5.870003951713443e-05,
+        "mean": 2.6160001289099456e-05,
+        "p50": 1.7700018361210823e-05,
+        "p95": 5.090002669021487e-05,
+        "p99": 5.7140036951750516e-05
+      }
+    },
+    "get_player_id_by_name": {
+      "error": "",
+      "plan": "2",
+      "rows": 6,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.020001506432891e-05,
+        "mean": 2.1379999816417693e-05,
+        "p50": 1.669995253905654e-05,
+        "p95": 3.566001541912556e-05,
+        "p99": 3.929201513528824e-05
+      }
+    },
+    "get_player_identity": {
+      "error": "",
+      "plan": "3\n6",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.800001624971628e-05,
+        "mean": 2.24800081923604e-05,
+        "p50": 1.580000389367342e-05,
+        "p95": 4.188001621514558e-05,
+        "p99": 4.677601624280214e-05
+      }
+    },
+    "get_player_name": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 3.060000017285347e-05,
+        "mean": 1.550000160932541e-05,
+        "p50": 1.1599971912801266e-05,
+        "p95": 2.7039996348321433e-05,
+        "p99": 2.9887999407947062e-05
+      }
+    },
+    "get_player_names": {
+      "error": "",
+      "plan": "2",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00019999995129182935,
+        "mean": 0.00016257999232038856,
+        "p50": 0.00015279999934136868,
+        "p95": 0.0001910599647089839,
+        "p99": 0.00019821195397526025
+      }
+    },
+    "get_players_and_sites_by_name": {
+      "error": "",
+      "plan": "3\n9",
+      "rows": 6,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 5.570001667365432e-05,
+        "mean": 2.8700008988380433e-05,
+        "p50": 2.1799991372972727e-05,
+        "p95": 4.924001405015587e-05,
+        "p99": 5.440801614895463e-05
+      }
+    },
+    "get_players_from_hand": {
+      "error": "",
+      "plan": "4\n11",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 5.690002581104636e-05,
+        "mean": 2.7299986686557532e-05,
+        "p50": 1.969997538253665e-05,
+        "p95": 4.982001846656203e-05,
+        "p99": 5.54840243421495e-05
+      }
+    },
+    "get_recent_player_auto_notes": {
+      "error": "",
+      "plan": "9\n12\n15\n43",
+      "rows": 25,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00033920002169907093,
+        "mean": 0.0002591600059531629,
+        "p50": 0.0002376000047661364,
+        "p95": 0.0003205400193110108,
+        "p99": 0.0003354680212214589
+      }
+    },
+    "get_site_hand_no": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 3.660004585981369e-05,
+        "mean": 1.7040001694113016e-05,
+        "p50": 1.1899974197149277e-05,
+        "p95": 3.2020034268498414e-05,
+        "p99": 3.568404354155064e-05
+      }
+    },
+    "get_stats_from_hand": {
+      "error": "near \"sum\": syntax error",
+      "plan": "<explain failed: near \"sum\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_stats_from_hand_aggregated": {
+      "error": "",
+      "plan": "13\n16\n22\n28\n44\n48\n51\n96\n100\n103\n141\n144",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0053041999926790595,
+        "mean": 0.0019242799957282842,
+        "p50": 0.0012743999832309783,
+        "p95": 0.004505799990147351,
+        "p99": 0.005144519992172717
+      }
+    },
+    "get_stats_from_hand_session": {
+      "error": "",
+      "plan": "11\n14\n22\n25\n40\n44\n565",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0009212000295519829,
+        "mean": 0.0006349200033582747,
+        "p50": 0.0006477999850176275,
+        "p95": 0.0008734800270758569,
+        "p99": 0.0009116560290567577
+      }
+    },
+    "get_table_name": {
+      "error": "",
+      "plan": "9\n12\n15\n18",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00016240001423284411,
+        "mean": 6.062001921236515e-05,
+        "p50": 3.530003596097231e-05,
+        "p95": 0.00013754001120105383,
+        "p99": 0.00015742801362648607
+      }
+    },
+    "get_winners_from_hand": {
+      "error": "",
+      "plan": "4\n13",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 7.230002665892243e-05,
+        "mean": 3.12600051984191e-05,
+        "p50": 2.0799983758479357e-05,
+        "p95": 6.242002127692102e-05,
+        "p99": 7.032402558252216e-05
+      }
+    },
+    "handActions": {
+      "error": "",
+      "plan": "6\n12\n15",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0001417000312358141,
+        "mean": 5.3660001140087846e-05,
+        "p50": 3.1400006264448166e-05,
+        "p95": 0.00012022001901641486,
+        "p99": 0.00013740402879193426
+      }
+    },
+    "handactions_action_street_idx": {
+      "status": "skipped_ddl"
+    },
+    "handactions_hand_idx": {
+      "status": "skipped_ddl"
+    },
+    "handactions_player_idx": {
+      "status": "skipped_ddl"
+    },
+    "handactions_sizing_idx": {
+      "status": "skipped_ddl"
+    },
+    "handactions_street_position_idx": {
+      "status": "skipped_ddl"
+    },
+    "handsInRange": {
+      "error": "incomplete input",
+      "plan": "<explain failed: incomplete input>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "handsInRangeSession": {
+      "error": "",
+      "plan": "2",
+      "rows": 664,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.000424700032453984,
+        "mean": 0.0003467000206001103,
+        "p50": 0.0003212000010535121,
+        "p95": 0.00040908002993091943,
+        "p99": 0.0004215760319493711
+      }
+    },
+    "handsInRangeSessionFilter": {
+      "error": "",
+      "plan": "5\n9\n12",
+      "rows": 664,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0009281000238843262,
+        "mean": 0.0007776999846100807,
+        "p50": 0.0007348000071942806,
+        "p95": 0.0009035200113430619,
+        "p99": 0.0009231840213760734
+      }
+    },
+    "handsPlayersTTypeId_joiner": {
+      "error": "near \"OR\": syntax error",
+      "plan": "<explain failed: near \"OR\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "handsPlayersTTypeId_joiner_id": {
+      "error": "near \"OR\": syntax error",
+      "plan": "<explain failed: near \"OR\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "hands_gametype_time_idx": {
+      "status": "skipped_ddl"
+    },
+    "hands_start_time_idx": {
+      "status": "skipped_ddl"
+    },
+    "handsplayers_hand_player_idx": {
+      "status": "skipped_ddl"
+    },
+    "handssituations_aggressor_idx": {
+      "status": "skipped_ddl"
+    },
+    "handssituations_hand_idx": {
+      "status": "skipped_ddl"
+    },
+    "handssituations_player_idx": {
+      "status": "skipped_ddl"
+    },
+    "handssituations_pot_role_idx": {
+      "status": "skipped_ddl"
+    },
+    "handssituations_street_response_idx": {
+      "status": "skipped_ddl"
+    },
+    "handstates_hand_idx": {
+      "status": "skipped_ddl"
+    },
+    "handstates_made_hand_idx": {
+      "status": "skipped_ddl"
+    },
+    "handstates_nutness_idx": {
+      "status": "skipped_ddl"
+    },
+    "handstates_player_idx": {
+      "status": "skipped_ddl"
+    },
+    "insertActionBubbleFactor": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 6.859999848529696e-05,
+        "mean": 3.5699992440640924e-05,
+        "p50": 2.6800029445439577e-05,
+        "p95": 6.124000065028667e-05,
+        "p99": 6.71279989182949e-05
+      }
+    },
+    "insertGameTypes": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 6.360001862049103e-05,
+        "mean": 3.890000516548753e-05,
+        "p50": 3.15000070258975e-05,
+        "p95": 5.8480014558881514e-05,
+        "p99": 6.257601780816912e-05
+      }
+    },
+    "insertTourney": {
+      "error": "UNIQUE constraint failed: Tourneys.siteTourneyNo, Tourneys.tourneyTypeId",
+      "plan": "",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insertTourneyPayout": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.640000406652689e-05,
+        "mean": 2.758001210168004e-05,
+        "p50": 2.2400054149329662e-05,
+        "p95": 4.2160006705671543e-05,
+        "p99": 4.555200459435582e-05
+      }
+    },
+    "insertTourneyType": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 9.709998266771436e-05,
+        "mean": 5.4759986232966186e-05,
+        "p50": 4.269997589290142e-05,
+        "p95": 8.797998307272791e-05,
+        "p99": 9.527598274871707e-05
+      }
+    },
+    "insertTourneysPlayer": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.819995956495404e-05,
+        "mean": 3.3559987787157294e-05,
+        "p50": 2.9099988751113415e-05,
+        "p95": 4.5139971189200874e-05,
+        "p99": 4.758796188980341e-05
+      }
+    },
+    "insert_M": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 2.5300018023699522e-05,
+        "mean": 1.93399959243834e-05,
+        "p50": 1.7499958630651236e-05,
+        "p95": 2.440001117065549e-05,
+        "p99": 2.5120016653090714e-05
+      }
+    },
+    "insert_S": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.779999678954482e-05,
+        "mean": 2.7279998175799846e-05,
+        "p50": 2.4100008886307478e-05,
+        "p95": 3.5699992440640924e-05,
+        "p99": 3.737999591976404e-05
+      }
+    },
+    "insert_SC": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00027359998784959316,
+        "mean": 0.00014367998810485005,
+        "p50": 0.00011239998275414109,
+        "p95": 0.00024171998957172032,
+        "p99": 0.00026722398819401856
+      }
+    },
+    "insert_TC": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0002478999667800963,
+        "mean": 0.00013679999392479658,
+        "p50": 0.00010880001354962587,
+        "p95": 0.00022059998009353875,
+        "p99": 0.00024243996944278478
+      }
+    },
+    "insert_W": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 2.7699978090822697e-05,
+        "mean": 1.9719998817890882e-05,
+        "p50": 1.6900012269616127e-05,
+        "p95": 2.6339979376643894e-05,
+        "p99": 2.7427978347986934e-05
+      }
+    },
+    "insert_cardscache": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00021600001491606236,
+        "mean": 0.0001460599945858121,
+        "p50": 0.0001406999654136598,
+        "p95": 0.00020572001812979576,
+        "p99": 0.00021394401555880905
+      }
+    },
+    "insert_hudcache": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0008951000054366887,
+        "mean": 0.00036163999466225504,
+        "p50": 0.00023120001424103975,
+        "p95": 0.0007625799975357948,
+        "p99": 0.0008685960038565099
+      }
+    },
+    "insert_positionscache": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0002481999690644443,
+        "mean": 0.00013131998712196947,
+        "p50": 9.849999332800508e-05,
+        "p95": 0.00022151997545734046,
+        "p99": 0.00024286397034302352
+      }
+    },
+    "isAlreadyInDB": {
+      "error": "",
+      "plan": "3\n9",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0001256999676115811,
+        "mean": 3.8799981120973824e-05,
+        "p50": 1.6599951777607203e-05,
+        "p95": 0.00010443996870890258,
+        "p99": 0.00012144796783104539
+      }
+    },
+    "list_indexes": {
+      "error": "",
+      "plan": "3\n11",
+      "rows": 96,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0001362999901175499,
+        "mean": 0.00010424000211060048,
+        "p50": 9.710004087537527e-05,
+        "p95": 0.00012867999030277132,
+        "p99": 0.00013477599015459418
+      }
+    },
+    "list_tables": {
+      "error": "",
+      "plan": "3\n11",
+      "rows": 41,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 8.179998258128762e-05,
+        "mean": 5.979998968541622e-05,
+        "p50": 5.460000829771161e-05,
+        "p95": 7.653998909518121e-05,
+        "p99": 8.074798388406635e-05
+      }
+    },
+    "lockForInsert": {
+      "error": "",
+      "plan": "<explain failed: incomplete input>",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 1.0300020221620798e-05,
+        "mean": 5.960033740848303e-06,
+        "p50": 4.900037311017513e-06,
+        "p95": 9.320024400949477e-06,
+        "p99": 1.0104021057486535e-05
+      }
+    },
+    "opponentsReport": {
+      "error": "near \")\": syntax error",
+      "plan": "<explain failed: near \")\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "playerDetailedStats": {
+      "error": "near \"AS\": syntax error",
+      "plan": "<explain failed: near \"AS\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "playerHand": {
+      "error": "",
+      "plan": "5\n12",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00022759998682886362,
+        "mean": 0.00010983999818563462,
+        "p50": 7.960002403706312e-05,
+        "p95": 0.00020021998789161442,
+        "p99": 0.00022212398704141379
+      }
+    },
+    "playerStats": {
+      "error": "near \"<\": syntax error",
+      "plan": "<explain failed: near \"<\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "playerStatsByPosition": {
+      "error": "near \"<\": syntax error",
+      "plan": "<explain failed: near \"<\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "player_has_any_notes": {
+      "error": "",
+      "plan": "1\n4\n8\n23\n27",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 7.259997073560953e-05,
+        "mean": 3.207998815923929e-05,
+        "p50": 2.169999061152339e-05,
+        "p95": 6.279997760429978e-05,
+        "p99": 7.063997210934758e-05
+      }
+    },
+    "rebuildCache": {
+      "status": "skipped_template"
+    },
+    "search_players_with_auto_notes": {
+      "error": "",
+      "plan": "6\n8\n33\n34",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 9.980000322684646e-05,
+        "mean": 5.388002609834075e-05,
+        "p50": 4.2700034100562334e-05,
+        "p95": 8.880001259967683e-05,
+        "p99": 9.760000510141254e-05
+      }
+    },
+    "selectHandKnockoutRules": {
+      "error": "",
+      "plan": "4\n7\n9",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 8.560001151636243e-05,
+        "mean": 3.3859990071505305e-05,
+        "p50": 2.0799983758479357e-05,
+        "p95": 7.310000946745274e-05,
+        "p99": 8.310001110658049e-05
+      }
+    },
+    "selectHandTourneyId": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 3.170000854879618e-05,
+        "mean": 1.6260019037872553e-05,
+        "p50": 1.2400036212056875e-05,
+        "p95": 2.8060004115104673e-05,
+        "p99": 3.097200766205788e-05
+      }
+    },
+    "selectHandsPlayersWithWrongTTypeId": {
+      "error": "no such column: tourneyTypeId",
+      "plan": "<explain failed: no such column: tourneyTypeId>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "selectSessionWithMonthId": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 4.169996827840805e-05,
+        "mean": 1.8459977582097054e-05,
+        "p50": 1.2599979527294636e-05,
+        "p95": 3.615997266024351e-05,
+        "p99": 4.059196915477514e-05
+      }
+    },
+    "selectSessionWithWeekId": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 3.8300000596791506e-05,
+        "mean": 1.7260003369301556e-05,
+        "p50": 1.179997343569994e-05,
+        "p95": 3.327999729663133e-05,
+        "p99": 3.7295999936759466e-05
+      }
+    },
+    "selectTourneyAllInHands": {
+      "error": "",
+      "plan": "6\n10\n19\n25\n30\n49",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00012310000602155924,
+        "mean": 5.3799990564584735e-05,
+        "p50": 3.649998689070344e-05,
+        "p95": 0.0001061800052411854,
+        "p99": 0.00011971600586548447
+      }
+    },
+    "selectTourneyFacts": {
+      "error": "",
+      "plan": "3\n7",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 5.830003647133708e-05,
+        "mean": 2.799999201670289e-05,
+        "p50": 2.0299979951232672e-05,
+        "p95": 5.098002729937434e-05,
+        "p99": 5.683603463694453e-05
+      }
+    },
+    "selectTourneyMaxSeats": {
+      "error": "",
+      "plan": "5\n12",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 8.779997006058693e-05,
+        "mean": 3.0359986703842877e-05,
+        "p50": 1.5700003132224083e-05,
+        "p95": 7.381996838375924e-05,
+        "p99": 8.500396972522139e-05
+      }
+    },
+    "selectTourneyPayouts": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 4.96999709866941e-05,
+        "mean": 2.180000301450491e-05,
+        "p50": 1.4399993233382702e-05,
+        "p95": 4.309997893869876e-05,
+        "p99": 4.837997257709503e-05
+      }
+    },
+    "selectTourneyPreflopDecisions": {
+      "error": "",
+      "plan": "6\n11\n14\n29",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0030984999611973763,
+        "mean": 0.0013962000026367604,
+        "p50": 0.0009268000139854848,
+        "p95": 0.0027048799791373306,
+        "p99": 0.003019775964785367
+      }
+    },
+    "selectTourneyResults": {
+      "error": "",
+      "plan": "3\n14",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 8.010002784430981e-05,
+        "mean": 2.9580004047602414e-05,
+        "p50": 1.7199956346303225e-05,
+        "p95": 6.782002747058867e-05,
+        "p99": 7.764402776956558e-05
+      }
+    },
+    "selectTourneyStartStacks": {
+      "error": "",
+      "plan": "5\n11\n16",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 6.749999010935426e-05,
+        "mean": 2.8280005790293216e-05,
+        "p50": 1.810002140700817e-05,
+        "p95": 5.8059999719262114e-05,
+        "p99": 6.561199203133583e-05
+      }
+    },
+    "selectTourneyWithTypeId": {
+      "error": "",
+      "plan": "2",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 5.299999611452222e-05,
+        "mean": 2.1679990459233524e-05,
+        "p50": 1.3699987903237343e-05,
+        "p95": 4.545999690890311e-05,
+        "p99": 5.149199627339839e-05
+      }
+    },
+    "selectTourneysWithHands": {
+      "error": "",
+      "plan": "3",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 7.92999635450542e-05,
+        "mean": 4.299998981878161e-05,
+        "p50": 4.060001811012626e-05,
+        "p95": 7.173996418714522e-05,
+        "p99": 7.77879636734724e-05
+      }
+    },
+    "select_M": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 7.609999738633633e-05,
+        "mean": 3.731998149305582e-05,
+        "p50": 2.7999980375170708e-05,
+        "p95": 6.735998904332517e-05,
+        "p99": 7.43519957177341e-05
+      }
+    },
+    "select_S": {
+      "error": "",
+      "plan": "4\n10\n13",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00011110003106296062,
+        "mean": 5.8680004440248015e-05,
+        "p50": 4.220003029331565e-05,
+        "p95": 0.00010020001791417598,
+        "p99": 0.00010892002843320369
+      }
+    },
+    "select_SC": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0003000999568030238,
+        "mean": 0.00013378000585362315,
+        "p50": 9.270000737160444e-05,
+        "p95": 0.0002591199707239866,
+        "p99": 0.00029190395958721637
+      }
+    },
+    "select_S_all": {
+      "error": "",
+      "plan": "4\n10\n13",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 6.669998401775956e-05,
+        "mean": 2.9919994994997977e-05,
+        "p50": 2.0499981474131346e-05,
+        "p95": 5.77599974349141e-05,
+        "p99": 6.491198670119047e-05
+      }
+    },
+    "select_TC": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 4.9399968702346087e-05,
+        "mean": 2.1579989697784187e-05,
+        "p50": 1.4599994756281376e-05,
+        "p95": 4.275997634977102e-05,
+        "p99": 4.8071970231831076e-05
+      }
+    },
+    "select_W": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 4.079996142536402e-05,
+        "mean": 1.8059974536299706e-05,
+        "p50": 1.2199976481497288e-05,
+        "p95": 3.533996641635895e-05,
+        "p99": 3.9707962423563e-05
+      }
+    },
+    "select_cardscache_ring": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 5.760003114119172e-05,
+        "mean": 2.4419999681413175e-05,
+        "p50": 1.6000005416572094e-05,
+        "p95": 4.9660017248243085e-05,
+        "p99": 5.601202836260199e-05
+      }
+    },
+    "select_cardscache_tour": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 4.9499969463795424e-05,
+        "mean": 2.2419996093958615e-05,
+        "p50": 1.5900004655122757e-05,
+        "p95": 4.2899977415800095e-05,
+        "p99": 4.8179971054196356e-05
+      }
+    },
+    "select_hudcache_ring": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 6.079999729990959e-05,
+        "mean": 2.617998979985714e-05,
+        "p50": 1.729995710775256e-05,
+        "p95": 5.243999185040592e-05,
+        "p99": 5.912799621000886e-05
+      }
+    },
+    "select_hudcache_ring_bulk": {
+      "error": "",
+      "plan": "2\n6\n7\n26\n27",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 8.739996701478958e-05,
+        "mean": 4.095997428521514e-05,
+        "p50": 2.9099988751113415e-05,
+        "p95": 7.63199641369283e-05,
+        "p99": 8.518396643921732e-05
+      }
+    },
+    "select_hudcache_tour": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 4.840001929551363e-05,
+        "mean": 2.2980000358074905e-05,
+        "p50": 1.650000922381878e-05,
+        "p95": 4.2280007619410746e-05,
+        "p99": 4.717601696029306e-05
+      }
+    },
+    "select_hudcache_tour_bulk": {
+      "error": "IN(...) element has 5 terms - expected 6",
+      "plan": "<explain failed: IN(...) element has 5 terms - expected 6>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "select_positionscache_ring": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 6.220000796020031e-05,
+        "mean": 2.679999452084303e-05,
+        "p50": 1.769996015354991e-05,
+        "p95": 5.370000144466757e-05,
+        "p99": 6.050000665709376e-05
+      }
+    },
+    "select_positionscache_tour": {
+      "error": "",
+      "plan": "2",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 4.810001701116562e-05,
+        "mean": 2.3220013827085494e-05,
+        "p50": 1.680001150816679e-05,
+        "p95": 4.214001819491386e-05,
+        "p99": 4.6908017247915267e-05
+      }
+    },
+    "sessionGuardHands": {
+      "error": "",
+      "plan": "6\n13\n18\n37",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00013840000610798597,
+        "mean": 6.0420017689466476e-05,
+        "p50": 4.060001811012626e-05,
+        "p95": 0.00011948001338168976,
+        "p99": 0.00013461600756272673
+      }
+    },
+    "sessionStats": {
+      "status": "skipped_template"
+    },
+    "set tx level": {
+      "error": "",
+      "plan": "<explain failed: incomplete input>",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 8.800008799880743e-06,
+        "mean": 5.620007868856192e-06,
+        "p50": 4.900037311017513e-06,
+        "p95": 8.060014806687832e-06,
+        "p99": 8.65201000124216e-06
+      }
+    },
+    "settleTourneyPlayerKoWinnings": {
+      "error": "",
+      "plan": "5",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 5.3499999921768904e-05,
+        "mean": 2.3380003403872253e-05,
+        "p50": 1.580000389367342e-05,
+        "p95": 4.6220002695918075e-05,
+        "p99": 5.204400047659874e-05
+      }
+    },
+    "singleHand": {
+      "error": "",
+      "plan": "2",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 8.480000542476773e-05,
+        "mean": 4.306001355871558e-05,
+        "p50": 3.250001464039087e-05,
+        "p95": 7.46800098568201e-05,
+        "p99": 8.27760063111782e-05
+      }
+    },
+    "singleHandBoards": {
+      "error": "",
+      "plan": "3",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 5.080003757029772e-05,
+        "mean": 2.1700013894587757e-05,
+        "p50": 1.4099990949034691e-05,
+        "p95": 4.380003083497285e-05,
+        "p99": 4.940003622323275e-05
+      }
+    },
+    "store_aof_decision": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 7.350003579631448e-05,
+        "mean": 4.868000978603959e-05,
+        "p50": 4.160002572461963e-05,
+        "p95": 6.856003310531377e-05,
+        "p99": 7.251203525811434e-05
+      }
+    },
+    "store_aof_decision_analysis": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 6.890000076964498e-05,
+        "mean": 4.243999719619751e-05,
+        "p50": 3.519997699186206e-05,
+        "p95": 6.280000088736414e-05,
+        "p99": 6.768000079318881e-05
+      }
+    },
+    "store_board_features": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 8.979998528957367e-05,
+        "mean": 4.371998365968466e-05,
+        "p50": 3.2599957194179296e-05,
+        "p95": 7.857998134568333e-05,
+        "p99": 8.75559845007956e-05
+      }
+    },
+    "store_boards": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.569999873638153e-05,
+        "mean": 2.8799998108297587e-05,
+        "p50": 2.4399952962994576e-05,
+        "p95": 4.164000274613499e-05,
+        "p99": 4.488799953833222e-05
+      }
+    },
+    "store_file": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 5.400000372901559e-05,
+        "mean": 3.8740003947168586e-05,
+        "p50": 3.3299962524324656e-05,
+        "p95": 5.138000706210732e-05,
+        "p99": 5.3476004395633936e-05
+      }
+    },
+    "store_hand": {
+      "error": "UNIQUE constraint failed: Hands.id",
+      "plan": "",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "store_hand_states": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 9.410001803189516e-05,
+        "mean": 5.020000971853733e-05,
+        "p50": 3.890000516548753e-05,
+        "p95": 8.346001850441098e-05,
+        "p99": 9.197201812639832e-05
+      }
+    },
+    "store_hands_actions": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00016679998952895403,
+        "mean": 8.697999874129891e-05,
+        "p50": 6.659998325631022e-05,
+        "p95": 0.00014757999451830983,
+        "p99": 0.0001629559905268252
+      }
+    },
+    "store_hands_cashout": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.3599982745945454e-05,
+        "mean": 2.4700001813471317e-05,
+        "p50": 1.9000028260052204e-05,
+        "p95": 3.9679987821727984e-05,
+        "p99": 4.281598376110196e-05
+      }
+    },
+    "store_hands_players": {
+      "error": "UNIQUE constraint failed: HandsPlayers.handId, HandsPlayers.seatNo",
+      "plan": "",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "store_hands_pots": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00018929998623207211,
+        "mean": 6.259999936446548e-05,
+        "p50": 2.9799994081258774e-05,
+        "p95": 0.00015897998819127676,
+        "p99": 0.00018323598662391306
+      }
+    },
+    "store_hands_showdown": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.5999983083456755e-05,
+        "mean": 2.422000980004668e-05,
+        "p50": 2.050003968179226e-05,
+        "p95": 3.3919978886842724e-05,
+        "p99": 3.558398224413395e-05
+      }
+    },
+    "store_hands_situations": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0001783999614417553,
+        "mean": 9.363999124616385e-05,
+        "p50": 7.210002513602376e-05,
+        "p95": 0.00015759996604174374,
+        "p99": 0.000174239962361753
+      }
+    },
+    "store_hands_stove": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 7.930002175271511e-05,
+        "mean": 4.2020005639642474e-05,
+        "p50": 3.3100019209086895e-05,
+        "p95": 7.02200224623084e-05,
+        "p99": 7.748402189463376e-05
+      }
+    },
+    "store_player_auto_note": {
+      "error": "",
+      "plan": "",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 6.0399994254112244e-05,
+        "mean": 4.037999315187335e-05,
+        "p50": 3.3800024539232254e-05,
+        "p95": 5.649999948218465e-05,
+        "p99": 5.961999529972672e-05
+      }
+    },
+    "tourneyChipEVByPosition": {
+      "error": "near \"AND\": syntax error",
+      "plan": "<explain failed: near \"AND\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyChipEVByPositionGrid": {
+      "error": "near \"AND\": syntax error",
+      "plan": "<explain failed: near \"AND\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyGraph": {
+      "error": "near \"AND\": syntax error",
+      "plan": "<explain failed: near \"AND\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyGraphType": {
+      "error": "near \"AND\": syntax error",
+      "plan": "<explain failed: near \"AND\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyHandsInRangeSessionFilter": {
+      "error": "",
+      "plan": "8\n10\n17\n21\n28\n56",
+      "rows": 664,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0035644000163301826,
+        "mean": 0.0035275200032629074,
+        "p50": 0.003539400000590831,
+        "p95": 0.0035631600068882106,
+        "p99": 0.003564152014441788
+      }
+    },
+    "tourneyPlayerDetailedStats": {
+      "error": "near \"AND\": syntax error",
+      "plan": "<explain failed: near \"AND\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyResults": {
+      "error": "near \"AND\": syntax error",
+      "plan": "<explain failed: near \"AND\": syntax error>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "updateHandsPlayersForTTypeId": {
+      "error": "no such column: tourneyTypeId",
+      "plan": "<explain failed: no such column: tourneyTypeId>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "updateTourney": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 6.189994746819139e-05,
+        "mean": 4.163999110460281e-05,
+        "p50": 3.320001997053623e-05,
+        "p95": 5.979995476081967e-05,
+        "p99": 6.147994892671704e-05
+      }
+    },
+    "updateTourneyEnd": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.840000135824084e-05,
+        "mean": 2.3300014436244965e-05,
+        "p50": 2.0000035874545574e-05,
+        "p95": 3.476000856608152e-05,
+        "p99": 3.7672002799808977e-05
+      }
+    },
+    "updateTourneyStart": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.069996066391468e-05,
+        "mean": 2.5679997634142637e-05,
+        "p50": 2.1600048057734966e-05,
+        "p95": 3.7239969242364164e-05,
+        "p99": 4.0007962379604574e-05
+      }
+    },
+    "updateTourneyTypeId": {
+      "error": "",
+      "plan": "4\n9\n11",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 7.309997454285622e-05,
+        "mean": 3.2199989072978495e-05,
+        "p50": 2.1499989088624716e-05,
+        "p95": 6.329996977001428e-05,
+        "p99": 7.113997358828783e-05
+      }
+    },
+    "updateTourneysPlayer": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.99000127799809e-05,
+        "mean": 2.7320010121911765e-05,
+        "p50": 2.3600005079060793e-05,
+        "p95": 3.73600167222321e-05,
+        "p99": 3.939201356843113e-05
+      }
+    },
+    "updateTourneysPlayerBounties": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.569999873638153e-05,
+        "mean": 2.468000166118145e-05,
+        "p50": 1.9499973859637976e-05,
+        "p95": 4.0620006620883936e-05,
+        "p99": 4.468400031328201e-05
+      }
+    },
+    "updateTourneysPlayerResults": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.4700049329549074e-05,
+        "mean": 2.6180001441389322e-05,
+        "p50": 2.139998832717538e-05,
+        "p95": 4.032003926113247e-05,
+        "p99": 4.3824047315865756e-05
+      }
+    },
+    "updateTourneysSessions": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.979995381087065e-05,
+        "mean": 2.5699986144900323e-05,
+        "p50": 2.1899992134422064e-05,
+        "p95": 3.675996558740735e-05,
+        "p99": 3.9191956166177984e-05
+      }
+    },
+    "update_RSC_H": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.4800032153725624e-05,
+        "mean": 1.9920000340789557e-05,
+        "p50": 1.5900004655122757e-05,
+        "p95": 3.1320028938353055e-05,
+        "p99": 3.410403151065111e-05
+      }
+    },
+    "update_S": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 3.4400029107928276e-05,
+        "mean": 1.774001866579056e-05,
+        "p50": 1.360004534944892e-05,
+        "p95": 3.0360033269971607e-05,
+        "p99": 3.359202994033694e-05
+      }
+    },
+    "update_SC": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0003440000000409782,
+        "mean": 0.00014379998901858926,
+        "p50": 9.379995753988624e-05,
+        "p95": 0.0002942799939773976,
+        "p99": 0.0003340559988282621
+      }
+    },
+    "update_S_H": {
+      "error": "",
+      "plan": "5",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 5.4999953135848045e-05,
+        "mean": 2.403998514637351e-05,
+        "p50": 1.6099947970360518e-05,
+        "p95": 4.749996587634086e-05,
+        "p99": 5.349995568394661e-05
+      }
+    },
+    "update_S_SC": {
+      "error": "",
+      "plan": "5",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.5900000259280205e-05,
+        "mean": 2.2079993505030872e-05,
+        "p50": 1.5900004655122757e-05,
+        "p95": 4.023999208584427e-05,
+        "p99": 4.476799862459302e-05
+      }
+    },
+    "update_S_T": {
+      "error": "",
+      "plan": "5",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.060001811012626e-05,
+        "mean": 2.066000597551465e-05,
+        "p50": 1.5600002370774746e-05,
+        "p95": 3.5820016637444493e-05,
+        "p99": 3.964401781558991e-05
+      }
+    },
+    "update_S_TC": {
+      "error": "",
+      "plan": "5",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.539999645203352e-05,
+        "mean": 2.1580001339316367e-05,
+        "p50": 1.550000160932541e-05,
+        "p95": 3.963999915868043e-05,
+        "p99": 4.4247996993362906e-05
+      }
+    },
+    "update_TC": {
+      "status": "skipped_template"
+    },
+    "update_WM_S": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 2.9499991796910763e-05,
+        "mean": 1.6099994536489248e-05,
+        "p50": 1.2599979527294636e-05,
+        "p95": 2.631999086588621e-05,
+        "p99": 2.8863991610705855e-05
+      }
+    },
+    "update_aof_decision": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 5.690002581104636e-05,
+        "mean": 2.566000912338495e-05,
+        "p50": 1.750001683831215e-05,
+        "p95": 4.936001496389508e-05,
+        "p99": 5.5392023641616104e-05
+      }
+    },
+    "update_aof_decision_analysis": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 4.840001929551363e-05,
+        "mean": 2.2120005451142787e-05,
+        "p50": 1.5900004655122757e-05,
+        "p95": 4.200001712888478e-05,
+        "p99": 4.712001886218786e-05
+      }
+    },
+    "update_cardscache": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0003352999920025468,
+        "mean": 0.0001405399991199374,
+        "p50": 9.159999899566174e-05,
+        "p95": 0.0002868999959900975,
+        "p99": 0.00032561999280005693
+      }
+    },
+    "update_file": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 6.340001709759235e-05,
+        "mean": 3.5540026146918535e-05,
+        "p50": 2.840004162862897e-05,
+        "p95": 5.6760013103485106e-05,
+        "p99": 6.20720162987709e-05
+      }
+    },
+    "update_hudcache": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0016724999877624214,
+        "mean": 0.0006391199771314859,
+        "p50": 0.000414299953263253,
+        "p95": 0.0014597599860280749,
+        "p99": 0.001629951987415552
+      }
+    },
+    "update_player_auto_note": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0001642999704927206,
+        "mean": 6.456001428887249e-05,
+        "p50": 3.660004585981369e-05,
+        "p95": 0.00014219997683539987,
+        "p99": 0.00015987997176125646
+      }
+    },
+    "update_player_comment": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 8.38999985717237e-05,
+        "mean": 6.597999017685652e-05,
+        "p50": 5.8399979025125504e-05,
+        "p95": 8.221999742090702e-05,
+        "p99": 8.356399834156035e-05
+      }
+    },
+    "update_positionscache": {
+      "error": "",
+      "plan": "4",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0006082999752834439,
+        "mean": 0.00025648000882938504,
+        "p50": 0.00016649998724460602,
+        "p95": 0.0005225799861364066,
+        "p99": 0.0005911559774540364
+      }
+    },
+    "vacuum": {
+      "status": "skipped_ddl"
+    }
+  },
+  "repeats": 5
+}
