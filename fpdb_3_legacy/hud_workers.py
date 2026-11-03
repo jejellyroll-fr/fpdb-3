@@ -28,6 +28,33 @@ from fpdb_3_legacy.hud_read_service import (
 DB_RECOVERY_INTERVAL_S = 5.0
 
 
+def _mysql_session_timeouts(database: Database.Database) -> tuple[str, ...]:
+    """Statement/lock timeouts for a MySQL-family worker session (#680).
+
+    MySQL caps a statement with max_execution_time (milliseconds); MariaDB uses
+    max_statement_time (seconds) instead, so detect the server flavor first --
+    an unknown variable would fail the whole session setup and leave MariaDB
+    users without HUD updates.
+    """
+    lock_wait = "SET SESSION innodb_lock_wait_timeout = 2"
+    try:
+        with contextlib.suppress(Exception):
+            database.connection.rollback()
+        cursor = database.connection.cursor()
+        try:
+            cursor.execute("SELECT VERSION()")
+            row = cursor.fetchone()
+            version = str(row[0]).lower() if row else ""
+        finally:
+            cursor.close()
+        if "mariadb" in version:
+            return ("SET SESSION max_statement_time = 10", lock_wait)
+        return ("SET SESSION max_execution_time = 10000", lock_wait)
+    except Exception:
+        log.debug("Could not detect MySQL flavor; using max_execution_time", exc_info=True)
+        return ("SET SESSION max_execution_time = 10000", lock_wait)
+
+
 def _merge_batch_requests(older: HudBatchReadRequest, newer: HudBatchReadRequest) -> HudBatchReadRequest:
     """Fold a waiting batch into a newer one instead of running both (#680).
 
@@ -48,7 +75,6 @@ def _merge_batch_requests(older: HudBatchReadRequest, newer: HudBatchReadRequest
         tables=tuple(tables_by_key.values()),
         submitted_at=newer.submitted_at,
     )
-
 
 
 class DbRecoveryWorker(QThread):
@@ -91,7 +117,6 @@ class DbRecoveryWorker(QThread):
         # connect timeout, but shutdown must not hang on it either.
         if not self.wait(15000):
             log.warning("Database recovery worker did not stop in time")
-
 
 
 class HudReadWorker(QThread):
@@ -193,6 +218,7 @@ class HudReadWorker(QThread):
         queue for as long as the server cares to take (#680). SQLite is local
         and single-connection here, so there is nothing to bound.
         """
+        statements: tuple[str, ...]
         if database.backend == Database.Database.PGSQL:
             statements = (
                 "SET statement_timeout = 10000",
@@ -200,10 +226,7 @@ class HudReadWorker(QThread):
                 "SET idle_in_transaction_session_timeout = 30000",
             )
         elif database.backend == Database.Database.MYSQL_INNODB:
-            statements = (
-                "SET SESSION max_execution_time = 10000",
-                "SET SESSION innodb_lock_wait_timeout = 2",
-            )
+            statements = _mysql_session_timeouts(database)
         else:
             return
         with contextlib.suppress(Exception):
@@ -344,6 +367,9 @@ class HudReadWorker(QThread):
                 else:
                     self.snapshot_ready.emit(snapshot)
             pending = None
+            # Emit the periodic latency report when FPDB_LATENCY_LOG_INTERVAL is
+            # set; the reporter itself decides whether the interval elapsed (#680).
+            latency_profile.maybe_log()
 
         self._close_database(database)
 
@@ -353,4 +379,3 @@ class HudReadWorker(QThread):
         self._requests.put(None)
         if not self.wait(15000):
             log.warning("HUD read worker did not stop in time")
-

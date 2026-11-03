@@ -176,3 +176,31 @@ def test_buffered_lines_still_accumulate_before_the_flush() -> None:
     (line,) = db.hcbulk.values()
     assert line[N] == 2
     assert line[PROFIT] == 150
+
+
+def test_hudcache_updates_never_go_through_executemany(fresh_db, monkeypatch) -> None:
+    """executemany on PostgreSQL bulk mode converts statements to COPY and rejects
+    UPDATE (#680, codex P1): updates must use execute per row."""
+    from unittest.mock import MagicMock
+
+    real_executemany = fresh_db.executemany
+    spy = MagicMock(side_effect=real_executemany)
+    monkeypatch.setattr(fresh_db, "executemany", spy)
+
+    pids = {"Hero": 11}
+    for _ in range(2):
+        fresh_db.storeHudCache(
+            7,
+            {"type": "ring"},
+            pids,
+            datetime(2026, 7, 20, 14, 30),
+            {"Hero": player_stats(position=0, street0VPI=1)},
+        )
+        fresh_db.storeHudCache(7, {"type": "ring"}, pids, datetime(2026, 7, 20, 14, 30), {}, doinsert=True)
+        fresh_db.resetBulkCache()
+
+    for call in spy.call_args_list:
+        assert "update" not in call.args[1].lower()
+    # the second flush updated the existing row via execute, not executemany
+    (row,) = rows(fresh_db, "SELECT n FROM HudCache WHERE playerId = 11")
+    assert row[0] == 2

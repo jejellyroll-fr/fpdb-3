@@ -31,7 +31,7 @@ import zmq as _zmq
 from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout
 
-from fpdb_3_legacy import Configuration, Database, IdentifySite, db_profile, import_prefetch
+from fpdb_3_legacy import Configuration, Database, IdentifySite, db_profile, import_prefetch, latency_profile
 from fpdb_3_legacy.equity import load_poker_eval
 from fpdb_3_legacy.Exceptions import (
     FpdbHandDuplicate,
@@ -252,7 +252,6 @@ class ZMQSender:
             # Force termination if there's an error
             with contextlib.suppress(builtins.BaseException):
                 self.context.term()
-
 
 
 @dataclass(frozen=True)
@@ -1114,8 +1113,7 @@ class Importer:
 
         # prepare progress popup window
         has_callbacks = all(
-            callback is not None
-            for callback in (self.progress_start_cb, self.progress_update_cb, self.progress_end_cb)
+            callback is not None for callback in (self.progress_start_cb, self.progress_update_cb, self.progress_end_cb)
         )
 
         if not has_callbacks:
@@ -1142,6 +1140,8 @@ class Importer:
                         self.filelist[f]
                     )
                     self._mark_outbox()
+                    # Periodic latency report when FPDB_LATENCY_LOG_INTERVAL is set (#680).
+                    latency_profile.maybe_log()
                     # The parser's room when it found one: a PokerTracker-format file is
                     # identified as "PokerTracker" and only parsing tells Merge from Everest.
                     room = detected if isinstance(detected, str) and detected else _site_name(self.filelist[f])
@@ -1648,7 +1648,9 @@ class Importer:
                                     log.debug(f"DEBUG: Calling report_hand_success for hand {hand.handid}")
                                     self.hand_data_reporter.report_hand_success(fpdbfile.path, hand)
                                     log.debug(f"DEBUG: report_hand_success completed for hand {hand.handid}")
-                                except Exception as e:  # intentional broad catch: reporter callback must not abort import.
+                                except (
+                                    Exception
+                                ) as e:  # intentional broad catch: reporter callback must not abort import.
                                     log.exception(f"DEBUG: Exception in report_hand_success: {e}")
 
                         except FpdbHandDuplicate as e:
@@ -1686,7 +1688,9 @@ class Importer:
                                     hand,
                                 )
 
-                        except Exception as e:  # intentional broad catch: per-hand import errors are counted and skipped.
+                        except (
+                            Exception
+                        ) as e:  # intentional broad catch: per-hand import errors are counted and skipped.
                             import traceback
 
                             errors += 1
@@ -1705,7 +1709,9 @@ class Importer:
                                 enriched_error = Exception(str(e))
                                 enriched_error.full_traceback = full_traceback
                                 self.hand_data_reporter.report_hand_failure(
-                                    fpdbfile.path, enriched_error, hand.handText[:500] if hasattr(hand, "handText") else ""
+                                    fpdbfile.path,
+                                    enriched_error,
+                                    hand.handText[:500] if hasattr(hand, "handText") else "",
                                 )
                             else:
                                 log.exception(f"'{hand.handText[0:200]}'")

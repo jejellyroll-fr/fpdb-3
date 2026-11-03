@@ -96,7 +96,7 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 # config version is used to flag a warning at runtime if the users config is
 #  out of date.
 # Increment with shipped template changes; add an explicit migration when needed.
-CONFIG_VERSION = 86
+CONFIG_VERSION = 87
 SOURCE_DIR = Path(__file__).resolve().parent
 SOURCE_ROOT_PATH = SOURCE_DIR.parent
 
@@ -868,9 +868,7 @@ class Config(
             None,
         )
         source_games = [
-            node
-            for node in source_doc.getElementsByTagName("game")
-            if node.getAttribute("game_name") in AOF_CATEGORIES
+            node for node in source_doc.getElementsByTagName("game") if node.getAttribute("game_name") in AOF_CATEGORIES
         ]
         if not source_profiles or not source_games:
             return False
@@ -1064,7 +1062,6 @@ class Config(
     def get_doc(self):
         return self.doc
 
-
     def reload(self) -> bool | None:
         """Reload configuration from file without creating a new object.
 
@@ -1253,7 +1250,6 @@ class Config(
             return line
         return line
 
-
     def detect_hh_path(self, site: str) -> str | None:
         """Return an existing hand-history directory for a site, or None.
 
@@ -1390,7 +1386,6 @@ class Config(
     #            if site.font_size:
     #                font_size = site.font_size
     #        return font, font_size
-
 
     def execution_path(self, filename):
         """Join the fpdb path to filename."""

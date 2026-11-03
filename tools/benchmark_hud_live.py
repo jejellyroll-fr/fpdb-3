@@ -218,8 +218,13 @@ def _contexts(db, table_hands: dict[str, list[str]], tables: list[str], last_ind
 CURRENT_STAT_RANGE = ["A"]
 
 
-def _import_loop(stop: threading.Event, config, files: list[Path], errors: list) -> None:
-    """Keep auto-importing files on a second connection while the HUD reads."""
+def _import_loop(stop: threading.Event, config, files: list[Path], errors: list, stored_counter: list) -> None:
+    """Keep auto-importing *fresh* files on a second connection while the HUD reads.
+
+    The files here are deliberately not part of the database build, so each
+    round stores new hands (real writes and cache updates) instead of exercising
+    only duplicate detection (#680, codex P2).
+    """
     from fpdb_3_legacy.Importer import Importer
 
     try:
@@ -229,7 +234,8 @@ def _import_loop(stop: threading.Event, config, files: list[Path], errors: list)
         while not stop.is_set():
             importer.clearFileList()
             importer.addImportFile(str(files[index % len(files)]), "auto")
-            importer.runImport()
+            stored, *_rest = importer.runImport()
+            stored_counter[0] += stored
             index += 1
         importer.close()
     except Exception as exc:  # surfaced by the caller
@@ -256,9 +262,12 @@ def bench_config(
 
     stop = threading.Event()
     errors: list = []
+    stored_counter = [0]
     writer = None
     if import_files:
-        writer = threading.Thread(target=_import_loop, args=(stop, config, import_files, errors), daemon=True)
+        writer = threading.Thread(
+            target=_import_loop, args=(stop, config, import_files, errors, stored_counter), daemon=True
+        )
         writer.start()
 
     walls: list[float] = []
@@ -291,6 +300,7 @@ def bench_config(
         "tables": n_tables,
         "stat_range": stat_range,
         "import_concurrent": import_files is not None,
+        "import_hands_stored": stored_counter[0] if import_files else 0,
         "rounds": rounds,
         "latency": profile.snapshot()["metrics"],
         "round_trips": {
@@ -354,7 +364,11 @@ def main(argv=None) -> int:
 
     with tempfile.TemporaryDirectory(prefix="fpdb-hud-live-bench-", ignore_cleanup_errors=True) as root:
         workdir = Path(root)
-        config, db = build_database(workdir, files)
+        # Reserve the last quarter of the corpus as fresh write workload for the
+        # concurrent-import runs, so they store new hands instead of duplicates.
+        writer_count = max(4, len(files) // 4) if len(files) > 8 else 0
+        setup_files, writer_files = (files[:-writer_count], files[-writer_count:]) if writer_count else (files, [])
+        config, db = build_database(workdir, setup_files)
         if args.simulate_rtt_ms > 0:
             db.connection = _SimulatedRttConnection(db.connection, args.simulate_rtt_ms / 1000.0)
         table_hands = _table_hands(db)
@@ -374,7 +388,7 @@ def main(argv=None) -> int:
                         n_tables,
                         stat_range,
                         args.repeats,
-                        files if concurrent else None,
+                        writer_files if concurrent else None,
                     )
                     results.append(result)
                     wall = result["latency"].get("bench_batch_wall", {})

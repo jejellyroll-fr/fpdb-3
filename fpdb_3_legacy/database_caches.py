@@ -590,12 +590,18 @@ class DatabaseCachesMixin:
                         inserts.append(list(k) + item)
 
                 if updates:
-                    self.executemany(c, update_hudcache, updates)
+                    # Never through executemany: on PostgreSQL with a bulk path
+                    # that helper converts every statement into COPY and rejects
+                    # UPDATE (#680). One execute per row stays a round trip only
+                    # in bulk-import mode; live auto-import has no bulk path.
+                    for update in updates:
+                        c.execute(update_hudcache, update)
                     latency_profile.count("hudcache_update", len(updates))
                 if inserts:
                     self.executemany(c, insert_hudcache, inserts)
                     latency_profile.count("hudcache_insert", len(inserts))
                 self.commit()
+
     def storeSessions(self, hid, pids, startTime, tid, heroes, tz_name, doinsert=False) -> None:
         """Update cached sessions. If no record exists, do an insert."""
         THRESHOLD = timedelta(seconds=int(self.sessionTimeout * 60))
@@ -849,6 +855,7 @@ class DatabaseCachesMixin:
                     for h in self.s["bk"][i]["ids"]:
                         self.s[h] = {"id": sid, "wid": wid, "mid": mid}
             self.commit()
+
     def storeSessionsCache(
         self,
         hid,
@@ -870,7 +877,9 @@ class DatabaseCachesMixin:
                 hp["hid"] = hid
                 hp["ids"] = []
                 pdata[p]["n"] = 1
-                hp["line"] = [int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in SESSION_CACHE_KEYS]
+                hp["line"] = [
+                    int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in SESSION_CACHE_KEYS
+                ]
                 session_indices: list[int] = []
                 sessionplayer: list[dict[str, Any]] | None = self.sc.get(k)
                 if sessionplayer is not None:
@@ -955,7 +964,9 @@ class DatabaseCachesMixin:
                     d: list[dict[str, Any]] = [{} for _ in range(num)]
                     for z in range(num):
                         d[z] = {}
-                        d[z]["line"] = [int(r[z][s]) if isinstance(r[z][s], bool) else r[z][s] for s in SESSION_CACHE_KEYS]
+                        d[z]["line"] = [
+                            int(r[z][s]) if isinstance(r[z][s], bool) else r[z][s] for s in SESSION_CACHE_KEYS
+                        ]
                         d[z]["id"] = r[z]["id"]
                         d[z]["sessionId"] = r[z]["sessionId"]
                         d[z]["startTime"] = r[z]["startTime"]
@@ -990,6 +1001,7 @@ class DatabaseCachesMixin:
                         c.execute(insert_SC, row)
                         id = self.get_last_insert_id(c)
             self.commit()
+
     def storeTourneysCache(
         self,
         hid,
@@ -1080,6 +1092,7 @@ class DatabaseCachesMixin:
             if inserts:
                 self.executemany(c, insert_TC, inserts)
             self.commit()
+
     def storeCardsCache(
         self,
         hid,
@@ -1164,6 +1177,7 @@ class DatabaseCachesMixin:
             if inserts:
                 self.executemany(c, insert_cardscache, inserts)
                 self.commit()
+
     def storePositionsCache(
         self,
         hid,
@@ -1227,8 +1241,14 @@ class DatabaseCachesMixin:
                     garbageTourneyTypes = cache_key[2] in self.ttnew or cache_key[2] in self.ttold
                     if self.import_options["hhBulkPath"] == "" or (not garbageWeekMonths and not garbageTourneyTypes):
                         group_key = (
-                            sc["wid"], sc["mid"], cache_key[1], cache_key[2], cache_key[3],
-                            cache_key[4], cache_key[5], cache_key[6],
+                            sc["wid"],
+                            sc["mid"],
+                            cache_key[1],
+                            cache_key[2],
+                            cache_key[3],
+                            cache_key[4],
+                            cache_key[5],
+                            cache_key[6],
                         )
                         positions = position_cache.get(group_key)
                         # Add line to the old line in the hudcache.
@@ -1260,6 +1280,7 @@ class DatabaseCachesMixin:
             if inserts:
                 self.executemany(c, insert_positionscache, inserts)
                 self.commit()
+
     def appendHandsSessionIds(self) -> None:
         for i in range(len(self.hbulk)):
             hid = self.hids[i]
