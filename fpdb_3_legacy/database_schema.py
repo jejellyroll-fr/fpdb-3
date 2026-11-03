@@ -1034,6 +1034,7 @@ FOREIGN_KEYS: list[list[dict[str, Any]]] = [
     [],  # no foreign keys in sqlite (index 4)
 ]
 
+
 class DatabaseSchemaMixin:
     """Builds the schema and seeds its reference data.
 
@@ -2120,19 +2121,29 @@ class DatabaseSchemaMixin:
         c.execute(
             "INSERT INTO Actions (id,name,code) VALUES ('16', 'button blind', 'BUB')",
         )
-        # Fill Rank
-        c.execute("INSERT INTO Rank (id,name) VALUES ('1', 'Nothing')")
-        c.execute("INSERT INTO Rank (id,name) VALUES ('2', 'NoPair')")
-        c.execute("INSERT INTO Rank (id,name) VALUES ('3', 'OnePair')")
-        c.execute("INSERT INTO Rank (id,name) VALUES ('4', 'TwoPair')")
-        c.execute("INSERT INTO Rank (id,name) VALUES ('5', 'Trips')")
-        c.execute("INSERT INTO Rank (id,name) VALUES ('6', 'Straight')")
-        c.execute("INSERT INTO Rank (id,name) VALUES ('7', 'Flush')")
-        c.execute("INSERT INTO Rank (id,name) VALUES ('8', 'FlHouse')")
-        c.execute("INSERT INTO Rank (id,name) VALUES ('9', 'Quads')")
-        c.execute("INSERT INTO Rank (id,name) VALUES ('10', 'StFlush')")
-        # Fill StartCards
-        sql = "INSERT INTO StartCards (category, name, rank, combinations) VALUES (%s, %s, %s, %s)".replace(
+        # Fill Rank. "Rank" is a reserved word since MySQL 8.0 (the RANK()
+        # window function), so the MySQL catalogue creates the table as
+        # `Rank` and these inserts must quote it the same way; PostgreSQL and
+        # SQLite take the bare name.
+        rank_table = "`Rank`" if self.backend == self.MYSQL_INNODB else "Rank"
+        for rank_id, rank_name in (
+            ("1", "Nothing"),
+            ("2", "NoPair"),
+            ("3", "OnePair"),
+            ("4", "TwoPair"),
+            ("5", "Trips"),
+            ("6", "Straight"),
+            ("7", "Flush"),
+            ("8", "FlHouse"),
+            ("9", "Quads"),
+            ("10", "StFlush"),
+        ):
+            c.execute(f"INSERT INTO {rank_table} (id,name) VALUES ('{rank_id}', '{rank_name}')")
+        # Fill StartCards. `rank` is a reserved word since MySQL 8.0, so the
+        # column is quoted in the MySQL catalogue; the inserts must quote it
+        # too (same rule as the Rank table above).
+        rank_col = "`rank`" if self.backend == self.MYSQL_INNODB else "rank"
+        sql = f"INSERT INTO StartCards (category, name, {rank_col}, combinations) VALUES (%s, %s, %s, %s)".replace(
             "%s",
             self.sql.query["placeholder"],
         )
@@ -2142,7 +2153,7 @@ class DatabaseSchemaMixin:
         for idx in range(-13, 1184):
             name = Card.decodeRazzStartHand(idx)
             c.execute(sql, ("razz", name, idx, 0))
-        sql = "INSERT INTO StartCards (id, category, name, rank, combinations) VALUES (%s, %s, %s, %s, %s)".replace(
+        sql = f"INSERT INTO StartCards (id, category, name, {rank_col}, combinations) VALUES (%s, %s, %s, %s, %s)".replace(
             "%s",
             self.sql.query["placeholder"],
         )

@@ -77,6 +77,8 @@ def _make_config(workdir: Path, db_file: Path):
                 "db-host": host_port[0],
                 "db-port": int(host_port[1]) if len(host_port) > 1 else 5432,
                 "db-name": host_db[1] if len(host_db) > 1 else "fpdb",
+                "db-databaseName": host_db[1] if len(host_db) > 1 else "fpdb",
+                "db-path": "",
                 "db-user": user,
                 "db-password": password,
             }
@@ -93,6 +95,8 @@ def _make_config(workdir: Path, db_file: Path):
                 "db-host": host_port[0],
                 "db-port": int(host_port[1]) if len(host_port) > 1 else 3306,
                 "db-name": host_db[1] if len(host_db) > 1 else "fpdb",
+                "db-databaseName": host_db[1] if len(host_db) > 1 else "fpdb",
+                "db-path": "",
                 "db-user": user,
                 "db-password": password,
             }
@@ -135,12 +139,13 @@ def build_database(workdir: Path, files: list[Path]):
 
 def _table_hands(db) -> dict[str, list[str]]:
     """Every cash table in the database with its hand ids, oldest first."""
+    placeholder = db.sql.query["placeholder"]
     c = db.connection.cursor()
     c.execute("SELECT DISTINCT tableName FROM Hands WHERE tableName IS NOT NULL ORDER BY tableName")
     tables = [row[0] for row in c.fetchall()]
     result: dict[str, list[str]] = {}
     for table in tables:
-        c.execute("SELECT id FROM Hands WHERE tableName = ? ORDER BY id", (table,))
+        c.execute(f"SELECT id FROM Hands WHERE tableName = {placeholder} ORDER BY id", (table,))
         result[table] = [str(row[0]) for row in c.fetchall()]
     c.close()
     return {table: hands for table, hands in result.items() if hands}

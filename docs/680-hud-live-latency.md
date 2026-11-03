@@ -96,17 +96,26 @@ table is printed and the full JSON goes to `--out`.
 * `tests/test_benchmark_hud_live.py` (perf) â€” smoke: the harness reports
   percentiles and round trips.
 
-## Local benchmark results (this branch, SQLite file, 40-file Stars corpus = 113 hands / 37 tables)
+## Benchmark results — all three backends, run locally (this branch)
 
-Full data: `docs/bench-680-sample.json`, log: `docs/bench-680-sample.log`.
+Same workload everywhere: 40-file Stars corpus imported with the HUD cache
+enabled (113 hands / 37 tables), then 10 HUD batch rounds per configuration at
+1/2/4/6/8 tables x stat range A/S x auto-import off/on. Backends: SQLite file
+local, PostgreSQL 17.6 and MySQL 8.4.3 both on 127.0.0.1 (loopback, not a LAN —
+the per-statement network latency of a real LAN is on top of these numbers, once
+per round trip). Full JSON: `docs/bench-680-sqlite.json`,
+`docs/bench-680-postgresql.json`, `docs/bench-680-mysql.json`.
 
-| tables | range | import concurrent | batch wall p50 | p95 | max | round trips / 10 rounds |
+Batch wall time (ms), stat range A, 10 rounds per cell:
+
+| backend | tables | import off p50 / p95 / max | import on p50 / p95 / max | round trips / 10 rounds | import txn p99 (import on) | commit max |
 |---|---|---|---|---|---|---|
-| 1 | A | off | 0.9 ms | 13.4 ms | 23.6 ms | 380 |
-| 4 | A | off | 1.5 ms | 3.3 ms | 4.6 ms | 590 |
-| 8 | A | off | 2.3 ms | 4.1 ms | 5.5 ms | 870 |
-| 1 | A | on | 2.8 ms | 16.6 ms | 19.4 ms | 443 |
-| 8 | A | on | 7.8 ms | 20.1 ms | 20.1 ms | 955 |
+| SQLite | 1 | 0.9 / 13.4 / 23.6 | 2.8 / 16.6 / 19.4 | 380 -> 443 | 21.2 ms | 0.0 ms |
+| SQLite | 8 | 2.3 / 4.1 / 5.5 | 7.8 / 20.1 / 20.1 | 870 -> 955 | 25.6 ms | 0.1 ms |
+| PostgreSQL | 1 | 10.3 / 26.3 / 38.9 | 12.5 / 16.8 / 18.0 | 380 -> 546 | 93.1 ms | 0.8 ms |
+| PostgreSQL | 8 | 24.0 / 26.1 / 26.9 | 28.1 / 40.8 / 43.4 | 870 -> 1053 | 108.3 ms | 0.9 ms |
+| MySQL | 1 | 12.9 / 25.4 / 34.9 | 16.7 / 33.1 / 40.5 | 380 -> 446 | 64.3 ms | 2.3 ms |
+| MySQL | 8 | 28.8 / 31.3 / 31.3 | 33.7 / 63.7 / 65.1 | 870 -> 958 | 42.3 ms | 3.1 ms |
 
 Reading:
 
@@ -116,18 +125,32 @@ Reading:
   table count even when every query is fast. This is the strongest candidate for
   the reported scaling; R1 removes the per-entry part of it on the import side,
   R3 removes superseded whole batches on the HUD side.
-* **Import concurrency multiplies the tail even on local SQLite**: with the
-  writer active, batch p50 goes 0.9 â†’ 7.8 ms and p95 reaches ~20 ms at 8 tables,
-  and `db_txn_total` p99 reaches ~25 ms â€” the single-writer lock contention is
-  visible locally and will be worse over a network. This matches "HUD +
-  auto-import together are unplayable, each alone is fine".
+* **Server backends pay a fixed per-statement cost even on loopback**: batch
+  p50 is ~10-29 ms on PostgreSQL/MySQL vs ~1-2 ms on SQLite for the same round
+  trips — parse/plan/round-trip overhead per statement, which a LAN multiplies
+  further.
+* **Import concurrency is the tail multiplier on every backend**, worst on MySQL
+  (batch p95 63.7 ms at 8 tables, commit max 12.8 ms already at 2 tables) and on
+  PostgreSQL for transaction duration (txn p99 > 100 ms with the writer active).
+  This matches "HUD + auto-import together are unplayable, each alone is fine":
+  the HUD worker's reads and the importer's writes contend on the same server.
 * Session (`S`) vs all-hands (`A`) made no difference on this small corpus; on a
   real long history `hud_session_rows` and the per-hand session path are the
   things to watch (the issue's session-range hypothesis).
 
-Caveat recorded as the issue requires: a local SQLite run changes both backend
-and location, so these numbers motivate, but do not by themselves prove, the
-remote-database behaviour.
+Caveat recorded as the issue requires: these runs are loopback, not a LAN, and
+the corpus is small; a local SQLite run also changes both backend and location.
+The numbers motivate the direction; the reporter's latency report will say which
+term dominates on their network.
+
+## Compatibility fix found while running the three backends
+
+`fillDefaultData` inserted into `Rank` and `StartCards(..., rank, ...)` without
+quoting, but both are reserved words since MySQL 8.0 — on MySQL 8.4
+`recreate_tables()` failed there (the CREATE statements already quoted them).
+The inserts now quote per backend (backticked on MySQL only). Covered by
+`tests/test_store_hud_cache_live_backends.py` (live PostgreSQL + MySQL) and the
+unit suite.
 
 ## P0 reproduction checklist for the reporter (same six-table workload, one change at a time)
 
