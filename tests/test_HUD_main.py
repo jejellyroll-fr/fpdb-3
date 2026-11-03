@@ -1290,13 +1290,22 @@ def test_idle_move(hud_main) -> None:
 # Verifies that idle_resize resizes the table and auxiliary windows.
 def test_idle_resize(hud_main) -> None:
     mock_hud = MagicMock()
-    mock_hud.aux_windows = [MagicMock()]
+    aux = MagicMock()
+    mock_hud.aux_windows = [aux]
     mock_hud.loading_window = None
+
+    # Hud.resize_windows() resizes every aux window itself, so make the mock
+    # behave like the real Hud: idle_resize must then run exactly one pass,
+    # not a second loop over the aux windows on top (#680).
+    def _resize_windows() -> None:
+        for aw in mock_hud.aux_windows:
+            aw.resize_windows()
+
+    mock_hud.resize_windows.side_effect = _resize_windows
     hud_main.idle_resize(mock_hud)
 
     mock_hud.resize_windows.assert_called_once()
-    for aw in mock_hud.aux_windows:
-        aw.resize_windows.assert_called_once()
+    aux.resize_windows.assert_called_once()
 
 
 @pytest.mark.parametrize("geometry_callback", ["idle_move", "idle_resize"])
