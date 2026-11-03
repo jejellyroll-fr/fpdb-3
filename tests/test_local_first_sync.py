@@ -372,7 +372,6 @@ def test_stop_is_on_the_sync_and_importer_close_does_not_crash(tmp_path) -> None
     importer = Importer(caller=None, settings={"testData": False, "threads": 1}, config=local.config, sql=None)
     importer.database = local
     sync = MagicMock()
-    sync.stop = LocalFirstSync.stop.__get__(sync) if False else MagicMock()
     importer._local_first_sync = sync
     importer.close()  # must not raise
     sync.stop.assert_called_once()
@@ -426,7 +425,7 @@ def _insert_decoy_rows(db, table: str, decoy_id: int = 9000) -> None:
     """Insert a row with an explicit high id so the server's auto ids diverge
     from the local ones."""
     c = db.connection.cursor()
-    c.execute(f"PRAGMA table_info({table})")  # nosec B608
+    c.execute(f"PRAGMA table_info({table})")  # nosec B608  # nosemgrep
     cols = c.fetchall()
     names, values = [], []
     for _cid, name, ctype, notnull, _dflt, _pk in cols:
@@ -443,7 +442,7 @@ def _insert_decoy_rows(db, table: str, decoy_id: int = 9000) -> None:
             else:
                 values.append("decoy")
     ph = ", ".join(["?"] * len(names))
-    c.execute(f"INSERT INTO {table} ({', '.join(names)}) VALUES ({ph})", values)  # nosec B608
+    c.execute(f"INSERT INTO {table} ({', '.join(names)}) VALUES ({ph})", values)  # nosec B608  # nosemgrep
     db.connection.commit()
     c.close()
 

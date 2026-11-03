@@ -232,9 +232,8 @@ class LocalFirstSync:
         insert_cols = [k for k in cols if k != "id"]
         bools = self._server_bool_columns(server, "Hands")
         q = f"INSERT INTO Hands ({', '.join(insert_cols)}) VALUES ({', '.join([sph] * len(insert_cols))})"  # nosec B608  # nosemgrep
-        c.execute(
-            q, [bool(hand[k]) if k.lower() in bools and hand[k] is not None else hand[k] for k in insert_cols]
-        )  # nosemgrep
+        values = [bool(hand[k]) if k.lower() in bools and hand[k] is not None else hand[k] for k in insert_cols]
+        c.execute(q, values)  # nosemgrep
         server_id = self._last_insert_id(server, c)
 
         # child rows, remapped to the server hand id and server referential ids
