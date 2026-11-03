@@ -190,7 +190,7 @@ def _run_all_cases(db, config, sample, primary, params_a, params_s, all_hands, r
 
 def _collect_plans(db, primary, sample, params_a) -> dict:
     plans: dict[str, str] = {}
-    sql_text, subs, info, handinfo = _aggregated_sql_and_params(db, primary, params_a)
+    sql_text, subs, _info, handinfo = _aggregated_sql_and_params(db, primary, params_a)
     plans["aggregated_per_hand"] = _explain(db, sql_text, subs)
     batched = db._batched_aggregated_sql(sql_text, len(sample))
     if batched is not None:
@@ -268,7 +268,8 @@ def bench_queries(config, db, repeats: int, out: str | None) -> dict:
 
 def format_markdown(report: dict) -> str:
     lines = [
-        f"backend: {report['backend']} ({report['db_server']}), dataset: {report['dataset']}, repeats: {report['repeats']}",
+        f"backend: {report['backend']} ({report['db_server']}), dataset: {report['dataset']}, "
+        f"repeats: {report['repeats']}",
         "",
         "| query case | n | mean ms | p50 | p95 | p99 | max | statements/iter |",
         "|---|---|---|---|---|---|---|---|",

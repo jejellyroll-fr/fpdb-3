@@ -746,7 +746,7 @@ class DatabaseCachesMixin:
                 upper = self.s["bk"][i]["sessionEnd"] + THRESHOLD
                 tourneys = self.s["bk"][i]["tourneys"]
                 if self.s["bk"][i]["tourneys"]:
-                    toursql = "OR SC.id in (SELECT DISTINCT sessionId FROM Tourneys T WHERE T.id in ({}))".format(  # nosec B608 -- placeholders are bound, not interpolated
+                    toursql = "OR SC.id in (SELECT DISTINCT sessionId FROM Tourneys T WHERE T.id in ({}))".format(  # nosec B608
                         ", ".join(str(t) for t in tourneys)
                     )
                     q = select_S.replace("<TOURSELECT>", toursql)

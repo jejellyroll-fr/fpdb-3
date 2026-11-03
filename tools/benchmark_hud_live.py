@@ -146,7 +146,7 @@ def _table_hands(db) -> dict[str, list[str]]:
     tables = [row[0] for row in c.fetchall()]
     result: dict[str, list[str]] = {}
     for table in tables:
-        c.execute(f"SELECT id FROM Hands WHERE tableName = {placeholder} ORDER BY id", (table,))  # nosec B608 -- placeholders are bound, not interpolated
+        c.execute(f"SELECT id FROM Hands WHERE tableName = {placeholder} ORDER BY id", (table,))  # nosec B608
         result[table] = [str(row[0]) for row in c.fetchall()]
     c.close()
     return {table: hands for table, hands in result.items() if hands}
@@ -294,7 +294,7 @@ def bench_config(
     if errors:
         raise errors[0]
 
-    for index, wall in enumerate(walls):
+    for wall in walls:
         profile.record("bench_batch_wall", wall)
     return {
         "tables": n_tables,
@@ -316,7 +316,8 @@ def bench_config(
 
 def format_markdown(results: list[dict]) -> str:
     lines = [
-        "| tables | stat range | import concurrent | rounds | batch wall p50 (ms) | batch wall p95 (ms) | batch wall max (ms) | query execute p99 (ms) | round trips |",
+        "| tables | stat range | import concurrent | rounds | batch wall p50 (ms) | p95 (ms) | max (ms) "
+        "| query execute p99 (ms) | round trips |",
         "|---|---|---|---|---|---|---|---|---|",
     ]
     for result in results:

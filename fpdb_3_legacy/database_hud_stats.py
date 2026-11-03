@@ -100,7 +100,7 @@ class DatabaseHudStatsMixin:
         try:
             ph = self.sql.query.get("placeholder", "%s")
             q = (
-                "SELECT hp.seatNo, hp.playerId, p.name "  # nosec B608 -- placeholders are bound, not interpolated
+                "SELECT hp.seatNo, hp.playerId, p.name "  # nosec B608
                 "FROM HandsPlayers hp "
                 "INNER JOIN Players p ON hp.playerId = p.id "
                 "WHERE hp.handId = %s"
@@ -130,7 +130,7 @@ class DatabaseHudStatsMixin:
             c = self.get_cursor()
             c.execute(
                 (
-                    "SELECT gt.bigBlind FROM Hands h INNER JOIN Gametypes gt ON h.gametypeId = gt.id WHERE h.id = %s"  # nosec B608 -- placeholders are bound, not interpolated
+                    "SELECT gt.bigBlind FROM Hands h INNER JOIN Gametypes gt ON h.gametypeId = gt.id WHERE h.id = %s"  # nosec B608
                 ).replace("%s", ph),
                 (hand_id,),
             )
@@ -142,7 +142,7 @@ class DatabaseHudStatsMixin:
                 return None
             c.execute(
                 (
-                    "SELECT startCash, committed, winnings FROM HandsPlayers WHERE handId = %s AND sitout = FALSE"  # nosec B608 -- placeholders are bound, not interpolated
+                    "SELECT startCash, committed, winnings FROM HandsPlayers WHERE handId = %s AND sitout = FALSE"  # nosec B608
                 ).replace("%s", ph),
                 (hand_id,),
             )
@@ -194,7 +194,7 @@ class DatabaseHudStatsMixin:
         if not hand_ids:
             return result
         in_sql, in_params = self._in_tuple(hand_ids)
-        q = f"SELECT handId, playerId, position FROM HandsPlayers WHERE handId IN {in_sql}"  # nosec B608 -- placeholders are bound, not interpolated
+        q = f"SELECT handId, playerId, position FROM HandsPlayers WHERE handId IN {in_sql}"  # nosec B608
         try:
             c = self.connection.cursor()
             c.execute(q, in_params)
@@ -213,7 +213,7 @@ class DatabaseHudStatsMixin:
             return result
         in_sql, in_params = self._in_tuple(hand_ids)
         q = (
-            "SELECT hp.handId, hp.seatNo, hp.playerId, p.name "  # nosec B608 -- placeholders are bound, not interpolated
+            "SELECT hp.handId, hp.seatNo, hp.playerId, p.name "  # nosec B608
             "FROM HandsPlayers hp "
             "INNER JOIN Players p ON hp.playerId = p.id "
             f"WHERE hp.handId IN {in_sql}"
@@ -257,7 +257,7 @@ class DatabaseHudStatsMixin:
         if not hand_ids:
             return result
         in_sql, in_params = self._in_tuple(hand_ids)
-        q = f"SELECT Id, boardcard1, boardcard2, boardcard3, boardcard4, boardcard5 FROM Hands WHERE Id IN {in_sql}"  # nosec B608 -- placeholders are bound, not interpolated
+        q = f"SELECT Id, boardcard1, boardcard2, boardcard3, boardcard4, boardcard5 FROM Hands WHERE Id IN {in_sql}"  # nosec B608
         try:
             c = self.connection.cursor()
             c.execute(q, in_params)
@@ -279,7 +279,7 @@ class DatabaseHudStatsMixin:
             c = self.get_cursor()
             c.execute(
                 (
-                    "SELECT h.id, gt.bigBlind FROM Hands h "  # nosec B608 -- placeholders are bound, not interpolated
+                    "SELECT h.id, gt.bigBlind FROM Hands h "  # nosec B608
                     "INNER JOIN Gametypes gt ON h.gametypeId = gt.id "
                     f"WHERE h.id IN {in_sql}"
                 ),
@@ -288,7 +288,7 @@ class DatabaseHudStatsMixin:
             big_blinds = {row[0]: float(row[1]) for row in c.fetchall() if row[1]}
             c.execute(
                 (
-                    "SELECT handId, startCash, committed, winnings FROM HandsPlayers "  # nosec B608 -- placeholders are bound, not interpolated
+                    "SELECT handId, startCash, committed, winnings FROM HandsPlayers "  # nosec B608
                     f"WHERE handId IN {in_sql} AND sitout = FALSE"
                 ),
                 in_params,

@@ -111,7 +111,7 @@ class LatencyProfile:
                 # Reservoir sampling: every sample past the cap has the same
                 # chance of replacing one already kept, so percentiles remain
                 # unbiased for arbitrarily long sessions.
-                index = random.randrange(seen)  # nosec B311 -- reservoir sampling, not a security value
+                index = random.randrange(seen)  # nosec B311
                 if index < MAX_EXACT_SAMPLES:
                     samples[index] = seconds
 
@@ -168,7 +168,9 @@ class LatencyProfile:
             gauges = dict(self._gauges)
         metrics = {name: self.metric_stats(name) for name in names}
         for name, value in gauges.items():
-            metrics.setdefault(name, {"count": 0, "counter": 0, "mean": 0.0, "p50": 0.0, "p95": 0.0, "p99": 0.0, "max": 0.0})
+            metrics.setdefault(
+                name, {"count": 0, "counter": 0, "mean": 0.0, "p50": 0.0, "p95": 0.0, "p99": 0.0, "max": 0.0}
+            )
             metrics[name]["gauge"] = value
         return {
             "recorded_at": time.time(),

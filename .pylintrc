@@ -1,0 +1,28 @@
+# Codacy runs pylint with this file. The repository's line length is 120
+# (pyproject.toml [tool.ruff]), so align pylint on it instead of failing every
+# long line. Docstring/convention rules stay off: the legacy modules predate
+# them and ruff already owns style.
+[MAIN]
+max-line-length = 120
+
+[MESSAGES CONTROL]
+disable =
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    too-few-public-methods,
+    duplicate-code,
+    fixme,
+    broad-exception-caught,
+    import-outside-toplevel,
+    protected-access,
+    too-many-locals,
+    global-statement,
+    too-many-branches,
+    too-many-statements,
+    too-many-arguments,
+    too-many-positional-arguments,
+    unspecified-encoding
+
+[BASIC]
+good-names = i, j, k, x, y, z, db, id, ok, ui, ph, ex, e, n, q, c, w

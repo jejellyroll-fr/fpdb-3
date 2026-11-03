@@ -307,7 +307,7 @@ def _run_one_query(db, final_sql: str, params: list, dml: bool, repeats: int):
             try:
                 db.connection.rollback()
             except Exception:
-                pass  # nosec B110 -- best-effort cleanup
+                pass  # nosec B110
     return status, rows_count, error, walls
 
 
@@ -325,7 +325,8 @@ def summarize(results: dict) -> str:
     for name, r in ranked[:40]:
         w = r["wall"]
         lines.append(
-            f"| {name} | {r['status']} | {r['rows']} | {w['p50'] * 1000:.2f} | {w['p95'] * 1000:.2f} | {w['max'] * 1000:.2f} |"
+            f"| {name} | {r['status']} | {r['rows']} | {w['p50'] * 1000:.2f} "
+            f"| {w['p95'] * 1000:.2f} | {w['max'] * 1000:.2f} |"
         )
     lines.append("")
     lines.append("## sequential scans over big tables in captured plans")
