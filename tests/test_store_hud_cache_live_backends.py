@@ -51,7 +51,7 @@ class _CacheHost(DatabaseCachesMixin):  # pylint: disable=too-many-instance-attr
     def get_cursor(self) -> Any:
         return self.connection.cursor()
 
-    def commit(self, force: bool = False) -> None:
+    def commit(self, force: bool = False) -> None:  # pylint: disable=unused-argument
         self.connection.commit()
 
     def executemany(self, c: Any, q: str, values: Any) -> None:
