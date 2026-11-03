@@ -101,7 +101,7 @@ table is printed and the full JSON goes to `--out`.
 Same workload everywhere: 40-file Stars corpus imported with the HUD cache
 enabled (113 hands / 37 tables), then 10 HUD batch rounds per configuration at
 1/2/4/6/8 tables x stat range A/S x auto-import off/on. Backends: SQLite file
-local, PostgreSQL 17.6 and MySQL 8.4.3 both on 127.0.0.1 (loopback, not a LAN —
+local, PostgreSQL 18.3 and MySQL 8.4.3 both on 127.0.0.1 (loopback, not a LAN —
 the per-statement network latency of a real LAN is on top of these numbers, once
 per round trip). Full JSON: `docs/bench-680-sqlite.json`,
 `docs/bench-680-postgresql.json`, `docs/bench-680-mysql.json`.
@@ -112,8 +112,8 @@ Batch wall time (ms), stat range A, 10 rounds per cell:
 |---|---|---|---|---|---|---|
 | SQLite | 1 | 0.9 / 13.4 / 23.6 | 2.8 / 16.6 / 19.4 | 380 -> 443 | 21.2 ms | 0.0 ms |
 | SQLite | 8 | 2.3 / 4.1 / 5.5 | 7.8 / 20.1 / 20.1 | 870 -> 955 | 25.6 ms | 0.1 ms |
-| PostgreSQL | 1 | 10.3 / 26.3 / 38.9 | 12.5 / 16.8 / 18.0 | 380 -> 546 | 93.1 ms | 0.8 ms |
-| PostgreSQL | 8 | 24.0 / 26.1 / 26.9 | 28.1 / 40.8 / 43.4 | 870 -> 1053 | 108.3 ms | 0.9 ms |
+| PostgreSQL 18.3 | 1 | 10.8 / 26.6 / 38.6 | 12.2 / 18.0 / 19.7 | 380 -> 546 | 91.8 ms | 0.9 ms |
+| PostgreSQL 18.3 | 8 | 25.4 / 27.2 / 27.7 | 30.0 / 43.6 / 44.7 | 870 -> 1053 | 106.1 ms | 0.9 ms |
 | MySQL | 1 | 12.9 / 25.4 / 34.9 | 16.7 / 33.1 / 40.5 | 380 -> 446 | 64.3 ms | 2.3 ms |
 | MySQL | 8 | 28.8 / 31.3 / 31.3 | 33.7 / 63.7 / 65.1 | 870 -> 958 | 42.3 ms | 3.1 ms |
 
@@ -142,6 +142,10 @@ Caveat recorded as the issue requires: these runs are loopback, not a LAN, and
 the corpus is small; a local SQLite run also changes both backend and location.
 The numbers motivate the direction; the reporter's latency report will say which
 term dominates on their network.
+
+PostgreSQL was run on both 17.6 and 18.3: no significant difference on this
+workload (18.3 numbers above; 17.6 within noise — e.g. batch p95 at 8 tables
+with import on: 40.8 ms on 17.6 vs 43.6 ms on 18.3).
 
 ## Compatibility fix found while running the three backends
 
