@@ -29,7 +29,6 @@ if TYPE_CHECKING:
     from fpdb_3_legacy.config_databases import Database
     from fpdb_3_legacy.config_gui import General, GUICashStats, GUITourStats
     from fpdb_3_legacy.config_hud_layouts import Aux_window, Layout_set
-    from fpdb_3_legacy.config_hud_ui import HudUI
     from fpdb_3_legacy.config_import import Import, RawHands, RawTourneys
     from fpdb_3_legacy.config_sites import DataSource, HeroProfile, Supported_games
 
@@ -146,7 +145,7 @@ class ConfigBase:
     supported_databases: dict[str, Database]
     supported_games: dict[str, Supported_games]
     supported_sites: dict[str, Any]
-    ui: HudUI
+    ui: Any  # dynamic XML node: attributes exist only when present in the file
     wrongConfigVersion: bool
 
     if TYPE_CHECKING:

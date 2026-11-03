@@ -19,6 +19,8 @@
 ########################################################################
 from __future__ import annotations
 
+from typing import Any
+
 from fpdb_3_legacy.config_common import (
     ConfigBase,
 )
@@ -187,7 +189,8 @@ class ConfigHudUiMixin(ConfigBase):
 
     # Allow to change the menu appearance
     def get_hud_ui_parameters(self):
-        hui = {}
+        ui: Any = self.ui  # XML node: attributes exist only when present in the file
+        hui: dict[str, Any] = {}
 
         default_text = "FPDB Menu - Right click\nLeft-Drag to Move"
 
@@ -195,111 +198,111 @@ class ConfigHudUiMixin(ConfigBase):
         # Larger values smooth bursts at many tables into fewer round trips at
         # the cost of that much extra display delay. Default keeps 200 ms.
         try:
-            hui["hand_batch_interval_ms"] = int(self.ui.hand_batch_interval_ms)
+            hui["hand_batch_interval_ms"] = int(ui.hand_batch_interval_ms)
         except (AttributeError, ValueError, TypeError):
             hui["hand_batch_interval_ms"] = 200
 
         try:
-            hui["label"] = self.ui.label
-            if self.ui.label == "":  # Empty menu label is a big no-no
+            hui["label"] = ui.label
+            if ui.label == "":  # Empty menu label is a big no-no
                 hui["label"] = default_text
         except AttributeError as e:
             log.exception(f"Error getting label: {e}")
             hui["label"] = default_text
 
         try:
-            hui["card_ht"] = int(self.ui.card_ht)
+            hui["card_ht"] = int(ui.card_ht)
         except (AttributeError, ValueError) as e:
             log.exception(f"Error getting card height: {e}")
             hui["card_ht"] = 42
 
         try:
-            hui["card_wd"] = int(self.ui.card_wd)
+            hui["card_wd"] = int(ui.card_wd)
         except (AttributeError, ValueError) as e:
             log.exception(f"Error getting card width: {e}")
             hui["card_wd"] = 30
 
         try:
-            hui["deck_type"] = str(self.ui.deck_type)
+            hui["deck_type"] = str(ui.deck_type)
         except AttributeError as e:
             log.exception(f"Error getting deck type: {e}")
             hui["deck_type"] = "colour"
 
         try:
-            hui["card_back"] = str(self.ui.card_back)
+            hui["card_back"] = str(ui.card_back)
         except AttributeError as e:
             log.exception(f"Error getting card back: {e}")
             hui["card_back"] = "back04"
 
         try:
-            hui["stat_range"] = self.ui.stat_range
+            hui["stat_range"] = ui.stat_range
         except AttributeError as e:
             log.exception(f"Error getting stat range: {e}")
             hui["stat_range"] = "A"  # default is show stats for All-time, also S(session) and T(ime)
 
         try:
-            hui["hud_days"] = int(self.ui.hud_days)
+            hui["hud_days"] = int(ui.hud_days)
         except (AttributeError, ValueError) as e:
             log.exception(f"Error getting HUD days: {e}")
             hui["hud_days"] = 90
 
         try:
-            hui["agg_bb_mult"] = int(self.ui.agg_bb_mult)
+            hui["agg_bb_mult"] = int(ui.agg_bb_mult)
         except (AttributeError, ValueError) as e:
             log.exception(f"Error getting aggregate BB multiplier: {e}")
             hui["agg_bb_mult"] = 1
 
         try:
-            hui["seats_style"] = self.ui.seats_style
+            hui["seats_style"] = ui.seats_style
         except AttributeError as e:
             log.exception(f"Error getting seats style: {e}")
             hui["seats_style"] = "A"  # A / C / E, use A(ll) / C(ustom) / E(xact) seat numbers
 
         try:
-            hui["seats_cust_nums_low"] = int(self.ui.seats_cust_nums_low)
+            hui["seats_cust_nums_low"] = int(ui.seats_cust_nums_low)
         except (AttributeError, ValueError) as e:
             log.exception(f"Error getting custom seat numbers low: {e}")
             hui["seats_cust_nums_low"] = 1
 
         try:
-            hui["seats_cust_nums_high"] = int(self.ui.seats_cust_nums_high)
+            hui["seats_cust_nums_high"] = int(ui.seats_cust_nums_high)
         except (AttributeError, ValueError) as e:
             log.exception(f"Error getting custom seat numbers high: {e}")
             hui["seats_cust_nums_high"] = 10
 
         # Hero specific
         try:
-            hui["h_stat_range"] = self.ui.h_stat_range
+            hui["h_stat_range"] = ui.h_stat_range
         except AttributeError as e:
             log.exception(f"Error getting hero stat range: {e}")
             hui["h_stat_range"] = "S"
 
         try:
-            hui["h_hud_days"] = int(self.ui.h_hud_days)
+            hui["h_hud_days"] = int(ui.h_hud_days)
         except (AttributeError, ValueError) as e:
             log.exception(f"Error getting hero HUD days: {e}")
             hui["h_hud_days"] = 30
 
         try:
-            hui["h_agg_bb_mult"] = int(self.ui.h_agg_bb_mult)
+            hui["h_agg_bb_mult"] = int(ui.h_agg_bb_mult)
         except (AttributeError, ValueError) as e:
             log.exception(f"Error getting hero aggregate BB multiplier: {e}")
             hui["h_agg_bb_mult"] = 1
 
         try:
-            hui["h_seats_style"] = self.ui.h_seats_style
+            hui["h_seats_style"] = ui.h_seats_style
         except AttributeError as e:
             log.exception(f"Error getting hero seats style: {e}")
             hui["h_seats_style"] = "A"  # A / C / E, use A(ll) / C(ustom) / E(xact) seat numbers
 
         try:
-            hui["h_seats_cust_nums_low"] = int(self.ui.h_seats_cust_nums_low)
+            hui["h_seats_cust_nums_low"] = int(ui.h_seats_cust_nums_low)
         except (AttributeError, ValueError) as e:
             log.exception(f"Error getting hero custom seat numbers low: {e}")
             hui["h_seats_cust_nums_low"] = 1
 
         try:
-            hui["h_seats_cust_nums_high"] = int(self.ui.h_seats_cust_nums_high)
+            hui["h_seats_cust_nums_high"] = int(ui.h_seats_cust_nums_high)
         except (AttributeError, ValueError) as e:
             log.exception(f"Error getting hero custom seat numbers high: {e}")
             hui["h_seats_cust_nums_high"] = 10
