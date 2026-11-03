@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytz
 
-from fpdb_3_legacy import hud_day
+from fpdb_3_legacy import hud_day, latency_profile
 from fpdb_3_legacy.action_enum_stats import CACHE_KEYS as ACTION_ENUM_CACHE_KEYS
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -541,50 +541,61 @@ class DatabaseCachesMixin:
                     self.hcbulk[k] = line
 
         if doinsert:
-            update_hudcache = self.sql.query["update_hudcache"]
-            update_hudcache = update_hudcache.replace(
-                "%s",
-                self.sql.query["placeholder"],
-            )
-            insert_hudcache = self.sql.query["insert_hudcache"]
-            insert_hudcache = insert_hudcache.replace(
-                "%s",
-                self.sql.query["placeholder"],
-            )
+            # One lookup per cache family plus one batched UPDATE and one
+            # batched INSERT, instead of a SELECT and an UPDATE per entry: with
+            # the database on another machine each of those round trips cost a
+            # network latency per player per table (#680). The accumulation
+            # semantics are unchanged -- update_hudcache still adds the buffered
+            # line to the stored one, and entries with no stored row are inserted.
+            with latency_profile.scope("hudcache_write"):
+                placeholder = self.sql.query["placeholder"]
+                update_hudcache = self.sql.query["update_hudcache"].replace("%s", placeholder)
+                insert_hudcache = self.sql.query["insert_hudcache"].replace("%s", placeholder)
+                ring_bulk = self.sql.query["select_hudcache_ring_bulk"]
+                tour_bulk = self.sql.query["select_hudcache_tour_bulk"]
 
-            select_hudcache_ring = self.sql.query["select_hudcache_ring"]
-            select_hudcache_ring = select_hudcache_ring.replace(
-                "%s",
-                self.sql.query["placeholder"],
-            )
-            select_hudcache_tour = self.sql.query["select_hudcache_tour"]
-            select_hudcache_tour = select_hudcache_tour.replace(
-                "%s",
-                self.sql.query["placeholder"],
-            )
-            inserts = []
-            c = self.get_cursor()
-            for k, item in list(self.hcbulk.items()):
-                if not k[4]:
-                    q = select_hudcache_ring
-                    row = [*list(k[:4]), k[-1]]
-                else:
-                    q = select_hudcache_tour
-                    row = list(k)
+                def _ring_key(k):
+                    # Ring rows store tourneyTypeId as NULL; a falsy id in the
+                    # key (None or 0) means the ring family either way.
+                    return (k[0], k[1], k[2], k[3], None, k[5])
 
-                c.execute(q, row)
-                result = c.fetchone()
-                if result:
-                    id = result[0]
-                    update = [*item, id]
-                    c.execute(update_hudcache, update)
+                ring_keys = [k for k in self.hcbulk if not k[4]]
+                tour_keys = [k for k in self.hcbulk if k[4]]
 
-                else:
-                    inserts.append(list(k) + item)
+                found: dict[tuple, Any] = {}
+                c = self.get_cursor()
+                if ring_keys:
+                    tuples = ",".join(["(%s, %s, %s, %s, %s)"] * len(ring_keys))
+                    q = ring_bulk.replace("<tuples>", tuples).replace("%s", placeholder)
+                    params = [v for k in ring_keys for v in (k[0], k[1], k[2], k[3], k[5])]
+                    c.execute(q, params)
+                    for row in c.fetchall():
+                        found[(row[1], row[2], row[3], row[4], None, row[5])] = row[0]
+                if tour_keys:
+                    tuples = ",".join(["(%s, %s, %s, %s, %s, %s)"] * len(tour_keys))
+                    q = tour_bulk.replace("<tuples>", tuples).replace("%s", placeholder)
+                    params = [v for k in tour_keys for v in k]
+                    c.execute(q, params)
+                    for row in c.fetchall():
+                        found[tuple(row[1:])] = row[0]
+                latency_profile.count("hudcache_lookup", len(self.hcbulk))
 
-            if inserts:
-                self.executemany(c, insert_hudcache, inserts)
-            self.commit()
+                updates = []
+                inserts = []
+                for k, item in list(self.hcbulk.items()):
+                    row_id = found.get(k if k[4] else _ring_key(k))
+                    if row_id is not None:
+                        updates.append([*item, row_id])
+                    else:
+                        inserts.append(list(k) + item)
+
+                if updates:
+                    self.executemany(c, update_hudcache, updates)
+                    latency_profile.count("hudcache_update", len(updates))
+                if inserts:
+                    self.executemany(c, insert_hudcache, inserts)
+                    latency_profile.count("hudcache_insert", len(inserts))
+                self.commit()
     def storeSessions(self, hid, pids, startTime, tid, heroes, tz_name, doinsert=False) -> None:
         """Update cached sessions. If no record exists, do an insert."""
         THRESHOLD = timedelta(seconds=int(self.sessionTimeout * 60))

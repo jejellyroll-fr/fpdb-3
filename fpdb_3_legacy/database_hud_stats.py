@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 from time import time
 from typing import TYPE_CHECKING, Any
 
+from fpdb_3_legacy import latency_profile
 from fpdb_3_legacy.autonotes_aof import AOF_CATEGORIES
 from fpdb_3_legacy.db_reconnect import reconnect_on_connection_loss
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -356,11 +357,16 @@ class DatabaseHudStatsMixin:
         # Now get the stats
         c.execute(sql_text, subs)
         ptime = time() - stime
+        latency_profile.record("hud_query_execute", ptime)
         log.info(
             f"HudCache query get_stats_from_hand_aggregated took {ptime:.3f} seconds",
         )
         colnames = [desc[0] for desc in c.description]
-        for row in c.fetchall():
+        ftime = time()
+        rows = c.fetchall()
+        latency_profile.record("hud_query_fetch", time() - ftime)
+        atime = time()
+        for row in rows:
             # Keep player ids as native DB integers: do_stat() coerces the player
             # to int and every stat function indexes stat_dict[int]. Coercing keys
             # to str here silently makes all stat lookups miss. String ids only
@@ -377,6 +383,7 @@ class DatabaseHudStatsMixin:
                 for name, val in zip(colnames, row, strict=False):
                     t_dict[name.lower()] = val
                 stat_dict[t_dict["player_id"]] = t_dict
+        latency_profile.record("hud_python_aggregate", time() - atime)
 
         self._merge_aof_profile_stats(stat_dict, poker_game or handinfo["category"])
         return stat_dict
@@ -647,18 +654,24 @@ class DatabaseHudStatsMixin:
         stime = time()
         c = self.connection.cursor()
         c.execute(batched, subs)
+        etime = time() - stime
+        latency_profile.record("hud_query_execute", etime)
         log.info(
             "HudCache batched aggregate covered %d hand(s) in %.3f seconds",
             len(hands),
-            time() - stime,
+            etime,
         )
         colnames = [desc[0].lower() for desc in c.description]
+        ftime = time()
+        rows = c.fetchall()
+        latency_profile.record("hud_query_fetch", time() - ftime)
+        atime = time()
         # ZMQ supplies hand ids as strings while every SQL backend returns the
         # selected Hands.id as an integer. Preserve the caller's key type in the
         # public result while using a canonical representation to match rows.
         hand_key_by_id = {str(hand): hand for hand in hands}
         results: dict[Any, dict[Any, Any]] = {hand: {} for hand in hands}
-        for row in c.fetchall():
+        for row in rows:
             t_dict = dict(zip(colnames, row, strict=False))
             # Not a statistic: it only says which table's row this is, and
             # leaving it in stat_dict would offer it to the stat renderer.
@@ -667,6 +680,7 @@ class DatabaseHudStatsMixin:
             if not self._row_is_wanted(t_dict["player_id"], hero_id, hud_params):
                 continue
             results.setdefault(hand, {})[t_dict["player_id"]] = t_dict
+        latency_profile.record("hud_python_aggregate", time() - atime)
         return results
 
     @staticmethod
@@ -740,12 +754,22 @@ class DatabaseHudStatsMixin:
 
         # now get the stats
         # print "sess_stats: subs =", subs, "subs[0] =", subs[0]
+        stime = time()
         c.execute(query, subs)
+        latency_profile.record("hud_query_execute", time() - stime)
         colnames = [desc[0] for desc in c.description]
+        ftime = time()
+        rows = []
         row = c.fetchone()
+        while row:
+            rows.append(row)
+            row = c.fetchone()
+        latency_profile.record("hud_query_fetch", time() - ftime)
+        latency_profile.count("hud_session_rows", len(rows))
+        atime = time()
         if colnames[0].lower() == "player_id":
             # Loop through stats adding them to appropriate stat_dict:
-            while row:
+            for row in rows:
                 # Native int keys, matching do_stat()/stat functions. See the
                 # aggregated loop above for why str coercion breaks stat lookups.
                 playerid = row[0]
@@ -770,7 +794,7 @@ class DatabaseHudStatsMixin:
                             "seats",
                         ):
                             stat_dict[playerid][name.lower()] += val
-                row = c.fetchone()
+            latency_profile.record("hud_python_aggregate", time() - atime)
         else:
             log.error(f"query {query} result does not have player_id as first column")
 

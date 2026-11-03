@@ -714,6 +714,21 @@ def hud_cache_write_queries() -> dict[str, str]:
                 AND   tourneyTypeId=%s
                 AND   styleKey = %s"""
 
+    # Bulk variants of the two lookups above, with the key tuples inlined by the
+    # caller: one SELECT per cache family instead of one per entry, so a remote
+    # database is asked once per import batch rather than once per player per
+    # table (#680). Ring rows have tourneyTypeId NULL, hence the IS NULL arm.
+    query["select_hudcache_ring_bulk"] = """
+                SELECT id, gametypeId, playerId, seats, position, styleKey
+                FROM HudCache
+                WHERE tourneyTypeId IS NULL
+                AND   (gametypeId, playerId, seats, position, styleKey) IN (<tuples>)"""
+
+    query["select_hudcache_tour_bulk"] = """
+                SELECT id, gametypeId, playerId, seats, position, tourneyTypeId, styleKey
+                FROM HudCache
+                WHERE (gametypeId, playerId, seats, position, tourneyTypeId, styleKey) IN (<tuples>)"""
+
     query["get_hero_hudcache_start"] = """select min(hc.styleKey)
                                                from HudCache hc
                                                where hc.playerId in <playerid_list>

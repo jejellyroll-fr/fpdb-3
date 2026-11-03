@@ -10,11 +10,12 @@ from __future__ import annotations
 
 import contextlib
 import copy
+import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-from fpdb_3_legacy import Database, Hand
+from fpdb_3_legacy import Database, Hand, latency_profile
 from fpdb_3_legacy.db_reconnect import is_connection_lost
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.table_info import TableInfo
@@ -90,6 +91,9 @@ class HudBatchReadRequest:
     hand_ids: tuple[str, ...]
     hud_params: dict[str, Any]
     tables: tuple[HudTableReadContext, ...] = ()
+    # When the Qt thread queued this request, so the worker can report how long
+    # it waited behind earlier work (#680).
+    submitted_at: float = field(default_factory=time.monotonic)
 
 
 @dataclass
@@ -290,12 +294,13 @@ class HudReadService:
         if provider is None or not bindings or not prepared.stat_dict:
             return
         try:
-            prepared.analytics_values = provider.compute_for_stat_dict(
-                self.database,
-                bindings,
-                prepared.stat_dict,
-                site=self._site_name(prepared),
-            )
+            with latency_profile.scope("hud_analytics_compute"):
+                prepared.analytics_values = provider.compute_for_stat_dict(
+                    self.database,
+                    bindings,
+                    prepared.stat_dict,
+                    site=self._site_name(prepared),
+                )
         except Exception:  # noqa: BLE001 - the hand still has to be painted
             log.exception("Analytics-backed HUD cells failed for hand %s", prepared.hand_id)
 
@@ -707,28 +712,31 @@ class HudReadService:
         hero_ids: dict[int, int] = {}
 
         try:
-            latest, unresolved, revision = self._resolve_primary_hands(
-                request,
-                hands,
-                failed,
-                progress_callback,
-            )
+            with latency_profile.scope("hud_batch_resolve_primary"):
+                latest, unresolved, revision = self._resolve_primary_hands(
+                    request,
+                    hands,
+                    failed,
+                    progress_callback,
+                )
             site_rows, player_ids, hero, hero_ids = self._hero_data()
             primary_order = [*latest.values(), *unresolved]
-            updated_tables, revision = self._load_primary_hands(
-                latest,
-                request,
-                contexts,
-                hero_ids,
-                hands,
-                failed,
-                site_rows,
-                player_ids,
-                hero,
-                progress_callback,
-                revision,
-            )
-            self._load_secondary_hands(request, updated_tables, hero_ids, hands, failed)
+            with latency_profile.scope("hud_batch_primary"):
+                updated_tables, revision = self._load_primary_hands(
+                    latest,
+                    request,
+                    contexts,
+                    hero_ids,
+                    hands,
+                    failed,
+                    site_rows,
+                    player_ids,
+                    hero,
+                    progress_callback,
+                    revision,
+                )
+            with latency_profile.scope("hud_batch_secondary"):
+                self._load_secondary_hands(request, updated_tables, hero_ids, hands, failed)
         finally:
             with contextlib.suppress(Exception):
                 self.database.connection.rollback()

@@ -10,9 +10,10 @@ import sys
 from collections.abc import Callable
 from decimal import Decimal
 from importlib import import_module
-from time import sleep, time
+from time import perf_counter, sleep, time
 from typing import TYPE_CHECKING, Any
 
+from fpdb_3_legacy import latency_profile
 from fpdb_3_legacy.database_schema import DB_VERSION
 from fpdb_3_legacy.db_reconnect import (
     MYSQL_NETWORK_KWARGS,
@@ -121,6 +122,9 @@ class DatabaseTransaction:
 
     def __enter__(self) -> "DatabaseTransaction":
         self.db._in_transaction += 1
+        # Remembered only when the latency profile is on, so the default path
+        # pays nothing (#680).
+        self._latency_start = perf_counter() if latency_profile.is_enabled() else None
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
@@ -140,8 +144,14 @@ class DatabaseTransaction:
                 log.exception(f"Rollback failed: {e}")
         else:
             if self.db._in_transaction == 0:
+                started = getattr(self, "_latency_start", None)
+                if started is not None:
+                    latency_profile.record("db_txn_total", perf_counter() - started)
                 try:
+                    commit_started = perf_counter()
                     self.db.commit(force=True)
+                    if started is not None:
+                        latency_profile.record("db_commit", perf_counter() - commit_started)
                 except (
                     Exception
                 ) as e:  # intentional broad catch: transaction commit during teardown; rolls back then re-raises
