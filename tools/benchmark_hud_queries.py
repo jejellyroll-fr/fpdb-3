@@ -38,7 +38,7 @@ os.environ.setdefault("FPDB_DB_PROFILE", "1")
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from tools.benchmark_hud_live import (  # noqa: E402
+from tools.benchmark_hud_live import (  # noqa: E402  # pylint: disable=wrong-import-position
     _corpus_files,
     _hud_params,
     _make_config,

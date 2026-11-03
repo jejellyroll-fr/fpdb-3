@@ -187,9 +187,8 @@ def test_push_to_live_postgresql(tmp_path) -> None:
     server_cfg.get_db_parameters = lambda: sp
     server = Database(server_cfg)
     server.recreate_tables()
-    # referentials first so the FK constraints on Hands hold
-    for _table, key in (("Sites", "name"), ("Gametypes", "siteId"), ("Players", "name")):
-        pass  # schema carries no rows; hands reference them, so push them explicitly below
+    # schema carries no referential rows; hands reference them, so the push
+    # must create them explicitly
 
     def server_factory():
         db = Database(server_cfg)
@@ -371,7 +370,7 @@ def test_stop_is_on_the_sync_and_importer_close_does_not_crash(tmp_path) -> None
     local.disconnect()
 
 
-def test_hand_batch_interval_ms_is_parsed_from_xml(tmp_path) -> None:
+def test_hand_batch_interval_ms_is_parsed_from_xml(tmp_path) -> None:  # pylint: disable=unused-argument
     """The XML attribute must reach get_hud_ui_parameters, not just mocks (#680 P1)."""
     import defusedxml.minidom
 

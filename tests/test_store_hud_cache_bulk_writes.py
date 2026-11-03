@@ -11,8 +11,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-import fpdb_3_legacy.Database as Database
-from fpdb_3_legacy import db_profile, latency_profile
+from fpdb_3_legacy import Database, db_profile, latency_profile
 
 CACHE_KEYS = Database.CACHE_KEYS
 HUDCACHE_EXTRA_KEYS = Database.HUDCACHE_EXTRA_KEYS

@@ -15,8 +15,7 @@ from typing import Any
 
 import pytest
 
-import fpdb_3_legacy.Database as Database
-from fpdb_3_legacy import dialects
+from fpdb_3_legacy import Database, dialects
 from fpdb_3_legacy.database_caches import DatabaseCachesMixin
 from fpdb_3_legacy.SQL import Sql
 from tests.test_database_backend_integration import _connection, _create_schema, _enabled_backends
@@ -36,7 +35,7 @@ def _player_stats(**overrides: Any) -> dict[str, Any]:
     return stats
 
 
-class _CacheHost(DatabaseCachesMixin):
+class _CacheHost(DatabaseCachesMixin):  # pylint: disable=too-many-instance-attributes,arguments-differ
     """Minimal Database-compatible host for the caches mixin, on a live connection."""
 
     def __init__(self, connection: Any, backend: str) -> None:
