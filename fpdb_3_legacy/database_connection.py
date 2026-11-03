@@ -119,12 +119,13 @@ class DatabaseTransaction:
 
     def __init__(self, db: Any) -> None:
         self.db = db
+        self._latency_start: Any = None
 
     def __enter__(self) -> "DatabaseTransaction":
         self.db._in_transaction += 1
         # Remembered only when the latency profile is on, so the default path
         # pays nothing (#680).
-        self._latency_start = perf_counter() if latency_profile.is_enabled() else None
+        self._latency_start = perf_counter() if latency_profile.is_enabled() else None  # pylint: disable=attribute-defined-outside-init
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:

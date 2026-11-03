@@ -8,9 +8,10 @@ single-connection, so there is nothing to set.
 
 from __future__ import annotations
 
+import importlib
 from unittest.mock import MagicMock, call
 
-from fpdb_3_legacy import HUD_main
+HUD_main = importlib.import_module("fpdb_3_legacy.HUD_main")
 
 HudReadWorker = HUD_main.HudReadWorker
 

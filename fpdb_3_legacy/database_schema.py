@@ -1800,7 +1800,7 @@ class DatabaseSchemaMixin:
 
     def fillDefaultData(self) -> None:
         c = self.get_cursor()
-        c.execute(f"INSERT INTO Settings (version) VALUES ({DB_VERSION});")  # nosemgrep
+        c.execute(f"INSERT INTO Settings (version) VALUES ({DB_VERSION});")  # nosec B608  # nosemgrep
         # Fill Sites
         c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('1', 'Full Tilt Poker', 'FT')",

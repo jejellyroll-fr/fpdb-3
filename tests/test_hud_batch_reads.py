@@ -281,8 +281,6 @@ def test_primary_hands_are_read_most_recent_first() -> None:
 
 def test_hand_batch_interval_is_configurable_with_default_200() -> None:
     """hud ui hand_batch_interval_ms overrides the 200 ms default (#680)."""
-    from unittest.mock import MagicMock
-
     from fpdb_3_legacy.config_hud_ui import ConfigHudUiMixin
 
     host = ConfigHudUiMixin.__new__(ConfigHudUiMixin)
@@ -319,11 +317,9 @@ def test_many_reads_canonicalise_string_hand_ids(db, hand_ids) -> None:
         assert db.get_table_min_stack_bb_many(str_ids)[s] == db.get_table_min_stack_bb(h)
 
 
-def test_read_batch_with_string_hand_ids_loads_full_stats(db, hand_ids) -> None:
+def test_read_batch_with_string_hand_ids_loads_full_stats(db) -> None:
     """End to end: string hand ids (as the ZMQ notifications carry) must produce
     fully loaded snapshots, not silently empty ones (#680 P0)."""
-    from fpdb_3_legacy.hud_read_service import HudBatchReadRequest, HudReadService
-
     service = HudReadService(db.config, db)
     c = db.connection.cursor()
     c.execute("SELECT MIN(id) FROM Hands GROUP BY tableName")
@@ -349,7 +345,7 @@ def test_read_batch_with_string_hand_ids_loads_full_stats(db, hand_ids) -> None:
             },
         )
     )
-    assert snapshot.failed_hand_ids == ()
+    assert not snapshot.failed_hand_ids
     for hand_id in str_ids:
         prepared = snapshot.hands[hand_id]
         assert prepared.stat_dict, f"stat_dict empty for {hand_id}"

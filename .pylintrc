@@ -1,7 +1,10 @@
-# Codacy runs pylint with this file. The repository's line length is 120
-# (pyproject.toml [tool.ruff]), so align pylint on it instead of failing every
-# long line. Docstring/convention rules stay off: the legacy modules predate
-# them and ruff already owns style.
+# Codacy runs pylint with this file. Line length is deliberately not enforced:
+# ruff ignores E501 repo-wide (pyproject.toml [tool.ruff]) and the base tree
+# already carries ~1000 lines over 120 chars, so pylint flagging them would only
+# produce noise on every diff that touches a long SQL string. Docstring and
+# convention rules stay off: the legacy modules predate them and ruff already
+# owns style. redefined-outer-name is the standard pytest fixture pattern
+# (a test parameter named like the fixture it requests).
 [MAIN]
 max-line-length = 120
 
@@ -22,7 +25,9 @@ disable =
     too-many-statements,
     too-many-arguments,
     too-many-positional-arguments,
-    unspecified-encoding
+    unspecified-encoding,
+    line-too-long,
+    redefined-outer-name
 
 [BASIC]
 good-names = i, j, k, x, y, z, db, id, ok, ui, ph, ex, e, n, q, c, w

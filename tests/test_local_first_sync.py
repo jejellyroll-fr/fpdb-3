@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -187,7 +188,7 @@ def test_push_to_live_postgresql(tmp_path) -> None:
     server = Database(server_cfg)
     server.recreate_tables()
     # referentials first so the FK constraints on Hands hold
-    for table, key in (("Sites", "name"), ("Gametypes", "siteId"), ("Players", "name")):
+    for _table, key in (("Sites", "name"), ("Gametypes", "siteId"), ("Players", "name")):
         pass  # schema carries no rows; hands reference them, so push them explicitly below
 
     def server_factory():
@@ -219,8 +220,6 @@ def test_gauge_is_reported_in_the_latency_snapshot(monkeypatch) -> None:
 
 
 def _config_with_node(attrs: dict):
-    from unittest.mock import MagicMock
-
     from fpdb_3_legacy.config_databases import ConfigDatabasesMixin
     from fpdb_3_legacy.config_databases import Database as DbNode
 
@@ -281,9 +280,6 @@ def test_local_first_off_by_default() -> None:
 
 def test_importer_marks_the_outbox_after_each_file(tmp_path) -> None:
     """The local-first hook registers the hands committed by each file (#680)."""
-    from unittest.mock import MagicMock
-
-    from fpdb_3_legacy.Importer import Importer
 
     local = _sqlite_db(tmp_path, "imp_local")
     importer = Importer(caller=None, settings={"testData": False, "threads": 1}, config=local.config, sql=None)
@@ -362,11 +358,8 @@ def test_failed_batch_marks_nothing_and_is_retried(local_db, server_db, monkeypa
     assert sync.push_once() == len(local_ids)
 
 
-def test_stop_is_on_the_sync_and_importer_close_does_not_crash(tmp_path) -> None:
+def test_stop_is_on_the_sync_and_importer_close_does_not_crash(tmp_path) -> None:  # pylint: disable=unused-argument
     """LocalFirstSync owns stop(); Importer.close() must not AttributeError (#680 P1)."""
-    from unittest.mock import MagicMock
-
-    from fpdb_3_legacy.Importer import Importer
 
     local = _sqlite_db(tmp_path, "imp_close")
     importer = Importer(caller=None, settings={"testData": False, "threads": 1}, config=local.config, sql=None)

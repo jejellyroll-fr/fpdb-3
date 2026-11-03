@@ -36,8 +36,12 @@ os.environ.setdefault("FPDB_DB_PROFILE", "1")
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from tools.benchmark_hud_live import _corpus_files, _make_config, drop_bench_server_dbs  # noqa: E402
-from tools.benchmark_hud_queries import _percentiles  # noqa: E402
+from tools.benchmark_hud_live import (  # noqa: E402  # pylint: disable=wrong-import-position
+    _corpus_files,
+    _make_config,
+    drop_bench_server_dbs,
+)
+from tools.benchmark_hud_queries import _percentiles  # noqa: E402  # pylint: disable=wrong-import-position
 
 DEFAULT_CORPUS = (
     "regression-test-files/cash/Stars/**/*.txt",

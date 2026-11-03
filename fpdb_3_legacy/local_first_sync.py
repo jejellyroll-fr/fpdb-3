@@ -47,6 +47,8 @@ PUSH_TABLES = ("Hands", "HandsPlayers", "HandsActions")
 class LocalFirstSync:
     """Asynchronous push of local hands to the server database."""
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(
         self,
         local_db: Any,

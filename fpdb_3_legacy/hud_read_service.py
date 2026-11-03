@@ -695,7 +695,7 @@ class HudReadService:
             max_secondary = int(request.hud_params.get("max_secondary_tables_per_batch", 0) or 0)
         except (TypeError, ValueError):
             max_secondary = 0
-        if max_secondary > 0 and len(request.tables) > max_secondary:
+        if 0 < max_secondary < len(request.tables):
             # Round-robin so a capped batch does not starve the same tables:
             # rotate the starting offset on every batch (#680 P2).
             offset = self._secondary_offset % len(request.tables)
