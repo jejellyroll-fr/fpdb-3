@@ -34,6 +34,7 @@ import shutil
 import sys
 import tempfile
 import threading
+import time
 from pathlib import Path
 from time import perf_counter
 
@@ -158,6 +159,38 @@ def _hud_params(stat_range: str) -> dict:
     # (hud_params["hud_days"]); without them every primary hand fails with a
     # KeyError and the benchmark silently measures only the secondary path.
     return dict(_DEFAULT_HUD_PARAMS, stat_range=stat_range, h_stat_range=stat_range, hud_days=30, h_hud_days=90)
+
+
+class _SimulatedRttConnection:
+    """Wraps a driver connection adding a fixed delay before every statement,
+    to simulate a LAN RTT without a traffic shaper (#680)."""
+
+    def __init__(self, connection, rtt_s: float):
+        self._connection = connection
+        self._rtt_s = rtt_s
+
+    def cursor(self, *args, **kwargs):
+        return _SimulatedRttCursor(self._connection.cursor(*args, **kwargs), self._rtt_s)
+
+    def __getattr__(self, name):
+        return getattr(self._connection, name)
+
+
+class _SimulatedRttCursor:
+    def __init__(self, cursor, rtt_s: float):
+        self._cursor = cursor
+        self._rtt_s = rtt_s
+
+    def execute(self, sql, *args, **kwargs):
+        time.sleep(self._rtt_s)
+        return self._cursor.execute(sql, *args, **kwargs)
+
+    def executemany(self, sql, *args, **kwargs):
+        time.sleep(self._rtt_s)
+        return self._cursor.executemany(sql, *args, **kwargs)
+
+    def __getattr__(self, name):
+        return getattr(self._cursor, name)
 
 
 def _contexts(db, table_hands: dict[str, list[str]], tables: list[str], last_index: int):
@@ -307,6 +340,12 @@ def main(argv=None) -> int:
         "--import-concurrent", action="store_true", help="run auto-import on a second connection during the reads"
     )
     parser.add_argument("--out", default=None, help="write the full JSON report here")
+    parser.add_argument(
+        "--simulate-rtt-ms",
+        type=float,
+        default=0.0,
+        help="add this many ms before every statement, to simulate a LAN RTT (#680)",
+    )
     args = parser.parse_args(argv)
 
     files = _corpus_files(args.corpus, args.corpus_limit)
@@ -316,6 +355,8 @@ def main(argv=None) -> int:
     with tempfile.TemporaryDirectory(prefix="fpdb-hud-live-bench-", ignore_cleanup_errors=True) as root:
         workdir = Path(root)
         config, db = build_database(workdir, files)
+        if args.simulate_rtt_ms > 0:
+            db.connection = _SimulatedRttConnection(db.connection, args.simulate_rtt_ms / 1000.0)
         table_hands = _table_hands(db)
         print(
             f"populated {sum(len(v) for v in table_hands.values())} hands over {len(table_hands)} tables",
