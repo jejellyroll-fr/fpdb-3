@@ -154,7 +154,10 @@ def _table_hands(db) -> dict[str, list[str]]:
 def _hud_params(stat_range: str) -> dict:
     from fpdb_3_legacy.database_hud_stats import _DEFAULT_HUD_PARAMS
 
-    return dict(_DEFAULT_HUD_PARAMS, stat_range=stat_range, h_stat_range=stat_range)
+    # _DEFAULT_HUD_PARAMS lacks the day windows the read path indexes directly
+    # (hud_params["hud_days"]); without them every primary hand fails with a
+    # KeyError and the benchmark silently measures only the secondary path.
+    return dict(_DEFAULT_HUD_PARAMS, stat_range=stat_range, h_stat_range=stat_range, hud_days=30, h_hud_days=90)
 
 
 def _contexts(db, table_hands: dict[str, list[str]], tables: list[str], last_index: int):

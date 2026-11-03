@@ -100,52 +100,70 @@ table is printed and the full JSON goes to `--out`.
 
 Same workload everywhere: 40-file Stars corpus imported with the HUD cache
 enabled (113 hands / 37 tables), then 10 HUD batch rounds per configuration at
-1/2/4/6/8 tables x stat range A/S x auto-import off/on. Backends: SQLite file
-local, PostgreSQL 18.3 and MySQL 8.4.3 both on 127.0.0.1 (loopback, not a LAN —
-the per-statement network latency of a real LAN is on top of these numbers, once
-per round trip). Full JSON: `docs/bench-680-sqlite.json`,
-`docs/bench-680-postgresql.json`, `docs/bench-680-mysql.json`.
+1/2/4/6/8 tables x stat range A/S x auto-import off/on, through the real
+`HudReadService.read_batch`. Backends: SQLite file local, PostgreSQL 18.3 and
+MySQL 8.4.3 on 127.0.0.1 (loopback — a real LAN adds one network latency per
+round trip on top). Full JSON: `docs/bench-680-{sqlite,postgresql,mysql}.json`.
 
-Batch wall time (ms), stat range A, 10 rounds per cell:
+Batch wall time (ms), 10 rounds per cell:
 
-| backend | tables | import off p50 / p95 / max | import on p50 / p95 / max | round trips / 10 rounds | import txn p99 (import on) | commit max |
-|---|---|---|---|---|---|---|
-| SQLite | 1 | 0.9 / 13.4 / 23.6 | 2.8 / 16.6 / 19.4 | 380 -> 443 | 21.2 ms | 0.0 ms |
-| SQLite | 8 | 2.3 / 4.1 / 5.5 | 7.8 / 20.1 / 20.1 | 870 -> 955 | 25.6 ms | 0.1 ms |
-| PostgreSQL 18.3 | 1 | 10.8 / 26.6 / 38.6 | 12.2 / 18.0 / 19.7 | 380 -> 546 | 91.8 ms | 0.9 ms |
-| PostgreSQL 18.3 | 8 | 25.4 / 27.2 / 27.7 | 30.0 / 43.6 / 44.7 | 870 -> 1053 | 106.1 ms | 0.9 ms |
-| MySQL | 1 | 12.9 / 25.4 / 34.9 | 16.7 / 33.1 / 40.5 | 380 -> 446 | 64.3 ms | 2.3 ms |
-| MySQL | 8 | 28.8 / 31.3 / 31.3 | 33.7 / 63.7 / 65.1 | 870 -> 958 | 42.3 ms | 3.1 ms |
+| backend | tables | range | import off p50 / p95 / max | import on p50 / p95 / max | round trips / 10 rounds |
+|---|---|---|---|---|---|
+| SQLite | 1 | A | 3.6 / 20.4 / 33.9 | 11.5 / 26.4 / 29.6 | 492 -> 575 |
+| SQLite | 8 | A | 30.2 / 35.4 / 35.5 | 77.1 / **1429** / 1467 | 1747 -> 1991 |
+| SQLite | 8 | S | 19.9 / 92.3 / 146.9 | 41.8 / 59.8 / 64.9 | 1740 -> 1898 |
+| PostgreSQL 18.3 | 1 | A | 27.8 / 55.0 / 75.4 | 33.3 / 47.7 / 53.7 | 492 -> 673 |
+| PostgreSQL 18.3 | 8 | A | 156.1 / 164.5 / 171.1 | 175.7 / 183.9 / 183.9 | 1747 -> 1947 |
+| PostgreSQL 18.3 | 8 | S | 102.3 / 109.3 / 110.8 | 123.0 / 141.1 / 147.3 | 1740 -> 1935 |
+| MySQL 8.4.3 | 1 | A | 33.1 / 46.1 / 54.8 | 46.1 / 69.1 / 70.8 | 492 -> 567 |
+| MySQL 8.4.3 | 8 | A | 160.7 / 207.8 / 218.5 | 212.0 / **1516** / 1592 | 1747 -> 1937 |
+| MySQL 8.4.3 | 8 | S | 116.0 / 130.8 / 134.9 | 171.2 / 223.5 / 228.5 | 1740 -> 1917 |
+
+(An earlier version of this table was produced with a harness bug — missing
+`hud_days` in the HUD params made every primary hand fail silently, so only the
+secondary path was measured. Fixed and re-run; the table above is the corrected
+one.)
 
 Reading:
 
-* **Round trips scale linearly with table count** (~11 statements per table per
-  batch round: 38 â†’ 87 per round from 1 to 8 tables). On a LAN database each
-  statement costs one network latency, so this is the term that grows with the
-  table count even when every query is fast. This is the strongest candidate for
-  the reported scaling; R1 removes the per-entry part of it on the import side,
-  R3 removes superseded whole batches on the HUD side.
-* **Server backends pay a fixed per-statement cost even on loopback**: batch
-  p50 is ~10-29 ms on PostgreSQL/MySQL vs ~1-2 ms on SQLite for the same round
-  trips — parse/plan/round-trip overhead per statement, which a LAN multiplies
-  further.
-* **Import concurrency is the tail multiplier on every backend**, worst on MySQL
-  (batch p95 63.7 ms at 8 tables, commit max 12.8 ms already at 2 tables) and on
-  PostgreSQL for transaction duration (txn p99 > 100 ms with the writer active).
-  This matches "HUD + auto-import together are unplayable, each alone is fine":
-  the HUD worker's reads and the importer's writes contend on the same server.
-* Session (`S`) vs all-hands (`A`) made no difference on this small corpus; on a
-  real long history `hud_session_rows` and the per-hand session path are the
-  things to watch (the issue's session-range hypothesis).
+* **Round trips scale with table count on every backend**: ~175-200 statements
+  per batch round at 8 tables (~22 per table), vs ~49 at 1 table. This is the
+  term that grows with the table count; on a LAN each statement costs one
+  network latency on top of its server time.
+* **At 8 tables the cost lives in the primary phase** (p99 51-200 ms), not the
+  secondary refresh (p99 ~0): the per-hand aggregate query plus the per-hand
+  reads (positions, seat players, cards, min stack). `hud_query_execute` p99
+  is only 8-17 ms per statement even on MySQL, so it is the *number* of
+  statements more than any single slow query — on this corpus. On a big real
+  database the per-query p99 is the thing to watch via `EXPLAIN`.
+* **Writer contention is the tail multiplier, and it is architectural**:
+  SQLite (single writer) and MySQL/InnoDB hit **p95 of 1.4-1.6 s** at 8 tables
+  with auto-import active, already on loopback; PostgreSQL stays at ~184 ms
+  p95 because readers never block on the writer. On a LAN database these
+  numbers get worse per round trip, but the ordering and the 1.4 s tail exist
+  even locally — this is not only a network problem.
+* **Session range (S)** was cheaper than all-hands (A) here only because the
+  regression corpus is old, so the 24h session window is empty
+  (`hud_session_rows` = 0). On a real long live session the per-hand session
+  path fetches and aggregates detailed rows in Python — watch
+  `hud_session_rows` and `hud_python_aggregate` in the reporter's report.
+* PostgreSQL 17.6 vs 18.3: no significant difference (within noise).
+
+Conclusion: the freeze is **both** — an architecture-level term (reader/writer
+contention, per-statement network latency on a remote DB) **and** a code-level
+term (~22 statements per table per refresh round, serial worker queue). The
+code-side levers already in this PR: R1 (HudCache flush: 2N -> ~4 statements
+per import batch), R3 (superseded batches coalesced: one read per burst
+instead of one per hand), R2 (MySQL worker session bounded like PostgreSQL).
+The next levers if the reporter's `hud_queue_wait` confirms queue growth:
+P2 (prioritise the active table, bound secondary refresh per batch) and
+reducing per-hand reads in `_read_hand` (positions/seat_players/cards could
+be batched across the primary hands of one round the way secondary stats
+already are).
 
 Caveat recorded as the issue requires: these runs are loopback, not a LAN, and
 the corpus is small; a local SQLite run also changes both backend and location.
-The numbers motivate the direction; the reporter's latency report will say which
-term dominates on their network.
-
-PostgreSQL was run on both 17.6 and 18.3: no significant difference on this
-workload (18.3 numbers above; 17.6 within noise — e.g. batch p95 at 8 tables
-with import on: 40.8 ms on 17.6 vs 43.6 ms on 18.3).
+The reporter's latency report will say which term dominates on their network.
 
 ## Compatibility fix found while running the three backends
 
