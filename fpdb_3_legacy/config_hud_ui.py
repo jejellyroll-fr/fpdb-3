@@ -45,6 +45,8 @@ class HudUI:
             self.deck_type = node.getAttribute("deck_type")
         if node.hasAttribute("card_back"):
             self.card_back = node.getAttribute("card_back")
+        if node.hasAttribute("hand_batch_interval_ms"):
+            self.hand_batch_interval_ms = node.getAttribute("hand_batch_interval_ms")
         if node.hasAttribute("stat_range"):
             self.stat_range = node.getAttribute("stat_range")
         if node.hasAttribute("stat_days"):

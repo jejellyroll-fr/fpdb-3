@@ -58,6 +58,74 @@ def _corpus_files(pattern: str, limit: int) -> list[Path]:
     return [Path(f) for f in files[:limit]]
 
 
+# Server databases created by the bench, dropped again on exit: a benchmark
+# must never recreate the tables of an existing database (#680 P0).
+_BENCH_SERVER_DBS: list[tuple[str, str, str]] = []
+
+
+def _create_bench_server_db(dsn: str, base_db: str) -> str:
+    """Create a throwaway <base>_bench<pid> database next to the DSN's one."""
+    import re
+
+    m = re.match(r"(postgresql|postgres|mysql)://([^@]+)@([^/]+)/(.*)", dsn)
+    assert m, f"bad DSN: {dsn}"  # nosec B101
+    flavor, creds, host, _db = m.groups()
+    user, password = creds.split(":", 1)
+    host_port = host.split(":", 1)
+    port = int(host_port[1]) if len(host_port) > 1 else (5432 if flavor.startswith("postgres") else 3306)
+    bench_db = f"{base_db}_bench{os.getpid()}"
+    if flavor.startswith("postgres"):
+        import psycopg
+
+        admin = psycopg.connect(host=host_port[0], port=port, dbname="postgres", user=user, password=password)
+        admin.autocommit = True
+        admin.execute(f'DROP DATABASE IF EXISTS "{bench_db}"')
+        admin.execute(f'CREATE DATABASE "{bench_db}" OWNER "{user}"')
+        admin.close()
+    else:
+        import pymysql
+
+        admin = pymysql.connect(host=host_port[0], port=port, user=user, password=password)
+        with admin.cursor() as cur:
+            cur.execute(f"DROP DATABASE IF EXISTS `{bench_db}`")
+            cur.execute(f"CREATE DATABASE `{bench_db}`")
+        admin.commit()
+        admin.close()
+    _BENCH_SERVER_DBS.append((flavor, dsn, bench_db))
+    return bench_db
+
+
+def drop_bench_server_dbs() -> None:
+    """Drop every throwaway database this process created."""
+    import re
+
+    for flavor, dsn, bench_db in _BENCH_SERVER_DBS:
+        m = re.match(r"(postgresql|postgres|mysql)://([^@]+)@([^/]+)/(.*)", dsn)
+        _flavor, creds, host, _db = m.groups()
+        user, password = creds.split(":", 1)
+        host_port = host.split(":", 1)
+        port = int(host_port[1]) if len(host_port) > 1 else (5432 if flavor.startswith("postgres") else 3306)
+        try:
+            if flavor.startswith("postgres"):
+                import psycopg
+
+                admin = psycopg.connect(host=host_port[0], port=port, dbname="postgres", user=user, password=password)
+                admin.autocommit = True
+                admin.execute(f'DROP DATABASE IF EXISTS "{bench_db}"')
+                admin.close()
+            else:
+                import pymysql
+
+                admin = pymysql.connect(host=host_port[0], port=port, user=user, password=password)
+                with admin.cursor() as cur:
+                    cur.execute(f"DROP DATABASE IF EXISTS `{bench_db}`")
+                admin.commit()
+                admin.close()
+        except Exception:
+            pass  # nosec B110  # nosemgrep
+    _BENCH_SERVER_DBS.clear()
+
+
 def _make_config(workdir: Path, db_file: Path):
     from fpdb_3_legacy.Configuration import Config
 
@@ -71,14 +139,17 @@ def _make_config(workdir: Path, db_file: Path):
         user, password = user_pass.split(":", 1)
         host_db = rest.split("/", 1)
         host_port = host_db[0].split(":", 1)
+        base_db = host_db[1] if len(host_db) > 1 else "fpdb"
+        # Never the DSN's own database: a throwaway copy is created (#680 P0).
+        bench_db = _create_bench_server_db(dsn, base_db)
         params.update(
             {
                 "db-server": "postgresql",
                 "db-backend": 3,
                 "db-host": host_port[0],
                 "db-port": int(host_port[1]) if len(host_port) > 1 else 5432,
-                "db-name": host_db[1] if len(host_db) > 1 else "fpdb",
-                "db-databaseName": host_db[1] if len(host_db) > 1 else "fpdb",
+                "db-name": bench_db,
+                "db-databaseName": bench_db,
                 "db-path": "",
                 "db-user": user,
                 "db-password": password,
@@ -89,14 +160,16 @@ def _make_config(workdir: Path, db_file: Path):
         user, password = user_pass.split(":", 1)
         host_db = rest.split("/", 1)
         host_port = host_db[0].split(":", 1)
+        base_db = host_db[1] if len(host_db) > 1 else "fpdb"
+        bench_db = _create_bench_server_db(dsn, base_db)
         params.update(
             {
                 "db-server": "mysql",
                 "db-backend": 2,
                 "db-host": host_port[0],
                 "db-port": int(host_port[1]) if len(host_port) > 1 else 3306,
-                "db-name": host_db[1] if len(host_db) > 1 else "fpdb",
-                "db-databaseName": host_db[1] if len(host_db) > 1 else "fpdb",
+                "db-name": bench_db,
+                "db-databaseName": bench_db,
                 "db-path": "",
                 "db-user": user,
                 "db-password": password,
@@ -363,6 +436,13 @@ def main(argv=None) -> int:
     table_counts = [int(t) for t in args.stat_range and args.tables.split(",")]
     stat_ranges = [s.strip() for s in args.stat_range.split(",")]
 
+    try:
+        return _main_inner(args, files, table_counts, stat_ranges)
+    finally:
+        drop_bench_server_dbs()
+
+
+def _main_inner(args, files, table_counts, stat_ranges) -> int:
     with tempfile.TemporaryDirectory(prefix="fpdb-hud-live-bench-", ignore_cleanup_errors=True) as root:
         workdir = Path(root)
         # Reserve the last quarter of the corpus as fresh write workload for the

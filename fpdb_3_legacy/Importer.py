@@ -455,7 +455,11 @@ class Importer:
             self._local_first_sync = LocalFirstSync(
                 self.database,
                 lambda: Database.Database(ServerConfigView(self.config), sql=self.sql),
+                local_db_path=self.config.get_db_parameters().get("db-databaseName"),
             )
+            # Start at construction so both runImport() and the live
+            # runUpdated()/_run_updated_cycle() auto-import path are covered.
+            self._local_first_sync.start()
             log.info(
                 "Local-first sync enabled: writing %s, pushing to server %s",
                 self.config.get_db_parameters().get("db-local-path"),
@@ -1405,6 +1409,7 @@ class Importer:
                         (stored, duplicates, partial, skipped, errors, ttime, detected_sitename) = (
                             self._import_despatch(tracked_file)
                         )
+                        self._mark_outbox()
                         self.logImport(
                             "auto",
                             f,

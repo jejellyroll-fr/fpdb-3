@@ -53,6 +53,7 @@ class LocalFirstSync:
         server_db_factory: Callable[[], Any],
         batch_size: int = 50,
         poll_s: float = 2.0,
+        local_db_path: str | None = None,
     ) -> None:
         self.local_db = local_db
         self.server_db_factory = server_db_factory
@@ -61,30 +62,42 @@ class LocalFirstSync:
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self._bool_columns: dict[str, set[str]] = {}
+        self._own_conn = None
+        if local_db_path:
+            import sqlite3
+
+            self._own_conn = sqlite3.connect(local_db_path, check_same_thread=False)
+            self._own_conn.execute("PRAGMA busy_timeout=60000")
+        self._id_maps: dict[str, dict[Any, int]] = {}
         self._ensure_outbox()
 
+    def _local_conn(self):
+        """The worker's own SQLite connection when a path is known, so its
+        commits never interleave with an in-flight import transaction (#680)."""
+        return self._own_conn if self._own_conn is not None else self.local_db.connection
+
     def _ensure_outbox(self) -> None:
-        c = self.local_db.connection.cursor()
+        c = self._local_conn().cursor()
         c.execute(OUTBOX_DDL)  # nosemgrep
-        self.local_db.connection.commit()
+        self._local_conn().commit()
         c.close()
 
     def mark(self, local_hand_ids: list) -> None:
         """Register locally imported hands for pushing (call after local commit)."""
         if not local_hand_ids:
             return
-        c = self.local_db.connection.cursor()
+        c = self._local_conn().cursor()
         c.executemany(
             "INSERT OR IGNORE INTO fpdb_sync_outbox (local_hand_id) VALUES (?)"
             if self.local_db.backend == 4
             else "INSERT IGNORE INTO fpdb_sync_outbox (local_hand_id) VALUES (%s)",
             [(int(h),) for h in local_hand_ids],
         )
-        self.local_db.connection.commit()
+        self._local_conn().commit()
         c.close()
 
     def pending(self) -> list[int]:
-        c = self.local_db.connection.cursor()
+        c = self._local_conn().cursor()
         c.execute(  # nosemgrep
             "SELECT local_hand_id FROM fpdb_sync_outbox WHERE pushed = 0 "
             f"ORDER BY local_hand_id LIMIT {self.batch_size}"  # nosec B608  # nosemgrep
@@ -100,6 +113,7 @@ class LocalFirstSync:
         if not local_ids:
             return 0
         pushed = 0
+        done: list[tuple[int, int]] = []
         try:
             server = self.server_db_factory()
             sph = server.sql.query["placeholder"]
@@ -109,8 +123,13 @@ class LocalFirstSync:
                     for local_id in local_ids:
                         server_id = self._push_hand(server, local_id, sph)
                         if server_id is not None:
-                            self._mark_pushed(local_id, server_id)
-                            pushed += 1
+                            # Marked locally only after the server commit: if this
+                            # batch fails, nothing is marked and all of it is
+                            # retried (#680 P0).
+                            done.append((local_id, server_id))
+            for local_id, server_id in done:
+                self._mark_pushed(local_id, server_id)
+            pushed = len(done)
         except Exception:
             latency_profile.count("sync_push_errors")
             raise
@@ -153,7 +172,7 @@ class LocalFirstSync:
         return cols
 
     def _push_referentials(self, server: Any, sph: str) -> None:
-        lc = self.local_db.connection.cursor()
+        lc = self._local_conn().cursor()
         c = server.connection.cursor()
         for table, keys in self.REFERENTIALS:
             lc.execute(f"SELECT * FROM {table}")  # nosec B608  # nosemgrep
@@ -165,7 +184,10 @@ class LocalFirstSync:
                 record = dict(zip(cols, row))
                 where = " AND ".join(f"{k} = {sph}" for k in keys)
                 c.execute(f"SELECT id FROM {table} WHERE {where}", [record[k] for k in keys])  # nosec B608  # nosemgrep
-                if c.fetchone():
+                existing = c.fetchone()
+                if existing:
+                    # local id -> server id, so child FKs can be remapped (#680 P0)
+                    self._id_maps.setdefault(table, {})[record.get("id")] = existing[0]
                     continue
                 insert_cols = [k for k in cols if k != "id"]
                 bools = self._server_bool_columns(server, table)
@@ -175,6 +197,7 @@ class LocalFirstSync:
                 ph_values = ", ".join([sph] * len(insert_cols))
                 q = f"INSERT INTO {table} ({', '.join(insert_cols)}) VALUES ({ph_values})"  # nosec B608  # nosemgrep
                 c.execute(q, values)  # nosemgrep
+                self._id_maps.setdefault(table, {})[record.get("id")] = self._last_insert_id(server, c)
         lc.close()
 
     def _push_hand(self, server: Any, local_id: int, sph: str) -> int | None:
@@ -182,7 +205,7 @@ class LocalFirstSync:
 
         Returns the server hand id, or None if the hand already existed.
         """
-        lc = self.local_db.connection.cursor()
+        lc = self._local_conn().cursor()
         lc.execute(f"SELECT * FROM Hands WHERE id = {self._ph()} ", (local_id,))  # nosec B608  # nosemgrep
         row = lc.fetchone()
         if row is None:
@@ -190,7 +213,10 @@ class LocalFirstSync:
             return None
         cols = [d[0] for d in lc.description]
         hand = dict(zip(cols, row))
+
         lc.close()
+
+        self._remap_hand_fks(hand)
 
         # dedup check
         c = server.connection.cursor()
@@ -206,28 +232,53 @@ class LocalFirstSync:
         insert_cols = [k for k in cols if k != "id"]
         bools = self._server_bool_columns(server, "Hands")
         q = f"INSERT INTO Hands ({', '.join(insert_cols)}) VALUES ({', '.join([sph] * len(insert_cols))})"  # nosec B608  # nosemgrep
-        c.execute(q, [bool(hand[k]) if k.lower() in bools and hand[k] is not None else hand[k] for k in insert_cols])  # nosemgrep
+        c.execute(
+            q, [bool(hand[k]) if k.lower() in bools and hand[k] is not None else hand[k] for k in insert_cols]
+        )  # nosemgrep
         server_id = self._last_insert_id(server, c)
 
-        # child rows, remapped to the server hand id
+        # child rows, remapped to the server hand id and server referential ids
         for table in ("HandsPlayers", "HandsActions"):
-            lc = self.local_db.connection.cursor()
-            lc.execute(f"SELECT * FROM {table} WHERE handId = {self._ph()}", (local_id,))  # nosec B608  # nosemgrep
-            child_rows = lc.fetchall()
-            child_cols = [d[0] for d in lc.description]
-            lc.close()
-            if not child_rows:
-                continue
-            bools = self._server_bool_columns(server, table)
-            for child in child_rows:
-                values = [
-                    server_id if k == "handId" else (bool(v) if k.lower() in bools and v is not None else v)
-                    for k, v in zip(child_cols, child)
-                ]
-                cph = ", ".join([sph] * len(child_cols))
-                cq = f"INSERT INTO {table} ({', '.join(child_cols)}) VALUES ({cph})"  # nosec B608  # nosemgrep
-                c.execute(cq, values)  # nosemgrep
+            self._push_children(server, table, local_id, server_id, sph)
         return server_id
+
+    def _remap_hand_fks(self, hand: dict) -> None:
+        """Rewrite the hand's referential FKs from local ids to server ids
+        using the maps built by _push_referentials (#680 P0)."""
+        for fk_col, ref_table in (("gametypeId", "Gametypes"), ("fileId", "Files"), ("siteId", "Sites")):
+            if hand.get(fk_col) is not None:
+                hand[fk_col] = self._id_maps.get(ref_table, {}).get(hand[fk_col], hand[fk_col])
+
+    def _push_children(self, server: Any, table: str, local_id: int, server_id: int, sph: str) -> None:
+        lc = self._local_conn().cursor()
+        lc.execute(f"SELECT * FROM {table} WHERE handId = {self._ph()}", (local_id,))  # nosec B608  # nosemgrep
+        child_rows = lc.fetchall()
+        child_cols = [d[0] for d in lc.description]
+        lc.close()
+        if not child_rows:
+            return
+        c = server.connection.cursor()
+        bools = self._server_bool_columns(server, table)
+        ins_cols = [k for k in child_cols if k != "id"]  # server assigns its own PKs
+        players_map = self._id_maps.get("Players", {})
+        for child in child_rows:
+            values = []
+            for k, v in zip(child_cols, child):
+                if k == "id":
+                    continue
+                if k == "handId":
+                    values.append(server_id)
+                elif k == "playerId" and v is not None:
+                    values.append(players_map.get(v, v))
+                elif k.lower() in bools and v is not None:
+                    values.append(bool(v))
+                else:
+                    values.append(v)
+
+            cph = ", ".join([sph] * len(ins_cols))
+            cq = f"INSERT INTO {table} ({', '.join(ins_cols)}) VALUES ({cph})"  # nosec B608  # nosemgrep
+            c.execute(cq, values)  # nosemgrep
+        c.close()
 
     def _ph(self) -> str:
         return self.local_db.sql.query["placeholder"]
@@ -241,13 +292,16 @@ class LocalFirstSync:
 
     def _mark_pushed(self, local_id: int, server_id: int) -> None:
         ph = self._ph()
-        c = self.local_db.connection.cursor()
-        c.execute(  # nosemgrep
-            "UPDATE fpdb_sync_outbox SET pushed = 1, server_hand_id = " + ph
-            + ", pushed_at = " + ph + f" WHERE local_hand_id = {ph}",  # nosec B608  # nosemgrep
+        c = self._local_conn().cursor()
+        c.execute(  # nosec B608  # nosemgrep
+            "UPDATE fpdb_sync_outbox SET pushed = 1, server_hand_id = "  # nosec B608
+            + ph
+            + ", pushed_at = "
+            + ph
+            + f" WHERE local_hand_id = {ph}",  # nosec B608  # nosemgrep
             (server_id, time.strftime("%Y-%m-%d %H:%M:%S"), local_id),
         )
-        self.local_db.connection.commit()
+        self._local_conn().commit()
         c.close()
 
     def start(self) -> None:
@@ -256,6 +310,18 @@ class LocalFirstSync:
         self._stop.clear()
         self._thread = threading.Thread(target=self._loop, daemon=True, name="local-first-sync")
         self._thread.start()
+
+    def stop(self) -> None:
+        """Stop the push thread and close the dedicated local connection."""
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join(timeout=10)
+        if self._own_conn is not None:
+            try:
+                self._own_conn.close()
+            except Exception:
+                pass  # nosec B110
+            self._own_conn = None
 
     def _loop(self) -> None:
         while not self._stop.is_set():
@@ -279,8 +345,3 @@ class ServerConfigView:
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._config, name)
-
-    def stop(self) -> None:
-        self._stop.set()
-        if self._thread is not None:
-            self._thread.join(timeout=10)

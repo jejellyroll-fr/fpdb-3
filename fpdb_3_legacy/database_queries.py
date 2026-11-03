@@ -141,7 +141,9 @@ class DatabaseQueriesMixin:
         tourney_nos = set()
         rows_by_hand = {}
         for row in c.fetchall():
-            hand_id, info_row = row[0], row[1:]
+            # SQL returns numeric ids; the HUD speaks string ids (#680): one
+            # canonical str key at this boundary.
+            hand_id, info_row = str(row[0]), row[1:]
             rows_by_hand[hand_id] = info_row
             if info_row[3] != "ring":
                 parts = re.split(" ", str(info_row[0]), maxsplit=1)
@@ -170,7 +172,7 @@ class DatabaseQueriesMixin:
         q = f"SELECT id, siteHandNo FROM Hands WHERE id IN {in_sql}"  # nosec B608  # nosemgrep
         c = self.connection.cursor()
         c.execute(q, in_params)  # nosemgrep
-        return {row[0]: (str(row[1]) if row[1] is not None else None) for row in c.fetchall()}
+        return {str(row[0]): (str(row[1]) if row[1] is not None else None) for row in c.fetchall()}
 
     def get_last_hand(self) -> Any:
         c = self.connection.cursor()

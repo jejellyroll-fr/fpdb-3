@@ -36,7 +36,7 @@ os.environ.setdefault("FPDB_DB_PROFILE", "1")
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from tools.benchmark_hud_live import _corpus_files, _make_config  # noqa: E402
+from tools.benchmark_hud_live import _corpus_files, _make_config, drop_bench_server_dbs  # noqa: E402
 from tools.benchmark_hud_queries import _percentiles  # noqa: E402
 
 DEFAULT_CORPUS = (
@@ -354,6 +354,13 @@ def main(argv=None) -> int:
         files.extend(_corpus_files(pattern, 10_000))
     files = list(dict.fromkeys(files))
 
+    try:
+        return _main_body(args, files)
+    finally:
+        drop_bench_server_dbs()
+
+
+def _main_body(args, files) -> int:
     with tempfile.TemporaryDirectory(prefix="fpdb-catalog-bench-", ignore_cleanup_errors=True) as root:
         workdir = Path(root)
         if args.dsn:

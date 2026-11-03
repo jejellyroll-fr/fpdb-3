@@ -157,7 +157,7 @@ import batch), R3 (superseded batches coalesced: one read per burst instead of
 one per hand), R2 (MySQL worker session bounded like PostgreSQL), and R4
 (batched primary reads: table info, site hand no, positions, seat players,
 cards, min stack -- one statement per detail per batch instead of per hand,
-~54% fewer round trips per round at 8 tables). P2 is implemented as an opt-in
+~32% fewer round trips per round at 8 tables once the str/int hand-id bug is fixed, see the corrected before/after table below). P2 is implemented as an opt-in
 bound (`max_secondary_tables_per_batch`, default 0 = unbounded, so displayed
 stats never go stale unless configured). Remaining levers if the reporter's
 `hud_queue_wait` still shows growth: prioritise the active table in the
@@ -170,23 +170,38 @@ the same table/params the way secondary stats already are.
 two statements (`get_table_info_many`, `get_site_hand_no_many`) and prefetches
 positions / seat players / cards / common cards / min stack for the whole batch
 in one statement each (`get_*_many`), with a per-hand fallback whenever a bulk
-value is missing. Measured on the same 3 backends, 8 tables, 10 rounds:
+value is missing.
 
-| backend | tables | range | imp | before p50/p95/max (ms) | after p50/p95/max (ms) | round trips before -> after |
-|---|---|---|---|---|---|---|
-| SQLite | 8 | A | off | 30.2 / 35.4 / 35.5 | 15.9 / 17.9 / 18.2 | 1747 -> 805 |
-| SQLite | 8 | A | on | 77.1 / **1429** / 1467 | 43.4 / **59.2** / 66.4 | 1991 -> 972 |
-| PostgreSQL 18.3 | 8 | A | off | 156.1 / 164.5 / 171.1 | 99.2 / 121.2 / 129.2 | 1747 -> 805 |
-| PostgreSQL 18.3 | 8 | A | on | 175.7 / 183.9 / 183.9 | 108.8 / 132.9 / 147.8 | 1947 -> 993 |
-| MySQL 8.4.3 | 8 | A | off | 160.7 / 207.8 / 218.5 | 90.0 / 100.4 / 103.3 | 1747 -> 805 |
-| MySQL 8.4.3 | 8 | A | on | 212.0 / **1516** / 1592 | 114.7 / **135.3** / 135.6 | 1937 -> 929 |
+> Correction (review of #681): the first version of this table was measured with
+> a str-vs-int `hand_id` mismatch at the `*_many` boundary — the harness feeds
+> hand ids as strings, SQL returns ints, so `_resolve_primary_hands` found
+> nothing and the primary reads were silently skipped (805 round trips, 59 ms
+> p95 were the *secondary-only* numbers). Fixed by canonical `str()` keys at
+> every SQL/HUD boundary, with regression tests feeding `("123", "124")`.
+> The table below is the corrected before/after, same flags on both sides
+> (`--tables 8 --stat-range A --repeats 20 --import-concurrent`, 20 rounds,
+> before = commit `fe28e478` just before the batched reads, after = this
+> branch with the id fix; two PG runs each to show run-to-run spread).
 
-**Round trips per batch round at 8 tables drop ~54% (1747 -> 805)** and the
-writer-contention tail collapses with them: SQLite p95 1429 -> 59 ms,
-MySQL p95 1516 -> 135 ms. PostgreSQL, already insulated from the writer by
-MVCC, still improves 26-28% from the removed round trips. The remaining cost at
-8 tables is the per-hand aggregate stats query (one per primary hand) and the
-per-hand `Hand` construction, which are the next levers.
+| backend | imp | before p50/p95 (ms) | after p50/p95 (ms) | round trips / 20 rounds before -> after |
+|---|---|---|---|---|
+| SQLite | off | 24 / 37 | 24 / 60 | 3496 -> 2374 |
+| SQLite | on | 74 / **1342** | 56 / **883** | 4022 -> 2927 |
+| PostgreSQL 18.3 | off | 150 / 186 (145 / 214) | 172 / 266 (126 / 136) | 3496 -> 2374 |
+| PostgreSQL 18.3 | on | 161 / 183 (162 / 230) | 183 / 605 (146 / 753) | 3712 -> 2788 |
+| MySQL 8.4.3 | off | 138 / 152 | 152 / 178 | 3496 -> 2374 |
+| MySQL 8.4.3 | on | 185 / 281 | 193 / 801 | 3828 -> 2886 |
+
+**Round trips per batch round at 8 tables drop ~32% (174.8 -> 118.7 per round,
+3496 -> 2374 per 20 rounds) on every backend — a deterministic counter, not a
+timing.** The SQLite writer-contention tail improves with them (p95 with import
+1342 -> 883 ms). PostgreSQL/MySQL wall time under concurrent import is noisy on
+the bench box (PG on: 605/753 ms after vs 183/230 before across two runs each),
+so no wall-time claim is made for them here; what is solid is the removed
+network round trips, which is exactly the term that a real LAN multiplies by
+the RTT. The remaining per-round cost at 8 tables is the per-hand aggregate
+stats query (one per primary hand) and the per-hand `Hand` construction, which
+are the next levers.
 
 Caveat recorded as the issue requires: these runs are loopback, not a LAN, and
 the corpus is small; a local SQLite run also changes both backend and location.
@@ -340,7 +355,7 @@ Code-side architecture choices shipped in this PR:
 * **Serial worker + coalescing** (R3): one in-flight batch, superseded batches
   merged — bounds the queue instead of growing it.
 * **Batched reads** (R4): one statement per detail per batch instead of per
-  hand (-54% round trips at 8 tables).
+  hand (-32% round trips at 8 tables after the id-type fix).
 * **Active table first**: primary hands are now read most-recently-notified
   first, so in a burst the HUD of the table the player is acting on is painted
   first (perceived latency down, total work unchanged).

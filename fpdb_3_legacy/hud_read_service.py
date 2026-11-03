@@ -243,6 +243,8 @@ class HudReadService:
             ]
             | None
         ) = None
+        # Rotation offset for the optional secondary-refresh cap (#680 P2).
+        self._secondary_offset = 0
         # Analytics-backed HUD cells (#335): resolved lazily, and only when the
         # configuration declares any, so a profile without them pays nothing.
         # The provider outlives one batch on purpose -- its cache is what makes
@@ -371,13 +373,13 @@ class HudReadService:
 
     def _cards(self, hand_id: str, poker_game: str, prefetched: dict | None = None) -> dict:
         prefetched = prefetched or {}
-        cards = prefetched.get("cards", {}).get(hand_id)
+        cards = prefetched.get("cards", {}).get(_hand_key(hand_id))
         if cards is None:
             cards = self.database.get_cards(hand_id)
         else:
             cards = dict(cards)
         if poker_game in {"holdem", "omahahi", "omahahilo"}:
-            common = prefetched.get("common", {}).get(hand_id)
+            common = prefetched.get("common", {}).get(_hand_key(hand_id))
             if common is None:
                 cards["common"] = self.database.get_common_cards(hand_id)["common"]
             else:
@@ -451,14 +453,15 @@ class HudReadService:
             poker_game=poker_game,
         )
         winners, actions = self._mucked_data(hand_id, needs_mucked_data)
-        positions = prefetched.get("positions", {}).get(hand_id)
+        positions = prefetched.get("positions", {}).get(_hand_key(hand_id))
         if positions is None:
             positions = self.database.get_hand_positions(hand_id)
-        seat_players = prefetched.get("seat_players", {}).get(hand_id)
+        seat_players = prefetched.get("seat_players", {}).get(_hand_key(hand_id))
         if seat_players is None:
             seat_players = self.database.get_seat_players(hand_id)
-        min_stack = prefetched.get("min_stack", {}).get(hand_id, None)
-        if hand_id not in prefetched.get("min_stack", {}):
+        key = _hand_key(hand_id)
+        min_stack = prefetched.get("min_stack", {}).get(key, None)
+        if key not in prefetched.get("min_stack", {}):
             min_stack = self.database.get_table_min_stack_bb(hand_id)
         loaded_fields = {
             "table_info",
@@ -558,12 +561,11 @@ class HudReadService:
         site_hand_nos = self._batched(request.hand_ids, "get_site_hand_no_many")
         for hand_id in request.hand_ids:
             try:
-                table_info = (
-                    table_infos.get(hand_id) if table_infos is not None else self.database.get_table_info(hand_id)
-                )
+                key = _hand_key(hand_id)
+                table_info = table_infos.get(key) if table_infos is not None else self.database.get_table_info(hand_id)
                 if table_info is None and table_infos is None:
                     table_info = self.database.get_table_info(hand_id)
-                if table_infos is not None and hand_id not in table_infos:
+                if table_infos is not None and key not in table_infos:
                     table_info = None
             except Exception as exc:
                 self._handle_read_error(exc)
@@ -575,7 +577,7 @@ class HudReadService:
                 unresolved.append(hand_id)
                 continue
             if site_hand_nos is not None:
-                site_hand_no = site_hand_nos.get(hand_id)
+                site_hand_no = site_hand_nos.get(_hand_key(hand_id))
             else:
                 site_hand_no = self.database.get_site_hand_no(hand_id)
             prepared = HudPreparedHand(
@@ -680,8 +682,7 @@ class HudReadService:
                 )
         return loaded_tables, revision
 
-    @staticmethod
-    def _bounded_secondary_tables(request: HudBatchReadRequest) -> tuple[HudTableReadContext, ...]:
+    def _bounded_secondary_tables(self, request: HudBatchReadRequest) -> tuple[HudTableReadContext, ...]:
         """The secondary tables this batch may refresh, honouring the P2 bound.
 
         ``max_secondary_tables_per_batch`` (hud param, default 0 = unbounded)
@@ -695,7 +696,12 @@ class HudReadService:
         except (TypeError, ValueError):
             max_secondary = 0
         if max_secondary > 0 and len(request.tables) > max_secondary:
-            return request.tables[:max_secondary]
+            # Round-robin so a capped batch does not starve the same tables:
+            # rotate the starting offset on every batch (#680 P2).
+            offset = self._secondary_offset % len(request.tables)
+            self._secondary_offset = (self._secondary_offset + max_secondary) % len(request.tables)
+            rotated = request.tables[offset:] + request.tables[:offset]
+            return rotated[:max_secondary]
         return request.tables
 
     def _load_secondary_hands(

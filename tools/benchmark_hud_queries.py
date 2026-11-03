@@ -43,6 +43,7 @@ from tools.benchmark_hud_live import (  # noqa: E402
     _hud_params,
     _make_config,
     _table_hands,
+    drop_bench_server_dbs,
 )
 
 DEFAULT_CORPUS = (
@@ -317,6 +318,13 @@ def main(argv=None) -> int:
     files = list(dict.fromkeys(files))
     print(f"corpus: {len(files)} files", file=sys.stderr)
 
+    try:
+        return _main_body(args, files)
+    finally:
+        drop_bench_server_dbs()
+
+
+def _main_body(args, files) -> int:
     with tempfile.TemporaryDirectory(prefix="fpdb-query-bench-", ignore_cleanup_errors=True) as root:
         workdir = Path(root)
         if args.dsn:

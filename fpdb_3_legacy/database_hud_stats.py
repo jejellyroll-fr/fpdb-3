@@ -189,7 +189,7 @@ class DatabaseHudStatsMixin:
 
     def get_hand_positions_many(self, hand_ids: list) -> dict[Any, dict[Any, Any]]:
         """get_hand_positions for many hands in one statement (#680)."""
-        result: dict[Any, dict[Any, Any]] = {hand: {} for hand in hand_ids}
+        result: dict[Any, dict[Any, Any]] = {str(hand): {} for hand in hand_ids}
         hand_ids = list(dict.fromkeys(hand_ids))
         if not hand_ids:
             return result
@@ -199,7 +199,7 @@ class DatabaseHudStatsMixin:
             c = self.connection.cursor()
             c.execute(q, in_params)  # nosemgrep
             for hand_id, player_id, position in c.fetchall():
-                result.setdefault(hand_id, {})[player_id] = position
+                result.setdefault(str(hand_id), {})[player_id] = position
         except Exception:
             log.exception("get_hand_positions_many failed")
             self._rollback_after_failed_read()
@@ -207,7 +207,7 @@ class DatabaseHudStatsMixin:
 
     def get_seat_players_many(self, hand_ids: list) -> dict[Any, dict[int, dict[str, object]]]:
         """get_seat_players for many hands in one statement (#680)."""
-        result: dict[Any, dict[int, dict[str, object]]] = {hand: {} for hand in hand_ids}
+        result: dict[Any, dict[int, dict[str, object]]] = {str(hand): {} for hand in hand_ids}
         hand_ids = list(dict.fromkeys(hand_ids))
         if not hand_ids:
             return result
@@ -222,7 +222,7 @@ class DatabaseHudStatsMixin:
             c = self.connection.cursor()
             c.execute(q, in_params)  # nosemgrep
             for hand_id, seat, player_id, name in c.fetchall():
-                result.setdefault(hand_id, {})[int(seat)] = {"player_id": int(player_id), "screen_name": name}
+                result.setdefault(str(hand_id), {})[int(seat)] = {"player_id": int(player_id), "screen_name": name}
         except Exception:
             log.exception("get_seat_players_many failed")
             self._rollback_after_failed_read()
@@ -230,7 +230,7 @@ class DatabaseHudStatsMixin:
 
     def get_cards_many(self, hand_ids: list) -> dict[Any, dict[Any, Any]]:
         """get_cards for many hands in one statement (#680)."""
-        result: dict[Any, dict[Any, Any]] = {hand: {} for hand in hand_ids}
+        result: dict[Any, dict[Any, Any]] = {str(hand): {} for hand in hand_ids}
         hand_ids = list(dict.fromkeys(hand_ids))
         if not hand_ids:
             return result
@@ -244,7 +244,7 @@ class DatabaseHudStatsMixin:
             c.execute(q, in_params)  # nosemgrep
             for row in c.fetchall():
                 hand_id = row[0]
-                result.setdefault(hand_id, {})[row[1]] = row[2:]
+                result.setdefault(str(hand_id), {})[row[1]] = row[2:]
         except Exception:
             log.exception("get_cards_many failed")
             self._rollback_after_failed_read()
@@ -252,7 +252,7 @@ class DatabaseHudStatsMixin:
 
     def get_common_cards_many(self, hand_ids: list) -> dict[Any, list]:
         """get_common_cards for many hands in one statement (#680)."""
-        result: dict[Any, list] = {hand: [] for hand in hand_ids}
+        result: dict[Any, list] = {str(hand): [] for hand in hand_ids}
         hand_ids = list(dict.fromkeys(hand_ids))
         if not hand_ids:
             return result
@@ -262,7 +262,7 @@ class DatabaseHudStatsMixin:
             c = self.connection.cursor()
             c.execute(q, in_params)  # nosemgrep
             for row in c.fetchall():
-                result[row[0]] = list(row[1:])
+                result[str(row[0])] = list(row[1:])
         except Exception:
             log.exception("get_common_cards_many failed")
             self._rollback_after_failed_read()
@@ -270,7 +270,7 @@ class DatabaseHudStatsMixin:
 
     def get_table_min_stack_bb_many(self, hand_ids: list) -> dict[Any, float | None]:
         """get_table_min_stack_bb for many hands in two statements (#680)."""
-        result: dict[Any, float | None] = {hand: None for hand in hand_ids}
+        result: dict[Any, float | None] = {str(hand): None for hand in hand_ids}
         hand_ids = list(dict.fromkeys(hand_ids))
         if not hand_ids:
             return result
@@ -285,7 +285,7 @@ class DatabaseHudStatsMixin:
                 ),
                 in_params,
             )
-            big_blinds = {row[0]: float(row[1]) for row in c.fetchall() if row[1]}
+            big_blinds = {str(row[0]): float(row[1]) for row in c.fetchall() if row[1]}
             c.execute(  # nosemgrep
                 (
                     "SELECT handId, startCash, committed, winnings FROM HandsPlayers "  # nosec B608  # nosemgrep
@@ -293,11 +293,11 @@ class DatabaseHudStatsMixin:
                 ),
                 in_params,
             )
-            stacks: dict[Any, list] = {hand: [] for hand in hand_ids}
+            stacks: dict[Any, list] = {str(hand): [] for hand in hand_ids}
             for hand_id, start_cash, committed, winnings in c.fetchall():
                 end_cash = float(start_cash) - float(committed) + float(winnings)
                 if end_cash > 0:
-                    stacks.setdefault(hand_id, []).append(end_cash)
+                    stacks.setdefault(str(hand_id), []).append(end_cash)
             for hand_id, blinds in big_blinds.items():
                 values = stacks.get(hand_id) or []
                 if blinds > 0 and values:

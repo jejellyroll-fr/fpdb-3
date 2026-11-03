@@ -331,3 +331,176 @@ def test_push_metrics_are_recorded(monkeypatch, local_db, server_db) -> None:
     metrics = profile.snapshot()["metrics"]
     assert metrics["sync_push_errors"]["counter"] == 1
     profile.reset()
+
+
+def test_failed_batch_marks_nothing_and_is_retried(local_db, server_db, monkeypatch) -> None:
+    """If the server transaction fails mid-batch, no hand may be marked pushed
+    (the server rolled back, so marking would lose it) (#680 P0)."""
+    sync = LocalFirstSync(local_db, server_db, batch_size=1000)
+    local_ids = _local_hand_ids(local_db)
+    sync.mark(local_ids)
+
+    original = sync._push_hand
+    calls = {"n": 0}
+
+    def failing(server, local_id, sph):
+        calls["n"] += 1
+        if calls["n"] == 2:
+            raise RuntimeError("simulated LAN drop mid-batch")
+        return original(server, local_id, sph)
+
+    monkeypatch.setattr(sync, "_push_hand", failing)
+    with pytest.raises(RuntimeError):
+        sync.push_once()
+
+    c = local_db.connection.cursor()
+    c.execute("SELECT COUNT(*) FROM fpdb_sync_outbox WHERE pushed = 1")
+    assert c.fetchone()[0] == 0
+    c.close()
+    # and a clean retry pushes everything
+    monkeypatch.setattr(sync, "_push_hand", original)
+    assert sync.push_once() == len(local_ids)
+
+
+def test_stop_is_on_the_sync_and_importer_close_does_not_crash(tmp_path) -> None:
+    """LocalFirstSync owns stop(); Importer.close() must not AttributeError (#680 P1)."""
+    from unittest.mock import MagicMock
+
+    from fpdb_3_legacy.Importer import Importer
+
+    local = _sqlite_db(tmp_path, "imp_close")
+    importer = Importer(caller=None, settings={"testData": False, "threads": 1}, config=local.config, sql=None)
+    importer.database = local
+    sync = MagicMock()
+    sync.stop = LocalFirstSync.stop.__get__(sync) if False else MagicMock()
+    importer._local_first_sync = sync
+    importer.close()  # must not raise
+    sync.stop.assert_called_once()
+    local.disconnect()
+
+
+def test_hand_batch_interval_ms_is_parsed_from_xml(tmp_path) -> None:
+    """The XML attribute must reach get_hud_ui_parameters, not just mocks (#680 P1)."""
+    import defusedxml.minidom
+
+    from fpdb_3_legacy.config_hud_ui import ConfigHudUiMixin, HudUI
+
+    xml = (
+        '<FreePokerToolsConfig><general version="87"/>'
+        '<hud_ui label="m" hand_batch_interval_ms="350"/></FreePokerToolsConfig>'
+    )
+    doc = defusedxml.minidom.parseString(xml)
+    host = ConfigHudUiMixin.__new__(ConfigHudUiMixin)
+    host.ui = HudUI(node=doc.getElementsByTagName("hud_ui")[0])
+    assert host.get_hud_ui_parameters()["hand_batch_interval_ms"] == 350
+
+
+def test_secondary_bound_rotates_instead_of_starving() -> None:
+    """A capped secondary refresh must rotate tables, not always take the first (#680 P2)."""
+    from fpdb_3_legacy.hud_read_service import HudBatchReadRequest, HudReadService, HudTableReadContext
+
+    service = HudReadService.__new__(HudReadService)
+    service._secondary_offset = 0
+
+    def ctx(i):
+        return HudTableReadContext(
+            temp_key=f"t{i}",
+            last_hand_id=str(i),
+            hud_params={},
+            poker_game="holdem",
+            game_type="ring",
+            site_id=1,
+            num_seats=6,
+        )
+
+    tables = tuple(ctx(i) for i in range(4))
+    req = HudBatchReadRequest(sequence=1, hand_ids=(), hud_params={"max_secondary_tables_per_batch": 1}, tables=tables)
+    first = [c.temp_key for c in service._bounded_secondary_tables(req)]
+    second = [c.temp_key for c in service._bounded_secondary_tables(req)]
+    third = [c.temp_key for c in service._bounded_secondary_tables(req)]
+    assert first != second != third
+    assert {first[0], second[0], third[0]} == {"t0", "t1", "t2"}
+
+
+def _insert_decoy_rows(db, table: str, decoy_id: int = 9000) -> None:
+    """Insert a row with an explicit high id so the server's auto ids diverge
+    from the local ones."""
+    c = db.connection.cursor()
+    c.execute(f"PRAGMA table_info({table})")  # nosec B608
+    cols = c.fetchall()
+    names, values = [], []
+    for _cid, name, ctype, notnull, _dflt, _pk in cols:
+        if name == "id":
+            names.append(name)
+            values.append(decoy_id)
+        elif notnull and _dflt is None:
+            names.append(name)
+            t = (ctype or "").upper()
+            if "INT" in t or "BOOL" in t:
+                values.append(0)
+            elif "TIME" in t or "DATE" in t:
+                values.append("2020-01-01 00:00:00")
+            else:
+                values.append("decoy")
+    ph = ", ".join(["?"] * len(names))
+    c.execute(f"INSERT INTO {table} ({', '.join(names)}) VALUES ({ph})", values)  # nosec B608
+    db.connection.commit()
+    c.close()
+
+
+def test_push_remaps_foreign_keys_when_server_ids_diverge(local_db, server_db) -> None:
+    """Server already populated -> server ids differ from local ids; the push
+    must remap gametypeId / playerId / handId instead of copying local ids."""
+    c = local_db.connection.cursor()
+    c.execute("SELECT id, gametypeId FROM Hands ORDER BY id LIMIT 1")
+    local_hand_id, local_gametype_id = c.fetchone()
+    c.execute("SELECT playerId FROM HandsPlayers WHERE handId = ? ORDER BY id LIMIT 1", (local_hand_id,))
+    local_player_id = c.fetchone()[0]
+    c.execute("SELECT name FROM Players WHERE id = ?", (local_player_id,))
+    player_name = c.fetchone()[0]
+    c.execute(
+        "SELECT siteId, type, base, category, limitType, hiLo, mix FROM Gametypes WHERE id = ?",
+        (local_gametype_id,),
+    )
+    gt_key = c.fetchone()
+    c.execute("SELECT name FROM Sites WHERE id = ?", (gt_key[0],))
+    site_name = c.fetchone()[0]
+    c.close()
+    # fresh local db: all referential ids start at 1
+    assert (local_gametype_id, local_player_id) == (1, 1)
+
+    # pre-populate the server with decoy rows so every pushed id is > 9000
+    srv = server_db()
+    for table in ("Sites", "Players", "Files", "Gametypes"):
+        _insert_decoy_rows(srv, table)
+    srv.disconnect()
+
+    sync = LocalFirstSync(local_db, server_db, batch_size=1000)
+    sync.mark([local_hand_id])
+    assert sync.push_once() == 1
+
+    srv = server_db()
+    c = srv.connection.cursor()
+    c.execute("SELECT id, gametypeId FROM Hands")
+    server_hand_id, server_gametype_id = c.fetchone()
+    assert server_gametype_id > 9000 and server_gametype_id != local_gametype_id
+    # the pushed hand references the server gametype with the same natural key
+    c.execute(
+        "SELECT g.id FROM Gametypes g JOIN Sites s ON s.id = g.siteId "
+        "WHERE s.name = ? AND g.type = ? AND g.base = ? AND g.category = ? "
+        "AND g.limitType = ? AND g.hiLo = ? AND g.mix = ?",
+        (site_name, *gt_key[1:]),
+    )
+    assert c.fetchone()[0] == server_gametype_id
+    # HandsPlayers rows reference the server hand id and the server player id
+    c.execute("SELECT handId, playerId FROM HandsPlayers")
+    hp_hand_id, hp_player_id = c.fetchone()
+    assert hp_hand_id == server_hand_id
+    assert hp_player_id > 9000 and hp_player_id != local_player_id
+    c.execute(
+        "SELECT p.id FROM Players p JOIN Sites s ON s.id = p.siteId WHERE p.name = ? AND s.name = ?",
+        (player_name, site_name),
+    )
+    assert c.fetchone()[0] == hp_player_id
+    c.close()
+    srv.disconnect()

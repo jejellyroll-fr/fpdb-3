@@ -33,6 +33,7 @@ def db(tmp_path_factory):
     Database(config).recreate_tables()
     importer = Importer(caller=None, settings={"testData": False, "threads": 1}, config=config, sql=None)
     importer.database = Database(config)
+    importer.setCallHud(True)
     for path in FILES:
         importer.addImportFile(str(path), "auto")
     stored, *_rest = importer.runImport()
@@ -55,51 +56,51 @@ def hand_ids(db):
 
 def test_get_table_info_many_matches_the_per_hand_read(db, hand_ids) -> None:
     many = db.get_table_info_many(hand_ids)
-    assert set(many) == set(hand_ids)
+    assert set(many) == {str(h) for h in hand_ids}
     for hand_id in hand_ids:
-        assert many[hand_id] == db.get_table_info(hand_id)
+        assert many[str(hand_id)] == db.get_table_info(hand_id)
 
 
 def test_get_site_hand_no_many_matches_the_per_hand_read(db, hand_ids) -> None:
     many = db.get_site_hand_no_many(hand_ids)
-    assert set(many) == set(hand_ids)
+    assert set(many) == {str(h) for h in hand_ids}
     for hand_id in hand_ids:
-        assert many[hand_id] == db.get_site_hand_no(hand_id)
+        assert many[str(hand_id)] == db.get_site_hand_no(hand_id)
 
 
 def test_get_hand_positions_many_matches_the_per_hand_read(db, hand_ids) -> None:
     many = db.get_hand_positions_many(hand_ids)
-    assert set(many) == set(hand_ids)
+    assert set(many) == {str(h) for h in hand_ids}
     for hand_id in hand_ids:
-        assert many[hand_id] == db.get_hand_positions(hand_id)
+        assert many[str(hand_id)] == db.get_hand_positions(hand_id)
 
 
 def test_get_seat_players_many_matches_the_per_hand_read(db, hand_ids) -> None:
     many = db.get_seat_players_many(hand_ids)
-    assert set(many) == set(hand_ids)
+    assert set(many) == {str(h) for h in hand_ids}
     for hand_id in hand_ids:
-        assert many[hand_id] == db.get_seat_players(hand_id)
+        assert many[str(hand_id)] == db.get_seat_players(hand_id)
 
 
 def test_get_cards_many_matches_the_per_hand_read(db, hand_ids) -> None:
     many = db.get_cards_many(hand_ids)
-    assert set(many) == set(hand_ids)
+    assert set(many) == {str(h) for h in hand_ids}
     for hand_id in hand_ids:
-        assert many[hand_id] == db.get_cards(hand_id)
+        assert many[str(hand_id)] == db.get_cards(hand_id)
 
 
 def test_get_common_cards_many_matches_the_per_hand_read(db, hand_ids) -> None:
     many = db.get_common_cards_many(hand_ids)
-    assert set(many) == set(hand_ids)
+    assert set(many) == {str(h) for h in hand_ids}
     for hand_id in hand_ids:
-        assert many[hand_id] == list(db.get_common_cards(hand_id)["common"])
+        assert many[str(hand_id)] == list(db.get_common_cards(hand_id)["common"])
 
 
 def test_get_table_min_stack_bb_many_matches_the_per_hand_read(db, hand_ids) -> None:
     many = db.get_table_min_stack_bb_many(hand_ids)
-    assert set(many) == set(hand_ids)
+    assert set(many) == {str(h) for h in hand_ids}
     for hand_id in hand_ids:
-        assert many[hand_id] == db.get_table_min_stack_bb(hand_id)
+        assert many[str(hand_id)] == db.get_table_min_stack_bb(hand_id)
 
 
 def _service_with_mock_db() -> tuple[HudReadService, MagicMock]:
@@ -299,3 +300,58 @@ def test_hand_batch_interval_is_configurable_with_default_200() -> None:
     host.ui.hand_batch_interval_ms = "350"
     params = host.get_hud_ui_parameters()
     assert params["hand_batch_interval_ms"] == 350
+
+
+def test_many_reads_canonicalise_string_hand_ids(db, hand_ids) -> None:
+    """The HUD speaks string hand ids; SQL returns ints. The *_many reads must
+    key their results by str(hand_id) so lookups never miss (#680 P0)."""
+    str_ids = [str(h) for h in hand_ids]
+    assert set(db.get_table_info_many(str_ids)) == set(str_ids)
+    assert set(db.get_site_hand_no_many(str_ids)) == set(str_ids)
+    for h in hand_ids:
+        s = str(h)
+        assert db.get_table_info_many(str_ids)[s] == db.get_table_info(h)
+        assert db.get_site_hand_no_many(str_ids)[s] == db.get_site_hand_no(h)
+        assert db.get_hand_positions_many(str_ids)[s] == db.get_hand_positions(h)
+        assert db.get_seat_players_many(str_ids)[s] == db.get_seat_players(h)
+        assert db.get_cards_many(str_ids)[s] == db.get_cards(h)
+        assert db.get_common_cards_many(str_ids)[s] == list(db.get_common_cards(h)["common"])
+        assert db.get_table_min_stack_bb_many(str_ids)[s] == db.get_table_min_stack_bb(h)
+
+
+def test_read_batch_with_string_hand_ids_loads_full_stats(db, hand_ids) -> None:
+    """End to end: string hand ids (as the ZMQ notifications carry) must produce
+    fully loaded snapshots, not silently empty ones (#680 P0)."""
+    from fpdb_3_legacy.hud_read_service import HudBatchReadRequest, HudReadService
+
+    service = HudReadService(db.config, db)
+    c = db.connection.cursor()
+    c.execute("SELECT MIN(id) FROM Hands GROUP BY tableName")
+    str_ids = [str(r[0]) for r in c.fetchall()[:3]]
+    c.close()
+    snapshot = service.read_batch(
+        HudBatchReadRequest(
+            sequence=1,
+            hand_ids=tuple(str_ids),
+            hud_params={
+                "hud_days": 30,
+                "h_hud_days": 90,
+                "stat_range": "A",
+                "h_stat_range": "A",
+                "agg_bb_mult": 1000,
+                "h_agg_bb_mult": 1000,
+                "seats_style": "A",
+                "seats_cust_nums_low": 1,
+                "seats_cust_nums_high": 10,
+                "h_seats_style": "A",
+                "h_seats_cust_nums_low": 1,
+                "h_seats_cust_nums_high": 10,
+            },
+        )
+    )
+    assert snapshot.failed_hand_ids == ()
+    for hand_id in str_ids:
+        prepared = snapshot.hands[hand_id]
+        assert prepared.stat_dict, f"stat_dict empty for {hand_id}"
+        assert prepared.positions, f"positions empty for {hand_id}"
+        assert prepared.seat_players, f"seat_players empty for {hand_id}"
