@@ -102,7 +102,7 @@ def test_check_tables_records_qt_event_loop_lag(monkeypatch) -> None:
 
     mgr._last_check_tables_ts = None
     HudMainTablesMixin.check_tables(mgr)
-    assert recorded == []  # first tick only arms the clock
+    assert not recorded  # first tick only arms the clock
 
     mgr._last_check_tables_ts = time.monotonic() - 0.8 - 0.05
     HudMainTablesMixin.check_tables(mgr)

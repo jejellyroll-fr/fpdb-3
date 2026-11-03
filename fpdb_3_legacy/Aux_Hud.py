@@ -25,7 +25,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QPoint, Qt
+from PySide6.QtCore import QPoint, Qt  # pylint: disable=wrong-import-position
 from PySide6.QtGui import QFont, QPixmap
 from PySide6.QtWidgets import (
     QComboBox,
@@ -40,7 +40,13 @@ from PySide6.QtWidgets import (
 )
 
 #    FreePokerTools modules
-from fpdb_3_legacy import Aux_Base, Configuration, Popup, Stats, latency_profile
+from fpdb_3_legacy import (  # pylint: disable=wrong-import-position
+    Aux_Base,
+    Configuration,
+    Popup,
+    Stats,
+    latency_profile,
+)
 from fpdb_3_legacy.hud_profiles import HudPositionScope
 from fpdb_3_legacy.i18n import gettext as _t
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace

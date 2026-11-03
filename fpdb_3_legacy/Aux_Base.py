@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from PySide6.QtGui import QMouseEvent
 
 #    Standard Library modules
-from fpdb_3_legacy import latency_profile
+from fpdb_3_legacy import latency_profile  # pylint: disable=wrong-import-position
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
