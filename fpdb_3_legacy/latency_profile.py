@@ -91,6 +91,7 @@ class LatencyProfile:
         self._durations: dict[str, list[float]] = {}
         self._reservoir_seen: dict[str, int] = {}
         self._counts: dict[str, int] = {}
+        self._gauges: dict[str, float] = {}
 
     # -- recording --------------------------------------------------------
 
@@ -119,6 +120,11 @@ class LatencyProfile:
         with self._lock:
             self._counts[name] = self._counts.get(name, 0) + amount
 
+    def gauge(self, name: str, value: float) -> None:
+        """Set the gauge ``name`` to its latest value (e.g. queue depth)."""
+        with self._lock:
+            self._gauges[name] = value
+
     @contextmanager
     def scope(self, name: str) -> Iterator[None]:
         """Record the wall time of the block under ``name``."""
@@ -134,6 +140,7 @@ class LatencyProfile:
             self._durations.clear()
             self._reservoir_seen.clear()
             self._counts.clear()
+            self._gauges.clear()
 
     # -- reporting --------------------------------------------------------
 
@@ -158,9 +165,14 @@ class LatencyProfile:
         """Every metric as JSON-ready data."""
         with self._lock:
             names = sorted(set(self._durations) | set(self._counts))
+            gauges = dict(self._gauges)
+        metrics = {name: self.metric_stats(name) for name in names}
+        for name, value in gauges.items():
+            metrics.setdefault(name, {"count": 0, "counter": 0, "mean": 0.0, "p50": 0.0, "p95": 0.0, "p99": 0.0, "max": 0.0})
+            metrics[name]["gauge"] = value
         return {
             "recorded_at": time.time(),
-            "metrics": {name: self.metric_stats(name) for name in names},
+            "metrics": metrics,
         }
 
     def report(self, top: int = 30) -> str:
@@ -268,6 +280,12 @@ def count(name: str, amount: int = 1) -> None:
     """Bump one counter, cheaply when profiling is off."""
     if _ENABLED:
         _PROFILE.count(name, amount)
+
+
+def gauge(name: str, value: float) -> None:
+    """Set one gauge to its latest value, cheaply when profiling is off."""
+    if _ENABLED:
+        _PROFILE.gauge(name, value)
 
 
 @contextmanager

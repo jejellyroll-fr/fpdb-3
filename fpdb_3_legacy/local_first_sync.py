@@ -26,6 +26,7 @@ import time
 from collections.abc import Callable
 from typing import Any
 
+from fpdb_3_legacy import latency_profile
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("local_first_sync")
@@ -94,24 +95,32 @@ class LocalFirstSync:
     def push_once(self) -> int:
         """Push one batch of pending hands; returns how many were pushed."""
         local_ids = self.pending()
+        latency_profile.gauge("sync_outbox_pending", len(local_ids))
         if not local_ids:
             return 0
-        server = self.server_db_factory()
         pushed = 0
         try:
+            server = self.server_db_factory()
             sph = server.sql.query["placeholder"]
-            with server.transaction():
-                self._push_referentials(server, sph)
-                for local_id in local_ids:
-                    server_id = self._push_hand(server, local_id, sph)
-                    if server_id is not None:
-                        self._mark_pushed(local_id, server_id)
-                        pushed += 1
+            with latency_profile.scope("sync_push_batch"):
+                with server.transaction():
+                    self._push_referentials(server, sph)
+                    for local_id in local_ids:
+                        server_id = self._push_hand(server, local_id, sph)
+                        if server_id is not None:
+                            self._mark_pushed(local_id, server_id)
+                            pushed += 1
+        except Exception:
+            latency_profile.count("sync_push_errors")
+            raise
         finally:
-            try:
-                server.close_connection()
-            except Exception:
-                pass
+            server = locals().get("server")
+            if server is not None:
+                try:
+                    server.close_connection()
+                except Exception:
+                    pass
+        latency_profile.gauge("sync_outbox_pending", len(self.pending()))
         return pushed
 
     # Referential tables pushed before any hand, deduped by their natural keys,
@@ -251,6 +260,21 @@ class LocalFirstSync:
             except Exception:
                 log.exception("local-first push failed; will retry")
             self._stop.wait(self.poll_s)
+
+
+class ServerConfigView:
+    """Adapts a Config so Database opens the *server* database while the main
+    config is switched to local-first: every method delegates, only
+    get_db_parameters returns the server params (#680)."""
+
+    def __init__(self, config: Any) -> None:
+        self._config = config
+
+    def get_db_parameters(self) -> dict:
+        return self._config.get_server_db_parameters()
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._config, name)
 
     def stop(self) -> None:
         self._stop.set()

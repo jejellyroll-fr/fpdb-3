@@ -204,3 +204,129 @@ def test_push_to_live_postgresql(tmp_path) -> None:
     assert pushed == len(local_ids)
     server.close_connection()
     local.disconnect()
+
+
+def test_gauge_is_reported_in_the_latency_snapshot(monkeypatch) -> None:
+    from fpdb_3_legacy import latency_profile
+
+    monkeypatch.setattr(latency_profile, "_ENABLED", True)
+    profile = latency_profile.get_profile()
+    profile.reset()
+    latency_profile.gauge("sync_outbox_pending", 7)
+    metrics = profile.snapshot()["metrics"]
+    assert metrics["sync_outbox_pending"]["gauge"] == 7
+    profile.reset()
+
+
+def _config_with_node(attrs: dict):
+    from unittest.mock import MagicMock
+
+    from fpdb_3_legacy.config_databases import ConfigDatabasesMixin, Database as DbNode
+
+    node = MagicMock()
+    node.getAttribute.side_effect = lambda name, default=None: attrs.get(name, default)
+    db_node = DbNode.__new__(DbNode)
+    DbNode.__init__(db_node, node)
+    host = ConfigDatabasesMixin.__new__(ConfigDatabasesMixin)
+    host.supported_databases = {"srv": db_node}
+    host.db_selected = "srv"
+    host.get_backend = lambda server: {"sqlite": 4, "postgresql": 3, "mysql": 2}[server]
+    return host
+
+
+def test_local_first_switch_returns_local_params_and_keeps_server_params() -> None:
+    host = _config_with_node(
+        {
+            "db_name": "srv",
+            "db_server": "postgresql",
+            "db_ip": "lan-server",
+            "db_port": "5432",
+            "db_user": "fpdb",
+            "db_pass": "secret",
+            "db_path": "",
+            "default": "true",
+            "local_first": "1",
+            "local_path": "C:/fpdb/local.sqlite3",
+        }
+    )
+    params = host.get_db_parameters()
+    assert params["db-local-first"] == "1"
+    assert params["db-server"] == "sqlite"
+    assert params["db-backend"] == 4
+    assert params["db-databaseName"] == "C:/fpdb/local.sqlite3"
+
+    server = host.get_server_db_parameters()
+    assert server["db-server"] == "postgresql"
+    assert server["db-host"] == "lan-server"
+    assert server["db-password"] == "secret"
+
+
+def test_local_first_off_by_default() -> None:
+    host = _config_with_node(
+        {
+            "db_name": "srv",
+            "db_server": "postgresql",
+            "db_ip": "lan-server",
+            "db_port": "5432",
+            "db_user": "fpdb",
+            "db_pass": "secret",
+            "default": "true",
+        }
+    )
+    params = host.get_db_parameters()
+    assert params["db-local-first"] == "0"
+    assert params["db-server"] == "postgresql"
+
+
+def test_importer_marks_the_outbox_after_each_file(tmp_path) -> None:
+    """The local-first hook registers the hands committed by each file (#680)."""
+    from unittest.mock import MagicMock
+
+    from fpdb_3_legacy.Importer import Importer
+
+    local = _sqlite_db(tmp_path, "imp_local")
+    importer = Importer(caller=None, settings={"testData": False, "threads": 1}, config=local.config, sql=None)
+    importer.database = local
+    importer.setCallHud(False)
+
+    sync = MagicMock()
+    importer._local_first_sync = sync
+    local.hids = [101, 102, 103]
+    importer._mark_outbox()
+    sync.mark.assert_called_once_with([101, 102, 103])
+
+    # no sync configured -> no-op, no crash
+    importer._local_first_sync = None
+    importer._mark_outbox()
+    local.disconnect()
+
+
+def test_push_metrics_are_recorded(monkeypatch, local_db, server_db) -> None:
+    from fpdb_3_legacy import latency_profile
+
+    monkeypatch.setattr(latency_profile, "_ENABLED", True)
+    profile = latency_profile.get_profile()
+    profile.reset()
+
+    sync = LocalFirstSync(local_db, server_db, batch_size=1000)
+    sync.mark(_local_hand_ids(local_db))
+    sync.push_once()
+
+    metrics = profile.snapshot()["metrics"]
+    assert metrics["sync_outbox_pending"]["gauge"] == 0
+    assert metrics["sync_push_batch"]["count"] == 1
+    profile.reset()
+
+    # a failing server must bump the error counter, not crash the caller of push_once's contract
+    # reset the outbox so the failing sync actually has pending work
+    c = local_db.connection.cursor()
+    c.execute("UPDATE fpdb_sync_outbox SET pushed = 0")
+    local_db.connection.commit()
+    c.close()
+    bad_sync = LocalFirstSync(local_db, lambda: (_ for _ in ()).throw(RuntimeError("lan down")), batch_size=1000)
+    bad_sync.mark(_local_hand_ids(local_db))
+    with pytest.raises(RuntimeError):
+        bad_sync.push_once()
+    metrics = profile.snapshot()["metrics"]
+    assert metrics["sync_push_errors"]["counter"] == 1
+    profile.reset()
