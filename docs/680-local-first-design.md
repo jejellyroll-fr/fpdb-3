@@ -33,7 +33,8 @@ whole client-side change. The new part is the import side and the sync worker.
    `batch_size` hands in one server transaction. Idempotent: dedup on the
    server by the unique `(siteHandNo, gametypeId)` index on Hands; referentials
    deduped by their natural keys (Sites.name, Players.(name,siteId), Files.file,
-   Gametypes.(siteId,type,base,...)). The server assigns hand ids; the mapping
+   Gametypes by every column, stakes and currency included). `Hands.sessionId`
+   is left NULL on the server (see the caches below). The server assigns hand ids; the mapping
    `local_hand_id -> server_hand_id` is stored in the outbox. Boolean columns
    are cast per server dialect (SQLite 0/1 -> PG boolean). Failures roll back
    the batch and retry on the next poll; the outbox persists across restarts.

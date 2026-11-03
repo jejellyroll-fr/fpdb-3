@@ -147,11 +147,36 @@ class LocalFirstSync:
 
     # Referential tables pushed before any hand, deduped by their natural keys,
     # so the server's foreign keys hold. (table, dedup columns)
+    # A game type is identified by every column: hands at other stakes, in
+    # another currency or at another table size must not share a server row.
     REFERENTIALS = (
         ("Sites", ("name",)),
         ("Players", ("name", "siteId")),
         ("Files", ("file",)),
-        ("Gametypes", ("siteId", "type", "base", "category", "limitType", "hiLo", "mix")),
+        (
+            "Gametypes",
+            (
+                "siteId",
+                "currency",
+                "type",
+                "base",
+                "category",
+                "limitType",
+                "hiLo",
+                "mix",
+                "smallBlind",
+                "bigBlind",
+                "smallBet",
+                "bigBet",
+                "maxSeats",
+                "ante",
+                "buyinType",
+                "fast",
+                "newToGame",
+                "homeGame",
+                "split",
+            ),
+        ),
     )
 
     def _server_bool_columns(self, server: Any, table: str) -> set[str]:
@@ -173,6 +198,11 @@ class LocalFirstSync:
         self._bool_columns[table] = cols
         return cols
 
+    @staticmethod
+    def _server_value(column: str, value: Any, bools: set[str]) -> Any:
+        """``value`` as the server's ``column`` expects it (see _server_bool_columns)."""
+        return bool(value) if column.lower() in bools and value is not None else value
+
     def _push_referentials(self, server: Any, sph: str) -> None:
         lc = self._local_conn().cursor()
         c = server.connection.cursor()
@@ -182,20 +212,24 @@ class LocalFirstSync:
             if not rows:
                 continue
             cols = [d[0] for d in lc.description]
+            bools = self._server_bool_columns(server, table)
+            sites_map = self._id_maps.get("Sites", {})
             for row in rows:
                 record = dict(zip(cols, row))
-                where = " AND ".join(f"{k} = {sph}" for k in keys)
-                c.execute(f"SELECT id FROM {table} WHERE {where}", [record[k] for k in keys])  # nosec B608  # nosemgrep
+                if "siteId" in record:
+                    record["siteId"] = sites_map.get(record["siteId"], record["siteId"])
+                # NULL never matches "=", and PostgreSQL rejects an int against a
+                # boolean column, so the lookup is built from the row's values.
+                where = " AND ".join(f"{k} IS NULL" if record[k] is None else f"{k} = {sph}" for k in keys)
+                params = [self._server_value(k, record[k], bools) for k in keys if record[k] is not None]
+                c.execute(f"SELECT id FROM {table} WHERE {where}", params)  # nosec B608  # nosemgrep
                 existing = c.fetchone()
                 if existing:
                     # local id -> server id, so child FKs can be remapped (#680 P0)
                     self._id_maps.setdefault(table, {})[record.get("id")] = existing[0]
                     continue
                 insert_cols = [k for k in cols if k != "id"]
-                bools = self._server_bool_columns(server, table)
-                values = [
-                    bool(record[k]) if k.lower() in bools and record[k] is not None else record[k] for k in insert_cols
-                ]
+                values = [self._server_value(k, record[k], bools) for k in insert_cols]
                 ph_values = ", ".join([sph] * len(insert_cols))
                 q = f"INSERT INTO {table} ({', '.join(insert_cols)}) VALUES ({ph_values})"  # nosec B608  # nosemgrep
                 c.execute(q, values)  # nosemgrep
@@ -249,6 +283,10 @@ class LocalFirstSync:
         for fk_col, ref_table in (("gametypeId", "Gametypes"), ("fileId", "Files"), ("siteId", "Sites")):
             if hand.get(fk_col) is not None:
                 hand[fk_col] = self._id_maps.get(ref_table, {}).get(hand[fk_col], hand[fk_col])
+        # Sessions are a cache, recomputed server-side and never pushed (see the
+        # design doc): the local id means nothing on the server, where it either
+        # breaks the foreign key or points at someone else's session.
+        hand["sessionId"] = None
 
     def _push_children(self, server: Any, table: str, local_id: int, server_id: int, sph: str) -> None:
         lc = self._local_conn().cursor()

@@ -196,6 +196,11 @@ def test_push_to_live_postgresql(tmp_path) -> None:
 
     sync = LocalFirstSync(local, server_factory, batch_size=1000)
     local_ids = _local_hand_ids(local)
+    # a local session id the server's foreign key would refuse
+    c = local.connection.cursor()
+    c.execute("UPDATE Hands SET sessionId = 4242")
+    local.connection.commit()
+    c.close()
     sync.mark(local_ids)
     # push referentials by importing the same file's lookups is out of scope
     # for the POC; assert the push ran and dedup mapping works when the
@@ -468,6 +473,208 @@ def _insert_decoy_rows(db, table: str, decoy_id: int = 9000) -> None:
     c.execute(f"INSERT INTO {table} ({', '.join(names)}) VALUES ({ph})", values)  # nosec B608  # nosemgrep
     db.connection.commit()
     c.close()
+
+
+def _gametype_with(db, gametype_id: int, **changes) -> int:
+    """Clone a Gametypes row with some columns changed; returns the new id."""
+    c = db.connection.cursor()
+    c.execute("SELECT * FROM Gametypes WHERE id = ?", (gametype_id,))
+    row = dict(zip([d[0] for d in c.description], c.fetchone()))
+    del row["id"]
+    row.update(changes)
+    ph = ", ".join(["?"] * len(row))
+    c.execute(f"INSERT INTO Gametypes ({', '.join(row)}) VALUES ({ph})", list(row.values()))  # nosec B608  # nosemgrep
+    new_id = c.lastrowid
+    db.connection.commit()
+    c.close()
+    return new_id
+
+
+def test_push_keeps_game_types_of_different_stakes_apart(local_db, server_db) -> None:
+    """Same variant at other stakes: each hand keeps its own server game type."""
+    local_ids = _local_hand_ids(local_db)
+    assert len(local_ids) >= 2
+    c = local_db.connection.cursor()
+    c.execute("SELECT gametypeId FROM Hands WHERE id = ?", (local_ids[0],))
+    local_gametype_id = c.fetchone()[0]
+    c.close()
+    higher = _gametype_with(local_db, local_gametype_id, smallBlind=5000, bigBlind=10000)
+    c = local_db.connection.cursor()
+    c.execute("UPDATE Hands SET gametypeId = ? WHERE id = ?", (higher, local_ids[1]))
+    c.execute("SELECT siteHandNo FROM Hands WHERE id = ?", (local_ids[1],))
+    moved_hand = c.fetchone()[0]
+    local_db.connection.commit()
+    c.close()
+
+    sync = LocalFirstSync(local_db, server_db, batch_size=1000)
+    sync.mark(local_ids[:2])
+    assert sync.push_once() == 2
+
+    srv = server_db()
+    c = srv.connection.cursor()
+    c.execute(
+        "SELECT h.siteHandNo, g.bigBlind FROM Hands h JOIN Gametypes g ON g.id = h.gametypeId ORDER BY h.id",
+    )
+    blinds = dict(c.fetchall())
+    c.close()
+    srv.disconnect()
+    assert len(set(blinds.values())) == 2
+    assert blinds[moved_hand] == 10000
+
+
+def test_push_finds_existing_game_types_with_null_columns(local_db, server_db) -> None:
+    """A NULL column must not defeat the lookup and duplicate the row per batch."""
+    local_ids = _local_hand_ids(local_db)
+    c = local_db.connection.cursor()
+    c.execute("UPDATE Gametypes SET fast = NULL, smallBlind = NULL")
+    local_db.connection.commit()
+    c.close()
+
+    for local_id in local_ids[:2]:
+        sync = LocalFirstSync(local_db, server_db, batch_size=1000)
+        sync.mark([local_id])
+        assert sync.push_once() == 1
+
+    srv = server_db()
+    c = srv.connection.cursor()
+    c.execute("SELECT COUNT(*) FROM Gametypes")
+    count = c.fetchone()[0]
+    c.close()
+    srv.disconnect()
+    c = local_db.connection.cursor()
+    c.execute("SELECT COUNT(*) FROM Gametypes")
+    assert count == c.fetchone()[0]
+    c.close()
+
+
+def test_push_casts_boolean_lookup_values_for_the_server(local_db, server_db) -> None:
+    """PostgreSQL rejects ``fast = 0``: lookups must bind real booleans."""
+    sync = LocalFirstSync(local_db, server_db, batch_size=1000)
+    sync._bool_columns["Gametypes"] = {"fast", "newtogame", "homegame", "split"}
+    seen = []
+    srv = server_db()
+    real_cursor = srv.connection.cursor
+
+    class SpyCursor:
+        def __init__(self) -> None:
+            self._c = real_cursor()
+
+        def execute(self, q, params=()):
+            if q.startswith("SELECT id FROM Gametypes"):
+                seen.append(list(params))
+            return self._c.execute(q, params)
+
+        def __getattr__(self, name):
+            return getattr(self._c, name)
+
+    class SpyConnection:
+        def cursor(self):
+            return SpyCursor()
+
+    server = MagicMock(connection=SpyConnection())
+    server.get_last_insert_id = srv.get_last_insert_id
+    sync._push_referentials(server, "?")
+    srv.disconnect()
+    assert seen
+    assert all(any(p is False or p is True for p in params) for params in seen)
+
+
+def test_push_remaps_site_of_referentials_when_server_ids_diverge(local_db, server_db) -> None:
+    """A local site with another id on the server: its players and game types follow."""
+    c = local_db.connection.cursor()
+    c.execute("SELECT id, name FROM Sites WHERE id = (SELECT MIN(siteId) FROM Gametypes)")
+    local_site_id, site_name = c.fetchone()
+    c.close()
+    srv = server_db()
+    c = srv.connection.cursor()
+    c.execute("PRAGMA foreign_keys = OFF")
+    c.execute("UPDATE Sites SET id = 7777 WHERE name = ?", (site_name,))
+    srv.connection.commit()
+    c.close()
+    srv.disconnect()
+    assert local_site_id != 7777
+
+    sync = LocalFirstSync(local_db, server_db, batch_size=1000)
+    sync.mark(_local_hand_ids(local_db)[:1])
+    assert sync.push_once() == 1
+
+    srv = server_db()
+    c = srv.connection.cursor()
+    c.execute("SELECT DISTINCT siteId FROM Gametypes")
+    assert c.fetchall() == [(7777,)]
+    c.execute("SELECT DISTINCT siteId FROM Players")
+    assert (7777,) in c.fetchall()
+    c.close()
+    srv.disconnect()
+
+
+def test_push_does_not_carry_the_local_session_id(local_db, server_db) -> None:
+    """Sessions are not pushed: the server's FK would fail, or hit a foreign session."""
+    local_ids = _local_hand_ids(local_db)
+    c = local_db.connection.cursor()
+    c.execute("UPDATE Hands SET sessionId = 4242 WHERE id = ?", (local_ids[0],))
+    local_db.connection.commit()
+    c.close()
+
+    sync = LocalFirstSync(local_db, server_db, batch_size=1000)
+    sync.mark(local_ids[:1])
+    assert sync.push_once() == 1
+
+    srv = server_db()
+    c = srv.connection.cursor()
+    c.execute("SELECT sessionId FROM Hands")
+    assert c.fetchall() == [(None,)]
+    c.close()
+    srv.disconnect()
+
+
+def _local_first_importer(tmp_path, monkeypatch):
+    """An Importer in local-first mode: relative local_path, SQLite catalogue
+    passed in as the GUI does, PostgreSQL as the server."""
+    from fpdb_3_legacy import SQL
+
+    config = golden.build_config(tmp_path)
+    config.dir_database = str(tmp_path)
+    params = dict(config.get_db_parameters(), **{"db-local-first": "1", "db-databaseName": "relative-local.sqlite3"})
+    config.get_db_parameters = lambda: params
+    config.get_server_db_parameters = lambda: dict(
+        params,
+        **{"db-server": "postgresql", "db-backend": Database.PGSQL, "db-databaseName": "fpdb", "db-local-first": "0"},
+    )
+    monkeypatch.chdir(tmp_path / "cwd")
+    return Importer(
+        caller=None, settings={"testData": False, "threads": 1}, config=config, sql=SQL.Sql(db_server="sqlite")
+    )
+
+
+def test_importer_sync_opens_the_database_the_importer_writes(tmp_path, monkeypatch) -> None:
+    (tmp_path / "cwd").mkdir()
+    importer = _local_first_importer(tmp_path, monkeypatch)
+    try:
+        sync = importer._local_first_sync
+        assert sync is not None
+        c = sync._local_conn().cursor()
+        c.execute("PRAGMA database_list")
+        opened = Path(c.fetchone()[2])
+        c.close()
+        assert opened.resolve() == Path(importer.database.db_path).resolve()
+        assert opened.resolve() == (tmp_path / "relative-local.sqlite3").resolve()
+        assert not (tmp_path / "cwd" / "relative-local.sqlite3").exists()
+    finally:
+        importer.close()
+
+
+def test_importer_sync_builds_the_server_connection_with_its_own_dialect(tmp_path, monkeypatch) -> None:
+    (tmp_path / "cwd").mkdir()
+    importer = _local_first_importer(tmp_path, monkeypatch)
+    try:
+        monkeypatch.setattr(Database, "_connect_and_configure", lambda self, c: None)
+        server = importer._local_first_sync.server_db_factory()
+        assert server.backend == Database.PGSQL
+        assert server.sql.query["placeholder"] == "%s"
+        assert importer.database.sql.query["placeholder"] == "?"
+    finally:
+        importer.close()
 
 
 def test_push_remaps_foreign_keys_when_server_ids_diverge(local_db, server_db) -> None:

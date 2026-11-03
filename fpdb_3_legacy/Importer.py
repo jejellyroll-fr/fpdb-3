@@ -452,10 +452,14 @@ class Importer:
         if self.config.get_db_parameters().get("db-local-first") == "1":
             from fpdb_3_legacy.local_first_sync import LocalFirstSync, ServerConfigView
 
+            # self.sql is the local SQLite catalogue (its "?" placeholder): the
+            # server connection builds its own from the server's db-server. The
+            # path is the one Database resolved under dir_database, not the raw
+            # local_path, so the worker opens the file the importer writes.
             self._local_first_sync = LocalFirstSync(
                 self.database,
-                lambda: Database.Database(ServerConfigView(self.config), sql=self.sql),
-                local_db_path=self.config.get_db_parameters().get("db-databaseName"),
+                lambda: Database.Database(ServerConfigView(self.config)),
+                local_db_path=self.database.db_path,
             )
             # Start at construction so both runImport() and the live
             # runUpdated()/_run_updated_cycle() auto-import path are covered.
