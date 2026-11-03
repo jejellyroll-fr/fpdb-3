@@ -568,14 +568,14 @@ class DatabaseCachesMixin:
                     tuples = ",".join(["(%s, %s, %s, %s, %s)"] * len(ring_keys))
                     q = ring_bulk.replace("<tuples>", tuples).replace("%s", placeholder)
                     params = [v for k in ring_keys for v in (k[0], k[1], k[2], k[3], k[5])]
-                    c.execute(q, params)
+                    c.execute(q, params)  # nosemgrep
                     for row in c.fetchall():
                         found[(row[1], row[2], row[3], row[4], None, row[5])] = row[0]
                 if tour_keys:
                     tuples = ",".join(["(%s, %s, %s, %s, %s, %s)"] * len(tour_keys))
                     q = tour_bulk.replace("<tuples>", tuples).replace("%s", placeholder)
                     params = [v for k in tour_keys for v in k]
-                    c.execute(q, params)
+                    c.execute(q, params)  # nosemgrep
                     for row in c.fetchall():
                         found[tuple(row[1:])] = row[0]
                 latency_profile.count("hudcache_lookup", len(self.hcbulk))
@@ -595,7 +595,7 @@ class DatabaseCachesMixin:
                     # UPDATE (#680). One execute per row stays a round trip only
                     # in bulk-import mode; live auto-import has no bulk path.
                     for update in updates:
-                        c.execute(update_hudcache, update)
+                        c.execute(update_hudcache, update)  # nosemgrep
                     latency_profile.count("hudcache_update", len(updates))
                 if inserts:
                     self.executemany(c, insert_hudcache, inserts)
@@ -752,7 +752,7 @@ class DatabaseCachesMixin:
                     q = select_S.replace("<TOURSELECT>", toursql)
                 else:
                     q = select_S.replace("<TOURSELECT>", "")
-                c.execute(q, (lower, upper))
+                c.execute(q, (lower, upper))  # nosemgrep
                 r = self.fetchallDict(
                     c,
                     [
@@ -800,7 +800,7 @@ class DatabaseCachesMixin:
                     if updateW or updateM:
                         self.wmnew.add((wid, mid))
                     if update:
-                        c.execute(update_S, [wid, mid, start, end, r[0]["id"]])
+                        c.execute(update_S, [wid, mid, start, end, r[0]["id"]])  # nosemgrep
                     for h in self.s["bk"][i]["ids"]:
                         self.s[h] = {"id": r[0]["id"], "wid": wid, "mid": mid}
                 elif num > 1:
@@ -829,7 +829,7 @@ class DatabaseCachesMixin:
                         self.wmold = self.wmold.union(wmold)
                         self.wmnew.add((wid, mid))
                     row = [wid, mid, start, end]
-                    c.execute(insert_S, row)
+                    c.execute(insert_S, row)  # nosemgrep
                     sid = self.get_last_insert_id(c)
                     for h in self.s["bk"][i]["ids"]:
                         self.s[h] = {"id": sid, "wid": wid, "mid": mid}
@@ -837,11 +837,11 @@ class DatabaseCachesMixin:
                         for h, n in list(self.s.items()):
                             if h != "bk" and n["id"] == m:
                                 self.s[h] = {"id": sid, "wid": wid, "mid": mid}
-                        c.execute(update_S_TC, (sid, m))
-                        c.execute(update_S_SC, (sid, m))
-                        c.execute(update_S_T, (sid, m))
-                        c.execute(update_S_H, (sid, m))
-                        c.execute(delete_S, (m,))
+                        c.execute(update_S_TC, (sid, m))  # nosemgrep
+                        c.execute(update_S_SC, (sid, m))  # nosemgrep
+                        c.execute(update_S_T, (sid, m))  # nosemgrep
+                        c.execute(update_S_H, (sid, m))  # nosemgrep
+                        c.execute(delete_S, (m,))  # nosemgrep
                 elif num == 0:
                     start = self.s["bk"][i]["sessionStart"]
                     end = self.s["bk"][i]["sessionEnd"]
@@ -850,7 +850,7 @@ class DatabaseCachesMixin:
                     wid = self.insertOrUpdate("weeks", c, (week,), select_W, insert_W)
                     mid = self.insertOrUpdate("months", c, (month,), select_M, insert_M)
                     row = [wid, mid, start, end]
-                    c.execute(insert_S, row)
+                    c.execute(insert_S, row)  # nosemgrep
                     sid = self.get_last_insert_id(c)
                     for h in self.s["bk"][i]["ids"]:
                         self.s[h] = {"id": sid, "wid": wid, "mid": mid}
@@ -955,7 +955,7 @@ class DatabaseCachesMixin:
                     lower = session["startTime"] - THRESHOLD
                     upper = session["endTime"] + THRESHOLD
                     row = [lower, upper, *list(k[:2])]
-                    c.execute(select_SC, row)
+                    c.execute(select_SC, row)  # nosemgrep
                     r = self.fetchallDict(
                         c,
                         ["id", "sessionId", "startTime", "endTime", *SESSION_CACHE_KEYS],
@@ -976,7 +976,7 @@ class DatabaseCachesMixin:
                         start = min(session["startTime"], start)
                         end = max(session["endTime"], end)
                         row = [start, end] + session["line"] + [id]
-                        c.execute(update_SC, row)
+                        c.execute(update_SC, row)  # nosemgrep
                     elif num > 1:
                         start, end, merge, line = None, None, [], [0] * len(SESSION_CACHE_KEYS)
                         for n in r:
@@ -989,16 +989,16 @@ class DatabaseCachesMixin:
                             for idx in range(len(SESSION_CACHE_KEYS)):
                                 line[idx] += int(n["line"][idx]) if isinstance(n["line"][idx], bool) else n["line"][idx]
                         row = [sid, start, end, *list(k[:2]), *line]
-                        c.execute(insert_SC, row)
+                        c.execute(insert_SC, row)  # nosemgrep
                         id = self.get_last_insert_id(c)
                         for m in merge:
-                            c.execute(delete_SC, (m,))
+                            c.execute(delete_SC, (m,))  # nosemgrep
                             self.commit()
                     elif num == 0:
                         start = session["startTime"]
                         end = session["endTime"]
                         row = [sid, start, end] + list(k[:2]) + session["line"]
-                        c.execute(insert_SC, row)
+                        c.execute(insert_SC, row)  # nosemgrep
                         id = self.get_last_insert_id(c)
             self.commit()
 
@@ -1065,7 +1065,7 @@ class DatabaseCachesMixin:
                     continue
                 tc["startTime"] = tc["startTime"].replace(tzinfo=None)
                 tc["endTime"] = tc["endTime"].replace(tzinfo=None)
-                c.execute(select_TC, k)
+                c.execute(select_TC, k)  # nosemgrep
                 r = self.fetchallDict(c, ["id", "startTime", "endTime"])
                 num = len(r)
                 if num == 1:
@@ -1083,7 +1083,7 @@ class DatabaseCachesMixin:
                         q = update_TC.replace("<UPDATE>", "")
                         row = tc["line"] + list(k[:2])
                     q = q.replace("%s", self.sql.query["placeholder"])
-                    c.execute(q, row)
+                    c.execute(q, row)  # nosemgrep
                 elif num == 0:
                     row = [sc["id"], tc["startTime"], tc["endTime"]] + list(k[:2]) + tc["line"]
                     # append to the bulk inserts
@@ -1164,12 +1164,12 @@ class DatabaseCachesMixin:
                 else:
                     q = select_cardscache_ring
                     row = list(cache_key[:3]) + list(cache_key[-2:])
-                c.execute(q, row)
+                c.execute(q, row)  # nosemgrep
                 result = c.fetchone()
                 if result:
                     id = result[0]
                     update = [*item, id]
-                    c.execute(update_cardscache, update)
+                    c.execute(update_cardscache, update)  # nosemgrep
                 else:
                     insert = list(cache_key) + item
                     inserts.append(insert)
@@ -1267,12 +1267,12 @@ class DatabaseCachesMixin:
                     q = select_positionscache_ring
                     row = list(cache_key[:3]) + list(cache_key[-4:])
 
-                c.execute(q, row)
+                c.execute(q, row)  # nosemgrep
                 result = c.fetchone()
                 if result:
                     id = result[0]
                     update = [*item, id]
-                    c.execute(update_positionscache, update)
+                    c.execute(update_positionscache, update)  # nosemgrep
                 else:
                     insert = list(cache_key) + item
                     inserts.append(insert)

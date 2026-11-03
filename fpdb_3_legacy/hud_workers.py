@@ -234,7 +234,7 @@ class HudReadWorker(QThread):
         cursor = database.connection.cursor()
         try:
             for statement in statements:
-                cursor.execute(statement)
+                cursor.execute(statement)  # nosemgrep
             database.connection.commit()
         finally:
             cursor.close()

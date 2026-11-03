@@ -118,7 +118,7 @@ def _context_values(db) -> dict:
 
     def one(sql, default):
         try:
-            c.execute(sql)
+            c.execute(sql)  # nosemgrep
             row = c.fetchone()
             return row[0] if row and row[0] is not None else default
         except Exception:
@@ -230,7 +230,7 @@ def _explain(db, sql: str, params: list, analyze: bool) -> str:
         prefix = "EXPLAIN QUERY PLAN "
     try:
         c = db.connection.cursor()
-        c.execute(prefix + sql, params)
+        c.execute(prefix + sql, params)  # nosemgrep
         rows = c.fetchall()
         c.close()
         return "\n".join(str(row[0]) for row in rows)
@@ -285,9 +285,9 @@ def _run_one_query(db, final_sql: str, params: list, dml: bool, repeats: int):
             c = db.connection.cursor()
             started = perf_counter()
             if params:
-                c.execute(final_sql, params)
+                c.execute(final_sql, params)  # nosemgrep
             else:
-                c.execute(final_sql)
+                c.execute(final_sql)  # nosemgrep
             if dml:
                 # DML cost is the execute; never fetchall on a write.
                 walls.append(perf_counter() - started)

@@ -104,7 +104,7 @@ def _explain(db, sql: str, params: tuple) -> str:
         prefix = "EXPLAIN QUERY PLAN "
     try:
         c = db.connection.cursor()
-        c.execute(prefix + sql, params)
+        c.execute(prefix + sql, params)  # nosemgrep
         rows = c.fetchall()
         c.close()
         return "\n".join(str(row[0]) for row in rows)

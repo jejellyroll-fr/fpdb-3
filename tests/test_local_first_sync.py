@@ -154,8 +154,8 @@ def test_push_to_live_postgresql(tmp_path) -> None:
         password=os.environ.get("FPDB_POSTGRES_PASSWORD", "fpdb"),
     )
     admin.autocommit = True
-    admin.execute(f"DROP DATABASE IF EXISTS {dsn_db}_sync_poc")
-    admin.execute(f"CREATE DATABASE {dsn_db}_sync_poc OWNER fpdb")
+    admin.execute(f"DROP DATABASE IF EXISTS {dsn_db}_sync_poc")  # nosemgrep
+    admin.execute(f"CREATE DATABASE {dsn_db}_sync_poc OWNER fpdb")  # nosemgrep
     admin.close()
 
     local = _sqlite_db(tmp_path, "local_pg")

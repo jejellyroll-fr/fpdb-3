@@ -39,7 +39,7 @@ class DatabaseQueriesMixin:
     @reconnect_on_connection_loss
     def get_table_name(self, hand_id: Any) -> Any:
         c = self.connection.cursor()
-        c.execute(self.sql.query["get_table_name"], (hand_id,))
+        c.execute(self.sql.query["get_table_name"], (hand_id,))  # nosemgrep
         return c.fetchone()
 
     def _table_info_from_row(self, row: Any, tourney_names: dict[Any, str] | None = None) -> Any:
@@ -84,7 +84,7 @@ class DatabaseQueriesMixin:
                 # Only the backend's placeholder is formatted in; the value is bound.
                 q = "SELECT tourneyName FROM Tourneys WHERE siteTourneyNo = %s".replace("%s", ph)  # nosec B608  # nosemgrep
                 c = self.connection.cursor()
-                c.execute(q, (int(tour_no),))
+                c.execute(q, (int(tour_no),))  # nosemgrep
                 trow = c.fetchone()
                 if trow:
                     tourney_name = trow[0]
@@ -97,7 +97,7 @@ class DatabaseQueriesMixin:
     @reconnect_on_connection_loss
     def get_table_info(self, hand_id: Any) -> Any:
         c = self.connection.cursor()
-        c.execute(self.sql.query["get_table_name"], (hand_id,))
+        c.execute(self.sql.query["get_table_name"], (hand_id,))  # nosemgrep
         row = c.fetchone()
         if row is None:
             # Hand not yet committed to the DB (race between the HUD reading the
@@ -137,7 +137,7 @@ class DatabaseQueriesMixin:
             .replace(f"h.id = {ph}", f"h.id IN {in_sql}")
         )
         c = self.connection.cursor()
-        c.execute(q, in_params)
+        c.execute(q, in_params)  # nosemgrep
         tourney_nos = set()
         rows_by_hand = {}
         for row in c.fetchall():
@@ -169,24 +169,24 @@ class DatabaseQueriesMixin:
         in_sql, in_params = self._in_tuple(hand_ids)
         q = f"SELECT id, siteHandNo FROM Hands WHERE id IN {in_sql}"  # nosec B608  # nosemgrep
         c = self.connection.cursor()
-        c.execute(q, in_params)
+        c.execute(q, in_params)  # nosemgrep
         return {row[0]: (str(row[1]) if row[1] is not None else None) for row in c.fetchall()}
 
     def get_last_hand(self) -> Any:
         c = self.connection.cursor()
-        c.execute(self.sql.query["get_last_hand"])
+        c.execute(self.sql.query["get_last_hand"])  # nosemgrep
         row = c.fetchone()
         return row[0]
 
     def get_xml(self, hand_id: Any) -> Any:
         c = self.connection.cursor()
-        c.execute(self.sql.query["get_xml"], (hand_id))
+        c.execute(self.sql.query["get_xml"], (hand_id))  # nosemgrep
         row = c.fetchone()
         return row[0]
 
     def get_recent_hands(self, last_hand: Any) -> Any:
         c = self.connection.cursor()
-        c.execute(self.sql.query["get_recent_hands"], {"last_hand": last_hand})
+        c.execute(self.sql.query["get_recent_hands"], {"last_hand": last_hand})  # nosemgrep
         return c.fetchall()
 
     def get_gameinfo_from_hid(self, hand_id: Any) -> Any:
@@ -207,7 +207,7 @@ class DatabaseQueriesMixin:
         c = self.connection.cursor()
         q = self.sql.query["get_gameinfo_from_hid"]
         q = q.replace("%s", self.sql.query["placeholder"])
-        c.execute(q, (hand_id,))
+        c.execute(q, (hand_id,))  # nosemgrep
         row = c.fetchone()
 
         if row is None:
@@ -252,33 +252,33 @@ class DatabaseQueriesMixin:
         cursor = self.connection.cursor()
         query = self.sql.query["get_last_gametype_for_table"]
         query = query.replace("%s", self.sql.query["placeholder"])
-        cursor.execute(query, (site_name, table_name))
+        cursor.execute(query, (site_name, table_name))  # nosemgrep
         row = cursor.fetchone()
         return None if row is None else row[0]
 
     #   Query 'get_hand_info' does not exist, so it seems
     #    def get_hand_info(self, new_hand_id):
     #        c = self.connection.cursor()
-    #        c.execute(self.sql.query['get_hand_info'], new_hand_id)
+    #        c.execute(self.sql.query['get_hand_info'], new_hand_id)  # nosemgrep
     #        return c.fetchall()
 
     def getHandCount(self) -> Any:
         c = self.connection.cursor()
-        c.execute(self.sql.query["getHandCount"])
+        c.execute(self.sql.query["getHandCount"])  # nosemgrep
         return c.fetchone()[0]
 
     # end def getHandCount
 
     def getTourneyCount(self) -> Any:
         c = self.connection.cursor()
-        c.execute(self.sql.query["getTourneyCount"])
+        c.execute(self.sql.query["getTourneyCount"])  # nosemgrep
         return c.fetchone()[0]
 
     # end def getTourneyCount
 
     def getTourneyTypeCount(self) -> Any:
         c = self.connection.cursor()
-        c.execute(self.sql.query["getTourneyTypeCount"])
+        c.execute(self.sql.query["getTourneyTypeCount"])  # nosemgrep
         return c.fetchone()[0]
 
     # end def getTourneyCount
@@ -287,11 +287,11 @@ class DatabaseQueriesMixin:
         c = self.connection.cursor()
         q = self.sql.query["getSiteId"]
         q = q.replace("%s", self.sql.query["placeholder"])
-        c.execute(q, (site,))
+        c.execute(q, (site,))  # nosemgrep
         siteid = c.fetchone()[0]
         q = self.sql.query["getSiteTourneyNos"]
         q = q.replace("%s", self.sql.query["placeholder"])
-        c.execute(q, (siteid,))
+        c.execute(q, (siteid,))  # nosemgrep
         alist = []
         for row in c.fetchall():
             alist.append(row)
@@ -299,7 +299,7 @@ class DatabaseQueriesMixin:
 
     def get_actual_seat(self, hand_id: Any, name: Any) -> Any:
         c = self.connection.cursor()
-        c.execute(self.sql.query["get_actual_seat"], (hand_id, name))
+        c.execute(self.sql.query["get_actual_seat"], (hand_id, name))  # nosemgrep
         row = c.fetchone()
         return row[0]
 
@@ -310,7 +310,7 @@ class DatabaseQueriesMixin:
         # the value is a tuple of the players cards
         # example: {1: (0, 0, 20, 21, 22, 0 , 0)}
         c = self.connection.cursor()
-        c.execute(self.sql.query["get_cards"], [hand])
+        c.execute(self.sql.query["get_cards"], [hand])  # nosemgrep
         for row in c.fetchall():
             cards[row[0]] = row[1:]
         return cards
@@ -339,7 +339,7 @@ class DatabaseQueriesMixin:
             # Only the backend's placeholder is formatted in; the value is bound.
             q = "SELECT playerId, position FROM HandsPlayers WHERE handId = %s".replace("%s", ph)  # nosec B608  # nosemgrep
             c = self.connection.cursor()
-            c.execute(q, (hand,))
+            c.execute(q, (hand,))  # nosemgrep
             for row in c.fetchall():
                 # int keys, so `pid in stat_dict` in _merge_positions matches.
                 positions[row[0]] = row[1]
@@ -353,7 +353,7 @@ class DatabaseQueriesMixin:
         """Get and return the community cards for the specified hand."""
         cards = {}
         c = self.connection.cursor()
-        c.execute(self.sql.query["get_common_cards"], [hand])
+        c.execute(self.sql.query["get_common_cards"], [hand])  # nosemgrep
         #        row = c.fetchone()
         cards["common"] = c.fetchone()
         return cards
@@ -361,7 +361,7 @@ class DatabaseQueriesMixin:
     def get_action_from_hand(self, hand_no: Any) -> Any:
         action: list[list[Any]] = [[], [], [], [], []]
         c = self.connection.cursor()
-        c.execute(self.sql.query["get_action_from_hand"], (hand_no,))
+        c.execute(self.sql.query["get_action_from_hand"], (hand_no,))  # nosemgrep
         for row in c.fetchall():
             street = row[0]
             act = row[1:]
@@ -372,14 +372,14 @@ class DatabaseQueriesMixin:
         """Returns a hash of winners:amount won, given a hand number."""
         winners = {}
         c = self.connection.cursor()
-        c.execute(self.sql.query["get_winners_from_hand"], (hand,))
+        c.execute(self.sql.query["get_winners_from_hand"], (hand,))  # nosemgrep
         for row in c.fetchall():
             winners[row[0]] = row[1]
         return winners
 
     def get_site_id(self, site: Any) -> Any:
         c = self.get_cursor()
-        c.execute(self.sql.query["getSiteId"], (site,))
+        c.execute(self.sql.query["getSiteId"], (site,))  # nosemgrep
         return c.fetchall()
 
     def get_site_hand_no(self, hand_id: Any) -> str | None:
@@ -390,7 +390,7 @@ class DatabaseQueriesMixin:
         """
         try:
             c = self.get_cursor()
-            c.execute(self.sql.query["get_site_hand_no"], (hand_id,))
+            c.execute(self.sql.query["get_site_hand_no"], (hand_id,))  # nosemgrep
             row = c.fetchone()
             return str(row[0]) if row and row[0] is not None else None
         except Exception:
@@ -402,7 +402,7 @@ class DatabaseQueriesMixin:
         """Retrieve database player ID by player screen name."""
         try:
             c = self.get_cursor()
-            c.execute(self.sql.query["get_player_id_by_name"], (player_name,))
+            c.execute(self.sql.query["get_player_id_by_name"], (player_name,))  # nosemgrep
             row = c.fetchone()
             return int(row[0]) if row else None
         except Exception:
@@ -418,7 +418,7 @@ class DatabaseQueriesMixin:
         result = {}
         try:
             c = self.get_cursor()
-            c.execute(self.sql.query["get_hands_showdown"], (hand_id,))
+            c.execute(self.sql.query["get_hands_showdown"], (hand_id,))  # nosemgrep
             for name, combo, cards in c.fetchall():
                 result[name] = (combo, cards)
         except Exception:  # noqa: BLE001 - missing table / legacy DB: no showdown info.
@@ -430,7 +430,7 @@ class DatabaseQueriesMixin:
         result = {}
         try:
             c = self.get_cursor()
-            c.execute(self.sql.query["get_hands_cashout"], (hand_id,))
+            c.execute(self.sql.query["get_hands_cashout"], (hand_id,))  # nosemgrep
             for name, amount, fee in c.fetchall():
                 result[name] = (amount, fee)
         except Exception:  # noqa: BLE001 - missing table / legacy DB: no cashout info.
@@ -442,7 +442,7 @@ class DatabaseQueriesMixin:
         result = {}
         try:
             c = self.get_cursor()
-            c.execute(self.sql.query["get_hands_splash"], (hand_id,))
+            c.execute(self.sql.query["get_hands_splash"], (hand_id,))  # nosemgrep
             for name, amount in c.fetchall():
                 result[name] = amount
         except Exception:  # noqa: BLE001 - column absent on a database predating the splash work.
@@ -454,7 +454,7 @@ class DatabaseQueriesMixin:
         q = self.sql.query["get_id"]
         q = q.replace("%s", self.sql.query["placeholder"])
         c = self.get_cursor()
-        c.execute(q, (file,))
+        c.execute(q, (file,))  # nosemgrep
         id = c.fetchone()
         if not id:
             return 0

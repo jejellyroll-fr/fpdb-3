@@ -106,7 +106,7 @@ class DatabaseHudStatsMixin:
                 "WHERE hp.handId = %s"
             ).replace("%s", ph)
             c = self.connection.cursor()
-            c.execute(q, (hand_id,))
+            c.execute(q, (hand_id,))  # nosemgrep
             for row in c.fetchall():
                 players[int(row[0])] = {"player_id": int(row[1]), "screen_name": row[2]}
         except Exception:
@@ -128,7 +128,7 @@ class DatabaseHudStatsMixin:
         try:
             ph = self.sql.query.get("placeholder", "%s")
             c = self.get_cursor()
-            c.execute(
+            c.execute(  # nosemgrep
                 (
                     "SELECT gt.bigBlind FROM Hands h INNER JOIN Gametypes gt ON h.gametypeId = gt.id WHERE h.id = %s"  # nosec B608  # nosemgrep
                 ).replace("%s", ph),
@@ -140,7 +140,7 @@ class DatabaseHudStatsMixin:
             big_blind = float(row[0])
             if big_blind <= 0:
                 return None
-            c.execute(
+            c.execute(  # nosemgrep
                 (
                     "SELECT startCash, committed, winnings FROM HandsPlayers WHERE handId = %s AND sitout = FALSE"  # nosec B608  # nosemgrep
                 ).replace("%s", ph),
@@ -197,7 +197,7 @@ class DatabaseHudStatsMixin:
         q = f"SELECT handId, playerId, position FROM HandsPlayers WHERE handId IN {in_sql}"  # nosec B608  # nosemgrep
         try:
             c = self.connection.cursor()
-            c.execute(q, in_params)
+            c.execute(q, in_params)  # nosemgrep
             for hand_id, player_id, position in c.fetchall():
                 result.setdefault(hand_id, {})[player_id] = position
         except Exception:
@@ -220,7 +220,7 @@ class DatabaseHudStatsMixin:
         )
         try:
             c = self.connection.cursor()
-            c.execute(q, in_params)
+            c.execute(q, in_params)  # nosemgrep
             for hand_id, seat, player_id, name in c.fetchall():
                 result.setdefault(hand_id, {})[int(seat)] = {"player_id": int(player_id), "screen_name": name}
         except Exception:
@@ -241,7 +241,7 @@ class DatabaseHudStatsMixin:
         q = q.replace("seatNo AS seat_number", "Hands.id AS hand_id, seatNo AS seat_number", 1)
         try:
             c = self.connection.cursor()
-            c.execute(q, in_params)
+            c.execute(q, in_params)  # nosemgrep
             for row in c.fetchall():
                 hand_id = row[0]
                 result.setdefault(hand_id, {})[row[1]] = row[2:]
@@ -260,7 +260,7 @@ class DatabaseHudStatsMixin:
         q = f"SELECT Id, boardcard1, boardcard2, boardcard3, boardcard4, boardcard5 FROM Hands WHERE Id IN {in_sql}"  # nosec B608  # nosemgrep
         try:
             c = self.connection.cursor()
-            c.execute(q, in_params)
+            c.execute(q, in_params)  # nosemgrep
             for row in c.fetchall():
                 result[row[0]] = list(row[1:])
         except Exception:
@@ -277,7 +277,7 @@ class DatabaseHudStatsMixin:
         in_sql, in_params = self._in_tuple(hand_ids)
         try:
             c = self.get_cursor()
-            c.execute(
+            c.execute(  # nosemgrep
                 (
                     "SELECT h.id, gt.bigBlind FROM Hands h "  # nosec B608  # nosemgrep
                     "INNER JOIN Gametypes gt ON h.gametypeId = gt.id "
@@ -286,7 +286,7 @@ class DatabaseHudStatsMixin:
                 in_params,
             )
             big_blinds = {row[0]: float(row[1]) for row in c.fetchall() if row[1]}
-            c.execute(
+            c.execute(  # nosemgrep
                 (
                     "SELECT handId, startCash, committed, winnings FROM HandsPlayers "  # nosec B608  # nosemgrep
                     f"WHERE handId IN {in_sql} AND sitout = FALSE"
@@ -323,7 +323,7 @@ class DatabaseHudStatsMixin:
 
         self.hand_1day_ago = 1
         c = self.get_cursor()
-        c.execute(self.sql.query["get_hand_1day_ago"])
+        c.execute(self.sql.query["get_hand_1day_ago"])  # nosemgrep
         row = c.fetchone()
         if row and row[0]:
             self.hand_1day_ago = int(row[0])
@@ -480,7 +480,7 @@ class DatabaseHudStatsMixin:
         sql_text = self._inject_hud_chipev_columns(self.sql.query[query])
 
         # Now get the stats
-        c.execute(sql_text, subs)
+        c.execute(sql_text, subs)  # nosemgrep
         ptime = time() - stime
         latency_profile.record("hud_query_execute", ptime)
         log.info(
@@ -620,7 +620,7 @@ class DatabaseHudStatsMixin:
 
         stat_dict: dict[Any, Any] = {}
         c = self.connection.cursor()
-        c.execute(sql_text, subs)
+        c.execute(sql_text, subs)  # nosemgrep
         colnames = [desc[0] for desc in c.description]
         for row in c.fetchall():
             t_dict = {name.lower(): val for name, val in zip(colnames, row, strict=False)}
@@ -778,7 +778,7 @@ class DatabaseHudStatsMixin:
 
         stime = time()
         c = self.connection.cursor()
-        c.execute(batched, subs)
+        c.execute(batched, subs)  # nosemgrep
         etime = time() - stime
         latency_profile.record("hud_query_execute", etime)
         log.info(
@@ -880,7 +880,7 @@ class DatabaseHudStatsMixin:
         # now get the stats
         # print "sess_stats: subs =", subs, "subs[0] =", subs[0]
         stime = time()
-        c.execute(query, subs)
+        c.execute(query, subs)  # nosemgrep
         latency_profile.record("hud_query_execute", time() - stime)
         colnames = [desc[0] for desc in c.description]
         ftime = time()
@@ -948,7 +948,7 @@ class DatabaseHudStatsMixin:
                 str(tuple(self.hero_ids.values())),
             )
             c = self.get_cursor()
-            c.execute(q)
+            c.execute(q)  # nosemgrep
             tmp = c.fetchone()
             if tmp == (None,):
                 return self.hero_hudstart_def

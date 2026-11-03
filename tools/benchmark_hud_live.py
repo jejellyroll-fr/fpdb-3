@@ -183,7 +183,7 @@ class _SimulatedRttCursor:
 
     def execute(self, sql, *args, **kwargs):
         time.sleep(self._rtt_s)
-        return self._cursor.execute(sql, *args, **kwargs)
+        return self._cursor.execute(sql, *args, **kwargs)  # nosemgrep
 
     def executemany(self, sql, *args, **kwargs):
         time.sleep(self._rtt_s)

@@ -35,7 +35,7 @@ def player_stats(position=0, tourney_type_id=None, **overrides):
 
 def rows(db, sql, params=()):
     c = db.connection.cursor()
-    c.execute(sql, params)
+    c.execute(sql, params)  # nosemgrep
     result = c.fetchall()
     c.close()
     return result

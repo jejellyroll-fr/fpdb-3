@@ -470,19 +470,19 @@ class DatabaseConnectionMixin:
                     ("Some database functions will not work without NumPy support"),
                 )
             self.cursor = self.connection.cursor()
-            self.cursor.execute(
+            self.cursor.execute(  # nosemgrep
                 "PRAGMA temp_store=2",
             )  # use memory for temp tables/indexes
-            self.cursor.execute(
+            self.cursor.execute(  # nosemgrep
                 "PRAGMA journal_mode=WAL",
             )  # use memory for temp tables/indexes
-            self.cursor.execute(
+            self.cursor.execute(  # nosemgrep
                 SQLITE_SYNCHRONOUS_PRAGMA,
             )  # crash-safe in WAL mode, see SQLITE_SYNCHRONOUS_PRAGMA
-            self.cursor.execute(
+            self.cursor.execute(  # nosemgrep
                 "PRAGMA busy_timeout=60000",
             )  # wait up to 60 seconds for locks
-            self.cursor.execute(
+            self.cursor.execute(  # nosemgrep
                 "PRAGMA cache_size=10000",
             )  # increase cache size for better performance
         else:

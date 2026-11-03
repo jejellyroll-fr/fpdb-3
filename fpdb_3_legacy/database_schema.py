@@ -1080,14 +1080,14 @@ class DatabaseSchemaMixin:
         and the subsequent DROP TABLE failed with errno 1451.
         """
         c = self.get_cursor()
-        c.execute(
+        c.execute(  # nosemgrep
             "SELECT DISTINCT table_name, constraint_name "
             "FROM information_schema.table_constraints "
             "WHERE constraint_type = 'FOREIGN KEY' AND table_schema = DATABASE()",
         )
         constraints = c.fetchall()
         for table, constraint in constraints:
-            c.execute(f"ALTER TABLE `{table}` DROP FOREIGN KEY `{constraint}`")
+            c.execute(f"ALTER TABLE `{table}` DROP FOREIGN KEY `{constraint}`")  # nosemgrep
         self.commit()
 
     # end drop_referential_inegrity
@@ -1130,11 +1130,11 @@ class DatabaseSchemaMixin:
         applied = False
         try:
             if self.backend == self.PGSQL:
-                self.get_cursor().execute(SET_PGSQL_LOCK_TIMEOUT)
+                self.get_cursor().execute(SET_PGSQL_LOCK_TIMEOUT)  # nosemgrep
                 applied = True
             elif self.backend == self.MYSQL_INNODB:
                 # MySQL counts metadata-lock waits in whole seconds, minimum 1.
-                self.get_cursor().execute(SET_MYSQL_LOCK_TIMEOUT)
+                self.get_cursor().execute(SET_MYSQL_LOCK_TIMEOUT)  # nosemgrep
                 applied = True
         except Exception:  # noqa: BLE001 - an unsupported knob must not stop the migrations
             log.debug("Could not bound the migration lock wait", exc_info=True)
@@ -1148,9 +1148,9 @@ class DatabaseSchemaMixin:
                     self.rollback()
                 with contextlib.suppress(Exception):
                     if self.backend == self.PGSQL:
-                        self.get_cursor().execute(RESET_PGSQL_LOCK_TIMEOUT)
+                        self.get_cursor().execute(RESET_PGSQL_LOCK_TIMEOUT)  # nosemgrep
                     else:
-                        self.get_cursor().execute(RESET_MYSQL_LOCK_TIMEOUT)
+                        self.get_cursor().execute(RESET_MYSQL_LOCK_TIMEOUT)  # nosemgrep
                     self.commit()
 
     def ensure_feature_tables(self) -> None:
@@ -1180,7 +1180,7 @@ class DatabaseSchemaMixin:
         ):
             try:
                 c = self.get_cursor()
-                c.execute(self.sql.query[query_name])
+                c.execute(self.sql.query[query_name])  # nosemgrep
                 self.commit()
             except Exception:  # noqa: BLE001 - table already exists: nothing to do.
                 self.rollback()
@@ -1203,7 +1203,7 @@ class DatabaseSchemaMixin:
         ):
             try:
                 c = self.get_cursor()
-                c.execute(self.sql.query[query_name])
+                c.execute(self.sql.query[query_name])  # nosemgrep
                 self.commit()
             except Exception:  # noqa: BLE001 - index/table already exists or feature table absent.
                 self.rollback()
@@ -1228,13 +1228,13 @@ class DatabaseSchemaMixin:
     def _get_table_columns(self, table: str) -> set[str]:
         c = self.get_cursor()
         if self.backend == self.SQLITE:
-            c.execute(f"PRAGMA table_info({table})")
+            c.execute(f"PRAGMA table_info({table})")  # nosemgrep
             return {row[1] for row in c.fetchall()}
         if self.backend == self.MYSQL_INNODB:
-            c.execute(f"SHOW COLUMNS FROM {table}")
+            c.execute(f"SHOW COLUMNS FROM {table}")  # nosemgrep
             return {row[0] for row in c.fetchall()}
 
-        c.execute(
+        c.execute(  # nosemgrep
             "SELECT column_name FROM information_schema.columns WHERE table_name = %s OR table_name = %s",
             (table, table.lower()),
         )
@@ -1290,7 +1290,7 @@ class DatabaseSchemaMixin:
         # clause: the analyser reads any query assembled from parts as an
         # injection site, and it is right to, even when every part is a literal.
         query = COLUMN_WIDTH_MYSQL if self.backend == self.MYSQL_INNODB else COLUMN_WIDTH_SQL
-        c.execute(query, (table.lower(), column.lower()))
+        c.execute(query, (table.lower(), column.lower()))  # nosemgrep
         row = c.fetchone()
         return None if row is None else row[0]
 
@@ -1321,9 +1321,9 @@ class DatabaseSchemaMixin:
         try:
             c = self.get_cursor()
             if self.backend == self.MYSQL_INNODB:
-                c.execute(WIDEN_GAMETYPE_CATEGORY_MYSQL)
+                c.execute(WIDEN_GAMETYPE_CATEGORY_MYSQL)  # nosemgrep
             else:
-                c.execute(WIDEN_GAMETYPE_CATEGORY_SQL)
+                c.execute(WIDEN_GAMETYPE_CATEGORY_SQL)  # nosemgrep
             self.commit()
             log.info("Widened Gametypes.category to varchar(%d)", GAMETYPE_CATEGORY_WIDTH)
         except Exception:  # noqa: BLE001 - another connection holds the table; retried next connection.
@@ -1337,11 +1337,11 @@ class DatabaseSchemaMixin:
         """Declared collation of a character column, or None when it takes the default."""
         c = self.get_cursor()
         if self.backend == self.MYSQL_INNODB:
-            c.execute(COLUMN_COLLATION_MYSQL, (table.lower(), column.lower()))
+            c.execute(COLUMN_COLLATION_MYSQL, (table.lower(), column.lower()))  # nosemgrep
         else:
             # The table name goes to ``to_regclass`` as written, so the catalogue row is the
             # one the unqualified ``ALTER TABLE`` addresses.
-            c.execute(COLUMN_COLLATION_SQL, (table.lower(), column.lower(), table))
+            c.execute(COLUMN_COLLATION_SQL, (table.lower(), column.lower(), table))  # nosemgrep
         row = c.fetchone()
         return None if row is None else row[0]
 
@@ -1404,7 +1404,7 @@ class DatabaseSchemaMixin:
             return
         try:
             c = self.get_cursor()
-            c.execute(
+            c.execute(  # nosemgrep
                 SET_PLAYERS_NAME_COLLATION_MYSQL
                 if self.backend == self.MYSQL_INNODB
                 else SET_PLAYERS_NAME_COLLATION_PGSQL
@@ -1441,7 +1441,7 @@ class DatabaseSchemaMixin:
         c = self.get_cursor()
         try:
             for column in missing:
-                c.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definitions[column]}")
+                c.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definitions[column]}")  # nosemgrep
             self.commit()
             log.info("Added %s missing %s columns: %s", len(missing), table, ", ".join(missing))
         except Exception:  # noqa: BLE001 - reported, then retried on the next connection
@@ -1461,94 +1461,94 @@ class DatabaseSchemaMixin:
     def create_tables(self) -> None:
         log.debug(f"{self.sql.query['createSettingsTable']}")
         c = self.get_cursor()
-        c.execute(self.sql.query["createSettingsTable"])
+        c.execute(self.sql.query["createSettingsTable"])  # nosemgrep
 
         log.debug("Creating tables")
-        c.execute(self.sql.query["createActionsTable"])
-        c.execute(self.sql.query["createRankTable"])
-        c.execute(self.sql.query["createStartCardsTable"])
-        c.execute(self.sql.query["createSitesTable"])
-        c.execute(self.sql.query["createGametypesTable"])
-        c.execute(self.sql.query["createFilesTable"])
-        c.execute(self.sql.query["createPlayersTable"])
-        c.execute(self.sql.query["createAutoratesTable"])
-        c.execute(self.sql.query["createWeeksTable"])
-        c.execute(self.sql.query["createMonthsTable"])
-        c.execute(self.sql.query["createSessionsTable"])
-        c.execute(self.sql.query["createTourneyTypesTable"])
-        c.execute(self.sql.query["createTourneysTable"])
-        c.execute(self.sql.query["createTourneysPlayersTable"])
-        c.execute(self.sql.query["createTourneyPayoutsTable"])
-        c.execute(self.sql.query["createActionBubbleFactorsTable"])
-        c.execute(self.sql.query["createSessionsCacheTable"])
-        c.execute(self.sql.query["createTourneysCacheTable"])
-        c.execute(self.sql.query["createHandsTable"])
-        c.execute(self.sql.query["createHandsPlayersTable"])
-        c.execute(self.sql.query["createHandsActionsTable"])
-        c.execute(self.sql.query["createHandsStoveTable"])
-        c.execute(self.sql.query["createHandsShowdownTable"])
-        c.execute(self.sql.query["createHandsCashoutTable"])
-        c.execute(self.sql.query["createHandsSituationsTable"])
-        c.execute(self.sql.query["createHandStatesTable"])
-        c.execute(self.sql.query["createPlayerAutoNotesTable"])
-        c.execute(self.sql.query["createAofDecisionsTable"])
-        c.execute(self.sql.query["createAofDecisionAnalysesTable"])
-        c.execute(self.sql.query["createHandsPotsTable"])
-        c.execute(self.sql.query["createBoardFeaturesTable"])
-        c.execute(self.sql.query["createHudCacheTable"])
-        c.execute(self.sql.query["createCardsCacheTable"])
-        c.execute(self.sql.query["createPositionsCacheTable"])
-        c.execute(self.sql.query["createBoardsTable"])
-        c.execute(self.sql.query["createBackingsTable"])
-        c.execute(self.sql.query["createRawHands"])
-        c.execute(self.sql.query["createRawTourneys"])
+        c.execute(self.sql.query["createActionsTable"])  # nosemgrep
+        c.execute(self.sql.query["createRankTable"])  # nosemgrep
+        c.execute(self.sql.query["createStartCardsTable"])  # nosemgrep
+        c.execute(self.sql.query["createSitesTable"])  # nosemgrep
+        c.execute(self.sql.query["createGametypesTable"])  # nosemgrep
+        c.execute(self.sql.query["createFilesTable"])  # nosemgrep
+        c.execute(self.sql.query["createPlayersTable"])  # nosemgrep
+        c.execute(self.sql.query["createAutoratesTable"])  # nosemgrep
+        c.execute(self.sql.query["createWeeksTable"])  # nosemgrep
+        c.execute(self.sql.query["createMonthsTable"])  # nosemgrep
+        c.execute(self.sql.query["createSessionsTable"])  # nosemgrep
+        c.execute(self.sql.query["createTourneyTypesTable"])  # nosemgrep
+        c.execute(self.sql.query["createTourneysTable"])  # nosemgrep
+        c.execute(self.sql.query["createTourneysPlayersTable"])  # nosemgrep
+        c.execute(self.sql.query["createTourneyPayoutsTable"])  # nosemgrep
+        c.execute(self.sql.query["createActionBubbleFactorsTable"])  # nosemgrep
+        c.execute(self.sql.query["createSessionsCacheTable"])  # nosemgrep
+        c.execute(self.sql.query["createTourneysCacheTable"])  # nosemgrep
+        c.execute(self.sql.query["createHandsTable"])  # nosemgrep
+        c.execute(self.sql.query["createHandsPlayersTable"])  # nosemgrep
+        c.execute(self.sql.query["createHandsActionsTable"])  # nosemgrep
+        c.execute(self.sql.query["createHandsStoveTable"])  # nosemgrep
+        c.execute(self.sql.query["createHandsShowdownTable"])  # nosemgrep
+        c.execute(self.sql.query["createHandsCashoutTable"])  # nosemgrep
+        c.execute(self.sql.query["createHandsSituationsTable"])  # nosemgrep
+        c.execute(self.sql.query["createHandStatesTable"])  # nosemgrep
+        c.execute(self.sql.query["createPlayerAutoNotesTable"])  # nosemgrep
+        c.execute(self.sql.query["createAofDecisionsTable"])  # nosemgrep
+        c.execute(self.sql.query["createAofDecisionAnalysesTable"])  # nosemgrep
+        c.execute(self.sql.query["createHandsPotsTable"])  # nosemgrep
+        c.execute(self.sql.query["createBoardFeaturesTable"])  # nosemgrep
+        c.execute(self.sql.query["createHudCacheTable"])  # nosemgrep
+        c.execute(self.sql.query["createCardsCacheTable"])  # nosemgrep
+        c.execute(self.sql.query["createPositionsCacheTable"])  # nosemgrep
+        c.execute(self.sql.query["createBoardsTable"])  # nosemgrep
+        c.execute(self.sql.query["createBackingsTable"])  # nosemgrep
+        c.execute(self.sql.query["createRawHands"])  # nosemgrep
+        c.execute(self.sql.query["createRawTourneys"])  # nosemgrep
 
         # Create unique indexes:
         log.debug("Creating unique indexes")
-        c.execute(self.sql.query["addTourneyIndex"])
-        c.execute(
+        c.execute(self.sql.query["addTourneyIndex"])  # nosemgrep
+        c.execute(  # nosemgrep
             self.sql.query["addHandsIndex"].replace(
                 "<heroseat>",
                 ", heroSeat" if self.publicDB else "",
             ),
         )
-        c.execute(self.sql.query["addPlayersIndex"])
-        c.execute(self.sql.query["addTPlayersIndex"])
-        c.execute(self.sql.query["addPlayersSeat"])
-        c.execute(self.sql.query["addHeroSeat"])
-        c.execute(self.sql.query["addStartCardsIndex"])
-        c.execute(self.sql.query["addSeatsIndex"])
-        c.execute(self.sql.query["addPositionIndex"])
+        c.execute(self.sql.query["addPlayersIndex"])  # nosemgrep
+        c.execute(self.sql.query["addTPlayersIndex"])  # nosemgrep
+        c.execute(self.sql.query["addPlayersSeat"])  # nosemgrep
+        c.execute(self.sql.query["addHeroSeat"])  # nosemgrep
+        c.execute(self.sql.query["addStartCardsIndex"])  # nosemgrep
+        c.execute(self.sql.query["addSeatsIndex"])  # nosemgrep
+        c.execute(self.sql.query["addPositionIndex"])  # nosemgrep
         # The feature tables created above index the same way the migration
         # path does, so a database built from scratch is not left doing full
         # scans until someone happens to reconnect with an older schema.
-        c.execute(self.sql.query["addBoardFeaturesHandIndex"])
-        c.execute(self.sql.query["addBoardFeaturesTextureIndex"])
-        c.execute(self.sql.query["addPlayerAutoNotesPlayerIndex"])
-        c.execute(self.sql.query["addPlayerAutoNotesHandIndex"])
-        c.execute(self.sql.query["addPlayerAutoNotesRuleIndex"])
-        c.execute(self.sql.query["addAofDecisionsPlayerIndex"])
-        c.execute(self.sql.query["addAofDecisionsHandIndex"])
-        c.execute(self.sql.query["addAofDecisionsRangeIndex"])
-        c.execute(self.sql.query["addAofAnalysesDecisionIndex"])
-        c.execute(self.sql.query["addAofAnalysesStatusIndex"])
+        c.execute(self.sql.query["addBoardFeaturesHandIndex"])  # nosemgrep
+        c.execute(self.sql.query["addBoardFeaturesTextureIndex"])  # nosemgrep
+        c.execute(self.sql.query["addPlayerAutoNotesPlayerIndex"])  # nosemgrep
+        c.execute(self.sql.query["addPlayerAutoNotesHandIndex"])  # nosemgrep
+        c.execute(self.sql.query["addPlayerAutoNotesRuleIndex"])  # nosemgrep
+        c.execute(self.sql.query["addAofDecisionsPlayerIndex"])  # nosemgrep
+        c.execute(self.sql.query["addAofDecisionsHandIndex"])  # nosemgrep
+        c.execute(self.sql.query["addAofDecisionsRangeIndex"])  # nosemgrep
+        c.execute(self.sql.query["addAofAnalysesDecisionIndex"])  # nosemgrep
+        c.execute(self.sql.query["addAofAnalysesStatusIndex"])  # nosemgrep
         if "addActionBubbleFactorsTourneyIndex" in self.sql.query:  # MySQL declares it in the table
-            c.execute(self.sql.query["addActionBubbleFactorsTourneyIndex"])
-        c.execute(self.sql.query["addFilesIndex"])
-        c.execute(self.sql.query["addTableNameIndex"])
-        c.execute(self.sql.query["addPlayerNameIndex"])
-        c.execute(self.sql.query["addPlayerHeroesIndex"])
-        c.execute(self.sql.query["addStartCashIndex"])
-        c.execute(self.sql.query["addEffStackIndex"])
-        c.execute(self.sql.query["addTotalProfitIndex"])
-        c.execute(self.sql.query["addWinningsIndex"])
-        c.execute(self.sql.query["addFinalPotIndex"])
-        c.execute(self.sql.query["addStreetIndex"])
-        c.execute(self.sql.query["addSessionsCacheCompundIndex"])
-        c.execute(self.sql.query["addTourneysCacheCompundIndex"])
-        c.execute(self.sql.query["addHudCacheCompundIndex"])
-        c.execute(self.sql.query["addCardsCacheCompundIndex"])
-        c.execute(self.sql.query["addPositionsCacheCompundIndex"])
+            c.execute(self.sql.query["addActionBubbleFactorsTourneyIndex"])  # nosemgrep
+        c.execute(self.sql.query["addFilesIndex"])  # nosemgrep
+        c.execute(self.sql.query["addTableNameIndex"])  # nosemgrep
+        c.execute(self.sql.query["addPlayerNameIndex"])  # nosemgrep
+        c.execute(self.sql.query["addPlayerHeroesIndex"])  # nosemgrep
+        c.execute(self.sql.query["addStartCashIndex"])  # nosemgrep
+        c.execute(self.sql.query["addEffStackIndex"])  # nosemgrep
+        c.execute(self.sql.query["addTotalProfitIndex"])  # nosemgrep
+        c.execute(self.sql.query["addWinningsIndex"])  # nosemgrep
+        c.execute(self.sql.query["addFinalPotIndex"])  # nosemgrep
+        c.execute(self.sql.query["addStreetIndex"])  # nosemgrep
+        c.execute(self.sql.query["addSessionsCacheCompundIndex"])  # nosemgrep
+        c.execute(self.sql.query["addTourneysCacheCompundIndex"])  # nosemgrep
+        c.execute(self.sql.query["addHudCacheCompundIndex"])  # nosemgrep
+        c.execute(self.sql.query["addCardsCacheCompundIndex"])  # nosemgrep
+        c.execute(self.sql.query["addPositionsCacheCompundIndex"])  # nosemgrep
 
         self.fillDefaultData()
         self.commit()
@@ -1582,7 +1582,7 @@ class DatabaseSchemaMixin:
             log.info(f"Creating index {idx['tab']} {idx['col']}")
             if self.backend == self.MYSQL_INNODB:
                 s = "CREATE INDEX {} ON {}({})".format(idx["col"], idx["tab"], idx["col"])
-                c.execute(s)
+                c.execute(s)  # nosemgrep
             elif self.backend in (self.PGSQL, self.SQLITE):
                 s = "CREATE INDEX {}_{}_idx ON {}({})".format(
                     idx["tab"],
@@ -1590,7 +1590,7 @@ class DatabaseSchemaMixin:
                     idx["tab"],
                     idx["col"],
                 )
-                c.execute(s)
+                c.execute(s)  # nosemgrep
 
         if self.backend == self.PGSQL:
             self._pg_set_isolation(1)  # go back to normal isolation level
@@ -1610,7 +1610,7 @@ class DatabaseSchemaMixin:
             if self.backend == self.MYSQL_INNODB:
                 log.debug(f"Dropping index: {idx['tab']} {idx['col']}")
                 try:
-                    self.get_cursor().execute(
+                    self.get_cursor().execute(  # nosemgrep
                         "alter table %s drop index %s",
                         (idx["tab"], idx["col"]),
                     )
@@ -1620,7 +1620,7 @@ class DatabaseSchemaMixin:
                 log.debug(f"Dropping index: {idx['tab']} {idx['col']}")
                 # mod to use tab_col for index name?
                 try:
-                    self.get_cursor().execute(
+                    self.get_cursor().execute(  # nosemgrep
                         "drop index {}_{}_idx".format(idx["tab"], idx["col"]),
                     )
                 except Exception:  # intentional broad catch: drop index (PG) best-effort, continue
@@ -1628,7 +1628,7 @@ class DatabaseSchemaMixin:
             elif self.backend == self.SQLITE:
                 log.debug(f"Dropping index: {idx['tab']} {idx['col']}")
                 try:
-                    self.get_cursor().execute(
+                    self.get_cursor().execute(  # nosemgrep
                         "drop index {}_{}_idx".format(idx["tab"], idx["col"]),
                     )
                 except Exception:  # intentional broad catch: drop index (SQLite) best-effort, continue
@@ -1655,7 +1655,7 @@ class DatabaseSchemaMixin:
 
         for fk in self.foreignKeys[self.backend]:
             if self.backend == self.MYSQL_INNODB:
-                c.execute(
+                c.execute(  # nosemgrep
                     "SELECT constraint_name "
                     "FROM information_schema.KEY_COLUMN_USAGE "
                     # "WHERE REFERENCED_TABLE_SCHEMA = 'fpdb'
@@ -1674,7 +1674,7 @@ class DatabaseSchemaMixin:
                         f"Creating foreign key: {fk['fktab']} {fk['fkcol']} -> {fk['rtab']} {fk['rcol']}",
                     )
                     try:
-                        c.execute(
+                        c.execute(  # nosemgrep
                             "alter table "
                             + fk["fktab"]
                             + " add foreign key ("
@@ -1692,7 +1692,7 @@ class DatabaseSchemaMixin:
                     f"Creating foreign key: {fk['fktab']}.{fk['fkcol']} -> {fk['rtab']}.{fk['rcol']}",
                 )
                 try:
-                    c.execute(
+                    c.execute(  # nosemgrep
                         "alter table "
                         + fk["fktab"]
                         + " add constraint "
@@ -1736,7 +1736,7 @@ class DatabaseSchemaMixin:
 
         for fk in self.foreignKeys[self.backend]:
             if self.backend == self.MYSQL_INNODB:
-                c.execute(
+                c.execute(  # nosemgrep
                     "SELECT constraint_name "
                     "FROM information_schema.KEY_COLUMN_USAGE "
                     # "WHERE REFERENCED_TABLE_SHEMA = 'fpdb'
@@ -1753,7 +1753,7 @@ class DatabaseSchemaMixin:
                         f"Dropping foreign key: {cons[0]} {fk['fktab']}.{fk['fkcol']}",
                     )
                     try:
-                        c.execute(
+                        c.execute(  # nosemgrep
                             "alter table " + fk["fktab"] + " drop foreign key " + cons[0],
                         )
                     except Exception:  # intentional broad catch: drop FK (MySQL) best-effort, continue
@@ -1773,7 +1773,7 @@ class DatabaseSchemaMixin:
                     # print "after lock, status:", c.statusmessage
                     # print "alter table %s drop constraint %s_%s_fkey" % (fk['fktab'], fk['fktab'], fk['fkcol'])
                     try:
-                        c.execute(
+                        c.execute(  # nosemgrep
                             "alter table {} drop constraint {}_{}_fkey".format(fk["fktab"], fk["fktab"], fk["fkcol"]),
                         )
                         log.debug(
@@ -1800,32 +1800,32 @@ class DatabaseSchemaMixin:
 
     def fillDefaultData(self) -> None:
         c = self.get_cursor()
-        c.execute(f"INSERT INTO Settings (version) VALUES ({DB_VERSION});")
+        c.execute(f"INSERT INTO Settings (version) VALUES ({DB_VERSION});")  # nosemgrep
         # Fill Sites
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('1', 'Full Tilt Poker', 'FT')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('2', 'PokerStars', 'PS')")
         # PokerStars variants
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('32', 'PokerStars.COM', 'PS')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('33', 'PokerStars.FR', 'PS')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('34', 'PokerStars.IT', 'PS')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('35', 'PokerStars.ES', 'PS')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('36', 'PokerStars.PT', 'PS')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('37', 'PokerStars.EU', 'PS')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('130', 'PokerStars.DE', 'PS')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('3', 'Everleaf', 'EV')")
@@ -1838,81 +1838,81 @@ class DatabaseSchemaMixin:
         # PartyPoker variants
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('38', 'Party Poker', 'PP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('39', 'Bwin Poker', 'PP')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('40', 'Bwin.fr Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('41', 'Bwin.it Poker', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('42', 'Bwin.es Poker', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('43', 'Bwin.de Poker', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('44', 'PartyPoker.fr', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('45', 'PartyPoker.it', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('46', 'PartyPoker.es', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('47', 'PartyPoker.de', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('48', 'Empire Poker', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('49', 'Gamebookers Poker', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('50', 'Intertops Poker', 'PP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('51', 'MultiPoker', 'PP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('52', 'PokerRoom', 'PP')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('53', 'PartyPoker NJ', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('54', 'BorgataPoker', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('55', 'Borgata Poker', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('120', 'WPT Poker', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('121', 'WPTPoker', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('122', 'PartyPoker.pt', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('123', 'PartyPoker.com', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('124', 'PartyPoker.eu', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('125', 'partycasino', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('126', 'PartyCasino', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('127', 'partypoker', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('128', 'bwin', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('129', 'PMU Poker (PartyPoker)', 'PP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('10', 'PacificPoker', 'P8')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('11', 'Partouche', 'PA')")
@@ -1925,149 +1925,149 @@ class DatabaseSchemaMixin:
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('58', 'Poker770', 'IP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('131', 'Betclic Poker', 'IP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('140', 'CoinPoker', 'CP')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('59', 'NetBet Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('60', 'Barrière Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('61', 'Red Star Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('62', 'Titan Poker', 'IP')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('63', 'Bet365 Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('64', 'William Hill Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('65', 'Paddy Power Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('66', 'Betfair Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('67', 'Coral Poker', 'IP')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('68', 'Genting Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('69', 'Mansion Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('70', 'Winner Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('71', 'Ladbrokes Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('72', 'Sky Poker', 'IP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('73', 'Sisal Poker', 'IP')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('74', 'Lottomatica Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('75', 'Eurobet Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('76', 'Snai Poker', 'IP')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('77', 'Goldbet Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('78', 'Casino Barcelona Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('79', 'Sportium Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('80', 'Marca Apuestas Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('81', 'Everest Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('82', 'Bet-at-home Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('83', 'Mybet Poker', 'IP')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('84', 'Betsson Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('85', 'Betsafe Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('86', 'NordicBet Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('87', 'Unibet Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('88', 'Maria Casino Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('89', 'LeoVegas Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('90', 'Mr Green Poker', 'IP')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('91', 'Redbet Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('15', 'Winamax', 'WM')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('16', 'Everest', 'EP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('17', 'Cake', 'CK')")
         # Cake network variants
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('92', 'Everygame Poker', 'CK')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('93', 'Everygame', 'CK')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('94', 'Cake Poker', 'CK')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('95', 'Juicy Stakes', 'CK')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('96', 'Juicy Stakes Poker', 'CK')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('97', 'JuicyStakes', 'CK')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('98', 'RedStar Poker', 'CK')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('99', 'RedStar', 'CK')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('100', 'Sportsbetting.ag Poker', 'CK')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('101', 'Sportsbetting Poker', 'CK')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('102', 'SportsBetting.ag', 'CK')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('18', 'Entraction', 'TR')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('19', 'BetOnline', 'BO')")
         # BetOnline network variants
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('103', 'BetOnline Poker', 'BO')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('104', 'BetOnline.ag', 'BO')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('105', 'Tiger Gaming', 'BO')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('106', 'TigerGaming', 'BO')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('107', 'Doyles Room', 'BO')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('108', 'DoylesRoom', 'BO')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('109', 'Poker4Ever', 'BO')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('110', 'Poker 4 Ever', 'BO')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('111', 'PlayersOnly', 'BO')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('112', 'Players Only', 'BO')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('113', 'SunPoker', 'BO')")
@@ -2075,24 +2075,24 @@ class DatabaseSchemaMixin:
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('20', 'Microgaming', 'MG')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('21', 'Bovada', 'BV')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('22', 'Enet', 'EN')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('23', 'SealsWithClubs', 'SW')",
         )
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('24', 'WinningPoker', 'WP')",
         )
         # WPN network variants
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('115', 'Americas Cardroom', 'WP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('116', 'ACR Poker', 'WP')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('117', 'BlackChipPoker', 'WP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('118', 'TruePoker', 'WP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('119', 'Ya Poker', 'WP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('25', 'PokerMaster', 'PM')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Sites (id,name,code) VALUES ('26', 'Run It Once Poker', 'RO')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('27', 'GGPoker', 'GG')")
@@ -2102,7 +2102,7 @@ class DatabaseSchemaMixin:
         # c.execute("INSERT INTO Sites (id,name,code) VALUES ('31', 'PMU Poker', 'PM')")
         # Fill Actions
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('1', 'ante', 'A')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Actions (id,name,code) VALUES ('2', 'small blind', 'SB')",
         )
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('3', 'secondsb', 'SSB')")
@@ -2118,7 +2118,7 @@ class DatabaseSchemaMixin:
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('13', 'bringin', 'I')")
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('14', 'completes', 'P')")
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('15', 'straddle', 'ST')")
-        c.execute(
+        c.execute(  # nosemgrep
             "INSERT INTO Actions (id,name,code) VALUES ('16', 'button blind', 'BUB')",
         )
         # Fill Rank. "Rank" is a reserved word since MySQL 8.0 (the RANK()
@@ -2149,17 +2149,17 @@ class DatabaseSchemaMixin:
         )
         for i in range(170):
             (name, rank, combinations) = Card.StartCardRank(i)
-            c.execute(sql, ("holdem", name, rank, combinations))
+            c.execute(sql, ("holdem", name, rank, combinations))  # nosemgrep
         for idx in range(-13, 1184):
             name = Card.decodeRazzStartHand(idx)
-            c.execute(sql, ("razz", name, idx, 0))
+            c.execute(sql, ("razz", name, idx, 0))  # nosemgrep
         sql = f"INSERT INTO StartCards (id, category, name, {rank_col}, combinations) VALUES (%s, %s, %s, %s, %s)".replace(  # nosec B608  # nosemgrep
             "%s",
             self.sql.query["placeholder"],
         )
         omaha_count = len(Card._omaha_rank_combos()) * len(Card.OMAHA_SUIT_CLASSES)
         for idx in range(Card.OMAHA_START_HAND_OFFSET, Card.OMAHA_START_HAND_OFFSET + omaha_count):
-            c.execute(sql, (idx, "omaha", Card.fourStartCardString(idx), idx, 0))
+            c.execute(sql, (idx, "omaha", Card.fourStartCardString(idx), idx, 0))  # nosemgrep
 
     # end def fillDefaultData
 

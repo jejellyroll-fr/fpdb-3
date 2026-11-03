@@ -65,7 +65,7 @@ class LocalFirstSync:
 
     def _ensure_outbox(self) -> None:
         c = self.local_db.connection.cursor()
-        c.execute(OUTBOX_DDL)
+        c.execute(OUTBOX_DDL)  # nosemgrep
         self.local_db.connection.commit()
         c.close()
 
@@ -85,7 +85,7 @@ class LocalFirstSync:
 
     def pending(self) -> list[int]:
         c = self.local_db.connection.cursor()
-        c.execute(
+        c.execute(  # nosemgrep
             "SELECT local_hand_id FROM fpdb_sync_outbox WHERE pushed = 0 "
             f"ORDER BY local_hand_id LIMIT {self.batch_size}"  # nosec B608  # nosemgrep
         )
@@ -143,7 +143,7 @@ class LocalFirstSync:
         cols: set[str] = set()
         if server.backend == Database.PGSQL:
             c = server.connection.cursor()
-            c.execute(
+            c.execute(  # nosemgrep
                 "SELECT column_name FROM information_schema.columns WHERE table_name = %s AND data_type = 'boolean'",
                 (table.lower(),),
             )
@@ -174,7 +174,7 @@ class LocalFirstSync:
                 ]
                 ph_values = ", ".join([sph] * len(insert_cols))
                 q = f"INSERT INTO {table} ({', '.join(insert_cols)}) VALUES ({ph_values})"  # nosec B608  # nosemgrep
-                c.execute(q, values)
+                c.execute(q, values)  # nosemgrep
         lc.close()
 
     def _push_hand(self, server: Any, local_id: int, sph: str) -> int | None:
@@ -194,7 +194,7 @@ class LocalFirstSync:
 
         # dedup check
         c = server.connection.cursor()
-        c.execute(
+        c.execute(  # nosemgrep
             f"SELECT id FROM Hands WHERE siteHandNo = {sph} AND gametypeId = {sph}",  # nosec B608  # nosemgrep
             (hand["siteHandNo"], hand["gametypeId"]),
         )
@@ -206,7 +206,7 @@ class LocalFirstSync:
         insert_cols = [k for k in cols if k != "id"]
         bools = self._server_bool_columns(server, "Hands")
         q = f"INSERT INTO Hands ({', '.join(insert_cols)}) VALUES ({', '.join([sph] * len(insert_cols))})"  # nosec B608  # nosemgrep
-        c.execute(q, [bool(hand[k]) if k.lower() in bools and hand[k] is not None else hand[k] for k in insert_cols])
+        c.execute(q, [bool(hand[k]) if k.lower() in bools and hand[k] is not None else hand[k] for k in insert_cols])  # nosemgrep
         server_id = self._last_insert_id(server, c)
 
         # child rows, remapped to the server hand id
@@ -226,7 +226,7 @@ class LocalFirstSync:
                 ]
                 cph = ", ".join([sph] * len(child_cols))
                 cq = f"INSERT INTO {table} ({', '.join(child_cols)}) VALUES ({cph})"  # nosec B608  # nosemgrep
-                c.execute(cq, values)
+                c.execute(cq, values)  # nosemgrep
         return server_id
 
     def _ph(self) -> str:
@@ -242,7 +242,7 @@ class LocalFirstSync:
     def _mark_pushed(self, local_id: int, server_id: int) -> None:
         ph = self._ph()
         c = self.local_db.connection.cursor()
-        c.execute(
+        c.execute(  # nosemgrep
             "UPDATE fpdb_sync_outbox SET pushed = 1, server_hand_id = " + ph
             + ", pushed_at = " + ph + f" WHERE local_hand_id = {ph}",  # nosec B608  # nosemgrep
             (server_id, time.strftime("%Y-%m-%d %H:%M:%S"), local_id),

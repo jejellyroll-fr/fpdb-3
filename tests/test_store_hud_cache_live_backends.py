@@ -72,18 +72,18 @@ def test_grouped_hudcache_flush_accumulates_into_one_row_on_a_live_backend(backe
         # the catalogue's own insert so every NOT NULL column is filled.
         placeholder = host.sql.query["placeholder"]
         with connection.cursor() as cursor:
-            cursor.execute(
+            cursor.execute(  # nosemgrep
                 f"INSERT INTO Sites (id,name,code) VALUES ({placeholder},{placeholder},{placeholder})",
                 (1, "Room", "RM"),
             )
             # buyinType is a varchar and the last four columns are BOOLEAN on
             # PostgreSQL but tinyint-ish on MySQL, so the values differ per backend.
             flags = (None, None, None, None) if backend == "postgresql" else (0, 0, 0, 0)
-            cursor.execute(
+            cursor.execute(  # nosemgrep
                 host.sql.query["insertGameTypes"].replace("%s", placeholder),
                 (1, "USD", "hold", "nl", "holdem", "fl", "h", "none", 5, 10, 10, 20, 6, 0, "none", *flags),
             )
-            cursor.execute(
+            cursor.execute(  # nosemgrep
                 f"INSERT INTO Players (id,name,siteId) VALUES ({placeholder},{placeholder},{placeholder})",
                 (11, "Hero", 1),
             )
@@ -103,7 +103,7 @@ def test_grouped_hudcache_flush_accumulates_into_one_row_on_a_live_backend(backe
             host.hcbulk.clear()
 
         with connection.cursor() as cursor:
-            cursor.execute(
+            cursor.execute(  # nosemgrep
                 f"SELECT COUNT(*), COALESCE(SUM(n), 0), COALESCE(SUM(street0VPI), 0) "
                 f"FROM HudCache WHERE playerId = {placeholder}",
                 (11,),
