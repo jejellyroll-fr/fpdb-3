@@ -7,12 +7,13 @@ other mixins is declared, for the type checker, on HudMainBase in hud_main_base.
 import contextlib
 import os
 import re
+import time
 from typing import Any
 
 from PySide6.QtCore import QEvent
 from PySide6.QtWidgets import QWidget
 
-from fpdb_3_legacy import Aux_Base, Hud
+from fpdb_3_legacy import Aux_Base, Hud, latency_profile
 from fpdb_3_legacy.hud_diagnostics import session_id
 from fpdb_3_legacy.hud_main_base import HudMainBase, log
 from fpdb_3_legacy.SmartHudManager import RestartReason
@@ -156,6 +157,13 @@ class HudMainTablesMixin(HudMainBase):
 
     def check_tables(self) -> None:
         """Periodically check the status of poker tables."""
+        # #680: how late this 800 ms timer runs is the cheapest available proxy
+        # for Qt event-loop lag on the UI thread.
+        now = time.monotonic()
+        last = getattr(self, "_last_check_tables_ts", None)
+        if last is not None:
+            latency_profile.record("qt_event_loop_lag", max(0.0, now - last - 0.8))
+        self._last_check_tables_ts = now
         # Skip while a HUD window is being dragged: the geometry poll (an
         # expensive AppleScript scan on macOS) and the window re-raise (topify)
         # both run on the UI thread and re-order the dragged window, which makes
@@ -280,10 +288,11 @@ class HudMainTablesMixin(HudMainBase):
         try:
             # Real geometry change: bump the generation so block windows re-place.
             hud.geometry_generation += 1
+            # Hud.resize_windows() already calls resize_windows() on every aux
+            # window; the extra loop below used to run a second full pass over
+            # the same windows on every real resize (#680).
             hud.resize_windows()
             self._position_loading_indicator(hud)
-            for aw in hud.aux_windows:
-                aw.resize_windows()
         except Exception:
             log.exception("Error resizing HUD for table: %s.", hud.table.title)
 

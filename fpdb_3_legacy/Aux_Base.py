@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from PySide6.QtGui import QMouseEvent
 
 #    Standard Library modules
+from fpdb_3_legacy import latency_profile
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
@@ -561,6 +562,10 @@ class AuxSeats(AuxWindow):
         """
         if not self.m_windows:
             return  # not created yet; create() will place everything itself
+        with latency_profile.scope("hud_resize_windows"):
+            self._resize_windows_body()
+
+    def _resize_windows_body(self) -> None:
         log.debug("RESIZING HUD WINDOWS - Table dimensions: %dx%d", self.hud.table.width, self.hud.table.height)
         # Resize calculation has already happened in HUD_main&hud.py
         # refresh our internal map to reflect these changes
@@ -591,10 +596,26 @@ class AuxSeats(AuxWindow):
         """Move all seat and common windows to their correct positions.
 
         Calculates the absolute positions for each window based on the table's current coordinates and layout,
-        clamps them to the screen, and moves the windows accordingly.
+        clamps them to the screen, and moves the windows accordingly. A window already at its
+        target position is not moved: on a stats refresh nothing geometric changed, and an
+        unconditional QWidget.move() per seat per table per refresh is what the #680 logs
+        showed (35+ moves for 5 tables in 2 s, all no-ops).
         """
         if not self.m_windows:
             return  # not created yet; there is nothing on screen to move
+        with latency_profile.scope("hud_move_windows"):
+            self._move_windows_body()
+
+    @staticmethod
+    def _move_if_needed(window: Any, x: int, y: int) -> None:
+        """Move ``window`` to (x, y) only if it is not already there (#680)."""
+        if window.pos() == QPoint(x, y):
+            latency_profile.count("hud_window_moves_skipped")
+            return
+        latency_profile.count("hud_window_moves")
+        window.move(x, y)
+
+    def _move_windows_body(self) -> None:
         # Ensure table coordinates are valid (not negative or off-screen)
         table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
         table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
@@ -623,7 +644,7 @@ class AuxSeats(AuxWindow):
                 clamped_x,
                 clamped_y,
             )
-            self.m_windows[i].move(clamped_x, clamped_y)
+            self._move_if_needed(self.m_windows[i], clamped_x, clamped_y)
 
         common_x = self.hud.layout.common[0] + table_x
         common_y = self.hud.layout.common[1] + table_y
@@ -639,7 +660,7 @@ class AuxSeats(AuxWindow):
             clamped_common_x,
             clamped_common_y,
         )
-        self.m_windows["common"].move(clamped_common_x, clamped_common_y)
+        self._move_if_needed(self.m_windows["common"], clamped_common_x, clamped_common_y)
 
     def _discard_previous_windows(self) -> None:
         """Take down any windows a previous ``create`` left behind.
@@ -788,12 +809,13 @@ class AuxSeats(AuxWindow):
         Calls the update_contents method for each seat window and
         resizes windows to reflect any changes in block positions.
         """
-        for i in list(self.m_windows.keys()):
-            self.update_contents(self.m_windows[i], i)
-        # reload latest block positions, in case another aux has changed them
-        # these lines allow the propagation of block-moves across
-        # the hud and mucked handlers for this table
-        self.resize_windows()
+        with latency_profile.scope("hud_update_gui"):
+            for i in list(self.m_windows.keys()):
+                self.update_contents(self.m_windows[i], i)
+            # reload latest block positions, in case another aux has changed them
+            # these lines allow the propagation of block-moves across
+            # the hud and mucked handlers for this table
+            self.resize_windows()
 
     #   Methods likely to be of use for any SeatWindow implementation
     def destroy(self) -> None:
