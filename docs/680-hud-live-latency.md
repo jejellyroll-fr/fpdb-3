@@ -355,6 +355,60 @@ Not shipped (needs the reporter's live `hud_queue_wait` first): splitting the
 worker into an active-table lane and a background lane; moving the HUD reader to
 a PostgreSQL read replica; local-first SQLite with deferred sync to the server.
 
+## Architecture exploration for this case: LAN + distributed DB, OLAP vs OLTP, embedded
+
+The workload has two very different shapes, and the architecture choice should
+follow them separately:
+
+* **HUD live** = many small *point* reads (one hand's table info, seats, cards,
+  and one aggregate over that table's players), plus one write per imported
+  hand. Latency-sensitive, latency = statements x network RTT.
+* **Reports / study** = few large *scan* aggregates over all history.
+  Throughput-sensitive, not latency-sensitive.
+
+Measured on the constant dataset (664 hands / 2270 HudCache rows):
+
+| workload | SQLite row | PostgreSQL row (LAN) | MySQL row (LAN) | DuckDB columnar (embedded) |
+|---|---|---|---|---|
+| HUD point query `get_stats_from_hand_aggregated` p50 | 2.3 ms | 10.2 ms | 17.1 ms | **419 ms** |
+| wide aggregate (top-100 by profit over HudCache) p50 | 0.9 ms | 3.7 ms | 15.5 ms | 7.8 ms |
+
+Reading:
+
+* **OLTP row-store is the right engine for the HUD live path.** Point reads hit
+  B-tree indexes in microseconds; a columnar engine pays a scan/vectorised
+  setup per query and is ~180x slower on the exact HUD query here (419 ms).
+* **OLAP/columnar (DuckDB, ClickHouse) only pays off on the report side, and
+  only at large scale** (millions of rows), where columnar scans beat row
+  scans by orders of magnitude. At our scale it is within noise. Conclusion:
+  keep OLTP for live; optionally export Parquet to DuckDB/ClickHouse *offline*
+  for heavy reports — never in the live path.
+* **Distributed SQL (CockroachDB/YugabyteDB/Spanner)** replicates rows across
+  nodes with consensus: great for multi-machine availability, useless overhead
+  for one LAN server. It does not remove the per-statement RTT — it can add
+  one. For this case (one DB server on the LAN): not recommended. It becomes
+  relevant only if several playing machines share one live database
+  simultaneously.
+* **PostgreSQL read replica / standby**: isolates HUD reads from bulk import
+  writes. Marginal here because PG's MVCC already lets readers overlap the
+  writer (measured: p95 184 ms at 8 tables with import on, vs 1.4-1.6 s on
+  SQLite/MySQL). Worth it only if bulk imports regularly saturate the primary.
+* **Local-first (SQLite or embedded DuckDB on the playing machine, async sync
+  to the LAN server)**: the biggest lever if the LAN RTT is high, because the
+  HUD then reads at 0 RTT (~2 ms instead of ~10-20 ms per statement on LAN).
+  Cost: import writes land locally first and are pushed asynchronously, and
+  multi-machine consistency needs a sync protocol. This is the recommended
+  next step if the reporter's LAN RTT is > 2-3 ms.
+* **In-process cache**: HudCache is already a pre-aggregated cache in the DB;
+  an in-memory stat_dict cache in the HUD process would only help if stats
+  were re-read unchanged, which they are not (every hand changes them).
+
+Recommendation for the reported setup (PokerStars, 6-max 2NL, 6 tables, DB on a
+LAN server): PostgreSQL on the LAN server as shipped in the decision matrix
+above + R1-R4 + active-table-first; if the measured LAN RTT is high, move to
+local-first with async push. Keep OLAP out of the live path; use it for reports
+if the database grows large.
+
 ## Backend guidance (provisional, unchanged from the issue)
 
 For multi-tabling with the database on a separate server, PostgreSQL remains
