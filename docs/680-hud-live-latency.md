@@ -35,6 +35,7 @@ Metrics wired into the live path:
 | `hud_refresh_secondary` | `_refresh_secondary_hud` | one secondary-table stats refresh (all its redraws) |
 | `hud_update_gui` / `hud_resize_windows` / `hud_move_windows` | `Aux_Base` on the UI thread | stats-driven repaint, geometry pass, window moves |
 | `hud_window_moves` / `hud_window_moves_skipped` (counters) | `Aux_Base._move_if_needed` | real vs no-op QWidget.move() calls -- the #680 logs showed 35+ no-op moves per burst |
+| `hud_stat_cells_rendered` / `hud_stat_cells_skipped` (counters) | `ClassicStat.update` | stat cells actually re-rendered (setText+stylesheet+tooltip) vs skipped because the displayed value/color was unchanged |
 | `qt_event_loop_lag` | `check_tables` 800 ms timer | how late the UI-thread timer runs; the cheapest event-loop lag proxy |
 | `hudcache_lookup` / `hudcache_update` / `hudcache_insert` (counters), `hudcache_write` | `storeHudCache` | cache write round trips per import batch |
 | `db_txn_total` / `db_commit` | `DatabaseTransaction` | import transaction duration and commit alone |

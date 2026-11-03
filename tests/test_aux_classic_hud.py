@@ -540,3 +540,58 @@ class TestErrorHandling(unittest.TestCase):
                 stat.save_comment(123, "x")
             finally:
                 assert mock_log.exception.called
+
+
+class TestClassicStatRenderSkip(unittest.TestCase):
+    """#680: a cell whose displayed value/color did not change must not be
+    re-rendered (no setText/setStyleSheet/tooltip rebuild) on a stats refresh."""
+
+    def _make_stat(self):
+        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "__init__", return_value=None):
+            mock_aw = Mock()
+            mock_hud = Mock()
+            mock_aw.hud = mock_hud
+            mock_aw.params = {"fgcolor": "#FFFFFF", "bgcolor": "#000000"}
+            mock_hud.supported_games_parameters = None
+            mock_hud.config = Mock()
+            mock_hud.config.get_db_parameters.return_value = {"db-backend": "sqlite"}
+            mock_hud.hand_instance = Mock()
+            stat = ClassicStat(stat="vpip", seat=2, popup=Mock(), aw=mock_aw)
+            stat.aw = mock_aw
+            stat.hud = mock_hud
+            stat.stat = "vpip"
+            stat.seat = 2
+            stat.lab = Mock()
+            stat.hudcolor = "#FFFFFF"
+            stat.aux_params = {"font": "Arial", "font_size": 10}
+            stat.stat_loth = ""
+            stat.stat_hith = ""
+            stat.hudprefix = ""
+            stat.hudsuffix = ""
+            stat.rich_text = False
+            stat.number = [0, "25", "x", "a", "b", "c"]
+            return stat
+
+    def test_update_twice_with_same_data_renders_once(self) -> None:
+        stat = self._make_stat()
+        stat_dict = {2: {"screen_name": "hero"}}
+        with (
+            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
+            patch.object(Aux_Classic_Hud.Stats, "do_tip") as do_tip,
+        ):
+            stat.update(2, stat_dict)
+            stat.update(2, stat_dict)
+        assert stat.lab.setText.call_count == 1
+        assert do_tip.call_count == 1
+
+    def test_update_rerenders_when_value_changes(self) -> None:
+        stat = self._make_stat()
+        stat_dict = {2: {"screen_name": "hero"}}
+        with (
+            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
+            patch.object(Aux_Classic_Hud.Stats, "do_tip"),
+        ):
+            stat.update(2, stat_dict)
+            stat.number = [0, "31", "x", "a", "b", "c"]
+            stat.update(2, stat_dict)
+        assert stat.lab.setText.call_count == 2

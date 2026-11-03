@@ -1545,7 +1545,8 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             self.hide()
             return
 
-        self.show()
+        if not self.isVisible():  # #680: show() on a visible window still costs an expose/repaint
+            self.show()
 
         player_pos = ""
         if pdata is not None:
