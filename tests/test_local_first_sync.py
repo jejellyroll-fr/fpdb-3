@@ -17,9 +17,11 @@ from fpdb_3_legacy.Database import Database
 from fpdb_3_legacy.Importer import Importer
 from fpdb_3_legacy.local_first_sync import LocalFirstSync
 from tests.helpers import analytics_golden as golden
+from tests.test_database_backend_integration import _enabled_backends
 
 REPO = Path(__file__).resolve().parent.parent
 ONE_FILE = REPO / "regression-test-files/cash/Stars/Flop/NLHE-6max-EUR-0.05-0.10-200911.txt"
+TOURNEY_FILE = REPO / "regression-test-files/tour/Stars/Flop/NLHE-Play-STT-20110405.txt"
 
 
 def _sqlite_db(tmp_path, name: str) -> Database:
@@ -280,7 +282,7 @@ _FULL_NODE_ATTRS = {
 def test_server_params_with_unknown_selected_db_return_empty() -> None:
     host = _config_with_node(dict(_FULL_NODE_ATTRS))
     host.db_selected = "missing"
-    assert host.get_server_db_parameters() == {}
+    assert not host.get_server_db_parameters()
 
 
 def test_server_params_with_unsupported_backend_yield_none_backend() -> None:
@@ -473,6 +475,188 @@ def _insert_decoy_rows(db, table: str, decoy_id: int = 9000) -> None:
     c.execute(f"INSERT INTO {table} ({', '.join(names)}) VALUES ({ph})", values)  # nosec B608  # nosemgrep
     db.connection.commit()
     c.close()
+
+
+@pytest.fixture
+def tourney_db(tmp_path):
+    """A local database holding the hands of one tournament."""
+    db = _sqlite_db(tmp_path, "tourney_local")
+    importer = Importer(caller=None, settings={"testData": False, "threads": 1}, config=db.config, sql=None)
+    importer.database = db
+    importer.setCallHud(False)
+    assert importer.addImportFile(str(TOURNEY_FILE), "auto")
+    stored, *_rest = importer.runImport()
+    assert stored >= 2
+    yield db
+    db.disconnect()
+
+
+def _rows(db, query: str) -> list[tuple]:
+    c = db.connection.cursor()
+    c.execute(query)
+    rows = [tuple(r) for r in c.fetchall()]
+    c.close()
+    return rows
+
+
+def _assert_tournament_links_hold(server) -> None:
+    """Each pushed hand points at its tournament, each seat at its own entry in it."""
+    hands = _rows(
+        server, "SELECT h.id, h.tourneyId, t.siteTourneyNo FROM Hands h JOIN Tourneys t ON t.id = h.tourneyId"
+    )
+    assert hands
+    seats = _rows(
+        server,
+        "SELECT hp.playerId, tp.playerId, h.tourneyId, tp.tourneyId FROM HandsPlayers hp "
+        "JOIN Hands h ON h.id = hp.handId JOIN TourneysPlayers tp ON tp.id = hp.tourneysPlayersId",
+    )
+    assert seats
+    assert all(
+        hp_player == tp_player and h_tourney == tp_tourney for hp_player, tp_player, h_tourney, tp_tourney in seats
+    )
+
+
+def test_push_maps_tournament_hands_to_server_rows(tourney_db, server_db) -> None:
+    """Server ids diverge from local ones: the hand, its seats and the tournament rows follow."""
+    srv = server_db()
+    for table in ("Players", "TourneyTypes", "Tourneys", "TourneysPlayers"):
+        _insert_decoy_rows(srv, table)
+    srv.disconnect()
+
+    sync = LocalFirstSync(tourney_db, server_db, batch_size=1000, local_db_path=tourney_db.db_path)
+    local_ids = _local_hand_ids(tourney_db)
+    sync.mark(local_ids)
+    assert sync.push_once() == len(local_ids)
+    sync.stop()
+
+    srv = server_db()
+    _assert_tournament_links_hold(srv)
+    local_no = _rows(tourney_db, "SELECT DISTINCT siteTourneyNo FROM Tourneys")
+    assert _rows(srv, "SELECT DISTINCT t.siteTourneyNo FROM Hands h JOIN Tourneys t ON t.id = h.tourneyId") == local_no
+    assert all(r[0] > 9000 for r in _rows(srv, "SELECT tourneyId FROM Hands"))
+    assert all(r[0] > 9000 for r in _rows(srv, "SELECT tourneysPlayersId FROM HandsPlayers"))
+    assert all(r[0] > 9000 for r in _rows(srv, "SELECT tourneyTypeId FROM Tourneys WHERE siteTourneyNo IS NOT NULL"))
+    srv.disconnect()
+
+
+def test_tournament_rows_are_not_duplicated_across_batches(tourney_db, server_db) -> None:
+    sync = LocalFirstSync(tourney_db, server_db, batch_size=1, local_db_path=tourney_db.db_path)
+    local_ids = _local_hand_ids(tourney_db)
+    sync.mark(local_ids)
+    for _ in local_ids:
+        assert sync.push_once() == 1
+    sync.stop()
+
+    srv = server_db()
+    for table in ("TourneyTypes", "Tourneys", "TourneysPlayers"):
+        query = f"SELECT COUNT(*) FROM {table}"  # nosec B608  # nosemgrep
+        assert _rows(srv, query) == _rows(tourney_db, query), table
+    _assert_tournament_links_hold(srv)
+    srv.disconnect()
+
+
+def test_push_carries_only_the_tournaments_of_the_batch(tourney_db, server_db) -> None:
+    """Tourneys grow with the hands played: a batch must not re-read them all."""
+    _insert_decoy_rows(tourney_db, "Tourneys")
+    sync = LocalFirstSync(tourney_db, server_db, batch_size=1000, local_db_path=tourney_db.db_path)
+    sync.mark(_local_hand_ids(tourney_db))
+    sync.push_once()
+    sync.stop()
+
+    srv = server_db()
+    assert _rows(srv, "SELECT COUNT(*) FROM Tourneys") == [(1,)]
+    srv.disconnect()
+
+
+def test_push_keeps_the_results_the_server_already_has(tourney_db, server_db) -> None:
+    """Another machine may have imported the summary: a local NULL must not erase it."""
+    local_ids = _local_hand_ids(tourney_db)
+    sync = LocalFirstSync(tourney_db, server_db, batch_size=1, local_db_path=tourney_db.db_path)
+    sync.mark(local_ids[:1])
+    assert sync.push_once() == 1
+
+    srv = server_db()
+    c = srv.connection.cursor()
+    c.execute("UPDATE TourneysPlayers SET winnings = 12345")
+    srv.connection.commit()
+    c.close()
+    srv.disconnect()
+
+    sync.mark(local_ids[1:2])
+    assert sync.push_once() == 1
+    sync.stop()
+
+    srv = server_db()
+    known = _rows(srv, "SELECT COUNT(*) FROM TourneysPlayers WHERE winnings = 12345")
+    assert known[0][0] > 0
+    srv.disconnect()
+
+
+def test_push_does_not_carry_the_tourneys_local_session_id(tourney_db, server_db) -> None:
+    c = tourney_db.connection.cursor()
+    c.execute("UPDATE Tourneys SET sessionId = 4242")
+    tourney_db.connection.commit()
+    c.close()
+    sync = LocalFirstSync(tourney_db, server_db, batch_size=1000, local_db_path=tourney_db.db_path)
+    sync.mark(_local_hand_ids(tourney_db))
+    sync.push_once()
+    sync.stop()
+
+    srv = server_db()
+    assert _rows(srv, "SELECT sessionId FROM Tourneys") == [(None,)]
+    srv.disconnect()
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("backend", ["postgresql", "mysql"])
+def test_push_tournament_hands_to_a_live_backend(backend: str, tourney_db) -> None:
+    """Foreign keys, boolean columns and the reserved ``rank`` only exist on real servers."""
+    if backend not in _enabled_backends():
+        pytest.skip(f"live {backend} service not requested")
+    from fpdb_3_legacy.Configuration import Config
+
+    env = "POSTGRES" if backend == "postgresql" else "MYSQL"
+    config = Config(file=str(REPO / "HUD_config.xml"))
+    params = config.get_db_parameters()
+    params.update(
+        {
+            "db-server": backend,
+            "db-backend": Database.PGSQL if backend == "postgresql" else Database.MYSQL_INNODB,
+            "db-host": os.environ.get(f"FPDB_{env}_HOST", "127.0.0.1"),
+            "db-port": int(os.environ.get(f"FPDB_{env}_PORT", "5432" if backend == "postgresql" else "3306")),
+            "db-databaseName": os.environ.get(f"FPDB_{env}_DB", "fpdb"),
+            "db-user": os.environ.get(f"FPDB_{env}_USER", "fpdb"),
+            "db-password": os.environ.get(f"FPDB_{env}_PASSWORD", "fpdb"),
+            "db-path": "",
+        }
+    )
+    config.get_db_parameters = lambda: params
+    server = Database(config)
+    server.recreate_tables()
+
+    c = tourney_db.connection.cursor()
+    c.execute("UPDATE Hands SET sessionId = 4242")
+    c.execute("UPDATE Tourneys SET sessionId = 4242")
+    tourney_db.connection.commit()
+    c.close()
+
+    # Two batches, as the production worker does, through its own local connection:
+    # the second one finds every referential row already on the server.
+    sync = LocalFirstSync(tourney_db, lambda: Database(config), batch_size=2, local_db_path=tourney_db.db_path)
+    local_ids = _local_hand_ids(tourney_db)
+    sync.mark(local_ids[:4])
+    assert sync.push_once() == 2
+    assert sync.push_once() == 2
+    sync.stop()
+
+    server.connection.commit()
+    _assert_tournament_links_hold(server)
+    for table in ("Gametypes", "TourneyTypes", "Tourneys"):
+        query = f"SELECT COUNT(*) FROM {table}"  # nosec B608  # nosemgrep
+        assert _rows(server, query) == _rows(tourney_db, query), table
+    assert _rows(server, "SELECT COUNT(*) FROM Hands") == [(4,)]
+    assert _rows(server, "SELECT COUNT(sessionId) FROM Hands") == [(0,)]
+    server.close_connection()
 
 
 def _gametype_with(db, gametype_id: int, **changes) -> int:
@@ -733,3 +917,11 @@ def test_push_remaps_foreign_keys_when_server_ids_diverge(local_db, server_db) -
     assert c.fetchone()[0] == hp_player_id
     c.close()
     srv.disconnect()
+
+
+def test_server_column_quotes_rank_only_on_mysql() -> None:
+    """``rank`` is reserved on MySQL 8, and a backtick is a syntax error elsewhere."""
+    mysql, postgres = MagicMock(backend=Database.MYSQL_INNODB), MagicMock(backend=Database.PGSQL)
+    assert LocalFirstSync._server_column(mysql, "rank") == "`rank`"
+    assert LocalFirstSync._server_column(mysql, "entryId") == "entryId"
+    assert LocalFirstSync._server_column(postgres, "rank") == "rank"

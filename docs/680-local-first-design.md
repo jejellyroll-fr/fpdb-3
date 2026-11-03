@@ -45,8 +45,7 @@ whole client-side change. The new part is the import side and the sync worker.
 
 Referentials: Sites, Players, Gametypes, Files, TourneyTypes.
 Facts per hand: Hands, HandsPlayers, HandsActions, HandsPots, HandsStove,
-HandsShowdown, HandsCashout, Boards, plus tournament tables when MTTs are in
-scope. Caches (HudCache, CardsCache, PositionsCache, Sessions, SessionsCache,
+HandsShowdown, HandsCashout, Boards, Tourneys, TourneysPlayers. Caches (HudCache, CardsCache, PositionsCache, Sessions, SessionsCache,
 TourneysCache) are **recomputed server-side** from the pushed facts (the server
 runs its own storeHudCache on ingest), never pushed — avoids counter-merge
 conflicts.
@@ -62,6 +61,19 @@ conflicts.
   hands immediately (0 RTT), other machines' hands appear when their owners'
   sync pushes them (eventual consistency, seconds on a LAN).
 * Reports/other tools keep reading the server database, unchanged.
+
+Tournaments: `TourneyTypes` are deduped by every column, like `Gametypes`. A
+batch pushes only the `Tourneys` (by `siteTourneyNo` + type) and
+`TourneysPlayers` (by tourney + player + entry) its hands reference, with
+`Tourneys.sessionId` left NULL. A row the server already has is never updated:
+another machine may have imported a result this one does not know.
+
+Not synced yet, because the outbox only carries hands:
+
+* Results imported after a tournament's hands were pushed (rank, winnings,
+  prize pool from a summary file) stay local.
+* A tourney re-typed locally by a later summary gets a second `Tourneys` row on
+  the server if more of its hands are pushed afterwards.
 
 ## Metrics to watch (extend latency_profile if needed)
 
@@ -84,7 +96,8 @@ to ~0 on the playing machine.
 * `fpdb_3_legacy/local_first_sync.py` + `tests/test_local_first_sync.py`:
   push from local SQLite to a server SQLite file and to a **live PostgreSQL
   18.3** (integration-marked), covering referentials, FK-safe insert order,
-  boolean casts, dedup/idempotence and the id mapping.
+  boolean casts, dedup/idempotence and the id mapping. Tournament hands are also
+  pushed to live PostgreSQL and MariaDB.
 * **Config switch**: `local_first="1"` + `local_path="..."` on the `<database>`
   node (shipped in HUD_config.xml.example, default `0`). When on,
   `get_db_parameters()` returns the local SQLite params (HUD and importer read

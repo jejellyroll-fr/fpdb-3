@@ -13,8 +13,8 @@ Design notes:
   mapped. Dedup on the server is by the unique ``(siteHandNo, gametypeId)``
   index, so re-pushing is idempotent.
 * Only the tables the HUD and the reports need are pushed here
-  (Hands, HandsPlayers, HandsActions); the full list for production is in the
-  design doc.
+  (Hands, HandsPlayers, HandsActions, and for tournament hands Tourneys and
+  TourneysPlayers); the full list for production is in the design doc.
 * The push runs in a transaction per batch, in a daemon thread, and never
   blocks the importer: failures are retried on the next poll.
 """
@@ -122,6 +122,7 @@ class LocalFirstSync:
             with latency_profile.scope("sync_push_batch"):
                 with server.transaction():
                     self._push_referentials(server, sph)
+                    self._push_tournaments(server, local_ids, sph)
                     for local_id in local_ids:
                         server_id = self._push_hand(server, local_id, sph)
                         if server_id is not None:
@@ -147,36 +148,15 @@ class LocalFirstSync:
 
     # Referential tables pushed before any hand, deduped by their natural keys,
     # so the server's foreign keys hold. (table, dedup columns)
-    # A game type is identified by every column: hands at other stakes, in
-    # another currency or at another table size must not share a server row.
+    # None means every column but id: hands at other stakes, in another currency
+    # or at another table size must not share a server game type, and likewise
+    # for the buy-in and format of a tourney type.
     REFERENTIALS = (
         ("Sites", ("name",)),
         ("Players", ("name", "siteId")),
         ("Files", ("file",)),
-        (
-            "Gametypes",
-            (
-                "siteId",
-                "currency",
-                "type",
-                "base",
-                "category",
-                "limitType",
-                "hiLo",
-                "mix",
-                "smallBlind",
-                "bigBlind",
-                "smallBet",
-                "bigBet",
-                "maxSeats",
-                "ante",
-                "buyinType",
-                "fast",
-                "newToGame",
-                "homeGame",
-                "split",
-            ),
-        ),
+        ("Gametypes", None),
+        ("TourneyTypes", None),
     )
 
     def _server_bool_columns(self, server: Any, table: str) -> set[str]:
@@ -203,38 +183,95 @@ class LocalFirstSync:
         """``value`` as the server's ``column`` expects it (see _server_bool_columns)."""
         return bool(value) if column.lower() in bools and value is not None else value
 
+    def _server_id(self, table: str, local_id: Any) -> Any:
+        """The server id ``local_id`` of ``table`` was mapped to in this batch."""
+        return self._id_maps.get(table, {}).get(local_id, local_id)
+
+    @staticmethod
+    def _server_column(server: Any, column: str) -> str:
+        """``column`` as the server's SQL names it: ``rank`` is reserved on MySQL."""
+        from fpdb_3_legacy.Database import Database
+
+        return f"`{column}`" if column == "rank" and server.backend == Database.MYSQL_INNODB else column
+
+    def _find_or_insert(self, server: Any, table: str, record: dict, keys: Any, sph: str) -> None:
+        """Map ``record``'s local id to the server row with the same natural key,
+        inserting that row if the server has none."""
+        c = server.connection.cursor()
+        bools = self._server_bool_columns(server, table)
+        # NULL never matches "=", and PostgreSQL rejects an int against a
+        # boolean column, so the lookup is built from the row's values.
+        where = " AND ".join(f"{k} IS NULL" if record[k] is None else f"{k} = {sph}" for k in keys)
+        params = [self._server_value(k, record[k], bools) for k in keys if record[k] is not None]
+        c.execute(f"SELECT id FROM {table} WHERE {where}", params)  # nosec B608  # nosemgrep
+        existing = c.fetchone()
+        if existing:
+            server_id = existing[0]
+        else:
+            insert_cols = [k for k in record if k != "id"]
+            names = ", ".join(self._server_column(server, k) for k in insert_cols)
+            values = [self._server_value(k, record[k], bools) for k in insert_cols]
+            ph_values = ", ".join([sph] * len(insert_cols))
+            q = f"INSERT INTO {table} ({names}) VALUES ({ph_values})"  # nosec B608  # nosemgrep
+            c.execute(q, values)  # nosemgrep
+            server_id = self._last_insert_id(server, c)
+        # local id -> server id, so child FKs can be remapped (#680 P0)
+        self._id_maps.setdefault(table, {})[record["id"]] = server_id
+        c.close()
+
     def _push_referentials(self, server: Any, sph: str) -> None:
         lc = self._local_conn().cursor()
-        c = server.connection.cursor()
         for table, keys in self.REFERENTIALS:
             lc.execute(f"SELECT * FROM {table}")  # nosec B608  # nosemgrep
-            rows = lc.fetchall()
-            if not rows:
-                continue
             cols = [d[0] for d in lc.description]
-            bools = self._server_bool_columns(server, table)
-            sites_map = self._id_maps.get("Sites", {})
-            for row in rows:
+            for row in lc.fetchall():
                 record = dict(zip(cols, row))
                 if "siteId" in record:
-                    record["siteId"] = sites_map.get(record["siteId"], record["siteId"])
-                # NULL never matches "=", and PostgreSQL rejects an int against a
-                # boolean column, so the lookup is built from the row's values.
-                where = " AND ".join(f"{k} IS NULL" if record[k] is None else f"{k} = {sph}" for k in keys)
-                params = [self._server_value(k, record[k], bools) for k in keys if record[k] is not None]
-                c.execute(f"SELECT id FROM {table} WHERE {where}", params)  # nosec B608  # nosemgrep
-                existing = c.fetchone()
-                if existing:
-                    # local id -> server id, so child FKs can be remapped (#680 P0)
-                    self._id_maps.setdefault(table, {})[record.get("id")] = existing[0]
-                    continue
-                insert_cols = [k for k in cols if k != "id"]
-                values = [self._server_value(k, record[k], bools) for k in insert_cols]
-                ph_values = ", ".join([sph] * len(insert_cols))
-                q = f"INSERT INTO {table} ({', '.join(insert_cols)}) VALUES ({ph_values})"  # nosec B608  # nosemgrep
-                c.execute(q, values)  # nosemgrep
-                self._id_maps.setdefault(table, {})[record.get("id")] = self._last_insert_id(server, c)
+                    record["siteId"] = self._server_id("Sites", record["siteId"])
+                self._find_or_insert(server, table, record, keys or [k for k in cols if k != "id"], sph)
         lc.close()
+
+    def _local_rows(self, table: str, ids: list) -> list[dict]:
+        """The local rows of ``table`` with these ids, as dicts."""
+        if not ids:
+            return []
+        lc = self._local_conn().cursor()
+        marks = ", ".join([self._ph()] * len(ids))
+        lc.execute(f"SELECT * FROM {table} WHERE id IN ({marks})", ids)  # nosec B608  # nosemgrep
+        cols = [d[0] for d in lc.description]
+        rows = [dict(zip(cols, row)) for row in lc.fetchall()]
+        lc.close()
+        return rows
+
+    def _push_tournaments(self, server: Any, local_ids: list, sph: str) -> None:
+        """Push the Tourneys and TourneysPlayers this batch's hands reference.
+
+        Unlike the referentials these only ever grow with the number of hands
+        played, so they are not re-read in full for every batch. Rows the server
+        already has are left alone: it may know a result this machine does not.
+        """
+        marks = ", ".join([self._ph()] * len(local_ids))
+        lc = self._local_conn().cursor()
+        lc.execute(  # nosec B608  # nosemgrep
+            f"SELECT DISTINCT tourneyId FROM Hands WHERE tourneyId IS NOT NULL AND id IN ({marks})",  # nosec B608  # nosemgrep
+            local_ids,
+        )
+        tourney_ids = [r[0] for r in lc.fetchall()]
+        lc.execute(  # nosec B608  # nosemgrep
+            f"SELECT DISTINCT tourneysPlayersId FROM HandsPlayers WHERE tourneysPlayersId IS NOT NULL AND handId IN ({marks})",  # nosec B608  # nosemgrep
+            local_ids,
+        )
+        tourneys_players_ids = [r[0] for r in lc.fetchall()]
+        lc.close()
+
+        for record in self._local_rows("Tourneys", tourney_ids):
+            record["tourneyTypeId"] = self._server_id("TourneyTypes", record["tourneyTypeId"])
+            record["sessionId"] = None  # see _remap_hand_fks
+            self._find_or_insert(server, "Tourneys", record, ("siteTourneyNo", "tourneyTypeId"), sph)
+        for record in self._local_rows("TourneysPlayers", tourneys_players_ids):
+            record["tourneyId"] = self._server_id("Tourneys", record["tourneyId"])
+            record["playerId"] = self._server_id("Players", record["playerId"])
+            self._find_or_insert(server, "TourneysPlayers", record, ("tourneyId", "playerId", "entryId"), sph)
 
     def _push_hand(self, server: Any, local_id: int, sph: str) -> int | None:
         """Insert one hand server-side, dedup by (siteHandNo, gametypeId).
@@ -280,9 +317,14 @@ class LocalFirstSync:
     def _remap_hand_fks(self, hand: dict) -> None:
         """Rewrite the hand's referential FKs from local ids to server ids
         using the maps built by _push_referentials (#680 P0)."""
-        for fk_col, ref_table in (("gametypeId", "Gametypes"), ("fileId", "Files"), ("siteId", "Sites")):
+        for fk_col, ref_table in (
+            ("gametypeId", "Gametypes"),
+            ("fileId", "Files"),
+            ("siteId", "Sites"),
+            ("tourneyId", "Tourneys"),
+        ):
             if hand.get(fk_col) is not None:
-                hand[fk_col] = self._id_maps.get(ref_table, {}).get(hand[fk_col], hand[fk_col])
+                hand[fk_col] = self._server_id(ref_table, hand[fk_col])
         # Sessions are a cache, recomputed server-side and never pushed (see the
         # design doc): the local id means nothing on the server, where it either
         # breaks the foreign key or points at someone else's session.
@@ -299,7 +341,6 @@ class LocalFirstSync:
         c = server.connection.cursor()
         bools = self._server_bool_columns(server, table)
         ins_cols = [k for k in child_cols if k != "id"]  # server assigns its own PKs
-        players_map = self._id_maps.get("Players", {})
         for child in child_rows:
             values = []
             for k, v in zip(child_cols, child):
@@ -308,7 +349,9 @@ class LocalFirstSync:
                 if k == "handId":
                     values.append(server_id)
                 elif k == "playerId" and v is not None:
-                    values.append(players_map.get(v, v))
+                    values.append(self._server_id("Players", v))
+                elif k == "tourneysPlayersId" and v is not None:
+                    values.append(self._server_id("TourneysPlayers", v))
                 elif k.lower() in bools and v is not None:
                     values.append(bool(v))
                 else:
