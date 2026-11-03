@@ -260,6 +260,37 @@ def test_local_first_switch_returns_local_params_and_keeps_server_params() -> No
     assert server["db-password"] == "secret"
 
 
+_FULL_NODE_ATTRS = {
+    "db_name": "srv",
+    "db_server": "postgresql",
+    "db_ip": "lan-server",
+    "db_port": "5432",
+    "db_user": "fpdb",
+    "db_pass": "secret",
+    "db_path": "",
+    "default": "true",
+}
+
+
+def test_server_params_with_unknown_selected_db_return_empty() -> None:
+    host = _config_with_node(dict(_FULL_NODE_ATTRS))
+    host.db_selected = "missing"
+    assert host.get_server_db_parameters() == {}
+
+
+def test_server_params_with_unsupported_backend_yield_none_backend() -> None:
+    attrs = dict(_FULL_NODE_ATTRS, db_server="oracle")
+    host = _config_with_node(attrs)
+
+    def _boom(server):
+        raise KeyError(server)  # get_backend raises KeyError for unknown servers
+
+    host.get_backend = _boom
+    params = host.get_server_db_parameters()
+    assert params["db-server"] == "oracle"
+    assert params["db-backend"] is None
+
+
 def test_local_first_off_by_default() -> None:
     host = _config_with_node(
         {
