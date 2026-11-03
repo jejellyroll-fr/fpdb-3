@@ -152,14 +152,41 @@ Reading:
 Conclusion: the freeze is **both** — an architecture-level term (reader/writer
 contention, per-statement network latency on a remote DB) **and** a code-level
 term (~22 statements per table per refresh round, serial worker queue). The
-code-side levers already in this PR: R1 (HudCache flush: 2N -> ~4 statements
-per import batch), R3 (superseded batches coalesced: one read per burst
-instead of one per hand), R2 (MySQL worker session bounded like PostgreSQL).
-The next levers if the reporter's `hud_queue_wait` confirms queue growth:
-P2 (prioritise the active table, bound secondary refresh per batch) and
-reducing per-hand reads in `_read_hand` (positions/seat_players/cards could
-be batched across the primary hands of one round the way secondary stats
-already are).
+code-side levers in this PR: R1 (HudCache flush: 2N -> ~4 statements per
+import batch), R3 (superseded batches coalesced: one read per burst instead of
+one per hand), R2 (MySQL worker session bounded like PostgreSQL), and R4
+(batched primary reads: table info, site hand no, positions, seat players,
+cards, min stack -- one statement per detail per batch instead of per hand,
+~54% fewer round trips per round at 8 tables). P2 is implemented as an opt-in
+bound (`max_secondary_tables_per_batch`, default 0 = unbounded, so displayed
+stats never go stale unless configured). Remaining levers if the reporter's
+`hud_queue_wait` still shows growth: prioritise the active table in the
+worker queue, and batch the per-hand aggregate stats across primary hands of
+the same table/params the way secondary stats already are.
+
+## After the batched-read remediation (this branch, same workload re-run)
+
+`HudReadService` now resolves all primary hands' table info / site hand no in
+two statements (`get_table_info_many`, `get_site_hand_no_many`) and prefetches
+positions / seat players / cards / common cards / min stack for the whole batch
+in one statement each (`get_*_many`), with a per-hand fallback whenever a bulk
+value is missing. Measured on the same 3 backends, 8 tables, 10 rounds:
+
+| backend | tables | range | imp | before p50/p95/max (ms) | after p50/p95/max (ms) | round trips before -> after |
+|---|---|---|---|---|---|---|
+| SQLite | 8 | A | off | 30.2 / 35.4 / 35.5 | 15.9 / 17.9 / 18.2 | 1747 -> 805 |
+| SQLite | 8 | A | on | 77.1 / **1429** / 1467 | 43.4 / **59.2** / 66.4 | 1991 -> 972 |
+| PostgreSQL 18.3 | 8 | A | off | 156.1 / 164.5 / 171.1 | 99.2 / 121.2 / 129.2 | 1747 -> 805 |
+| PostgreSQL 18.3 | 8 | A | on | 175.7 / 183.9 / 183.9 | 108.8 / 132.9 / 147.8 | 1947 -> 993 |
+| MySQL 8.4.3 | 8 | A | off | 160.7 / 207.8 / 218.5 | 90.0 / 100.4 / 103.3 | 1747 -> 805 |
+| MySQL 8.4.3 | 8 | A | on | 212.0 / **1516** / 1592 | 114.7 / **135.3** / 135.6 | 1937 -> 929 |
+
+**Round trips per batch round at 8 tables drop ~54% (1747 -> 805)** and the
+writer-contention tail collapses with them: SQLite p95 1429 -> 59 ms,
+MySQL p95 1516 -> 135 ms. PostgreSQL, already insulated from the writer by
+MVCC, still improves 26-28% from the removed round trips. The remaining cost at
+8 tables is the per-hand aggregate stats query (one per primary hand) and the
+per-hand `Hand` construction, which are the next levers.
 
 Caveat recorded as the issue requires: these runs are loopback, not a LAN, and
 the corpus is small; a local SQLite run also changes both backend and location.

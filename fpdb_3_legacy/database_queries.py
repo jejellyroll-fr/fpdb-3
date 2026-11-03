@@ -42,17 +42,12 @@ class DatabaseQueriesMixin:
         c.execute(self.sql.query["get_table_name"], (hand_id,))
         return c.fetchone()
 
-    @reconnect_on_connection_loss
-    def get_table_info(self, hand_id: Any) -> Any:
-        c = self.connection.cursor()
-        c.execute(self.sql.query["get_table_name"], (hand_id,))
-        row = c.fetchone()
-        if row is None:
-            # Hand not yet committed to the DB (race between the HUD reading the
-            # hand id from stdin and the importer writing the row). Let the caller
-            # skip and retry on a later notification instead of crashing.
-            log.debug("No table info found yet for hand %s", hand_id)
-            return None
+    def _table_info_from_row(self, row: Any, tourney_names: dict[Any, str] | None = None) -> Any:
+        """Map one get_table_name row onto a TableInfo.
+
+        ``tourney_names`` optionally supplies an already-batched tourney name
+        lookup (siteTourneyNo -> name), as get_table_info_many builds it.
+        """
         # The query selects the eight historical columns first, so the row
         # maps onto TableInfo's leading fields; anything added to the SELECT
         # is read by name here rather than shifting a caller's index.
@@ -72,29 +67,110 @@ class DatabaseQueriesMixin:
             # storage convention.
             tour_no = tab_no = str(row[0])
             log.warning(
-                "Tournament hand %s has unqualified tableName %r; using it for both tour and table ids",
-                hand_id,
+                "Tournament hand has unqualified tableName %r; using it for both tour and table ids",
                 row[0],
             )
         table_info.append(tour_no)
         table_info.append(tab_no)
-
-        # Query tournament name
         tourney_name = None
-        try:
-            ph = self.sql.query.get("placeholder", "%s")
-            # Only the backend's placeholder is formatted in; the value is bound.
-            q = "SELECT tourneyName FROM Tourneys WHERE siteTourneyNo = %s".replace("%s", ph)  # nosec B608  # nosemgrep
-            c.execute(q, (int(tour_no),))
-            trow = c.fetchone()
-            if trow:
-                tourney_name = trow[0]
-        except Exception:
-            log.exception("Error querying tourneyName for siteTourneyNo=%s", tour_no)
-            self._rollback_after_failed_read()
-
+        if tourney_names is not None:
+            try:
+                tourney_name = tourney_names.get(int(tour_no))
+            except (ValueError, TypeError):
+                tourney_name = None
+        else:
+            try:
+                ph = self.sql.query.get("placeholder", "%s")
+                # Only the backend's placeholder is formatted in; the value is bound.
+                q = "SELECT tourneyName FROM Tourneys WHERE siteTourneyNo = %s".replace("%s", ph)  # nosec B608  # nosemgrep
+                c = self.connection.cursor()
+                c.execute(q, (int(tour_no),))
+                trow = c.fetchone()
+                if trow:
+                    tourney_name = trow[0]
+            except Exception:
+                log.exception("Error querying tourneyName for siteTourneyNo=%s", tour_no)
+                self._rollback_after_failed_read()
         table_info.append(tourney_name)
         return TableInfo.coerce([*table_info, limit_type])
+
+    @reconnect_on_connection_loss
+    def get_table_info(self, hand_id: Any) -> Any:
+        c = self.connection.cursor()
+        c.execute(self.sql.query["get_table_name"], (hand_id,))
+        row = c.fetchone()
+        if row is None:
+            # Hand not yet committed to the DB (race between the HUD reading the
+            # hand id from stdin and the importer writing the row). Let the caller
+            # skip and retry on a later notification instead of crashing.
+            log.debug("No table info found yet for hand %s", hand_id)
+            return None
+        return self._table_info_from_row(row)
+
+    def _in_tuple(self, values: list) -> tuple[str, list]:
+        """A bound IN clause for ``values`` as (sql, params), portable per backend."""
+        ph = self.sql.query.get("placeholder", "%s")
+        return f"({', '.join([ph] * len(values))})", list(values)
+
+    @reconnect_on_connection_loss
+    def get_table_info_many(self, hand_ids: list) -> dict[Any, Any]:
+        """get_table_info for many hands: two statements instead of 2 per hand.
+
+        The HUD resolves every new hand's table before reading it (#680): at
+        eight tables that was sixteen round trips per batch round on a remote
+        database, for rows one IN query returns together.
+        """
+        result: dict[Any, Any] = {}
+        hand_ids = list(dict.fromkeys(hand_ids))
+        if not hand_ids:
+            return result
+        ph = self.sql.query.get("placeholder", "%s")
+        in_sql, in_params = self._in_tuple(hand_ids)
+        # get_table_name does not select h.id, so add it to key the rows by hand.
+        q = (
+            self.sql.query["get_table_name"]
+            .replace("SELECT h.tableName", "SELECT h.id, h.tableName")
+            # One row per hand, not per table: a batch can hold several hands
+            # of the same table and each needs its own TableInfo.
+            .replace("GROUP BY h.tableName", "GROUP BY h.id, h.tableName")
+            .replace("%s", ph)
+            .replace(f"h.id = {ph}", f"h.id IN {in_sql}")
+        )
+        c = self.connection.cursor()
+        c.execute(q, in_params)
+        tourney_nos = set()
+        rows_by_hand = {}
+        for row in c.fetchall():
+            hand_id, info_row = row[0], row[1:]
+            rows_by_hand[hand_id] = info_row
+            if info_row[3] != "ring":
+                parts = re.split(" ", str(info_row[0]), maxsplit=1)
+                if len(parts) == 2:
+                    try:
+                        tourney_nos.add(int(parts[0]))
+                    except (ValueError, TypeError):
+                        pass
+        tourney_names: dict[Any, str] = {}
+        if tourney_nos:
+            tin, tparams = self._in_tuple(sorted(tourney_nos))
+            c.execute(f"SELECT siteTourneyNo, tourneyName FROM Tourneys WHERE siteTourneyNo IN {tin}", tparams)
+            for trow in c.fetchall():
+                tourney_names[trow[0]] = trow[1]
+        for hand_id, row in rows_by_hand.items():
+            result[hand_id] = self._table_info_from_row(row, tourney_names)
+        return result
+
+    @reconnect_on_connection_loss
+    def get_site_hand_no_many(self, hand_ids: list) -> dict[Any, str | None]:
+        """get_site_hand_no for many hands in one statement (#680)."""
+        hand_ids = list(dict.fromkeys(hand_ids))
+        if not hand_ids:
+            return {}
+        in_sql, in_params = self._in_tuple(hand_ids)
+        q = f"SELECT id, siteHandNo FROM Hands WHERE id IN {in_sql}"
+        c = self.connection.cursor()
+        c.execute(q, in_params)
+        return {row[0]: (str(row[1]) if row[1] is not None else None) for row in c.fetchall()}
 
     def get_last_hand(self) -> Any:
         c = self.connection.cursor()

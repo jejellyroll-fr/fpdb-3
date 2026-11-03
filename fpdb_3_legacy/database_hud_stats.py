@@ -182,6 +182,131 @@ class DatabaseHudStatsMixin:
                 self._hud_chipev_clause = ""
         return sql_text.replace("<chipev_columns>", self._hud_chipev_clause)
 
+    def _in_tuple(self, values: list) -> tuple[str, list]:
+        """A bound IN clause for ``values`` as (sql, params), portable per backend."""
+        ph = self.sql.query.get("placeholder", "%s")
+        return f"({', '.join([ph] * len(values))})", list(values)
+
+    def get_hand_positions_many(self, hand_ids: list) -> dict[Any, dict[Any, Any]]:
+        """get_hand_positions for many hands in one statement (#680)."""
+        result: dict[Any, dict[Any, Any]] = {hand: {} for hand in hand_ids}
+        hand_ids = list(dict.fromkeys(hand_ids))
+        if not hand_ids:
+            return result
+        in_sql, in_params = self._in_tuple(hand_ids)
+        q = f"SELECT handId, playerId, position FROM HandsPlayers WHERE handId IN {in_sql}"
+        try:
+            c = self.connection.cursor()
+            c.execute(q, in_params)
+            for hand_id, player_id, position in c.fetchall():
+                result.setdefault(hand_id, {})[player_id] = position
+        except Exception:
+            log.exception("get_hand_positions_many failed")
+            self._rollback_after_failed_read()
+        return result
+
+    def get_seat_players_many(self, hand_ids: list) -> dict[Any, dict[int, dict[str, object]]]:
+        """get_seat_players for many hands in one statement (#680)."""
+        result: dict[Any, dict[int, dict[str, object]]] = {hand: {} for hand in hand_ids}
+        hand_ids = list(dict.fromkeys(hand_ids))
+        if not hand_ids:
+            return result
+        in_sql, in_params = self._in_tuple(hand_ids)
+        q = (
+            "SELECT hp.handId, hp.seatNo, hp.playerId, p.name "
+            "FROM HandsPlayers hp "
+            "INNER JOIN Players p ON hp.playerId = p.id "
+            f"WHERE hp.handId IN {in_sql}"
+        )
+        try:
+            c = self.connection.cursor()
+            c.execute(q, in_params)
+            for hand_id, seat, player_id, name in c.fetchall():
+                result.setdefault(hand_id, {})[int(seat)] = {"player_id": int(player_id), "screen_name": name}
+        except Exception:
+            log.exception("get_seat_players_many failed")
+            self._rollback_after_failed_read()
+        return result
+
+    def get_cards_many(self, hand_ids: list) -> dict[Any, dict[Any, Any]]:
+        """get_cards for many hands in one statement (#680)."""
+        result: dict[Any, dict[Any, Any]] = {hand: {} for hand in hand_ids}
+        hand_ids = list(dict.fromkeys(hand_ids))
+        if not hand_ids:
+            return result
+        ph = self.sql.query.get("placeholder", "%s")
+        in_sql, in_params = self._in_tuple(hand_ids)
+        q = self.sql.query["get_cards"].replace("%s", ph).replace(f"handID = {ph}", f"handID IN {in_sql}")
+        # get_cards does not select the hand id; add it to key the rows.
+        q = q.replace("seatNo AS seat_number", "Hands.id AS hand_id, seatNo AS seat_number", 1)
+        try:
+            c = self.connection.cursor()
+            c.execute(q, in_params)
+            for row in c.fetchall():
+                hand_id = row[0]
+                result.setdefault(hand_id, {})[row[1]] = row[2:]
+        except Exception:
+            log.exception("get_cards_many failed")
+            self._rollback_after_failed_read()
+        return result
+
+    def get_common_cards_many(self, hand_ids: list) -> dict[Any, list]:
+        """get_common_cards for many hands in one statement (#680)."""
+        result: dict[Any, list] = {hand: [] for hand in hand_ids}
+        hand_ids = list(dict.fromkeys(hand_ids))
+        if not hand_ids:
+            return result
+        in_sql, in_params = self._in_tuple(hand_ids)
+        q = f"SELECT Id, boardcard1, boardcard2, boardcard3, boardcard4, boardcard5 FROM Hands WHERE Id IN {in_sql}"
+        try:
+            c = self.connection.cursor()
+            c.execute(q, in_params)
+            for row in c.fetchall():
+                result[row[0]] = list(row[1:])
+        except Exception:
+            log.exception("get_common_cards_many failed")
+            self._rollback_after_failed_read()
+        return result
+
+    def get_table_min_stack_bb_many(self, hand_ids: list) -> dict[Any, float | None]:
+        """get_table_min_stack_bb for many hands in two statements (#680)."""
+        result: dict[Any, float | None] = {hand: None for hand in hand_ids}
+        hand_ids = list(dict.fromkeys(hand_ids))
+        if not hand_ids:
+            return result
+        in_sql, in_params = self._in_tuple(hand_ids)
+        try:
+            c = self.get_cursor()
+            c.execute(
+                (
+                    "SELECT h.id, gt.bigBlind FROM Hands h "
+                    "INNER JOIN Gametypes gt ON h.gametypeId = gt.id "
+                    f"WHERE h.id IN {in_sql}"
+                ),
+                in_params,
+            )
+            big_blinds = {row[0]: float(row[1]) for row in c.fetchall() if row[1]}
+            c.execute(
+                (
+                    "SELECT handId, startCash, committed, winnings FROM HandsPlayers "
+                    f"WHERE handId IN {in_sql} AND sitout = FALSE"
+                ),
+                in_params,
+            )
+            stacks: dict[Any, list] = {hand: [] for hand in hand_ids}
+            for hand_id, start_cash, committed, winnings in c.fetchall():
+                end_cash = float(start_cash) - float(committed) + float(winnings)
+                if end_cash > 0:
+                    stacks.setdefault(hand_id, []).append(end_cash)
+            for hand_id, blinds in big_blinds.items():
+                values = stacks.get(hand_id) or []
+                if blinds > 0 and values:
+                    result[hand_id] = min(values) / blinds
+        except Exception:
+            log.exception("get_table_min_stack_bb_many failed")
+            self._rollback_after_failed_read()
+        return result
+
     def _refresh_hand_1day_ago(self) -> None:
         """Re-read the 24-hour boundary hand id, at most once per TTL.
 
