@@ -194,7 +194,7 @@ class ClassicStatWindow(Aux_Hud.SimpleStatWindow):
 
         opacity = float(self.aw.params["opacity"])
         if getattr(self, "_last_opacity", None) != opacity:  # #680: no redundant style/visibility churn
-            self._last_opacity = opacity
+            self._last_opacity = opacity  # pylint: disable=attribute-defined-outside-init
             self.setWindowOpacity(opacity)
         if not self.isVisible():
             self.show()  # in case the user has hidden it
@@ -634,7 +634,7 @@ class ClassicStat(Aux_Hud.SimpleStat):
         if getattr(self, "_last_render_key", None) == render_key:
             latency_profile.count("hud_stat_cells_skipped")
             return None
-        self._last_render_key = render_key
+        self._last_render_key = render_key  # pylint: disable=attribute-defined-outside-init
         latency_profile.count("hud_stat_cells_rendered")
 
         # Keep the configured cell background when the value colour changes on

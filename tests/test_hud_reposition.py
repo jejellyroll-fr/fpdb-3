@@ -29,7 +29,7 @@ class _Win:
     def move(self, x, y):
         self.moves.append((x, y))
 
-    def isVisible(self):
+    def isVisible(self):  # pylint: disable=invalid-name  # Qt override
         return self._visible
 
     def setWindowOpacity(self, _o):
