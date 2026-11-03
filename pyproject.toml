@@ -171,7 +171,8 @@ ignore = [
 "fpdb_3_legacy/database_bulk_import.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/database_caches.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/database_hud_stats.py" = ["C901", "PLR0912", "PLR0915", "UP031"]
-"fpdb_3_legacy/database_schema.py" = ["C901", "PLR0915"]
+"fpdb_3_legacy/database_indexes.py" = ["C901"]
+"fpdb_3_legacy/database_schema.py" = ["PLR0915"]
 "fpdb_3_legacy/database_tournaments.py" = ["C901", "PLR0912"]
 "fpdb_3_legacy/derived_stats_actions.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/derived_stats_base.py" = ["C901"]
@@ -318,7 +319,9 @@ module = [
     "fpdb_3_legacy.database_aof",
     "fpdb_3_legacy.database_auto_notes",
     "fpdb_3_legacy.database_connection",
+    "fpdb_3_legacy.database_indexes",
     "fpdb_3_legacy.database_lambda_dict",
+    "fpdb_3_legacy.database_migrations",
     "fpdb_3_legacy.database_queries",
     "fpdb_3_legacy.database_rebuild",
     "fpdb_3_legacy.database_schema",
