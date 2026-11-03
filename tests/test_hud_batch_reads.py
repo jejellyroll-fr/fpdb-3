@@ -245,3 +245,57 @@ def test_secondary_refresh_is_unbounded_by_default() -> None:
     database.get_stats_from_hands.assert_called_once()
     assert len(database.get_stats_from_hands.call_args[0][0]) == 3
     assert len(snapshot.hands) == 3
+
+
+def test_primary_hands_are_read_most_recent_first() -> None:
+    """The active table's HUD should be painted first in a multi-table burst (#680)."""
+    service, database = _service_with_mock_db()
+    database.get_table_info.side_effect = lambda hand_id: (
+        f"table-{hand_id}",
+        6,
+        "holdem",
+        "ring",
+        False,
+        1,
+        "site",
+        6,
+        None,
+        None,
+        None,
+    )
+    progress = []
+    service.read_batch(
+        HudBatchReadRequest(
+            sequence=1,
+            hand_ids=("101", "102", "103"),
+            hud_params={"hud_days": 30, "h_hud_days": 90},
+        ),
+        progress_callback=progress.append,
+    )
+    published = [s.primary_order for s in progress if not s.identity_only]
+    # 103 (last notified) is published before 102 before 101.
+    assert published[0] == ("103",)
+    assert published[-1] == ("101",)
+
+
+def test_hand_batch_interval_is_configurable_with_default_200() -> None:
+    """hud ui hand_batch_interval_ms overrides the 200 ms default (#680)."""
+    from unittest.mock import MagicMock
+
+    from fpdb_3_legacy.config_hud_ui import ConfigHudUiMixin
+
+    host = ConfigHudUiMixin.__new__(ConfigHudUiMixin)
+    host.ui = MagicMock()
+    del host.ui.hand_batch_interval_ms  # attribute error path -> default
+    host.ui.hand_batch_interval_ms = AttributeError  # ensure AttributeError
+    try:
+        del host.ui.hand_batch_interval_ms
+    except AttributeError:
+        pass
+    params = host.get_hud_ui_parameters()
+    assert params["hand_batch_interval_ms"] == 200
+
+    host.ui = MagicMock()
+    host.ui.hand_batch_interval_ms = "350"
+    params = host.get_hud_ui_parameters()
+    assert params["hand_batch_interval_ms"] == 350

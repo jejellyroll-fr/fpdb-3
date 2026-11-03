@@ -318,6 +318,43 @@ selection on some backends/statistics. Do not change indexes or narrow the
 queries before the plans and the latency report say which query is actually
 slow.
 
+## Architecture decision matrix (complementary choices, backed by the measurements above)
+
+Measured facts this rests on: round trips per HUD refresh round scale with table
+count and each one costs a network RTT on a remote DB (~22 statements/table
+before R4, ~10 after); writer contention produces the multi-second tail on
+SQLite (single writer) and MySQL/InnoDB (p95 1.4-1.6 s at 8 tables + import,
+even on loopback) but not on PostgreSQL (MVCC, ~184 ms p95); no point query
+seq-scans at this scale on any backend.
+
+| situation | recommendation | why (measured) |
+|---|---|---|
+| DB on a separate LAN server, multi-table cash | **PostgreSQL**, HUD worker timeouts already applied (R2-style) | readers never block the writer; per-query 2-3x faster than MySQL on loopback |
+| DB remote, MySQL kept | acceptable with R2 session timeouts; expect worse tail under import load; keep import transactions short | MySQL p95 135 ms at 8 tables after R4 vs 133 ms PG; before R4 it was 1.5 s |
+| local SQLite, <= 2-3 tables | fine as-is | p95 ~20 ms at 8 tables without import; single-writer tail only bites with concurrent import at 6+ tables |
+| local SQLite, 6+ tables + auto-import | move the DB to a server backend, or pause auto-import while playing | SQLite p95 1.4 s at 8 tables with import on, even locally |
+| very large production DB | additionally: read replica / standby for the HUD reader, and a covering index on HudCache(playerId, ...) if EXPLAIN shows heap-fetch pressure | only seq scans found are whole-table dumps; covering index deferred until a big-DB plan shows it |
+
+Code-side architecture choices shipped in this PR:
+
+* **Serial worker + coalescing** (R3): one in-flight batch, superseded batches
+  merged — bounds the queue instead of growing it.
+* **Batched reads** (R4): one statement per detail per batch instead of per
+  hand (-54% round trips at 8 tables).
+* **Active table first**: primary hands are now read most-recently-notified
+  first, so in a burst the HUD of the table the player is acting on is painted
+  first (perceived latency down, total work unchanged).
+* **Configurable batch window**: `hand_batch_interval_ms` in the HUD ui config
+  (default 200 ms, unchanged) lets a many-table profile trade display delay
+  for fewer round trips per burst.
+* **Opt-in secondary bound** (P2): `max_secondary_tables_per_batch` (default 0 =
+  unbounded) caps secondary refreshes per batch so a burst cannot queue
+  unbounded non-active work.
+
+Not shipped (needs the reporter's live `hud_queue_wait` first): splitting the
+worker into an active-table lane and a background lane; moving the HUD reader to
+a PostgreSQL read replica; local-first SQLite with deferred sync to the server.
+
 ## Backend guidance (provisional, unchanged from the issue)
 
 For multi-tabling with the database on a separate server, PostgreSQL remains

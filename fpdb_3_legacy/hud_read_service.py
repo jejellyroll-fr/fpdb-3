@@ -627,7 +627,12 @@ class HudReadService:
     ) -> tuple[set[str], int]:
         loaded_tables: set[str] = set()
         prefetched = self._prefetch_primary_details(list(latest.values()))
-        for hand_id in latest.values():
+        # Most recently notified table first (#680): in a multi-table burst the
+        # newest hand is almost always the table the player is acting on, and
+        # the progress callback paints each hand as it is read, so reading it
+        # first minimises the perceived delay on the active table. Every hand
+        # is still read; only the order changes.
+        for hand_id in reversed(list(latest.values())):
             table_info = hands[_hand_key(hand_id)].table_info
             if table_info is None:
                 continue

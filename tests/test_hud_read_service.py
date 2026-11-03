@@ -100,11 +100,14 @@ def test_worker_can_publish_each_primary_table_before_the_batch_is_complete() ->
         progress_callback=progress.append,
     )
 
+    # Identity snapshots publish in request order; primary hands are then read
+    # most-recently-notified first (#680: the active table's HUD is painted
+    # first), so the primary publish order is reversed.
     assert [snapshot.primary_order for snapshot in progress] == [
         ("211",),
         ("212",),
-        ("211",),
         ("212",),
+        ("211",),
     ]
     assert [snapshot.identity_only for snapshot in progress] == [True, True, False, False]
     assert [snapshot.final for snapshot in progress] == [False, False, False, False]

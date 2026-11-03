@@ -191,6 +191,14 @@ class ConfigHudUiMixin(ConfigBase):
 
         default_text = "FPDB Menu - Right click\nLeft-Drag to Move"
 
+        # How long new hands wait before one batched database read (#680).
+        # Larger values smooth bursts at many tables into fewer round trips at
+        # the cost of that much extra display delay. Default keeps 200 ms.
+        try:
+            hui["hand_batch_interval_ms"] = int(self.ui.hand_batch_interval_ms)
+        except (AttributeError, ValueError, TypeError):
+            hui["hand_batch_interval_ms"] = 200
+
         try:
             hui["label"] = self.ui.label
             if self.ui.label == "":  # Empty menu label is a big no-no
