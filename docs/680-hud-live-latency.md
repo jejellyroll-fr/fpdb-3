@@ -217,6 +217,52 @@ unit suite.
    `hud_session_rows` (session path), `hud_snapshot_apply` (Qt/render side), or
    `db_txn_total`/`db_commit` on the import side (writer contention).
 
+## Per-query bench on the three backends (constant dataset)
+
+`tools/benchmark_hud_queries.py` imports the *same* corpus into a fresh
+database on each backend (664/663/664 hands, 2270 HudCache rows, 427 players,
+194 tables — identical by construction), then runs every HUD read query
+15 times against real hand ids, capturing per-statement timings and the
+server-side plan for the heavy queries. Full JSON with plans:
+`docs/bench-680-queries-{sqlite,postgresql,mysql}.json`.
+
+p50 / p95 / max ms per query case (15 runs):
+
+| query case | SQLite | PostgreSQL 18.3 | MySQL 8.4.3 |
+|---|---|---|---|
+| aggregated_per_hand (big HudCache aggregate) | 2.3 / 3.9 / 6.5 | 10.2 / 15.0 / 18.8 | 17.1 / 25.8 / 31.2 |
+| aggregated_batch_6 (6 hands, one batched aggregate) | 8.9 / 12.6 / 14.4 | 25.4 / 53.7 / 59.1 | 58.6 / 63.5 / 63.7 |
+| session_per_hand (range S) | 0.6 / 1.0 / 1.3 | 5.2 / 7.3 / 7.8 | 6.1 / 7.3 / 7.4 |
+| table_info_many_8 | 0.12 | 0.90 | 0.93 |
+| positions_many_8 / seat_players_many_8 | 0.08 / 0.10 | 0.29 / 0.63 | 0.90 / 1.12 |
+| cards_many_8 / common_cards_many_8 | 0.20 / 0.05 | 0.95 / 0.23 | 1.75 / 0.46 |
+| min_stack_many_8 (2 statements) | 0.14 | 0.73 | 1.55 |
+| hand_construction (Hand.hand_factory, 7 statements) | 0.50 | 3.63 | 5.60 |
+
+Findings and perf pistas (all verified against EXPLAIN, none change results):
+
+* **MySQL is 2-3x slower than PostgreSQL per query even on loopback**, and
+  SQLite is fastest locally; on a LAN each of the statements above also pays a
+  network round trip, so the ranking amplifies. This is the backend guidance.
+* **`hand_construction` costs 7 statements per hand** (singleHand, playerHand,
+  handActions, showdown, cashout, splash, heroseat) — at 8 tables that is 56
+  round trips per refresh round. Next code lever: read the hand once instead
+  of 7 lookups.
+* **The batched reads from R4 are all single-statement** (table_info_many,
+  positions_many, ...) — confirmed 1 statement/iter in the report.
+* **Query plans use the indexes**: the aggregate uses `hudcache_playerid_idx`
+  (the `gametypeId + 0` stays in the filter, it does not defeat the index on
+  playerId); the session query uses `heroseat_idx`, `handsplayers_handid_idx`
+  and `players_pkey` even with a full 24h window (663 hands in-window probe on
+  PostgreSQL: 5.8 ms p50, no seq scan). `HandsPlayers(playerId)` already exists
+  (`HandsPlayers_playerId_idx` via `INDEXES`) — an extra one was tried and
+  reverted as a duplicate.
+* **Not a missing-index problem at this scale**: no seq scan over HudCache or
+  HandsPlayers in any captured plan. On a much larger production database the
+  remaining lever is a covering index on HudCache(playerId, ...) to cut the
+  heap fetches (395 buffers for 56 rows on PostgreSQL here); deferred until a
+  big-database plan shows it, since every index also taxes import writes.
+
 ## Query-plan review (P1)
 
 Use the existing `tools/explain_hud_queries.py` against the production PostgreSQL

@@ -1,0 +1,223 @@
+{
+  "backend": "mysql",
+  "cases": {
+    "aggregated_batch_6": {
+      "statements": {
+        "get_stats_from_hand_aggregated (assembled)": {
+          "calls": 6,
+          "seconds": 0.048920600092969835
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.06371219997527078,
+        "mean": 0.05908080666946868,
+        "p50": 0.0586345000192523,
+        "p95": 0.06350072999484838,
+        "p99": 0.06366990597918629
+      }
+    },
+    "aggregated_per_hand": {
+      "statements": {
+        "get_stats_from_hand_aggregated (assembled)": {
+          "calls": 1,
+          "seconds": 0.01539379998575896
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.031206000014208257,
+        "mean": 0.0190316466614604,
+        "p50": 0.0170963000273332,
+        "p95": 0.025790659972699352,
+        "p99": 0.03012293200590647
+      }
+    },
+    "cards_many_8": {
+      "statements": {
+        "get_cards (assembled)": {
+          "calls": 1,
+          "seconds": 0.0015522000030614436
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.002168400038499385,
+        "mean": 0.0017766199928397933,
+        "p50": 0.001745699963066727,
+        "p95": 0.0020195100049022583,
+        "p99": 0.0021386220317799595
+      }
+    },
+    "common_cards_many_8": {
+      "statements": {
+        "select id, boardcard1, boardcard2, boardcard3, boardcard4, boardcard5 ...": {
+          "calls": 1,
+          "seconds": 0.0004387999651953578
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.000513700011651963,
+        "mean": 0.00046479334123432635,
+        "p50": 0.00046369998017326,
+        "p95": 0.0004985100182238965,
+        "p99": 0.0005106620129663497
+      }
+    },
+    "hand_construction": {
+      "statements": {
+        "get_hands_cashout": {
+          "calls": 1,
+          "seconds": 0.00036050000926479697
+        },
+        "get_hands_showdown": {
+          "calls": 1,
+          "seconds": 0.0004292999510653317
+        },
+        "get_hands_splash": {
+          "calls": 1,
+          "seconds": 0.00047530001029372215
+        },
+        "handActions": {
+          "calls": 1,
+          "seconds": 0.0013970999862067401
+        },
+        "playerHand": {
+          "calls": 1,
+          "seconds": 0.0009576999582350254
+        },
+        "select heroseat from hands where id = 367": {
+          "calls": 1,
+          "seconds": 0.00024049996864050627
+        },
+        "singleHand": {
+          "calls": 1,
+          "seconds": 0.0007517999620176852
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.008773699984885752,
+        "mean": 0.005773100000806153,
+        "p50": 0.005601900047622621,
+        "p95": 0.00720772999920882,
+        "p99": 0.008460505987750364
+      }
+    },
+    "min_stack_many_8": {
+      "statements": {
+        "select h.id, gt.bigblind from hands h inner join gametypes gt on h.gam...": {
+          "calls": 1,
+          "seconds": 0.0003779000253416598
+        },
+        "select handid, startcash, committed, winnings from handsplayers where ...": {
+          "calls": 1,
+          "seconds": 0.000944300030823797
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.0022849999950267375,
+        "mean": 0.0016828600123214225,
+        "p50": 0.0015516999992541969,
+        "p95": 0.002134429989382624,
+        "p99": 0.002254885993897915
+      }
+    },
+    "positions_many_8": {
+      "statements": {
+        "select handid, playerid, position from handsplayers where handid in (%...": {
+          "calls": 1,
+          "seconds": 0.0009588999673724174
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.0011149999918416142,
+        "mean": 0.0009332133457064628,
+        "p50": 0.00089640001533553,
+        "p95": 0.001097920024767518,
+        "p99": 0.001111583998426795
+      }
+    },
+    "seat_players_many_8": {
+      "statements": {
+        "select hp.handid, hp.seatno, hp.playerid, p.name from handsplayers hp ...": {
+          "calls": 1,
+          "seconds": 0.0013484999653883278
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.0014257000293582678,
+        "mean": 0.0011605200008489192,
+        "p50": 0.001123800000641495,
+        "p95": 0.0013953900022897869,
+        "p99": 0.0014196380239445716
+      }
+    },
+    "session_per_hand": {
+      "statements": {
+        "get_stats_from_hand_session": {
+          "calls": 1,
+          "seconds": 0.004539199988357723
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.007386400015093386,
+        "mean": 0.0063019800116308035,
+        "p50": 0.0061169000109657645,
+        "p95": 0.007334460027050227,
+        "p99": 0.0073760120174847545
+      }
+    },
+    "site_hand_no_many_8": {
+      "statements": {
+        "select id, sitehandno from hands where id in (%s, %s, %s, %s, %s, %s, ...": {
+          "calls": 1,
+          "seconds": 0.0003407999756745994
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.0004673000075854361,
+        "mean": 0.00038282667131473623,
+        "p50": 0.00037640001391991973,
+        "p95": 0.0004273300291970371,
+        "p99": 0.0004593060119077563
+      }
+    },
+    "table_info_many_8": {
+      "statements": {
+        "select h.id, h.tablename, gt.maxseats, gt.category, gt.type, gt.fast, ...": {
+          "calls": 1,
+          "seconds": 0.0008224999764934182
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.0014800999779254198,
+        "mean": 0.00102743999256442,
+        "p50": 0.0009296999778598547,
+        "p95": 0.0013863699976354835,
+        "p99": 0.0014613539818674325
+      }
+    }
+  },
+  "dataset": {
+    "hands": 664,
+    "hands_players_rows": 3769,
+    "hudcache_rows": 2268,
+    "players": 427,
+    "tables": 194
+  },
+  "db_server": "mysql",
+  "plans": {
+    "aggregated_batch_6": "-> Sort: h.id, hc.playerId, p.`name`  (actual time=3.57..3.57 rows=0 loops=1)\n    -> Table scan on <temporary>  (actual time=3.56..3.56 rows=0 loops=1)\n        -> Aggregate using temporary table  (actual time=3.56..3.56 rows=0 loops=1)\n            -> Nested loop inner join  (cost=59.9 rows=4.49) (actual time=3.55..3.55 rows=0 loops=1)\n                -> Nested loop inner join  (cost=58.3 rows=4.49) (actual time=3.55..3.55 rows=0 loops=1)\n                    -> Nested loop inner join  (cost=56.7 rows=4.49) (actual time=3.55..3.55 rows=0 loops=1)\n                        -> Nested loop inner join  (cost=55.2 rows=4.49) (actual time=3.55..3.55 rows=0 loops=1)\n                            -> Index range scan on hp using playerSeat_idx over (handId = 446) OR (handId = 584) OR (4 more), with index condition: (hp.handId in (446,584,586,610,587,617))  (cost=12.8 rows=25) (actual time=0.0338..0.141 rows=25 loops=1)\n                            -> Filter: ((hc.styleKey > '0000000') and <in_optimizer>((hc.gametypeId + 0),(hc.gametypeId + 0) in (select #2)) and (hc.seats between 0 and 10))  (cost=1.21 rows=0.18) (actual time=0.136..0.136 rows=0 loops=25)\n                                -> Index lookup on hc using playerId (playerId=hp.playerId)  (cost=1.21 rows=4.85) (actual time=0.0294..0.123 rows=11.6 loops=25)\n                                -> Select #2 (subquery in condition; run only once)\n                                    -> Filter: (((hc.gametypeId + 0) = `<materialized_subquery>`.id))  (cost=2.36..2.36 rows=0.367) (actual time=0.00181..0.00181 rows=0 loops=119)\n                                        -> Limit: 1 row(s)  (cost=2.32..2.32 rows=0.367) (actual time=0.00173..0.00173 rows=0 loops=119)\n                                            -> Index lookup on <materialized_subquery> using <auto_distinct_key> (id=(hc.gametypeId + 0))  (actual time=0.00161..0.00161 rows=0 loops=119)\n                                                -> Materialize with deduplication  (cost=2.32..2.32 rows=0.367) (actual time=0.148..0.148 rows=14 loops=1)\n                                                    -> Filter: ((gt1.bigBlind <= <cache>(('20000' * 1000))) and (gt1.bigBlind >= <cache>(('20000' / 1000))) and (gt1.`type` = 'ring') and (gt1.category = 'holdem') and (gt1.limitType = 'nl'))  (cost=2.29 rows=0.367) (actual time=0.11..0.142 rows=14 loops=1)\n                                                        -> Index lookup on gt1 using siteId (siteId='32')  (cost=2.29 rows=62) (actual time=0.0498..0.121 rows=62 loops=1)\n                        -> Single-row index lookup on h using PRIMARY (id=hp.handId)  (cost=0.272 rows=1) (never executed)\n                    -> Single-row index lookup on gt using PRIMARY (id=hc.gametypeId)  (cost=0.272 rows=1) (never executed)\n                -> Single-row index lookup on p using PRIMARY (id=hp.playerId)  (cost=0.272 rows=1) (never executed)\n",
+    "aggregated_per_hand": "-> Sort: hc.playerId, p.`name`  (actual time=7.31..7.34 rows=9 loops=1)\n    -> Table scan on <temporary>  (actual time=7.23..7.25 rows=9 loops=1)\n        -> Aggregate using temporary table  (actual time=7.23..7.23 rows=9 loops=1)\n            -> Nested loop inner join  (cost=19.6 rows=1.62) (actual time=0.558..4.83 rows=56 loops=1)\n                -> Nested loop inner join  (cost=19 rows=1.62) (actual time=0.55..4.79 rows=56 loops=1)\n                    -> Nested loop inner join  (cost=18.4 rows=1.62) (actual time=0.543..4.65 rows=56 loops=1)\n                        -> Index lookup on hp using playerSeat_idx (handId=367), with index condition: (hp.handId = 367)  (cost=3.15 rows=9) (actual time=0.0675..0.0718 rows=9 loops=1)\n                        -> Filter: ((hc.styleKey > '0000000') and <in_optimizer>((hc.gametypeId + 0),(hc.gametypeId + 0) in (select #2)) and (hc.seats between 0 and 10))  (cost=1.21 rows=0.18) (actual time=0.239..0.508 rows=6.22 loops=9)\n                            -> Index lookup on hc using playerId (playerId=hp.playerId)  (cost=1.21 rows=4.85) (actual time=0.0517..0.457 rows=44.1 loops=9)\n                            -> Select #2 (subquery in condition; run only once)\n                                -> Filter: (((hc.gametypeId + 0) = `<materialized_subquery>`.id))  (cost=2.36..2.36 rows=0.367) (actual time=0.00133..0.00133 rows=0.223 loops=220)\n                                    -> Limit: 1 row(s)  (cost=2.32..2.32 rows=0.367) (actual time=0.00123..0.00123 rows=0.223 loops=220)\n                                        -> Index lookup on <materialized_subquery> using <auto_distinct_key> (id=(hc.gametypeId + 0))  (actual time=0.00111..0.00111 rows=0.223 loops=220)\n                                            -> Materialize with deduplication  (cost=2.32..2.32 rows=0.367) (actual time=0.155..0.155 rows=14 loops=1)\n                                                -> Filter: ((gt1.bigBlind <= <cache>(('20000' * 1000))) and (gt1.bigBlind >= <cache>(('20000' / 1000))) and (gt1.`type` = 'ring') and (gt1.category = 'holdem') and (gt1.limitType = 'nl'))  (cost=2.29 rows=0.367) (actual time=0.114..0.146 rows=14 loops=1)\n                                                    -> Index lookup on gt1 using siteId (siteId='32')  (cost=2.29 rows=62) (actual time=0.0513..0.123 rows=62 loops=1)\n                    -> Single-row index lookup on gt using PRIMARY (id=hc.gametypeId)  (cost=0.312 rows=1) (actual time=0.00222..0.00225 rows=1 loops=56)\n                -> Single-row index lookup on p using PRIMARY (id=hp.playerId)  (cost=0.312 rows=1) (actual time=625e-6..652e-6 rows=1 loops=56)\n",
+    "session_per_hand": "-> Sort: hp2.playerId  (actual time=0.0209..0.0209 rows=0 loops=1)\n    -> Stream results  (cost=2.29 rows=4.87) (actual time=0.0167..0.0167 rows=0 loops=1)\n        -> Nested loop inner join  (cost=2.29 rows=4.87) (actual time=0.0155..0.0155 rows=0 loops=1)\n            -> Nested loop inner join  (cost=1.2 rows=0.542) (actual time=0.015..0.015 rows=0 loops=1)\n                -> Nested loop inner join  (cost=1.07 rows=0.542) (actual time=0.015..0.015 rows=0 loops=1)\n                    -> Nested loop inner join  (cost=0.953 rows=0.1) (actual time=0.0148..0.0148 rows=0 loops=1)\n                        -> Filter: ((h2.tableName = 'Zamenhof VII') and (h2.seats between 0 and 10) and (h2.id >= 664))  (cost=0.93 rows=0.1) (actual time=0.0145..0.0145 rows=0 loops=1)\n                            -> Index range scan on h2 using PRIMARY over (664 <= id)  (cost=0.93 rows=1) (actual time=0.0095..0.0134 rows=1 loops=1)\n                        -> Single-row index lookup on gt using PRIMARY (id=h2.gametypeId)  (cost=2.25 rows=1) (never executed)\n                    -> Index lookup on hp2 using playerSeat_idx (handId=(h2.id + 0)), with index condition: (hp2.handId = (h2.id + 0))  (cost=12.2 rows=5.42) (never executed)\n                -> Filter: (p.id = (hp2.playerId + 0))  (cost=0.619 rows=1) (never executed)\n                    -> Single-row index lookup on p using PRIMARY (id=(hp2.playerId + 0))  (cost=0.619 rows=1) (never executed)\n            -> Filter: ((hp2.playerId + 0) = (hp.playerId + 0))  (cost=5.57 rows=9) (never executed)\n                -> Index lookup on hp using playerSeat_idx (handId=367), with index condition: (hp.handId = 367)  (cost=5.57 rows=9) (never executed)\n"
+  },
+  "repeats": 15
+}
