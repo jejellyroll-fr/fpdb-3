@@ -98,6 +98,12 @@ def test_merge_keeps_every_hand_and_table_of_both_batches() -> None:
     assert {c.temp_key for c in merged.tables} == {"a", "b"}
 
 
+def test_a_merged_batch_reports_the_oldest_wait() -> None:
+    older = HudBatchReadRequest(sequence=1, hand_ids=("1",), hud_params={}, submitted_at=100.0)
+    newer = HudBatchReadRequest(sequence=2, hand_ids=("2",), hud_params={}, submitted_at=103.0)
+    assert _merge_batch_requests(older, newer).submitted_at == 100.0
+
+
 def test_fast_fold_requests_do_not_touch_the_batch_coalescing() -> None:
     from fpdb_3_legacy.fast_fold_engine import FastFoldStatsRequest
 

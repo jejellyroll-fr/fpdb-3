@@ -1636,6 +1636,13 @@ class SimpleStat:
             player_id: The unique identifier of the player.
             stat_dict: A dictionary containing statistics for all players.
         """
+        self._load_number(player_id, stat_dict)
+        if self.number:
+            self.lab.setText(str(self.number[1]))
+        self._apply_color_range()
+
+    def _load_number(self, player_id: int | str | None, stat_dict: dict) -> None:
+        """Recalculate ``self.number`` for a player without touching the label."""
         self.stat_dict = stat_dict  # So the Simple_stat obj always has a fresh stat_dict
         self.lab.stat_dict = stat_dict
 
@@ -1657,8 +1664,6 @@ class SimpleStat:
                     "",
                     value.tooltip() if value is not None else str(self.stat),
                 )
-                self.lab.setText(str(text))
-                self._apply_color_range()
                 return
 
         # Two scopes, both computed in Stats (the single source of truth), never
@@ -1678,9 +1683,6 @@ class SimpleStat:
                 self.stat,
                 self.hud.hand_instance,
             )
-        if self.number:
-            self.lab.setText(str(self.number[1]))
-        self._apply_color_range()
 
     def _analytics_session(self) -> Any:
         """The table's analytics session, or ``None`` when this profile has none.

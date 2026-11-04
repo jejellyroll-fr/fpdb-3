@@ -315,7 +315,7 @@ def test_stop_is_on_the_sync_and_importer_close_does_not_crash(tmp_path) -> None
     sync = MagicMock()
     importer._local_first_sync = sync
     importer.close()  # must not raise
-    sync.stop.assert_called_once()
+    sync.release.assert_called_once()
     local.disconnect()
 
 
@@ -461,6 +461,20 @@ def test_push_carries_only_the_tournaments_of_the_batch(tourney_db, server_db) -
     srv = server_db()
     assert _rows(srv, "SELECT COUNT(*) FROM Tourneys") == [(1,)]
     srv.disconnect()
+
+
+def test_a_hand_gone_from_the_local_database_does_not_stay_pending(local_db, server_db) -> None:
+    """Oldest ids are read first: left pending, enough of these would fill every batch."""
+    real = _local_hand_ids(local_db)[0]
+    sync = LocalFirstSync(local_db, server_db, batch_size=1)
+    gone = real - 1
+    sync.mark([gone, real])
+
+    assert sync.push_once() == 0
+    assert sync.pending() == [real]
+    assert sync.push_once() == 1
+    assert not sync.pending()
+    assert _rows(local_db, "SELECT server_hand_id FROM fpdb_sync_outbox ORDER BY local_hand_id")[0] == (None,)
 
 
 def _hud_cache(db) -> list[tuple]:
@@ -856,6 +870,21 @@ def test_importer_sync_opens_the_database_the_importer_writes(tmp_path, monkeypa
         assert not (tmp_path / "cwd" / "relative-local.sqlite3").exists()
     finally:
         importer.close()
+
+
+def test_importers_of_one_local_database_share_one_worker(tmp_path, monkeypatch) -> None:
+    (tmp_path / "cwd").mkdir()
+    first = _local_first_importer(tmp_path, monkeypatch)
+    second = Importer(caller=None, settings={"testData": False, "threads": 1}, config=first.config, sql=first.sql)
+    sync = first._local_first_sync
+    try:
+        assert second._local_first_sync is sync
+        first.close()
+        assert sync._thread.is_alive()  # the other Importer still needs it
+    finally:
+        second.close()
+        first.close()
+    assert not sync._thread.is_alive()
 
 
 def test_importer_sync_builds_the_server_connection_with_its_own_dialect(tmp_path, monkeypatch) -> None:

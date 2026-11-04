@@ -21,6 +21,7 @@ Design notes:
 
 from __future__ import annotations
 
+import os
 import threading
 import time
 from collections.abc import Callable
@@ -44,6 +45,12 @@ CREATE TABLE IF NOT EXISTS fpdb_sync_outbox (
 
 # Tables pushed per hand, in FK-safe order. (table, local select cols)
 PUSH_TABLES = ("Hands", "HandsPlayers", "HandsActions")
+
+# One worker per local database, shared by every Importer of this process: two
+# would push the same outbox at once, and one of them would lose its whole batch
+# on the unique index, or, with the indexes dropped, insert every hand twice.
+_shared_workers: dict[str, LocalFirstSync] = {}
+_shared_workers_lock = threading.Lock()
 
 
 class LocalFirstSync:
@@ -75,6 +82,34 @@ class LocalFirstSync:
         self._id_maps: dict[str, dict[Any, int]] = {}
         self._tourney_types: dict[int, int] = {}  # server tourney id -> server type id
         self._ensure_outbox()
+        self._users = 0
+        self._shared_key = ""
+
+    @classmethod
+    def shared(cls, local_db: Any, server_db_factory: Callable[[], Any], local_db_path: str) -> LocalFirstSync:
+        """The running worker for this local database, started if there is none.
+
+        Each call is paired with a :meth:`release`.
+        """
+        key = os.path.abspath(local_db_path)
+        with _shared_workers_lock:
+            sync = _shared_workers.get(key)
+            if sync is None:
+                sync = cls(local_db, server_db_factory, local_db_path=local_db_path)
+                sync._shared_key = key
+                _shared_workers[key] = sync
+            sync._users += 1
+        sync.start()
+        return sync
+
+    def release(self) -> None:
+        """Give up a :meth:`shared` worker; the last user stops it."""
+        with _shared_workers_lock:
+            self._users -= 1
+            if self._users > 0:
+                return
+            _shared_workers.pop(self._shared_key, None)
+        self.stop()
 
     def _local_conn(self):
         """The worker's own SQLite connection when a path is known, so its
@@ -118,7 +153,7 @@ class LocalFirstSync:
         if not local_ids:
             return 0
         pushed = 0
-        done: list[tuple[int, int]] = []
+        done: list[tuple[int, int | None]] = []
         try:
             server = self.server_db_factory()
             sph = server.sql.query["placeholder"]
@@ -127,18 +162,16 @@ class LocalFirstSync:
                     self._push_referentials(server, sph)
                     self._push_tournaments(server, local_ids, sph)
                     for local_id in local_ids:
-                        server_id = self._push_hand(server, local_id, sph)
-                        if server_id is not None:
-                            # Marked locally only after the server commit: if this
-                            # batch fails, nothing is marked and all of it is
-                            # retried (#680 P0).
-                            done.append((local_id, server_id))
+                        # Marked locally only after the server commit: if this
+                        # batch fails, nothing is marked and all of it is
+                        # retried (#680 P0).
+                        done.append((local_id, self._push_hand(server, local_id, sph)))
                     # In the same transaction, so a hand and its statistics land
                     # together. Nothing to add buffers nothing: this only flushes.
                     server.storeHudCache(None, None, {}, None, {}, doinsert=True)
             for local_id, server_id in done:
                 self._mark_pushed(local_id, server_id)
-            pushed = len(done)
+            pushed = sum(server_id is not None for _local_id, server_id in done)
         except Exception:
             latency_profile.count("sync_push_errors")
             raise
@@ -283,7 +316,10 @@ class LocalFirstSync:
     def _push_hand(self, server: Any, local_id: int, sph: str) -> int | None:
         """Insert one hand server-side, dedup by (siteHandNo, gametypeId).
 
-        Returns the server hand id, or None if the hand already existed.
+        Returns the server hand id, the existing one if the server has the hand.
+        None means the local row is gone: there is nothing left to push, and the
+        outbox entry is closed with no server id. Left pending, enough of those
+        would fill every batch, since the oldest pending ids are read first.
         """
         lc = self._local_conn().cursor()
         lc.execute(f"SELECT * FROM Hands WHERE id = {self._ph()} ", (local_id,))  # nosec B608  # nosemgrep
@@ -412,7 +448,7 @@ class LocalFirstSync:
         row = cursor.fetchone()
         return int(row[0]) if row else 0
 
-    def _mark_pushed(self, local_id: int, server_id: int) -> None:
+    def _mark_pushed(self, local_id: int, server_id: int | None) -> None:
         ph = self._ph()
         c = self._local_conn().cursor()
         c.execute(  # nosec B608  # nosemgrep

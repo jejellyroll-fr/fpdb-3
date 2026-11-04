@@ -351,3 +351,41 @@ def test_read_batch_with_string_hand_ids_loads_full_stats(db) -> None:
         assert prepared.stat_dict, f"stat_dict empty for {hand_id}"
         assert prepared.positions, f"positions empty for {hand_id}"
         assert prepared.seat_players, f"seat_players empty for {hand_id}"
+
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        "get_hand_positions_many",
+        "get_seat_players_many",
+        "get_cards_many",
+        "get_common_cards_many",
+        "get_table_min_stack_bb_many",
+    ],
+)
+def test_a_failed_bulk_read_raises_instead_of_answering_empty(db, hand_ids, method, monkeypatch) -> None:
+    """Empty entries would read as "this hand has none" and skip the per-hand fallback."""
+    broken = MagicMock()
+    broken.cursor.side_effect = RuntimeError("server went away")
+    monkeypatch.setattr(db, "connection", broken)
+    with pytest.raises(RuntimeError):
+        getattr(db, method)(hand_ids)
+
+
+def test_a_failed_bulk_read_falls_back_to_the_per_hand_read() -> None:
+    service, database = _service_with_mock_db()
+    database.get_seat_players_many.side_effect = RuntimeError("boom")
+    prefetched = service._prefetch_primary_details(["7"])
+    assert "7" not in prefetched["seat_players"]
+    database.connection.rollback.assert_called()
+
+
+def test_a_bulk_read_timeout_aborts_the_batch_like_any_other_read() -> None:
+    service, database = _service_with_mock_db()
+
+    class Timeout(Exception):
+        sqlstate = "57014"
+
+    database.get_table_info_many.side_effect = Timeout()
+    with pytest.raises(Timeout):
+        service._batched(["7"], "get_table_info_many")

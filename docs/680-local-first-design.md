@@ -107,8 +107,9 @@ to ~0 on the playing machine.
   the push.
 * **Outbox hook**: `Importer._mark_outbox()` registers `database.hids` after
   every successfully imported file, in the import process.
-* **Lifecycle**: the sync thread starts in `Importer.runImport()` and stops in
-  `Importer.close()`.
+* **Lifecycle**: one sync thread per local database in a process, started by
+  the first `Importer` and stopped when the last one closes. Two processes
+  importing into the same local file each run their own.
 * **Metrics** (in the `FPDB_LATENCY_PROFILE` report): `sync_outbox_pending`
   (gauge), `sync_push_batch` (p50/p95/p99), `sync_push_errors` (counter); plus
   `hud_queue_wait`, which should collapse on the playing machine.

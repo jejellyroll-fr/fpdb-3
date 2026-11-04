@@ -131,7 +131,7 @@ class TestClassicStat(unittest.TestCase):
         assert self.classic_stat.stat_hicolor == "#FF0000"
 
     def test_color_selection_high_value(self) -> None:
-        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None):
+        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "_load_number", return_value=None):
             self.classic_stat.stat_loth = "20"
             self.classic_stat.stat_hith = "35"
             self.classic_stat.stat_hicolor = "#FF0000"
@@ -141,7 +141,7 @@ class TestClassicStat(unittest.TestCase):
                 mock_set_color.assert_called()
 
     def test_color_selection_low_value(self) -> None:
-        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None):
+        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "_load_number", return_value=None):
             self.classic_stat.stat_loth = "20"
             self.classic_stat.stat_hith = "35"
             self.classic_stat.stat_locolor = "#00FF00"
@@ -151,7 +151,7 @@ class TestClassicStat(unittest.TestCase):
                 mock_set_color.assert_called()
 
     def test_color_selection_na_value(self) -> None:
-        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None):
+        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "_load_number", return_value=None):
             self.classic_stat.stat_loth = "20"
             self.classic_stat.stat_hith = "35"
             self.classic_stat.incolor = "rgba(0, 0, 0, 0)"
@@ -285,7 +285,7 @@ class TestClassicStat(unittest.TestCase):
 
     def test_update_no_number(self) -> None:
         with (
-            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
+            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "_load_number", return_value=None),
             patch("fpdb_3_legacy.Aux_Classic_Hud.log") as mock_log,
         ):
             self.classic_stat.stat_loth = "20"
@@ -295,7 +295,7 @@ class TestClassicStat(unittest.TestCase):
             mock_log.exception.assert_called()
 
     def test_update_normal_stat(self) -> None:
-        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None):
+        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "_load_number", return_value=None):
             self.classic_stat.stat_loth = "20"
             self.classic_stat.stat_hith = "35"
             self.classic_stat.stat_locolor = "#00FF00"
@@ -315,7 +315,7 @@ class TestClassicStat(unittest.TestCase):
         assert "font-weight:700" in html
 
     def test_update_uses_compact_html_when_stat_set_opts_in(self) -> None:
-        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None):
+        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "_load_number", return_value=None):
             self.classic_stat.rich_text = True
             self.classic_stat.hudprefix = "AI "
             self.classic_stat.hudsuffix = "%"
@@ -351,7 +351,7 @@ class TestClassicStat(unittest.TestCase):
         mock_db.playerHasNotes.return_value = True
         mock_db_class.return_value = mock_db
 
-        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None):
+        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "_load_number", return_value=None):
             self.classic_stat.stat = "player_note"
             self.classic_stat.number = ("", "N", "", "", "", "")
             self.classic_stat.lab = Mock()
@@ -369,7 +369,7 @@ class TestClassicStat(unittest.TestCase):
         mock_db.playerHasNotes.return_value = False
         mock_db_class.return_value = mock_db
 
-        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None):
+        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "_load_number", return_value=None):
             self.classic_stat.stat = "player_note"
             self.classic_stat.number = ("", "N", "", "", "", "")
             self.classic_stat.lab = Mock()
@@ -420,7 +420,7 @@ class TestClassicHudIntegration(unittest.TestCase):
 
         with (
             patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "__init__", return_value=None),
-            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
+            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "_load_number", return_value=None),
             _note_dialog("New comment"),
         ):
             mock_aw = Mock()
@@ -463,7 +463,7 @@ class TestClassicHudIntegration(unittest.TestCase):
 
         with (
             patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "__init__", return_value=None),
-            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
+            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "_load_number", return_value=None),
             _note_dialog("Updated comment"),
         ):
             mock_aw = Mock()
@@ -513,7 +513,7 @@ class TestErrorHandling(unittest.TestCase):
 
         with (
             patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "__init__", return_value=None),
-            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
+            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "_load_number", return_value=None),
             patch("fpdb_3_legacy.Aux_Classic_Hud.log") as mock_log,
             patch("fpdb_3_legacy.Aux_Classic_Hud.QMessageBox"),
         ):
@@ -576,7 +576,7 @@ class TestClassicStatRenderSkip(unittest.TestCase):
         stat = self._make_stat()
         stat_dict = {2: {"screen_name": "hero"}}
         with (
-            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
+            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "_load_number", return_value=None),
             patch.object(Aux_Classic_Hud.Stats, "do_tip") as do_tip,
         ):
             stat.update(2, stat_dict)
@@ -584,11 +584,27 @@ class TestClassicStatRenderSkip(unittest.TestCase):
         assert stat.lab.setText.call_count == 1
         assert do_tip.call_count == 1
 
+    def test_an_unchanged_cell_keeps_its_decorated_text(self) -> None:
+        """Through the real value load: nothing may overwrite the label before the skip."""
+        stat = self._make_stat()
+        stat.hudprefix = "("
+        stat.hudsuffix = ")"
+        stat.number = None
+        stat_dict = {2: {"screen_name": "hero"}}
+        with (
+            patch.object(stat, "_analytics_session", return_value=None),
+            patch.object(Aux_Classic_Hud.Aux_Hud.Stats, "do_stat", return_value=(0, "25", "x", "a", "b", "c")),
+            patch.object(Aux_Classic_Hud.Stats, "do_tip"),
+        ):
+            stat.update(2, stat_dict)
+            stat.update(2, stat_dict)
+        stat.lab.setText.assert_called_once_with("(25)")
+
     def test_update_rerenders_when_value_changes(self) -> None:
         stat = self._make_stat()
         stat_dict = {2: {"screen_name": "hero"}}
         with (
-            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
+            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "_load_number", return_value=None),
             patch.object(Aux_Classic_Hud.Stats, "do_tip"),
         ):
             stat.update(2, stat_dict)

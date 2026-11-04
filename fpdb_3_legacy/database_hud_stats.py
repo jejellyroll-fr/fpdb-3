@@ -187,6 +187,9 @@ class DatabaseHudStatsMixin:
         ph = self.sql.query.get("placeholder", "%s")
         return f"({', '.join([ph] * len(values))})", list(values)
 
+    # The *_many reads let a failure propagate. Returning the empty entries here
+    # would read as "this hand has none", and HudReadService would then paint every
+    # table of the batch without them instead of falling back to the per-hand reads.
     def get_hand_positions_many(self, hand_ids: list) -> dict[Any, dict[Any, Any]]:
         """get_hand_positions for many hands in one statement (#680)."""
         result: dict[Any, dict[Any, Any]] = {str(hand): {} for hand in hand_ids}
@@ -195,14 +198,10 @@ class DatabaseHudStatsMixin:
             return result
         in_sql, in_params = self._in_tuple(hand_ids)
         q = f"SELECT handId, playerId, position FROM HandsPlayers WHERE handId IN {in_sql}"  # nosec B608  # nosemgrep
-        try:
-            c = self.connection.cursor()
-            c.execute(q, in_params)  # nosemgrep
-            for hand_id, player_id, position in c.fetchall():
-                result.setdefault(str(hand_id), {})[player_id] = position
-        except Exception:
-            log.exception("get_hand_positions_many failed")
-            self._rollback_after_failed_read()
+        c = self.connection.cursor()
+        c.execute(q, in_params)  # nosemgrep
+        for hand_id, player_id, position in c.fetchall():
+            result.setdefault(str(hand_id), {})[player_id] = position
         return result
 
     def get_seat_players_many(self, hand_ids: list) -> dict[Any, dict[int, dict[str, object]]]:
@@ -218,14 +217,10 @@ class DatabaseHudStatsMixin:
             "INNER JOIN Players p ON hp.playerId = p.id "
             f"WHERE hp.handId IN {in_sql}"
         )
-        try:
-            c = self.connection.cursor()
-            c.execute(q, in_params)  # nosemgrep
-            for hand_id, seat, player_id, name in c.fetchall():
-                result.setdefault(str(hand_id), {})[int(seat)] = {"player_id": int(player_id), "screen_name": name}
-        except Exception:
-            log.exception("get_seat_players_many failed")
-            self._rollback_after_failed_read()
+        c = self.connection.cursor()
+        c.execute(q, in_params)  # nosemgrep
+        for hand_id, seat, player_id, name in c.fetchall():
+            result.setdefault(str(hand_id), {})[int(seat)] = {"player_id": int(player_id), "screen_name": name}
         return result
 
     def get_cards_many(self, hand_ids: list) -> dict[Any, dict[Any, Any]]:
@@ -239,15 +234,11 @@ class DatabaseHudStatsMixin:
         q = self.sql.query["get_cards"].replace("%s", ph).replace(f"handID = {ph}", f"handID IN {in_sql}")
         # get_cards does not select the hand id; add it to key the rows.
         q = q.replace("seatNo AS seat_number", "Hands.id AS hand_id, seatNo AS seat_number", 1)
-        try:
-            c = self.connection.cursor()
-            c.execute(q, in_params)  # nosemgrep
-            for row in c.fetchall():
-                hand_id = row[0]
-                result.setdefault(str(hand_id), {})[row[1]] = row[2:]
-        except Exception:
-            log.exception("get_cards_many failed")
-            self._rollback_after_failed_read()
+        c = self.connection.cursor()
+        c.execute(q, in_params)  # nosemgrep
+        for row in c.fetchall():
+            hand_id = row[0]
+            result.setdefault(str(hand_id), {})[row[1]] = row[2:]
         return result
 
     def get_common_cards_many(self, hand_ids: list) -> dict[Any, list]:
@@ -258,14 +249,10 @@ class DatabaseHudStatsMixin:
             return result
         in_sql, in_params = self._in_tuple(hand_ids)
         q = f"SELECT Id, boardcard1, boardcard2, boardcard3, boardcard4, boardcard5 FROM Hands WHERE Id IN {in_sql}"  # nosec B608  # nosemgrep
-        try:
-            c = self.connection.cursor()
-            c.execute(q, in_params)  # nosemgrep
-            for row in c.fetchall():
-                result[str(row[0])] = list(row[1:])
-        except Exception:
-            log.exception("get_common_cards_many failed")
-            self._rollback_after_failed_read()
+        c = self.connection.cursor()
+        c.execute(q, in_params)  # nosemgrep
+        for row in c.fetchall():
+            result[str(row[0])] = list(row[1:])
         return result
 
     def get_table_min_stack_bb_many(self, hand_ids: list) -> dict[Any, float | None]:
@@ -275,36 +262,32 @@ class DatabaseHudStatsMixin:
         if not hand_ids:
             return result
         in_sql, in_params = self._in_tuple(hand_ids)
-        try:
-            c = self.get_cursor()
-            c.execute(  # nosemgrep
-                (
-                    "SELECT h.id, gt.bigBlind FROM Hands h "  # nosec B608  # nosemgrep
-                    "INNER JOIN Gametypes gt ON h.gametypeId = gt.id "
-                    f"WHERE h.id IN {in_sql}"
-                ),
-                in_params,
-            )
-            big_blinds = {str(row[0]): float(row[1]) for row in c.fetchall() if row[1]}
-            c.execute(  # nosemgrep
-                (
-                    "SELECT handId, startCash, committed, winnings FROM HandsPlayers "  # nosec B608  # nosemgrep
-                    f"WHERE handId IN {in_sql} AND sitout = FALSE"
-                ),
-                in_params,
-            )
-            stacks: dict[Any, list] = {str(hand): [] for hand in hand_ids}
-            for hand_id, start_cash, committed, winnings in c.fetchall():
-                end_cash = float(start_cash) - float(committed) + float(winnings)
-                if end_cash > 0:
-                    stacks.setdefault(str(hand_id), []).append(end_cash)
-            for hand_id, blinds in big_blinds.items():
-                values = stacks.get(hand_id) or []
-                if blinds > 0 and values:
-                    result[hand_id] = min(values) / blinds
-        except Exception:
-            log.exception("get_table_min_stack_bb_many failed")
-            self._rollback_after_failed_read()
+        c = self.get_cursor()
+        c.execute(  # nosemgrep
+            (
+                "SELECT h.id, gt.bigBlind FROM Hands h "  # nosec B608  # nosemgrep
+                "INNER JOIN Gametypes gt ON h.gametypeId = gt.id "
+                f"WHERE h.id IN {in_sql}"
+            ),
+            in_params,
+        )
+        big_blinds = {str(row[0]): float(row[1]) for row in c.fetchall() if row[1]}
+        c.execute(  # nosemgrep
+            (
+                "SELECT handId, startCash, committed, winnings FROM HandsPlayers "  # nosec B608  # nosemgrep
+                f"WHERE handId IN {in_sql} AND sitout = FALSE"
+            ),
+            in_params,
+        )
+        stacks: dict[Any, list] = {str(hand): [] for hand in hand_ids}
+        for hand_id, start_cash, committed, winnings in c.fetchall():
+            end_cash = float(start_cash) - float(committed) + float(winnings)
+            if end_cash > 0:
+                stacks.setdefault(str(hand_id), []).append(end_cash)
+        for hand_id, blinds in big_blinds.items():
+            values = stacks.get(hand_id) or []
+            if blinds > 0 and values:
+                result[hand_id] = min(values) / blinds
         return result
 
     def _refresh_hand_1day_ago(self) -> None:

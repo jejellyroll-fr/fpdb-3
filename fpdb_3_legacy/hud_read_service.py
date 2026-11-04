@@ -508,15 +508,8 @@ class HudReadService:
             ("min_stack", "get_table_min_stack_bb_many"),
         )
         for key, method_name in batch_reads:
-            method = getattr(self.database, method_name, None)
-            if method is None:
-                continue
-            try:
-                data = method(list(hand_ids))
-            except Exception:
-                log.exception("Bulk HUD read %s failed; falling back to per-hand reads", method_name)
-                continue
-            if isinstance(data, dict):
+            data = self._batched(hand_ids, method_name)
+            if data is not None:
                 out[key] = data
         return out
 
@@ -533,14 +526,20 @@ class HudReadService:
             self.database.connection.rollback()
 
     def _batched(self, hand_ids, method_name: str):
-        """Call a bulk read if the backend has it and it returns a dict, else None."""
+        """Call a bulk read if the backend has it and it returns a dict, else None.
+
+        A failure gets the same treatment as any other read: a timeout or a lost
+        connection aborts the batch, anything else is rolled back so the per-hand
+        fallback does not run on an aborted PostgreSQL transaction.
+        """
         method = getattr(self.database, method_name, None)
         if method is None:
             return None
         try:
             data = method(list(hand_ids))
-        except Exception:
+        except Exception as exc:
             log.exception("Bulk HUD read %s failed; falling back to per-hand reads", method_name)
+            self._handle_read_error(exc)
             return None
         return data if isinstance(data, dict) else None
 
@@ -563,10 +562,6 @@ class HudReadService:
             try:
                 key = _hand_key(hand_id)
                 table_info = table_infos.get(key) if table_infos is not None else self.database.get_table_info(hand_id)
-                if table_info is None and table_infos is None:
-                    table_info = self.database.get_table_info(hand_id)
-                if table_infos is not None and key not in table_infos:
-                    table_info = None
             except Exception as exc:
                 self._handle_read_error(exc)
                 log.exception("HUD primary preload failed for hand %s", hand_id)

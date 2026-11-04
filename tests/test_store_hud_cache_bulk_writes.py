@@ -11,7 +11,9 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from fpdb_3_legacy import Database, db_profile, latency_profile
+import pytest
+
+from fpdb_3_legacy import Database, database_caches, db_profile, latency_profile
 
 CACHE_KEYS = Database.CACHE_KEYS
 HUDCACHE_EXTRA_KEYS = Database.HUDCACHE_EXTRA_KEYS
@@ -203,3 +205,21 @@ def test_hudcache_updates_never_go_through_executemany(fresh_db, monkeypatch) ->
     # the second flush updated the existing row via execute, not executemany
     (row,) = rows(fresh_db, "SELECT n FROM HudCache WHERE playerId = 11")
     assert row[0] == 2
+
+
+@pytest.mark.parametrize("tourney_type_id", [None, 3])
+def test_a_large_flush_splits_its_lookup_and_still_accumulates(fresh_db, monkeypatch, tourney_type_id) -> None:
+    """One statement for every key of a large file would pass the backend's parameter limit."""
+    monkeypatch.setattr(database_caches, "HUDCACHE_LOOKUP_CHUNK", 2)
+    game = RING if tourney_type_id is None else TOUR
+    pids = {f"P{i}": 100 + i for i in range(5)}
+    for _ in range(2):
+        pdata = {name: player_stats(position=0, tourney_type_id=tourney_type_id) for name in pids}
+        fresh_db.storeHudCache(7, game, pids, datetime(2026, 7, 20, 14, 30), pdata, doinsert=True)
+        fresh_db.hcbulk = {}
+
+    assert rows(fresh_db, "SELECT playerId, n FROM HudCache ORDER BY playerId") == [(pid, 2) for pid in pids.values()]
+
+
+def test_the_lookup_chunk_stays_under_the_oldest_sqlite_limit() -> None:
+    assert database_caches.HUDCACHE_LOOKUP_CHUNK * 6 <= 999

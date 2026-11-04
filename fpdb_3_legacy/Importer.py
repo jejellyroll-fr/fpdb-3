@@ -456,14 +456,15 @@ class Importer:
             # server connection builds its own from the server's db-server. The
             # path is the one Database resolved under dir_database, not the raw
             # local_path, so the worker opens the file the importer writes.
-            self._local_first_sync = LocalFirstSync(
+            # Running from construction so both runImport() and the live
+            # runUpdated()/_run_updated_cycle() auto-import path are covered. The
+            # worker can outlive this Importer, so it holds the config, not self.
+            config = self.config
+            self._local_first_sync = LocalFirstSync.shared(
                 self.database,
-                lambda: Database.Database(ServerConfigView(self.config)),
-                local_db_path=self.database.db_path,
+                lambda: Database.Database(ServerConfigView(config)),
+                self.database.db_path,
             )
-            # Start at construction so both runImport() and the live
-            # runUpdated()/_run_updated_cycle() auto-import path are covered.
-            self._local_first_sync.start()
             log.info(
                 "Local-first sync enabled: writing %s, pushing to server %s",
                 self.config.get_db_parameters().get("db-local-path"),
@@ -694,7 +695,7 @@ class Importer:
         """
         sync = getattr(self, "_local_first_sync", None)
         if sync is not None:
-            sync.stop()
+            sync.release()
             self._local_first_sync = None
         databases = [getattr(self, "database", None), *(getattr(self, "writerdbs", None) or [])]
         self.writerdbs = []

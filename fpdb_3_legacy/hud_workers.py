@@ -73,7 +73,8 @@ def _merge_batch_requests(older: HudBatchReadRequest, newer: HudBatchReadRequest
         hand_ids=hand_ids,
         hud_params=newer.hud_params,
         tables=tuple(tables_by_key.values()),
-        submitted_at=newer.submitted_at,
+        # The oldest wait: hud_queue_wait is what says whether the queue is growing.
+        submitted_at=min(older.submitted_at, newer.submitted_at),
     )
 
 

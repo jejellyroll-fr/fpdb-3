@@ -27,6 +27,12 @@ HANDS_ROW_SESSION_ID = 5
 
 log = get_logger("db")
 
+# Keys per grouped HudCache lookup. A flush at the end of a large file can hold
+# tens of thousands, and one statement for all of them passes the bound-parameter
+# limit of the backend: at 6 parameters a key this stays under the 999 of the
+# oldest SQLite builds. A live flush holds far fewer, so it is still one statement.
+HUDCACHE_LOOKUP_CHUNK = 150
+
 CACHE_KEYS = [
     "n",
     "street0VPIChance",
@@ -564,17 +570,19 @@ class DatabaseCachesMixin:
 
                 found: dict[tuple, Any] = {}
                 c = self.get_cursor()
-                if ring_keys:
-                    tuples = ",".join(["(%s, %s, %s, %s, %s)"] * len(ring_keys))
+                for start in range(0, len(ring_keys), HUDCACHE_LOOKUP_CHUNK):
+                    chunk = ring_keys[start : start + HUDCACHE_LOOKUP_CHUNK]
+                    tuples = ",".join(["(%s, %s, %s, %s, %s)"] * len(chunk))
                     q = ring_bulk.replace("<tuples>", tuples).replace("%s", placeholder)
-                    params = [v for k in ring_keys for v in (k[0], k[1], k[2], k[3], k[5])]
+                    params = [v for k in chunk for v in (k[0], k[1], k[2], k[3], k[5])]
                     c.execute(q, params)  # nosemgrep
                     for row in c.fetchall():
                         found[(row[1], row[2], row[3], row[4], None, row[5])] = row[0]
-                if tour_keys:
-                    tuples = ",".join(["(%s, %s, %s, %s, %s, %s)"] * len(tour_keys))
+                for start in range(0, len(tour_keys), HUDCACHE_LOOKUP_CHUNK):
+                    chunk = tour_keys[start : start + HUDCACHE_LOOKUP_CHUNK]
+                    tuples = ",".join(["(%s, %s, %s, %s, %s, %s)"] * len(chunk))
                     q = tour_bulk.replace("<tuples>", tuples).replace("%s", placeholder)
-                    params = [v for k in tour_keys for v in k]
+                    params = [v for k in chunk for v in k]
                     c.execute(q, params)  # nosemgrep
                     for row in c.fetchall():
                         found[tuple(row[1:])] = row[0]

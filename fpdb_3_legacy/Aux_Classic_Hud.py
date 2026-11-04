@@ -546,7 +546,9 @@ class ClassicStat(Aux_Hud.SimpleStat):
         Returns:
             None.
         """
-        super().update(player_id, stat_dict)
+        # Not super().update(): it writes the bare value to the label, which the
+        # render skip below would then leave there instead of the decorated text.
+        self._load_number(player_id, stat_dict)
 
         if not self.number:  # stat did not create, so exit now
             return
