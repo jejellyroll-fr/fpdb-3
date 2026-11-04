@@ -1,8 +1,9 @@
 # #680 — Live HUD freezes at high table counts: investigation kit and first remediations
 
-Status: instrumentation + benchmark harness + three measured remediations landed.
-The PokerStars-side reproduction (P0 checklist below) still needs the reporter's
-machine; everything else is runnable from this branch.
+Status: instrumentation, benchmark harness, four remediations (R1-R4) and an
+opt-in local-first mode landed. The PokerStars-side reproduction (P0 checklist
+below) still needs the reporter's machine; everything else is runnable from this
+branch.
 
 ## What this branch delivers
 
@@ -34,7 +35,7 @@ Metrics wired into the live path:
 | `hud_snapshot_apply` | `HudMain._on_db_snapshot` | Qt-side apply/render time, separate from the worker |
 | `hud_refresh_secondary` | `_refresh_secondary_hud` | one secondary-table stats refresh (all its redraws) |
 | `hud_update_gui` / `hud_resize_windows` / `hud_move_windows` | `Aux_Base` on the UI thread | stats-driven repaint, geometry pass, window moves |
-| `hud_window_moves` / `hud_window_moves_skipped` (counters) | `Aux_Base._move_if_needed` | real vs no-op QWidget.move() calls -- the #680 logs showed 35+ no-op moves per burst |
+| `hud_window_moves` / `hud_window_moves_skipped` (counters) | `Aux_Base.move_if_needed` | real vs no-op QWidget.move() calls -- the #680 logs showed 35+ no-op moves per burst |
 | `hud_stat_cells_rendered` / `hud_stat_cells_skipped` (counters) | `ClassicStat.update` | stat cells actually re-rendered (setText+stylesheet+tooltip) vs skipped because the displayed value/color was unchanged |
 | `qt_event_loop_lag` | `check_tables` 800 ms timer | how late the UI-thread timer runs; the cheapest event-loop lag proxy |
 | `hudcache_lookup` / `hudcache_update` / `hudcache_insert` (counters), `hudcache_write` | `storeHudCache` | cache write round trips per import batch |
@@ -342,7 +343,7 @@ slow.
 
 Measured facts this rests on: round trips per HUD refresh round scale with table
 count and each one costs a network RTT on a remote DB (~22 statements/table
-before R4, ~10 after); writer contention produces the multi-second tail on
+before R4, ~15 after); writer contention produces the multi-second tail on
 SQLite (single writer) and MySQL/InnoDB (p95 1.4-1.6 s at 8 tables + import,
 even on loopback) but not on PostgreSQL (MVCC, ~184 ms p95); no point query
 seq-scans at this scale on any backend.
@@ -350,7 +351,7 @@ seq-scans at this scale on any backend.
 | situation | recommendation | why (measured) |
 |---|---|---|
 | DB on a separate LAN server, multi-table cash | **PostgreSQL**, HUD worker timeouts already applied (R2-style) | readers never block the writer; per-query 2-3x faster than MySQL on loopback |
-| DB remote, MySQL kept | acceptable with R2 session timeouts; expect worse tail under import load; keep import transactions short | MySQL p95 135 ms at 8 tables after R4 vs 133 ms PG; before R4 it was 1.5 s |
+| DB remote, MySQL kept | acceptable with R2 session timeouts; expect worse tail under import load; keep import transactions short | with import on at 8 tables after R4, MySQL p95 is 801 ms and PostgreSQL 605-753 ms; both noisy on the bench machine, so R4's solid gain is the round trips |
 | local SQLite, <= 2-3 tables | fine as-is | p95 ~20 ms at 8 tables without import; single-writer tail only bites with concurrent import at 6+ tables |
 | local SQLite, 6+ tables + auto-import | move the DB to a server backend, or pause auto-import while playing | SQLite p95 1.4 s at 8 tables with import on, even locally |
 | very large production DB | additionally: read replica / standby for the HUD reader, and a covering index on HudCache(playerId, ...) if EXPLAIN shows heap-fetch pressure | only seq scans found are whole-table dumps; covering index deferred until a big-DB plan shows it |
@@ -373,7 +374,8 @@ Code-side architecture choices shipped in this PR:
 
 Not shipped (needs the reporter's live `hud_queue_wait` first): splitting the
 worker into an active-table lane and a background lane; moving the HUD reader to
-a PostgreSQL read replica; local-first SQLite with deferred sync to the server.
+a PostgreSQL read replica. Local-first SQLite with deferred sync to the server is
+shipped, off by default: see `docs/680-local-first-design.md`.
 
 ## Architecture exploration for this case: LAN + distributed DB, OLAP vs OLTP, embedded
 
@@ -440,9 +442,10 @@ single-writer model plus checkpointing shows up in the tail (measured above).
 A server database will not by itself fix expensive queries, excessive round
 trips, or a HUD queue that grows faster than it drains.
 
-## Deliberately not done (P2)
+## P2: shipped in a limited form
 
-Prioritising active-table updates over secondary-table refreshes, and bounding
-secondary work per batch, are only worth doing if the reporter's
-`hud_queue_wait` shows the queue growing during multitabling. They touch refresh
-policy and stale-stat display, so they need that evidence first.
+The most recently notified table is read first, and
+`max_secondary_tables_per_batch` can bound secondary work per batch; it stays at
+0 (no cap) unless configured, because a cap can leave displayed stats stale. Use
+it only if the reporter's `hud_queue_wait` shows the queue growing during
+multitabling. A separate worker lane for the active table is not implemented.
