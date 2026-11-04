@@ -10,9 +10,10 @@ import sys
 from collections.abc import Callable
 from decimal import Decimal
 from importlib import import_module
-from time import sleep, time
+from time import perf_counter, sleep, time
 from typing import TYPE_CHECKING, Any
 
+from fpdb_3_legacy import latency_profile
 from fpdb_3_legacy.database_schema import DB_VERSION
 from fpdb_3_legacy.db_reconnect import (
     MYSQL_NETWORK_KWARGS,
@@ -118,9 +119,13 @@ class DatabaseTransaction:
 
     def __init__(self, db: Any) -> None:
         self.db = db
+        self._latency_start: Any = None
 
     def __enter__(self) -> "DatabaseTransaction":
         self.db._in_transaction += 1
+        # Remembered only when the latency profile is on, so the default path
+        # pays nothing (#680).
+        self._latency_start = perf_counter() if latency_profile.is_enabled() else None  # pylint: disable=attribute-defined-outside-init
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
@@ -140,8 +145,14 @@ class DatabaseTransaction:
                 log.exception(f"Rollback failed: {e}")
         else:
             if self.db._in_transaction == 0:
+                started = getattr(self, "_latency_start", None)
+                if started is not None:
+                    latency_profile.record("db_txn_total", perf_counter() - started)
                 try:
+                    commit_started = perf_counter()
                     self.db.commit(force=True)
+                    if started is not None:
+                        latency_profile.record("db_commit", perf_counter() - commit_started)
                 except (
                     Exception
                 ) as e:  # intentional broad catch: transaction commit during teardown; rolls back then re-raises
@@ -460,19 +471,19 @@ class DatabaseConnectionMixin:
                     ("Some database functions will not work without NumPy support"),
                 )
             self.cursor = self.connection.cursor()
-            self.cursor.execute(
+            self.cursor.execute(  # nosemgrep
                 "PRAGMA temp_store=2",
             )  # use memory for temp tables/indexes
-            self.cursor.execute(
+            self.cursor.execute(  # nosemgrep
                 "PRAGMA journal_mode=WAL",
             )  # use memory for temp tables/indexes
-            self.cursor.execute(
+            self.cursor.execute(  # nosemgrep
                 SQLITE_SYNCHRONOUS_PRAGMA,
             )  # crash-safe in WAL mode, see SQLITE_SYNCHRONOUS_PRAGMA
-            self.cursor.execute(
+            self.cursor.execute(  # nosemgrep
                 "PRAGMA busy_timeout=60000",
             )  # wait up to 60 seconds for locks
-            self.cursor.execute(
+            self.cursor.execute(  # nosemgrep
                 "PRAGMA cache_size=10000",
             )  # increase cache size for better performance
         else:

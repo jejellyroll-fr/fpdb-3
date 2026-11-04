@@ -91,6 +91,16 @@ def _preserve_85_to_86(doc, template) -> None:
     del doc, template
 
 
+def _preserve_86_to_87(doc, template) -> None:
+    """Advance to v87 without touching user settings (#680).
+
+    v87 only adds optional database attributes (local_first/local_path) that
+    default to off when absent, so an existing configuration keeps its document
+    intact and simply gains the new schema version.
+    """
+    del doc, template
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {n.getAttribute("name") for n in doc.getElementsByTagName("aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -109,6 +119,7 @@ MIGRATIONS = (
     (83, 84, _merge_83_to_84),
     (84, 85, _preserve_84_to_85),
     (85, 86, _preserve_85_to_86),
+    (86, 87, _preserve_86_to_87),
 )
 
 

@@ -31,7 +31,7 @@ import zmq as _zmq
 from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout
 
-from fpdb_3_legacy import Configuration, Database, IdentifySite, db_profile, import_prefetch
+from fpdb_3_legacy import Configuration, Database, IdentifySite, db_profile, import_prefetch, latency_profile
 from fpdb_3_legacy.equity import load_poker_eval
 from fpdb_3_legacy.Exceptions import (
     FpdbHandDuplicate,
@@ -254,7 +254,6 @@ class ZMQSender:
                 self.context.term()
 
 
-
 @dataclass(frozen=True)
 class FileImportResult:
     """What one file of the last bulk import gave, kept for per-room summaries (#612)."""
@@ -445,6 +444,32 @@ class Importer:
 
         self.writeq = None
         self.database = Database.Database(self.config, sql=self.sql)
+        # Local-first (#680): when the config switches the effective database to
+        # the embedded local SQLite, push imported hands asynchronously to the
+        # configured server database. Activated only when the measured LAN RTT
+        # justifies it (see docs/680-local-first-design.md).
+        self._local_first_sync = None
+        if self.config.get_db_parameters().get("db-local-first") == "1":
+            from fpdb_3_legacy.local_first_sync import LocalFirstSync, ServerConfigView
+
+            # self.sql is the local SQLite catalogue (its "?" placeholder): the
+            # server connection builds its own from the server's db-server. The
+            # path is the one Database resolved under dir_database, not the raw
+            # local_path, so the worker opens the file the importer writes.
+            # Running from construction so both runImport() and the live
+            # runUpdated()/_run_updated_cycle() auto-import path are covered. The
+            # worker can outlive this Importer, so it holds the config, not self.
+            config = self.config
+            self._local_first_sync = LocalFirstSync.shared(
+                self.database,
+                lambda: Database.Database(ServerConfigView(config)),
+                self.database.db_path,
+            )
+            log.info(
+                "Local-first sync enabled: writing %s, pushing to server %s",
+                self.config.get_db_parameters().get("db-local-path"),
+                self.config.get_db_parameters().get("db-host"),
+            )
         # Explicit ids copied into PostgreSQL do not advance BIGSERIAL. Repair
         # every owned id sequence before auto/bulk import starts inserting rows.
         with self.database.transaction():
@@ -668,6 +693,10 @@ class Importer:
         something else has already gone wrong, so one connection that refuses
         must not strand the others behind it.
         """
+        sync = getattr(self, "_local_first_sync", None)
+        if sync is not None:
+            sync.release()
+            self._local_first_sync = None
         databases = [getattr(self, "database", None), *(getattr(self, "writerdbs", None) or [])]
         self.writerdbs = []
         for database in databases:
@@ -677,6 +706,19 @@ class Importer:
                 database.close_connection()
             except Exception:  # noqa: BLE001 - one bad handle must not keep the rest open
                 log.exception("Could not close an importer database connection")
+
+    def _mark_outbox(self) -> None:
+        """Register the hands just committed in the local-first outbox (#680).
+
+        ``database.hids`` holds the ids inserted by the last bulk commit, so this
+        runs right after a successful hand import, inside the same process.
+        """
+        sync = getattr(self, "_local_first_sync", None)
+        if sync is None:
+            return
+        hids = list(getattr(self.database, "hids", []) or [])
+        if hids:
+            sync.mark(hids)
 
     def logImport(self, type, file, stored, dups, partial, skipped, errs, ttime, id) -> None:
         """Log the results of an import operation to the database.
@@ -974,6 +1016,9 @@ class Importer:
         Returns:
             tuple: A tuple containing the number of stored, duplicate, partial, skipped, and error hands, and the total import duration in seconds.
         """
+        if self._local_first_sync is not None:
+            self._local_first_sync.start()
+
         # Initial setup
         start = datetime.datetime.now()
         starttime = time()
@@ -1077,8 +1122,7 @@ class Importer:
 
         # prepare progress popup window
         has_callbacks = all(
-            callback is not None
-            for callback in (self.progress_start_cb, self.progress_update_cb, self.progress_end_cb)
+            callback is not None for callback in (self.progress_start_cb, self.progress_update_cb, self.progress_end_cb)
         )
 
         if not has_callbacks:
@@ -1104,6 +1148,8 @@ class Importer:
                     (stored, duplicates, partial, skipped, errors, ttime, detected) = self._import_despatch(
                         self.filelist[f]
                     )
+                    # Periodic latency report when FPDB_LATENCY_LOG_INTERVAL is set (#680).
+                    latency_profile.maybe_log()
                     # The parser's room when it found one: a PokerTracker-format file is
                     # identified as "PokerTracker" and only parsing tells Merge from Everest.
                     room = detected if isinstance(detected, str) and detected else _site_name(self.filelist[f])
@@ -1241,6 +1287,8 @@ class Importer:
         if fpdbfile.ftype == "phh":
             (stored, duplicates, partial, skipped, errors, ttime) = self._import_phh_file(fpdbfile)
             detected_sitename = PHH_SITE_NAME
+        # Before the summary below: it resets the bulk buffers, database.hids included.
+        self._mark_outbox()
         if fpdbfile.ftype == "both" and fpdbfile.path not in self.updatedsize:
             self._import_summary_file(fpdbfile)
         #    pass
@@ -1266,7 +1314,14 @@ class Importer:
 
     def _import_phh_file(self, fpdbfile):
         """Import a PHH file (#381): partial histories count as partial, unsupported as skipped, malformed as errors."""
-        result = import_phh_file(self.database, self.config, fpdbfile.path, file_id=fpdbfile.fileId or 0)
+        sync = getattr(self, "_local_first_sync", None)
+        result = import_phh_file(
+            self.database,
+            self.config,
+            fpdbfile.path,
+            file_id=fpdbfile.fileId or 0,
+            on_stored=sync.mark if sync is not None else None,
+        )
         self.phh_results[fpdbfile.path] = result
         log.info(result.summary())
         for error in result.errors:
@@ -1610,7 +1665,9 @@ class Importer:
                                     log.debug(f"DEBUG: Calling report_hand_success for hand {hand.handid}")
                                     self.hand_data_reporter.report_hand_success(fpdbfile.path, hand)
                                     log.debug(f"DEBUG: report_hand_success completed for hand {hand.handid}")
-                                except Exception as e:  # intentional broad catch: reporter callback must not abort import.
+                                except (
+                                    Exception
+                                ) as e:  # intentional broad catch: reporter callback must not abort import.
                                     log.exception(f"DEBUG: Exception in report_hand_success: {e}")
 
                         except FpdbHandDuplicate as e:
@@ -1648,7 +1705,9 @@ class Importer:
                                     hand,
                                 )
 
-                        except Exception as e:  # intentional broad catch: per-hand import errors are counted and skipped.
+                        except (
+                            Exception
+                        ) as e:  # intentional broad catch: per-hand import errors are counted and skipped.
                             import traceback
 
                             errors += 1
@@ -1667,7 +1726,9 @@ class Importer:
                                 enriched_error = Exception(str(e))
                                 enriched_error.full_traceback = full_traceback
                                 self.hand_data_reporter.report_hand_failure(
-                                    fpdbfile.path, enriched_error, hand.handText[:500] if hasattr(hand, "handText") else ""
+                                    fpdbfile.path,
+                                    enriched_error,
+                                    hand.handText[:500] if hasattr(hand, "handText") else "",
                                 )
                             else:
                                 log.exception(f"'{hand.handText[0:200]}'")

@@ -1076,7 +1076,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
                 common_x = self.hud.layout.common[0] + table_x
                 common_y = self.hud.layout.common[1] + table_y
                 clamped_x, clamped_y = Aux_Base.clamp_to_screen(common_x, common_y)
-                window.move(clamped_x, clamped_y)
+                Aux_Base.move_if_needed(window, clamped_x, clamped_y)
                 continue
 
             if not isinstance(key, tuple):
@@ -1086,7 +1086,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
             seat, block_index = key
             canon = self._canonical_for(key)
             screen_x, screen_y = self._canonical_to_screen(canon)
-            window.move(screen_x, screen_y)
+            Aux_Base.move_if_needed(window, screen_x, screen_y)
             window._pos_gen = getattr(self.hud, "geometry_generation", 0)
             self._log_block_window_position("move", seat, block_index, canon, (screen_x, screen_y))
 
@@ -1535,7 +1535,8 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             self.hide()
             return
 
-        self.show()
+        if not self.isVisible():  # #680: show() on a visible window still costs an expose/repaint
+            self.show()
 
         player_pos = ""
         if pdata is not None:
@@ -1625,6 +1626,13 @@ class SimpleStat:
             player_id: The unique identifier of the player.
             stat_dict: A dictionary containing statistics for all players.
         """
+        self._load_number(player_id, stat_dict)
+        if self.number:
+            self.lab.setText(str(self.number[1]))
+        self._apply_color_range()
+
+    def _load_number(self, player_id: int | str | None, stat_dict: dict) -> None:
+        """Recalculate ``self.number`` for a player without touching the label."""
         self.stat_dict = stat_dict  # So the Simple_stat obj always has a fresh stat_dict
         self.lab.stat_dict = stat_dict
 
@@ -1646,8 +1654,6 @@ class SimpleStat:
                     "",
                     value.tooltip() if value is not None else str(self.stat),
                 )
-                self.lab.setText(str(text))
-                self._apply_color_range()
                 return
 
         # Two scopes, both computed in Stats (the single source of truth), never
@@ -1667,9 +1673,6 @@ class SimpleStat:
                 self.stat,
                 self.hud.hand_instance,
             )
-        if self.number:
-            self.lab.setText(str(self.number[1]))
-        self._apply_color_range()
 
     def _analytics_session(self) -> Any:
         """The table's analytics session, or ``None`` when this profile has none.
@@ -1850,7 +1853,7 @@ class SimpleTableMW(Aux_Base.SeatWindow):
         pos_x = table_x + self.aw.xshift
         pos_y = table_y + self.aw.yshift
         clamped_x, clamped_y = Aux_Base.clamp_to_screen(pos_x, pos_y)
-        self.move(clamped_x, clamped_y)
+        Aux_Base.move_if_needed(self, clamped_x, clamped_y)
 
 
 class SimpleTablePopupMenu(QWidget):

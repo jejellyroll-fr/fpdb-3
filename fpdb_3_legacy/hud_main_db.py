@@ -8,7 +8,7 @@ import contextlib
 
 from PySide6.QtCore import QTimer
 
-from fpdb_3_legacy import db_profile
+from fpdb_3_legacy import db_profile, latency_profile
 from fpdb_3_legacy.db_reconnect import is_connection_lost
 from fpdb_3_legacy.hud_main_base import HudMainBase, log
 from fpdb_3_legacy.hud_read_service import (
@@ -189,6 +189,12 @@ class HudMainDbMixin(HudMainBase):
 
     def _on_db_snapshot(self, snapshot: HudBatchSnapshot) -> None:
         """Apply a database-free snapshot on the Qt thread."""
+        # Timed so a freeze can be attributed to the worker (queue/batch) or to
+        # the Qt side (snapshot apply and repaint) separately (#680).
+        with latency_profile.scope("hud_snapshot_apply"):
+            self._apply_db_snapshot(snapshot)
+
+    def _apply_db_snapshot(self, snapshot: HudBatchSnapshot) -> None:
         if self._shutdown_started:
             return
         if snapshot.sequence < self._last_applied_sequence:

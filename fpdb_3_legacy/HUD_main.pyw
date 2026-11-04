@@ -489,7 +489,12 @@ class HudMain(
             self._deferred_hands: list[str] = []
             self._hand_batch_timer = QTimer(self)
             self._hand_batch_timer.setSingleShot(True)
-            self._hand_batch_timer.setInterval(HAND_BATCH_INTERVAL_MS)
+            # Configurable since #680: hud ui hand_batch_interval_ms overrides
+            # the built-in default, so a many-table profile can trade display
+            # delay for fewer database round trips per burst.
+            self._hand_batch_timer.setInterval(
+                int(self.hud_params.get("hand_batch_interval_ms", HAND_BATCH_INTERVAL_MS))
+            )
             self._hand_batch_timer.timeout.connect(self._drain_pending_hands)
 
             self._cleanup_timer = QTimer(self)

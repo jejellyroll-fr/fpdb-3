@@ -41,6 +41,10 @@ class Database:
         self.db_pass = node.getAttribute("db_pass")
         self.db_path = node.getAttribute("db_path")
         self.db_selected = string_to_bool(node.getAttribute("default"), default=False)
+        # Local-first (#680): when enabled, the HUD/import run on an embedded
+        # SQLite at local_path and push asynchronously to this server database.
+        self.local_first = string_to_bool(node.getAttribute("local_first") or "0", default=False)
+        self.local_path = node.getAttribute("local_path") or "fpdb-local.sqlite3"
         log.debug(
             f"Database db_name:'{self.db_name}'  db_server:'{self.db_server}'  db_ip:'{self.db_ip}'  db_port:'{self.db_port}' db_user:'{self.db_user}'  db_pass (not logged)  selected:'{self.db_selected}'",
         )
@@ -107,6 +111,45 @@ class ConfigDatabasesMixin(ConfigBase):
             log.exception(f"Error retrieving backend for {name}: {e!s}")
             db["db-backend"] = None
 
+        node = self.supported_databases[name]
+        db["db-local-first"] = "1" if getattr(node, "local_first", False) else "0"
+        db["db-local-path"] = getattr(node, "local_path", "fpdb-local.sqlite3")
+        if getattr(node, "local_first", False):
+            # Effective database = the embedded local SQLite; the server params
+            # above stay available via get_server_db_parameters() for the push.
+            db.update(
+                {
+                    "db-server": "sqlite",
+                    "db-backend": 4,
+                    "db-databaseName": db["db-local-path"],
+                    "db-path": "",
+                    "db-host": "localhost",
+                }
+            )
+
+        return db
+
+    def get_server_db_parameters(self) -> dict[str, Any]:
+        """The configured server database parameters, for the local-first push.
+
+        Only meaningful when get_db_parameters()["db-local-first"] == "1".
+        """
+        db: dict[str, Any] = {}
+        name = self.db_selected
+        if name not in self.supported_databases:
+            return db
+        node = self.supported_databases[name]
+        db["db-databaseName"] = name
+        db["db-host"] = getattr(node, "db_ip", None)
+        db["db-port"] = getattr(node, "db_port", None)
+        db["db-user"] = getattr(node, "db_user", None)
+        db["db-password"] = getattr(node, "db_pass", None)
+        db["db-server"] = getattr(node, "db_server", None)
+        db["db-path"] = getattr(node, "db_path", None)
+        try:
+            db["db-backend"] = self.get_backend(node.db_server)
+        except (AttributeError, KeyError):
+            db["db-backend"] = None
         return db
 
     @staticmethod

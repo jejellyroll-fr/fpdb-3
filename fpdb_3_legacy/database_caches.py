@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytz
 
-from fpdb_3_legacy import hud_day
+from fpdb_3_legacy import hud_day, latency_profile
 from fpdb_3_legacy.action_enum_stats import CACHE_KEYS as ACTION_ENUM_CACHE_KEYS
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -26,6 +26,12 @@ HANDS_ROW_TOURNEY_ID = 3
 HANDS_ROW_SESSION_ID = 5
 
 log = get_logger("db")
+
+# Keys per grouped HudCache lookup. A flush at the end of a large file can hold
+# tens of thousands, and one statement for all of them passes the bound-parameter
+# limit of the backend: at 6 parameters a key this stays under the 999 of the
+# oldest SQLite builds. A live flush holds far fewer, so it is still one statement.
+HUDCACHE_LOOKUP_CHUNK = 150
 
 CACHE_KEYS = [
     "n",
@@ -541,50 +547,69 @@ class DatabaseCachesMixin:
                     self.hcbulk[k] = line
 
         if doinsert:
-            update_hudcache = self.sql.query["update_hudcache"]
-            update_hudcache = update_hudcache.replace(
-                "%s",
-                self.sql.query["placeholder"],
-            )
-            insert_hudcache = self.sql.query["insert_hudcache"]
-            insert_hudcache = insert_hudcache.replace(
-                "%s",
-                self.sql.query["placeholder"],
-            )
+            # One lookup per cache family plus one batched UPDATE and one
+            # batched INSERT, instead of a SELECT and an UPDATE per entry: with
+            # the database on another machine each of those round trips cost a
+            # network latency per player per table (#680). The accumulation
+            # semantics are unchanged -- update_hudcache still adds the buffered
+            # line to the stored one, and entries with no stored row are inserted.
+            with latency_profile.scope("hudcache_write"):
+                placeholder = self.sql.query["placeholder"]
+                update_hudcache = self.sql.query["update_hudcache"].replace("%s", placeholder)
+                insert_hudcache = self.sql.query["insert_hudcache"].replace("%s", placeholder)
+                ring_bulk = self.sql.query["select_hudcache_ring_bulk"]
+                tour_bulk = self.sql.query["select_hudcache_tour_bulk"]
 
-            select_hudcache_ring = self.sql.query["select_hudcache_ring"]
-            select_hudcache_ring = select_hudcache_ring.replace(
-                "%s",
-                self.sql.query["placeholder"],
-            )
-            select_hudcache_tour = self.sql.query["select_hudcache_tour"]
-            select_hudcache_tour = select_hudcache_tour.replace(
-                "%s",
-                self.sql.query["placeholder"],
-            )
-            inserts = []
-            c = self.get_cursor()
-            for k, item in list(self.hcbulk.items()):
-                if not k[4]:
-                    q = select_hudcache_ring
-                    row = [*list(k[:4]), k[-1]]
-                else:
-                    q = select_hudcache_tour
-                    row = list(k)
+                def _ring_key(k):
+                    # Ring rows store tourneyTypeId as NULL; a falsy id in the
+                    # key (None or 0) means the ring family either way.
+                    return (k[0], k[1], k[2], k[3], None, k[5])
 
-                c.execute(q, row)
-                result = c.fetchone()
-                if result:
-                    id = result[0]
-                    update = [*item, id]
-                    c.execute(update_hudcache, update)
+                ring_keys = [k for k in self.hcbulk if not k[4]]
+                tour_keys = [k for k in self.hcbulk if k[4]]
 
-                else:
-                    inserts.append(list(k) + item)
+                found: dict[tuple, Any] = {}
+                c = self.get_cursor()
+                for start in range(0, len(ring_keys), HUDCACHE_LOOKUP_CHUNK):
+                    chunk = ring_keys[start : start + HUDCACHE_LOOKUP_CHUNK]
+                    tuples = ",".join(["(%s, %s, %s, %s, %s)"] * len(chunk))
+                    q = ring_bulk.replace("<tuples>", tuples).replace("%s", placeholder)
+                    params = [v for k in chunk for v in (k[0], k[1], k[2], k[3], k[5])]
+                    c.execute(q, params)  # nosemgrep
+                    for row in c.fetchall():
+                        found[(row[1], row[2], row[3], row[4], None, row[5])] = row[0]
+                for start in range(0, len(tour_keys), HUDCACHE_LOOKUP_CHUNK):
+                    chunk = tour_keys[start : start + HUDCACHE_LOOKUP_CHUNK]
+                    tuples = ",".join(["(%s, %s, %s, %s, %s, %s)"] * len(chunk))
+                    q = tour_bulk.replace("<tuples>", tuples).replace("%s", placeholder)
+                    params = [v for k in chunk for v in k]
+                    c.execute(q, params)  # nosemgrep
+                    for row in c.fetchall():
+                        found[tuple(row[1:])] = row[0]
+                latency_profile.count("hudcache_lookup", len(self.hcbulk))
 
-            if inserts:
-                self.executemany(c, insert_hudcache, inserts)
-            self.commit()
+                updates = []
+                inserts = []
+                for k, item in list(self.hcbulk.items()):
+                    row_id = found.get(k if k[4] else _ring_key(k))
+                    if row_id is not None:
+                        updates.append([*item, row_id])
+                    else:
+                        inserts.append(list(k) + item)
+
+                if updates:
+                    # Never through executemany: on PostgreSQL with a bulk path
+                    # that helper converts every statement into COPY and rejects
+                    # UPDATE (#680). One execute per row stays a round trip only
+                    # in bulk-import mode; live auto-import has no bulk path.
+                    for update in updates:
+                        c.execute(update_hudcache, update)  # nosemgrep
+                    latency_profile.count("hudcache_update", len(updates))
+                if inserts:
+                    self.executemany(c, insert_hudcache, inserts)
+                    latency_profile.count("hudcache_insert", len(inserts))
+                self.commit()
+
     def storeSessions(self, hid, pids, startTime, tid, heroes, tz_name, doinsert=False) -> None:
         """Update cached sessions. If no record exists, do an insert."""
         THRESHOLD = timedelta(seconds=int(self.sessionTimeout * 60))
@@ -729,13 +754,12 @@ class DatabaseCachesMixin:
                 upper = self.s["bk"][i]["sessionEnd"] + THRESHOLD
                 tourneys = self.s["bk"][i]["tourneys"]
                 if self.s["bk"][i]["tourneys"]:
-                    toursql = "OR SC.id in (SELECT DISTINCT sessionId FROM Tourneys T WHERE T.id in ({}))".format(
-                        ", ".join(str(t) for t in tourneys)
-                    )
+                    tour_ids = ", ".join(str(t) for t in tourneys)
+                    toursql = f"OR SC.id in (SELECT DISTINCT sessionId FROM Tourneys T WHERE T.id in ({tour_ids}))"  # nosec B608  # nosemgrep
                     q = select_S.replace("<TOURSELECT>", toursql)
                 else:
                     q = select_S.replace("<TOURSELECT>", "")
-                c.execute(q, (lower, upper))
+                c.execute(q, (lower, upper))  # nosemgrep
                 r = self.fetchallDict(
                     c,
                     [
@@ -783,7 +807,7 @@ class DatabaseCachesMixin:
                     if updateW or updateM:
                         self.wmnew.add((wid, mid))
                     if update:
-                        c.execute(update_S, [wid, mid, start, end, r[0]["id"]])
+                        c.execute(update_S, [wid, mid, start, end, r[0]["id"]])  # nosemgrep
                     for h in self.s["bk"][i]["ids"]:
                         self.s[h] = {"id": r[0]["id"], "wid": wid, "mid": mid}
                 elif num > 1:
@@ -812,7 +836,7 @@ class DatabaseCachesMixin:
                         self.wmold = self.wmold.union(wmold)
                         self.wmnew.add((wid, mid))
                     row = [wid, mid, start, end]
-                    c.execute(insert_S, row)
+                    c.execute(insert_S, row)  # nosemgrep
                     sid = self.get_last_insert_id(c)
                     for h in self.s["bk"][i]["ids"]:
                         self.s[h] = {"id": sid, "wid": wid, "mid": mid}
@@ -820,11 +844,11 @@ class DatabaseCachesMixin:
                         for h, n in list(self.s.items()):
                             if h != "bk" and n["id"] == m:
                                 self.s[h] = {"id": sid, "wid": wid, "mid": mid}
-                        c.execute(update_S_TC, (sid, m))
-                        c.execute(update_S_SC, (sid, m))
-                        c.execute(update_S_T, (sid, m))
-                        c.execute(update_S_H, (sid, m))
-                        c.execute(delete_S, (m,))
+                        c.execute(update_S_TC, (sid, m))  # nosemgrep
+                        c.execute(update_S_SC, (sid, m))  # nosemgrep
+                        c.execute(update_S_T, (sid, m))  # nosemgrep
+                        c.execute(update_S_H, (sid, m))  # nosemgrep
+                        c.execute(delete_S, (m,))  # nosemgrep
                 elif num == 0:
                     start = self.s["bk"][i]["sessionStart"]
                     end = self.s["bk"][i]["sessionEnd"]
@@ -833,11 +857,12 @@ class DatabaseCachesMixin:
                     wid = self.insertOrUpdate("weeks", c, (week,), select_W, insert_W)
                     mid = self.insertOrUpdate("months", c, (month,), select_M, insert_M)
                     row = [wid, mid, start, end]
-                    c.execute(insert_S, row)
+                    c.execute(insert_S, row)  # nosemgrep
                     sid = self.get_last_insert_id(c)
                     for h in self.s["bk"][i]["ids"]:
                         self.s[h] = {"id": sid, "wid": wid, "mid": mid}
             self.commit()
+
     def storeSessionsCache(
         self,
         hid,
@@ -859,7 +884,9 @@ class DatabaseCachesMixin:
                 hp["hid"] = hid
                 hp["ids"] = []
                 pdata[p]["n"] = 1
-                hp["line"] = [int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in SESSION_CACHE_KEYS]
+                hp["line"] = [
+                    int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in SESSION_CACHE_KEYS
+                ]
                 session_indices: list[int] = []
                 sessionplayer: list[dict[str, Any]] | None = self.sc.get(k)
                 if sessionplayer is not None:
@@ -935,7 +962,7 @@ class DatabaseCachesMixin:
                     lower = session["startTime"] - THRESHOLD
                     upper = session["endTime"] + THRESHOLD
                     row = [lower, upper, *list(k[:2])]
-                    c.execute(select_SC, row)
+                    c.execute(select_SC, row)  # nosemgrep
                     r = self.fetchallDict(
                         c,
                         ["id", "sessionId", "startTime", "endTime", *SESSION_CACHE_KEYS],
@@ -944,7 +971,9 @@ class DatabaseCachesMixin:
                     d: list[dict[str, Any]] = [{} for _ in range(num)]
                     for z in range(num):
                         d[z] = {}
-                        d[z]["line"] = [int(r[z][s]) if isinstance(r[z][s], bool) else r[z][s] for s in SESSION_CACHE_KEYS]
+                        d[z]["line"] = [
+                            int(r[z][s]) if isinstance(r[z][s], bool) else r[z][s] for s in SESSION_CACHE_KEYS
+                        ]
                         d[z]["id"] = r[z]["id"]
                         d[z]["sessionId"] = r[z]["sessionId"]
                         d[z]["startTime"] = r[z]["startTime"]
@@ -954,7 +983,7 @@ class DatabaseCachesMixin:
                         start = min(session["startTime"], start)
                         end = max(session["endTime"], end)
                         row = [start, end] + session["line"] + [id]
-                        c.execute(update_SC, row)
+                        c.execute(update_SC, row)  # nosemgrep
                     elif num > 1:
                         start, end, merge, line = None, None, [], [0] * len(SESSION_CACHE_KEYS)
                         for n in r:
@@ -967,18 +996,19 @@ class DatabaseCachesMixin:
                             for idx in range(len(SESSION_CACHE_KEYS)):
                                 line[idx] += int(n["line"][idx]) if isinstance(n["line"][idx], bool) else n["line"][idx]
                         row = [sid, start, end, *list(k[:2]), *line]
-                        c.execute(insert_SC, row)
+                        c.execute(insert_SC, row)  # nosemgrep
                         id = self.get_last_insert_id(c)
                         for m in merge:
-                            c.execute(delete_SC, (m,))
+                            c.execute(delete_SC, (m,))  # nosemgrep
                             self.commit()
                     elif num == 0:
                         start = session["startTime"]
                         end = session["endTime"]
                         row = [sid, start, end] + list(k[:2]) + session["line"]
-                        c.execute(insert_SC, row)
+                        c.execute(insert_SC, row)  # nosemgrep
                         id = self.get_last_insert_id(c)
             self.commit()
+
     def storeTourneysCache(
         self,
         hid,
@@ -1042,7 +1072,7 @@ class DatabaseCachesMixin:
                     continue
                 tc["startTime"] = tc["startTime"].replace(tzinfo=None)
                 tc["endTime"] = tc["endTime"].replace(tzinfo=None)
-                c.execute(select_TC, k)
+                c.execute(select_TC, k)  # nosemgrep
                 r = self.fetchallDict(c, ["id", "startTime", "endTime"])
                 num = len(r)
                 if num == 1:
@@ -1060,7 +1090,7 @@ class DatabaseCachesMixin:
                         q = update_TC.replace("<UPDATE>", "")
                         row = tc["line"] + list(k[:2])
                     q = q.replace("%s", self.sql.query["placeholder"])
-                    c.execute(q, row)
+                    c.execute(q, row)  # nosemgrep
                 elif num == 0:
                     row = [sc["id"], tc["startTime"], tc["endTime"]] + list(k[:2]) + tc["line"]
                     # append to the bulk inserts
@@ -1069,6 +1099,7 @@ class DatabaseCachesMixin:
             if inserts:
                 self.executemany(c, insert_TC, inserts)
             self.commit()
+
     def storeCardsCache(
         self,
         hid,
@@ -1140,12 +1171,12 @@ class DatabaseCachesMixin:
                 else:
                     q = select_cardscache_ring
                     row = list(cache_key[:3]) + list(cache_key[-2:])
-                c.execute(q, row)
+                c.execute(q, row)  # nosemgrep
                 result = c.fetchone()
                 if result:
                     id = result[0]
                     update = [*item, id]
-                    c.execute(update_cardscache, update)
+                    c.execute(update_cardscache, update)  # nosemgrep
                 else:
                     insert = list(cache_key) + item
                     inserts.append(insert)
@@ -1153,6 +1184,7 @@ class DatabaseCachesMixin:
             if inserts:
                 self.executemany(c, insert_cardscache, inserts)
                 self.commit()
+
     def storePositionsCache(
         self,
         hid,
@@ -1216,8 +1248,14 @@ class DatabaseCachesMixin:
                     garbageTourneyTypes = cache_key[2] in self.ttnew or cache_key[2] in self.ttold
                     if self.import_options["hhBulkPath"] == "" or (not garbageWeekMonths and not garbageTourneyTypes):
                         group_key = (
-                            sc["wid"], sc["mid"], cache_key[1], cache_key[2], cache_key[3],
-                            cache_key[4], cache_key[5], cache_key[6],
+                            sc["wid"],
+                            sc["mid"],
+                            cache_key[1],
+                            cache_key[2],
+                            cache_key[3],
+                            cache_key[4],
+                            cache_key[5],
+                            cache_key[6],
                         )
                         positions = position_cache.get(group_key)
                         # Add line to the old line in the hudcache.
@@ -1236,12 +1274,12 @@ class DatabaseCachesMixin:
                     q = select_positionscache_ring
                     row = list(cache_key[:3]) + list(cache_key[-4:])
 
-                c.execute(q, row)
+                c.execute(q, row)  # nosemgrep
                 result = c.fetchone()
                 if result:
                     id = result[0]
                     update = [*item, id]
-                    c.execute(update_positionscache, update)
+                    c.execute(update_positionscache, update)  # nosemgrep
                 else:
                     insert = list(cache_key) + item
                     inserts.append(insert)
@@ -1249,6 +1287,7 @@ class DatabaseCachesMixin:
             if inserts:
                 self.executemany(c, insert_positionscache, inserts)
                 self.commit()
+
     def appendHandsSessionIds(self) -> None:
         for i in range(len(self.hbulk)):
             hid = self.hids[i]

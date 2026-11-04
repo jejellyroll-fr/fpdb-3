@@ -24,15 +24,20 @@ class _Win:
         self.block_key = block_key
         self.moves: list[tuple[int, int]] = []
         self.shown = 0
+        self._visible = False  # a fresh window has never been shown
 
     def move(self, x, y):
         self.moves.append((x, y))
+
+    def isVisible(self):  # pylint: disable=invalid-name  # Qt override
+        return self._visible
 
     def setWindowOpacity(self, _o):
         pass
 
     def show(self):
         self.shown += 1
+        self._visible = True
 
     _position_and_show_block = Aux_Classic_Hud.ClassicStatWindow._position_and_show_block
 
@@ -71,15 +76,17 @@ def test_first_show_positions_then_reuses_without_moving():
     win = _Win(aw, (1, 0))
 
     win._position_and_show_block(1)
-    assert len(win.moves) == 1          # placed once
+    assert len(win.moves) == 1  # placed once
     win.moves[0]
     assert win.shown == 1
 
-    # same geometry generation -> subsequent hands only show, never move
+    # same geometry generation -> subsequent hands neither move nor re-show
+    # an already-visible window (#680: show() on a visible window still costs
+    # an expose/repaint)
     win._position_and_show_block(1)
     win._position_and_show_block(1)
-    assert len(win.moves) == 1          # no extra moves
-    assert win.shown == 3              # but shown every time
+    assert len(win.moves) == 1  # no extra moves
+    assert win.shown == 1  # no redundant show() either
 
 
 def test_geometry_change_triggers_one_reposition():
@@ -91,7 +98,7 @@ def test_geometry_change_triggers_one_reposition():
     # a real geometry change bumps the generation
     aw.hud.geometry_generation = 1
     win._position_and_show_block(1)
-    assert len(win.moves) == 2          # repositioned once for the new geometry
+    assert len(win.moves) == 2  # repositioned once for the new geometry
 
     # and then stays put again on further hands
     win._position_and_show_block(1)
@@ -108,6 +115,6 @@ def test_reposition_after_table_move_follows_new_origin():
     aw.hud.table.x, aw.hud.table.y = 400, 500
     aw.hud.geometry_generation = 1
     win._position_and_show_block(1)
-    assert win.moves[-1] != placed_at   # window followed the table
+    assert win.moves[-1] != placed_at  # window followed the table
     # canonical (50,60) at scale 1 + new origin (400,500)
     assert win.moves[-1] == (450, 560)

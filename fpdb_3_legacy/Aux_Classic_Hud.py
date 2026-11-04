@@ -50,7 +50,7 @@ from PySide6.QtWidgets import (
 )
 
 #    FreePokerTools modules
-from fpdb_3_legacy import Aux_Hud, Database, Stats
+from fpdb_3_legacy import Aux_Hud, Database, Stats, latency_profile
 from fpdb_3_legacy.AutoNotes import format_generated_notes
 
 #    Standard Library modules
@@ -192,8 +192,12 @@ class ClassicStatWindow(Aux_Hud.SimpleStatWindow):
             self.move(pos_x, pos_y)
             self._pos_gen = gen
 
-        self.setWindowOpacity(float(self.aw.params["opacity"]))
-        self.show()  # in case the user has hidden it
+        opacity = float(self.aw.params["opacity"])
+        if getattr(self, "_last_opacity", None) != opacity:  # #680: no redundant style/visibility churn
+            self._last_opacity = opacity  # pylint: disable=attribute-defined-outside-init
+            self.setWindowOpacity(opacity)
+        if not self.isVisible():
+            self.show()  # in case the user has hidden it
 
     def button_press_middle(self, _event: Any) -> None:
         """Handles the middle mouse button press event.
@@ -542,7 +546,9 @@ class ClassicStat(Aux_Hud.SimpleStat):
         Returns:
             None.
         """
-        super().update(player_id, stat_dict)
+        # Not super().update(): it writes the bare value to the label, which the
+        # render skip below would then leave there instead of the decorated text.
+        self._load_number(player_id, stat_dict)
 
         if not self.number:  # stat did not create, so exit now
             return
@@ -620,6 +626,18 @@ class ClassicStat(Aux_Hud.SimpleStat):
 
         if self.rich_text and self.stat != "player_note":
             statstring = _compact_stat_html(self.hudprefix, display_value, self.hudsuffix, fg)
+
+        # #680: a stats refresh re-renders every cell of every seat window of
+        # every open table. Skip the stylesheet rebuild, setText and tooltip
+        # when nothing the cell displays has changed since the last render --
+        # on a secondary refresh most cells are unchanged.
+        number = self.number
+        render_key = (player_id, tuple(number) if isinstance(number, (list, tuple)) else number, fg, statstring)
+        if getattr(self, "_last_render_key", None) == render_key:
+            latency_profile.count("hud_stat_cells_skipped")
+            return None
+        self._last_render_key = render_key  # pylint: disable=attribute-defined-outside-init
+        latency_profile.count("hud_stat_cells_rendered")
 
         # Keep the configured cell background when the value colour changes on
         # each refresh; rebuilding the stylesheet with bg=None used to erase

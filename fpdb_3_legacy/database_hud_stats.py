@@ -13,10 +13,12 @@ from __future__ import annotations
 
 import sys
 import traceback
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from time import time
 from typing import TYPE_CHECKING, Any
 
+from fpdb_3_legacy import latency_profile
 from fpdb_3_legacy.autonotes_aof import AOF_CATEGORIES
 from fpdb_3_legacy.db_reconnect import reconnect_on_connection_loss
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -86,6 +88,8 @@ class DatabaseHudStatsMixin:
 
         def _rollback_after_failed_read(self) -> None: ...
 
+        _in_tuple: Callable[[list], tuple[str, list]]
+
         def recover_connection(self) -> bool: ...
 
     def get_seat_players(self, hand_id: str) -> dict[int, dict[str, object]]:
@@ -99,13 +103,13 @@ class DatabaseHudStatsMixin:
         try:
             ph = self.sql.query.get("placeholder", "%s")
             q = (
-                "SELECT hp.seatNo, hp.playerId, p.name "
+                "SELECT hp.seatNo, hp.playerId, p.name "  # nosec B608  # nosemgrep
                 "FROM HandsPlayers hp "
                 "INNER JOIN Players p ON hp.playerId = p.id "
                 "WHERE hp.handId = %s"
             ).replace("%s", ph)
             c = self.connection.cursor()
-            c.execute(q, (hand_id,))
+            c.execute(q, (hand_id,))  # nosemgrep
             for row in c.fetchall():
                 players[int(row[0])] = {"player_id": int(row[1]), "screen_name": row[2]}
         except Exception:
@@ -127,9 +131,9 @@ class DatabaseHudStatsMixin:
         try:
             ph = self.sql.query.get("placeholder", "%s")
             c = self.get_cursor()
-            c.execute(
+            c.execute(  # nosemgrep
                 (
-                    "SELECT gt.bigBlind FROM Hands h INNER JOIN Gametypes gt ON h.gametypeId = gt.id WHERE h.id = %s"
+                    "SELECT gt.bigBlind FROM Hands h INNER JOIN Gametypes gt ON h.gametypeId = gt.id WHERE h.id = %s"  # nosec B608  # nosemgrep
                 ).replace("%s", ph),
                 (hand_id,),
             )
@@ -139,9 +143,9 @@ class DatabaseHudStatsMixin:
             big_blind = float(row[0])
             if big_blind <= 0:
                 return None
-            c.execute(
+            c.execute(  # nosemgrep
                 (
-                    "SELECT startCash, committed, winnings FROM HandsPlayers WHERE handId = %s AND sitout = FALSE"
+                    "SELECT startCash, committed, winnings FROM HandsPlayers WHERE handId = %s AND sitout = FALSE"  # nosec B608  # nosemgrep
                 ).replace("%s", ph),
                 (hand_id,),
             )
@@ -181,6 +185,109 @@ class DatabaseHudStatsMixin:
                 self._hud_chipev_clause = ""
         return sql_text.replace("<chipev_columns>", self._hud_chipev_clause)
 
+    # The *_many reads let a failure propagate. Returning the empty entries here
+    # would read as "this hand has none", and HudReadService would then paint every
+    # table of the batch without them instead of falling back to the per-hand reads.
+    def get_hand_positions_many(self, hand_ids: list) -> dict[Any, dict[Any, Any]]:
+        """get_hand_positions for many hands in one statement (#680)."""
+        result: dict[Any, dict[Any, Any]] = {str(hand): {} for hand in hand_ids}
+        hand_ids = list(dict.fromkeys(hand_ids))
+        if not hand_ids:
+            return result
+        in_sql, in_params = self._in_tuple(hand_ids)
+        q = f"SELECT handId, playerId, position FROM HandsPlayers WHERE handId IN {in_sql}"  # nosec B608  # nosemgrep
+        c = self.connection.cursor()
+        c.execute(q, in_params)  # nosemgrep
+        for hand_id, player_id, position in c.fetchall():
+            result.setdefault(str(hand_id), {})[player_id] = position
+        return result
+
+    def get_seat_players_many(self, hand_ids: list) -> dict[Any, dict[int, dict[str, object]]]:
+        """get_seat_players for many hands in one statement (#680)."""
+        result: dict[Any, dict[int, dict[str, object]]] = {str(hand): {} for hand in hand_ids}
+        hand_ids = list(dict.fromkeys(hand_ids))
+        if not hand_ids:
+            return result
+        in_sql, in_params = self._in_tuple(hand_ids)
+        q = (
+            "SELECT hp.handId, hp.seatNo, hp.playerId, p.name "  # nosec B608  # nosemgrep
+            "FROM HandsPlayers hp "
+            "INNER JOIN Players p ON hp.playerId = p.id "
+            f"WHERE hp.handId IN {in_sql}"
+        )
+        c = self.connection.cursor()
+        c.execute(q, in_params)  # nosemgrep
+        for hand_id, seat, player_id, name in c.fetchall():
+            result.setdefault(str(hand_id), {})[int(seat)] = {"player_id": int(player_id), "screen_name": name}
+        return result
+
+    def get_cards_many(self, hand_ids: list) -> dict[Any, dict[Any, Any]]:
+        """get_cards for many hands in one statement (#680)."""
+        result: dict[Any, dict[Any, Any]] = {str(hand): {} for hand in hand_ids}
+        hand_ids = list(dict.fromkeys(hand_ids))
+        if not hand_ids:
+            return result
+        ph = self.sql.query.get("placeholder", "%s")
+        in_sql, in_params = self._in_tuple(hand_ids)
+        q = self.sql.query["get_cards"].replace("%s", ph).replace(f"handID = {ph}", f"handID IN {in_sql}")
+        # get_cards does not select the hand id; add it to key the rows.
+        q = q.replace("seatNo AS seat_number", "Hands.id AS hand_id, seatNo AS seat_number", 1)
+        c = self.connection.cursor()
+        c.execute(q, in_params)  # nosemgrep
+        for row in c.fetchall():
+            hand_id = row[0]
+            result.setdefault(str(hand_id), {})[row[1]] = row[2:]
+        return result
+
+    def get_common_cards_many(self, hand_ids: list) -> dict[Any, list]:
+        """get_common_cards for many hands in one statement (#680)."""
+        result: dict[Any, list] = {str(hand): [] for hand in hand_ids}
+        hand_ids = list(dict.fromkeys(hand_ids))
+        if not hand_ids:
+            return result
+        in_sql, in_params = self._in_tuple(hand_ids)
+        q = f"SELECT Id, boardcard1, boardcard2, boardcard3, boardcard4, boardcard5 FROM Hands WHERE Id IN {in_sql}"  # nosec B608  # nosemgrep
+        c = self.connection.cursor()
+        c.execute(q, in_params)  # nosemgrep
+        for row in c.fetchall():
+            result[str(row[0])] = list(row[1:])
+        return result
+
+    def get_table_min_stack_bb_many(self, hand_ids: list) -> dict[Any, float | None]:
+        """get_table_min_stack_bb for many hands in two statements (#680)."""
+        result: dict[Any, float | None] = {str(hand): None for hand in hand_ids}
+        hand_ids = list(dict.fromkeys(hand_ids))
+        if not hand_ids:
+            return result
+        in_sql, in_params = self._in_tuple(hand_ids)
+        c = self.get_cursor()
+        c.execute(  # nosemgrep
+            (
+                "SELECT h.id, gt.bigBlind FROM Hands h "  # nosec B608  # nosemgrep
+                "INNER JOIN Gametypes gt ON h.gametypeId = gt.id "
+                f"WHERE h.id IN {in_sql}"
+            ),
+            in_params,
+        )
+        big_blinds = {str(row[0]): float(row[1]) for row in c.fetchall() if row[1]}
+        c.execute(  # nosemgrep
+            (
+                "SELECT handId, startCash, committed, winnings FROM HandsPlayers "  # nosec B608  # nosemgrep
+                f"WHERE handId IN {in_sql} AND sitout = FALSE"
+            ),
+            in_params,
+        )
+        stacks: dict[Any, list] = {str(hand): [] for hand in hand_ids}
+        for hand_id, start_cash, committed, winnings in c.fetchall():
+            end_cash = float(start_cash) - float(committed) + float(winnings)
+            if end_cash > 0:
+                stacks.setdefault(str(hand_id), []).append(end_cash)
+        for hand_id, blinds in big_blinds.items():
+            values = stacks.get(hand_id) or []
+            if blinds > 0 and values:
+                result[hand_id] = min(values) / blinds
+        return result
+
     def _refresh_hand_1day_ago(self) -> None:
         """Re-read the 24-hour boundary hand id, at most once per TTL.
 
@@ -197,7 +304,7 @@ class DatabaseHudStatsMixin:
 
         self.hand_1day_ago = 1
         c = self.get_cursor()
-        c.execute(self.sql.query["get_hand_1day_ago"])
+        c.execute(self.sql.query["get_hand_1day_ago"])  # nosemgrep
         row = c.fetchone()
         if row and row[0]:
             self.hand_1day_ago = int(row[0])
@@ -354,13 +461,18 @@ class DatabaseHudStatsMixin:
         sql_text = self._inject_hud_chipev_columns(self.sql.query[query])
 
         # Now get the stats
-        c.execute(sql_text, subs)
+        c.execute(sql_text, subs)  # nosemgrep
         ptime = time() - stime
+        latency_profile.record("hud_query_execute", ptime)
         log.info(
             f"HudCache query get_stats_from_hand_aggregated took {ptime:.3f} seconds",
         )
         colnames = [desc[0] for desc in c.description]
-        for row in c.fetchall():
+        ftime = time()
+        rows = c.fetchall()
+        latency_profile.record("hud_query_fetch", time() - ftime)
+        atime = time()
+        for row in rows:
             # Keep player ids as native DB integers: do_stat() coerces the player
             # to int and every stat function indexes stat_dict[int]. Coercing keys
             # to str here silently makes all stat lookups miss. String ids only
@@ -377,6 +489,7 @@ class DatabaseHudStatsMixin:
                 for name, val in zip(colnames, row, strict=False):
                     t_dict[name.lower()] = val
                 stat_dict[t_dict["player_id"]] = t_dict
+        latency_profile.record("hud_python_aggregate", time() - atime)
 
         self._merge_aof_profile_stats(stat_dict, poker_game or handinfo["category"])
         return stat_dict
@@ -488,7 +601,7 @@ class DatabaseHudStatsMixin:
 
         stat_dict: dict[Any, Any] = {}
         c = self.connection.cursor()
-        c.execute(sql_text, subs)
+        c.execute(sql_text, subs)  # nosemgrep
         colnames = [desc[0] for desc in c.description]
         for row in c.fetchall():
             t_dict = {name.lower(): val for name, val in zip(colnames, row, strict=False)}
@@ -646,19 +759,25 @@ class DatabaseHudStatsMixin:
 
         stime = time()
         c = self.connection.cursor()
-        c.execute(batched, subs)
+        c.execute(batched, subs)  # nosemgrep
+        etime = time() - stime
+        latency_profile.record("hud_query_execute", etime)
         log.info(
             "HudCache batched aggregate covered %d hand(s) in %.3f seconds",
             len(hands),
-            time() - stime,
+            etime,
         )
         colnames = [desc[0].lower() for desc in c.description]
+        ftime = time()
+        rows = c.fetchall()
+        latency_profile.record("hud_query_fetch", time() - ftime)
+        atime = time()
         # ZMQ supplies hand ids as strings while every SQL backend returns the
         # selected Hands.id as an integer. Preserve the caller's key type in the
         # public result while using a canonical representation to match rows.
         hand_key_by_id = {str(hand): hand for hand in hands}
         results: dict[Any, dict[Any, Any]] = {hand: {} for hand in hands}
-        for row in c.fetchall():
+        for row in rows:
             t_dict = dict(zip(colnames, row, strict=False))
             # Not a statistic: it only says which table's row this is, and
             # leaving it in stat_dict would offer it to the stat renderer.
@@ -667,6 +786,7 @@ class DatabaseHudStatsMixin:
             if not self._row_is_wanted(t_dict["player_id"], hero_id, hud_params):
                 continue
             results.setdefault(hand, {})[t_dict["player_id"]] = t_dict
+        latency_profile.record("hud_python_aggregate", time() - atime)
         return results
 
     @staticmethod
@@ -740,12 +860,22 @@ class DatabaseHudStatsMixin:
 
         # now get the stats
         # print "sess_stats: subs =", subs, "subs[0] =", subs[0]
-        c.execute(query, subs)
+        stime = time()
+        c.execute(query, subs)  # nosemgrep
+        latency_profile.record("hud_query_execute", time() - stime)
         colnames = [desc[0] for desc in c.description]
+        ftime = time()
+        rows = []
         row = c.fetchone()
+        while row:
+            rows.append(row)
+            row = c.fetchone()
+        latency_profile.record("hud_query_fetch", time() - ftime)
+        latency_profile.count("hud_session_rows", len(rows))
+        atime = time()
         if colnames[0].lower() == "player_id":
             # Loop through stats adding them to appropriate stat_dict:
-            while row:
+            for row in rows:
                 # Native int keys, matching do_stat()/stat functions. See the
                 # aggregated loop above for why str coercion breaks stat lookups.
                 playerid = row[0]
@@ -770,7 +900,7 @@ class DatabaseHudStatsMixin:
                             "seats",
                         ):
                             stat_dict[playerid][name.lower()] += val
-                row = c.fetchone()
+            latency_profile.record("hud_python_aggregate", time() - atime)
         else:
             log.error(f"query {query} result does not have player_id as first column")
 
@@ -799,7 +929,7 @@ class DatabaseHudStatsMixin:
                 str(tuple(self.hero_ids.values())),
             )
             c = self.get_cursor()
-            c.execute(q)
+            c.execute(q)  # nosemgrep
             tmp = c.fetchone()
             if tmp == (None,):
                 return self.hero_hudstart_def

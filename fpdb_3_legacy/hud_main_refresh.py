@@ -6,7 +6,7 @@ other mixins is declared, for the type checker, on HudMainBase in hud_main_base.
 
 import contextlib
 
-from fpdb_3_legacy import Hud, db_profile
+from fpdb_3_legacy import Hud, db_profile, latency_profile
 from fpdb_3_legacy.hud_main_base import HudMainBase, log
 from fpdb_3_legacy.table_info import TableInfo
 
@@ -67,6 +67,18 @@ class HudMainRefreshMixin(HudMainBase):
         windows read hud.stat_dict when they redraw, so handing them the new
         one and asking them to redraw is the whole job.
         """
+        with latency_profile.scope("hud_refresh_secondary"):
+            self._refresh_secondary_hud_body(hand_id, temp_key, game_type, site_id, num_seats, stat_dict)
+
+    def _refresh_secondary_hud_body(
+        self,
+        hand_id: str,
+        temp_key: str,
+        game_type: str,
+        site_id: int,
+        num_seats: int,
+        stat_dict: dict | None = None,
+    ) -> None:
         hud = self.hud_dict[temp_key]
         if stat_dict is None:
             self.db_connection.init_hud_stat_vars(hud.hud_params["hud_days"], hud.hud_params["h_hud_days"])
