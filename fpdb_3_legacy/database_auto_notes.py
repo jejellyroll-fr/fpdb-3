@@ -315,7 +315,7 @@ class DatabaseAutoNotesMixin:
             return query, params
         return query.replace("/*AUTONOTE_FILTERS*/", " where " + " and ".join(filters)), params
 
-    def playersWithNotes(self, player_ids: Iterable[int]) -> set[int]:
+    def players_with_notes(self, player_ids: Iterable[int]) -> set[int]:
         """Which of these players have manual or generated notes, in one statement.
 
         Runs on the HUD's read worker, so the note cell of each seat can be drawn

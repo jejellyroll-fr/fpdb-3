@@ -156,11 +156,9 @@ def mark_players_with_notes(database: Any, *stat_dicts: dict) -> None:
     keeps that cell from opening a connection on the Qt thread for every seat of
     every table on every refresh, which froze the HUD on a remote database (#680).
     """
-    players = {
-        player: stats for stat_dict in stat_dicts for player, stats in stat_dict.items() if isinstance(player, int)
-    }
-    with_notes = database.playersWithNotes(players)
-    for player, stats in players.items():
+    rows = [(player, stats) for stat_dict in stat_dicts for player, stats in stat_dict.items() if isinstance(player, int)]
+    with_notes = database.players_with_notes([player for player, _stats in rows])
+    for player, stats in rows:
         stats["has_notes"] = player in with_notes
 
 

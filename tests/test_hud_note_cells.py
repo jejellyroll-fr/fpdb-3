@@ -61,28 +61,39 @@ def test_players_with_notes_finds_comments_and_generated_notes(db) -> None:
     blank = _player(db, "carol", "")
     silent = _player(db, "dave")
 
-    assert db.playersWithNotes([commented, generated, blank, silent]) == {commented, generated}
+    assert db.players_with_notes([commented, generated, blank, silent]) == {commented, generated}
 
 
 def test_players_with_notes_with_nobody_runs_no_statement() -> None:
     database = object.__new__(Database)
     database.get_cursor = MagicMock()
 
-    assert database.playersWithNotes([]) == set()
+    assert database.players_with_notes([]) == set()
     database.get_cursor.assert_not_called()
 
 
 def test_mark_flags_every_player_with_one_statement() -> None:
     database = MagicMock()
-    database.playersWithNotes.return_value = {1, 3}
+    database.players_with_notes.return_value = {1, 3}
     first, second = {1: {}, 2: {}}, {3: {}}
 
     mark_players_with_notes(database, first, second)
 
     assert first == {1: {"has_notes": True}, 2: {"has_notes": False}}
     assert second == {3: {"has_notes": True}}
-    assert list(database.playersWithNotes.call_args[0][0]) == [1, 2, 3]
-    database.playersWithNotes.assert_called_once()
+    assert list(database.players_with_notes.call_args[0][0]) == [1, 2, 3]
+    database.players_with_notes.assert_called_once()
+
+
+def test_a_player_seen_at_two_tables_is_flagged_at_both() -> None:
+    database = MagicMock()
+    database.players_with_notes.return_value = {1}
+    first, second = {1: {}}, {1: {}}
+
+    mark_players_with_notes(database, first, second)
+
+    assert first == {1: {"has_notes": True}}
+    assert second == {1: {"has_notes": True}}
 
 
 class _Connection(DatabaseMigrationsMixin):
@@ -104,7 +115,8 @@ def clock(monkeypatch):
     return now
 
 
-def test_a_second_connection_skips_the_migration_pass(clock) -> None:
+@pytest.mark.usefixtures("clock")
+def test_a_second_connection_skips_the_migration_pass() -> None:
     first, second = _Connection(), _Connection()
 
     first.ensure_feature_tables_on_connect()
@@ -124,7 +136,8 @@ def test_the_pass_comes_back_so_a_lost_race_gets_another_chance(clock) -> None:
     later.ensure_feature_tables.assert_called_once_with()
 
 
-def test_another_database_runs_its_own_pass(clock) -> None:
+@pytest.mark.usefixtures("clock")
+def test_another_database_runs_its_own_pass() -> None:
     _Connection("one").ensure_feature_tables_on_connect()
 
     other = _Connection("two")
@@ -133,7 +146,8 @@ def test_another_database_runs_its_own_pass(clock) -> None:
     other.ensure_feature_tables.assert_called_once_with()
 
 
-def test_dropped_tables_make_the_next_connection_run_the_pass(clock) -> None:
+@pytest.mark.usefixtures("clock")
+def test_dropped_tables_make_the_next_connection_run_the_pass() -> None:
     connection = _Connection()
     connection.ensure_feature_tables_on_connect()
 
@@ -144,7 +158,8 @@ def test_dropped_tables_make_the_next_connection_run_the_pass(clock) -> None:
     after.ensure_feature_tables.assert_called_once_with()
 
 
-def test_sqlite_always_runs_the_pass(clock, tmp_path: Path) -> None:
+@pytest.mark.usefixtures("clock")
+def test_sqlite_always_runs_the_pass(tmp_path: Path) -> None:
     connection = _Connection(str(tmp_path / "db.sqlite3"))
     connection.backend = connection.SQLITE
 
