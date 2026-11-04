@@ -24,7 +24,8 @@ from __future__ import annotations
 import os
 import threading
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from datetime import datetime
 from typing import Any
 
@@ -74,6 +75,9 @@ class LocalFirstSync:
         self._thread: threading.Thread | None = None
         self._bool_columns: dict[str, set[str]] = {}
         self._own_conn = None
+        # The importer's thread marks hands while the worker marks them pushed, on one
+        # connection, and a connection has only one transaction (#680).
+        self._outbox_lock = threading.Lock()
         if local_db_path:
             import sqlite3
 
@@ -116,34 +120,46 @@ class LocalFirstSync:
         commits never interleave with an in-flight import transaction (#680)."""
         return self._own_conn if self._own_conn is not None else self.local_db.connection
 
+    @contextmanager
+    def _outbox_transaction(self) -> Iterator[Any]:
+        """A cursor for one whole outbox transaction, committed or rolled back as a unit."""
+        with self._outbox_lock:
+            conn = self._local_conn()
+            c = conn.cursor()
+            try:
+                yield c
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
+            finally:
+                c.close()
+
     def _ensure_outbox(self) -> None:
-        c = self._local_conn().cursor()
-        c.execute(OUTBOX_DDL)  # nosemgrep
-        self._local_conn().commit()
-        c.close()
+        with self._outbox_transaction() as c:
+            c.execute(OUTBOX_DDL)  # nosemgrep
 
     def mark(self, local_hand_ids: list) -> None:
         """Register locally imported hands for pushing (call after local commit)."""
         if not local_hand_ids:
             return
-        c = self._local_conn().cursor()
-        c.executemany(
-            "INSERT OR IGNORE INTO fpdb_sync_outbox (local_hand_id) VALUES (?)"
-            if self.local_db.backend == 4
-            else "INSERT IGNORE INTO fpdb_sync_outbox (local_hand_id) VALUES (%s)",
-            [(int(h),) for h in local_hand_ids],
-        )
-        self._local_conn().commit()
-        c.close()
+        with self._outbox_transaction() as c:
+            c.executemany(
+                "INSERT OR IGNORE INTO fpdb_sync_outbox (local_hand_id) VALUES (?)"
+                if self.local_db.backend == 4
+                else "INSERT IGNORE INTO fpdb_sync_outbox (local_hand_id) VALUES (%s)",
+                [(int(h),) for h in local_hand_ids],
+            )
 
     def pending(self) -> list[int]:
-        c = self._local_conn().cursor()
-        c.execute(  # nosemgrep
-            "SELECT local_hand_id FROM fpdb_sync_outbox WHERE pushed = 0 "
-            f"ORDER BY local_hand_id LIMIT {self.batch_size}"  # nosec B608  # nosemgrep
-        )
-        rows = [r[0] for r in c.fetchall()]
-        c.close()
+        with self._outbox_lock:
+            c = self._local_conn().cursor()
+            c.execute(  # nosemgrep
+                "SELECT local_hand_id FROM fpdb_sync_outbox WHERE pushed = 0 "
+                f"ORDER BY local_hand_id LIMIT {self.batch_size}"  # nosec B608  # nosemgrep
+            )
+            rows = [r[0] for r in c.fetchall()]
+            c.close()
         return rows
 
     def push_once(self) -> int:
@@ -463,17 +479,15 @@ class LocalFirstSync:
 
     def _mark_pushed(self, local_id: int, server_id: int | None) -> None:
         ph = self._ph()
-        c = self._local_conn().cursor()
-        c.execute(  # nosec B608  # nosemgrep
-            "UPDATE fpdb_sync_outbox SET pushed = 1, server_hand_id = "  # nosec B608
-            + ph
-            + ", pushed_at = "
-            + ph
-            + f" WHERE local_hand_id = {ph}",  # nosec B608  # nosemgrep
-            (server_id, time.strftime("%Y-%m-%d %H:%M:%S"), local_id),
-        )
-        self._local_conn().commit()
-        c.close()
+        with self._outbox_transaction() as c:
+            c.execute(  # nosec B608  # nosemgrep
+                "UPDATE fpdb_sync_outbox SET pushed = 1, server_hand_id = "  # nosec B608
+                + ph
+                + ", pushed_at = "
+                + ph
+                + f" WHERE local_hand_id = {ph}",  # nosec B608  # nosemgrep
+                (server_id, time.strftime("%Y-%m-%d %H:%M:%S"), local_id),
+            )
 
     def start(self) -> None:
         if self._thread is not None and self._thread.is_alive():
@@ -487,12 +501,13 @@ class LocalFirstSync:
         self._stop.set()
         if self._thread is not None:
             self._thread.join(timeout=10)
-        if self._own_conn is not None:
-            try:
-                self._own_conn.close()
-            except Exception:
-                pass  # nosec B110
-            self._own_conn = None
+        with self._outbox_lock:
+            if self._own_conn is not None:
+                try:
+                    self._own_conn.close()
+                except Exception:
+                    pass  # nosec B110
+                self._own_conn = None
 
     def _loop(self) -> None:
         while not self._stop.is_set():
