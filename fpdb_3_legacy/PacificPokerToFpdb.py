@@ -98,6 +98,10 @@ class PacificPoker(HandHistoryConverter):
         "Omaha Hi/Lo PL": ("hold", "omahahilo"),
     }
 
+    # 888 heads a 5-card Omaha hand exactly like a 4-card one ("Pot Limit Omaha"),
+    # so only the number of cards in the hand itself tells them apart.
+    five_card_categories = {"omahahi": "5_omahahi", "omahahilo": "5_omaha8"}
+
     currencies = {"€": "EUR", "$": "USD", "": "T$"}
 
     # Static regexes
@@ -244,6 +248,15 @@ class PacificPoker(HandHistoryConverter):
             ["tour", "hold", "fl"],
         ]
 
+    def _holeCardCount(self, handText: str) -> int:
+        """Return the size of the largest hole-card line, 0 if the hand reveals none.
+
+        A hand we observed and that ended without a showdown has no such line.
+        """
+        lines = [m.group("NEWCARDS") for m in self.re_HeroCards.finditer(handText)]
+        lines += [m.group("CARDS") for m in self.re_ShownCards.finditer(handText)]
+        return max((len(line.split(",")) for line in lines), default=0)
+
     def determineGameType(self, handText):
         info: dict[str, Any] = {}
         m = self.re_GameInfo_old.search(handText)
@@ -283,6 +296,8 @@ class PacificPoker(HandHistoryConverter):
         if game:
             # print "DEBUG: re_GameInfo[GAME] \'", game, "\'"
             (info["base"], info["category"]) = self.games[game]
+            if info["category"] in self.five_card_categories and self._holeCardCount(handText) == 5:
+                info["category"] = self.five_card_categories[info["category"]]
         if sb:
             # print "DEBUG: re_GameInfo[SB] \'", sb, "\'"
             info["sb"] = self.clearMoneyString(sb)

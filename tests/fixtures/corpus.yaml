@@ -1044,6 +1044,13 @@
   tags:
   - regression
   - golden
+- id: pacificpoker_cash_plo5_6max_usd_0_50_1_202611_five_hole_cards
+  source: regression-test-files/cash/PacificPoker/Flop/PLO5-6max-USD-0.50-1-202611.five.hole.cards.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
 - id: partypoker_cash_lhe_6max_usd_15_30_201104_live_second_sb
   source: regression-test-files/cash/PartyPoker/Flop/LHE-6max-USD-15-30-201104.live.second.sb.txt
   room: partypoker

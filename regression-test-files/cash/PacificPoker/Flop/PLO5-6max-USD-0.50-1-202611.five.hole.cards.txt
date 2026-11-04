@@ -1,0 +1,16 @@
+#Game No : 799338264
+***** 888.de Hand History for Game 799338264 *****
+$0.50/$1 Blinds Pot Limit Omaha - *** 03 11 2026 14:16:24
+Table Mariupol 6 Max (Real Money)
+Seat 9 is the button
+Total number of players : 2
+Seat 1: PlayerA ( $100 )
+Seat 9: PlayerB ( $42.54 )
+PlayerB posts small blind [$0.50]
+PlayerA posts big blind [$1]
+** Dealing down cards **
+Dealt to PlayerA [ Qh, Tc, Th, Ts, 6s ]
+PlayerB raises [$2.50]
+PlayerA folds
+** Summary **
+First runout PlayerB collected [ $2 ]
