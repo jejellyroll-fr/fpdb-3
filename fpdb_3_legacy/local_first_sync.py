@@ -343,7 +343,7 @@ class LocalFirstSync:
             self._find_or_insert(server, "TourneysPlayers", record, ("tourneyId", "playerId", "entryId"), sph)
 
     def _push_hand(self, server: Any, local_id: int, sph: str) -> int | None:
-        """Insert one hand server-side, dedup by (siteHandNo, gametypeId).
+        """Insert one hand server-side, dedup by (siteHandNo, gametypeId), plus heroSeat on a public database.
 
         Returns the server hand id, the existing one if the server has the hand.
         None means the local row is gone: there is nothing left to push, and the
@@ -365,10 +365,13 @@ class LocalFirstSync:
 
         # dedup check
         c = server.connection.cursor()
-        c.execute(  # nosemgrep
-            f"SELECT id FROM Hands WHERE siteHandNo = {sph} AND gametypeId = {sph}",  # nosec B608  # nosemgrep
-            (hand["siteHandNo"], hand["gametypeId"]),
-        )
+        lookup = f"SELECT id FROM Hands WHERE siteHandNo = {sph} AND gametypeId = {sph}"  # nosec B608  # nosemgrep
+        key = [hand["siteHandNo"], hand["gametypeId"]]
+        if server.publicDB:
+            # A public database keeps one row per hero seat, as isDuplicate and its unique index do.
+            lookup += f" AND heroSeat = {sph}"  # nosec B608  # nosemgrep
+            key.append(hand["heroSeat"])
+        c.execute(lookup, key)  # nosemgrep
         existing = c.fetchone()
         if existing:
             return existing[0]

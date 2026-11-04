@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import sys
 import traceback
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from time import time
 from typing import TYPE_CHECKING, Any
@@ -87,7 +88,7 @@ class DatabaseHudStatsMixin:
 
         def _rollback_after_failed_read(self) -> None: ...
 
-        def _in_tuple(self, values: list) -> tuple[str, list]: ...
+        _in_tuple: Callable[[list], tuple[str, list]]
 
         def recover_connection(self) -> bool: ...
 

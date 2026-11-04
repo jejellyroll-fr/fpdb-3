@@ -31,7 +31,8 @@ whole client-side change. The new part is the import side and the sync worker.
 3. **`LocalFirstSync`** (`fpdb_3_legacy/local_first_sync.py`, POC shipped in
    this PR): daemon thread, polls the outbox every `poll_s`, pushes batches of
    `batch_size` hands in one server transaction. Idempotent: dedup on the
-   server by the unique `(siteHandNo, gametypeId)` index on Hands; referentials
+   server by the unique `(siteHandNo, gametypeId)` index on Hands, plus `heroSeat`
+   in public-database mode; referentials
    deduped by their natural keys (Sites.name, Players.(name,siteId), Files.file,
    Gametypes by every column, stakes and currency included). `Hands.sessionId`
    is left NULL on the server (see the caches below). The server assigns hand ids; the mapping
