@@ -710,7 +710,7 @@ class Importer:
         """Register the hands just committed in the local-first outbox (#680).
 
         ``database.hids`` holds the ids inserted by the last bulk commit, so this
-        runs right after a successful file import, inside the same process.
+        runs right after a successful hand import, inside the same process.
         """
         sync = getattr(self, "_local_first_sync", None)
         if sync is None:
@@ -1147,7 +1147,6 @@ class Importer:
                     (stored, duplicates, partial, skipped, errors, ttime, detected) = self._import_despatch(
                         self.filelist[f]
                     )
-                    self._mark_outbox()
                     # Periodic latency report when FPDB_LATENCY_LOG_INTERVAL is set (#680).
                     latency_profile.maybe_log()
                     # The parser's room when it found one: a PokerTracker-format file is
@@ -1287,6 +1286,8 @@ class Importer:
         if fpdbfile.ftype == "phh":
             (stored, duplicates, partial, skipped, errors, ttime) = self._import_phh_file(fpdbfile)
             detected_sitename = PHH_SITE_NAME
+        # Before the summary below: it resets the bulk buffers, database.hids included.
+        self._mark_outbox()
         if fpdbfile.ftype == "both" and fpdbfile.path not in self.updatedsize:
             self._import_summary_file(fpdbfile)
         #    pass
@@ -1413,7 +1414,6 @@ class Importer:
                         (stored, duplicates, partial, skipped, errors, ttime, detected_sitename) = (
                             self._import_despatch(tracked_file)
                         )
-                        self._mark_outbox()
                         self.logImport(
                             "auto",
                             f,

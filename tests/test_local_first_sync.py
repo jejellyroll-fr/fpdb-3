@@ -8,6 +8,7 @@ imported hand to the server asynchronously, deduplicated by
 from __future__ import annotations
 
 import os
+from decimal import Decimal
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -493,7 +494,7 @@ def tourney_db(tmp_path):
 
 def _rows(db, query: str) -> list[tuple]:
     c = db.connection.cursor()
-    c.execute(query)
+    c.execute(query)  # nosec B608  # nosemgrep
     rows = [tuple(r) for r in c.fetchall()]
     c.close()
     return rows
@@ -566,6 +567,116 @@ def test_push_carries_only_the_tournaments_of_the_batch(tourney_db, server_db) -
     srv = server_db()
     assert _rows(srv, "SELECT COUNT(*) FROM Tourneys") == [(1,)]
     srv.disconnect()
+
+
+def _hud_cache(db) -> list[tuple]:
+    """HudCache without its id, which depends on the order a row was first written in,
+    and with fractions rounded: a sum of them depends on the order of its terms."""
+    c = db.connection.cursor()
+    c.execute("SELECT * FROM HudCache")
+    cols = [d[0] for d in c.description]
+    rows = [
+        tuple(round(float(v), 6) if isinstance(v, (float, Decimal)) else v for k, v in zip(cols, row) if k != "id")
+        for row in c.fetchall()
+    ]
+    c.close()
+    return sorted(rows, key=repr)
+
+
+@pytest.mark.parametrize("batch_size", [1, 1000])
+def test_pushed_hud_cache_matches_a_full_rebuild(tmp_path, server_db, batch_size) -> None:
+    """The server's statistics after a push are what a rebuild from its facts gives."""
+    local = _sqlite_db(tmp_path, "hud_local")
+    importer = Importer(caller=None, settings={"testData": False, "threads": 1}, config=local.config, sql=None)
+    importer.database = local
+    importer.setCallHud(False)
+    for path in (ONE_FILE, TOURNEY_FILE):
+        assert importer.addImportFile(str(path), "auto")
+    stored, *_rest = importer.runImport()
+    assert stored >= 2
+
+    sync = LocalFirstSync(local, server_db, batch_size=batch_size, local_db_path=local.db_path)
+    local_ids = _local_hand_ids(local)
+    sync.mark(local_ids)
+    pushed = 0
+    while sync.pending():
+        pushed += sync.push_once()
+    sync.stop()
+    assert pushed == len(local_ids)
+    local.disconnect()
+
+    srv = server_db()
+    pushed_cache = _hud_cache(srv)
+    assert pushed_cache
+    srv.rebuild_cache()
+    assert pushed_cache == _hud_cache(srv)
+    srv.disconnect()
+
+
+def test_pushing_a_hand_twice_counts_it_once_in_the_hud_cache(local_db, server_db) -> None:
+    local_ids = _local_hand_ids(local_db)[:1]
+    sync = LocalFirstSync(local_db, server_db, batch_size=1000)
+    sync.mark(local_ids)
+    assert sync.push_once() == 1
+    c = local_db.connection.cursor()
+    c.execute("UPDATE fpdb_sync_outbox SET pushed = 0")
+    local_db.connection.commit()
+    c.close()
+    srv = server_db()
+    before = _hud_cache(srv)
+    srv.disconnect()
+    assert before
+
+    sync.push_once()
+
+    srv = server_db()
+    assert _hud_cache(srv) == before
+    srv.disconnect()
+
+
+def test_a_failed_batch_leaves_no_hud_cache_behind(local_db, server_db, monkeypatch) -> None:
+    sync = LocalFirstSync(local_db, server_db, batch_size=1000)
+    local_ids = _local_hand_ids(local_db)[:2]
+    sync.mark(local_ids)
+    original = sync._push_hand
+    calls = {"n": 0}
+
+    def failing(server, local_id, sph):
+        calls["n"] += 1
+        if calls["n"] == 2:
+            raise RuntimeError("simulated LAN drop mid-batch")
+        return original(server, local_id, sph)
+
+    monkeypatch.setattr(sync, "_push_hand", failing)
+    with pytest.raises(RuntimeError):
+        sync.push_once()
+    srv = server_db()
+    assert _hud_cache(srv) == []
+    srv.disconnect()
+
+
+def test_outbox_gets_the_hands_of_a_file_that_also_holds_summaries(tmp_path) -> None:
+    """The summary resets database.hids: the hands must be registered before it runs."""
+    local = _sqlite_db(tmp_path, "both_local")
+    importer = Importer(caller=None, settings={"testData": False, "threads": 1}, config=local.config, sql=None)
+    importer.database = local
+    sync = MagicMock()
+    importer._local_first_sync = sync
+
+    def import_hands(fpdbfile):
+        local.hids = [101, 102]
+        fpdbfile.ftype = "both"
+        return (2, 0, 0, 0, 0, 0.0, "PokerStars")
+
+    importer._import_hh_file = import_hands
+    importer._import_summary_file = lambda _fpdbfile: local.resetBulkCache(False)
+    fpdbfile = MagicMock(ftype="hh", path="tourney.txt")
+    importer._import_despatch(fpdbfile)
+
+    assert local.hids == []  # the summary did run and reset the buffer
+    sync.mark.assert_called_once_with([101, 102])
+    importer._local_first_sync = None
+    local.disconnect()
 
 
 def test_push_keeps_the_results_the_server_already_has(tourney_db, server_db) -> None:
@@ -656,6 +767,11 @@ def test_push_tournament_hands_to_a_live_backend(backend: str, tourney_db) -> No
         assert _rows(server, query) == _rows(tourney_db, query), table
     assert _rows(server, "SELECT COUNT(*) FROM Hands") == [(4,)]
     assert _rows(server, "SELECT COUNT(sessionId) FROM Hands") == [(0,)]
+    pushed_cache = _hud_cache(server)
+    assert pushed_cache
+    server.rebuild_cache()
+    server.connection.commit()
+    assert pushed_cache == _hud_cache(server)
     server.close_connection()
 
 

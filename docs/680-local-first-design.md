@@ -26,8 +26,8 @@ whole client-side change. The new part is the import side and the sync worker.
    process exactly as now (same Importer, same transactions, same HudCache).
 2. **Outbox** (`fpdb_sync_outbox`, created by `LocalFirstSync`): one row per
    locally imported hand — `local_hand_id, server_hand_id, pushed, pushed_at`.
-   Written in the same transaction as the import, so a crash never loses a
-   hand without a trace.
+   Written right after the import commits: a crash in between leaves a hand
+   that is local only, with no outbox row.
 3. **`LocalFirstSync`** (`fpdb_3_legacy/local_first_sync.py`, POC shipped in
    this PR): daemon thread, polls the outbox every `poll_s`, pushes batches of
    `batch_size` hands in one server transaction. Idempotent: dedup on the
@@ -46,9 +46,11 @@ whole client-side change. The new part is the import side and the sync worker.
 Referentials: Sites, Players, Gametypes, Files, TourneyTypes.
 Facts per hand: Hands, HandsPlayers, HandsActions, HandsPots, HandsStove,
 HandsShowdown, HandsCashout, Boards, Tourneys, TourneysPlayers. Caches (HudCache, CardsCache, PositionsCache, Sessions, SessionsCache,
-TourneysCache) are **recomputed server-side** from the pushed facts (the server
-runs its own storeHudCache on ingest), never pushed — avoids counter-merge
-conflicts.
+TourneysCache) are **recomputed server-side** from the pushed facts, never
+pushed — avoids counter-merge conflicts. `LocalFirstSync` runs the server's own
+`storeHudCache` for each new hand, in the batch's transaction. The other caches
+are not computed on ingest yet: on the server they stay out of date until a
+cache rebuild.
 
 ## Conflict and consistency rules
 

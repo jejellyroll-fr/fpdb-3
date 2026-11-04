@@ -24,9 +24,11 @@ from __future__ import annotations
 import threading
 import time
 from collections.abc import Callable
+from datetime import datetime
 from typing import Any
 
 from fpdb_3_legacy import latency_profile
+from fpdb_3_legacy.action_enum_stats import derive_counters as derive_action_enum_counters
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("local_first_sync")
@@ -71,6 +73,7 @@ class LocalFirstSync:
             self._own_conn = sqlite3.connect(local_db_path, check_same_thread=False)
             self._own_conn.execute("PRAGMA busy_timeout=60000")
         self._id_maps: dict[str, dict[Any, int]] = {}
+        self._tourney_types: dict[int, int] = {}  # server tourney id -> server type id
         self._ensure_outbox()
 
     def _local_conn(self):
@@ -130,6 +133,9 @@ class LocalFirstSync:
                             # batch fails, nothing is marked and all of it is
                             # retried (#680 P0).
                             done.append((local_id, server_id))
+                    # In the same transaction, so a hand and its statistics land
+                    # together. Nothing to add buffers nothing: this only flushes.
+                    server.storeHudCache(None, None, {}, None, {}, doinsert=True)
             for local_id, server_id in done:
                 self._mark_pushed(local_id, server_id)
             pushed = len(done)
@@ -268,6 +274,7 @@ class LocalFirstSync:
             record["tourneyTypeId"] = self._server_id("TourneyTypes", record["tourneyTypeId"])
             record["sessionId"] = None  # see _remap_hand_fks
             self._find_or_insert(server, "Tourneys", record, ("siteTourneyNo", "tourneyTypeId"), sph)
+            self._tourney_types[self._server_id("Tourneys", record["id"])] = record["tourneyTypeId"]
         for record in self._local_rows("TourneysPlayers", tourneys_players_ids):
             record["tourneyId"] = self._server_id("Tourneys", record["tourneyId"])
             record["playerId"] = self._server_id("Players", record["playerId"])
@@ -312,7 +319,40 @@ class LocalFirstSync:
         # child rows, remapped to the server hand id and server referential ids
         for table in ("HandsPlayers", "HandsActions"):
             self._push_children(server, table, local_id, server_id, sph)
+        self._buffer_hud_cache(server, local_id, hand)
         return server_id
+
+    def _buffer_hud_cache(self, server: Any, local_id: int, hand: dict) -> None:
+        """Add a newly inserted hand to the server's HudCache buffer.
+
+        A hand the server already had is not added again, and the counters are
+        the server's own: HudCache rows are never copied, since another machine
+        may be adding to the same ones. ``hand`` has its server ids already.
+        """
+        lc = self._local_conn().cursor()
+        lc.execute(f"SELECT * FROM HandsPlayers WHERE handId = {self._ph()}", (local_id,))  # nosec B608  # nosemgrep
+        cols = [d[0] for d in lc.description]
+        pdata, pids = {}, {}
+        for row in lc.fetchall():
+            stats = dict(zip(cols, row))
+            player = stats["playerId"]
+            # storeHudCache takes what the parser produces: seat positions as
+            # numbers, where the column holds them as text.
+            stats["position"] = int(stats["position"]) if str(stats["position"]).isdigit() else stats["position"]
+            stats["tourneyTypeId"] = self._tourney_types.get(hand["tourneyId"])
+            # What the import derives in memory and never stores; the cache
+            # rebuild computes the same in SQL (cache_rebuild._derived_expressions).
+            shown = stats["sawShowdown"]
+            stats["showdownWinnings"] = stats["totalProfit"] if shown else 0
+            stats["nonShowdownWinnings"] = 0 if shown else stats["totalProfit"]
+            stats["street0OpenLimpChance"] = stats["raiseFirstInChance"]
+            derive_action_enum_counters(stats)
+            pdata[player] = stats
+            pids[player] = self._server_id("Players", player)
+        lc.close()
+        start = hand["startTime"]
+        start = datetime.fromisoformat(start) if isinstance(start, str) else start
+        server.storeHudCache(hand["gametypeId"], None, pids, start, pdata)
 
     def _remap_hand_fks(self, hand: dict) -> None:
         """Rewrite the hand's referential FKs from local ids to server ids
