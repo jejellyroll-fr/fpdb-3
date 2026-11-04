@@ -389,3 +389,38 @@ def test_a_bulk_read_timeout_aborts_the_batch_like_any_other_read() -> None:
     database.get_table_info_many.side_effect = Timeout()
     with pytest.raises(Timeout):
         service._batched(["7"], "get_table_info_many")
+
+
+def test_primary_tables_do_not_use_up_the_secondary_cap() -> None:
+    service, _database = _service_with_mock_db()
+    tables = tuple(
+        HudTableReadContext(
+            temp_key=f"t{i}",
+            last_hand_id=str(i),
+            hud_params={},
+            poker_game="holdem",
+            game_type="ring",
+            site_id=1,
+            num_seats=6,
+        )
+        for i in range(3)
+    )
+    request = HudBatchReadRequest(
+        sequence=1,
+        hand_ids=(),
+        hud_params={"max_secondary_tables_per_batch": 2},
+        tables=tables,
+    )
+    assert [c.temp_key for c in service._bounded_secondary_tables(request, {"t0"})] == ["t1", "t2"]
+
+
+@pytest.mark.parametrize(("attribute", "expected"), [('max_secondary_tables_per_batch="2"', 2), ("", 0)])
+def test_the_secondary_cap_is_read_from_the_config(attribute: str, expected: int) -> None:
+    import defusedxml.minidom
+
+    from fpdb_3_legacy.config_hud_ui import ConfigHudUiMixin, HudUI
+
+    doc = defusedxml.minidom.parseString(f'<c><hud_ui label="m" {attribute}/></c>')
+    host = ConfigHudUiMixin.__new__(ConfigHudUiMixin)
+    host.ui = HudUI(node=doc.getElementsByTagName("hud_ui")[0])
+    assert host.get_hud_ui_parameters()["max_secondary_tables_per_batch"] == expected

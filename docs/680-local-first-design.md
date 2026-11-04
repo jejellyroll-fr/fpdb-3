@@ -39,7 +39,8 @@ whole client-side change. The new part is the import side and the sync worker.
    are cast per server dialect (SQLite 0/1 -> PG boolean). Failures roll back
    the batch and retry on the next poll; the outbox persists across restarts.
 4. **Referentials pushed first** (Sites, Players, Files, Gametypes, then
-   TourneyTypes) so the server's foreign keys hold.
+   TourneyTypes), only the rows a batch's hands reference, so the server's
+   foreign keys hold at a cost that does not grow with the local history.
 
 ## Tables to sync (production list)
 

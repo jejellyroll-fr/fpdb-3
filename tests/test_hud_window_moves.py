@@ -15,7 +15,7 @@ import pytest
 from PySide6.QtCore import QPoint
 
 from fpdb_3_legacy import Aux_Base
-from fpdb_3_legacy.Aux_Base import AuxSeats
+from fpdb_3_legacy.Aux_Base import AuxSeats, move_if_needed
 
 
 class FakeWindow:
@@ -65,8 +65,8 @@ def test_move_if_needed_counts_skipped_and_real_moves(monkeypatch) -> None:
     counts: dict[str, int] = {}
     monkeypatch.setattr(Aux_Base.latency_profile, "count", lambda n, a=1: counts.__setitem__(n, counts.get(n, 0) + a))
     window = FakeWindow(5, 5)
-    AuxSeats._move_if_needed(window, 5, 5)
-    AuxSeats._move_if_needed(window, 7, 9)
+    move_if_needed(window, 5, 5)
+    move_if_needed(window, 7, 9)
     assert window.moves == [(7, 9)]
     assert counts == {"hud_window_moves_skipped": 1, "hud_window_moves": 1}
 

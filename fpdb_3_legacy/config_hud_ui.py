@@ -47,6 +47,8 @@ class HudUI:
             self.card_back = node.getAttribute("card_back")
         if node.hasAttribute("hand_batch_interval_ms"):
             self.hand_batch_interval_ms = node.getAttribute("hand_batch_interval_ms")
+        if node.hasAttribute("max_secondary_tables_per_batch"):
+            self.max_secondary_tables_per_batch = node.getAttribute("max_secondary_tables_per_batch")
         if node.hasAttribute("stat_range"):
             self.stat_range = node.getAttribute("stat_range")
         if node.hasAttribute("stat_days"):
@@ -203,6 +205,13 @@ class ConfigHudUiMixin(ConfigBase):
             hui["hand_batch_interval_ms"] = int(ui.hand_batch_interval_ms)
         except (AttributeError, ValueError, TypeError):
             hui["hand_batch_interval_ms"] = 200
+
+        # How many tables without a new hand one batch refreshes (#680): 0 is all
+        # of them, and anything else lets the others show older statistics.
+        try:
+            hui["max_secondary_tables_per_batch"] = int(ui.max_secondary_tables_per_batch)
+        except (AttributeError, ValueError, TypeError):
+            hui["max_secondary_tables_per_batch"] = 0
 
         try:
             hui["label"] = ui.label

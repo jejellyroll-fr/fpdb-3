@@ -339,9 +339,9 @@ def test_secondary_bound_rotates_instead_of_starving() -> None:
 
     tables = tuple(ctx(i) for i in range(4))
     req = HudBatchReadRequest(sequence=1, hand_ids=(), hud_params={"max_secondary_tables_per_batch": 1}, tables=tables)
-    first = [c.temp_key for c in service._bounded_secondary_tables(req)]
-    second = [c.temp_key for c in service._bounded_secondary_tables(req)]
-    third = [c.temp_key for c in service._bounded_secondary_tables(req)]
+    first = [c.temp_key for c in service._bounded_secondary_tables(req, set())]
+    second = [c.temp_key for c in service._bounded_secondary_tables(req, set())]
+    third = [c.temp_key for c in service._bounded_secondary_tables(req, set())]
     assert first != second != third
     assert {first[0], second[0], third[0]} == {"t0", "t1", "t2"}
 
@@ -460,6 +460,25 @@ def test_push_carries_only_the_tournaments_of_the_batch(tourney_db, server_db) -
 
     srv = server_db()
     assert _rows(srv, "SELECT COUNT(*) FROM Tourneys") == [(1,)]
+    srv.disconnect()
+
+
+def test_push_leaves_out_referentials_the_batch_does_not_use(local_db, server_db) -> None:
+    """Each row is a round trip, and Players and Files grow with everything ever imported."""
+    for table in ("Players", "Files", "Gametypes"):
+        _insert_decoy_rows(local_db, table)
+    sync = LocalFirstSync(local_db, server_db, batch_size=1000)
+    sync.mark(_local_hand_ids(local_db)[:1])
+    assert sync.push_once() == 1
+
+    srv = server_db()
+    assert _rows(srv, "SELECT COUNT(*) FROM Players WHERE name = 'decoy'") == [(0,)]
+    assert _rows(srv, "SELECT COUNT(*) FROM Files WHERE file = 'decoy'") == [(0,)]
+    assert _rows(srv, "SELECT COUNT(*) FROM Gametypes WHERE currency = 'decoy'") == [(0,)]
+    assert _rows(srv, "SELECT COUNT(*) FROM Players") == _rows(
+        local_db,
+        "SELECT COUNT(DISTINCT playerId) FROM HandsPlayers WHERE handId = (SELECT MIN(id) FROM Hands)",
+    )
     srv.disconnect()
 
 
@@ -781,7 +800,7 @@ def test_push_casts_boolean_lookup_values_for_the_server(local_db, server_db) ->
 
     server = MagicMock(connection=SpyConnection())
     server.get_last_insert_id = srv.get_last_insert_id
-    sync._push_referentials(server, "?")
+    sync._push_referentials(server, _local_hand_ids(local_db), "?")
     srv.disconnect()
     assert seen
     assert all(any(p is False or p is True for p in params) for params in seen)

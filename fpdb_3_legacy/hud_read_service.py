@@ -677,7 +677,11 @@ class HudReadService:
                 )
         return loaded_tables, revision
 
-    def _bounded_secondary_tables(self, request: HudBatchReadRequest) -> tuple[HudTableReadContext, ...]:
+    def _bounded_secondary_tables(
+        self,
+        request: HudBatchReadRequest,
+        updated_tables: set[str],
+    ) -> tuple[HudTableReadContext, ...]:
         """The secondary tables this batch may refresh, honouring the P2 bound.
 
         ``max_secondary_tables_per_batch`` (hud param, default 0 = unbounded)
@@ -690,14 +694,19 @@ class HudReadService:
             max_secondary = int(request.hud_params.get("max_secondary_tables_per_batch", 0) or 0)
         except (TypeError, ValueError):
             max_secondary = 0
-        if 0 < max_secondary < len(request.tables):
+        # Counted after the tables with nothing to do, so a table that just got its
+        # primary refresh does not use up the cap.
+        eligible = tuple(
+            context for context in request.tables if context.temp_key not in updated_tables and context.last_hand_id
+        )
+        if 0 < max_secondary < len(eligible):
             # Round-robin so a capped batch does not starve the same tables:
             # rotate the starting offset on every batch (#680 P2).
-            offset = self._secondary_offset % len(request.tables)
-            self._secondary_offset = (self._secondary_offset + max_secondary) % len(request.tables)
-            rotated = request.tables[offset:] + request.tables[:offset]
+            offset = self._secondary_offset % len(eligible)
+            self._secondary_offset = (offset + max_secondary) % len(eligible)
+            rotated = eligible[offset:] + eligible[:offset]
             return rotated[:max_secondary]
-        return request.tables
+        return eligible
 
     def _load_secondary_hands(
         self,
@@ -708,9 +717,7 @@ class HudReadService:
         failed: list[str],
     ) -> None:
         groups: dict[str, tuple[HudTableReadContext, int, list[HudPreparedHand]]] = {}
-        for context in self._bounded_secondary_tables(request):
-            if context.temp_key in updated_tables or not context.last_hand_id:
-                continue
+        for context in self._bounded_secondary_tables(request, updated_tables):
             try:
                 table_info = self.database.get_table_info(context.last_hand_id)
                 if table_info is None:

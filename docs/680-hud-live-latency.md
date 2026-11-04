@@ -101,13 +101,13 @@ table is printed and the full JSON goes to `--out`.
 * `tests/test_benchmark_hud_live.py` (perf) â€” smoke: the harness reports
   percentiles and round trips.
 
-## Benchmark results — all three backends, run locally (this branch)
+## Benchmark results â€” all three backends, run locally (this branch)
 
 Same workload everywhere: 40-file Stars corpus imported with the HUD cache
 enabled (113 hands / 37 tables), then 10 HUD batch rounds per configuration at
 1/2/4/6/8 tables x stat range A/S x auto-import off/on, through the real
 `HudReadService.read_batch`. Backends: SQLite file local, PostgreSQL 18.3 and
-MySQL 8.4.3 on 127.0.0.1 (loopback — a real LAN adds one network latency per
+MySQL 8.4.3 on 127.0.0.1 (loopback â€” a real LAN adds one network latency per
 round trip on top). Full JSON: `docs/bench-680-{sqlite,postgresql,mysql}.json`.
 
 Batch wall time (ms), 10 rounds per cell:
@@ -124,7 +124,7 @@ Batch wall time (ms), 10 rounds per cell:
 | MySQL 8.4.3 | 8 | A | 160.7 / 207.8 / 218.5 | 212.0 / **1516** / 1592 | 1747 -> 1937 |
 | MySQL 8.4.3 | 8 | S | 116.0 / 130.8 / 134.9 | 171.2 / 223.5 / 228.5 | 1740 -> 1917 |
 
-(An earlier version of this table was produced with a harness bug — missing
+(An earlier version of this table was produced with a harness bug â€” missing
 `hud_days` in the HUD params made every primary hand fail silently, so only the
 secondary path was measured. Fixed and re-run; the table above is the corrected
 one.)
@@ -139,22 +139,22 @@ Reading:
   secondary refresh (p99 ~0): the per-hand aggregate query plus the per-hand
   reads (positions, seat players, cards, min stack). `hud_query_execute` p99
   is only 8-17 ms per statement even on MySQL, so it is the *number* of
-  statements more than any single slow query — on this corpus. On a big real
+  statements more than any single slow query â€” on this corpus. On a big real
   database the per-query p99 is the thing to watch via `EXPLAIN`.
 * **Writer contention is the tail multiplier, and it is architectural**:
   SQLite (single writer) and MySQL/InnoDB hit **p95 of 1.4-1.6 s** at 8 tables
   with auto-import active, already on loopback; PostgreSQL stays at ~184 ms
   p95 because readers never block on the writer. On a LAN database these
   numbers get worse per round trip, but the ordering and the 1.4 s tail exist
-  even locally — this is not only a network problem.
+  even locally â€” this is not only a network problem.
 * **Session range (S)** was cheaper than all-hands (A) here only because the
   regression corpus is old, so the 24h session window is empty
   (`hud_session_rows` = 0). On a real long live session the per-hand session
-  path fetches and aggregates detailed rows in Python — watch
+  path fetches and aggregates detailed rows in Python â€” watch
   `hud_session_rows` and `hud_python_aggregate` in the reporter's report.
 * PostgreSQL 17.6 vs 18.3: no significant difference (within noise).
 
-Conclusion: the freeze is **both** — an architecture-level term (reader/writer
+Conclusion: the freeze is **both** â€” an architecture-level term (reader/writer
 contention, per-statement network latency on a remote DB) **and** a code-level
 term (~22 statements per table per refresh round, serial worker queue). The
 code-side levers in this PR: R1 (HudCache flush: 2N -> ~4 statements per
@@ -178,7 +178,7 @@ in one statement each (`get_*_many`), with a per-hand fallback whenever a bulk
 value is missing.
 
 > Correction (review of #681): the first version of this table was measured with
-> a str-vs-int `hand_id` mismatch at the `*_many` boundary — the harness feeds
+> a str-vs-int `hand_id` mismatch at the `*_many` boundary â€” the harness feeds
 > hand ids as strings, SQL returns ints, so `_resolve_primary_hands` found
 > nothing and the primary reads were silently skipped (805 round trips, 59 ms
 > p95 were the *secondary-only* numbers). Fixed by canonical `str()` keys at
@@ -198,7 +198,7 @@ value is missing.
 | MySQL 8.4.3 | on | 185 / 281 | 193 / 801 | 3828 -> 2886 |
 
 **Round trips per batch round at 8 tables drop ~32% (174.8 -> 118.7 per round,
-3496 -> 2374 per 20 rounds) on every backend — a deterministic counter, not a
+3496 -> 2374 per 20 rounds) on every backend â€” a deterministic counter, not a
 timing.** The SQLite writer-contention tail improves with them (p95 with import
 1342 -> 883 ms). PostgreSQL/MySQL wall time under concurrent import is noisy on
 the bench box (PG on: 605/753 ms after vs 183/230 before across two runs each),
@@ -215,7 +215,7 @@ The reporter's latency report will say which term dominates on their network.
 ## Compatibility fix found while running the three backends
 
 `fillDefaultData` inserted into `Rank` and `StartCards(..., rank, ...)` without
-quoting, but both are reserved words since MySQL 8.0 — on MySQL 8.4
+quoting, but both are reserved words since MySQL 8.0 â€” on MySQL 8.4
 `recreate_tables()` failed there (the CREATE statements already quoted them).
 The inserts now quote per backend (backticked on MySQL only). Covered by
 `tests/test_store_hud_cache_live_backends.py` (live PostgreSQL + MySQL) and the
@@ -241,7 +241,7 @@ unit suite.
 
 `tools/benchmark_hud_queries.py` imports the *same* corpus into a fresh
 database on each backend (664/663/664 hands, 2270 HudCache rows, 427 players,
-194 tables — identical by construction), then runs every HUD read query
+194 tables â€” identical by construction), then runs every HUD read query
 15 times against real hand ids, capturing per-statement timings and the
 server-side plan for the heavy queries. Full JSON with plans:
 `docs/bench-680-queries-{sqlite,postgresql,mysql}.json`.
@@ -265,17 +265,17 @@ Findings and perf pistas (all verified against EXPLAIN, none change results):
   SQLite is fastest locally; on a LAN each of the statements above also pays a
   network round trip, so the ranking amplifies. This is the backend guidance.
 * **`hand_construction` costs 7 statements per hand** (singleHand, playerHand,
-  handActions, showdown, cashout, splash, heroseat) — at 8 tables that is 56
+  handActions, showdown, cashout, splash, heroseat) â€” at 8 tables that is 56
   round trips per refresh round. Next code lever: read the hand once instead
   of 7 lookups.
 * **The batched reads from R4 are all single-statement** (table_info_many,
-  positions_many, ...) — confirmed 1 statement/iter in the report.
+  positions_many, ...) â€” confirmed 1 statement/iter in the report.
 * **Query plans use the indexes**: the aggregate uses `hudcache_playerid_idx`
   (the `gametypeId + 0` stays in the filter, it does not defeat the index on
   playerId); the session query uses `heroseat_idx`, `handsplayers_handid_idx`
   and `players_pkey` even with a full 24h window (663 hands in-window probe on
   PostgreSQL: 5.8 ms p50, no seq scan). `HandsPlayers(playerId)` already exists
-  (`HandsPlayers_playerId_idx` via `INDEXES`) — an extra one was tried and
+  (`HandsPlayers_playerId_idx` via `INDEXES`) â€” an extra one was tried and
   reverted as a duplicate.
 * **Not a missing-index problem at this scale**: no seq scan over HudCache or
   HandsPlayers in any captured plan. On a much larger production database the
@@ -286,7 +286,7 @@ Findings and perf pistas (all verified against EXPLAIN, none change results):
 ## Full SQL catalogue bench on the three backends (constant dataset)
 
 `tools/benchmark_all_queries.py` executes **every query in the SQL catalogue**
-(333 per backend; ~230 executed per backend — DDL skipped, run-time-assembled
+(333 per backend; ~230 executed per backend â€” DDL skipped, run-time-assembled
 template queries reported as skipped, DML measured then rolled back) against
 the same populated database (664 hands, constant across backends), with
 parameters resolved from real rows and the EXPLAIN plan captured per query.
@@ -308,7 +308,7 @@ nature):
 
 Findings:
 
-* **No point query seq-scans a big table on any backend** — the only Seq
+* **No point query seq-scans a big table on any backend** â€” the only Seq
   Scan / Table scan hits in the captured plans are the whole-table dumps
   (getHands*, getHudCache, getPositions, getHandCount) and the DELETE-all
   maintenance queries, which are full scans by design.
@@ -317,7 +317,7 @@ Findings:
   import-heavy maintenance should expect that gap, and on a LAN it multiplies
   per round trip.
 * The live HUD path queries (aggregated/session/many-reads) are all in the
-  sub-10-ms p95 band on this dataset on every backend — consistent with the
+  sub-10-ms p95 band on this dataset on every backend â€” consistent with the
   earlier per-query bench; the multi-table cost is statement *count*, already
   addressed by R4.
 * Remaining errors in the report are bench artifacts (run-time-assembled
@@ -358,7 +358,7 @@ seq-scans at this scale on any backend.
 Code-side architecture choices shipped in this PR:
 
 * **Serial worker + coalescing** (R3): one in-flight batch, superseded batches
-  merged — bounds the queue instead of growing it.
+  merged â€” bounds the queue instead of growing it.
 * **Batched reads** (R4): one statement per detail per batch instead of per
   hand (-32% round trips at 8 tables after the id-type fix).
 * **Active table first**: primary hands are now read most-recently-notified
@@ -367,8 +367,8 @@ Code-side architecture choices shipped in this PR:
 * **Configurable batch window**: `hand_batch_interval_ms` in the HUD ui config
   (default 200 ms, unchanged) lets a many-table profile trade display delay
   for fewer round trips per burst.
-* **Opt-in secondary bound** (P2): `max_secondary_tables_per_batch` (default 0 =
-  unbounded) caps secondary refreshes per batch so a burst cannot queue
+* **Opt-in secondary bound** (P2): `max_secondary_tables_per_batch` on `<hud_ui>`
+  (default 0 = unbounded) caps secondary refreshes per batch so a burst cannot queue
   unbounded non-active work.
 
 Not shipped (needs the reporter's live `hud_queue_wait` first): splitting the
@@ -402,10 +402,10 @@ Reading:
   only at large scale** (millions of rows), where columnar scans beat row
   scans by orders of magnitude. At our scale it is within noise. Conclusion:
   keep OLTP for live; optionally export Parquet to DuckDB/ClickHouse *offline*
-  for heavy reports — never in the live path.
+  for heavy reports â€” never in the live path.
 * **Distributed SQL (CockroachDB/YugabyteDB/Spanner)** replicates rows across
   nodes with consensus: great for multi-machine availability, useless overhead
-  for one LAN server. It does not remove the per-statement RTT — it can add
+  for one LAN server. It does not remove the per-statement RTT â€” it can add
   one. For this case (one DB server on the LAN): not recommended. It becomes
   relevant only if several playing machines share one live database
   simultaneously.

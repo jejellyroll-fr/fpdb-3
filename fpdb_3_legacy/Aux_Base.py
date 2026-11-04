@@ -505,6 +505,15 @@ class SeatWindow(QWidget):
         """
 
 
+def move_if_needed(window: Any, x: int, y: int) -> None:
+    """Move ``window`` to (x, y) only if it is not already there (#680)."""
+    if window.pos() == QPoint(x, y):
+        latency_profile.count("hud_window_moves_skipped")
+        return
+    latency_profile.count("hud_window_moves")
+    window.move(x, y)
+
+
 class AuxSeats(AuxWindow):
     """A super class to display an aux_window or a stat block at each seat."""
 
@@ -606,15 +615,6 @@ class AuxSeats(AuxWindow):
         with latency_profile.scope("hud_move_windows"):
             self._move_windows_body()
 
-    @staticmethod
-    def _move_if_needed(window: Any, x: int, y: int) -> None:
-        """Move ``window`` to (x, y) only if it is not already there (#680)."""
-        if window.pos() == QPoint(x, y):
-            latency_profile.count("hud_window_moves_skipped")
-            return
-        latency_profile.count("hud_window_moves")
-        window.move(x, y)
-
     def _move_windows_body(self) -> None:
         # Ensure table coordinates are valid (not negative or off-screen)
         table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
@@ -644,7 +644,7 @@ class AuxSeats(AuxWindow):
                 clamped_x,
                 clamped_y,
             )
-            self._move_if_needed(self.m_windows[i], clamped_x, clamped_y)
+            move_if_needed(self.m_windows[i], clamped_x, clamped_y)
 
         common_x = self.hud.layout.common[0] + table_x
         common_y = self.hud.layout.common[1] + table_y
@@ -660,7 +660,7 @@ class AuxSeats(AuxWindow):
             clamped_common_x,
             clamped_common_y,
         )
-        self._move_if_needed(self.m_windows["common"], clamped_common_x, clamped_common_y)
+        move_if_needed(self.m_windows["common"], clamped_common_x, clamped_common_y)
 
     def _discard_previous_windows(self) -> None:
         """Take down any windows a previous ``create`` left behind.

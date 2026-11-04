@@ -159,7 +159,7 @@ class LocalFirstSync:
             sph = server.sql.query["placeholder"]
             with latency_profile.scope("sync_push_batch"):
                 with server.transaction():
-                    self._push_referentials(server, sph)
+                    self._push_referentials(server, local_ids, sph)
                     self._push_tournaments(server, local_ids, sph)
                     for local_id in local_ids:
                         # Marked locally only after the server commit: if this
@@ -258,17 +258,41 @@ class LocalFirstSync:
         self._id_maps.setdefault(table, {})[record["id"]] = server_id
         c.close()
 
-    def _push_referentials(self, server: Any, sph: str) -> None:
+    def _referenced_ids(self, table: str, column: str, key: str, values: list) -> list:
+        """The distinct ``column`` of the local ``table`` rows whose ``key`` is in ``values``."""
+        if not values:
+            return []
+        marks = ", ".join([self._ph()] * len(values))
         lc = self._local_conn().cursor()
+        lc.execute(  # nosec B608  # nosemgrep
+            f"SELECT DISTINCT {column} FROM {table} WHERE {column} IS NOT NULL AND {key} IN ({marks})",  # nosec B608  # nosemgrep
+            values,
+        )
+        ids = [r[0] for r in lc.fetchall()]
+        lc.close()
+        return ids
+
+    def _push_referentials(self, server: Any, local_ids: list, sph: str) -> None:
+        """Push the referential rows this batch's hands reference.
+
+        Only those: each row costs a round trip inside the batch's transaction,
+        and Players and Files only ever grow, so reading them whole would make a
+        batch slower with every hand ever imported.
+        """
+        gametypes = self._referenced_ids("Hands", "gametypeId", "id", local_ids)
+        tourneys = self._referenced_ids("Hands", "tourneyId", "id", local_ids)
+        referenced = {
+            "Sites": self._referenced_ids("Gametypes", "siteId", "id", gametypes),
+            "Players": self._referenced_ids("HandsPlayers", "playerId", "handId", local_ids),
+            "Files": self._referenced_ids("Hands", "fileId", "id", local_ids),
+            "Gametypes": gametypes,
+            "TourneyTypes": self._referenced_ids("Tourneys", "tourneyTypeId", "id", tourneys),
+        }
         for table, keys in self.REFERENTIALS:
-            lc.execute(f"SELECT * FROM {table}")  # nosec B608  # nosemgrep
-            cols = [d[0] for d in lc.description]
-            for row in lc.fetchall():
-                record = dict(zip(cols, row))
+            for record in self._local_rows(table, referenced[table]):
                 if "siteId" in record:
                     record["siteId"] = self._server_id("Sites", record["siteId"])
-                self._find_or_insert(server, table, record, keys or [k for k in cols if k != "id"], sph)
-        lc.close()
+                self._find_or_insert(server, table, record, keys or [k for k in record if k != "id"], sph)
 
     def _local_rows(self, table: str, ids: list) -> list[dict]:
         """The local rows of ``table`` with these ids, as dicts."""
@@ -289,19 +313,8 @@ class LocalFirstSync:
         played, so they are not re-read in full for every batch. Rows the server
         already has are left alone: it may know a result this machine does not.
         """
-        marks = ", ".join([self._ph()] * len(local_ids))
-        lc = self._local_conn().cursor()
-        lc.execute(  # nosec B608  # nosemgrep
-            f"SELECT DISTINCT tourneyId FROM Hands WHERE tourneyId IS NOT NULL AND id IN ({marks})",  # nosec B608  # nosemgrep
-            local_ids,
-        )
-        tourney_ids = [r[0] for r in lc.fetchall()]
-        lc.execute(  # nosec B608  # nosemgrep
-            f"SELECT DISTINCT tourneysPlayersId FROM HandsPlayers WHERE tourneysPlayersId IS NOT NULL AND handId IN ({marks})",  # nosec B608  # nosemgrep
-            local_ids,
-        )
-        tourneys_players_ids = [r[0] for r in lc.fetchall()]
-        lc.close()
+        tourney_ids = self._referenced_ids("Hands", "tourneyId", "id", local_ids)
+        tourneys_players_ids = self._referenced_ids("HandsPlayers", "tourneysPlayersId", "handId", local_ids)
 
         for record in self._local_rows("Tourneys", tourney_ids):
             record["tourneyTypeId"] = self._server_id("TourneyTypes", record["tourneyTypeId"])

@@ -25,7 +25,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QPoint, Qt  # pylint: disable=wrong-import-position
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QPixmap
 from PySide6.QtWidgets import (
     QComboBox,
@@ -40,13 +40,7 @@ from PySide6.QtWidgets import (
 )
 
 #    FreePokerTools modules
-from fpdb_3_legacy import (  # pylint: disable=wrong-import-position
-    Aux_Base,
-    Configuration,
-    Popup,
-    Stats,
-    latency_profile,
-)
+from fpdb_3_legacy import Aux_Base, Configuration, Popup, Stats
 from fpdb_3_legacy.hud_profiles import HudPositionScope
 from fpdb_3_legacy.i18n import gettext as _t
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
@@ -1082,7 +1076,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
                 common_x = self.hud.layout.common[0] + table_x
                 common_y = self.hud.layout.common[1] + table_y
                 clamped_x, clamped_y = Aux_Base.clamp_to_screen(common_x, common_y)
-                Aux_Base.AuxSeats._move_if_needed(window, clamped_x, clamped_y)  # #680
+                Aux_Base.move_if_needed(window, clamped_x, clamped_y)
                 continue
 
             if not isinstance(key, tuple):
@@ -1092,11 +1086,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
             seat, block_index = key
             canon = self._canonical_for(key)
             screen_x, screen_y = self._canonical_to_screen(canon)
-            if window.pos() != QPoint(screen_x, screen_y):  # #680: no-op moves are the common case
-                latency_profile.count("hud_window_moves")
-                window.move(screen_x, screen_y)
-            else:
-                latency_profile.count("hud_window_moves_skipped")
+            Aux_Base.move_if_needed(window, screen_x, screen_y)
             window._pos_gen = getattr(self.hud, "geometry_generation", 0)
             self._log_block_window_position("move", seat, block_index, canon, (screen_x, screen_y))
 
@@ -1863,11 +1853,7 @@ class SimpleTableMW(Aux_Base.SeatWindow):
         pos_x = table_x + self.aw.xshift
         pos_y = table_y + self.aw.yshift
         clamped_x, clamped_y = Aux_Base.clamp_to_screen(pos_x, pos_y)
-        if self.pos() != QPoint(clamped_x, clamped_y):  # #680
-            latency_profile.count("hud_window_moves")
-            self.move(clamped_x, clamped_y)
-        else:
-            latency_profile.count("hud_window_moves_skipped")
+        Aux_Base.move_if_needed(self, clamped_x, clamped_y)
 
 
 class SimpleTablePopupMenu(QWidget):

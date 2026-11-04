@@ -87,6 +87,8 @@ class DatabaseHudStatsMixin:
 
         def _rollback_after_failed_read(self) -> None: ...
 
+        def _in_tuple(self, values: list) -> tuple[str, list]: ...
+
         def recover_connection(self) -> bool: ...
 
     def get_seat_players(self, hand_id: str) -> dict[int, dict[str, object]]:
@@ -181,11 +183,6 @@ class DatabaseHudStatsMixin:
                 log.exception("failed to build HUD ChipEV columns; disabling")
                 self._hud_chipev_clause = ""
         return sql_text.replace("<chipev_columns>", self._hud_chipev_clause)
-
-    def _in_tuple(self, values: list) -> tuple[str, list]:
-        """A bound IN clause for ``values`` as (sql, params), portable per backend."""
-        ph = self.sql.query.get("placeholder", "%s")
-        return f"({', '.join([ph] * len(values))})", list(values)
 
     # The *_many reads let a failure propagate. Returning the empty entries here
     # would read as "this hand has none", and HudReadService would then paint every
