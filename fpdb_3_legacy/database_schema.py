@@ -1,9 +1,9 @@
 """Schema construction and reference data for the fpdb database.
 
-Split out of Database.py: these methods own the DDL -- creating and dropping
-tables, indexes and foreign keys -- and the reference rows every fresh database
-needs. The per-backend index and foreign-key catalogues live here too, with the
-code that applies them.
+Split out of Database.py: these methods create and drop the tables and seed the
+reference rows every fresh database needs. Bringing an older database up to date is
+in database_migrations; indexes and foreign keys are in database_indexes. Both are
+bases of DatabaseSchemaMixin, and the names they define stay importable from here.
 
 The mixin borrows connection and cursor handling from its host; the borrowings
 are declared below so the coupling is visible.
@@ -11,1086 +11,60 @@ are declared below so the coupling is visible.
 
 from __future__ import annotations
 
-import contextlib
-import sys
-from collections.abc import Iterator
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from fpdb_3_legacy import Card
-from fpdb_3_legacy.action_events import ACTION_EVENT_COLUMNS
-from fpdb_3_legacy.database_caches import CACHE_KEYS, HUDCACHE_EXTRA_KEYS
+from fpdb_3_legacy.database_indexes import FOREIGN_KEYS as FOREIGN_KEYS
+from fpdb_3_legacy.database_indexes import INDEXES as INDEXES
+from fpdb_3_legacy.database_indexes import DatabaseIndexesMixin
+from fpdb_3_legacy.database_migrations import ACTION_ENUM_COLUMNS as ACTION_ENUM_COLUMNS
+from fpdb_3_legacy.database_migrations import COLUMN_COLLATION_MYSQL as COLUMN_COLLATION_MYSQL
+from fpdb_3_legacy.database_migrations import COLUMN_COLLATION_SQL as COLUMN_COLLATION_SQL
+from fpdb_3_legacy.database_migrations import COLUMN_WIDTH_MYSQL as COLUMN_WIDTH_MYSQL
+from fpdb_3_legacy.database_migrations import COLUMN_WIDTH_SQL as COLUMN_WIDTH_SQL
+from fpdb_3_legacy.database_migrations import DDL_LOCK_TIMEOUT_MS as DDL_LOCK_TIMEOUT_MS
+from fpdb_3_legacy.database_migrations import GAMETYPE_CATEGORY_WIDTH as GAMETYPE_CATEGORY_WIDTH
+from fpdb_3_legacy.database_migrations import HANDS_ACTIONS_EVENT_DEFINITIONS as HANDS_ACTIONS_EVENT_DEFINITIONS
+from fpdb_3_legacy.database_migrations import HANDS_PLAYERS_KEYS as HANDS_PLAYERS_KEYS
+from fpdb_3_legacy.database_migrations import PGSQL_BINARY_COLLATIONS as PGSQL_BINARY_COLLATIONS
+from fpdb_3_legacy.database_migrations import RESET_MYSQL_LOCK_TIMEOUT as RESET_MYSQL_LOCK_TIMEOUT
+from fpdb_3_legacy.database_migrations import RESET_PGSQL_LOCK_TIMEOUT as RESET_PGSQL_LOCK_TIMEOUT
+from fpdb_3_legacy.database_migrations import SET_MYSQL_LOCK_TIMEOUT as SET_MYSQL_LOCK_TIMEOUT
+from fpdb_3_legacy.database_migrations import SET_PGSQL_LOCK_TIMEOUT as SET_PGSQL_LOCK_TIMEOUT
+from fpdb_3_legacy.database_migrations import SET_PLAYERS_NAME_COLLATION_MYSQL as SET_PLAYERS_NAME_COLLATION_MYSQL
+from fpdb_3_legacy.database_migrations import SET_PLAYERS_NAME_COLLATION_PGSQL as SET_PLAYERS_NAME_COLLATION_PGSQL
+from fpdb_3_legacy.database_migrations import WIDEN_GAMETYPE_CATEGORY_MYSQL as WIDEN_GAMETYPE_CATEGORY_MYSQL
+from fpdb_3_legacy.database_migrations import WIDEN_GAMETYPE_CATEGORY_SQL as WIDEN_GAMETYPE_CATEGORY_SQL
+from fpdb_3_legacy.database_migrations import DatabaseMigrationsMixin
 from fpdb_3_legacy.loggingFpdb import get_logger
-from fpdb_3_legacy.sql_indexes import ANALYTICS_INDEX_NAMES
 
 log = get_logger("db")
 
 # Schema version written into Settings by create_tables and checked on connect.
 DB_VERSION = 224
 
-# How long a migration may wait for a table lock before giving up.
-#
-# PostgreSQL and MySQL both wait forever by default, and ``ensure_feature_tables``
-# runs on *every* Database() construction -- which the GUI does once per heavy
-# tab. One tab left idle inside a read transaction on Gametypes is enough to
-# make the next tab's ALTER TABLE wait on it for the life of the process, on the
-# GUI thread, with no timeout and nothing logged: the freeze reported in #249.
-# Migrations are re-attempted on every connection, so losing a race is a delay
-# until the next one, while blocking on it is the application hanging.
-DDL_LOCK_TIMEOUT_MS = 2000
 
-# Width Gametypes.category must have for aof_holdem (10 chars) to fit. The
-# statements are spelled out rather than formatted from the constant: the
-# quality gate rejects SQL built by string interpolation, whatever the input.
-GAMETYPE_CATEGORY_WIDTH = 10
-WIDEN_GAMETYPE_CATEGORY_MYSQL = "ALTER TABLE Gametypes MODIFY category VARCHAR(10) NOT NULL"
-WIDEN_GAMETYPE_CATEGORY_SQL = "ALTER TABLE Gametypes ALTER COLUMN category TYPE VARCHAR(10)"
-
-# Reads a column's declared width. MySQL needs the schema pinned because
-# information_schema.columns spans every database on the server; PostgreSQL's
-# is already scoped to the connected one.
-COLUMN_WIDTH_SQL = (
-    "SELECT character_maximum_length FROM information_schema.columns "
-    "WHERE lower(table_name) = %s AND lower(column_name) = %s"
-)
-COLUMN_WIDTH_MYSQL = (
-    "SELECT character_maximum_length FROM information_schema.columns "
-    "WHERE lower(table_name) = %s AND lower(column_name) = %s AND table_schema = DATABASE()"
-)
-
-# Reads a column's collation, for the one migration that has to know it before issuing DDL.
-# Scoped to the current database on MySQL for the reason COLUMN_WIDTH_MYSQL is. PostgreSQL's
-# catalogue is scoped to the connected database but not to one schema, so the schema is
-# resolved from the table name exactly as the unqualified ALTER TABLE resolves it: a database
-# that holds a Players table in more than one schema must not answer for another one's row,
-# or the migration would skip the table it is about to alter -- or alter it every connection.
-COLUMN_COLLATION_SQL = (
-    "SELECT collation_name FROM information_schema.columns "
-    "WHERE lower(table_name) = %s AND lower(column_name) = %s AND table_schema = ("
-    "SELECT n.nspname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
-    "WHERE c.oid = to_regclass(%s))"
-)
-COLUMN_COLLATION_MYSQL = (
-    "SELECT collation_name FROM information_schema.columns "
-    "WHERE lower(table_name) = %s AND lower(column_name) = %s AND table_schema = DATABASE()"
-)
-
-# Players.name compares byte for byte after this migration (#417): case, accents and ligatures
-# are distinct, so the unique (name, siteId) index no longer files two players as one. The
-# character set is named with the collation because a collation belongs to one character set;
-# MySQL's utf8mb4_bin is PAD SPACE, so a trailing space still compares equal there.
-SET_PLAYERS_NAME_COLLATION_MYSQL = (
-    "ALTER TABLE Players MODIFY name VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL"
-)
-SET_PLAYERS_NAME_COLLATION_PGSQL = 'ALTER TABLE Players ALTER COLUMN name TYPE VARCHAR(32) COLLATE "C"'
-
-# PostgreSQL's collations that compare a name byte for byte. Anything else -- its locale, or
-# MySQL's server default -- folds at least case, or is not known not to.
-PGSQL_BINARY_COLLATIONS = frozenset({"c", "posix", "ucs_basic"})
-
-
-def _is_binary_collation(collation: str | None, *, mysql: bool) -> bool:
-    """Whether *collation* stores and compares a name as the migration leaves it.
-
-    ``None`` is the server's default, and a default is never taken for binary: MySQL's usual
-    one folds case and accents, and PostgreSQL's is its locale, which is not known to do
-    otherwise. On MySQL a binary collation counts only in ``utf8mb4`` (``utf8mb4_bin``,
-    ``utf8mb4_0900_bin``): ``latin1_bin`` or ``utf8mb3_bin`` compare byte for byte but cannot
-    store every name -- ``Alice😀`` is refused at insertion -- so they are migrated too.
-    """
-    if collation is None:
-        return False
-    normalised = collation.lower()
-    if mysql:
-        return normalised.startswith("utf8mb4_") and normalised.endswith("_bin")
-    return normalised in PGSQL_BINARY_COLLATIONS
-
-
-# Session settings that apply DDL_LOCK_TIMEOUT_MS on each server backend.
-SET_PGSQL_LOCK_TIMEOUT = "SET lock_timeout = 2000"
-RESET_PGSQL_LOCK_TIMEOUT = "SET lock_timeout = DEFAULT"
-SET_MYSQL_LOCK_TIMEOUT = "SET SESSION lock_wait_timeout = 2"
-RESET_MYSQL_LOCK_TIMEOUT = "SET SESSION lock_wait_timeout = DEFAULT"
-
-# Keys used to index into player data in storeHandsPlayers.
-HANDS_PLAYERS_KEYS = [
-    "startCash",
-    "effStack",
-    "startBounty",
-    "endBounty",
-    "seatNo",
-    "sitout",
-    "card1",
-    "card2",
-    "card3",
-    "card4",
-    "card5",
-    "card6",
-    "card7",
-    "card8",
-    "card9",
-    "card10",
-    "card11",
-    "card12",
-    "card13",
-    "card14",
-    "card15",
-    "card16",
-    "card17",
-    "card18",
-    "card19",
-    "card20",
-    "common",
-    "committed",
-    "winnings",
-    "rake",
-    "rakeDealt",
-    "rakeContributed",
-    "rakeWeighted",
-    "totalProfit",
-    "allInEV",
-    "street0VPIChance",
-    "street0VPI",
-    "street1Seen",
-    "street2Seen",
-    "street3Seen",
-    "street4Seen",
-    "sawShowdown",
-    "showed",
-    "street0AllIn",
-    "street1AllIn",
-    "street2AllIn",
-    "street3AllIn",
-    "street4AllIn",
-    "wentAllIn",
-    "splashWinnings",
-    "street0AggrChance",
-    "street0Aggr",
-    "street1Aggr",
-    "street2Aggr",
-    "street3Aggr",
-    "street4Aggr",
-    "street1CBChance",
-    "street2CBChance",
-    "street3CBChance",
-    "street4CBChance",
-    "street1CBDone",
-    "street2CBDone",
-    "street3CBDone",
-    "street4CBDone",
-    "wonWhenSeenStreet1",
-    "wonWhenSeenStreet2",
-    "wonWhenSeenStreet3",
-    "wonWhenSeenStreet4",
-    "wonAtSD",
-    "position",
-    "street0InPosition",
-    "street1InPosition",
-    "street2InPosition",
-    "street3InPosition",
-    "street4InPosition",
-    "street0FirstToAct",
-    "street1FirstToAct",
-    "street2FirstToAct",
-    "street3FirstToAct",
-    "street4FirstToAct",
-    "tourneysPlayersId",
-    "startCards",
-    "street0CalledRaiseChance",
-    "street0CalledRaiseDone",
-    "street0FaceRaise",
-    "street0_2BChance",
-    "street0_2BDone",
-    "street0_3BChance",
-    "street0_3BDone",
-    "street0_4BChance",
-    "street0_4BDone",
-    "street0_C4BChance",
-    "street0_C4BDone",
-    "street0_FoldTo2BChance",
-    "street0_FoldTo2BDone",
-    "street0_FoldTo3BChance",
-    "street0_FoldTo3BDone",
-    "street0_FoldTo4BChance",
-    "street0_FoldTo4BDone",
-    "street0_SqueezeChance",
-    "street0_SqueezeDone",
-    "raiseToStealChance",
-    "raiseToStealDone",
-    "stealChance",
-    "stealDone",
-    "success_Steal",
-    "otherRaisedStreet0",
-    "otherRaisedStreet1",
-    "otherRaisedStreet2",
-    "otherRaisedStreet3",
-    "otherRaisedStreet4",
-    "foldToOtherRaisedStreet0",
-    "foldToOtherRaisedStreet1",
-    "foldToOtherRaisedStreet2",
-    "foldToOtherRaisedStreet3",
-    "foldToOtherRaisedStreet4",
-    "raiseFirstInChance",
-    "raisedFirstIn",
-    "foldBbToStealChance",
-    "foldedBbToSteal",
-    "foldSbToStealChance",
-    "foldedSbToSteal",
-    "foldToStreet1CBChance",
-    "foldToStreet1CBDone",
-    "foldToStreet2CBChance",
-    "foldToStreet2CBDone",
-    "foldToStreet3CBChance",
-    "foldToStreet3CBDone",
-    "foldToStreet4CBChance",
-    "foldToStreet4CBDone",
-    "street1CheckCallRaiseChance",
-    "street1CheckCallDone",
-    "street1CheckRaiseDone",
-    "street2CheckCallRaiseChance",
-    "street2CheckCallDone",
-    "street2CheckRaiseDone",
-    "street3CheckCallRaiseChance",
-    "street3CheckCallDone",
-    "street3CheckRaiseDone",
-    "street4CheckCallRaiseChance",
-    "street4CheckCallDone",
-    "street4CheckRaiseDone",
-    "street0Calls",
-    "street1Calls",
-    "street2Calls",
-    "street3Calls",
-    "street4Calls",
-    "street0Bets",
-    "street1Bets",
-    "street2Bets",
-    "street3Bets",
-    "street4Bets",
-    "street0Raises",
-    "street1Raises",
-    "street2Raises",
-    "street3Raises",
-    "street4Raises",
-    "street1Discards",
-    "street2Discards",
-    "street3Discards",
-    "street0Limp",
-    "street0OpenLimp",
-    "handString",
-    "cashOutFee",
-    "isCashOut",
-    # Postflop per-street 3-bet (re-raise) — appended at the end so existing
-    # insert column positions are unchanged (see store_hands_players).
-    "street1_3BChance",
-    "street1_3BDone",
-    "street2_3BChance",
-    "street2_3BDone",
-    "street3_3BChance",
-    "street3_3BDone",
-    "street1_4BChance",
-    "street1_4BDone",
-    "street1_FoldTo4BChance",
-    "street1_FoldTo4BDone",
-    "street2_4BChance",
-    "street2_4BDone",
-    "street2_FoldTo4BChance",
-    "street2_FoldTo4BDone",
-    "street3_4BChance",
-    "street3_4BDone",
-    "street3_FoldTo4BChance",
-    "street3_FoldTo4BDone",
-    "street1OpenChance",
-    "street1OpenDone",
-    "street2OpenChance",
-    "street2OpenDone",
-    "street3OpenChance",
-    "street3OpenDone",
-    "flg_f_fold",
-    "flg_t_fold",
-    "flg_r_fold",
-    "street1FirstRaise",
-    "street2FirstRaise",
-    "street3FirstRaise",
-    "street1FaceRaise",
-    "street2FaceRaise",
-    "street3FaceRaise",
-    "flg_f_donk_def_opp",
-    "flg_t_float_opp",
-    "flg_t_float",
-    "flg_t_float_def_opp",
-    "flg_r_float_opp",
-    "flg_r_float",
-    "flg_r_float_def_opp",
-    "flg_t_donk_def_opp",
-    "flg_r_donk_def_opp",
-    # Fold-to-3bet postflop (computed in calc3BetPostflop) — appended at the end.
-    "street1_FoldTo3BChance",
-    "street1_FoldTo3BDone",
-    "street2_FoldTo3BChance",
-    "street2_FoldTo3BDone",
-    "street3_FoldTo3BChance",
-    "street3_FoldTo3BDone",
-    # Preflop squeeze defense + limpers faced — appended at the end.
-    "street0_FoldToSqueezeChance",
-    "street0_FoldToSqueezeDone",
-    "street0_FaceLimpers",
-    # GenerationPoker open-sizing / limp counts (PT4 cnt_gp_* custom pack).
-    "cnt_gp_open_opp",
-    "cnt_gp_2x",
-    "cnt_gp_os",
-    "cnt_gp_limp",
-    # Special blinds (dead small/big blind, straddle) — appended at the end.
-    "flg_blind_ds",
-    "flg_blind_db",
-    "flg_blind_k",
-    # Faced an all-in + fold response — appended at the end.
-    "flg_faced_allin",
-    "flg_fold_to_allin",
-    # Bet-sizing: flop bet faced (count + basis points of pot) — appended at the end.
-    "cnt_f_bet_facing",
-    "val_f_bet_facing_bp",
-    # Bet-sizing: turn + river bet faced — appended at the end.
-    "cnt_t_bet_facing",
-    "val_t_bet_facing_bp",
-    "cnt_r_bet_facing",
-    "val_r_bet_facing_bp",
-    # Bet-sizing: preflop raise faced per level (count + basis points) — appended at the end.
-    "cnt_p_2bet_facing",
-    "val_p_2bet_facing_bp",
-    "cnt_p_3bet_facing",
-    "val_p_3bet_facing_bp",
-    "cnt_p_4bet_facing",
-    "val_p_4bet_facing_bp",
-    # Bet-sizing: postflop bet made per street (count + basis points) — appended at the end.
-    "cnt_f_bet_made",
-    "val_f_bet_made_bp",
-    "cnt_t_bet_made",
-    "val_t_bet_made_bp",
-    "cnt_r_bet_made",
-    "val_r_bet_made_bp",
-    # Bet-sizing: postflop SPR per street (count + SPR*100) — appended at the end.
-    "cnt_f_spr",
-    "val_f_spr",
-    "cnt_t_spr",
-    "val_t_spr",
-    "cnt_r_spr",
-    "val_r_spr",
-    # Bet-sizing: size of the first raise made per street (count + basis points) — appended at the end.
-    "cnt_p_raise_made",
-    "val_p_raise_made_bp",
-    "cnt_f_raise_made",
-    "val_f_raise_made_bp",
-    "cnt_t_raise_made",
-    "val_t_raise_made_bp",
-    "cnt_r_raise_made",
-    "val_r_raise_made_bp",
-    # Bet-sizing: postflop raise faced per street and level (count + basis points) — appended at the end.
-    "cnt_f_2bet_facing",
-    "val_f_2bet_facing_bp",
-    "cnt_f_3bet_facing",
-    "val_f_3bet_facing_bp",
-    "cnt_f_4bet_facing",
-    "val_f_4bet_facing_bp",
-    "cnt_t_2bet_facing",
-    "val_t_2bet_facing_bp",
-    "cnt_t_3bet_facing",
-    "val_t_3bet_facing_bp",
-    "cnt_t_4bet_facing",
-    "val_t_4bet_facing_bp",
-    "cnt_r_2bet_facing",
-    "val_r_2bet_facing_bp",
-    "cnt_r_3bet_facing",
-    "val_r_3bet_facing_bp",
-    "cnt_r_4bet_facing",
-    "val_r_4bet_facing_bp",
-    # Bet-sizing completion (raw amounts, generic raise faced, 2nd raise, 5bet) — appended at the end.
-    "amt_blind",
-    "amt_bet_p",
-    "amt_bet_f",
-    "amt_bet_t",
-    "amt_bet_r",
-    "amt_bet_ttl",
-    "cnt_p_raise_facing",
-    "val_p_raise_facing_bp",
-    "cnt_f_raise_facing",
-    "val_f_raise_facing_bp",
-    "cnt_t_raise_facing",
-    "val_t_raise_facing_bp",
-    "cnt_r_raise_facing",
-    "val_r_raise_facing_bp",
-    "cnt_p_raise_made_2",
-    "val_p_raise_made_2_bp",
-    "cnt_f_raise_made_2",
-    "val_f_raise_made_2_bp",
-    "cnt_t_raise_made_2",
-    "val_t_raise_made_2_bp",
-    "cnt_r_raise_made_2",
-    "val_r_raise_made_2_bp",
-    "cnt_p_5bet_facing",
-    "val_p_5bet_facing_bp",
-    # Delayed turn c-bet (DerivedStats._calc_delayed_turn_cbet). Appended at the
-    # end so existing insert column positions stay unchanged; older databases get
-    # the columns via ensure_handsplayers_columns().
-    "street2DelayedCBChance",
-    "street2DelayedCBDone",
-    # Turn probe bet (DerivedStats._calc_turn_probe).
-    "street2ProbeChance",
-    "street2ProbeDone",
-    # PT4 action enums (DerivedStats.calcActionEnums). One char per column --
-    # F/C/R for the response, N when the situation never came up -- so they are
-    # CHAR(1) rather than the INT the other stat columns use. The order mirrors
-    # DerivedStats.ACTION_ENUM_KEYS and the store_hands_players insert.
-    "enum_p_3bet_action",
-    "enum_p_4bet_action",
-    "enum_p_squeeze_action",
-    "enum_f_3bet_action",
-    "enum_f_4bet_action",
-    "enum_f_cbet_action",
-    "enum_f_donk_action",
-    "enum_t_3bet_action",
-    "enum_t_4bet_action",
-    "enum_t_cbet_action",
-    "enum_t_float_action",
-    "enum_t_donk_action",
-    "enum_r_3bet_action",
-    "enum_r_4bet_action",
-    "enum_r_cbet_action",
-    "enum_r_float_action",
-    "enum_r_donk_action",
-    "enum_face_allin",
-    "enum_face_allin_action",
-    "enum_folded",
-]
-
-# The subset of HANDS_PLAYERS_KEYS holding a PT4 action enum. Split out so the
-# migration can give them a char column instead of the INT default.
-ACTION_ENUM_COLUMNS = [key for key in HANDS_PLAYERS_KEYS if key.startswith("enum_")]
-
-# Just like STATS_KEYS, this lets us efficiently add data at the
-# "beginning" later.
-HANDS_PLAYERS_KEYS.reverse()
-
-# Column definition per normalized action-event column (issue #293). The
-# mapping is keyed by every column action_events.ACTION_EVENT_COLUMNS declares,
-# and spelled out so that adding a column without deciding how an existing
-# database gains it fails here, at import, rather than in the ALTER of whoever
-# upgrades next.
-_HANDS_ACTIONS_EVENT_TYPES = {
-    "actionType": "VARCHAR(24)",
-    "toCall": "BIGINT DEFAULT 0",
-    "potBefore": "BIGINT DEFAULT 0",
-    "potAfter": "BIGINT DEFAULT 0",
-    "sizingBp": "INT DEFAULT 0",
-    "position": "SMALLINT",
-    "relativePosition": "SMALLINT DEFAULT 0",
-    "inPosition": "BOOLEAN DEFAULT false",
-    "effectiveStack": "BIGINT DEFAULT 0",
-    "effectiveStackBB": "INT DEFAULT 0",
-    "sprBefore": "INT DEFAULT 0",
-    "isAggressor": "BOOLEAN DEFAULT false",
-    "facingActionType": "VARCHAR(24)",
-    "facingAmount": "BIGINT DEFAULT 0",
-    "facingSizingBp": "INT DEFAULT 0",
-    "raiserCount": "SMALLINT DEFAULT 0",
-    "callerCount": "SMALLINT DEFAULT 0",
-    "playersInHand": "SMALLINT DEFAULT 0",
-}
-HANDS_ACTIONS_EVENT_DEFINITIONS: dict[str, str] = {
-    column: _HANDS_ACTIONS_EVENT_TYPES[column] for column in ACTION_EVENT_COLUMNS
-}
-
-# db differences:
-# - note that mysql automatically creates indexes on constrained columns when
-#   foreign keys are created, while postgres does not. Hence the much longer list
-#   of indexes is required for postgres.
-# all primary keys are left on all the time
-#
-#             table     column           drop_code
-
-INDEXES: list[list[dict[str, Any]]] = [
-    [],  # no db with index 0
-    [],  # no db with index 1
-    [  # indexes for mysql (list index 2) (foreign keys not here, in next data structure)
-        #  {'tab':'Players',         'col':'name',              'drop':0}  unique indexes not dropped
-        #  {'tab':'Hands',           'col':'siteHandNo',        'drop':0}  unique indexes not dropped
-        # , {'tab':'Tourneys',        'col':'siteTourneyNo',     'drop':0}  unique indexes not dropped
-    ],
-    [  # indexes for postgres (list index 3)
-        {"tab": "Gametypes", "col": "siteId", "drop": 0},
-        {"tab": "Hands", "col": "tourneyId", "drop": 0},  # mct 22/3/09
-        {"tab": "Hands", "col": "gametypeId", "drop": 0},  # mct 22/3/09
-        {"tab": "Hands", "col": "sessionId", "drop": 0},  # mct 22/3/09
-        {"tab": "Hands", "col": "fileId", "drop": 0},  # mct 22/3/09
-        # , {'tab':'Hands',           'col':'siteHandNo',        'drop':0}  unique indexes not dropped
-        {"tab": "HandsActions", "col": "handId", "drop": 1},
-        {"tab": "HandsActions", "col": "playerId", "drop": 1},
-        {"tab": "HandsActions", "col": "actionId", "drop": 1},
-        # The event model is queried street by street and by action type
-        # (#293), which the two foreign-key indexes above cannot serve.
-        {"tab": "HandsActions", "col": "street", "drop": 1},
-        {"tab": "HandsActions", "col": "actionType", "drop": 1},
-        {"tab": "HandsStove", "col": "handId", "drop": 1},
-        {"tab": "HandsStove", "col": "playerId", "drop": 1},
-        {"tab": "HandsStove", "col": "hiLo", "drop": 1},
-        {"tab": "HandsPots", "col": "handId", "drop": 1},
-        {"tab": "HandsPots", "col": "playerId", "drop": 1},
-        {"tab": "Boards", "col": "handId", "drop": 1},
-        {"tab": "HandsPlayers", "col": "handId", "drop": 1},
-        {"tab": "HandsPlayers", "col": "playerId", "drop": 1},
-        {"tab": "HandsPlayers", "col": "tourneysPlayersId", "drop": 0},
-        {"tab": "HandsPlayers", "col": "startCards", "drop": 1},
-        {"tab": "HudCache", "col": "gametypeId", "drop": 1},
-        {"tab": "HudCache", "col": "playerId", "drop": 0},
-        {"tab": "HudCache", "col": "tourneyTypeId", "drop": 0},
-        {"tab": "Sessions", "col": "weekId", "drop": 1},
-        {"tab": "Sessions", "col": "monthId", "drop": 1},
-        {"tab": "SessionsCache", "col": "sessionId", "drop": 1},
-        {"tab": "SessionsCache", "col": "gametypeId", "drop": 1},
-        {"tab": "SessionsCache", "col": "playerId", "drop": 0},
-        {"tab": "TourneysCache", "col": "sessionId", "drop": 1},
-        {"tab": "TourneysCache", "col": "tourneyId", "drop": 1},
-        {"tab": "TourneysCache", "col": "playerId", "drop": 0},
-        {"tab": "Players", "col": "siteId", "drop": 1},
-        # , {'tab':'Players',         'col':'name',              'drop':0}  unique indexes not dropped
-        {"tab": "Tourneys", "col": "tourneyTypeId", "drop": 1},
-        {"tab": "Tourneys", "col": "sessionId", "drop": 1},
-        # , {'tab':'Tourneys',        'col':'siteTourneyNo',     'drop':0}  unique indexes not dropped
-        {"tab": "TourneysPlayers", "col": "playerId", "drop": 0},
-        # , {'tab':'TourneysPlayers', 'col':'tourneyId',         'drop':0}  unique indexes not dropped
-        {"tab": "TourneyTypes", "col": "siteId", "drop": 0},
-        {"tab": "Backings", "col": "tourneysPlayersId", "drop": 0},
-        {"tab": "Backings", "col": "playerId", "drop": 0},
-        {"tab": "RawHands", "col": "id", "drop": 0},
-        {"tab": "RawTourneys", "col": "id", "drop": 0},
-    ],
-    [  # indexes for sqlite (list index 4)
-        {"tab": "Hands", "col": "tourneyId", "drop": 0},
-        {"tab": "Hands", "col": "gametypeId", "drop": 0},
-        {"tab": "Hands", "col": "sessionId", "drop": 0},
-        {"tab": "Hands", "col": "fileId", "drop": 0},
-        {"tab": "Boards", "col": "handId", "drop": 0},
-        {"tab": "Gametypes", "col": "siteId", "drop": 0},
-        {"tab": "HandsPlayers", "col": "handId", "drop": 0},
-        {"tab": "HandsPlayers", "col": "playerId", "drop": 0},
-        {"tab": "HandsPlayers", "col": "tourneysPlayersId", "drop": 0},
-        {"tab": "HandsActions", "col": "handId", "drop": 0},
-        {"tab": "HandsActions", "col": "playerId", "drop": 0},
-        {"tab": "HandsActions", "col": "actionId", "drop": 1},
-        {"tab": "HandsActions", "col": "street", "drop": 1},
-        {"tab": "HandsActions", "col": "actionType", "drop": 1},
-        {"tab": "HandsStove", "col": "handId", "drop": 0},
-        {"tab": "HandsStove", "col": "playerId", "drop": 0},
-        {"tab": "HandsPots", "col": "handId", "drop": 0},
-        {"tab": "HandsPots", "col": "playerId", "drop": 0},
-        {"tab": "HudCache", "col": "gametypeId", "drop": 1},
-        {"tab": "HudCache", "col": "playerId", "drop": 0},
-        {"tab": "HudCache", "col": "tourneyTypeId", "drop": 0},
-        {"tab": "Sessions", "col": "weekId", "drop": 1},
-        {"tab": "Sessions", "col": "monthId", "drop": 1},
-        {"tab": "SessionsCache", "col": "sessionId", "drop": 1},
-        {"tab": "SessionsCache", "col": "gametypeId", "drop": 1},
-        {"tab": "SessionsCache", "col": "playerId", "drop": 0},
-        {"tab": "TourneysCache", "col": "sessionId", "drop": 1},
-        {"tab": "TourneysCache", "col": "tourneyId", "drop": 1},
-        {"tab": "TourneysCache", "col": "playerId", "drop": 0},
-        {"tab": "Players", "col": "siteId", "drop": 1},
-        {"tab": "Tourneys", "col": "tourneyTypeId", "drop": 1},
-        {"tab": "Tourneys", "col": "sessionId", "drop": 1},
-        {"tab": "TourneysPlayers", "col": "playerId", "drop": 0},
-        {"tab": "TourneyTypes", "col": "siteId", "drop": 0},
-        {"tab": "Backings", "col": "tourneysPlayersId", "drop": 0},
-        {"tab": "Backings", "col": "playerId", "drop": 0},
-        {"tab": "RawHands", "col": "id", "drop": 0},
-        {"tab": "RawTourneys", "col": "id", "drop": 0},
-    ],
-]
-
-FOREIGN_KEYS: list[list[dict[str, Any]]] = [
-    [],  # no db with index 0
-    [],  # no db with index 1
-    [  # foreign keys for mysql (index 2)
-        {
-            "fktab": "Hands",
-            "fkcol": "tourneyId",
-            "rtab": "Tourneys",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "Hands",
-            "fkcol": "gametypeId",
-            "rtab": "Gametypes",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "Hands",
-            "fkcol": "sessionId",
-            "rtab": "Sessions",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "Hands",
-            "fkcol": "fileId",
-            "rtab": "Files",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "Boards",
-            "fkcol": "handId",
-            "rtab": "Hands",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsPlayers",
-            "fkcol": "handId",
-            "rtab": "Hands",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsPlayers",
-            "fkcol": "playerId",
-            "rtab": "Players",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsPlayers",
-            "fkcol": "tourneysPlayersId",
-            "rtab": "TourneysPlayers",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsPlayers",
-            "fkcol": "startCards",
-            "rtab": "StartCards",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsActions",
-            "fkcol": "handId",
-            "rtab": "Hands",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsActions",
-            "fkcol": "playerId",
-            "rtab": "Players",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsActions",
-            "fkcol": "actionId",
-            "rtab": "Actions",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsStove",
-            "fkcol": "handId",
-            "rtab": "Hands",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsStove",
-            "fkcol": "playerId",
-            "rtab": "Players",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsStove",
-            "fkcol": "rankId",
-            "rtab": "Rank",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsPots",
-            "fkcol": "handId",
-            "rtab": "Hands",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsPots",
-            "fkcol": "playerId",
-            "rtab": "Players",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HudCache",
-            "fkcol": "gametypeId",
-            "rtab": "Gametypes",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HudCache",
-            "fkcol": "playerId",
-            "rtab": "Players",
-            "rcol": "id",
-            "drop": 0,
-        },
-        {
-            "fktab": "HudCache",
-            "fkcol": "tourneyTypeId",
-            "rtab": "TourneyTypes",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "Sessions",
-            "fkcol": "weekId",
-            "rtab": "Weeks",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "Sessions",
-            "fkcol": "monthId",
-            "rtab": "Months",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "SessionsCache",
-            "fkcol": "sessionId",
-            "rtab": "Sessions",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "SessionsCache",
-            "fkcol": "gametypeId",
-            "rtab": "Gametypes",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "SessionsCache",
-            "fkcol": "playerId",
-            "rtab": "Players",
-            "rcol": "id",
-            "drop": 0,
-        },
-        {
-            "fktab": "TourneysCache",
-            "fkcol": "sessionId",
-            "rtab": "Sessions",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "TourneysCache",
-            "fkcol": "tourneyId",
-            "rtab": "Tourneys",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "TourneysCache",
-            "fkcol": "playerId",
-            "rtab": "Players",
-            "rcol": "id",
-            "drop": 0,
-        },
-        {
-            "fktab": "Tourneys",
-            "fkcol": "tourneyTypeId",
-            "rtab": "TourneyTypes",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "Tourneys",
-            "fkcol": "sessionId",
-            "rtab": "Sessions",
-            "rcol": "id",
-            "drop": 1,
-        },
-    ],
-    [  # foreign keys for postgres (index 3)
-        {
-            "fktab": "Hands",
-            "fkcol": "tourneyId",
-            "rtab": "Tourneys",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "Hands",
-            "fkcol": "gametypeId",
-            "rtab": "Gametypes",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "Hands",
-            "fkcol": "sessionId",
-            "rtab": "Sessions",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "Hands",
-            "fkcol": "fileId",
-            "rtab": "Files",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "Boards",
-            "fkcol": "handId",
-            "rtab": "Hands",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsPlayers",
-            "fkcol": "handId",
-            "rtab": "Hands",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsPlayers",
-            "fkcol": "playerId",
-            "rtab": "Players",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsPlayers",
-            "fkcol": "tourneysPlayersId",
-            "rtab": "TourneysPlayers",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsPlayers",
-            "fkcol": "startCards",
-            "rtab": "StartCards",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsActions",
-            "fkcol": "handId",
-            "rtab": "Hands",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsActions",
-            "fkcol": "playerId",
-            "rtab": "Players",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsActions",
-            "fkcol": "actionId",
-            "rtab": "Actions",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsStove",
-            "fkcol": "handId",
-            "rtab": "Hands",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsStove",
-            "fkcol": "playerId",
-            "rtab": "Players",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsStove",
-            "fkcol": "rankId",
-            "rtab": "Rank",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsPots",
-            "fkcol": "handId",
-            "rtab": "Hands",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HandsPots",
-            "fkcol": "playerId",
-            "rtab": "Players",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HudCache",
-            "fkcol": "gametypeId",
-            "rtab": "Gametypes",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "HudCache",
-            "fkcol": "playerId",
-            "rtab": "Players",
-            "rcol": "id",
-            "drop": 0,
-        },
-        {
-            "fktab": "HudCache",
-            "fkcol": "tourneyTypeId",
-            "rtab": "TourneyTypes",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "Sessions",
-            "fkcol": "weekId",
-            "rtab": "Weeks",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "Sessions",
-            "fkcol": "monthId",
-            "rtab": "Months",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "SessionsCache",
-            "fkcol": "sessionId",
-            "rtab": "Sessions",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "SessionsCache",
-            "fkcol": "gametypeId",
-            "rtab": "Gametypes",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "SessionsCache",
-            "fkcol": "playerId",
-            "rtab": "Players",
-            "rcol": "id",
-            "drop": 0,
-        },
-        {
-            "fktab": "TourneysCache",
-            "fkcol": "sessionId",
-            "rtab": "Sessions",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "TourneysCache",
-            "fkcol": "tourneyId",
-            "rtab": "Tourneys",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "TourneysCache",
-            "fkcol": "playerId",
-            "rtab": "Players",
-            "rcol": "id",
-            "drop": 0,
-        },
-        {
-            "fktab": "Tourneys",
-            "fkcol": "tourneyTypeId",
-            "rtab": "TourneyTypes",
-            "rcol": "id",
-            "drop": 1,
-        },
-        {
-            "fktab": "Tourneys",
-            "fkcol": "sessionId",
-            "rtab": "Sessions",
-            "rcol": "id",
-            "drop": 1,
-        },
-    ],
-    [],  # no foreign keys in sqlite (index 4)
-]
-
-
-class DatabaseSchemaMixin:
+class DatabaseSchemaMixin(DatabaseMigrationsMixin, DatabaseIndexesMixin):
     """Builds the schema and seeds its reference data.
 
     Mixed into Database, which supplies the connection, the query catalogue and
     the backend identity named below.
     """
 
-    # The per-backend catalogues this mixin applies. prepareBulkImport and
-    # afterBulkImport, still on the host, read them through the MRO.
-    indexes = INDEXES
-    foreignKeys = FOREIGN_KEYS
-
     # Provided by Database.
     sql: Any
     backend: int
     publicDB: bool
-    MYSQL_INNODB: int
-    PGSQL: int
-    SQLITE: int
 
     if TYPE_CHECKING:
-
-        def get_cursor(self, connect: bool = False) -> Any: ...
-
-        def commit(self, force: bool = False) -> None: ...
-
-        def rollback(self, force: bool = False) -> None: ...
-
-        def get_sites(self) -> None: ...
-
-        def resetCache(self) -> None: ...
-
-        def resetBulkCache(self, reconnect: bool = False) -> None: ...
-
-        def _pg_set_isolation(self, level: int) -> None: ...
-
-    def drop_referential_integrity(self) -> None:
-        """Update all tables to remove foreign keys (MySQL/MariaDB).
-
-        Reads the constraint names from information_schema instead of guessing
-        them from ``SHOW CREATE TABLE``: the old regex only matched the default
-        ``<table>_ibfk_N`` names, so any explicitly named constraint survived
-        and the subsequent DROP TABLE failed with errno 1451.
-        """
-        c = self.get_cursor()
-        c.execute(  # nosemgrep
-            "SELECT DISTINCT table_name, constraint_name "
-            "FROM information_schema.table_constraints "
-            "WHERE constraint_type = 'FOREIGN KEY' AND table_schema = DATABASE()",
-        )
-        constraints = c.fetchall()
-        for table, constraint in constraints:
-            c.execute(f"ALTER TABLE `{table}` DROP FOREIGN KEY `{constraint}`")  # nosemgrep
-        self.commit()
-
-    # end drop_referential_inegrity
+        # Declared as callables rather than stub methods: pylint reads a stub's
+        # empty body as a method that returns nothing.
+        commit: Callable[..., None]
+        get_cursor: Callable[..., Any]
+        get_sites: Callable[..., None]
+        resetBulkCache: Callable[..., None]
+        resetCache: Callable[..., None]
 
     def recreate_tables(self) -> None:
         """(Re-)creates the tables of the current DB."""
@@ -1111,444 +85,97 @@ class DatabaseSchemaMixin:
 
     # end def recreate_tables
 
-    @contextlib.contextmanager
-    def bounded_ddl_lock_wait(self) -> Iterator[None]:
-        """Make every migration inside the block fail rather than block.
-
-        A migration that cannot take its lock is a migration that has to wait
-        for another connection to end its transaction -- something a GUI tab
-        holding an open read can keep doing for hours. Both server backends
-        wait for that lock forever unless told otherwise, so the statement
-        never raises, never logs, and never returns: the caller simply stops.
-
-        The timeout is set on the session rather than with SET LOCAL because
-        the block below commits between statements, and a SET LOCAL would not
-        survive the commit. It is restored on the way out, so nothing outside
-        this block inherits it. SQLite has no such knob (it serialises with its
-        own busy timeout) and is left alone.
-        """
-        applied = False
-        try:
-            if self.backend == self.PGSQL:
-                self.get_cursor().execute(SET_PGSQL_LOCK_TIMEOUT)  # nosemgrep
-                applied = True
-            elif self.backend == self.MYSQL_INNODB:
-                # MySQL counts metadata-lock waits in whole seconds, minimum 1.
-                self.get_cursor().execute(SET_MYSQL_LOCK_TIMEOUT)  # nosemgrep
-                applied = True
-        except Exception:  # noqa: BLE001 - an unsupported knob must not stop the migrations
-            log.debug("Could not bound the migration lock wait", exc_info=True)
-        try:
-            yield
-        finally:
-            if applied:
-                # The last statement may have left the connection in an aborted
-                # transaction, which refuses everything until it is rolled back.
-                with contextlib.suppress(Exception):
-                    self.rollback()
-                with contextlib.suppress(Exception):
-                    if self.backend == self.PGSQL:
-                        self.get_cursor().execute(RESET_PGSQL_LOCK_TIMEOUT)  # nosemgrep
-                    else:
-                        self.get_cursor().execute(RESET_MYSQL_LOCK_TIMEOUT)  # nosemgrep
-                    self.commit()
-
-    def ensure_feature_tables(self) -> None:
-        """Create tables added after the original schema if they are missing, so
-        that databases created by older versions keep working (used for the
-        showdown combinations, cashout details, and additive HudCache stats).
-
-        Runs on every connection, so it must never block: see
-        :meth:`bounded_ddl_lock_wait`.
-        """
-        with self.bounded_ddl_lock_wait():
-            self._run_feature_migrations()
-
-    def _run_feature_migrations(self) -> None:
-        """The migrations themselves, each one best-effort and self-contained."""
-        for query_name in (
-            "createHandsShowdownTable",
-            "createHandsCashoutTable",
-            "createBoardFeaturesTable",
-            "createPlayerAutoNotesTable",
-            "createAofDecisionsTable",
-            "createAofDecisionAnalysesTable",
-            "createHandsSituationsTable",
-            "createHandStatesTable",
-            "createTourneyPayoutsTable",
-            "createActionBubbleFactorsTable",
-        ):
-            try:
-                c = self.get_cursor()
-                c.execute(self.sql.query[query_name])  # nosemgrep
-                self.commit()
-            except Exception:  # noqa: BLE001 - table already exists: nothing to do.
-                self.rollback()
-
-        for query_name in (
-            "addBoardFeaturesHandIndex",
-            "addBoardFeaturesTextureIndex",
-            "addPlayerAutoNotesPlayerIndex",
-            "addPlayerAutoNotesHandIndex",
-            "addPlayerAutoNotesRuleIndex",
-            "addAofDecisionsPlayerIndex",
-            "addAofDecisionsHandIndex",
-            "addAofDecisionsRangeIndex",
-            "addAofAnalysesDecisionIndex",
-            "addAofAnalysesStatusIndex",
-            "addActionBubbleFactorsTourneyIndex",
-            # The analytics fact-table indexes (#304). Best-effort like the
-            # rest: a database that already has them rolls back and moves on.
-            *ANALYTICS_INDEX_NAMES,
-        ):
-            try:
-                c = self.get_cursor()
-                c.execute(self.sql.query[query_name])  # nosemgrep
-                self.commit()
-            except Exception:  # noqa: BLE001 - index/table already exists or feature table absent.
-                self.rollback()
-
-        self._ensure_gametype_category_width()
-        self._ensure_players_name_collation()
-
-        # The analytics lifecycle bookkeeping (#305): the meta table itself,
-        # then the version stamps. On a database that predates versioning the
-        # subsystems stay unrecorded (stale by definition) until a rebuild
-        # claims them -- only a fresh recreate_tables gets born current.
-        from fpdb_3_legacy import analytics_lifecycle
-
-        analytics_lifecycle.ensure_analytics_meta(self)
-
-        self.ensure_hudcache_columns()
-        self.ensure_handsplayers_columns()
-        self.ensure_hands_columns()
-        self.ensure_tourneysplayers_columns()
-        self.ensure_handsactions_columns()
-
-    def _get_table_columns(self, table: str) -> set[str]:
-        c = self.get_cursor()
-        if self.backend == self.SQLITE:
-            c.execute(f"PRAGMA table_info({table})")  # nosemgrep
-            return {row[1] for row in c.fetchall()}
-        if self.backend == self.MYSQL_INNODB:
-            c.execute(f"SHOW COLUMNS FROM {table}")  # nosemgrep
-            return {row[0] for row in c.fetchall()}
-
-        c.execute(  # nosemgrep
-            "SELECT column_name FROM information_schema.columns WHERE table_name = %s OR table_name = %s",
-            (table, table.lower()),
-        )
-        return {row[0] for row in c.fetchall()}
-
-    def ensure_hudcache_columns(self) -> None:
-        """Add missing additive HudCache stat columns for databases created by older code."""
-        definitions = {column: "INT DEFAULT 0" for column in CACHE_KEYS}
-        # HudCache-only columns (not in the shared CACHE_KEYS).
-        definitions.update({column: "INT DEFAULT 0" for column in HUDCACHE_EXTRA_KEYS})
-        self._ensure_table_columns("HudCache", definitions)
-
-    def ensure_handsplayers_columns(self) -> None:
-        """Add missing HandsPlayers stat columns for databases created by older code."""
-        definitions = {column: "INT DEFAULT 0" for column in HANDS_PLAYERS_KEYS}
-        # The PT4 action enums store a single response char, not a counter.
-        definitions.update({column: "CHAR(1) DEFAULT 'N'" for column in ACTION_ENUM_COLUMNS})
-        definitions["handString"] = "TEXT"
-        definitions["cashOutFee"] = "INT DEFAULT 0"
-        definitions["isCashOut"] = "BOOLEAN DEFAULT 0"
-        self._ensure_table_columns("HandsPlayers", definitions)
-
-    def ensure_hands_columns(self) -> None:
-        """Add missing additive Hands columns for databases created by older code."""
-        definitions = {
-            "bombPot": "INT DEFAULT 0",
-            "splashPot": "INT DEFAULT 0",
-        }
-        self._ensure_table_columns("Hands", definitions)
-
-    def ensure_tourneysplayers_columns(self) -> None:
-        """Add the bounty money column (#447) to TourneysPlayers of databases created by older code."""
-        self._ensure_table_columns("TourneysPlayers", {"koWinnings": "BIGINT"})
-
-    def ensure_handsactions_columns(self) -> None:
-        """Add missing normalized action-event columns for databases created by older code.
-
-        The event columns (#293) are additive like the stat columns: an existing
-        database gains them empty on its next connection, and the rows already
-        imported keep zeros there until they are rebuilt. Docs:
-        docs/action-event-model.md.
-        """
-        self._ensure_table_columns("HandsActions", HANDS_ACTIONS_EVENT_DEFINITIONS)
-
-    def _column_character_length(self, table: str, column: str) -> int | None:
-        """Declared width of a character column, or None when there is none.
-
-        None covers both "no such column" and a type with no declared width, so
-        callers can treat it as "nothing to widen".
-        """
-        c = self.get_cursor()
-        # Two whole statements rather than one built by appending the MySQL
-        # clause: the analyser reads any query assembled from parts as an
-        # injection site, and it is right to, even when every part is a literal.
-        query = COLUMN_WIDTH_MYSQL if self.backend == self.MYSQL_INNODB else COLUMN_WIDTH_SQL
-        c.execute(query, (table.lower(), column.lower()))  # nosemgrep
-        row = c.fetchone()
-        return None if row is None else row[0]
-
-    def _ensure_gametype_category_width(self) -> None:
-        """Widen Gametypes.category to varchar(10) for aof_holdem support.
-
-        The original schema used varchar(9), which fits aof_omaha (8 chars)
-        but not aof_holdem (10 chars). Avoided on SQLite (TEXT is unbounded)
-        and skipped when the column is already wide enough.
-
-        That last sentence used to be a claim rather than a check: the only
-        test was that a column named "category" exists, so an ALTER TABLE went
-        out on every single connection, for the life of the schema, to set a
-        width that was already set. It takes ACCESS EXCLUSIVE on Gametypes,
-        which is why a database that had nothing to migrate could still hang
-        the GUI behind another tab's open read (#249). Reading the width first
-        makes the statement run once, on the one database that needs it.
-        """
-        if self.backend == self.SQLITE:
-            return
-        try:
-            width = self._column_character_length("Gametypes", "category")
-        except Exception:  # noqa: BLE001 - table absent during first-time setup
-            self.rollback()
-            return
-        if width is None or width >= GAMETYPE_CATEGORY_WIDTH:
-            return
-        try:
-            c = self.get_cursor()
-            if self.backend == self.MYSQL_INNODB:
-                c.execute(WIDEN_GAMETYPE_CATEGORY_MYSQL)  # nosemgrep
-            else:
-                c.execute(WIDEN_GAMETYPE_CATEGORY_SQL)  # nosemgrep
-            self.commit()
-            log.info("Widened Gametypes.category to varchar(%d)", GAMETYPE_CATEGORY_WIDTH)
-        except Exception:  # noqa: BLE001 - another connection holds the table; retried next connection.
-            self.rollback()
-            log.warning(
-                "Could not widen Gametypes.category to varchar(%d); retrying on the next connection",
-                GAMETYPE_CATEGORY_WIDTH,
-            )
-
-    def _column_collation(self, table: str, column: str) -> str | None:
-        """Declared collation of a character column, or None when it takes the default."""
-        c = self.get_cursor()
-        if self.backend == self.MYSQL_INNODB:
-            c.execute(COLUMN_COLLATION_MYSQL, (table.lower(), column.lower()))  # nosemgrep
-        else:
-            # The table name goes to ``to_regclass`` as written, so the catalogue row is the
-            # one the unqualified ``ALTER TABLE`` addresses.
-            c.execute(COLUMN_COLLATION_SQL, (table.lower(), column.lower(), table))  # nosemgrep
-        row = c.fetchone()
-        return None if row is None else row[0]
-
-    def players_name_compares_binary(self) -> bool:
-        """Whether ``Players.name`` compares names byte for byte on this connection (#417).
-
-        :meth:`_ensure_players_name_collation` is best-effort, like every migration that runs
-        from :meth:`ensure_feature_tables`: a table lock it cannot take is logged and retried on
-        the next connection. The DDL it issues therefore cannot be assumed to have run, and a
-        caller that stores two names differing only in case relies on it: under the server's
-        default collation the unique ``(name, siteId)`` index files them as one row, and
-        ``insertPlayer()`` hands the second name the first player's id, merging their actions
-        and results for good. Asking the catalogue here, immediately before such an import,
-        turns that silent merge into a refused import the next connection can retry.
-
-        SQLite's default comparison is already ``BINARY``, and its DDL spells that out.
-        """
-        if self.backend == self.SQLITE:
-            return True
-        try:
-            return _is_binary_collation(
-                self._column_collation("Players", "name"), mysql=self.backend == self.MYSQL_INNODB
-            )
-        except Exception:  # noqa: BLE001 - a catalogue that cannot be read cannot vouch for the column
-            self.rollback()
-            return False
-
-    def _ensure_players_name_collation(self) -> None:
-        """Give ``Players.name`` an explicit binary collation (#417).
-
-        The column was created with no ``COLLATE``, so it compared names with the server's
-        default: on MySQL that ignores case and accents, and the unique index on
-        ``(name, siteId)`` made ``Alice`` and ``alice`` one row -- ``insertPlayer()``'s upsert
-        handed the second seat the first player's id, merging their actions and results for
-        good. The column now compares byte for byte, so two such names are two players.
-
-        Read before writing, like the Gametypes width migration: the ALTER rewrites the table
-        and rebuilds the index, so it must run once, not on every connection. PostgreSQL's
-        ``"C"`` makes the comparison independent of the database's locale; SQLite's default
-        is already ``BINARY``.
-
-        Reversing the migration is a statement, not a data repair: the DDL without its
-        ``COLLATE`` clause restores the server default, and no row is rewritten by reverting.
-        A database where the merge has *already* happened is not split -- the surviving row
-        kept whichever spelling was inserted first, and the other is not recorded anywhere --
-        so the log says so on the one connection that migrates.
-
-        Losing the race for the table leaves the column folded, so callers that store two
-        names which differ only in case must ask :meth:`players_name_compares_binary` rather
-        than take this method's success for granted.
-        """
-        if self.backend == self.SQLITE:
-            return
-        try:
-            collation = self._column_collation("Players", "name")
-        except Exception:  # noqa: BLE001 - table absent during first-time setup
-            self.rollback()
-            return
-        if _is_binary_collation(collation, mysql=self.backend == self.MYSQL_INNODB):
-            return
-        try:
-            c = self.get_cursor()
-            c.execute(  # nosemgrep
-                SET_PLAYERS_NAME_COLLATION_MYSQL
-                if self.backend == self.MYSQL_INNODB
-                else SET_PLAYERS_NAME_COLLATION_PGSQL
-            )
-            self.commit()
-        except Exception:  # noqa: BLE001 - another connection holds the table; retried next connection.
-            self.rollback()
-            log.warning(
-                "Could not give Players.name a binary collation; retrying on the next connection",
-                exc_info=True,
-            )
-            return
-        log.info("Gave Players.name a binary collation: names now compare byte for byte")
-        log.warning(
-            "Players already merged under the old collation stay one row: the row kept only the "
-            "first spelling, so the other cannot be recovered or split",
-        )
-
-    def _ensure_table_columns(self, table: str, definitions: dict[str, str]) -> None:
-        try:
-            existing = self._get_table_columns(table)
-        except Exception:  # noqa: BLE001 - the table may not exist yet during first-time setup.
-            self.rollback()
-            return
-
-        if not existing:
-            return
-
-        existing_lower = {column.lower() for column in existing}
-        missing = [column for column in definitions if column.lower() not in existing_lower]
-        if not missing:
-            return
-
-        c = self.get_cursor()
-        try:
-            for column in missing:
-                c.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definitions[column]}")  # nosemgrep
-            self.commit()
-            log.info("Added %s missing %s columns: %s", len(missing), table, ", ".join(missing))
-        except Exception:  # noqa: BLE001 - reported, then retried on the next connection
-            self.rollback()
-            # Raising here used to abort whatever was opening the connection.
-            # Now that the block bounds its lock wait, the likeliest failure is
-            # losing a race for the table -- against the HUD process starting at
-            # the same time, say -- and taking down the window that lost is a
-            # worse answer than saying so and trying again next connection.
-            log.warning(
-                "Could not add missing %s columns (%s); retrying on the next connection",
-                table,
-                ", ".join(missing),
-                exc_info=True,
-            )
-
     def create_tables(self) -> None:
         log.debug(f"{self.sql.query['createSettingsTable']}")
         c = self.get_cursor()
-        c.execute(self.sql.query["createSettingsTable"])  # nosemgrep
+        c.execute(self.sql.query["createSettingsTable"])
 
         log.debug("Creating tables")
-        c.execute(self.sql.query["createActionsTable"])  # nosemgrep
-        c.execute(self.sql.query["createRankTable"])  # nosemgrep
-        c.execute(self.sql.query["createStartCardsTable"])  # nosemgrep
-        c.execute(self.sql.query["createSitesTable"])  # nosemgrep
-        c.execute(self.sql.query["createGametypesTable"])  # nosemgrep
-        c.execute(self.sql.query["createFilesTable"])  # nosemgrep
-        c.execute(self.sql.query["createPlayersTable"])  # nosemgrep
-        c.execute(self.sql.query["createAutoratesTable"])  # nosemgrep
-        c.execute(self.sql.query["createWeeksTable"])  # nosemgrep
-        c.execute(self.sql.query["createMonthsTable"])  # nosemgrep
-        c.execute(self.sql.query["createSessionsTable"])  # nosemgrep
-        c.execute(self.sql.query["createTourneyTypesTable"])  # nosemgrep
-        c.execute(self.sql.query["createTourneysTable"])  # nosemgrep
-        c.execute(self.sql.query["createTourneysPlayersTable"])  # nosemgrep
-        c.execute(self.sql.query["createTourneyPayoutsTable"])  # nosemgrep
-        c.execute(self.sql.query["createActionBubbleFactorsTable"])  # nosemgrep
-        c.execute(self.sql.query["createSessionsCacheTable"])  # nosemgrep
-        c.execute(self.sql.query["createTourneysCacheTable"])  # nosemgrep
-        c.execute(self.sql.query["createHandsTable"])  # nosemgrep
-        c.execute(self.sql.query["createHandsPlayersTable"])  # nosemgrep
-        c.execute(self.sql.query["createHandsActionsTable"])  # nosemgrep
-        c.execute(self.sql.query["createHandsStoveTable"])  # nosemgrep
-        c.execute(self.sql.query["createHandsShowdownTable"])  # nosemgrep
-        c.execute(self.sql.query["createHandsCashoutTable"])  # nosemgrep
-        c.execute(self.sql.query["createHandsSituationsTable"])  # nosemgrep
-        c.execute(self.sql.query["createHandStatesTable"])  # nosemgrep
-        c.execute(self.sql.query["createPlayerAutoNotesTable"])  # nosemgrep
-        c.execute(self.sql.query["createAofDecisionsTable"])  # nosemgrep
-        c.execute(self.sql.query["createAofDecisionAnalysesTable"])  # nosemgrep
-        c.execute(self.sql.query["createHandsPotsTable"])  # nosemgrep
-        c.execute(self.sql.query["createBoardFeaturesTable"])  # nosemgrep
-        c.execute(self.sql.query["createHudCacheTable"])  # nosemgrep
-        c.execute(self.sql.query["createCardsCacheTable"])  # nosemgrep
-        c.execute(self.sql.query["createPositionsCacheTable"])  # nosemgrep
-        c.execute(self.sql.query["createBoardsTable"])  # nosemgrep
-        c.execute(self.sql.query["createBackingsTable"])  # nosemgrep
-        c.execute(self.sql.query["createRawHands"])  # nosemgrep
-        c.execute(self.sql.query["createRawTourneys"])  # nosemgrep
+        c.execute(self.sql.query["createActionsTable"])
+        c.execute(self.sql.query["createRankTable"])
+        c.execute(self.sql.query["createStartCardsTable"])
+        c.execute(self.sql.query["createSitesTable"])
+        c.execute(self.sql.query["createGametypesTable"])
+        c.execute(self.sql.query["createFilesTable"])
+        c.execute(self.sql.query["createPlayersTable"])
+        c.execute(self.sql.query["createAutoratesTable"])
+        c.execute(self.sql.query["createWeeksTable"])
+        c.execute(self.sql.query["createMonthsTable"])
+        c.execute(self.sql.query["createSessionsTable"])
+        c.execute(self.sql.query["createTourneyTypesTable"])
+        c.execute(self.sql.query["createTourneysTable"])
+        c.execute(self.sql.query["createTourneysPlayersTable"])
+        c.execute(self.sql.query["createTourneyPayoutsTable"])
+        c.execute(self.sql.query["createActionBubbleFactorsTable"])
+        c.execute(self.sql.query["createSessionsCacheTable"])
+        c.execute(self.sql.query["createTourneysCacheTable"])
+        c.execute(self.sql.query["createHandsTable"])
+        c.execute(self.sql.query["createHandsPlayersTable"])
+        c.execute(self.sql.query["createHandsActionsTable"])
+        c.execute(self.sql.query["createHandsStoveTable"])
+        c.execute(self.sql.query["createHandsShowdownTable"])
+        c.execute(self.sql.query["createHandsCashoutTable"])
+        c.execute(self.sql.query["createHandsSituationsTable"])
+        c.execute(self.sql.query["createHandStatesTable"])
+        c.execute(self.sql.query["createPlayerAutoNotesTable"])
+        c.execute(self.sql.query["createAofDecisionsTable"])
+        c.execute(self.sql.query["createAofDecisionAnalysesTable"])
+        c.execute(self.sql.query["createHandsPotsTable"])
+        c.execute(self.sql.query["createBoardFeaturesTable"])
+        c.execute(self.sql.query["createHudCacheTable"])
+        c.execute(self.sql.query["createCardsCacheTable"])
+        c.execute(self.sql.query["createPositionsCacheTable"])
+        c.execute(self.sql.query["createBoardsTable"])
+        c.execute(self.sql.query["createBackingsTable"])
+        c.execute(self.sql.query["createRawHands"])
+        c.execute(self.sql.query["createRawTourneys"])
 
         # Create unique indexes:
         log.debug("Creating unique indexes")
-        c.execute(self.sql.query["addTourneyIndex"])  # nosemgrep
-        c.execute(  # nosemgrep
+        c.execute(self.sql.query["addTourneyIndex"])
+        c.execute(
             self.sql.query["addHandsIndex"].replace(
                 "<heroseat>",
                 ", heroSeat" if self.publicDB else "",
             ),
         )
-        c.execute(self.sql.query["addPlayersIndex"])  # nosemgrep
-        c.execute(self.sql.query["addTPlayersIndex"])  # nosemgrep
-        c.execute(self.sql.query["addPlayersSeat"])  # nosemgrep
-        c.execute(self.sql.query["addHeroSeat"])  # nosemgrep
-        c.execute(self.sql.query["addStartCardsIndex"])  # nosemgrep
-        c.execute(self.sql.query["addSeatsIndex"])  # nosemgrep
-        c.execute(self.sql.query["addPositionIndex"])  # nosemgrep
+        c.execute(self.sql.query["addPlayersIndex"])
+        c.execute(self.sql.query["addTPlayersIndex"])
+        c.execute(self.sql.query["addPlayersSeat"])
+        c.execute(self.sql.query["addHeroSeat"])
+        c.execute(self.sql.query["addStartCardsIndex"])
+        c.execute(self.sql.query["addSeatsIndex"])
+        c.execute(self.sql.query["addPositionIndex"])
         # The feature tables created above index the same way the migration
         # path does, so a database built from scratch is not left doing full
         # scans until someone happens to reconnect with an older schema.
-        c.execute(self.sql.query["addBoardFeaturesHandIndex"])  # nosemgrep
-        c.execute(self.sql.query["addBoardFeaturesTextureIndex"])  # nosemgrep
-        c.execute(self.sql.query["addPlayerAutoNotesPlayerIndex"])  # nosemgrep
-        c.execute(self.sql.query["addPlayerAutoNotesHandIndex"])  # nosemgrep
-        c.execute(self.sql.query["addPlayerAutoNotesRuleIndex"])  # nosemgrep
-        c.execute(self.sql.query["addAofDecisionsPlayerIndex"])  # nosemgrep
-        c.execute(self.sql.query["addAofDecisionsHandIndex"])  # nosemgrep
-        c.execute(self.sql.query["addAofDecisionsRangeIndex"])  # nosemgrep
-        c.execute(self.sql.query["addAofAnalysesDecisionIndex"])  # nosemgrep
-        c.execute(self.sql.query["addAofAnalysesStatusIndex"])  # nosemgrep
+        c.execute(self.sql.query["addBoardFeaturesHandIndex"])
+        c.execute(self.sql.query["addBoardFeaturesTextureIndex"])
+        c.execute(self.sql.query["addPlayerAutoNotesPlayerIndex"])
+        c.execute(self.sql.query["addPlayerAutoNotesHandIndex"])
+        c.execute(self.sql.query["addPlayerAutoNotesRuleIndex"])
+        c.execute(self.sql.query["addAofDecisionsPlayerIndex"])
+        c.execute(self.sql.query["addAofDecisionsHandIndex"])
+        c.execute(self.sql.query["addAofDecisionsRangeIndex"])
+        c.execute(self.sql.query["addAofAnalysesDecisionIndex"])
+        c.execute(self.sql.query["addAofAnalysesStatusIndex"])
         if "addActionBubbleFactorsTourneyIndex" in self.sql.query:  # MySQL declares it in the table
-            c.execute(self.sql.query["addActionBubbleFactorsTourneyIndex"])  # nosemgrep
-        c.execute(self.sql.query["addFilesIndex"])  # nosemgrep
-        c.execute(self.sql.query["addTableNameIndex"])  # nosemgrep
-        c.execute(self.sql.query["addPlayerNameIndex"])  # nosemgrep
-        c.execute(self.sql.query["addPlayerHeroesIndex"])  # nosemgrep
-        c.execute(self.sql.query["addStartCashIndex"])  # nosemgrep
-        c.execute(self.sql.query["addEffStackIndex"])  # nosemgrep
-        c.execute(self.sql.query["addTotalProfitIndex"])  # nosemgrep
-        c.execute(self.sql.query["addWinningsIndex"])  # nosemgrep
-        c.execute(self.sql.query["addFinalPotIndex"])  # nosemgrep
-        c.execute(self.sql.query["addStreetIndex"])  # nosemgrep
-        c.execute(self.sql.query["addSessionsCacheCompundIndex"])  # nosemgrep
-        c.execute(self.sql.query["addTourneysCacheCompundIndex"])  # nosemgrep
-        c.execute(self.sql.query["addHudCacheCompundIndex"])  # nosemgrep
-        c.execute(self.sql.query["addCardsCacheCompundIndex"])  # nosemgrep
-        c.execute(self.sql.query["addPositionsCacheCompundIndex"])  # nosemgrep
+            c.execute(self.sql.query["addActionBubbleFactorsTourneyIndex"])
+        c.execute(self.sql.query["addFilesIndex"])
+        c.execute(self.sql.query["addTableNameIndex"])
+        c.execute(self.sql.query["addPlayerNameIndex"])
+        c.execute(self.sql.query["addPlayerHeroesIndex"])
+        c.execute(self.sql.query["addStartCashIndex"])
+        c.execute(self.sql.query["addEffStackIndex"])
+        c.execute(self.sql.query["addTotalProfitIndex"])
+        c.execute(self.sql.query["addWinningsIndex"])
+        c.execute(self.sql.query["addFinalPotIndex"])
+        c.execute(self.sql.query["addStreetIndex"])
+        c.execute(self.sql.query["addSessionsCacheCompundIndex"])
+        c.execute(self.sql.query["addTourneysCacheCompundIndex"])
+        c.execute(self.sql.query["addHudCacheCompundIndex"])
+        c.execute(self.sql.query["addCardsCacheCompundIndex"])
+        c.execute(self.sql.query["addPositionsCacheCompundIndex"])
 
         self.fillDefaultData()
         self.commit()
@@ -1571,261 +198,34 @@ class DatabaseSchemaMixin:
 
     # end def drop_tables
 
-    def createAllIndexes(self) -> None:
-        """Create new indexes."""
-        if self.backend == self.PGSQL:
-            self._pg_set_isolation(
-                0,
-            )  # allow table/index operations to work
-        c = self.get_cursor()
-        for idx in self.indexes[self.backend]:
-            log.info(f"Creating index {idx['tab']} {idx['col']}")
-            if self.backend == self.MYSQL_INNODB:
-                s = "CREATE INDEX {} ON {}({})".format(idx["col"], idx["tab"], idx["col"])
-                c.execute(s)  # nosemgrep
-            elif self.backend in (self.PGSQL, self.SQLITE):
-                s = "CREATE INDEX {}_{}_idx ON {}({})".format(
-                    idx["tab"],
-                    idx["col"],
-                    idx["tab"],
-                    idx["col"],
-                )
-                c.execute(s)  # nosemgrep
-
-        if self.backend == self.PGSQL:
-            self._pg_set_isolation(1)  # go back to normal isolation level
-
-    # end def createAllIndexes
-
-    def dropAllIndexes(self) -> int | None:
-        """Drop all standalone indexes (i.e. not including primary keys or foreign keys)
-        using list of indexes in indexes data structure.
-        """
-        # maybe upgrade to use data dictionary?? (but take care to exclude PK and FK)
-        if self.backend == self.PGSQL:
-            self._pg_set_isolation(
-                0,
-            )  # allow table/index operations to work
-        for idx in self.indexes[self.backend]:
-            if self.backend == self.MYSQL_INNODB:
-                log.debug(f"Dropping index: {idx['tab']} {idx['col']}")
-                try:
-                    self.get_cursor().execute(  # nosemgrep
-                        "alter table %s drop index %s",
-                        (idx["tab"], idx["col"]),
-                    )
-                except Exception:  # intentional broad catch: drop index (MySQL) best-effort, continue
-                    log.exception(f"Drop index failed: {sys.exc_info()}")
-            elif self.backend == self.PGSQL:
-                log.debug(f"Dropping index: {idx['tab']} {idx['col']}")
-                # mod to use tab_col for index name?
-                try:
-                    self.get_cursor().execute(  # nosemgrep
-                        "drop index {}_{}_idx".format(idx["tab"], idx["col"]),
-                    )
-                except Exception:  # intentional broad catch: drop index (PG) best-effort, continue
-                    log.exception(f"Drop index failed: {sys.exc_info()}")
-            elif self.backend == self.SQLITE:
-                log.debug(f"Dropping index: {idx['tab']} {idx['col']}")
-                try:
-                    self.get_cursor().execute(  # nosemgrep
-                        "drop index {}_{}_idx".format(idx["tab"], idx["col"]),
-                    )
-                except Exception:  # intentional broad catch: drop index (SQLite) best-effort, continue
-                    log.exception(f"Drop index failed: {sys.exc_info()}")
-            else:
-                return -1
-        if self.backend == self.PGSQL:
-            self._pg_set_isolation(1)  # go back to normal isolation level
-            return None
-        return None
-
-    # end def dropAllIndexes
-
-    def createAllForeignKeys(self) -> None:
-        """Create foreign keys."""
-        try:
-            if self.backend == self.PGSQL:
-                self._pg_set_isolation(
-                    0,
-                )  # allow table/index operations to work
-            c = self.get_cursor()
-        except Exception:  # intentional broad catch: set_isolation_level (PG) best-effort before DDL
-            log.exception(f"set_isolation_level failed: {sys.exc_info()}")
-
-        for fk in self.foreignKeys[self.backend]:
-            if self.backend == self.MYSQL_INNODB:
-                c.execute(  # nosemgrep
-                    "SELECT constraint_name "
-                    "FROM information_schema.KEY_COLUMN_USAGE "
-                    # "WHERE REFERENCED_TABLE_SCHEMA = 'fpdb'
-                    "WHERE 1=1 "
-                    "AND table_name = %s AND column_name = %s "
-                    "AND referenced_table_name = %s "
-                    "AND referenced_column_name = %s ",
-                    (fk["fktab"], fk["fkcol"], fk["rtab"], fk["rcol"]),
-                )
-                cons = c.fetchone()
-                # print "afterbulk: cons=", cons
-                if cons:
-                    pass
-                else:
-                    log.debug(
-                        f"Creating foreign key: {fk['fktab']} {fk['fkcol']} -> {fk['rtab']} {fk['rcol']}",
-                    )
-                    try:
-                        c.execute(  # nosemgrep
-                            "alter table "
-                            + fk["fktab"]
-                            + " add foreign key ("
-                            + fk["fkcol"]
-                            + ") references "
-                            + fk["rtab"]
-                            + "("
-                            + fk["rcol"]
-                            + ")",
-                        )
-                    except Exception:  # intentional broad catch: create FK (MySQL) best-effort, continue
-                        log.exception(f"Create foreign key failed: {sys.exc_info()}")
-            elif self.backend == self.PGSQL:
-                log.debug(
-                    f"Creating foreign key: {fk['fktab']}.{fk['fkcol']} -> {fk['rtab']}.{fk['rcol']}",
-                )
-                try:
-                    c.execute(  # nosemgrep
-                        "alter table "
-                        + fk["fktab"]
-                        + " add constraint "
-                        + fk["fktab"]
-                        + "_"
-                        + fk["fkcol"]
-                        + "_fkey"
-                        + " foreign key ("
-                        + fk["fkcol"]
-                        + ") references "
-                        + fk["rtab"]
-                        + "("
-                        + fk["rcol"]
-                        + ")",
-                    )
-                except Exception:  # intentional broad catch: create FK (PG) best-effort, continue
-                    log.exception(f"Create foreign key failed: {sys.exc_info()!s}")
-            else:
-                pass
-
-        try:
-            if self.backend == self.PGSQL:
-                self._pg_set_isolation(
-                    1,
-                )  # go back to normal isolation level
-        except Exception:  # intentional broad catch: reset isolation_level (PG) best-effort after DDL
-            log.exception(f"set_isolation_level failed: {sys.exc_info()!s}")
-
-    # end def createAllForeignKeys
-
-    def dropAllForeignKeys(self) -> None:
-        """Drop all standalone indexes (i.e. not including primary keys or foreign keys)
-        using list of indexes in indexes data structure.
-        """
-        # maybe upgrade to use data dictionary?? (but take care to exclude PK and FK)
-        if self.backend == self.PGSQL:
-            self._pg_set_isolation(
-                0,
-            )  # allow table/index operations to work
-        c = self.get_cursor()
-
-        for fk in self.foreignKeys[self.backend]:
-            if self.backend == self.MYSQL_INNODB:
-                c.execute(  # nosemgrep
-                    "SELECT constraint_name "
-                    "FROM information_schema.KEY_COLUMN_USAGE "
-                    # "WHERE REFERENCED_TABLE_SHEMA = 'fpdb'
-                    "WHERE 1=1 "
-                    "AND table_name = %s AND column_name = %s "
-                    "AND referenced_table_name = %s "
-                    "AND referenced_column_name = %s ",
-                    (fk["fktab"], fk["fkcol"], fk["rtab"], fk["rcol"]),
-                )
-                cons = c.fetchone()
-                # print "preparebulk find fk: cons=", cons
-                if cons:
-                    log.debug(
-                        f"Dropping foreign key: {cons[0]} {fk['fktab']}.{fk['fkcol']}",
-                    )
-                    try:
-                        c.execute(  # nosemgrep
-                            "alter table " + fk["fktab"] + " drop foreign key " + cons[0],
-                        )
-                    except Exception:  # intentional broad catch: drop FK (MySQL) best-effort, continue
-                        log.exception(
-                            f"Warning: Drop foreign key {fk['fktab']}_{fk['fkcol']}_fkey failed: {str(sys.exc_info()[1]).rstrip('')}, continuing ...",
-                        )
-            elif self.backend == self.PGSQL:
-                #    DON'T FORGET TO RECREATE THEM!!
-                log.debug(f"Dropping foreign key: {fk['fktab']}.{fk['fkcol']}")
-                try:
-                    # try to lock table to see if index drop will work:
-                    # hmmm, tested by commenting out rollback in grapher. lock seems to work but
-                    # then drop still hangs :-(  does work in some tests though??
-                    # will leave code here for now pending further tests/enhancement ...
-                    c.execute("BEGIN TRANSACTION")
-                    c.execute("lock table {} in exclusive mode nowait".format(fk["fktab"]))
-                    # print "after lock, status:", c.statusmessage
-                    # print "alter table %s drop constraint %s_%s_fkey" % (fk['fktab'], fk['fktab'], fk['fkcol'])
-                    try:
-                        c.execute(  # nosemgrep
-                            "alter table {} drop constraint {}_{}_fkey".format(fk["fktab"], fk["fktab"], fk["fkcol"]),
-                        )
-                        log.debug(
-                            f"dropped foreign key {fk['fktab']}_{fk['fkcol']}_fkey, continuing ...",
-                        )
-                    except Exception:  # intentional broad catch: drop FK constraint (PG) ignores 'does not exist'
-                        if "does not exist" not in str(sys.exc_info()[1]):
-                            log.exception(
-                                f"Drop foreign key {fk['fktab']}_{fk['fkcol']}_fkey failed: {str(sys.exc_info()[1]).rstrip('')}, continuing ...",
-                            )
-                    c.execute("END TRANSACTION")
-                except Exception:  # intentional broad catch: drop FK (PG lock/txn) best-effort, continue
-                    log.exception(
-                        f"Constraint {fk['fktab']}_{fk['fkcol']}_fkey not dropped: {str(sys.exc_info()[1]).rstrip('')}, continuing ...",
-                    )
-            else:
-                # print ("Only MySQL and Postgres supported so far")
-                pass
-
-        if self.backend == self.PGSQL:
-            self._pg_set_isolation(1)  # go back to normal isolation level
-
-    # end def dropAllForeignKeys
-
     def fillDefaultData(self) -> None:
         c = self.get_cursor()
-        c.execute(f"INSERT INTO Settings (version) VALUES ({DB_VERSION});")  # nosec B608  # nosemgrep
+        c.execute(f"INSERT INTO Settings (version) VALUES ({DB_VERSION});")
         # Fill Sites
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('1', 'Full Tilt Poker', 'FT')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('2', 'PokerStars', 'PS')")
         # PokerStars variants
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('32', 'PokerStars.COM', 'PS')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('33', 'PokerStars.FR', 'PS')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('34', 'PokerStars.IT', 'PS')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('35', 'PokerStars.ES', 'PS')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('36', 'PokerStars.PT', 'PS')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('37', 'PokerStars.EU', 'PS')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('130', 'PokerStars.DE', 'PS')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('3', 'Everleaf', 'EV')")
@@ -1838,81 +238,81 @@ class DatabaseSchemaMixin:
         # PartyPoker variants
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('38', 'Party Poker', 'PP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('39', 'Bwin Poker', 'PP')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('40', 'Bwin.fr Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('41', 'Bwin.it Poker', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('42', 'Bwin.es Poker', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('43', 'Bwin.de Poker', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('44', 'PartyPoker.fr', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('45', 'PartyPoker.it', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('46', 'PartyPoker.es', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('47', 'PartyPoker.de', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('48', 'Empire Poker', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('49', 'Gamebookers Poker', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('50', 'Intertops Poker', 'PP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('51', 'MultiPoker', 'PP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('52', 'PokerRoom', 'PP')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('53', 'PartyPoker NJ', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('54', 'BorgataPoker', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('55', 'Borgata Poker', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('120', 'WPT Poker', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('121', 'WPTPoker', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('122', 'PartyPoker.pt', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('123', 'PartyPoker.com', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('124', 'PartyPoker.eu', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('125', 'partycasino', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('126', 'PartyCasino', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('127', 'partypoker', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('128', 'bwin', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('129', 'PMU Poker (PartyPoker)', 'PP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('10', 'PacificPoker', 'P8')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('11', 'Partouche', 'PA')")
@@ -1925,149 +325,149 @@ class DatabaseSchemaMixin:
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('58', 'Poker770', 'IP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('131', 'Betclic Poker', 'IP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('140', 'CoinPoker', 'CP')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('59', 'NetBet Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('60', 'Barrière Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('61', 'Red Star Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('62', 'Titan Poker', 'IP')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('63', 'Bet365 Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('64', 'William Hill Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('65', 'Paddy Power Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('66', 'Betfair Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('67', 'Coral Poker', 'IP')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('68', 'Genting Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('69', 'Mansion Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('70', 'Winner Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('71', 'Ladbrokes Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('72', 'Sky Poker', 'IP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('73', 'Sisal Poker', 'IP')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('74', 'Lottomatica Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('75', 'Eurobet Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('76', 'Snai Poker', 'IP')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('77', 'Goldbet Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('78', 'Casino Barcelona Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('79', 'Sportium Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('80', 'Marca Apuestas Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('81', 'Everest Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('82', 'Bet-at-home Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('83', 'Mybet Poker', 'IP')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('84', 'Betsson Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('85', 'Betsafe Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('86', 'NordicBet Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('87', 'Unibet Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('88', 'Maria Casino Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('89', 'LeoVegas Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('90', 'Mr Green Poker', 'IP')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('91', 'Redbet Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('15', 'Winamax', 'WM')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('16', 'Everest', 'EP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('17', 'Cake', 'CK')")
         # Cake network variants
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('92', 'Everygame Poker', 'CK')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('93', 'Everygame', 'CK')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('94', 'Cake Poker', 'CK')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('95', 'Juicy Stakes', 'CK')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('96', 'Juicy Stakes Poker', 'CK')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('97', 'JuicyStakes', 'CK')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('98', 'RedStar Poker', 'CK')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('99', 'RedStar', 'CK')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('100', 'Sportsbetting.ag Poker', 'CK')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('101', 'Sportsbetting Poker', 'CK')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('102', 'SportsBetting.ag', 'CK')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('18', 'Entraction', 'TR')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('19', 'BetOnline', 'BO')")
         # BetOnline network variants
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('103', 'BetOnline Poker', 'BO')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('104', 'BetOnline.ag', 'BO')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('105', 'Tiger Gaming', 'BO')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('106', 'TigerGaming', 'BO')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('107', 'Doyles Room', 'BO')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('108', 'DoylesRoom', 'BO')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('109', 'Poker4Ever', 'BO')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('110', 'Poker 4 Ever', 'BO')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('111', 'PlayersOnly', 'BO')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('112', 'Players Only', 'BO')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('113', 'SunPoker', 'BO')")
@@ -2075,24 +475,24 @@ class DatabaseSchemaMixin:
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('20', 'Microgaming', 'MG')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('21', 'Bovada', 'BV')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('22', 'Enet', 'EN')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('23', 'SealsWithClubs', 'SW')",
         )
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('24', 'WinningPoker', 'WP')",
         )
         # WPN network variants
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('115', 'Americas Cardroom', 'WP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('116', 'ACR Poker', 'WP')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('117', 'BlackChipPoker', 'WP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('118', 'TruePoker', 'WP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('119', 'Ya Poker', 'WP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('25', 'PokerMaster', 'PM')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('26', 'Run It Once Poker', 'RO')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('27', 'GGPoker', 'GG')")
@@ -2102,7 +502,7 @@ class DatabaseSchemaMixin:
         # c.execute("INSERT INTO Sites (id,name,code) VALUES ('31', 'PMU Poker', 'PM')")
         # Fill Actions
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('1', 'ante', 'A')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Actions (id,name,code) VALUES ('2', 'small blind', 'SB')",
         )
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('3', 'secondsb', 'SSB')")
@@ -2118,7 +518,7 @@ class DatabaseSchemaMixin:
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('13', 'bringin', 'I')")
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('14', 'completes', 'P')")
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('15', 'straddle', 'ST')")
-        c.execute(  # nosemgrep
+        c.execute(
             "INSERT INTO Actions (id,name,code) VALUES ('16', 'button blind', 'BUB')",
         )
         # Fill Rank. "Rank" is a reserved word since MySQL 8.0 (the RANK()
@@ -2149,24 +549,16 @@ class DatabaseSchemaMixin:
         )
         for i in range(170):
             (name, rank, combinations) = Card.StartCardRank(i)
-            c.execute(sql, ("holdem", name, rank, combinations))  # nosemgrep
+            c.execute(sql, ("holdem", name, rank, combinations))
         for idx in range(-13, 1184):
             name = Card.decodeRazzStartHand(idx)
-            c.execute(sql, ("razz", name, idx, 0))  # nosemgrep
+            c.execute(sql, ("razz", name, idx, 0))
         sql = f"INSERT INTO StartCards (id, category, name, {rank_col}, combinations) VALUES (%s, %s, %s, %s, %s)".replace(  # nosec B608  # nosemgrep
             "%s",
             self.sql.query["placeholder"],
         )
         omaha_count = len(Card._omaha_rank_combos()) * len(Card.OMAHA_SUIT_CLASSES)
         for idx in range(Card.OMAHA_START_HAND_OFFSET, Card.OMAHA_START_HAND_OFFSET + omaha_count):
-            c.execute(sql, (idx, "omaha", Card.fourStartCardString(idx), idx, 0))  # nosemgrep
+            c.execute(sql, (idx, "omaha", Card.fourStartCardString(idx), idx, 0))
 
     # end def fillDefaultData
-
-    def rebuild_indexes(self, start: Any = None) -> None:
-        self.dropAllIndexes()
-        self.createAllIndexes()
-        self.dropAllForeignKeys()
-        self.createAllForeignKeys()
-
-    # end def rebuild_indexes
