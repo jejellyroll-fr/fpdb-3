@@ -16,6 +16,7 @@ from PySide6.QtCore import QPoint
 
 from fpdb_3_legacy import Aux_Base
 from fpdb_3_legacy.Aux_Base import AuxSeats, move_if_needed
+from fpdb_3_legacy.Aux_Classic_Hud import ClassicHud
 
 
 class FakeWindow:
@@ -108,3 +109,25 @@ def test_check_tables_records_qt_event_loop_lag(monkeypatch) -> None:
     HudMainTablesMixin.check_tables(mgr)
     assert recorded[0][0] == "qt_event_loop_lag"
     assert recorded[0][1] == pytest.approx(0.05, abs=0.02)
+
+
+def _classic_hud(m_windows: dict) -> ClassicHud:
+    aux = object.__new__(ClassicHud)
+    aux.m_windows = m_windows
+    return aux
+
+
+def test_a_table_moved_before_the_hud_is_created_moves_nothing() -> None:
+    """A placeholder HUD has aux windows but no table menu yet: the move used to raise AttributeError."""
+    _classic_hud({}).move_windows()
+
+
+def test_a_created_hud_still_moves_its_table_menu(monkeypatch) -> None:
+    aux = _classic_hud({"common": FakeWindow(0, 0)})
+    aux.table_mw = MagicMock()
+    monkeypatch.setattr(ClassicHud, "_uses_block_windows", lambda _self: True)
+    monkeypatch.setattr(ClassicHud, "_move_block_windows", lambda _self: None)
+
+    aux.move_windows()
+
+    aux.table_mw.move_windows.assert_called_once_with()

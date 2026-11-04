@@ -129,9 +129,9 @@ class TestAuxClassicHudBasics(unittest.TestCase):
             assert comment == "Test comment"
             p_get.assert_called_with(123)
 
-            has_comment = stat.has_comment(123)
+            has_comment = stat.has_comment(123, {})
             assert has_comment is True
-            p_has.assert_called_with(123)
+            p_has.assert_called_with(123, {})
 
 
 if __name__ == "__main__":

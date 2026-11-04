@@ -238,28 +238,13 @@ class TestClassicStat(unittest.TestCase):
         assert name == "Unknown Player"
 
     @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
-    def test_has_comment_false(self, mock_db_class) -> None:
-        mock_db = Mock()
-        mock_cur = Mock()
-        mock_db.cursor = mock_cur
-        mock_db.sql.query = {"get_player_comment": "SELECT comment FROM players WHERE id = %s"}
-        mock_cur.fetchone.return_value = None
-        mock_db.playerHasNotes.return_value = False
-        mock_db_class.return_value = mock_db
-        assert self.classic_stat.has_comment(123) is False
-        mock_db.close_connection.assert_called_once()
-
-    @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
-    def test_has_comment_true(self, mock_db_class) -> None:
-        mock_db = Mock()
-        mock_cur = Mock()
-        mock_db.cursor = mock_cur
-        mock_db.sql.query = {"get_player_comment": "SELECT comment FROM players WHERE id = %s"}
-        mock_cur.fetchone.return_value = ("Some note",)
-        mock_db.playerHasNotes.return_value = True
-        mock_db_class.return_value = mock_db
-        assert self.classic_stat.has_comment(123) is True
-        mock_db.close_connection.assert_called_once()
+    def test_has_comment_reads_the_stats_without_a_connection(self, mock_db_class) -> None:
+        stat_dict = {123: {"has_notes": True}, 456: {"has_notes": False}, 789: {}}
+        assert self.classic_stat.has_comment(123, stat_dict) is True
+        assert self.classic_stat.has_comment(456, stat_dict) is False
+        assert self.classic_stat.has_comment(789, stat_dict) is False
+        assert self.classic_stat.has_comment(999, stat_dict) is False
+        mock_db_class.assert_not_called()
 
     def test_open_comment_dialog_playershort(self) -> None:
         with (
@@ -355,7 +340,8 @@ class TestClassicStat(unittest.TestCase):
             self.classic_stat.stat = "player_note"
             self.classic_stat.number = ("", "N", "", "", "", "")
             self.classic_stat.lab = Mock()
-            self.classic_stat.update(123, {123: {"screen_name": "Player"}})
+            self.classic_stat.update(123, {123: {"screen_name": "Player", "has_notes": True}})
+            mock_db_class.assert_not_called()
             label_html = self.classic_stat.lab.setText.call_args[0][0]
             self.assertTrue("#FFA500" in label_html or "orange" in label_html.lower())
 

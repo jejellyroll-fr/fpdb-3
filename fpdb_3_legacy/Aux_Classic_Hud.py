@@ -498,6 +498,8 @@ class ClassicStat(Aux_Hud.SimpleStat):
             q = db.sql.query["update_player_comment"]
             db.cursor.execute(q, (comment, player_id))
             db.commit()
+            if self.stat_dict and player_id in self.stat_dict:
+                self.stat_dict[player_id]["has_notes"] = db.playerHasNotes(player_id)
             QMessageBox.information(
                 None,
                 "Comment saved",
@@ -513,25 +515,22 @@ class ClassicStat(Aux_Hud.SimpleStat):
         finally:
             db.close_connection()
 
-    def has_comment(self, player_id: int) -> bool:
-        """Checks if the specified player has a comment in the database.
+    @staticmethod
+    def has_comment(player_id: int, stat_dict: dict) -> bool:
+        """Whether the player has notes, as the read worker found when it read these stats.
 
-        This method queries the database to determine if a comment exists for the given player ID.
+        This runs for every seat of every table on every refresh, on the Qt thread,
+        so it must not touch the database: opening a connection here froze the HUD
+        for seconds at a time on a remote database (#680).
 
         Args:
             player_id: The unique identifier of the player.
+            stat_dict: The statistics of the players at the table.
 
         Returns:
-            bool: True if a comment exists for the player, otherwise False.
+            bool: True if the player has manual or generated notes.
         """
-        db = Database.Database(self.aw.hud.config)
-        try:
-            return db.playerHasNotes(player_id)
-        except Exception:  # intentional broad catch: HUD comment DB lookup must not break UI.
-            log.exception("Error checking comment:")
-            return False
-        finally:
-            db.close_connection()
+        return bool(stat_dict.get(player_id, {}).get("has_notes"))
 
     def update(self, player_id: int | str | None, stat_dict: dict) -> None:
         """Updates the display of the statistic for a given player.
@@ -617,7 +616,7 @@ class ClassicStat(Aux_Hud.SimpleStat):
 
         # Special handling for player_note stat - change color based on notes
         elif self.stat == "player_note":
-            if isinstance(player_id, int) and self.has_comment(player_id):
+            if isinstance(player_id, int) and self.has_comment(player_id, stat_dict):
                 # Orange/yellow color when notes exist
                 statstring = f'<span style="color: #FFA500; font-size: 16px;">{self.number[1]}</span>'
             else:

@@ -645,6 +645,8 @@ class SimpleHUD(Aux_Base.AuxSeats):
 
         This method moves both the stat windows and the main table menu window to their updated locations.
         """
+        if not self.m_windows:
+            return  # not created yet, so no table menu either: the table moved before the first create
         if self._uses_block_windows():
             self._move_block_windows()
             self.table_mw.move_windows()

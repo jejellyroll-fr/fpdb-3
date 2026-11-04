@@ -6,7 +6,7 @@ from fpdb_3_legacy.sql_queries_player_auto_notes import player_auto_note_queries
 
 def test_player_auto_note_queries_are_installed_with_sqlite_placeholders() -> None:
     expected = player_auto_note_queries()
-    assert len(expected) == 10
+    assert len(expected) == 11
     for backend in ("mysql", "postgresql"):
         assert expected.items() <= Sql(db_server=backend).query.items()
     sqlite_expected = {key: value.replace("%s", "?") for key, value in expected.items()}
