@@ -78,6 +78,9 @@ Not synced yet, because the outbox only carries hands:
 * A tourney re-typed locally by a later summary gets a second `Tourneys` row on
   the server if more of its hands are pushed afterwards.
 
+Hands stored outside `Importer` never reach the outbox: the HTTP capture and the
+CoinPoker and SwC live captures write to the local file and stay there.
+
 ## Metrics to watch (extend latency_profile if needed)
 
 `sync_outbox_pending` (gauge), `sync_push_batch` (duration p50/p95/p99),
@@ -107,7 +110,8 @@ to ~0 on the playing machine.
   it, 0 RTT) and `get_server_db_parameters()` returns the server params used by
   the push.
 * **Outbox hook**: `Importer._mark_outbox()` registers `database.hids` after
-  every successfully imported file, in the import process.
+  every successfully imported file, in the import process. A PHH file commits
+  hand by hand, so each of its hands is registered right after its commit.
 * **Lifecycle**: one sync thread per local database in a process, started by
   the first `Importer` and stopped when the last one closes. Two processes
   importing into the same local file each run their own.

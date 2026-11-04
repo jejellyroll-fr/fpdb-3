@@ -2043,8 +2043,19 @@ def _players_name_compares_binary(db: Any) -> bool:
     return True if not callable(check) else bool(check())
 
 
-def import_file(db: Any, config: Any, path: str | Path, *, file_id: int = 0) -> PHHImportResult:
-    """Import every hand of one PHH file into *db*; what was found and done."""
+def import_file(
+    db: Any,
+    config: Any,
+    path: str | Path,
+    *,
+    file_id: int = 0,
+    on_stored: Callable[[list[Any]], None] | None = None,
+) -> PHHImportResult:
+    """Import every hand of one PHH file into *db*; what was found and done.
+
+    *on_stored* gets the ids of each hand right after its commit. The bulk buffers are emptied
+    before every hand, so ``db.hids`` only ever holds the last one when this returns.
+    """
     from fpdb_3_legacy.Exceptions import FpdbHandDuplicate  # noqa: PLC0415
     from fpdb_3_legacy.http_capture_hand_builder import import_fpdb_hand  # noqa: PLC0415
 
@@ -2094,6 +2105,8 @@ def import_file(db: Any, config: Any, path: str | Path, *, file_id: int = 0) -> 
             db.resetBulkCache()
             result.add_failure(PHHImportError(MALFORMED, f"not stored: {error}", source=item.where, hand=item.label))
             continue
+        if on_stored is not None:
+            on_stored(list(db.hids))
         for name in names:
             taken[_storage_key(name)] = name
         result.imported += 1

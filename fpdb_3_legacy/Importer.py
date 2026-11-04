@@ -1314,7 +1314,14 @@ class Importer:
 
     def _import_phh_file(self, fpdbfile):
         """Import a PHH file (#381): partial histories count as partial, unsupported as skipped, malformed as errors."""
-        result = import_phh_file(self.database, self.config, fpdbfile.path, file_id=fpdbfile.fileId or 0)
+        sync = getattr(self, "_local_first_sync", None)
+        result = import_phh_file(
+            self.database,
+            self.config,
+            fpdbfile.path,
+            file_id=fpdbfile.fileId or 0,
+            on_stored=sync.mark if sync is not None else None,
+        )
         self.phh_results[fpdbfile.path] = result
         log.info(result.summary())
         for error in result.errors:
