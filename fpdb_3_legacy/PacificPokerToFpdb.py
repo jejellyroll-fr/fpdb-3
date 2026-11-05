@@ -248,13 +248,13 @@ class PacificPoker(HandHistoryConverter):
             ["tour", "hold", "fl"],
         ]
 
-    def _holeCardCount(self, handText: str) -> int:
+    def _hole_card_count(self, hand_text: str) -> int:
         """Return the size of the largest hole-card line, 0 if the hand reveals none.
 
         A hand we observed and that ended without a showdown has no such line.
         """
-        lines = [m.group("NEWCARDS") for m in self.re_HeroCards.finditer(handText)]
-        lines += [m.group("CARDS") for m in self.re_ShownCards.finditer(handText)]
+        lines = [m.group("NEWCARDS") for m in self.re_HeroCards.finditer(hand_text)]
+        lines += [m.group("CARDS") for m in self.re_ShownCards.finditer(hand_text)]
         return max((len(line.split(",")) for line in lines), default=0)
 
     def determineGameType(self, handText):
@@ -296,7 +296,7 @@ class PacificPoker(HandHistoryConverter):
         if game:
             # print "DEBUG: re_GameInfo[GAME] \'", game, "\'"
             (info["base"], info["category"]) = self.games[game]
-            if info["category"] in self.five_card_categories and self._holeCardCount(handText) == 5:
+            if info["category"] in self.five_card_categories and self._hole_card_count(handText) == 5:
                 info["category"] = self.five_card_categories[info["category"]]
         if sb:
             # print "DEBUG: re_GameInfo[SB] \'", sb, "\'"
