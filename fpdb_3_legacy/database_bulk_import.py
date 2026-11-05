@@ -18,6 +18,7 @@ import random
 import re
 import string
 import sys
+from collections.abc import Callable
 from datetime import datetime
 from time import time
 from typing import TYPE_CHECKING, Any
@@ -84,6 +85,8 @@ class DatabaseBulkImportMixin:
         def commit(self, force: bool = False) -> None: ...
 
         def get_last_insert_id(self, cursor: Any = None) -> Any: ...
+
+        insert_returning_id: Callable[..., Any]
 
         def do_connect(self, config: Any) -> None: ...
 
@@ -351,8 +354,9 @@ class DatabaseBulkImportMixin:
 
     # end def afterBulkImport
 
-    def resetBulkCache(self, reconnect=False) -> None:
+    def resetBulkCache(self) -> None:  # pylint: disable=invalid-name  # public name, called across the importers
         self.siteHandNos: list[Any] = []  # cache of siteHandNo
+        self.known_hands: dict[Any, bool] = {}  # whether a hand is stored, see preload_duplicate_check
         self.hbulk: list[Any] = []  # Hands bulk inserts
         self.bbulk: list[Any] = []  # Boards bulk inserts
         self.bfbulk: list[Any] = []  # BoardFeatures bulk inserts
@@ -374,8 +378,6 @@ class DatabaseBulkImportMixin:
         self.tc: dict[Any, Any] = {}  # TourneysCache bulk updates
         self.hids: list[Any] = []  # hand ids in order of hand bulk inserts
         # self.tids        = []         # tourney ids in order of hp bulk inserts
-        if reconnect:
-            self.do_connect(self.config)
 
     def executemany(self, c, q, values) -> None:
         if self.backend == self.PGSQL and self.import_options["hhBulkPath"] != "":
@@ -673,6 +675,4 @@ class DatabaseBulkImportMixin:
     def storeFile(self, fdata):
         q = self.sql.query["store_file"]
         q = q.replace("%s", self.sql.query["placeholder"])
-        c = self.get_cursor()
-        c.execute(q, fdata)
-        return self.get_last_insert_id(c)
+        return self.insert_returning_id(self.get_cursor(), q, fdata)

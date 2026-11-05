@@ -9,6 +9,7 @@ from __future__ import annotations
 import re
 import sys
 import traceback
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from fpdb_3_legacy.database_lambda_dict import LambdaDict
@@ -21,6 +22,21 @@ re_char = re.compile("[^a-zA-Z]")
 def _site_key(site_name: str) -> str:
     """A site name compared loosely: "PokerStars.FR" and "pokerstars fr" are one key."""
     return site_name.lower().replace(" ", "").replace(".", "").replace("-", "")
+
+
+INSERT_PLAYER = "INSERT INTO Players (name, siteId, hero, chars) VALUES (%s, %s, %s, %s)"
+
+
+def _player_row(name: str, site_id: int, hero: bool) -> tuple[str, int, bool, str]:
+    """A player's row as INSERT_PLAYER writes it: the name cut to the column, and its index letters."""
+    stored_name = name[:32] if name else " "
+    if re_char.match(stored_name[0]):
+        char = "123"
+    elif len(stored_name) == 1 or re_char.match(stored_name[1]):
+        char = stored_name[0] + "1"
+    else:
+        char = stored_name[:2]
+    return stored_name, site_id, hero, char.upper()
 
 
 class DatabasePlayersMixin:
@@ -36,6 +52,7 @@ class DatabasePlayersMixin:
     connection: Any
     pcache: Any
     MYSQL_INNODB: int
+    PGSQL: int
 
     if TYPE_CHECKING:
 
@@ -44,6 +61,8 @@ class DatabasePlayersMixin:
         def get_site_id(self, site: str) -> Any: ...
 
         def get_last_insert_id(self, cursor: Any) -> Any: ...
+
+        insert_many_returning_ids: Callable[..., list[Any]]
 
         def insertOrUpdate(self, type: str, cursor: Any, key: Any, select: Any, insert: Any) -> Any: ...
 
@@ -278,25 +297,54 @@ class DatabasePlayersMixin:
                 lambda key: self.insertPlayer(key[0], key[1], key[2]),
             )
 
+        if self.backend == self.PGSQL:
+            self._load_players(pnames, siteid, hero)
         for player in pnames:
             result[player] = self.pcache[(player, siteid, player == hero)]
 
         return result
 
-    def insertPlayer(self, name, site_id, hero):
-        insert_player = "INSERT INTO Players (name, siteId, hero, chars) VALUES (%s, %s, %s, %s)"
-        insert_player = insert_player.replace("%s", self.sql.query["placeholder"])
-        _name = name[:32] if name else " "
-        if not _name:
-            _name = " "
-        if re_char.match(_name[0]):
-            char = "123"
-        elif len(_name) == 1 or re_char.match(_name[1]):
-            char = _name[0] + "1"
-        else:
-            char = _name[:2]
+    def _load_players(self, pnames, siteid, hero) -> None:
+        """Fill pcache with the players it lacks, in two round trips however many there are (#705).
 
-        key = (_name, site_id, hero, char.upper())
+        What insertPlayer does one player at a time: a stored player keeps their
+        id and only ever gains the hero flag, and the others are inserted.
+        """
+        wanted, rows = self._players_not_cached(pnames, siteid, hero)
+        if not wanted:
+            return
+
+        c = self.get_cursor()
+        c.execute(self.sql.query["players_by_names"], (siteid, list(wanted)))
+        for player_id, stored_name, stored_hero in c.fetchall():
+            if rows[stored_name][2] and not stored_hero:
+                c.execute("UPDATE Players SET hero=%s WHERE id=%s", (True, player_id))
+            for key in wanted.pop(stored_name):
+                self.pcache[key] = player_id
+        if wanted:
+            new_rows = [rows[stored_name] for stored_name in wanted]
+            ids = self.insert_many_returning_ids(c, INSERT_PLAYER, new_rows)
+            for row, player_id in zip(new_rows, ids, strict=True):
+                for key in wanted[row[0]]:
+                    self.pcache[key] = player_id
+
+    def _players_not_cached(self, pnames, siteid, hero) -> tuple[dict[str, list[Any]], dict[str, tuple[Any, ...]]]:
+        """By stored name: the pcache keys still missing, and the row to insert."""
+        wanted: dict[str, list[Any]] = {}
+        rows: dict[str, tuple[Any, ...]] = {}
+        for name in dict.fromkeys(pnames):
+            key = (name, siteid, name == hero)
+            if key not in self.pcache:
+                row = _player_row(name, siteid, name == hero)
+                wanted.setdefault(row[0], []).append(key)
+                # Two names cut to the same 32 characters are one player, the hero if either is.
+                if row[0] not in rows or row[2]:
+                    rows[row[0]] = row
+        return wanted, rows
+
+    def insertPlayer(self, name, site_id, hero):
+        insert_player = INSERT_PLAYER.replace("%s", self.sql.query["placeholder"])
+        key = _player_row(name, site_id, hero)
 
         c = self.get_cursor()
         if self.backend == self.MYSQL_INNODB:

@@ -22,6 +22,9 @@ def core_lookup_queries() -> dict[str, str]:
 
     query["get_player_id_by_name"] = "SELECT id FROM Players WHERE name = %s"
 
+    # PostgreSQL only, see Database.getSqlPlayerIDs.
+    query["players_by_names"] = "SELECT id, name, hero FROM Players WHERE siteId = %s AND name = ANY(%s)"
+
     query["get_players_and_sites_by_name"] = """
             SELECT p.id, s.name
             FROM Players p
