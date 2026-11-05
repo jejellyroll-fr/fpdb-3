@@ -86,3 +86,48 @@ batching. When it reaches a hand, the equity is usually known already.
   To lift it: build a bundle, bulk import a few files with `threads=-1` through
   `fpdb --run-module fpdb_3_legacy.GuiBulkImport -x -C <throwaway config>`, and
   check that the workers run and that no fpdb process is left behind.
+
+## PostgreSQL over a network (#705)
+
+```bash
+FPDB_BENCH_DSN=postgresql://user:password@host:5432 python tools/benchmark_import.py --postgres --rtt-ms 5
+```
+
+Each statement costs a round trip, so the number of statements decides how long
+an import takes. The PokerTracker samples of `regression-test-files` (41 files,
+539 hands), local PostgreSQL 16, one sequential import, with a delay proxy:
+
+| Added RTT | Before (4,325 statements) | After (1,133 statements) |
+| --- | --- | --- |
+| none | 7.4 s | 7.0 s |
+| 2 ms | 21.6 s | 11.1 s |
+| 5 ms | 39.2 s | 17.3 s |
+| 20 ms | 119.2 s | 43.1 s |
+
+Fitted per file on the same sample: a hand costs 5.6 statements before and 0.8
+after, a summary 45 before and 10 after. A hand file with a single hand costs
+about the same as before, its writes being one statement per table.
+
+- **Not the cause on their own.** With a million hands, `COUNT(*)` takes about
+  10 ms locally and reconnecting about 8 ms: at 20 ms RTT they were 1.5 % and
+  4 % of the import. Both are gone, as they cost per file for no benefit.
+- **Per hand.** The tourney type, the tourney and its end time were read or
+  written again for each hand, and `isAlreadyInDB` ran once per hand. They now
+  happen once per file (`Database.tourney_lookups_for_file`,
+  `Database.preload_duplicate_check`).
+- **Per row.** Players and tourney entries were looked up and inserted one at a
+  time, each followed by `SELECT lastval()`. On PostgreSQL they now go in
+  batches and the id comes back with the insert. A summary of 29,000 entrants
+  went from 87,011 statements to 11.
+
+The stored data is unchanged: the regression corpus imported twice (342 files,
+300,390 rows in 40 tables) compares equal to the code before the change, apart
+from timestamps and the order of `HandsShowdown` and `HandsCashout` ids, which
+already varies from one process to the next. One import in two also numbered
+differently the `HudCache` rows rebuilt after a tourney type changes, with the
+same rows: that rebuild is an `INSERT ... SELECT ... GROUP BY` with no `ORDER BY`,
+so the plan PostgreSQL picks probably decides the order (not confirmed with `EXPLAIN`).
+
+What is left is one statement per table for each file, `logImport`, and the
+gametype of each new tournament level. Sending the writes of a file together
+(psycopg's pipeline mode) could remove more; it has not been tried.

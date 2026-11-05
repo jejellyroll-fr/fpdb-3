@@ -73,9 +73,15 @@ def tournament_persistence_queries(db_server: str = "") -> dict[str, str]:
                                             WHERE tourneyId=%s AND playerId=%s AND entryId=%s
     """
 
-    query["getTourneysPlayersByTourney"] = """SELECT playerId, entryId
+    query["getTourneysPlayersByTourney"] = """SELECT *
                                                    FROM TourneysPlayers
                                                    WHERE tourneyId=%s
+    """
+
+    # PostgreSQL only, see Database.getSqlTourneysPlayersIDs.
+    query["tourneysPlayersIdsByPlayers"] = """SELECT playerId, id
+                                                   FROM TourneysPlayers
+                                                   WHERE tourneyId=%s AND entryId=%s AND playerId = ANY(%s)
     """
 
     query["updateTourneysPlayer"] = f"""UPDATE TourneysPlayers

@@ -80,6 +80,18 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 re_char = re.compile("[^a-zA-Z]")
 
+BIGINT_MAX = 2**63 - 1
+
+
+def _bigint_or_none(value: Any) -> int | None:
+    """``value`` as the integer a BIGINT column can hold, or None if it cannot."""
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return None
+    return number if abs(number) <= BIGINT_MAX else None
+
+
 # Gametype-per-hand cache. A hand's game is fixed when the hand is written, so
 # the TTL is only there to bound how long a re-imported hand could be served
 # from a stale entry; the size bounds a long multi-tabling session.
@@ -651,6 +663,26 @@ class Database(
             raise
         return ret
 
+    def insert_returning_id(self, cursor, query, params):
+        """Run one INSERT and return the new row's id.
+
+        On PostgreSQL the id comes back with the INSERT, which saves the round
+        trip of asking for it afterwards (#705).
+        """
+        if self.backend == self.PGSQL:
+            cursor.execute(query + " RETURNING id", params)  # nosemgrep
+            return cursor.fetchone()[0]
+        cursor.execute(query, params)
+        return self.get_last_insert_id(cursor)
+
+    def insert_many_returning_ids(self, cursor, query, rows):
+        """Insert ``rows`` in one batch on PostgreSQL and return their ids, in order."""
+        cursor.executemany(query + " RETURNING id", rows, returning=True)  # nosemgrep
+        ids = []
+        while True:
+            ids.append(cursor.fetchone()[0])
+            if not cursor.nextset():
+                return ids
 
     def analyzeDB(self) -> None:
         """Do whatever the DB can offer to update index/table statistics."""
@@ -780,13 +812,45 @@ class Database(
             q = q.replace("<heroSeat>", "")
         if key in self.siteHandNos:
             return True
-        c = self.get_cursor()
-        c.execute(q, key)
-        result = c.fetchall()
-        if len(result) > 0:
+        known = self.known_hands.get(key)
+        if known is None:
+            c = self.get_cursor()
+            c.execute(q, key)
+            known = len(c.fetchall()) > 0
+        if known:
             return True
         self.siteHandNos.append(key)
         return False
+
+    def preload_duplicate_check(self, hands) -> None:
+        """Ask once which of a file's hands are stored, so isDuplicate needs no query per hand (#705).
+
+        PostgreSQL only: elsewhere a statement costs no network round trip. A hand
+        whose number the column cannot hold is left to isDuplicate's own query.
+        """
+        self.known_hands = {}
+        if self.backend != self.PGSQL or not hands:
+            return
+        keys = {}
+        for hand in hands:
+            site_hand_no, hero_seat = hand.hands["siteHandNo"], hand.hands["heroSeat"]
+            number, seat = _bigint_or_none(site_hand_no), _bigint_or_none(hero_seat)
+            if number is None or (hand.publicDB and seat is None):
+                continue
+            key = (site_hand_no, hand.siteId, hero_seat) if hand.publicDB else (site_hand_no, hand.siteId)
+            keys[key] = (number, hand.siteId, seat) if hand.publicDB else (number, hand.siteId)
+        if not keys:
+            return
+        c = self.get_cursor()
+        c.execute(
+            self.sql.query["hands_already_stored"],
+            (sorted({key[0] for key in keys.values()}), sorted({key[1] for key in keys.values()})),
+        )
+        rows = c.fetchall()
+        # Number, site and seat, and number and site: a key has one shape or the other.
+        stored = {tuple(row) for row in rows} | {tuple(row[:2]) for row in rows}
+        for key, normalised in keys.items():
+            self.known_hands[key] = normalised in stored
 
     def insertOrUpdate(self, type, cursor, key, select, insert):
         if type == "players":
@@ -795,8 +859,7 @@ class Database(
             cursor.execute(select, key)
         tmp = cursor.fetchone()
         if tmp is None:
-            cursor.execute(insert, key)
-            result = self.get_last_insert_id(cursor)
+            result = self.insert_returning_id(cursor, insert, key)
         else:
             result = tmp[0]
             if type == "players" and not tmp[2] and key[2]:
@@ -877,14 +940,14 @@ class Database(
                 pp.pprint(gtinsert)
                 log.debug("###### End Gametype ########")
 
-            c.execute(
+            result = self.insert_returning_id(
+                c,
                 self.sql.query["insertGameTypes"].replace(
                     "%s",
                     self.sql.query["placeholder"],
                 ),
                 gtinsert,
             )
-            result = self.get_last_insert_id(c)
         else:
             result = tmp[0]
         return result

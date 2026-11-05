@@ -386,6 +386,7 @@ jobs:
           python -m pytest -q -p no:pytest-qt
           tests/test_database_backend_integration.py
           tests/test_hud_postgresql_integration.py
+          tests/test_import_round_trips_postgres.py
 
   build:
     name: Build with PyInstaller (${{ matrix.label }})

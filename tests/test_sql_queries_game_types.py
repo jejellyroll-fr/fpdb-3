@@ -7,7 +7,7 @@ from fpdb_3_legacy.sql_queries_game_types import game_type_queries
 def test_game_type_queries_are_installed_with_sqlite_placeholders() -> None:
     for backend in ("mysql", "postgresql"):
         expected = game_type_queries(backend)
-        assert len(expected) == 10
+        assert len(expected) == 11
         assert expected.items() <= Sql(db_server=backend).query.items()
     sqlite_expected = {
         key: value.replace("%s", "?") for key, value in game_type_queries("sqlite").items()

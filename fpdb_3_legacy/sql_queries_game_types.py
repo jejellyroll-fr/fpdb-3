@@ -53,6 +53,12 @@ def game_type_queries(db_server: str) -> dict[str, str]:
                                      WHERE siteHandNo=%s AND G.siteId=%s<heroSeat>
     """
 
+    # PostgreSQL only, see Database.preload_duplicate_check.
+    query["hands_already_stored"] = """SELECT H.siteHandNo, G.siteId, H.heroSeat FROM Hands H
+                                            INNER JOIN Gametypes G ON (H.gametypeId = G.id)
+                                            WHERE H.siteHandNo = ANY(%s::bigint[]) AND G.siteId = ANY(%s::int[])
+    """
+
     query["getTourneyTypeIdByTourneyNo"] = """SELECT tt.id,
                                                           tt.siteId,
                                                           tt.currency,

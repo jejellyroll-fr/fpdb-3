@@ -348,8 +348,10 @@ def test_secondary_bound_rotates_instead_of_starving() -> None:
 
 def _insert_decoy_rows(db, table: str, decoy_id: int = 9000) -> None:
     """Insert a row with an explicit high id so the server's auto ids diverge
-    from the local ones."""
+    from the local ones. Its references point nowhere, so foreign keys are off:
+    this connection created the schema, which leaves them on."""
     c = db.connection.cursor()
+    c.execute("PRAGMA foreign_keys = OFF")
     c.execute(f"PRAGMA table_info({table})")  # nosec B608  # nosemgrep
     cols = c.fetchall()
     names, values = [], []
@@ -596,7 +598,7 @@ def test_outbox_gets_the_hands_of_a_file_that_also_holds_summaries(tmp_path) -> 
         return (2, 0, 0, 0, 0, 0.0, "PokerStars")
 
     importer._import_hh_file = import_hands
-    importer._import_summary_file = lambda _fpdbfile: local.resetBulkCache(False)
+    importer._import_summary_file = lambda _fpdbfile: local.resetBulkCache()
     fpdbfile = MagicMock(ftype="hh", path="tourney.txt")
     importer._import_despatch(fpdbfile)
 

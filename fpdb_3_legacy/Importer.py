@@ -1124,13 +1124,16 @@ class Importer:
             self.progress_start_cb(len(self.filelist))
 
         prefetch = self._start_equity_prefetch()
+        # Counted once and kept up to date: counting again for each file, only for
+        # this display, is a scan of Hands and two network round trips (#705).
+        hands_in_db = self.database.getHandCount()
         try:
             for f in self.filelist:
                 if not has_callbacks:
-                    ProgressDialog.progress_update(f, str(self.database.getHandCount()))
+                    ProgressDialog.progress_update(f, str(hands_in_db))
                 else:
                     assert self.progress_update_cb is not None
-                    self.progress_update_cb(f, str(self.database.getHandCount()))
+                    self.progress_update_cb(f, str(hands_in_db))
                 if prefetch is not None:
                     prefetch.before_import(f)
 
@@ -1161,6 +1164,8 @@ class Importer:
                     totpartial += partial
                     totskipped += skipped
                     toterrors += errors
+                    if self.filelist[f].ftype != "summary":
+                        hands_in_db += stored
 
                     self.logImport(
                         "bulk",
@@ -1623,13 +1628,13 @@ class Importer:
                     if self.caller:
                         self.progressNotify()
                     handlist = hhc.getProcessedHands()
-                    self.database.resetBulkCache(True)
                     self.pos_in_file[fpdbfile.path] = hhc.getLastCharacterRead()
                     self.database.resetBulkCache()
 
-                    for hand in handlist:
-                        hand.prepInsert(self.database, printtest=self.settings["testData"])
-                        ahands.append(hand)
+                    with self.database.tourney_lookups_for_file():
+                        for hand in handlist:
+                            hand.prepInsert(self.database, printtest=self.settings["testData"])
+                            ahands.append(hand)
 
                     for hand in ahands:
                         hand.assembleHand()
@@ -1640,6 +1645,9 @@ class Importer:
                     # database.transaction() context manager above.
                     backtrack = False
                     id = self.database.nextHandId()
+                    # After nextHandId, which waits for any other importer to commit:
+                    # asked earlier, a hand it has just stored would still look absent.
+                    self.database.preload_duplicate_check(phands)
                     for i in range(len(phands)):
                         doinsert = len(phands) == i + 1
                         hand = phands[i]
@@ -1948,7 +1956,7 @@ class Importer:
                             in_path=fpdbfile.path,
                             header=summaryTexts[0],
                         )
-                        self.database.resetBulkCache(False)
+                        self.database.resetBulkCache()
                         conv.insertOrUpdate(printtest=self.settings["testData"])
                         self._note_tourney(conv.tourneyId)
                     except FpdbSummaryNotFound as exc:
