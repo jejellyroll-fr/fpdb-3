@@ -25,10 +25,10 @@ Menu names move between tracker versions. If yours differ, look for the setting 
 *processed* or *archived* hand histories go.
 
 **No archive?** Use the tracker's hand export instead (in PT4, *Database ▸ Export Hands*). An export
-may not be in the room's original format: PT4's database does not keep iPoker hands as the room's
-XML, but as text starting with `GAME #`. fpdb reads such text with its PokerTracker parser, which is
-not yet validated on recent iPoker hands (#616). The import summary lists every file fpdb could not
-read, so nothing goes missing silently. If a whole export is refused, please open an issue and attach a
+may not be in the room's original format: PT4 writes iPoker hands as text starting with `GAME #`, not
+as the room's XML. fpdb reads that text too. Each tournament also gets a summary file, which the import
+counts apart from the hands. The import summary lists every file fpdb could not read, so nothing goes
+missing silently. If a whole export is refused, please open an issue and attach a
 few hands, with the names anonymised if you prefer.
 
 ## 2. Set your screen names first

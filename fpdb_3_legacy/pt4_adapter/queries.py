@@ -6,7 +6,7 @@ PT4_STATS_PER_HAND = """
 SELECT
     p.player_name,
     s.flg_vpip,
-    s.flg_p_first_raise          AS pfr,
+    s.cnt_p_raise > 0            AS pfr,
     s.flg_p_3bet                 AS three_bet,
     s.flg_p_3bet_opp             AS three_bet_opp,
     s.flg_f_saw,

@@ -230,7 +230,7 @@ class PokerTracker(HandHistoryConverter):
 
     re_HandInfo_Cash = re.compile(
         r"""
-          ^Table\s(?P<TABLE>[^,]+?)(,\sSeats\s(?P<MAX>\d+))?$""".format(),
+          ^Table\s(?!Info:|Size\s)(?P<TABLE>[^,]+?)(,\sSeats\s(?P<MAX>\d+)|,\s\d+)?$""".format(),
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -366,10 +366,10 @@ class PokerTracker(HandHistoryConverter):
         pass
 
     def detectiPokerSkin(self, handText):
-        """Detect specific iPoker skin from hand text content."""
+        """Detect specific iPoker skin from the table name, the only part a player cannot name."""
         # Extract table name from hand text
-        table_pattern = r"Table\s+(.+?),"
-        table_match = re.search(table_pattern, handText)
+        table_pattern = r"^Table\s+(?!Info:|Size\s)(.+?)(?:,|$)"
+        table_match = re.search(table_pattern, handText, re.MULTILINE)
         table_name = table_match.group(1) if table_match else ""
 
         log.debug(f"Detected table name: {table_name}")
@@ -428,8 +428,8 @@ class PokerTracker(HandHistoryConverter):
             "redstar": "Red Star Poker",
         }
 
-        # Check table name and hand text for skin indicators
-        search_text = (table_name + " " + handText).lower()
+        # Check the table name for skin indicators
+        search_text = table_name.lower()
 
         # Specific patterns for French sites
         if any(indicator in search_text for indicator in ["saratov", "scone", "moscow"]):
@@ -642,9 +642,10 @@ class PokerTracker(HandHistoryConverter):
                     datetimestr,
                     "%Y/%m/%d %H:%M:%S",
                 )  # also timezone at end, e.g. " ET"
+                # iPoker headers say "/GMT"; the others carry no zone and are taken as ET.
                 hand.startTime = HandHistoryConverter.changeTimezone(
                     hand.startTime,
-                    "ET",
+                    "UTC" if info[key].rstrip().endswith("/GMT") else "ET",
                     "UTC",
                 )
             if key == "HID":

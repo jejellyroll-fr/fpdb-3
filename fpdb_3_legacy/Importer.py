@@ -264,6 +264,8 @@ class FileImportResult:
     partial: int = 0
     skipped: int = 0
     errors: int = 0
+    summaries: int = 0  # tournament summaries stored: not hands, so not in ``stored``
+    is_summary_file: bool = False
 
 
 def _site_name(fpdbfile: Any) -> str | None:
@@ -1153,7 +1155,19 @@ class Importer:
                     # The parser's room when it found one: a PokerTracker-format file is
                     # identified as "PokerTracker" and only parsing tells Merge from Everest.
                     room = detected if isinstance(detected, str) and detected else _site_name(self.filelist[f])
-                    self.file_results[f] = FileImportResult(room, stored, duplicates, partial, skipped, errors)
+                    self.file_results[f] = (
+                        FileImportResult(
+                            room,
+                            duplicates=duplicates,
+                            partial=partial,
+                            skipped=skipped,
+                            errors=errors,
+                            summaries=stored,
+                            is_summary_file=True,
+                        )
+                        if self.filelist[f].ftype == "summary"
+                        else FileImportResult(room, stored, duplicates, partial, skipped, errors)
+                    )
                     totstored += stored
                     totdups += duplicates
                     totpartial += partial
