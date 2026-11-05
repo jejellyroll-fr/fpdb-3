@@ -15,12 +15,16 @@ by session" a grep rather than a guess.
 
 from __future__ import annotations
 
+import contextlib
 import faulthandler
 import os
 import sys
+import threading
+import traceback
 import uuid
 from datetime import datetime
 from pathlib import Path
+from types import TracebackType
 from typing import Any, Protocol
 
 # macOS runs a quarantined app from a read-only, randomly named mount instead
@@ -35,8 +39,9 @@ SESSION_ENV_VAR = "FPDB_SESSION_ID"
 ROLE_MAIN = "main"
 ROLE_HUD = "hud"
 
-#: Where the HUD writes the stacks of a native crash.
-CRASH_LOG_NAME = "HUD-crash.txt"
+#: Where each process keeps its native crashes and uncaught exceptions.
+HUD_CRASH_LOG_NAME = "HUD-crash.txt"
+MAIN_CRASH_LOG_NAME = "fpdb-crash.txt"
 
 
 def session_id() -> str:
@@ -121,21 +126,23 @@ def format_identity(identity: dict[str, Any]) -> str:
     return " ".join(f"{key}={value!r}" for key, value in identity.items())
 
 
-def enable_crash_log(log_dir: str | os.PathLike[str]) -> Path | None:
-    """Have a native crash write the stack of every thread to a file.
+def enable_crash_log(log_dir: str | os.PathLike[str], file_name: str) -> Path | None:
+    """Keep the trace of a native crash or an uncaught exception in a file.
 
     A crash inside Qt raises no Python exception and bypasses ``sys.stderr``, so
-    nothing else records it. The file is appended to because the player restarts
-    the HUD right after a crash, and a file truncated on start would lose it. The
-    line written here dates the crash that may follow it.
+    only ``faulthandler`` records it. An uncaught exception does reach
+    ``sys.stderr``, but fpdb and the HUD truncate their error files on start. This
+    file is appended to because the player restarts right after a problem, and
+    the line written here dates the crash that may follow it.
 
     Args:
         log_dir: The directory of the log files.
+        file_name: The file of this process in that directory.
 
     Returns:
-        The file in use, or None if it cannot be written: the HUD runs without it.
+        The file in use, or None if it cannot be written: the app runs without it.
     """
-    path = Path(log_dir) / CRASH_LOG_NAME
+    path = Path(log_dir) / file_name
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         # faulthandler keeps the file open until the process ends.
@@ -143,9 +150,63 @@ def enable_crash_log(log_dir: str | os.PathLike[str]) -> Path | None:
         crash_log.write(f"--- started {datetime.now():%Y-%m-%d %H:%M:%S} pid={os.getpid()} session={session_id()}\n")
         crash_log.flush()
         faulthandler.enable(file=crash_log, all_threads=True)
-    except OSError:
+    except (OSError, ValueError):
         return None
+    _record_uncaught_exceptions(path)
     return path
+
+
+def _record_uncaught_exceptions(path: Path) -> None:
+    """Append uncaught exceptions to ``path``, then let the previous hooks run as before.
+
+    PySide6 hands an exception raised in a slot or a virtual method to
+    ``sys.excepthook``, on whichever thread raised it, and the app keeps running.
+    """
+    previous_hook = sys.excepthook
+    previous_thread_hook = threading.excepthook
+
+    def hook(
+        exc_type: type[BaseException],
+        exc_value: BaseException,
+        exc_traceback: TracebackType | None,
+    ) -> None:
+        _append_trace(path, None, exc_type, exc_value, exc_traceback)
+        # The app is already handling a failure: this must not add another one.
+        with contextlib.suppress(Exception):
+            previous_hook(exc_type, exc_value, exc_traceback)
+
+    def thread_hook(args: threading.ExceptHookArgs) -> None:
+        _append_trace(path, args.thread, args.exc_type, args.exc_value, args.exc_traceback)
+        with contextlib.suppress(Exception):
+            previous_thread_hook(args)
+
+    sys.excepthook = hook
+    threading.excepthook = thread_hook
+
+
+def _append_trace(
+    path: Path,
+    thread: threading.Thread | None,
+    exc_type: type[BaseException],
+    exc_value: BaseException | None,
+    exc_traceback: TracebackType | None,
+) -> None:
+    """Append one dated traceback. Never raises: a failure here only loses the trace."""
+    with contextlib.suppress(Exception):
+        # Asking to leave is not a failure. threading.excepthook receives
+        # SystemExit, which its default handler ignores, and Ctrl+C is the user's.
+        if issubclass(exc_type, (SystemExit, KeyboardInterrupt)):
+            return
+        name = (thread or threading.current_thread()).name
+        header = (
+            f"--- uncaught exception {datetime.now():%Y-%m-%d %H:%M:%S} "
+            f"pid={os.getpid()} session={session_id()} thread={name}\n"
+        )
+        trace = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        # Opened per trace: a handle kept open would keep writing to a file the
+        # user has removed since. A message can hold characters utf-8 refuses.
+        with path.open("a", encoding="utf-8", errors="backslashreplace") as crash_log:
+            crash_log.write(header + trace)
 
 
 class _WarningLog(Protocol):
