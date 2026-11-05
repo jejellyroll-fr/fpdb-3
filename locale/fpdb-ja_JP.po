@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 22:00+0100\n"
+"POT-Creation-Date: 2026-11-05 10:16+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -72,6 +72,70 @@ msgstr "未実装 %s: '%s' '%s'"
 #: fpdb_3_legacy/EverleafToFpdb.py fpdb_3_legacy/OnGameToFpdb.py
 msgid "reading antes"
 msgstr "アンティ読込中"
+
+#: fpdb_3_legacy/Aux_Hud.py
+#: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+msgid "Close"
+msgstr "閉じる"
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Close this menu"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Drag to move this menu"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy
+#| msgid "Force layout"
+msgid "Force layout..."
+msgstr "レイアウトを強制指定"
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "HUD - stats"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy
+msgid "Restart"
+msgstr "最初"
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Restart the HUD on this table"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy
+#| msgid "Save HUD Layout"
+msgid "Save layout"
+msgstr "HUD配置を保存する"
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Save where this HUD's windows are"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy
+msgid "Stat set"
+msgstr "統計"
+
+#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Stop"
+msgstr "停止"
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy
+msgid "Stop the HUD on this table"
+msgstr "テーブル全体をコピー"
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy, python-brace-format
+msgid "{label} - HUD configuration"
+msgstr "設定を再読み込み"
 
 #: fpdb_3_legacy/BossToFpdb.py
 #, python-format
@@ -730,6 +794,18 @@ msgstr ""
 msgid "Time between imports (seconds):"
 msgstr "インポート間隔 (秒):"
 
+#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, python-format
+msgid ""
+"macOS does not let fpdb read this folder:\n"
+"%s\n"
+"\n"
+"Allow the app that launches fpdb (your terminal, or fpdb itself) in System "
+"Settings > Privacy & Security > Full Disk Access, then restart fpdb. Until "
+"then, its hands cannot be imported."
+msgstr ""
+
 #: fpdb_3_legacy/GuiAutoNoteRules.py
 #, fuzzy
 msgid "Automatic Notes"
@@ -812,7 +888,8 @@ msgstr "ノートを読み込む"
 msgid "Notes: 0"
 msgstr "ノート: 0"
 
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Player"
 msgstr "プレイヤー"
@@ -909,6 +986,10 @@ msgstr "移動先フォルダーを選択"
 #, fuzzy
 msgid "Configured Import Directories:"
 msgstr "設定済みのインポートフォルダー:"
+
+#: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
+msgid "Folder access needed"
+msgstr ""
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy, python-brace-format
@@ -1529,6 +1610,7 @@ msgid "Analytics data unavailable"
 msgstr "分析データを利用できません"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/hud_options_panel.py
 #, fuzzy
 msgid "Any"
 msgstr "任意"
@@ -2495,7 +2577,7 @@ msgstr "から"
 msgid "or type a value"
 msgstr "または値を入力"
 
-#: fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/hud_options_panel.py
 #, fuzzy
 msgid "to"
 msgstr "まで"
@@ -2593,7 +2675,8 @@ msgstr "現地通貨の合計は省略されています (複数の通貨)"
 msgid "Profit: {profit} · Currency/hour: {hour}"
 msgstr "利益: {profit} · 通貨/時: {hour}"
 
-#: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/research_labels.py
 msgid "Session"
 msgstr "このセッション"
 
@@ -3096,10 +3179,6 @@ msgid "Enter your username"
 msgstr "ユーザー名を入力"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Folder access needed"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
 msgid "Hand History:"
 msgstr "ハンド履歴:"
@@ -3163,17 +3242,6 @@ msgstr "トーナメント:"
 #, fuzzy
 msgid "Your names in these hands, one per line"
 msgstr "これらのハンドでのあなたの名前 (1 行に 1 つ)"
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-#, python-format
-msgid ""
-"macOS does not let fpdb read this folder:\n"
-"%s\n"
-"\n"
-"Allow the app that launches fpdb (your terminal, or fpdb itself) in System "
-"Settings > Privacy & Security > Full Disk Access, then restart fpdb. Until "
-"then, its hands cannot be imported."
-msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🎭"
@@ -3332,13 +3400,6 @@ msgstr ""
 #, fuzzy
 msgid "Start capture"
 msgstr "キャプチャを開始"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
-#: fpdb_3_legacy/session_guard_dialog.py
-#, fuzzy
-msgid "Stop"
-msgstr "停止"
 
 #: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
 #, fuzzy
@@ -3965,6 +4026,75 @@ msgstr ""
 "このハンドを表示できませんでした:\n"
 "%s"
 
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "0.1x to 10x"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "0.33x to 3x"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "0.5x to 2x"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+#| msgid "All Levels"
+msgid "All levels"
+msgstr "全レベル"
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "All time"
+msgstr "すべてのファイル"
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "Blinds"
+msgstr "ビッグブラインド"
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "Custom"
+msgstr "カスタムルール"
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "Exact"
+msgstr "同一"
+
+#: fpdb_3_legacy/hud_options_panel.py fpdb_3_legacy/menu_layout.py
+msgid "HUD Options"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "Last n days"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "Opponents"
+msgstr "対戦相手レポート"
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "Period"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Seats"
+msgstr "席数"
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "This level"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid ""
+"Used by tables opened from now on. Open tables keep their current options."
+msgstr ""
+
 #: fpdb_3_legacy/i18n.py
 #, fuzzy
 msgid "Stack"
@@ -4109,6 +4239,10 @@ msgstr "リングゲーム"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/update_notice.py
 msgid "Check for updates"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Choose the blinds, seats and period that new HUD tables start with"
 msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
@@ -5033,11 +5167,6 @@ msgstr "サンプル列"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Seats"
-msgstr "席数"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Select Popup:"
 msgstr "ポップアップを選択:"
 
@@ -5277,10 +5406,6 @@ msgstr "🧩 ダイナミックパネル"
 #, fuzzy
 msgid "100% Reset"
 msgstr "100% にリセット"
-
-#: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-msgid "Close"
-msgstr "閉じる"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, fuzzy, python-brace-format
@@ -7832,9 +7957,6 @@ msgstr ""
 #~ msgid "Alias '%s' unknown"
 #~ msgstr "ポーカーサイトの別名 '%s' は不明です"
 
-#~ msgid "All Levels"
-#~ msgstr "全レベル"
-
 #~ msgid "An invalid DB version or missing tables have been detected."
 #~ msgstr "無効なデータベースバージョンかDBテーブルの欠落を検出しました"
 
@@ -8155,9 +8277,6 @@ msgstr ""
 #~ msgid "Error updating HUD for hand %s."
 #~ msgstr "HUD更新エラー ハンド %s。"
 
-#~ msgid "Exact"
-#~ msgstr "同一"
-
 #~ msgid "FEE"
 #~ msgstr "FEE"
 
@@ -8211,9 +8330,6 @@ msgstr ""
 
 #~ msgid "Force initial-run dialog"
 #~ msgstr "強制的に初期設定ダイアログ"
-
-#~ msgid "Force layout"
-#~ msgstr "レイアウトを強制指定"
 
 #~ msgid "Found %s eMails to fetch"
 #~ msgstr "%s 通のEメールが見つかりました"
@@ -8856,9 +8972,6 @@ msgstr ""
 
 #~ msgid "STREETS"
 #~ msgstr "STREETS"
-
-#~ msgid "Save HUD Layout"
-#~ msgstr "HUD配置を保存する"
 
 #~ msgid "Saw Showdown / River"
 #~ msgstr "ショーダウンを見た / リバー"

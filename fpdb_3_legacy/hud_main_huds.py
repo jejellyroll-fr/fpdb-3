@@ -93,6 +93,10 @@ class HudMainHudsMixin(HudMainBase):
         if self._theme_manager is not None:
             self._theme_manager.apply_saved_theme()
 
+        # What new tables start with. Open tables hold their own copy, which the
+        # player may have changed from the table menu, so they keep it.
+        self.hud_params = self.config.get_hud_ui_parameters()
+
         rebuilt = 0
         for temp_key, hud in list(self.hud_dict.items()):
             if self._reapply_profile(temp_key, hud):

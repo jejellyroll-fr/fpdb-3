@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 22:00+0100\n"
+"POT-Creation-Date: 2026-11-05 10:16+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -64,6 +64,69 @@ msgstr "Nicht implementierte %s: '%s' '%s'"
 #: fpdb_3_legacy/EverleafToFpdb.py fpdb_3_legacy/OnGameToFpdb.py
 msgid "reading antes"
 msgstr "Lese Antes"
+
+#: fpdb_3_legacy/Aux_Hud.py
+#: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
+msgid "Close"
+msgstr "Schließen"
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Close this menu"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Drag to move this menu"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Force layout..."
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "HUD - stats"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy
+msgid "Restart"
+msgstr "Anfang"
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Restart the HUD on this table"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy
+#| msgid "Save HUD Layout"
+msgid "Save layout"
+msgstr "HUD-Layout speichern"
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Save where this HUD's windows are"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy
+msgid "Stat set"
+msgstr "Statistiken"
+
+#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Stop"
+msgstr "Stopp"
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy
+msgid "Stop the HUD on this table"
+msgstr "Ganze Tabelle kopieren"
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy, python-brace-format
+msgid "{label} - HUD configuration"
+msgstr "Konfiguration neu laden"
 
 #: fpdb_3_legacy/BossToFpdb.py
 #, fuzzy, python-format
@@ -729,6 +792,18 @@ msgstr ""
 msgid "Time between imports (seconds):"
 msgstr "Zeit zwischen Importen (Sekunden):"
 
+#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, python-format
+msgid ""
+"macOS does not let fpdb read this folder:\n"
+"%s\n"
+"\n"
+"Allow the app that launches fpdb (your terminal, or fpdb itself) in System "
+"Settings > Privacy & Security > Full Disk Access, then restart fpdb. Until "
+"then, its hands cannot be imported."
+msgstr ""
+
 #: fpdb_3_legacy/GuiAutoNoteRules.py
 #, fuzzy
 msgid "Automatic Notes"
@@ -810,7 +885,8 @@ msgstr "Notizen laden"
 msgid "Notes: 0"
 msgstr "Notizen: 0"
 
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Player"
 msgstr "Spieler"
@@ -908,6 +984,10 @@ msgstr "Zielordner wählen"
 #, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Konfigurierte Importordner:"
+
+#: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
+msgid "Folder access needed"
+msgstr ""
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy, python-brace-format
@@ -1530,6 +1610,7 @@ msgid "Analytics data unavailable"
 msgstr "Analysedaten nicht verfügbar"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/hud_options_panel.py
 #, fuzzy
 msgid "Any"
 msgstr "Beliebig"
@@ -2501,7 +2582,7 @@ msgstr "von"
 msgid "or type a value"
 msgstr "oder einen Wert eingeben"
 
-#: fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/hud_options_panel.py
 #, fuzzy
 msgid "to"
 msgstr "bis"
@@ -2604,7 +2685,8 @@ msgstr "Summen in Originalwährung ausgelassen (mehrere Währungen)"
 msgid "Profit: {profit} · Currency/hour: {hour}"
 msgstr "Gewinn: {profit} · Währung/Stunde: {hour}"
 
-#: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/research_labels.py
 msgid "Session"
 msgstr "Sitzung"
 
@@ -3105,10 +3187,6 @@ msgid "Enter your username"
 msgstr "Benutzernamen eingeben"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Folder access needed"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
 msgid "Hand History:"
 msgstr "Pfad zur History"
@@ -3172,17 +3250,6 @@ msgstr "Tournamente"
 #, fuzzy
 msgid "Your names in these hands, one per line"
 msgstr "Ihre Namen in diesen Händen, einer pro Zeile"
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-#, python-format
-msgid ""
-"macOS does not let fpdb read this folder:\n"
-"%s\n"
-"\n"
-"Allow the app that launches fpdb (your terminal, or fpdb itself) in System "
-"Settings > Privacy & Security > Full Disk Access, then restart fpdb. Until "
-"then, its hands cannot be imported."
-msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🎭"
@@ -3340,13 +3407,6 @@ msgstr ""
 #, fuzzy
 msgid "Start capture"
 msgstr "Aufzeichnung starten"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
-#: fpdb_3_legacy/session_guard_dialog.py
-#, fuzzy
-msgid "Stop"
-msgstr "Stopp"
 
 #: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
 #, fuzzy
@@ -3973,6 +4033,75 @@ msgstr ""
 "Diese Hand konnte nicht dargestellt werden:\n"
 "%s"
 
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "0.1x to 10x"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "0.33x to 3x"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "0.5x to 2x"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+#| msgid "All Levels"
+msgid "All levels"
+msgstr "Alle Level"
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "All time"
+msgstr "Alle Dateien"
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "Blinds"
+msgstr "Big Blinds"
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "Custom"
+msgstr "Eigene Regeln"
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "Exact"
+msgstr "Exakt"
+
+#: fpdb_3_legacy/hud_options_panel.py fpdb_3_legacy/menu_layout.py
+msgid "HUD Options"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "Last n days"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "Opponents"
+msgstr "Gegnerbericht"
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "Period"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Seats"
+msgstr "Für Sitzzahl:"
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "This level"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid ""
+"Used by tables opened from now on. Open tables keep their current options."
+msgstr ""
+
 #: fpdb_3_legacy/i18n.py
 #, fuzzy
 msgid "Stack"
@@ -4120,6 +4249,10 @@ msgstr "Cash"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/update_notice.py
 msgid "Check for updates"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Choose the blinds, seats and period that new HUD tables start with"
 msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
@@ -5061,11 +5194,6 @@ msgstr "Stichprobenspalte"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Seats"
-msgstr "Für Sitzzahl:"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Select Popup:"
 msgstr "Popup wählen:"
 
@@ -5310,11 +5438,6 @@ msgstr "🧩 Dynamische Panels"
 #, fuzzy
 msgid "100% Reset"
 msgstr "100 % zurücksetzen"
-
-#: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-#, fuzzy
-msgid "Close"
-msgstr "Schließen"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, fuzzy, python-brace-format
@@ -8032,9 +8155,6 @@ msgstr ""
 #~ msgid "Alias '%s' unknown"
 #~ msgstr "Alias '%s' ist unbekannt"
 
-#~ msgid "All Levels"
-#~ msgstr "Alle Level"
-
 #~ msgid "An invalid DB version or missing tables have been detected."
 #~ msgstr ""
 #~ "Falsche Version der Datenbankstrukturen oder fehlende Tabellen gefunden."
@@ -8569,9 +8689,6 @@ msgstr ""
 
 #~ msgid "Everleaf cannot read all stud/razz hands yet."
 #~ msgstr "Everleaf kann noch nicht alle Stud/Razz Hände einlesen."
-
-#~ msgid "Exact"
-#~ msgstr "Exakt"
 
 #~ msgid "Example stats. Player = %s, Hand = %s:"
 #~ msgstr "Beispielstats. Spieler = %s, Hand = %s:"
@@ -9601,9 +9718,6 @@ msgstr ""
 
 #~ msgid "SUB TOURNEY FEE"
 #~ msgstr "SUBTOURNEY GEBÜHR"
-
-#~ msgid "Save HUD Layout"
-#~ msgstr "HUD-Layout speichern"
 
 #~ msgid "Saw Showdown / River"
 #~ msgstr "Showdown/River gesehen"

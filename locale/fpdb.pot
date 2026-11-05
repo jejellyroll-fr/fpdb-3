@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 22:00+0100\n"
+"POT-Creation-Date: 2026-11-05 10:16+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,6 +63,62 @@ msgstr ""
 #: fpdb_3_legacy/OnGameToFpdb.py fpdb_3_legacy/PkrToFpdb.py
 #, python-format
 msgid "Unimplemented %s: '%s' '%s'"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "HUD - stats"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, python-brace-format
+msgid "{label} - HUD configuration"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Drag to move this menu"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Restart"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Restart the HUD on this table"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Save layout"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Save where this HUD's windows are"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/session_guard_dialog.py
+msgid "Stop"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Stop the HUD on this table"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+#: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+msgid "Close"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Close this menu"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Stat set"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Force layout..."
 msgstr ""
 
 #: fpdb_3_legacy/BossToFpdb.py
@@ -659,6 +715,18 @@ msgstr ""
 msgid "Auto Import Running..."
 msgstr ""
 
+#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, python-format
+msgid ""
+"macOS does not let fpdb read this folder:\n"
+"%s\n"
+"\n"
+"Allow the app that launches fpdb (your terminal, or fpdb itself) in System "
+"Settings > Privacy & Security > Full Disk Access, then restart fpdb. Until "
+"then, its hands cannot be imported."
+msgstr ""
+
 #: fpdb_3_legacy/GuiAutoNoteRules.py
 msgid "Automatic Notes"
 msgstr ""
@@ -727,7 +795,8 @@ msgstr ""
 msgid "Idle"
 msgstr ""
 
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/research_labels.py
 msgid "Player"
 msgstr ""
 
@@ -797,6 +866,10 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiBulkImport.py
 msgid "Importing..."
+msgstr ""
+
+#: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
+msgid "Folder access needed"
 msgstr ""
 
 #: fpdb_3_legacy/GuiBulkImport.py
@@ -1331,6 +1404,7 @@ msgid "Exact known cards"
 msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/hud_options_panel.py
 msgid "Any"
 msgstr ""
 
@@ -1825,7 +1899,7 @@ msgstr ""
 msgid "from"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/hud_options_panel.py
 msgid "to"
 msgstr ""
 
@@ -2199,7 +2273,8 @@ msgstr ""
 msgid "{minutes}m"
 msgstr ""
 
-#: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/research_labels.py
 msgid "Session"
 msgstr ""
 
@@ -2634,21 +2709,6 @@ msgid "🔍 Auto-Detect Paths"
 msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Folder access needed"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-#, python-format
-msgid ""
-"macOS does not let fpdb read this folder:\n"
-"%s\n"
-"\n"
-"Allow the app that launches fpdb (your terminal, or fpdb itself) in System "
-"Settings > Privacy & Security > Full Disk Access, then restart fpdb. Until "
-"then, its hands cannot be imported."
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
 msgid "Site Preferences"
 msgstr ""
 
@@ -2795,12 +2855,6 @@ msgstr ""
 
 #: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
 msgid "Start capture"
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
-#: fpdb_3_legacy/session_guard_dialog.py
-msgid "Stop"
 msgstr ""
 
 #: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
@@ -3332,6 +3386,68 @@ msgid ""
 "%s"
 msgstr ""
 
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "This level"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "0.5x to 2x"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "0.33x to 3x"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "0.1x to 10x"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "All levels"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "Custom"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "Exact"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "All time"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "Last n days"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "Blinds"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "Period"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Seats"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "Opponents"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py fpdb_3_legacy/menu_layout.py
+msgid "HUD Options"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid ""
+"Used by tables opened from now on. Open tables keep their current options."
+msgstr ""
+
 #: fpdb_3_legacy/i18n.py
 msgid "Stack"
 msgstr ""
@@ -3458,6 +3574,10 @@ msgstr ""
 #: fpdb_3_legacy/menu_layout.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "HUD Preferences"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Choose the blinds, seats and period that new HUD tables start with"
 msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
@@ -4135,10 +4255,6 @@ msgid "Game"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Seats"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
 msgid "Players"
 msgstr ""
@@ -4431,10 +4547,6 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 msgid "Reset to 100% natural size"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-msgid "Close"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py

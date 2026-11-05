@@ -1257,6 +1257,12 @@ class ThemeManager:
             return
 
         try:
+            # This object may be older than the file: fpdb's dialogs save through
+            # configs of their own, and saving writes the whole document back.
+            if hasattr(self._config, "reload") and self._config.reload() is False:
+                log.warning("Theme not saved: the configuration file could not be read")
+                return
+
             # Save to general configuration dictionary
             if not hasattr(self._config, "general"):
                 self._config.general = {}
