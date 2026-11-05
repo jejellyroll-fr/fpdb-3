@@ -13,7 +13,7 @@ different definition says how. Nothing that does not translate is approximated s
 
 | PT4 stat | FPDB value | Status |
 |---|---|---|
-| VPIP | `(street0VPI / (street0VPIChance)) * 100` | translated: PT4's VPIP opportunity is every hand but a walk; fpdb's also leaves out a blind that folds or is all-in before acting. |
+| VPIP | `(street0VPI / (street0VPIChance)) * 100` | translated: PT4's VPIP opportunity is every hand but a walk; fpdb's also leaves out a blind that is all-in before acting, or folds without having called or raised. |
 | PFR | `(street0Aggr / street0AggrChance) * 100` | translated: PT4 counts a preflop raise opportunity from the player's preflop actions and stack; fpdb's street0AggrChance is any preflop decision with a raise still possible. |
 | 3Bet Preflop | `(street0_3BDone / street0_3BChance) * 100` | translated |
 | Fold to PF 3Bet | `(street0_FoldTo3BDone / street0_FoldTo3BChance) * 100` | translated |
