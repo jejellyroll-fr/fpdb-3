@@ -1423,6 +1423,10 @@
     "hand_count": 2,
     "sha256": "66a4ff7487d66d36a08dc25388ca04cd3c5be596d7507215b137d99ae32960ad"
   },
+  "regression/PacificPoker/Flop/PLO5-6max-USD-0.50-1-202611.five.hole.cards.txt": {
+    "hand_count": 1,
+    "sha256": "f58e2c338f5f321079aef825b40a13f4fe3a90cb4b901a25d1b59527a317b316"
+  },
   "regression/PartyPoker/Flop/LHE-6max-USD-15-30-201104.live.second.sb.txt": {
     "hand_count": 1,
     "sha256": "fb633c8746d8e0b50f3f6de8e6334bbcb6fef5996c8648250fdd6592da8e7ace"
