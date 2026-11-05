@@ -38,6 +38,7 @@ from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QVBoxLayout
 
 from fpdb_3_legacy import Configuration, Deck, Hud, Options, db_profile
 from fpdb_3_legacy.hud_diagnostics import (
+    HUD_CRASH_LOG_NAME,
     ROLE_HUD,
     enable_crash_log,
     format_identity,
@@ -288,11 +289,11 @@ class HudMain(
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
         log.info("HUD_main initialized - Config loaded, OS family: %s", self.config.os_family)
 
-        crash_log = enable_crash_log(self.config.dir_log)
+        crash_log = enable_crash_log(self.config.dir_log, HUD_CRASH_LOG_NAME)
         if crash_log is None:
-            log.warning("Cannot write a crash log in %s: a native crash will leave no trace.", self.config.dir_log)
+            log.warning("Cannot write a crash log in %s: a crash will leave no lasting trace.", self.config.dir_log)
         else:
-            log.info("A native crash will be recorded in %s.", crash_log)
+            log.info("Crashes and uncaught exceptions will be recorded in %s.", crash_log)
 
         # Selecting the right module for the OS. Imported through the package
         # rather than as bare top-level modules: a bare "import OSXTables" only
@@ -330,12 +331,16 @@ class HudMain(
         # Logging configuration
         if not options.errorsToConsole:
             log_dir = Path(self.config.dir_log)
-            log_dir.mkdir(exist_ok=True)
             file_name = log_dir / "HUD-errors.txt"
-            log.info("Note: error output is being diverted to %s.", file_name)
-            log.info("Any major error will be reported there *only*.")
-            error_file = file_name.open("w", encoding="utf-8")
-            sys.stderr = error_file
+            try:
+                log_dir.mkdir(exist_ok=True)
+                error_file = file_name.open("w", encoding="utf-8")
+            except OSError as e:
+                log.warning("Cannot write %s, error output stays on the console: %s", file_name, e)
+            else:
+                log.info("Note: error output is being diverted to %s.", file_name)
+                log.info("Any major error will be reported there *only*.")
+                sys.stderr = error_file
             log.info("HudMain starting")
 
         log.info("HudMain.__init__ starting")

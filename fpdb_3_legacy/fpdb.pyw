@@ -1626,7 +1626,11 @@ class fpdb(QMainWindow):
         # handlers and reopens the rotating log file, and load_profile() runs on
         # nearly every dialog the menus open.
         if self.config.dir_log != getattr(self, "_configured_log_dir", None):
-            setup_logging(log_dir=self.config.dir_log)
+            try:
+                setup_logging(log_dir=self.config.dir_log)
+            except OSError as e:
+                # setup_logging attaches the console handler first, so logging still works.
+                log.error(f"Cannot write logs in {self.config.dir_log}, logging to the console only: {e}")
             self._configured_log_dir = self.config.dir_log
             if options.log_level != "EMPTY":
                 level = getattr(logging, options.log_level)
@@ -2473,11 +2477,15 @@ class fpdb(QMainWindow):
 
         if not options.errorsToConsole:
             fileName = os.path.join(self.config.dir_log, "fpdb-errors.txt")
-            log.info(
-                f"Note: error output is being diverted to {self.config.dir_log}. Any major error will be reported there _only_.",
-            )
-            errorFile = codecs.open(fileName, "w", "utf-8")
-            sys.stderr = errorFile
+            try:
+                errorFile = codecs.open(fileName, "w", "utf-8")
+            except OSError as e:
+                log.error(f"Cannot write {fileName}, error output stays on the console: {e}")
+            else:
+                log.info(
+                    f"Note: error output is being diverted to {self.config.dir_log}. Any major error will be reported there _only_.",
+                )
+                sys.stderr = errorFile
 
         sys.stderr.write("fpdb starting ...")
 
@@ -2615,7 +2623,7 @@ def warn_if_app_translocated() -> bool:
 if __name__ == "__main__":
     import time
 
-    from fpdb_3_legacy.hud_diagnostics import ROLE_MAIN, log_process_identity
+    from fpdb_3_legacy.hud_diagnostics import MAIN_CRASH_LOG_NAME, ROLE_MAIN, enable_crash_log, log_process_identity
 
     # One banner per launch, before anything can fail: which build ran, from
     # where, as which process. The HUD child inherits this session id, so both
@@ -2636,6 +2644,13 @@ if __name__ == "__main__":
     except Exception as e:
         log.exception(f"Failed to initialize configuration: {e}")
         sys.exit(1)
+
+    # Before QApplication, so a crash while Qt starts is recorded too.
+    crash_log = enable_crash_log(config.dir_log, MAIN_CRASH_LOG_NAME)
+    if crash_log is None:
+        log.warning(f"Cannot write a crash log in {config.dir_log}: a crash will leave no lasting trace.")
+    else:
+        log.info(f"Crashes and uncaught exceptions will be recorded in {crash_log}.")
 
     try:
         app = QApplication([])

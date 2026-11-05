@@ -53,7 +53,7 @@ def app():
 
 
 @pytest.fixture
-def hud_main(app):
+def hud_main(app, request):
     # Crate mock
     options = MagicMock()
     options.dbname = "test_db"
@@ -80,7 +80,7 @@ def hud_main(app):
         mock_config_instance = MagicMock()
         mock_config.return_value = mock_config_instance
 
-        mock_config_instance.dir_log = tempfile.gettempdir()
+        mock_config_instance.dir_log = getattr(request, "param", tempfile.gettempdir())
         mock_config_instance.os_family = "Win7"
         mock_config_instance.get_hud_ui_parameters.return_value = {
             "deck_type": "default",
@@ -98,7 +98,10 @@ def hud_main(app):
         }
         mock_config_instance.get_layout.return_value = "some_layout"
 
+        stderr_before_init = sys.stderr
         hm = HUD_main.HudMain(options, db_name=options.dbname)
+        hm.stderr_before_init = stderr_before_init
+        hm.stderr_after_init = sys.stderr
         hm.enable_crash_log_mock = enable_crash_log
         # The focused HudMain tests exercise the legacy synchronous seam with a
         # controllable Database mock. Runtime construction uses HudReadWorker,
@@ -2149,7 +2152,12 @@ def test_hud_main_follows_the_theme_before_opening_its_window(hud_main) -> None:
 
 
 def test_hud_main_records_native_crashes_in_its_log_directory(hud_main) -> None:
-    hud_main.enable_crash_log_mock.assert_called_once_with(hud_main.config.dir_log)
+    hud_main.enable_crash_log_mock.assert_called_once_with(hud_main.config.dir_log, "HUD-crash.txt")
+
+
+@pytest.mark.parametrize("hud_main", [os.path.join(os.devnull, "log")], indirect=True)
+def test_a_log_directory_that_cannot_be_written_leaves_the_hud_running(hud_main) -> None:
+    assert hud_main.stderr_after_init is hud_main.stderr_before_init
 
 
 def test_an_unchanged_config_file_is_not_reloaded(hud_main, tmp_path) -> None:
