@@ -255,10 +255,9 @@ def enabled_log(tmp_path: Path, previous_hooks: tuple[MagicMock, MagicMock]) -> 
 
 
 def _raised(error: BaseException) -> tuple[type[BaseException], BaseException, object]:
-    try:
+    with contextlib.suppress(BaseException):
         raise error
-    except BaseException as caught:
-        return type(caught), caught, caught.__traceback__
+    return type(error), error, error.__traceback__
 
 
 def _thread_args(error: BaseException) -> threading.ExceptHookArgs:
