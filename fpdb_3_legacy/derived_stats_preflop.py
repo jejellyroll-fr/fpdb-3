@@ -34,6 +34,9 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("derived_stats")
 
+# The preflop actions that put money in the pot voluntarily.
+VPIP_ACTIONS = ("calls", "raises", "bets", "completes")
+
 
 class DerivedStatsPreflopMixin(DerivedStatsBase):
     """Calculate the preflop stats."""
@@ -41,7 +44,8 @@ class DerivedStatsPreflopMixin(DerivedStatsBase):
     def vpip(self, hand: Any) -> None:
         """Calculate VPIP (Voluntarily Put In Pot) for all players.
 
-        VPIP Opportunity: Player had a chance to act preflop (not all-in blind, didn't fold blinds)
+        VPIP Opportunity: Player had a chance to act preflop (not all-in blind, and not a
+        blind who folded without having put money in voluntarily)
         VPIP Done: Player voluntarily put money in pot (call/raise/bet/complete)
         """
         log.debug("Starting VPIP calculation for hand ID: %s", hand.handid)
@@ -75,7 +79,8 @@ class DerivedStatsPreflopMixin(DerivedStatsBase):
                 allin_blind_players.add(act[0])
         log.debug("vpip: All-in blind players: %s", allin_blind_players)
 
-        # Get players who folded their blinds (no VPIP opportunity).
+        # Get players who folded their blinds (no VPIP opportunity). A blind who
+        # called or raised before folding did not: that money went in voluntarily.
         #
         # Except in All-in or Fold, where folding from a blind is not giving up
         # a preflop the game does not have -- it is the one decision of the
@@ -85,10 +90,10 @@ class DerivedStatsPreflopMixin(DerivedStatsBase):
         # hands they declined.
         fold_blind_players = set()
         if not _is_all_in_or_fold(hand):
+            blind_players = {x[0] for x in blinds_antes_actions if x[1] in ["small blind", "big blind"]}
+            voluntary_players = {act[0] for act in preflop_actions if act[1] in VPIP_ACTIONS}
             for act in preflop_actions:
-                if act[1] == "folds" and act[0] in [
-                    x[0] for x in blinds_antes_actions if x[1] in ["small blind", "big blind"]
-                ]:
+                if act[1] == "folds" and act[0] in blind_players - voluntary_players:
                     fold_blind_players.add(act[0])
         log.debug("vpip: Fold blind players: %s", fold_blind_players)
 
@@ -118,9 +123,7 @@ class DerivedStatsPreflopMixin(DerivedStatsBase):
 
                 # Check if they voluntarily put money in pot
                 # For Stud, 'completes' is a voluntary action like calls/raises/bets
-                vpip_action = any(
-                    act[0] == p and act[1] in ["calls", "raises", "bets", "completes"] for act in preflop_actions
-                )
+                vpip_action = any(act[0] == p and act[1] in VPIP_ACTIONS for act in preflop_actions)
                 log.debug("vpip: Player %s had VPIP action: %s", p, vpip_action)
                 if vpip_action:
                     log.debug("vpip: Setting street0VPI=True for player %s", p)
