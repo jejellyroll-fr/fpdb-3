@@ -74,6 +74,8 @@ def hud_main(app):
         patch("HUD_main.ZMQWorker"),
         patch("sys.exit"),
         patch("HUD_main.QCoreApplication.quit"),
+        # It would take the crash reports of the whole test run away from pytest.
+        patch("HUD_main.enable_crash_log") as enable_crash_log,
     ):
         mock_config_instance = MagicMock()
         mock_config.return_value = mock_config_instance
@@ -97,6 +99,7 @@ def hud_main(app):
         mock_config_instance.get_layout.return_value = "some_layout"
 
         hm = HUD_main.HudMain(options, db_name=options.dbname)
+        hm.enable_crash_log_mock = enable_crash_log
         # The focused HudMain tests exercise the legacy synchronous seam with a
         # controllable Database mock. Runtime construction uses HudReadWorker,
         # whose connection intentionally lives on its own thread.
@@ -2143,6 +2146,10 @@ def test_hud_main_follows_the_theme_before_opening_its_window(hud_main) -> None:
     from fpdb_3_legacy.ThemeManager import ThemeManager
 
     assert hud_main._theme_manager is ThemeManager()
+
+
+def test_hud_main_records_native_crashes_in_its_log_directory(hud_main) -> None:
+    hud_main.enable_crash_log_mock.assert_called_once_with(hud_main.config.dir_log)
 
 
 def test_an_unchanged_config_file_is_not_reloaded(hud_main, tmp_path) -> None:

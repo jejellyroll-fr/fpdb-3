@@ -37,7 +37,13 @@ from PySide6.QtGui import QCloseEvent, QIcon
 from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QVBoxLayout
 
 from fpdb_3_legacy import Configuration, Deck, Hud, Options, db_profile
-from fpdb_3_legacy.hud_diagnostics import ROLE_HUD, format_identity, log_process_identity, session_id
+from fpdb_3_legacy.hud_diagnostics import (
+    ROLE_HUD,
+    enable_crash_log,
+    format_identity,
+    log_process_identity,
+    session_id,
+)
 from fpdb_3_legacy.hud_main_db import HudMainDbMixin
 from fpdb_3_legacy.hud_main_fast_fold import HudMainFastFoldMixin
 from fpdb_3_legacy.hud_main_huds import HudMainHudsMixin
@@ -281,6 +287,12 @@ class HudMain(
 
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
         log.info("HUD_main initialized - Config loaded, OS family: %s", self.config.os_family)
+
+        crash_log = enable_crash_log(self.config.dir_log)
+        if crash_log is None:
+            log.warning("Cannot write a crash log in %s: a native crash will leave no trace.", self.config.dir_log)
+        else:
+            log.info("A native crash will be recorded in %s.", crash_log)
 
         # Selecting the right module for the OS. Imported through the package
         # rather than as bare top-level modules: a bare "import OSXTables" only
