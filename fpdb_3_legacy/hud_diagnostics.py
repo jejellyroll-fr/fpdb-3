@@ -15,9 +15,11 @@ by session" a grep rather than a guess.
 
 from __future__ import annotations
 
+import faulthandler
 import os
 import sys
 import uuid
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -32,6 +34,9 @@ SESSION_ENV_VAR = "FPDB_SESSION_ID"
 #: Values accepted for the ``role`` field of an identity banner.
 ROLE_MAIN = "main"
 ROLE_HUD = "hud"
+
+#: Where the HUD writes the stacks of a native crash.
+CRASH_LOG_NAME = "HUD-crash.txt"
 
 
 def session_id() -> str:
@@ -114,6 +119,33 @@ def process_identity(role: str, command: list[str] | None = None) -> dict[str, A
 def format_identity(identity: dict[str, Any]) -> str:
     """Render an identity mapping as one greppable line."""
     return " ".join(f"{key}={value!r}" for key, value in identity.items())
+
+
+def enable_crash_log(log_dir: str | os.PathLike[str]) -> Path | None:
+    """Have a native crash write the stack of every thread to a file.
+
+    A crash inside Qt raises no Python exception and bypasses ``sys.stderr``, so
+    nothing else records it. The file is appended to because the player restarts
+    the HUD right after a crash, and a file truncated on start would lose it. The
+    line written here dates the crash that may follow it.
+
+    Args:
+        log_dir: The directory of the log files.
+
+    Returns:
+        The file in use, or None if it cannot be written: the HUD runs without it.
+    """
+    path = Path(log_dir) / CRASH_LOG_NAME
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        # faulthandler keeps the file open until the process ends.
+        crash_log = path.open("a", encoding="utf-8")
+        crash_log.write(f"--- started {datetime.now():%Y-%m-%d %H:%M:%S} pid={os.getpid()} session={session_id()}\n")
+        crash_log.flush()
+        faulthandler.enable(file=crash_log, all_threads=True)
+    except OSError:
+        return None
+    return path
 
 
 class _WarningLog(Protocol):

@@ -7,17 +7,23 @@ each absence turned a five-minute answer into a day of inference.
 
 from __future__ import annotations
 
+import faulthandler
 import logging
+import multiprocessing
 import os
+from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
 from fpdb_3_legacy import hud_diagnostics
 from fpdb_3_legacy.hud_diagnostics import (
+    CRASH_LOG_NAME,
     ROLE_HUD,
     ROLE_MAIN,
     SESSION_ENV_VAR,
     bundle_path,
+    enable_crash_log,
     format_identity,
     is_app_translocated,
     log_process_identity,
@@ -156,3 +162,47 @@ def test_json_log_records_carry_the_session_and_pid() -> None:
     assert payload["session"] == session_id()
     assert payload["pid"] == os.getpid()
     assert payload["message"] == "HUD created"
+
+
+def _crash_with_the_log_enabled(log_dir: str) -> None:
+    enable_crash_log(log_dir)
+    faulthandler._sigsegv()
+
+
+def test_a_native_crash_writes_its_stack_to_the_crash_log(tmp_path: Path) -> None:
+    # In a process of its own: the crash is real, and enabling the log here would
+    # take this test run's own crash reports away from pytest.
+    crashing = multiprocessing.get_context("spawn").Process(target=_crash_with_the_log_enabled, args=(str(tmp_path),))
+    crashing.start()
+    crashing.join(120)
+
+    assert crashing.exitcode not in (None, 0)
+    written = (tmp_path / CRASH_LOG_NAME).read_text(encoding="utf-8")
+    assert "--- started " in written
+    assert "Segmentation fault" in written
+    assert "_crash_with_the_log_enabled" in written
+
+
+def test_starting_again_keeps_the_stack_of_the_previous_crash(tmp_path: Path) -> None:
+    (tmp_path / CRASH_LOG_NAME).write_text("the previous crash\n", encoding="utf-8")
+
+    with patch.object(hud_diagnostics.faulthandler, "enable") as enable:
+        assert enable_crash_log(tmp_path) == tmp_path / CRASH_LOG_NAME
+    crash_log = enable.call_args.kwargs["file"]
+    crash_log.close()
+
+    assert enable.call_args.kwargs["all_threads"] is True
+    lines = (tmp_path / CRASH_LOG_NAME).read_text(encoding="utf-8").splitlines()
+    assert lines[0] == "the previous crash"
+    assert lines[1].startswith("--- started ")
+    assert f"pid={os.getpid()}" in lines[1]
+
+
+def test_a_log_directory_that_cannot_be_written_does_not_stop_the_hud(tmp_path: Path) -> None:
+    not_a_directory = tmp_path / "a_file"
+    not_a_directory.write_text("", encoding="utf-8")
+
+    with patch.object(hud_diagnostics.faulthandler, "enable") as enable:
+        assert enable_crash_log(not_a_directory / "log") is None
+
+    enable.assert_not_called()
