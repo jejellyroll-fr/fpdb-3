@@ -96,4 +96,4 @@ def test_the_scan_previews_what_the_import_records(legacy_config) -> None:
     scan = scan_folder(legacy_config, str(EXPORT))
 
     assert {room: len(files) for room, files in scan.rooms.items()} == dict.fromkeys(ROOMS.values(), 1)
-    assert scan.unsupported == []
+    assert not scan.unsupported
