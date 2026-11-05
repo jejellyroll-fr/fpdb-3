@@ -217,7 +217,7 @@ class DatabaseConnectionMixin:
         # empty body as a method that returns nothing.
         close_worker_pool: Callable[..., None]
         connect: Callable[..., None]
-        ensure_feature_tables: Callable[..., None]
+        ensure_feature_tables_on_connect: Callable[..., None]
         get_cursor: Callable[..., Any]
         get_sites: Callable[..., None]
         recreate_tables: Callable[..., None]
@@ -275,7 +275,7 @@ class DatabaseConnectionMixin:
         elif self.is_connected():
             # Create feature tables added after the original schema so that
             # existing databases keep working (showdown / cashout details).
-            self.ensure_feature_tables()
+            self.ensure_feature_tables_on_connect()
 
         self.gtcache: Any = None  # GameTypeId cache
         self.tcache: Any = None  # TourneyId cache

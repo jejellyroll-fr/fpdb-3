@@ -195,6 +195,7 @@ class DatabaseSchemaMixin(DatabaseMigrationsMixin, DatabaseIndexesMixin):
         from fpdb_3_legacy import dialects
 
         dialects.dialect_for_backend(self.backend).drop_all_tables(self)
+        self.forget_feature_tables_check()
 
     # end def drop_tables
 

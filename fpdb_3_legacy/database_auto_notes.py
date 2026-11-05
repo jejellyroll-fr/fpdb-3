@@ -7,7 +7,7 @@ holds the notes the rule engine generates about players, keyed by rule and hand.
 from __future__ import annotations
 
 import json
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from typing import TYPE_CHECKING, Any
 
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -27,6 +27,7 @@ class DatabaseAutoNotesMixin:
     panbulk: list[Any]
 
     if TYPE_CHECKING:
+        _in_tuple: Callable[[list], tuple[str, list]]
 
         def get_cursor(self, connect: bool = False) -> Any: ...
 
@@ -313,6 +314,26 @@ class DatabaseAutoNotesMixin:
         if not filters:
             return query, params
         return query.replace("/*AUTONOTE_FILTERS*/", " where " + " and ".join(filters)), params
+
+    def players_with_notes(self, player_ids: Iterable[int]) -> set[int]:
+        """Which of these players have manual or generated notes, in one statement.
+
+        Runs on the HUD's read worker, so the note cell of each seat can be drawn
+        without a database round trip on the Qt thread (#680). A failed lookup
+        reads as no notes: the marker is cosmetic and comes back on the next hand.
+        """
+        ids = list(dict.fromkeys(player_ids))
+        if not ids:
+            return set()
+        in_sql, in_params = self._in_tuple(ids)
+        try:
+            c = self.get_cursor()
+            c.execute(self.sql.query["players_with_any_notes"].replace("<ids>", in_sql), in_params * 2)  # nosemgrep
+            return {row[0] for row in c.fetchall()}
+        except Exception:  # noqa: BLE001 - DB-API drivers expose different exception hierarchies.
+            log.warning("Unable to read which players have notes", exc_info=True)
+            self.rollback()
+            return set()
 
     def playerHasNotes(self, player_id: int) -> bool:
         """Return true when a player has manual or generated notes."""
