@@ -708,7 +708,7 @@ class DatabaseTournamentsMixin:
         if updateDb:
             self.commit()
     def createOrUpdateTourneysPlayers(self, summary) -> None:
-        tourneysPlayersIds, inserts, updates = {}, [], []
+        tourneys_players_ids, inserts, updates = {}, [], []
         cursor = self.get_cursor()
         cursor.execute(
             self.sql.query["getTourneysPlayersByTourney"].replace(
@@ -717,11 +717,11 @@ class DatabaseTournamentsMixin:
             ),
             (summary.tourneyId,),
         )
-        columnNames = [desc[0] for desc in cursor.description]
-        lowerNames = [name.lower() for name in columnNames]
-        playerColumn, entryColumn = lowerNames.index("playerid"), lowerNames.index("entryid")
+        column_names = [desc[0] for desc in cursor.description]
+        lower_names = [name.lower() for name in column_names]
+        player_column, entry_column = lower_names.index("playerid"), lower_names.index("entryid")
         # One read for the whole tournament: a large field would pay one per entrant (#705).
-        stored = {(row[playerColumn], row[entryColumn]): row for row in cursor.fetchall()}
+        stored = {(row[player_column], row[entry_column]): row for row in cursor.fetchall()}
         for player, entries in list(summary.players.items()):
             playerId = summary.playerIds[player]
             for entryIdx in range(len(entries)):
@@ -749,20 +749,20 @@ class DatabaseTournamentsMixin:
                             ("koWinnings", "koWinnings"),
                         )
                     updateDb = False
-                    resultDict = dict(list(zip(columnNames, result, strict=False)))
-                    tourneysPlayersIds[(player, entryId)] = result[0]
+                    result_dict = dict(list(zip(column_names, result, strict=False)))
+                    tourneys_players_ids[(player, entryId)] = result[0]
                     for ev in expectedValues:
                         summaryAttribute = ev[0]
                         if ev[0] not in ("winnings", "winningsCurrency", "koWinnings"):
                             summaryAttribute += "s"
                         summaryDict = getattr(summary, summaryAttribute)
                         if (
-                            summaryDict[player][entryIdx] is None and resultDict[ev[1]] is not None
+                            summaryDict[player][entryIdx] is None and result_dict[ev[1]] is not None
                         ):  # DB has this value but object doesnt, so update object
-                            summaryDict[player][entryIdx] = resultDict[ev[1]]
+                            summaryDict[player][entryIdx] = result_dict[ev[1]]
                             setattr(summary, summaryAttribute, summaryDict)
                         elif (
-                            summaryDict[player][entryIdx] is not None and not resultDict[ev[1]]
+                            summaryDict[player][entryIdx] is not None and not result_dict[ev[1]]
                         ):  # object has this value but DB doesnt, so update DB
                             updateDb = True
                     if updateDb:
@@ -774,7 +774,7 @@ class DatabaseTournamentsMixin:
                             summary.addOnCounts[player][entryIdx],
                             summary.koCounts[player][entryIdx],
                             summary.koWinnings[player][entryIdx],
-                            tourneysPlayersIds[(player, entryId)],
+                            tourneys_players_ids[(player, entryId)],
                         ))
                 else:
                     inserts.append(
