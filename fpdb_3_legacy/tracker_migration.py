@@ -15,6 +15,7 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
+from fpdb_3_legacy import ipoker_rooms
 from fpdb_3_legacy.i18n import N_
 
 __all__ = [
@@ -81,6 +82,7 @@ class ExportScan:
     rooms: dict[str, list[str]] = field(default_factory=dict)  # room -> files
     heroes: dict[str, set[str]] = field(default_factory=dict)  # room -> hero names seen in the files
     unsupported: list[str] = field(default_factory=list)  # files no parser recognises
+    undecided: dict[str, list[str]] = field(default_factory=dict)  # iPoker hero -> files only the user can place
 
     @property
     def file_count(self) -> int:
@@ -98,7 +100,7 @@ def _candidate_files(folder: str) -> Iterable[str]:
 
 
 # PokerTracker's own export format carries hands of several rooms. IdentifySite
-# names them "PokerTracker", or an iPoker skin whenever "GAME #" appears -- Merge's
+# names them "PokerTracker", or an iPoker room whenever "GAME #" appears -- Merge's
 # "MERGE_GAME #" included -- and leaves the room to the parser, which reads it
 # from the hand header. The scan reads it the same way, so preview and import agree.
 # A tournament summary needs none of this: IdentifySite reads the room it names.
@@ -158,6 +160,12 @@ def scan_folder(config: Any, folder: str, identifier: Any = None) -> ExportScan:
         if site is None:
             scan.unsupported.append(path)
             continue
+        undecided = getattr(found, "undecided_hero", None)
+        if isinstance(undecided, str):
+            # Shown under the network until the user has placed them: whatever
+            # room the identification fell back on is not a finding.
+            site = ipoker_rooms.GENERIC_ROOM
+            scan.undecided.setdefault(undecided, []).append(path)
         scan.rooms.setdefault(site, []).append(path)
         hero = getattr(found, "hero", "-")
         if hero and hero not in ("-", "Hero"):

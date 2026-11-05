@@ -23,7 +23,7 @@ import re
 from decimal import Decimal
 from typing import Any, ClassVar
 
-from fpdb_3_legacy import MergeStructures
+from fpdb_3_legacy import MergeStructures, ipoker_rooms
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -42,6 +42,7 @@ class PokerTracker(HandHistoryConverter):
     # Placeholders only: determineGameType reads each hand's room from its header
     # (the ``sites`` table below) and raises FpdbParseError when it knows none,
     # so no hand is ever filed under these (#617, tests/test_pokertracker_rooms.py).
+    # The header names the iPoker network, not a skin: see ipoker_rooms (#702).
     sitename = "iPoker"
     filetype = "text"
     codepage = ("utf8", "cp1252")
@@ -365,141 +366,9 @@ class PokerTracker(HandHistoryConverter):
     def compilePlayerRegexs(self, hand) -> None:
         pass
 
-    def detectiPokerSkin(self, handText):
-        """Detect specific iPoker skin from the table name, the only part a player cannot name."""
-        # Extract table name from hand text
-        table_pattern = r"^Table\s+(?!Info:|Size\s)(.+?)(?:,|$)"
-        table_match = re.search(table_pattern, handText, re.MULTILINE)
-        table_name = table_match.group(1) if table_match else ""
-
-        log.debug(f"Detected table name: {table_name}")
-
-        # Map of indicators to skin names (must match Sites table)
-        skin_mapping = {
-            "redbet": "Redbet Poker",
-            "pmu": "PMU Poker",
-            "fdj": "FDJ Poker",
-            "betclic": "Betclic Poker",
-            "netbet": "NetBet Poker",
-            "poker770": "Poker770",
-            "barriere": "Barrière Poker",
-            "titan": "Titan Poker",
-            "bet365": "Bet365 Poker",
-            "william hill": "William Hill Poker",
-            "williamhill": "William Hill Poker",
-            "paddy power": "Paddy Power Poker",
-            "paddypower": "Paddy Power Poker",
-            "betfair": "Betfair Poker",
-            "coral": "Coral Poker",
-            "genting": "Genting Poker",
-            "mansion": "Mansion Poker",
-            "winner": "Winner Poker",
-            "ladbrokes": "Ladbrokes Poker",
-            "sky": "Sky Poker",
-            "sisal": "Sisal Poker",
-            "lottomatica": "Lottomatica Poker",
-            "eurobet": "Eurobet Poker",
-            "snai": "Snai Poker",
-            "goldbet": "Goldbet Poker",
-            "casino barcelona": "Casino Barcelona Poker",
-            "sportium": "Sportium Poker",
-            "marca": "Marca Apuestas Poker",
-            "everest": "Everest Poker",
-            "bet-at-home": "Bet-at-home Poker",
-            "mybet": "Mybet Poker",
-            "betsson": "Betsson Poker",
-            "betsafe": "Betsafe Poker",
-            "nordicbet": "NordicBet Poker",
-            "unibet": "Unibet Poker",
-            "maria": "Maria Casino Poker",
-            "leovegas": "LeoVegas Poker",
-            "mr green": "Mr Green Poker",
-            "expekt": "Expekt Poker",
-            "coolbet": "Coolbet Poker",
-            "chilipoker": "Chilipoker",
-            "dafa": "Dafa Poker",
-            "dafabet": "Dafabet Poker",
-            "fun88": "Fun88 Poker",
-            "betfred": "Betfred Poker",
-            "guts": "Guts Poker",
-            "sportingbet": "Sportingbet Poker",
-            "multipoker": "MultiPoker",
-            "red star": "Red Star Poker",
-            "redstar": "Red Star Poker",
-        }
-
-        # Check the table name for skin indicators
-        search_text = table_name.lower()
-
-        # Specific patterns for French sites
-        if any(indicator in search_text for indicator in ["saratov", "scone", "moscow"]):
-            # These table name patterns are typical of FDJ Poker
-            log.debug("Detected FDJ Poker based on table name pattern")
-            return "FDJ Poker"
-
-        # Check each mapping
-        for indicator, skin_name in skin_mapping.items():
-            if indicator in search_text:
-                log.debug(f"Detected iPoker skin: {skin_name} from indicator: {indicator}")
-                return skin_name
-
-        # Default to generic iPoker if no specific skin detected
-        log.debug("No specific iPoker skin detected, using default 'iPoker'")
-        return "iPoker"
-
     def is_ipoker_skin(self):
-        """Check if current sitename is an iPoker skin."""
-        ipoker_skins = {
-            "iPoker",
-            "FDJ Poker",
-            "Redbet Poker",
-            "PMU Poker",
-            "Betclic Poker",
-            "NetBet Poker",
-            "Poker770",
-            "Barrière Poker",
-            "Titan Poker",
-            "Bet365 Poker",
-            "William Hill Poker",
-            "Paddy Power Poker",
-            "Betfair Poker",
-            "Coral Poker",
-            "Genting Poker",
-            "Mansion Poker",
-            "Winner Poker",
-            "Ladbrokes Poker",
-            "Sky Poker",
-            "Sisal Poker",
-            "Lottomatica Poker",
-            "Eurobet Poker",
-            "Snai Poker",
-            "Goldbet Poker",
-            "Casino Barcelona Poker",
-            "Sportium Poker",
-            "Marca Apuestas Poker",
-            "Everest Poker",
-            "Bet-at-home Poker",
-            "Mybet Poker",
-            "Betsson Poker",
-            "Betsafe Poker",
-            "NordicBet Poker",
-            "Unibet Poker",
-            "Maria Casino Poker",
-            "LeoVegas Poker",
-            "Mr Green Poker",
-            "Expekt Poker",
-            "Coolbet Poker",
-            "Chilipoker",
-            "Dafa Poker",
-            "Dafabet Poker",
-            "Fun88 Poker",
-            "Betfred Poker",
-            "Guts Poker",
-            "Sportingbet Poker",
-            "MultiPoker",
-            "Red Star Poker",
-        }
-        return self.sitename in ipoker_skins
+        """Check if the current hand is on the iPoker network, whichever room it is filed under."""
+        return self.sitename == ipoker_rooms.GENERIC_ROOM or ipoker_rooms.is_room(self.config, self.sitename)
 
     def readSupportedGames(self):
         return [
@@ -518,15 +387,10 @@ class PokerTracker(HandHistoryConverter):
             log.error(f"determine Game Type failed: '{tmp}'")
             raise FpdbParseError
 
-        self.sitename = self.sites[m.group("SITE")][0]
-        self.site_id = self.sites[m.group("SITE")][1]  # Needs to match id entry in Sites database
-
-        # Detect iPoker skin from table name or hand text
-        if self.sitename == "iPoker":
-            detected_skin = self.detectiPokerSkin(handText)
-            if detected_skin != "iPoker":
-                self.sitename = detected_skin
-                log.debug(f"Detected iPoker skin: {self.sitename}")
+        room, self.site_id = self.sites[m.group("SITE")]  # site_id needs to match id entry in Sites database
+        # The header stops at the network: an iPoker hand keeps the room IdentifySite gave it (#702).
+        if room != ipoker_rooms.GENERIC_ROOM or not self.is_ipoker_skin():
+            self.sitename = room
 
         info: dict[str, Any] = {}
         if self.is_ipoker_skin() or self.sitename == "Merge":

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 10:16+0100\n"
+"POT-Creation-Date: 2026-11-05 14:27+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -2763,6 +2763,11 @@ msgid "Another import is running. Try again once it has finished."
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+#, fuzzy
+msgid "Choose a room…"
+msgstr "Kezek kiválasztása…"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Choose the folder holding the hand histories"
 msgstr ""
 
@@ -2858,6 +2863,13 @@ msgstr ""
 msgid ""
 "Stats, the HUD and player notes are not part of this import; see the "
 "migration guide in the docs."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid ""
+"The files do not say which iPoker room these names played on. Choose the "
+"room of each one. Setting the name as that room's screen name in Configure > "
+"Site Settings spares you this question."
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py

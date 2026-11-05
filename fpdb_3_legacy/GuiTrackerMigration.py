@@ -17,7 +17,9 @@ from typing import Any
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import (
     QButtonGroup,
+    QComboBox,
     QFileDialog,
+    QFormLayout,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -33,7 +35,7 @@ from PySide6.QtWidgets import (
     QWizardPage,
 )
 
-from fpdb_3_legacy import tracker_migration
+from fpdb_3_legacy import ipoker_rooms, tracker_migration
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.tracker_migration import TRACKERS, ExportScan, RoomSummary
@@ -152,6 +154,18 @@ class ScanPage(QWizardPage):
         layout.addWidget(self.status)
         self.rooms = _table([_("Room"), _("Files"), _("Hero in the files"), _("Hero in fpdb")])
         layout.addWidget(self.rooms)
+        self.room_question = QLabel(
+            _(
+                "The files do not say which iPoker room these names played on. Choose the room of each one. "
+                "Setting the name as that room's screen name in Configure > Site Settings spares you this question."
+            )
+        )
+        self.room_question.setWordWrap(True)
+        self.room_question.hide()
+        layout.addWidget(self.room_question)
+        self.room_answers = QFormLayout()
+        layout.addLayout(self.room_answers)
+        self.room_choices: dict[str, QComboBox] = {}
         self.unsupported_label = QLabel()
         self.unsupported_label.setWordWrap(True)
         layout.addWidget(self.unsupported_label)
@@ -161,6 +175,7 @@ class ScanPage(QWizardPage):
     def initializePage(self) -> None:
         self.scan = None
         _fill(self.rooms, [])
+        self._ask_rooms([])
         self.unsupported.clear()
         self.unsupported_label.clear()
         self.status.setText(_("Reading the folder…"))
@@ -209,6 +224,26 @@ class ScanPage(QWizardPage):
             self.running.remove(thread)
             adopt_orphaned_import(thread, lambda: None)  # nothing to clean up: a scan only reads
 
+    def _ask_rooms(self, heroes: list[str]) -> None:
+        """Ask which room each of these iPoker heroes played on; nobody is placed by default."""
+        while self.room_answers.rowCount():
+            self.room_answers.removeRow(0)
+        self.room_choices = {}
+        self.room_question.setVisible(bool(heroes))
+        rooms = ipoker_rooms.room_choices(self.config)
+        for hero in heroes:
+            choice = QComboBox()
+            choice.addItem(_("Choose a room…"), None)
+            for room in rooms:
+                choice.addItem(room, room)
+            choice.currentIndexChanged.connect(self.completeChanged)
+            self.room_answers.addRow(hero, choice)
+            self.room_choices[hero] = choice
+
+    def chosen_rooms(self) -> dict[str, str]:
+        """The room the user chose for each iPoker hero the configuration could not place."""
+        return {hero: choice.currentData() for hero, choice in self.room_choices.items() if choice.currentData()}
+
     def show_scan(self, scan: ExportScan) -> None:
         self.scan = scan
         rows = []
@@ -217,9 +252,12 @@ class ScanPage(QWizardPage):
             seen = ", ".join(sorted(scan.heroes.get(site, set()))) or "—"
             configured = tracker_migration.configured_hero(self.config, site)
             rows.append([site, str(len(scan.rooms[site])), seen, configured or _("not set")])
+            if site == ipoker_rooms.GENERIC_ROOM and scan.undecided:
+                continue  # the question below settles these; there is no screen name to set for "iPoker"
             if configured is None or (scan.heroes.get(site) and configured not in scan.heroes[site]):
                 warnings.append(site)
         _fill(self.rooms, rows)
+        self._ask_rooms(sorted(scan.undecided, key=str.casefold))
         if not scan.rooms:
             self.status.setText(_("No hand history fpdb can read was found in this folder."))
         else:
@@ -244,7 +282,11 @@ class ScanPage(QWizardPage):
         self.completeChanged.emit()
 
     def isComplete(self) -> bool:
-        return self.scan is not None and self.scan.file_count > 0
+        return (
+            self.scan is not None
+            and self.scan.file_count > 0
+            and len(self.chosen_rooms()) == len(self.room_choices)
+        )
 
 
 class ImportPage(QWizardPage):
@@ -376,6 +418,7 @@ class GuiTrackerMigration(QWizard):
         # Read the tracker's archive, never move it.
         importer.setMoveImportedFiles(False)
         importer.setMoveFailedFiles(False)
+        importer.setIpokerRooms(self.scan_page.chosen_rooms())
         self.button(QWizard.WizardButton.BackButton).setEnabled(False)
         # Exactly the files the preview showed: walking the folder again would also take
         # what the scan leaves out on purpose (symlinks, which can point outside the archive).

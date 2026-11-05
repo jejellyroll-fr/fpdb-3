@@ -666,6 +666,10 @@ class Importer:
     #   def setWatchTime(self):
     #       self.updated = time()
 
+    def setIpokerRooms(self, rooms: dict[str, str]) -> None:
+        """Set the room the user chose for each iPoker hero nothing else could place (#702)."""
+        self.idsite.choose_ipoker_rooms(rooms)
+
     def clearFileList(self) -> None:
         """Clear all tracked file lists and related state.
 

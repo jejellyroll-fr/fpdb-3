@@ -19,10 +19,12 @@ import copy
 import os
 import re
 import sys
+from collections.abc import Mapping
 from time import time
+from types import MappingProxyType
 from typing import Any
 
-from fpdb_3_legacy import Configuration
+from fpdb_3_legacy import Configuration, ipoker_rooms
 from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter, unpack_sqlite_hand_history
 from fpdb_3_legacy.import_failure_cache import FailureCache, is_sidecar_file
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -57,6 +59,7 @@ re_Divider["Fulltilt"] = re.compile(r"\*{20}\s#\s\d+\s\*{15,25}\s?", re.MULTILIN
 re_Head["Fulltilt"] = re.compile(r"^((BEGIN)?\n)?FullTiltPoker.+\n\nSeat", re.MULTILINE)
 re_XLS["PokerStars"] = re.compile(r"Tournaments\splayed\sby\s\'.+?\'")
 re_XLS["Fulltilt"] = re.compile(r"Player\sTournament\sReport\sfor\s.+?\s\(.*\)")
+re_iPokerNickname = re.compile(r"<nickname>([^<]+)</nickname>")
 
 
 class FPDBFile:
@@ -71,6 +74,7 @@ class FPDBFile:
         self.gametype: object = False
         self.hero = "-"
         self.fileId: int | None = None
+        self.undecided_hero: str | None = None  # an iPoker hero whose room only the user can tell (#702)
 
 
 class Site:
@@ -151,6 +155,9 @@ class Site:
 
 
 class IdentifySite:
+    # The room the user chose for each iPoker hero nothing else could place (#702).
+    chosen_ipoker_rooms: Mapping[str, str] = MappingProxyType({})
+
     def __init__(self, config: Any, hhcs: Any = None) -> None:
         self.config = config
         self.codepage = ("utf8", "cp1252", "ISO-8859-1")
@@ -168,88 +175,6 @@ class IdentifySite:
     def remember_failure(self, path) -> None:
         """Record that `path` failed as it currently stands."""
         self.failed_files.remember(path)
-
-    def detectiPokerSkin(self, handText):
-        """Detect specific iPoker skin from the table name, the only part a player cannot name."""
-        # Extract table name from hand text
-        table_pattern = r"^Table\s+(?!Info:|Size\s)(.+?)(?:,|$)"
-        table_match = re.search(table_pattern, handText, re.MULTILINE)
-        table_name = table_match.group(1) if table_match else ""
-
-        log.debug(f"Detected table name: {table_name}")
-
-        # Map of indicators to skin names (must match Sites table)
-        skin_mapping = {
-            "redbet": "Redbet Poker",
-            "pmu": "PMU Poker",
-            "fdj": "FDJ Poker",
-            "betclic": "Betclic Poker",
-            "netbet": "NetBet Poker",
-            "poker770": "Poker770",
-            "barriere": "Barrière Poker",
-            "titan": "Titan Poker",
-            "bet365": "Bet365 Poker",
-            "william hill": "William Hill Poker",
-            "williamhill": "William Hill Poker",
-            "paddy power": "Paddy Power Poker",
-            "paddypower": "Paddy Power Poker",
-            "betfair": "Betfair Poker",
-            "coral": "Coral Poker",
-            "genting": "Genting Poker",
-            "mansion": "Mansion Poker",
-            "winner": "Winner Poker",
-            "ladbrokes": "Ladbrokes Poker",
-            "sky": "Sky Poker",
-            "sisal": "Sisal Poker",
-            "lottomatica": "Lottomatica Poker",
-            "eurobet": "Eurobet Poker",
-            "snai": "Snai Poker",
-            "goldbet": "Goldbet Poker",
-            "casino barcelona": "Casino Barcelona Poker",
-            "sportium": "Sportium Poker",
-            "marca": "Marca Apuestas Poker",
-            "everest": "Everest Poker",
-            "bet-at-home": "Bet-at-home Poker",
-            "mybet": "Mybet Poker",
-            "betsson": "Betsson Poker",
-            "betsafe": "Betsafe Poker",
-            "nordicbet": "NordicBet Poker",
-            "unibet": "Unibet Poker",
-            "maria": "Maria Casino Poker",
-            "leovegas": "LeoVegas Poker",
-            "mr green": "Mr Green Poker",
-            "expekt": "Expekt Poker",
-            "coolbet": "Coolbet Poker",
-            "chilipoker": "Chilipoker",
-            "dafa": "Dafa Poker",
-            "dafabet": "Dafabet Poker",
-            "fun88": "Fun88 Poker",
-            "betfred": "Betfred Poker",
-            "guts": "Guts Poker",
-            "sportingbet": "Sportingbet Poker",
-            "multipoker": "MultiPoker",
-            "red star": "Red Star Poker",
-            "redstar": "Red Star Poker",
-        }
-
-        # Check the table name for skin indicators
-        search_text = table_name.lower()
-
-        # Specific patterns for French sites
-        if any(indicator in search_text for indicator in ["saratov", "scone", "moscow"]):
-            # These table name patterns are typical of FDJ Poker
-            log.debug("Detected FDJ Poker based on table name pattern")
-            return "FDJ Poker"
-
-        # Check each mapping
-        for indicator, skin_name in skin_mapping.items():
-            if indicator in search_text:
-                log.debug(f"Detected iPoker skin: {skin_name} from indicator: {indicator}")
-                return skin_name
-
-        # Default to generic iPoker if no specific skin detected
-        log.debug("No specific iPoker skin detected, using default 'iPoker'")
-        return "iPoker"
 
     def _select_pokerstars_skin_site(self, path, whole_file, fallback_site):
         """Return the configured PokerStars skin site for this file."""
@@ -279,7 +204,15 @@ class IdentifySite:
         """
         return self._select_network_skin_site(path, fallback_site, "WinningPoker")
 
-    def _select_ipoker_skin_site(self, path, fallback_site):
+    def choose_ipoker_rooms(self, rooms: Mapping[str, str]) -> None:
+        """File each of these iPoker heroes under the room the user chose for them.
+
+        Files already identified were placed without these answers, so they are forgotten.
+        """
+        self.chosen_ipoker_rooms = dict(rooms)
+        self.clear_filelist()
+
+    def _select_ipoker_skin_site(self, path, fallback_site, whole_file=""):
         """Return the configured iPoker skin site for this file.
 
         All iPoker skins share the iPoker parser class, so only one survives
@@ -287,9 +220,45 @@ class IdentifySite:
         arbitrary (whichever <hhc> came last in the config). The XML content
         carries no skin marker either, so resolve the skin from the
         configured HH/TS paths (PMU Poker, Bwin.fr Poker, ... each watch
-        their own client directory).
+        their own client directory), then from the hero the file names: an
+        archive such as PokerTracker's sits outside every configured path.
+        A file nothing places stays on the network rather than in a room picked
+        for being first.
         """
-        return self._select_network_skin_site(path, fallback_site, "iPoker")
+        room = ipoker_rooms.room_for(self.config, self._ipoker_xml_hero(whole_file), self.chosen_ipoker_rooms)
+        return self._select_network_skin_site(
+            path,
+            fallback_site,
+            "iPoker",
+            preferred=room or ipoker_rooms.GENERIC_ROOM,
+        )
+
+    @staticmethod
+    def _ipoker_xml_hero(whole_file: str) -> list[str]:
+        match = re_iPokerNickname.search(whole_file)
+        return [match.group(1)] if match else []
+
+    def _undecided_ipoker_hero(self, path: str, whole_file: str) -> str | None:
+        """The hero of an iPoker XML file whose room only the user can tell, if it is one."""
+        heroes = self._ipoker_xml_hero(whole_file)
+        if not heroes or ipoker_rooms.room_for(self.config, heroes, self.chosen_ipoker_rooms):
+            return None
+        norm_path = os.path.normcase(os.path.abspath(path))
+        supported = getattr(self.config, "supported_sites", None) or {}
+        for site in supported.values():
+            if getattr(site, "network", "") == "iPoker" and self._configured_path_length(site, norm_path) >= 0:
+                return None
+        return heroes[0]
+
+    def _name_ipoker_export(self, f: FPDBFile, whole_file: str, hero_regex: Any) -> str:
+        """Name the room of a PokerTracker ``GAME #`` file, noting a hero only the user can place."""
+        match = hero_regex.search(whole_file) if hero_regex is not None else None
+        hero = match.group("PNAME") if match else None
+        room = ipoker_rooms.room_for(self.config, [hero] if hero else [], self.chosen_ipoker_rooms)
+        if room is None:
+            f.undecided_hero = hero
+            return ipoker_rooms.GENERIC_ROOM
+        return room
 
     def _select_partypoker_skin_site(self, path, fallback_site):
         """Return the configured PartyPoker skin site for this file.
@@ -305,8 +274,23 @@ class IdentifySite:
         """
         return self._select_network_skin_site(path, fallback_site, "PartyPoker")
 
-    def _select_network_skin_site(self, path, fallback_site, network):
-        """Resolve the skin site of a multi-skin network from the file path."""
+    @staticmethod
+    def _configured_path_length(site: Any, norm_path: str) -> int:
+        """How long the configured HH/TS path holding this file is, or -1 if none holds it."""
+        path_len = -1
+        for cfg_path in (site.HH_path, site.TS_path):
+            if not cfg_path:
+                continue
+            cfg_abs = os.path.normcase(os.path.abspath(os.path.expanduser(cfg_path)))
+            if norm_path.startswith(cfg_abs):
+                path_len = max(path_len, len(cfg_abs))
+        return path_len
+
+    def _select_network_skin_site(self, path, fallback_site, network, preferred=None):
+        """Resolve the skin site of a multi-skin network from the file path.
+
+        ``preferred`` names the skin to use when no configured path holds the file.
+        """
         supported = getattr(self.config, "supported_sites", None)
         if not supported:
             return fallback_site
@@ -317,13 +301,7 @@ class IdentifySite:
         norm_path = os.path.normcase(os.path.abspath(path))
         best_site, best_score = None, None
         for site in wpn_sites:
-            path_len = -1
-            for cfg_path in (site.HH_path, site.TS_path):
-                if not cfg_path:
-                    continue
-                cfg_abs = os.path.normcase(os.path.abspath(os.path.expanduser(cfg_path)))
-                if norm_path.startswith(cfg_abs):
-                    path_len = max(path_len, len(cfg_abs))
+            path_len = self._configured_path_length(site, norm_path)
             # Rank candidates: a file under a configured path beats non-matches,
             # an enabled skin beats a disabled one, and a longer (more specific)
             # configured path breaks remaining ties.
@@ -336,6 +314,12 @@ class IdentifySite:
             # these; the check keeps the types non-optional for the rest.
             return fallback_site
         matched_by_path, is_enabled, _ = best_score
+        if preferred and not matched_by_path:
+            if preferred == fallback_site.name:
+                return fallback_site
+            skin_site = copy.copy(fallback_site)
+            skin_site.name = preferred
+            return skin_site
         # Nothing matched by path and nothing is enabled: keep the fallback
         # rather than silently renaming to an arbitrary skin.
         if not matched_by_path and not is_enabled:
@@ -550,7 +534,8 @@ class IdentifySite:
                 elif filter_name == "Winning":
                     selected_site = self._select_winning_skin_site(path, site)
                 elif filter_name == "iPoker":
-                    selected_site = self._select_ipoker_skin_site(path, site)
+                    selected_site = self._select_ipoker_skin_site(path, site, whole_file)
+                    f.undecided_hero = self._undecided_ipoker_hero(path, whole_file)
                 elif filter_name == "PartyPoker":
                     selected_site = self._select_partypoker_skin_site(path, site)
                 else:
@@ -584,7 +569,8 @@ class IdentifySite:
                         elif site.filter_name == "Winning":
                             f.site = self._select_winning_skin_site(path, site)
                         elif site.filter_name == "iPoker":
-                            f.site = self._select_ipoker_skin_site(path, site)
+                            f.site = self._select_ipoker_skin_site(path, site, whole_file)
+                            f.undecided_hero = self._undecided_ipoker_hero(path, whole_file)
                         elif site.filter_name == "PartyPoker":
                             f.site = self._select_partypoker_skin_site(path, site)
                         else:
@@ -600,17 +586,28 @@ class IdentifySite:
             obj = get_parser_class(filter_name)
             summary = "PokerTrackerSummary"
 
-            # Detect specific iPoker skin for PokerTracker format
             detected_site_name = "PokerTracker"  # default
-            if m1 and "GAME #" in m1.group():
-                # This is an iPoker hand, detect the specific skin
-                detected_site_name = self.detectiPokerSkin(whole_file)
-                log.debug(f"Detected iPoker skin from PokerTracker format: {detected_site_name}")
+            if m1 and m1.group().startswith("GAME #"):
+                detected_site_name = self._name_ipoker_export(f, whole_file, getattr(obj, "re_HeroCards1", None))
+                log.debug(f"Room of a PokerTracker iPoker file: {detected_site_name}")
+            elif m1 and "GAME #" in m1.group():
+                # Merge's "MERGE_GAME #": the parser reads the room from the hand header.
+                detected_site_name = ipoker_rooms.GENERIC_ROOM
             elif not m1:
-                # PokerTracker is the format: the summary itself names its room.
+                # PokerTracker is the format: the summary itself names its room,
+                # down to the network for iPoker, whose players tell the skin.
                 from fpdb_3_legacy.PokerTrackerSummary import PokerTrackerSummary
 
                 detected_site_name = PokerTrackerSummary.room_named_in(whole_file[:200]) or detected_site_name
+                if detected_site_name == ipoker_rooms.GENERIC_ROOM:
+                    detected_site_name = (
+                        ipoker_rooms.room_for(
+                            self.config,
+                            PokerTrackerSummary.players_named_in(whole_file),
+                            self.chosen_ipoker_rooms,
+                        )
+                        or detected_site_name
+                    )
 
             pt_site = Site(detected_site_name, filter, filter_name, summary, obj)
             f.site = pt_site

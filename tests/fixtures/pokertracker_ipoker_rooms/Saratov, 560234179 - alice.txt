@@ -1,0 +1,66 @@
+﻿GAME #9149549605 Version:26.7.1.25 Uncalled:Y Omaha PL €0.01/€0.02 2026-11-01 21:55:45/GMT
+Table Info: Size: 6, Blinds: 0.01/0.02
+Table Saratov, 560234179
+Seat 1: frank (€2.00 in chips)
+Seat 5: dave (€6.07 in chips)  DEALER
+Seat 6: grace (€1.68 in chips)
+Seat 8: alice (€2.00 in chips)
+Seat 10: carol (€8.97 in chips)
+Seat 3: erin (€2.58 in chips)
+grace: Post SB €0.01
+alice: Post BB €0.02
+*** HOLE CARDS ***
+Dealt to alice [S10 C3 DA D10]
+carol: Call €0.02
+frank: Call €0.02
+erin: Fold
+dave: Fold
+grace: Call €0.01
+alice: Raise (NF) €0.09
+carol: Call €0.07
+frank: Call €0.07
+grace: Call €0.07
+*** FLOP *** [S7 SQ S9]
+grace: Check
+alice: Check
+carol: Bet €0.04
+frank: Call €0.04
+grace: Fold
+alice: Fold
+*** TURN *** [D5]
+carol: Bet €0.06
+frank: Call €0.06
+*** RIVER *** [HQ]
+carol: Bet €0.28
+frank: Fold
+*** SUMMARY ***
+Total pot €0.53 Rake €0.03
+carol: wins €0.53
+
+
+GAME #9149551452 Version:26.7.1.25 Uncalled:Y Omaha PL €0.01/€0.02 2026-11-01 21:56:39/GMT
+Table Info: Size: 6, Blinds: 0.01/0.02
+Table Saratov, 560234179
+Seat 1: frank (€2.00 in chips)
+Seat 5: dave (€6.07 in chips)
+Seat 6: grace (€1.59 in chips)  DEALER
+Seat 8: alice (€1.91 in chips)
+Seat 10: carol (€9.31 in chips)
+alice: Post SB €0.01
+carol: Post BB €0.02
+*** HOLE CARDS ***
+Dealt to alice [C7 SK S2 DK]
+frank: Fold
+dave: Fold
+grace: Call €0.02
+alice: Raise (NF) €0.08
+carol: Call €0.06
+grace: Call €0.06
+*** FLOP *** [SA CK D5]
+alice: Bet €0.12
+carol: Fold
+grace: Fold
+*** SUMMARY ***
+Total pot €0.23 Rake €0.01
+alice: Mucks [C7 SK S2 DK]
+alice: wins €0.23

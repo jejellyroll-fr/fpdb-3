@@ -95,14 +95,13 @@ def test_a_player_name_does_not_choose_the_room(config, tmp_path, opponent) -> N
     text = _cash_hand(opponent=opponent)
 
     assert _parse(config, tmp_path, text)[0].sitename == "iPoker"
-    assert IdentifySite(config).detectiPokerSkin(text) == "iPoker"
+    assert IdentifySite(config).idSite("export.txt", text, "utf-8").site.name == "iPoker"
 
 
-def test_the_table_name_still_chooses_the_room(config) -> None:
+def test_the_table_name_does_not_choose_the_room_either(config) -> None:
     text = _cash_hand("Saratov, 560234179")
 
-    assert PokerTracker(config=config, autostart=False).detectiPokerSkin(text) == "FDJ Poker"
-    assert IdentifySite(config).detectiPokerSkin(text) == "FDJ Poker"
+    assert IdentifySite(config).idSite("export.txt", text, "utf-8").site.name == "iPoker"
 
 
 @pytest.mark.parametrize("site", ["iPoker", "GG Poker", "Winamax"])

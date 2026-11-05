@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 10:16+0100\n"
+"POT-Creation-Date: 2026-11-05 14:27+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -2478,6 +2478,10 @@ msgid "Another import is running. Try again once it has finished."
 msgstr "Un autre import est en cours. Réessayez quand il sera terminé."
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Choose a room…"
+msgstr "Choisir une room…"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Choose the folder holding the hand histories"
 msgstr "Choisir le dossier contenant les historiques de mains"
 
@@ -2569,6 +2573,16 @@ msgid ""
 msgstr ""
 "Les stats, le HUD et les notes ne font pas partie de cet import ; voir le "
 "guide de migration dans la documentation."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid ""
+"The files do not say which iPoker room these names played on. Choose the "
+"room of each one. Setting the name as that room's screen name in Configure > "
+"Site Settings spares you this question."
+msgstr ""
+"Les fichiers ne disent pas sur quelle room iPoker ces pseudos ont joué. Choisissez la "
+"room de chacun. Renseigner le pseudo comme screen name de cette room dans "
+"Configurer > Paramètres des sites vous évitera cette question."
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 #, python-format
@@ -3819,7 +3833,9 @@ msgstr "Rechercher des mises à jour"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Choose the blinds, seats and period that new HUD tables start with"
-msgstr "Choisir les blinds, les sièges et la période de départ des nouvelles tables HUD"
+msgstr ""
+"Choisir les blinds, les sièges et la période de départ des nouvelles tables "
+"HUD"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "CoinPoker Live Capture"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 10:16+0100\n"
+"POT-Creation-Date: 2026-11-05 14:27+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2351,6 +2351,13 @@ msgid "Room"
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+msgid ""
+"The files do not say which iPoker room these names played on. Choose the "
+"room of each one. Setting the name as that room's screen name in Configure > "
+"Site Settings spares you this question."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Reading the folder…"
 msgstr ""
 
@@ -2359,6 +2366,10 @@ msgstr ""
 msgid ""
 "The folder could not be read:\n"
 "%s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Choose a room…"
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py

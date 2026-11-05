@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 10:16+0100\n"
+"POT-Creation-Date: 2026-11-05 14:27+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -2784,6 +2784,11 @@ msgid "Another import is running. Try again once it has finished."
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+#, fuzzy
+msgid "Choose a room…"
+msgstr "Alege mâinile…"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Choose the folder holding the hand histories"
 msgstr ""
 
@@ -2878,6 +2883,13 @@ msgstr ""
 msgid ""
 "Stats, the HUD and player notes are not part of this import; see the "
 "migration guide in the docs."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid ""
+"The files do not say which iPoker room these names played on. Choose the "
+"room of each one. Setting the name as that room's screen name in Configure > "
+"Site Settings spares you this question."
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
