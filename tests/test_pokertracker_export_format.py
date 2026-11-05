@@ -98,7 +98,7 @@ def test_a_player_name_does_not_choose_the_room(config, tmp_path, opponent) -> N
     assert IdentifySite(config).detectiPokerSkin(text) == "iPoker"
 
 
-def test_the_table_name_still_chooses_the_room(config, tmp_path) -> None:
+def test_the_table_name_still_chooses_the_room(config) -> None:
     text = _cash_hand("Saratov, 560234179")
 
     assert PokerTracker(config=config, autostart=False).detectiPokerSkin(text) == "FDJ Poker"
