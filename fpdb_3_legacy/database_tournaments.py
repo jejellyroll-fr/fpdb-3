@@ -208,13 +208,13 @@ class DatabaseTournamentsMixin:
             ttid = result_dict["id"]
             for ev in expectedValues:
                 objField, dbField = ev
-                objVal, dbVal = getattr(obj, objField), result_dict[dbField]
+                obj_val, db_val = getattr(obj, objField), result_dict[dbField]
                 if (
-                    self.defaultTourneyTypeValue(objVal, dbVal, objField) and dbVal
+                    self.defaultTourneyTypeValue(obj_val, db_val, objField) and db_val
                 ):  # DB has this value but object doesnt, so update object
-                    setattr(obj, objField, dbVal)
+                    setattr(obj, objField, db_val)
                 elif (
-                    self.defaultTourneyTypeValue(dbVal, objVal, objField) and objVal
+                    self.defaultTourneyTypeValue(db_val, obj_val, objField) and obj_val
                 ):  # object has this value but DB doesnt, so update DB
                     updateDb = True
                     oldttid = ttid
@@ -222,11 +222,11 @@ class DatabaseTournamentsMixin:
             if self._tourney_lookups is not None:
                 self._tourney_lookups.types.pop((obj.tourNo, obj.siteId), None)
             if obj.gametype["mix"] != "none":
-                category, limitType = obj.gametype["mix"], "mx"
+                category, limit_type = obj.gametype["mix"], "mx"
             elif result is not None and result_dict["limittype"] == "mx":
-                category, limitType = result_dict["category"], "mx"
+                category, limit_type = result_dict["category"], "mx"
             else:
-                category, limitType = (
+                category, limit_type = (
                     obj.gametype["category"],
                     obj.gametype["limitType"],
                 )
@@ -236,7 +236,7 @@ class DatabaseTournamentsMixin:
                 obj.buyin,
                 obj.fee,
                 category,
-                limitType,
+                limit_type,
                 obj.maxseats,
                 obj.isSng,
                 obj.isKO,
