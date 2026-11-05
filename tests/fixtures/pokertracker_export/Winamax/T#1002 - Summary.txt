@@ -1,0 +1,16 @@
+PokerTracker 4 Tournament Summary
+Site: Winamax
+Game: Holdem
+Tournament #: 1002
+Started: 2026/01/02 17:30:00
+Finished: 2026/01/02 18:32:15
+Buyin: €0.23
+Fee: €0.02
+Prize Pool: €2.30
+Initial Stack: 0
+Table Type: STT (6 max) Turbo
+Tourney Type: No Limit
+Players: 2
+
+Place: 1, Player: alice, Won: €2.30,
+Place: 2, Player: bob, Won: €0.00,

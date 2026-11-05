@@ -606,6 +606,11 @@ class IdentifySite:
                 # This is an iPoker hand, detect the specific skin
                 detected_site_name = self.detectiPokerSkin(whole_file)
                 log.debug(f"Detected iPoker skin from PokerTracker format: {detected_site_name}")
+            elif not m1:
+                # PokerTracker is the format: the summary itself names its room.
+                from fpdb_3_legacy.PokerTrackerSummary import PokerTrackerSummary
+
+                detected_site_name = PokerTrackerSummary.room_named_in(whole_file[:200]) or detected_site_name
 
             pt_site = Site(detected_site_name, filter, filter_name, summary, obj)
             f.site = pt_site
