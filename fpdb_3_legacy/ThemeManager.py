@@ -23,6 +23,7 @@ FPDB_THEME_END = "/* FPDB_LEGACY_THEME_END */"
 
 # Custom themes directory
 CUSTOM_THEMES_DIR = Path.home() / ".fpdb" / "themes"
+DEFAULT_QT_THEME = "dark_purple.xml"
 
 
 class ThemeManager:
@@ -75,6 +76,8 @@ class ThemeManager:
             self._popup_theme = "material_dark"
             self._config: Any | None = None
             self._main_window = None
+            # What apply_saved_theme() last put on screen, None before its first run.
+            self._applied_qt_theme: str | None = None
             # Initialize available themes list on first instance
             if ThemeManager.AVAILABLE_QT_THEMES is None:
                 ThemeManager.AVAILABLE_QT_THEMES = self._detect_available_themes()
@@ -939,6 +942,52 @@ class ThemeManager:
 
         except (AttributeError, TypeError, ValueError) as e:
             log.exception(f"Error loading saved themes: {e}")
+
+    def apply_saved_theme(self) -> bool:
+        """Show the theme saved in the configuration, if it is not already showing.
+
+        For a process that follows the theme rather than owns it: the HUD is a
+        subprocess of fpdb, so the configuration is how a theme chosen there
+        reaches it. Nothing is saved here, because this process holding an older
+        copy of the file must not write it back over the player's choice.
+
+        A theme that is invalid or fails to apply leaves the current one on
+        screen, or the default if nothing is showing yet.
+
+        Returns:
+            bool: True if the theme on screen changed.
+        """
+        with self._lock:
+            # A custom theme created in fpdb since the last look needs a rescan.
+            ThemeManager.AVAILABLE_QT_THEMES = self._detect_available_themes()
+            self._load_saved_themes()
+
+            wanted = self._qt_material_theme
+            if wanted == self._applied_qt_theme:
+                return False
+            if self._try_apply_theme(wanted):
+                self._applied_qt_theme = wanted
+                return True
+
+            self._qt_material_theme = self._applied_qt_theme or DEFAULT_QT_THEME
+            if self._applied_qt_theme is None and wanted != DEFAULT_QT_THEME:
+                log.warning("Theme %s could not be applied, using %s", wanted, DEFAULT_QT_THEME)
+                if self._try_apply_theme(DEFAULT_QT_THEME):
+                    self._applied_qt_theme = DEFAULT_QT_THEME
+                    return True
+            return False
+
+    def _try_apply_theme(self, theme_name: str) -> bool:
+        """Apply a theme, turning any failure into False.
+
+        A custom theme only has its root element validated, so qt_material can
+        raise anything while rendering it, and that must not stop the HUD.
+        """
+        try:
+            return self._apply_theme_to_application(theme_name)
+        except Exception:  # intentional broad catch: see the docstring.
+            log.exception("Error applying theme %s", theme_name)
+            return False
 
     def _detect_available_themes(self) -> list[str]:
         """Detect all available qt_material themes dynamically.

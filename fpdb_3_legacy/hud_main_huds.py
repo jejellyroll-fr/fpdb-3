@@ -20,10 +20,20 @@ from fpdb_3_legacy.hud_window_registry import ClaimOutcome
 from fpdb_3_legacy.loggingFpdb import hud_trace
 from fpdb_3_legacy.SmartHudManager import RestartReason
 from fpdb_3_legacy.table_info import TableInfo
+from fpdb_3_legacy.ThemeManager import ThemeManager
 
 
 class HudMainHudsMixin(HudMainBase):
     """Create, update and reconfigure the HUD of a table."""
+
+    # Set by init_theme(), so nothing is restyled before the HUD starts following the theme.
+    _theme_manager: ThemeManager | None = None
+
+    def init_theme(self) -> None:
+        """Show the theme chosen in fpdb rather than a fixed one."""
+        self._theme_manager = ThemeManager()
+        self._theme_manager.initialize(config=self.config)
+        self._theme_manager.apply_saved_theme()
 
     def set_table_stat_set_override(
         self,
@@ -78,6 +88,10 @@ class HudMainHudsMixin(HudMainBase):
         if self.config.reload() is False:
             log.warning("HUD_config.xml changed but could not be reloaded; keeping the profiles in use")
             return 0
+
+        # A theme change restyles the open windows in place, so it rebuilds no table.
+        if self._theme_manager is not None:
+            self._theme_manager.apply_saved_theme()
 
         rebuilt = 0
         for temp_key, hud in list(self.hud_dict.items()):
