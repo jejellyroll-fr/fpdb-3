@@ -17,17 +17,13 @@ from operator import attrgetter
 from unittest.mock import MagicMock
 
 import pytest
-
-pytestmark = pytest.mark.qt
-
-os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-
-import shiboken6
 from PySide6.QtCore import QEvent, Qt
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication, QPushButton, QWidget
 
 from fpdb_3_legacy.Aux_Hud import SimpleTableMW, SimpleTablePopupMenu
+
+pytestmark = pytest.mark.qt
 
 _HUD_PARAMS = {
     "new_max_seats": 0,
@@ -48,6 +44,8 @@ _HUD_PARAMS = {
 
 @pytest.fixture(scope="module", autouse=True)
 def _qapp():
+    # Read when the application is created, so these menus stay off a developer's screen.
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     return QApplication.instance() or QApplication([])
 
 
@@ -166,7 +164,8 @@ def test_closed_popup_is_deleted():
     menu.callback(data="close")
     QApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
 
-    assert not shiboken6.isValid(menu)
+    with pytest.raises(RuntimeError):  # the wrapper outlives the deleted C++ object
+        menu.isVisible()
 
 
 def test_closing_the_table_takes_the_popup_down():
