@@ -7,6 +7,7 @@ each absence turned a five-minute answer into a day of inference.
 
 from __future__ import annotations
 
+import contextlib
 import faulthandler
 import logging
 import multiprocessing
@@ -191,11 +192,10 @@ def _raise_in_a_thread_with_the_log_enabled(log_dir: str, file_name: str) -> Non
 
     enable_crash_log(log_dir, file_name)
     # What fpdb and the HUD do on start: the previous hook has to keep writing there.
-    sys.stderr = (Path(log_dir) / "errors.txt").open("w", encoding="utf-8")
-    thread = threading.Thread(target=fail, name="the-failing-thread")
-    thread.start()
-    thread.join()
-    sys.stderr.flush()
+    with (Path(log_dir) / "errors.txt").open("w", encoding="utf-8") as errors, contextlib.redirect_stderr(errors):
+        thread = threading.Thread(target=fail, name="the-failing-thread")
+        thread.start()
+        thread.join()
 
 
 def test_a_native_crash_writes_its_stack_to_the_crash_log(tmp_path: Path) -> None:
@@ -249,6 +249,8 @@ def enabled_log(tmp_path: Path, previous_hooks: tuple[MagicMock, MagicMock]) -> 
         path = enable_crash_log(tmp_path, HUD_CRASH_LOG_NAME)
     enable.call_args.kwargs["file"].close()
     assert path is not None
+    assert sys.excepthook is not previous_hooks[0]
+    assert threading.excepthook is not previous_hooks[1]
     yield path
 
 
@@ -260,13 +262,11 @@ def _raised(error: BaseException) -> tuple[type[BaseException], BaseException, o
 
 
 def _thread_args(error: BaseException) -> threading.ExceptHookArgs:
-    return threading.ExceptHookArgs((*_raised(error), threading.Thread(name="a-worker")))
+    return threading.ExceptHookArgs((*_raised(error), threading.Thread(target=print, name="a-worker")))
 
 
-def test_starting_again_keeps_the_stack_of_the_previous_crash(
-    tmp_path: Path,
-    previous_hooks: tuple[MagicMock, MagicMock],
-) -> None:
+@pytest.mark.usefixtures("previous_hooks")
+def test_starting_again_keeps_the_stack_of_the_previous_crash(tmp_path: Path) -> None:
     (tmp_path / HUD_CRASH_LOG_NAME).write_text("the previous crash\n", encoding="utf-8")
 
     with patch.object(hud_diagnostics.faulthandler, "enable") as enable:

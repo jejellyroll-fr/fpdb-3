@@ -12,6 +12,7 @@ HUD already running. ``test_HUD_main.py`` checks that it enables its file.
 
 from __future__ import annotations
 
+import contextlib
 import faulthandler
 import multiprocessing
 import os
@@ -59,9 +60,6 @@ def _raise_from_qt_with_the_log_enabled(log_dir: str, errors_file: str) -> None:
         raise ValueError("in a click")
 
     enable_crash_log(log_dir, MAIN_CRASH_LOG_NAME)
-    # What fpdb and the HUD do on start: the previous hook has to keep writing there.
-    sys.stderr = Path(errors_file).open("w", encoding="utf-8")
-
     app = QApplication([])
     button = QPushButton()
     button.clicked.connect(fail_in_a_click)
@@ -77,11 +75,12 @@ def _raise_from_qt_with_the_log_enabled(log_dir: str, errors_file: str) -> None:
     QTimer.singleShot(0, worker.started.emit)
     # Reached only if the app kept running through all three.
     QTimer.singleShot(500, app.quit)
-    assert app.exec() == 0
+    # What fpdb and the HUD do on start: the previous hook has to keep writing there.
+    with Path(errors_file).open("w", encoding="utf-8") as errors, contextlib.redirect_stderr(errors):
+        assert app.exec() == 0
 
     worker_thread.quit()
     worker_thread.wait()
-    sys.stderr.flush()
 
 
 def test_a_real_exception_in_a_qt_slot_reaches_the_crash_file(tmp_path: Path) -> None:
