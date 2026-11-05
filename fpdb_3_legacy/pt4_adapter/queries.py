@@ -8,27 +8,25 @@ SELECT
     s.flg_vpip,
     s.flg_p_first_raise          AS pfr,
     s.flg_p_3bet                 AS three_bet,
-    s.cnt_p_3bet_opp             AS three_bet_opp,
-    s.flg_saw_flop,
-    s.flg_saw_showdown,
+    s.flg_p_3bet_opp             AS three_bet_opp,
+    s.flg_f_saw,
+    s.flg_showdown,
     s.amt_won,
     s.amt_expected_won           AS all_in_ev,
     s.flg_steal_att,
-    s.flg_p_first_raise_open     AS rfi,
-    s.enum_position              AS position,
-    s.cnt_p_3bet                 AS three_bet_count,
-    s.cnt_p_3bet_opp             AS three_bet_opp_count,
-    s.flg_p_3bet                 AS three_bet_done,
-    s.cnt_p_cbet                 AS cbet,
-    s.cnt_p_cbet_opp             AS cbet_opp,
-    s.cnt_p_f_cbet               AS f_cbet,
-    s.cnt_p_f_cbet_opp           AS f_cbet_opp,
+    s.flg_steal_opp,
+    s.flg_p_open                 AS rfi,
+    s.position,
+    s.flg_f_cbet                 AS cbet,
+    s.flg_f_cbet_opp             AS cbet_opp,
+    s.flg_f_cbet_def_opp         AS f_cbet_opp,
     s.cnt_p_call                 AS car,
-    s.cnt_p_call_opp             AS car_opp,
-    s.hand_no                    AS hand_id,
-    s.player_id                  AS pt4_player_id
+    s.id_hand                    AS hand_id,
+    h.hand_no,
+    s.id_player                  AS pt4_player_id
 FROM cash_hand_player_statistics s
-JOIN player p ON p.player_id = s.id_player
+JOIN cash_hand_summary h ON h.id_hand = s.id_hand
+JOIN player p ON p.id_player = s.id_player
 WHERE s.id_hand = %s
 """
 
