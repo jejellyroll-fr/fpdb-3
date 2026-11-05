@@ -113,23 +113,19 @@ def test_a_tournament_summary_of_each_exported_room_matches(site) -> None:
     assert PokerTrackerSummary.site_name_map[match.group("SITE")]
 
 
-def test_a_summary_file_is_previewed_under_the_room_it_names(tmp_path) -> None:
+def test_a_summary_file_is_previewed_under_the_room_it_names(config, tmp_path) -> None:
     path = tmp_path / "T#1 - Summary.txt"
     path.write_text(SUMMARY.format(site="GG Poker"), encoding="utf-8")
-    found = SimpleNamespace(site=SimpleNamespace(name="PokerTracker", filter_name="PokerTracker"), ftype="summary")
+    found = IdentifySite(config).idSite(str(path), path.read_text(encoding="utf-8"), "utf-8")
 
     assert _room(found, str(path)) == "GGPoker"
 
 
-def test_summaries_join_their_room_and_are_not_counted_as_hands(tmp_path) -> None:
-    good = tmp_path / "T#1 - Summary.txt"
-    good.write_text(SUMMARY.format(site="Winamax"), encoding="utf-8")
-    unknown = tmp_path / "T#2 - Summary.txt"
-    unknown.write_text(SUMMARY.format(site="Nowhere"), encoding="utf-8")
+def test_summaries_join_their_room_and_are_not_counted_as_hands() -> None:
     results = {
         "hands.txt": FileImportResult("Winamax", stored=10),
-        str(good): FileImportResult("PokerTracker", summaries=1, is_summary_file=True),
-        str(unknown): FileImportResult("PokerTracker", errors=1, is_summary_file=True),
+        "T#1 - Summary.txt": FileImportResult("Winamax", summaries=1, is_summary_file=True),
+        "T#2 - Summary.txt": FileImportResult("PokerTracker", errors=1, is_summary_file=True),
     }
 
     rooms = {room.site: room for room in summarize(results, SimpleNamespace(supported_sites={}))}

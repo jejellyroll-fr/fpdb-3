@@ -11,7 +11,6 @@ came over, room by room. This module is that, without Qt: the wizard in
 from __future__ import annotations
 
 import os
-import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from typing import Any
@@ -102,35 +101,17 @@ def _candidate_files(folder: str) -> Iterable[str]:
 # names them "PokerTracker", or an iPoker skin whenever "GAME #" appears -- Merge's
 # "MERGE_GAME #" included -- and leaves the room to the parser, which reads it
 # from the hand header. The scan reads it the same way, so preview and import agree.
+# A tournament summary needs none of this: IdentifySite reads the room it names.
 _POKERTRACKER = "PokerTracker"
 _HEAD_CHARS = 5000
-_SUMMARY_HEAD_CHARS = 200
-_SUMMARY_SITE = re.compile(r"^Site:\s*(.+)$", re.MULTILINE)
-
-
-def _summary_room(path: str, default: str | None) -> str | None:
-    """The room a PokerTracker tournament summary names on its ``Site:`` line."""
-    from fpdb_3_legacy.PokerTrackerSummary import PokerTrackerSummary
-
-    try:
-        with open(path, encoding="utf-8", errors="replace") as handle:
-            head = handle.read(_SUMMARY_HEAD_CHARS)
-    except OSError:
-        return default
-    match = _SUMMARY_SITE.search(head)
-    if match is None:
-        return default
-    return PokerTrackerSummary.site_name_map.get(match.group(1).strip(), default)
 
 
 def _room(found: Any, path: str) -> str | None:
     """The room a file's hands were played in, as the import will record it."""
     site = getattr(found, "site", None)
     name = getattr(site, "name", None)
-    if getattr(site, "filter_name", None) != _POKERTRACKER:
+    if getattr(site, "filter_name", None) != _POKERTRACKER or getattr(found, "ftype", None) == "summary":
         return name
-    if getattr(found, "ftype", None) == "summary":
-        return _summary_room(path, name)
     from fpdb_3_legacy.PokerTrackerToFpdb import PokerTracker
 
     try:
@@ -211,11 +192,8 @@ def summarize(file_results: Mapping[str, Any], config: Any) -> list[RoomSummary]
     A tournament summary goes to the room it names, and counts as a summary rather than a hand.
     """
     totals: dict[str, list[int]] = {}
-    for path, result in file_results.items():
-        room = result.site or "?"
-        if getattr(result, "is_summary_file", False) and room == _POKERTRACKER:
-            room = _summary_room(path, room) or room
-        row = totals.setdefault(room, [0, 0, 0, 0, 0, 0])
+    for result in file_results.values():
+        row = totals.setdefault(result.site or "?", [0, 0, 0, 0, 0, 0])
         row[0] += 1
         row[1] += result.stored
         row[2] += result.duplicates

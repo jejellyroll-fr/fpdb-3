@@ -118,6 +118,14 @@ class PokerTrackerSummary(TourneySummary):
         "GG Poker": "GGPoker",
     }
 
+    re_site_line = re.compile(r"^Site:\s*(?P<SITE>.+?)\s*$", re.MULTILINE)
+
+    @classmethod
+    def room_named_in(cls, text: str) -> str | None:
+        """The fpdb room a summary's ``Site:`` line names; None if it names none fpdb knows."""
+        match = cls.re_site_line.search(text)
+        return cls.site_name_map.get(match.group("SITE")) if match else None
+
     def getSplitRe(self, _head: str) -> re.Pattern[str]:
         """Get regex pattern for splitting tournament summaries.
 

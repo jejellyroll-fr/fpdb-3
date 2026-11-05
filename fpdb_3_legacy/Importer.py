@@ -419,7 +419,6 @@ class Importer:
         self.failed_files = FailureCache()
         self.dirlist: dict[Any, list[Any]] = {}
         self.refused_dirs: set[str] = set()  # watched folders the system refused to list
-        self.siteIds: dict[str, int] = {}
         self.removeFromFileList: dict[str, bool] = {}  # to remove deleted files
         self.monitor = False
         self.updatedsize: dict[str, int] = {}
@@ -831,22 +830,7 @@ class Importer:
 
         self.addFileToList(fpdbfile)
         self.filelist[filename] = fpdbfile
-        fpdb_site = fpdbfile.site
-        if fpdb_site is None:
-            return False
-        if site not in self.siteIds:
-            # Get id from Sites table in DB
-            result = self.database.get_site_id(fpdb_site.name)
-            if len(result) == 1:
-                self.siteIds[fpdb_site.name] = result[0][0]
-            elif len(result) == 0:
-                log.warning(f"Database ID for {fpdb_site.name} not found")
-            else:
-                log.warning(
-                    f"More than 1 Database ID found for {fpdb_site.name}",
-                )
-
-        return True
+        return fpdbfile.site is not None
 
     def _is_valid_import_file(self, filepath: str) -> bool:
         return is_valid_import_file(filepath)
