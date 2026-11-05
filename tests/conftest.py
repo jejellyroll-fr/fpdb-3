@@ -126,14 +126,14 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
 # such as HudReadWorker then destroyed widgets of the main thread, and the Qt
 # suite deadlocked on it. Between tests, on the main thread, the policy of
 # fpdb_3_legacy.main_thread_gc runs instead of its timer.
-def pytest_sessionstart(session):
+def pytest_sessionstart():
     import gc
 
     gc.disable()
 
 
 @pytest.hookimpl(trylast=True)
-def pytest_runtest_teardown(item, nextitem):
+def pytest_runtest_teardown():
     import gc
 
     from fpdb_3_legacy.main_thread_gc import collect_if_due

@@ -54,8 +54,8 @@ def _allocate_on_a_worker_thread() -> list[list[object]]:
     return kept
 
 
-@pytest.mark.usefixtures("automatic_gc")
-def test_without_it_a_worker_thread_frees_the_qobject(qapp) -> None:
+@pytest.mark.usefixtures("qapp", "automatic_gc")
+def test_without_it_a_worker_thread_frees_the_qobject() -> None:
     """What the deadlock started from: the worker's allocations run the collection."""
     freed_on = _abandon_a_cycle_holding_a_qobject()
 
@@ -80,8 +80,8 @@ def test_with_it_the_qobject_is_freed_on_the_main_thread(qtbot) -> None:
         collector.stop()
 
 
-@pytest.mark.usefixtures("automatic_gc")
-def test_stopping_gives_collection_back_to_python(qapp) -> None:
+@pytest.mark.usefixtures("qapp", "automatic_gc")
+def test_stopping_gives_collection_back_to_python() -> None:
     collector = MainThreadGarbageCollector()
     assert not gc.isenabled()
 
