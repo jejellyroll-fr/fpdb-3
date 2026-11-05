@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Any
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont, QPixmap
+from PySide6.QtGui import QCloseEvent, QFont, QPixmap
 from PySide6.QtWidgets import (
     QComboBox,
     QFrame,
@@ -1840,7 +1840,6 @@ class SimpleTableMW(Aux_Base.SeatWindow):
         if popup is not None:
             with contextlib.suppress(RuntimeError):  # popup's C++ side may already be gone
                 popup.close()
-                popup.destroy()
         self.menu_is_popped = False
         super().destroy(destroyWindow, destroySubWindows)
 
@@ -1876,6 +1875,9 @@ class SimpleTablePopupMenu(QWidget):
             None,
             Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint,
         )
+        # Without this every menu opened stays alive once closed: the partials
+        # connected in build_button() and friends keep a reference to it.
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.parentwin = parentwin
         table_x = max(0, self.parentwin.hud.table.x) if self.parentwin.hud.table.x is not None else 50
         table_y = max(0, self.parentwin.hud.table.y) if self.parentwin.hud.table.y is not None else 50
@@ -2106,26 +2108,40 @@ class SimpleTablePopupMenu(QWidget):
         stat_sets = self.parentwin.hud.config.get_stat_sets()
         return {i: (stat_set_name, stat_set_name) for i, stat_set_name in enumerate(stat_sets)}
 
-    def delete_event(self) -> None:
-        """Handle the event to close and destroy the popup menu.
+    def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802 - Qt override
+        """Let the parent window open a new menu, however this one was closed.
 
-        This method resets the menu state in the parent window and destroys the popup menu instance.
+        This is the only path a window-manager close (Alt+F4) goes through, so the
+        state is reset here rather than in delete_event().
+
+        Args:
+            event: The close event being delivered.
         """
         # The parent window may already be gone (table closed while the menu was
-        # open), so drop the menu either way.
+        # open), so close the menu either way.
         with contextlib.suppress(RuntimeError):
             self.parentwin.menu_is_popped = False
             self.parentwin.popup_menu = None
-        self.close()
-        self.destroy()
+        super().closeEvent(event)
 
-    def callback(self, _check_state: Any, data: str | None = None) -> None:
+    def delete_event(self) -> None:
+        """Close the popup menu; closeEvent() resets the parent and Qt deletes it.
+
+        A kill or blacklist action may already have closed the menu through the
+        parent's destroy(), hence the suppress.
+        """
+        with contextlib.suppress(RuntimeError):
+            self.close()
+
+    def callback(self, *_args: object, data: str | None = None) -> None:
         """Handle button callbacks for popup menu actions.
 
         This method processes actions such as killing the HUD, blacklisting, saving the layout, and closing the popup.
 
         Args:
-            _check_state: The state of the triggering event (unused).
+            *_args: Whatever the signal passes. PySide6 connects a partial to the
+                argument-less clicked() overload, so a required positional here
+                raises a TypeError that Qt swallows and the button does nothing.
             data: The action keyword indicating which operation to perform.
         """
         if data == "kill":
