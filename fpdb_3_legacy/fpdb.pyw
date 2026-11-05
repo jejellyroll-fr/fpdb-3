@@ -1395,13 +1395,21 @@ class fpdb(QMainWindow):
             # no close messages on queue, do nothing
             pass
 
-    def __calendar_dialog(self, widget, entry) -> None:
+    def __calendar_dialog(self, *_args: object, entry: QDateEdit) -> None:
+        """Let the user pick a date for ``entry`` from a calendar.
+
+        ``*_args`` because PySide6 connects a partial to the argument-less
+        clicked() overload: a required positional here raises a TypeError that Qt
+        swallows, and the button does nothing.
+        """
         d = QDialog(self.dia_confirm)
         d.setWindowTitle(_("Pick a date"))
 
         vb = QVBoxLayout()
         d.setLayout(vb)
         cal = QCalendarWidget()
+        # A new calendar selects today, which Done would turn into the cache's start.
+        cal.setSelectedDate(entry.date())
         vb.addWidget(cal)
 
         btn = QPushButton(_("Done"))
@@ -1410,6 +1418,11 @@ class fpdb(QMainWindow):
         vb.addWidget(btn)
 
         d.exec()
+
+    def __get_date(self, *_args: object, calendar: QCalendarWidget, entry: QDateEdit, win: QDialog) -> None:
+        """Copy the date selected in ``calendar`` to ``entry`` and close the dialog."""
+        entry.setDate(calendar.selectedDate())
+        win.accept()
 
     def createMenuBar(self) -> None:
         """Build the menu bar from the declarative layout in ``menu_layout``."""
