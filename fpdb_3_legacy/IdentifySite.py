@@ -170,10 +170,10 @@ class IdentifySite:
         self.failed_files.remember(path)
 
     def detectiPokerSkin(self, handText):
-        """Detect specific iPoker skin from hand text content."""
+        """Detect specific iPoker skin from the table name, the only part a player cannot name."""
         # Extract table name from hand text
-        table_pattern = r"Table\s+(.+?),"
-        table_match = re.search(table_pattern, handText)
+        table_pattern = r"^Table\s+(?!Info:|Size\s)(.+?)(?:,|$)"
+        table_match = re.search(table_pattern, handText, re.MULTILINE)
         table_name = table_match.group(1) if table_match else ""
 
         log.debug(f"Detected table name: {table_name}")
@@ -232,8 +232,8 @@ class IdentifySite:
             "redstar": "Red Star Poker",
         }
 
-        # Check table name and hand text for skin indicators
-        search_text = (table_name + " " + handText).lower()
+        # Check the table name for skin indicators
+        search_text = table_name.lower()
 
         # Specific patterns for French sites
         if any(indicator in search_text for indicator in ["saratov", "scone", "moscow"]):

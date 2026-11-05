@@ -1,8 +1,8 @@
 """Bringing hands over from PokerTracker 4 or Holdem Manager 3 (#612).
 
-Both trackers keep the hand histories they import in each room's own format,
-which fpdb's room parsers already read, so moving over is a bulk import of the
-right folder. What the user needs from fpdb is the route to that folder, a look
+A tracker's archive folder keeps the hand histories it imported in each room's
+own format, which fpdb's room parsers already read, so moving over is a bulk
+import of the right folder. What the user needs from fpdb is the route to that folder, a look
 at what it holds before anything is written, and an account afterwards of what
 came over, room by room. This module is that, without Qt: the wizard in
 ``GuiTrackerMigration`` only renders it.
@@ -11,6 +11,7 @@ came over, room by room. This module is that, without Qt: the wizard in
 from __future__ import annotations
 
 import os
+import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from typing import Any
@@ -103,6 +104,23 @@ def _candidate_files(folder: str) -> Iterable[str]:
 # from the hand header. The scan reads it the same way, so preview and import agree.
 _POKERTRACKER = "PokerTracker"
 _HEAD_CHARS = 5000
+_SUMMARY_HEAD_CHARS = 200
+_SUMMARY_SITE = re.compile(r"^Site:\s*(.+)$", re.MULTILINE)
+
+
+def _summary_room(path: str, default: str | None) -> str | None:
+    """The room a PokerTracker tournament summary names on its ``Site:`` line."""
+    from fpdb_3_legacy.PokerTrackerSummary import PokerTrackerSummary
+
+    try:
+        with open(path, encoding="utf-8", errors="replace") as handle:
+            head = handle.read(_SUMMARY_HEAD_CHARS)
+    except OSError:
+        return default
+    match = _SUMMARY_SITE.search(head)
+    if match is None:
+        return default
+    return PokerTrackerSummary.site_name_map.get(match.group(1).strip(), default)
 
 
 def _room(found: Any, path: str) -> str | None:
@@ -111,6 +129,8 @@ def _room(found: Any, path: str) -> str | None:
     name = getattr(site, "name", None)
     if getattr(site, "filter_name", None) != _POKERTRACKER:
         return name
+    if getattr(found, "ftype", None) == "summary":
+        return _summary_room(path, name)
     from fpdb_3_legacy.PokerTrackerToFpdb import PokerTracker
 
     try:
@@ -182,21 +202,28 @@ class RoomSummary:
     duplicates: int
     partial: int
     errors: int
+    tournament_summaries: int = 0
 
 
 def summarize(file_results: Mapping[str, Any], config: Any) -> list[RoomSummary]:
-    """Group an import's per-file results (``Importer.file_results``) by room, busiest room first."""
+    """Group an import's per-file results (``Importer.file_results``) by room, busiest room first.
+
+    A tournament summary goes to the room it names, and counts as a summary rather than a hand.
+    """
     totals: dict[str, list[int]] = {}
-    for result in file_results.values():
+    for path, result in file_results.items():
         room = result.site or "?"
-        row = totals.setdefault(room, [0, 0, 0, 0, 0])
+        if getattr(result, "is_summary_file", False) and room == _POKERTRACKER:
+            room = _summary_room(path, room) or room
+        row = totals.setdefault(room, [0, 0, 0, 0, 0, 0])
         row[0] += 1
         row[1] += result.stored
         row[2] += result.duplicates
         row[3] += result.partial
         row[4] += result.errors
+        row[5] += getattr(result, "summaries", 0)
     summaries = [
-        RoomSummary(site, configured_hero(config, site), files, stored, dups, partial, errors)
-        for site, (files, stored, dups, partial, errors) in totals.items()
+        RoomSummary(site, configured_hero(config, site), files, stored, dups, partial, errors, tournaments)
+        for site, (files, stored, dups, partial, errors, tournaments) in totals.items()
     ]
     return sorted(summaries, key=lambda room: (-room.stored, room.site))

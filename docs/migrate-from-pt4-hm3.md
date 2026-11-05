@@ -1,7 +1,7 @@
 # Moving from PokerTracker 4 or Holdem Manager 3
 
-This guide brings your hand history over from PokerTracker 4 (PT4) or Holdem Manager 3 (HM3). Both
-trackers keep the hands they import in each poker room's **own** format. fpdb's room parsers read those
+This guide brings your hand history over from PokerTracker 4 (PT4) or Holdem Manager 3 (HM3). The
+tracker's **archive folder** holds each poker room's original files. fpdb's room parsers read those
 files as they are, so moving over amounts to one import of the right folder.
 
 | What | Comes over today | Tracked in |
@@ -25,8 +25,10 @@ Menu names move between tracker versions. If yours differ, look for the setting 
 *processed* or *archived* hand histories go.
 
 **No archive?** Use the tracker's hand export instead (in PT4, *Database ▸ Export Hands*). An export
-may not be in the room's original format. The import summary lists every file fpdb could not read,
-so nothing goes missing silently. If a whole export is refused, please open an issue and attach a
+may not be in the room's original format: PT4 writes iPoker hands as text starting with `GAME #`, not
+as the room's XML. fpdb reads that text too. Each tournament also gets a summary file, which the import
+counts apart from the hands. The import summary lists every file fpdb could not read, so nothing goes
+missing silently. If a whole export is refused, please open an issue and attach a
 few hands, with the names anonymised if you prefer.
 
 ## 2. Set your screen names first

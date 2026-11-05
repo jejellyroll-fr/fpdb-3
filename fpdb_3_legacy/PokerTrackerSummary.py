@@ -70,6 +70,7 @@ class PokerTrackerSummary(TourneySummary):
                         Finished:\\s(?P<DATETIME1>.+?)\\s+
                         Buyin:\\s(?P<CURRENCY>[{LS}]?)(?P<BUYIN>[,.0-9]+)\\s+
                         (Bounty:\\s[{LS}]?(?P<BOUNTY>[,.0-9]+)\\s+)?
+                        (BountyVal:\\s[{LS}]?[,.0-9]+\\s+)?
                         Fee:\\s[{LS}]?(?P<FEE>[,.0-9]+)\\s+
                         (Prize\\sPool:\\s[{LS}]?(?P<PRIZEPOOL>[,.0-9]+)\\s+)?
                         (Rebuy:\\s[{LS}]?(?P<REBUYAMT>[,.0-9]+)\\s+)?
@@ -113,6 +114,8 @@ class PokerTrackerSummary(TourneySummary):
         "Party Poker": "PartyPoker",
         "Merge": "Merge",
         "Winamax": "Winamax",
+        "iPoker": "iPoker",
+        "GG Poker": "GGPoker",
     }
 
     def getSplitRe(self, _head: str) -> re.Pattern[str]:

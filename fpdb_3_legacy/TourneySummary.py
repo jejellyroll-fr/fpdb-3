@@ -80,6 +80,7 @@ class TourneySummary:
         "Merge": 12,
         "PKR": 13,
         "iPoker": 14,
+        "GGPoker": 27,
         "Winamax": 15,
         "Everest": 16,
         "Cake": 17,

@@ -13,6 +13,36 @@ class StatComparison:
     fpdb_value: Any
     matched: bool
     delta: float | None = None
+    player: str = ""
+
+
+# One row per player of one hand. get_stats_from_hand would not do: it returns the HUD's
+# aggregates over a stat range, keyed by player id.
+FPDB_STATS_PER_HAND = (
+    "SELECT p.name, hp.street0VPI, hp.street0Aggr, hp.street0_3BDone, hp.street1Seen "  # nosec B608  # nosemgrep
+    "FROM HandsPlayers hp "
+    "INNER JOIN Players p ON hp.playerId = p.id "
+    "WHERE hp.handId = %s"
+)
+
+# (compared stat, key in the PT4 row, key in the FPDB row)
+_COMPARED_STATS = (
+    ("vpip", "flg_vpip", "street0VPI"),
+    ("pfr", "pfr", "street0Aggr"),
+    ("three_bet", "three_bet", "street0_3BDone"),
+    ("saw_flop", "flg_f_saw", "street1Seen"),
+)
+
+
+def _get_fpdb_stats_for_hand(fpdb_db, fpdb_hand_id: int) -> dict[str, dict[str, Any]]:
+    """Return player name -> this hand's HandsPlayers flags."""
+    placeholder = fpdb_db.sql.query.get("placeholder", "%s")
+    cursor = fpdb_db.connection.cursor()
+    cursor.execute(FPDB_STATS_PER_HAND.replace("%s", placeholder), (fpdb_hand_id,))  # nosemgrep
+    return {
+        row[0]: {"street0VPI": row[1], "street0Aggr": row[2], "street0_3BDone": row[3], "street1Seen": row[4]}
+        for row in cursor.fetchall()
+    }
 
 
 def compare_hand(
@@ -22,6 +52,9 @@ def compare_hand(
     fpdb_hand_id: int,
 ) -> list[StatComparison]:
     """Compare stats between PT4 and FPDB for a given hand.
+
+    A player found on one side only is reported as a failed "seated" comparison,
+    so that a hand no name matches on cannot pass for a hand without differences.
 
     Args:
         pt4_conn: psycopg connection to PT4 database
@@ -34,43 +67,26 @@ def compare_hand(
     """
     from fpdb_3_legacy.pt4_adapter.queries import get_pt4_stats_for_hand
 
+    pt4_by_name = {s["player_name"]: s for s in get_pt4_stats_for_hand(pt4_conn, pt4_hand_id)}
+    fpdb_by_name = _get_fpdb_stats_for_hand(fpdb_db, fpdb_hand_id)
+
     comparisons = []
-
-    # Get PT4 stats
-    pt4_stats = get_pt4_stats_for_hand(pt4_conn, pt4_hand_id)
-
-    # Get FPDB stats
-    fpdb_stats = fpdb_db.get_stats_from_hand(fpdb_hand_id, "ring")
-
-    # Build lookup by player name for PT4
-    pt4_by_name = {s["player_name"]: s for s in pt4_stats}
-
-    # Compare each player
-    for player_name, stat_dict in fpdb_stats.items():
-        if player_name not in pt4_by_name:
+    for player_name in sorted(pt4_by_name.keys() | fpdb_by_name.keys()):
+        pt4_player = pt4_by_name.get(player_name)
+        fpdb_player = fpdb_by_name.get(player_name)
+        if pt4_player is None or fpdb_player is None:
+            comparisons.append(StatComparison(
+                name="seated",
+                pt4_value=pt4_player is not None,
+                fpdb_value=fpdb_player is not None,
+                matched=False,
+                player=player_name,
+            ))
             continue
-
-        pt4_player = pt4_by_name[player_name]
-
-        # Compare vpip
-        comparisons.append(_compare_bool(
-            "vpip", pt4_player.get("flg_vpip"), stat_dict.get("vpip"),
-        ))
-
-        # Compare pfr
-        comparisons.append(_compare_bool(
-            "pfr", pt4_player.get("pfr"), stat_dict.get("pfr"),
-        ))
-
-        # Compare three_bet
-        comparisons.append(_compare_bool(
-            "three_bet", pt4_player.get("three_bet"), stat_dict.get("tb_0"),
-        ))
-
-        # Compare saw_flop
-        comparisons.append(_compare_bool(
-            "saw_flop", pt4_player.get("flg_saw_flop"), stat_dict.get("saw_f"),
-        ))
+        for stat, pt4_key, fpdb_key in _COMPARED_STATS:
+            comparison = _compare_bool(stat, pt4_player.get(pt4_key), fpdb_player.get(fpdb_key))
+            comparison.player = player_name
+            comparisons.append(comparison)
 
     return comparisons
 
