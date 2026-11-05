@@ -339,5 +339,5 @@ def test_going_back_forgets_the_question_of_the_previous_scan(qtbot, config, tmp
     wizard.next()
     qtbot.waitUntil(lambda: wizard.scan_page.scan is not None, timeout=10000)
 
-    assert wizard.scan_page.room_choices == {}
+    assert not wizard.scan_page.room_choices
     assert not wizard.scan_page.room_question.isVisibleTo(wizard)

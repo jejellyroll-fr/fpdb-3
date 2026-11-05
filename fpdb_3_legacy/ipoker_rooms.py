@@ -41,13 +41,13 @@ def room_for(config: Any, names: Iterable[str], chosen: Mapping[str, str] | None
 
     In order: the room the user chose for one of the names; the one skin that has
     one of them as an account, an enabled skin before a disabled one; the one skin
-    enabled. A name held on several skins settles nothing, since any of them could
-    be right, so it is not resolved by the one-enabled-skin rule either.
+    enabled. Names pointing at several rooms settle nothing, since any of them could
+    be right, so they are not resolved by a later rule either.
     """
     wanted = {name for name in names if name}
-    for name in wanted:
-        if chosen and name in chosen:
-            return chosen[name]
+    answers = {chosen[name] for name in wanted if name in chosen} if chosen else set()
+    if answers:
+        return answers.pop() if len(answers) == 1 else None
     folded = {name.casefold() for name in wanted}
     skins = skins_of(config)
     enabled = [site for site in skins if getattr(site, "enabled", False)]

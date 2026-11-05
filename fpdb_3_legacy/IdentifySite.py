@@ -286,21 +286,14 @@ class IdentifySite:
                 path_len = max(path_len, len(cfg_abs))
         return path_len
 
-    def _select_network_skin_site(self, path, fallback_site, network, preferred=None):
-        """Resolve the skin site of a multi-skin network from the file path.
-
-        ``preferred`` names the skin to use when no configured path holds the file.
-        """
-        supported = getattr(self.config, "supported_sites", None)
-        if not supported:
-            return fallback_site
-        wpn_sites = [s for s in supported.values() if getattr(s, "network", "") == network]
-        if not wpn_sites:
-            return fallback_site
-
+    def _best_network_skin(self, path, network):
+        """The skin of a network best fitting this file, with whether a configured path holds it and it is enabled."""
+        supported = getattr(self.config, "supported_sites", None) or {}
         norm_path = os.path.normcase(os.path.abspath(path))
         best_site, best_score = None, None
-        for site in wpn_sites:
+        for site in supported.values():
+            if getattr(site, "network", "") != network:
+                continue
             path_len = self._configured_path_length(site, norm_path)
             # Rank candidates: a file under a configured path beats non-matches,
             # an enabled skin beats a disabled one, and a longer (more specific)
@@ -308,28 +301,34 @@ class IdentifySite:
             score = (path_len >= 0, bool(site.enabled), path_len)
             if best_score is None or score > best_score:
                 best_site, best_score = site, score
-
         if best_site is None or best_score is None:
-            # wpn_sites is non-empty (guarded above), so the loop always fills
-            # these; the check keeps the types non-optional for the rest.
+            return None
+        return best_site, best_score[0], best_score[1]
+
+    @staticmethod
+    def _site_named(fallback_site, name):
+        if name == fallback_site.name:
             return fallback_site
-        matched_by_path, is_enabled, _ = best_score
+        skin_site = copy.copy(fallback_site)
+        skin_site.name = name
+        return skin_site
+
+    def _select_network_skin_site(self, path, fallback_site, network, preferred=None):
+        """Resolve the skin site of a multi-skin network from the file path.
+
+        ``preferred`` names the skin to use when no configured path holds the file.
+        """
+        best = self._best_network_skin(path, network)
+        if best is None:
+            return fallback_site
+        site, matched_by_path, is_enabled = best
         if preferred and not matched_by_path:
-            if preferred == fallback_site.name:
-                return fallback_site
-            skin_site = copy.copy(fallback_site)
-            skin_site.name = preferred
-            return skin_site
+            return self._site_named(fallback_site, preferred)
         # Nothing matched by path and nothing is enabled: keep the fallback
         # rather than silently renaming to an arbitrary skin.
         if not matched_by_path and not is_enabled:
             return fallback_site
-        if best_site.site_name == fallback_site.name:
-            return fallback_site
-
-        skin_site = copy.copy(fallback_site)
-        skin_site.name = best_site.site_name
-        return skin_site
+        return self._site_named(fallback_site, site.site_name)
 
     def scan(self, path) -> None:
         if os.path.isdir(path):

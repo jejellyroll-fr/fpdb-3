@@ -158,6 +158,18 @@ def test_the_users_answer_beats_the_configuration() -> None:
     assert ipoker_rooms.room_for(config, ["alice"], {"alice": "FDJ Poker"}) == "FDJ Poker"
 
 
+def test_answers_disagreeing_on_a_summary_settle_nothing() -> None:
+    config = _config(_skin("PMU Poker"), _skin("FDJ Poker"))
+
+    assert ipoker_rooms.room_for(config, ["alice", "bob"], {"alice": "PMU Poker", "bob": "FDJ Poker"}) is None
+
+
+def test_answers_agreeing_on_a_summary_settle_it() -> None:
+    config = _config(_skin("PMU Poker"), _skin("FDJ Poker"))
+
+    assert ipoker_rooms.room_for(config, ["alice", "bob"], {"alice": "PMU Poker", "bob": "PMU Poker"}) == "PMU Poker"
+
+
 def test_the_rooms_offered_start_with_the_enabled_ones() -> None:
     config = _config(_skin("Betclic Poker", enabled=False), _skin("PMU Poker"), _skin("FDJ Poker"))
 
@@ -181,7 +193,7 @@ def test_the_scan_previews_each_account_under_its_room(accounts) -> None:
     scan = scan_folder(accounts, str(EXPORT))
 
     assert {room: len(files) for room, files in scan.rooms.items()} == {"PMU Poker": 1, "Bwin.fr Poker": 3}
-    assert scan.undecided == {}
+    assert not scan.undecided
 
 
 def test_the_scan_holds_back_a_hero_only_the_user_can_place(undecided) -> None:
