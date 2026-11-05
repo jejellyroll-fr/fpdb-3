@@ -20,6 +20,7 @@ from fpdb_3_legacy.hud_main_base import log
 from fpdb_3_legacy.hud_read_service import (
     HudBatchReadRequest,
     HudReadService,
+    mark_players_with_notes,
 )
 
 # How long the recovery worker waits between attempts to re-open a database
@@ -284,6 +285,7 @@ class HudReadWorker(QThread):
                 gametype_id=gametype_id,
                 num_seats=request.num_seats,
             )
+            mark_players_with_notes(database, stat_dict)
         finally:
             with contextlib.suppress(Exception):
                 database.connection.rollback()

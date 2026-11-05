@@ -149,6 +149,21 @@ class _NullConnection:
         """There is no connection on the Qt side."""
 
 
+def mark_players_with_notes(database: Any, *stat_dicts: dict) -> None:
+    """Record on each player's stats whether they have notes.
+
+    The note cell of a seat shows this. Reading it here, on the worker, is what
+    keeps that cell from opening a connection on the Qt thread for every seat of
+    every table on every refresh, which froze the HUD on a remote database (#680).
+    """
+    rows = [
+        (player, stats) for stat_dict in stat_dicts for player, stats in stat_dict.items() if isinstance(player, int)
+    ]
+    with_notes = database.players_with_notes([player for player, _stats in rows])
+    for player, stats in rows:
+        stats["has_notes"] = player in with_notes
+
+
 class HudReplayDatabase:
     """Serve a worker snapshot through the legacy Database read API."""
 
@@ -452,6 +467,7 @@ class HudReadService:
             num_seats,
             poker_game=poker_game,
         )
+        mark_players_with_notes(self.database, stat_dict)
         winners, actions = self._mucked_data(hand_id, needs_mucked_data)
         positions = prefetched.get("positions", {}).get(_hand_key(hand_id))
         if positions is None:
@@ -773,6 +789,7 @@ class HudReadService:
                 )
                 continue
 
+            mark_players_with_notes(self.database, *stats.values())
             stats_by_key = {_hand_key(hand_id): value for hand_id, value in stats.items()}
             for prepared in prepared_hands:
                 prepared.stat_dict = stats_by_key.get(_hand_key(prepared.hand_id), {})
@@ -802,6 +819,7 @@ class HudReadService:
                     context.num_seats,
                     poker_game=context.poker_game,
                 )
+                mark_players_with_notes(self.database, prepared.stat_dict)
                 prepared.loaded_fields = prepared.loaded_fields | {"stat_dict"}
                 self._attach_analytics(prepared)
             except Exception as exc:

@@ -11,6 +11,8 @@ module or by its callers, never input.
 from __future__ import annotations
 
 import contextlib
+import threading
+import time
 from collections.abc import Callable, Iterator
 from typing import TYPE_CHECKING, Any
 
@@ -24,13 +26,22 @@ log = get_logger("db")
 # How long a migration may wait for a table lock before giving up.
 #
 # PostgreSQL and MySQL both wait forever by default, and ``ensure_feature_tables``
-# runs on *every* Database() construction -- which the GUI does once per heavy
+# runs from Database() construction -- which the GUI does once per heavy
 # tab. One tab left idle inside a read transaction on Gametypes is enough to
 # make the next tab's ALTER TABLE wait on it for the life of the process, on the
 # GUI thread, with no timeout and nothing logged: the freeze reported in #249.
-# Migrations are re-attempted on every connection, so losing a race is a delay
-# until the next one, while blocking on it is the application hanging.
+# Migrations are re-attempted (see FEATURE_TABLES_RECHECK_S), so losing a race is
+# a delay until the next attempt, while blocking on it is the application hanging.
 DDL_LOCK_TIMEOUT_MS = 2000
+
+# How long a process trusts the last migration pass on a server database. The
+# pass is about 50 statements: at 10 ms a round trip, every new connection cost
+# seconds before it could do any work (#680). It stays periodic rather than
+# once per process because each migration is best-effort, and one that lost a
+# race for a lock must get another chance.
+FEATURE_TABLES_RECHECK_S = 600.0
+_feature_tables_checked: dict[tuple[Any, ...], float] = {}
+_feature_tables_lock = threading.Lock()
 
 # Width Gametypes.category must have for aof_holdem (10 chars) to fit. The
 # statements are spelled out rather than formatted from the constant: the
@@ -502,6 +513,9 @@ class DatabaseMigrationsMixin:
     # Provided by Database.
     sql: Any
     backend: int
+    host: Any
+    port: Any
+    database: Any
     MYSQL_INNODB: int
     PGSQL: int
     SQLITE: int
@@ -555,12 +569,33 @@ class DatabaseMigrationsMixin:
                         self.get_cursor().execute(RESET_MYSQL_LOCK_TIMEOUT)
                     self.commit()
 
+    def ensure_feature_tables_on_connect(self) -> None:
+        """Run the migration pass for a new connection, unless it just ran.
+
+        SQLite always runs it: the file is local, so the pass costs next to
+        nothing, and a path can hold a different database from one moment to the next.
+        """
+        if self.backend != self.SQLITE:
+            key = (self.backend, self.host, self.port, self.database)
+            now = time.monotonic()
+            with _feature_tables_lock:
+                last = _feature_tables_checked.get(key)
+                if last is not None and now - last < FEATURE_TABLES_RECHECK_S:
+                    return
+                _feature_tables_checked[key] = now
+        self.ensure_feature_tables()
+
+    def forget_feature_tables_check(self) -> None:
+        """The tables just changed: the next connection must run the pass again."""
+        with _feature_tables_lock:
+            _feature_tables_checked.clear()
+
     def ensure_feature_tables(self) -> None:
         """Create tables added after the original schema if they are missing, so
         that databases created by older versions keep working (used for the
         showdown combinations, cashout details, and additive HudCache stats).
 
-        Runs on every connection, so it must never block: see
+        Runs for new connections, so it must never block: see
         :meth:`bounded_ddl_lock_wait`.
         """
         with self.bounded_ddl_lock_wait():
