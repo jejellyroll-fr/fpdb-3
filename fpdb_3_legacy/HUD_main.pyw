@@ -67,6 +67,7 @@ from fpdb_3_legacy.interlocks import (
     read_lock_owner,
 )
 from fpdb_3_legacy.loggingFpdb import hud_trace
+from fpdb_3_legacy.main_thread_gc import install_main_thread_gc
 from fpdb_3_legacy.SmartHudManager import get_smart_hud_manager
 from fpdb_3_legacy.table_info import TableInfo
 
@@ -1060,6 +1061,8 @@ if __name__ == "__main__":
         (options, argv) = Options.fpdb_options()
 
         app = QApplication([])
+        # Before any worker thread starts: see main_thread_gc (#707).
+        install_main_thread_gc(app)
 
         hm = HudMain(options, db_name=options.dbname)
 

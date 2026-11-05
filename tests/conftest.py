@@ -119,3 +119,24 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
         terminalreporter.section("Windows CI diagnostics")
         for line in log_lines:
             terminalreporter.write_line(line)
+
+
+# Collect on the main thread only, as fpdb and the HUD do (#707). Left to
+# Python, a collection runs on whichever thread crosses the threshold: a worker
+# such as HudReadWorker then destroyed widgets of the main thread, and the Qt
+# suite deadlocked on it. Between tests, on the main thread, the policy of
+# fpdb_3_legacy.main_thread_gc runs instead of its timer.
+def pytest_sessionstart(session):
+    import gc
+
+    gc.disable()
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_runtest_teardown(item, nextitem):
+    import gc
+
+    from fpdb_3_legacy.main_thread_gc import collect_if_due
+
+    gc.disable()  # in case a test turned it back on
+    collect_if_due()
