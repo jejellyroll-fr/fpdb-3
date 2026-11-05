@@ -107,9 +107,9 @@ def test_close_button_click_closes_the_popup(slot_errors):
 @pytest.mark.parametrize(
     ("label", "called"),
     [
-        ("Save HUD Layout", "save_layout"),
-        ("Restart This HUD", "parent.kill_hud"),
-        ("Stop this HUD", "parent.blacklist_hud"),
+        ("Save layout", "save_layout"),
+        ("Restart", "parent.kill_hud"),
+        ("Stop", "parent.blacklist_hud"),
     ],
 )
 def test_action_buttons_run_their_action_when_clicked(slot_errors, label, called):
@@ -130,7 +130,7 @@ def test_restart_button_survives_the_hud_closing_the_popup_first(slot_errors):
     menu = _popped_menu(parent)
     parent.hud.parent.kill_hud.side_effect = lambda *_args: parent.destroy()
 
-    QTest.mouseClick(_button(menu, "Restart This HUD"), Qt.MouseButton.LeftButton)
+    QTest.mouseClick(_button(menu, "Restart"), Qt.MouseButton.LeftButton)
 
     assert slot_errors == []
     assert not menu.isVisible()

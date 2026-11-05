@@ -100,6 +100,11 @@ def menu_layout() -> tuple[Menu, ...]:
                 MenuItem(N_("Site Settings"), "dia_site_preferences"),
                 MenuItem(N_("Seat Settings"), "dia_site_preferences_seat"),
                 MenuItem(N_("HUD Preferences"), "dia_hud_preferences"),
+                MenuItem(
+                    N_("HUD Options"),
+                    "dia_hud_options",
+                    tip=N_("Choose the blinds, seats and period that new HUD tables start with"),
+                ),
                 MenuItem(N_("Manage HUD Sites"), "dia_manage_hud_sites"),
                 MenuItem(
                     N_("Auto Note Rules"),

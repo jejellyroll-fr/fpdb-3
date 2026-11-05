@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 22:00+0100\n"
+"POT-Creation-Date: 2026-11-05 10:16+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -67,6 +67,69 @@ msgstr "Neįgyvendinta %s: '%s' '%s'"
 #, fuzzy
 msgid "reading antes"
 msgstr "skaitomi antai"
+
+#: fpdb_3_legacy/Aux_Hud.py
+#: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
+msgid "Close"
+msgstr "Uždaryti"
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Close this menu"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Drag to move this menu"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Force layout..."
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "HUD - stats"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy
+msgid "Restart"
+msgstr "Pradžia"
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Restart the HUD on this table"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy
+#| msgid "Save HUD Layout"
+msgid "Save layout"
+msgstr "Išsaugoti HUD išdėstymą"
+
+#: fpdb_3_legacy/Aux_Hud.py
+msgid "Save where this HUD's windows are"
+msgstr ""
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy
+msgid "Stat set"
+msgstr "Statistika"
+
+#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/GuiCoinPokerCapture.py
+#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/session_guard_dialog.py
+#, fuzzy
+msgid "Stop"
+msgstr "Stabdyti"
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy
+msgid "Stop the HUD on this table"
+msgstr "Kopijuoti visą lentelę"
+
+#: fpdb_3_legacy/Aux_Hud.py
+#, fuzzy, python-brace-format
+msgid "{label} - HUD configuration"
+msgstr "Iš naujo įkelti konfigūraciją"
 
 #: fpdb_3_legacy/BossToFpdb.py
 #, python-format
@@ -757,6 +820,18 @@ msgstr ""
 msgid "Time between imports (seconds):"
 msgstr "Laikas tarp importų (sekundės):"
 
+#: fpdb_3_legacy/GuiAutoImport.py fpdb_3_legacy/GuiBulkImport.py
+#: fpdb_3_legacy/ModernSitePreferences.py
+#, python-format
+msgid ""
+"macOS does not let fpdb read this folder:\n"
+"%s\n"
+"\n"
+"Allow the app that launches fpdb (your terminal, or fpdb itself) in System "
+"Settings > Privacy & Security > Full Disk Access, then restart fpdb. Until "
+"then, its hands cannot be imported."
+msgstr ""
+
 #: fpdb_3_legacy/GuiAutoNoteRules.py
 #, fuzzy
 msgid "Automatic Notes"
@@ -839,7 +914,8 @@ msgstr "Rankos"
 msgid "Notes: 0"
 msgstr "Pastabos: 0"
 
-#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Player"
 msgstr "Žaidėjas"
@@ -938,6 +1014,10 @@ msgstr "Pasirinkite paskirties aplanką"
 #, fuzzy
 msgid "Configured Import Directories:"
 msgstr "Sukonfigūruoti importo aplankai:"
+
+#: fpdb_3_legacy/GuiBulkImport.py fpdb_3_legacy/ModernSitePreferences.py
+msgid "Folder access needed"
+msgstr ""
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, fuzzy, python-brace-format
@@ -1565,6 +1645,7 @@ msgid "Analytics data unavailable"
 msgstr "Analitiniai duomenys nepasiekiami"
 
 #: fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/hud_options_panel.py
 #, fuzzy
 msgid "Any"
 msgstr "Bet kuris"
@@ -2556,7 +2637,7 @@ msgstr "nuo"
 msgid "or type a value"
 msgstr "arba įveskite reikšmę"
 
-#: fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/hud_options_panel.py
 #, fuzzy
 msgid "to"
 msgstr "iki"
@@ -2658,7 +2739,8 @@ msgstr "Sumos vietine valiuta praleistos (kelios valiutos)"
 msgid "Profit: {profit} · Currency/hour: {hour}"
 msgstr "Pelnas: {profit} · Valiuta/val.: {hour}"
 
-#: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/research_labels.py
+#: fpdb_3_legacy/GuiSessionViewer.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Session"
 msgstr "Sesijos"
@@ -3158,10 +3240,6 @@ msgid "Enter your username"
 msgstr "Įveskite savo naudotojo vardą"
 
 #: fpdb_3_legacy/ModernSitePreferences.py
-msgid "Folder access needed"
-msgstr ""
-
-#: fpdb_3_legacy/ModernSitePreferences.py
 #, fuzzy
 msgid "Hand History:"
 msgstr "Rankų istorija:"
@@ -3226,17 +3304,6 @@ msgstr "Turnyrai"
 #, fuzzy
 msgid "Your names in these hands, one per line"
 msgstr "Jūsų vardai šiose rankose, po vieną eilutėje"
-
-#: fpdb_3_legacy/ModernSitePreferences.py
-#, python-format
-msgid ""
-"macOS does not let fpdb read this folder:\n"
-"%s\n"
-"\n"
-"Allow the app that launches fpdb (your terminal, or fpdb itself) in System "
-"Settings > Privacy & Security > Full Disk Access, then restart fpdb. Until "
-"then, its hands cannot be imported."
-msgstr ""
 
 #: fpdb_3_legacy/ModernSitePreferences.py
 msgid "🎭"
@@ -3395,13 +3462,6 @@ msgstr "Prašoma teisių… patvirtinkite užklausą, tada žaiskite CoinPoker."
 #, fuzzy
 msgid "Start capture"
 msgstr "Pradėti fiksavimą"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
-#: fpdb_3_legacy/session_guard_dialog.py
-#, fuzzy
-msgid "Stop"
-msgstr "Stabdyti"
 
 #: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
 #, fuzzy
@@ -4026,6 +4086,75 @@ msgstr ""
 "Šios rankos nepavyko atvaizduoti:\n"
 "%s"
 
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "0.1x to 10x"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "0.33x to 3x"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "0.5x to 2x"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "All levels"
+msgstr "Visi lygiai"
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "All time"
+msgstr "Visą laiką"
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "Blinds"
+msgstr "Didieji blindai"
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "Custom"
+msgstr "Pagal nuožiūrą"
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "Exact"
+msgstr "Būtent"
+
+#: fpdb_3_legacy/hud_options_panel.py fpdb_3_legacy/menu_layout.py
+msgid "HUD Options"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "Last n days"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+#, fuzzy
+msgid "Opponents"
+msgstr "Varžovų ataskaita"
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "Period"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Seats"
+msgstr "Vietos"
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid "This level"
+msgstr ""
+
+#: fpdb_3_legacy/hud_options_panel.py
+msgid ""
+"Used by tables opened from now on. Open tables keep their current options."
+msgstr ""
+
 #: fpdb_3_legacy/i18n.py
 #, fuzzy
 msgid "Stack"
@@ -4174,6 +4303,10 @@ msgstr "Cash"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/update_notice.py
 msgid "Check for updates"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Choose the blinds, seats and period that new HUD tables start with"
 msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
@@ -5129,11 +5262,6 @@ msgstr "Imties stulpelis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Seats"
-msgstr "Vietos"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Select Popup:"
 msgstr "Pasirinkite iššokantį langą:"
 
@@ -5380,11 +5508,6 @@ msgstr "🧩 Dinaminiai skydeliai"
 #, fuzzy
 msgid "100% Reset"
 msgstr "100% atstatyti"
-
-#: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
-#, fuzzy
-msgid "Close"
-msgstr "Uždaryti"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, fuzzy, python-brace-format
@@ -7736,10 +7859,6 @@ msgstr ""
 #~ msgid "ALL STREETS"
 #~ msgstr "VISOS GATVĖS"
 
-#, fuzzy
-#~ msgid "All Levels"
-#~ msgstr "Visi lygiai"
-
 #~ msgid "Analyze took %.1f seconds"
 #~ msgstr "Analizė užtruko %.1f sekundžių"
 
@@ -7871,10 +7990,6 @@ msgstr ""
 
 #~ msgid "Error resizing HUD for table: %s."
 #~ msgstr "Klaida keičiant HUD matmenis stalui: %s"
-
-#, fuzzy
-#~ msgid "Exact"
-#~ msgstr "Būtent"
 
 #~ msgid "FEE"
 #~ msgstr "MOKESTIS"
@@ -8177,9 +8292,6 @@ msgstr ""
 
 #~ msgid "STREETS"
 #~ msgstr "GATVĖS"
-
-#~ msgid "Save HUD Layout"
-#~ msgstr "Išsaugoti HUD išdėstymą"
 
 #~ msgid "Session candlestick graph"
 #~ msgstr "Sesijos žvakinis grafikas"

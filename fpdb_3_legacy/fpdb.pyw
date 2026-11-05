@@ -102,6 +102,7 @@ from fpdb_3_legacy.ConfigurationManager import ConfigurationManager
 from fpdb_3_legacy.disabled_sites import is_site_disabled
 from fpdb_3_legacy.Exceptions import FpdbError
 from fpdb_3_legacy.GuiConfigObserver import GuiConfigObserver
+from fpdb_3_legacy.hud_options_panel import HudOptionsDialog
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.L10n import set_locale_translation
 from fpdb_3_legacy.ui_instrumentation import TabOpenProfiler, perf_level
@@ -436,6 +437,17 @@ class fpdb(QMainWindow):
 
             self.config.save()
             self.reload_config()
+
+    def dia_hud_options(self, widget, data=None) -> None:
+        """Edit the options new HUD tables start with; the HUD reads them from the saved file."""
+        # The HUD process may have changed the file since it was last read.
+        self.load_profile()
+
+        dia = HudOptionsDialog(self.config.get_hud_ui_parameters(), self)
+        if dia.exec():
+            self.config.set_hud_ui_parameters(dia.option_values())
+            self.config.save()
+        dia.deleteLater()
 
     def dia_import_pt4hud(self, widget, data=None) -> None:
         """Import a PokerTracker 4 .pt4hud layout into the HUD config.

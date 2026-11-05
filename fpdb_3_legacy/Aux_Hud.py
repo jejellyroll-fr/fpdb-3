@@ -25,8 +25,8 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QCloseEvent, QFont, QPixmap
+from PySide6.QtCore import QPoint, Qt
+from PySide6.QtGui import QCloseEvent, QFont, QMouseEvent, QPixmap
 from PySide6.QtWidgets import (
     QComboBox,
     QFrame,
@@ -34,15 +34,15 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QPushButton,
-    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
 
 #    FreePokerTools modules
 from fpdb_3_legacy import Aux_Base, Configuration, Popup, Stats
+from fpdb_3_legacy.hud_options_panel import COMPACT_STYLE, HudOptionsPanel, bound_combo, fit_to_content
 from fpdb_3_legacy.hud_profiles import HudPositionScope
-from fpdb_3_legacy.i18n import gettext as _t
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
@@ -1286,7 +1286,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         """
         super().__init__(aw, seat)
         self.popup_count = 0
-        self.setWindowTitle(_t("HUD - stats"))
+        self.setWindowTitle(_("HUD - stats"))
 
     # button_release_left is inherited from Aux_Base.SeatWindow: it releases the
     # drag grab and, only if the window actually moved, calls configure_event_cb
@@ -1875,227 +1875,90 @@ class SimpleTablePopupMenu(QWidget):
             None,
             Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint,
         )
-        # Without this every menu opened stays alive once closed: the partials
+        # Without this every menu opened stays alive once closed: the slots
         # connected in build_button() and friends keep a reference to it.
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.parentwin = parentwin
+        self._drag_offset: QPoint | None = None
         table_x = max(0, self.parentwin.hud.table.x) if self.parentwin.hud.table.x is not None else 50
         table_y = max(0, self.parentwin.hud.table.y) if self.parentwin.hud.table.y is not None else 50
-        pos_x = table_x + self.parentwin.aw.xshift
-        pos_y = table_y + self.parentwin.aw.yshift
-        clamped_x, clamped_y = Aux_Base.clamp_to_screen(pos_x, pos_y, 400, 300)  # Larger window size
-        self.move(clamped_x, clamped_y)
-        self.setWindowTitle(f"{self.parentwin.menu_label} - HUD configuration")
+        self.move(table_x + self.parentwin.aw.xshift, table_y + self.parentwin.aw.yshift)
+        self.setWindowTitle(_("{label} - HUD configuration").format(label=self.parentwin.menu_label))
         self._setup_ui()
+        self._fit_on_screen()
         self.show()
         self.raise_()
 
     def _setup_ui(self) -> None:
-        """Set up the user interface for the table popup menu.
+        """Lay out the actions, the stat set and layout choices, then the stat range options."""
+        self.setStyleSheet(COMPACT_STYLE)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(6, 6, 6, 6)
+        layout.setSpacing(4)
+        layout.addLayout(self._create_actions_row())
+        layout.addLayout(self._create_stat_set_row())
+        self.options_panel = HudOptionsPanel(self.parentwin.hud.hud_params, self)
+        self.options_panel.layout_changed.connect(self._fit_on_screen)
+        layout.addWidget(self.options_panel)
 
-        This method initializes the combo box dictionaries, creates the main controls and stats configuration boxes,
-        and arranges them in the popup menu layout.
-        """
-        # Dictionaries for combo boxes
-        stat_range_combo_dict = self._create_stat_range_dict()
-        seats_style_combo_dict = self._create_seats_style_dict()
-        multiplier_combo_dict = self._create_multiplier_dict()
-        cb_max_dict = self._create_max_seats_dict()
+    def _create_actions_row(self) -> QHBoxLayout:
+        """Create the row with the drag handle and the actions on this table's HUD."""
+        row = QHBoxLayout()
+        row.setSpacing(4)
+        grip = QLabel("≡")
+        grip.setCursor(Qt.CursorShape.SizeAllCursor)
+        grip.setToolTip(_("Drag to move this menu"))
+        row.addWidget(grip)
+        row.addWidget(self.build_button(_("Restart"), "kill", _("Restart the HUD on this table")))
+        row.addWidget(self.build_button(_("Save layout"), "save", _("Save where this HUD's windows are")))
+        row.addWidget(self.build_button(_("Stop"), "blacklist", _("Stop the HUD on this table")))
+        row.addWidget(self.build_button(_("Close"), "close", _("Close this menu")))
+        return row
 
-        # Layouts
-        grid = QGridLayout()
-        self.setLayout(grid)
-        vbox1 = self._create_main_controls(cb_max_dict)
-        vbox2 = self._create_player_stats_box(
-            multiplier_combo_dict,
-            seats_style_combo_dict,
-            stat_range_combo_dict,
-        )
-        vbox3 = self._create_opponent_stats_box(
-            multiplier_combo_dict,
-            seats_style_combo_dict,
-            stat_range_combo_dict,
-        )
-
-        self.set_spinners_active()
-
-        grid.addLayout(vbox1, 0, 0)
-        grid.addLayout(vbox2, 0, 1)
-        grid.addLayout(vbox3, 0, 2)
-        grid.addWidget(QLabel(f"Stat set: {self.parentwin.aw.game_params.name}"), 1, 0)
-
-    def _create_main_controls(self, cb_max_dict: dict) -> QVBoxLayout:
-        """Create the main control buttons and selectors for the popup menu.
-
-        This method adds buttons for HUD control actions and, if available, a stat set selector and max seats combo box.
-
-        Args:
-            cb_max_dict: The dictionary for the max seats combo box.
-
-        Returns:
-            QVBoxLayout: The vertical layout containing all main controls.
-        """
-        vbox = QVBoxLayout()
-        vbox.addWidget(self.build_button("Restart This HUD", "kill"))
-        vbox.addWidget(self.build_button("Save HUD Layout", "save"))
-        vbox.addWidget(self.build_button("Stop this HUD", "blacklist"))
-        vbox.addWidget(self.build_button("Close", "close"))
-        vbox.addWidget(QLabel(""))
-
-        # Add stat set selector
+    def _create_stat_set_row(self) -> QHBoxLayout:
+        """Create the row choosing this table's stat set and forced layout."""
+        row = QHBoxLayout()
+        row.setSpacing(4)
+        row.addWidget(QLabel(_("Stat set")))
         stat_sets_dict = self._create_stat_sets_dict()
-        if len(stat_sets_dict) > 1:  # Only show if there are multiple stat sets
-            vbox.addWidget(QLabel(_t("Stat Set (HUD):")))
+        if len(stat_sets_dict) > 1:
             self.stat_set_combo = self.build_stat_set_combo(stat_sets_dict)
-            vbox.addWidget(self.stat_set_combo)
-            vbox.addWidget(QLabel(""))
+            row.addWidget(self.stat_set_combo, 1)
+        else:
+            row.addWidget(QLabel(self._get_current_stat_set()), 1)
+        force_layout = [(_("Force layout..."), None)]
+        force_layout += [(f"{seats}-max", seats) for seats in sorted(self.parentwin.hud.layout_set.layout)]
+        row.addWidget(bound_combo(self.parentwin.hud.hud_params, "new_max_seats", force_layout))
+        return row
 
-        vbox.addWidget(self.build_combo_and_set_active("new_max_seats", cb_max_dict))
-        return vbox
+    def _fit_on_screen(self) -> None:
+        """Take the size the content needs and keep all of it on screen."""
+        fit_to_content(self)
+        self.move(*Aux_Base.clamp_to_screen(self.x(), self.y(), self.width(), self.height()))
 
-    def _create_player_stats_box(
-        self,
-        multiplier_dict: dict,
-        seats_style_dict: dict,
-        stat_range_dict: dict,
-    ) -> QVBoxLayout:
-        """Create the player stats configuration box for the popup menu.
+    def mousePressEvent(self, event: QMouseEvent) -> None:  # noqa: N802 - Qt override
+        """Start moving the menu: the window has no title bar to drag it by."""
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._drag_offset = event.globalPosition().toPoint() - self.pos()
+            Aux_Base.set_drag_active(True)
+        super().mousePressEvent(event)
 
-        This method builds and arranges the controls for configuring player stats display,
-        including combo boxes and spinners.
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:  # noqa: N802 - Qt override
+        """Follow the mouse, staying on screen."""
+        if self._drag_offset is not None:
+            target = event.globalPosition().toPoint() - self._drag_offset
+            self.move(*Aux_Base.clamp_to_screen(target.x(), target.y(), self.width(), self.height()))
+        super().mouseMoveEvent(event)
 
-        Args:
-            multiplier_dict: The dictionary for the multiplier combo box.
-            seats_style_dict: The dictionary for the seats style combo box.
-            stat_range_dict: The dictionary for the stat range combo box.
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:  # noqa: N802 - Qt override
+        """Stop moving the menu."""
+        self._end_drag()
+        super().mouseReleaseEvent(event)
 
-        Returns:
-            QVBoxLayout: The vertical layout containing all player stats controls.
-        """
-        vbox = QVBoxLayout()
-        vbox.addWidget(QLabel(_t("Show Player Stats for")))
-        vbox.addWidget(
-            self.build_combo_and_set_active("h_agg_bb_mult", multiplier_dict),
-        )
-        vbox.addWidget(
-            self.build_combo_and_set_active("h_seats_style", seats_style_dict),
-        )
-        hbox = QHBoxLayout()
-        hbox.addWidget(QLabel(_t("Custom")))
-        self.h_nums_low_spinner = self.build_spinner("h_seats_cust_nums_low", 1, 9)
-        hbox.addWidget(self.h_nums_low_spinner)
-        hbox.addWidget(QLabel(_t("To")))
-        self.h_nums_high_spinner = self.build_spinner("h_seats_cust_nums_high", 2, 10)
-        hbox.addWidget(self.h_nums_high_spinner)
-        vbox.addLayout(hbox)
-        hbox = QHBoxLayout()
-        hbox.addWidget(
-            self.build_combo_and_set_active("h_stat_range", stat_range_dict),
-        )
-        self.h_hud_days_spinner = self.build_spinner("h_hud_days", 1, 9999)
-        hbox.addWidget(self.h_hud_days_spinner)
-        vbox.addLayout(hbox)
-        return vbox
-
-    def _create_opponent_stats_box(
-        self,
-        multiplier_dict: dict,
-        seats_style_dict: dict,
-        stat_range_dict: dict,
-    ) -> QVBoxLayout:
-        """Create the opponent stats configuration box for the popup menu.
-
-        This method builds and arranges the controls for configuring opponent stats display,
-        including combo boxes and spinners.
-
-        Args:
-            multiplier_dict: The dictionary for the multiplier combo box.
-            seats_style_dict: The dictionary for the seats style combo box.
-            stat_range_dict: The dictionary for the stat range combo box.
-
-        Returns:
-            QVBoxLayout: The vertical layout containing all opponent stats controls.
-        """
-        vbox = QVBoxLayout()
-        vbox.addWidget(QLabel(_t("Show Opponent Stats for")))
-        vbox.addWidget(self.build_combo_and_set_active("agg_bb_mult", multiplier_dict))
-        vbox.addWidget(
-            self.build_combo_and_set_active("seats_style", seats_style_dict),
-        )
-        hbox = QHBoxLayout()
-        hbox.addWidget(QLabel(_t("Custom")))
-        self.nums_low_spinner = self.build_spinner("seats_cust_nums_low", 1, 9)
-        hbox.addWidget(self.nums_low_spinner)
-        hbox.addWidget(QLabel(_t("To")))
-        self.nums_high_spinner = self.build_spinner("seats_cust_nums_high", 2, 10)
-        hbox.addWidget(self.nums_high_spinner)
-        vbox.addLayout(hbox)
-        hbox = QHBoxLayout()
-        hbox.addWidget(self.build_combo_and_set_active("stat_range", stat_range_dict))
-        self.hud_days_spinner = self.build_spinner("hud_days", 1, 9999)
-        hbox.addWidget(self.hud_days_spinner)
-        vbox.addLayout(hbox)
-        return vbox
-
-    def _create_stat_range_dict(self) -> dict:
-        """Create the dictionary for the stat range combo box.
-
-        This method returns a dictionary mapping stat range options to their display labels and codes.
-
-        Returns:
-            dict: The dictionary for the stat range combo box.
-        """
-        return {
-            0: ("Since: All Time", "A"),
-            1: ("Since: Session", "S"),
-            2: ("Since: n Days" + " - - >", "T"),
-        }
-
-    def _create_seats_style_dict(self) -> dict:
-        """Create the dictionary for the seats style combo box.
-
-        This method returns a dictionary mapping seat style options to their display labels and codes.
-
-        Returns:
-            dict: The dictionary for the seats style combo box.
-        """
-        return {
-            0: ("Number of Seats: Any Number", "A"),
-            1: ("Number of Seats: Custom", "C"),
-            2: ("Number of Seats: Exact", "E"),
-        }
-
-    def _create_multiplier_dict(self) -> dict:
-        """Create the dictionary for the multiplier combo box.
-
-        This method returns a dictionary mapping multiplier options to their display labels and values.
-
-        Returns:
-            dict: The dictionary for the multiplier combo box.
-        """
-        return {
-            0: ("For This Blind Level Only", 1),
-            1: ("  0.5 to 2 * Current Blinds", 2),
-            2: ("  0.33 to 3 * Current Blinds", 3),
-            3: ("  0.1 to 10 * Current Blinds", 10),
-            4: ("All Levels", 10000),
-        }
-
-    def _create_max_seats_dict(self) -> dict:
-        """Create the dictionary for the max seats combo box.
-
-        This method returns a dictionary mapping available table layouts to their display labels and values.
-
-        Returns:
-            dict: The dictionary for the max seats combo box.
-        """
-        cb_max_dict = {0: ("Force layout...", None)}
-        for pos, i in enumerate(
-            sorted(self.parentwin.hud.layout_set.layout),
-            start=1,
-        ):
-            cb_max_dict[pos] = (f"{i}-max", i)
-        return cb_max_dict
+    def _end_drag(self) -> None:
+        if self._drag_offset is not None:
+            self._drag_offset = None
+            Aux_Base.set_drag_active(False)
 
     def _create_stat_sets_dict(self) -> dict:
         """Create the dictionary for the stat set combo box.
@@ -2117,6 +1980,7 @@ class SimpleTablePopupMenu(QWidget):
         Args:
             event: The close event being delivered.
         """
+        self._end_drag()
         # The parent window may already be gone (table closed while the menu was
         # open), so close the menu either way.
         with contextlib.suppress(RuntimeError):
@@ -2157,7 +2021,7 @@ class SimpleTablePopupMenu(QWidget):
             self.parentwin.hud.save_layout()
         self.delete_event()
 
-    def build_button(self, labeltext: str, cbkeyword: str) -> QPushButton:
+    def build_button(self, labeltext: str, cbkeyword: str, tooltip: str) -> QPushButton:
         """Build a QPushButton with a connected callback for the popup menu.
 
         This method creates a button with the specified label and connects it
@@ -2166,56 +2030,15 @@ class SimpleTablePopupMenu(QWidget):
         Args:
             labeltext: The text to display on the button.
             cbkeyword: The keyword to pass to the callback when the button is clicked.
+            tooltip: What the button does, since its label is kept short.
 
         Returns:
             QPushButton: The created button instance.
         """
         button = QPushButton(labeltext)
+        button.setToolTip(tooltip)
         button.clicked.connect(partial(self.callback, data=cbkeyword))
         return button
-
-    def build_spinner(self, field: str, low: int, high: int) -> QSpinBox:
-        """Build a QSpinBox for numeric input in the popup menu.
-
-        This method creates a spin box with the specified range and initial value,
-        and connects it to update the HUD parameter.
-
-        Args:
-            field: The HUD parameter field to bind to the spin box.
-            low: The minimum value for the spin box.
-            high: The maximum value for the spin box.
-
-        Returns:
-            QSpinBox: The created spin box instance.
-        """
-        spin_box = QSpinBox()
-        spin_box.setRange(low, high)
-        spin_box.setValue(self.parentwin.hud.hud_params[field])
-        spin_box.valueChanged.connect(partial(self.change_spin_field_value, field=field))
-        return spin_box
-
-    def build_combo_and_set_active(self, field: str, combo_dict: dict) -> QComboBox:
-        """Build a QComboBox for selection in the popup menu and set the active value.
-
-        This method creates a combo box with the specified options, sets the current value based on the HUD parameter,
-        and connects it to update the parameter when changed.
-
-        Args:
-            field: The HUD parameter field to bind to the combo box.
-            combo_dict: The dictionary of options for the combo box.
-
-        Returns:
-            QComboBox: The created combo box instance.
-        """
-        widget = QComboBox()
-        for pos in combo_dict:
-            widget.addItem(combo_dict[pos][0])
-            if combo_dict[pos][1] == self.parentwin.hud.hud_params[field]:
-                widget.setCurrentIndex(pos)
-        widget.currentIndexChanged.connect(
-            partial(self.change_combo_field_value, field=field, combo_dict=combo_dict),
-        )
-        return widget
 
     def build_stat_set_combo(self, stat_sets_dict: dict) -> QComboBox:
         """Build a QComboBox for selecting the stat set in the popup menu.
@@ -2348,55 +2171,3 @@ class SimpleTablePopupMenu(QWidget):
                         gss_node.setAttribute("stat_set", new_stat_set)
                         break
                 break
-
-    def change_combo_field_value(self, sel: int, field: str, combo_dict: dict) -> None:
-        """Update the HUD parameter value based on the selected combo box option.
-
-        This method sets the specified HUD parameter to the value associated with the selected combo box item
-        and updates the enabled state of related spinners.
-
-        Args:
-            sel: The index of the selected item in the combo box.
-            field: The HUD parameter field to update.
-            combo_dict: The dictionary of options for the combo box.
-        """
-        self.parentwin.hud.hud_params[field] = combo_dict[sel][1]
-        self.set_spinners_active()
-
-    def change_spin_field_value(self, value: int, field: str) -> None:
-        """Update the HUD parameter value based on the spin box input.
-
-        This method sets the specified HUD parameter to the value provided by the spin box.
-
-        Args:
-            value: The new value selected in the spin box.
-            field: The HUD parameter field to update.
-        """
-        self.parentwin.hud.hud_params[field] = value
-
-    def set_spinners_active(self) -> None:
-        """Enable or disable spinner controls based on current HUD parameter selections.
-
-        This method updates the enabled state of various spinner widgets in the popup menu
-        according to the current values of the HUD's parameter fields.
-        """
-        if self.parentwin.hud.hud_params["h_stat_range"] == "T":
-            self.h_hud_days_spinner.setEnabled(True)
-        else:
-            self.h_hud_days_spinner.setEnabled(False)
-        if self.parentwin.hud.hud_params["stat_range"] == "T":
-            self.hud_days_spinner.setEnabled(True)
-        else:
-            self.hud_days_spinner.setEnabled(False)
-        if self.parentwin.hud.hud_params["h_seats_style"] == "C":
-            self.h_nums_low_spinner.setEnabled(True)
-            self.h_nums_high_spinner.setEnabled(True)
-        else:
-            self.h_nums_low_spinner.setEnabled(False)
-            self.h_nums_high_spinner.setEnabled(False)
-        if self.parentwin.hud.hud_params["seats_style"] == "C":
-            self.nums_low_spinner.setEnabled(True)
-            self.nums_high_spinner.setEnabled(True)
-        else:
-            self.nums_low_spinner.setEnabled(False)
-            self.nums_high_spinner.setEnabled(False)
