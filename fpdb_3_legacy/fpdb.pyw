@@ -105,6 +105,7 @@ from fpdb_3_legacy.GuiConfigObserver import GuiConfigObserver
 from fpdb_3_legacy.hud_options_panel import HudOptionsDialog
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.L10n import set_locale_translation
+from fpdb_3_legacy.main_thread_gc import install_main_thread_gc
 from fpdb_3_legacy.ui_instrumentation import TabOpenProfiler, perf_level
 
 np = import_module("numpy")
@@ -2654,6 +2655,8 @@ if __name__ == "__main__":
 
     try:
         app = QApplication([])
+        # Before any worker thread starts: see main_thread_gc (#707).
+        install_main_thread_gc(app)
 
         warn_if_app_translocated()
 
