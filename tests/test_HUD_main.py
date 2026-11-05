@@ -311,6 +311,7 @@ def test_macos_permission_action_exists_before_any_table_without_auto_show(tmp_p
         check_tables=MagicMock(),
         show_macos_permissions=MagicMock(),
         _on_application_state_changed=MagicMock(),
+        init_theme=MagicMock(),
     )
     main_window = MagicMock()
     layout = MagicMock()
@@ -2136,6 +2137,12 @@ def _resolves_to(hud_main, profile_name: str) -> MagicMock:
     stat_set = _named_stat_set(profile_name)
     hud_main.config.get_supported_games_parameters.return_value = {"game_stat_set": stat_set}
     return stat_set
+
+
+def test_hud_main_follows_the_theme_before_opening_its_window(hud_main) -> None:
+    from fpdb_3_legacy.ThemeManager import ThemeManager
+
+    assert hud_main._theme_manager is ThemeManager()
 
 
 def test_an_unchanged_config_file_is_not_reloaded(hud_main, tmp_path) -> None:

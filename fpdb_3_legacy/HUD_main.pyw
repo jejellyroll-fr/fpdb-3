@@ -35,7 +35,6 @@ from cachetools import TTLCache
 from PySide6.QtCore import QCoreApplication, QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QCloseEvent, QIcon
 from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QVBoxLayout
-from qt_material import apply_stylesheet
 
 from fpdb_3_legacy import Configuration, Deck, Hud, Options, db_profile
 from fpdb_3_legacy.hud_diagnostics import ROLE_HUD, format_identity, log_process_identity, session_id
@@ -633,6 +632,7 @@ class HudMain(
 
     def init_main_window(self) -> None:
         """Initialize the main application window."""
+        self.init_theme()
         self.main_window = HudMainWindow(self.close_event_handler)
         if self.options.xloc is not None or self.options.yloc is not None:
             x = int(self.options.xloc) if self.options.xloc is not None else self.main_window.x()
@@ -1043,7 +1043,6 @@ if __name__ == "__main__":
         (options, argv) = Options.fpdb_options()
 
         app = QApplication([])
-        apply_stylesheet(app, theme="dark_purple.xml")
 
         hm = HudMain(options, db_name=options.dbname)
 
