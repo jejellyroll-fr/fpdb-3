@@ -1,0 +1,68 @@
+﻿GAME #9153571626 Version:26.7.1.15 Uncalled:Y Omaha PL €0.01/€0.02 2026-11-04 23:32:29/GMT
+Table Info: Size: 6, Blinds: 0.01/0.02
+Table Saratov, 560234179
+Seat 1: dave (€4.19 in chips)
+Seat 5: carol (€0.61 in chips)  DEALER
+Seat 6: erin (€0.99 in chips)
+Seat 8: bob (€2.00 in chips)
+Seat 10: frank (€1.32 in chips)
+erin: Post SB €0.01
+bob: Post BB €0.02
+*** HOLE CARDS ***
+Dealt to bob [D5 HK C5 SJ]
+frank: Call €0.02
+dave: Fold
+carol: Call €0.02
+erin: Call €0.01
+bob: Check
+*** FLOP *** [H10 DJ H3]
+erin: Check
+bob: Check
+frank: Check
+carol: Check
+*** TURN *** [D2]
+erin: Check
+bob: Check
+frank: Check
+carol: Check
+*** RIVER *** [S6]
+erin: Bet €0.02
+bob: Fold
+frank: Fold
+carol: Fold
+*** SUMMARY ***
+Total pot €0.08 Rake €0.00
+erin: wins €0.08
+
+
+GAME #9153571819 Version:26.7.1.15 Uncalled:Y Omaha PL €0.01/€0.02 2026-11-04 23:34:00/GMT
+Table Info: Size: 6, Blinds: 0.01/0.02
+Table Saratov, 560234179
+Seat 1: dave (€4.19 in chips)
+Seat 5: carol (€0.59 in chips)
+Seat 6: erin (€1.05 in chips)  DEALER
+Seat 8: bob (€1.98 in chips)
+Seat 10: frank (€1.30 in chips)
+bob: Post SB €0.01
+frank: Post BB €0.02
+*** HOLE CARDS ***
+Dealt to bob [C3 S10 D5 D4]
+dave: Raise (NF) €0.04
+carol: Call €0.04
+erin: Call €0.04
+bob: Fold
+frank: Fold
+*** FLOP *** [H6 DJ C10]
+dave: Check
+carol: Check
+erin: Check
+*** TURN *** [SJ]
+dave: Bet €0.15
+carol: Fold
+erin: Call €0.15
+*** RIVER *** [S4]
+dave: Bet €0.45
+erin: Fold
+*** SUMMARY ***
+Total pot €0.42 Rake €0.03
+dave: wins €0.42

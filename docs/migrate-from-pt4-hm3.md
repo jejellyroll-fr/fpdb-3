@@ -52,6 +52,23 @@ when a room's screen name is missing, or does not match the hero found in the fi
 Importing the same folder twice is safe: hands fpdb already holds are counted as duplicates and are
 not stored again.
 
+### iPoker rooms
+
+iPoker files do not name the room they were played on, and PT4 files them all under *iPoker Network*.
+fpdb places each file in this order:
+
+1. a file under the hand history folder configured for a room belongs to that room;
+2. the hero's name is the screen name, or a hero alias, of one room;
+3. only one iPoker room is enabled.
+
+Otherwise the wizard asks which room each hero played on, at step 3. Entering your screen name for
+each room in *Configure ▸ Site Settings* before you import spares you the question. A plain *Bulk
+Import* cannot ask, so those hands stay under `iPoker`.
+
+A hand is a duplicate only within its room. If you imported iPoker hands before fpdb placed them this
+way, importing them again stores them a second time under the right room. Start from a recreated
+database (*Database ▸ Create or Recreate Tables*) rather than importing on top of the old rows.
+
 ## 4. After the import
 
 - **Stats**: fpdb computes its own stats from the imported hands. Definitions can differ slightly from

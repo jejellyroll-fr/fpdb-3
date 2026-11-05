@@ -289,3 +289,55 @@ def test_open_stats_tabs_are_refreshed_once_the_import_ends(qtbot, config, archi
     qtbot.waitUntil(wizard.import_page.isComplete, timeout=10000)
 
     assert window.refreshed == 1
+
+
+IPOKER_EXPORT = ROOT / "tests" / "fixtures" / "pokertracker_ipoker_rooms"
+
+
+@pytest.mark.qt
+def test_the_import_waits_for_the_room_of_each_unplaced_ipoker_hero(qtbot, config) -> None:
+    # The shipped file enables several iPoker rooms and names no screen name: nothing places these heroes.
+    importer = FakeImporter()
+    wizard = open_wizard(qtbot, config, importer, FakeLock())
+
+    advance_to_scan(qtbot, wizard, IPOKER_EXPORT)
+
+    page = wizard.scan_page
+    assert sorted(page.room_choices) == ["alice", "bob"]
+    assert page.room_question.isVisibleTo(wizard)
+    assert not wizard.button(QWizard.WizardButton.NextButton).isEnabled()
+
+    page.room_choices["alice"].setCurrentIndex(page.room_choices["alice"].findData("PMU Poker"))
+    assert not wizard.button(QWizard.WizardButton.NextButton).isEnabled()
+
+    page.room_choices["bob"].setCurrentIndex(page.room_choices["bob"].findData("FDJ Poker"))
+    assert wizard.button(QWizard.WizardButton.NextButton).isEnabled()
+
+    wizard.next()  # scan -> import
+    qtbot.waitUntil(wizard.import_page.isComplete, timeout=10000)
+
+    assert importer.calls["setIpokerRooms"] == ({"alice": "PMU Poker", "bob": "FDJ Poker"},)
+
+
+@pytest.mark.qt
+def test_the_screen_name_warning_does_not_name_the_network_while_the_user_is_asked(qtbot, config) -> None:
+    wizard = open_wizard(qtbot, config, FakeImporter(), FakeLock())
+
+    advance_to_scan(qtbot, wizard, IPOKER_EXPORT)
+
+    assert "Set your screen name" not in wizard.scan_page.status.text()
+
+
+@pytest.mark.qt
+def test_going_back_forgets_the_question_of_the_previous_scan(qtbot, config, tmp_path) -> None:
+    (tmp_path / "notes.txt").write_text("not a hand history", encoding="utf-8")
+    wizard = open_wizard(qtbot, config, FakeImporter(), FakeLock())
+    advance_to_scan(qtbot, wizard, IPOKER_EXPORT)
+
+    wizard.back()
+    wizard.source_page.folder.setText(str(tmp_path))
+    wizard.next()
+    qtbot.waitUntil(lambda: wizard.scan_page.scan is not None, timeout=10000)
+
+    assert not wizard.scan_page.room_choices
+    assert not wizard.scan_page.room_question.isVisibleTo(wizard)

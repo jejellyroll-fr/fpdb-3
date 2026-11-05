@@ -3,7 +3,7 @@
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.PokerTrackerToFpdb import PokerTracker
 
-# Sample PokerTracker4 hand text from FDJ/iPoker
+# Sample PokerTracker4 hand text from iPoker
 sample_hand = """GAME #8043869466 Version:24.7.1.16 Uncalled:Y Omaha PL €0.01/€0.02 2024-11-06 23:38:55/GMT
 Table Size 6
 Table Saratov, 560234179
@@ -48,24 +48,15 @@ louisaf55: wins €0.56"""
 
 
 def test_pt4_ipoker_detection() -> None:
-    """Test PokerTracker4 iPoker skin detection."""
-    """Test PokerTracker4 iPoker skin detection."""
-    # Create a minimal config
+    """A PokerTracker4 iPoker hand is read as iPoker, its room coming from IdentifySite."""
     config = Config()
 
-    # Create PokerTracker instance
     pt = PokerTracker(config=config, autostart=False)
 
     gametype = pt.determineGameType(sample_hand)
 
-    # Test specific skin detection method
-    pt.detectiPokerSkin(sample_hand)
-
-    # Test is_ipoker_skin method
-    pt.is_ipoker_skin()
-
-    # Verify detection worked
-    assert pt.sitename is not None
+    assert pt.is_ipoker_skin()
+    assert pt.sitename == "iPoker"
     assert pt.siteId is not None
     assert gametype is not None
 

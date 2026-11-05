@@ -20,6 +20,7 @@ import re
 from decimal import Decimal
 from typing import ClassVar
 
+from fpdb_3_legacy import ipoker_rooms
 from fpdb_3_legacy.HandHistoryConverter import FpdbParseError
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.TourneySummary import TourneySummary
@@ -126,6 +127,11 @@ class PokerTrackerSummary(TourneySummary):
         match = cls.re_site_line.search(text)
         return cls.site_name_map.get(match.group("SITE")) if match else None
 
+    @classmethod
+    def players_named_in(cls, text: str) -> list[str]:
+        """Everyone a summary lists: the hero is among them, though nothing says which one."""
+        return [match.group("NAME") for match in cls.re_player.finditer(text)]
+
     def getSplitRe(self, _head: str) -> re.Pattern[str]:
         """Get regex pattern for splitting tournament summaries.
 
@@ -146,9 +152,13 @@ class PokerTrackerSummary(TourneySummary):
 
         mg = m.groupdict()
         if "SITE" in mg:
-            if self.site_name_map.get(mg["SITE"]) is not None:
-                self.siteName = self.site_name_map.get(mg["SITE"])
-                self.siteId = self.SITEIDS.get(self.siteName)
+            room = self.site_name_map.get(mg["SITE"])
+            if room is not None:
+                # "iPoker" is only the network: keep the room IdentifySite gave
+                # this summary, the one its tournament's hands are filed under (#702).
+                if room != ipoker_rooms.GENERIC_ROOM or not ipoker_rooms.is_room(self.config, self.siteName):
+                    self.siteName = room
+                    self.siteId = self.SITEIDS.get(room)
             else:
                 tmp = self.summaryText[0:200]
                 log.error("Unsupported site summary '%s'", tmp)

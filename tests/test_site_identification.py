@@ -3,7 +3,7 @@
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.IdentifySite import IdentifySite
 
-# Sample PokerTracker4 hand text from FDJ/iPoker
+# Sample PokerTracker4 hand text from iPoker
 sample_hand = """GAME #8043869466 Version:24.7.1.16 Uncalled:Y Omaha PL €0.01/€0.02 2024-11-06 23:38:55/GMT
 Table Size 6
 Table Saratov, 560234179

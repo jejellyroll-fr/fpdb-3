@@ -57,7 +57,7 @@ from pathlib import Path
 from typing import Any, ClassVar
 from zoneinfo import ZoneInfo
 
-from fpdb_3_legacy import Database
+from fpdb_3_legacy import Database, ipoker_rooms
 from fpdb_3_legacy.HandHistoryConverter import FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.iPoker.dispatcher import detect_skin, resolve_site_id
 from fpdb_3_legacy.iPoker.hand_info import IPokerHandInfoMixin
@@ -411,7 +411,10 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
             return
 
         detected_skin = self.detectSkin(skin_path)
-        self.sitename = detected_skin
+        # A path naming no skin says nothing: IdentifySite may know the room from
+        # a configured folder or the hero, as for a tracker's archive (#702).
+        if detected_skin != "iPoker" or not ipoker_rooms.is_room(self.config, self.sitename):
+            self.sitename = detected_skin
         site_id_result = resolve_site_id(self.config, self.sitename)
         if site_id_result:
             self.site_id = site_id_result
