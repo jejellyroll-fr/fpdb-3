@@ -185,7 +185,7 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
             (<startdate>.+</startdate>\s+?)?
             <currency>(?P<CURRENCY>.+)?</currency>\s+?
             <nickname>(?P<HERO>.+)?</nickname>
-            """.format(**substitutions),
+            """,
         re.MULTILINE | re.VERBOSE,
     )
     re_game_info_trny = re.compile(
