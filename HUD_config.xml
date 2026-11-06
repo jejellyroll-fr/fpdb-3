@@ -1,5 +1,5 @@
 <?xml version="1.0" ?><FreePokerToolsConfig>
-    <general version="87" config_wrap_len="-1" day_start="5" ui_language="fr_FR" config_difficulty="expert" qt_material_theme="dark_purple.xml" popup_theme="material_dark"/>
+    <general version="88" config_wrap_len="-1" day_start="5" ui_language="fr_FR" config_difficulty="expert" qt_material_theme="dark_purple.xml" popup_theme="material_dark"/>
     <site_ids>
         <site_id site="Full Tilt Poker" id="1"/>
         <site_id site="PokerStars" id="2"/>
@@ -3859,6 +3859,18 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
+        <site site_name="Bet365.fr Poker" enabled="False" HH_path="" screen_name="" site_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
         <site site_name="William Hill Poker" enabled="False" HH_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/YOUR_OS_USER/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
@@ -4592,6 +4604,7 @@
         <hhc site="Barrière Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
         <hhc site="Titan Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
         <hhc site="Bet365 Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Bet365.fr Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
         <hhc site="William Hill Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
         <hhc site="Paddy Power Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
         <hhc site="Betfair Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>

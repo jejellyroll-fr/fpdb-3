@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import fnmatch
+import re
 from dataclasses import dataclass
 from importlib import import_module
 from typing import TYPE_CHECKING, Any
@@ -19,6 +21,22 @@ class IPokerSkin:
     module_name: str
     default_site_id: int | None = None
     parser_class_name: str | None = None
+    # fnmatch patterns, matched case-insensitively against each folder of a
+    # path, for a client whose folder name is not known exactly. The installed
+    # sites detector looks for the client with the same patterns, so whatever
+    # folder it finds is filed under this skin too.
+    folder_patterns: tuple[str, ...] = ()
+
+    def matches(self, path_lower: str) -> bool:
+        """Whether this skin owns ``path_lower`` (a lowercased path)."""
+        if any(indicator in path_lower for indicator in self.indicators):
+            return True
+        if not self.folder_patterns:
+            return False
+        patterns = [pattern.casefold() for pattern in self.folder_patterns]
+        return any(
+            fnmatch.fnmatchcase(part, pattern) for part in _PATH_SEPARATORS.split(path_lower) for pattern in patterns
+        )
 
     @property
     def class_name(self) -> str:
@@ -26,6 +44,9 @@ class IPokerSkin:
             return self.parser_class_name
         return "".join(part.capitalize() for part in self.module_name.split("_")) + "IPoker"
 
+
+# Both separators: a Windows path is routed the same on every platform.
+_PATH_SEPARATORS = re.compile(r"[\\/]")
 
 IPOKER_SKINS: tuple[IPokerSkin, ...] = (
     IPokerSkin(("redbet",), "Redbet Poker", "redbet", 91, "RedbetIPoker"),
@@ -41,6 +62,19 @@ IPOKER_SKINS: tuple[IPokerSkin, ...] = (
         "bwin_fr",
         40,
         "BwinFrIPoker",
+    ),
+    IPokerSkin(
+        # Must stay before the generic ("bet365",) entry: detect() returns the
+        # first skin with an indicator in the path, and every bet365.fr path
+        # also contains "bet365".
+        ("bet365.fr", "bet365fr", "bet365 fr", "bet365-fr", "bet365_fr", "bet365 poker fr"),
+        "Bet365.fr Poker",
+        "bet365_fr",
+        132,
+        "Bet365FrIPoker",
+        # Any other folder naming bet365 with the French marker, either side:
+        # "bet365 Poker France", "fr.bet365", "bet365-FR"...
+        ("*bet365*fr*", "*fr*bet365*"),
     ),
     IPokerSkin(("partypokerfr", "partypoker.fr", "partypoker.fr online poker"), "PartyPoker.fr", "partypoker_fr", 44, "PartyPokerFrIPoker"),
     IPokerSkin(("netbet",), "NetBet Poker", "netbet", 59),
@@ -97,7 +131,7 @@ class IPokerSkinDispatcher:
     def detect(self, path: str) -> IPokerSkin | None:
         path_lower = path.lower()
         for skin in self.skins:
-            if any(indicator in path_lower for indicator in skin.indicators):
+            if skin.matches(path_lower):
                 log.info("Detected iPoker skin: %s from path: %s", skin.site_name, path)
                 return skin
         log.info("No specific iPoker skin detected from path: %s, using default 'iPoker'", path)

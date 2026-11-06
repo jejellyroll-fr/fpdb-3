@@ -286,7 +286,15 @@ class ModernSiteCard(QFrame):
         if site_name == "PMU Poker (PartyPoker)":
             # PMU Poker on PartyPoker network (old version)
             return "PartyGaming"  # PMU Poker PartyPoker version uses PartyGaming detector
-        if site_name in ["FDJ Poker", "Poker770", "NetBet Poker", "En ligne", "Bwin.fr Poker", "PartyPoker.fr"]:
+        if site_name in [
+            "FDJ Poker",
+            "Poker770",
+            "NetBet Poker",
+            "En ligne",
+            "Bwin.fr Poker",
+            "PartyPoker.fr",
+            "Bet365.fr Poker",
+        ]:
             return "iPoker"
         if site_name in ["Americas Cardroom", "ACR Poker", "WinningPoker"]:
             return "ACR"

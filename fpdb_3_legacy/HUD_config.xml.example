@@ -3,7 +3,7 @@
     <!-- config_wrap_len  is preferred max line length in this file, -1 means no max
          day_start        is time that logical day starts, e.g. 5 means that any play
                           between 00:00 and 04:59:59 counts as being on the previous day -->
-    <general version="87" config_wrap_len="-1" day_start="5" ui_language="system" config_difficulty="expert"/>
+    <general version="88" config_wrap_len="-1" day_start="5" ui_language="system" config_difficulty="expert"/>
 
     <import callFpdbHud="True" interval="5" fastStoreHudCache="False" saveActions="True" cacheSessions="False" sessionTimeout="30" publicDB="False"/>
 
@@ -323,6 +323,18 @@
         </site>
 
         <site site_name="iPoker" enabled="False" HH_path="C:/Program Files/iPoker/HandHistory/YOUR SCREEN NAME HERE/" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+
+        <!-- bet365.fr (iPoker): paths are left empty, Detect fills them in from the installed client. -->
+        <site site_name="Bet365.fr Poker" network="iPoker" enabled="False" HH_path="" TS_path="" screen_name="YOUR SCREEN NAME HERE" site_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
@@ -2272,6 +2284,7 @@
         <hhc site="Betfair" converter="BetfairToFpdb"/>
         <hhc site="Merge" converter="MergeToFpdb" summaryImporter="MergeSummary"/>
         <hhc site="iPoker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Bet365.fr Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
         <hhc site="Winamax" converter="WinamaxToFpdb" summaryImporter="WinamaxSummary"/>
         <hhc site="PacificPoker" converter="PacificPokerToFpdb" summaryImporter="PacificPokerSummary"/>
         <hhc site="Cake" converter="CakeToFpdb"/>
