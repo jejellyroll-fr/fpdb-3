@@ -360,7 +360,7 @@ def test_an_upgraded_configuration_gains_the_room() -> None:
     assert hhc.getAttribute("converter") == "iPokerToFpdb"
     # The layout set it uses comes along, so the upgrade's reference check passes.
     assert "ipoker_default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
-    assert reference_errors(updated) == []
+    assert not reference_errors(updated)
     # The user's own entries are kept as they were, first in place.
     assert updated.getElementsByTagName("site")[0].getAttribute("HH_path") == "/mine"
     # Running the upgrade again changes nothing.
@@ -383,7 +383,7 @@ def test_a_configuration_without_a_sites_section_is_upgraded_untouched() -> None
 
     updated = upgrade_document(old, template(), CONFIG_VERSION)
 
-    assert updated.getElementsByTagName("site") == []
+    assert not updated.getElementsByTagName("site")
     assert updated.getElementsByTagName("general")[0].getAttribute("version") == str(CONFIG_VERSION)
 
 
