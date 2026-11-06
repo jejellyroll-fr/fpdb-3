@@ -60,6 +60,7 @@ from zoneinfo import ZoneInfo
 from fpdb_3_legacy import Database, ipoker_rooms
 from fpdb_3_legacy.HandHistoryConverter import FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.iPoker.dispatcher import detect_skin, resolve_site_id
+from fpdb_3_legacy.iPoker.gametype_text import GAMES, GAMETYPE_VALUE, LIMITS, SUBSTITUTIONS
 from fpdb_3_legacy.iPoker.hand_info import IPokerHandInfoMixin
 from fpdb_3_legacy.iPoker.streets_actions import IPokerStreetsActionsMixin
 from fpdb_3_legacy.iPoker.tournament_results import IPokerTournamentResultsMixin
@@ -90,36 +91,11 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
     summary_in_file = False
     summary_in_file_alt = False  # Alternative naming used by importer
 
-    substitutions: ClassVar[dict[str, str]] = {
-        "LS": r"\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|kr|",  # Currency symbols
-        "PLYR": r"(?P<PNAME>[^\"]+)",  # Regex pattern for matching player names
-        "NUM": r"(.,\d+)|(\d+)",  # Regex pattern for matching numbers
-        "NUM2": r"\b((?:\d{1,3}(?:\s\d{3})*)|(?:\d+))\b",  # Regex pattern for matching numbers with spaces
-    }
-
-    limits: ClassVar[dict[str, str]] = {
-        "No limit": "nl",
-        "Pot limit": "pl",
-        "Limit": "fl",
-        "NL": "nl",
-        "SL": "nl",
-        "БЛ": "nl",
-        "PL": "pl",
-        "LP": "pl",
-        "L": "fl",
-        "LZ": "nl",
-    }
-    games: ClassVar[dict[str, tuple[str, str]]] = {  # base, category
-        "7 Card Stud": ("stud", "studhi"),
-        "7 Card Stud Hi-Lo": ("stud", "studhilo"),
-        "7 Card Stud HiLow": ("stud", "studhilo"),
-        "5 Card Stud": ("stud", "5_studhi"),
-        "Holdem": ("hold", "holdem"),
-        "Six Plus Holdem": ("hold", "6_holdem"),
-        "Omaha": ("hold", "omahahi"),
-        "Omaha Hi-Lo": ("hold", "omahahilo"),
-        "Omaha HiLow": ("hold", "omahahilo"),
-    }
+    # Shared with the XML path through gametype_text, so that every hand of a
+    # session reads its <gametype> the same way (#715).
+    substitutions: ClassVar[dict[str, str]] = SUBSTITUTIONS
+    limits: ClassVar[dict[str, str]] = LIMITS
+    games: ClassVar[dict[str, tuple[str, str]]] = GAMES  # base, category
 
     currencies: ClassVar[dict[str, str]] = {
         "€": "EUR",
@@ -197,9 +173,9 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
     re_split_hands = re.compile(r"</game>")
     re_tail_split_hands = re.compile(r"(</game>)")
     re_game_info = re.compile(
-        r"""
-            <gametype>(?P<GAME>((?P<CATEGORY>(5|7)\sCard\sStud(\sHi\-Lo|\sHiLow)?|(Six\sPlus\s)?Holdem|Omaha(\sHi\-Lo|\sHiLow)?)?\s?(?P<LIMIT>NL|SL|L|LZ|PL|БЛ|LP|No\slimit|Pot\slimit|Limit))|LH\s(?P<LSB>[{NUM}]+)({LS})?/(?P<LBB>[{NUM}]+)({LS})?.+?)
-            (\s({LS})?(?P<SB>[{NUM}]+)({LS})?/({LS})?(?P<BB>[{NUM}]+))?({LS})?(\sAnte\s({LS})?(?P<ANTE>[{NUM}]+)({LS})?)?</gametype>\s+?
+        r"<gametype>"
+        + GAMETYPE_VALUE
+        + r"""</gametype>\s+?
             <tablename>(?P<TABLE>.+)?</tablename>\s+?
             (<(tablecurrency|tournamentcurrency)>(?P<TABLECURRENCY>.*)</(tablecurrency|tournamentcurrency)>\s+?)?
             (<smallblind>.+</smallblind>\s+?)?
@@ -209,7 +185,7 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
             (<startdate>.+</startdate>\s+?)?
             <currency>(?P<CURRENCY>.+)?</currency>\s+?
             <nickname>(?P<HERO>.+)?</nickname>
-            """.format(**substitutions),
+            """,
         re.MULTILINE | re.VERBOSE,
     )
     re_game_info_trny = re.compile(
