@@ -267,7 +267,7 @@ class StartingHandsTab(QWidget):
         toggle_layout.addWidget(toggle_lbl)
 
         self.color_by_combo = QComboBox()
-        self.color_by_combo.addItems(["Profit Net (€)", "VPIP (%)"])
+        self.color_by_combo.addItems([_("Net profit"), _("VPIP (%)")])
         self.color_by_combo.currentIndexChanged.connect(self.on_color_by_changed)
         self.color_by_combo.setMaximumWidth(150)
         toggle_layout.addWidget(self.color_by_combo)

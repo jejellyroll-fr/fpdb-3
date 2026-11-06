@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 14:27+0100\n"
+"POT-Creation-Date: 2026-11-06 11:18+0100\n"
 "PO-Revision-Date: 2011-10-08 08:58+0000\n"
 "Last-Translator: greg20 <greg20@hushmail.com>\n"
 "Language-Team: Polish (Poland) (http://www.transifex.net/projects/p/fpdb/"
@@ -6905,6 +6905,19 @@ msgstr "i"
 msgid "between"
 msgstr "pomiędzy"
 
+#: fpdb_3_legacy/ring_stats/base.py
+#, fuzzy
+#| msgid "Database"
+msgid "Database error"
+msgstr "Baza danych"
+
+#: fpdb_3_legacy/ring_stats/base.py
+#, fuzzy
+msgid "The statistics could not be loaded:"
+msgstr ""
+"Nie udało się wyświetlić tego rozdania:\n"
+"%s"
+
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
 msgid "% Big Blind fold to steal"
@@ -7137,8 +7150,30 @@ msgstr "Dobrowolnie włożone pieniądze do puli preflop"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #, fuzzy
+#| msgid "Aggression factor"
+msgid "Aggression (AF)"
+msgstr "Współczynnik agresji"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
+msgid "Hands played"
+msgstr "Rozdania po"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
+msgid "Net profit"
+msgstr "Całkowity zysk netto"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
 msgstr "Profil preflop (VPIP vs PFR)"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
+msgid "Profit over time"
+msgstr "Zysk na rozdanie"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy, python-brace-format
@@ -7196,6 +7231,11 @@ msgstr "Analiza rąk startowych"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy
+msgid "VPIP (%)"
+msgstr "VPIP"
+
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "min sample:"
 msgstr "min. próba:"
 
@@ -7208,9 +7248,34 @@ msgstr ""
 "{0} decyzji w tym wyborze nie ma znanych kart własnych i nie ma ich w siatce"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Essentials"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy
 msgid "Hand Breakdown"
 msgstr "Podział rozdań"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Postflop detail"
+msgstr "Postflop"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Preflop detail"
+msgstr "Przebicie preflop"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Show all"
+msgstr "pokaż jako"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+#| msgid "Showdown Winnings"
+msgid "Showdown and winnings"
+msgstr "Wygrane na wyłożeniu"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy
@@ -7962,9 +8027,6 @@ msgstr ""
 #~ msgid ""
 #~ "AbsoluteToFpdb.readHandInfo: File name didn't match re_*InfoFromFilename"
 #~ msgstr "Nazwa pliku nie pasowała re_*InfoFromFilename"
-
-#~ msgid "Aggression factor"
-#~ msgstr "Współczynnik agresji"
 
 #, fuzzy
 #~ msgid "Aggression factor pct"

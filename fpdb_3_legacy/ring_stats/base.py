@@ -11,6 +11,7 @@ import contextlib
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import QMessageBox, QTabWidget
 
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.ring_stats.styles import get_modern_qss
 
 
@@ -157,8 +158,8 @@ class ModernStatsWidget(QTabWidget):
         """Comportement par défaut lors d'une erreur de base de données."""
         QMessageBox.critical(
             self,
-            "Erreur Base de Données",
-            f"Une erreur est survenue lors du chargement des statistiques :\n\n{error_message}",
+            _("Database error"),
+            _("The statistics could not be loaded:") + "\n\n" + error_message,
         )
 
     def shutdown_workers(self) -> None:

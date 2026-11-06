@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 14:27+0100\n"
+"POT-Creation-Date: 2026-11-06 11:18+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -6896,6 +6896,19 @@ msgstr "から"
 msgid "between"
 msgstr " "
 
+#: fpdb_3_legacy/ring_stats/base.py
+#, fuzzy
+#| msgid "Database"
+msgid "Database error"
+msgstr "データベース"
+
+#: fpdb_3_legacy/ring_stats/base.py
+#, fuzzy
+msgid "The statistics could not be loaded:"
+msgstr ""
+"このハンドを表示できませんでした:\n"
+"%s"
+
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
 msgid "% Big Blind fold to steal"
@@ -7126,8 +7139,30 @@ msgstr "プリフロップで自発的にポットへチップを入れた割合
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #, fuzzy
+#| msgid "Aggression factor"
+msgid "Aggression (AF)"
+msgstr "アグレッシブ係数(AF)"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
+msgid "Hands played"
+msgstr "このハンド以降"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
+msgid "Net profit"
+msgstr "総純利益"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
 msgstr "プリフロッププロフィール (VPIP 対 PFR)"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
+msgid "Profit over time"
+msgstr "ハンドあたりの利益"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy, python-brace-format
@@ -7185,6 +7220,11 @@ msgstr "スターティングハンド分析"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy
+msgid "VPIP (%)"
+msgstr "VPIP"
+
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "min sample:"
 msgstr "最小サンプル:"
 
@@ -7197,9 +7237,34 @@ msgstr ""
 "この選択の {0} 件の判断はホールカードが不明なためグリッドに含まれていません"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Essentials"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy
 msgid "Hand Breakdown"
 msgstr "ハンドの内訳"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Postflop detail"
+msgstr "ポストフロップ"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Preflop detail"
+msgstr "プリフロップレイズ"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Show all"
+msgstr "表示色"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+#| msgid "Showdown Winnings"
+msgid "Showdown and winnings"
+msgstr "ショーダウン勝利:"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy
@@ -7947,9 +8012,6 @@ msgstr ""
 
 #~ msgid "Add %s import directory %s"
 #~ msgstr "%s インポート対象ディレクトリに %s を追加"
-
-#~ msgid "Aggression factor"
-#~ msgstr "アグレッシブ係数(AF)"
 
 #~ msgid "Aggression factor pct"
 #~ msgstr "アグレッシブ係数 pct"

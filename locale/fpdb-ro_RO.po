@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 14:27+0100\n"
+"POT-Creation-Date: 2026-11-06 11:18+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -6952,6 +6952,19 @@ msgstr "si"
 msgid "between"
 msgstr "intre"
 
+#: fpdb_3_legacy/ring_stats/base.py
+#, fuzzy
+#| msgid "*** Database Error: "
+msgid "Database error"
+msgstr "*** Eroare in baza de date: "
+
+#: fpdb_3_legacy/ring_stats/base.py
+#, fuzzy
+msgid "The statistics could not be loaded:"
+msgstr ""
+"Această mână nu a putut fi afișată:\n"
+"%s"
+
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
 msgid "% Big Blind fold to steal"
@@ -7188,8 +7201,30 @@ msgstr "Bani puși voluntar în pot preflop"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #, fuzzy
+#| msgid "Aggression factor"
+msgid "Aggression (AF)"
+msgstr "Factorul de agresiune"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
+msgid "Hands played"
+msgstr "Mâini după"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
+msgid "Net profit"
+msgstr "Profit net total"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
 msgstr "Profil preflop (VPIP vs PFR)"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
+msgid "Profit over time"
+msgstr "Profit pe mână"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy, python-brace-format
@@ -7247,6 +7282,11 @@ msgstr "Analiza mâinilor de start"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy
+msgid "VPIP (%)"
+msgstr "VPIP"
+
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "min sample:"
 msgstr "eșantion min.:"
 
@@ -7260,9 +7300,34 @@ msgstr ""
 "grilă"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Essentials"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy
 msgid "Hand Breakdown"
 msgstr "Defalcarea mâinilor"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Postflop detail"
+msgstr "Postflop"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Preflop detail"
+msgstr "Raise preflop"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Show all"
+msgstr "arata"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+#| msgid "Showdown Winnings"
+msgid "Showdown and winnings"
+msgstr "Cistigurile la Showdown"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy
@@ -8021,9 +8086,6 @@ msgstr ""
 #~ msgid "*** %s was not found"
 #~ msgstr "hud_dict[%s] nu a fost gasit"
 
-#~ msgid "*** Database Error: "
-#~ msgstr "*** Eroare in baza de date: "
-
 #~ msgid "*** Database get_last_insert_id error: "
 #~ msgstr "*** Eroare in baza de date la get_last_insert_id: "
 
@@ -8172,9 +8234,6 @@ msgstr ""
 
 #~ msgid "After import took %s seconds"
 #~ msgstr "Dupa importare a durat %s secunde"
-
-#~ msgid "Aggression factor"
-#~ msgstr "Factorul de agresiune"
 
 #, fuzzy
 #~ msgid "Aggression factor pct"

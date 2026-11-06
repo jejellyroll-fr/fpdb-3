@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 14:27+0100\n"
+"POT-Creation-Date: 2026-11-06 11:18+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -6934,6 +6934,19 @@ msgstr "Max:"
 msgid "between"
 msgstr "Min:"
 
+#: fpdb_3_legacy/ring_stats/base.py
+#, fuzzy
+#| msgid "*** Database Error: "
+msgid "Database error"
+msgstr "*** Adatbázis hiba: "
+
+#: fpdb_3_legacy/ring_stats/base.py
+#, fuzzy
+msgid "The statistics could not be loaded:"
+msgstr ""
+"A leosztás nem jeleníthető meg:\n"
+"%s"
+
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
 msgid "% Big Blind fold to steal"
@@ -7164,8 +7177,30 @@ msgstr "Önként kasszába tett pénz preflop"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #, fuzzy
+#| msgid "Aggression Freq"
+msgid "Aggression (AF)"
+msgstr "agresszió gyakoriság"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
+msgid "Hands played"
+msgstr "Leosztások ez után"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
+msgid "Net profit"
+msgstr "Teljes nettó nyereség"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
 msgstr "Preflop profil (VPIP vs PFR)"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
+msgid "Profit over time"
+msgstr "Nyereség leosztásonként"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy, python-brace-format
@@ -7223,6 +7258,11 @@ msgstr "Kezdőkéz-elemzés"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy
+msgid "VPIP (%)"
+msgstr "VPIP"
+
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "min sample:"
 msgstr "min. minta:"
 
@@ -7236,9 +7276,34 @@ msgstr ""
 "nincsenek a rácsban"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Essentials"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy
 msgid "Hand Breakdown"
 msgstr "Leosztásbontás"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Postflop detail"
+msgstr "Postflop"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Preflop detail"
+msgstr "Preflop emelés"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Show all"
+msgstr "megjelenítés így"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+#| msgid "Showdown Winnings"
+msgid "Showdown and winnings"
+msgstr "Nyeremény mutatással"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy
@@ -8105,9 +8170,6 @@ msgstr ""
 #~ msgid "*** DEALING HANDS ***"
 #~ msgstr "*** OSZTÁS ***"
 
-#~ msgid "*** Database Error: "
-#~ msgstr "*** Adatbázis hiba: "
-
 #~ msgid "*** Database get_last_insert_id error: "
 #~ msgstr "*** get_last_insert_id adatbázis hiba: "
 
@@ -8318,9 +8380,6 @@ msgstr ""
 
 #~ msgid "Aggression Factor\n"
 #~ msgstr "agresszió faktor\n"
-
-#~ msgid "Aggression Freq"
-#~ msgstr "agresszió gyakoriság"
 
 #~ msgid ""
 #~ "Aggression Frequency\n"

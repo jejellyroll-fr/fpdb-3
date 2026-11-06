@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 14:27+0100\n"
+"POT-Creation-Date: 2026-11-06 11:18+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -2580,9 +2580,10 @@ msgid ""
 "room of each one. Setting the name as that room's screen name in Configure > "
 "Site Settings spares you this question."
 msgstr ""
-"Les fichiers ne disent pas sur quelle room iPoker ces pseudos ont joué. Choisissez la "
-"room de chacun. Renseigner le pseudo comme screen name de cette room dans "
-"Configurer > Paramètres des sites vous évitera cette question."
+"Les fichiers ne disent pas sur quelle room iPoker ces pseudos ont joué. "
+"Choisissez la room de chacun. Renseigner le pseudo comme screen name de "
+"cette room dans Configurer > Paramètres des sites vous évitera cette "
+"question."
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 #, python-format
@@ -6099,6 +6100,14 @@ msgstr "et"
 msgid "between"
 msgstr "entre"
 
+#: fpdb_3_legacy/ring_stats/base.py
+msgid "Database error"
+msgstr "Erreur de base de données"
+
+#: fpdb_3_legacy/ring_stats/base.py
+msgid "The statistics could not be loaded:"
+msgstr "Les statistiques n'ont pas pu être chargées :"
+
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "% Big Blind fold to steal"
 msgstr "% couché de la grosse blinde face au vol"
@@ -6284,8 +6293,25 @@ msgid "Voluntarily put money in pot preflop"
 msgstr "Argent mis volontairement au pot préflop"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+msgid "Aggression (AF)"
+msgstr "Agression (AF)"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+msgid "Hands played"
+msgstr "Mains jouées"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+msgid "Net profit"
+msgstr "Profit net"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 msgid "Preflop Profile (VPIP vs PFR)"
 msgstr "Profil préflop (VPIP vs PFR)"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+msgid "Profit over time"
+msgstr "Évolution du profit"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, python-brace-format
@@ -6334,6 +6360,10 @@ msgid "Starting Hands Analysis"
 msgstr "Analyse des mains de départ"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+msgid "VPIP (%)"
+msgstr "VPIP (%)"
+
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 msgid "min sample:"
 msgstr "échantillon min. :"
 
@@ -6347,8 +6377,28 @@ msgstr ""
 "ne sont pas dans la grille"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Essentials"
+msgstr "Essentiel"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
 msgid "Hand Breakdown"
 msgstr "Détail de la main"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Postflop detail"
+msgstr "Postflop détaillé"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Preflop detail"
+msgstr "Préflop détaillé"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Show all"
+msgstr "Tout afficher"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Showdown and winnings"
+msgstr "Abattage et gains"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
 msgid "Statistics group:"
