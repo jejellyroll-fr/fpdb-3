@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from fpdb_3_legacy.iPoker.skins.barriere import BarriereIPoker
 from fpdb_3_legacy.iPoker.skins.bet365 import Bet365IPoker
+from fpdb_3_legacy.iPoker.skins.bet365_fr import Bet365FrIPoker
 from fpdb_3_legacy.iPoker.skins.bet_at_home import BetAtHomeIPoker
 from fpdb_3_legacy.iPoker.skins.betclic import BetclicIPoker
 from fpdb_3_legacy.iPoker.skins.betfair import BetfairIPoker
@@ -51,6 +52,7 @@ from fpdb_3_legacy.iPoker.skins.winner import WinnerIPoker
 
 __all__ = [
     "BarriereIPoker",
+    "Bet365FrIPoker",
     "Bet365IPoker",
     "BetAtHomeIPoker",
     "BetfairIPoker",

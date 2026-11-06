@@ -64,6 +64,8 @@ class MacOSTableDetector:
         "bwin",
         "betclic",
         "Betclic",
+        # bet365.fr (iPoker). Process name not yet confirmed on a Mac (#717).
+        "bet365",
         "iPoker",
         "ipoker",
     )
@@ -372,7 +374,7 @@ class MacOSTableDetector:
             "bovada": ("bovada", "bodog"),
             "ggpoker": ("ggpoker",),
             "sealswithclubs": ("seals", "swc"),
-            "ipoker": ("ipoker", "betclic"),
+            "ipoker": ("ipoker", "betclic", "bet365"),
         }
 
         fallback_group = None

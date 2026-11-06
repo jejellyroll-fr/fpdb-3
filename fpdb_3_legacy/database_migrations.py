@@ -53,6 +53,11 @@ WIDEN_GAMETYPE_CATEGORY_SQL = "ALTER TABLE Gametypes ALTER COLUMN category TYPE 
 # Reads a column's declared width. MySQL needs the schema pinned because
 # information_schema.columns spans every database on the server; PostgreSQL's
 # is already scoped to the connected one.
+# Sites registered after databases already existed. fillDefaultData only runs
+# when the tables are created, so an older database lacks these rows, and its
+# hands would break the Sites foreign key once a parser files them there.
+SITES_ADDED_LATER: tuple[tuple[int, str, str], ...] = ((132, "Bet365.fr Poker", "IP"),)
+
 COLUMN_WIDTH_SQL = (
     "SELECT character_maximum_length FROM information_schema.columns "
     "WHERE lower(table_name) = %s AND lower(column_name) = %s"
@@ -647,6 +652,7 @@ class DatabaseMigrationsMixin:
 
         self._ensure_gametype_category_width()
         self._ensure_players_name_collation()
+        self.ensure_sites_rows()
 
         # The analytics lifecycle bookkeeping (#305): the meta table itself,
         # then the version stamps. On a database that predates versioning the
@@ -661,6 +667,27 @@ class DatabaseMigrationsMixin:
         self.ensure_hands_columns()
         self.ensure_tourneysplayers_columns()
         self.ensure_handsactions_columns()
+
+    def ensure_sites_rows(self) -> None:
+        """Add the Sites rows registered after this database was created."""
+        try:
+            c = self.get_cursor()
+            c.execute("SELECT id FROM Sites")
+            present = {int(row[0]) for row in c.fetchall()}
+            # An empty table is about to be filled by fillDefaultData, which
+            # inserts these rows itself and would collide with ours.
+            missing = [row for row in SITES_ADDED_LATER if present and row[0] not in present]
+            if not missing:
+                return
+            ph = self.sql.query.get("placeholder", "%s")
+            insert = f"INSERT INTO Sites (id,name,code) VALUES ({ph},{ph},{ph})"  # nosemgrep
+            for site_id, name, code in missing:
+                c.execute(insert, (site_id, name, code))
+                log.info("Registered site %s as id %s", name, site_id)
+            self.commit()
+        except Exception:  # noqa: BLE001 - best-effort like the other migrations.
+            log.warning("Could not add the missing Sites rows", exc_info=True)
+            self.rollback()
 
     def _get_table_columns(self, table: str) -> set[str]:
         c = self.get_cursor()

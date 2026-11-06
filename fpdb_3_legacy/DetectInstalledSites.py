@@ -37,6 +37,7 @@ Usage:
 
 from __future__ import annotations
 
+import fnmatch
 import os
 import platform
 from collections.abc import Iterable
@@ -338,7 +339,160 @@ IPOKER_NON_PLAYER_FOLDERS = ("cache", "logs", "plugins", "qml", "missions")
 WINDOWS_IPOKER_DATA_DIR_ALIASES: dict[str, tuple[str, ...]] = {
     # New Entain France client (iPoker network since the 2026 migration).
     "Bwin.fr Poker": ("bwin Poker France",),
+    # bet365.fr: the exact directory name is still to be confirmed on a real
+    # install; IPOKER_CLIENT_NAME_PATTERNS below catches the other spellings.
+    "Bet365.fr Poker": ("bet365 Poker France", "bet365.fr Poker", "bet365.fr", "bet365fr"),
 }
+
+# Skins whose client folder, uninstall entry or macOS container name is not
+# known exactly. Each pattern is matched case-insensitively (fnmatch) against:
+# the folders of %LOCALAPPDATA% and %APPDATA%, the DisplayName of the Windows
+# uninstall entries and the App Paths executables, and the macOS containers.
+# The patterns require the French marker so the international "Bet365 Poker"
+# client is never taken for bet365.fr.
+IPOKER_CLIENT_NAME_PATTERNS: dict[str, tuple[str, ...]] = {
+    "Bet365.fr Poker": ("*bet365*fr*", "*fr*bet365*"),
+}
+
+# Folders that can hold the iPoker data directory inside a macOS sandbox
+# container, under Data/Library/Application Support.
+# Not confirmed yet (#717): bet365.fr's bundle id and folder name (no Mac to
+# check on). Containers are found by IPOKER_CLIENT_NAME_PATTERNS or by
+# MAC_IPOKER_CONTAINER_HINTS; these names are probed inside them, and any
+# folder matching the patterns is taken when the container can be listed.
+MAC_IPOKER_SUPPORT_DIRS: dict[str, tuple[str, ...]] = {
+    "Bet365.fr Poker": ("bet365.fr Online Poker", "bet365.fr PLAY", "bet365.fr Poker", "bet365 Poker France"),
+}
+
+# Containers that may belong to a skin even though their name lacks the
+# French marker (one bundle id shared by every bet365 market, for instance).
+# Only the MAC_IPOKER_SUPPORT_DIRS names are probed in those.
+MAC_IPOKER_CONTAINER_HINTS: dict[str, tuple[str, ...]] = {
+    "Bet365.fr Poker": ("*bet365*",),
+}
+
+UNINSTALL_KEY = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
+UNINSTALL_KEY_WOW64 = r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
+APP_PATHS_KEY = r"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths"
+
+
+def matches_any(name: str, patterns: Iterable[str]) -> bool:
+    """Whether ``name`` matches one of the fnmatch ``patterns``, ignoring case."""
+    folded = name.casefold()
+    return any(fnmatch.fnmatchcase(folded, pattern.casefold()) for pattern in patterns)
+
+
+def matching_subfolders(parent: str | Path, patterns: Iterable[str]) -> list[Path]:
+    """The folders directly under ``parent`` whose name matches ``patterns``, sorted by name.
+
+    A parent that is missing, empty or cannot be listed yields nothing.
+    """
+    patterns = tuple(patterns)
+    if not parent or not patterns:
+        return []
+    try:
+        with os.scandir(parent) as entries:
+            found = [Path(entry.path) for entry in entries if entry.is_dir() and matches_any(entry.name, patterns)]
+    except OSError:
+        return []
+    return sorted(found, key=lambda path: path.name.casefold())
+
+
+def _registry_value(winreg: Any, key: Any, name: str) -> str:
+    try:
+        value, _kind = winreg.QueryValueEx(key, name)
+    except OSError:
+        return ""
+    return value.strip() if isinstance(value, str) else ""
+
+
+def _registry_subkeys(winreg: Any, key: Any) -> list[str]:
+    names = []
+    index = 0
+    while True:
+        try:
+            names.append(winreg.EnumKey(key, index))
+        except OSError:
+            return names
+        index += 1
+
+
+def _folder_of_executable(value: str) -> str:
+    """The folder of the executable a registry value names, as in ``"<dir>/client.exe",0``."""
+    path = value.strip()
+    if path.startswith('"'):
+        path = path[1:].split('"', 1)[0]
+    else:
+        path = path.split(",", 1)[0].strip()
+    return str(Path(path).parent) if path else ""
+
+
+def windows_registry_install_dirs(patterns: Iterable[str], winreg: Any = None) -> list[str]:
+    """Install folders of the Windows programs whose name matches ``patterns``.
+
+    Reads the uninstall entries of HKCU and HKLM (32-bit view included): the
+    DisplayName is matched, then InstallLocation, or the folder of DisplayIcon,
+    is taken. Also reads the App Paths executables. Nothing is hardcoded: the
+    registry says where the client was installed, whatever drive or folder the
+    user picked. Returns an empty list off Windows or when nothing can be read.
+    """
+    patterns = tuple(patterns)
+    if winreg is None:
+        try:
+            import winreg  # noqa: PLC0415 - only exists on Windows
+        except ImportError:
+            return []
+    if not patterns:
+        return []
+
+    found: list[str] = []
+    for hive in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
+        for root in (UNINSTALL_KEY, UNINSTALL_KEY_WOW64):
+            found.extend(_uninstall_locations(winreg, hive, root, patterns))
+        found.extend(_app_paths_locations(winreg, hive, patterns))
+    return list(dict.fromkeys(found))
+
+
+def _uninstall_locations(winreg: Any, hive: Any, root: str, patterns: tuple[str, ...]) -> list[str]:
+    found = []
+    try:
+        with winreg.OpenKey(hive, root) as uninstall:
+            for subkey in _registry_subkeys(winreg, uninstall):
+                try:
+                    with winreg.OpenKey(uninstall, subkey) as entry:
+                        if not matches_any(_registry_value(winreg, entry, "DisplayName") or subkey, patterns):
+                            continue
+                        location = _registry_value(winreg, entry, "InstallLocation") or _folder_of_executable(
+                            _registry_value(winreg, entry, "DisplayIcon"),
+                        )
+                except OSError:
+                    continue
+                if location:
+                    found.append(location)
+    except OSError:
+        return []
+    return found
+
+
+def _app_paths_locations(winreg: Any, hive: Any, patterns: tuple[str, ...]) -> list[str]:
+    found = []
+    try:
+        with winreg.OpenKey(hive, APP_PATHS_KEY) as app_paths:
+            for subkey in _registry_subkeys(winreg, app_paths):
+                if not matches_any(subkey, patterns):
+                    continue
+                try:
+                    with winreg.OpenKey(app_paths, subkey) as entry:
+                        location = _registry_value(winreg, entry, "Path") or _folder_of_executable(
+                            _registry_value(winreg, entry, ""),
+                        )
+                except OSError:
+                    continue
+                if location:
+                    found.append(location)
+    except OSError:
+        return []
+    return found
 
 
 class iPokerDetector(SiteDetector):  # noqa: N801
@@ -373,6 +527,7 @@ class iPokerDetector(SiteDetector):  # noqa: N801
             "Winamax Poker",  # old iPoker skin
             "Bwin.fr Poker",
             "PartyPoker.fr",
+            "Bet365.fr Poker",
             # UK Skins
             "Red Star Poker",
             "RedStar Poker",
@@ -491,6 +646,7 @@ class iPokerDetector(SiteDetector):  # noqa: N801
             for folder in (skin, *WINDOWS_IPOKER_DATA_DIR_ALIASES.get(skin, ())):
                 candidates.append(str(Path(paths["local_appdata"]) / folder / "data"))
                 candidates.append(str(Path(paths["appdata"]) / folder / "data"))
+            candidates.extend(self._windows_pattern_candidates(skin, paths))
             base_path = self._check_path_exists(*candidates)
 
         elif self.platform == "Linux":
@@ -580,6 +736,8 @@ class iPokerDetector(SiteDetector):  # noqa: N801
                 )
                 if party_container:
                     base_path = party_container
+            elif skin in MAC_IPOKER_SUPPORT_DIRS:
+                base_path = self._mac_container_candidate(skin, containers_path, paths)
             elif skin in ["FDJ Poker", "En ligne", "Parions Sport en ligne"]:
                 # FDJ/En ligne on macOS uses a sandboxed container
                 fdj_container = str(
@@ -632,6 +790,44 @@ class iPokerDetector(SiteDetector):  # noqa: N801
                 log.exception("Error detecting iPoker (%s)", skin)
 
         return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
+
+    def _windows_pattern_candidates(self, skin: str, paths: dict[str, str]) -> list[str]:
+        """Data directories of ``skin`` found by name pattern and in the registry.
+
+        For a skin whose client folder is not known exactly: any folder of
+        %LOCALAPPDATA% or %APPDATA% matching its patterns, then the install
+        folders the Windows registry records for it.
+        """
+        patterns = IPOKER_CLIENT_NAME_PATTERNS.get(skin)
+        if not patterns:
+            return []
+        candidates: list[str] = []
+        for root in (paths["local_appdata"], paths["appdata"]):
+            candidates.extend(str(folder / "data") for folder in matching_subfolders(root, patterns))
+        for location in windows_registry_install_dirs(patterns):
+            install = Path(location)
+            candidates.append(str(install / "data"))
+            candidates.extend(
+                str(install / folder / "data") for folder in (skin, *WINDOWS_IPOKER_DATA_DIR_ALIASES.get(skin, ()))
+            )
+        return candidates
+
+    def _mac_container_candidate(self, skin: str, containers_path: str, paths: dict[str, str]) -> str | None:
+        """The data folder of ``skin`` in its macOS sandbox container, else in Application Support."""
+        patterns = IPOKER_CLIENT_NAME_PATTERNS.get(skin, ())
+        support_dirs = MAC_IPOKER_SUPPORT_DIRS.get(skin, ())
+        containers = matching_subfolders(containers_path, (*patterns, *MAC_IPOKER_CONTAINER_HINTS.get(skin, ())))
+        candidates: list[str] = []
+        for container in containers:
+            support = container / "Data" / "Library" / "Application Support"
+            candidates.extend(str(support / name) for name in support_dirs)
+            # macOS 14+ often refuses to list another app's container: then
+            # only the names above can be checked.
+            candidates.extend(str(folder) for folder in matching_subfolders(support, patterns))
+        for name in (skin, *support_dirs):
+            candidates.append(str(Path(paths["app_support"]) / name / "data"))
+            candidates.append(str(Path(paths["app_support"]) / name))
+        return self._check_path_exists(*candidates)
 
     def _found(self, skin: str, base_path: str, result: dict[str, Any]) -> dict[str, Any]:
         """Return a detected hero folder, recording ``skin`` as protected if its hands cannot be listed."""
@@ -767,6 +963,8 @@ class iPokerDetector(SiteDetector):  # noqa: N801
                 "mansionpoker": "Mansion Poker",
                 "genting": "Genting Poker",
                 "gentingpoker": "Genting Poker",
+                "bet365.fr": "Bet365.fr Poker",
+                "bet365fr": "Bet365.fr Poker",
                 "bet365": "Bet365 Poker",
                 "bet365poker": "Bet365 Poker",
                 "unibet": "Unibet Poker",

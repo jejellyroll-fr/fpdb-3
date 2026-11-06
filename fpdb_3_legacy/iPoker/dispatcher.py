@@ -42,6 +42,16 @@ IPOKER_SKINS: tuple[IPokerSkin, ...] = (
         40,
         "BwinFrIPoker",
     ),
+    IPokerSkin(
+        # Must stay before the generic ("bet365",) entry: detect() returns the
+        # first skin with an indicator in the path, and every bet365.fr path
+        # also contains "bet365".
+        ("bet365.fr", "bet365fr", "bet365 fr", "bet365-fr", "bet365_fr", "bet365 poker fr"),
+        "Bet365.fr Poker",
+        "bet365_fr",
+        132,
+        "Bet365FrIPoker",
+    ),
     IPokerSkin(("partypokerfr", "partypoker.fr", "partypoker.fr online poker"), "PartyPoker.fr", "partypoker_fr", 44, "PartyPokerFrIPoker"),
     IPokerSkin(("netbet",), "NetBet Poker", "netbet", 59),
     IPokerSkin(("poker770",), "Poker770", "poker770", 58),
