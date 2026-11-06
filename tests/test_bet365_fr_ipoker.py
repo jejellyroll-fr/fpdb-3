@@ -266,7 +266,9 @@ def test_the_preferences_detect_the_site_with_the_ipoker_network() -> None:
     assert ModernSiteCard.get_network_for_skin(None, SITE) == "iPoker"
 
 
-@pytest.mark.parametrize("example", ["HUD_config.xml.example", "fpdb_3_legacy/HUD_config.xml.example"])
+@pytest.mark.parametrize(
+    "example", ["HUD_config.xml", "HUD_config.xml.example", "fpdb_3_legacy/HUD_config.xml.example"]
+)
 def test_the_example_configuration_declares_the_site(example: str) -> None:
     doc = xml.dom.minidom.parse(str(REPO / example))
     [site] = [node for node in doc.getElementsByTagName("site") if node.getAttribute("site_name") == SITE]
