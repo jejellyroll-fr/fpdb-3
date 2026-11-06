@@ -152,7 +152,7 @@ class PokerStarsSummary(TourneySummary):
     # You collected 5 bounties for a total of USD 875.00.
     re_ko_bounties = re.compile(
         r"""
-                        You\scollected\s(?P<KOCOUNT>\d+)\sbounties\sfor\sa\stotal\sof\s({LEGAL_ISO})\s(?P<KOBOUNTY>[,.0-9]+)
+                        You\scollected\s(?P<KOCOUNT>\d+)\sbounties\sfor\sa\stotal\sof\s({LEGAL_ISO})\s(?P<KOBOUNTY>[0-9][,0-9]*(?:\.[0-9]+)?)
                                """.format(**substitutions),
         re.VERBOSE | re.MULTILINE,
     )
@@ -206,12 +206,12 @@ class PokerStarsSummary(TourneySummary):
     re_xls_tourney_info["Qualified"] = re.compile(r"(?P<WONTICKET>\*\\\/\*)?")
 
     re_player_stars = re.compile(
-        r"""(?P<RANK>[,.0-9]+):\s(?P<NAME>.+?)(\s\[(?P<ENTRYID>\d+)\])?\s\(.+?\),(\s)?((?P<CUR>\[{LS}]?)(?P<WINNINGS>[,.0-9]+)(\s(?P<CUR1>(FPP|SC)))?)?(?P<STILLPLAYING>still\splaying)?((?P<TICKET>Tournament\sTicket)\s\(WSOP\sStep\s(?P<LEVEL>\d)\))?(?P<QUALIFIED>\s\(qualified\sfor\sthe\starget\stournament\)|Sunday\sMillion\s(ticket|biļete))?(\s+)?""".format(
+        r"""(?P<RANK>[,.0-9]+):\s(?P<NAME>.+?)(\s\[(?P<ENTRYID>\d+)\])?\s\(.+?\),(\s)?((?P<CUR>(?:{LS})?)(?P<WINNINGS>[,.0-9]+)(\s(?P<CUR1>(FPP|SC)))?)?(?P<STILLPLAYING>still\splaying)?((?P<TICKET>Tournament\sTicket)\s\(WSOP\sStep\s(?P<LEVEL>\d)\))?(?P<QUALIFIED>\s\(qualified\sfor\sthe\starget\stournament\)|Sunday\sMillion\s(ticket|biļete))?(\s+)?""".format(
             **substitutions,
         ),
     )
     re_player_rio = re.compile(
-        r"""(?P<RANK>[,.0-9]+):\s(?P<NAME>[^,]+?)(,\s(?P<CUR>\[{LS}])(?P<WINNINGS>[,.0-9]+))?(\s+)?$""".format(
+        r"""(?P<RANK>[,.0-9]+):\s(?P<NAME>[^,]+?)(,\s(?P<CUR>(?:{LS}))(?P<WINNINGS>[,.0-9]+))?(\s+)?$""".format(
             **substitutions,
         ),
         re.MULTILINE,
@@ -258,7 +258,10 @@ class PokerStarsSummary(TourneySummary):
         r"A\s+(?P<CUR>[A-Z]{3})\s+(?P<WINNINGS>[.,0-9]+)\s+award\s+has\sbeen\scredited",
     )
 
-    codepage: ClassVar[list[str]] = ["cp1252", "utf8", "latin1", "iso-8859-1"]
+    # UTF-8 first (#625): cp1252 decodes almost any bytes, so trying it first read a UTF-8
+    # summary's "€9.04" as "â‚¬9.04" and stored buy-in 400, fee 9600, USD and prize pool 0.
+    # A genuine cp1252 file is not valid UTF-8 as soon as it holds an accent or a euro sign.
+    codepage: ClassVar[list[str]] = ["utf8", "cp1252", "latin1"]
 
     # Constants for tournament structure lookup
     MAX_9_PLAYER_ENTRIES = 45
@@ -779,6 +782,11 @@ class PokerStarsSummary(TourneySummary):
         else:
             rebuy_count_hero = None
 
+        # The bounties are not in the rank lines' winnings (#447): only this line says what they paid.
+        # The count stays out of koCount, which the hand import keeps in units of the fixed bounty.
+        ko = self.re_ko_bounties.search(self.summaryText)
+        ko_winnings_hero = self._money_to_cents(ko.group("KOBOUNTY")) if ko else None
+
         if "PRIZEPOOL" in mg and mg["PRIZEPOOL"] is not None:
             if "Sunday Million" in mg["PRIZEPOOL"]:
                 self.isSatellite = True
@@ -908,10 +916,14 @@ class PokerStarsSummary(TourneySummary):
                 entry_id = int(mg["ENTRYID"])
                 self.isReEntry = True
 
+            ko_winnings = None
             if hero_rank == rank and entry_id == 1:
                 rebuy_count = rebuy_count_hero
                 add_on_count = None
                 ko_count = None
+            if hero_rank and hero_rank == rank:
+                # The entry that finished where the hero did, a re-entry included: the total is the hero's.
+                ko_winnings = ko_winnings_hero
 
             # print "DEBUG: addPlayer(%s, %s, %s, %s, None, None, None)" %(rank, name, winnings, self.currency)
             # print "DEBUG: self.buyin: %s self.fee %s" %(self.buyin, self.fee)
@@ -924,6 +936,7 @@ class PokerStarsSummary(TourneySummary):
                 add_on_count,
                 ko_count,
                 entry_id,
+                koWinnings=ko_winnings,
             )
 
         if not registered:

@@ -280,12 +280,12 @@ class HudAdapter:
             frags.extend(self.select_fragments(descriptor))
         return (", " + ", ".join(frags)) if frags else ""
 
-    def compute(self, descriptor: StatDescriptor, player_stats: Mapping[str, Any]) -> float | None:
-        """Evaluate the descriptor from a ``stat_dict[player]`` mapping.
+    def _variables(self, descriptor: StatDescriptor, player_stats: Mapping[str, Any]) -> dict[str, Any]:
+        """The descriptor's inputs, read case-insensitively from ``stat_dict``.
 
-        Inputs are read case-insensitively. A dimensioned input is read from its
-        injected ``name__input`` alias if present, else from its own column name
-        (so ratio stats over existing HudCache columns work without any change).
+        A dimensioned input is read from its injected ``name__input`` alias if
+        present, else from its own column name (so ratio stats over existing
+        HudCache columns work without any change).
         """
         lowered = {str(k).lower(): v for k, v in player_stats.items()}
         variables: dict[str, Any] = {}
@@ -295,10 +295,26 @@ class HudAdapter:
                 variables[input_name] = lowered[alias_key]
             else:
                 variables[input_name] = lowered.get(input_name.lower(), 0)
-        return descriptor.compute(variables)
+        return variables
+
+    def compute(self, descriptor: StatDescriptor, player_stats: Mapping[str, Any]) -> float | None:
+        """Evaluate the descriptor's value expression from ``stat_dict[player]``."""
+        return descriptor.compute(self._variables(descriptor, player_stats))
+
+    def compute_sample(self, descriptor: StatDescriptor, player_stats: Mapping[str, Any]) -> float | None:
+        """Evaluate a descriptor's sample expression from ``stat_dict[player]``."""
+        if descriptor.sample_expression is None:
+            return None
+        return descriptor.compute_sample(self._variables(descriptor, player_stats))
 
     def stat_tuple(self, descriptor: StatDescriptor, player_stats: Mapping[str, Any]) -> tuple:
-        """Build the 6-element tuple ``do_stat`` returns for HUD rendering."""
+        """Build the 6-element tuple ``do_stat`` returns for HUD rendering.
+
+        The fifth element is the *sample* column the popup shows beside the
+        value (``(1200)``), which is where the HUD reads a denominator. It is
+        empty when a descriptor declares no ``sample`` expression rather than
+        carrying the value expression, which is what it used to hand out.
+        """
         raw = self.compute(descriptor, player_stats)
         formatted = descriptor.format(raw)
         numeric = raw if raw is not None else 0
@@ -307,6 +323,6 @@ class HudAdapter:
             formatted,
             f"{descriptor.name}={formatted}",
             f"{descriptor.name}={formatted}",
-            descriptor.value,
+            descriptor.format_sample(self.compute_sample(descriptor, player_stats)),
             descriptor.label,
         )

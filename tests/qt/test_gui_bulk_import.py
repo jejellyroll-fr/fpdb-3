@@ -3,7 +3,7 @@ from __future__ import annotations
 import time
 
 import pytest
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import QPoint, Qt, QTimer
 from PySide6.QtWidgets import QWidget
 
 
@@ -58,6 +58,10 @@ class FakeImporter:
         self.move_imported = None
         self.move_failed = None
 
+    def phh_summary(self):
+        # No PHH file in these imports (#381).
+        return None
+
     def clearFileList(self):
         self.cleared += 1
         self.filelist = {}
@@ -82,6 +86,9 @@ class FakeImporter:
 
     def setMode(self, value):
         self.mode = value
+
+    def setThreads(self, value):
+        self.threads = value
 
     def setCallHud(self, value):
         self.call_hud = value
@@ -138,6 +145,7 @@ def test_import_button_triggers_use_case(qtbot, bulk_import_widget, tmp_path):
     assert widget.importer.progress_callbacks is not None
     assert widget.importer.hands_in_db == 7
     assert widget.importer.mode == "bulk"
+    assert widget.importer.threads == -1  # equity workers, as the command line uses (#443)
     assert widget.importer.call_hud is False
 
 
@@ -298,3 +306,164 @@ def test_no_importable_files_warns_user(qtbot, monkeypatch, tmp_path):
     assert captured["title"] == "Bulk Import"
     assert "No importable" in captured["message"]
     assert lock.released is True
+
+
+@pytest.mark.qt
+def test_a_phh_import_reports_its_own_counts(qtbot, monkeypatch, tmp_path):
+    """PHH files (#381): the completion message adds found / unsupported / malformed."""
+    from fpdb_3_legacy import GuiBulkImport
+    from fpdb_3_legacy.phh_import import PHHImportResult
+
+    class PHHImporter(FakeImporter):
+        def phh_summary(self):
+            return PHHImportResult(discovered=5, imported=2, duplicates=1, unsupported=1, malformed=1, seconds=0.2)
+
+    PHHImporter.result = (2, 1, 0, 1, 1, 0.2)
+    PHHImporter.error = None
+    PHHImporter.delay = 0
+    monkeypatch.setattr(GuiBulkImport.Importer, "Importer", PHHImporter)
+    captured = {}
+    monkeypatch.setattr(
+        GuiBulkImport.QMessageBox, "information", lambda parent, title, message: captured.update(message=message)
+    )
+
+    widget = GuiBulkImport.GuiBulkImport({"global_lock": FakeLock()}, FakeConfig(), sql=None)
+    qtbot.addWidget(widget)
+    widget.show()
+    widget.importDir.setText(str(tmp_path))
+    widget.load_clicked()
+    qtbot.waitUntil(lambda: "message" in captured, timeout=10_000)
+
+    assert "Skipped: 1" in captured["message"]
+    for line in ("PHH hands found: 5", "Unsupported variants: 1", "Malformed: 1"):
+        assert line in captured["message"]
+
+
+def _widget_with_sites(qtbot, monkeypatch, tmp_path, settings=None):
+    """A Bulk Import tab listing one configured cash and one tourney directory."""
+    from fpdb_3_legacy import GuiBulkImport
+
+    class FakeSite:
+        enabled = True
+        HH_path = str(tmp_path / "cash")
+        TS_path = str(tmp_path / "tourney")
+
+    class ConfigWithSite:
+        supported_sites = {"Bwin.fr Poker": FakeSite()}
+
+    FakeImporter.result = (1, 0, 0, 0, 0, 0.1)
+    FakeImporter.error = None
+    FakeImporter.delay = 0
+    monkeypatch.setattr(GuiBulkImport.Importer, "Importer", FakeImporter)
+    monkeypatch.setattr(GuiBulkImport.QMessageBox, "information", lambda *a, **k: None)
+
+    widget = GuiBulkImport.GuiBulkImport({"global_lock": FakeLock(), **(settings or {})}, ConfigWithSite(), sql=None)
+    qtbot.addWidget(widget)
+    widget.show()
+    return widget
+
+
+def _click_row(qtbot, widget, row, column):
+    tree = widget.import_tree
+    rect = tree.visualItemRect(tree.topLevelItem(row))
+    x = tree.header().sectionViewportPosition(column) + 8
+    qtbot.mouseClick(tree.viewport(), Qt.MouseButton.LeftButton, pos=QPoint(x, rect.center().y()))
+
+
+@pytest.mark.qt
+def test_clicking_a_configured_row_picks_it_for_import(qtbot, monkeypatch, tmp_path):
+    """#662: a click on the row, not only on its (barely visible) box, picks it."""
+    widget = _widget_with_sites(qtbot, monkeypatch, tmp_path)
+    tourney = widget.import_tree.topLevelItem(1)
+
+    _click_row(qtbot, widget, 1, column=1)
+    assert tourney.checkState(0) == Qt.CheckState.Checked
+
+    widget.load_clicked()
+    qtbot.waitUntil(lambda: widget.load_button.isEnabled(), timeout=10_000)
+
+    assert widget.importer.files == [(str(tmp_path / "tourney"), "Bwin.fr Poker")]
+
+
+@pytest.mark.qt
+def test_clicking_a_picked_row_again_unpicks_it(qtbot, monkeypatch, tmp_path):
+    widget = _widget_with_sites(qtbot, monkeypatch, tmp_path)
+    cash = widget.import_tree.topLevelItem(0)
+
+    _click_row(qtbot, widget, 0, column=1)
+    _click_row(qtbot, widget, 0, column=1)
+
+    assert cash.checkState(0) == Qt.CheckState.Unchecked
+    assert cash.isSelected() is False
+
+
+@pytest.mark.qt
+def test_clicking_the_check_box_toggles_it_once(qtbot, monkeypatch, tmp_path):
+    """The box shows the selection; a click on it must not toggle it a second time."""
+    widget = _widget_with_sites(qtbot, monkeypatch, tmp_path)
+    cash = widget.import_tree.topLevelItem(0)
+
+    _click_row(qtbot, widget, 0, column=0)
+
+    assert cash.isSelected() is True
+    assert cash.checkState(0) == Qt.CheckState.Checked
+
+
+@pytest.mark.qt
+def test_missing_default_path_is_not_imported_as_a_folder(qtbot, monkeypatch, tmp_path):
+    """#662: the 'default path does not exist' message stays out of the folder field and the import."""
+    from fpdb_3_legacy import Configuration, GuiBulkImport
+
+    told = {}
+    widget = _widget_with_sites(
+        qtbot, monkeypatch, tmp_path, settings={"bulkImport-defaultPath": Configuration.MISSING_DEFAULT_PATH}
+    )
+    monkeypatch.setattr(
+        GuiBulkImport.QMessageBox, "information", lambda parent, title, message: told.update(message=message)
+    )
+
+    assert widget.importDir.text() == ""
+
+    widget.load_clicked()
+
+    assert widget.importer.run_called is False
+    assert widget.settings["global_lock"].released is True
+    assert "Select at least one configured directory" in told["message"]
+
+
+@pytest.mark.qt
+def test_a_folder_macos_refuses_to_list_asks_for_access(qtbot, monkeypatch, tmp_path):
+    """#662: a protected folder (Bwin.fr's Tables) is not reported as empty."""
+    from fpdb_3_legacy import GuiBulkImport
+
+    warnings = []
+    widget = _widget_with_sites(qtbot, monkeypatch, tmp_path)
+    monkeypatch.setattr(GuiBulkImport, "_cannot_list", lambda path: path == str(tmp_path / "cash"))
+    monkeypatch.setattr(
+        GuiBulkImport.QMessageBox, "warning", lambda parent, title, message: warnings.append((title, message))
+    )
+
+    class EmptyImporter(FakeImporter):
+        def addBulkImportImportFileOrDir(self, path, site="auto"):
+            self.files.append((path, site))
+
+    widget.importer = EmptyImporter()
+    widget.import_tree.topLevelItem(0).setSelected(True)
+    widget.load_clicked()
+    qtbot.waitUntil(lambda: widget.load_button.isEnabled(), timeout=10_000)
+
+    assert [title for title, _ in warnings] == ["Folder access needed"]
+    assert str(tmp_path / "cash") in warnings[0][1]
+
+
+def test_cannot_list_tells_a_refused_folder_from_an_empty_one(tmp_path, monkeypatch):
+    from fpdb_3_legacy import GuiBulkImport
+
+    assert GuiBulkImport._cannot_list(str(tmp_path)) is False
+    assert GuiBulkImport._cannot_list(str(tmp_path / "missing")) is False
+
+    def refuse(path):
+        raise PermissionError(1, "Operation not permitted")
+
+    monkeypatch.setattr(GuiBulkImport.os, "listdir", refuse)
+    assert GuiBulkImport._cannot_list(str(tmp_path)) is True

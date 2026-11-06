@@ -25,8 +25,8 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont, QPixmap
+from PySide6.QtCore import QPoint, Qt
+from PySide6.QtGui import QCloseEvent, QFont, QMouseEvent, QPixmap
 from PySide6.QtWidgets import (
     QComboBox,
     QFrame,
@@ -34,19 +34,20 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QPushButton,
-    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
 
 #    FreePokerTools modules
 from fpdb_3_legacy import Aux_Base, Configuration, Popup, Stats
+from fpdb_3_legacy.hud_options_panel import COMPACT_STYLE, HudOptionsPanel, bound_combo, fit_to_content
 from fpdb_3_legacy.hud_profiles import HudPositionScope
-from fpdb_3_legacy.i18n import gettext as _t
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("hud_main")
+
 
 BlockKey = tuple[int | str, int]
 WindowKey = str | BlockKey
@@ -199,36 +200,11 @@ _ALIGN = {
 }
 
 
-def normalize_position(raw: Any) -> str:
-    """Map a stored/labelled position to a canonical panel code.
-
-    Accepts the values DerivedStats stores in HandsPlayers.position (0 = button,
-    "S" = small blind, "B" = big blind, 1.. = seats after the BB) and the panel
-    labels used in configs ("BU"/"SB"/"BB"/...). Returns one of
-    BTN/SB/BB/CO/MP/EP (or "" when unknown/empty).
-    """
-    if raw is None or raw == "":
-        return ""
-    s = str(raw).strip().upper()
-    if s in ("0", "BTN", "BU", "D", "BUTTON"):
-        return "BTN"
-    if s in ("S", "SB"):
-        return "SB"
-    if s in ("B", "BB"):
-        return "BB"
-    after_bb = {"1": "CO", "2": "MP", "3": "MP", "4": "EP", "5": "EP", "6": "EP", "7": "EP", "8": "EP", "9": "EP"}
-    return after_bb.get(s, s)
-
-
-def block_visible(block_position: str, player_position: Any) -> bool:
-    """Whether a panel bound to ``block_position`` shows for ``player_position``.
-
-    A block with no position binding is always visible; otherwise the player's
-    normalized position must match the block's.
-    """
-    if not block_position:
-        return True
-    return normalize_position(block_position) == normalize_position(player_position)
+# The position vocabulary and the position-bound visibility rule live in
+# ``hud_situation`` (#298), which the dynamic panel layer also needs. They are
+# re-exported here because this is where callers have always imported them, and
+# so the two layers cannot disagree about what "B" means.
+from fpdb_3_legacy.hud_situation import block_visible, block_visible_for, normalize_position  # noqa: E402,F401
 
 
 def false_attr(value: Any) -> bool:
@@ -279,6 +255,8 @@ class SimpleHUD(Aux_Base.AuxSeats):
         except (TypeError, ValueError):
             self.font_size = int(self.aux_params["font_size"])
         self.font = QFont(self.aux_params["font"], self.font_size)
+        self.title_font_scale = self._hud_font_scale(getattr(self.game_params, "title_font_scale", ""), 1.0)
+        self.heading_font_scale = self._hud_font_scale(getattr(self.game_params, "heading_font_scale", ""), 1.0)
 
         # store these class definitions for use elsewhere
         # this is needed to guarantee that the classes in _this_ module
@@ -296,6 +274,13 @@ class SimpleHUD(Aux_Base.AuxSeats):
         self._build_legacy_grid_arrays()
         self._build_block_layouts()
 
+    @staticmethod
+    def _hud_font_scale(value: Any, default: float) -> float:
+        try:
+            return min(2.0, max(0.5, float(value))) if value not in (None, "") else default
+        except (TypeError, ValueError):
+            return default
+
     def _positional_mode(self) -> str:
         """'all' (show every position panel, stacked) or 'current' (only the
         panel matching the live position). Defaults to 'current'."""
@@ -305,6 +290,165 @@ class SimpleHUD(Aux_Base.AuxSeats):
             if mode:
                 return str(mode).strip().lower()
         return "current"
+
+    # -- context-aware dynamic panels (#298) --------------------------------
+
+    def _panel_resolver(self) -> Any:
+        """The panel rules this table's profile enables, or None when it has none.
+
+        Built once per HUD and rebuilt when the stat set changes, because the
+        profile is what scopes the rules. A configuration with no panel rules
+        -- the shipped default -- yields None, and every caller then takes the
+        static path it always did: turning dynamic panels on is what changes
+        behaviour, and turning them off is indistinguishable from not having
+        them, which is what the issue asks for.
+
+        Configured rules are still None here until the user said yes after
+        reading what rooms say about them, and always at a table of a room
+        that forbids them (#647): whatever wrote the rules, this is the one
+        place every table asks.
+        """
+        profile = getattr(self.game_params, "name", "default")
+        try:
+            from fpdb_3_legacy import dynamic_panels_consent, hud_situation
+
+            configured = self.config.get_hud_panel_rules()
+            # Asked before the cache, on every update: a yes given meanwhile
+            # applies, and a yes withdrawn -- the answer file deleted -- stops a
+            # table that already shows panels.
+            refused = (
+                dynamic_panels_consent.why_not_at(
+                    getattr(self.hud, "site", None),
+                    dynamic_panels_consent.consent_path(getattr(self.config, "file", None)),
+                )
+                if configured
+                else None
+            )
+            if refused and refused != getattr(self, "_panel_refusal_logged", None):
+                # Said once, not on every redraw.
+                log.info("Dynamic HUD panels kept off at this %s table: %s", getattr(self.hud, "site", ""), refused)
+            self._panel_refusal_logged = refused
+            cached = getattr(self, "_panel_resolver_cache", None)
+            if not configured or refused:
+                resolver = None
+            elif cached is not None and getattr(self, "_panel_resolver_profile", None) == profile:
+                return cached
+            else:
+                resolver = hud_situation.HudSituationResolver(
+                    configured,
+                    fallback=str(getattr(self.config, "hud_panel_fallback", "") or ""),
+                ).for_profile(profile)
+        except Exception:  # intentional broad catch: a broken rule set must not break the HUD
+            log.exception("Dynamic HUD panels could not be resolved; falling back to the static grid")
+            resolver = None
+        self._panel_resolver_cache = resolver
+        self._panel_resolver_profile = profile
+        return resolver
+
+    def _panel_state(self) -> Any:
+        """This table's panel memory, created on first use.
+
+        Kept only while the resolver it was made for is the one in force: when
+        panels are turned off or refused, the memory goes with them (#647).
+        """
+        resolver = self._panel_resolver()
+        state = getattr(self, "_panel_state_cache", None)
+        if resolver is None:
+            self._panel_state_cache = None
+            return None
+        if state is not None and getattr(state, "resolver", None) is resolver:
+            return state
+        from fpdb_3_legacy import hud_situation
+
+        state = hud_situation.PanelState(resolver, getattr(self.game_params, "name", "default"))
+        self._panel_state_cache = state
+        return state
+
+    def forget_dynamic_panels(self) -> None:
+        """Drop the cached panel memory, after a live-state or profile change."""
+        state = getattr(self, "_panel_state_cache", None)
+        if state is not None:
+            state.forget()
+
+    def dynamic_panel_selection(self, seat: int | str, player_id: Any) -> Any:
+        """Which dynamic panels this seat shows right now, or None when disabled.
+
+        None is the answer whenever dynamic panels are off, which is the normal
+        case: the caller then applies the position-bound rule it has always
+        applied. A seat with no live data is no different from a disabled
+        profile -- the static grid stands.
+        """
+        state = self._panel_state()
+        if state is None:
+            return None
+        pdata = self.hud.stat_dict.get(player_id) if self.hud.stat_dict else None
+        if not isinstance(pdata, dict):
+            pdata = {}
+        try:
+            from fpdb_3_legacy import hud_situation
+
+            live = hud_situation.winamax_live_state_for_player(
+                pdata,
+                self.hud.stat_dict.values() if self.hud.stat_dict else (),
+                getattr(self.hud, "live_state", None) or {},
+            )
+            context = hud_situation.HudSituationContext.from_stat_dict(pdata, live)
+            selection, _change = state.update((seat, 0), context, samples=pdata)
+            log.debug(
+                "Dynamic HUD seat=%s profile=%s context={%s} panels=%s suppressed=%s",
+                seat,
+                getattr(self.game_params, "name", "default"),
+                context.describe(),
+                selection.panels,
+                selection.suppressed,
+            )
+            return selection
+        except Exception:  # intentional broad catch: a bad rule must not blank a seat
+            log.exception("Dynamic panel selection failed for seat %s; using the static grid", seat)
+            return None
+
+    # -- analytics-backed cells (#335) --------------------------------------
+
+    def analytics_session(self) -> Any:
+        """The analytics cells *this profile* binds, or an empty session.
+
+        Scoped to the active stat set, so a cell another profile declared as
+        analytics is never taken over in a profile that has it as a native stat.
+        A profile with no analytics-backed cell gets an empty session: every
+        ``text_for`` answers ``None`` for its names, and every existing stat keeps
+        the path it always took. Cached per profile, like the panel resolver, so a
+        stat-set switch rebuilds it.
+        """
+        profile = str(getattr(self.game_params, "name", "") or "")
+        cached = getattr(self, "_analytics_session_cache", None)
+        if cached is not None and getattr(self, "_analytics_session_profile", None) == profile:
+            return cached
+        try:
+            from fpdb_3_legacy import hud_analytics_stats
+
+            session = hud_analytics_stats.AnalyticsStatSession.from_config(self.config, stat_set=profile)
+        except Exception:  # intentional broad catch: analytics must not cost a HUD its stats
+            log.exception("Could not read the analytics-backed HUD cells; those cells will show no data")
+            session = None
+        self._analytics_session_cache = session
+        self._analytics_session_profile = profile
+        return session
+
+    def publish_analytics(self, values_by_player: Any) -> None:
+        """Adopt the analytics values a finished read batch computed (#335).
+
+        Called on the Qt thread with what the worker already produced, so this
+        is a dict assignment and never a query.
+        """
+        # Built here if the first hand's labels have not refreshed yet: otherwise
+        # the opening hand's values would be dropped on a session that does not
+        # exist yet, and the cells would show no data for that hand.
+        session = self.analytics_session()
+        if session is None:
+            return
+        # Stored, not painted: the seats read it on their next refresh, which is
+        # the same refresh that already follows every new hand.
+        session.publish(values_by_player or {})
 
     def _show_hero_hud(self) -> bool:
         """Whether this stat-set should display hero stat windows."""
@@ -381,6 +525,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
             stats = [[None] * nc for _ in range(nr)]
             popups = [[None] * nc for _ in range(nr)]
             tips = [[None] * nc for _ in range(nr)]
+            display_labels = [[""] * nc for _ in range(nr)]
             hudcolors = [[""] * nc for _ in range(nr)]
             hudbgcolors = [[""] * nc for _ in range(nr)]
             colorranges = [[None] * nc for _ in range(nr)]
@@ -391,6 +536,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
                     stats[r][c] = st.stat_name
                     popups[r][c] = st.popup
                     tips[r][c] = st.tip
+                    display_labels[r][c] = getattr(st, "display_label", "")
                     hudcolors[r][c] = getattr(st, "hudcolor", "")
                     hudbgcolors[r][c] = getattr(st, "hudbgcolor", "")
                     colspans[r][c] = getattr(st, "colspan", 1) or 1
@@ -418,6 +564,8 @@ class SimpleHUD(Aux_Base.AuxSeats):
                     "bordercolor": getattr(blk, "bordercolor", ""),
                     "title_bgcolor": getattr(blk, "title_bgcolor", ""),
                     "title_fgcolor": getattr(blk, "title_fgcolor", ""),
+                    "title_font_scale": getattr(blk, "title_font_scale", 0),
+                    "heading_font_scale": getattr(blk, "heading_font_scale", 0),
                     "cell_width": getattr(blk, "cell_width", 0),
                     "x": getattr(blk, "x", 0),
                     "y": getattr(blk, "y", 0),
@@ -426,6 +574,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
                     "stats": stats,
                     "popups": popups,
                     "tips": tips,
+                    "display_labels": display_labels,
                     "hudcolors": hudcolors,
                     "hudbgcolors": hudbgcolors,
                     "colorranges": colorranges,
@@ -496,6 +645,8 @@ class SimpleHUD(Aux_Base.AuxSeats):
 
         This method moves both the stat windows and the main table menu window to their updated locations.
         """
+        if not self.m_windows:
+            return  # not created yet, so no table menu either: the table moved before the first create
         if self._uses_block_windows():
             self._move_block_windows()
             self.table_mw.move_windows()
@@ -585,7 +736,10 @@ class SimpleHUD(Aux_Base.AuxSeats):
             f"block={block_index} label={block.get('label', '')!r} block_pos={block.get('position', '')!r} "
             f"rel={rel_pos} abs={abs_pos} visible={visible}"
         )
-        log.warning(msg)
+        # This is per-window placement telemetry, emitted for every seat and
+        # every block on each redraw. Keep it available for diagnostics without
+        # flooding the WARNING log or hiding actionable warnings.
+        log.debug(msg)
 
         # Log to the dedicated trace log if active
         trace_logger = logging.getLogger("hud_trace")
@@ -660,6 +814,15 @@ class SimpleHUD(Aux_Base.AuxSeats):
             # stack instead (a starting layout; the user can drag to fine-tune,
             # and drags persist and override this).
             return (anchor_x, anchor_y + self._stack_offset(block_index))
+        if self.block_layouts[block_index].get("position") == "dynamic" and not (offset_x or offset_y):
+            # Only one contextual block is visible at a time, but the static
+            # core stays visible. An unpositioned dynamic block used to land
+            # exactly on top of the core, making a working selection look
+            # permanently static. Keep the two panels apart by default while
+            # preserving explicit offsets and user-dragged positions.
+            reference_height = getattr(self.hud, "ref_layout_height", None) or 546
+            gap = -96 if anchor_y > reference_height * 0.55 else 96
+            return (anchor_x, anchor_y + gap)
         return (anchor_x + offset_x, anchor_y + offset_y)
 
     def _stack_offset(self, block_index: int) -> int:
@@ -915,7 +1078,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
                 common_x = self.hud.layout.common[0] + table_x
                 common_y = self.hud.layout.common[1] + table_y
                 clamped_x, clamped_y = Aux_Base.clamp_to_screen(common_x, common_y)
-                window.move(clamped_x, clamped_y)
+                Aux_Base.move_if_needed(window, clamped_x, clamped_y)
                 continue
 
             if not isinstance(key, tuple):
@@ -925,7 +1088,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
             seat, block_index = key
             canon = self._canonical_for(key)
             screen_x, screen_y = self._canonical_to_screen(canon)
-            window.move(screen_x, screen_y)
+            Aux_Base.move_if_needed(window, screen_x, screen_y)
             window._pos_gen = getattr(self.hud, "geometry_generation", 0)
             self._log_block_window_position("move", seat, block_index, canon, (screen_x, screen_y))
 
@@ -1123,7 +1286,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         """
         super().__init__(aw, seat)
         self.popup_count = 0
-        self.setWindowTitle(_t("HUD - stats"))
+        self.setWindowTitle(_("HUD - stats"))
 
     # button_release_left is inherited from Aux_Base.SeatWindow: it releases the
     # drag grab and, only if the window actually moved, calls configure_event_cb
@@ -1201,7 +1364,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         block_index = getattr(self, "block_index", None)
         blocks = [all_blocks[block_index]] if block_index is not None else all_blocks
         self.stat_boxes = []  # one 2D array of SimpleStat per block
-        self.block_widgets = []  # (container widget, position) per block, for show/hide
+        self.block_widgets = []  # (container widget, block metadata) per block, for show/hide
         for blk in blocks:
             container = QWidget()
             if multi:
@@ -1229,10 +1392,15 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             if multi and blk["label"]:
                 title = self.aw.aw_class_label(blk["label"])
                 title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                title_font = QFont(self.aw.font)
+                title_scale = blk.get("title_font_scale") or getattr(self.aw, "title_font_scale", 1.0)
+                title_font.setPointSize(max(6, round(self.aw.font.pointSize() * title_scale)))
+                title.setFont(title_font)
+                title.setToolTip(blk["label"])
                 title_bg = blk.get("title_bgcolor") or blk.get("bordercolor") or panel_fg
                 title_fg = blk.get("title_fgcolor") or self.aw.bgcolor
                 title.setStyleSheet(
-                    f"background: {title_bg};color: {title_fg};font-weight: 700;padding: 1px 4px;border: 0;"
+                    f"background: {title_bg};color: {title_fg};font-weight: 700;padding: 0px 3px;border: 0;"
                 )
                 cl.addWidget(title)
             grid = QGridLayout()
@@ -1245,13 +1413,19 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             # captions) render them at their grid positions; otherwise fall back to
             # the per-stat tip-as-header mode.
             show_headers = multi and not btexts and any(tip for row in blk["tips"] for tip in row)
+            header_font = QFont(self.aw.font)
+            heading_scale = blk.get("heading_font_scale") or getattr(self.aw, "heading_font_scale", 1.0)
+            header_font.setPointSize(max(5, round(self.aw.font.pointSize() * heading_scale)))
             for t in btexts:
                 tr, tc = t["rowcol"]
                 if not (0 <= tr < blk["nrows"] and 0 <= tc < blk["ncols"]):
                     continue
                 tlabel = self.aw.aw_class_label(t.get("label", ""))
                 tlabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                tlabel.setFont(self.aw.font)
+                tlabel.setFont(header_font if multi else self.aw.font)
+                if multi:
+                    tlabel.setWordWrap(True)
+                    tlabel.setToolTip(t.get("label", ""))
                 t_fg = t.get("fgcolor") or ""
                 t_bg = t.get("bgcolor") or ""
                 tlabel.setStyleSheet(
@@ -1264,9 +1438,14 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
                 for c in range(blk["ncols"]):
                     grid_row = r * 2 if show_headers else r
                     if show_headers:
-                        label = self.aw.aw_class_label(blk["tips"][r][c] or "")
+                        full_tip = blk["tips"][r][c] or ""
+                        display_labels = blk.get("display_labels") or []
+                        display_label = display_labels[r][c] if r < len(display_labels) and c < len(display_labels[r]) else ""
+                        label = self.aw.aw_class_label(display_label or full_tip)
                         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                        label.setFont(self.aw.font)
+                        label.setFont(header_font)
+                        label.setWordWrap(True)
+                        label.setToolTip(full_tip)
                         label.setStyleSheet("font-weight: 700; padding: 0px 2px;")
                         grid.addWidget(label, grid_row, c)
                     stat_name = blk["stats"][r][c]
@@ -1317,7 +1496,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             cl.addLayout(grid)
             outer.addWidget(container)
             self.stat_boxes.append(box)
-            self.block_widgets.append((container, blk.get("position", "")))
+            self.block_widgets.append((container, blk))
         # Legacy alias: keep self.stat_box pointing at the first block's grid.
         self.stat_box = self.stat_boxes[0] if self.stat_boxes else []
 
@@ -1336,7 +1515,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         if i == "table":
             self.show()
             has_visible_block = False
-            for box, (container, block_pos) in zip(self.stat_boxes, self.block_widgets, strict=False):
+            for box, (container, block) in zip(self.stat_boxes, self.block_widgets, strict=False):
                 container.setVisible(True)
                 has_visible_block = True
                 for row in box:
@@ -1358,7 +1537,8 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             self.hide()
             return
 
-        self.show()
+        if not self.isVisible():  # #680: show() on a visible window still costs an expose/repaint
+            self.show()
 
         player_pos = ""
         if pdata is not None:
@@ -1370,9 +1550,16 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         # import-driven HUD only knows the *previous* hand's position and would
         # otherwise display a one-hand-stale panel. "current" filters by position.
         show_all_positions = self.aw._positional_mode() == "all"
+        # Context-aware panels (#298) refine this: when the profile has panel
+        # rules, a block the selection names is shown and a block it does not
+        # name keeps the position rule, so the static core is untouched.
+        selection = self.aw.dynamic_panel_selection(i, player_id)
         has_visible_block = False
-        for box, (container, block_pos) in zip(self.stat_boxes, self.block_widgets, strict=False):
-            visible = True if show_all_positions else block_visible(block_pos, player_pos)
+        for box, (container, block) in zip(self.stat_boxes, self.block_widgets, strict=False):
+            if selection is not None:
+                visible = block_visible_for(block, selection, player_pos)
+            else:
+                visible = True if show_all_positions else block_visible(block.get("position", ""), player_pos)
             container.setVisible(visible)
             if not visible:
                 continue
@@ -1420,11 +1607,17 @@ class SimpleStat:
         self.lab.stat_dict = None
         self.widget = self.lab
         self.stat_dict: dict[Any, Any] | None = None
+        self.aw = aw
         self.hud = aw.hud
         self.aux_params = aw.aux_params
         self.font_size = getattr(aw, "font_size", self.aux_params.get("font_size", 8))
         self.colors = colors or {}
         self._bg = ""
+        # The six-tuple Stats returns, declared here rather than inferred from
+        # the first branch that assigns it: the analytics path (#335) builds its
+        # own five strings and a tooltip, and the narrower tuple those literals
+        # imply would then reject ``do_table_stat``'s own return type.
+        self.number: tuple[Any, ...] | None = None
 
     def update(self, player_id: int | str | None, stat_dict: dict) -> None:
         """Update the statistic display for a given player.
@@ -1435,8 +1628,35 @@ class SimpleStat:
             player_id: The unique identifier of the player.
             stat_dict: A dictionary containing statistics for all players.
         """
+        self._load_number(player_id, stat_dict)
+        if self.number:
+            self.lab.setText(str(self.number[1]))
+        self._apply_color_range()
+
+    def _load_number(self, player_id: int | str | None, stat_dict: dict) -> None:
+        """Recalculate ``self.number`` for a player without touching the label."""
         self.stat_dict = stat_dict  # So the Simple_stat obj always has a fresh stat_dict
         self.lab.stat_dict = stat_dict
+
+        # An analytics-backed cell (#335) asks its session first. ``None`` from
+        # ``text_for`` means "not an analytics cell", so a native stat never
+        # takes this branch; a bound cell whose batch has not landed yet shows
+        # the no-data convention rather than falling through to a same-named
+        # column-backed stat, which would be a different number under this name.
+        session = self._analytics_session()
+        if session is not None:
+            text = session.text_for(self.stat, player_id)
+            if text is not None:
+                value = session.value_for(self.stat, player_id)
+                self.number = (
+                    self.stat,
+                    text,
+                    "",
+                    "",
+                    "",
+                    value.tooltip() if value is not None else str(self.stat),
+                )
+                return
 
         # Two scopes, both computed in Stats (the single source of truth), never
         # with inline SQL here (this runs on the UI thread, once per label).
@@ -1455,9 +1675,29 @@ class SimpleStat:
                 self.stat,
                 self.hud.hand_instance,
             )
-        if self.number:
-            self.lab.setText(str(self.number[1]))
-        self._apply_color_range()
+
+    def _analytics_session(self) -> Any:
+        """The table's analytics session, or ``None`` when this profile has none.
+
+        The answer is checked by *type*, not merely for truthiness: any object
+        with an ``analytics_session`` attribute would otherwise be accepted, and
+        a duck-typed or auto-mocked ``aw`` would then answer ``text_for`` with
+        something that is not ``None`` for every stat -- silently taking every
+        native stat off the path it has always taken. Only a real session is a
+        session; anything else falls back to the native path.
+        """
+        aw = getattr(self, "aw", None)
+        accessor = getattr(aw, "analytics_session", None)
+        if not callable(accessor):
+            return None
+        try:
+            from fpdb_3_legacy import hud_analytics_stats
+
+            session = accessor()
+        except Exception:  # intentional broad catch: the label must still paint
+            log.exception("Could not reach the analytics session for stat %s", self.stat)
+            return None
+        return session if isinstance(session, hud_analytics_stats.AnalyticsStatSession) else None
 
     def _apply_color_range(self) -> None:
         """Colour the label by value using the PT4-style thresholds (if any).
@@ -1512,7 +1752,7 @@ class EmptyStat:
         self.widget.stat_dict = None
         self.widget.aw_popup = None
 
-    def update(self, _player_id: str, _stat_dict: dict) -> None:
+    def update(self, _player_id: int | str | None, _stat_dict: dict) -> None:
         return
 
 
@@ -1600,7 +1840,6 @@ class SimpleTableMW(Aux_Base.SeatWindow):
         if popup is not None:
             with contextlib.suppress(RuntimeError):  # popup's C++ side may already be gone
                 popup.close()
-                popup.destroy()
         self.menu_is_popped = False
         super().destroy(destroyWindow, destroySubWindows)
 
@@ -1615,7 +1854,7 @@ class SimpleTableMW(Aux_Base.SeatWindow):
         pos_x = table_x + self.aw.xshift
         pos_y = table_y + self.aw.yshift
         clamped_x, clamped_y = Aux_Base.clamp_to_screen(pos_x, pos_y)
-        self.move(clamped_x, clamped_y)
+        Aux_Base.move_if_needed(self, clamped_x, clamped_y)
 
 
 class SimpleTablePopupMenu(QWidget):
@@ -1636,224 +1875,90 @@ class SimpleTablePopupMenu(QWidget):
             None,
             Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint,
         )
+        # Without this every menu opened stays alive once closed: the slots
+        # connected in build_button() and friends keep a reference to it.
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.parentwin = parentwin
+        self._drag_offset: QPoint | None = None
         table_x = max(0, self.parentwin.hud.table.x) if self.parentwin.hud.table.x is not None else 50
         table_y = max(0, self.parentwin.hud.table.y) if self.parentwin.hud.table.y is not None else 50
-        pos_x = table_x + self.parentwin.aw.xshift
-        pos_y = table_y + self.parentwin.aw.yshift
-        clamped_x, clamped_y = Aux_Base.clamp_to_screen(pos_x, pos_y, 400, 300)  # Larger window size
-        self.move(clamped_x, clamped_y)
-        self.setWindowTitle(f"{self.parentwin.menu_label} - HUD configuration")
+        self.move(table_x + self.parentwin.aw.xshift, table_y + self.parentwin.aw.yshift)
+        self.setWindowTitle(_("{label} - HUD configuration").format(label=self.parentwin.menu_label))
         self._setup_ui()
+        self._fit_on_screen()
         self.show()
         self.raise_()
 
     def _setup_ui(self) -> None:
-        """Set up the user interface for the table popup menu.
+        """Lay out the actions, the stat set and layout choices, then the stat range options."""
+        self.setStyleSheet(COMPACT_STYLE)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(6, 6, 6, 6)
+        layout.setSpacing(4)
+        layout.addLayout(self._create_actions_row())
+        layout.addLayout(self._create_stat_set_row())
+        self.options_panel = HudOptionsPanel(self.parentwin.hud.hud_params, self)
+        self.options_panel.layout_changed.connect(self._fit_on_screen)
+        layout.addWidget(self.options_panel)
 
-        This method initializes the combo box dictionaries, creates the main controls and stats configuration boxes,
-        and arranges them in the popup menu layout.
-        """
-        # Dictionaries for combo boxes
-        stat_range_combo_dict = self._create_stat_range_dict()
-        seats_style_combo_dict = self._create_seats_style_dict()
-        multiplier_combo_dict = self._create_multiplier_dict()
-        cb_max_dict = self._create_max_seats_dict()
+    def _create_actions_row(self) -> QHBoxLayout:
+        """Create the row with the drag handle and the actions on this table's HUD."""
+        row = QHBoxLayout()
+        row.setSpacing(4)
+        grip = QLabel("≡")
+        grip.setCursor(Qt.CursorShape.SizeAllCursor)
+        grip.setToolTip(_("Drag to move this menu"))
+        row.addWidget(grip)
+        row.addWidget(self.build_button(_("Restart"), "kill", _("Restart the HUD on this table")))
+        row.addWidget(self.build_button(_("Save layout"), "save", _("Save where this HUD's windows are")))
+        row.addWidget(self.build_button(_("Stop"), "blacklist", _("Stop the HUD on this table")))
+        row.addWidget(self.build_button(_("Close"), "close", _("Close this menu")))
+        return row
 
-        # Layouts
-        grid = QGridLayout()
-        self.setLayout(grid)
-        vbox1 = self._create_main_controls(cb_max_dict)
-        vbox2 = self._create_player_stats_box(
-            multiplier_combo_dict,
-            seats_style_combo_dict,
-            stat_range_combo_dict,
-        )
-        vbox3 = self._create_opponent_stats_box(
-            multiplier_combo_dict,
-            seats_style_combo_dict,
-            stat_range_combo_dict,
-        )
-
-        self.set_spinners_active()
-
-        grid.addLayout(vbox1, 0, 0)
-        grid.addLayout(vbox2, 0, 1)
-        grid.addLayout(vbox3, 0, 2)
-        grid.addWidget(QLabel(f"Stat set: {self.parentwin.aw.game_params.name}"), 1, 0)
-
-    def _create_main_controls(self, cb_max_dict: dict) -> QVBoxLayout:
-        """Create the main control buttons and selectors for the popup menu.
-
-        This method adds buttons for HUD control actions and, if available, a stat set selector and max seats combo box.
-
-        Args:
-            cb_max_dict: The dictionary for the max seats combo box.
-
-        Returns:
-            QVBoxLayout: The vertical layout containing all main controls.
-        """
-        vbox = QVBoxLayout()
-        vbox.addWidget(self.build_button("Restart This HUD", "kill"))
-        vbox.addWidget(self.build_button("Save HUD Layout", "save"))
-        vbox.addWidget(self.build_button("Stop this HUD", "blacklist"))
-        vbox.addWidget(self.build_button("Close", "close"))
-        vbox.addWidget(QLabel(""))
-
-        # Add stat set selector
+    def _create_stat_set_row(self) -> QHBoxLayout:
+        """Create the row choosing this table's stat set and forced layout."""
+        row = QHBoxLayout()
+        row.setSpacing(4)
+        row.addWidget(QLabel(_("Stat set")))
         stat_sets_dict = self._create_stat_sets_dict()
-        if len(stat_sets_dict) > 1:  # Only show if there are multiple stat sets
-            vbox.addWidget(QLabel(_t("Stat Set (HUD):")))
+        if len(stat_sets_dict) > 1:
             self.stat_set_combo = self.build_stat_set_combo(stat_sets_dict)
-            vbox.addWidget(self.stat_set_combo)
-            vbox.addWidget(QLabel(""))
+            row.addWidget(self.stat_set_combo, 1)
+        else:
+            row.addWidget(QLabel(self._get_current_stat_set()), 1)
+        force_layout = [(_("Force layout..."), None)]
+        force_layout += [(f"{seats}-max", seats) for seats in sorted(self.parentwin.hud.layout_set.layout)]
+        row.addWidget(bound_combo(self.parentwin.hud.hud_params, "new_max_seats", force_layout))
+        return row
 
-        vbox.addWidget(self.build_combo_and_set_active("new_max_seats", cb_max_dict))
-        return vbox
+    def _fit_on_screen(self) -> None:
+        """Take the size the content needs and keep all of it on screen."""
+        fit_to_content(self)
+        self.move(*Aux_Base.clamp_to_screen(self.x(), self.y(), self.width(), self.height()))
 
-    def _create_player_stats_box(
-        self,
-        multiplier_dict: dict,
-        seats_style_dict: dict,
-        stat_range_dict: dict,
-    ) -> QVBoxLayout:
-        """Create the player stats configuration box for the popup menu.
+    def mousePressEvent(self, event: QMouseEvent) -> None:  # noqa: N802 - Qt override
+        """Start moving the menu: the window has no title bar to drag it by."""
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._drag_offset = event.globalPosition().toPoint() - self.pos()
+            Aux_Base.set_drag_active(True)
+        super().mousePressEvent(event)
 
-        This method builds and arranges the controls for configuring player stats display,
-        including combo boxes and spinners.
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:  # noqa: N802 - Qt override
+        """Follow the mouse, staying on screen."""
+        if self._drag_offset is not None:
+            target = event.globalPosition().toPoint() - self._drag_offset
+            self.move(*Aux_Base.clamp_to_screen(target.x(), target.y(), self.width(), self.height()))
+        super().mouseMoveEvent(event)
 
-        Args:
-            multiplier_dict: The dictionary for the multiplier combo box.
-            seats_style_dict: The dictionary for the seats style combo box.
-            stat_range_dict: The dictionary for the stat range combo box.
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:  # noqa: N802 - Qt override
+        """Stop moving the menu."""
+        self._end_drag()
+        super().mouseReleaseEvent(event)
 
-        Returns:
-            QVBoxLayout: The vertical layout containing all player stats controls.
-        """
-        vbox = QVBoxLayout()
-        vbox.addWidget(QLabel(_t("Show Player Stats for")))
-        vbox.addWidget(
-            self.build_combo_and_set_active("h_agg_bb_mult", multiplier_dict),
-        )
-        vbox.addWidget(
-            self.build_combo_and_set_active("h_seats_style", seats_style_dict),
-        )
-        hbox = QHBoxLayout()
-        hbox.addWidget(QLabel(_t("Custom")))
-        self.h_nums_low_spinner = self.build_spinner("h_seats_cust_nums_low", 1, 9)
-        hbox.addWidget(self.h_nums_low_spinner)
-        hbox.addWidget(QLabel(_t("To")))
-        self.h_nums_high_spinner = self.build_spinner("h_seats_cust_nums_high", 2, 10)
-        hbox.addWidget(self.h_nums_high_spinner)
-        vbox.addLayout(hbox)
-        hbox = QHBoxLayout()
-        hbox.addWidget(
-            self.build_combo_and_set_active("h_stat_range", stat_range_dict),
-        )
-        self.h_hud_days_spinner = self.build_spinner("h_hud_days", 1, 9999)
-        hbox.addWidget(self.h_hud_days_spinner)
-        vbox.addLayout(hbox)
-        return vbox
-
-    def _create_opponent_stats_box(
-        self,
-        multiplier_dict: dict,
-        seats_style_dict: dict,
-        stat_range_dict: dict,
-    ) -> QVBoxLayout:
-        """Create the opponent stats configuration box for the popup menu.
-
-        This method builds and arranges the controls for configuring opponent stats display,
-        including combo boxes and spinners.
-
-        Args:
-            multiplier_dict: The dictionary for the multiplier combo box.
-            seats_style_dict: The dictionary for the seats style combo box.
-            stat_range_dict: The dictionary for the stat range combo box.
-
-        Returns:
-            QVBoxLayout: The vertical layout containing all opponent stats controls.
-        """
-        vbox = QVBoxLayout()
-        vbox.addWidget(QLabel(_t("Show Opponent Stats for")))
-        vbox.addWidget(self.build_combo_and_set_active("agg_bb_mult", multiplier_dict))
-        vbox.addWidget(
-            self.build_combo_and_set_active("seats_style", seats_style_dict),
-        )
-        hbox = QHBoxLayout()
-        hbox.addWidget(QLabel(_t("Custom")))
-        self.nums_low_spinner = self.build_spinner("seats_cust_nums_low", 1, 9)
-        hbox.addWidget(self.nums_low_spinner)
-        hbox.addWidget(QLabel(_t("To")))
-        self.nums_high_spinner = self.build_spinner("seats_cust_nums_high", 2, 10)
-        hbox.addWidget(self.nums_high_spinner)
-        vbox.addLayout(hbox)
-        hbox = QHBoxLayout()
-        hbox.addWidget(self.build_combo_and_set_active("stat_range", stat_range_dict))
-        self.hud_days_spinner = self.build_spinner("hud_days", 1, 9999)
-        hbox.addWidget(self.hud_days_spinner)
-        vbox.addLayout(hbox)
-        return vbox
-
-    def _create_stat_range_dict(self) -> dict:
-        """Create the dictionary for the stat range combo box.
-
-        This method returns a dictionary mapping stat range options to their display labels and codes.
-
-        Returns:
-            dict: The dictionary for the stat range combo box.
-        """
-        return {
-            0: ("Since: All Time", "A"),
-            1: ("Since: Session", "S"),
-            2: ("Since: n Days" + " - - >", "T"),
-        }
-
-    def _create_seats_style_dict(self) -> dict:
-        """Create the dictionary for the seats style combo box.
-
-        This method returns a dictionary mapping seat style options to their display labels and codes.
-
-        Returns:
-            dict: The dictionary for the seats style combo box.
-        """
-        return {
-            0: ("Number of Seats: Any Number", "A"),
-            1: ("Number of Seats: Custom", "C"),
-            2: ("Number of Seats: Exact", "E"),
-        }
-
-    def _create_multiplier_dict(self) -> dict:
-        """Create the dictionary for the multiplier combo box.
-
-        This method returns a dictionary mapping multiplier options to their display labels and values.
-
-        Returns:
-            dict: The dictionary for the multiplier combo box.
-        """
-        return {
-            0: ("For This Blind Level Only", 1),
-            1: ("  0.5 to 2 * Current Blinds", 2),
-            2: ("  0.33 to 3 * Current Blinds", 3),
-            3: ("  0.1 to 10 * Current Blinds", 10),
-            4: ("All Levels", 10000),
-        }
-
-    def _create_max_seats_dict(self) -> dict:
-        """Create the dictionary for the max seats combo box.
-
-        This method returns a dictionary mapping available table layouts to their display labels and values.
-
-        Returns:
-            dict: The dictionary for the max seats combo box.
-        """
-        cb_max_dict = {0: ("Force layout...", None)}
-        for pos, i in enumerate(
-            sorted(self.parentwin.hud.layout_set.layout),
-            start=1,
-        ):
-            cb_max_dict[pos] = (f"{i}-max", i)
-        return cb_max_dict
+    def _end_drag(self) -> None:
+        if self._drag_offset is not None:
+            self._drag_offset = None
+            Aux_Base.set_drag_active(False)
 
     def _create_stat_sets_dict(self) -> dict:
         """Create the dictionary for the stat set combo box.
@@ -1866,26 +1971,41 @@ class SimpleTablePopupMenu(QWidget):
         stat_sets = self.parentwin.hud.config.get_stat_sets()
         return {i: (stat_set_name, stat_set_name) for i, stat_set_name in enumerate(stat_sets)}
 
-    def delete_event(self) -> None:
-        """Handle the event to close and destroy the popup menu.
+    def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802 - Qt override
+        """Let the parent window open a new menu, however this one was closed.
 
-        This method resets the menu state in the parent window and destroys the popup menu instance.
+        This is the only path a window-manager close (Alt+F4) goes through, so the
+        state is reset here rather than in delete_event().
+
+        Args:
+            event: The close event being delivered.
         """
+        self._end_drag()
         # The parent window may already be gone (table closed while the menu was
-        # open), so drop the menu either way.
+        # open), so close the menu either way.
         with contextlib.suppress(RuntimeError):
             self.parentwin.menu_is_popped = False
             self.parentwin.popup_menu = None
-        self.close()
-        self.destroy()
+        super().closeEvent(event)
 
-    def callback(self, _check_state: Any, data: str | None = None) -> None:
+    def delete_event(self) -> None:
+        """Close the popup menu; closeEvent() resets the parent and Qt deletes it.
+
+        A kill or blacklist action may already have closed the menu through the
+        parent's destroy(), hence the suppress.
+        """
+        with contextlib.suppress(RuntimeError):
+            self.close()
+
+    def callback(self, *_args: object, data: str | None = None) -> None:
         """Handle button callbacks for popup menu actions.
 
         This method processes actions such as killing the HUD, blacklisting, saving the layout, and closing the popup.
 
         Args:
-            _check_state: The state of the triggering event (unused).
+            *_args: Whatever the signal passes. PySide6 connects a partial to the
+                argument-less clicked() overload, so a required positional here
+                raises a TypeError that Qt swallows and the button does nothing.
             data: The action keyword indicating which operation to perform.
         """
         if data == "kill":
@@ -1901,7 +2021,7 @@ class SimpleTablePopupMenu(QWidget):
             self.parentwin.hud.save_layout()
         self.delete_event()
 
-    def build_button(self, labeltext: str, cbkeyword: str) -> QPushButton:
+    def build_button(self, labeltext: str, cbkeyword: str, tooltip: str) -> QPushButton:
         """Build a QPushButton with a connected callback for the popup menu.
 
         This method creates a button with the specified label and connects it
@@ -1910,56 +2030,15 @@ class SimpleTablePopupMenu(QWidget):
         Args:
             labeltext: The text to display on the button.
             cbkeyword: The keyword to pass to the callback when the button is clicked.
+            tooltip: What the button does, since its label is kept short.
 
         Returns:
             QPushButton: The created button instance.
         """
         button = QPushButton(labeltext)
+        button.setToolTip(tooltip)
         button.clicked.connect(partial(self.callback, data=cbkeyword))
         return button
-
-    def build_spinner(self, field: str, low: int, high: int) -> QSpinBox:
-        """Build a QSpinBox for numeric input in the popup menu.
-
-        This method creates a spin box with the specified range and initial value,
-        and connects it to update the HUD parameter.
-
-        Args:
-            field: The HUD parameter field to bind to the spin box.
-            low: The minimum value for the spin box.
-            high: The maximum value for the spin box.
-
-        Returns:
-            QSpinBox: The created spin box instance.
-        """
-        spin_box = QSpinBox()
-        spin_box.setRange(low, high)
-        spin_box.setValue(self.parentwin.hud.hud_params[field])
-        spin_box.valueChanged.connect(partial(self.change_spin_field_value, field=field))
-        return spin_box
-
-    def build_combo_and_set_active(self, field: str, combo_dict: dict) -> QComboBox:
-        """Build a QComboBox for selection in the popup menu and set the active value.
-
-        This method creates a combo box with the specified options, sets the current value based on the HUD parameter,
-        and connects it to update the parameter when changed.
-
-        Args:
-            field: The HUD parameter field to bind to the combo box.
-            combo_dict: The dictionary of options for the combo box.
-
-        Returns:
-            QComboBox: The created combo box instance.
-        """
-        widget = QComboBox()
-        for pos in combo_dict:
-            widget.addItem(combo_dict[pos][0])
-            if combo_dict[pos][1] == self.parentwin.hud.hud_params[field]:
-                widget.setCurrentIndex(pos)
-        widget.currentIndexChanged.connect(
-            partial(self.change_combo_field_value, field=field, combo_dict=combo_dict),
-        )
-        return widget
 
     def build_stat_set_combo(self, stat_sets_dict: dict) -> QComboBox:
         """Build a QComboBox for selecting the stat set in the popup menu.
@@ -2092,55 +2171,3 @@ class SimpleTablePopupMenu(QWidget):
                         gss_node.setAttribute("stat_set", new_stat_set)
                         break
                 break
-
-    def change_combo_field_value(self, sel: int, field: str, combo_dict: dict) -> None:
-        """Update the HUD parameter value based on the selected combo box option.
-
-        This method sets the specified HUD parameter to the value associated with the selected combo box item
-        and updates the enabled state of related spinners.
-
-        Args:
-            sel: The index of the selected item in the combo box.
-            field: The HUD parameter field to update.
-            combo_dict: The dictionary of options for the combo box.
-        """
-        self.parentwin.hud.hud_params[field] = combo_dict[sel][1]
-        self.set_spinners_active()
-
-    def change_spin_field_value(self, value: int, field: str) -> None:
-        """Update the HUD parameter value based on the spin box input.
-
-        This method sets the specified HUD parameter to the value provided by the spin box.
-
-        Args:
-            value: The new value selected in the spin box.
-            field: The HUD parameter field to update.
-        """
-        self.parentwin.hud.hud_params[field] = value
-
-    def set_spinners_active(self) -> None:
-        """Enable or disable spinner controls based on current HUD parameter selections.
-
-        This method updates the enabled state of various spinner widgets in the popup menu
-        according to the current values of the HUD's parameter fields.
-        """
-        if self.parentwin.hud.hud_params["h_stat_range"] == "T":
-            self.h_hud_days_spinner.setEnabled(True)
-        else:
-            self.h_hud_days_spinner.setEnabled(False)
-        if self.parentwin.hud.hud_params["stat_range"] == "T":
-            self.hud_days_spinner.setEnabled(True)
-        else:
-            self.hud_days_spinner.setEnabled(False)
-        if self.parentwin.hud.hud_params["h_seats_style"] == "C":
-            self.h_nums_low_spinner.setEnabled(True)
-            self.h_nums_high_spinner.setEnabled(True)
-        else:
-            self.h_nums_low_spinner.setEnabled(False)
-            self.h_nums_high_spinner.setEnabled(False)
-        if self.parentwin.hud.hud_params["seats_style"] == "C":
-            self.nums_low_spinner.setEnabled(True)
-            self.nums_high_spinner.setEnabled(True)
-        else:
-            self.nums_low_spinner.setEnabled(False)
-            self.nums_high_spinner.setEnabled(False)

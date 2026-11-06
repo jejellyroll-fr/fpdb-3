@@ -10,11 +10,12 @@ from __future__ import annotations
 
 import contextlib
 import copy
+import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-from fpdb_3_legacy import Database, Hand
+from fpdb_3_legacy import Database, Hand, latency_profile
 from fpdb_3_legacy.db_reconnect import is_connection_lost
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.table_info import TableInfo
@@ -44,6 +45,7 @@ def _snapshot_hand(prepared: HudPreparedHand) -> HudPreparedHand:
         hand_instance=prepared.hand_instance,
         winners=copy.deepcopy(prepared.winners),
         actions=copy.deepcopy(prepared.actions),
+        analytics_values=copy.deepcopy(prepared.analytics_values),
         loaded_fields=prepared.loaded_fields,
     )
 
@@ -89,6 +91,9 @@ class HudBatchReadRequest:
     hand_ids: tuple[str, ...]
     hud_params: dict[str, Any]
     tables: tuple[HudTableReadContext, ...] = ()
+    # When the Qt thread queued this request, so the worker can report how long
+    # it waited behind earlier work (#680).
+    submitted_at: float = field(default_factory=time.monotonic)
 
 
 @dataclass
@@ -108,6 +113,13 @@ class HudPreparedHand:
     hand_instance: Any = None
     winners: dict[Any, Any] = field(default_factory=dict)
     actions: list[Any] = field(default_factory=list)
+    """Analytics-backed cell values of this hand (#335), ``{player_id: {stat_name: value}}``.
+
+    Empty for every profile that has no analytics-backed cell, which is the
+    shipped default, so the read path is unchanged unless a configuration asks
+    for it.
+    """
+    analytics_values: dict[Any, dict[str, Any]] = field(default_factory=dict)
     loaded_fields: frozenset[str] = frozenset()
 
 
@@ -135,6 +147,21 @@ class _NullConnection:
 
     def close(self) -> None:
         """There is no connection on the Qt side."""
+
+
+def mark_players_with_notes(database: Any, *stat_dicts: dict) -> None:
+    """Record on each player's stats whether they have notes.
+
+    The note cell of a seat shows this. Reading it here, on the worker, is what
+    keeps that cell from opening a connection on the Qt thread for every seat of
+    every table on every refresh, which froze the HUD on a remote database (#680).
+    """
+    rows = [
+        (player, stats) for stat_dict in stat_dicts for player, stats in stat_dict.items() if isinstance(player, int)
+    ]
+    with_notes = database.players_with_notes([player for player, _stats in rows])
+    for player, stats in rows:
+        stats["has_notes"] = player in with_notes
 
 
 class HudReplayDatabase:
@@ -222,12 +249,80 @@ class HudReadService:
         self.config = config
         self.database = database
         self.hand_factory = hand_factory
-        self._hero_cache: tuple[
-            dict[str, Any],
-            dict[tuple[str, str], int | None],
-            dict[int, str],
-            dict[int, int],
-        ] | None = None
+        self._hero_cache: (
+            tuple[
+                dict[str, Any],
+                dict[tuple[str, str], int | None],
+                dict[int, str],
+                dict[int, int],
+            ]
+            | None
+        ) = None
+        # Rotation offset for the optional secondary-refresh cap (#680 P2).
+        self._secondary_offset = 0
+        # Analytics-backed HUD cells (#335): resolved lazily, and only when the
+        # configuration declares any, so a profile without them pays nothing.
+        # The provider outlives one batch on purpose -- its cache is what makes
+        # two refreshes of the same villain cost one query, not two.
+        self._analytics_bindings: tuple[Any, ...] | None = None
+        self._analytics_provider: Any = None
+
+    def _analytics(self) -> tuple[Any, tuple[Any, ...]]:
+        """The provider and the analytics cells this configuration declares.
+
+        A configuration that cannot be walked -- a mock, or a document with no
+        stats -- yields no bindings and therefore no provider, and the read path
+        behaves exactly as it did before #335.
+        """
+        if self._analytics_bindings is None:
+            from fpdb_3_legacy import hud_analytics_stats
+
+            try:
+                self._analytics_bindings = hud_analytics_stats.bindings_from_config(self.config)
+            except Exception:  # noqa: BLE001 - a HUD with no analytics cells is the normal case
+                log.debug("Could not read analytics-backed HUD cells from the configuration", exc_info=True)
+                self._analytics_bindings = ()
+            if self._analytics_bindings and self._analytics_provider is None:
+                self._analytics_provider = hud_analytics_stats.AnalyticsStatProvider()
+        return self._analytics_provider, self._analytics_bindings
+
+    @staticmethod
+    def _site_name(prepared: HudPreparedHand) -> str:
+        """The room this hand was played on, for the identity filter.
+
+        A seat is asked about as a ``(site, screen name)`` pair, so the site has
+        to travel with the query: the same screen name on two rooms is two
+        different people. The table info already carries it -- reading it here
+        keeps every caller from having to pass it correctly.
+        """
+        info = prepared.table_info
+        if info is None:
+            return ""
+        try:
+            return str(TableInfo.coerce(info).site_name or "")
+        except Exception:  # noqa: BLE001 - an odd table_info must not cost the hand
+            return ""
+
+    def _attach_analytics(self, prepared: HudPreparedHand) -> None:
+        """Compute this hand's analytics-backed cells, on the worker's thread.
+
+        Best-effort on purpose: an analytics query that fails must cost the
+        value, never the hand. The provider already turns a failure into an
+        ``error`` value with a reason, so this only guards a programming error.
+        """
+        provider, bindings = self._analytics()
+        if provider is None or not bindings or not prepared.stat_dict:
+            return
+        try:
+            with latency_profile.scope("hud_analytics_compute"):
+                prepared.analytics_values = provider.compute_for_stat_dict(
+                    self.database,
+                    bindings,
+                    prepared.stat_dict,
+                    site=self._site_name(prepared),
+                )
+        except Exception:  # noqa: BLE001 - the hand still has to be painted
+            log.exception("Analytics-backed HUD cells failed for hand %s", prepared.hand_id)
 
     @staticmethod
     def _site_aliases(site: str) -> tuple[str, ...]:
@@ -291,10 +386,19 @@ class HudReadService:
                     return True
         return False
 
-    def _cards(self, hand_id: str, poker_game: str) -> dict:
-        cards = self.database.get_cards(hand_id)
+    def _cards(self, hand_id: str, poker_game: str, prefetched: dict | None = None) -> dict:
+        prefetched = prefetched or {}
+        cards = prefetched.get("cards", {}).get(_hand_key(hand_id))
+        if cards is None:
+            cards = self.database.get_cards(hand_id)
+        else:
+            cards = dict(cards)
         if poker_game in {"holdem", "omahahi", "omahahilo"}:
-            cards["common"] = self.database.get_common_cards(hand_id)["common"]
+            common = prefetched.get("common", {}).get(_hand_key(hand_id))
+            if common is None:
+                cards["common"] = self.database.get_common_cards(hand_id)["common"]
+            else:
+                cards["common"] = common
         return cards
 
     def _hand_instance(self, hand_id: str) -> Any:
@@ -341,7 +445,17 @@ class HudReadService:
         poker_game: str,
         hero_id: int,
         needs_mucked_data: bool,
+        prefetched: dict | None = None,
     ) -> HudPreparedHand:
+        """Read one primary hand.
+
+        ``prefetched`` carries the per-hand details (positions, seat players,
+        cards, min stack) already loaded in bulk for the whole batch: one
+        statement per detail instead of one per hand, which is what scales
+        with the table count on a remote database (#680). Anything missing
+        falls back to the individual read.
+        """
+        prefetched = prefetched or {}
         info = TableInfo.coerce(table_info)
         game_type, num_seats = info.game_type, info.num_seats
         self.database.init_hud_stat_vars(hud_params["hud_days"], hud_params["h_hud_days"])
@@ -353,7 +467,18 @@ class HudReadService:
             num_seats,
             poker_game=poker_game,
         )
+        mark_players_with_notes(self.database, stat_dict)
         winners, actions = self._mucked_data(hand_id, needs_mucked_data)
+        positions = prefetched.get("positions", {}).get(_hand_key(hand_id))
+        if positions is None:
+            positions = self.database.get_hand_positions(hand_id)
+        seat_players = prefetched.get("seat_players", {}).get(_hand_key(hand_id))
+        if seat_players is None:
+            seat_players = self.database.get_seat_players(hand_id)
+        key = _hand_key(hand_id)
+        min_stack = prefetched.get("min_stack", {}).get(key, None)
+        if key not in prefetched.get("min_stack", {}):
+            min_stack = self.database.get_table_min_stack_bb(hand_id)
         loaded_fields = {
             "table_info",
             "stat_dict",
@@ -365,19 +490,44 @@ class HudReadService:
         }
         if needs_mucked_data:
             loaded_fields.update({"winners", "actions"})
-        return HudPreparedHand(
+        prepared = HudPreparedHand(
             hand_id=hand_id,
             table_info=table_info,
             stat_dict=stat_dict,
-            positions=self.database.get_hand_positions(hand_id),
-            seat_players=self.database.get_seat_players(hand_id),
-            table_stats={"live_min_stack_bb": self.database.get_table_min_stack_bb(hand_id)},
-            cards=self._cards(hand_id, poker_game),
+            positions=positions,
+            seat_players=seat_players,
+            table_stats={"live_min_stack_bb": min_stack},
+            cards=self._cards(hand_id, poker_game, prefetched),
             hand_instance=self._hand_instance(hand_id),
             winners=winners,
             actions=actions,
             loaded_fields=frozenset(loaded_fields),
         )
+        self._attach_analytics(prepared)
+        return prepared
+
+    def _prefetch_primary_details(self, hand_ids: list[str]) -> dict:
+        """Load positions/seat players/cards/min stack for a batch in bulk.
+
+        Each detail costs one statement for the whole batch instead of one per
+        hand (#680). A backend without a bulk method, or a failed bulk read,
+        simply leaves the key absent and _read_hand falls back to the
+        individual query, so this can only reduce round trips, never change
+        what is read.
+        """
+        out: dict[str, dict] = {"positions": {}, "seat_players": {}, "cards": {}, "common": {}, "min_stack": {}}
+        batch_reads = (
+            ("positions", "get_hand_positions_many"),
+            ("seat_players", "get_seat_players_many"),
+            ("cards", "get_cards_many"),
+            ("common", "get_common_cards_many"),
+            ("min_stack", "get_table_min_stack_bb_many"),
+        )
+        for key, method_name in batch_reads:
+            data = self._batched(hand_ids, method_name)
+            if data is not None:
+                out[key] = data
+        return out
 
     def _handle_read_error(self, exc: BaseException) -> None:
         # PostgreSQL statement/lock timeouts leave the connection usable after
@@ -391,6 +541,24 @@ class HudReadService:
         with contextlib.suppress(Exception):
             self.database.connection.rollback()
 
+    def _batched(self, hand_ids, method_name: str):
+        """Call a bulk read if the backend has it and it returns a dict, else None.
+
+        A failure gets the same treatment as any other read: a timeout or a lost
+        connection aborts the batch, anything else is rolled back so the per-hand
+        fallback does not run on an aborted PostgreSQL transaction.
+        """
+        method = getattr(self.database, method_name, None)
+        if method is None:
+            return None
+        try:
+            data = method(list(hand_ids))
+        except Exception as exc:
+            log.exception("Bulk HUD read %s failed; falling back to per-hand reads", method_name)
+            self._handle_read_error(exc)
+            return None
+        return data if isinstance(data, dict) else None
+
     def _resolve_primary_hands(
         self,
         request: HudBatchReadRequest,
@@ -401,9 +569,15 @@ class HudReadService:
         latest: dict[str, str] = {}
         unresolved: list[str] = []
         revision = 0
+        # Resolve every hand's table in two statements for the whole batch
+        # instead of two per hand (#680); a backend without the bulk methods
+        # falls back to the per-hand reads.
+        table_infos = self._batched(request.hand_ids, "get_table_info_many")
+        site_hand_nos = self._batched(request.hand_ids, "get_site_hand_no_many")
         for hand_id in request.hand_ids:
             try:
-                table_info = self.database.get_table_info(hand_id)
+                key = _hand_key(hand_id)
+                table_info = table_infos.get(key) if table_infos is not None else self.database.get_table_info(hand_id)
             except Exception as exc:
                 self._handle_read_error(exc)
                 log.exception("HUD primary preload failed for hand %s", hand_id)
@@ -413,6 +587,10 @@ class HudReadService:
                 hands[_hand_key(hand_id)] = HudPreparedHand(hand_id=hand_id)
                 unresolved.append(hand_id)
                 continue
+            if site_hand_nos is not None:
+                site_hand_no = site_hand_nos.get(_hand_key(hand_id))
+            else:
+                site_hand_no = self.database.get_site_hand_no(hand_id)
             prepared = HudPreparedHand(
                 hand_id=hand_id,
                 table_info=table_info,
@@ -420,7 +598,7 @@ class HudReadService:
                 # client window it was played on straight away. Without it the
                 # loading HUD cannot be placed and the table waits for the full
                 # snapshot, which costs it a hand or two.
-                site_hand_no=self.database.get_site_hand_no(hand_id),
+                site_hand_no=site_hand_no,
                 loaded_fields=frozenset({"table_info", "site_hand_no"}),
             )
             hands[_hand_key(hand_id)] = prepared
@@ -461,7 +639,13 @@ class HudReadService:
         revision: int,
     ) -> tuple[set[str], int]:
         loaded_tables: set[str] = set()
-        for hand_id in latest.values():
+        prefetched = self._prefetch_primary_details(list(latest.values()))
+        # Most recently notified table first (#680): in a multi-table burst the
+        # newest hand is almost always the table the player is acting on, and
+        # the progress callback paints each hand as it is read, so reading it
+        # first minimises the perceived delay on the active table. Every hand
+        # is still read; only the order changes.
+        for hand_id in reversed(list(latest.values())):
             table_info = hands[_hand_key(hand_id)].table_info
             if table_info is None:
                 continue
@@ -470,9 +654,7 @@ class HudReadService:
             context = contexts.get(temp_key)
             poker_game = context.poker_game if context else hud_poker_game(info.poker_game)
             params = context.hud_params if context else request.hud_params
-            needs_mucked = (
-                context.needs_mucked_data if context else self._needs_mucked_data(poker_game, info.game_type)
-            )
+            needs_mucked = context.needs_mucked_data if context else self._needs_mucked_data(poker_game, info.game_type)
             try:
                 hands[_hand_key(hand_id)] = self._read_hand(
                     hand_id,
@@ -481,6 +663,7 @@ class HudReadService:
                     poker_game,
                     hero_ids.get(info.site_id, -1),
                     needs_mucked,
+                    prefetched,
                 )
                 loaded_tables.add(temp_key)
             except Exception as exc:
@@ -510,6 +693,37 @@ class HudReadService:
                 )
         return loaded_tables, revision
 
+    def _bounded_secondary_tables(
+        self,
+        request: HudBatchReadRequest,
+        updated_tables: set[str],
+    ) -> tuple[HudTableReadContext, ...]:
+        """The secondary tables this batch may refresh, honouring the P2 bound.
+
+        ``max_secondary_tables_per_batch`` (hud param, default 0 = unbounded)
+        caps how many secondary tables refresh per batch: the rest keep their
+        previous statistics -- the same thing that happens today when a
+        refresh fails -- so a burst at many tables cannot queue unbounded
+        secondary work behind the active table's update (#680).
+        """
+        try:
+            max_secondary = int(request.hud_params.get("max_secondary_tables_per_batch", 0) or 0)
+        except (TypeError, ValueError):
+            max_secondary = 0
+        # Counted after the tables with nothing to do, so a table that just got its
+        # primary refresh does not use up the cap.
+        eligible = tuple(
+            context for context in request.tables if context.temp_key not in updated_tables and context.last_hand_id
+        )
+        if 0 < max_secondary < len(eligible):
+            # Round-robin so a capped batch does not starve the same tables:
+            # rotate the starting offset on every batch (#680 P2).
+            offset = self._secondary_offset % len(eligible)
+            self._secondary_offset = (offset + max_secondary) % len(eligible)
+            rotated = eligible[offset:] + eligible[:offset]
+            return rotated[:max_secondary]
+        return eligible
+
     def _load_secondary_hands(
         self,
         request: HudBatchReadRequest,
@@ -519,9 +733,7 @@ class HudReadService:
         failed: list[str],
     ) -> None:
         groups: dict[str, tuple[HudTableReadContext, int, list[HudPreparedHand]]] = {}
-        for context in request.tables:
-            if context.temp_key in updated_tables or not context.last_hand_id:
-                continue
+        for context in self._bounded_secondary_tables(request, updated_tables):
             try:
                 table_info = self.database.get_table_info(context.last_hand_id)
                 if table_info is None:
@@ -577,10 +789,12 @@ class HudReadService:
                 )
                 continue
 
+            mark_players_with_notes(self.database, *stats.values())
             stats_by_key = {_hand_key(hand_id): value for hand_id, value in stats.items()}
             for prepared in prepared_hands:
                 prepared.stat_dict = stats_by_key.get(_hand_key(prepared.hand_id), {})
                 prepared.loaded_fields = prepared.loaded_fields | {"stat_dict"}
+                self._attach_analytics(prepared)
 
     def _load_secondary_stats_individually(
         self,
@@ -605,7 +819,9 @@ class HudReadService:
                     context.num_seats,
                     poker_game=context.poker_game,
                 )
+                mark_players_with_notes(self.database, prepared.stat_dict)
                 prepared.loaded_fields = prepared.loaded_fields | {"stat_dict"}
+                self._attach_analytics(prepared)
             except Exception as exc:
                 self._handle_read_error(exc)
                 hands.pop(_hand_key(prepared.hand_id), None)
@@ -617,6 +833,13 @@ class HudReadService:
         progress_callback: Callable[[HudBatchSnapshot], None] | None = None,
     ) -> HudBatchSnapshot:
         """Read one coalesced batch and release its transaction before returning."""
+        # A batch exists because new hands landed, so every analytics value it
+        # would otherwise reuse is behind. Dropping the provider's cache here
+        # keeps the within-batch deduplication -- many cells, one query -- while
+        # never showing yesterday's rate on today's hand.
+        provider, _bindings = self._analytics()
+        if provider is not None:
+            provider.invalidate("new HUD batch")
         contexts = {context.temp_key: context for context in request.tables}
         hands: dict[str, HudPreparedHand] = {}
         failed: list[str] = []
@@ -626,28 +849,31 @@ class HudReadService:
         hero_ids: dict[int, int] = {}
 
         try:
-            latest, unresolved, revision = self._resolve_primary_hands(
-                request,
-                hands,
-                failed,
-                progress_callback,
-            )
+            with latency_profile.scope("hud_batch_resolve_primary"):
+                latest, unresolved, revision = self._resolve_primary_hands(
+                    request,
+                    hands,
+                    failed,
+                    progress_callback,
+                )
             site_rows, player_ids, hero, hero_ids = self._hero_data()
             primary_order = [*latest.values(), *unresolved]
-            updated_tables, revision = self._load_primary_hands(
-                latest,
-                request,
-                contexts,
-                hero_ids,
-                hands,
-                failed,
-                site_rows,
-                player_ids,
-                hero,
-                progress_callback,
-                revision,
-            )
-            self._load_secondary_hands(request, updated_tables, hero_ids, hands, failed)
+            with latency_profile.scope("hud_batch_primary"):
+                updated_tables, revision = self._load_primary_hands(
+                    latest,
+                    request,
+                    contexts,
+                    hero_ids,
+                    hands,
+                    failed,
+                    site_rows,
+                    player_ids,
+                    hero,
+                    progress_callback,
+                    revision,
+                )
+            with latency_profile.scope("hud_batch_secondary"):
+                self._load_secondary_hands(request, updated_tables, hero_ids, hands, failed)
         finally:
             with contextlib.suppress(Exception):
                 self.database.connection.rollback()

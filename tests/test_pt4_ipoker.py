@@ -1,0 +1,65 @@
+"""Test script for PokerTracker4 iPoker hands parsing."""
+
+from fpdb_3_legacy.Configuration import Config
+from fpdb_3_legacy.PokerTrackerToFpdb import PokerTracker
+
+# Sample PokerTracker4 hand text from iPoker
+sample_hand = """GAME #8043869466 Version:24.7.1.16 Uncalled:Y Omaha PL €0.01/€0.02 2024-11-06 23:38:55/GMT
+Table Size 6
+Table Saratov, 560234179
+Seat 3: kermen56 (€0.44 in chips)
+Seat 5: maresdelsur (€0.70 in chips)
+Seat 6: trooperbold15 (€0.50 in chips)  DEALER
+Seat 8: louisaf55 (€2.11 in chips)
+Seat 10: kokolantern (€2.00 in chips)
+louisaf55: Post SB €0.01
+kokolantern: Post BB €0.02
+*** HOLE CARDS ***
+Dealt to kokolantern [C9 H5 H9 S9]
+kermen56: Call €0.02
+maresdelsur: Call €0.02
+trooperbold15: Call €0.02
+louisaf55: Call €0.01
+kokolantern: Check
+*** FLOP *** [C6 CA D10]
+louisaf55: Check
+kokolantern: Check
+kermen56: Check
+maresdelsur: Check
+trooperbold15: Check
+*** TURN *** [CJ]
+louisaf55: Check
+kokolantern: Check
+kermen56: Check
+maresdelsur: Check
+trooperbold15: Check
+*** RIVER *** [H8]
+louisaf55: Bet €0.05
+kokolantern: Fold
+kermen56: Fold
+maresdelsur: Raise (NF) €0.25
+trooperbold15: Fold
+louisaf55: Call €0.20
+*** SUMMARY ***
+Total pot €0.56 Rake €0.04
+maresdelsur: Shows [DQ HK S7 D7] Straight, Ace High
+louisaf55: Shows [S8 CQ C5 C8] Flush, Ace High
+louisaf55: wins €0.56"""
+
+
+def test_pt4_ipoker_detection() -> None:
+    """A PokerTracker4 iPoker hand is read as iPoker, its room coming from IdentifySite."""
+    config = Config()
+
+    pt = PokerTracker(config=config, autostart=False)
+
+    gametype = pt.determineGameType(sample_hand)
+
+    assert pt.is_ipoker_skin()
+    assert pt.sitename == "iPoker"
+    assert pt.siteId is not None
+    assert gametype is not None
+
+
+if __name__ == "__main__":
+    test_pt4_ipoker_detection()

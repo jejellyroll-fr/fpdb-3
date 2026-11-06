@@ -1,0 +1,160 @@
+PokerStars Hand #3100000016:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:15:00 ET
+Table 'Golden 16 Texture' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Kc Qd]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [Ah 7d 2c]
+Boris: bets $7.00
+Cara: folds
+Uncalled bet ($7.00) returned to Boris
+Boris collected $13.00 from pot
+*** SUMMARY ***
+Total pot $13.00 | Rake $0.00
+Board [Ah 7d 2c]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($13.00)
+Seat 3: Cara (button) folded on the Flop
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)
+PokerStars Hand #3100000017:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:16:00 ET
+Table 'Golden 16 Texture' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Ad Qs]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [Kh 9h 3c]
+Boris: bets $7.00
+Cara: folds
+Uncalled bet ($7.00) returned to Boris
+Boris collected $13.00 from pot
+*** SUMMARY ***
+Total pot $13.00 | Rake $0.00
+Board [Kh 9h 3c]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($13.00)
+Seat 3: Cara (button) folded on the Flop
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)
+PokerStars Hand #3100000018:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:17:00 ET
+Table 'Golden 16 Texture' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Ad Kd]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [Qs Js 8s]
+Boris: bets $7.00
+Cara: folds
+Uncalled bet ($7.00) returned to Boris
+Boris collected $13.00 from pot
+*** SUMMARY ***
+Total pot $13.00 | Rake $0.00
+Board [Qs Js 8s]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($13.00)
+Seat 3: Cara (button) folded on the Flop
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)
+PokerStars Hand #3100000019:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:18:00 ET
+Table 'Golden 16 Texture' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Ah Ks]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [9d 9c 4h]
+Boris: bets $7.00
+Cara: folds
+Uncalled bet ($7.00) returned to Boris
+Boris collected $13.00 from pot
+*** SUMMARY ***
+Total pot $13.00 | Rake $0.00
+Board [9d 9c 4h]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($13.00)
+Seat 3: Cara (button) folded on the Flop
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)
+PokerStars Hand #3100000020:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:19:00 ET
+Table 'Golden 16 Texture' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [As Kd]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [7h 6d 5c]
+Boris: bets $7.00
+Cara: folds
+Uncalled bet ($7.00) returned to Boris
+Boris collected $13.00 from pot
+*** SUMMARY ***
+Total pot $13.00 | Rake $0.00
+Board [7h 6d 5c]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($13.00)
+Seat 3: Cara (button) folded on the Flop
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)

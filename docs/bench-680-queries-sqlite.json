@@ -1,0 +1,223 @@
+{
+  "backend": "sqlite",
+  "cases": {
+    "aggregated_batch_6": {
+      "statements": {
+        "get_stats_from_hand_aggregated (assembled)": {
+          "calls": 4,
+          "seconds": 0.0012469000648707151
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.014375699975062162,
+        "mean": 0.009476113323277484,
+        "p50": 0.008846000011544675,
+        "p95": 0.012547369988169518,
+        "p99": 0.014010033977683634
+      }
+    },
+    "aggregated_per_hand": {
+      "statements": {
+        "get_stats_from_hand_aggregated (assembled)": {
+          "calls": 1,
+          "seconds": 0.0011443999828770757
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.006511499988846481,
+        "mean": 0.002652653333886216,
+        "p50": 0.0023247000062838197,
+        "p95": 0.003878379985690113,
+        "p99": 0.005984875988215206
+      }
+    },
+    "cards_many_8": {
+      "statements": {
+        "get_cards (assembled)": {
+          "calls": 1,
+          "seconds": 5.759997293353081e-05
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.0003401999711059034,
+        "mean": 0.0002133466574984292,
+        "p50": 0.00020299997413530946,
+        "p95": 0.00025493997382000075,
+        "p99": 0.0003231479716487228
+      }
+    },
+    "common_cards_many_8": {
+      "statements": {
+        "select id, boardcard1, boardcard2, boardcard3, boardcard4, boardcard5 ...": {
+          "calls": 1,
+          "seconds": 1.2000033166259527e-05
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 8.289999095723033e-05,
+        "mean": 5.2206660620868205e-05,
+        "p50": 4.630000330507755e-05,
+        "p95": 7.65299831982702e-05,
+        "p99": 8.162598940543831e-05
+      }
+    },
+    "hand_construction": {
+      "statements": {
+        "get_hands_cashout": {
+          "calls": 1,
+          "seconds": 8.700008038431406e-06
+        },
+        "get_hands_showdown": {
+          "calls": 1,
+          "seconds": 3.840000135824084e-05
+        },
+        "get_hands_splash": {
+          "calls": 1,
+          "seconds": 9.800016414374113e-06
+        },
+        "handActions": {
+          "calls": 1,
+          "seconds": 1.2400036212056875e-05
+        },
+        "playerHand": {
+          "calls": 1,
+          "seconds": 1.4100049156695604e-05
+        },
+        "select heroseat from hands where id = 265": {
+          "calls": 1,
+          "seconds": 7.700000423938036e-06
+        },
+        "singleHand": {
+          "calls": 1,
+          "seconds": 1.8099963199347258e-05
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.0010487999534234405,
+        "mean": 0.0005337933427654207,
+        "p50": 0.0004950000438839197,
+        "p95": 0.0006861299625597889,
+        "p99": 0.0009762659552507099
+      }
+    },
+    "min_stack_many_8": {
+      "statements": {
+        "select h.id, gt.bigblind from hands h inner join gametypes gt on h.gam...": {
+          "calls": 1,
+          "seconds": 1.2199976481497288e-05
+        },
+        "select handid, startcash, committed, winnings from handsplayers where ...": {
+          "calls": 1,
+          "seconds": 1.1400028597563505e-05
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.0002384000108577311,
+        "mean": 0.00014519999579836924,
+        "p50": 0.00013669999316334724,
+        "p95": 0.00017714999266900112,
+        "p99": 0.00022615000721998508
+      }
+    },
+    "positions_many_8": {
+      "statements": {
+        "select handid, playerid, position from handsplayers where handid in (?...": {
+          "calls": 1,
+          "seconds": 1.2299977242946625e-05
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.00019949994748458266,
+        "mean": 8.865332153315345e-05,
+        "p50": 7.950002327561378e-05,
+        "p95": 0.00012270997394807625,
+        "p99": 0.00018414195277728133
+      }
+    },
+    "seat_players_many_8": {
+      "statements": {
+        "select hp.handid, hp.seatno, hp.playerid, p.name from handsplayers hp ...": {
+          "calls": 1,
+          "seconds": 1.3300043065100908e-05
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.00017220003064721823,
+        "mean": 0.00010729333152994513,
+        "p50": 0.00010149995796382427,
+        "p95": 0.00013033999712206416,
+        "p99": 0.0001638280239421874
+      }
+    },
+    "session_per_hand": {
+      "statements": {
+        "get_stats_from_hand_session (assembled)": {
+          "calls": 1,
+          "seconds": 5.9399986639618874e-05
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.0012855000095441937,
+        "mean": 0.000682333332952112,
+        "p50": 0.0006214000168256462,
+        "p95": 0.0009657400194555516,
+        "p99": 0.0012215480115264651
+      }
+    },
+    "site_hand_no_many_8": {
+      "statements": {
+        "select id, sitehandno from hands where id in (?, ?, ?, ?, ?, ?, ?, ?)": {
+          "calls": 1,
+          "seconds": 1.1200027074664831e-05
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 7.419998291879892e-05,
+        "mean": 4.1586661245673896e-05,
+        "p50": 3.890000516548753e-05,
+        "p95": 5.193997640162703e-05,
+        "p99": 6.974798161536454e-05
+      }
+    },
+    "table_info_many_8": {
+      "statements": {
+        "select h.id, h.tablename, gt.maxseats, gt.category, gt.type, gt.fast, ...": {
+          "calls": 1,
+          "seconds": 2.110004425048828e-05
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.0004363000043667853,
+        "mean": 0.00014031333460782965,
+        "p50": 0.00011920003453269601,
+        "p95": 0.00022384997573681145,
+        "p99": 0.0003938099986407904
+      }
+    }
+  },
+  "dataset": {
+    "hands": 664,
+    "hands_players_rows": 3771,
+    "hudcache_rows": 2270,
+    "players": 427,
+    "tables": 194
+  },
+  "db_server": "sqlite",
+  "plans": {
+    "aggregated_batch_6": "13\n41\n46\n52\n68\n72\n75\n120\n124\n127\n165\n168",
+    "aggregated_per_hand": "13\n16\n22\n28\n44\n48\n51\n96\n100\n103\n141\n144",
+    "session_per_hand": "11\n14\n22\n25\n40\n44\n565"
+  },
+  "repeats": 15
+}

@@ -1,0 +1,11 @@
+# Constraints for every `uv pip install` in CI (UV_CONSTRAINT, set in ci.yml).
+#
+# PySide6 6.12.0 (2026-10) makes the no-GUI test run (`pytest -p no:pytest-qt`)
+# crash at interpreter exit on Linux and macOS: every test passes, then
+# "QObject: shared QObject was deleted directly" and a segmentation fault
+# (exit code 139). 6.11 ends the same run cleanly. Lift this once the teardown
+# crash under 6.12 is understood and fixed.
+PySide6<6.12
+PySide6-Essentials<6.12
+PySide6-Addons<6.12
+shiboken6<6.12

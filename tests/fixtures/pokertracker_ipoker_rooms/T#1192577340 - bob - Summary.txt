@@ -1,0 +1,17 @@
+PokerTracker 4 Tournament Summary
+Site: iPoker
+Game: Holdem
+Tournament #: 1192577340
+Started: 2026/07/16 23:16:53
+Finished: 2026/07/16 23:16:53
+Buyin: €0.23
+Fee: €0.02
+Prize Pool: €0.75
+Initial Stack: 0
+Table Type: STT (3 max) Turbo SNG LOTTERY
+Tourney Type: No Limit
+Players: 3
+
+Place: 0, Player: dave, Won: €0.00,
+Place: 0, Player: carol, Won: €0.00,
+Place: 3, Player: bob, Won: €0.00,

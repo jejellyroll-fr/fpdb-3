@@ -33,7 +33,7 @@ class Pt4Config:
 
 
 def connect_pt4(config: Pt4Config) -> psycopg.Connection:
-    """Read-only connection to PT4 PostgreSQL database."""
+    """Read-only connection to PT4 PostgreSQL database: the server refuses any write on it."""
     import psycopg  # deferred: only needed to actually connect, not to import the adapter
 
     return psycopg.connect(
@@ -42,5 +42,6 @@ def connect_pt4(config: Pt4Config) -> psycopg.Connection:
         user=config.user,
         password=config.password,
         dbname=config.database,
-        autocommit=True,  # read-only, no transaction
+        autocommit=True,
+        options="-c default_transaction_read_only=on",
     )

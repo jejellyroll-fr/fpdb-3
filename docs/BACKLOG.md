@@ -28,15 +28,15 @@ useful *before* import and does not touch the database. Migration of rows that
 are already inserted still does not exist — the three `backfill_*` scripts
 cover boards, showdown and auto notes, not identifiers.
 
-**To do.** Write a maintenance script that, for every imported iPoker file,
-finds the hand whose `siteHandNo` equals a `sessioncode` in the corpus, then
-deletes or reconciles it. It should be run once, with a `--dry-run` mode.
+**Done for the hand tables (#440).** `tools/repair_ipoker_session_ids.py`
+removes the duplicates and, given the files (`--hh-dir`), renumbers the hands
+stored only under their session code. Report-only by default, `--rehearse`
+rolls back, `--apply` backs a SQLite database up first. See
+[ipoker-session-code-repair.md](ipoker-session-code-repair.md).
 
-**Risk.** High: it deletes database rows. Make `--dry-run` the default, show a
-count before taking action, and document the backup procedure. Note that the
-3.4.2 tool made the opposite choice — `--dry-run` is an optional flag there,
-not the default — because it only touches files that the importer can
-regenerate. That reasoning no longer applies once the database is written.
+**Caches.** The tool rebuilds every cache from the repaired hands: HudCache
+(#591), then the session tables with CardsCache and PositionsCache (#598).
+Nothing remains of the duplicates.
 
 ---
 
@@ -158,9 +158,14 @@ Handle these when an opportunity arises; there is nothing to do until then.
 
 ## 7. Translations
 
-Thirteen of the 14 shipped locales are untranslated — only French is complete.
-The gettext pipeline, language selector and extraction work; only catalogue
-content is missing. This is a translation task, not a development task.
+The catalogues had not been merged with the source for years: French looked
+complete, but two thirds of its entries were for strings that no longer exist.
+Since #444 every `.po` is merged against a committed `locale/fpdb.pot` (1,275
+strings), CI checks they stay so, and *View ▸ Language* shows each language's
+completion. French covers 48 % after a review of its fuzzy entries; every
+other language is under 14 %. What remains is translation, not development:
+hosting the catalogues on a translation platform (Weblate or Crowdin) is the
+next step.
 
 Since 3.4.2, note that #198 fixed language resolution itself: a configuration
 without `ui_language` falls back to `system`, not English, so old

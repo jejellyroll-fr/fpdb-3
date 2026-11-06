@@ -1,13 +1,13 @@
 # FPDB-3 Legacy (Python)
 
-This is the 3.9.1 reference application.
+This is the 3.10.0 reference application.
 
 The original FPDB-3 Python application: hand-history parsers, PySide6 GUI,
 statistics engine, and the HUD overlay. This standalone repository is the
 actively maintained Python application; the `fpdb/` package contains the
 shared platform/window infrastructure used by the legacy HUD.
 
-> The fast-fold HUD path in 3.9.1 includes platform-specific window contracts,
+> The fast-fold HUD path in 3.10.0 includes platform-specific window contracts,
 > duplicate-renderer interlocks, and deterministic seat handling.
 
 ## ✨ Highlights
@@ -60,15 +60,6 @@ python fpdb_3_legacy/fpdb.pyw
 
 # HUD process
 python fpdb_3_legacy/HUD_main.pyw
-
-# Legacy CLI
-python fpdb_3_legacy/fpdb_cli.py --help
-
-# Legacy REST API launcher
-python fpdb_3_legacy/run_fpdb_api.py
-
-# Web launcher
-python fpdb_3_legacy/run_fpdb_web.py
 ```
 
 ### Linux / Wayland
@@ -102,8 +93,6 @@ fpdb_3_legacy/
 ├── Hand.py, Database.py  # core hand model + DB layer
 ├── Hud.py, HUD_main.pyw  # HUD overlay
 ├── fpdb.pyw              # desktop GUI entry point
-├── fpdb_cli.py           # CLI entry point
-├── run_fpdb_*.py         # api / web / full launchers
 └── legacy_launcher.py    # `fpdb_3_legacy` console script
 ```
 

@@ -1,0 +1,223 @@
+{
+  "backend": "postgresql",
+  "cases": {
+    "aggregated_batch_6": {
+      "statements": {
+        "get_stats_from_hand_aggregated (assembled)": {
+          "calls": 4,
+          "seconds": 0.013803199923131615
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.05904510000254959,
+        "mean": 0.03028194666452085,
+        "p50": 0.025389599963091314,
+        "p95": 0.053681629989296195,
+        "p99": 0.057972405999898904
+      }
+    },
+    "aggregated_per_hand": {
+      "statements": {
+        "get_stats_from_hand_aggregated (assembled)": {
+          "calls": 1,
+          "seconds": 0.002667299995664507
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.01875430002110079,
+        "mean": 0.010141119985685993,
+        "p50": 0.010172899987082928,
+        "p95": 0.014971779985353345,
+        "p99": 0.0179977960139513
+      }
+    },
+    "cards_many_8": {
+      "statements": {
+        "get_cards (assembled)": {
+          "calls": 1,
+          "seconds": 0.0004885999951511621
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.001450899988412857,
+        "mean": 0.0009593800059519708,
+        "p50": 0.0009535999852232635,
+        "p95": 0.0013006099849008023,
+        "p99": 0.0014208419877104461
+      }
+    },
+    "common_cards_many_8": {
+      "statements": {
+        "select id, boardcard1, boardcard2, boardcard3, boardcard4, boardcard5 ...": {
+          "calls": 1,
+          "seconds": 0.00012969999806955457
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.0006259999936446548,
+        "mean": 0.00026972000487148764,
+        "p50": 0.00023390003480017185,
+        "p95": 0.0004985300009138881,
+        "p99": 0.0006005059950985013
+      }
+    },
+    "hand_construction": {
+      "statements": {
+        "get_hands_cashout": {
+          "calls": 1,
+          "seconds": 0.00013749999925494194
+        },
+        "get_hands_showdown": {
+          "calls": 1,
+          "seconds": 0.00021299999207258224
+        },
+        "get_hands_splash": {
+          "calls": 1,
+          "seconds": 0.0001403999631293118
+        },
+        "handActions": {
+          "calls": 1,
+          "seconds": 0.00027050002245232463
+        },
+        "playerHand": {
+          "calls": 1,
+          "seconds": 0.00021949998335912824
+        },
+        "select heroseat from hands where id = 367": {
+          "calls": 1,
+          "seconds": 0.00010850001126527786
+        },
+        "singleHand": {
+          "calls": 1,
+          "seconds": 0.0001382000045850873
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.011711900006048381,
+        "mean": 0.0038714733401623864,
+        "p50": 0.0036341000231914222,
+        "p95": 0.006503339990740634,
+        "p99": 0.010670188002986828
+      }
+    },
+    "min_stack_many_8": {
+      "statements": {
+        "select h.id, gt.bigblind from hands h inner join gametypes gt on h.gam...": {
+          "calls": 1,
+          "seconds": 0.00017640000442042947
+        },
+        "select handid, startcash, committed, winnings from handsplayers where ...": {
+          "calls": 1,
+          "seconds": 0.0001667000469751656
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.001227599976118654,
+        "mean": 0.0007126333347211282,
+        "p50": 0.0007255999953486025,
+        "p95": 0.001081090001389384,
+        "p99": 0.0011982979811728
+      }
+    },
+    "positions_many_8": {
+      "statements": {
+        "select handid, playerid, position from handsplayers where handid in (%...": {
+          "calls": 1,
+          "seconds": 0.00014999997802078724
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.00043349998304620385,
+        "mean": 0.00029407332573706905,
+        "p50": 0.0002905000001192093,
+        "p95": 0.0004227899829857051,
+        "p99": 0.0004313579830341041
+      }
+    },
+    "seat_players_many_8": {
+      "statements": {
+        "select hp.handid, hp.seatno, hp.playerid, p.name from handsplayers hp ...": {
+          "calls": 1,
+          "seconds": 0.0002601000014692545
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.0008888000156730413,
+        "mean": 0.000595553331853201,
+        "p50": 0.000631399976555258,
+        "p95": 0.0008511400141287595,
+        "p99": 0.0008812680153641849
+      }
+    },
+    "session_per_hand": {
+      "statements": {
+        "get_stats_from_hand_session (assembled)": {
+          "calls": 1,
+          "seconds": 0.0007112000021152198
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.007752099947538227,
+        "mean": 0.004915573323766391,
+        "p50": 0.005161699955351651,
+        "p95": 0.007282049994682892,
+        "p99": 0.007658089956967159
+      }
+    },
+    "site_hand_no_many_8": {
+      "statements": {
+        "select id, sitehandno from hands where id in (%s, %s, %s, %s, %s, %s, ...": {
+          "calls": 1,
+          "seconds": 0.00012630003038793802
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.00035149999894201756,
+        "mean": 0.00022977998790641626,
+        "p50": 0.00022390001686289907,
+        "p95": 0.00032881998922675845,
+        "p99": 0.00034696399699896574
+      }
+    },
+    "table_info_many_8": {
+      "statements": {
+        "select h.id, h.tablename, gt.maxseats, gt.category, gt.type, gt.fast, ...": {
+          "calls": 1,
+          "seconds": 0.0002908000024035573
+        }
+      },
+      "wall": {
+        "count": 15,
+        "max": 0.0015602000057697296,
+        "mean": 0.0008219999998497466,
+        "p50": 0.000901999999769032,
+        "p95": 0.0012306400225497779,
+        "p99": 0.001494288009125739
+      }
+    }
+  },
+  "dataset": {
+    "hands": 663,
+    "hands_players_rows": 3769,
+    "hudcache_rows": 2268,
+    "players": 427,
+    "tables": 193
+  },
+  "db_server": "postgresql",
+  "plans": {
+    "aggregated_batch_6": "GroupAggregate  (cost=707.95..1242.26 rows=537 width=2801) (actual rows=32.00 loops=1)\n  Group Key: h.id, hc.playerid, p.name\n  Buffers: shared hit=598\n  ->  Sort  (cost=707.95..709.29 rows=537 width=1159) (actual rows=68.00 loops=1)\n        Sort Key: h.id, hc.playerid, p.name COLLATE \"C\"\n        Sort Method: quicksort  Memory: 103kB\n        Buffers: shared hit=598\n        ->  Hash Join  (cost=136.00..683.60 rows=537 width=1159) (actual rows=68.00 loops=1)\n              Hash Cond: (hc.gametypeid = gt.id)\n              Buffers: shared hit=598\n              ->  Hash Join  (cost=129.22..675.38 rows=537 width=1151) (actual rows=68.00 loops=1)\n                    Hash Cond: (hc.playerid = hp.playerid)\n                    Join Filter: (((hp.playerid <> '-1'::smallint) AND (ANY ((hc.gametypeid + 0) = (hashed SubPlan 1).col1))) OR ((hp.playerid = '-1'::smallint) AND (ANY ((hc.gametypeid + 0) = (hashed SubPlan 2).col1))))\n                    Buffers: shared hit=595\n                    ->  Seq Scan on hudcache hc  (cost=29.64..545.01 rows=1701 width=1128) (actual rows=91.00 loops=1)\n                          Filter: ((stylekey > '0000000'::bpchar) AND (seats >= '0'::smallint) AND (seats <= '10'::smallint) AND ((ANY ((gametypeid + 0) = (hashed SubPlan 1).col1)) OR (ANY ((gametypeid + 0) = (hashed SubPlan 2).col1))))\n                          Rows Removed by Filter: 2177\n                          Buffers: shared hit=465\n                          SubPlan 1\n                            ->  Nested Loop  (cost=0.00..14.82 rows=1 width=4) (actual rows=14.00 loops=2)\n                                  Join Filter: ((gt1.siteid = gt2.siteid) AND (gt1.type = gt2.type) AND ((gt1.category)::text = (gt2.category)::text) AND (gt1.limittype = gt2.limittype) AND (gt1.bigblind <= (gt2.bigblind * '1000'::smallint)) AND (gt1.bigblind >= (gt2.bigblind / '1000'::smallint)))\n                                  Rows Removed by Join Filter: 154\n                                  Buffers: shared hit=12\n                                  ->  Seq Scan on gametypes gt2  (cost=0.00..5.10 rows=1 width=27) (actual rows=1.00 loops=2)\n                                        Filter: (id = '54'::smallint)\n                                        Rows Removed by Filter: 167\n                                        Buffers: shared hit=6\n                                  ->  Seq Scan on gametypes gt1  (cost=0.00..4.68 rows=168 width=31) (actual rows=168.00 loops=2)\n                                        Buffers: shared hit=6\n                          SubPlan 2\n                            ->  Nested Loop  (cost=0.00..14.82 rows=1 width=4) (actual rows=14.00 loops=1)\n                                  Join Filter: ((gt1_1.siteid = gt2_1.siteid) AND (gt1_1.type = gt2_1.type) AND ((gt1_1.category)::text = (gt2_1.category)::text) AND (gt1_1.limittype = gt2_1.limittype) AND (gt1_1.bigblind <= (gt2_1.bigblind * '1000'::smallint)) AND (gt1_1.bigblind >= (gt2_1.bigblind / '1000'::smallint)))\n                                  Rows Removed by Join Filter: 154\n                                  Buffers: shared hit=6\n                                  ->  Seq Scan on gametypes gt2_1  (cost=0.00..5.10 rows=1 width=27) (actual rows=1.00 loops=1)\n                                        Filter: (id = '54'::smallint)\n                                        Rows Removed by Filter: 167\n                                        Buffers: shared hit=3\n                                  ->  Seq Scan on gametypes gt1_1  (cost=0.00..4.68 rows=168 width=31) (actual rows=168.00 loops=1)\n                                        Buffers: shared hit=3\n                    ->  Hash  (cost=69.51..69.51 rows=34 width=31) (actual rows=32.00 loops=1)\n                          Buckets: 1024  Batches: 1  Memory Usage: 11kB\n                          Buffers: shared hit=124\n                          ->  Nested Loop  (cost=0.83..69.51 rows=34 width=31) (actual rows=32.00 loops=1)\n                                Buffers: shared hit=124\n                                ->  Nested Loop  (cost=0.56..59.33 rows=34 width=18) (actual rows=32.00 loops=1)\n                                      Buffers: shared hit=28\n                                      ->  Index Scan using hands_pkey on hands h  (cost=0.28..12.66 rows=6 width=12) (actual rows=6.00 loops=1)\n                                            Index Cond: (id = ANY ('{97,98,96,376,371,259}'::bigint[]))\n                                            Index Searches: 2\n                                            Buffers: shared hit=7\n                                      ->  Index Scan using handsplayers_handid_idx on handsplayers hp  (cost=0.28..7.72 rows=6 width=14) (actual rows=5.33 loops=6)\n                                            Index Cond: (handid = h.id)\n                                            Index Searches: 6\n                                            Buffers: shared hit=21\n                                ->  Index Scan using players_pkey on players p  (cost=0.27..0.30 rows=1 width=13) (actual rows=1.00 loops=32)\n                                      Index Cond: (id = hp.playerid)\n                                      Index Searches: 32\n                                      Buffers: shared hit=96\n              ->  Hash  (cost=4.68..4.68 rows=168 width=12) (actual rows=168.00 loops=1)\n                    Buckets: 1024  Batches: 1  Memory Usage: 16kB\n                    Buffers: shared hit=3\n                    ->  Seq Scan on gametypes gt  (cost=0.00..4.68 rows=168 width=12) (actual rows=168.00 loops=1)\n                          Buffers: shared hit=3\nPlanning:\n  Buffers: shared hit=99\nPlanning Time: 4.757 ms\nExecution Time: 3.416 ms",
+    "aggregated_per_hand": "GroupAggregate  (cost=383.06..524.00 rows=142 width=2793) (actual rows=9.00 loops=1)\n  Group Key: hc.playerid, p.name\n  Buffers: shared hit=415\n  ->  Sort  (cost=383.06..383.42 rows=142 width=1151) (actual rows=56.00 loops=1)\n        Sort Key: hc.playerid, p.name COLLATE \"C\"\n        Sort Method: quicksort  Memory: 89kB\n        Buffers: shared hit=415\n        ->  Hash Join  (cost=81.51..377.98 rows=142 width=1151) (actual rows=56.00 loops=1)\n              Hash Cond: (hc.gametypeid = gt.id)\n              Buffers: shared hit=415\n              ->  Nested Loop  (cost=74.73..370.82 rows=142 width=1143) (actual rows=56.00 loops=1)\n                    Join Filter: ((hp.playerid = hc.playerid) AND (((hp.playerid <> '-1'::smallint) AND (ANY ((hc.gametypeid + 0) = (hashed SubPlan 1).col1))) OR ((hp.playerid = '-1'::smallint) AND (ANY ((hc.gametypeid + 0) = (hashed SubPlan 2).col1)))))\n                    Buffers: shared hit=412\n                    ->  Hash Join  (cost=15.16..31.45 rows=9 width=23) (actual rows=9.00 loops=1)\n                          Hash Cond: (hp.playerid = p.id)\n                          Buffers: shared hit=11\n                          ->  Nested Loop  (cost=0.56..16.82 rows=9 width=10) (actual rows=9.00 loops=1)\n                                Buffers: shared hit=6\n                                ->  Index Scan using heroseat_idx on hands h  (cost=0.28..8.29 rows=1 width=12) (actual rows=1.00 loops=1)\n                                      Index Cond: (id = '367'::bigint)\n                                      Index Searches: 1\n                                      Buffers: shared hit=3\n                                ->  Index Scan using handsplayers_handid_idx on handsplayers hp  (cost=0.28..8.44 rows=9 width=14) (actual rows=9.00 loops=1)\n                                      Index Cond: (handid = '367'::bigint)\n                                      Index Searches: 1\n                                      Buffers: shared hit=3\n                          ->  Hash  (cost=9.27..9.27 rows=427 width=13) (actual rows=427.00 loops=1)\n                                Buckets: 1024  Batches: 1  Memory Usage: 28kB\n                                Buffers: shared hit=5\n                                ->  Seq Scan on players p  (cost=0.00..9.27 rows=427 width=13) (actual rows=427.00 loops=1)\n                                      Buffers: shared hit=5\n                    ->  Index Scan using hudcache_playerid_idx on hudcache hc  (cost=29.93..34.30 rows=4 width=1128) (actual rows=6.22 loops=9)\n                          Index Cond: (playerid = p.id)\n                          Filter: ((stylekey > '0000000'::bpchar) AND (seats >= '0'::smallint) AND (seats <= '10'::smallint) AND ((ANY ((gametypeid + 0) = (hashed SubPlan 1).col1)) OR (ANY ((gametypeid + 0) = (hashed SubPlan 2).col1))))\n                          Rows Removed by Filter: 38\n                          Index Searches: 9\n                          Buffers: shared hit=395\n                          SubPlan 1\n                            ->  Nested Loop  (cost=0.00..14.82 rows=1 width=4) (actual rows=14.00 loops=2)\n                                  Join Filter: ((gt1.siteid = gt2.siteid) AND (gt1.type = gt2.type) AND ((gt1.category)::text = (gt2.category)::text) AND (gt1.limittype = gt2.limittype) AND (gt1.bigblind <= (gt2.bigblind * '1000'::smallint)) AND (gt1.bigblind >= (gt2.bigblind / '1000'::smallint)))\n                                  Rows Removed by Join Filter: 154\n                                  Buffers: shared hit=12\n                                  ->  Seq Scan on gametypes gt2  (cost=0.00..5.10 rows=1 width=27) (actual rows=1.00 loops=2)\n                                        Filter: (id = '54'::smallint)\n                                        Rows Removed by Filter: 167\n                                        Buffers: shared hit=6\n                                  ->  Seq Scan on gametypes gt1  (cost=0.00..4.68 rows=168 width=31) (actual rows=168.00 loops=2)\n                                        Buffers: shared hit=6\n                          SubPlan 2\n                            ->  Nested Loop  (cost=0.00..14.82 rows=1 width=4) (actual rows=14.00 loops=1)\n                                  Join Filter: ((gt1_1.siteid = gt2_1.siteid) AND (gt1_1.type = gt2_1.type) AND ((gt1_1.category)::text = (gt2_1.category)::text) AND (gt1_1.limittype = gt2_1.limittype) AND (gt1_1.bigblind <= (gt2_1.bigblind * '1000'::smallint)) AND (gt1_1.bigblind >= (gt2_1.bigblind / '1000'::smallint)))\n                                  Rows Removed by Join Filter: 154\n                                  Buffers: shared hit=6\n                                  ->  Seq Scan on gametypes gt2_1  (cost=0.00..5.10 rows=1 width=27) (actual rows=1.00 loops=1)\n                                        Filter: (id = '54'::smallint)\n                                        Rows Removed by Filter: 167\n                                        Buffers: shared hit=3\n                                  ->  Seq Scan on gametypes gt1_1  (cost=0.00..4.68 rows=168 width=31) (actual rows=168.00 loops=1)\n                                        Buffers: shared hit=3\n              ->  Hash  (cost=4.68..4.68 rows=168 width=12) (actual rows=168.00 loops=1)\n                    Buckets: 1024  Batches: 1  Memory Usage: 16kB\n                    Buffers: shared hit=3\n                    ->  Seq Scan on gametypes gt  (cost=0.00..4.68 rows=168 width=12) (actual rows=168.00 loops=1)\n                          Buffers: shared hit=3\nPlanning:\n  Buffers: shared hit=86\nPlanning Time: 4.349 ms\nExecution Time: 1.929 ms",
+    "session_per_hand": "Sort  (cost=39.73..39.74 rows=1 width=721) (actual rows=0.00 loops=1)\n  Sort Key: h.starttime DESC, hp2.playerid\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=15\n  ->  Nested Loop  (cost=17.69..39.72 rows=1 width=721) (actual rows=0.00 loops=1)\n        Buffers: shared hit=15\n        ->  Hash Join  (cost=17.42..39.01 rows=1 width=212) (actual rows=0.00 loops=1)\n              Hash Cond: ((hp2.playerid + 0) = (hp.playerid + 0))\n              Buffers: shared hit=15\n              ->  Nested Loop  (cost=8.87..30.41 rows=6 width=206) (actual rows=0.00 loops=1)\n                    Buffers: shared hit=12\n                    ->  Nested Loop  (cost=8.59..21.93 rows=1 width=34) (actual rows=0.00 loops=1)\n                          Join Filter: ((h.tablename)::text = (h2.tablename)::text)\n                          Rows Removed by Join Filter: 1\n                          Buffers: shared hit=12\n                          ->  Hash Join  (cost=8.31..13.63 rows=1 width=26) (actual rows=1.00 loops=1)\n                                Hash Cond: (gt.id = h2.gametypeid)\n                                Buffers: shared hit=9\n                                ->  Seq Scan on gametypes gt  (cost=0.00..4.68 rows=168 width=12) (actual rows=168.00 loops=1)\n                                      Buffers: shared hit=3\n                                ->  Hash  (cost=8.30..8.30 rows=1 width=22) (actual rows=1.00 loops=1)\n                                      Buckets: 1024  Batches: 1  Memory Usage: 9kB\n                                      Buffers: shared hit=6\n                                      ->  Index Scan using heroseat_idx on hands h2  (cost=0.28..8.30 rows=1 width=22) (actual rows=1.00 loops=1)\n                                            Index Cond: (id >= '663'::smallint)\n                                            Filter: ((seats >= '0'::smallint) AND (seats <= '10'::smallint))\n                                            Index Searches: 1\n                                            Buffers: shared hit=6\n                          ->  Index Scan using heroseat_idx on hands h  (cost=0.28..8.29 rows=1 width=28) (actual rows=1.00 loops=1)\n                                Index Cond: (id = '367'::bigint)\n                                Index Searches: 1\n                                Buffers: shared hit=3\n                    ->  Index Scan using handsplayers_handid_idx on handsplayers hp2  (cost=0.28..8.42 rows=6 width=188) (never executed)\n                          Index Cond: (handid = h2.id)\n                          Filter: ((playerid <> '-1'::smallint) OR (playerid = '-1'::smallint))\n                          Index Searches: 0\n              ->  Hash  (cost=8.44..8.44 rows=9 width=14) (actual rows=9.00 loops=1)\n                    Buckets: 1024  Batches: 1  Memory Usage: 9kB\n                    Buffers: shared hit=3\n                    ->  Index Scan using handsplayers_handid_idx on handsplayers hp  (cost=0.28..8.44 rows=9 width=14) (actual rows=9.00 loops=1)\n                          Index Cond: (handid = '367'::bigint)\n                          Index Searches: 1\n                          Buffers: shared hit=3\n        ->  Index Scan using players_pkey on players p  (cost=0.28..0.30 rows=1 width=13) (never executed)\n              Index Cond: (id = (hp2.playerid + 0))\n              Index Searches: 0\nPlanning:\n  Buffers: shared hit=38\nPlanning Time: 2.304 ms\nExecution Time: 0.352 ms"
+  },
+  "repeats": 15
+}

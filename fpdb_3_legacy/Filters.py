@@ -46,6 +46,7 @@ from fpdb_3_legacy import SQL, Card, Configuration, Database
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.phh_import import PHH_SITE_ID, PHH_SITE_NAME, phh_source_players
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
@@ -53,6 +54,9 @@ log = get_logger("filter")
 
 # Constants for UI thresholds
 MIN_ITEMS_FOR_CONTROLS = 2  # Minimum number of items to show control buttons
+# Native clients can store ante/all-in hands without a standard seat position.
+# Keep these values selectable so those hands are not silently excluded.
+POSITION_FILTER_VALUES = (0, 1, 2, 3, 4, 5, 6, 7, "S", "B", 8, 9)
 ICONS_DIR = Path(__file__).parent.parent / "icons"
 ROOM_WEB_LOGOS_DIR = ICONS_DIR / "room_logos"
 ROOM_ICON_FILES = {
@@ -289,6 +293,7 @@ class Filters(QWidget):
         self.cbTourney: dict[str, QCheckBox] = {}
         self.cbTourneyCat: dict[str, QCheckBox] = {}
         self.cbTourneyLim: dict[str, QCheckBox] = {}
+        self.tourneyFormat: QComboBox | None = None  # knockout or freezeout (#447)
         self.cbTourneyBuyin: dict[str, QCheckBox] = {}
 
         self.gameName = {
@@ -347,6 +352,7 @@ class Filters(QWidget):
             "gamestitle": (_("Games") + ":"),
             "tourneytitle": (_("Tourney") + ":"),
             "tourneycat": (_("Category") + ":"),
+            "tourneyformat": (_("Format") + ":"),
             "limitstitle": _("Limits:"),
             "positionstitle": _("Positions:"),
             "seatstitle": _("Number of Players:"),
@@ -410,6 +416,10 @@ class Filters(QWidget):
                 self.siteid[site] = result[0][0]
             else:
                 log.debug("Either 0 or more than one site matched for %s", site)
+        # PHH hands come from a data source, not a configured room: offered when stored.
+        self.phh_players = self._phh_players()
+        if self.phh_players:
+            self.siteid[PHH_SITE_NAME] = PHH_SITE_ID
 
         self.start_date = QDateEdit(QDate(1970, 1, 1))
         self.end_date = QDateEdit(QDate(2100, 1, 1))
@@ -433,6 +443,8 @@ class Filters(QWidget):
             layout.addWidget(self.create_tourney_lim_frame())
         if self.display.get("TourneyBuyin", False):
             layout.addWidget(self.create_tourney_buyin_frame())
+        if self.display.get("TourneyFormat", False):
+            layout.addWidget(self.create_tourney_format_frame())
         if self.display.get("Currencies", False):
             layout.addWidget(self.create_currencies_frame())
         if self.display.get("Limits", False):
@@ -486,6 +498,7 @@ class Filters(QWidget):
         self._clear_layout(self.layout())
 
         self.heroList = None
+        self.tourneyFormat = None
         for name in (
             "cbSites",
             "cbGames",
@@ -587,6 +600,28 @@ class Filters(QWidget):
         self.cbTourneyCat = {}
         return self._create_card_container(self.filterText["tourneycat"], self.fillTourneyCatFrame)
 
+    def create_tourney_format_frame(self) -> QWidget:
+        """Create the knockout / freezeout selection frame (#447)."""
+        return self._create_card_container(self.filterText["tourneyformat"], self.fillTourneyFormatFrame)
+
+    def fillTourneyFormatFrame(self, frame: QGroupBox) -> None:
+        """Fill the tournament format frame: every tournament, knockouts only or freezeouts only."""
+        from fpdb_3_legacy.tourney_format import FORMAT_ALL, FORMAT_FREEZEOUT, FORMAT_KNOCKOUT
+
+        vbox = QVBoxLayout()
+        frame.setLayout(vbox)
+        self.tourneyFormat = QComboBox()
+        self.tourneyFormat.addItem(_("All tournaments"), FORMAT_ALL)
+        self.tourneyFormat.addItem(_("Knockouts only"), FORMAT_KNOCKOUT)
+        self.tourneyFormat.addItem(_("Freezeouts only"), FORMAT_FREEZEOUT)
+        vbox.addWidget(self.tourneyFormat)
+
+    def getTourneyFormat(self) -> str:
+        """The selected tournament format: ``all``, ``knockout`` or ``freezeout``."""
+        if self.tourneyFormat is None:
+            return "all"
+        return str(self.tourneyFormat.currentData() or "all")
+
     def create_tourney_lim_frame(self) -> QWidget:
         """Create the tournament limit selection frame."""
         self.cbTourneyLim = {}
@@ -675,6 +710,32 @@ class Filters(QWidget):
         """Get selected graph options."""
         return [g for g in self.cbGraphops if self.cbGraphops[g].isChecked()]
 
+    def _phh_players(self) -> list[str]:
+        """The PHH players to offer; none when the source cannot be read -- a filter is
+        never lost to it (a failed read is rolled back, so the next query still runs).
+
+        Its configured hero aliases come first (#423), as a room lists its own; the
+        source is still offered only once it holds hands.
+        """
+        try:
+            players = phh_source_players(self.db_cursor, str(self.sql.query.get("placeholder", "%s")))
+        except Exception:  # noqa: BLE001 - optional entries: the rooms' filters come first.
+            log.debug("The PHH data source could not be read for the filters", exc_info=True)
+            self.end_read_transaction()
+            return []
+        if not players:
+            return []
+        getter = getattr(self.conf, "get_data_source_hero_aliases", None)
+        aliases = list(getter(PHH_SITE_NAME)) if callable(getter) else []
+        return [*aliases, *(name for name in players if name not in aliases)]
+
+    def filter_sites(self) -> list[str]:
+        """The sites a filter offers: the configured rooms, then the PHH data source if stored."""
+        sites = list(self.conf.get_supported_sites())
+        if PHH_SITE_NAME in self.siteid:
+            sites.append(PHH_SITE_NAME)
+        return sites
+
     def getSites(self) -> list[str]:
         """Get selected sites."""
         return [s for s in self.cbSites if self.cbSites[s].isChecked() and self.cbSites[s].isEnabled()]
@@ -749,6 +810,63 @@ class Filters(QWidget):
                 return getter().get(data[1])
         return None
 
+    def get_selected_players(self) -> list[tuple[str, int]]:
+        """``(site, playerId)`` for every player the reports read, in order (#434).
+
+        A hero profile: every player it links, on each of its sites still checked. A
+        room alias or a PHH player: the players ``Database.get_selected_player_ids``
+        resolves on each site checked -- for a room, every hero alias configured there,
+        as the filters and the Hand Viewer read. A player is listed once. A filter
+        that offers no sites restricts none.
+        """
+        sites = self.getSites() if self.cbSites else None
+        if (profile := self.get_selected_hero_profile()) is not None:
+            pairs = [
+                (self._offered_site(site) or site, pid)
+                for site, pids in self.db.get_hero_player_ids_by_site(profile).items()
+                for pid in pids
+            ]
+            if sites is not None:
+                pairs = [(site, pid) for site, pid in pairs if site in sites]
+        else:
+            heroes = self.getHeroes()
+            pairs = [
+                (site, int(pid))
+                for site in (sites if sites is not None else list(heroes))
+                if heroes.get(site)
+                for pid in self.db.get_selected_player_ids(site, heroes[site])
+            ]
+        seen: set[int] = set()
+        players = []
+        for site, pid in pairs:
+            if pid not in seen:
+                seen.add(pid)
+                players.append((site, pid))
+        return players
+
+    def get_selected_identities(self) -> list[tuple[str, str]]:
+        """``(site, name)`` of every player the reports read, as the analytics filters name them.
+
+        Each player's own site -- "PokerStars.FR" for an account a "PokerStars"
+        selection resolves to -- so a name on another room is never read.
+        """
+        identities = []
+        for _site, pid in self.get_selected_players():
+            if (identity := self.db.get_player_identity(pid)) is not None:
+                identities.append(identity)
+        return identities
+
+    def _offered_site(self, site: str) -> str | None:
+        """The site checkbox standing for *site*: its own, else the room or skin it belongs to."""
+        if site in self.cbSites:
+            return site
+        wanted = site.lower().replace(" ", "").replace(".", "").replace("-", "")
+        for offered in self.cbSites:
+            key = offered.lower().replace(" ", "").replace(".", "").replace("-", "")
+            if wanted.startswith(key) or key.startswith(wanted):
+                return offered
+        return None
+
     def get_hero_for_site(self, sitename: str, hand: Any = None) -> str | None:
         """Resolve hero name for the given sitename, mapping site variants if needed.
 
@@ -766,8 +884,18 @@ class Filters(QWidget):
                     if norm_s.startswith(norm_parent) or norm_parent.startswith(norm_s):
                         site_name = site
                         break
+            is_source = getattr(self.conf, "is_data_source", None)
+            if site_name is None and callable(is_source) and is_source(sitename):
+                site_name = sitename  # a data source (PHH) names its hero aliases itself (#423)
             if site_name:
-                aliases = self.conf.get_hero_aliases(site_name)
+                aliases = list(self.conf.get_hero_aliases(site_name))
+                # A selected hero profile names its own alias on each site, which need not
+                # be a configured alias there too (a PHH link, #423): getHeroes() is empty
+                # for a profile, so without this the hand had no hero and was dropped.
+                profile = self.get_selected_hero_profile()
+                if profile is not None:
+                    linked = profile.aliases_by_site().get(site_name, [])
+                    aliases.extend(alias for alias in linked if alias not in aliases)
                 player_names = {p[1] for p in hand.players if len(p) > 1}
                 for alias in aliases:
                     if alias in player_names:
@@ -1010,6 +1138,10 @@ class Filters(QWidget):
 
             for alias in aliases:
                 self.heroList.addItem(resolve_site_icon(site), f"{alias} on {site}", ("site_alias", site, alias))
+        for name in self.phh_players:
+            self.heroList.addItem(
+                resolve_site_icon(PHH_SITE_NAME), f"{name} on {PHH_SITE_NAME}", ("site_alias", PHH_SITE_NAME, name)
+            )
 
         # Multiroom hero profiles (aggregate a player's identity across rooms).
         getter = getattr(self.conf, "get_hero_profiles", None)
@@ -1042,7 +1174,7 @@ class Filters(QWidget):
         vbox = QVBoxLayout()
         frame.setLayout(vbox)
 
-        for site in self.conf.get_supported_sites():
+        for site in self.filter_sites():
             self.cbSites[site] = QCheckBox(site)
             self.cbSites[site].setChecked(True)
 
@@ -1282,7 +1414,7 @@ class Filters(QWidget):
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
-        result: list[list[Any]] = [[0], [1], [2], [3], [4], [5], [6], [7], ["S"], ["B"]]
+        result: list[list[Any]] = [[position] for position in POSITION_FILTER_VALUES]
         res_count = len(result)
 
         if res_count > 0:
@@ -1647,7 +1779,10 @@ class Filters(QWidget):
         if "<player_test>" in query:
             profile = self.get_selected_hero_profile()
             if profile is not None and hasattr(self.db, "get_hero_player_ids"):
-                hero_ids = self.db.get_hero_player_ids(profile=profile)
+                # The profile's players on the sites still checked, as the reports read
+                # them (#434); every one of them when no site is.
+                hero_ids = [pid for _site, pid in self.get_selected_players()]
+                hero_ids = hero_ids or self.db.get_hero_player_ids(profile=profile)
             else:
                 heroes = self.getHeroes()
                 hero_ids = self.get_hero_ids(heroes) if heroes else []
@@ -1680,7 +1815,7 @@ class Filters(QWidget):
         seen: set[int] = set()
         resolver = getattr(self.db, "get_hero_player_ids", None)
         if callable(resolver):
-            for site in heroes:
+            for site in (site for site, hero in heroes.items() if self._resolves_by_alias(site, hero)):
                 for pid in resolver(site):
                     if pid not in seen:
                         seen.add(pid)
@@ -1693,6 +1828,19 @@ class Filters(QWidget):
                     seen.add(int(result))
                     hero_ids.append(int(result))
         return hero_ids
+
+    def _resolves_by_alias(self, site: str, hero: str) -> bool:
+        """Whether *hero* on *site* stands for every hero alias configured there.
+
+        A configured room: always -- each of its aliases is the same hero. A data source
+        (PHH): only when the player selected is one of its configured hero aliases
+        (#423). Any other of its players is read by name: its hero-flagged players are
+        each file's own ``_hero``, not the player selected.
+        """
+        if site in self.conf.get_supported_sites():
+            return True
+        is_source = getattr(self.conf, "is_data_source", None)
+        return bool(callable(is_source) and is_source(site) and hero in self.conf.get_hero_aliases(site))
 
     @staticmethod
     def _stretch_calendar_cells(cal: QCalendarWidget) -> None:
@@ -1788,15 +1936,20 @@ class Filters(QWidget):
     def update_filters_for_hero(self) -> None:
         """Update all filters when hero selection changes."""
         if self.heroList and self.heroList.count() > 0:
-            selected_text = self.heroList.currentText()
-            if " on " in selected_text:
-                selected_hero, selected_site = selected_text.split(" on ")
+            # The item's data, not its label: a player's name is an arbitrary string, and
+            # "Alice on Call on PHH" is not a two-part "name on site" text. getHeroes()
+            # reads the same tuple.
+            data = self.heroList.currentData()
+            if isinstance(data, tuple) and len(data) == 3 and data[0] == "site_alias":
+                _kind, selected_site, selected_hero = data
                 self.update_sites_for_hero(selected_hero, selected_site)
                 self.update_games_for_hero(selected_hero, selected_site)
                 self.update_limits_for_hero(selected_hero, selected_site)
                 self.update_positions_for_hero(selected_hero, selected_site)
                 self.update_currencies_for_hero(selected_hero, selected_site)
                 self.update_tourney_filters_for_hero(selected_hero, selected_site)
+            elif (profile := self.get_selected_hero_profile()) is not None:
+                self.update_sites_for_profile(profile)
         # Reached on every hero change too, not just the first: the six updates
         # above each run their own queries, so the transaction reopens each time.
         self.end_read_transaction()
@@ -1806,7 +1959,7 @@ class Filters(QWidget):
         # Prefer the hero's own site checkbox when it exists. Prefix matching is
         # only a fallback for when the hero plays a skin that has no checkbox of
         # its own (e.g. data under "PokerStars.FR" but only "PokerStars" enabled).
-        # Without the exact-match shortcut, selecting "jeje_sat on PokerStars.FR"
+        # Without the exact-match shortcut, selecting "koko_sat on PokerStars.FR"
         # matched the "PokerStars" checkbox first (".FR" startswith "PokerStars"),
         # checking the wrong site so getSites() no longer matched the hero's key.
         if site in self.cbSites:
@@ -1829,6 +1982,51 @@ class Filters(QWidget):
             # parented to the row QWidget built in fillSitesFrame.
             (checkbox.parentWidget() or checkbox).setVisible(is_match)
 
+    def update_sites_for_profile(self, profile: Any) -> None:
+        """Offer exactly the sites a hero profile links, and every value of the other filters (#434).
+
+        A room alias selected before leaves only its own site checked, and only the
+        games, stakes, positions, currencies and tournaments played there; a profile
+        spans several rooms, and the reports read a profile's players on the sites
+        checked, through every other filter.
+        """
+        linked = {offered for site in profile.sites() if (offered := self._offered_site(site)) is not None}
+        for site, checkbox in self.cbSites.items():
+            is_linked = site in linked
+            checkbox.setChecked(is_linked)
+            checkbox.setEnabled(is_linked)
+            (checkbox.parentWidget() or checkbox).setVisible(is_linked)
+        for checkboxes in (
+            self.cbGames,
+            self.cbLimits,
+            self.cbPositions,
+            self.cbTourney,
+            self.cbTourneyCat,
+            self.cbTourneyLim,
+            self.cbTourneyBuyin,
+        ):
+            self._update_checkbox_set(checkboxes, set(checkboxes))
+        # T$ is play money for tournaments, never a ring currency (update_currencies_for_hero).
+        self._update_checkbox_set(
+            self.cbCurrencies,
+            {currency for currency in self.cbCurrencies if not (currency == "T$" and self.getType() == "ring")},
+        )
+        self.games = list(self.cbGames)
+
+    def _player_ids_for(self, site: str, hero: str) -> list[int]:
+        """The players a filter refresh reads for *hero* on *site*.
+
+        A configured room: every alias of its hero (or its hero-flagged players). A data
+        source (PHH): every configured hero alias when the player selected is one of them
+        (#423), otherwise the player selected, by name -- its hero-flagged players are
+        other files' heroes.
+        """
+        pids = self.db.get_hero_player_ids(site) if self._resolves_by_alias(site, hero) else []
+        if not pids:
+            pid = self.db.get_player_id(self.conf, site, hero)
+            pids = [int(pid)] if pid is not None else []
+        return pids
+
     def get_actual_site_id(self, site: str, hero: str) -> int:
         """Resolve the actual site ID for the hero, mapping site variants if needed."""
         player_id = self.db.get_player_id(self.conf, site, hero)
@@ -1844,10 +2042,7 @@ class Filters(QWidget):
         usetype = self.display.get("UseType", "")
         log.debug("Game type for hero %s on site %s: %s", hero, site, usetype)
 
-        pids = self.db.get_hero_player_ids(site)
-        if not pids:
-            pid = self.db.get_player_id(self.conf, site, hero)
-            pids = [int(pid)] if pid is not None else []
+        pids = self._player_ids_for(site, hero)
 
         if pids:
             marks = ",".join(["?"] * len(pids))
@@ -1900,10 +2095,7 @@ class Filters(QWidget):
     def update_positions_for_hero(self, hero: str, site: str) -> None:
         """Update positions filter for selected hero and site."""
         site_id = self.get_actual_site_id(site, hero)
-        pids = self.db.get_hero_player_ids(site)
-        if not pids:
-            pid = self.db.get_player_id(self.conf, site, hero)
-            pids = [int(pid)] if pid is not None else []
+        pids = self._player_ids_for(site, hero)
 
         if pids:
             marks = ",".join(["?"] * len(pids))
@@ -1948,10 +2140,7 @@ class Filters(QWidget):
             return
 
         site_id = self.get_actual_site_id(site, hero)
-        pids = self.db.get_hero_player_ids(site)
-        if not pids:
-            pid = self.db.get_player_id(self.conf, site, hero)
-            pids = [int(pid)] if pid is not None else []
+        pids = self._player_ids_for(site, hero)
         if not pids:
             return
 
@@ -2000,10 +2189,7 @@ class Filters(QWidget):
         site_id = self.get_actual_site_id(site, hero)
         # debug
         log.debug("executed request for %s on %s (site_id: %s)", hero, site, site_id)
-        pids = self.db.get_hero_player_ids(site)
-        if not pids:
-            pid = self.db.get_player_id(self.conf, site, hero)
-            pids = [int(pid)] if pid is not None else []
+        pids = self._player_ids_for(site, hero)
 
         if pids:
             marks = ",".join(["?"] * len(pids))

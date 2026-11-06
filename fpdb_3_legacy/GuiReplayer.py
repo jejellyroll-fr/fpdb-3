@@ -41,6 +41,8 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Hand
 from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity
+from fpdb_3_legacy.hand_review_dialog import HandReviewDialog
+from fpdb_3_legacy.hand_share_dialog import HandShareDialog
 from fpdb_3_legacy.http_capture_ofc import OFCHand, build_ofc_hand, load_ofc_hand
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency, format_number
@@ -795,6 +797,35 @@ class GuiReplayer(QWidget):
         self.deckPreview.setFixedSize(72, 38)
         self.deckPreview.setToolTip(_("Current card deck preview"))
         self.buttonBox2.addWidget(self.deckPreview)
+
+        # The hand being replayed, for sharing; an OFC replay has none.
+        self.shared_hand: Any = None
+        self.shared_hero: str | None = None
+        self.shareButton = QPushButton(_("Share..."))
+        self.shareButton.setToolTip(_("Copy or save this hand as text, Markdown or forum code"))
+        self.shareButton.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.shareButton.setEnabled(False)
+        self.shareButton.clicked.connect(self.share_clicked)
+        self.buttonBox2.addWidget(self.shareButton)
+
+        # Solver review of the hand's preflop in PreflopAdvisor (#328); the
+        # database id is kept because the loaded hand does not carry it.
+        self.shared_hand_id: int | None = None
+        self.reviewButton = QPushButton(_("Solver review..."))
+        self.reviewButton.setToolTip(_("Send this hand's preflop decisions to PreflopAdvisor"))
+        self.reviewButton.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.reviewButton.setEnabled(False)
+        self.reviewButton.clicked.connect(self.review_clicked)
+        self.buttonBox2.addWidget(self.reviewButton)
+
+        # The payout structure ICM prices the hand with (#446), for a stored tournament hand.
+        self.shared_tourney_id: int | None = None
+        self.payoutsButton = QPushButton(_("Payouts..."))
+        self.payoutsButton.setToolTip(_("Enter or apply this tournament's payout structure, for ICM"))
+        self.payoutsButton.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.payoutsButton.setEnabled(False)
+        self.payoutsButton.clicked.connect(self.payouts_clicked)
+        self.buttonBox2.addWidget(self.payoutsButton)
 
         self.stateSlider = QSlider(Qt.Orientation.Horizontal)
         self.stateSlider.valueChanged.connect(self.slider_changed)
@@ -2353,13 +2384,117 @@ class GuiReplayer(QWidget):
             parts.append(f"{label} {push_pct}%")
         return " · ".join(parts)
 
+    def _hand_tourney_id(self, hand) -> int | None:
+        """The stored tournament of the hand, whose payouts the dialog edits; None otherwise."""
+        if self.shared_hand_id is None or hand.gametype.get("type") != "tour":
+            return None
+        try:
+            from fpdb_3_legacy.tourney_payouts import tourney_for_hand
+
+            return tourney_for_hand(self.db, self.shared_hand_id)
+        except Exception:  # noqa: BLE001 - a lookup failure only leaves the button off.
+            log.exception("Could not find the tournament of hand %s", self.shared_hand_id)
+            return None
+
+    def payouts_clicked(self) -> None:
+        if self.shared_tourney_id is None:
+            return
+        from fpdb_3_legacy.tourney_payouts_dialog import TourneyPayoutsDialog
+
+        dialog = TourneyPayoutsDialog(self.db, self.shared_tourney_id, self)
+        dialog.exec()
+        self.payouts_changed(dialog.changed)
+
+    def payouts_changed(self, changed: bool) -> None:
+        """Price the hand again with the structure just stored or cleared."""
+        if changed and self.shared_hand is not None:
+            self.hand_icm = self._price_hand_icm(self.shared_hand)
+            self.update()
+
+    def _price_hand_icm(self, hand):
+        """The hand's all-in in prize equity (#446), or None; never in the way of the replay."""
+        try:
+            from fpdb_3_legacy.hand_icm import icm_for_replay
+
+            return icm_for_replay(getattr(self, "db", None), hand, self.shared_hand_id)
+        except Exception:  # intentional broad catch: a pricing failure must not stop the replay
+            log.exception("ICM pricing failed for hand %s", self.shared_hand_id)
+            return None
+
+    def _price_hand_bounty(self, hand):
+        """The hand's all-in with the bounty it can win (#447), or None; never in the way of the replay."""
+        try:
+            from fpdb_3_legacy.hand_bounty import bounty_for_replay
+
+            return bounty_for_replay(getattr(self, "db", None), hand, self.shared_hand_id)
+        except Exception:  # intentional broad catch: a pricing failure must not stop the replay
+            log.exception("Bounty pricing failed for hand %s", self.shared_hand_id)
+            return None
+
+    def _bounty_line(self, frame: ReplayFrame) -> tuple[str, str] | None:
+        """The summary's bounty line once the hero is all-in in a knockout tournament: (text, colour)."""
+        priced = getattr(self, "hand_bounty", None)
+        if priced is None or not any(player.allin for player in frame.players if player.action != "folds"):
+            return None
+        hero = next((player for player in frame.players if player.name == self.Heroes), None)
+        if hero is None or hero.action == "folds":
+            return None
+        allin = priced.allin
+        if allin is None:
+            quiet = {"not a tournament hand", "not a knockout tournament", "no all-in in this hand"}
+            return None if priced.reason in quiet else (_("Bounty: %s") % priced.reason, "#9aa5ad")
+        if self.Heroes not in allin.players:
+            return None
+
+        def money(value) -> str:
+            sign = "+" if value >= 0 else ""
+            return sign + (format_currency(value, allin.currency) if allin.currency else format_number(value, 2))
+
+        if not allin.collects[self.Heroes]:
+            text = _("Bounty EV %(ev)s: winning does not bust your opponent") % {"ev": money(0)}
+            return text, "#9aa5ad"
+        text = _("Bounty EV %(ev)s") % {"ev": money(allin.bounty_ev[self.Heroes])}
+        if allin.head_ev[self.Heroes]:
+            text += " " + _("(%(head)s to your own bounty)") % {"head": money(allin.head_ev[self.Heroes])}
+        if allin.adjusted_chip_ev is not None:
+            text += " · " + _("bounty-adjusted chip EV %(chips)s") % {
+                "chips": format_number(allin.adjusted_chip_ev[self.Heroes], 0, show_plus=True)
+            }
+        return text, "#4ade80"
+
+    def _icm_line(self, frame: ReplayFrame) -> tuple[str, str] | None:
+        """The summary's ICM line once the hero is all-in in a tournament: (text, colour)."""
+        priced = getattr(self, "hand_icm", None)
+        if priced is None or not any(player.allin for player in frame.players if player.action != "folds"):
+            return None
+        hero = next((player for player in frame.players if player.name == self.Heroes), None)
+        if hero is None or hero.action == "folds":
+            return None
+        allin = priced.allin
+        if allin is None:
+            quiet = {"not a tournament hand", "no all-in in this hand"}
+            return None if priced.reason in quiet else (_("ICM: %s") % priced.reason, "#9aa5ad")
+        if self.Heroes not in allin.players:
+            return None
+        ev = allin.icm_ev[self.Heroes]
+        text = _("ICM $EV %(ev)s · result %(result)s · chip EV %(chips)s") % {
+            "ev": format_number(ev, 2, show_plus=True),
+            "result": format_number(allin.icm_result[self.Heroes], 2, show_plus=True),
+            "chips": format_number(allin.chip_ev[self.Heroes], 0, show_plus=True),
+        }
+        if allin.table_only:
+            text += " " + _("(this table taken as the whole field)")
+        return text, "#4ade80" if ev >= 0 else "#ff6b6b"
+
     def _draw_summary(self, painter: QPainter, frame: ReplayFrame, layout: ReplayLayout, current_index: int) -> None:
         metrics = self._hero_decision_metrics(frame, current_index)
         has_metrics = bool(
             metrics.get("is_hero_turn")
             and (metrics.get("facing_call") or metrics.get("push_equity_pct") is not None)
         )
-        box_height = 78 if has_metrics else 56
+        icm_line = self._icm_line(frame)
+        bounty_line = self._bounty_line(frame)
+        box_height = (78 if has_metrics else 56) + (22 if icm_line else 0) + (22 if bounty_line else 0)
         summary_width = min(640, max(320, layout.table_rect.width() * 0.48))
         if layout.timeline_rect.isNull():
             x = self.width() - summary_width - 28
@@ -2379,6 +2514,26 @@ class GuiReplayer(QWidget):
             Qt.AlignmentFlag.AlignLeft,
             self._current_action_summary(frame),
         )
+
+        if bounty_line:
+            # Above the ICM line, or last: the bounty a knockout all-in can win (#447).
+            painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
+            painter.setPen(QColor(bounty_line[1]))
+            painter.drawText(
+                QRectF(rect.x() + 12, rect.y() + box_height - (48 if icm_line else 26), rect.width() - 24, 20),
+                Qt.AlignmentFlag.AlignLeft,
+                bounty_line[0],
+            )
+
+        if icm_line:
+            # Last line of the box: prize equity next to the chip figures (#446).
+            painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
+            painter.setPen(QColor(icm_line[1]))
+            painter.drawText(
+                QRectF(rect.x() + 12, rect.y() + box_height - 26, rect.width() - 24, 20),
+                Qt.AlignmentFlag.AlignLeft,
+                icm_line[0],
+            )
 
         if not has_metrics:
             painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
@@ -2501,6 +2656,17 @@ class GuiReplayer(QWidget):
         self._apply_replayer_style()
         self.handidx = handidx
         entry = self.handlist[handidx]
+        # Forget the previous hand first, so a hand that fails to load can
+        # never be shared under the one shown before it.
+        self.shared_hand = None
+        self.shared_hero = None
+        self.shared_hand_id = None
+        self.hand_icm = None
+        self.hand_bounty = None
+        self.shared_tourney_id = None
+        self.shareButton.setEnabled(False)
+        self.reviewButton.setEnabled(False)
+        self.payoutsButton.setEnabled(False)
         is_ofc = self._is_ofc_replay_entry(entry)
         self.replay_mode = "ofc" if is_ofc else "hand"
         if is_ofc:
@@ -2514,12 +2680,24 @@ class GuiReplayer(QWidget):
             if hand is None:
                 log.error("Could not load hand ID %s for replayer", entry)
                 return
+            self.shared_hand = hand
+            self.shared_hand_id = int(entry) if str(entry).isdigit() else None
             self.currency = hand.sym
             self.currency_code = str(hand.gametype.get("currency", "USD"))
             self.Heroes = hand.hero or self._resolve_hero(hand.sitename)
             self.replay_model = self._build_replay_model(hand)
+            self.hand_icm = self._price_hand_icm(hand)
+            self.hand_bounty = self._price_hand_bounty(hand)
+            self.shared_tourney_id = self._hand_tourney_id(hand)
+            # Legacy hands without a hero seat: share them from the same point
+            # of view the replayer shows, without writing it into the hand.
+            if not hand.hero and self.Heroes in {player[1] for player in hand.players}:
+                self.shared_hero = self.Heroes
         self.info = self.replay_model.info
         self.states = self.replay_model.states
+        self.shareButton.setEnabled(self.shared_hand is not None)
+        self.reviewButton.setEnabled(self.shared_hand is not None)
+        self.payoutsButton.setEnabled(self.shared_tourney_id is not None)
 
         for idx in reversed(list(range(self.buttonBox.count()))):
             item = self.buttonBox.takeAt(idx)
@@ -2554,6 +2732,39 @@ class GuiReplayer(QWidget):
         self.stateSlider.setValue(0)
         self._sync_replayer_controls()
         self.update()
+
+    def share_clicked(self) -> None:
+        if self.shared_hand is not None:
+            HandShareDialog(self.shared_hand, self, hero=self.shared_hero).exec()
+
+    def preflop_actions_shown(self) -> int:
+        """How many of the hand's preflop actions the displayed state has played.
+
+        Past preflop that is all of them, so a review opened on the river still
+        points at the hero's last preflop decision.
+        """
+        hand = self.shared_hand
+        total = len((hand.actions.get("PREFLOP") if hand is not None else None) or [])
+        if not self.states:
+            return 0
+        current = self.stateSlider.value()
+        start = next((index for index, state in enumerate(self.states) if state.street == "PREFLOP"), None)
+        if start is None or current < start:
+            return 0
+        if self.states[current].street == "PREFLOP" and not getattr(self.states[current], "ended", False):
+            return min(current - start, total)
+        return total
+
+    def review_clicked(self) -> None:
+        if self.shared_hand is not None:
+            HandReviewDialog(
+                self.shared_hand,
+                self,
+                hero=self.shared_hero,
+                fpdb_hand_id=self.shared_hand_id,
+                applied_preflop=self.preflop_actions_shown(),
+                config=self.conf,
+            ).exec()
 
     def increment_state(self) -> None:  # noqa: F811
         if self.stateSlider.value() >= self.stateSlider.maximum():
@@ -2676,36 +2887,6 @@ class GuiReplayer(QWidget):
                 break
 
 
-# ICM code originally grabbed from http://svn.gna.org/svn/pokersource/trunk/icm-calculator/icm-webservice.py
-# Copyright (c) 2008 Thomas Johnson <tomfmason@gmail.com>
-
-
-class ICM:
-    def __init__(self, stacks, payouts) -> None:
-        self.stacks = stacks
-        self.payouts = payouts
-        self.equities: list[Decimal] = []
-        self.prepare()
-
-    def prepare(self) -> None:
-        total = sum(self.stacks)
-        for k in self.stacks:
-            self.equities.append(round(Decimal(str(self.getEquities(total, k, 0))), 4))
-
-    def getEquities(self, total, player, depth):
-        D = Decimal
-        eq = D(self.stacks[player]) / total * D(str(self.payouts[depth]))
-        if depth + 1 < len(self.payouts):
-            i = 0
-            for stack in self.stacks:
-                if i != player and stack > 0.0:
-                    self.stacks[i] = 0.0
-                    eq += self.getEquities((total - stack), player, (depth + 1)) * ((stack) // (D(total)))
-                    self.stacks[i] = stack
-                i += 1
-        return eq
-
-
 class TableState:
     def __init__(self, hand) -> None:
         self.pot = Decimal(0)
@@ -2720,9 +2901,6 @@ class TableState:
         self.allinThisStreet = False
         self.ended = False
         self.newpot = Decimal()
-        # NOTE: Need a useful way to grab payouts
-        # self.icm = ICM(stacks,payouts)
-        # print icm.equities
 
         self.players = {}
         # print ('hand.players', hand.players)

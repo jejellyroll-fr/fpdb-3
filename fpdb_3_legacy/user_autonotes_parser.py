@@ -10,9 +10,10 @@ from decimal import Decimal
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from fpdb_3_legacy.AutoNotePlo import normalize_cards, rank_counts
+from fpdb_3_legacy.AutoNotePlo import normalize_cards
 from fpdb_3_legacy.AutoNoteRules import PreflopContext
 from fpdb_3_legacy.AutoNotes import AutoNoteRule, AutoNoteRuleSet, GeneratedAutoNote
+from fpdb_3_legacy.board_features import autonote_flop_texture_word
 from fpdb_3_legacy.Configuration import CONFIG_PATH
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -258,19 +259,9 @@ def extract_field_value(field: str, hand: Any, player_name: str, context: Preflo
         return str(rank).lower()
 
     if field == "board.flop_texture":
-        board = _extract_community_cards(hand)
-        flop = board[:3]
-        if not flop:
-            return "dry"
-        counts = rank_counts(flop)
-        if any(c >= 2 for c in counts.values()):
-            return "paired"
-        suits = [card[-1].lower() for card in flop if len(card) >= 2]
-        if len(set(suits)) == 1:
-            return "monotone"
-        if len(set(suits)) == 2:
-            return "twotone"
-        return "rainbow"
+        # Classified by the shared board classifier (#295): a custom note and an
+        # analytics filter must not disagree about the same flop.
+        return autonote_flop_texture_word(_extract_community_cards(hand))
 
     return ""
 

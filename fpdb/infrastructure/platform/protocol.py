@@ -114,11 +114,13 @@ class TableDetector(Protocol):
         ...     print(f"Found: {table.title} at ({table.geometry.x}, {table.geometry.y})")
     """
 
-    def find_tables(self, search_string: str = "") -> list[TableInfo]:
+    def find_tables(self, search_string: str = "", *, allow_fallback: bool = True) -> list[TableInfo]:
         """Find all poker table windows matching the search string
 
         Args:
             search_string: String to search for in window titles (empty = all windows)
+            allow_fallback: Whether a slower secondary source may be asked when the
+                primary one finds nothing. A platform with a single source ignores it.
 
         Returns:
             List of TableInfo objects for matching windows

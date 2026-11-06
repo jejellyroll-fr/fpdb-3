@@ -1080,7 +1080,8 @@ or None if we fail to get the info """
         """Returns string to search window title for tournament table no."""
         # Full Tilt:  $30 + $3 Tournament (181398949), Table 1 - 600/1200 Ante 100 - Limit Razz
         # PokerStars: WCOOP 2nd Chance 02: $1,050 NLHE - Tournament 307521826 Table 1 - Blinds $30/$60
-        return rf"{tournament}.+(?:Table|Torneo) (\d+)"
+        # PokerStars.it: €0.50 NL Hold'em [6 Giocatori - Turbo] - 10/20 - Torneo 4039582670 Tavolo 1
+        return rf"{tournament}.+(?:Table|Torneo|Tavolo) (\d+)"
 
     @staticmethod
     def clearMoneyString(money):

@@ -90,11 +90,11 @@ def importer(legacy_config, fresh_db):
     return imp
 
 
-# Failure logs and diagnostic hooks for Windows CI
+# Failure logs and diagnostic hooks for Windows CI. They stay in the job's own
+# log: failure tracebacks are never sent to a service outside the repository.
 def pytest_terminal_summary(terminalreporter, exitstatus, config):
     import os
     import sys
-    import urllib.request
 
     if os.environ.get("GITHUB_ACTIONS") and sys.platform == "win32" and exitstatus != 0:
         log_lines = []
@@ -116,18 +116,27 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
             log_lines.append(str(getattr(rep, 'longrepr', 'No traceback info')))
             log_lines.append("="*80)
 
-        log_content = "\n".join(log_lines)
+        terminalreporter.section("Windows CI diagnostics")
+        for line in log_lines:
+            terminalreporter.write_line(line)
 
-        # Send to Webhook.site
-        webhook_url = "https://webhook.site/08d9d8a2-04b6-49a7-a6a0-3fbcb3c3ac78"
-        req = urllib.request.Request(
-            webhook_url,
-            data=log_content.encode("utf-8"),
-            headers={"Content-Type": "text/plain"},
-            method="POST"
-        )
-        try:
-            with urllib.request.urlopen(req) as response:
-                print(f"Diagnostics sent successfully: {response.status}")
-        except Exception as e:
-            print(f"Failed to send diagnostics: {e}", file=sys.stderr)
+
+# Collect on the main thread only, as fpdb and the HUD do (#707). Left to
+# Python, a collection runs on whichever thread crosses the threshold: a worker
+# such as HudReadWorker then destroyed widgets of the main thread, and the Qt
+# suite deadlocked on it. Between tests, on the main thread, the policy of
+# fpdb_3_legacy.main_thread_gc runs instead of its timer.
+def pytest_sessionstart():
+    import gc
+
+    gc.disable()
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_runtest_teardown():
+    import gc
+
+    from fpdb_3_legacy.main_thread_gc import collect_if_due
+
+    gc.disable()  # in case a test turned it back on
+    collect_if_due()

@@ -14,7 +14,7 @@ test-all: ## Run all tests including GUI tests (using unified script)
 	./run_tests.sh
 
 test-gui: ## Run only GUI tests
-	uv run pytest test/test_HUD_main.py -v
+	uv run pytest tests/test_HUD_main.py -v
 
 test-main: ## Run only non-GUI tests with coverage
 	uv run pytest --cov=. --cov-report=html
@@ -23,7 +23,7 @@ test-stats: ## Run only stats-related tests
 	uv run pytest -k "stats"
 
 test-specific: ## Run specific test file (usage: make test-specific FILE=test_file.py)
-	uv run pytest test/$(FILE) -v
+	uv run pytest tests/$(FILE) -v
 
 lint: ## Run linting checks
 	uv run ruff check .

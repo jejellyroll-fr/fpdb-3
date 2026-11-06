@@ -27,6 +27,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QListWidget,
     QMessageBox,
+    QPlainTextEdit,
     QPushButton,
     QScrollArea,
     QTableWidget,
@@ -299,7 +300,11 @@ class ModernSiteCard(QFrame):
         # Scope the sweep to the network this card is about: the default "All"
         # probes every supported network, and "Detect all sites" calls this once
         # per card, which made detection quadratic in the number of sites shown.
-        detector = DetectInstalledSites.DetectInstalledSites(sitename=detection_site)
+        # The names typed in this card come first: macOS lets fpdb check a
+        # hero folder inside another app's container but not list it.
+        detector = DetectInstalledSites.DetectInstalledSites(
+            sitename=detection_site, hero_names=self.typed_hero_names()
+        )
 
         if detection_site == "PokerStars":
             all_variants = detector.get_all_pokerstars_variants()
@@ -335,13 +340,21 @@ class ModernSiteCard(QFrame):
 
                 if matching_skin:
                     self.apply_detection_results(matching_skin)
-                    self.show_detection_success()
+                    if matching_skin.get("listing_denied"):
+                        self.show_folder_access_needed(matching_skin["hhpath"])
+                    else:
+                        self.show_detection_success()
                     return
-                if all_ipoker_skins:
-                    # No exact match, use the first detected iPoker skin
-                    self.apply_detection_results(all_ipoker_skins[0])
-                    self.show_detection_info_ipoker(all_ipoker_skins)
-                    return
+            protected_folder = detector.get_protected_ipoker_skins().get(self.site_name)
+            if protected_folder:
+                # This room is installed: another skin's paths would be wrong here.
+                self.show_folder_access_needed(protected_folder)
+                return
+            if all_ipoker_skins:
+                # No exact match, use the first detected iPoker skin
+                self.apply_detection_results(all_ipoker_skins[0])
+                self.show_detection_info_ipoker(all_ipoker_skins)
+                return
 
         elif detection_site == "PartyGaming":
             # Special handling for PartyGaming skins (including PMU Poker PartyPoker)
@@ -449,6 +462,24 @@ class ModernSiteCard(QFrame):
             "iPoker Detection",
             f"Detected iPoker skins: {', '.join(skin_names)}\nApplied configuration from the first skin found.",
         )
+
+    def show_folder_access_needed(self, folder: str) -> None:
+        """Explain that macOS keeps fpdb out of the client's folder."""
+        QMessageBox.warning(
+            self,
+            _("Folder access needed"),
+            _(
+                "macOS does not let fpdb read this folder:\n%s\n\n"
+                "Allow the app that launches fpdb (your terminal, or fpdb itself) in System Settings > "
+                "Privacy & Security > Full Disk Access, then restart fpdb. Until then, its hands cannot be imported."
+            )
+            % folder,
+        )
+
+    def typed_hero_names(self) -> list[str]:
+        """Screen name and aliases typed in this card, saved or not."""
+        names = [self.screen_name_input.text(), *self.aliases_input.text().split(",")]
+        return [name.strip() for name in names if name.strip()]
 
     def show_detection_info_party(self, skins) -> None:
         """Show information about detected PartyGaming skins."""
@@ -580,6 +611,7 @@ class ModernSitePreferencesDialog(QDialog):
         self.tabs = QTabWidget()
         self.tabs.addTab(self.setup_sites_tab(), _("Sites"))
         self.tabs.addTab(self.setup_profiles_tab(), _("Hero Profiles"))
+        self.tabs.addTab(self.setup_data_sources_tab(), _("Data Sources"))
         main_layout.addWidget(self.tabs)
 
         # Action buttons
@@ -645,6 +677,53 @@ class ModernSitePreferencesDialog(QDialog):
         return tab
 
     # ------------------------------------------------------------------ #
+    # Data Sources tab (the hero of a source that is not a room, #423)    #
+    # ------------------------------------------------------------------ #
+
+    def setup_data_sources_tab(self) -> QWidget:
+        """Build the 'Data Sources' tab: the hero aliases of each data source (PHH)."""
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+
+        intro = QLabel(
+            _(
+                "A data source such as PHH is not a poker room: it has no screen name. "
+                "Name the players that are you in its hands, and the reports read them as "
+                "one hero, as a room's aliases are."
+            )
+        )
+        intro.setWordWrap(True)
+        intro.setProperty("class", "caption")
+        layout.addWidget(intro)
+
+        # One name per line, not comma separated as a room's aliases are: a PHH player's
+        # name is any string, "Smith, John" included, and is matched exactly.
+        self.data_source_inputs: dict[str, QPlainTextEdit] = {}
+        getter = getattr(self.config, "get_data_source_hero_aliases", None)
+        for name in self._data_source_names():
+            layout.addWidget(QLabel(_("%s hero aliases:") % name))
+            aliases_input = QPlainTextEdit()
+            aliases_input.setPlainText("\n".join(getter(name) if callable(getter) else []))
+            aliases_input.setPlaceholderText(_("Your names in these hands, one per line"))
+            aliases_input.setMaximumHeight(120)
+            layout.addWidget(aliases_input)
+            self.data_source_inputs[name] = aliases_input
+
+        layout.addStretch()
+        return tab
+
+    def get_data_source_changes(self) -> dict[str, list[str]]:
+        """Return ``{source: [alias, ...]}`` to persist on save, deduplicated and in order."""
+        changes: dict[str, list[str]] = {}
+        for name, aliases_input in self.data_source_inputs.items():
+            aliases: list[str] = []
+            for alias in (line.strip() for line in aliases_input.toPlainText().splitlines()):
+                if alias and alias not in aliases:
+                    aliases.append(alias)
+            changes[name] = aliases
+        return changes
+
+    # ------------------------------------------------------------------ #
     # Hero Profiles tab (multiroom hero identities)                       #
     # ------------------------------------------------------------------ #
 
@@ -660,13 +739,21 @@ class ModernSitePreferencesDialog(QDialog):
         self._loading_profile = False
 
     def _all_site_names(self) -> list[str]:
+        """The sites a profile link can name: every room, then the data sources (PHH, #423)."""
         getter = getattr(self.config, "get_supported_sites", None)
         if callable(getter):
             try:
-                return list(getter(all=True))
+                names = list(getter(all=True))
             except TypeError:
-                return list(getter())
-        return list(getattr(self.config, "supported_sites", {}).keys())
+                names = list(getter())
+        else:
+            names = list(getattr(self.config, "supported_sites", {}).keys())
+        names.extend(source for source in self._data_source_names() if source not in names)
+        return names
+
+    def _data_source_names(self) -> list[str]:
+        getter = getattr(self.config, "get_data_source_names", None)
+        return list(getter()) if callable(getter) else []
 
     def setup_profiles_tab(self) -> QWidget:
         """Build the 'Hero Profiles' tab: profile list + link editor."""

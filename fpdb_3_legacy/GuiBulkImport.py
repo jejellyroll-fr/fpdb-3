@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import os
 import sys
+from contextlib import suppress
 from pathlib import Path
 from time import time
 from typing import Any
@@ -27,6 +28,7 @@ from typing import Any
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QCheckBox,
     QFileDialog,
     QHBoxLayout,
@@ -55,6 +57,16 @@ if __name__ == "__main__":
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("gui_bulk_import")
 
+#: How long a closing tab waits for a running import, in milliseconds. Bounded
+#: on purpose and matching GuiAutoImport's: the wait runs on the UI thread, and
+#: one against an unresponsive database would freeze the window instead of
+#: closing the tab.
+STOP_WAIT_MS = 5000
+
+
+# Shared with auto-import, which watches the same folders.
+_cannot_list = Importer.cannot_list_directory
+
 
 class BulkImportThread(QThread):
     """Worker thread to run bulk import off the main GUI thread."""
@@ -77,6 +89,11 @@ class BulkImportThread(QThread):
             self.importer.clearFileList()
             for import_dir, site in self.import_sources:
                 self.importer.addBulkImportImportFileOrDir(import_dir, site=site)
+            # os.walk swallows a refused listing, so a folder macOS keeps fpdb
+            # out of looks empty (#662). Name those apart from empty ones.
+            unreadable = [src for src, _ in self.import_sources if _cannot_list(src)]
+            if unreadable:
+                log.warning("Bulk import cannot list these folders (permission denied): %s", unreadable)
 
             # Number of importable files actually discovered in the selected
             # sources. When this is 0 the directories were empty (or only held
@@ -98,7 +115,7 @@ class BulkImportThread(QThread):
 
             # Run the actual import
             res = self.importer.runImport()
-            self.finished.emit((file_count, res))
+            self.finished.emit((file_count, res, unreadable))
         except Exception as e:  # intentional broad catch: Qt worker thread surfaces any failure via the error signal
             log.exception("Bulk import background thread failed")
             self.error.emit(str(e))
@@ -106,9 +123,6 @@ class BulkImportThread(QThread):
 
 class GuiBulkImport(QWidget):
     """Widget for bulk importing hand history files."""
-
-    # Configuration  -  update these as preferred:
-    allow_threads = False  # set to True to try out the threads field
 
     def load_clicked(self) -> None:
         """Handle load button click event by spawning a background thread."""
@@ -127,13 +141,18 @@ class GuiBulkImport(QWidget):
                     path = item.text(1)  # Path is in the second column
                     import_sources.append((path, site_name))
 
-            custom_dir = self.importDir.text()
-            if custom_dir:
+            custom_dir = self.importDir.text().strip()
+            if custom_dir and custom_dir != Configuration.MISSING_DEFAULT_PATH:
                 import_sources.append((custom_dir, "auto"))
 
             if not import_sources:
                 log.warning("No import directories selected.")
                 self.settings["global_lock"].release()
+                QMessageBox.information(
+                    self,
+                    _("Bulk Import"),
+                    _("Select at least one configured directory, or choose a folder to import."),
+                )
                 return
 
             self.load_button.setEnabled(False)
@@ -143,6 +162,8 @@ class GuiBulkImport(QWidget):
 
             self.importer.setHandsInDB(self.n_hands_in_db)
             self.importer.setMode("bulk")
+            # Equity workers ahead of the import (#443), as the command line does.
+            self.importer.setThreads(-1)
             self.importer.setCallHud(False)
             self._apply_move_settings()
 
@@ -183,7 +204,7 @@ class GuiBulkImport(QWidget):
 
     def import_finished(self, payload: tuple) -> None:
         """Handle successful import completion in background thread."""
-        file_count, results = payload
+        file_count, results, unreadable = payload
         stored, dups, partial, skipped, errs, ttime = results
         elapsed = time() - self.starttime
         if elapsed == 0:
@@ -195,6 +216,8 @@ class GuiBulkImport(QWidget):
             f"Time: {elapsed:.2f} seconds, Stored/second: {stored / elapsed:.0f}"
         )
         log.info(completion_message)
+        # PHH files (#381) say more than the totals: what was unsupported, what malformed.
+        phh = self.importer.phh_summary()
 
         self.importer.clearFileList()
         self.settings["global_lock"].release()
@@ -206,7 +229,21 @@ class GuiBulkImport(QWidget):
         # Always give the user explicit feedback. Without this, a run that finds
         # no importable files (empty history folders, archives only, etc.) looks
         # identical to a broken importer.
-        if file_count == 0:
+        if unreadable:
+            # Same words as the site preferences use for the same refusal (#661).
+            QMessageBox.warning(
+                self,
+                _("Folder access needed"),
+                _(
+                    "macOS does not let fpdb read this folder:\n%s\n\n"
+                    "Allow the app that launches fpdb (your terminal, or fpdb itself) in System Settings > "
+                    "Privacy & Security > Full Disk Access, then restart fpdb. Until then, its hands cannot be imported."
+                )
+                % "\n".join(unreadable),
+            )
+        if file_count == 0 and unreadable:
+            pass  # the folders are out of reach, not empty: said above
+        elif file_count == 0:
             QMessageBox.warning(
                 self,
                 _("Bulk Import"),
@@ -237,12 +274,34 @@ class GuiBulkImport(QWidget):
                     skipped=format_number(skipped, 0),
                     errs=format_number(errs, 0),
                     elapsed=format_number(elapsed),
-                ),
+                )
+                + (self._phh_lines(phh) if phh is not None else ""),
             )
 
         main_window = getattr(self, "main_window", None) or self.parent()
         if main_window is not None and hasattr(main_window, "refresh_after_import"):
             main_window.refresh_after_import()
+
+    @staticmethod
+    def _phh_lines(phh) -> str:
+        """The PHH part of the completion message: the counts the totals fold together."""
+        return "\n\n" + _(
+            "PHH hands found: {found}\n"
+            "Imported: {imported}\n"
+            "Duplicates: {dups}\n"
+            "Partial (history stops early): {partial}\n"
+            "Unsupported variants: {unsupported}\n"
+            "Malformed: {malformed}\n"
+            "PHH import time: {seconds}s",
+        ).format(
+            found=format_number(phh.discovered, 0),
+            imported=format_number(phh.imported, 0),
+            dups=format_number(phh.duplicates, 0),
+            partial=format_number(phh.partial, 0),
+            unsupported=format_number(phh.unsupported, 0),
+            malformed=format_number(phh.malformed, 0),
+            seconds=format_number(phh.seconds),
+        )
 
     def import_error(self, error_msg: str) -> None:
         """Handle error from background import thread."""
@@ -280,6 +339,10 @@ class GuiBulkImport(QWidget):
         self.import_tree.setColumnCount(2)
         self.import_tree.setHeaderLabels([_("Site"), _("Path")])
         self.import_tree.setColumnWidth(0, 200)
+        # A click anywhere on a row picks it (#662). The check box alone was the
+        # only way in, and dark themes draw an unchecked one dark on dark: the
+        # row highlighted, looked picked, and was left out of the import.
+        self.import_tree.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
 
         # The project icons directory is located at the root of the project (parent of fpdb_3_legacy)
         icons_dir = Path(__file__).parent.parent / "icons"
@@ -290,23 +353,22 @@ class GuiBulkImport(QWidget):
                 icon = QIcon(str(icon_path)) if icon_path.exists() else QIcon()
 
                 if site.HH_path and site.HH_path not in ["", "0"]:
-                    item = QTreeWidgetItem(self.import_tree, [site_name, site.HH_path])
-                    item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-                    item.setCheckState(0, Qt.CheckState.Unchecked)
-                    item.setIcon(0, icon)
+                    self._add_import_row(site_name, site.HH_path, icon)
 
                 if site.TS_path and site.TS_path not in ["", "0"]:
-                    item = QTreeWidgetItem(self.import_tree, [f"{site_name} (Tourney)", site.TS_path])
-                    item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-                    item.setCheckState(0, Qt.CheckState.Unchecked)
-                    item.setIcon(0, icon)
+                    self._add_import_row(f"{site_name} (Tourney)", site.TS_path, icon)
+
+        self.import_tree.itemSelectionChanged.connect(self._check_selected_rows)
 
         self.main_layout.addWidget(QLabel(_("Configured Import Directories:")))
         self.main_layout.addWidget(self.import_tree)
 
         # Custom import directory
         custom_dir_layout = QHBoxLayout()
-        self.importDir = QLineEdit(self.settings.get("bulkImport-defaultPath", ""))
+        default_dir = self.settings.get("bulkImport-defaultPath", "")
+        if default_dir == Configuration.MISSING_DEFAULT_PATH:
+            default_dir = ""
+        self.importDir = QLineEdit(default_dir)
         custom_dir_layout.addWidget(self.importDir)
         self.chooseButton = QPushButton(_("Browse..."))
 
@@ -348,6 +410,25 @@ class GuiBulkImport(QWidget):
         self.importer.database.rollback()
         self.n_hands_in_db = row[0]
 
+    def _add_import_row(self, label: str, path: str, icon: QIcon) -> None:
+        """Add a configured directory to the tree, unpicked.
+
+        The check box only shows the row's state: the selection sets it (see
+        _check_selected_rows), so the item is not user-checkable, or a click on
+        the box would toggle it a second time.
+        """
+        item = QTreeWidgetItem(self.import_tree, [label, path])
+        item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsUserCheckable)
+        item.setCheckState(0, Qt.CheckState.Unchecked)
+        item.setIcon(0, icon)
+
+    def _check_selected_rows(self) -> None:
+        """Tick exactly the selected rows: they are the ones load_clicked imports."""
+        root = self.import_tree.invisibleRootItem()
+        for i in range(root.childCount()):
+            item = root.child(i)
+            item.setCheckState(0, Qt.CheckState.Checked if item.isSelected() else Qt.CheckState.Unchecked)
+
     def browseClicked(self) -> None:
         """Handle browse button click to select import directory."""
         newdir = QFileDialog.getExistingDirectory(
@@ -385,6 +466,64 @@ class GuiBulkImport(QWidget):
         """Push the move-files widget state into the importer before running an import."""
         self.importer.setMoveImportedFiles(self.moveImportedCheck.isChecked(), self.moveImportedDir.text())
         self.importer.setMoveFailedFiles(self.moveFailedCheck.isChecked(), self.moveFailedDir.text())
+
+    def shutdown_workers(self) -> None:
+        """Wait for a running import before this tab is destroyed (#347).
+
+        A widget removed from the tab notebook gets no ``closeEvent``, so this
+        is the only place a closing Bulk Import tab can notice that its worker
+        is still going. The wait is bounded, for the same reason the rest of
+        the application bounds its stops: it runs on the UI thread, and one
+        against an unresponsive database would freeze the window rather than
+        close the tab. An overrunning import is left to finish on its own.
+        """
+        thread = getattr(self, "import_thread", None)
+        if thread is None or not thread.isRunning():
+            return
+        if thread.wait(STOP_WAIT_MS):
+            return
+        # It outlives the tab, so the cleanup has to as well. import_finished
+        # and import_error are the only paths that release the global lock, and
+        # they are slots of a widget about to be deleted; a lock held past this
+        # tab blocks every later import until the application is restarted
+        # (#347). They are disconnected first, so exactly one path releases it.
+        log.warning("Bulk Import tab closed while an import was still running; adopting it to clean up after.")
+        for signal, slot in ((thread.finished, self.import_finished), (thread.error, self.import_error)):
+            with suppress(RuntimeError, TypeError):
+                signal.disconnect(slot)
+        Importer.adopt_orphaned_import(thread, self._detached_cleanup())
+
+    def _detached_cleanup(self):
+        """What an overrunning import still owes, with no widget left in it."""
+        importer = self.importer
+        lock = self.settings["global_lock"]
+
+        def _cleanup() -> None:
+            with suppress(Exception):
+                importer.clearFileList()
+            importer.close()
+            with suppress(Exception):
+                lock.release()
+
+        return _cleanup
+
+    def close_owned_database(self) -> None:
+        """Give back the connections this tab's importer opened (#282, #347).
+
+        An importer holds one connection for itself and one per writer thread,
+        and every open of this tab builds a new one. ``close_tab`` calls this
+        after :meth:`shutdown_workers`, so an import has had its chance to
+        finish; one that overran still holds the importer, and closing
+        underneath it would hand it a dead handle, so it keeps what it holds.
+        """
+        importer = getattr(self, "importer", None)
+        if importer is None:
+            return
+        thread = getattr(self, "import_thread", None)
+        if thread is not None and thread.isRunning():
+            log.warning("Bulk Import: an import is still running; its database connections stay open.")
+            return
+        importer.close()
 
 
 def _compare_regression_sidecars(filename: str, importer, *, quiet: bool) -> int:
@@ -484,11 +623,16 @@ def main(argv=None) -> int:
     (stored, dups, partial, skipped, errs, _ttime) = importer.runImport()
     elapsed = (time() - starttime) or 1
 
+    phh = importer.phh_summary()
     comparison_errors = 0
     if args.compare_regression:
         comparison_errors = _compare_regression_sidecars(args.filename, importer, quiet=args.quiet)
 
     importer.clearFileList()
+    # The connections go with the importer: this is a one-shot command, and a
+    # caller that deletes or replaces the database next must not find it held
+    # open (#282).
+    importer.close()
 
     print(
         f"Bulk import done: Stored: {format_number(stored, 0)}, "
@@ -497,7 +641,18 @@ def main(argv=None) -> int:
         f"Regression mismatches: {format_number(comparison_errors, 0)}, "
         f"Time: {format_number(elapsed, 3)}s, Stored/second: {format_number(stored / elapsed, 0)}",
     )
+    _print_phh_summary(phh, quiet=args.quiet)
     return 0 if errs == 0 and comparison_errors == 0 else 1
+
+
+def _print_phh_summary(phh, *, quiet: bool) -> None:
+    """PHH files (#381): found, imported, duplicates, unsupported, malformed -- and why."""
+    if phh is None:
+        return
+    print(phh.summary())
+    if not quiet:
+        for error in phh.errors:
+            print(f"  {error}")
 
 
 if __name__ == "__main__":

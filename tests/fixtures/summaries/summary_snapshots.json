@@ -249,15 +249,15 @@
   },
   "Stars/5-Card-PLO-6max-MTT-USD-12.30-12.25-2.45-201611.progressive.txt": {
     "player_count": 49,
-    "sha256": "b86e415e9124ed780ba16ffb9d17e551ea925fe175cbc4df7d39718a42689a81"
+    "sha256": "b0b7f9c50e9fab0efd6f173ef3891dcc6336732f5af5e128a36f18d7398e47d8"
   },
   "Stars/6+Holdem-3max-STT-USD-1.00-201907.txt": {
     "player_count": 3,
-    "sha256": "bd4b57810ca7dd1bd68ec456b6ada75ae39299614c7175dc44cdb7dbda4026a6"
+    "sha256": "1c3058fcc83a0f32ad486bd9e62eba1c3096bd1f49ef9cac3f39692a22365c1f"
   },
   "Stars/8-Game-2max-STT-play-100-201306.homeGame.shootout.txt": {
     "player_count": 2,
-    "sha256": "1442696c8a807ce7bee9d6b82a1314a46eacad11ae1969ff814e8922db30c8e4"
+    "sha256": "52d679b78f02b670cbbb386411b120ca41e64d52d4bcf6bd5f597627a4160c45"
   },
   "Stars/MPLO-6max-MTT-USD-27-201605.txt": {
     "player_count": 1804,
@@ -265,7 +265,7 @@
   },
   "Stars/NLHE-4max-MTT-USD-2-201305.shootout.txt": {
     "player_count": 348,
-    "sha256": "5843d5be65998d501747c40790a165f7d72000ecde5a9d0c312d6aedee8c8e4e"
+    "sha256": "500cfd808c926bf8a109db43f7524c0bdab0bbd8151db8bf21ad4f6250a277ba"
   },
   "Stars/NLHE-6max-STT-play-1000-201605.FullTilt.txt": {
     "player_count": 6,
@@ -281,11 +281,11 @@
   },
   "Stars/NLHE-9max-MTT-USD-2.50-201305.KO.v2.txt": {
     "player_count": 6643,
-    "sha256": "1e96cdf4e3f2638a520a99493302b15e2bc842b1cca3a585e5770dfc1828911e"
+    "sha256": "af3b218999276ea92fb6c3f9df656feafce3b54d9f2f46275a27850d1fad9640"
   },
   "Stars/NLHE-9max-SC-MTT-201512.txt": {
     "player_count": 77,
-    "sha256": "aa4726547075fbc39e74179ba39bff141175d9d5cc051e068c95c06455c83766"
+    "sha256": "abc6e670cd411dd49955e72ade0a93de16040560f68145f53c0c7b7659f879ec"
   },
   "Stars/NLHE-EUR-STT-0.42-201102.emailed.cp1252.txt": {
     "player_count": 1,
@@ -313,11 +313,11 @@
   },
   "Stars/NLHE-MTT-USD-250-250-30-202005.reentry.ko.txt": {
     "player_count": 1263,
-    "sha256": "a344eff274c1dfe01bc5a937288618418dd10b8896f1f33407858515fb04f2b6"
+    "sha256": "8262832eee78329b8013fd4810e33cdcd5e440984aa1a0d79588c4ab3262d2de"
   },
   "Stars/NLHE-MTT-USD-50-5-202112.double.entryid.txt": {
     "player_count": 33557,
-    "sha256": "c61ecc3edc43d54b8a853d95aacfd27bbc6ef236094cc0985fc9e181b17bea22"
+    "sha256": "3d6c468305328825ee1e38f6b62b91a2822c260fd4e554bdeb775a727c8638a7"
   },
   "Stars/NLHE-Play-STT-20110405.txt": {
     "player_count": 9,
@@ -333,7 +333,7 @@
   },
   "Stars/NLHE-USD-HUSnG-10-201011.s0rrow.wins.txt": {
     "player_count": 2,
-    "sha256": "e2683b85ef5428633c08efa0a2c0a0e3343cbac4abd9cff245741311848593bb"
+    "sha256": "a2533f1e8ea9e330e623beed8cafd24ff041e7a7d0d2233f19a393e148d8bf12"
   },
   "Stars/NLHE-USD-MTT-0.50-201107.Super.Satellite.txt": {
     "player_count": 44,
@@ -345,7 +345,7 @@
   },
   "Stars/NLHE-USD-MTT-20-200708.s0rrow.2nd.txt": {
     "player_count": 276,
-    "sha256": "d99d9be6d79f0f530b6f868764e3b7757c50a16c4be0c4e9d19472be84a456fe"
+    "sha256": "d5cc7534703a947a964b6ff68ae535cfebba667d801dbbcbf43e2dee9994bdde"
   },
   "Stars/NLHE-USD-MTT-4max-2.00-201011.Stars.local.format.txt": {
     "player_count": 440,
@@ -361,11 +361,11 @@
   },
   "Stars/NLO8-USD-STT-201109.Knockout.sample.txt": {
     "player_count": 9,
-    "sha256": "f9af443e6c7bb8ca57796293275704bcccff7bb49de98ccdbc40524239c98e67"
+    "sha256": "e933d767dc9451fd1aa2f8788e9218bb38c383a55a17bae37d6eab843ec8d9be"
   },
   "Stars/NLSD-MTT-USD-1000-50-201609.reentry.txt": {
     "player_count": 145,
-    "sha256": "3091475adef87dc969f9c94cab693dcb4296655219626e42e676a302044e715b"
+    "sha256": "9c8b75a58e816656f0d067744269b28c36ebebb70c22e072e4585ea4cd819417"
   },
   "Stars/PHL-PLO-USD-MTT-2-201202.txt": {
     "player_count": 73,
@@ -373,11 +373,11 @@
   },
   "Stars/PLO-MTT-USD-505-25-202005.rebuy.addon.txt": {
     "player_count": 236,
-    "sha256": "aeec15a6b4ece69b67968d0ed0c1d70e8cca01baf3cf88d7d4563ada445044c4"
+    "sha256": "92e15d22028c3199e1f30fd999816d6078aba34f3bddbb69dde1c676b0a7ac72"
   },
   "Stars/PokerStars Tournament History Request - Last 3 tournaments.eml": {
     "player_count": 10,
-    "sha256": "915832f19f7a77c02725711b9b6aa294ba00b1d027a25678860f4048a17e9d1a"
+    "sha256": "8ec96b2a37713b0b1d8f0f53d05da39f155e0f840e437e4546f2dbc070136776"
   },
   "Winamax/20110305_Freeroll 150%80(5142226)_real_holdem_no-limit_summary.txt": {
     "player_count": 0,

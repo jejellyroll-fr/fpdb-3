@@ -1,6 +1,6 @@
 """Shared MockHand for parser-style unit tests.
 
-Legacy parser tests (`test/test_*ToFpdb.py`) write into a hand object via
+Legacy parser tests (`tests/test_*ToFpdb.py`) write into a hand object via
 a fixed set of `add*` / `set*` methods inherited from
 `fpdb_3_legacy.Hand.Hand`. Each test file used to redefine its own
 MockHand with subtly different field layouts, accumulating maintenance

@@ -21,6 +21,7 @@ from fpdb_3_legacy.autonotes_aof import (
     describe_all_in,
     is_aof_omaha,
 )
+from fpdb_3_legacy.board_features import autonote_flop_texture
 
 RULE_SET_HWANG_PLO_PREFLOP = "hwang_plo_preflop"
 RULE_SET_HOLDEM_CASH_PREFLOP = "holdem_cash_preflop"
@@ -441,11 +442,21 @@ def rule_enabled(config, rule_id: str, rule_set_name: str = RULE_SET_HWANG_PLO_P
 
 
 def _autonotes_node(config):
+    """The <autonotes> element, a child of the configuration's root.
+
+    That is where the example configuration has it and where
+    ensure_autonotes_node creates it. Only the root's children are looked at:
+    getElementsByTagName walked the whole document, and the import asks about
+    ten times per hand, which was a third of the import time (#443).
+    """
     doc = getattr(config, "doc", None)
-    if doc is None:
+    root = getattr(doc, "documentElement", None) if doc is not None else None
+    if root is None:
         return None
-    nodes = doc.getElementsByTagName("autonotes")
-    return nodes[0] if nodes else None
+    for child in root.childNodes:
+        if getattr(child, "tagName", None) == "autonotes":
+            return child
+    return None
 
 
 def _string_to_bool(value: str, default=True) -> bool:
@@ -817,48 +828,13 @@ def _board_cards(hand, street: str = "FLOP") -> list[str]:
 
 
 def _flop_texture(hand) -> dict[str, Any] | None:
-    cards = _board_cards(hand)
-    if len(cards) < 3:
-        return None
+    """The flop's texture, classified by the shared board classifier (#295).
 
-    ranks = [card[0].upper() for card in cards if len(card) >= 2]
-    suits = [card[-1].lower() for card in cards if len(card) >= 2]
-    if len(ranks) < 3 or len(suits) < 3:
-        return None
-
-    rank_counts = {rank: ranks.count(rank) for rank in set(ranks)}
-    suit_counts = {suit: suits.count(suit) for suit in set(suits)}
-    values = sorted({RANK_VALUES.get(rank, 0) for rank in ranks if RANK_VALUES.get(rank, 0)})
-    wheel_values = sorted({1 if value == 14 else value for value in values})
-    connected = bool(
-        len(values) >= 3 and (max(values) - min(values) <= 4 or max(wheel_values) - min(wheel_values) <= 4),
-    )
-    paired = max(rank_counts.values()) >= 2
-    monotone = max(suit_counts.values()) == 3
-    two_tone = max(suit_counts.values()) == 2
-    wet = bool(monotone or two_tone or connected)
-
-    labels = []
-    if paired:
-        labels.append("paired")
-    if monotone:
-        labels.append("monotone")
-    elif two_tone:
-        labels.append("two-tone")
-    if connected:
-        labels.append("connected")
-    if not labels:
-        labels.append("dry")
-
-    return {
-        "board": " ".join(cards),
-        "paired": paired,
-        "monotone": monotone,
-        "two_tone": two_tone,
-        "connected": connected,
-        "wet": wet,
-        "label": ", ".join(labels),
-    }
+    The vocabulary and its meaning are unchanged; only the implementation moved
+    to ``board_features``, so an auto-note and an analytics filter cannot
+    disagree about what a two-tone connected flop is.
+    """
+    return autonote_flop_texture(_board_cards(hand))
 
 
 def _raw_action_is_allin(raw: tuple) -> bool:

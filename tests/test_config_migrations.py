@@ -123,7 +123,7 @@ def test_load_reports_current_config_errors_and_invalid_version(tmp_path, monkey
     config = configuration.Config(file=str(path))
     assert config.wrongConfigVersion is False
     assert any("unknown" in error for error in config.config_reference_errors)
-    path.write_text(xml.replace('version="84"', 'version="invalid"'), encoding="utf-8")
+    path.write_text(xml.replace(f'version="{CONFIG_VERSION}"', 'version="invalid"', 1), encoding="utf-8")
     assert configuration.Config(file=str(path)).wrongConfigVersion is True
 
 
@@ -133,7 +133,9 @@ def test_upgrade_config_can_be_reloaded_and_does_not_repeat(tmp_path, monkeypatc
     monkeypatch.setattr(configuration, "CONFIG_PATH", str(tmp_path))
     monkeypatch.setattr(configuration, "_find_example_config", lambda _: str(ROOT / "HUD_config.xml.example"))
     path = tmp_path / "HUD_config.xml"
-    old = (ROOT / "HUD_config.xml.example").read_text(encoding="utf-8").replace('version="84"', 'version="83"')
+    old = (ROOT / "HUD_config.xml.example").read_text(encoding="utf-8").replace(
+        f'version="{CONFIG_VERSION}"', 'version="83"', 1
+    )
     old = old.replace('aux="ClassicHud, mucked"', 'aux="Classic_HUD, mucked"')
     path.write_text(old, encoding="utf-8")
     config = configuration.Config(file=str(path))
@@ -178,6 +180,28 @@ def test_ci_rejects_unversioned_changes_and_version_mismatch(tmp_path):
         check(base_dir, tmp_path)
     (tmp_path / "fpdb_3_legacy/Configuration.py").write_text("CONFIG_VERSION = 85", encoding="utf-8")
     check(base_dir, tmp_path)
+
+
+def test_a_sites_folders_change_without_a_new_version(tmp_path):
+    from tools.check_config_version import check
+
+    (tmp_path / "fpdb_3_legacy").mkdir()
+    (tmp_path / "fpdb_3_legacy/Configuration.py").write_text("CONFIG_VERSION = 84", encoding="utf-8")
+    base_dir = tmp_path / "base"
+    (base_dir / "fpdb_3_legacy").mkdir(parents=True)
+    site = '<config><general version="84"/><site site_name="S" HH_path="{}" TS_path="{}" site_path="{}" {}/></config>'
+    names = ("HUD_config.xml", "HUD_config.xml.example", "fpdb_3_legacy/HUD_config.xml.example")
+    for name in names:
+        (base_dir / name).write_text(site.format("C:/a", "C:/b", "C:/c", ""), encoding="utf-8")
+        (tmp_path / name).write_text(site.format("C:/x", "C:/y", "C:/z", ""), encoding="utf-8")
+
+    # An upgrade never carries a site's folders to an existing configuration.
+    check(base_dir, tmp_path)
+
+    # Any other change to the site still needs one.
+    (tmp_path / "HUD_config.xml").write_text(site.format("C:/x", "C:/y", "C:/z", 'enabled="True"'), encoding="utf-8")
+    with pytest.raises(ValueError, match="increment"):
+        check(base_dir, tmp_path)
 
 
 def test_adding_general_defaults_does_not_hide_missing_version(tmp_path, monkeypatch):

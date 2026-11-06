@@ -477,6 +477,7 @@ class Hand:
         self.hands["fileId"] = fileId
         db.storeHand(self.hands, doinsert, printtest)
         db.storeBoards(self.dbid_hands, self.hands["boards"], doinsert)
+        db.storeBoardFeatures(self.dbid_hands, self.hands["boardfeatures"], doinsert)
 
     def insertHandsPlayers(self, db, doinsert=False, printtest=False) -> None:
         log.info(
@@ -542,6 +543,26 @@ class Hand:
             for hs in self.handsstove:
                 hs[0] = self.dbid_hands
         db.storeHandsStove(self.handsstove, doinsert)
+
+    def insertHandsSituations(self, db, doinsert=False) -> None:
+        """Persist the named decisions of this hand (#294, stored since #305)."""
+        if self.saveActions:
+            db.storeHandsSituations(
+                self.dbid_hands,
+                self.playerIds,
+                self.stats.getSituations(),
+                doinsert,
+            )
+
+    def insertHandStates(self, db, doinsert=False) -> None:
+        """Persist what each postflop decision was holding (#302)."""
+        if self.saveActions:
+            db.storeHandStates(
+                self.dbid_hands,
+                self.playerIds,
+                self.stats.getHandStates(),
+                doinsert,
+            )
 
     def insertHandsShowdown(self, db, doinsert=False) -> None:
         """Persist parsed showdown combinations (and winning cards) per player.
@@ -709,6 +730,10 @@ class Hand:
                 row["sitout"],
                 str(row["bounty"]),
             )
+            # A progressive bounty the hand raised (#447): the HUD shows it at its new value.
+            # In hundredths, as the parsers keep endBounty.
+            if row.get("endbounty") is not None and row["endbounty"] != row["bounty"]:
+                self.endBounty[row["name"]] = Decimal(str(row["endbounty"])) * 100
             cardlist = [Card.valueSuitFromCard(row[f"card{i}"]) for i in range(1, 21)]
             # mucked/shown/dealt is not in the database, use mucked for villain and dealt for hero
             if row["seatno"] == heroSeat:
@@ -2257,9 +2282,14 @@ class HoldemOmahaHand(Hand):
 
         if self.hero == "":
             for player in self.shown.difference(self.dealt):
-                fh.write(
-                    f"Dealt to {player} [{' '.join(self.holecards[hole_street][player][1])}]\n",
-                )
+                # Showing is not the same as having cards on file: a player may have shown
+                # with every card unknown (a hand history that never names them), and there
+                # is then nothing to print. The other readers of `shown` guard the same way
+                # (see the showdown section below and DrawHand's).
+                cards = self.holecards.get(hole_street, {}).get(player, [None, []])[1]
+                if not cards:
+                    continue
+                fh.write(f"Dealt to {player} [{' '.join(cards)}]\n")
 
         if self.actions[initial_street]:
             for act in self.actions[initial_street]:

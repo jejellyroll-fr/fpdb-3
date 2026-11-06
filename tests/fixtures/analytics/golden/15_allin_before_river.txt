@@ -1,0 +1,37 @@
+PokerStars Hand #3100000015:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:14:00 ET
+Table 'Golden 15 Allin Flop' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Th Tc]
+Frank: raises $3.00 to $5.00
+Anna: raises $11.00 to $16.00
+Boris: folds
+Cara: folds
+Dave: folds
+Erin: folds
+Frank: calls $11.00
+*** FLOP *** [Ad Kd Qc]
+Frank: bets $184.00 and is all-in
+Anna: calls $184.00 and is all-in
+*** TURN *** [Ad Kd Qc] [2h]
+*** RIVER *** [Ad Kd Qc 2h] [7s]
+*** SHOW DOWN ***
+Frank: shows [Ks Kc] (three of a kind, Kings)
+Anna: shows [Ah Ac] (three of a kind, Aces)
+Anna collected $403.00 from pot
+*** SUMMARY ***
+Total pot $403.00 | Rake $0.00
+Board [Ad Kd Qc 2h 7s]
+Seat 1: Anna showed [Ah Ac] and won ($403.00) with three of a kind, Aces
+Seat 2: Boris folded before Flop (didn't bet)
+Seat 3: Cara (button) folded before Flop (didn't bet)
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank showed [Ks Kc] and lost with three of a kind, Kings

@@ -3,11 +3,27 @@ name: CI
 on:
   push:
     branches: [ bigbang, main, development ]
+    # Pushing a version tag cuts a release: the release job below drafts it,
+    # the build jobs attach their archives, and it is published once they
+    # and the tests pass. `gh release create vX.Y.Z` and the GitHub release
+    # form create the tag too, so they go through the same path.
+    tags: [ 'v*' ]
   pull_request:
-    branches: [ bigbang, main, development ]
-  release:
-    types: [ published ]
+    # Feature branches too: a stacked pull request targets its parent branch,
+    # and without this it would merge having never run a single test.
+    branches: [ bigbang, main, development, 'feature/**', 'fix/**', 'release/**' ]
   workflow_dispatch:
+
+env:
+  # The one place every job's uv version is pinned; keep it in sync with
+  # [tool.uv] required-version in pyproject.toml.
+  UV_VERSION: "0.12.7"
+  # Constraints every `uv pip install` below applies (PySide6 below 6.12: see the file).
+  UV_CONSTRAINT: .github/ci-constraints.txt
+  # The release this run builds for: the version tag it runs on, or empty for
+  # a branch. A run started by hand on a tag (`gh workflow run CI --ref vX.Y.Z`)
+  # rebuilds that release's archives.
+  FPDB_RELEASE_TAG: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
 
 jobs:
   config-version:
@@ -33,6 +49,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
       - name: Install Ruff
         run: uv tool install ruff
       - name: Install mypy
@@ -40,287 +58,46 @@ jobs:
       - name: Install Pyright
         run: uv tool install pyright
       - name: Lint repository
-        run: ruff check fpdb_3_legacy fpdb test tests tools
+        run: ruff check fpdb_3_legacy fpdb tests tools
       - name: Prepare compiled translation resources
         run: python tools/prepare_briefcase_resources.py
+      - name: Check translations are merged with the source
+        # Prints each language's completion; fails when locale/fpdb.pot or a
+        # catalogue lags the source (fix: python tools/update_pot.py --merge).
+        run: |
+          sudo apt-get install -y gettext
+          python tools/update_pot.py --check
       - name: Verify technical-debt inventory
         run: python tools/todo_inventory.py --check
-      - name: Type-check modernized core
-        run: >-
-          mypy
-          fpdb
-          tools/prepare_briefcase_resources.py
-          tools/todo_inventory.py
-          tools/coverage_ratchet.py
-          fpdb_3_legacy/__init__.py
-          fpdb_3_legacy/equity.py
-          fpdb_3_legacy/fpdb_api.py
-          fpdb_3_legacy/HandDataReporter.py
-          fpdb_3_legacy/ImprovedErrorHandler.py
-          fpdb_3_legacy/interlocks.py
-          fpdb_3_legacy/LeakDetector.py
-          fpdb_3_legacy/dialects.py
-          fpdb_3_legacy/pt4_adapter
-          fpdb_3_legacy/http_capture_models.py
-          fpdb_3_legacy/http_capture_actions.py
-          fpdb_3_legacy/http_capture_adapter.py
-          fpdb_3_legacy/http_capture_diff.py
-          fpdb_3_legacy/http_capture_hand_builder.py
-          fpdb_3_legacy/http_capture_db_import.py
-          fpdb_3_legacy/http_capture_ofc.py
-          fpdb_3_legacy/swc_http_adapter.py
-          fpdb_3_legacy/menu_layout.py
-          fpdb_3_legacy/i18n.py
-          fpdb_3_legacy/i18n_compile.py
-          fpdb_3_legacy/localized_formats.py
-          fpdb_3_legacy/ConfigInitializer.py
-          fpdb_3_legacy/ConfigReloadWidget.py
-          fpdb_3_legacy/Configuration.py
-          fpdb_3_legacy/ConfigurationManager.py
-          fpdb_3_legacy/Filters.py
-          fpdb_3_legacy/db_backends.py
-          fpdb_3_legacy/db_migrate.py
-          fpdb_3_legacy/Database.py
-          fpdb_3_legacy/database_bulk_import.py
-          fpdb_3_legacy/database_hud_stats.py
-          fpdb_3_legacy/database_schema.py
-          fpdb_3_legacy/http_capture_importability.py
-          fpdb_3_legacy/http_capture_registry.py
-          fpdb_3_legacy/http_capture_archive.py
-          fpdb_3_legacy/http_capture_build.py
-          fpdb_3_legacy/http_capture_refresh.py
-          fpdb_3_legacy/http_capture_replay.py
-          fpdb_3_legacy/http_capture_analyze.py
-          fpdb_3_legacy/swc_http_capture.py
-          fpdb_3_legacy/stat_adapters.py
-          fpdb_3_legacy/action_enum_stats.py
-          fpdb_3_legacy/stats_action_enums.py
-          fpdb_3_legacy/stats_context.py
-          fpdb_3_legacy/stats_formatting.py
-          fpdb_3_legacy/stats_display.py
-          fpdb_3_legacy/stats_financial.py
-          fpdb_3_legacy/stats_postflop.py
-          fpdb_3_legacy/stats_preflop.py
-          fpdb_3_legacy/stats_sizing.py
-          fpdb_3_legacy/stats_table.py
-          fpdb_3_legacy/stats_tournament.py
-          fpdb_3_legacy/sql_indexes.py
-          fpdb_3_legacy/sql_queries_cash_profit.py
-          fpdb_3_legacy/sql_queries_cache_maintenance.py
-          fpdb_3_legacy/sql_queries_cache_rebuild.py
-          fpdb_3_legacy/sql_queries_cards_cache_write.py
-          fpdb_3_legacy/sql_queries_core.py
-          fpdb_3_legacy/sql_queries_database_admin.py
-          fpdb_3_legacy/sql_queries_filters.py
-          fpdb_3_legacy/sql_queries_game_types.py
-          fpdb_3_legacy/sql_queries_hand_artifacts.py
-          fpdb_3_legacy/sql_queries_hand_detail.py
-          fpdb_3_legacy/sql_queries_hand_player_persistence.py
-          fpdb_3_legacy/sql_queries_hand_root_persistence.py
-          fpdb_3_legacy/sql_queries_history.py
-          fpdb_3_legacy/sql_queries_hud_aggregated_stats.py
-          fpdb_3_legacy/sql_queries_hud_current_stats.py
-          fpdb_3_legacy/sql_queries_hud_session_stats.py
-          fpdb_3_legacy/sql_queries_hud_cache_write.py
-          fpdb_3_legacy/sql_queries_import_auxiliary.py
-          fpdb_3_legacy/sql_queries_opponents.py
-          fpdb_3_legacy/sql_queries_player_detailed.py
-          fpdb_3_legacy/sql_queries_player_position.py
-          fpdb_3_legacy/sql_queries_player_auto_notes.py
-          fpdb_3_legacy/sql_queries_player_stats.py
-          fpdb_3_legacy/sql_queries_positions_cache_write.py
-          fpdb_3_legacy/sql_queries_replayer.py
-          fpdb_3_legacy/sql_queries_session_stats.py
-          fpdb_3_legacy/sql_queries_session_cache_write.py
-          fpdb_3_legacy/sql_queries_tournament_player.py
-          fpdb_3_legacy/sql_queries_tournament_graph.py
-          fpdb_3_legacy/sql_queries_tournament_persistence.py
-          fpdb_3_legacy/sql_queries_utility.py
-          fpdb_3_legacy/sql_query_placeholders.py
-          fpdb_3_legacy/sql_metadata.py
-          fpdb_3_legacy/sql_schema_cards_cache.py
-          fpdb_3_legacy/sql_schema_core.py
-          fpdb_3_legacy/sql_schema_game.py
-          fpdb_3_legacy/sql_schema_hand.py
-          fpdb_3_legacy/sql_schema_hand_player.py
-          fpdb_3_legacy/sql_schema_hand_root.py
-          fpdb_3_legacy/sql_schema_hud_cache.py
-          fpdb_3_legacy/sql_schema_import.py
-          fpdb_3_legacy/sql_schema_lookup.py
-          fpdb_3_legacy/sql_schema_player.py
-          fpdb_3_legacy/sql_schema_position_cache.py
-          fpdb_3_legacy/sql_schema_raw.py
-          fpdb_3_legacy/sql_schema_session_cache.py
-          fpdb_3_legacy/sql_schema_tournament.py
-          fpdb_3_legacy/sql_schema_tournament_cache.py
-          fpdb_3_legacy/sql_schema_time.py
-          fpdb_3_legacy/AutoNoteRules.py
-          fpdb_3_legacy/AutoNotes.py
-          fpdb_3_legacy/PlayerProfiler.py
-          fpdb_3_legacy/Exceptions.py
-          fpdb_3_legacy/ConfigObservers.py
-          fpdb_3_legacy/AutoImportConfigObserver.py
-          fpdb_3_legacy/PopupIcons.py
-          fpdb_3_legacy/ModernPopup.py
-          fpdb_3_legacy/ModernHudPreferences.py
-          fpdb_3_legacy/ModernSeatPreferences.py
-          fpdb_3_legacy/ModernSitePreferences.py
-          fpdb_3_legacy/L10n.py
-          fpdb_3_legacy/Options.py
-          fpdb_3_legacy/RegressionFileComparator.py
-          fpdb_3_legacy/PopupThemes.py
-          fpdb_3_legacy/ThemeManager.py
-          fpdb_3_legacy/ThemeCreatorDialog.py
-          fpdb_3_legacy/DetectInstalledSites.py
-          fpdb_3_legacy/detect_site.py
-          fpdb_3_legacy/Card.py
-          fpdb_3_legacy/Hand.py
-          fpdb_3_legacy/HandHistory.py
-          fpdb_3_legacy/AbsoluteToFpdb.py
-          fpdb_3_legacy/BetfairToFpdb.py
-          fpdb_3_legacy/CakeToFpdb.py
-          fpdb_3_legacy/EverestToFpdb.py
-          fpdb_3_legacy/DerivedStats.py
-          fpdb_3_legacy/HandHistoryConverter.py
-          fpdb_3_legacy/Deck.py
-          fpdb_3_legacy/TourneySummary.py
-          fpdb_3_legacy/PartyPokerSummary.py
-          fpdb_3_legacy/PartyPokerToFpdb.py
-          fpdb_3_legacy/PacificPokerSummary.py
-          fpdb_3_legacy/PacificPokerToFpdb.py
-          fpdb_3_legacy/PkrToFpdb.py
-          fpdb_3_legacy/UnibetSummary.py
-          fpdb_3_legacy/UnibetToFpdb.py
-          fpdb_3_legacy/WinningSummary.py
-          fpdb_3_legacy/iPokerSummary.py
-          fpdb_3_legacy/PokerTrackerSummary.py
-          fpdb_3_legacy/MergeSummary.py
-          fpdb_3_legacy/MergeToFpdb.py
-          fpdb_3_legacy/OnGameToFpdb.py
-          fpdb_3_legacy/EnetToFpdb.py
-          fpdb_3_legacy/EntractionToFpdb.py
-          fpdb_3_legacy/BossToFpdb.py
-          fpdb_3_legacy/EverleafToFpdb.py
-          fpdb_3_legacy/MicrogamingToFpdb.py
-          fpdb_3_legacy/KingsClubToFpdb.py
-          fpdb_3_legacy/SealsWithClubsToFpdb.py
-          fpdb_3_legacy/GGPokerToFpdb.py
-          fpdb_3_legacy/WinningToFpdb.py
-          fpdb_3_legacy/PokerTrackerToFpdb.py
-          fpdb_3_legacy/BetOnlineToFpdb.py
-          fpdb_3_legacy/FulltiltToFpdb.py
-          fpdb_3_legacy/BovadaToFpdb.py
-          fpdb_3_legacy/backfill_boards.py
-          fpdb_3_legacy/backfill_showdown.py
-          fpdb_3_legacy/backfill_autonotes.py
-          fpdb_3_legacy/card_path.py
-          fpdb_3_legacy/fpdb_cli.py
-          fpdb_3_legacy/legacy_launcher.py
-          fpdb_3_legacy/migrate_tests.py
-          fpdb_3_legacy/migrate_to_pyside6.py
-          fpdb_3_legacy/validate_pyside6_migration.py
-          fpdb_3_legacy/swc_poker_console.py
-          fpdb_3_legacy/AutoNotePlo.py
-          fpdb_3_legacy/MergeStructures.py
-          fpdb_3_legacy/stat_registry.py
-          fpdb_3_legacy/pt4_import.py
-          fpdb_3_legacy/pt4hud.py
-          fpdb_3_legacy/debug_imports.py
-          fpdb_3_legacy/debug_imports_v2.py
-          fpdb_3_legacy/debug_partypoker_parser.py
-          fpdb_3_legacy/test_fpdb_api.py
-          fpdb_3_legacy/test_draw_starting_hand.py
-          fpdb_3_legacy/test_empty_data_popups.py
-          fpdb_3_legacy/test_ftp_detection.py
-          fpdb_3_legacy/test_leak_detector.py
-          fpdb_3_legacy/test_opponents_report.py
-          fpdb_3_legacy/test_partypoker_fix.py
-          fpdb_3_legacy/test_player_profiler.py
-          fpdb_3_legacy/test_rit_parser.py
-          fpdb_3_legacy/fetch_comments.py
-          fpdb_3_legacy/fetch_reviews.py
-          fpdb_3_legacy/fix_draw_starting_hands.py
-          fpdb_3_legacy/loggingFpdb.py
-          fpdb_3_legacy/WinamaxSummary.py
-          fpdb_3_legacy/WinamaxToFpdb.py
-          fpdb_3_legacy/PokerStarsSummary.py
-          fpdb_3_legacy/PokerStarsStructures.py
-          fpdb_3_legacy/PokerStarsToFpdb.py
-          fpdb_3_legacy/FullTiltPokerSummary.py
-          fpdb_3_legacy/BovadaSummary.py
-          fpdb_3_legacy/parser_registry.py
-          fpdb_3_legacy/IdentifySite.py
-          fpdb_3_legacy/Importer.py
-          fpdb_3_legacy/GuiBulkImport.py
-          fpdb_3_legacy/GuiAutoImport.py
-          fpdb_3_legacy/GuiGraphViewer.py
-          fpdb_3_legacy/GuiSessionViewer.py
-          fpdb_3_legacy/GuiTourneyGraphViewer.py
-          fpdb_3_legacy/GuiHandViewer.py
-          fpdb_3_legacy/GuiTourHandViewer.py
-          fpdb_3_legacy/GuiReplayer.py
-          fpdb_3_legacy/GuiStatsInfo.py
-          fpdb_3_legacy/GuiConfigObserver.py
-          fpdb_3_legacy/GuiLogView.py
-          fpdb_3_legacy/GuiPrefs.py
-          fpdb_3_legacy/GuiAutoNoteRules.py
-          fpdb_3_legacy/GuiAutoNotesWorkbench.py
-          fpdb_3_legacy/GuiOpponentsReport.py
-          fpdb_3_legacy/GuiDatabase.py
-          fpdb_3_legacy/GuiRingPlayerStats.py
-          fpdb_3_legacy/GuiTourneyPlayerStats.py
-          fpdb_3_legacy/Aux_Base.py
-          fpdb_3_legacy/Aux_Hud.py
-          fpdb_3_legacy/Aux_Classic_Hud.py
-          fpdb_3_legacy/Mucked.py
-          fpdb_3_legacy/BlockPopup.py
-          fpdb_3_legacy/Popup.py
-          fpdb_3_legacy/RangeChartPopup.py
-          fpdb_3_legacy/Stats.py
-          fpdb_3_legacy/SmartHudManager.py
-          fpdb_3_legacy/TableWindow.py
-          fpdb_3_legacy/SQL.py
-          fpdb_3_legacy/OSXTables.py
-          fpdb_3_legacy/XTables.py
-          fpdb_3_legacy/WinTables.py
-          fpdb_3_legacy/Hud.py
-          fpdb_3_legacy/HUD_main.pyw
-          fpdb_3_legacy/HudStatsPersistence.py
-          fpdb_3_legacy/iPoker/__init__.py
-          fpdb_3_legacy/iPoker/dispatcher.py
-          fpdb_3_legacy/iPoker/base.py
-          fpdb_3_legacy/iPoker/xml_format.py
-          fpdb_3_legacy/iPoker/streets_actions.py
-          fpdb_3_legacy/iPoker/hand_info.py
-          fpdb_3_legacy/iPokerToFpdb.py
-          fpdb_3_legacy/iPoker/skins
-          fpdb_3_legacy/iPoker/tournament_results.py
-      - name: Type-check main application window
-        run: mypy fpdb_3_legacy/fpdb.pyw
+      - name: Type-check the application
+        # What is checked is pyproject.toml's [tool.mypy] (#454): the whole
+        # application with imports followed, a strict tier, and no file list
+        # here to forget a module in.
+        run: mypy
+      - name: Type-check the two entry-point scripts
+        # mypy names every script __main__, so each needs a run of its own.
+        run: |
+          mypy --no-warn-unused-configs fpdb_3_legacy/fpdb.pyw
+          mypy --no-warn-unused-configs fpdb_3_legacy/HUD_main.pyw
       - name: Cross-check modern modules with Pyright
         run: pyright
-      - name: Type-check NumPy consumers
-        run: >-
-          mypy
-          fpdb_3_legacy/ring_stats
-          fpdb_3_legacy/test_feature_1_1.py
-          fpdb_3_legacy/test_migration.py
-          fpdb_3_legacy/validate_migration.py
       - name: Lint newly modernized modules
         run: >-
           ruff check
           fpdb_3_legacy/equity.py
           fpdb_3_legacy/PartyPokerSummary.py
-          test/test_equity.py
-          test/test_live_parser_regression.py
-          test/test_partypoker_summary.py
-          test/test_stats_known_hands.py
+          tests/test_equity.py
+          tests/test_live_parser_regression.py
+          tests/test_partypoker_summary.py
+          tests/test_stats_known_hands.py
           tests/helpers/parser_regression.py
 
   # The interposer carries a distinct #ifdef branch per platform -- dlsym on
-  # POSIX, GetModuleHandleA over the bundled OpenSSL DLLs on Windows. Compiling
-  # it only where CI happens to run would leave two of the three branches
-  # unbuilt, so each one is compiled on its own runner.
+  # POSIX, and on Windows an inline hook of ssleay32.dll installed by an injected
+  # DLL. Compiling it only where CI happens to run would leave branches unbuilt,
+  # so each one is compiled on its own runner. On Windows this builds two 32-bit
+  # artifacts (the tap DLL and its injector) to match the 32-bit SwC client;
+  # clang cross-targets the MSVC ABI using the runner's Windows SDK.
   #
   # swc_tap_build imports nothing but the standard library, so this needs no
   # project install: it is a compiler check, not an import check.
@@ -337,8 +114,17 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Ensure clang is available (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (-not (Get-Command clang -ErrorAction SilentlyContinue)) {
+            choco install llvm -y --no-progress
+            echo "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          }
+          clang --version
       - name: Compile the tap
-        run: python -m fpdb_3_legacy.swc_tap_build --build
+        run: python -m fpdb_3_legacy.capture.swc_tap_build --build
 
   test:
     runs-on: ${{ matrix.os }}
@@ -353,10 +139,20 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update
+          # The hosted image may include third-party feeds (for example
+          # packages.microsoft.com) that can return 403 and fail the whole
+          # update even though these dependencies come from Ubuntu itself.
+          if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+            sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
+          else
+            # A runner image without the deb822 Ubuntu sources: plain update.
+            sudo apt-get update
+          fi
           sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
       - name: Install dependencies
         run: |
@@ -377,7 +173,7 @@ jobs:
           # These tests use deterministic Winamax captures and mocked platform
           # APIs, so they exercise the macOS and Windows contracts on every
           # runner without requiring a live poker client.
-          python -m pytest -q -m "not qt" test/test_fast_fold_replay.py test/test_fast_fold_clockwise_mapping_and_cleanup.py test/test_fast_fold_display_optimization.py test/test_fast_fold_engine.py test/test_winamax_ax_seats.py test/test_windows_fast_fold_resolver.py
+          python -m pytest -q -m "not qt" tests/test_fast_fold_replay.py tests/test_fast_fold_clockwise_mapping_and_cleanup.py tests/test_fast_fold_display_optimization.py tests/test_fast_fold_engine.py tests/test_winamax_ax_seats.py tests/test_windows_fast_fold_resolver.py
 
       - name: Check FastHUD coverage has not dropped
         env:
@@ -399,13 +195,13 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          python -m pytest -q -m qt test/test_HUD_main.py
+          python -m pytest -q -m qt tests/test_HUD_main.py
       - name: Run Qt regression tests (offscreen)
         if: runner.os == 'Linux'
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          python -m pytest -m qt --tb=short
+          python -m pytest -m "qt and not perf" --tb=short
       # The perf tests assert wall-clock budgets, some as tight as 5 ms for a
       # loop of pure-Python work. Hosted runners are shared and noisy -- the
       # Windows ones especially -- so as a required check on all three they
@@ -434,10 +230,17 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update
+          if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+            sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
+          else
+            # A runner image without the deb822 Ubuntu sources: plain update.
+            sudo apt-get update
+          fi
           sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
       - name: Install fpdb dependencies
         run: |
@@ -474,8 +277,8 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          native_tests=(test/test_equity.py)
-          for f in test/test_aof_equity.py test/test_aof_ranges.py; do
+          native_tests=(tests/test_equity.py)
+          for f in tests/test_aof_equity.py tests/test_aof_ranges.py; do
             if [[ -f "$f" ]]; then
               native_tests+=("$f")
             fi
@@ -491,9 +294,16 @@ jobs:
         with:
           python-version: "3.11"
       - uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
       - name: Install system dependencies
         run: |
-          sudo apt-get update
+          if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+            sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
+          else
+            # A runner image without the deb822 Ubuntu sources: plain update.
+            sudo apt-get update
+          fi
           sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
       - name: Install dependencies
         run: |
@@ -509,7 +319,7 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          python -m pytest -m qt --cov --cov-append --cov-report= --tb=short
+          python -m pytest -m "qt and not perf" --cov --cov-append --cov-report= --tb=short
       - name: Render coverage reports
         run: |
           python -m coverage json -o coverage.json
@@ -563,9 +373,16 @@ jobs:
         with:
           python-version: "3.11"
       - uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
       - name: Install system dependencies
         run: |
-          sudo apt-get update
+          if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+            sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
+          else
+            # A runner image without the deb822 Ubuntu sources: plain update.
+            sudo apt-get update
+          fi
           sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
       - name: Install database test dependencies
         run: uv pip install --system -e ".[test-no-gui]"
@@ -574,11 +391,55 @@ jobs:
           FPDB_TEST_DATABASES: postgresql,mysql
         run: >-
           python -m pytest -q -p no:pytest-qt
-          test/test_database_backend_integration.py
-          test/test_hud_postgresql_integration.py
+          tests/test_database_backend_integration.py
+          tests/test_hud_postgresql_integration.py
+          tests/test_import_round_trips_postgres.py
+
+  release:
+    name: Draft the GitHub release
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      drafted: ${{ steps.draft.outputs.drafted }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Draft the release unless the tag already has one
+        id: draft
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$FPDB_RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "$FPDB_RELEASE_TAG already has a release; the builds attach to it."
+            echo "drafted=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          version="${FPDB_RELEASE_TAG#v}"
+          notes="docs/RELEASE_NOTES_${version}.md"
+          args=(--draft --verify-tag --title "FPDB ${version}")
+          if [[ -f "$notes" ]]; then
+            args+=(--notes-file "$notes")
+          else
+            echo "::warning::$notes not found; the release gets GitHub's generated notes"
+            args+=(--generate-notes)
+          fi
+          # v3.10.0-rc1 and the like are prereleases.
+          if [[ "$version" == *-* ]]; then
+            args+=(--prerelease)
+          fi
+          gh release create "$FPDB_RELEASE_TAG" "${args[@]}" --repo "$GITHUB_REPOSITORY"
+          echo "drafted=true" >> "$GITHUB_OUTPUT"
 
   build:
     name: Build with PyInstaller (${{ matrix.label }})
+    # Release artefacts only (#669). A branch push or a pull request runs the
+    # checks above; these builds run for a version tag, which attaches them
+    # to its release, or by hand from the Actions tab (workflow_dispatch).
+    # `release` is skipped on a branch, hence the explicit status check.
+    needs: release
+    if: ${{ !cancelled() && !failure() && (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch') }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -596,10 +457,17 @@ jobs:
         with:
           python-version: "3.11"
       - uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update
+          if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+            sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
+          else
+            # A runner image without the deb822 Ubuntu sources: plain update.
+            sudo apt-get update
+          fi
           sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
       - name: Install dependencies
         run: |
@@ -615,11 +483,11 @@ jobs:
           # distribution still exposes numpy's compiled sub-packages, and
           # "import numpy" then yields an empty namespace package.
           if [ "${{ runner.os }}" = "Windows" ]; then
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import comtypes --hidden-import comtypes.client --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/fpdb.pyw"
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import comtypes --hidden-import comtypes.client --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/HUD_main.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import comtypes --hidden-import comtypes.client --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/fpdb.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import comtypes --hidden-import comtypes.client --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/HUD_main.pyw"
           else
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/fpdb.pyw"
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/HUD_main.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/fpdb.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/HUD_main.pyw"
           fi
       - name: Bundle HUD inside fpdb
         run: python tools/bundle_pyinstaller_hud.py dist
@@ -638,16 +506,22 @@ jobs:
       # macOS is distributed only by build-pyoxidizer. Keep the runner guard as
       # defense in depth if a macOS entry is ever accidentally reintroduced.
       - name: Attach PyInstaller build to the release
-        if: github.event_name == 'release' && runner.os != 'macOS'
+        if: env.FPDB_RELEASE_TAG != '' && runner.os != 'macOS'
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ env.FPDB_RELEASE_TAG }}
           ASSET: ${{ matrix.artifact }}.tar.gz
         run: gh release upload "$RELEASE_TAG" "$ASSET" --clobber --repo "$GITHUB_REPOSITORY"
 
   build-pyoxidizer:
     name: Build with PyOxidizer (${{ matrix.label }})
+    # Release artefacts only (#669). A branch push or a pull request runs the
+    # checks above; these builds run for a version tag, which attaches them
+    # to its release, or by hand from the Actions tab (workflow_dispatch).
+    # `release` is skipped on a branch, hence the explicit status check.
+    needs: release
+    if: ${{ !cancelled() && !failure() && (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch') }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     # Needed by the release-asset upload step below; read-only elsewhere.
@@ -657,8 +531,8 @@ jobs:
     # emitted by `cargo init` since Rust 1.85.
     env:
       RUSTUP_TOOLCHAIN: "1.83.0"
-      # release/published covers both final releases and published prereleases
-      # (including RCs), so neither may fall back to an ad-hoc identity.
+      # A version tag covers both final releases and prereleases (including
+      # RCs), so neither may fall back to an ad-hoc identity once one is set.
       FPDB_MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY || '-' }}
       FPDB_REQUIRE_STABLE_MACOS_SIGNING: ${{ secrets.MACOS_SIGNING_IDENTITY != '' && '1' || '0' }}
     strategy:
@@ -695,7 +569,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate macOS release credentials
-        if: runner.os == 'macOS' && github.event_name == 'release'
+        if: runner.os == 'macOS' && env.FPDB_RELEASE_TAG != ''
         shell: bash
         env:
           MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
@@ -734,7 +608,7 @@ jobs:
           fi
           exit "$missing"
       - name: Import Developer ID certificate
-        if: runner.os == 'macOS' && github.event_name == 'release' && env.FPDB_REQUIRE_STABLE_MACOS_SIGNING == '1'
+        if: runner.os == 'macOS' && env.FPDB_RELEASE_TAG != '' && env.FPDB_REQUIRE_STABLE_MACOS_SIGNING == '1'
         uses: apple-actions/import-codesign-certs@7abe6dfe88f6bf6b1fa06e6a5704a2605d897418 # v7
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
@@ -763,13 +637,30 @@ jobs:
             pyoxidizer-${{ runner.os }}-${{ runner.arch }}-0.24.0-rust-1.83.0-
       - name: Install PyOxidizer
         shell: bash
+        env:
+          # The gh fallback below refuses to run in Actions without a token.
+          GH_TOKEN: ${{ github.token }}
         run: |
           pyoxidizer_asset="pyoxidizer-0.24.0-${{ matrix.pyoxidizer_host }}.${{ matrix.pyoxidizer_archive }}"
           pyoxidizer_archive="$RUNNER_TEMP/$pyoxidizer_asset"
           pyoxidizer_dir="$RUNNER_TEMP/pyoxidizer-0.24.0-${{ matrix.pyoxidizer_host }}"
-          curl --fail --location --retry 3 \
+          # GitHub release assets occasionally return a transient 5xx before
+          # the runner can reach them. Keep the build deterministic by retrying
+          # the download itself; the checksum below still guards the artifact.
+          if ! curl --fail --location --retry 10 --retry-all-errors --retry-delay 5 \
+            --connect-timeout 30 \
             --output "$pyoxidizer_archive" \
-            "https://github.com/indygreg/PyOxidizer/releases/download/pyoxidizer/0.24.0/$pyoxidizer_asset"
+            "https://github.com/indygreg/PyOxidizer/releases/download/pyoxidizer/0.24.0/$pyoxidizer_asset"; then
+            # Some runner/asset combinations return a persistent 504 from the
+            # browser-download endpoint. The CLI uses the release-assets API
+            # instead and keeps the same asset name and checksum contract.
+            echo "Direct PyOxidizer asset download failed; retrying through the GitHub release API."
+            gh release download "pyoxidizer/0.24.0" \
+              --repo indygreg/PyOxidizer \
+              --pattern "$pyoxidizer_asset" \
+              --output "$pyoxidizer_archive" \
+              --clobber
+          fi
           python -c "import hashlib, pathlib, sys; actual = hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest(); assert actual == sys.argv[2], actual" \
             "$pyoxidizer_archive" "${{ matrix.pyoxidizer_sha256 }}"
           if [[ "$pyoxidizer_archive" == *.zip ]]; then
@@ -853,7 +744,7 @@ jobs:
           # This module is intentionally absent from the pre-sign smoke list.
           dist/fpdb.app/Contents/MacOS/fpdb --run-module fpdb_3_legacy.winamax_ax_seats
           codesign --verify --deep --strict dist/fpdb.app
-          if [[ "${{ github.event_name }}" == "release" && "$FPDB_REQUIRE_STABLE_MACOS_SIGNING" == "1" ]]; then
+          if [[ -n "$FPDB_RELEASE_TAG" && "$FPDB_REQUIRE_STABLE_MACOS_SIGNING" == "1" ]]; then
             codesign -dv --verbose=4 dist/fpdb.app 2> "$RUNNER_TEMP/fpdb-signature.txt"
             codesign -dr - dist/fpdb.app 2> "$RUNNER_TEMP/fpdb-requirement.txt"
             codesign -d --entitlements :- dist/fpdb.app > "$RUNNER_TEMP/fpdb-entitlements.plist" 2>/dev/null
@@ -883,7 +774,7 @@ jobs:
             grep -q 'com.apple.security.automation.apple-events' "$RUNNER_TEMP/fpdb-entitlements.plist"
           fi
       - name: Notarize and staple PyOxidizer macOS release
-        if: runner.os == 'macOS' && github.event_name == 'release' && env.FPDB_REQUIRE_STABLE_MACOS_SIGNING == '1'
+        if: runner.os == 'macOS' && env.FPDB_RELEASE_TAG != '' && env.FPDB_REQUIRE_STABLE_MACOS_SIGNING == '1'
         shell: bash
         env:
           MACOS_NOTARY_API_KEY_P8_BASE64: ${{ secrets.MACOS_NOTARY_API_KEY_P8_BASE64 }}
@@ -908,7 +799,7 @@ jobs:
             verify_dir="$(mktemp -d "$RUNNER_TEMP/fpdb-pyoxidizer-artifact.XXXXXX")"
             tar -xzf "${{ matrix.artifact }}.tar.gz" -C "$verify_dir"
             codesign --verify --deep --strict --verbose=2 "$verify_dir/fpdb.app"
-            if [[ "${{ github.event_name }}" == "release" && "$FPDB_MACOS_SIGNING_IDENTITY" != "-" ]]; then
+            if [[ -n "$FPDB_RELEASE_TAG" && "$FPDB_MACOS_SIGNING_IDENTITY" != "-" ]]; then
               xcrun stapler validate "$verify_dir/fpdb.app"
               spctl --assess --type execute --verbose=4 "$verify_dir/fpdb.app"
             fi
@@ -921,13 +812,29 @@ jobs:
           name: ${{ matrix.artifact }}
           path: ${{ matrix.artifact }}.tar.gz
           compression-level: 0
-      # On a published release, the same tarball also becomes a downloadable
-      # release asset, so users do not need a GitHub account to fetch a build.
+      # On a version tag, the same tarball also becomes a downloadable release
+      # asset, so users do not need a GitHub account to fetch a build.
       - name: Attach PyOxidizer build to the release
-        if: github.event_name == 'release'
+        if: env.FPDB_RELEASE_TAG != ''
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ env.FPDB_RELEASE_TAG }}
           ASSET: ${{ matrix.artifact }}.tar.gz
         run: gh release upload "$RELEASE_TAG" "$ASSET" --clobber --repo "$GITHUB_REPOSITORY"
+
+  publish-release:
+    name: Publish the GitHub release
+    # Only a release this run drafted: one made by hand stays as its author
+    # left it. A failed build or test leaves the draft unpublished, with
+    # whatever archives did build, for a look before publishing by hand.
+    needs: [ release, build, build-pyoxidizer, quality, test ]
+    if: needs.release.outputs.drafted == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish the drafted release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "$FPDB_RELEASE_TAG" --draft=false --repo "$GITHUB_REPOSITORY"

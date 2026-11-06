@@ -1,0 +1,3533 @@
+{
+  "backend": "postgresql://fpdb:fpdb@127.0.0.1:5432/fpdb_bench",
+  "dataset_hands": 664,
+  "queries": {
+    "addActionBubbleFactorsTourneyIndex": {
+      "status": "skipped_ddl"
+    },
+    "addAofAnalysesDecisionIndex": {
+      "status": "skipped_ddl"
+    },
+    "addAofAnalysesStatusIndex": {
+      "status": "skipped_ddl"
+    },
+    "addAofDecisionsHandIndex": {
+      "status": "skipped_ddl"
+    },
+    "addAofDecisionsPlayerIndex": {
+      "status": "skipped_ddl"
+    },
+    "addAofDecisionsRangeIndex": {
+      "status": "skipped_ddl"
+    },
+    "addBoardFeaturesHandIndex": {
+      "status": "skipped_ddl"
+    },
+    "addBoardFeaturesTextureIndex": {
+      "status": "skipped_ddl"
+    },
+    "addBombPotColumn": {
+      "status": "skipped_ddl"
+    },
+    "addBombPotIndex": {
+      "status": "skipped_ddl"
+    },
+    "addCardsCacheCompundIndex": {
+      "status": "skipped_ddl"
+    },
+    "addEffStackIndex": {
+      "status": "skipped_ddl"
+    },
+    "addFilesIndex": {
+      "status": "skipped_ddl"
+    },
+    "addFinalPotIndex": {
+      "status": "skipped_ddl"
+    },
+    "addHandsIndex": {
+      "status": "skipped_ddl"
+    },
+    "addHandsPlayersSeat": {
+      "status": "skipped_ddl"
+    },
+    "addHeroSeat": {
+      "status": "skipped_ddl"
+    },
+    "addHudCacheCompundIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayerAutoNotesHandIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayerAutoNotesPlayerIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayerAutoNotesRuleIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayerHeroesIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayerNameIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayersIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPlayersSeat": {
+      "status": "skipped_ddl"
+    },
+    "addPositionIndex": {
+      "status": "skipped_ddl"
+    },
+    "addPositionsCacheCompundIndex": {
+      "status": "skipped_ddl"
+    },
+    "addSeatsIndex": {
+      "status": "skipped_ddl"
+    },
+    "addSessionsCacheCompundIndex": {
+      "status": "skipped_ddl"
+    },
+    "addSplashPotColumn": {
+      "status": "skipped_ddl"
+    },
+    "addSplashPotIndex": {
+      "status": "skipped_ddl"
+    },
+    "addStartCardsIndex": {
+      "status": "skipped_ddl"
+    },
+    "addStartCashIndex": {
+      "status": "skipped_ddl"
+    },
+    "addStreetIndex": {
+      "status": "skipped_ddl"
+    },
+    "addTPlayersIndex": {
+      "status": "skipped_ddl"
+    },
+    "addTableNameIndex": {
+      "status": "skipped_ddl"
+    },
+    "addTotalProfitIndex": {
+      "status": "skipped_ddl"
+    },
+    "addTourneyIndex": {
+      "status": "skipped_ddl"
+    },
+    "addTourneysCacheCompundIndex": {
+      "status": "skipped_ddl"
+    },
+    "addWinningsIndex": {
+      "status": "skipped_ddl"
+    },
+    "analyze": {
+      "status": "skipped_ddl"
+    },
+    "clearCardsCache": {
+      "error": "",
+      "plan": "Delete on cardscache  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on cardscache  (cost=0.00..0.00 rows=1 width=6)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0014436999917961657,
+        "mean": 0.000492619990836829,
+        "p50": 0.0002491999766789377,
+        "p95": 0.0012213599984534083,
+        "p99": 0.0013992319931276141
+      }
+    },
+    "clearCardsCacheTourneyType": {
+      "error": "",
+      "plan": "Delete on cardscache  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on cardscache  (cost=0.00..0.00 rows=1 width=6)\n        Filter: (tourneytypeid = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0004202999989502132,
+        "mean": 0.00031048000091686844,
+        "p50": 0.0003141000051982701,
+        "p95": 0.00040349999908357854,
+        "p99": 0.0004169399989768863
+      }
+    },
+    "clearCardsCacheWeeksMonths": {
+      "error": "",
+      "plan": "Delete on cardscache  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on cardscache  (cost=0.00..0.00 rows=1 width=6)\n        Filter: ((weekid = '1'::smallint) AND (monthid = '1'::smallint))",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00046280003152787685,
+        "mean": 0.00031320000998675824,
+        "p50": 0.00027900002896785736,
+        "p95": 0.00043338002869859333,
+        "p99": 0.00045691603096202014
+      }
+    },
+    "clearHudCache": {
+      "error": "",
+      "plan": "Delete on hudcache  (cost=0.00..478.68 rows=0 width=0)\n  ->  Seq Scan on hudcache  (cost=0.00..478.68 rows=2268 width=6)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.006049700023140758,
+        "mean": 0.0028148600016720594,
+        "p50": 0.0019619999802671373,
+        "p95": 0.005288200022187084,
+        "p99": 0.0058974000229500235
+      }
+    },
+    "clearHudCacheTourneyType": {
+      "error": "",
+      "plan": "Delete on hudcache  (cost=0.28..10.45 rows=0 width=0)\n  ->  Index Scan using hudcache_tourneytypeid_idx on hudcache  (cost=0.28..10.45 rows=10 width=6)\n        Index Cond: (tourneytypeid = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.000548299984075129,
+        "mean": 0.0004155599977821112,
+        "p50": 0.00040819996502250433,
+        "p95": 0.0005265999934636056,
+        "p99": 0.0005439599859528243
+      }
+    },
+    "clearMonths": {
+      "error": "l'argument de WHERE doit \u00eatre de type boolean, et non du type integer\nLINE 1: DELETE FROM Months WHERE 1\n                                 ^",
+      "plan": "<explain failed: l'argument de WHERE doit \u00eatre de type boolean, et non du type integer\nLINE 1: EXPLAIN DELETE FROM Months WHERE 1\n                                         ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "clearPositionsCache": {
+      "error": "",
+      "plan": "Delete on positionscache  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on positionscache  (cost=0.00..0.00 rows=1 width=6)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0015211999998427927,
+        "mean": 0.00045929999323561787,
+        "p50": 0.00019120000069960952,
+        "p95": 0.0012585999909788368,
+        "p99": 0.0014686799980700017
+      }
+    },
+    "clearPositionsCacheTourneyType": {
+      "error": "syntaxe en entr\u00e9e invalide pour le type integer : \u00ab B \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $1 = '...'",
+      "plan": "<explain failed: syntaxe en entr\u00e9e invalide pour le type integer : \u00ab B \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $1 = '...'>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "clearPositionsCacheWeeksMonths": {
+      "error": "syntaxe en entr\u00e9e invalide pour le type integer : \u00ab B \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $1 = '...'",
+      "plan": "<explain failed: syntaxe en entr\u00e9e invalide pour le type integer : \u00ab B \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $1 = '...'>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "clearSessions": {
+      "error": "l'argument de WHERE doit \u00eatre de type boolean, et non du type integer\nLINE 1: DELETE FROM Sessions WHERE 1\n                                   ^",
+      "plan": "<explain failed: l'argument de WHERE doit \u00eatre de type boolean, et non du type integer\nLINE 1: EXPLAIN DELETE FROM Sessions WHERE 1\n                                           ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "clearSessionsCache": {
+      "error": "l'argument de WHERE doit \u00eatre de type boolean, et non du type integer\nLINE 1: DELETE FROM SessionsCache WHERE 1\n                                        ^",
+      "plan": "<explain failed: l'argument de WHERE doit \u00eatre de type boolean, et non du type integer\nLINE 1: EXPLAIN DELETE FROM SessionsCache WHERE 1\n                                                ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "clearTourneysCache": {
+      "error": "l'argument de WHERE doit \u00eatre de type boolean, et non du type integer\nLINE 1: DELETE FROM TourneysCache WHERE 1\n                                        ^",
+      "plan": "<explain failed: l'argument de WHERE doit \u00eatre de type boolean, et non du type integer\nLINE 1: EXPLAIN DELETE FROM TourneysCache WHERE 1\n                                                ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "clearWeeks": {
+      "error": "l'argument de WHERE doit \u00eatre de type boolean, et non du type integer\nLINE 1: DELETE FROM Weeks WHERE 1\n                                ^",
+      "plan": "<explain failed: l'argument de WHERE doit \u00eatre de type boolean, et non du type integer\nLINE 1: EXPLAIN DELETE FROM Weeks WHERE 1\n                                        ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "clear_M_S": {
+      "error": "",
+      "plan": "Update on sessions  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on sessions  (cost=0.00..0.00 rows=1 width=10)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.002517600019928068,
+        "mean": 0.0007284399936906994,
+        "p50": 0.0003285999991931021,
+        "p95": 0.002084180014207959,
+        "p99": 0.002430916018784046
+      }
+    },
+    "clear_S_H": {
+      "error": "",
+      "plan": "Update on hands  (cost=0.00..140.94 rows=0 width=0)\n  ->  Seq Scan on hands  (cost=0.00..140.94 rows=3794 width=10)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.029597199987620115,
+        "mean": 0.027285039995331318,
+        "p50": 0.02691909996792674,
+        "p95": 0.029084659996442497,
+        "p99": 0.02949469198938459
+      }
+    },
+    "clear_S_SC": {
+      "error": "",
+      "plan": "Update on sessionscache  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on sessionscache  (cost=0.00..0.00 rows=1 width=10)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0028531000134535134,
+        "mean": 0.0007468400057405233,
+        "p50": 0.00020629999926313758,
+        "p95": 0.0023360600112937386,
+        "p99": 0.0027496920130215584
+      }
+    },
+    "clear_S_T": {
+      "error": "",
+      "plan": "Update on tourneys  (cost=0.00..1.01 rows=0 width=0)\n  ->  Seq Scan on tourneys  (cost=0.00..1.01 rows=1 width=10)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.000430900021456182,
+        "mean": 0.0003188400063663721,
+        "p50": 0.0002970999921672046,
+        "p95": 0.0004063400207087398,
+        "p99": 0.0004259880213066935
+      }
+    },
+    "clear_S_TC": {
+      "error": "",
+      "plan": "Update on tourneyscache  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on tourneyscache  (cost=0.00..0.00 rows=1 width=10)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.003285100043285638,
+        "mean": 0.0008307000272907317,
+        "p50": 0.0002080000122077763,
+        "p95": 0.0026792600401677183,
+        "p99": 0.003163932042662054
+      }
+    },
+    "clear_W_S": {
+      "error": "",
+      "plan": "Update on sessions  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on sessions  (cost=0.00..0.00 rows=1 width=10)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0003040999872609973,
+        "mean": 0.00021785999415442349,
+        "p50": 0.0001900999923236668,
+        "p95": 0.00028643999248743055,
+        "p99": 0.000300567988306284
+      }
+    },
+    "countTourneyPlayerKoWinnings": {
+      "error": "",
+      "plan": "Aggregate  (cost=1.15..1.16 rows=1 width=8) (actual rows=1.00 loops=1)\n  Buffers: shared hit=1\n  ->  Seq Scan on tourneysplayers  (cost=0.00..1.15 rows=1 width=0) (actual rows=0.00 loops=1)\n        Filter: ((kowinnings IS NOT NULL) AND (tourneyid = 71487580) AND (playerid = '390'::smallint))\n        Rows Removed by Filter: 10\n        Buffers: shared hit=1\nPlanning Time: 0.041 ms\nExecution Time: 0.017 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0024953000247478485,
+        "mean": 0.0007237399811856448,
+        "p50": 0.0002826999989338219,
+        "p95": 0.0020580400130711493,
+        "p99": 0.0024078480224125087
+      }
+    },
+    "count_player_auto_notes": {
+      "error": "",
+      "plan": "Aggregate  (cost=1.31..1.32 rows=1 width=8) (actual rows=1.00 loops=1)\n  Buffers: shared hit=1\n  ->  Seq Scan on playerautonotes  (cost=0.00..1.31 rows=1 width=0) (actual rows=1.00 loops=1)\n        Filter: (playerid = '390'::smallint)\n        Rows Removed by Filter: 24\n        Buffers: shared hit=1\nPlanning Time: 0.040 ms\nExecution Time: 0.017 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0027219000039622188,
+        "mean": 0.0007510400027967989,
+        "p50": 0.0002531000063754618,
+        "p95": 0.0022336599999107417,
+        "p99": 0.0026242520031519233
+      }
+    },
+    "createActionBubbleFactorsTable": {
+      "status": "skipped_ddl"
+    },
+    "createActionsTable": {
+      "status": "skipped_ddl"
+    },
+    "createAofDecisionAnalysesTable": {
+      "status": "skipped_ddl"
+    },
+    "createAofDecisionsTable": {
+      "status": "skipped_ddl"
+    },
+    "createAutoratesTable": {
+      "status": "skipped_ddl"
+    },
+    "createBackingsTable": {
+      "status": "skipped_ddl"
+    },
+    "createBoardFeaturesTable": {
+      "status": "skipped_ddl"
+    },
+    "createBoardsTable": {
+      "status": "skipped_ddl"
+    },
+    "createCardsCacheTable": {
+      "status": "skipped_ddl"
+    },
+    "createFilesTable": {
+      "status": "skipped_ddl"
+    },
+    "createGametypesTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandStatesTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsActionsTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsCashoutTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsPlayersTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsPotsTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsShowdownTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsSituationsTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsStoveTable": {
+      "status": "skipped_ddl"
+    },
+    "createHandsTable": {
+      "status": "skipped_ddl"
+    },
+    "createHudCacheTable": {
+      "status": "skipped_ddl"
+    },
+    "createMonthsTable": {
+      "status": "skipped_ddl"
+    },
+    "createPlayerAutoNotesTable": {
+      "status": "skipped_ddl"
+    },
+    "createPlayersTable": {
+      "status": "skipped_ddl"
+    },
+    "createPositionsCacheTable": {
+      "status": "skipped_ddl"
+    },
+    "createRankTable": {
+      "status": "skipped_ddl"
+    },
+    "createRawHands": {
+      "status": "skipped_ddl"
+    },
+    "createRawTourneys": {
+      "status": "skipped_ddl"
+    },
+    "createSessionsCacheTable": {
+      "status": "skipped_ddl"
+    },
+    "createSessionsTable": {
+      "status": "skipped_ddl"
+    },
+    "createSettingsTable": {
+      "status": "skipped_ddl"
+    },
+    "createSitesTable": {
+      "status": "skipped_ddl"
+    },
+    "createStartCardsTable": {
+      "status": "skipped_ddl"
+    },
+    "createTourneyPayoutsTable": {
+      "status": "skipped_ddl"
+    },
+    "createTourneyTypesTable": {
+      "status": "skipped_ddl"
+    },
+    "createTourneysCacheTable": {
+      "status": "skipped_ddl"
+    },
+    "createTourneysPlayersTable": {
+      "status": "skipped_ddl"
+    },
+    "createTourneysTable": {
+      "status": "skipped_ddl"
+    },
+    "createWeeksTable": {
+      "status": "skipped_ddl"
+    },
+    "deleteActionBubbleFactors": {
+      "error": "",
+      "plan": "Delete on actionbubblefactors  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on actionbubblefactors  (cost=0.00..0.00 rows=1 width=6)\n        Filter: (tourneyid = 71487580)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0029728999943472445,
+        "mean": 0.0008670199895277619,
+        "p50": 0.0003394000232219696,
+        "p95": 0.0024643199867568906,
+        "p99": 0.0028711839928291737
+      }
+    },
+    "deleteMonthId": {
+      "error": "",
+      "plan": "Delete on months  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on months  (cost=0.00..0.00 rows=1 width=6)\n        Filter: (id = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0011175000108778477,
+        "mean": 0.00039708000840619204,
+        "p50": 0.0002133999951183796,
+        "p95": 0.0009403200121596455,
+        "p99": 0.0010820640111342073
+      }
+    },
+    "deleteTourneyPayouts": {
+      "error": "",
+      "plan": "Delete on tourneypayouts  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on tourneypayouts  (cost=0.00..0.00 rows=1 width=6)\n        Filter: (tourneyid = 71487580)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0013207999872975051,
+        "mean": 0.0004395200056023896,
+        "p50": 0.00021619995823130012,
+        "p95": 0.0011029199929907918,
+        "p99": 0.0012772239884361624
+      }
+    },
+    "deleteTourneyTypeId": {
+      "error": "UPDATE ou DELETE sur la table \u00ab tourneytypes \u00bb viole la contrainte de cl\u00e9 \u00e9trang\u00e8re \u00ab tourneys_tourneytypeid_fkey \u00bb de la table \u00ab tourneys \u00bb\nDETAIL:  La cl\u00e9 (id)=(1) est toujours r\u00e9f\u00e9renc\u00e9e \u00e0 partir d",
+      "plan": "Delete on tourneytypes  (cost=0.00..1.01 rows=0 width=0)\n  ->  Seq Scan on tourneytypes  (cost=0.00..1.01 rows=1 width=6)\n        Filter: (id = '1'::smallint)",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "deleteWeekId": {
+      "error": "",
+      "plan": "Delete on weeks  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on weeks  (cost=0.00..0.00 rows=1 width=6)\n        Filter: (id = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0008912000339478254,
+        "mean": 0.00043107999954372644,
+        "p50": 0.0003519000019878149,
+        "p95": 0.000807840027846396,
+        "p99": 0.0008745280327275396
+      }
+    },
+    "delete_S": {
+      "error": "",
+      "plan": "Delete on sessions  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on sessions  (cost=0.00..0.00 rows=1 width=6)\n        Filter: (id = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005603000172413886,
+        "mean": 0.0003682199981994927,
+        "p50": 0.00033930002246052027,
+        "p95": 0.0005283800070174038,
+        "p99": 0.0005539160151965916
+      }
+    },
+    "delete_SC": {
+      "error": "",
+      "plan": "Delete on sessionscache  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on sessionscache  (cost=0.00..0.00 rows=1 width=6)\n        Filter: (id = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0004078000201843679,
+        "mean": 0.00031318000983446834,
+        "p50": 0.00026810000417754054,
+        "p95": 0.00040272001642733813,
+        "p99": 0.00040678401943296195
+      }
+    },
+    "drop_table": {
+      "status": "skipped_ddl"
+    },
+    "fetchNewCardsCacheTourneyTypeIds": {
+      "error": "",
+      "plan": "Nested Loop Anti Join  (cost=0.00..1.02 rows=1 width=4) (actual rows=1.00 loops=1)\n  Join Filter: (tt.id = cc.tourneytypeid)\n  Buffers: shared hit=1\n  ->  Seq Scan on tourneytypes tt  (cost=0.00..1.01 rows=1 width=4) (actual rows=1.00 loops=1)\n        Buffers: shared hit=1\n  ->  Seq Scan on cardscache cc  (cost=0.00..0.00 rows=1 width=4) (actual rows=0.00 loops=1)\nPlanning:\n  Buffers: shared hit=2\nPlanning Time: 0.078 ms\nExecution Time: 0.031 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00047389999963343143,
+        "mean": 0.00033131998497992754,
+        "p50": 0.0002953999792225659,
+        "p95": 0.0004399799974635243,
+        "p99": 0.00046711599919945
+      }
+    },
+    "fetchNewCardsCacheWeeksMonths": {
+      "error": "",
+      "plan": "Nested Loop Left Join  (cost=0.01..0.03 rows=1 width=8)\n  Join Filter: ((sessions.weekid = cc.weekid) AND (sessions.monthid = cc.monthid))\n  Filter: ((cc.weekid IS NULL) OR (cc.monthid IS NULL))\n  ->  HashAggregate  (cost=0.01..0.01 rows=1 width=8)\n        Group Key: sessions.weekid, sessions.monthid\n        ->  Seq Scan on sessions  (cost=0.00..0.00 rows=1 width=8)\n  ->  Seq Scan on cardscache cc  (cost=0.00..0.00 rows=1 width=8)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00043809995986521244,
+        "mean": 0.0003624999895691872,
+        "p50": 0.0003377000102773309,
+        "p95": 0.00042603997280821204,
+        "p99": 0.00043568796245381237
+      }
+    },
+    "fetchNewHudCacheTourneyTypeIds": {
+      "error": "",
+      "plan": "Nested Loop Anti Join  (cost=0.28..2.98 rows=1 width=4)\n  ->  Seq Scan on tourneytypes tt  (cost=0.00..1.01 rows=1 width=4)\n  ->  Index Only Scan using hudcache_tourneytypeid_idx on hudcache hc  (cost=0.28..9.45 rows=10 width=4)\n        Index Cond: (tourneytypeid = tt.id)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.000492700026370585,
+        "mean": 0.00042590000666677954,
+        "p50": 0.0004275999963283539,
+        "p95": 0.00048202002653852105,
+        "p99": 0.0004905640264041722
+      }
+    },
+    "fetchNewPositionsCacheTourneyTypeIds": {
+      "error": "",
+      "plan": "Nested Loop Anti Join  (cost=0.00..1.02 rows=1 width=4) (actual rows=1.00 loops=1)\n  Join Filter: (tt.id = pc.tourneytypeid)\n  Buffers: shared hit=1\n  ->  Seq Scan on tourneytypes tt  (cost=0.00..1.01 rows=1 width=4) (actual rows=1.00 loops=1)\n        Buffers: shared hit=1\n  ->  Seq Scan on positionscache pc  (cost=0.00..0.00 rows=1 width=4) (actual rows=0.00 loops=1)\nPlanning:\n  Buffers: shared hit=2\nPlanning Time: 0.077 ms\nExecution Time: 0.027 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0006158999749459326,
+        "mean": 0.00044344000052660705,
+        "p50": 0.0003829000052064657,
+        "p95": 0.0006014399812556804,
+        "p99": 0.0006130079762078822
+      }
+    },
+    "fetchNewPositionsCacheWeeksMonths": {
+      "error": "",
+      "plan": "Nested Loop Left Join  (cost=0.01..0.03 rows=1 width=8)\n  Join Filter: ((sessions.weekid = pc.weekid) AND (sessions.monthid = pc.monthid))\n  Filter: ((pc.weekid IS NULL) OR (pc.monthid IS NULL))\n  ->  HashAggregate  (cost=0.01..0.01 rows=1 width=8)\n        Group Key: sessions.weekid, sessions.monthid\n        ->  Seq Scan on sessions  (cost=0.00..0.00 rows=1 width=8)\n  ->  Seq Scan on positionscache pc  (cost=0.00..0.00 rows=1 width=8)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0006434000097215176,
+        "mean": 0.000518259999807924,
+        "p50": 0.0004697999684140086,
+        "p95": 0.0006339400075376034,
+        "p99": 0.0006415080092847347
+      }
+    },
+    "find_aof_decision": {
+      "error": "",
+      "plan": "Seq Scan on aofdecisions  (cost=0.00..0.00 rows=1 width=8)\n  Filter: ((handid = '663'::smallint) AND (playerid = '663'::smallint) AND (classifierversion = '390'::smallint))",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0034814999671652913,
+        "mean": 0.0009480000007897615,
+        "p50": 0.00027050002245232463,
+        "p95": 0.002881739975418895,
+        "p99": 0.003361547968816012
+      }
+    },
+    "find_aof_decision_analysis": {
+      "error": "l'op\u00e9rateur n'existe pas : character varying = smallint\nLINE 2:             where decisionId=$1 and backend=$2 and backendVe...\n                                                   ^\nHINT:  Aucun op\u00e9rat",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : character varying = smallint\nLINE 2:             where decisionId=$1 and backend=$2 and backendVe...\n                                                   ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "find_player_auto_note": {
+      "error": "l'op\u00e9rateur n'existe pas : character varying = smallint\nLINE 3: ...        where playerId=$1 and handId=$2 and ruleId=$3 and ru...\n                                                             ^\nHINT: ",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : character varying = smallint\nLINE 3: ...        where playerId=$1 and handId=$2 and ruleId=$3 and ru...\n                                                             ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getAutorates": {
+      "error": "",
+      "plan": "Seq Scan on autorates  (cost=0.00..0.00 rows=1 width=182)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0011107000173069537,
+        "mean": 0.00038445999380201103,
+        "p50": 0.00020150002092123032,
+        "p95": 0.0009323000092990695,
+        "p99": 0.0010750200157053768
+      }
+    },
+    "getBackings": {
+      "error": "",
+      "plan": "Seq Scan on backings  (cost=0.00..0.00 rows=1 width=32)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0027013999642804265,
+        "mean": 0.0007059199851937592,
+        "p50": 0.0001998000079765916,
+        "p95": 0.0022090799640864128,
+        "p99": 0.002602935964241624
+      }
+    },
+    "getCashLimits": {
+      "error": "",
+      "plan": "Sort  (cost=6.81..6.87 rows=26 width=16) (actual rows=53.00 loops=1)\n  Sort Key: limittype DESC, bigblind DESC\n  Sort Method: quicksort  Memory: 26kB\n  Buffers: shared hit=3\n  ->  HashAggregate  (cost=5.93..6.19 rows=26 width=16) (actual rows=53.00 loops=1)\n        Group Key: limittype, bigblind\n        Batches: 1  Memory Usage: 32kB\n        Buffers: shared hit=3\n        ->  Seq Scan on gametypes gt  (cost=0.00..5.10 rows=167 width=16) (actual rows=167.00 loops=1)\n              Filter: (type = 'ring'::bpchar)\n              Rows Removed by Filter: 1\n              Buffers: shared hit=3\nPlanning Time: 0.037 ms\nExecution Time: 0.121 ms",
+      "rows": 53,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.002259800035972148,
+        "mean": 0.0007900600088760257,
+        "p50": 0.00045009999303147197,
+        "p95": 0.001901200029533356,
+        "p99": 0.00218808003468439
+      }
+    },
+    "getCategoryBySiteAndPlayer": {
+      "error": "",
+      "plan": "Unique  (cost=12.98..12.98 rows=1 width=7)\n  ->  Sort  (cost=12.98..12.98 rows=1 width=7)\n        Sort Key: tt.category\n        ->  Nested Loop  (cost=5.54..12.97 rows=1 width=7)\n              Join Filter: (tt.id = t.tourneytypeid)\n              ->  Nested Loop  (cost=5.54..11.94 rows=1 width=4)\n                    Join Filter: (t.id = tp.tourneyid)\n                    ->  Hash Join  (cost=5.54..10.92 rows=1 width=4)\n                          Hash Cond: (p.id = tp.playerid)\n                          ->  Bitmap Heap Scan on players p  (cost=4.32..9.66 rows=6 width=4)\n                                Recheck Cond: ((name)::text = 'Player1'::text)\n                                ->  Bitmap Index Scan on index_playername  (cost=0.00..4.32 rows=6 width=0)\n                                      Index Cond: ((name)::text = 'Player1'::text)\n                          ->  Hash  (cost=1.10..1.10 rows=10 width=8)\n                                ->  Seq Scan on tourneysplayers tp  (cost=0.00..1.10 rows=10 width=8)\n                    ->  Seq Scan on tourneys t  (cost=0.00..1.01 rows=1 width=8)\n              ->  Seq Scan on tourneytypes tt  (cost=0.00..1.01 rows=1 width=11)\n                    Filter: (siteid = '390'::smallint)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0010653000208549201,
+        "mean": 0.0007543799933046102,
+        "p50": 0.0006883000023663044,
+        "p95": 0.0009953800123184918,
+        "p99": 0.0010513160191476345
+      }
+    },
+    "getCategoryBySiteAndPlayerRing": {
+      "error": "",
+      "plan": "Unique  (cost=36.58..36.59 rows=1 width=7)\n  ->  Sort  (cost=36.58..36.58 rows=1 width=7)\n        Sort Key: gt.category\n        ->  Nested Loop  (cost=0.83..36.57 rows=1 width=7)\n              ->  Nested Loop  (cost=0.56..29.61 rows=23 width=11)\n                    ->  Nested Loop  (cost=0.28..15.30 rows=23 width=15)\n                          ->  Seq Scan on gametypes gt  (cost=0.00..5.52 rows=1 width=11)\n                                Filter: ((siteid = '390'::smallint) AND (type = 'ring'::bpchar))\n                          ->  Index Scan using hands_gametypeid_idx on hands h  (cost=0.28..9.74 rows=4 width=12)\n                                Index Cond: (gametypeid = gt.id)\n                    ->  Index Only Scan using handsplayers_hand_player_idx on handsplayers hp  (cost=0.28..0.56 rows=6 width=12)\n                          Index Cond: (handid = h.id)\n              ->  Index Scan using players_pkey on players p  (cost=0.27..0.30 rows=1 width=4)\n                    Index Cond: (id = hp.playerid)\n                    Filter: ((name)::text = 'Player1'::text)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0016389000229537487,
+        "mean": 0.0015734999906271696,
+        "p50": 0.0015784999704919755,
+        "p95": 0.0016373800113797187,
+        "p99": 0.0016385960206389428
+      }
+    },
+    "getCurrencies": {
+      "error": "",
+      "plan": "Sort  (cost=5.21..5.22 rows=5 width=4) (actual rows=5.00 loops=1)\n  Sort Key: currency\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=3\n  ->  HashAggregate  (cost=5.10..5.15 rows=5 width=4) (actual rows=5.00 loops=1)\n        Group Key: currency\n        Batches: 1  Memory Usage: 32kB\n        Buffers: shared hit=3\n        ->  Seq Scan on gametypes  (cost=0.00..4.68 rows=168 width=4) (actual rows=168.00 loops=1)\n              Buffers: shared hit=3\nPlanning Time: 0.027 ms\nExecution Time: 0.056 ms",
+      "rows": 5,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00032409996492788196,
+        "mean": 0.00026576000964269043,
+        "p50": 0.00025100004859268665,
+        "p95": 0.00031017997534945604,
+        "p99": 0.0003213159670121968
+      }
+    },
+    "getCurrencyBySiteAndPlayer": {
+      "error": "",
+      "plan": "Unique  (cost=36.16..36.17 rows=1 width=4)\n  ->  Sort  (cost=36.16..36.16 rows=1 width=4)\n        Sort Key: gt.currency\n        ->  Nested Loop  (cost=0.83..36.15 rows=1 width=4)\n              ->  Nested Loop  (cost=0.56..29.19 rows=23 width=8)\n                    ->  Nested Loop  (cost=0.28..14.88 rows=23 width=12)\n                          ->  Seq Scan on gametypes gt  (cost=0.00..5.10 rows=1 width=8)\n                                Filter: (siteid = '390'::smallint)\n                          ->  Index Scan using hands_gametypeid_idx on hands h  (cost=0.28..9.74 rows=4 width=12)\n                                Index Cond: (gametypeid = gt.id)\n                    ->  Index Only Scan using handsplayers_hand_player_idx on handsplayers hp  (cost=0.28..0.56 rows=6 width=12)\n                          Index Cond: (handid = h.id)\n              ->  Index Scan using players_pkey on players p  (cost=0.27..0.30 rows=1 width=4)\n                    Index Cond: (id = hp.playerid)\n                    Filter: ((name)::text = 'Player1'::text)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0014315999578684568,
+        "mean": 0.0012241199961863457,
+        "p50": 0.0011680999887175858,
+        "p95": 0.0013917599688284099,
+        "p99": 0.0014236319600604474
+      }
+    },
+    "getGames": {
+      "error": "",
+      "plan": "HashAggregate  (cost=5.10..5.29 rows=19 width=7) (actual rows=19.00 loops=1)\n  Group Key: category\n  Batches: 1  Memory Usage: 32kB\n  Buffers: shared hit=3\n  ->  Seq Scan on gametypes  (cost=0.00..4.68 rows=168 width=7) (actual rows=168.00 loops=1)\n        Buffers: shared hit=3\nPlanning Time: 0.026 ms\nExecution Time: 0.056 ms",
+      "rows": 19,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0004113999893888831,
+        "mean": 0.000283440004568547,
+        "p50": 0.0002531000063754618,
+        "p95": 0.00038025999674573535,
+        "p99": 0.00040517199086025356
+      }
+    },
+    "getGametypeFL": {
+      "error": "l'op\u00e9rateur n'existe pas : character = smallint\nLINE 4:                                        AND   type=$2\n                                                         ^\nHINT:  Aucun op\u00e9rateur ne corres",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : character = smallint\nLINE 4:                                        AND   type=$2\n                                                         ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getGametypeNL": {
+      "error": "l'op\u00e9rateur n'existe pas : character = smallint\nLINE 4:                                        AND   type=$2\n                                                         ^\nHINT:  Aucun op\u00e9rateur ne corres",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : character = smallint\nLINE 4:                                        AND   type=$2\n                                                         ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getGametypes": {
+      "error": "",
+      "plan": "Seq Scan on gametypes  (cost=0.00..4.68 rows=168 width=88) (actual rows=168.00 loops=1)\n  Buffers: shared hit=3\nPlanning Time: 0.024 ms\nExecution Time: 0.019 ms",
+      "rows": 168,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0007223000284284353,
+        "mean": 0.0006192600005306304,
+        "p50": 0.0005932999774813652,
+        "p95": 0.0007087000180035829,
+        "p99": 0.0007195800263434648
+      }
+    },
+    "getHandCount": {
+      "error": "",
+      "plan": "Aggregate  (cost=150.43..150.44 rows=1 width=8) (actual rows=1.00 loops=1)\n  Buffers: shared hit=103\n  ->  Seq Scan on hands  (cost=0.00..140.94 rows=3794 width=0) (actual rows=663.00 loops=1)\n        Buffers: shared hit=103\nPlanning Time: 0.059 ms\nExecution Time: 0.094 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005529000191017985,
+        "mean": 0.0003628400154411793,
+        "p50": 0.0003124999930150807,
+        "p95": 0.000507800024934113,
+        "p99": 0.0005438800202682614
+      }
+    },
+    "getHands": {
+      "error": "",
+      "plan": "Seq Scan on hands  (cost=0.00..140.94 rows=3794 width=207) (actual rows=663.00 loops=1)\n  Buffers: shared hit=103\nPlanning Time: 0.111 ms\nExecution Time: 0.168 ms",
+      "rows": 663,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.003926700039301068,
+        "mean": 0.0035253800102509557,
+        "p50": 0.0035032000159844756,
+        "p95": 0.003843640035483986,
+        "p99": 0.003910088038537651
+      }
+    },
+    "getHandsActions": {
+      "error": "",
+      "plan": "Seq Scan on handsactions  (cost=0.00..341.44 rows=9944 width=140) (actual rows=9944.00 loops=1)\n  Buffers: shared hit=242\nPlanning Time: 0.115 ms\nExecution Time: 0.639 ms",
+      "rows": 9944,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.04045400000177324,
+        "mean": 0.036536680010613054,
+        "p50": 0.035196300013922155,
+        "p95": 0.03978478000499308,
+        "p99": 0.04032015600241721
+      }
+    },
+    "getHandsPlayers": {
+      "error": "",
+      "plan": "Seq Scan on handsplayers  (cost=0.00..418.69 rows=3769 width=837) (actual rows=3769.00 loops=1)\n  Buffers: shared hit=381\nPlanning Time: 0.245 ms\nExecution Time: 0.428 ms",
+      "rows": 3769,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.1037044000113383,
+        "mean": 0.1013712799991481,
+        "p50": 0.10140449996106327,
+        "p95": 0.10356332000810653,
+        "p99": 0.10367618401069195
+      }
+    },
+    "getHudCache": {
+      "error": "",
+      "plan": "Seq Scan on hudcache  (cost=0.00..478.68 rows=2268 width=1300) (actual rows=2268.00 loops=1)\n  Buffers: shared hit=456\nPlanning Time: 0.204 ms\nExecution Time: 0.485 ms",
+      "rows": 2268,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.08316259999992326,
+        "mean": 0.07312813999596983,
+        "p50": 0.0720378999831155,
+        "p95": 0.08156797999981791,
+        "p99": 0.0828436759999022
+      }
+    },
+    "getLimits": {
+      "error": "",
+      "plan": "Sort  (cost=5.97..6.04 rows=26 width=8) (actual rows=26.00 loops=1)\n  Sort Key: bigblind DESC\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=3\n  ->  HashAggregate  (cost=5.10..5.36 rows=26 width=8) (actual rows=26.00 loops=1)\n        Group Key: bigblind\n        Batches: 1  Memory Usage: 32kB\n        Buffers: shared hit=3\n        ->  Seq Scan on gametypes  (cost=0.00..4.68 rows=168 width=8) (actual rows=168.00 loops=1)\n              Buffers: shared hit=3\nPlanning Time: 0.028 ms\nExecution Time: 0.057 ms",
+      "rows": 26,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.003368199977558106,
+        "mean": 0.0009100400027818977,
+        "p50": 0.00025859999004751444,
+        "p95": 0.0027759399847127495,
+        "p99": 0.003249747978989035
+      }
+    },
+    "getLimits2": {
+      "error": "",
+      "plan": "Sort  (cost=6.81..6.88 rows=26 width=16) (actual rows=54.00 loops=1)\n  Sort Key: type, limittype DESC, bigblind DESC\n  Sort Method: quicksort  Memory: 26kB\n  Buffers: shared hit=3\n  ->  HashAggregate  (cost=5.94..6.20 rows=26 width=16) (actual rows=54.00 loops=1)\n        Group Key: type, limittype, bigblind\n        Batches: 1  Memory Usage: 32kB\n        Buffers: shared hit=3\n        ->  Seq Scan on gametypes  (cost=0.00..4.68 rows=168 width=16) (actual rows=168.00 loops=1)\n              Buffers: shared hit=3\nPlanning Time: 0.031 ms\nExecution Time: 0.136 ms",
+      "rows": 54,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00039080000715330243,
+        "mean": 0.0003690600045956671,
+        "p50": 0.0003651999868452549,
+        "p95": 0.0003866600105538964,
+        "p99": 0.0003899720078334212
+      }
+    },
+    "getLimits3": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab else \u00bb\nLINE 5: -                                                else buyin\n                                                         ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab else \u00bb\nLINE 5: -                                                else buyin\n                                                         ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getPlayerId": {
+      "error": "",
+      "plan": "Index Scan using name on players  (cost=0.27..8.29 rows=1 width=4) (actual rows=1.00 loops=1)\n  Index Cond: (((name)::text = 'Player1'::text) AND (siteid = '1'::smallint))\n  Index Searches: 1\n  Buffers: shared hit=3\nPlanning Time: 0.045 ms\nExecution Time: 0.012 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0003616000176407397,
+        "mean": 0.0002793999970890582,
+        "p50": 0.000262299960013479,
+        "p95": 0.00034258001251146196,
+        "p99": 0.0003577960166148841
+      }
+    },
+    "getPlayers": {
+      "error": "",
+      "plan": "Seq Scan on players  (cost=0.00..9.27 rows=427 width=106) (actual rows=427.00 loops=1)\n  Buffers: shared hit=5\nPlanning Time: 0.052 ms\nExecution Time: 0.054 ms",
+      "rows": 427,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0010863000061362982,
+        "mean": 0.0008228800143115222,
+        "p50": 0.0007721000001765788,
+        "p95": 0.0010379800107330082,
+        "p99": 0.0010766360070556403
+      }
+    },
+    "getPositionByPlayerAndHandid": {
+      "error": "l'op\u00e9rateur n'existe pas : character varying = smallint\nLINE 5:         WHERE p.name = $1 AND CAST(h.siteHandNo AS text) LIK...\n                             ^\nHINT:  Aucun op\u00e9rateur ne correspond au n",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : character varying = smallint\nLINE 5:         WHERE p.name = $1 AND CAST(h.siteHandNo AS text) LIK...\n                             ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getPositions": {
+      "error": "",
+      "plan": "Sort  (cost=428.41..428.44 rows=11 width=2) (actual rows=11.00 loops=1)\n  Sort Key: \"position\"\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=381\n  ->  HashAggregate  (cost=428.11..428.22 rows=11 width=2) (actual rows=11.00 loops=1)\n        Group Key: \"position\"\n        Batches: 1  Memory Usage: 32kB\n        Buffers: shared hit=381\n        ->  Seq Scan on handsplayers gt  (cost=0.00..418.69 rows=3769 width=2) (actual rows=3769.00 loops=1)\n              Buffers: shared hit=381\nPlanning Time: 0.083 ms\nExecution Time: 0.921 ms",
+      "rows": 11,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0016770000220276415,
+        "mean": 0.0013099799863994122,
+        "p50": 0.0011790000135079026,
+        "p95": 0.0016386400093324482,
+        "p99": 0.0016693280194886029
+      }
+    },
+    "getRawHands": {
+      "error": "",
+      "plan": "Seq Scan on rawhands  (cost=0.00..0.00 rows=1 width=49)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0015347999869845808,
+        "mean": 0.00048044000286608937,
+        "p50": 0.00020080001559108496,
+        "p95": 0.0012834799941629168,
+        "p99": 0.0014845359884202481
+      }
+    },
+    "getRawTourneys": {
+      "error": "",
+      "plan": "Seq Scan on rawtourneys  (cost=0.00..0.00 rows=1 width=49)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0021176000009290874,
+        "mean": 0.0006720599951222539,
+        "p50": 0.00033220002660527825,
+        "p95": 0.0017650399939157066,
+        "p99": 0.0020470879995264112
+      }
+    },
+    "getRingProfitAllHandsPlayerIdSite": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 7:         AND   tt.siteId in \n                ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 7:         AND   tt.siteId in \n                ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getRingProfitAllHandsPlayerIdSiteInBB": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 7:         AND   pl.siteId in \n                ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 7:         AND   pl.siteId in \n                ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getRingProfitAllHandsPlayerIdSiteInDollars": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 7:         AND   pl.siteId in \n                ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 7:         AND   pl.siteId in \n                ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getSettings": {
+      "error": "",
+      "plan": "Seq Scan on settings  (cost=0.00..1.01 rows=1 width=2) (actual rows=1.00 loops=1)\n  Buffers: shared hit=1\nPlanning Time: 0.012 ms\nExecution Time: 0.008 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00025510002160444856,
+        "mean": 0.00019716001115739347,
+        "p50": 0.00018319999799132347,
+        "p95": 0.0002409800188615918,
+        "p99": 0.0002522760210558772
+      }
+    },
+    "getSiteId": {
+      "error": "",
+      "plan": "Seq Scan on sites  (cost=0.00..2.62 rows=1 width=4)\n  Filter: ((name)::text = 'Player1'::text)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0002866999711841345,
+        "mean": 0.0002494199899956584,
+        "p50": 0.0002503999858163297,
+        "p95": 0.0002819599816575646,
+        "p99": 0.00028575197327882054
+      }
+    },
+    "getSiteTourneyNos": {
+      "error": "",
+      "plan": "Nested Loop  (cost=0.00..4.67 rows=1 width=8)\n  ->  Nested Loop  (cost=0.00..2.04 rows=1 width=12)\n        Join Filter: (t.tourneytypeid = tt.id)\n        ->  Seq Scan on tourneys t  (cost=0.00..1.01 rows=1 width=12)\n        ->  Seq Scan on tourneytypes tt  (cost=0.00..1.01 rows=1 width=8)\n              Filter: (siteid = '1'::smallint)\n  ->  Seq Scan on sites s  (cost=0.00..2.62 rows=1 width=4)\n        Filter: (id = '1'::smallint)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00048450002213940024,
+        "mean": 0.00041229999624192715,
+        "p50": 0.00039329996798187494,
+        "p95": 0.000474600016605109,
+        "p99": 0.00048252002103254204
+      }
+    },
+    "getSites": {
+      "error": "",
+      "plan": "Seq Scan on sites  (cost=0.00..2.30 rows=130 width=19) (actual rows=130.00 loops=1)\n  Buffers: shared hit=1\nPlanning Time: 0.017 ms\nExecution Time: 0.014 ms",
+      "rows": 130,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00044650002382695675,
+        "mean": 0.000303900009021163,
+        "p50": 0.00026220001745969057,
+        "p95": 0.00041808001697063446,
+        "p99": 0.00044081602245569227
+      }
+    },
+    "getTourneyByTourneyNo": {
+      "error": "",
+      "plan": "Nested Loop  (cost=0.00..2.04 rows=1 width=137)\n  Join Filter: (t.tourneytypeid = tt.id)\n  ->  Seq Scan on tourneys t  (cost=0.00..1.01 rows=1 width=137)\n        Filter: (sitetourneyno = '1'::smallint)\n  ->  Seq Scan on tourneytypes tt  (cost=0.00..1.01 rows=1 width=4)\n        Filter: (siteid = '1'::smallint)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0007408999954350293,
+        "mean": 0.0006020599976181984,
+        "p50": 0.0005797999911010265,
+        "p95": 0.0007226199959404767,
+        "p99": 0.0007372439955361188
+      }
+    },
+    "getTourneyCount": {
+      "error": "",
+      "plan": "Aggregate  (cost=1.01..1.02 rows=1 width=8) (actual rows=1.00 loops=1)\n  Buffers: shared hit=1\n  ->  Seq Scan on tourneys  (cost=0.00..1.01 rows=1 width=0) (actual rows=1.00 loops=1)\n        Buffers: shared hit=1\nPlanning Time: 0.031 ms\nExecution Time: 0.016 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00031889998354017735,
+        "mean": 0.00025048000970855354,
+        "p50": 0.00022909999825060368,
+        "p95": 0.00030763999093323945,
+        "p99": 0.00031664798501878977
+      }
+    },
+    "getTourneyInfo": {
+      "error": "syntaxe en entr\u00e9e invalide pour le type bigint : \u00ab Player1 \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $2 = '...'",
+      "plan": "<explain failed: syntaxe en entr\u00e9e invalide pour le type bigint : \u00ab Player1 \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $2 = '...'>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getTourneyNames": {
+      "error": "",
+      "plan": "Seq Scan on tourneys  (cost=0.00..1.01 rows=1 width=13) (actual rows=1.00 loops=1)\n  Buffers: shared hit=1\nPlanning Time: 0.029 ms\nExecution Time: 0.011 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00036589999217540026,
+        "mean": 0.00023460000520572066,
+        "p50": 0.00019779999274760485,
+        "p95": 0.0003363399999216199,
+        "p99": 0.00035998799372464416
+      }
+    },
+    "getTourneyPlayerInfo": {
+      "error": "syntaxe en entr\u00e9e invalide pour le type bigint : \u00ab Player1 \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $2 = '...'",
+      "plan": "<explain failed: syntaxe en entr\u00e9e invalide pour le type bigint : \u00ab Player1 \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $2 = '...'>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getTourneyTypeCount": {
+      "error": "",
+      "plan": "Aggregate  (cost=1.01..1.02 rows=1 width=8) (actual rows=1.00 loops=1)\n  Buffers: shared hit=1\n  ->  Seq Scan on tourneytypes  (cost=0.00..1.01 rows=1 width=0) (actual rows=1.00 loops=1)\n        Buffers: shared hit=1\nPlanning Time: 0.028 ms\nExecution Time: 0.017 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00023579999106004834,
+        "mean": 0.00022029998945072293,
+        "p50": 0.00021769996965304017,
+        "p95": 0.0002323799883015454,
+        "p99": 0.00023511599050834775
+      }
+    },
+    "getTourneyTypeId": {
+      "error": "l'op\u00e9rateur n'existe pas : character varying = smallint\nLINE 4:                                         AND currency=$2\n                                                            ^\nHINT:  Aucun op\u00e9ra",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : character varying = smallint\nLINE 4:                                         AND currency=$2\n                                                            ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "getTourneyTypeIdByTourneyNo": {
+      "error": "",
+      "plan": "Nested Loop  (cost=0.00..2.04 rows=1 width=130)\n  Join Filter: (tt.id = t.tourneytypeid)\n  ->  Seq Scan on tourneytypes tt  (cost=0.00..1.01 rows=1 width=130)\n        Filter: (siteid = '1'::smallint)\n  ->  Seq Scan on tourneys t  (cost=0.00..1.01 rows=1 width=4)\n        Filter: (sitetourneyno = 71487580)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0007224000291898847,
+        "mean": 0.0005086800083518028,
+        "p50": 0.000457199988886714,
+        "p95": 0.0006702600163407624,
+        "p99": 0.0007119720266200603
+      }
+    },
+    "getTourneyTypes": {
+      "error": "",
+      "plan": "Seq Scan on tourneytypes  (cost=0.00..1.01 rows=1 width=170) (actual rows=1.00 loops=1)\n  Buffers: shared hit=1\nPlanning Time: 0.045 ms\nExecution Time: 0.017 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.000694699992891401,
+        "mean": 0.0004072999930940568,
+        "p50": 0.0003182999789714813,
+        "p95": 0.0006602799869142473,
+        "p99": 0.0006878159916959703
+      }
+    },
+    "getTourneyTypesIds": {
+      "error": "",
+      "plan": "Seq Scan on tourneytypes  (cost=0.00..1.01 rows=1 width=4) (actual rows=1.00 loops=1)\n  Buffers: shared hit=1\nPlanning Time: 0.020 ms\nExecution Time: 0.009 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00033179996535182,
+        "mean": 0.00022597997449338436,
+        "p50": 0.00019609997980296612,
+        "p95": 0.00030777996871620414,
+        "p99": 0.0003269959660246968
+      }
+    },
+    "getTourneys": {
+      "error": "",
+      "plan": "Seq Scan on tourneys  (cost=0.00..1.01 rows=1 width=137) (actual rows=1.00 loops=1)\n  Buffers: shared hit=1\nPlanning Time: 0.026 ms\nExecution Time: 0.009 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0002413999754935503,
+        "mean": 0.00021913998061791063,
+        "p50": 0.00021269998978823423,
+        "p95": 0.00023741998011246322,
+        "p99": 0.00024060397641733288
+      }
+    },
+    "getTourneysPlayers": {
+      "error": "",
+      "plan": "Seq Scan on tourneysplayers  (cost=0.00..1.10 rows=10 width=140) (actual rows=10.00 loops=1)\n  Buffers: shared hit=1\nPlanning Time: 0.024 ms\nExecution Time: 0.010 ms",
+      "rows": 10,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00027820002287626266,
+        "mean": 0.0002269999939016998,
+        "p50": 0.00021319999359548092,
+        "p95": 0.00026642001466825604,
+        "p99": 0.0002758440212346613
+      }
+    },
+    "getTourneysPlayersByIds": {
+      "error": "",
+      "plan": "Seq Scan on tourneysplayers  (cost=0.00..1.18 rows=1 width=140)\n  Filter: ((tourneyid = 71487580) AND (playerid = '390'::smallint) AND (entryid = '390'::smallint))",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00031589996069669724,
+        "mean": 0.0002745599951595068,
+        "p50": 0.00026270002126693726,
+        "p95": 0.00030685997335240246,
+        "p99": 0.0003140919632278383
+      }
+    },
+    "getTourneysPlayersByTourney": {
+      "error": "",
+      "plan": "Seq Scan on tourneysplayers  (cost=0.00..1.12 rows=1 width=8)\n  Filter: (tourneyid = 71487580)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00025209999876096845,
+        "mean": 0.0002405600040219724,
+        "p50": 0.00023700000019744039,
+        "p95": 0.0002511200029402971,
+        "p99": 0.00025190399959683417
+      }
+    },
+    "get_actual_seat": {
+      "error": "plus d'une ligne renvoy\u00e9e par une sous-requ\u00eate utilis\u00e9e comme une expression",
+      "plan": "Index Scan using handsplayers_hand_player_idx on handsplayers  (cost=9.94..17.96 rows=1 width=2)\n  Index Cond: ((handid = '663'::smallint) AND (playerid = (InitPlan 1).col1))\n  InitPlan 1\n    ->  Bitmap Heap Scan on players  (cost=4.32..9.66 rows=6 width=4)\n          Recheck Cond: ((name)::text = 'Player1'::text)\n          ->  Bitmap Index Scan on index_playername  (cost=0.00..4.32 rows=6 width=0)\n                Index Cond: ((name)::text = 'Player1'::text)",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_aof_action_observations": {
+      "error": "l'op\u00e9rateur n'existe pas : character varying = smallint\nLINE 9:               and d.category=$3\n                                    ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'a",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : character varying = smallint\nLINE 9:               and d.category=$3\n                                    ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_aof_decision_scope": {
+      "error": "",
+      "plan": "Nested Loop  (cost=0.55..16.63 rows=1 width=12)\n  ->  Nested Loop  (cost=0.27..8.33 rows=1 width=12)\n        ->  Seq Scan on aofdecisions d  (cost=0.00..0.00 rows=1 width=12)\n              Filter: (id = '663'::smallint)\n        ->  Index Scan using players_pkey on players p  (cost=0.27..8.29 rows=1 width=8)\n              Index Cond: (id = d.playerid)\n  ->  Index Scan using heroseat_idx on hands h  (cost=0.28..8.30 rows=1 width=16)\n        Index Cond: (id = d.handid)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0008481999975629151,
+        "mean": 0.000697840005159378,
+        "p50": 0.0006846999749541283,
+        "p95": 0.0008474400034174323,
+        "p99": 0.0008480479987338186
+      }
+    },
+    "get_aof_profile_stats": {
+      "error": "l'op\u00e9rateur n'existe pas : character varying = smallint\nLINE 51:              and a.backend=$1\n                                   ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arg",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : character varying = smallint\nLINE 51:              and a.backend=$1\n                                   ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_aof_range_observations": {
+      "error": "l'op\u00e9rateur n'existe pas : character varying = smallint\nLINE 9:               and d.category=$3\n                                    ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'a",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : character varying = smallint\nLINE 9:               and d.category=$3\n                                    ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_auto_note_player_summary": {
+      "error": "syntaxe en entr\u00e9e invalide pour le type bigint : \u00ab Player1 \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $1 = '...'",
+      "plan": "<explain failed: syntaxe en entr\u00e9e invalide pour le type bigint : \u00ab Player1 \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $1 = '...'>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_auto_note_rule_summary": {
+      "error": "",
+      "plan": "Limit  (cost=14.55..14.56 rows=6 width=22) (actual rows=6.00 loops=1)\n  Buffers: shared hit=6\n  ->  Sort  (cost=14.55..14.56 rows=6 width=22) (actual rows=6.00 loops=1)\n        Sort Key: (count(*)) DESC, pan.ruleid\n        Sort Method: quicksort  Memory: 25kB\n        Buffers: shared hit=6\n        ->  HashAggregate  (cost=14.41..14.47 rows=6 width=22) (actual rows=6.00 loops=1)\n              Group Key: pan.ruleid\n              Batches: 1  Memory Usage: 32kB\n              Buffers: shared hit=6\n              ->  Hash Join  (cost=1.56..14.29 rows=25 width=14) (actual rows=25.00 loops=1)\n                    Hash Cond: (p.id = pan.playerid)\n                    Buffers: shared hit=6\n                    ->  Seq Scan on players p  (cost=0.00..9.27 rows=427 width=4) (actual rows=427.00 loops=1)\n                          Buffers: shared hit=5\n                    ->  Hash  (cost=1.25..1.25 rows=25 width=26) (actual rows=25.00 loops=1)\n                          Buckets: 1024  Batches: 1  Memory Usage: 10kB\n                          Buffers: shared hit=1\n                          ->  Seq Scan on playerautonotes pan  (cost=0.00..1.25 rows=25 width=26) (actual rows=25.00 loops=1)\n                                Buffers: shared hit=1\nPlanning:\n  Buffers: shared hit=7\nPlanning Time: 0.187 ms\nExecution Time: 0.095 ms",
+      "rows": 6,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0008860999951139092,
+        "mean": 0.0006180400028824806,
+        "p50": 0.0005446000141091645,
+        "p95": 0.000825079996138811,
+        "p99": 0.0008738959953188896
+      }
+    },
+    "get_cards": {
+      "error": "",
+      "plan": "Sort  (cost=22.21..22.22 rows=5 width=20) (actual rows=2.00 loops=1)\n  Sort Key: handsplayers.seatno\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=9\n  ->  Nested Loop  (cost=8.59..22.15 rows=5 width=20) (actual rows=2.00 loops=1)\n        Buffers: shared hit=9\n        ->  Hash Join  (cost=8.31..13.43 rows=1 width=13) (actual rows=1.00 loops=1)\n              Hash Cond: (gametypes.id = hands.gametypeid)\n              Buffers: shared hit=6\n              ->  Seq Scan on gametypes  (cost=0.00..4.68 rows=168 width=9) (actual rows=168.00 loops=1)\n                    Buffers: shared hit=3\n              ->  Hash  (cost=8.30..8.30 rows=1 width=12) (actual rows=1.00 loops=1)\n                    Buckets: 1024  Batches: 1  Memory Usage: 9kB\n                    Buffers: shared hit=3\n                    ->  Index Scan using heroseat_idx on hands  (cost=0.28..8.30 rows=1 width=12) (actual rows=1.00 loops=1)\n                          Index Cond: (id = '663'::smallint)\n                          Index Searches: 1\n                          Buffers: shared hit=3\n        ->  Index Scan using handsplayers_handid_idx on handsplayers  (cost=0.28..8.37 rows=5 width=50) (actual rows=2.00 loops=1)\n              Index Cond: (handid = '663'::smallint)\n              Index Searches: 1\n              Buffers: shared hit=3\nPlanning:\n  Buffers: shared hit=10\nPlanning Time: 0.315 ms\nExecution Time: 0.105 ms",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0016820000018924475,
+        "mean": 0.001159680017735809,
+        "p50": 0.0010832000407390296,
+        "p95": 0.0015846800059080123,
+        "p99": 0.0016625360026955604
+      }
+    },
+    "get_common_cards": {
+      "error": "",
+      "plan": "Index Scan using heroseat_idx on hands  (cost=0.28..8.30 rows=1 width=10) (actual rows=1.00 loops=1)\n  Index Cond: (id = '1'::smallint)\n  Index Searches: 1\n  Buffers: shared hit=5\nPlanning Time: 0.051 ms\nExecution Time: 0.014 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0004199999966658652,
+        "mean": 0.00029991999035701157,
+        "p50": 0.00027439999394118786,
+        "p95": 0.0003915199893526733,
+        "p99": 0.00041430399520322683
+      }
+    },
+    "get_date_nhands_ago": {
+      "error": "entr\u00e9e manquante de la clause FROM pour la table \u00ab h3 \u00bb\nLINE 1: select 'd' || to_char(max(h3.startTime), 'YYMMDD')\n                                  ^",
+      "plan": "<explain failed: entr\u00e9e manquante de la clause FROM pour la table \u00ab h3 \u00bb\nLINE 1: EXPLAIN select 'd' || to_char(max(h3.startTime), 'YYMMDD')\n                                          ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_first_date": {
+      "error": "",
+      "plan": "Result  (cost=0.39..0.40 rows=1 width=8) (actual rows=1.00 loops=1)\n  Buffers: shared hit=3\n  InitPlan 1\n    ->  Limit  (cost=0.28..0.39 rows=1 width=8) (actual rows=1.00 loops=1)\n          Buffers: shared hit=3\n          ->  Index Only Scan using hands_start_time_idx on hands  (cost=0.28..404.24 rows=3794 width=8) (actual rows=1.00 loops=1)\n                Heap Fetches: 1\n                Index Searches: 1\n                Buffers: shared hit=3\nPlanning Time: 0.090 ms\nExecution Time: 0.015 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0003586999955587089,
+        "mean": 0.0002981600002385676,
+        "p50": 0.0002826999989338219,
+        "p95": 0.00034521999768912794,
+        "p99": 0.0003560039959847927
+      }
+    },
+    "get_gameinfo_from_hid": {
+      "error": "",
+      "plan": "Limit  (cost=0.98..12.40 rows=1 width=171) (actual rows=1.00 loops=1)\n  Buffers: shared hit=14\n  ->  Nested Loop  (cost=0.98..58.08 rows=5 width=171) (actual rows=1.00 loops=1)\n        Buffers: shared hit=14\n        ->  Nested Loop  (cost=0.83..56.97 rows=5 width=67) (actual rows=1.00 loops=1)\n              Buffers: shared hit=12\n              ->  Nested Loop  (cost=0.56..23.50 rows=5 width=67) (actual rows=1.00 loops=1)\n                    Buffers: shared hit=9\n                    ->  Nested Loop  (cost=0.28..15.08 rows=1 width=71) (actual rows=1.00 loops=1)\n                          Join Filter: (h.gametypeid = g.id)\n                          Rows Removed by Join Filter: 167\n                          Buffers: shared hit=6\n                          ->  Index Scan using heroseat_idx on hands h  (cost=0.28..8.30 rows=1 width=12) (actual rows=1.00 loops=1)\n                                Index Cond: (id = '663'::smallint)\n                                Index Searches: 1\n                                Buffers: shared hit=3\n                          ->  Seq Scan on gametypes g  (cost=0.00..4.68 rows=168 width=63) (actual rows=168.00 loops=1)\n                                Buffers: shared hit=3\n                    ->  Index Scan using handsplayers_handid_idx on handsplayers hp  (cost=0.28..8.37 rows=5 width=12) (actual rows=1.00 loops=1)\n                          Index Cond: (handid = '663'::smallint)\n                          Index Searches: 1\n                          Buffers: shared hit=3\n              ->  Index Scan using players_pkey on players p  (cost=0.27..6.69 rows=1 width=8) (actual rows=1.00 loops=1)\n                    Index Cond: (id = hp.playerid)\n                    Index Searches: 1\n                    Buffers: shared hit=3\n        ->  Index Scan using sites_pkey on sites s  (cost=0.14..0.19 rows=1 width=16) (actual rows=1.00 loops=1)\n              Index Cond: (id = p.siteid)\n              Index Searches: 1\n              Buffers: shared hit=2\nPlanning:\n  Buffers: shared hit=25\nPlanning Time: 0.746 ms\nExecution Time: 0.135 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0015906000044196844,
+        "mean": 0.0014082000125199556,
+        "p50": 0.0014136000536382198,
+        "p95": 0.0015604399959556758,
+        "p99": 0.0015845680027268827
+      }
+    },
+    "get_hand_1day_ago": {
+      "error": "",
+      "plan": "Result  (cost=0.34..0.35 rows=1 width=8) (actual rows=1.00 loops=1)\n  Buffers: shared hit=3\n  InitPlan 1\n    ->  Limit  (cost=0.28..0.34 rows=1 width=8) (actual rows=1.00 loops=1)\n          Buffers: shared hit=3\n          ->  Index Scan Backward using hands_pkey on hands  (cost=0.28..233.13 rows=3794 width=8) (actual rows=1.00 loops=1)\n                Filter: (starttime < ((now() AT TIME ZONE 'UTC'::text) - '1 day'::interval))\n                Index Searches: 1\n                Buffers: shared hit=3\nPlanning:\n  Buffers: shared hit=6\nPlanning Time: 0.166 ms\nExecution Time: 0.015 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.000631399976555258,
+        "mean": 0.0005913199856877327,
+        "p50": 0.0006007000338286161,
+        "p95": 0.0006275999709032475,
+        "p99": 0.000630639975424856
+      }
+    },
+    "get_hands_cashout": {
+      "error": "",
+      "plan": "Nested Loop  (cost=0.27..9.44 rows=1 width=21)\n  ->  Seq Scan on handscashout hc  (cost=0.00..1.11 rows=1 width=16)\n        Filter: (handid = '663'::smallint)\n  ->  Index Scan using players_pkey on players p  (cost=0.27..8.29 rows=1 width=13)\n        Index Cond: (id = hc.playerid)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0016342999879270792,
+        "mean": 0.0006381199928000569,
+        "p50": 0.00041069998405873775,
+        "p95": 0.0013955999864265322,
+        "p99": 0.0015865599876269698
+      }
+    },
+    "get_hands_showdown": {
+      "error": "",
+      "plan": "Hash Join  (cost=11.10..22.52 rows=2 width=178) (actual rows=2.00 loops=1)\n  Hash Cond: (p.id = hs.playerid)\n  Buffers: shared hit=10\n  ->  Seq Scan on players p  (cost=0.00..9.27 rows=427 width=13) (actual rows=427.00 loops=1)\n        Buffers: shared hit=5\n  ->  Hash  (cost=11.07..11.07 rows=2 width=173) (actual rows=2.00 loops=1)\n        Buckets: 1024  Batches: 1  Memory Usage: 9kB\n        Buffers: shared hit=5\n        ->  Seq Scan on handsshowdown hs  (cost=0.00..11.07 rows=2 width=173) (actual rows=2.00 loops=1)\n              Filter: (handid = '663'::smallint)\n              Rows Removed by Filter: 484\n              Buffers: shared hit=5\nPlanning:\n  Buffers: shared hit=6\nPlanning Time: 0.184 ms\nExecution Time: 0.119 ms",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0018847999745048583,
+        "mean": 0.0008887799922376871,
+        "p50": 0.0005857000360265374,
+        "p95": 0.0016842599725350735,
+        "p99": 0.0018446919741109014
+      }
+    },
+    "get_hands_splash": {
+      "error": "",
+      "plan": "Nested Loop  (cost=0.55..16.71 rows=1 width=13)\n  ->  Index Scan using handsplayers_handid_idx on handsplayers hp  (cost=0.28..8.38 rows=1 width=8)\n        Index Cond: (handid = '663'::smallint)\n        Filter: (splashwinnings <> 0)\n  ->  Index Scan using players_pkey on players p  (cost=0.27..8.29 rows=1 width=13)\n        Index Cond: (id = hp.playerid)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0010990999871864915,
+        "mean": 0.0009691399754956365,
+        "p50": 0.0009799999534152448,
+        "p95": 0.0010897399857640266,
+        "p99": 0.0010972279869019984
+      }
+    },
+    "get_hero_hudcache_start": {
+      "error": "",
+      "plan": "<explain failed: only '%s', '%b', '%t' are allowed as placeholders, got '%''>",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0010105000110343099,
+        "mean": 0.0006782400072552264,
+        "p50": 0.0006211000145412982,
+        "p95": 0.0009386800113134085,
+        "p99": 0.0009961360110901296
+      }
+    },
+    "get_id": {
+      "error": "l'op\u00e9rateur n'existe pas : text = smallint\nLINE 3:                     WHERE file=$1\n                                      ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : text = smallint\nLINE 3:                     WHERE file=$1\n                                      ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_last_date": {
+      "error": "",
+      "plan": "Result  (cost=0.39..0.40 rows=1 width=8) (actual rows=1.00 loops=1)\n  Buffers: shared hit=3\n  InitPlan 1\n    ->  Limit  (cost=0.28..0.39 rows=1 width=8) (actual rows=1.00 loops=1)\n          Buffers: shared hit=3\n          ->  Index Only Scan Backward using hands_start_time_idx on hands  (cost=0.28..404.24 rows=3794 width=8) (actual rows=1.00 loops=1)\n                Heap Fetches: 1\n                Index Searches: 1\n                Buffers: shared hit=3\nPlanning Time: 0.097 ms\nExecution Time: 0.018 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00043620000360533595,
+        "mean": 0.00032504000701010226,
+        "p50": 0.0002965000458061695,
+        "p95": 0.00041366000659763807,
+        "p99": 0.0004316920042037964
+      }
+    },
+    "get_last_gametype_for_table": {
+      "error": "",
+      "plan": "Limit  (cost=10.56..10.56 rows=1 width=12)\n  ->  Sort  (cost=10.56..10.56 rows=1 width=12)\n        Sort Key: h.id DESC\n        ->  Nested Loop  (cost=2.92..10.55 rows=1 width=12)\n              ->  Hash Join  (cost=2.64..7.77 rows=1 width=4)\n                    Hash Cond: (g.siteid = s.id)\n                    ->  Seq Scan on gametypes g  (cost=0.00..4.68 rows=168 width=8)\n                    ->  Hash  (cost=2.62..2.62 rows=1 width=4)\n                          ->  Seq Scan on sites s  (cost=0.00..2.62 rows=1 width=4)\n                                Filter: ((name)::text = 'Player1'::text)\n              ->  Index Scan using hands_gametypeid_idx on hands h  (cost=0.28..2.77 rows=1 width=12)\n                    Index Cond: (gametypeid = g.id)\n                    Filter: ((tablename)::text = 'Player1'::text)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0007578000077046454,
+        "mean": 0.0007017600117251277,
+        "p50": 0.0007048000115901232,
+        "p95": 0.0007541400031186641,
+        "p99": 0.000757068006787449
+      }
+    },
+    "get_last_hand": {
+      "error": "",
+      "plan": "Result  (cost=0.33..0.34 rows=1 width=8) (actual rows=1.00 loops=1)\n  Buffers: shared hit=3\n  InitPlan 1\n    ->  Limit  (cost=0.28..0.33 rows=1 width=8) (actual rows=1.00 loops=1)\n          Buffers: shared hit=3\n          ->  Index Only Scan Backward using hands_pkey on hands  (cost=0.28..195.19 rows=3794 width=8) (actual rows=1.00 loops=1)\n                Heap Fetches: 1\n                Index Searches: 1\n                Buffers: shared hit=3\nPlanning Time: 0.096 ms\nExecution Time: 0.019 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0004531000158749521,
+        "mean": 0.0003475800156593323,
+        "p50": 0.0003231000155210495,
+        "p95": 0.00044044001260772346,
+        "p99": 0.0004505680152215064
+      }
+    },
+    "get_player_auto_notes": {
+      "error": "",
+      "plan": "Sort  (cost=9.62..9.63 rows=1 width=256)\n  Sort Key: pan.createdts DESC, pan.id DESC\n  ->  Nested Loop Left Join  (cost=0.28..9.61 rows=1 width=256)\n        ->  Seq Scan on playerautonotes pan  (cost=0.00..1.31 rows=1 width=240)\n              Filter: (playerid = '663'::smallint)\n        ->  Index Scan using heroseat_idx on hands h  (cost=0.28..8.30 rows=1 width=24)\n              Index Cond: (id = pan.handid)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0006562999915331602,
+        "mean": 0.00046951998956501484,
+        "p50": 0.00041689997306093574,
+        "p95": 0.0006147599895484745,
+        "p99": 0.0006479919911362231
+      }
+    },
+    "get_player_comment": {
+      "error": "",
+      "plan": "Index Scan using players_pkey on players  (cost=0.27..8.29 rows=1 width=32) (actual rows=1.00 loops=1)\n  Index Cond: (id = '1'::smallint)\n  Index Searches: 1\n  Buffers: shared hit=3\nPlanning Time: 0.033 ms\nExecution Time: 0.011 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00026760000037029386,
+        "mean": 0.00024098000722005963,
+        "p50": 0.00023499998496845365,
+        "p95": 0.00026127999881282444,
+        "p99": 0.00026633600005879996
+      }
+    },
+    "get_player_id": {
+      "error": "",
+      "plan": "Nested Loop  (cost=4.32..12.36 rows=1 width=4)\n  Join Filter: (players.siteid = sites.id)\n  ->  Seq Scan on sites  (cost=0.00..2.62 rows=1 width=4)\n        Filter: ((name)::text = 'Player1'::text)\n  ->  Bitmap Heap Scan on players  (cost=4.32..9.66 rows=6 width=8)\n        Recheck Cond: ((name)::text = 'Player1'::text)\n        ->  Bitmap Index Scan on index_playername  (cost=0.00..4.32 rows=6 width=0)\n              Index Cond: ((name)::text = 'Player1'::text)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0004634999786503613,
+        "mean": 0.0003864999976940453,
+        "p50": 0.0003741999971680343,
+        "p95": 0.0004516399814747274,
+        "p99": 0.0004611279792152345
+      }
+    },
+    "get_player_id_by_name": {
+      "error": "",
+      "plan": "Bitmap Heap Scan on players  (cost=4.32..9.66 rows=6 width=4) (actual rows=6.00 loops=1)\n  Recheck Cond: ((name)::text = 'Player1'::text)\n  Heap Blocks: exact=4\n  Buffers: shared hit=6\n  ->  Bitmap Index Scan on index_playername  (cost=0.00..4.32 rows=6 width=0) (actual rows=7.00 loops=1)\n        Index Cond: ((name)::text = 'Player1'::text)\n        Index Searches: 1\n        Buffers: shared hit=2\nPlanning Time: 0.053 ms\nExecution Time: 0.028 ms",
+      "rows": 6,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00048479996621608734,
+        "mean": 0.00034073999850079415,
+        "p50": 0.0002787999692372978,
+        "p95": 0.00047475997125729914,
+        "p99": 0.0004827919672243297
+      }
+    },
+    "get_player_identity": {
+      "error": "",
+      "plan": "Hash Join  (cost=8.30..10.95 rows=1 width=21) (actual rows=1.00 loops=1)\n  Hash Cond: (s.id = p.siteid)\n  Buffers: shared hit=4\n  ->  Seq Scan on sites s  (cost=0.00..2.30 rows=130 width=16) (actual rows=130.00 loops=1)\n        Buffers: shared hit=1\n  ->  Hash  (cost=8.29..8.29 rows=1 width=13) (actual rows=1.00 loops=1)\n        Buckets: 1024  Batches: 1  Memory Usage: 9kB\n        Buffers: shared hit=3\n        ->  Index Scan using players_pkey on players p  (cost=0.27..8.29 rows=1 width=13) (actual rows=1.00 loops=1)\n              Index Cond: (id = '390'::smallint)\n              Index Searches: 1\n              Buffers: shared hit=3\nPlanning:\n  Buffers: shared hit=2\nPlanning Time: 0.097 ms\nExecution Time: 0.036 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0004980000085197389,
+        "mean": 0.00038108001463115214,
+        "p50": 0.00034680002136155963,
+        "p95": 0.0004729000153020024,
+        "p99": 0.0004929800098761916
+      }
+    },
+    "get_player_name": {
+      "error": "syntaxe en entr\u00e9e invalide pour le type integer : \u00ab Player1 \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $1 = '...'",
+      "plan": "<explain failed: syntaxe en entr\u00e9e invalide pour le type integer : \u00ab Player1 \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $1 = '...'>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_player_names": {
+      "error": "",
+      "plan": "Bitmap Heap Scan on players p  (cost=4.69..10.95 rows=1 width=9) (actual rows=2.00 loops=1)\n  Recheck Cond: (siteid = '1'::smallint)\n  Filter: (lower((name)::text) ~~ 'player1'::text)\n  Rows Removed by Filter: 70\n  Heap Blocks: exact=2\n  Buffers: shared hit=3\n  ->  Bitmap Index Scan on players_siteid_idx  (cost=0.00..4.69 rows=72 width=0) (actual rows=72.00 loops=1)\n        Index Cond: (siteid = '1'::smallint)\n        Index Searches: 1\n        Buffers: shared hit=1\nPlanning Time: 0.047 ms\nExecution Time: 0.035 ms",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00043189997086301446,
+        "mean": 0.0003289800020866096,
+        "p50": 0.00030670000705868006,
+        "p95": 0.0004106599721126258,
+        "p99": 0.00042765197111293673
+      }
+    },
+    "get_players_and_sites_by_name": {
+      "error": "",
+      "plan": "Hash Join  (cost=9.74..12.39 rows=6 width=16) (actual rows=6.00 loops=1)\n  Hash Cond: (s.id = p.siteid)\n  Buffers: shared hit=7\n  ->  Seq Scan on sites s  (cost=0.00..2.30 rows=130 width=16) (actual rows=130.00 loops=1)\n        Buffers: shared hit=1\n  ->  Hash  (cost=9.66..9.66 rows=6 width=8) (actual rows=6.00 loops=1)\n        Buckets: 1024  Batches: 1  Memory Usage: 9kB\n        Buffers: shared hit=6\n        ->  Bitmap Heap Scan on players p  (cost=4.32..9.66 rows=6 width=8) (actual rows=6.00 loops=1)\n              Recheck Cond: ((name)::text = 'Player1'::text)\n              Heap Blocks: exact=4\n              Buffers: shared hit=6\n              ->  Bitmap Index Scan on index_playername  (cost=0.00..4.32 rows=6 width=0) (actual rows=7.00 loops=1)\n                    Index Cond: ((name)::text = 'Player1'::text)\n                    Index Searches: 1\n                    Buffers: shared hit=2\nPlanning:\n  Buffers: shared hit=2\nPlanning Time: 0.102 ms\nExecution Time: 0.045 ms",
+      "rows": 6,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0003968999953940511,
+        "mean": 0.0003621399984695017,
+        "p50": 0.0003537999582476914,
+        "p95": 0.00038862000219523906,
+        "p99": 0.00039524399675428863
+      }
+    },
+    "get_players_from_hand": {
+      "error": "",
+      "plan": "Hash Join  (cost=8.43..21.49 rows=5 width=15) (actual rows=2.00 loops=1)\n  Hash Cond: (players.id = handsplayers.playerid)\n  Buffers: shared hit=8\n  ->  Seq Scan on players  (cost=0.00..9.27 rows=427 width=13) (actual rows=427.00 loops=1)\n        Buffers: shared hit=5\n  ->  Hash  (cost=8.37..8.37 rows=5 width=6) (actual rows=2.00 loops=1)\n        Buckets: 1024  Batches: 1  Memory Usage: 9kB\n        Buffers: shared hit=3\n        ->  Index Scan using handsplayers_handid_idx on handsplayers  (cost=0.28..8.37 rows=5 width=6) (actual rows=2.00 loops=1)\n              Index Cond: (handid = '663'::smallint)\n              Index Searches: 1\n              Buffers: shared hit=3\nPlanning:\n  Buffers: shared hit=13\nPlanning Time: 0.165 ms\nExecution Time: 0.065 ms",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0006671000155620277,
+        "mean": 0.0006241000141017139,
+        "p50": 0.0006059000152163208,
+        "p95": 0.000664980011060834,
+        "p99": 0.000666676014661789
+      }
+    },
+    "get_recent_player_auto_notes": {
+      "error": "",
+      "plan": "Limit  (cost=116.64..116.70 rows=25 width=269) (actual rows=25.00 loops=1)\n  Buffers: shared hit=63\n  ->  Sort  (cost=116.64..116.70 rows=25 width=269) (actual rows=25.00 loops=1)\n        Sort Key: pan.createdts DESC, pan.id DESC\n        Sort Method: quicksort  Memory: 37kB\n        Buffers: shared hit=63\n        ->  Nested Loop Left Join  (cost=1.85..116.06 rows=25 width=269) (actual rows=25.00 loops=1)\n              Buffers: shared hit=63\n              ->  Hash Join  (cost=1.56..14.29 rows=25 width=253) (actual rows=25.00 loops=1)\n                    Hash Cond: (p.id = pan.playerid)\n                    Buffers: shared hit=6\n                    ->  Seq Scan on players p  (cost=0.00..9.27 rows=427 width=13) (actual rows=427.00 loops=1)\n                          Buffers: shared hit=5\n                    ->  Hash  (cost=1.25..1.25 rows=25 width=244) (actual rows=25.00 loops=1)\n                          Buckets: 1024  Batches: 1  Memory Usage: 15kB\n                          Buffers: shared hit=1\n                          ->  Seq Scan on playerautonotes pan  (cost=0.00..1.25 rows=25 width=244) (actual rows=25.00 loops=1)\n                                Buffers: shared hit=1\n              ->  Memoize  (cost=0.29..5.27 rows=1 width=28) (actual rows=1.00 loops=25)\n                    Cache Key: pan.handid\n                    Cache Mode: logical\n                    Hits: 6  Misses: 19  Evictions: 0  Overflows: 0  Memory Usage: 3kB\n                    Buffers: shared hit=57\n                    ->  Index Scan using heroseat_idx on hands h  (cost=0.28..5.26 rows=1 width=28) (actual rows=1.00 loops=19)\n                          Index Cond: (id = pan.handid)\n                          Index Searches: 19\n                          Buffers: shared hit=57\nPlanning:\n  Buffers: shared hit=14\nPlanning Time: 0.312 ms\nExecution Time: 0.169 ms",
+      "rows": 25,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.001397700048983097,
+        "mean": 0.0010754000046290456,
+        "p50": 0.000987800012808293,
+        "p95": 0.0013441200368106364,
+        "p99": 0.001386984046548605
+      }
+    },
+    "get_site_hand_no": {
+      "error": "",
+      "plan": "Index Scan using heroseat_idx on hands  (cost=0.28..8.30 rows=1 width=8)\n  Index Cond: (id = '11480841734'::bigint)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0003848000196740031,
+        "mean": 0.00028008000226691364,
+        "p50": 0.00025670003378763795,
+        "p95": 0.00035932001192122697,
+        "p99": 0.00037970401812344786
+      }
+    },
+    "get_stats_from_hand": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab sum \u00bb\nLINE 263:                 sum(hc.street4CheckRaiseDone)       AS cr_4\n                          ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab sum \u00bb\nLINE 263:                 sum(hc.street4CheckRaiseDone)       AS cr_4\n                          ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "get_stats_from_hand_aggregated": {
+      "error": "",
+      "plan": "GroupAggregate  (cost=232.39..233.34 rows=1 width=2633)\n  Group Key: hc.playerid, p.name\n  ->  Sort  (cost=232.39..232.40 rows=1 width=1145)\n        Sort Key: hc.playerid, p.name COLLATE \"C\"\n        ->  Nested Loop  (cost=68.43..232.38 rows=1 width=1145)\n              ->  Nested Loop  (cost=68.28..231.21 rows=1 width=1137)\n                    ->  Nested Loop  (cost=68.00..222.90 rows=1 width=1141)\n                          Join Filter: ((hp.playerid = hc.playerid) AND (((hp.playerid <> '390'::smallint) AND (ANY ((hc.gametypeid + 0) = (hashed SubPlan 1).col1))) OR ((hp.playerid = '390'::smallint) AND (ANY ((hc.gametypeid + 0) = (hashed SubPlan 2).col1)))))\n                          ->  Hash Join  (cost=8.43..21.49 rows=5 width=27)\n                                Hash Cond: (p.id = hp.playerid)\n                                ->  Seq Scan on players p  (cost=0.00..9.27 rows=427 width=13)\n                                ->  Hash  (cost=8.37..8.37 rows=5 width=14)\n                                      ->  Index Scan using handsplayers_handid_idx on handsplayers hp  (cost=0.28..8.37 rows=5 width=14)\n                                            Index Cond: (handid = '663'::smallint)\n                          ->  Index Scan using hudcache_playerid_idx on hudcache hc  (cost=29.93..34.33 rows=1 width=1122)\n                                Index Cond: (playerid = p.id)\n                                Filter: ((stylekey > 'd20260101'::bpchar) AND (seats >= '6'::smallint) AND (seats <= '6'::smallint) AND ((ANY ((gametypeid + 0) = (hashed SubPlan 1).col1)) OR (ANY ((gametypeid + 0) = (hashed SubPlan 2).col1))))\n                                SubPlan 1\n                                  ->  Nested Loop  (cost=0.00..14.82 rows=1 width=4)\n                                        Join Filter: ((gt1.siteid = gt2.siteid) AND (gt1.type = gt2.type) AND ((gt1.category)::text = (gt2.category)::text) AND (gt1.limittype = gt2.limittype) AND (gt1.bigblind <= (gt2.bigblind * '1'::smallint)) AND (gt1.bigblind >= (gt2.bigblind / '1'::smallint)))\n                                        ->  Seq Scan on gametypes gt2  (cost=0.00..5.10 rows=1 width=27)\n                                              Filter: (id = '1'::smallint)\n                                        ->  Seq Scan on gametypes gt1  (cost=0.00..4.68 rows=168 width=31)\n                                SubPlan 2\n                                  ->  Nested Loop  (cost=0.00..14.82 rows=1 width=4)\n                                        Join Filter: ((gt1_1.siteid = gt2_1.siteid) AND (gt1_1.type = gt2_1.type) AND ((gt1_1.category)::text = (gt2_1.category)::text) AND (gt1_1.limittype = gt2_1.limittype) AND (gt1_1.bigblind <= (gt2_1.bigblind * '1'::smallint)) AND (gt1_1.bigblind >= (gt2_1.bigblind / '1'::smallint)))\n                                        ->  Seq Scan on gametypes gt2_1  (cost=0.00..5.10 rows=1 width=27)\n                                              Filter: (id = '1'::smallint)\n                                        ->  Seq Scan on gametypes gt1_1  (cost=0.00..4.68 rows=168 width=31)\n                    ->  Index Scan using heroseat_idx on hands h  (cost=0.28..8.30 rows=1 width=12)\n                          Index Cond: (id = '663'::smallint)\n              ->  Index Scan using gametypes_pkey on gametypes gt  (cost=0.14..1.16 rows=1 width=12)\n                    Index Cond: (id = hc.gametypeid)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.010638299980200827,
+        "mean": 0.010038039984647185,
+        "p50": 0.009927099978085607,
+        "p95": 0.010612299980130047,
+        "p99": 0.010633099980186671
+      }
+    },
+    "get_stats_from_hand_session": {
+      "error": "",
+      "plan": "Sort  (cost=174.08..174.08 rows=2 width=721)\n  Sort Key: h.starttime DESC, hp2.playerid\n  ->  Nested Loop  (cost=13.71..174.07 rows=2 width=721)\n        ->  Nested Loop  (cost=13.57..172.88 rows=2 width=217)\n              ->  Hash Join  (cost=13.29..172.28 rows=2 width=208)\n                    Hash Cond: ((hp2.playerid + 0) = (hp.playerid + 0))\n                    ->  Nested Loop  (cost=4.86..163.35 rows=76 width=202)\n                          ->  Nested Loop  (cost=4.58..23.13 rows=77 width=30)\n                                ->  Index Scan using heroseat_idx on hands h  (cost=0.28..8.30 rows=1 width=28)\n                                      Index Cond: (id = '663'::smallint)\n                                ->  Bitmap Heap Scan on hands h2  (cost=4.30..14.83 rows=1 width=22)\n                                      Recheck Cond: ((h.tablename)::text = (tablename)::text)\n                                      Filter: ((id >= '1'::smallint) AND (seats >= '6'::smallint) AND (seats <= '6'::smallint))\n                                      ->  Bitmap Index Scan on index_tablename  (cost=0.00..4.30 rows=3 width=0)\n                                            Index Cond: ((tablename)::text = (h.tablename)::text)\n                          ->  Index Scan using handsplayers_handid_idx on handsplayers hp2  (cost=0.28..1.76 rows=6 width=188)\n                                Index Cond: (handid = h2.id)\n                                Filter: ((playerid <> '390'::smallint) OR (playerid = '390'::smallint))\n                    ->  Hash  (cost=8.37..8.37 rows=5 width=14)\n                          ->  Index Scan using handsplayers_handid_idx on handsplayers hp  (cost=0.28..8.37 rows=5 width=14)\n                                Index Cond: (handid = '663'::smallint)\n              ->  Index Scan using players_pkey on players p  (cost=0.28..0.30 rows=1 width=13)\n                    Index Cond: (id = (hp2.playerid + 0))\n        ->  Index Scan using gametypes_pkey on gametypes gt  (cost=0.14..0.18 rows=1 width=12)\n              Index Cond: (id = h2.gametypeid)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.005922699987422675,
+        "mean": 0.0054944199975579975,
+        "p50": 0.005427700001746416,
+        "p95": 0.0058453399920836095,
+        "p99": 0.0059072279883548625
+      }
+    },
+    "get_table_name": {
+      "error": "",
+      "plan": "GroupAggregate  (cost=22.14..22.30 rows=5 width=52) (actual rows=1.00 loops=1)\n  Group Key: h.tablename, gt.maxseats, gt.category, gt.type, gt.fast, s.id, gt.limittype\n  Buffers: shared hit=12\n  ->  Sort  (cost=22.14..22.15 rows=5 width=44) (actual rows=2.00 loops=1)\n        Sort Key: h.tablename, gt.maxseats, gt.category, gt.type, gt.fast, s.id, gt.limittype\n        Sort Method: quicksort  Memory: 25kB\n        Buffers: shared hit=12\n        ->  Nested Loop  (cost=8.73..22.08 rows=5 width=44) (actual rows=2.00 loops=1)\n              Buffers: shared hit=12\n              ->  Nested Loop  (cost=8.45..13.67 rows=1 width=52) (actual rows=1.00 loops=1)\n                    Buffers: shared hit=8\n                    ->  Hash Join  (cost=8.31..13.43 rows=1 width=40) (actual rows=1.00 loops=1)\n                          Hash Cond: (gt.id = h.gametypeid)\n                          Buffers: shared hit=6\n                          ->  Seq Scan on gametypes gt  (cost=0.00..4.68 rows=168 width=26) (actual rows=168.00 loops=1)\n                                Buffers: shared hit=3\n                          ->  Hash  (cost=8.30..8.30 rows=1 width=22) (actual rows=1.00 loops=1)\n                                Buckets: 1024  Batches: 1  Memory Usage: 9kB\n                                Buffers: shared hit=3\n                                ->  Index Scan using heroseat_idx on hands h  (cost=0.28..8.30 rows=1 width=22) (actual rows=1.00 loops=1)\n                                      Index Cond: (id = '663'::smallint)\n                                      Index Searches: 1\n                                      Buffers: shared hit=3\n                    ->  Index Scan using sites_pkey on sites s  (cost=0.14..0.23 rows=1 width=16) (actual rows=1.00 loops=1)\n                          Index Cond: (id = gt.siteid)\n                          Index Searches: 1\n                          Buffers: shared hit=2\n              ->  Index Only Scan using handsplayers_handid_idx on handsplayers hp  (cost=0.28..8.37 rows=5 width=8) (actual rows=2.00 loops=1)\n                    Index Cond: (handid = '663'::smallint)\n                    Heap Fetches: 2\n                    Index Searches: 1\n                    Buffers: shared hit=4\nPlanning:\n  Buffers: shared hit=20\nPlanning Time: 0.391 ms\nExecution Time: 0.085 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0012859999551437795,
+        "mean": 0.0009980999981053173,
+        "p50": 0.0008842999814078212,
+        "p95": 0.0012616999680176376,
+        "p99": 0.001281139957718551
+      }
+    },
+    "get_winners_from_hand": {
+      "error": "",
+      "plan": "Nested Loop  (cost=0.55..16.71 rows=1 width=17) (actual rows=2.00 loops=1)\n  Buffers: shared hit=9\n  ->  Index Scan using handsplayers_handid_idx on handsplayers  (cost=0.28..8.38 rows=1 width=12) (actual rows=2.00 loops=1)\n        Index Cond: (handid = '663'::smallint)\n        Filter: (winnings > 0)\n        Index Searches: 1\n        Buffers: shared hit=3\n  ->  Index Scan using players_pkey on players  (cost=0.27..8.29 rows=1 width=13) (actual rows=1.00 loops=2)\n        Index Cond: (id = handsplayers.playerid)\n        Index Searches: 2\n        Buffers: shared hit=6\nPlanning:\n  Buffers: shared hit=16\nPlanning Time: 0.292 ms\nExecution Time: 0.050 ms",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0015371000044979155,
+        "mean": 0.0008791999891400338,
+        "p50": 0.0007158999796956778,
+        "p95": 0.0014087399933487175,
+        "p99": 0.001511428002268076
+      }
+    },
+    "handActions": {
+      "error": "",
+      "plan": "Sort  (cost=31.92..31.95 rows=13 width=63) (actual rows=2.00 loops=1)\n  Sort Key: ha.id\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=11\n  ->  Nested Loop  (cost=15.17..31.68 rows=13 width=63) (actual rows=2.00 loops=1)\n        Buffers: shared hit=11\n        ->  Index Only Scan using heroseat_idx on hands h  (cost=0.28..8.30 rows=1 width=8) (actual rows=1.00 loops=1)\n              Index Cond: (id = '663'::smallint)\n              Heap Fetches: 1\n              Index Searches: 1\n              Buffers: shared hit=3\n        ->  Hash Join  (cost=14.89..23.15 rows=13 width=47) (actual rows=2.00 loops=1)\n              Hash Cond: (ha.playerid = p.id)\n              Buffers: shared hit=8\n              ->  Index Scan using handsactions_handid_idx on handsactions ha  (cost=0.29..8.51 rows=13 width=42) (actual rows=2.00 loops=1)\n                    Index Cond: (handid = '663'::smallint)\n                    Index Searches: 1\n                    Buffers: shared hit=3\n              ->  Hash  (cost=9.27..9.27 rows=427 width=13) (actual rows=427.00 loops=1)\n                    Buckets: 1024  Batches: 1  Memory Usage: 28kB\n                    Buffers: shared hit=5\n                    ->  Seq Scan on players p  (cost=0.00..9.27 rows=427 width=13) (actual rows=427.00 loops=1)\n                          Buffers: shared hit=5\nPlanning:\n  Buffers: shared hit=13\nPlanning Time: 0.240 ms\nExecution Time: 0.125 ms",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0010080999927595258,
+        "mean": 0.0008003000053577125,
+        "p50": 0.000777499983087182,
+        "p95": 0.0009806999936699868,
+        "p99": 0.001002619992941618
+      }
+    },
+    "handactions_action_street_idx": {
+      "status": "skipped_ddl"
+    },
+    "handactions_hand_idx": {
+      "status": "skipped_ddl"
+    },
+    "handactions_player_idx": {
+      "status": "skipped_ddl"
+    },
+    "handactions_sizing_idx": {
+      "status": "skipped_ddl"
+    },
+    "handactions_street_position_idx": {
+      "status": "skipped_ddl"
+    },
+    "handsInRange": {
+      "error": "erreur de syntaxe \u00e0 la fin de l'entr\u00e9e\nLINE 9:             \n                    ^",
+      "plan": "<explain failed: erreur de syntaxe \u00e0 la fin de l'entr\u00e9e\nLINE 9:             \n                    ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "handsInRangeSession": {
+      "error": "l'argument de WHERE doit \u00eatre de type boolean, et non du type timestamp without time zone\nLINE 4:         where h.startTime \n                      ^",
+      "plan": "<explain failed: l'argument de WHERE doit \u00eatre de type boolean, et non du type timestamp without time zone\nLINE 4:         where h.startTime \n                      ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "handsInRangeSessionFilter": {
+      "error": "l'argument de WHERE doit \u00eatre de type boolean, et non du type timestamp without time zone\nLINE 5:         where h.startTime \n                      ^",
+      "plan": "<explain failed: l'argument de WHERE doit \u00eatre de type boolean, et non du type timestamp without time zone\nLINE 5:         where h.startTime \n                      ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "handsPlayersTTypeId_joiner": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab OR \u00bb\nLINE 1: OR TourneysPlayersId+0=\n        ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab OR \u00bb\nLINE 1: EXPLAIN OR TourneysPlayersId+0=\n                ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "handsPlayersTTypeId_joiner_id": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab OR \u00bb\nLINE 1: OR id=\n        ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab OR \u00bb\nLINE 1: EXPLAIN OR id=\n                ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "hands_gametype_time_idx": {
+      "status": "skipped_ddl"
+    },
+    "hands_start_time_idx": {
+      "status": "skipped_ddl"
+    },
+    "handsplayers_hand_player_idx": {
+      "status": "skipped_ddl"
+    },
+    "handssituations_aggressor_idx": {
+      "status": "skipped_ddl"
+    },
+    "handssituations_hand_idx": {
+      "status": "skipped_ddl"
+    },
+    "handssituations_player_idx": {
+      "status": "skipped_ddl"
+    },
+    "handssituations_pot_role_idx": {
+      "status": "skipped_ddl"
+    },
+    "handssituations_street_response_idx": {
+      "status": "skipped_ddl"
+    },
+    "handstates_hand_idx": {
+      "status": "skipped_ddl"
+    },
+    "handstates_made_hand_idx": {
+      "status": "skipped_ddl"
+    },
+    "handstates_nutness_idx": {
+      "status": "skipped_ddl"
+    },
+    "handstates_player_idx": {
+      "status": "skipped_ddl"
+    },
+    "insertActionBubbleFactor": {
+      "error": "",
+      "plan": "Insert on actionbubblefactors  (cost=0.00..0.01 rows=0 width=0)\n  ->  Result  (cost=0.00..0.01 rows=1 width=108)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.001077100052498281,
+        "mean": 0.00046454002149403094,
+        "p50": 0.0002772000152617693,
+        "p95": 0.0009517200407572089,
+        "p99": 0.0010520240501500668
+      }
+    },
+    "insertGameTypes": {
+      "error": "la colonne \u00ab fast \u00bb est de type boolean mais l'expression est de type smallint\nLINE 3: ...$5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, ...\n                                              ",
+      "plan": "<explain failed: la colonne \u00ab fast \u00bb est de type boolean mais l'expression est de type smallint\nLINE 3: ...$5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, ...\n                                                             ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insertTourney": {
+      "error": "la colonne \u00ab endtime \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 5: ...                  values ($1, $2, $3, $4, $5, $6, $7, $8, $9...\n                       ",
+      "plan": "<explain failed: la colonne \u00ab endtime \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 5: ...                  values ($1, $2, $3, $4, $5, $6, $7, $8, $9...\n                                                             ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insertTourneyPayout": {
+      "error": "une instruction insert ou update sur la table \u00ab tourneypayouts \u00bb viole la contrainte de cl\u00e9\n\u00e9trang\u00e8re \u00ab tourneypayouts_tourneyid_fkey \u00bb\nDETAIL:  La cl\u00e9 (tourneyid)=(71487580) n'est pas pr\u00e9sente dans l",
+      "plan": "Insert on tourneypayouts  (cost=0.00..0.01 rows=0 width=0)\n  ->  Result  (cost=0.00..0.01 rows=1 width=106)",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insertTourneyType": {
+      "error": "la colonne \u00ab sng \u00bb est de type boolean mais l'expression est de type smallint\nLINE 8: ...              values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $1...\n                                               ",
+      "plan": "<explain failed: la colonne \u00ab sng \u00bb est de type boolean mais l'expression est de type smallint\nLINE 8: ...              values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $1...\n                                                             ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insertTourneysPlayer": {
+      "error": "une instruction insert ou update sur la table \u00ab tourneysplayers \u00bb viole la contrainte de cl\u00e9\n\u00e9trang\u00e8re \u00ab tourneysplayers_tourneyid_fkey \u00bb\nDETAIL:  La cl\u00e9 (tourneyid)=(71487580) n'est pas pr\u00e9sente dans",
+      "plan": "Insert on tourneysplayers  (cost=0.00..0.01 rows=0 width=0)\n  ->  Result  (cost=0.00..0.01 rows=1 width=140)",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_M": {
+      "error": "la colonne \u00ab monthstart \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 3:                 values ($1)\n                                ^\nHINT:  Vous devez r\u00e9\u00e9crir",
+      "plan": "<explain failed: la colonne \u00ab monthstart \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 3:                 values ($1)\n                                ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_S": {
+      "error": "la colonne \u00ab sessionstart \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 6:                 values ($1, $2, $3, $4)\n                                        ^\nHIN",
+      "plan": "<explain failed: la colonne \u00ab sessionstart \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 6:                 values ($1, $2, $3, $4)\n                                        ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_SC": {
+      "error": "la colonne \u00ab endtime \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 124:                 values ($1, $2, $3, $4, $5,\n                                          ^\n",
+      "plan": "<explain failed: la colonne \u00ab endtime \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 124:                 values ($1, $2, $3, $4, $5,\n                                          ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_TC": {
+      "error": "la colonne \u00ab endtime \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 124:                 values ($1, $2, $3, $4, $5,\n                                          ^\n",
+      "plan": "<explain failed: la colonne \u00ab endtime \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 124:                 values ($1, $2, $3, $4, $5,\n                                          ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_W": {
+      "error": "la colonne \u00ab weekstart \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 3:                 values ($1)\n                                ^\nHINT:  Vous devez r\u00e9\u00e9crire",
+      "plan": "<explain failed: la colonne \u00ab weekstart \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 3:                 values ($1)\n                                ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_cardscache": {
+      "error": "une instruction insert ou update sur la table \u00ab cardscache \u00bb viole la contrainte de cl\u00e9\n\u00e9trang\u00e8re \u00ab cardscache_weekid_fkey \u00bb\nDETAIL:  La cl\u00e9 (weekid)=(1) n'est pas pr\u00e9sente dans la table \u00ab weeks \u00bb.",
+      "plan": "Insert on cardscache  (cost=0.00..0.01 rows=0 width=0)\n  ->  Result  (cost=0.00..0.01 rows=1 width=634)",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_hudcache": {
+      "error": "valeur trop longue pour le type character(7)",
+      "plan": "<explain failed: valeur trop longue pour le type character(7)>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "insert_positionscache": {
+      "error": "syntaxe en entr\u00e9e invalide pour le type smallint : \u00ab B \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $7 = '...'",
+      "plan": "<explain failed: syntaxe en entr\u00e9e invalide pour le type smallint : \u00ab B \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $7 = '...'>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "isAlreadyInDB": {
+      "error": "",
+      "plan": "Nested Loop  (cost=0.28..13.41 rows=1 width=8)\n  Join Filter: (h.gametypeid = g.id)\n  ->  Index Scan using sitehandno on hands h  (cost=0.28..8.30 rows=1 width=12)\n        Index Cond: (sitehandno = '11480841734'::bigint)\n  ->  Seq Scan on gametypes g  (cost=0.00..5.10 rows=1 width=4)\n        Filter: (siteid = '11480841734'::bigint)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.000998099974822253,
+        "mean": 0.0007281400030478835,
+        "p50": 0.0007012999849393964,
+        "p95": 0.0009774399804882705,
+        "p99": 0.0009939679759554565
+      }
+    },
+    "list_indexes": {
+      "error": "",
+      "plan": "Hash Join  (cost=45.13..74.87 rows=24 width=128) (actual rows=260.00 loops=1)\n  Hash Cond: (i.oid = x.indexrelid)\n  Buffers: shared hit=50\n  ->  Seq Scan on pg_class i  (cost=0.00..28.31 rows=317 width=72) (actual rows=317.00 loops=1)\n        Filter: (relkind = ANY ('{i,I}'::\"char\"[]))\n        Rows Removed by Filter: 348\n        Buffers: shared hit=20\n  ->  Hash  (cost=44.50..44.50 rows=51 width=68) (actual rows=260.00 loops=1)\n        Buckets: 1024  Batches: 1  Memory Usage: 34kB\n        Buffers: shared hit=30\n        ->  Hash Join  (cost=30.49..44.50 rows=51 width=68) (actual rows=260.00 loops=1)\n              Hash Cond: (x.indrelid = c.oid)\n              Buffers: shared hit=30\n              ->  Seq Scan on pg_index x  (cost=0.00..13.17 rows=317 width=8) (actual rows=317.00 loops=1)\n                    Buffers: shared hit=10\n              ->  Hash  (cost=29.14..29.14 rows=108 width=72) (actual rows=108.00 loops=1)\n                    Buckets: 1024  Batches: 1  Memory Usage: 19kB\n                    Buffers: shared hit=20\n                    ->  Seq Scan on pg_class c  (cost=0.00..29.14 rows=108 width=72) (actual rows=108.00 loops=1)\n                          Filter: (relkind = ANY ('{r,m,p}'::\"char\"[]))\n                          Rows Removed by Filter: 557\n                          Buffers: shared hit=20\nPlanning:\n  Buffers: shared hit=20\nPlanning Time: 0.280 ms\nExecution Time: 0.421 ms",
+      "rows": 260,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0038619000115431845,
+        "mean": 0.0017879800056107343,
+        "p50": 0.0012727000284940004,
+        "p95": 0.003374720003921538,
+        "p99": 0.003764464010018855
+      }
+    },
+    "list_tables": {
+      "error": "",
+      "plan": "Hash Left Join  (cost=44.72..96.21 rows=44 width=64) (actual rows=40.00 loops=1)\n  Hash Cond: (c.reloftype = t.oid)\n  Buffers: shared hit=45\n  ->  Hash Join  (cost=1.07..51.95 rows=44 width=68) (actual rows=40.00 loops=1)\n        Hash Cond: (c.relnamespace = nc.oid)\n        Buffers: shared hit=21\n        ->  Seq Scan on pg_class c  (cost=0.00..49.93 rows=178 width=72) (actual rows=253.00 loops=1)\n              Filter: ((relkind = ANY ('{r,v,f,p}'::\"char\"[])) AND (pg_has_role(relowner, 'USAGE'::text) OR has_table_privilege(oid, 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER'::text) OR has_any_column_privilege(oid, 'SELECT, INSERT, UPDATE, REFERENCES'::text)))\n              Rows Removed by Filter: 412\n              Buffers: shared hit=20\n        ->  Hash  (cost=1.06..1.06 rows=1 width=4) (actual rows=1.00 loops=1)\n              Buckets: 1024  Batches: 1  Memory Usage: 9kB\n              Buffers: shared hit=1\n              ->  Seq Scan on pg_namespace nc  (cost=0.00..1.06 rows=1 width=4) (actual rows=1.00 loops=1)\n                    Filter: ((NOT pg_is_other_temp_schema(oid)) AND (nspname = 'public'::name))\n                    Rows Removed by Filter: 3\n                    Buffers: shared hit=1\n  ->  Hash  (cost=34.89..34.89 rows=701 width=4) (actual rows=701.00 loops=1)\n        Buckets: 1024  Batches: 1  Memory Usage: 33kB\n        Buffers: shared hit=24\n        ->  Hash Join  (cost=1.09..34.89 rows=701 width=4) (actual rows=701.00 loops=1)\n              Hash Cond: (t.typnamespace = nt.oid)\n              Buffers: shared hit=24\n              ->  Seq Scan on pg_type t  (cost=0.00..30.01 rows=701 width=8) (actual rows=701.00 loops=1)\n                    Buffers: shared hit=23\n              ->  Hash  (cost=1.04..1.04 rows=4 width=4) (actual rows=4.00 loops=1)\n                    Buckets: 1024  Batches: 1  Memory Usage: 9kB\n                    Buffers: shared hit=1\n                    ->  Seq Scan on pg_namespace nt  (cost=0.00..1.04 rows=4 width=4) (actual rows=4.00 loops=1)\n                          Buffers: shared hit=1\nPlanning:\n  Buffers: shared hit=14\nPlanning Time: 0.273 ms\nExecution Time: 0.419 ms",
+      "rows": 40,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.001980200002435595,
+        "mean": 0.0013480800203979014,
+        "p50": 0.0012585000367835164,
+        "p95": 0.001848320011049509,
+        "p99": 0.0019538240041583775
+      }
+    },
+    "lockForInsert": {
+      "error": "the last operation didn't produce records (result status: EMPTY_QUERY)",
+      "plan": "<explain failed: erreur de syntaxe \u00e0 la fin de l'entr\u00e9e\nLINE 1: EXPLAIN \n                ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "opponentsReport": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab ) \u00bb\nLINE 38: ...    on (opp.handId = hphero.handId and opp.playerId not in )\n                                                                       ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab ) \u00bb\nLINE 38: ...    on (opp.handId = hphero.handId and opp.playerId not in )\n                                                                       ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "playerDetailedStats": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab AS \u00bb\nLINE 1: ...                                                  AS hgamety...\n                                                             ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab AS \u00bb\nLINE 1: ...                                                  AS hgamety...\n                                                             ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "playerHand": {
+      "error": "",
+      "plan": "Sort  (cost=21.69..21.71 rows=5 width=183) (actual rows=2.00 loops=1)\n  Sort Key: hp.seatno\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=8\n  ->  Hash Join  (cost=8.43..21.64 rows=5 width=183) (actual rows=2.00 loops=1)\n        Hash Cond: (p.id = hp.playerid)\n        Buffers: shared hit=8\n        ->  Seq Scan on players p  (cost=0.00..9.27 rows=427 width=13) (actual rows=427.00 loops=1)\n              Buffers: shared hit=5\n        ->  Hash  (cost=8.37..8.37 rows=5 width=82) (actual rows=2.00 loops=1)\n              Buckets: 1024  Batches: 1  Memory Usage: 9kB\n              Buffers: shared hit=3\n              ->  Index Scan using handsplayers_handid_idx on handsplayers hp  (cost=0.28..8.37 rows=5 width=82) (actual rows=2.00 loops=1)\n                    Index Cond: (handid = '663'::smallint)\n                    Index Searches: 1\n                    Buffers: shared hit=3\nPlanning:\n  Buffers: shared hit=13\nPlanning Time: 0.256 ms\nExecution Time: 0.098 ms",
+      "rows": 2,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0012506000348366797,
+        "mean": 0.0008492200053296983,
+        "p50": 0.0007331999950110912,
+        "p95": 0.0011676200199872255,
+        "p99": 0.0012340040318667889
+      }
+    },
+    "playerStats": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab < \u00bb\nLINE 36:                        ,<selectgt.bigBlind>                 ...\n                                 ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab < \u00bb\nLINE 36:                        ,<selectgt.bigBlind>                 ...\n                                 ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "playerStatsByPosition": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab < \u00bb\nLINE 46:                        ,<selectgt.bigBlind>                 ...\n                                 ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab < \u00bb\nLINE 46:                        ,<selectgt.bigBlind>                 ...\n                                 ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "player_has_any_notes": {
+      "error": "",
+      "plan": "Result  (cost=9.61..9.62 rows=1 width=4) (actual rows=1.00 loops=1)\n  Buffers: shared hit=4\n  InitPlan 1\n    ->  Index Scan using players_pkey on players  (cost=0.27..8.29 rows=1 width=0) (actual rows=0.00 loops=1)\n          Index Cond: (id = '1'::smallint)\n          Filter: ((comment IS NOT NULL) AND (comment <> ''::text))\n          Rows Removed by Filter: 1\n          Index Searches: 1\n          Buffers: shared hit=3\n  InitPlan 2\n    ->  Seq Scan on playerautonotes  (cost=0.00..1.31 rows=1 width=0) (actual rows=1.00 loops=1)\n          Filter: (playerid = '390'::smallint)\n          Rows Removed by Filter: 24\n          Buffers: shared hit=1\nPlanning Time: 0.076 ms\nExecution Time: 0.024 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005170999793335795,
+        "mean": 0.00036691999994218347,
+        "p50": 0.00032679998548701406,
+        "p95": 0.0004847399890422821,
+        "p99": 0.00051062798127532
+      }
+    },
+    "rebuildCache": {
+      "status": "skipped_template"
+    },
+    "search_players_with_auto_notes": {
+      "error": "",
+      "plan": "Limit  (cost=12.76..12.77 rows=1 width=17) (actual rows=1.00 loops=1)\n  Buffers: shared hit=6\n  ->  Unique  (cost=12.76..12.77 rows=1 width=17) (actual rows=1.00 loops=1)\n        Buffers: shared hit=6\n        ->  Sort  (cost=12.76..12.76 rows=1 width=17) (actual rows=1.00 loops=1)\n              Sort Key: p.name COLLATE \"C\", p.id, p.siteid\n              Sort Method: quicksort  Memory: 25kB\n              Buffers: shared hit=6\n              ->  Hash Join  (cost=11.43..12.75 rows=1 width=17) (actual rows=1.00 loops=1)\n                    Hash Cond: (pan.playerid = p.id)\n                    Buffers: shared hit=6\n                    ->  Seq Scan on playerautonotes pan  (cost=0.00..1.25 rows=25 width=4) (actual rows=25.00 loops=1)\n                          Buffers: shared hit=1\n                    ->  Hash  (cost=11.40..11.40 rows=2 width=17) (actual rows=8.00 loops=1)\n                          Buckets: 1024  Batches: 1  Memory Usage: 9kB\n                          Buffers: shared hit=5\n                          ->  Seq Scan on players p  (cost=0.00..11.40 rows=2 width=17) (actual rows=8.00 loops=1)\n                                Filter: (lower((name)::text) ~~ 'player1'::text)\n                                Rows Removed by Filter: 419\n                                Buffers: shared hit=5\nPlanning:\n  Buffers: shared hit=7\nPlanning Time: 0.155 ms\nExecution Time: 0.126 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0006120000034570694,
+        "mean": 0.0005418599816039204,
+        "p50": 0.0005248999805189669,
+        "p95": 0.0005988999968394637,
+        "p99": 0.0006093800021335482
+      }
+    },
+    "selectHandKnockoutRules": {
+      "error": "",
+      "plan": "Nested Loop  (cost=0.28..10.34 rows=1 width=31)\n  Join Filter: (t.tourneytypeid = tt.id)\n  ->  Nested Loop  (cost=0.28..9.32 rows=1 width=4)\n        Join Filter: (h.tourneyid = t.id)\n        ->  Index Scan using heroseat_idx on hands h  (cost=0.28..8.30 rows=1 width=4)\n              Index Cond: (id = '663'::smallint)\n        ->  Seq Scan on tourneys t  (cost=0.00..1.01 rows=1 width=8)\n  ->  Seq Scan on tourneytypes tt  (cost=0.00..1.01 rows=1 width=35)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0005634999834001064,
+        "mean": 0.00047845998778939247,
+        "p50": 0.00045900000259280205,
+        "p95": 0.0005433399812318384,
+        "p99": 0.0005594679829664528
+      }
+    },
+    "selectHandTourneyId": {
+      "error": "",
+      "plan": "Index Scan using heroseat_idx on hands  (cost=0.28..8.30 rows=1 width=4)\n  Index Cond: (id = 71487580)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0008035000064410269,
+        "mean": 0.00044446000829339026,
+        "p50": 0.0003417999832890928,
+        "p95": 0.0007377600064501167,
+        "p99": 0.0007903520064428449
+      }
+    },
+    "selectHandsPlayersWithWrongTTypeId": {
+      "error": "la colonne \u00ab tourneytypeid \u00bb n'existe pas\nLINE 3: ...                                            WHERE tourneyTyp...\n                                                             ^",
+      "plan": "<explain failed: la colonne \u00ab tourneytypeid \u00bb n'existe pas\nLINE 3: ...                                            WHERE tourneyTyp...\n                                                             ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "selectSessionWithMonthId": {
+      "error": "",
+      "plan": "Seq Scan on sessions  (cost=0.00..0.00 rows=1 width=4)\n  Filter: (monthid = '1'::smallint)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00031650002347305417,
+        "mean": 0.00024323997786268592,
+        "p50": 0.00022479996550828218,
+        "p95": 0.00029976001242175697,
+        "p99": 0.0003131520212627947
+      }
+    },
+    "selectSessionWithWeekId": {
+      "error": "",
+      "plan": "Seq Scan on sessions  (cost=0.00..0.00 rows=1 width=4)\n  Filter: (weekid = '1'::smallint)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.000242199981585145,
+        "mean": 0.00022607999853789805,
+        "p50": 0.00022140005603432655,
+        "p95": 0.00023883997928351164,
+        "p99": 0.00024152798112481833
+      }
+    },
+    "selectTourneyAllInHands": {
+      "error": "",
+      "plan": "Sort  (cost=80.36..80.37 rows=1 width=29)\n  Sort Key: h.starttime, h.id\n  ->  Nested Loop Semi Join  (cost=5.16..80.35 rows=1 width=29)\n        Join Filter: (h.id = ai.handid)\n        ->  Nested Loop  (cost=4.88..71.96 rows=1 width=37)\n              ->  Nested Loop  (cost=4.61..63.66 rows=1 width=32)\n                    Join Filter: (hp.handid = h.id)\n                    ->  Bitmap Heap Scan on hands h  (cost=4.33..24.04 rows=6 width=20)\n                          Recheck Cond: (tourneyid IS NOT NULL)\n                          ->  Bitmap Index Scan on hands_tourneyid_idx  (cost=0.00..4.33 rows=6 width=0)\n                                Index Cond: (tourneyid IS NOT NULL)\n                    ->  Materialize  (cost=0.28..39.27 rows=4 width=12)\n                          ->  Index Scan using handsplayers_playerid_idx on handsplayers hp  (cost=0.28..39.25 rows=4 width=12)\n                                Index Cond: (playerid = '390'::smallint)\n                                Filter: sawshowdown\n              ->  Index Scan using players_pkey on players pl  (cost=0.27..8.29 rows=1 width=13)\n                    Index Cond: (id = '390'::smallint)\n        ->  Index Scan using handsplayers_handid_idx on handsplayers ai  (cost=0.28..8.39 rows=1 width=8)\n              Index Cond: (handid = hp.handid)\n              Filter: wentallin",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0023427000269293785,
+        "mean": 0.0016974400146864354,
+        "p50": 0.0015631000278517604,
+        "p95": 0.0021914200275205075,
+        "p99": 0.002312444027047604
+      }
+    },
+    "selectTourneyFacts": {
+      "error": "",
+      "plan": "Nested Loop  (cost=0.00..2.04 rows=1 width=42) (actual rows=1.00 loops=1)\n  Join Filter: (t.tourneytypeid = tt.id)\n  Buffers: shared hit=2\n  ->  Seq Scan on tourneys t  (cost=0.00..1.01 rows=1 width=24) (actual rows=1.00 loops=1)\n        Filter: (id = '1'::smallint)\n        Buffers: shared hit=1\n  ->  Seq Scan on tourneytypes tt  (cost=0.00..1.01 rows=1 width=26) (actual rows=1.00 loops=1)\n        Buffers: shared hit=1\nPlanning Time: 0.084 ms\nExecution Time: 0.022 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0004737999988719821,
+        "mean": 0.0003912199987098575,
+        "p50": 0.0003724999842233956,
+        "p95": 0.0004605800029821694,
+        "p99": 0.0004711559996940196
+      }
+    },
+    "selectTourneyMaxSeats": {
+      "error": "",
+      "plan": "Aggregate  (cost=13.63..13.64 rows=1 width=2) (actual rows=1.00 loops=1)\n  Buffers: shared hit=4\n  ->  Hash Join  (cost=8.31..13.63 rows=1 width=2) (actual rows=0.00 loops=1)\n        Hash Cond: (g.id = h.gametypeid)\n        Buffers: shared hit=4\n        ->  Seq Scan on gametypes g  (cost=0.00..4.68 rows=168 width=6) (actual rows=1.00 loops=1)\n              Buffers: shared hit=2\n        ->  Hash  (cost=8.30..8.30 rows=1 width=4) (actual rows=0.00 loops=1)\n              Buckets: 1024  Batches: 1  Memory Usage: 8kB\n              Buffers: shared hit=2\n              ->  Index Scan using hands_tourneyid_idx on hands h  (cost=0.28..8.30 rows=1 width=4) (actual rows=0.00 loops=1)\n                    Index Cond: (tourneyid = 71487580)\n                    Index Searches: 1\n                    Buffers: shared hit=2\nPlanning:\n  Buffers: shared hit=10\nPlanning Time: 0.153 ms\nExecution Time: 0.029 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005206000059843063,
+        "mean": 0.000425220001488924,
+        "p50": 0.00040530000114813447,
+        "p95": 0.0004978200071491301,
+        "p99": 0.0005160440062172712
+      }
+    },
+    "selectTourneyPayouts": {
+      "error": "",
+      "plan": "Sort  (cost=1.76..1.76 rows=1 width=94)\n  Sort Key: place\n  ->  Seq Scan on tourneypayouts  (cost=0.00..1.75 rows=1 width=94)\n        Filter: (tourneyid = 71487580)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0002940000267699361,
+        "mean": 0.0002534200088120997,
+        "p50": 0.0002447000006213784,
+        "p95": 0.00028500002808868886,
+        "p99": 0.00029220002703368665
+      }
+    },
+    "selectTourneyPreflopDecisions": {
+      "error": "",
+      "plan": "Sort  (cost=36.58..36.58 rows=1 width=32)\n  Sort Key: si.handid, si.actionno\n  ->  Nested Loop  (cost=0.83..36.57 rows=1 width=32)\n        ->  Nested Loop  (cost=0.56..36.27 rows=1 width=27)\n              ->  Index Scan using hands_tourneyid_idx on hands h  (cost=0.28..8.30 rows=1 width=8)\n                    Index Cond: (tourneyid = 71487580)\n              ->  Index Scan using handssituations_hand_idx on handssituations si  (cost=0.28..27.93 rows=4 width=27)\n                    Index Cond: (handid = h.id)\n                    Filter: ((streetname)::text = 'preflop'::text)\n        ->  Index Scan using players_pkey on players pl  (cost=0.27..0.30 rows=1 width=13)\n              Index Cond: (id = si.playerid)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.004191800020635128,
+        "mean": 0.0015286800102330745,
+        "p50": 0.000859099964145571,
+        "p95": 0.0035858400166034693,
+        "p99": 0.0040706080198287965
+      }
+    },
+    "selectTourneyResults": {
+      "error": "",
+      "plan": "Sort  (cost=1.14..1.14 rows=1 width=12)\n  Sort Key: rank\n  ->  Seq Scan on tourneysplayers tp  (cost=0.00..1.12 rows=1 width=12)\n        Filter: ((rank IS NOT NULL) AND (tourneyid = 71487580))",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00033329997677356005,
+        "mean": 0.000267699989490211,
+        "p50": 0.00025189999723806977,
+        "p95": 0.0003180599771440029,
+        "p99": 0.0003302519768476486
+      }
+    },
+    "selectTourneyStartStacks": {
+      "error": "",
+      "plan": "Nested Loop  (cost=0.83..17.04 rows=1 width=25)\n  ->  Nested Loop  (cost=0.56..16.74 rows=1 width=20)\n        ->  Index Scan using hands_tourneyid_idx on hands h  (cost=0.28..8.30 rows=1 width=8)\n              Index Cond: (tourneyid = 71487580)\n        ->  Index Scan using handsplayers_handid_idx on handsplayers hp  (cost=0.28..8.39 rows=6 width=20)\n              Index Cond: (handid = h.id)\n  ->  Index Scan using players_pkey on players pl  (cost=0.27..0.30 rows=1 width=13)\n        Index Cond: (id = hp.playerid)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0010940000065602362,
+        "mean": 0.0009961600066162647,
+        "p50": 0.0009860999998636544,
+        "p95": 0.0010726000065915285,
+        "p99": 0.0010897200065664947
+      }
+    },
+    "selectTourneyWithTypeId": {
+      "error": "",
+      "plan": "Seq Scan on tourneys  (cost=0.00..1.01 rows=1 width=4) (actual rows=1.00 loops=1)\n  Filter: (tourneytypeid = '1'::smallint)\n  Buffers: shared hit=1\nPlanning Time: 0.032 ms\nExecution Time: 0.011 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0003619000199250877,
+        "mean": 0.0002638400183059275,
+        "p50": 0.00023830001009628177,
+        "p95": 0.000338880019262433,
+        "p99": 0.00035729601979255676
+      }
+    },
+    "selectTourneysWithHands": {
+      "error": "",
+      "plan": "Unique  (cost=24.12..24.15 rows=4 width=4) (actual rows=1.00 loops=1)\n  Buffers: shared hit=8\n  ->  Sort  (cost=24.12..24.13 rows=6 width=4) (actual rows=1.00 loops=1)\n        Sort Key: tourneyid\n        Sort Method: quicksort  Memory: 25kB\n        Buffers: shared hit=8\n        ->  Bitmap Heap Scan on hands  (cost=4.33..24.04 rows=6 width=4) (actual rows=1.00 loops=1)\n              Recheck Cond: (tourneyid IS NOT NULL)\n              Heap Blocks: exact=6\n              Buffers: shared hit=8\n              ->  Bitmap Index Scan on hands_tourneyid_idx  (cost=0.00..4.33 rows=6 width=0) (actual rows=6.00 loops=1)\n                    Index Cond: (tourneyid IS NOT NULL)\n                    Index Searches: 1\n                    Buffers: shared hit=2\nPlanning Time: 0.059 ms\nExecution Time: 0.036 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005763000226579607,
+        "mean": 0.0004041799926199019,
+        "p50": 0.00039469997864216566,
+        "p95": 0.0005550000118091702,
+        "p99": 0.0005720400204882025
+      }
+    },
+    "select_M": {
+      "error": "l'op\u00e9rateur n'existe pas : timestamp without time zone = smallint\nLINE 3:                 WHERE monthStart = $1\n                                         ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom d",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : timestamp without time zone = smallint\nLINE 3:                 WHERE monthStart = $1\n                                         ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "select_S": {
+      "error": "l'op\u00e9rateur n'existe pas : timestamp without time zone >= smallint\nLINE 11:                 WHERE (sessionEnd>=$1 AND sessionStart<=$2)\n                                          ^\nHINT:  Aucun op\u00e9rate",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : timestamp without time zone >= smallint\nLINE 11:                 WHERE (sessionEnd>=$1 AND sessionStart<=$2)\n                                          ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "select_SC": {
+      "error": "l'op\u00e9rateur n'existe pas : timestamp without time zone >= smallint\nLINE 122:                 WHERE endTime>=$1\n                                       ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : timestamp without time zone >= smallint\nLINE 122:                 WHERE endTime>=$1\n                                       ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "select_S_all": {
+      "error": "l'op\u00e9rateur n'existe pas : timestamp without time zone >= smallint\nLINE 10:                 WHERE sessionEnd>=$1\n                                         ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom ",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : timestamp without time zone >= smallint\nLINE 10:                 WHERE sessionEnd>=$1\n                                         ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "select_TC": {
+      "error": "",
+      "plan": "Seq Scan on tourneyscache tc  (cost=0.00..0.00 rows=1 width=20)\n  Filter: ((tourneyid = 71487580) AND (playerid = '390'::smallint))",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00039380002999678254,
+        "mean": 0.0002926200046204031,
+        "p50": 0.0002709999680519104,
+        "p95": 0.0003694000304676592,
+        "p99": 0.0003889200300909579
+      }
+    },
+    "select_W": {
+      "error": "l'op\u00e9rateur n'existe pas : timestamp without time zone = smallint\nLINE 3:                 WHERE weekStart = $1\n                                        ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom don",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : timestamp without time zone = smallint\nLINE 3:                 WHERE weekStart = $1\n                                        ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "select_cardscache_ring": {
+      "error": "",
+      "plan": "Seq Scan on cardscache  (cost=0.00..1.27 rows=1 width=8)\n  Filter: ((tourneytypeid IS NULL) AND (weekid = '1'::smallint) AND (monthid = '1'::smallint) AND (startcards = '1'::smallint) AND (gametypeid = '169'::smallint) AND (playerid = '390'::smallint))",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.000860299973282963,
+        "mean": 0.0003962599905207753,
+        "p50": 0.000278300023637712,
+        "p95": 0.0007476199767552315,
+        "p99": 0.0008377639739774168
+      }
+    },
+    "select_cardscache_tour": {
+      "error": "",
+      "plan": "Seq Scan on cardscache  (cost=0.00..1.30 rows=1 width=8)\n  Filter: ((weekid = '1'::smallint) AND (monthid = '1'::smallint) AND (tourneytypeid = '1'::smallint) AND (startcards = '1'::smallint) AND (gametypeid = '169'::smallint) AND (playerid = '390'::smallint))",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.00030590000096708536,
+        "mean": 0.00027922000735998155,
+        "p50": 0.0002725999802350998,
+        "p95": 0.0002998600015416741,
+        "p99": 0.00030469200108200316
+      }
+    },
+    "select_hudcache_ring": {
+      "error": "l'op\u00e9rateur n'existe pas : character = smallint\nLINE 6:                 AND   position=$4\n                                      ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'argum",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : character = smallint\nLINE 6:                 AND   position=$4\n                                      ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "select_hudcache_ring_bulk": {
+      "error": "l'op\u00e9rateur n'existe pas : character = integer\nLINE 4: ...(gametypeId, playerId, seats, position, styleKey) IN ((1, 1,...\n                                                             ^\nHINT:  Aucun op",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : character = integer\nLINE 4: ...(gametypeId, playerId, seats, position, styleKey) IN ((1, 1,...\n                                                             ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "select_hudcache_tour": {
+      "error": "l'op\u00e9rateur n'existe pas : character = smallint\nLINE 6:                 AND   position=$4\n                                      ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'argum",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : character = smallint\nLINE 6:                 AND   position=$4\n                                      ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "select_hudcache_tour_bulk": {
+      "error": "nombre diff\u00e9rent d'entr\u00e9es dans les expressions de ligne\nLINE 3: ...ayerId, seats, position, tourneyTypeId, styleKey) IN ((1, 1,...\n                                                             ^",
+      "plan": "<explain failed: nombre diff\u00e9rent d'entr\u00e9es dans les expressions de ligne\nLINE 3: ...ayerId, seats, position, tourneyTypeId, styleKey) IN ((1, 1,...\n                                                             ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "select_positionscache_ring": {
+      "error": "syntaxe en entr\u00e9e invalide pour le type smallint : \u00ab B \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $6 = '...'",
+      "plan": "<explain failed: syntaxe en entr\u00e9e invalide pour le type smallint : \u00ab B \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $6 = '...'>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "select_positionscache_tour": {
+      "error": "syntaxe en entr\u00e9e invalide pour le type smallint : \u00ab B \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $7 = '...'",
+      "plan": "<explain failed: syntaxe en entr\u00e9e invalide pour le type smallint : \u00ab B \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $7 = '...'>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "sessionGuardHands": {
+      "error": "",
+      "plan": "Sort  (cost=21.05..21.05 rows=1 width=64)\n  Sort Key: (EXTRACT(epoch FROM h.starttime)), h.id\n  ->  Nested Loop  (cost=7.27..21.04 rows=1 width=64)\n        ->  Hash Join  (cost=6.99..12.73 rows=1 width=28)\n              Hash Cond: (gt.id = h.gametypeid)\n              ->  Seq Scan on gametypes gt  (cost=0.00..5.10 rows=167 width=16)\n                    Filter: (type ~~ 'ring'::text)\n              ->  Hash  (cost=6.98..6.98 rows=1 width=20)\n                    ->  Index Scan using hands_start_time_idx on hands h  (cost=0.28..6.98 rows=1 width=20)\n                          Index Cond: (starttime >= '2026-11-03 12:52:27.773503'::timestamp without time zone)\n        ->  Index Scan using handsplayers_hand_player_idx on handsplayers hp  (cost=0.28..8.30 rows=1 width=20)\n              Index Cond: ((handid = h.id) AND (playerid = '390'::smallint))",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0014378000050783157,
+        "mean": 0.001132700010202825,
+        "p50": 0.0010822999756783247,
+        "p95": 0.001371260010637343,
+        "p99": 0.0014244920061901212
+      }
+    },
+    "sessionStats": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 9:              AND  h.startTime \n                     ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 9:              AND  h.startTime \n                     ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "set tx level": {
+      "status": "skipped_ddl"
+    },
+    "settleTourneyPlayerKoWinnings": {
+      "error": "",
+      "plan": "Update on tourneysplayers  (cost=0.00..1.15 rows=0 width=0)\n  ->  Seq Scan on tourneysplayers  (cost=0.00..1.15 rows=1 width=14)\n        Filter: ((kowinnings IS NULL) AND (tourneyid = 71487580) AND (playerid = '390'::smallint))",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005928000318817794,
+        "mean": 0.0004315600031986833,
+        "p50": 0.00043699995148926973,
+        "p95": 0.0005680400296114384,
+        "p99": 0.0005878480314277112
+      }
+    },
+    "singleHand": {
+      "error": "",
+      "plan": "Index Scan using heroseat_idx on hands h  (cost=0.28..8.30 rows=1 width=207) (actual rows=1.00 loops=1)\n  Index Cond: (id = '1'::smallint)\n  Index Searches: 1\n  Buffers: shared hit=5\nPlanning Time: 0.103 ms\nExecution Time: 0.020 ms",
+      "rows": 1,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00047829997492954135,
+        "mean": 0.00041624001460149884,
+        "p50": 0.0004529000143520534,
+        "p95": 0.0004777199821546674,
+        "p99": 0.00047818397637456656
+      }
+    },
+    "singleHandBoards": {
+      "error": "",
+      "plan": "Seq Scan on boards b  (cost=0.00..1.20 rows=1 width=28)\n  Filter: (handid = '663'::smallint)",
+      "rows": 0,
+      "status": "empty",
+      "wall": {
+        "count": 5,
+        "max": 0.0019676999654620886,
+        "mean": 0.0006008800119161606,
+        "p50": 0.0002462000120431185,
+        "p95": 0.0016349999816156922,
+        "p99": 0.0019011599686928093
+      }
+    },
+    "store_aof_decision": {
+      "error": "la colonne \u00ab cardsobservable \u00bb est de type boolean mais l'expression est de type smallint\nLINE 8:                 $9, $10, $11, $12, $13, $14, $15, $16\n                            ^\nHINT:  Vous devez ",
+      "plan": "<explain failed: la colonne \u00ab cardsobservable \u00bb est de type boolean mais l'expression est de type smallint\nLINE 8:                 $9, $10, $11, $12, $13, $14, $15, $16\n                            ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "store_aof_decision_analysis": {
+      "error": "une instruction insert ou update sur la table \u00ab aofdecisionanalyses \u00bb viole la contrainte de cl\u00e9\n\u00e9trang\u00e8re \u00ab aofdecisionanalyses_decisionid_fkey \u00bb\nDETAIL:  La cl\u00e9 (decisionid)=(1) n'est pas pr\u00e9sente d",
+      "plan": "Insert on aofdecisionanalyses  (cost=0.00..0.02 rows=0 width=0)\n  ->  Result  (cost=0.00..0.02 rows=1 width=564)",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "store_board_features": {
+      "error": "",
+      "plan": "Insert on boardfeatures  (cost=0.00..0.01 rows=0 width=0)\n  ->  Result  (cost=0.00..0.01 rows=1 width=250)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0010057000326924026,
+        "mean": 0.0005954600055702031,
+        "p50": 0.0005895000067539513,
+        "p95": 0.0009234400233253836,
+        "p99": 0.0009892480308189987
+      }
+    },
+    "store_boards": {
+      "error": "",
+      "plan": "Insert on boards  (cost=0.00..0.01 rows=0 width=0)\n  ->  Result  (cost=0.00..0.01 rows=1 width=28)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0008461999823339283,
+        "mean": 0.0004529000143520534,
+        "p50": 0.0003489000373519957,
+        "p95": 0.000760779995471239,
+        "p99": 0.0008291159849613904
+      }
+    },
+    "store_file": {
+      "error": "la colonne \u00ab finished \u00bb est de type boolean mais l'expression est de type smallint\nLINE 17:                 $11, $12\n                              ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appl",
+      "plan": "<explain failed: la colonne \u00ab finished \u00bb est de type boolean mais l'expression est de type smallint\nLINE 17:                 $11, $12\n                              ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "store_hand": {
+      "error": "la colonne \u00ab importtime \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 42: ...                 ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $...\n                   ",
+      "plan": "<explain failed: la colonne \u00ab importtime \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 42: ...                 ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $...\n                                                              ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "store_hand_states": {
+      "error": "",
+      "plan": "Insert on handstates  (cost=0.00..0.01 rows=0 width=0)\n  ->  Result  (cost=0.00..0.01 rows=1 width=398)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0018254999886266887,
+        "mean": 0.000703579990658909,
+        "p50": 0.0004222000134177506,
+        "p95": 0.0015522999921813603,
+        "p99": 0.001770859989337623
+      }
+    },
+    "store_hands_actions": {
+      "error": "la colonne \u00ab allin \u00bb est de type boolean mais l'expression est de type smallint\nLINE 36:                 $11, $12, $13, $14, $15,\n                              ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expressio",
+      "plan": "<explain failed: la colonne \u00ab allin \u00bb est de type boolean mais l'expression est de type smallint\nLINE 36:                 $11, $12, $13, $14, $15,\n                              ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "store_hands_cashout": {
+      "error": "",
+      "plan": "Insert on handscashout  (cost=0.00..0.01 rows=0 width=0)\n  ->  Result  (cost=0.00..0.01 rows=1 width=84)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0006281999521888793,
+        "mean": 0.00042062000138685105,
+        "p50": 0.00035230000503361225,
+        "p95": 0.0005885399645194411,
+        "p99": 0.0006202679546549916
+      }
+    },
+    "store_hands_players": {
+      "error": "la colonne \u00ab sitout \u00bb est de type boolean mais l'expression est de type smallint\nLINE 330:                  $6, $7, $8, $9, $10,\n                                   ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expre",
+      "plan": "<explain failed: la colonne \u00ab sitout \u00bb est de type boolean mais l'expression est de type smallint\nLINE 330:                  $6, $7, $8, $9, $10,\n                                   ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "store_hands_pots": {
+      "error": "",
+      "plan": "Insert on handspots  (cost=0.00..0.01 rows=0 width=0)\n  ->  Result  (cost=0.00..0.01 rows=1 width=52)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0017374999588355422,
+        "mean": 0.0006841399939730763,
+        "p50": 0.0004376999568194151,
+        "p95": 0.001486819970887154,
+        "p99": 0.0016873639612458645
+      }
+    },
+    "store_hands_showdown": {
+      "error": "",
+      "plan": "Insert on handsshowdown  (cost=0.00..0.01 rows=0 width=0)\n  ->  Result  (cost=0.00..0.01 rows=1 width=682)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0006170000415295362,
+        "mean": 0.00041127998847514393,
+        "p50": 0.00036259996704757214,
+        "p95": 0.0005666000302881002,
+        "p99": 0.000606920039281249
+      }
+    },
+    "store_hands_situations": {
+      "error": "la colonne \u00ab ishero \u00bb est de type boolean mais l'expression est de type smallint\nLINE 62: ...1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, ...\n                                           ",
+      "plan": "<explain failed: la colonne \u00ab ishero \u00bb est de type boolean mais l'expression est de type smallint\nLINE 62: ...1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, ...\n                                                              ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "store_hands_stove": {
+      "error": "",
+      "plan": "Insert on handsstove  (cost=0.00..0.01 rows=0 width=0)\n  ->  Result  (cost=0.00..0.01 rows=1 width=98)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0034118000185117126,
+        "mean": 0.0011567199951969087,
+        "p50": 0.0005631999811157584,
+        "p95": 0.002876680018380284,
+        "p99": 0.0033047760184854265
+      }
+    },
+    "store_player_auto_note": {
+      "error": "",
+      "plan": "Insert on playerautonotes  (cost=0.00..0.02 rows=0 width=0)\n  ->  Result  (cost=0.00..0.02 rows=1 width=282)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0007363000186160207,
+        "mean": 0.0004673599964007735,
+        "p50": 0.0004159999662078917,
+        "p95": 0.0006729400134645403,
+        "p99": 0.0007236280175857247
+      }
+    },
+    "tourneyChipEVByPosition": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 8:         AND   pl.siteId in \n                ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 8:         AND   pl.siteId in \n                ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyChipEVByPositionGrid": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 10:         AND   ((h.startTime > '' AND h.startTime < '')\n                 ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 10:         AND   ((h.startTime > '' AND h.startTime < '')\n                 ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyGraph": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 7:         AND   pl.siteId in \n                ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 7:         AND   pl.siteId in \n                ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyGraphType": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 7:         AND   pl.siteId in \n                ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 7:         AND   pl.siteId in \n                ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyHandsInRangeSessionFilter": {
+      "error": "l'argument de WHERE doit \u00eatre de type boolean, et non du type timestamp without time zone\nLINE 7:         where h.startTime \n                      ^",
+      "plan": "<explain failed: l'argument de WHERE doit \u00eatre de type boolean, et non du type timestamp without time zone\nLINE 7:         where h.startTime \n                      ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyPlayerDetailedStats": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 43:                   AND   (tt.maxSeats  OR COALESCE(tt.maxSeat...\n                           ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 43:                   AND   (tt.maxSeats  OR COALESCE(tt.maxSeat...\n                           ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "tourneyResults": {
+      "error": "erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 7:         AND   pl.siteId in \n                ^",
+      "plan": "<explain failed: erreur de syntaxe sur ou pr\u00e8s de \u00ab AND \u00bb\nLINE 7:         AND   pl.siteId in \n                ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "updateHandsPlayersForTTypeId": {
+      "error": "la colonne \u00ab tourneytypeid \u00bb de la relation \u00ab handsplayers \u00bb n'existe pas\nLINE 2: ...                                              SET tourneyTyp...\n                                                   ",
+      "plan": "<explain failed: la colonne \u00ab tourneytypeid \u00bb de la relation \u00ab handsplayers \u00bb n'existe pas\nLINE 2: ...                                              SET tourneyTyp...\n                                                             ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "updateTourney": {
+      "error": "la colonne \u00ab endtime \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 5:                                              endTime = $4,\n                               ",
+      "plan": "<explain failed: la colonne \u00ab endtime \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 5:                                              endTime = $4,\n                                                               ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "updateTourneyEnd": {
+      "error": "la colonne \u00ab endtime \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 2:                                          SET endTime = $1\n                                ",
+      "plan": "<explain failed: la colonne \u00ab endtime \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 2:                                          SET endTime = $1\n                                                               ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "updateTourneyStart": {
+      "error": "",
+      "plan": "Update on tourneys  (cost=0.00..1.01 rows=0 width=0)\n  ->  Seq Scan on tourneys  (cost=0.00..1.01 rows=1 width=14)\n        Filter: (id = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00040550000267103314,
+        "mean": 0.0003263800172135234,
+        "p50": 0.00031510001281276345,
+        "p95": 0.0003976400126703084,
+        "p99": 0.00040392800467088815
+      }
+    },
+    "updateTourneyTypeId": {
+      "error": "",
+      "plan": "Update on tourneys t  (cost=0.00..2.04 rows=0 width=0)\n  ->  Nested Loop  (cost=0.00..2.04 rows=1 width=16)\n        Join Filter: (t.tourneytypeid = tt.id)\n        ->  Seq Scan on tourneys t  (cost=0.00..1.01 rows=1 width=10)\n              Filter: (sitetourneyno = 71487580)\n        ->  Seq Scan on tourneytypes tt  (cost=0.00..1.01 rows=1 width=10)\n              Filter: (siteid = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0003940000315196812,
+        "mean": 0.00032696000998839737,
+        "p50": 0.00030990003142505884,
+        "p95": 0.00037842002930119637,
+        "p99": 0.00039088403107598427
+      }
+    },
+    "updateTourneysPlayer": {
+      "error": "",
+      "plan": "Update on tourneysplayers  (cost=0.00..1.12 rows=0 width=0)\n  ->  Seq Scan on tourneysplayers  (cost=0.00..1.12 rows=1 width=86)\n        Filter: (id = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00035960000241175294,
+        "mean": 0.0002896399819292128,
+        "p50": 0.0002731999848037958,
+        "p95": 0.00034313999349251385,
+        "p99": 0.0003563080006279051
+      }
+    },
+    "updateTourneysPlayerBounties": {
+      "error": "",
+      "plan": "Update on tourneysplayers  (cost=0.00..1.13 rows=0 width=0)\n  ->  Seq Scan on tourneysplayers  (cost=0.00..1.13 rows=1 width=38)\n        Filter: (id = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00038549996679648757,
+        "mean": 0.00030311999144032596,
+        "p50": 0.000272100034635514,
+        "p95": 0.00037869997322559357,
+        "p99": 0.00038413996808230874
+      }
+    },
+    "updateTourneysPlayerResults": {
+      "error": "les COALESCE types smallint et character varying ne peuvent pas correspondre\nLINE 4: ...                  winningsCurrency = COALESCE($3, winningsCu...\n                                                ",
+      "plan": "<explain failed: les COALESCE types smallint et character varying ne peuvent pas correspondre\nLINE 4: ...                  winningsCurrency = COALESCE($3, winningsCu...\n                                                             ^>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "updateTourneysSessions": {
+      "error": "une instruction insert ou update sur la table \u00ab tourneys \u00bb viole la contrainte de cl\u00e9\n\u00e9trang\u00e8re \u00ab tourneys_sessionid_fkey \u00bb\nDETAIL:  La cl\u00e9 (sessionid)=(1) n'est pas pr\u00e9sente dans la table \u00ab sessions ",
+      "plan": "Update on tourneys  (cost=0.00..1.01 rows=0 width=0)\n  ->  Seq Scan on tourneys  (cost=0.00..1.01 rows=1 width=10)\n        Filter: (id = '1'::smallint)",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "update_RSC_H": {
+      "error": "la colonne \u00ab sessionid \u00bb est de type integer mais l'expression est de type timestamp without time zone\nLINE 1: UPDATE Hands SET sessionId = $1 WHERE id = $2\n                                     ^\nHINT",
+      "plan": "<explain failed: la colonne \u00ab sessionid \u00bb est de type integer mais l'expression est de type timestamp without time zone\nLINE 1: EXPLAIN UPDATE Hands SET sessionId = $1 WHERE id = $2\n                                             ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "update_S": {
+      "error": "la colonne \u00ab sessionstart \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 4:                 sessionStart=$3,\n                                     ^\nHINT:  Vous d",
+      "plan": "<explain failed: la colonne \u00ab sessionstart \u00bb est de type timestamp without time zone mais l'expression est de type smallint\nLINE 4:                 sessionStart=$3,\n                                     ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "update_SC": {
+      "error": "",
+      "plan": "Update on sessionscache  (cost=0.00..0.29 rows=0 width=0)\n  ->  Seq Scan on sessionscache  (cost=0.00..0.29 rows=1 width=626)\n        Filter: (id = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.001811699999962002,
+        "mean": 0.0013491999940015375,
+        "p50": 0.0011615999974310398,
+        "p95": 0.0017444800003431737,
+        "p99": 0.0017982560000382364
+      }
+    },
+    "update_S_H": {
+      "error": "",
+      "plan": "Update on hands  (cost=0.28..8.30 rows=0 width=0)\n  ->  Index Scan using hands_sessionid_idx on hands  (cost=0.28..8.30 rows=1 width=10)\n        Index Cond: (sessionid = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00031759997364133596,
+        "mean": 0.00027088000206276774,
+        "p50": 0.00025839998852461576,
+        "p95": 0.0003083999850787222,
+        "p99": 0.0003157599759288132
+      }
+    },
+    "update_S_SC": {
+      "error": "",
+      "plan": "Update on sessionscache  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on sessionscache  (cost=0.00..0.00 rows=1 width=10)\n        Filter: (sessionid = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00027950003277510405,
+        "mean": 0.00024918001145124435,
+        "p50": 0.00024239998310804367,
+        "p95": 0.0002723200246691704,
+        "p99": 0.00027806403115391735
+      }
+    },
+    "update_S_T": {
+      "error": "",
+      "plan": "Update on tourneys  (cost=0.00..1.01 rows=0 width=0)\n  ->  Seq Scan on tourneys  (cost=0.00..1.01 rows=1 width=10)\n        Filter: (sessionid = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005135999526828527,
+        "mean": 0.000398539996240288,
+        "p50": 0.0004162000259384513,
+        "p95": 0.000505279959179461,
+        "p99": 0.0005119359539821743
+      }
+    },
+    "update_S_TC": {
+      "error": "",
+      "plan": "Update on tourneyscache  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on tourneyscache  (cost=0.00..0.00 rows=1 width=10)\n        Filter: (sessionid = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0004019000334665179,
+        "mean": 0.0003535800031386316,
+        "p50": 0.00033980002626776695,
+        "p95": 0.0004017600207589567,
+        "p99": 0.00040187203092500567
+      }
+    },
+    "update_TC": {
+      "status": "skipped_template"
+    },
+    "update_WM_S": {
+      "error": "",
+      "plan": "Update on sessions  (cost=0.00..0.00 rows=0 width=0)\n  ->  Seq Scan on sessions  (cost=0.00..0.00 rows=1 width=14)\n        Filter: (id = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.00039280002238228917,
+        "mean": 0.0003229800146073103,
+        "p50": 0.00031920004403218627,
+        "p95": 0.00038012001896277066,
+        "p99": 0.00039026402169838547
+      }
+    },
+    "update_aof_decision": {
+      "error": "la colonne \u00ab cardsobservable \u00bb est de type boolean mais l'expression est de type smallint\nLINE 4:                 cardsObservable=$8, holeCards=$9, flopCards=...\n                                      ",
+      "plan": "<explain failed: la colonne \u00ab cardsobservable \u00bb est de type boolean mais l'expression est de type smallint\nLINE 4:                 cardsObservable=$8, holeCards=$9, flopCards=...\n                                        ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "update_aof_decision_analysis": {
+      "error": "",
+      "plan": "Update on aofdecisionanalyses  (cost=0.00..1.17 rows=0 width=0)\n  ->  Seq Scan on aofdecisionanalyses  (cost=0.00..1.17 rows=1 width=132)\n        Filter: (id = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005109999910928309,
+        "mean": 0.00036479998379945755,
+        "p50": 0.0003092999686487019,
+        "p95": 0.0004938999889418482,
+        "p99": 0.0005075799906626344
+      }
+    },
+    "update_cardscache": {
+      "error": "l'op\u00e9rateur n'existe pas : integer + timestamp without time zone\nLINE 2:                 n=n+$1,\n                           ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : integer + timestamp without time zone\nLINE 2:                 n=n+$1,\n                           ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "update_file": {
+      "error": "la colonne \u00ab finished \u00bb est de type boolean mais l'expression est de type smallint\nLINE 12:                 finished=$11\n                                  ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou ",
+      "plan": "<explain failed: la colonne \u00ab finished \u00bb est de type boolean mais l'expression est de type smallint\nLINE 12:                 finished=$11\n                                  ^\nHINT:  Vous devez r\u00e9\u00e9crire l'expression ou lui appliquer une transformation de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "update_hudcache": {
+      "error": "l'op\u00e9rateur n'existe pas : integer + timestamp without time zone\nLINE 2:         n=n+$1,\n                   ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajo",
+      "plan": "<explain failed: l'op\u00e9rateur n'existe pas : integer + timestamp without time zone\nLINE 2:         n=n+$1,\n                   ^\nHINT:  Aucun op\u00e9rateur ne correspond au nom donn\u00e9 et aux types d'arguments.\nVous devez ajouter des conversions explicites de type.>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "update_player_auto_note": {
+      "error": "",
+      "plan": "Update on playerautonotes  (cost=0.00..1.32 rows=0 width=0)\n  ->  Seq Scan on playerautonotes  (cost=0.00..1.32 rows=1 width=78)\n        Filter: (id = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0005609000218100846,
+        "mean": 0.00044483999954536557,
+        "p50": 0.00044329999946057796,
+        "p95": 0.0005596800125204027,
+        "p99": 0.0005606560199521482
+      }
+    },
+    "update_player_comment": {
+      "error": "",
+      "plan": "Update on players  (cost=0.27..8.30 rows=0 width=0)\n  ->  Index Scan using players_pkey on players  (cost=0.27..8.30 rows=1 width=46)\n        Index Cond: (id = '1'::smallint)",
+      "rows": 0,
+      "status": "ok",
+      "wall": {
+        "count": 5,
+        "max": 0.0007073000306263566,
+        "mean": 0.0005669000092893839,
+        "p50": 0.000561899971216917,
+        "p95": 0.0006844400311820209,
+        "p99": 0.0007027280307374894
+      }
+    },
+    "update_positionscache": {
+      "error": "syntaxe en entr\u00e9e invalide pour le type integer : \u00ab B \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $1 = '...'",
+      "plan": "<explain failed: syntaxe en entr\u00e9e invalide pour le type integer : \u00ab B \u00bb\nCONTEXT:  param\u00e8tre de portail non nomm\u00e9 $1 = '...'>",
+      "rows": 0,
+      "status": "error",
+      "wall": {
+        "count": 1,
+        "max": 0.0,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      }
+    },
+    "vacuum": {
+      "status": "skipped_ddl"
+    }
+  },
+  "repeats": 5
+}

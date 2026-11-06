@@ -69,6 +69,7 @@ from fpdb_3_legacy import Database, Filters, LeakDetector, gui_empty_state
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.table_export import install_table_export
 
 log = get_logger("gui_opponents_report")
 
@@ -476,6 +477,7 @@ class GuiOpponentsReport(QSplitter):
         self.model = QStandardItemModel(0, 9, self.view)
         self.model.setSortRole(Qt.ItemDataRole.UserRole)
         self.view.setModel(self.model)
+        install_table_export(self.view)
         self.stats_frame.layout().addWidget(self.view)
 
         self.addWidget(scroll)
@@ -503,7 +505,6 @@ class GuiOpponentsReport(QSplitter):
     def fillStatsFrame(self) -> None:
         startTime = time()
         sites = self.filters.getSites()
-        heroes = self.filters.getHeroes()
         siteids = self.filters.getSiteIds()
         limits = self.filters.getLimits()
         dates = self.filters.getDates()
@@ -513,25 +514,15 @@ class GuiOpponentsReport(QSplitter):
         sitenos = []
         playerids = []
 
-        for site in sites:
-            hname = heroes.get(site, "")
-            if not hname:
-                log.info(f"fillStatsFrame: site '{site}' has no selected hero, skipping")
-                continue
-            # Plot the hero the user selected, resolved variant-aware:
-            # get_player_id maps a "PokerStars" selection to the hero's
-            # "PokerStars.FR" account, so data imported under a site skin still
-            # shows. Fall back to the site's hero-flagged players if unresolved.
-            result = self.db.get_player_id(self.conf, site, hname)
-            pids = [int(result)] if result is not None else self.db.get_hero_player_ids(site)
-            for pid in pids:
-                if pid not in playerids:
-                    playerids.append(pid)
-                    actual_site_id = self.db.get_player_site_id(pid)
-                    if actual_site_id is not None:
-                        sitenos.append(actual_site_id)
-                    else:
-                        sitenos.append(siteids[site])
+        # Every alias of the hero selected, or every player of a hero profile (#434):
+        # see Filters.get_selected_players.
+        for site, pid in self.filters.get_selected_players():
+            playerids.append(pid)
+            actual_site_id = self.db.get_player_site_id(pid)
+            if actual_site_id is not None:
+                sitenos.append(actual_site_id)
+            else:
+                sitenos.append(siteids[site])
 
         missing = gui_empty_state.missing_filter_reason(sites=sites, playerids=playerids, limits=limits)
         if missing is not None:

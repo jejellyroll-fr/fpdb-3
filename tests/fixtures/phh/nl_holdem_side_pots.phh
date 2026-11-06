@@ -1,0 +1,23 @@
+variant = "NT"
+antes = [0, 0, 0, 0]
+blinds_or_straddles = [5, 10, 0, 0]
+min_bet = 10
+starting_stacks = [300, 1000, 120, 1000]
+actions = [
+  "d dh p1 AcAd",
+  "d dh p2 KcKd",
+  "d dh p3 QcQd",
+  "d dh p4 7c2h",
+  "p3 cbr 120",
+  "p4 f",
+  "p1 cbr 300",
+  "p2 cc",
+  "d db 3s8h9d",
+  "d db Th",
+  "d db 4s",
+  "p1 sm AcAd",
+  "p2 sm KcKd",
+  "p3 sm QcQd",
+]
+players = ["Ann", "Ben", "Cid", "Dee"]
+winnings = [720, 0, 0, 0]

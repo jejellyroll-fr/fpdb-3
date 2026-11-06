@@ -18,6 +18,7 @@ from typing import Any
 
 import pytest
 
+import fpdb_3_legacy.hud_diagnostics as hud_diagnostics
 import fpdb_3_legacy.loggingFpdb as logging_fpdb
 
 
@@ -65,6 +66,34 @@ def preserve_global_logging():
 # --------------------------------------------------------------------------
 # Levels
 # --------------------------------------------------------------------------
+
+
+def test_hud_launch_identity_survives_the_default_warning_threshold(caplog, monkeypatch) -> None:
+    identity = {
+        "session": "abc123",
+        "role": "hud",
+        "version": "test",
+        "pid": 42,
+        "ppid": 1,
+        "executable": "/usr/bin/python",
+        "frozen": "False",
+        "bundle": None,
+        "translocated": False,
+        "command": ["hud"],
+    }
+    monkeypatch.setattr(hud_diagnostics, "process_identity", lambda role, command: identity)
+    logger = logging.getLogger("fpdb.test.hud_identity")
+    logger.setLevel(logging.WARNING)
+
+    with caplog.at_level(logging.WARNING, logger=logger.name):
+        hud_diagnostics.log_process_identity(logger, hud_diagnostics.ROLE_HUD)
+
+    assert any(
+        record.levelno == logging.WARNING
+        and "FPDB launch identity" in record.message
+        and "session='abc123'" in record.message
+        for record in caplog.records
+    )
 
 
 @pytest.mark.parametrize(
@@ -284,6 +313,29 @@ def test_a_saved_configuration_can_be_read_back(tmp_path, registry) -> None:
     data = config.load_config_data()
     assert "loggers" in data
     assert "fpdb.test.saved" in data["loggers"]
+
+
+def test_a_save_that_fails_halfway_leaves_the_previous_file_whole(tmp_path, registry, monkeypatch) -> None:
+    """Every fpdb process reads this file at startup while others rewrite it.
+
+    A save that truncated the file in place showed the readers an empty one
+    ("Expecting value: line 1 column 1"). The file is replaced whole instead,
+    so a write interrupted halfway leaves the previous one readable.
+    """
+    registry.register_logger("fpdb.test.atomic", logging.getLogger("fpdb.test.atomic"))
+    config = logging_fpdb.LogConfig(config_dir=str(tmp_path))
+    assert config.save_config(registry)
+    before = (tmp_path / "logger_config.json").read_text(encoding="utf-8")
+
+    def half_written(data, f, **kwargs):
+        f.write("{")
+        raise ValueError("interrupted")
+
+    monkeypatch.setattr(logging_fpdb.json, "dump", half_written)
+
+    assert config.save_config(registry) is False
+    assert (tmp_path / "logger_config.json").read_text(encoding="utf-8") == before
+    assert [p.name for p in tmp_path.iterdir()] == ["logger_config.json"]
 
 
 def test_an_exported_configuration_is_readable_json(tmp_path, registry) -> None:

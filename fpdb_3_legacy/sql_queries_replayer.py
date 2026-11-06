@@ -34,10 +34,28 @@ def replayer_queries() -> dict[str, str]:
     # Querry to get all hands in a date range for cash games session variation filter
     ####################################
     query["handsInRangeSessionFilter"] = """
-        select h.id
+        select distinct h.id
         from Hands h
         join Gametypes gt on h.gametypeId = gt.id
         join HandsPlayers hp on h.id = hp.handId  -- utilisation de HandsPlayers
+        where h.startTime <datetest>
+        <game_test>
+        <limit_test>
+        <player_test>
+        <position_test>
+    """
+
+    ####################################
+    # The same hands for the tournament viewer, each with its tournament's
+    # category, limit and buy-in, which GuiTourHandViewer filters on (#650)
+    ####################################
+    query["tourneyHandsInRangeSessionFilter"] = """
+        select distinct h.id, tt.category, tt.limitType, tt.buyin, tt.fee, tt.currency
+        from Hands h
+        join Gametypes gt on h.gametypeId = gt.id
+        join HandsPlayers hp on h.id = hp.handId
+        left join Tourneys t on h.tourneyId = t.id
+        left join TourneyTypes tt on t.tourneyTypeId = tt.id
         where h.startTime <datetest>
         <game_test>
         <limit_test>
@@ -83,6 +101,7 @@ def replayer_queries() -> dict[str, str]:
                     hp.card16,hp.card17,hp.card18,hp.card19,hp.card20,
                     hp.position,
                     round(hp.startBounty / 100.0,2) as bounty,
+                    round(hp.endBounty / 100.0,2) as endbounty,
                     hp.sitout,
                     hp.isCashOut
                 FROM

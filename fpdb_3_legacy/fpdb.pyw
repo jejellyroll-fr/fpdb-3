@@ -24,10 +24,13 @@ import sys
 if not hasattr(datetime, "UTC"):
     datetime.UTC = datetime.timezone.utc
 
-from fpdb_3_legacy.subprocess_launch import dispatch_hud_main, dispatch_run_module
+from fpdb_3_legacy.subprocess_launch import dispatch_hud_main, dispatch_multiprocessing, dispatch_run_module
 
 # Frozen builds have no "python -m": helper processes re-invoke this executable
-# with --run-module. Dispatch before pulling in the GUI stack below.
+# with --run-module, and multiprocessing workers with --multiprocessing-fork.
+# Dispatch before pulling in the GUI stack below.
+if __name__ == "__main__":
+    dispatch_multiprocessing()
 if __name__ == "__main__" and dispatch_run_module():
     sys.exit(0)
 if __name__ == "__main__" and dispatch_hud_main():
@@ -83,7 +86,6 @@ from fpdb_3_legacy import (
     GuiAutoNoteRules,
     GuiAutoNotesWorkbench,
     GuiBulkImport,
-    GuiCoinPokerCapture,
     GuiDatabase,
     GuiHandViewer,
     GuiLogView,
@@ -100,8 +102,10 @@ from fpdb_3_legacy.ConfigurationManager import ConfigurationManager
 from fpdb_3_legacy.disabled_sites import is_site_disabled
 from fpdb_3_legacy.Exceptions import FpdbError
 from fpdb_3_legacy.GuiConfigObserver import GuiConfigObserver
+from fpdb_3_legacy.hud_options_panel import HudOptionsDialog
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.L10n import set_locale_translation
+from fpdb_3_legacy.main_thread_gc import install_main_thread_gc
 from fpdb_3_legacy.ui_instrumentation import TabOpenProfiler, perf_level
 
 np = import_module("numpy")
@@ -435,6 +439,17 @@ class fpdb(QMainWindow):
             self.config.save()
             self.reload_config()
 
+    def dia_hud_options(self, widget, data=None) -> None:
+        """Edit the options new HUD tables start with; the HUD reads them from the saved file."""
+        # The HUD process may have changed the file since it was last read.
+        self.load_profile()
+
+        dia = HudOptionsDialog(self.config.get_hud_ui_parameters(), self)
+        if dia.exec():
+            self.config.set_hud_ui_parameters(dia.option_values())
+            self.config.save()
+        dia.deleteLater()
+
     def dia_import_pt4hud(self, widget, data=None) -> None:
         """Import a PokerTracker 4 .pt4hud layout into the HUD config.
 
@@ -463,19 +478,39 @@ class fpdb(QMainWindow):
             QMessageBox.critical(self, "Import failed", f"Could not import {path}:\n{e}")
             return
 
-        lines = [
-            f"Imported layout '{summary['name']}'.",
-            f"• {summary['stats']} stats mapped to a new HUD stat-set.",
-        ]
-        if summary["charts"]:
-            lines.append(
-                f"• {len(summary['charts'])} range chart(s) ({', '.join(summary['charts'])}) "
-                f"→ popup '{summary['popup']}'."
-            )
-        if summary["unmapped"]:
-            lines.append(f"• {len(summary['unmapped'])} custom formula stat(s) could not be mapped.")
-        lines.append("\nAssign the new stat-set / popup to a game in HUD Preferences.")
-        QMessageBox.information(self, _("PT4 HUD imported"), "\n".join(lines))
+        from fpdb_3_legacy.pt4hud_dialogs import show_import_summary
+
+        show_import_summary(self, summary)
+
+    def dia_stat_packs(self, widget=None, data=None) -> None:
+        """Manage user-installed declarative stat packs (#403)."""
+        from fpdb_3_legacy.stat_packs_dialog import open_stat_packs
+
+        open_stat_packs(self)
+
+    def dia_get_packs(self, widget=None, data=None) -> None:
+        """Tools ▸ Get packs: install HUDs and stat packs from the pack gallery (#449)."""
+        from fpdb_3_legacy.pack_gallery_dialog import open_pack_gallery
+
+        open_pack_gallery(self.config, self)
+
+    def dia_share_pack(self, widget=None, data=None) -> None:
+        """Tools ▸ Share a HUD or pack: write one ready to submit to the pack gallery (#449)."""
+        from fpdb_3_legacy.pack_share_dialog import open_share_pack
+
+        open_share_pack(self.config, self)
+
+    def dia_live_capture(self, widget=None, data=None) -> None:
+        """Tools ▸ Live capture: turn on, or off, a capture that reaches into a client (#451)."""
+        from fpdb_3_legacy.live_capture_dialog import open_live_capture
+
+        open_live_capture(self.config, self)
+
+    def dia_convert_pt4hud(self, widget=None, data=None) -> None:
+        """Configure ▸ Convert PT4 HUD to .fpdbhud: a layout as a package, untranslated stats listed (#614)."""
+        from fpdb_3_legacy.pt4hud_dialogs import convert_to_package
+
+        convert_to_package(self)
 
     def dia_import_pt4stat(self, widget, data=None) -> None:
         """Import PokerTracker 4 .pt4stat custom-statistic definitions.
@@ -1017,6 +1052,97 @@ class fpdb(QMainWindow):
                 "Re-start fpdb to use this option.",
             )
 
+    def help_research_omaha(self, widget, data=None) -> None:
+        """Open the Omaha reading of the Research Browser (#353).
+
+        The quick start teaches the browser with Hold'em examples, and the one
+        view that cannot work on a four-card game is the one it leads with. An
+        Omaha player deserves an entry of their own rather than a guide that
+        keeps saying "not for you".
+        """
+        from fpdb_3_legacy import help_links
+
+        if not help_links.open_help("research-omaha"):
+            self.info_box(
+                "Research Browser for Omaha",
+                f"The guide is published at {help_links.DOCS_URL}/research-omaha.md",
+            )
+
+    def help_fair_play(self, widget, data=None) -> None:
+        """Open what fpdb does during play, and what rooms say about it (#450)."""
+        from fpdb_3_legacy import help_links
+
+        if not help_links.open_help("fair-play"):
+            self.info_box(
+                _("What fpdb does while you play"),
+                _("The guide is published at {url}").format(url=f"{help_links.DOCS_URL}/fair-play.md"),
+            )
+
+    def dia_rebuild_analytics(self, widget, data=None) -> None:
+        """Re-derive the analytics rows this database is missing (#351).
+
+        A database imported before the analytics layers existed holds hands and
+        actions but none of the rows derived from them, so every Research
+        Browser question answers "0 decisions" and the context-aware HUD panels
+        have nothing to read. The rebuild has existed since #305 and nothing
+        called it: only the demo-workspace tool did, which is no help to a user
+        with their own history.
+        """
+        from fpdb_3_legacy.analytics_lifecycle import rebuildable_subsystems, subsystems_ahead_of_code
+        from fpdb_3_legacy.analytics_rebuild import rebuild_subsystems
+
+        if not self.obtain_global_lock("dia_rebuild_analytics"):
+            self.warning_box(
+                "Cannot open Database Maintenance window because"
+                " other windows have been opened. Re-start fpdb to use this option.",
+            )
+            return
+        try:
+            # Deliberately not stale_subsystems(): that list includes rows a
+            # *newer* fpdb wrote, which this version cannot read as current but
+            # must not overwrite with its own older rules either.
+            stale = list(rebuildable_subsystems(self.db))
+            ahead = list(subsystems_ahead_of_code(self.db))
+            if ahead:
+                self.warning_box(
+                    "These analytics rows were written by a newer version of fpdb and are left "
+                    f"untouched, because re-deriving them here would replace them with older "
+                    f"rules:\n\n    {', '.join(ahead)}\n\n"
+                    "Upgrade fpdb to read them.",
+                    "Rebuild Analytics Data",
+                )
+            if not stale:
+                self.info_box("Rebuild Analytics Data", "There is nothing for this version to rebuild.")
+                return
+            confirm = QMessageBox(
+                QMessageBox.Warning,
+                "Rebuild Analytics Data",
+                "Confirm rebuilding the analytics data",
+                QMessageBox.Yes | QMessageBox.No,
+                self,
+            )
+            confirm.setInformativeText(
+                f"These subsystems were derived by older rules, or never derived at all:\n\n"
+                f"    {', '.join(stale)}\n\n"
+                "Re-deriving them reads the hands already stored -- no hand history files are "
+                "needed and no hand ids change. It can take a while on a large database.",
+            )
+            if confirm.exec() != QMessageBox.Yes:
+                log.info("User cancelled rebuilding analytics data")
+                return
+            log.info("Rebuilding analytics data: %s", stale)
+            result = rebuild_subsystems(self.db, self.config, stale)
+            log.info("Analytics rebuild finished: %s", result)
+            summary = f"{result.rebuilt} of {result.scanned} hands re-derived."
+            if result.failed:
+                # Named rather than buried in the log: a rebuild that silently
+                # derived nothing is what left the Research Browser empty in the
+                # first place.
+                summary += f"\n\n{result.failed} hand(s) failed. First: {result.failures[0]}"
+            self.info_box("Rebuild Analytics Data", summary)
+        finally:
+            self.release_global_lock()
+
     def dia_rebuild_indexes(self, widget, data=None) -> None:
         if self.obtain_global_lock("dia_rebuild_indexes"):
             self.dia_confirm = QMessageBox(
@@ -1081,9 +1207,49 @@ class fpdb(QMainWindow):
         # Dialog handles saving and reloading itself
         dia.exec()
 
+    def dia_session_guard(self, widget=None, data=None) -> None:
+        """Open the Session Guard (#395): limits for the session being played."""
+        from fpdb_3_legacy.session_guard_dialog import (
+            SessionGuardAlert,
+            SessionGuardDialog,
+            SessionGuardIndicator,
+            SessionGuardMonitor,
+        )
+
+        if getattr(self, "session_guard", None) is None:
+            # One monitor for the window's lifetime: it keeps running with the dialog closed,
+            # and reads through the window's current connection and configuration so a
+            # configuration reload is followed.
+            self.session_guard = SessionGuardMonitor(lambda: self.db, lambda: self.config, self)
+            self.session_guard_alert = SessionGuardAlert(self.session_guard, self)
+            self.session_guard.alerts.connect(lambda _fired: self.session_guard_alert.show_pending())
+            self.session_guard_indicator = SessionGuardIndicator(self.session_guard, self.dia_session_guard, self)
+            self.statusBar().addPermanentWidget(self.session_guard_indicator)
+        dialog = getattr(self, "session_guard_dialog", None)
+        if dialog is None:
+            # No configuration pinned: the dialog reads the window's current one, which a
+            # reload replaces while the modeless dialog stays open.
+            dialog = SessionGuardDialog(self.session_guard, parent=self)
+            # Kept so the modeless dialog is not garbage-collected while open.
+            self.session_guard_dialog = dialog
+        dialog.show()
+        dialog.raise_()
+        dialog.activateWindow()
+
+    def _capture_missing(self) -> bool:
+        """Say so, and answer True, when this install carries no capture package (#451)."""
+        from fpdb_3_legacy import live_capture_consent
+
+        if live_capture_consent.capture_installed():
+            return False
+        self.info_box(_("Live capture"), str(live_capture_consent.CaptureNotInstalled()))
+        return True
+
     def launch_swc_capture(self, widget=None, data=None) -> None:
         """Launch the SwC Poker Console & Replayer."""
-        from fpdb_3_legacy.swc_poker_console import SwCPokerConsoleDialog
+        if self._capture_missing():
+            return
+        from fpdb_3_legacy.capture.swc_poker_console import SwCPokerConsoleDialog
 
         try:
             dialog = SwCPokerConsoleDialog(self.config, self)
@@ -1124,6 +1290,11 @@ class fpdb(QMainWindow):
                     hero_aliases = values.get("hero_aliases")
                     if hero_aliases is not None:
                         self.config.set_hero_aliases(site_name, hero_aliases)
+
+            # Apply data source hero aliases (Data Sources tab, #423).
+            if hasattr(dia, "get_data_source_changes"):
+                for source_name, source_aliases in dia.get_data_source_changes().items():
+                    self.config.set_data_source_hero_aliases(source_name, source_aliases)
 
             # Apply multiroom hero profile changes (Hero Profiles tab).
             if hasattr(dia, "get_profile_changes"):
@@ -1237,13 +1408,21 @@ class fpdb(QMainWindow):
             # no close messages on queue, do nothing
             pass
 
-    def __calendar_dialog(self, widget, entry) -> None:
+    def __calendar_dialog(self, *_args: object, entry: QDateEdit) -> None:
+        """Let the user pick a date for ``entry`` from a calendar.
+
+        ``*_args`` because PySide6 connects a partial to the argument-less
+        clicked() overload: a required positional here raises a TypeError that Qt
+        swallows, and the button does nothing.
+        """
         d = QDialog(self.dia_confirm)
         d.setWindowTitle(_("Pick a date"))
 
         vb = QVBoxLayout()
         d.setLayout(vb)
         cal = QCalendarWidget()
+        # A new calendar selects today, which Done would turn into the cache's start.
+        cal.setSelectedDate(entry.date())
         vb.addWidget(cal)
 
         btn = QPushButton(_("Done"))
@@ -1252,6 +1431,11 @@ class fpdb(QMainWindow):
         vb.addWidget(btn)
 
         d.exec()
+
+    def __get_date(self, *_args: object, calendar: QCalendarWidget, entry: QDateEdit, win: QDialog) -> None:
+        """Copy the date selected in ``calendar`` to ``entry`` and close the dialog."""
+        entry.setDate(calendar.selectedDate())
+        win.accept()
 
     def createMenuBar(self) -> None:
         """Build the menu bar from the declarative layout in ``menu_layout``."""
@@ -1330,7 +1514,7 @@ class fpdb(QMainWindow):
 
         from fpdb_3_legacy import menu_layout
         from fpdb_3_legacy.Configuration import GRAPHICS_PATH
-        from fpdb_3_legacy.i18n_compile import available_locales
+        from fpdb_3_legacy.i18n_compile import available_locales, completion
 
         menu = parent_menu.addMenu(title)
         locale_dir = Path(GRAPHICS_PATH).parent / "locale"
@@ -1346,7 +1530,12 @@ class fpdb(QMainWindow):
             elif code == menu_layout.SOURCE_LANGUAGE:
                 label = "English"
             else:
-                label = QLocale(code).nativeLanguageName().capitalize() or code
+                try:
+                    done = completion(locale_dir / f"fpdb-{code}.po")
+                except OSError:
+                    done = None
+                name = QLocale(code).nativeLanguageName().capitalize() or code
+                label = menu_layout.language_label(name, done)
             action = QAction(label, self, checkable=True)
             action.setChecked(checked)
             action.triggered.connect(partial(self._on_select_language, code))
@@ -1438,7 +1627,11 @@ class fpdb(QMainWindow):
         # handlers and reopens the rotating log file, and load_profile() runs on
         # nearly every dialog the menus open.
         if self.config.dir_log != getattr(self, "_configured_log_dir", None):
-            setup_logging(log_dir=self.config.dir_log)
+            try:
+                setup_logging(log_dir=self.config.dir_log)
+            except OSError as e:
+                # setup_logging attaches the console handler first, so logging still works.
+                log.error(f"Cannot write logs in {self.config.dir_log}, logging to the console only: {e}")
             self._configured_log_dir = self.config.dir_log
             if options.log_level != "EMPTY":
                 level = getattr(logging, options.log_level)
@@ -1769,12 +1962,26 @@ class fpdb(QMainWindow):
             lambda: GuiBulkImport.GuiBulkImport(self.settings, self.config, self.sql, self),
         )
 
+    def dia_tracker_migration(self, widget=None, data=None) -> None:
+        """Import ▸ From Another Tracker: bring PT4 / HM3 hands over (#612)."""
+        from fpdb_3_legacy.GuiTrackerMigration import GuiTrackerMigration
+
+        self.load_profile()
+        wizard = GuiTrackerMigration(self.settings, self.config, self.sql, self)
+        wizard.exec()
+
     def tab_coinpoker_capture(self, widget, data=None) -> None:
         """Open the CoinPoker live packet-capture tab."""
         if is_site_disabled("CoinPoker"):
             log.info("CoinPoker support is disabled; not opening the live capture tab")
             return
-        self.open_tab("CoinPoker Capture", lambda: GuiCoinPokerCapture.GuiCoinPokerCapture(self.config, self))
+        if self._capture_missing():
+            return
+        self.open_tab(
+            "CoinPoker Capture",
+            lambda module: module.GuiCoinPokerCapture(self.config, self),
+            module="fpdb_3_legacy.capture.GuiCoinPokerCapture",
+        )
 
     def tab_auto_notes_workbench(self, widget, data=None) -> None:
         """Open the automatic notes workbench tab."""
@@ -1799,6 +2006,81 @@ class fpdb(QMainWindow):
             "Ring Player Stats",
             lambda module: module.GuiRingPlayerStats(self.config, self.sql, self),
             module="fpdb_3_legacy.GuiRingPlayerStats",
+        )
+
+    def tab_research_browser(self, widget, data=None) -> None:
+        # Lazily imported like the other tabs: the browser pulls the analytics
+        # engine and its view tree, and most sessions never open this tab.
+        self.open_tab(
+            "Research Browser",
+            lambda module: module.GuiResearchBrowser(self.config, self.sql, self),
+            module="fpdb_3_legacy.GuiResearchBrowser",
+        )
+
+    def tab_study_explorer(self, widget, data=None) -> None:
+        """Open the spot-first Study Explorer (#360)."""
+
+        def build_explorer(module):
+            explorer = module.GuiStudyExplorer(self.config, self.sql, self)
+            explorer.study_opened.connect(self._open_study_dashboard)
+            explorer.differences_requested.connect(self._open_study_differences)
+            return explorer
+
+        self.open_tab(
+            "Study Explorer",
+            build_explorer,
+            module="fpdb_3_legacy.GuiStudyExplorer",
+        )
+
+    def _open_study_dashboard(self, selection) -> None:
+        """Open the synchronized dashboard for a Study Explorer selection (#361)."""
+        self.open_tab(
+            f"Study · {selection.study.title}",
+            lambda module: module.GuiStudyDashboard(
+                self.config,
+                self.sql,
+                self,
+                selection=selection,
+            ),
+            module="fpdb_3_legacy.GuiStudyDashboard",
+        )
+
+    def _open_study_differences(self) -> None:
+        """Open the curated Hero-versus-Field discovery page (#365)."""
+
+        def build_differences(module):
+            differences = module.GuiStudyDifferences(self.config, self.sql, self)
+            differences.study_requested.connect(self._open_difference_study)
+            return differences
+
+        self.open_tab(
+            "Biggest Differences vs Field",
+            build_differences,
+            module="fpdb_3_legacy.GuiStudyDifferences",
+        )
+
+    def _open_difference_study(self, detail) -> None:
+        """Open the study and preserve the clicked difference context (#365)."""
+
+        def build_dashboard(module):
+            from fpdb_3_legacy.research_study_dashboard import StudyDashboardModel
+
+            model = StudyDashboardModel(detail.selection)
+            model.set_active_panel(detail.panel_id)
+            for name, value in detail.cross_filters.items():
+                try:
+                    model.add_cross_filter(name, value)
+                except ValueError:
+                    # A dimension can be descriptive without being a legal
+                    # query filter; the study itself remains a valid target.
+                    continue
+            model.set_focus_filters(detail.focus_filters)
+            return module.GuiStudyDashboard(self.config, self.sql, self, model=model)
+
+        self.open_tab(
+            f"Study · {detail.row.spot}",
+            build_dashboard,
+            module="fpdb_3_legacy.GuiStudyDashboard",
         )
 
     def tab_opponents_report(self, widget, data=None) -> None:
@@ -1847,6 +2129,64 @@ class fpdb(QMainWindow):
 
         self.open_tab("Version", build, allow_multiple=False, module="fpdb_3_legacy.GuiVersionInfo")
 
+    def _update_checker(self):
+        """The window's one update checker (#445), created on first use."""
+        checker = getattr(self, "_update_checker_instance", None)
+        if checker is None:
+            from fpdb_3_legacy.update_notice import UpdateChecker
+
+            checker = UpdateChecker(self)
+            checker.finished.connect(self._on_update_check_finished)
+            self._update_checker_instance = checker
+        return checker
+
+    def _start_update_check(self, *, manual: bool) -> None:
+        from fpdb_3_legacy import version_info
+
+        # The declared version, not git describe: a checkout's "3.9.1-12-gabc" is no release number.
+        self._update_checker().start(
+            PACKAGE_VERSION,
+            version_info.detect_packaging(),
+            include_prereleases=self.config.get_update_prereleases(),
+            manual=manual,
+        )
+
+    def _startup_update_check(self) -> None:
+        """Look for a newer release once a day, after asking the first time (#445)."""
+        from pathlib import Path
+
+        from fpdb_3_legacy import update_check
+
+        try:
+            enabled = self.config.get_check_for_updates()
+            if enabled is None:
+                if not self.visible:
+                    return  # nobody to ask; the next visible start will
+                from fpdb_3_legacy.update_notice import ask_to_check_for_updates
+
+                enabled = ask_to_check_for_updates(self)
+                self.config.set_check_for_updates(enabled)
+            if not enabled:
+                return
+            state_file = Path(self.config.file).parent / "update_check.json"
+            if not update_check.check_due(state_file):
+                return
+            update_check.record_check(state_file)
+            self._start_update_check(manual=False)
+        except Exception:
+            # Never let the update check get in the way of starting fpdb.
+            log.exception("Update check could not start")
+
+    def check_for_updates(self, widget=None, data=None) -> None:
+        """Help > Check for updates: ask GitHub now, whatever the setting (#445)."""
+        self.statusBar().showMessage(_("Checking for updates…"), 3000)
+        self._start_update_check(manual=True)
+
+    def _on_update_check_finished(self, reached: bool, release, manual: bool) -> None:
+        from fpdb_3_legacy.update_notice import present_result
+
+        present_result(self, reached, release, manual, PACKAGE_VERSION)
+
     def tab_main_help(self, widget, data=None) -> None:
         """Displays a tab with the main fpdb help screen.
 
@@ -1860,6 +2200,9 @@ class fpdb(QMainWindow):
                         Welcome to Fpdb {VERSION}!
 
                         Open Help > Version for the full version, packaging and environment report.
+
+                        Before using the HUD at a table, read Help > What fpdb does while you play:
+                        fpdb never recommends an action or acts in a poker client, and your room's terms prevail.
 
                         This program is currently in an alpha-state, so our database format is still sometimes changed.
                         You should therefore always keep your hand history files so that you can re-import
@@ -2135,16 +2478,25 @@ class fpdb(QMainWindow):
 
         if not options.errorsToConsole:
             fileName = os.path.join(self.config.dir_log, "fpdb-errors.txt")
-            log.info(
-                f"Note: error output is being diverted to {self.config.dir_log}. Any major error will be reported there _only_.",
-            )
-            errorFile = codecs.open(fileName, "w", "utf-8")
-            sys.stderr = errorFile
+            try:
+                errorFile = codecs.open(fileName, "w", "utf-8")
+            except OSError as e:
+                log.error(f"Cannot write {fileName}, error output stays on the console: {e}")
+            else:
+                log.info(
+                    f"Note: error output is being diverted to {self.config.dir_log}. Any major error will be reported there _only_.",
+                )
+                sys.stderr = errorFile
 
         sys.stderr.write("fpdb starting ...")
 
         if options.autoimport:
             self.tab_auto_import(None)
+
+        # After the event loop starts, so the window is up before any first-run question.
+        from PySide6.QtCore import QTimer
+
+        QTimer.singleShot(0, self._startup_update_check)
 
     def _register_gui_observer(self) -> None:
         """Registers the GUI observer with the ConfigurationManager."""
@@ -2272,7 +2624,7 @@ def warn_if_app_translocated() -> bool:
 if __name__ == "__main__":
     import time
 
-    from fpdb_3_legacy.hud_diagnostics import ROLE_MAIN, log_process_identity
+    from fpdb_3_legacy.hud_diagnostics import MAIN_CRASH_LOG_NAME, ROLE_MAIN, enable_crash_log, log_process_identity
 
     # One banner per launch, before anything can fail: which build ran, from
     # where, as which process. The HUD child inherits this session id, so both
@@ -2294,8 +2646,17 @@ if __name__ == "__main__":
         log.exception(f"Failed to initialize configuration: {e}")
         sys.exit(1)
 
+    # Before QApplication, so a crash while Qt starts is recorded too.
+    crash_log = enable_crash_log(config.dir_log, MAIN_CRASH_LOG_NAME)
+    if crash_log is None:
+        log.warning(f"Cannot write a crash log in {config.dir_log}: a crash will leave no lasting trace.")
+    else:
+        log.info(f"Crashes and uncaught exceptions will be recorded in {crash_log}.")
+
     try:
         app = QApplication([])
+        # Before any worker thread starts: see main_thread_gc (#707).
+        install_main_thread_gc(app)
 
         warn_if_app_translocated()
 

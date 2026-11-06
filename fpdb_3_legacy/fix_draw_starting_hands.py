@@ -49,6 +49,7 @@ from fpdb_3_legacy import Card, Configuration, Database
 CHILD_TABLES = [
     "RawHands",
     "Boards",
+    "BoardFeatures",
     "HandsActions",
     "HandsCashout",
     "HandsPots",

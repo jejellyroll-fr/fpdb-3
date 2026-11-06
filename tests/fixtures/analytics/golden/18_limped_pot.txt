@@ -1,0 +1,38 @@
+PokerStars Hand #3100000031:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:17:00 ET
+Table 'Golden 18 Limped Pot' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Jc Tc]
+Frank: calls $2.00
+Anna: folds
+Boris: calls $2.00
+Cara: folds
+Dave: folds
+Erin: checks
+*** FLOP *** [Jh 7c 3d]
+Erin: checks
+Frank: bets $4.00
+Boris: calls $4.00
+Erin: folds
+*** TURN *** [Jh 7c 3d] [2s]
+Frank: checks
+Boris: bets $8.00
+Frank: folds
+Uncalled bet ($8.00) returned to Boris
+Boris collected $15.00 from pot
+*** SUMMARY ***
+Total pot $15.00 | Rake $0.00
+Board [Jh 7c 3d 2s]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($15.00)
+Seat 3: Cara (button) folded before Flop (didn't bet)
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded on the Flop
+Seat 6: Frank folded on the Turn

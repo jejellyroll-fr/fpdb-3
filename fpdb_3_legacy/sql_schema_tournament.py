@@ -90,6 +90,7 @@ def tournament_schema_queries(db_server: str) -> dict[str, str]:
                         rebuyCount INT,
                         addOnCount INT,
                         koCount NUMERIC,
+                        koWinnings BIGINT,
                         comment TEXT,
                         commentTs DATETIME)
                         ENGINE=INNODB""",
@@ -177,6 +178,7 @@ def tournament_schema_queries(db_server: str) -> dict[str, str]:
                         rebuyCount INT,
                         addOnCount INT,
                         koCount NUMERIC,
+                        koWinnings BIGINT,
                         comment TEXT,
                         commentTs timestamp without time zone)""",
         }
@@ -263,6 +265,7 @@ def tournament_schema_queries(db_server: str) -> dict[str, str]:
                         rebuyCount INT,
                         addOnCount INT,
                         koCount decimal,
+                        koWinnings INT,
                         comment TEXT,
                         commentTs timestamp,
                         FOREIGN KEY (tourneyId) REFERENCES Tourneys(id),

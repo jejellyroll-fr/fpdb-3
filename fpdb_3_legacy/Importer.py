@@ -17,19 +17,22 @@ from __future__ import annotations
 import builtins
 import contextlib
 import datetime
+import json
 import os
 import re
 import shutil
 import sys
 from collections.abc import Callable
+from dataclasses import dataclass
 from time import process_time, time
 from typing import Any
 
 import zmq as _zmq
-from PySide6.QtCore import QCoreApplication
+from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout
 
-from fpdb_3_legacy import Configuration, Database, IdentifySite, db_profile
+from fpdb_3_legacy import Configuration, Database, IdentifySite, db_profile, import_prefetch, latency_profile
+from fpdb_3_legacy.equity import load_poker_eval
 from fpdb_3_legacy.Exceptions import (
     FpdbHandDuplicate,
     FpdbHandPartial,
@@ -40,6 +43,8 @@ from fpdb_3_legacy.import_failure_cache import SIDECAR_EXTENSIONS, FailureCache
 from fpdb_3_legacy.iPoker.dispatcher import get_parser_class_for_path as get_ipoker_parser_class_for_path
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.parser_registry import get_parser_class, get_summary_class
+from fpdb_3_legacy.phh_import import PHH_SITE_NAME, PHHImportResult, is_phh_path, phh_file_name
+from fpdb_3_legacy.phh_import import import_file as import_phh_file
 
 zmq: Any = _zmq
 
@@ -72,10 +77,106 @@ log = get_logger("importer")
 IMPORTER_FILE_READ_ERRORS = (OSError, UnicodeDecodeError)
 ZMQ_CLOSE_ERRORS = (RuntimeError, zmq.ZMQError)
 
+#: How often an adopted import is checked for having finished, in milliseconds.
+ORPHAN_POLL_MS = 500
+
+#: Imports still running after the tab that started them was closed (#347), each
+#: mapped to the cleanup its tab owed. The thread is kept referenced here for a
+#: second reason: dropping the last reference to a running QThread destroys it
+#: mid-run.
+_orphaned_imports: dict[Any, Any] = {}
+_orphan_timer: Any = None
+
+
+def adopt_orphaned_import(thread: Any, cleanup: Any) -> None:
+    """Take over a closed tab's running import and clean up after it (#347).
+
+    A tab that closes while its import overruns cannot wait for it -- the wait
+    runs on the UI thread and is bounded on purpose -- so the worker outlives
+    the widget. What it leaves behind is not only database connections: the
+    global lock is released by a slot of that widget, and a lock held past the
+    tab blocks every later import and every database maintenance action until
+    the application is restarted.
+
+    So the thread is kept here and ``cleanup`` is run once it has really
+    finished. ``cleanup`` must touch nothing owned by the UI, because by then
+    the widget it came from is gone.
+
+    Finishing is detected by polling ``isRunning()`` rather than by connecting
+    to the worker's ``finished`` signal: both import threads shadow QThread's
+    own ``finished`` with a signal of their own, emitted from inside ``run()``
+    and not at all on some paths -- the auto-import worker returns without
+    emitting anything when the database is away. Polling is the only check that
+    covers every way a run can end.
+    """
+    if thread is None or not thread.isRunning():
+        _run_orphan_cleanup(cleanup)
+        return
+    _orphaned_imports[thread] = cleanup
+    _start_orphan_timer()
+
+
+def reap_orphaned_imports() -> None:
+    """Run the cleanup owed by every adopted import that has finished."""
+    for thread in [thread for thread in _orphaned_imports if not thread.isRunning()]:
+        _run_orphan_cleanup(_orphaned_imports.pop(thread))
+    if not _orphaned_imports and _orphan_timer is not None:
+        _orphan_timer.stop()
+
+
+def _run_orphan_cleanup(cleanup: Any) -> None:
+    try:
+        cleanup()
+    except Exception:  # noqa: BLE001 - nothing is left to report this to
+        log.exception("Could not clean up after an import that outlived its tab")
+
+
+def _start_orphan_timer() -> None:
+    global _orphan_timer  # noqa: PLW0603 - one timer for the process, owned by no widget
+    if _orphan_timer is None:
+        try:
+            _orphan_timer = QTimer()
+            _orphan_timer.timeout.connect(reap_orphaned_imports)
+        except Exception:  # noqa: BLE001 - no Qt loop (a CLI import): nothing to poll with
+            log.debug("No Qt timer available to reap orphaned imports", exc_info=True)
+            _orphan_timer = None
+            return
+    if not _orphan_timer.isActive():
+        _orphan_timer.start(ORPHAN_POLL_MS)
+
+
+#: Prefix marking a ZMQ message that carries a live action instead of a hand id
+#: (#336). A hand id is a bare string, so the receiver tells the two apart by
+#: this prefix; the JSON payload behind it is built by the capture and routed by
+#: HUD_main to the HUD whose table it names.
+LIVE_ACTION_PREFIX = "live:"
+
 # Round-trip profiling (off unless FPDB_DB_PROFILE=1). Module-level rather than
 # per-Importer: the profile it reports is process-wide anyway, and a profiling
 # hook must not be something the import path can trip over.
 _profile_reporter = db_profile.DeltaReporter("Auto-import round-trip profile:")
+
+
+HUD_NOTIFY_ENV = "FPDB_HUD_NOTIFY"
+"""Set to ``0`` to keep this process from notifying a running HUD.
+
+A HUD looks every id it is sent up in its own database. A process importing
+into a database of its own -- the test suite, a benchmark -- hands it ids that
+name unrelated hands there, and the HUD goes looking for their tables' windows.
+"""
+
+
+class _DiscardingSocket:
+    """Stands in for the PUSH socket when HUD notifications are switched off."""
+
+    def send_string(self, *_args: Any) -> None:
+        return None
+
+    def setsockopt(self, *_args: Any) -> None:
+        return None
+
+    def close(self) -> None:
+        return None
 
 
 class ZMQSender:
@@ -88,6 +189,12 @@ class ZMQSender:
             port (str, optional): The port to connect to on localhost. Defaults to "5555".
         """
         self.context = zmq.Context()
+        # Either a real zmq socket or its stand-in; they share only what is used.
+        self.socket: Any
+        if os.environ.get(HUD_NOTIFY_ENV) == "0":
+            self.socket = _DiscardingSocket()
+            log.info("HUD notifications disabled by %s=0", HUD_NOTIFY_ENV)
+            return
         self.socket = self.context.socket(zmq.PUSH)
         # Set high water mark to prevent memory issues
         self.socket.setsockopt(zmq.SNDHWM, 1000)
@@ -110,6 +217,24 @@ class ZMQSender:
         except zmq.ZMQError as e:
             log.exception(f"Failed to send hand ID {hand_id}: {e}")
 
+    def send_live_action(self, payload) -> None:
+        """Send one live action payload to the HUD, best effort (#336).
+
+        ``payload`` is a JSON-able dict naming the hand, the table and the room's
+        own action record. Actions arrive many per hand and the stream never
+        stops for them, so a full queue drops the action with a warning rather
+        than blocking the capture: the next action describes the table at least
+        as well as the one lost, and the hand-refresh path remains behind it.
+        """
+        try:
+            message = LIVE_ACTION_PREFIX + json.dumps(payload, default=str)
+            self.socket.send_string(message, zmq.NOBLOCK)
+            log.debug("Sent live action for hand %s via ZMQ", payload.get("hand_id"))
+        except zmq.Again:
+            log.warning("ZMQ queue full, dropping a live action for hand %s", payload.get("hand_id"))
+        except (zmq.ZMQError, TypeError, ValueError) as e:
+            log.warning("Could not send a live action for hand %s: %s", payload.get("hand_id"), e)
+
     def close(self) -> None:
         """Close the ZMQ socket and terminate the context.
 
@@ -127,6 +252,139 @@ class ZMQSender:
             # Force termination if there's an error
             with contextlib.suppress(builtins.BaseException):
                 self.context.term()
+
+
+@dataclass(frozen=True)
+class FileImportResult:
+    """What one file of the last bulk import gave, kept for per-room summaries (#612)."""
+
+    site: str | None
+    stored: int = 0
+    duplicates: int = 0
+    partial: int = 0
+    skipped: int = 0
+    errors: int = 0
+    summaries: int = 0  # tournament summaries stored: not hands, so not in ``stored``
+    is_summary_file: bool = False
+
+
+def _site_name(fpdbfile: Any) -> str | None:
+    site = getattr(fpdbfile, "site", None)
+    return getattr(site, "name", None)
+
+
+def is_valid_import_file(filepath: str) -> bool:
+    """Check if a file is a valid candidate for import.
+
+    Checks for:
+    1. Hidden files (starting with .)
+    2. Common system files
+    3. Known binary/ignored extensions
+
+    Args:
+        filepath: The full path to the file.
+
+    Returns:
+        bool: True if the file seems valid, False otherwise.
+    """
+    filename = os.path.basename(filepath)
+
+    # 1. Skip hidden files and common system files
+    if filename.startswith("."):
+        return False
+
+    if filename.lower() in ("desktop.ini", "thumbs.db"):
+        return False
+
+    # 2. Check extension blacklist
+    ext = os.path.splitext(filename)[1].lower()
+
+    # List of extensions to explicitly ignore
+    ignored_extensions = {
+        # Images
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".bmp",
+        ".ico",
+        ".tiff",
+        ".webp",
+        ".svg",
+        ".psd",
+        # Archives
+        ".zip",
+        ".rar",
+        ".7z",
+        ".tar",
+        ".gz",
+        ".bz2",
+        ".xz",
+        ".iso",
+        # Executables and Libraries
+        ".exe",
+        ".dll",
+        ".so",
+        ".dylib",
+        ".bin",
+        ".msi",
+        ".app",
+        ".bat",
+        ".sh",
+        ".cmd",
+        # Media
+        ".mp3",
+        ".wav",
+        ".mp4",
+        ".avi",
+        ".mkv",
+        ".mov",
+        ".flv",
+        ".wmv",
+        # Documents/Office (excluding xls/xlsx which are supported)
+        ".pdf",
+        ".doc",
+        ".docx",
+        ".ppt",
+        ".pptx",
+        ".odt",
+        ".rtf",
+        # Database
+        ".db",
+        ".db-wal",
+        ".db-shm",
+        ".sqlite",
+        ".sqlite-wal",
+        ".sqlite-shm",
+        ".sqlite3",
+        ".sqlite3-wal",
+        ".sqlite3-shm",
+        ".mdb",
+        # Code/Compiled
+        ".pyc",
+        ".class",
+        ".o",
+        ".obj",
+        ".py",
+        # Test & sidecar reference data (shared with IdentifySite)
+        *SIDECAR_EXTENSIONS,
+    }
+
+    if ext in ignored_extensions:
+        return False
+
+    return True
+
+
+def cannot_list_directory(path: str) -> bool:
+    """Whether ``path`` is a folder the system refuses to list, as macOS does an app's container."""
+    if not os.path.isdir(path):
+        return False
+    try:
+        os.listdir(path)
+    except PermissionError:
+        return True
+    return False
 
 
 class Importer:
@@ -156,9 +414,11 @@ class Importer:
         self.idsite = IdentifySite.IdentifySite(config)
 
         self.filelist: dict[str, IdentifySite.FPDBFile] = {}
+        self._touched_tourneys: set[int] = set()  # their bubble factors are refreshed after the import (#446)
+        self.file_results: dict[str, FileImportResult] = {}
         self.failed_files = FailureCache()
         self.dirlist: dict[Any, list[Any]] = {}
-        self.siteIds: dict[str, int] = {}
+        self.refused_dirs: set[str] = set()  # watched folders the system refused to list
         self.removeFromFileList: dict[str, bool] = {}  # to remove deleted files
         self.monitor = False
         self.updatedsize: dict[str, int] = {}
@@ -185,20 +445,48 @@ class Importer:
 
         self.writeq = None
         self.database = Database.Database(self.config, sql=self.sql)
+        # Local-first (#680): when the config switches the effective database to
+        # the embedded local SQLite, push imported hands asynchronously to the
+        # configured server database. Activated only when the measured LAN RTT
+        # justifies it (see docs/680-local-first-design.md).
+        self._local_first_sync = None
+        if self.config.get_db_parameters().get("db-local-first") == "1":
+            from fpdb_3_legacy.local_first_sync import LocalFirstSync, ServerConfigView
+
+            # self.sql is the local SQLite catalogue (its "?" placeholder): the
+            # server connection builds its own from the server's db-server. The
+            # path is the one Database resolved under dir_database, not the raw
+            # local_path, so the worker opens the file the importer writes.
+            # Running from construction so both runImport() and the live
+            # runUpdated()/_run_updated_cycle() auto-import path are covered. The
+            # worker can outlive this Importer, so it holds the config, not self.
+            config = self.config
+            self._local_first_sync = LocalFirstSync.shared(
+                self.database,
+                lambda: Database.Database(ServerConfigView(config)),
+                self.database.db_path,
+            )
+            log.info(
+                "Local-first sync enabled: writing %s, pushing to server %s",
+                self.config.get_db_parameters().get("db-local-path"),
+                self.config.get_db_parameters().get("db-host"),
+            )
         # Explicit ids copied into PostgreSQL do not advance BIGSERIAL. Repair
         # every owned id sequence before auto/bulk import starts inserting rows.
         with self.database.transaction():
             self.database.repair_sequences()
-        self.writerdbs = []
+        self.writerdbs: list[Any] = []
+        # Workers computing a bulk import's all-in equities ahead of it (#443);
+        # 1 is none. It used to open writer connections nothing wrote through.
         self.settings.setdefault("threads", 1)
-        for _i in range(self.settings["threads"]):
-            self.writerdbs.append(Database.Database(self.config, sql=self.sql))
 
         # Modification: specify port for ZMQ
         self.zmq_sender: ZMQSender | None = None
 
         # HandDataReporter for quality analysis
         self.hand_data_reporter = None
+        #: What each PHH file imported (#381), for whoever wants more than the totals.
+        self.phh_results: dict[str, PHHImportResult] = {}
 
         process_time()  # init clock in windows
         self.progress_start_cb: Callable[[int], None] | None = None
@@ -278,17 +566,17 @@ class Importer:
         self.settings["handsInDB"] = value
 
     def setThreads(self, value) -> None:
-        """Set the number of threads used for importing.
+        """Set how many worker processes a bulk import uses (#443).
 
-        Updates the 'threads' setting and ensures the writer database list matches the thread count.
+        The workers parse the files ahead of the import and compute their exact
+        all-in equities, which is where most of the time goes; the import
+        itself stays sequential. 1 (the default) uses none, -1 every core but
+        one, up to four. Auto-import never uses them.
 
         Args:
-            value: The number of threads to use for importing.
+            value: The number of worker processes, or -1 for automatic.
         """
         self.settings["threads"] = value
-        if self.settings["threads"] > len(self.writerdbs):
-            for _i in range(self.settings["threads"] - len(self.writerdbs)):
-                self.writerdbs.append(Database.Database(self.config, sql=self.sql))
 
     def setDropIndexes(self, value) -> None:
         """Set the dropIndexes setting for the importer.
@@ -378,6 +666,10 @@ class Importer:
     #   def setWatchTime(self):
     #       self.updated = time()
 
+    def setIpokerRooms(self, rooms: dict[str, str]) -> None:
+        """Set the room the user chose for each iPoker hero nothing else could place (#702)."""
+        self.idsite.choose_ipoker_rooms(rooms)
+
     def clearFileList(self) -> None:
         """Clear all tracked file lists and related state.
 
@@ -387,9 +679,51 @@ class Importer:
         self.updatedtime = {}
         self.pos_in_file = {}
         self.filelist = {}
+        self.phh_results = {}
         # Reassigned rather than cleared in place: callers that build an
         # Importer without running __init__ rely on this creating the cache.
         self.failed_files = FailureCache()
+
+    def close(self) -> None:
+        """Release every database connection this importer opened (#282).
+
+        An importer holds its own connection plus one per writer thread, and
+        nothing else owns them. Until this existed the only way to let them go
+        was to end the process, so a caller that imports and then deletes or
+        replaces the database file found it still in use -- harmless on POSIX,
+        which unlinks an open file happily, and a ``WinError 32`` on Windows,
+        where it is not allowed.
+
+        Idempotent and best-effort: closing is what shutdown paths do while
+        something else has already gone wrong, so one connection that refuses
+        must not strand the others behind it.
+        """
+        sync = getattr(self, "_local_first_sync", None)
+        if sync is not None:
+            sync.release()
+            self._local_first_sync = None
+        databases = [getattr(self, "database", None), *(getattr(self, "writerdbs", None) or [])]
+        self.writerdbs = []
+        for database in databases:
+            if database is None:
+                continue
+            try:
+                database.close_connection()
+            except Exception:  # noqa: BLE001 - one bad handle must not keep the rest open
+                log.exception("Could not close an importer database connection")
+
+    def _mark_outbox(self) -> None:
+        """Register the hands just committed in the local-first outbox (#680).
+
+        ``database.hids`` holds the ids inserted by the last bulk commit, so this
+        runs right after a successful hand import, inside the same process.
+        """
+        sync = getattr(self, "_local_first_sync", None)
+        if sync is None:
+            return
+        hids = list(getattr(self.database, "hids", []) or [])
+        if hids:
+            sync.mark(hids)
 
     def logImport(self, type, file, stored, dups, partial, skipped, errs, ttime, id) -> None:
         """Log the results of an import operation to the database.
@@ -436,19 +770,23 @@ class Importer:
         Args:
             fpdbfile: The file object to add and update with a file ID.
         """
-        if fpdbfile.site is None:
+        if fpdbfile.site is None and fpdbfile.ftype != "phh":
             msg = f"Cannot register unidentified file: {fpdbfile.path}"
             raise ValueError(msg)
+        source_name = fpdbfile.site.name if fpdbfile.site is not None else PHH_SITE_NAME
         file = os.path.splitext(os.path.basename(fpdbfile.path))[0]
         # Filenames are str on Python 3; decode only if a bytes path slips in.
         if isinstance(file, bytes):
             file = file.decode("utf8", "replace")
+        if fpdbfile.ftype == "phh":
+            # Never a room file's row, nor another directory's 1.phh (see phh_file_name).
+            file = phh_file_name(fpdbfile.path)
         fpdbfile.fileId = self.database.get_id(file)
         if not fpdbfile.fileId:
             now = datetime.datetime.utcnow()
             with self.database.transaction():
                 fpdbfile.fileId = self.database.storeFile(
-                    [file, fpdbfile.site.name, now, now, 0, 0, 0, 0, 0, 0, 0, False],
+                    [file, source_name, now, now, 0, 0, 0, 0, 0, 0, 0, False],
                 )
 
     # Add an individual file to filelist
@@ -477,6 +815,15 @@ class Importer:
             self.failed_files.remember(filename)
             return False
 
+        if is_phh_path(filename):
+            # A PHH file is a format, not a room: it is recognised by its extension and
+            # imported by the PHH adapter, never offered to the room identifier.
+            fpdbfile = IdentifySite.FPDBFile(filename)
+            fpdbfile.ftype = "phh"
+            self.addFileToList(fpdbfile)
+            self.filelist[filename] = fpdbfile
+            return True
+
         self.idsite.processFile(filename)
         if self.idsite.get_fobj(filename):
             fpdbfile = self.idsite.filelist[filename]
@@ -487,124 +834,10 @@ class Importer:
 
         self.addFileToList(fpdbfile)
         self.filelist[filename] = fpdbfile
-        fpdb_site = fpdbfile.site
-        if fpdb_site is None:
-            return False
-        if site not in self.siteIds:
-            # Get id from Sites table in DB
-            result = self.database.get_site_id(fpdb_site.name)
-            if len(result) == 1:
-                self.siteIds[fpdb_site.name] = result[0][0]
-            elif len(result) == 0:
-                log.warning(f"Database ID for {fpdb_site.name} not found")
-            else:
-                log.warning(
-                    f"More than 1 Database ID found for {fpdb_site.name}",
-                )
-
-        return True
+        return fpdbfile.site is not None
 
     def _is_valid_import_file(self, filepath: str) -> bool:
-        """Check if a file is a valid candidate for import.
-
-        Checks for:
-        1. Hidden files (starting with .)
-        2. Common system files
-        3. Known binary/ignored extensions
-
-        Args:
-            filepath: The full path to the file.
-
-        Returns:
-            bool: True if the file seems valid, False otherwise.
-        """
-        filename = os.path.basename(filepath)
-
-        # 1. Skip hidden files and common system files
-        if filename.startswith("."):
-            return False
-
-        if filename.lower() in ("desktop.ini", "thumbs.db"):
-            return False
-
-        # 2. Check extension blacklist
-        ext = os.path.splitext(filename)[1].lower()
-
-        # List of extensions to explicitly ignore
-        ignored_extensions = {
-            # Images
-            ".jpg",
-            ".jpeg",
-            ".png",
-            ".gif",
-            ".bmp",
-            ".ico",
-            ".tiff",
-            ".webp",
-            ".svg",
-            ".psd",
-            # Archives
-            ".zip",
-            ".rar",
-            ".7z",
-            ".tar",
-            ".gz",
-            ".bz2",
-            ".xz",
-            ".iso",
-            # Executables and Libraries
-            ".exe",
-            ".dll",
-            ".so",
-            ".dylib",
-            ".bin",
-            ".msi",
-            ".app",
-            ".bat",
-            ".sh",
-            ".cmd",
-            # Media
-            ".mp3",
-            ".wav",
-            ".mp4",
-            ".avi",
-            ".mkv",
-            ".mov",
-            ".flv",
-            ".wmv",
-            # Documents/Office (excluding xls/xlsx which are supported)
-            ".pdf",
-            ".doc",
-            ".docx",
-            ".ppt",
-            ".pptx",
-            ".odt",
-            ".rtf",
-            # Database
-            ".db",
-            ".db-wal",
-            ".db-shm",
-            ".sqlite",
-            ".sqlite-wal",
-            ".sqlite-shm",
-            ".sqlite3",
-            ".sqlite3-wal",
-            ".sqlite3-shm",
-            ".mdb",
-            # Code/Compiled
-            ".pyc",
-            ".class",
-            ".o",
-            ".obj",
-            ".py",
-            # Test & sidecar reference data (shared with IdentifySite)
-            *SIDECAR_EXTENSIONS,
-        }
-
-        if ext in ignored_extensions:
-            return False
-
-        return True
+        return is_valid_import_file(filepath)
 
     # Called from GuiBulkImport to add a file or directory. Bulk import never monitors
     def addBulkImportImportFileOrDir(self, inputPath, site="auto"):
@@ -668,8 +901,11 @@ class Importer:
                 self.monitor = True
                 self.dirlist[site] = [dir, filter]
 
-            # print "addImportDirectory: checking files in", dir
-            for subdir in os.walk(dir):
+            # os.walk drops a refused listing unless told otherwise, and a
+            # folder macOS keeps fpdb out of then reads as one with no new
+            # hands: auto-import ran, imported nothing and said nothing.
+            refusals: list[OSError] = []
+            for subdir in os.walk(dir, onerror=refusals.append):
                 for file in subdir[2]:
                     filename = os.path.join(subdir[0], file)
                     # ignore symbolic links (Linux & Mac)
@@ -691,10 +927,34 @@ class Importer:
                         # need long time because FTP in Win does not
                         # update the timestamp on the HH during session
                         self.addImportFile(filename, "auto")
+            self._report_refused_listing(dir, refusals)
         else:
             log.warning(
                 f"Attempted to add non-directory '{dir!s}' as an import directory",
             )
+
+    def _report_refused_listing(self, dir: str, refusals: list[OSError]) -> None:
+        """Warn once that ``dir`` could not be listed, and again only after it could be.
+
+        Auto-import walks every watched folder on each cycle; one warning per
+        refusal is enough to say why its hands stop arriving.
+        """
+        # Instances built without __init__ (tests) have no record yet.
+        refused = self.__dict__.setdefault("refused_dirs", set())
+        denied = [error for error in refusals if isinstance(error, PermissionError)]
+        if not denied:
+            refused.discard(dir)
+            return
+        if dir in refused:
+            return
+        refused.add(dir)
+        log.warning(
+            "Cannot list %s (%s): its new hands are not imported. On macOS, allow the app that "
+            "launches fpdb (your terminal, or fpdb itself) in System Settings > Privacy & Security > "
+            "Full Disk Access, then restart fpdb.",
+            denied[0].filename or dir,
+            denied[0].strerror,
+        )
 
     def removeImportDirectory(self, dir=None, site=None) -> None:
         """Remove monitored import directories and stale files below them.
@@ -746,6 +1006,9 @@ class Importer:
         Returns:
             tuple: A tuple containing the number of stored, duplicate, partial, skipped, and error hands, and the total import duration in seconds.
         """
+        if self._local_first_sync is not None:
+            self._local_first_sync.start()
+
         # Initial setup
         start = datetime.datetime.now()
         starttime = time()
@@ -813,6 +1076,21 @@ class Importer:
         self.database.cleanUpTourneyTypes()
         self.database.cleanUpWeeksMonths()
         self.database.resetClean()
+        self._refresh_bubble_factors()
+
+    def _note_tourney(self, tourney_id: Any) -> None:
+        """Remember a tournament this import touched: its bubble factors are refreshed afterwards (#446)."""
+        if tourney_id is not None:
+            # getattr: some callers build an Importer without __init__.
+            self._touched_tourneys = getattr(self, "_touched_tourneys", set()) | {int(tourney_id)}
+
+    def _refresh_bubble_factors(self) -> None:
+        touched: set[int] = getattr(self, "_touched_tourneys", set())
+        self._touched_tourneys = set()
+        if touched:
+            from fpdb_3_legacy import bubble_factors
+
+            bubble_factors.refresh_tourneys(self.database, touched)
 
     def importFiles(self, q):
         """Import all files in the file list and aggregate import statistics.
@@ -830,11 +1108,11 @@ class Importer:
         totpartial = 0
         totskipped = 0
         toterrors = 0
+        self.file_results = {}
 
         # prepare progress popup window
         has_callbacks = all(
-            callback is not None
-            for callback in (self.progress_start_cb, self.progress_update_cb, self.progress_end_cb)
+            callback is not None for callback in (self.progress_start_cb, self.progress_update_cb, self.progress_end_cb)
         )
 
         if not has_callbacks:
@@ -845,42 +1123,75 @@ class Importer:
             assert self.progress_start_cb is not None
             self.progress_start_cb(len(self.filelist))
 
-        for f in self.filelist:
-            if not has_callbacks:
-                ProgressDialog.progress_update(f, str(self.database.getHandCount()))
-            else:
-                assert self.progress_update_cb is not None
-                self.progress_update_cb(f, str(self.database.getHandCount()))
+        prefetch = self._start_equity_prefetch()
+        # Counted once and kept up to date: counting again for each file, only for
+        # this display, is a scan of Hands and two network round trips (#705).
+        hands_in_db = self.database.getHandCount()
+        try:
+            for f in self.filelist:
+                if not has_callbacks:
+                    ProgressDialog.progress_update(f, str(hands_in_db))
+                else:
+                    assert self.progress_update_cb is not None
+                    self.progress_update_cb(f, str(hands_in_db))
+                if prefetch is not None:
+                    prefetch.before_import(f)
 
-            try:
-                (stored, duplicates, partial, skipped, errors, ttime, _) = self._import_despatch(self.filelist[f])
-                totstored += stored
-                totdups += duplicates
-                totpartial += partial
-                totskipped += skipped
-                toterrors += errors
+                try:
+                    (stored, duplicates, partial, skipped, errors, ttime, detected) = self._import_despatch(
+                        self.filelist[f]
+                    )
+                    # Periodic latency report when FPDB_LATENCY_LOG_INTERVAL is set (#680).
+                    latency_profile.maybe_log()
+                    # The parser's room when it found one: a PokerTracker-format file is
+                    # identified as "PokerTracker" and only parsing tells Merge from Everest.
+                    room = detected if isinstance(detected, str) and detected else _site_name(self.filelist[f])
+                    self.file_results[f] = (
+                        FileImportResult(
+                            room,
+                            duplicates=duplicates,
+                            partial=partial,
+                            skipped=skipped,
+                            errors=errors,
+                            summaries=stored,
+                            is_summary_file=True,
+                        )
+                        if self.filelist[f].ftype == "summary"
+                        else FileImportResult(room, stored, duplicates, partial, skipped, errors)
+                    )
+                    totstored += stored
+                    totdups += duplicates
+                    totpartial += partial
+                    totskipped += skipped
+                    toterrors += errors
+                    if self.filelist[f].ftype != "summary":
+                        hands_in_db += stored
 
-                self.logImport(
-                    "bulk",
-                    f,
-                    stored,
-                    duplicates,
-                    partial,
-                    skipped,
-                    errors,
-                    ttime,
-                    self.filelist[f].fileId,
-                )
-            except Exception as e:  # intentional broad catch: file import must isolate per-file failures.
-                self.database.rollback()
-                log.exception(f"A fatal error occurred while processing file: {f}. Error: {e}")
-                toterrors += 1
-                self._relocate_processed_file(f, failed=True)
-                continue
+                    self.logImport(
+                        "bulk",
+                        f,
+                        stored,
+                        duplicates,
+                        partial,
+                        skipped,
+                        errors,
+                        ttime,
+                        self.filelist[f].fileId,
+                    )
+                except Exception as e:  # intentional broad catch: file import must isolate per-file failures.
+                    self.database.rollback()
+                    log.exception(f"A fatal error occurred while processing file: {f}. Error: {e}")
+                    self.file_results[f] = FileImportResult(_site_name(self.filelist[f]), errors=1)
+                    toterrors += 1
+                    self._relocate_processed_file(f, failed=True)
+                    continue
 
-            # Optionally archive the file once processed: successful imports go to
-            # the "imported" directory, files that produced errors to the "failed" one.
-            self._relocate_processed_file(f, failed=errors > 0)
+                # Optionally archive the file once processed: successful imports go to
+                # the "imported" directory, files that produced errors to the "failed" one.
+                self._relocate_processed_file(f, failed=errors > 0)
+        finally:
+            if prefetch is not None:
+                prefetch.close()
 
         if not has_callbacks:
             ProgressDialog.accept()
@@ -892,6 +1203,32 @@ class Importer:
         return totstored, totdups, totpartial, totskipped, toterrors
 
     # end def importFiles
+
+    def _start_equity_prefetch(self) -> import_prefetch.EquityPrefetch | None:
+        """Start the workers that compute the files' all-in equities ahead of a bulk import (#443).
+
+        None for auto-import, whose latency the HUD waits on, without the
+        equity engine, with fewer than two hand history files, and in the
+        packaged builds until their multiprocessing dispatch
+        (subprocess_launch.dispatch_multiprocessing) is checked on a bundle.
+        """
+        workers = import_prefetch.worker_count(self.settings.get("threads"))
+        if self.mode == "auto" or workers == 0 or getattr(sys, "frozen", False) or getattr(sys, "oxidized", False):
+            return None
+        jobs = [
+            import_prefetch.PrefetchJob(path, fpdbfile.site.filter_name, fpdbfile.site.name, bool(fpdbfile.archive))
+            for path, fpdbfile in self.filelist.items()
+            if fpdbfile.ftype in ("hh", "both") and fpdbfile.site is not None
+        ]
+        if len(jobs) < 2 or load_poker_eval() is None:
+            return None
+        try:
+            prefetch = import_prefetch.EquityPrefetch(self.config, min(workers, len(jobs)))
+            prefetch.submit(jobs)
+        except (OSError, RuntimeError, ValueError):
+            log.warning("Importing without equity workers: they could not start", exc_info=True)
+            return None
+        return prefetch
 
     def _relocate_processed_file(self, filepath: str, *, failed: bool) -> None:
         """Move a just-processed file to the configured imported/failed directory.
@@ -954,12 +1291,56 @@ class Importer:
             (stored, duplicates, partial, skipped, errors, ttime, detected_sitename) = self._import_hh_file(fpdbfile)
         if fpdbfile.ftype == "summary":
             (stored, duplicates, partial, skipped, errors, ttime) = self._import_summary_file(fpdbfile)
+        if fpdbfile.ftype == "phh":
+            (stored, duplicates, partial, skipped, errors, ttime) = self._import_phh_file(fpdbfile)
+            detected_sitename = PHH_SITE_NAME
+        # Before the summary below: it resets the bulk buffers, database.hids included.
+        self._mark_outbox()
         if fpdbfile.ftype == "both" and fpdbfile.path not in self.updatedsize:
             self._import_summary_file(fpdbfile)
         #    pass
         log.debug(f"_import_summary_file.ttime: {ttime:.3f} {fpdbfile.ftype}")
 
         return (stored, duplicates, partial, skipped, errors, ttime, detected_sitename)
+
+    def phh_summary(self) -> PHHImportResult | None:
+        """The PHH files of this run added up, or ``None`` when there were none."""
+        if not self.phh_results:
+            return None
+        total = PHHImportResult()
+        for result in self.phh_results.values():
+            total.discovered += result.discovered
+            total.imported += result.imported
+            total.duplicates += result.duplicates
+            total.unsupported += result.unsupported
+            total.malformed += result.malformed
+            total.partial += result.partial
+            total.seconds += result.seconds
+            total.errors.extend(result.errors)
+        return total
+
+    def _import_phh_file(self, fpdbfile):
+        """Import a PHH file (#381): partial histories count as partial, unsupported as skipped, malformed as errors."""
+        sync = getattr(self, "_local_first_sync", None)
+        result = import_phh_file(
+            self.database,
+            self.config,
+            fpdbfile.path,
+            file_id=fpdbfile.fileId or 0,
+            on_stored=sync.mark if sync is not None else None,
+        )
+        self.phh_results[fpdbfile.path] = result
+        log.info(result.summary())
+        for error in result.errors:
+            log.warning(f"PHH: {error}")
+        return (
+            result.imported,
+            result.duplicates,
+            result.partial,
+            result.unsupported,
+            result.malformed,
+            result.seconds,
+        )
 
     def calculate_auto2(self, db, scale, increment):
         """Determine whether to drop indexes based on database and import file sizes.
@@ -1247,13 +1628,13 @@ class Importer:
                     if self.caller:
                         self.progressNotify()
                     handlist = hhc.getProcessedHands()
-                    self.database.resetBulkCache(True)
                     self.pos_in_file[fpdbfile.path] = hhc.getLastCharacterRead()
                     self.database.resetBulkCache()
 
-                    for hand in handlist:
-                        hand.prepInsert(self.database, printtest=self.settings["testData"])
-                        ahands.append(hand)
+                    with self.database.tourney_lookups_for_file():
+                        for hand in handlist:
+                            hand.prepInsert(self.database, printtest=self.settings["testData"])
+                            ahands.append(hand)
 
                     for hand in ahands:
                         hand.assembleHand()
@@ -1264,6 +1645,9 @@ class Importer:
                     # database.transaction() context manager above.
                     backtrack = False
                     id = self.database.nextHandId()
+                    # After nextHandId, which waits for any other importer to commit:
+                    # asked earlier, a hand it has just stored would still look absent.
+                    self.database.preload_duplicate_check(phands)
                     for i in range(len(phands)):
                         doinsert = len(phands) == i + 1
                         hand = phands[i]
@@ -1280,6 +1664,7 @@ class Importer:
                             hand.updatePositionsCache(self.database, None, doinsert)
                             hand.updateHudCache(self.database, doinsert)
                             hand.updateTourneyResults(self.database)
+                            self._note_tourney(hand.tourneyId)
                             ihands.append(hand)
                             to_hud.append(hand.dbid_hands)
                             log.info(f"Hand {hand.dbid_hands} added to HUD queue")
@@ -1290,7 +1675,9 @@ class Importer:
                                     log.debug(f"DEBUG: Calling report_hand_success for hand {hand.handid}")
                                     self.hand_data_reporter.report_hand_success(fpdbfile.path, hand)
                                     log.debug(f"DEBUG: report_hand_success completed for hand {hand.handid}")
-                                except Exception as e:  # intentional broad catch: reporter callback must not abort import.
+                                except (
+                                    Exception
+                                ) as e:  # intentional broad catch: reporter callback must not abort import.
                                     log.exception(f"DEBUG: Exception in report_hand_success: {e}")
 
                         except FpdbHandDuplicate as e:
@@ -1328,7 +1715,9 @@ class Importer:
                                     hand,
                                 )
 
-                        except Exception as e:  # intentional broad catch: per-hand import errors are counted and skipped.
+                        except (
+                            Exception
+                        ) as e:  # intentional broad catch: per-hand import errors are counted and skipped.
                             import traceback
 
                             errors += 1
@@ -1347,7 +1736,9 @@ class Importer:
                                 enriched_error = Exception(str(e))
                                 enriched_error.full_traceback = full_traceback
                                 self.hand_data_reporter.report_hand_failure(
-                                    fpdbfile.path, enriched_error, hand.handText[:500] if hasattr(hand, "handText") else ""
+                                    fpdbfile.path,
+                                    enriched_error,
+                                    hand.handText[:500] if hasattr(hand, "handText") else "",
                                 )
                             else:
                                 log.exception(f"'{hand.handText[0:200]}'")
@@ -1363,6 +1754,7 @@ class Importer:
                                 [],
                             )  # making sure we don't insert data from this hand
                             self.database.bbulk = [b for b in self.database.bbulk if hand.dbid_hands != b[0]]
+                            self.database.bfbulk = [b for b in self.database.bfbulk if hand.dbid_hands != b[0]]
                             hand.updateSessionsCache(self.database, None, doinsert)
                             hand.insertHands(
                                 self.database,
@@ -1390,6 +1782,8 @@ class Importer:
                             self.settings["testData"],
                         )
                         hand.insertHandsStove(self.database, doinsert)
+                        hand.insertHandsSituations(self.database, doinsert)
+                        hand.insertHandStates(self.database, doinsert)
                         hand.insertHandsShowdown(self.database, doinsert)
                         hand.insertHandsCashout(self.database, doinsert)
 
@@ -1562,8 +1956,9 @@ class Importer:
                             in_path=fpdbfile.path,
                             header=summaryTexts[0],
                         )
-                        self.database.resetBulkCache(False)
+                        self.database.resetBulkCache()
                         conv.insertOrUpdate(printtest=self.settings["testData"])
+                        self._note_tourney(conv.tourneyId)
                     except FpdbSummaryNotFound as exc:
                         # Page furniture, not a half-imported tournament: an
                         # archive page splits into its head, its column headers

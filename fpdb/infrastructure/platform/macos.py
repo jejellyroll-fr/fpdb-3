@@ -172,6 +172,7 @@ class MacOSTableDetector:
         titled_windows = 0
         blank_target_windows = []
         target_table_windows = []
+        quartz_listed = False
         try:
             # Get list of all on-screen windows
             options = self._kCGWindowListOptionOnScreenOnly
@@ -221,6 +222,7 @@ class MacOSTableDetector:
                     )
                     tables.append(table_info)
 
+            quartz_listed = True
         except Exception as e:
             logger.error(f"Error finding tables via Quartz: {e}", exc_info=True)
 
@@ -247,6 +249,7 @@ class MacOSTableDetector:
                 blank_target_windows,
                 total_windows,
                 titled_windows,
+                quartz_listed=quartz_listed,
             )
             if fallback is not None:
                 return fallback
@@ -261,11 +264,17 @@ class MacOSTableDetector:
         blank_target_windows: list[TableInfo],
         total_windows: int,
         titled_windows: int,
+        *,
+        quartz_listed: bool = False,
     ) -> list[TableInfo] | None:
         """Resolve tables when Quartz exposed no usable title, else return None.
 
         Tried in order: the owning process's argv (deterministic, no Screen
         Recording), then AppleScript, then the sole blank target window.
+
+        ``quartz_listed`` says the Quartz window list was read in full, so
+        ``blank_target_windows`` really holds every untitled poker table on
+        screen. Callers that cannot vouch for that leave it False.
         """
         # CoinPoker renders each table in its own Unity process whose window
         # carries no useful title and no accessibility text, so the tables are
@@ -283,6 +292,20 @@ class MacOSTableDetector:
                     search_string,
                 )
                 return [pid_match]
+
+        # Quartz listed every on-screen window, and each poker table among them
+        # carries a title that did not match: the table searched for is not
+        # open. System Events reads those same windows, so its scan cannot do
+        # better -- and it takes seconds, on the HUD's GUI thread, for every
+        # hand that arrives for a table no longer on screen. At 3.9 s a lookup,
+        # a run of such hands froze the HUD.
+        if search_string and quartz_listed and not blank_target_windows:
+            logger.debug(
+                "DIAGNOSTIC: every on-screen poker table has a Quartz title and none matched %r; "
+                "skipping the System Events scan",
+                search_string,
+            )
+            return None
 
         self._check_permissions_once()
         if not (total_windows > 0 and titled_windows == 0):

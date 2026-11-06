@@ -23,7 +23,7 @@ from typing import Any
 import numpy as np
 import pyqtgraph as pg
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QFrame, QMessageBox, QScrollArea, QSplitter, QVBoxLayout
+from PySide6.QtWidgets import QApplication, QCheckBox, QFrame, QMessageBox, QScrollArea, QSplitter, QVBoxLayout
 
 from fpdb_3_legacy import Database, Filters, gui_empty_state
 from fpdb_3_legacy.Filters import parse_tourney_buyin_key
@@ -61,6 +61,7 @@ class GuiTourneyGraphViewer(QSplitter):
             "TourneyCat": True,
             "TourneyLim": True,
             "TourneyBuyin": True,
+            "TourneyFormat": True,
             "Currencies": True,
             "Limits": False,
             "LimitSep": True,
@@ -91,6 +92,18 @@ class GuiTourneyGraphViewer(QSplitter):
         self.graphFrame.setStyleSheet(f"background-color: {self.colors['background']}")
         self.graphBox = QVBoxLayout()
         self.graphFrame.setLayout(self.graphBox)
+        # Off by default: the line rebuilds and prices every all-in hand of the graph's tournaments (#446).
+        self.icmCheck = QCheckBox(_("ICM $EV-adjusted line"))
+        self.icmCheck.setToolTip(
+            _(
+                "The results with the luck of every priced all-in taken out, in prize equity. "
+                "Slower: each all-in hand is rebuilt and priced."
+            )
+        )
+        self.icmCheck.toggled.connect(self.icm_toggled)
+        self.graphBox.addWidget(self.icmCheck)
+        self.icm_cache: dict[Any, float | None] = {}
+        self.graph_rows: list[Any] = []
         self.addWidget(self.graphFrame)
         self.setStretchFactor(0, 0)
         self.setStretchFactor(1, 1)
@@ -133,30 +146,19 @@ class GuiTourneyGraphViewer(QSplitter):
             f"GuiTourneyGraphViewer.generateGraph called. Sites selected: {sites}, Heroes config: {heroes}, siteids: {siteids}, games: {games}"
         )
 
-        for site in sites:
-            _hname = heroes.get(site, "")
-            if not _hname:
-                continue
-            # Plot the hero the user selected, resolved variant-aware:
-            # get_player_id maps a "PokerStars" selection to the hero's
-            # "PokerStars.FR" account, so data imported under a site skin still
-            # shows. Fall back to the site's hero-flagged players if unresolved.
-            result = self.db.get_player_id(self.conf, site, _hname)
-            pids = [int(result)] if result is not None else self.db.get_hero_player_ids(site)
-            for pid in pids:
-                if pid not in playerids:
-                    playerids.append(pid)
-                    pname = self.db.get_player_name_by_id(pid) or _hname
-                    names = names + "\n" + pname + " on " + site
+        # Every alias of the hero selected, or every player of a hero profile (#434):
+        # see Filters.get_selected_players.
+        for site, pid in self.filters.get_selected_players():
+            playerids.append(pid)
+            pname = self.db.get_player_name_by_id(pid) or str(pid)
+            names = names + "\n" + pname + " on " + site
 
-                    actual_site_id = self.db.get_player_site_id(pid)
-                    if actual_site_id is not None:
-                        sitenos.append(actual_site_id)
-                        log.debug(
-                            f"GuiTourneyGraphViewer: Using resolved actual siteId {actual_site_id} for hero '{pname}'"
-                        )
-                    else:
-                        sitenos.append(siteids[site])
+            actual_site_id = self.db.get_player_site_id(pid)
+            if actual_site_id is not None:
+                sitenos.append(actual_site_id)
+                log.debug(f"GuiTourneyGraphViewer: Using resolved actual siteId {actual_site_id} for hero '{pname}'")
+            else:
+                sitenos.append(siteids[site])
 
         log.debug(
             f"GuiTourneyGraphViewer.generateGraph resolved sitenos: {sitenos}, playerids: {playerids}, names: {names!r}"
@@ -252,7 +254,47 @@ class GuiTourneyGraphViewer(QSplitter):
                     name=f"{label}: {format_number(values[-1], 0)}",
                 )
 
+        if self.icmCheck.isChecked():
+            self.plot_icm_line(playerids, display_currency, "#38bdf8" if is_dark else "#0369a1")
+
         self.graphBox.addWidget(self.plot_widget)
+
+    def icm_toggled(self, _checked: bool) -> None:
+        if self.plot_widget is not None:
+            self.generateGraph(None)
+
+    def plot_icm_line(self, playerids: list[int], display_currency: str, color: str) -> None:
+        """Add the ICM $EV-adjusted line, priced from the rows the profit line was drawn from."""
+        from fpdb_3_legacy import Hand
+        from fpdb_3_legacy.tourney_icm_line import allin_hands, icm_line
+
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        try:
+            line = icm_line(
+                self.db,
+                [(int(row[0]), float(row[1]) / 100.0) for row in self.graph_rows],
+                allin_hands(self.db, playerids),
+                lambda hand_id: Hand.hand_factory(hand_id, self.conf, self.db),
+                cache=self.icm_cache,
+            )
+        except Exception:  # noqa: BLE001 - the profit line stands without it
+            log.warning("GuiTourneyGraphViewer: the ICM line could not be computed", exc_info=True)
+            return
+        finally:
+            self.db.rollback()
+            QApplication.restoreOverrideCursor()
+        if not line.values:
+            return
+        self.plot_widget.plot(
+            np.array(line.values),
+            pen=pg.mkPen(color=color, width=2, style=Qt.PenStyle.DashLine),
+            name=_("ICM $EV-adjusted: %(total)s | %(priced)s of %(allins)s all-ins priced")
+            % {
+                "total": format_currency(line.values[-1], display_currency),
+                "priced": format_number(line.priced, 0),
+                "allins": format_number(line.allins, 0),
+            },
+        )
 
     def getData(self, names, sites, Tourneys):
         tmp = self.sql.query["tourneyGraphType"]
@@ -287,6 +329,12 @@ class GuiTourneyGraphViewer(QSplitter):
 
         currency_values = make_in_clause_sql(currencies, "str")
         currencytest = f"AND tt.currency in {currency_values}" if currency_values else ""
+        # Knockouts or freezeouts (#447): every query this fills joins TourneyTypes as tt.
+        from fpdb_3_legacy.tourney_format import format_condition
+
+        currencytest = " ".join(
+            (currencytest, format_condition(self.filters.getTourneyFormat(), self.db.backend == self.db.SQLITE))
+        )
         tourneysCattest = make_in_clause_sql(tourneysCat, "str")
         tourneysLimtest = make_in_clause_sql(tourneysLim, "str")
 
@@ -325,6 +373,7 @@ class GuiTourneyGraphViewer(QSplitter):
         self.db.cursor.execute(tmp)
         winnings = self.db.cursor.fetchall()
         self.db.rollback()
+        self.graph_rows = list(winnings)
 
         log.debug(f"GuiTourneyGraphViewer.getData: SQL query returned {len(winnings)} records.")
 

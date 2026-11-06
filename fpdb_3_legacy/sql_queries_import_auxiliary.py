@@ -20,6 +20,124 @@ def import_auxiliary_queries() -> dict[str, str]:
                 %s, %s
             )"""
 
+    # One row per board and community street, classified once at import time
+    # (#295). The column order is board_features.BOARD_FEATURE_COLUMNS, and
+    # test_board_features guards the two against drift.
+    query["store_board_features"] = """insert into BoardFeatures (
+                    handId,
+                    boardId,
+                    street,
+                    streetName,
+                    cardCount,
+                    textureMask,
+                    runoutMask,
+                    topRank,
+                    suitStructure,
+                    pairing,
+                    rankBucket,
+                    connectivity
+           )
+           values (
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s,
+                %s, %s
+            )"""
+
+    # One row per persisted decision situation (#294, stored since #305).
+    # The column order is analytics_lifecycle.HANDS_SITUATION_COLUMNS, and
+    # test_analytics_lifecycle guards the two against drift.
+    query["store_hands_situations"] = """insert into HandsSituations (
+                    handId,
+                    playerId,
+                    actionNo,
+                    street,
+                    streetName,
+                    position,
+                    relativePosition,
+                    inPosition,
+                    effectiveStack,
+                    effectiveStackBB,
+                    stackBucket,
+                    sprBefore,
+                    isHero,
+                    potType,
+                    multiway,
+                    playersInHand,
+                    preflopAggressor,
+                    isPreflopAggressor,
+                    streetAggressor,
+                    isAggressor,
+                    previousAggressor,
+                    isPreviousAggressor,
+                    previousAggressorLed,
+                    previousAggressorChecked,
+                    previousAggressorPosition,
+                    inPositionVsPreviousAggressor,
+                    aggressorCheckedThisStreet,
+                    previousRaiser,
+                    isPreviousRaiser,
+                    toCall,
+                    potBefore,
+                    potAfter,
+                    potOddsBp,
+                    facingAction,
+                    facingPlayer,
+                    facingPosition,
+                    inPositionVsFacing,
+                    facingAmount,
+                    facingSizingBp,
+                    facingAllIn,
+                    betLevelFaced,
+                    raisesBefore,
+                    callsBefore,
+                    callersBetweenRaises,
+                    callersSinceRaise,
+                    streetActions,
+                    previousStreetActions,
+                    board,
+                    response,
+                    isAllIn,
+                    role,
+                    labels,
+                    primaryLabel,
+                    groupName,
+                    enumKey,
+                    enumResponse,
+                    enumAnswers,
+                    situationVersion
+           )
+           values (
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+           )"""
+
+    # One row per classified decision (#302). Only a postflop decision whose
+    # actor's cards are known gets one, so the table is smaller than
+    # HandsActions by construction. The column order is
+    # hand_state_store.HAND_STATE_COLUMNS, and tests/test_hand_state guards the
+    # two against drift.
+    query["store_hand_states"] = """insert into HandStates (
+                    handId,
+                    playerId,
+                    actionNo,
+                    street,
+                    streetName,
+                    madeHand,
+                    madeHandRank,
+                    madeHandLabel,
+                    pairDetail,
+                    drawsMask,
+                    nutness,
+                    nutnessBeats,
+                    nutnessHoldings,
+                    blockersMask,
+                    stateVersion
+           )
+           values (
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s
+            )"""
+
     query["store_hands_pots"] = """insert into HandsPots (
                     handId,
                     potId,
@@ -78,4 +196,3 @@ def import_auxiliary_queries() -> dict[str, str]:
                 finished=%s
                 WHERE id=%s"""
     return query
-

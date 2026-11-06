@@ -24,9 +24,9 @@ def main() -> None:
     """Run the legacy full launcher from an installed console script.
 
     ``uv run fpdb_3_legacy`` executes this function from the repository root or
-    an installed environment. The original legacy launchers expect their working
-    directory to be ``fpdb_3_legacy`` because they spawn sibling scripts such as
-    ``run_fpdb_api.py`` and ``fpdb.pyw``.
+    an installed environment. The GUI expects its working directory to be
+    ``fpdb_3_legacy`` because it spawns sibling scripts such as
+    ``HUD_main.pyw``.
     """
     legacy_dir = Path(__file__).resolve().parent
     sys.path.insert(0, str(legacy_dir))

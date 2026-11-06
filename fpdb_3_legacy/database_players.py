@@ -9,6 +9,7 @@ from __future__ import annotations
 import re
 import sys
 import traceback
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from fpdb_3_legacy.database_lambda_dict import LambdaDict
@@ -16,6 +17,26 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("db")
 re_char = re.compile("[^a-zA-Z]")
+
+
+def _site_key(site_name: str) -> str:
+    """A site name compared loosely: "PokerStars.FR" and "pokerstars fr" are one key."""
+    return site_name.lower().replace(" ", "").replace(".", "").replace("-", "")
+
+
+INSERT_PLAYER = "INSERT INTO Players (name, siteId, hero, chars) VALUES (%s, %s, %s, %s)"
+
+
+def _player_row(name: str, site_id: int, hero: bool) -> tuple[str, int, bool, str]:
+    """A player's row as INSERT_PLAYER writes it: the name cut to the column, and its index letters."""
+    stored_name = name[:32] if name else " "
+    if re_char.match(stored_name[0]):
+        char = "123"
+    elif len(stored_name) == 1 or re_char.match(stored_name[1]):
+        char = stored_name[0] + "1"
+    else:
+        char = stored_name[:2]
+    return stored_name, site_id, hero, char.upper()
 
 
 class DatabasePlayersMixin:
@@ -31,6 +52,7 @@ class DatabasePlayersMixin:
     connection: Any
     pcache: Any
     MYSQL_INNODB: int
+    PGSQL: int
 
     if TYPE_CHECKING:
 
@@ -39,6 +61,8 @@ class DatabasePlayersMixin:
         def get_site_id(self, site: str) -> Any: ...
 
         def get_last_insert_id(self, cursor: Any) -> Any: ...
+
+        insert_many_returning_ids: Callable[..., list[Any]]
 
         def insertOrUpdate(self, type: str, cursor: Any, key: Any, select: Any, insert: Any) -> Any: ...
 
@@ -140,18 +164,70 @@ class DatabasePlayersMixin:
 
     def get_hero_player_ids_for_profile(self, profile):
         """Return hero playerIds for a multiroom HeroProfile."""
+        ids = set()
+        for site_ids in self.get_hero_player_ids_by_site(profile).values():
+            ids.update(site_ids)
+        return sorted(ids)
+
+    def get_hero_player_ids_by_site(self, profile):
+        """Return ``{site_name: [playerId, ...]}`` for a multiroom HeroProfile.
+
+        Each site lists the players its links resolve to; a site none of them resolve
+        on is left out.
+        """
         if isinstance(profile, str):
             getter = getattr(self.config, "get_hero_profiles", None)
             profile = getter().get(profile) if callable(getter) else None
         if profile is None:
-            return []
-        ids = set()
+            return {}
+        by_site = {}
         for site_name, aliases in profile.aliases_by_site().items():
-            ids.update(self._resolve_alias_ids(site_name, aliases))
-        return sorted(ids)
+            site_ids = self._resolve_alias_ids(site_name, aliases)
+            # A link imported under a site skin only ("PokerStars" linked, hands under
+            # "PokerStars.FR"), as get_player_id resolves a hero selection.
+            for alias in aliases:
+                if not self._resolve_alias_ids(site_name, [alias]):
+                    site_ids.update(self._resolve_alias_skin_ids(site_name, alias))
+            if site_ids:
+                by_site[site_name] = sorted(site_ids)
+        return by_site
+
+    def _resolve_alias_skin_ids(self, site_name, alias):
+        """The players named *alias* on a skin of *site_name*, or the room a skin belongs to.
+
+        Matched by site-name prefix, as ``get_player_id`` does -- but never on an
+        unrelated room: a name alone stands for no one there.
+        """
+        if not alias or not site_name:
+            return set()
+        c = self.get_cursor()
+        c.execute(self.sql.query["get_players_and_sites_by_name"], (alias,))
+        wanted = _site_key(site_name)
+        return {
+            int(player_id)
+            for player_id, stored_site in c.fetchall()
+            if (key := _site_key(stored_site)) != wanted and (key.startswith(wanted) or wanted.startswith(key))
+        }
+
+    def get_player_identity(self, player_id):
+        """``(site name, player name)`` of a player, or ``None``: who the analytics filters name."""
+        c = self.get_cursor()
+        c.execute(self.sql.query["get_player_identity"], (player_id,))
+        row = c.fetchone()
+        return (row[0], row[1]) if row else None
+
+    def _is_data_source(self, site_name) -> bool:
+        """Whether *site_name* is a data source (PHH) rather than a configured room."""
+        is_source = getattr(self.config, "is_data_source", None)
+        return bool(callable(is_source) and is_source(site_name))
 
     def get_hero_player_ids(self, site_name=None, profile=None):
-        """Return every hero playerId for a site (multi-alias aware)."""
+        """Return every hero playerId for a site (multi-alias aware).
+
+        A data source (PHH) answers with its configured hero aliases only (#423): its
+        hero-flagged players are each file's own ``_hero``, not one hero, so they are no
+        fallback there.
+        """
         if profile is not None:
             return self.get_hero_player_ids_for_profile(profile)
 
@@ -162,7 +238,7 @@ class DatabasePlayersMixin:
 
         ids = self._resolve_alias_ids(site_name, self._hero_aliases(site_name))
 
-        if not ids:
+        if not ids and not self._is_data_source(site_name):
             ph = self.sql.query["placeholder"]
             q = "SELECT id FROM Players WHERE siteId=%s AND hero=%s".replace("%s", ph)
             c = self.get_cursor()
@@ -170,6 +246,34 @@ class DatabasePlayersMixin:
             ids.update(int(r[0]) for r in c.fetchall())
 
         return sorted(ids)
+
+    def get_selected_player_ids(self, site_name, name):
+        """The players a report reads for *name* selected on *site_name*.
+
+        The same players the report filters read (#434). On a configured room the alias
+        selected stands for every hero alias configured there -- an old nickname, a
+        second account -- or, when none of them is imported yet, the room's
+        hero-flagged players. On a data source (PHH) one of its configured hero aliases
+        stands for all of them (#423), and any other of its players for that player
+        alone. When that resolves to no one, the name selected, resolved variant-aware:
+        ``get_player_id`` maps a "PokerStars" selection to the hero's "PokerStars.FR"
+        account, so data imported under a site skin still shows.
+        """
+        if self._stands_for_hero_aliases(site_name, name) and (ids := self.get_hero_player_ids(site_name)):
+            return ids
+        result = self.get_player_id(self.config, site_name, name)
+        return [int(result)] if result is not None else []
+
+    def _stands_for_hero_aliases(self, site_name, name) -> bool:
+        """Whether *name* on *site_name* stands for every hero alias configured there.
+
+        Mirrors ``Filters._resolves_by_alias``: a configured room always, a data source
+        only for one of its configured hero aliases.
+        """
+        getter = getattr(self.config, "get_supported_sites", None)
+        if callable(getter) and site_name in getter():
+            return True
+        return self._is_data_source(site_name) and name in self._hero_aliases(site_name)
 
     def getHeroIds(self, pids, sitename):
         try:
@@ -193,25 +297,54 @@ class DatabasePlayersMixin:
                 lambda key: self.insertPlayer(key[0], key[1], key[2]),
             )
 
+        if self.backend == self.PGSQL:
+            self._load_players(pnames, siteid, hero)
         for player in pnames:
             result[player] = self.pcache[(player, siteid, player == hero)]
 
         return result
 
-    def insertPlayer(self, name, site_id, hero):
-        insert_player = "INSERT INTO Players (name, siteId, hero, chars) VALUES (%s, %s, %s, %s)"
-        insert_player = insert_player.replace("%s", self.sql.query["placeholder"])
-        _name = name[:32] if name else " "
-        if not _name:
-            _name = " "
-        if re_char.match(_name[0]):
-            char = "123"
-        elif len(_name) == 1 or re_char.match(_name[1]):
-            char = _name[0] + "1"
-        else:
-            char = _name[:2]
+    def _load_players(self, pnames, siteid, hero) -> None:
+        """Fill pcache with the players it lacks, in two round trips however many there are (#705).
 
-        key = (_name, site_id, hero, char.upper())
+        What insertPlayer does one player at a time: a stored player keeps their
+        id and only ever gains the hero flag, and the others are inserted.
+        """
+        wanted, rows = self._players_not_cached(pnames, siteid, hero)
+        if not wanted:
+            return
+
+        c = self.get_cursor()
+        c.execute(self.sql.query["players_by_names"], (siteid, list(wanted)))
+        for player_id, stored_name, stored_hero in c.fetchall():
+            if rows[stored_name][2] and not stored_hero:
+                c.execute("UPDATE Players SET hero=%s WHERE id=%s", (True, player_id))
+            for key in wanted.pop(stored_name):
+                self.pcache[key] = player_id
+        if wanted:
+            new_rows = [rows[stored_name] for stored_name in wanted]
+            ids = self.insert_many_returning_ids(c, INSERT_PLAYER, new_rows)
+            for row, player_id in zip(new_rows, ids, strict=True):
+                for key in wanted[row[0]]:
+                    self.pcache[key] = player_id
+
+    def _players_not_cached(self, pnames, siteid, hero) -> tuple[dict[str, list[Any]], dict[str, tuple[Any, ...]]]:
+        """By stored name: the pcache keys still missing, and the row to insert."""
+        wanted: dict[str, list[Any]] = {}
+        rows: dict[str, tuple[Any, ...]] = {}
+        for name in dict.fromkeys(pnames):
+            key = (name, siteid, name == hero)
+            if key not in self.pcache:
+                row = _player_row(name, siteid, name == hero)
+                wanted.setdefault(row[0], []).append(key)
+                # Two names cut to the same 32 characters are one player, the hero if either is.
+                if row[0] not in rows or row[2]:
+                    rows[row[0]] = row
+        return wanted, rows
+
+    def insertPlayer(self, name, site_id, hero):
+        insert_player = INSERT_PLAYER.replace("%s", self.sql.query["placeholder"])
+        key = _player_row(name, site_id, hero)
 
         c = self.get_cursor()
         if self.backend == self.MYSQL_INNODB:

@@ -1,0 +1,37 @@
+PokerStars Hand #2810000002:  Omaha Pot Limit ($0.25/$0.50 USD) - 2026/09/01 20:05:00 ET
+Table 'Review PLO' 6-max Seat #1 is the button
+Seat 1: Player1 ($50.00 in chips)
+Seat 2: Hero ($60.00 in chips)
+Seat 3: Player3 ($50.00 in chips)
+Seat 4: Player4 ($50.00 in chips)
+Seat 5: Player5 ($50.00 in chips)
+Seat 6: Player6 ($50.00 in chips)
+Hero: posts small blind $0.25
+Player3: posts big blind $0.50
+*** HOLE CARDS ***
+Dealt to Hero [As Ad Kh Qh]
+Player4: folds
+Player5: folds
+Player6: folds
+Player1: raises $1.25 to $1.75
+Hero: raises $4 to $5.75
+Player3: folds
+Player1: calls $4
+*** FLOP *** [Ac 9d 4s]
+Hero: bets $12
+Player1: folds
+Uncalled bet ($12) returned to Hero
+Hero collected $12 from pot
+Hero: doesn't show hand
+*** SUMMARY ***
+Total pot $12 | Rake $0
+Board [Ac 9d 4s]
+Seat 1: Player1 (button) folded on the Flop
+Seat 2: Hero (small blind) collected ($12)
+Seat 3: Player3 (big blind) folded before Flop
+Seat 4: Player4 folded before Flop (didn't bet)
+Seat 5: Player5 folded before Flop (didn't bet)
+Seat 6: Player6 folded before Flop (didn't bet)
+
+
+

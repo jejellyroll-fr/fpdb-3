@@ -1,0 +1,35 @@
+PokerStars Hand #3100000012:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:11:00 ET
+Table 'Golden 12 Turn Barrel' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Ac Kd]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [Ac 9h 4d]
+Boris: bets $7.00
+Cara: calls $7.00
+*** TURN *** [Ac 9h 4d] [2s]
+Boris: bets $18.00
+Cara: folds
+Uncalled bet ($18.00) returned to Boris
+Boris collected $27.00 from pot
+*** SUMMARY ***
+Total pot $27.00 | Rake $0.00
+Board [Ac 9h 4d 2s]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($27.00)
+Seat 3: Cara (button) folded on the Turn
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)

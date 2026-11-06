@@ -166,12 +166,15 @@ def test_one_dimension_can_be_saved_without_the_other(config, layout_set, dimens
     assert (in_use(config).width, in_use(config).height) != (640, 640)
 
 
-def test_a_size_of_zero_is_treated_as_no_size(config, layout_set) -> None:
-    # Observed: the width is written only when it is truthy, so a zero reads
-    # as "not specified" rather than as a window with no width.
+def test_a_size_of_zero_is_refused_rather_than_read_as_no_size(config, layout_set) -> None:
+    # A minimized, rolled-up or not yet realized window measures 0. That used to
+    # read as "not specified" -- the size was left alone, but the positions were
+    # written anyway, so they ended up paired with the size the layout already
+    # had. Nothing is saved now.
     config.save_layout_set(layout_set, 2, {1: (11, 12)}, width=0, height=0)
 
     assert (in_use(config).width, in_use(config).height) == (100, 200)
+    assert in_use(config).location[1] == (1, 2), "the positions are not written either"
 
 
 # --------------------------------------------------------------------------

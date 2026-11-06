@@ -1,0 +1,31 @@
+variant = "FB"
+antes = [0, 0, 0]
+blinds_or_straddles = [1, 2, 0]
+small_bet = 2
+big_bet = 4
+starting_stacks = [100, 100, 100]
+actions = [
+  "d dh p1 As2d3c4h",
+  "d dh p2 ????????",
+  "d dh p3 KsKdQcJh",
+  "p3 cbr 4",
+  "p1 cc",
+  "p2 f",
+  "p1 sd",
+  "p3 sd KdQc",
+  "d dh p3 5d6c",
+  "p1 cbr 2",
+  "p3 cc",
+  "p1 sd",
+  "p3 sd Ks",
+  "d dh p3 7s",
+  "p1 cbr 4",
+  "p3 cc",
+  "p1 sd",
+  "p3 sd",
+  "p1 cbr 4",
+  "p3 cc",
+  "p1 sm As2d3c4h",
+  "p3 sm 7s5d6cJh",
+]
+winnings = [30, 0, 0]

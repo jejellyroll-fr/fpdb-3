@@ -1,0 +1,32 @@
+# PHH's own example: a big pot between Dwan and Ivey (results added by PokerKit).
+variant = "NT"
+antes = [500, 500, 500]
+blinds_or_straddles = [1000, 2000, 0]
+min_bet = 2000
+starting_stacks = [1125600, 2000000, 553500]
+actions = [
+  "d dh p1 Ac2d",
+  "d dh p2 ????",
+  "d dh p3 7h6h",
+  "p3 cbr 7000",
+  "p1 cbr 23000",
+  "p2 f",
+  "p3 cc",
+  "d db Jc3d5c",
+  "p1 cbr 35000",
+  "p3 cc",
+  "d db 4h",
+  "p1 cbr 90000",
+  "p3 cbr 232600",
+  "p1 cbr 1067100",
+  "p3 cc",
+  "p1 sm Ac2d",
+  "p3 sm 7h6h",
+  "d db Jh",
+]
+author = "Juho Kim"
+event = "Million Dollar Cash Game"
+year = 2009
+players = ["Phil Ivey", "Patrik Antonius", "Tom Dwan"]
+currency = "USD"
+finishing_stacks = [572100, 1997500, 1109500]

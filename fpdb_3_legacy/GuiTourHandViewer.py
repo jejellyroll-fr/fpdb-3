@@ -38,11 +38,38 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Filters, GuiReplayer, Hand, gui_empty_state
+from fpdb_3_legacy.hand_review_dialog import add_review_action
+from fpdb_3_legacy.hand_share_dialog import add_share_actions
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_tour_hand_viewer")
+
+
+def hands_in_tourney_selection(rows, *, categories, limits, buyins) -> list:
+    """The hand ids whose tournament matches the Category, Limit and Buy-In filters (#650).
+
+    ``rows`` are ``(hand id, category, limitType, buyin, fee, currency)`` from
+    ``tourneyHandsInRangeSessionFilter``. Each filter holds the keys its check
+    boxes were built from: the column value (``None`` for a NULL one), and for
+    buy-ins ``Filters.tourney_buyin_key`` or ``"None"``. An empty filter
+    restricts nothing, as in the other tournament views.
+    """
+    wanted_categories = set(categories)
+    wanted_limits = set(limits)
+    wanted_buyins = set(buyins)
+    hand_ids = []
+    for hand_id, category, limit_type, buyin, fee, currency in rows:
+        buyin_key = "None" if buyin is None and fee is None else Filters.tourney_buyin_key(buyin, fee, currency)
+        if wanted_categories and category not in wanted_categories:
+            continue
+        if wanted_limits and limit_type not in wanted_limits:
+            continue
+        if wanted_buyins and buyin_key not in wanted_buyins:
+            continue
+        hand_ids.append(hand_id)
+    return hand_ids
 
 
 class TourHandViewer(QSplitter):
@@ -196,18 +223,20 @@ class TourHandViewer(QSplitter):
         self.reload_hands(hand_ids)
 
     def get_hand_ids_from_date_range(self, start, end):
-        q = self.db.sql.query["handsInRangeSessionFilter"]
+        q = self.db.sql.query["tourneyHandsInRangeSessionFilter"]
         q = q.replace("<datetest>", "between '" + start + "' and '" + end + "'")
 
         # Apply filters
         q = self.filters.replace_placeholders_with_filter_values(q)
 
-        # debug
-        # print("Filtered SQL query:", q)
-
         c = self.db.get_cursor()
         c.execute(q)
-        return [r[0] for r in c.fetchall()]
+        return hands_in_tourney_selection(
+            c.fetchall(),
+            categories=self.filters.getTourneyCat(),
+            limits=self.filters.getTourneyLim(),
+            buyins=self.filters.getTourneyBuyin(),
+        )
 
     def rankedhand(self, hand, game):
         ranks = {
@@ -289,8 +318,10 @@ class TourHandViewer(QSplitter):
             bet = hand.pot.committed[hero]
         log.debug(f"Hero committed (bet): {bet}")
 
-        net = won
-        log.debug(f"Net calculated (won): {net}")
+        # Same accounting as Hand.calculate_net_collected and the cash viewer:
+        # Pot.removeMoney already took uncalled bets out of committed (#653).
+        net = won - bet
+        log.debug(f"Net calculated (won - bet): {net}")
 
         pos = hand.get_player_position(hero)
         log.debug(f"Hero position: {pos}")
@@ -301,7 +332,8 @@ class TourHandViewer(QSplitter):
         totalpot = hand.totalpot
         log.debug(f"Total pot: {totalpot}")
 
-        rake = (totalpot / nbplayers) - net
+        # Hand.totalPot sets no per-hand rake for tournaments; what it holds is the rake.
+        rake = getattr(hand, "rake", None) or 0
         log.debug(f"Rake: {rake}")
 
         sitehandid = hand.handid
@@ -435,11 +467,16 @@ class TourHandViewer(QSplitter):
         index = self.view.currentIndex()
         if index.row() < 0:
             return
-        hand = self.hands[int(index.sibling(index.row(), self.colnum["HandId"]).data())]
+        hand_id = int(index.sibling(index.row(), self.colnum["HandId"]).data())
+        hand = self.hands[hand_id]
         m = QMenu()
-        copyAction = m.addAction(_("Copy to clipboard"))
+        copyAction = m.addAction(_("Copy hand history"))
         if copyAction is not None:
             copyAction.triggered.connect(partial(self.copyHandToClipboard, hand=hand))
+        m.addSeparator()
+        add_share_actions(m, hand, self)
+        m.addSeparator()
+        add_review_action(m, hand, self, fpdb_hand_id=hand_id, config=self.config)
         m.move(event.globalPosition().toPoint())
         m.exec()
 

@@ -11,12 +11,18 @@ launchers instead accept a ``--run-module`` escape hatch, dispatched by
 from __future__ import annotations
 
 import os
+import re
 import runpy
 import sys
 from pathlib import Path
 
 RUN_MODULE_FLAG = "--run-module"
 HUD_FLAG = "--hud"
+# What multiprocessing passes a frozen executable it starts as a worker.
+MULTIPROCESSING_FLAG = "--multiprocessing-fork"
+# ... and the command it gives the same executable for its resource tracker,
+# after the interpreter flags (-B and the like).
+RESOURCE_TRACKER_COMMAND = re.compile(r"from multiprocessing\.resource_tracker import main;main\((\d+)\)")
 
 
 def python_module_command(module: str, *args: str, unbuffered: bool = True) -> list[str]:
@@ -95,6 +101,45 @@ def dispatch_hud_main(argv: list[str] | None = None) -> bool:
     unbuffer_streams()
     runpy.run_path(str(hud_main), run_name="__main__")
     return True
+
+
+def dispatch_multiprocessing(argv: list[str] | None = None) -> bool:
+    """Run the multiprocessing worker this launcher was started as, then exit (#443).
+
+    In a frozen build ``sys.executable`` is fpdb itself, so multiprocessing
+    starts a worker as ``fpdb --multiprocessing-fork ...``, and on macOS and
+    Linux its resource tracker as ``fpdb -B -c "...resource_tracker..."``:
+    without this, each would be another fpdb (or an options error).
+    multiprocessing.freeze_support() only handles workers, and only on Windows,
+    so the spawn module's own is called. Returns False for any other command
+    line; a worker never returns.
+    """
+    argv = sys.argv if argv is None else argv
+    tracker = _resource_tracker_fd(argv)
+    if tracker is not None:
+        from multiprocessing import resource_tracker
+
+        resource_tracker.main(tracker)
+        sys.exit(0)
+    if len(argv) < 2 or argv[1] != MULTIPROCESSING_FLAG:
+        return False
+    from multiprocessing import spawn
+
+    sys.argv = list(argv)
+    spawn.freeze_support()
+    sys.exit(0)
+
+
+def _resource_tracker_fd(argv: list[str]) -> int | None:
+    """The pipe of the resource tracker multiprocessing starts this launcher as, if it does.
+
+    Matched exactly rather than executed: it is
+    ``<flags> -c "from multiprocessing.resource_tracker import main;main(<fd>)"``.
+    """
+    if len(argv) < 3 or argv[-2] != "-c" or not all(flag.startswith("-") for flag in argv[1:-2]):
+        return None
+    match = RESOURCE_TRACKER_COMMAND.fullmatch(argv[-1])
+    return int(match.group(1)) if match else None
 
 
 def unbuffer_streams() -> None:

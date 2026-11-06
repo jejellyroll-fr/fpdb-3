@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QListWidget,
+    QMenu,
     QMessageBox,
     QPushButton,
     QScrollArea,
@@ -31,11 +32,12 @@ from PySide6.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QTabWidget,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
 
-from fpdb_3_legacy import Configuration
+from fpdb_3_legacy import Configuration, dynamic_panels_consent
 from fpdb_3_legacy.hud_profiles import HudContext, HudProfileResolver, HudProfileRule
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.i18n import translate_hud_category
@@ -54,8 +56,47 @@ from fpdb_3_legacy.modern_hud_preferences.preview_widgets import (
 )
 from fpdb_3_legacy.PopupIcons import AVAILABLE_PROVIDERS
 from fpdb_3_legacy.PopupThemes import AVAILABLE_THEMES
+from fpdb_3_legacy.responsive_layout import (
+    CollapsibleSection,
+    ReflowGrid,
+    column_count,
+    fit_window,
+    labelled_field,
+    wrap_in_scroll,
+)
 
 log = get_logger("modern_hud_preferences.main_dialog")
+
+#: ``(minimum width, columns)`` for the Dynamic Panels field grids. Four across
+#: is the layout the tab was designed for; three once a caption would start to
+#: wrap, two once two combos side by side stop being readable, and a single
+#: column at the end so no selector is ever squeezed out of view.
+PANEL_FIELD_BREAKPOINTS = ((1000, 4), (840, 3), (600, 2))
+
+#: Width below which the five profile buttons of the header give way to a single
+#: menu. The five buttons and the profile combo are what set the dialog's
+#: minimum width at 890 px, so the swap has to happen above that or the window
+#: could never be narrowed to the width that needs it.
+NARROW_HEADER_WIDTH = 900
+
+
+def confirm_dynamic_panels(parent: QWidget | None, path: Any) -> bool:
+    """Ask before dynamic panels are turned on (#647); record and return a yes."""
+    if dynamic_panels_consent.is_confirmed(path):
+        return True
+    box = QMessageBox(parent)
+    box.setIcon(QMessageBox.Icon.Warning)
+    box.setWindowTitle(_("Turn on dynamic panels?"))
+    box.setText(_(dynamic_panels_consent.DYNAMIC_PANELS.title))
+    box.setInformativeText(dynamic_panels_consent.statement())
+    turn_on = box.addButton(_("I understand, turn them on"), QMessageBox.ButtonRole.AcceptRole)
+    box.addButton(QMessageBox.StandardButton.Cancel)
+    box.setDefaultButton(QMessageBox.StandardButton.Cancel)
+    box.exec()
+    if box.clickedButton() is not turn_on:
+        return False
+    dynamic_panels_consent.confirm(path)
+    return True
 
 
 class ModernHudPreferences(QDialog):
@@ -63,8 +104,8 @@ class ModernHudPreferences(QDialog):
         super().__init__(parent)
         self.config = config
         self.setWindowTitle(_("HUD Preferences"))
-        self.setMinimumSize(1200, 800)
-        self.resize(1400, 900)
+        # The size is applied at the end of __init__, once the content is known;
+        # see the ``fit_window`` call there.
 
         # Main layout with better spacing
         main_layout = QVBoxLayout(self)
@@ -91,7 +132,11 @@ class ModernHudPreferences(QDialog):
         profile_bar.addWidget(profile_label)
 
         self.profile_combo = QComboBox()
-        self.profile_combo.setMinimumWidth(250)
+        # Wide enough to read a profile name, small enough that the five action
+        # buttons beside it still fit a 1024-wide window. The buttons below take
+        # their natural width instead of a 120 px floor each: five floors were
+        # the single largest contributor to the dialog's minimum width.
+        self.profile_combo.setMinimumWidth(180)
         # Let qt_material manage the style
         self.profile_combo.currentIndexChanged.connect(self.on_profile_selected)
         profile_bar.addWidget(self.profile_combo)
@@ -102,23 +147,18 @@ class ModernHudPreferences(QDialog):
 
         # Profile action buttons with better styling
         self.add_profile_btn = QPushButton(_("➕ New Profile"))
-        self.add_profile_btn.setMinimumWidth(120)
         self.add_profile_btn.clicked.connect(self.add_profile)
 
         self.dup_profile_btn = QPushButton(_("📋 Duplicate"))
-        self.dup_profile_btn.setMinimumWidth(120)
         self.dup_profile_btn.clicked.connect(self.duplicate_profile)
 
         self.del_profile_btn = QPushButton(_("🗑️ Delete"))
-        self.del_profile_btn.setMinimumWidth(120)
         self.del_profile_btn.clicked.connect(self.delete_profile)
 
         self.export_profile_btn = QPushButton(_("📤 Export HUD"))
-        self.export_profile_btn.setMinimumWidth(120)
         self.export_profile_btn.clicked.connect(self.export_profile)
 
         self.import_profile_btn = QPushButton(_("📥 Import HUD"))
-        self.import_profile_btn.setMinimumWidth(120)
         self.import_profile_btn.clicked.connect(self.import_profile)
 
         profile_bar.addWidget(self.add_profile_btn)
@@ -126,6 +166,22 @@ class ModernHudPreferences(QDialog):
         profile_bar.addWidget(self.del_profile_btn)
         profile_bar.addWidget(self.export_profile_btn)
         profile_bar.addWidget(self.import_profile_btn)
+
+        # The same five actions behind one button, for a window too narrow to
+        # hold them. Five buttons are what set the dialog's minimum width at
+        # 890 px, so a reader who wants the preferences beside their table could
+        # not narrow the window. ``_fit_profile_actions`` swaps between the two
+        # as the width changes.
+        self.profile_actions_btn = QToolButton()
+        self.profile_actions_btn.setText(_("Profile actions"))
+        self.profile_actions_btn.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.profile_actions_menu = QMenu(self.profile_actions_btn)
+        for button in self._profile_action_buttons():
+            action = self.profile_actions_menu.addAction(button.text())
+            action.triggered.connect(lambda _checked=False, source=button: source.click())
+        self.profile_actions_btn.setMenu(self.profile_actions_menu)
+        self.profile_actions_btn.setVisible(False)
+        profile_bar.addWidget(self.profile_actions_btn)
 
         header_layout.addLayout(profile_bar)
 
@@ -392,9 +448,11 @@ class ModernHudPreferences(QDialog):
         left_layout.addWidget(stat_btn_frame)
         # Wrap the editor in a scroll area: a vertical scrollbar appears when the
         # content is taller than the window, and a horizontal one when the window
-        # is too narrow for the property zones — instead of cramming/truncating,
-        # the editor keeps a comfortable minimum width and scrolls.
-        left_panel.setMinimumWidth(1000)
+        # is too narrow for the property zones. The minimum is the width at which
+        # the four property zones stay legible, not the 1000 px the layout wanted:
+        # that floor alone forced the whole dialog wider than a laptop screen, and
+        # the scroll area already covers the rest by scrolling.
+        left_panel.setMinimumWidth(560)
         left_scroll = QScrollArea()
         left_scroll.setWidgetResizable(True)
         left_scroll.setFrameShape(QFrame.Shape.NoFrame)
@@ -468,7 +526,9 @@ class ModernHudPreferences(QDialog):
         popup_select_layout.addWidget(popup_select_label)
 
         self.popup_combo = QComboBox()
-        self.popup_combo.setMinimumWidth(360)
+        # The 360 px floor plus three 120 px buttons was the widest row in the
+        # dialog and set its minimum width on its own.
+        self.popup_combo.setMinimumWidth(220)
         self.popup_combo.setMinimumHeight(30)
         self.popup_combo.currentIndexChanged.connect(self.on_popup_selected)
         popup_select_layout.addWidget(self.popup_combo)
@@ -477,17 +537,14 @@ class ModernHudPreferences(QDialog):
 
         # Popup action buttons
         self.add_popup_btn = QPushButton(_("➕ New Popup"))
-        self.add_popup_btn.setMinimumWidth(120)
         self.add_popup_btn.setFixedHeight(34)
         self.add_popup_btn.clicked.connect(self.add_popup)
 
         self.dup_popup_btn = QPushButton(_("📋 Duplicate"))
-        self.dup_popup_btn.setMinimumWidth(120)
         self.dup_popup_btn.setFixedHeight(34)
         self.dup_popup_btn.clicked.connect(self.duplicate_popup)
 
         self.del_popup_btn = QPushButton(_("🗑️ Delete"))
-        self.del_popup_btn.setMinimumWidth(120)
         self.del_popup_btn.setFixedHeight(34)
         self.del_popup_btn.clicked.connect(self.delete_popup)
 
@@ -505,7 +562,10 @@ class ModernHudPreferences(QDialog):
         # Left panel: Statistics list
         left_popup_panel = QFrame()
         left_popup_panel.setFrameStyle(QFrame.Shape.StyledPanel)
-        left_popup_panel.setMinimumWidth(1000)
+        # Same reasoning as the statistics editor: the scroll area added below
+        # covers a narrow window, so the floor only has to keep the statistics
+        # list and the item properties readable side by side.
+        left_popup_panel.setMinimumWidth(560)
         left_popup_layout = QVBoxLayout(left_popup_panel)
         left_popup_layout.setContentsMargins(12, 12, 12, 12)
         left_popup_layout.setSpacing(8)
@@ -720,6 +780,8 @@ class ModernHudPreferences(QDialog):
         # PT-style persistent rules selecting a HUD profile from the table
         # context (room/game/format/seats/etc.).
         self._create_profile_select_tab()
+        self._create_dynamic_panels_tab()
+        self._create_reference_hud_tab()
 
         # Tab 3: General Settings
         general_tab = QWidget()
@@ -824,6 +886,12 @@ class ModernHudPreferences(QDialog):
         # Update status
         self.update_status()
 
+        # Size the dialog last, once the content is known. The dialog used to
+        # demand 1200 x 800 and open at 1400 x 900 without ever asking the screen
+        # how much room it had, so on a laptop the bottom of a tab sat below the
+        # visible area and the window could not be made smaller.
+        fit_window(self, 1400, 900)
+
     def update_status(self) -> None:
         """Update status label with current profile info."""
         if self.profile_combo.currentIndex() >= 0:
@@ -917,7 +985,14 @@ class ModernHudPreferences(QDialog):
             "hudbgcolor",
             "hudprefix",
             "hudsuffix",
+            "display_label",
             "tip",
+            # The declarative binding of an analytics-backed stat (#309). Empty
+            # for a column-backed stat, written back only when it is set.
+            "data_source",
+            "data_definition",
+            "data_format",
+            "data_min_sample",
         ):
             if hasattr(stat, attr):
                 d[attr] = getattr(stat, attr, "")
@@ -1450,6 +1525,7 @@ class ModernHudPreferences(QDialog):
             return
         name = self.profile_combo.currentText()
         profile = self.hud_profiles.get(name, {})
+        self._refresh_panel_stat_blocks()
 
         # Reflect this profile's positional-panel mode in the combo (multi-block
         # only). Block the signal so setting it here doesn't mark a fake edit.
@@ -2243,7 +2319,11 @@ class ModernHudPreferences(QDialog):
         import defusedxml.minidom
         from PySide6.QtWidgets import QFileDialog, QInputDialog, QMessageBox
 
-        from fpdb_3_legacy.hud_package import merge_package_game_bindings, merge_package_profile_rules
+        from fpdb_3_legacy.hud_package import (
+            merge_package_game_bindings,
+            merge_package_panel_rules,
+            merge_package_profile_rules,
+        )
 
         filename, _filter = QFileDialog.getOpenFileName(
             self,
@@ -2517,9 +2597,34 @@ class ModernHudPreferences(QDialog):
                 overwrite=True,
             )
 
+            # F. Apply the dynamic-panel section a package carries, if any. The
+            # reference Dynamic HUD (#332) ships the blocks the built-in
+            # resolver selects and the section that enables them for its own
+            # profile; a configuration that already has panel rules keeps them,
+            # because those are the user's. The section is scoped to a profile
+            # by name, so a renamed import has to repoint it here -- otherwise
+            # the panels turn on for the profile that already existed and the
+            # one the user just imported resolves nothing.
+            merge_package_panel_rules(
+                self.config.doc,
+                root,
+                overwrite=False,
+                profile_names={imported_name: new_profile_name},
+            )
+
             # Save configuration and reload
             self.config.save()
             self.config.reload()
+
+            # Importing a Dynamic package can replace the disabled placeholder
+            # with an enabled source. Keep the editor's draft in sync, or the
+            # next Save silently writes its old empty/disabled draft over the
+            # newly imported source.
+            if hasattr(self, "panel_rules_enabled"):
+                self.panel_rules: list[Any] = list(self.config.get_hud_panel_rules())
+                self.panel_rules_fallback = str(getattr(self.config, "hud_panel_fallback", "") or "")
+                self.panel_rules_enabled.setChecked(bool(self.config.hud_panel_rules_enabled))
+                self._refresh_panel_rules_table()
 
             # Reload HUD profiles and popups in the UI
             self.load_profiles()
@@ -2532,9 +2637,10 @@ class ModernHudPreferences(QDialog):
             # Reload parent config to apply changes live
             self.reload_parent_config()
 
-            QMessageBox.information(
-                self, "Import Successful", f"HUD profile '{new_profile_name}' successfully imported!"
-            )
+            from fpdb_3_legacy.pt4hud_dialogs import show_package_import
+
+            # A package converted from PT4 names the stats it left out (#614).
+            show_package_import(self, new_profile_name, root)
 
         except Exception as e:  # intentional broad catch
             QMessageBox.critical(self, "Import Error", f"An error occurred while importing HUD profile:\n{e}")
@@ -2555,27 +2661,38 @@ class ModernHudPreferences(QDialog):
             self.load_popup_windows()
             self.profile_combo.setCurrentText(summary["name"])
             self.on_profile_selected(self.profile_combo.currentIndex())
-            # Apply live in the running HUD if the parent wired this hook.
-            if hasattr(self, "reload_parent_config"):
-                self.reload_parent_config()
+            self.reload_parent_config()
         except Exception as e:  # intentional broad catch
             log.exception("PT4 .pt4hud import failed")
             QMessageBox.critical(self, "Import Error", f"Could not import {filename}:\n{e}")
             return
 
-        lines = [
-            f"Imported '{summary['name']}'.",
-            f"• {summary['stats']} stats mapped"
-            + (f" across {summary['blocks']} position panels." if summary.get("blocks") else "."),
-        ]
-        if summary["charts"]:
-            lines.append(
-                f"• {len(summary['charts'])} range chart(s) "
-                f"({', '.join(summary['charts'])}) → popup '{summary['popup']}'."
+        from fpdb_3_legacy.pt4hud_dialogs import show_import_summary
+
+        show_import_summary(self, summary)
+
+    def reload_parent_config(self) -> None:
+        """Ask the host to apply an import that has already been saved.
+
+        Standalone editors have no host to refresh. A host refresh failure
+        must not report a failed import: the package is already on disk and
+        loaded in this dialog, and importing it again would create conflicts.
+        """
+        try:
+            reload_config = getattr(self.parent(), "reload_config", None)
+            if callable(reload_config):
+                reload_config()
+        except Exception:  # intentional broad catch: optional host callback after a successful save
+            log.exception("HUD import saved, but parent configuration refresh failed")
+            QMessageBox.warning(
+                self,
+                _("HUD imported — refresh required"),
+                _(
+                    "The HUD profile was imported and saved, but the application could not "
+                    "refresh its configuration. Restart fpdb to apply it. "
+                    "You do not need to import the file again."
+                ),
             )
-        if summary["unmapped"]:
-            lines.append(f"• {len(summary['unmapped'])} custom formula stat(s) could not be mapped.")
-        QMessageBox.information(self, "PT4 HUD imported", "\n".join(lines))
 
     def get_current_profile(self):
         if self.profile_combo.currentIndex() < 0:
@@ -2805,6 +2922,8 @@ class ModernHudPreferences(QDialog):
         stat_node.setAttribute("click", stat.get("click", ""))
         stat_node.setAttribute("popup", stat.get("popup", "default"))
         stat_node.setAttribute("tip", stat.get("tip", ""))
+        if stat.get("display_label"):
+            stat_node.setAttribute("display_label", stat["display_label"])
         stat_node.setAttribute("hudprefix", stat.get("hudprefix", ""))
         stat_node.setAttribute("hudsuffix", stat.get("hudsuffix", ""))
         stat_node.setAttribute("hudcolor", stat.get("hudcolor", ""))
@@ -2819,6 +2938,12 @@ class ModernHudPreferences(QDialog):
             stat_node.setAttribute("colspan", str(int(stat["colspan"])))
         if stat.get("align") and stat["align"] != "center":
             stat_node.setAttribute("align", stat["align"])
+        # An analytics-backed stat (#309) says where its number comes from, so a
+        # configuration is self-describing rather than depending on what the
+        # build knew when it was written.
+        for attr in ("data_source", "data_definition", "data_format", "data_min_sample"):
+            if stat.get(attr):
+                stat_node.setAttribute(attr, str(stat[attr]))
         parent_node.appendChild(stat_node)
 
     def _append_hline_node(self, parent_node, hline: dict) -> None:
@@ -3003,7 +3128,10 @@ class ModernHudPreferences(QDialog):
 
         self.profile_rules = list(getattr(self.config, "get_hud_profile_rules", lambda: [])())
         self._refresh_profile_rules_table()
-        self.tabs.addTab(tab, _("🎯 Profile Select"))
+        # The selector grid, the preview and the rules table together ask for
+        # more height than a laptop screen has; scrolling keeps the Add button
+        # and the rules table reachable instead of pushing them below the fold.
+        self.tabs.addTab(wrap_in_scroll(tab), _("🎯 Profile Select"))
 
     def _add_profile_rule(self) -> None:
         if self.rule_profile_combo.currentIndex() < 0:
@@ -3133,6 +3261,881 @@ class ModernHudPreferences(QDialog):
             if default is None:
                 text += "\n" + _("Pick a Game (and Format) to see the default that would apply.")
         self.profile_preview_label.setText(text)
+
+    # ------------------------------------------------------------------ #
+    # Dynamic panels (#309): the panel rules of #298, editable.
+    # ------------------------------------------------------------------ #
+
+    def _open_help(self, topic: str) -> None:
+        """Open a user guide from a Help affordance (#334), never raising."""
+        try:
+            from fpdb_3_legacy import help_links
+
+            help_links.open_help(topic)
+        except Exception:  # intentional broad catch: Help must not break the dialog
+            log.exception("Could not open the help topic %r", topic)
+
+    def _create_reference_hud_tab(self) -> None:
+        """The three shipped HUDs, inspectable without a poker table (#370).
+
+        Read-only on purpose: this tab answers "what do these look like, and
+        where does each number live" before a reader commits to one. Choosing
+        a profile is still the Profile Select tab's job.
+        """
+        from fpdb_3_legacy.modern_hud_preferences.reference_preview import ReferenceHudPreview
+
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        intro = QLabel(
+            _(
+                "The HUDs fpdb ships, as a seat would see them. Pick a context to watch the "
+                "Dynamic package change panel, and read the popup paths to find where a "
+                "number lives before you go looking for it at a table.",
+            ),
+        )
+        intro.setWordWrap(True)
+        layout.addWidget(intro)
+        self.reference_preview = ReferenceHudPreview()
+        # Inside a scroll area the preview keeps the height it needs to show a
+        # seat; a window shorter than that scrolls rather than clipping the HUD.
+        self.reference_preview.setMinimumHeight(320)
+        layout.addWidget(self.reference_preview, 1)
+        self.tabs.addTab(wrap_in_scroll(tab), _("🃏 Reference HUDs"))
+
+    def _create_dynamic_panels_tab(self) -> None:
+        """The tab that writes the ``<hud_panel_rules>`` section of #298.
+
+        The selectors are the conditions a rule may state, and they come from
+        ``hud_panel_editor``, which validates them against the query engine's own
+        vocabulary: this tab cannot offer a condition the HUD would refuse. The
+        preview below runs the production resolver on the context the selectors
+        describe, so what is shown here is what a table would show.
+        """
+        from fpdb_3_legacy import hud_panel_editor as editor
+        from fpdb_3_legacy.ring_stats.styles import get_theme_palette
+
+        # The captions above the fields follow the active theme's muted colour,
+        # the same one the Study Explorer uses, so a caption never competes with
+        # the value it labels.
+        muted = get_theme_palette().get("muted_text", "#a0aec0")
+
+        # The state first: the widget builders below ask for the known panels and
+        # the stat choices, and both read it.
+        self.panel_rules = list(getattr(self.config, "get_hud_panel_rules", lambda: [])())
+        self.panel_rules_fallback = str(getattr(self.config, "hud_panel_fallback", "") or "")
+        self.panel_stat_choices: tuple[Any, ...] = ()
+
+        tab = QWidget()
+        outer = QVBoxLayout(tab)
+        outer.setContentsMargins(12, 10, 12, 10)
+
+        # In-app help (#334): the dynamic-panel guide, opened from here so the
+        # reader does not have to know the file name.
+        help_row = QHBoxLayout()
+        help_row.addStretch()
+        self.dynamic_help_button = QLabel(_("?"))
+        self.dynamic_help_button.setToolTip(_("Open the Dynamic HUD guide"))
+        self.dynamic_help_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.dynamic_help_button.setStyleSheet("font-weight: bold;")
+        self.dynamic_help_button.mousePressEvent = lambda _event: self._open_help("hud-dynamic")  # type: ignore[assignment]
+        help_row.addWidget(self.dynamic_help_button)
+        outer.addLayout(help_row)
+
+        self.panel_rules_enabled = QCheckBox(_("Show the panels that fit the hand"))
+        self.panel_rules_enabled.setToolTip(
+            _(
+                "Off by default. When it is on, the panels a rule names are shown and every "
+                "other block keeps the position rule it has always had."
+            )
+        )
+        outer.addWidget(self.panel_rules_enabled)
+        rooms_note = QLabel(
+            _(
+                "Some rooms forbid statistics that change with the hand: fpdb asks once before turning "
+                "them on, and never shows them at PokerStars tables."
+            )
+        )
+        rooms_note.setWordWrap(True)
+        outer.addWidget(rooms_note)
+
+        selectors = QGroupBox(_("When this is the spot"))
+        selectors_layout = QVBoxLayout(selectors)
+        # The selector captions used to be cells of their own in a fixed
+        # four-column grid (``row * 2`` for the caption, ``row * 2 + 1`` for the
+        # field), inside a second scroll area that kept the group at 190 px of
+        # minimum height. A reflowing grid of caption-above-field blocks says the
+        # same thing, follows the window width, and needs no inner scroller now
+        # that the whole tab scrolls.
+        self.panel_selector_grid = ReflowGrid()
+        self.panel_selector_widgets: dict[str, Any] = {}
+        selector_blocks: list[QWidget] = []
+        for field in editor.fill_choices(editor.selector_fields(), **self._panel_vocabularies()):
+            widget = self._panel_selector_widget(field)
+            self.panel_selector_widgets[field.name] = widget
+            self._panel_selector_hook(widget, field.name)
+            selector_blocks.append(labelled_field(field.label, widget, muted))
+        self.panel_selector_grid.set_items(selector_blocks)
+        selectors_layout.addLayout(self.panel_selector_grid)
+        outer.addWidget(selectors)
+
+        behaviour = QGroupBox(_("Then show"))
+        behaviour_layout = QVBoxLayout(behaviour)
+        self.panel_rule_panel_combo = QComboBox()
+        self.panel_rule_panel_combo.setEditable(True)
+        self.panel_rule_panel_combo.addItems(self._known_panel_names())
+        self.panel_rule_profile_combo = QComboBox()
+        self.panel_rule_profile_combo.addItem(_("all profiles"), "all")
+        for profile in sorted(getattr(self.config, "stat_sets", {}) or {}):
+            self.panel_rule_profile_combo.addItem(profile, profile)
+        self.panel_rule_fallback_combo = QComboBox()
+        self.panel_rule_fallback_combo.addItem(_("(none)"), "")
+        self.panel_rule_fallback_combo.addItems(self._known_panel_names())
+        self.panel_rule_priority = QSpinBox()
+        self.panel_rule_priority.setRange(-100, 100)
+        self.panel_rule_min_sample = QSpinBox()
+        self.panel_rule_min_sample.setRange(0, 1000000)
+        self.panel_rule_min_sample.setToolTip(_("Below this many hands the panel is withheld and the fallback shows."))
+        self.panel_rule_sample = QLineEdit("n")
+        self.panel_rule_id = QLineEdit()
+        self.panel_rule_id.setPlaceholderText(_("optional name"))
+        self.panel_rule_enabled = QCheckBox(_("Enabled"))
+        self.panel_rule_enabled.setChecked(True)
+        # Same treatment as the selectors: the caption above its field, in a
+        # grid that reflows. The seven fields were two fixed rows of
+        # caption/field pairs before, and "Enabled" was parked in the leftover
+        # cell at (1, 6) -- which the grid silently dropped once the row was
+        # full, so the checkbox is now in a row of its own where nothing can
+        # take its place.
+        self.panel_behaviour_grid = ReflowGrid()
+        self.panel_behaviour_grid.set_items(
+            [
+                labelled_field(_("Panel"), self.panel_rule_panel_combo, muted),
+                labelled_field(_("HUD profile"), self.panel_rule_profile_combo, muted),
+                labelled_field(_("Priority"), self.panel_rule_priority, muted),
+                labelled_field(_("Min sample"), self.panel_rule_min_sample, muted),
+                labelled_field(_("Sample column"), self.panel_rule_sample, muted),
+                labelled_field(_("Fallback"), self.panel_rule_fallback_combo, muted),
+                labelled_field(_("Rule name"), self.panel_rule_id, muted),
+            ]
+        )
+        behaviour_layout.addLayout(self.panel_behaviour_grid)
+        enabled_row = QHBoxLayout()
+        enabled_row.addWidget(self.panel_rule_enabled)
+        enabled_row.addStretch()
+        behaviour_layout.addLayout(enabled_row)
+        outer.addWidget(behaviour)
+
+        buttons = QHBoxLayout()
+        for label, slot in (
+            (_("Add"), self._add_panel_rule),
+            (_("Update selected"), self._update_panel_rule),
+            (_("Delete"), self._delete_panel_rule),
+            (_("Move up"), lambda: self._move_panel_rule(-1)),
+            (_("Move down"), lambda: self._move_panel_rule(1)),
+        ):
+            button = QPushButton(label)
+            button.clicked.connect(slot)
+            buttons.addWidget(button)
+        buttons.addStretch()
+        for label, slot in ((_("Import…"), self._import_panel_rules), (_("Export…"), self._export_panel_rules)):
+            button = QPushButton(label)
+            button.clicked.connect(slot)
+            buttons.addWidget(button)
+        outer.addLayout(buttons)
+
+        active = QGroupBox(_("Panel rules"))
+        active_layout = QVBoxLayout(active)
+        self.panel_rules_table = QTableWidget(0, 8)
+        self.panel_rules_table.setHorizontalHeaderLabels(
+            [
+                _("#"),
+                _("Panel"),
+                _("Conditions"),
+                _("HUD profile"),
+                _("Priority"),
+                _("Min sample"),
+                _("Fallback"),
+                _("Issues"),
+            ]
+        )
+        self.panel_rules_table.verticalHeader().hide()
+        self.panel_rules_table.verticalHeader().setDefaultSectionSize(34)
+        self.panel_rules_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.panel_rules_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.panel_rules_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.panel_rules_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.panel_rules_table.setAlternatingRowColors(True)
+        self.panel_rules_table.setMinimumHeight(150)
+        self.panel_rules_table.itemSelectionChanged.connect(self._load_panel_rule_into_form)
+        active_layout.addWidget(self.panel_rules_table)
+        outer.addWidget(active, 1)
+
+        preview = QGroupBox(_("Preview, by the same resolver the HUD uses"))
+        preview_layout = QVBoxLayout(preview)
+        self.panel_preview_sample = QSpinBox()
+        self.panel_preview_sample.setRange(0, 1000000)
+        self.panel_preview_sample.setValue(500)
+        self.panel_preview_sample.valueChanged.connect(self._update_panel_preview)
+        sample_row = QHBoxLayout()
+        sample_row.addWidget(QLabel(_("Hands for this seat")))
+        sample_row.addWidget(self.panel_preview_sample)
+        sample_row.addStretch()
+        preview_layout.addLayout(sample_row)
+        self.panel_preview_label = QLabel()
+        self.panel_preview_label.setWordWrap(True)
+        self.panel_preview_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        preview_layout.addWidget(self.panel_preview_label)
+        outer.addWidget(preview)
+
+        self._create_panel_stat_picker(outer)
+
+        # Ticked only when the HUD would act on it: rules nobody said yes to are
+        # off at every table, so the box says so instead of asking on opening.
+        self.panel_rules_enabled.setChecked(
+            bool(getattr(self.config, "hud_panel_rules_enabled", False))
+            and dynamic_panels_consent.is_confirmed(self._dynamic_panels_answers())
+        )
+        self.panel_rules_enabled.toggled.connect(self._dynamic_panels_toggled)
+        if self.panel_rules_fallback:
+            index = self.panel_rule_fallback_combo.findText(self.panel_rules_fallback)
+            if index >= 0:
+                self.panel_rule_fallback_combo.setCurrentIndex(index)
+        self._refresh_panel_rules_table()
+        # This tab stacked seven sections and measured 880 px of minimum height,
+        # which alone set the height of the whole dialog. It scrolls now, so the
+        # rules table and the preview stay reachable on a short screen.
+        self.tabs.addTab(wrap_in_scroll(tab), _("🧩 Dynamic Panels"))
+        # The grids are laid out once here so the tab is never shown empty; the
+        # width the dialog ends up with arrives with the resize event below.
+        self._reflow_panel_fields(self.width())
+
+    def _profile_action_buttons(self) -> tuple[QPushButton, ...]:
+        """The header's profile actions, in the order the menu shows them."""
+        return (
+            self.add_profile_btn,
+            self.dup_profile_btn,
+            self.del_profile_btn,
+            self.export_profile_btn,
+            self.import_profile_btn,
+        )
+
+    def _fit_profile_actions(self, width: int) -> None:
+        """Five buttons, or one menu when the window cannot hold them.
+
+        Both arrangements carry the same five actions; the menu only changes how
+        many clicks they cost, and it is what lets the dialog be narrowed past
+        the width the buttons need.
+        """
+        wide = width >= NARROW_HEADER_WIDTH
+        for button in self._profile_action_buttons():
+            button.setVisible(wide)
+        self.profile_actions_btn.setVisible(not wide)
+
+    def _reflow_panel_fields(self, width: int) -> None:
+        """Lay the Dynamic Panels fields out for ``width``.
+
+        The selectors and the "Then show" fields are the same widgets at every
+        width; only how many fit on a row changes. Four across is the design,
+        two once the captions would wrap, one when even two combos side by side
+        would be unreadable.
+        """
+        columns = column_count(width, PANEL_FIELD_BREAKPOINTS)
+        for grid in (
+            getattr(self, "panel_selector_grid", None),
+            getattr(self, "panel_behaviour_grid", None),
+        ):
+            if grid is not None:
+                grid.reflow(columns)
+
+    def resizeEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
+        super().resizeEvent(event)
+        width = event.size().width()
+        self._reflow_panel_fields(width)
+        self._fit_profile_actions(width)
+
+    def showEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
+        super().showEvent(event)
+        self._reflow_panel_fields(self.width())
+        self._fit_profile_actions(self.width())
+
+    def _create_panel_stat_picker(self, outer: QVBoxLayout) -> None:
+        """The stat picker: the column-backed stats and the analytics ones.
+
+        The analytics entries of #306 carry what the issue asks the picker to
+        show -- the filters they apply, the format, the sample threshold and the
+        popups that already bind them -- and adding one to a block writes those
+        attributes into the configuration, so the block says where its number
+        comes from instead of depending on what the code knew that day.
+
+        It is folded by default: the catalogue runs to every analytics stat the
+        app knows, and unfolded it pushed the rules table below the fold of the
+        tab. The header keeps the count in view, so a folded section still says
+        what it holds.
+        """
+        self.panel_stat_section = CollapsibleSection(
+            _("Analytics-backed stats"),
+            expanded=False,
+            tooltip=_("Stats whose value comes from the analytics layer rather than a column."),
+        )
+        layout = QVBoxLayout(self.panel_stat_section.body())
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.panel_stat_combo = QComboBox()
+        self.panel_stat_combo.setMinimumWidth(0)
+        self.panel_stat_combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+        self.panel_stat_combo.setMinimumContentsLength(18)
+        self.panel_stat_combo.currentIndexChanged.connect(self._update_panel_stat_detail)
+        self.panel_stat_detail = QLabel()
+        self.panel_stat_detail.setWordWrap(True)
+        self.panel_stat_block_combo = QComboBox()
+        self.panel_stat_add_button = QPushButton(_("Add to block"))
+        self.panel_stat_add_button.clicked.connect(self._add_panel_stat_to_block)
+        row = QHBoxLayout()
+        row.addWidget(self.panel_stat_combo, 1)
+        row.addWidget(self.panel_stat_block_combo)
+        row.addWidget(self.panel_stat_add_button)
+        layout.addLayout(row)
+        layout.addWidget(self.panel_stat_detail)
+        outer.addWidget(self.panel_stat_section)
+        self._refresh_panel_stat_choices()
+
+    def _panel_vocabularies(self) -> dict[str, list[str]]:
+        """The selector values only the loaded configuration knows."""
+        limits = {"nl", "pl", "fl", "cn"}
+        seats = {str(value) for value in range(2, 11)}
+        for game in (getattr(self.config, "supported_games", {}) or {}):
+            for game_type in ("ring", "tour"):
+                try:
+                    params = self.config.get_supported_games_parameters(game, game_type)
+                except Exception:  # intentional broad catch: a missing game is not a broken tab
+                    continue
+                if not isinstance(params, dict):
+                    continue
+                limit = str(params.get("limitType") or params.get("limit_type") or "").strip()
+                if limit:
+                    limits.add(limit)
+                max_seats = params.get("maxSeats") or params.get("max_seats")
+                if max_seats:
+                    seats.add(str(max_seats))
+        return {
+            "site": sorted(getattr(self.config, "supported_sites", {}) or {}),
+            "game": sorted(getattr(self.config, "supported_games", {}) or {}),
+            "limit": sorted(limits),
+            "seats": sorted(seats, key=int),
+            "profile": sorted(getattr(self.config, "stat_sets", {}) or {}),
+            "situation": list(self._situation_words()),
+            "situation_group": list(self._situation_words(groups=True)),
+            "primary_situation": list(self._situation_words()),
+        }
+
+    @staticmethod
+    def _situation_words(*, groups: bool = False) -> tuple[str, ...]:
+        """The situation vocabulary of #294, so the labels are not typed by hand."""
+        try:
+            from fpdb_3_legacy import player_situations
+        except Exception:  # intentional broad catch: a missing layer must not break the tab
+            return ()
+        attribute = "group" if groups else "label"
+        return tuple(sorted({str(getattr(rule, attribute, "") or "") for rule in player_situations.SITUATION_RULES} - {""}))
+
+    def _panel_selector_widget(self, field) -> Any:
+        if field.kind == "bool":
+            combo = QComboBox()
+            combo.addItem(_("ANY"), None)
+            combo.addItem(_("Yes"), True)
+            combo.addItem(_("No"), False)
+            return combo
+        if field.kind == "range":
+            holder = QWidget()
+            layout = QHBoxLayout(holder)
+            layout.setContentsMargins(0, 0, 0, 0)
+            holder.low_edit = QLineEdit()
+            holder.high_edit = QLineEdit()
+            for entry in (holder.low_edit, holder.high_edit):
+                entry.setMaximumWidth(64)
+                entry.setPlaceholderText("—")
+                layout.addWidget(entry)
+                entry.textChanged.connect(self._update_panel_preview)
+            return holder
+        combo = QComboBox()
+        combo.setEditable(not field.choices)
+        combo.addItem(_("ANY"), "")
+        for choice in field.choices:
+            combo.addItem(str(choice), str(choice))
+        return combo
+
+    def _panel_selector_hook(self, widget, name: str = "") -> None:
+        """Repreview whenever a selector moves."""
+        if isinstance(widget, QComboBox):
+            widget.currentIndexChanged.connect(self._update_panel_preview)
+            if name:
+                widget.currentIndexChanged.connect(
+                    lambda _index, selector=name: getattr(self, "_preserved_selector_values", {}).pop(selector, None)
+                )
+
+    def _known_panel_names(self) -> list[str]:
+        """The panels a block can actually carry: the library, then the config's.
+
+        The library's names come first because they are what a rule means by
+        default -- a user who has not drawn the block yet still has to be able to
+        name the panel, and only the shipped rules know those names.
+
+        The panels the current rules name are deliberately **not** in here: this
+        list is what a rule is checked against, and a rule validating itself
+        would make every typo a known block.
+        """
+        names: list[str] = []
+        try:
+            from fpdb_3_legacy import hud_situation
+
+            for rule in hud_situation.load_source("builtin")[0]:
+                if rule.panel not in names:
+                    names.append(rule.panel)
+        except (OSError, ValueError):  # a broken library must not break the tab
+            log.debug("the shipped panel library could not be read", exc_info=True)
+        for name, profile in (getattr(self, "hud_profiles", None) or {}).items():
+            blocks = profile.get("blocks") if isinstance(profile, dict) else None
+            for block in blocks or []:
+                for key in ("id", "label"):
+                    value = str(block.get(key, "") or "").strip()
+                    if value and value not in names:
+                        names.append(value)
+            if name and name not in names:
+                names.append(name)
+        return names
+
+    def _panel_selector_values(self) -> dict[str, Any]:
+        """The conditions the selector widgets state, in the engine's vocabulary.
+
+        A selector left on ANY states nothing, which is what an unconstrained
+        dimension is: a rule that does not mention the street is a rule about
+        every street.
+        """
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        values: dict[str, Any] = {}
+        for name, widget in self.panel_selector_widgets.items():
+            field = editor.selector_field(name)
+            if field is None or name == "profile":
+                continue
+            if field.kind == "bool":
+                value = widget.currentData()
+            elif field.kind == "range":
+                low = widget.low_edit.text().strip()
+                high = widget.high_edit.text().strip()
+                if not low and not high:
+                    continue
+                try:
+                    value = [int(low) if low else None, int(high) if high else None]
+                except ValueError:
+                    continue
+            else:
+                preserved = getattr(self, "_preserved_selector_values", {}).get(name)
+                if preserved is not None:
+                    values[name] = list(preserved) if isinstance(preserved, tuple) else preserved
+                    continue
+                text = (widget.currentText() if widget.isEditable() else str(widget.currentData() or "")).strip()
+                if not text:
+                    continue
+                value = [text] if name == "situation" else text
+            if value is None:
+                continue
+            values[name] = value
+        return values
+
+    def _panel_behaviour(self) -> dict[str, Any]:
+        return {
+            "panel": self.panel_rule_panel_combo.currentText().strip(),
+            "profile": str(self.panel_rule_profile_combo.currentData() or "all"),
+            "rule_id": self.panel_rule_id.text().strip(),
+            "min_sample": int(self.panel_rule_min_sample.value()),
+            "sample": self.panel_rule_sample.text().strip() or "n",
+            "fallback": str(self.panel_rule_fallback_combo.currentText() or "").strip(),
+            "priority": int(self.panel_rule_priority.value()),
+            "enabled": self.panel_rule_enabled.isChecked(),
+        }
+
+    def _panel_draft(self):
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        behaviour = self._panel_behaviour()
+        return editor.PanelRuleDraft(conditions=self._panel_selector_values(), **behaviour)
+
+    def _add_panel_rule(self) -> None:
+        draft = self._panel_draft()
+        try:
+            rule = draft.to_rule(len(self.panel_rules))
+        except ValueError as error:
+            QMessageBox.warning(self, _("Cannot add this rule"), str(error))
+            return
+        if any(existing.selector() == rule.selector() for existing in self.panel_rules):
+            QMessageBox.warning(
+                self, _("Duplicate rule"), _("A panel rule with these conditions and this profile already exists.")
+            )
+            return
+        self.panel_rules.append(rule)
+        self._refresh_panel_rules_table()
+
+    def _update_panel_rule(self) -> None:
+        row = self.panel_rules_table.currentRow()
+        if not 0 <= row < len(self.panel_rules):
+            QMessageBox.information(self, _("Update rule"), _("Select a rule to update first."))
+            return
+        draft = self._panel_draft()
+        try:
+            replaced = draft.to_rule(row)
+        except ValueError as error:
+            QMessageBox.warning(self, _("Cannot update this rule"), str(error))
+            return
+        self.panel_rules[row] = replaced
+        self._refresh_panel_rules_table()
+        self.panel_rules_table.setCurrentCell(row, 0)
+
+    def _delete_panel_rule(self) -> None:
+        row = self.panel_rules_table.currentRow()
+        if not 0 <= row < len(self.panel_rules):
+            return
+        self.panel_rules.pop(row)
+        self._renumber_panel_rules()
+
+    def _move_panel_rule(self, delta: int) -> None:
+        """Reordering matters: file order is the last tie-breaker of the resolver."""
+        row = self.panel_rules_table.currentRow()
+        target = row + delta
+        if not 0 <= row < len(self.panel_rules) or not 0 <= target < len(self.panel_rules):
+            return
+        self.panel_rules[row], self.panel_rules[target] = self.panel_rules[target], self.panel_rules[row]
+        self._renumber_panel_rules()
+        self.panel_rules_table.setCurrentCell(target, 0)
+
+    def _renumber_panel_rules(self) -> None:
+        from fpdb_3_legacy import hud_situation
+
+        self.panel_rules = hud_situation.number_rules(self.panel_rules)
+        self._refresh_panel_rules_table()
+
+    def _load_panel_rule_into_form(self) -> None:
+        """Put the selected row back in the form, so editing is not retyping."""
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        row = self.panel_rules_table.currentRow()
+        if not 0 <= row < len(self.panel_rules):
+            return
+        draft = editor.PanelRuleDraft.from_rule(self.panel_rules[row])
+        for name, widget in self.panel_selector_widgets.items():
+            field = editor.selector_field(name)
+            value = draft.conditions.get(name)
+            if field is None or field.kind == "range":
+                if field is not None and field.kind == "range":
+                    pair = value if isinstance(value, (list, tuple)) else [value, value]
+                    widget.low_edit.setText("" if pair[0] is None else str(pair[0]))
+                    widget.high_edit.setText("" if len(pair) < 2 or pair[1] is None else str(pair[1]))
+                continue
+            if field.kind == "bool":
+                index = widget.findData(value if value is not None else None)
+                widget.setCurrentIndex(max(0, index))
+                continue
+            text = "" if value is None else (value[0] if isinstance(value, (list, tuple)) and value else str(value))
+            index = widget.findText(str(text))
+            widget.setCurrentIndex(index if index >= 0 else 0)
+            # Set the widget first: currentIndexChanged clears preserved
+            # values when a selector changes. Store the full collection after
+            # that signal so updating a rule does not collapse e.g.
+            # street=["turn", "river"] to only its first item.
+            if isinstance(value, (list, tuple)):
+                if not hasattr(self, "_preserved_selector_values"):
+                    self._preserved_selector_values = {}
+                self._preserved_selector_values[name] = list(value)
+        self.panel_rule_panel_combo.setCurrentText(draft.panel)
+        self.panel_rule_profile_combo.setCurrentIndex(max(0, self.panel_rule_profile_combo.findData(draft.profile)))
+        self.panel_rule_priority.setValue(int(draft.priority))
+        self.panel_rule_min_sample.setValue(int(draft.min_sample))
+        self.panel_rule_sample.setText(draft.sample or "n")
+        self.panel_rule_id.setText(draft.rule_id)
+        self.panel_rule_enabled.setChecked(bool(draft.enabled))
+        index = self.panel_rule_fallback_combo.findText(draft.fallback)
+        self.panel_rule_fallback_combo.setCurrentIndex(index if index >= 0 else 0)
+
+    def _refresh_panel_rules_table(self) -> None:
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        issues = editor.issues_by_index(self.panel_rules, self._known_panel_names())
+        self.panel_rules_table.blockSignals(True)
+        self.panel_rules_table.setRowCount(len(self.panel_rules))
+        for row, rule in enumerate(self.panel_rules):
+            self.panel_rules_table.setRowHeight(row, 34)
+            conditions = " ".join(f"{name}={editor.readable(value)}" for name, value in sorted(rule.when.items()))
+            values = [
+                str(row + 1),
+                rule.panel,
+                conditions or _("always"),
+                rule.profile,
+                str(rule.priority),
+                str(rule.min_sample) if rule.min_sample else "",
+                rule.fallback,
+                "",
+            ]
+            for column, value in enumerate(values):
+                item = QTableWidgetItem(value)
+                item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.panel_rules_table.setItem(row, column, item)
+            row_issues = issues.get(row, ())
+            if row_issues:
+                issue_item = self.panel_rules_table.item(row, 7)
+                severity = "⚠" if any(issue.severity == "duplicate" for issue in row_issues) else "!"
+                if issue_item is not None:
+                    issue_item.setText(severity)
+                    issue_item.setToolTip("\n".join(issue.message for issue in row_issues))
+            if not rule.enabled:
+                row_item = self.panel_rules_table.item(row, 0)
+                if row_item is not None:
+                    row_item.setToolTip(_("Disabled: this rule never matches."))
+        self.panel_rules_table.blockSignals(False)
+        self._update_panel_preview()
+
+    def _panel_preview_rules(self) -> list[Any]:
+        """The rules as the preview resolves them, including the form's draft."""
+        return list(self.panel_rules)
+
+    def _update_panel_preview(self, *_args: Any) -> None:
+        """Say which panel wins for the selectors, and why the others did not."""
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        if not hasattr(self, "panel_preview_label"):
+            return
+        fallback = str(self.panel_rule_fallback_combo.currentText() or "").strip()
+        hands = int(self.panel_preview_sample.value())
+        preview = editor.preview(
+            self._panel_selector_values(),
+            self._panel_preview_rules(),
+            profile=str(self.panel_rule_profile_combo.currentData() or "all"),
+            fallback=fallback,
+            samples={"n": hands, "opportunities": hands},
+            panels=self._known_panel_names(),
+            enabled=self.panel_rules_enabled.isChecked() or bool(self.panel_rules),
+        )
+        lines = [preview.describe(), ""]
+        for outcome in preview.outcomes:
+            if outcome.matched or outcome.reason.startswith("condition"):
+                mark = "✔" if outcome.shown else ("∅" if not outcome.matched else "⊘")
+                lines.append(f"{mark} {outcome.panel}: {outcome.reason}")
+        self.panel_preview_label.setText("\n".join(lines))
+
+    def _refresh_panel_stat_choices(self) -> None:
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        try:
+            from fpdb_3_legacy import popup_packs
+
+            packs = popup_packs.get_registry()
+        except Exception:  # intentional broad catch: a missing pack library must not break the tab
+            log.debug("popup packs unavailable", exc_info=True)
+            packs = None
+        self.panel_stat_choices = editor.stat_choices(config=self.config, packs=packs)
+        self.panel_stat_combo.clear()
+        for choice in self.panel_stat_choices:
+            # The source is part of the key: a registry stat and a declarative one
+            # can share a name, and a picker that cannot tell them apart would
+            # silently add the wrong one.
+            self.panel_stat_combo.addItem(f"{choice.label} [{choice.origin()}]", editor.choice_key(choice))
+        section = getattr(self, "panel_stat_section", None)
+        if section is not None:
+            section.set_summary(f"{len(self.panel_stat_choices)} available")
+        self._refresh_panel_stat_blocks()
+        self._update_panel_stat_detail()
+
+    def _current_panel_choice(self):
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        key = self.panel_stat_combo.currentData()
+        return next((choice for choice in self.panel_stat_choices if editor.choice_key(choice) == key), None)
+
+    def _update_panel_stat_detail(self, *_args: Any) -> None:
+        if not hasattr(self, "panel_stat_detail"):
+            return
+        choice = self._current_panel_choice()
+        self.panel_stat_detail.setText(choice.describe() if choice else "")
+
+    def _refresh_panel_stat_blocks(self) -> None:
+        """The blocks the current profile has, as targets for a new stat."""
+        if not hasattr(self, "panel_stat_block_combo"):
+            return
+        self.panel_stat_block_combo.clear()
+        _name, profile = self._current_profile()
+        blocks = profile.get("blocks") if isinstance(profile, dict) else None
+        if blocks:
+            for index, block in enumerate(blocks):
+                label = str(block.get("label") or block.get("id") or f"#{index + 1}")
+                self.panel_stat_block_combo.addItem(label, index)
+        else:
+            self.panel_stat_block_combo.addItem(_("the profile grid"), None)
+
+    def _add_panel_stat_to_block(self) -> None:
+        """Put the chosen stat in the chosen block, declarative attributes and all."""
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        choice = self._current_panel_choice()
+        _name, profile = self._current_profile()
+        if choice is None or profile is None:
+            QMessageBox.information(self, _("Add stat"), _("Pick a HUD profile first."))
+            return
+        block_index = self.panel_stat_block_combo.currentData()
+        container = self._item_container(profile, block_index)
+        stats = container.setdefault("stats", [])
+        row = len(stats)
+        attributes = editor.stat_entry_attributes(choice, grid=(row, 0))
+        item = {
+            "row": row,
+            "col": 0,
+            "stat": choice.name,
+            "click": "",
+            "popup": "",
+        }
+        for key, value in attributes.items():
+            item[key if key != "name" else "stat"] = value
+        stats.append(item)
+        container["rows"] = max(int(container.get("rows", 1) or 1), row + 1)
+        container["cols"] = max(int(container.get("cols", 1) or 1), 1)
+        self.on_profile_selected(self.profile_combo.currentIndex())
+
+    def _import_panel_rules(self) -> None:
+        from PySide6.QtWidgets import QFileDialog
+
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        path, _selected = QFileDialog.getOpenFileName(
+            self, _("Import panel rules"), "", _("Panel documents (*.json)")
+        )
+        if not path:
+            return
+        try:
+            document = editor.load_document(path)
+            imported = editor.import_document(
+                document, known_stats=[choice.name for choice in getattr(self, "panel_stat_choices", ())]
+            )
+        except (OSError, ValueError) as error:
+            QMessageBox.critical(self, _("Cannot import"), str(error))
+            return
+        self.panel_rules = list(imported.rules)
+        self._apply_imported_panel_stats(imported.stats)
+        if imported.fallback:
+            self.panel_rules_fallback = imported.fallback
+            index = self.panel_rule_fallback_combo.findText(imported.fallback)
+            if index >= 0:
+                self.panel_rule_fallback_combo.setCurrentIndex(index)
+        self.panel_rules_enabled.setChecked(True)
+        self._refresh_panel_rules_table()
+        message = _("Imported {count} rule(s).").format(count=len(self.panel_rules))
+        if imported.warnings:
+            message += "\n" + "\n".join(imported.warnings)
+        QMessageBox.information(self, _("Import panel rules"), message)
+
+    def _export_panel_rules(self) -> None:
+        from PySide6.QtWidgets import QFileDialog
+
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        path, _selected = QFileDialog.getSaveFileName(
+            self, _("Export panel rules"), "hud-panels.json", _("Panel documents (*.json)")
+        )
+        if not path:
+            return
+        try:
+            document = editor.export_document(
+                self.panel_rules,
+                fallback=self.panel_rules_fallback,
+                stats=self._panel_stat_bindings(),
+            )
+            editor.save_document(document, path)
+        except (OSError, ValueError) as error:
+            QMessageBox.critical(self, _("Cannot export"), str(error))
+            return
+        QMessageBox.information(self, _("Export panel rules"), _("Wrote {path}").format(path=path))
+
+    def _panel_stat_bindings(self) -> list[dict[str, Any]]:
+        """Serialize analytics-backed bindings with their profile location."""
+        bindings: list[dict[str, Any]] = []
+        for profile_name, profile in (getattr(self, "hud_profiles", {}) or {}).items():
+            blocks = profile.get("blocks") if isinstance(profile, dict) else None
+            containers = enumerate(blocks) if blocks else [(None, profile)]
+            for block_index, container in containers:
+                for stat in container.get("stats", []):
+                    if stat.get("data_source") != "analytics":
+                        continue
+                    entry = {
+                        "name": stat.get("stat", ""),
+                        "source": stat.get("data_source", "analytics"),
+                        "profile": profile_name,
+                        "row": stat.get("row", 0),
+                        "col": stat.get("col", 0),
+                    }
+                    if block_index is not None:
+                        entry["block"] = block_index
+                    entry.update({key: value for key, value in stat.items() if key.startswith("data_")})
+                    bindings.append(entry)
+        return bindings
+
+    def _apply_imported_panel_stats(self, entries: tuple[dict[str, Any], ...]) -> None:
+        """Place imported stat bindings in the selected or named profiles."""
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        choices = {(choice.source, choice.name): choice for choice in getattr(self, "panel_stat_choices", ())}
+        for entry in entries:
+            name = str(entry.get("name", "")).strip()
+            source = str(entry.get("source", "analytics")).strip() or "analytics"
+            choice = choices.get((source, name)) or choices.get(("analytics", name))
+            if choice is None:
+                continue
+            profile_name = str(entry.get("profile") or self.profile_combo.currentText())
+            profile = self.hud_profiles.get(profile_name)
+            if profile is None:
+                continue
+            block = entry.get("block")
+            try:
+                block_index = int(block) if block is not None else None
+            except (TypeError, ValueError):
+                block_index = None
+            container = self._item_container(profile, block_index)
+            stats = container.setdefault("stats", [])
+            row = int(entry.get("row", len(stats)) or len(stats))
+            col = int(entry.get("col", 0) or 0)
+            item = {"row": row, "col": col, "stat": choice.name, "click": "", "popup": ""}
+            item.update(editor.stat_entry_attributes(choice, grid=(row, col)))
+            item.update({key: value for key, value in entry.items() if key.startswith("data_")})
+            stats.append(item)
+            container["rows"] = max(int(container.get("rows", 1) or 1), row + 1)
+            container["cols"] = max(int(container.get("cols", 1) or 1), col + 1)
+        self.on_profile_selected(self.profile_combo.currentIndex())
+
+    def _dynamic_panels_answers(self) -> Any:
+        return dynamic_panels_consent.consent_path(getattr(self.config, "file", None))
+
+    def _dynamic_panels_toggled(self, on: bool) -> None:
+        """Ticking -- or importing rules, which ticks -- asks first; a no unticks."""
+        if not on or confirm_dynamic_panels(self, self._dynamic_panels_answers()):
+            return
+        self.panel_rules_enabled.blockSignals(True)
+        self.panel_rules_enabled.setChecked(False)
+        self.panel_rules_enabled.blockSignals(False)
+
+    def _persist_panel_rules(self) -> None:
+        """Hand the rules to the configuration, or leave it exactly as it was.
+
+        Untouched means untouched: a user who never opens the tab does not get a
+        section rewritten on every save, which keeps the static HUD static.
+        """
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        setter = getattr(self.config, "set_hud_panel_rules", None)
+        if setter is None:
+            return
+        enabled = self.panel_rules_enabled.isChecked()
+        touched = enabled or self.panel_rules or bool(getattr(self.config, "hud_panel_rules_enabled", False))
+        if not touched:
+            return
+        duplicates = [issue for issue in editor.rule_issues(self.panel_rules) if issue.severity == "duplicate"]
+        if duplicates:
+            raise ValueError(duplicates[0].message)
+        setter(self.panel_rules, fallback=self.panel_rules_fallback, enabled=enabled)
 
     def save_changes(self) -> None:
         try:
@@ -3297,6 +4300,8 @@ class ModernHudPreferences(QDialog):
                 if duplicates:
                     raise ValueError("Duplicate HUD profile selectors")
                 self.config.set_hud_profile_rules(self.profile_rules)
+
+            self._persist_panel_rules()
 
             # Save to file
             if hasattr(self.config, "save"):

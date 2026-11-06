@@ -41,6 +41,13 @@ CATEGORY_TRANSLATION_MAP: dict[str, str] = {
     "💰 SPLASH POTS &amp; NOTES": "💰 SPLASH POTS & NOTES",
 }
 
+# Popup-pack labels live in JSON, which gettext extraction does not read:
+# marking them here puts them in the catalogue translate_hud_label() reads.
+POPUP_PACK_LABELS: tuple[str, ...] = (
+    N_("Stack"),
+    N_("Stack (bb)"),
+)
+
 LABEL_TRANSLATION_MAP: dict[str, str] = {
     "All-ins observés": "Observed All-ins",
     "Weak AI % (Cibles EV+)": "Weak AI % (EV+ Targets)",

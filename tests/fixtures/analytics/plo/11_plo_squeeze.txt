@@ -1,0 +1,30 @@
+PokerStars Hand #3200000011:  Omaha Pot Limit ($0.50/$1.00 USD) - 2026/09/18 12:20:00 ET
+Table 'PLO 11 Squeeze' 6-max Seat #3 is the button
+Seat 1: Anna ($100.00 in chips)
+Seat 2: Boris ($100.00 in chips)
+Seat 3: Cara ($100.00 in chips)
+Seat 4: Dave ($100.00 in chips)
+Seat 5: Erin ($100.00 in chips)
+Seat 6: Frank ($100.00 in chips)
+Dave: posts small blind $0.50
+Erin: posts big blind $1.00
+*** HOLE CARDS ***
+Dealt to Boris [Ad Ah Kc Qh]
+Frank: raises $2.50 to $3.50
+Anna: calls $3.50
+Boris: raises $11.50 to $15.00
+Cara: folds
+Dave: folds
+Erin: folds
+Frank: folds
+Anna: folds
+Uncalled bet ($11.50) returned to Boris
+Boris collected $12.00 from pot
+*** SUMMARY ***
+Total pot $12.00 | Rake $0.00
+Seat 1: Anna folded before Flop
+Seat 2: Boris collected ($12.00)
+Seat 3: Cara (button) folded before Flop (didn't bet)
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop

@@ -115,6 +115,26 @@
     "hand_count": 1,
     "sha256": "9b95ab93bd533347d833f87dc285c1fd8b742ee8918e00bb10e32192348e76d7"
   },
+  "pokerstars/review/nl_3bet_6max.txt": {
+    "hand_count": 1,
+    "sha256": "5771a395611feb12d162a2bebf114baa09f45d0053579b8fc09f22500dfbe457"
+  },
+  "pokerstars/review/nl_9handed_antes_mtt.txt": {
+    "hand_count": 1,
+    "sha256": "ca20d6b0ba18a3d28d7e39cae7bb5a1c730d66945874b65b89e9153ad3080fb8"
+  },
+  "pokerstars/review/nl_9max_short_sitout.txt": {
+    "hand_count": 1,
+    "sha256": "ce3c461a48a7fe8bc45f9feadf69095ee83a4ce192df8ae9568c2e940fcafd09"
+  },
+  "pokerstars/review/nl_hu.txt": {
+    "hand_count": 1,
+    "sha256": "c3d9a0468191b2bad23467f61e087249bccb534627f1f56ece1b605822377947"
+  },
+  "pokerstars/review/plo_3bet_6max.txt": {
+    "hand_count": 1,
+    "sha256": "55f629def7131aaa361b0b642e5f78ed0a1dae3bb52752ad7ab4ae9dd7a69da7"
+  },
   "pokerstars/stud/7stud.txt": {
     "hand_count": 1,
     "sha256": "7489b9e59b3e3a5a70668fcb52709ee21b9e793e719b67f1a2934c8018263010"
@@ -122,6 +142,46 @@
   "pokerstars/stud/razz.txt": {
     "hand_count": 1,
     "sha256": "a18a3d086ed0bb5c383c79b639a884865da96e19f64cc51c8ff1164aec8072fb"
+  },
+  "regression-tour/PokerTracker/Flop/LHE-EUR-SNG-201111.Everest.txt": {
+    "hand_count": 67,
+    "sha256": "c3544f4eaf44e9926db4fde8642d0d79f120e62e1785d25c6c41d0e696367b54"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-10max-MTT-USD-5.00-202104.iPoker.txt": {
+    "hand_count": 1,
+    "sha256": "630ff0c1088adec8929144a04fd9554a118e019368fb3f4f0a91677e63b6c43b"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-2max-USD-0-STT-201307.Microgaming.allin.blind.txt": {
+    "hand_count": 1,
+    "sha256": "366afbfc53a6fafec8fe33189851c46225c27cf1716c4a3ccbb8fe3d04c36d70"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-2max-USD-0-STT-201307.Microgaming.txt": {
+    "hand_count": 6,
+    "sha256": "060b1e586425985b581e6ba68e23c0da0f88495239aa3f10fb62730f0335d2e3"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-9max-USD-MTT-16.50-201307.Microgaming.antes.txt": {
+    "hand_count": 1,
+    "sha256": "42c6b73a4e9cba61c6ff0fa5642da545415dbf762fb779d38542f792d20af920"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-EUR-200-MTT-201901.iPoker.txt": {
+    "hand_count": 1,
+    "sha256": "938c319d811415431d7fc8e2cc60b525b5464c208b207b52d401d1f508f1cb65"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-MTT-EUR-22.25-22.25-202104.KO.iPoker.txt": {
+    "hand_count": 1,
+    "sha256": "940aa8994dba8fe46c1a96c8b251052ff7fd97f1079a27c1094c9fa589e0077a"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-USD-SNG-2-201106.iPoker.txt": {
+    "hand_count": 240,
+    "sha256": "6fd227dc1a9214dae5161d1d909cc3e693d6cc4e63baa82c6efea8c3a69ac0e2"
+  },
+  "regression-tour/PokerTracker/Flop/NLHE-USD-SNG-2-201111.Merge.txt": {
+    "hand_count": 17,
+    "sha256": "dcd14183b151ea514ba2fabd849396f33a0572085b97df2bca5c504000c68b97"
+  },
+  "regression-tour/PokerTracker/Flop/PLO-USD-5-201202.Merge.all.in.blind.txt": {
+    "hand_count": 1,
+    "sha256": "ad433a50ac154995021804a638cc581308e8c30cdafbf73d0acfa18ee9e78427"
   },
   "regression/Absolute/Flop/IHH20090610 Chile Way - Hold'em No Limit $0.02(Real Money) Table 9339866.txt": {
     "hand_count": 1,
@@ -787,6 +847,10 @@
     "hand_count": 1,
     "sha256": "068dca2f413fa524c6ddc0f1d783dabf50076bc68fb647ed34e657debfbba5ea"
   },
+  "regression/GGPoker/Flop/PLO-7max-USD-0.02-0.05-202601.run.it.twice.first.streets.txt": {
+    "hand_count": 1,
+    "sha256": "c78d9f3a551ab357e3e615c9c08f66235d55bbc62a8a7fca2205080cea318931"
+  },
   "regression/GGPoker/Flop/PLO5-6max-USD-0.1-0.25-202104.over.straddle.txt": {
     "hand_count": 1,
     "sha256": "9b91d9f03e961bff0ba7958380ad9aa5b56ad4ea037072ee59393bddc2a23758"
@@ -1358,6 +1422,10 @@
   "regression/PacificPoker/Flop/PLO-6max-USD-25-50-201604.Swedish.txt": {
     "hand_count": 2,
     "sha256": "66a4ff7487d66d36a08dc25388ca04cd3c5be596d7507215b137d99ae32960ad"
+  },
+  "regression/PacificPoker/Flop/PLO5-6max-USD-0.50-1-202611.five.hole.cards.txt": {
+    "hand_count": 1,
+    "sha256": "f58e2c338f5f321079aef825b40a13f4fe3a90cb4b901a25d1b59527a317b316"
   },
   "regression/PartyPoker/Flop/LHE-6max-USD-15-30-201104.live.second.sb.txt": {
     "hand_count": 1,
@@ -2339,6 +2407,10 @@
     "hand_count": 1,
     "sha256": "888f6e42f419ddff6e2c80a325866bec4603335c963769c59fb40fb3be3cd011"
   },
+  "regression/Winning/Stud/7StudHL-8max-USD-0.10-0.20-202607.six.card.showdown.CASHID-TN-Braselton GAMETYPE.txt": {
+    "hand_count": 1,
+    "sha256": "a438dee49cf21cf6eaa874edaa9062fe76f55fb8d41293637be33054f7b4a0ba"
+  },
   "regression/iPoker/Flop/5CPLO-EUR-0.05-0.10-202105.new.date.format.txt": {
     "hand_count": 1,
     "sha256": "dc9659d6611bd5191de7a4fff083f802cfb01231b27775dcd2566200325087eb"
@@ -2349,7 +2421,7 @@
   },
   "regression/iPoker/Flop/5CPLO-EUR-2.00-4.00-201905.txt": {
     "hand_count": 2,
-    "sha256": "dc852b41468e033594700bc0703d4de86e5d0565edfaca98a17ed3fbdd875c37"
+    "sha256": "24e233a6bd5af850e335c2b0ea418982790f6b061a4da3311081471492aefbca"
   },
   "regression/iPoker/Flop/6+Holdem-EUR-0.25-0.50-201702.txt": {
     "hand_count": 1,
@@ -2374,6 +2446,10 @@
   "regression/iPoker/Flop/LHE-USD-5-10-201204.post.both.txt": {
     "hand_count": 1,
     "sha256": "c5ff62992409eb09906a44ee768f5df9ad6d24bd5b3f5ecb97643f678528d75d"
+  },
+  "regression/iPoker/Flop/NLHE-6max-EUR-0.01-0.02-202607.tablesize.in.session.header.xml": {
+    "hand_count": 2,
+    "sha256": "9297c88d82cb66898de65c5b4ba3d1597c5585ccba95f37bd335cb5d19a5f420"
   },
   "regression/iPoker/Flop/NLHE-6max-USD-0.01-0.02-201111.Spanish.sample.xml": {
     "hand_count": 1,

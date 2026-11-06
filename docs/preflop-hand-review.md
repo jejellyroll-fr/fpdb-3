@@ -1,0 +1,253 @@
+# Preflop hand review for PreflopAdvisor
+
+fpdb-3 owns the hands that were played; [PreflopAdvisor](https://github.com/jejellyroll-fr/PreflopAdvisor)
+owns the solver strategies and the trainer. The solver review sends the factual
+description of a hand's preflop from fpdb-3 to PreflopAdvisor, which matches
+each hero decision to a node of a compatible simulation, compares it with the
+solver's frequencies and EVs, and can turn the costly ones into training spots.
+
+fpdb-3 never names a solver node, computes an EV or picks a simulation: that
+is PreflopAdvisor's side ([PreflopAdvisor#22](https://github.com/jejellyroll-fr/PreflopAdvisor/issues/22)).
+
+## Using it
+
+- **Replayer**: *Solver review...* next to *Share...*. The review points at the
+  hero's preflop decision on screen (the one just played, else the next one;
+  once past preflop, the last one), or at every hero decision of the hand.
+- **Hand Viewer** and **tournament hand viewer**: right-click a hand,
+  *Solver review (PreflopAdvisor)...*.
+
+The dialog shows the preflop line with the hero's decisions marked. Then:
+
+- **Open in PreflopAdvisor** writes the document to a temporary folder
+  private to the user and made once per session (`fpdb-hand-reviews-<random>/`,
+  by `tempfile.mkdtemp`: never a fixed name in the shared temporary directory),
+  as a new `fpdb-hand-review-<id>-<random>.json` for every launch, so a
+  PreflopAdvisor still starting never finds its document rewritten by a second
+  click. It then starts PreflopAdvisor on it with
+  `--review <file>` (PreflopAdvisor's own option), which opens *Review Hands*
+  with the document loaded. Each click starts a new PreflopAdvisor window.
+- **Save for PreflopAdvisor...** saves the JSON (or **Copy JSON** copies it), to
+  load in PreflopAdvisor with *Review Hands > Load a hand review*.
+
+### Where PreflopAdvisor is
+
+fpdb-3 starts, in this order:
+
+1. the program the user located, remembered as the optional `preflop_advisor`
+   attribute of `<general>` in `HUD_config.xml` (the shipped templates do not
+   carry it), as long as it is still there;
+2. the `preflop_advisor` console script on the PATH (`uv tool install`,
+   `pip install`).
+
+A file counts as a program only if it may be executed (Windows has no such
+bit). When neither can be found, or the program does not start, the dialog
+asks where PreflopAdvisor is; the answer is remembered once it has started, and
+a remembered program that no longer starts is forgotten, so a broken one is
+never retried on later reviews (the next one looks on the PATH again). A review that
+cannot be written (a full or missing temporary folder) is reported as such,
+without asking for another program. On macOS a `PreflopAdvisor.app` bundle can
+be chosen; it is started through `open -n -a … --args`.
+
+## The document
+
+Code: `fpdb_3_legacy/hand_review_payload.py` (`build_hand_review`,
+`review_document`). One document holds one hand or many, so a batch review of
+selected hands writes the same format: `review_hands(hands)` describes each
+hand and returns the refused ones with their code, which `review_document(...,
+skipped=...)` lists under `skipped` (`{"hand", "code", "message"}`) beside the
+hands it could describe.
+
+```json
+{
+  "version": 1,
+  "schema": "fpdb-3/preflop-hand-review",
+  "source": "fpdb-3",
+  "generated_at": "2026-10-02T12:00:00+00:00",
+  "hands": [ { ... one hand ... } ]
+}
+```
+
+`version` is the one PreflopAdvisor's reader checks (`PAYLOAD_VERSION` in
+`preflop_advisor/hand_review.py`); it refuses any other. A change a version-1
+reader would misread needs a new number. Fields may be added: readers ignore
+the ones they do not know.
+
+### One hand
+
+The fields PreflopAdvisor reads:
+
+| Field | Meaning |
+| --- | --- |
+| `hand_id` | The fpdb database id of the hand (as a string), or `site#hand number` when the hand was not loaded from the database. |
+| `played_at` | Start time, ISO 8601. |
+| `hero` | The hero's seat, named as below. |
+| `hero_cards` | The hero's hole cards, concatenated (`AhQd`, `AsAdKhQh`). |
+| `game` | `NL` (no-limit hold'em), `PLO`, `PLO8`, `PLO5` (pot-limit). |
+| `table_size` | Players dealt in. |
+| `effective_stack_bb` | The hero's starting stack capped by the deepest opponent's, in big blinds. |
+| `ante_bb` | The ante per seat, in big blinds (a big-blind ante paid for the table is spread over the seats). |
+| `site`, `stake_label` | Labels only. |
+| `seats` | Seat names in preflop acting order, blinds last. |
+| `actions` | Every preflop action in order, folds included: `{"seat", "action", "to_bb"}`. `action` is `Fold`, `Check`, `Call`, `Raise` or `AllIn` (a raise that puts the seat all in). `to_bb` is the seat's street total after the action, in big blinds, antes excluded: for a raise, what it raises *to*. It is given for calls too, because PreflopAdvisor reads `amount_bb` in its place when it is missing. EV cash-outs are not decisions and are left out. |
+
+Factual context beside them, for auditing and later readers:
+
+| Field | Meaning |
+| --- | --- |
+| `fpdb_hand_id`, `site_hand_no`, `table`, `max_seats` | Where the hand comes from. `max_seats` is `null` for a hand read back from the database, which only stores a placeholder. |
+| `category`, `limit_type`, `game_type`, `currency`, `tournament` | The game as fpdb stores it; `tournament` holds `tourney_no`, `level`, `buyin`, `knockout` for tournament hands, else `null`. |
+| `blinds`, `ante` | Stakes in the hand's own chips or money; `blinds.sb_bb` is the small blind in big blinds. |
+| `hero_name`, `hero_seat_no` | Who the hero is, explicitly. |
+| `position_scheme` | `preflop-advisor-default`: how seats are named. |
+| `players` | Per seat dealt in: `position`, raw `seat_no`, starting `stack` and `stack_bb`, `is_hero`. |
+| `hero_decisions` | Indices into `actions` of the hero's turns. |
+| `selected_decision` | The hero decision the review points at, or `null` for the whole hand. |
+
+Each action also carries `index`, `street` (`PREFLOP`), `seat_no`, `is_hero`,
+the fpdb action (`fpdb_action`), what it put in (`amount`, `amount_bb`), the
+seat's street total after it (`to`), `all_in`, the pot before it
+(`pot_before`, `pot_before_bb`, antes included), what it faced (`to_call`,
+`to_call_bb`) and the effective stack at that moment (`effective_stack`,
+`effective_stack_bb`: what the actor had behind, capped by the deepest
+opponent still in the hand).
+
+### Amounts
+
+Chip and money amounts are the hand's own values; big-blind values are
+computed from them and **never rounded**: a raise to 2.47 BB stays 2.47, and
+PreflopAdvisor's matcher decides with its own tolerance whether that is the
+tree's 2.5 BB branch.
+
+### Seat names
+
+PreflopAdvisor's default seat names, in preflop acting order:
+
+| Players | Seats |
+| --- | --- |
+| 2 | SB, BB (the button posts the small blind) |
+| 3 | BU, SB, BB |
+| 4 | CO, BU, SB, BB |
+| 5 | MP, CO, BU, SB, BB |
+| 6 | UTG, MP, CO, BU, SB, BB |
+| 7 | UTG, MP, HJ, CO, BU, SB, BB |
+| 8 | UTG, MP, LJ, HJ, CO, BU, SB, BB |
+| 9 | UTG, UTG1, MP, LJ, HJ, CO, BU, SB, BB |
+
+Only the players dealt in count: empty seats and players sitting out do not
+shift the positions. The order is fixed by who posted the blinds; the button
+is checked against it. The raw seat numbers are kept in `players` and in each
+action so the mapping can be audited.
+
+## Hands that are refused
+
+A hand that cannot be described reliably is refused with a reason rather than
+sent with invented values (`HandReviewError.code`):
+
+| Code | When |
+| --- | --- |
+| `unsupported_game` | Not no-limit hold'em or pot-limit Omaha (PLO, PLO8, PLO5). |
+| `no_hero`, `hero_not_dealt` | The hand names no hero, or the hero was not dealt in. |
+| `hero_cards` | The hero's hole cards are not all known. |
+| `unsupported_posts` | A straddle, a dead small blind posted with the big one, a button blind: PreflopAdvisor's model has the two blinds and antes only. Also a blind posted short of the declared stakes (all in for less) and antes of different sizes, which one number per table cannot describe. |
+| `ambiguous_position` | Not exactly one small and one big blind, blinds out of order, a button that contradicts them, a listed player who never acts preflop (not dealt in?), or a player sitting out who posts. Heads-up the button is not checked: the seats are named after the blinds, and parsers record the heads-up button inconsistently. |
+| `unsupported_table_size` | Fewer than 2 or more than 9 players dealt in. |
+| `missing_stacks` | A starting stack or the blinds are missing, or an action puts in more than the stack. |
+| `invalid_amount` | An amount in the hand cannot be read as a number. |
+| `missing_preflop`, `unsupported_action` | No preflop action recorded, or one a review cannot describe. |
+| `no_hero_decision` | The hero never acted preflop (a walk). |
+
+## The whole-hand document (version 2)
+
+Version 1 stops at the flop: it is what PreflopAdvisor reviews. Version 2 describes
+every street, for postflop study tools (#448). It is its own document, with its
+own schema, so a version 1 reader never meets it, and it is the stable format a
+third-party tool can read:
+
+```json
+{
+  "version": 2,
+  "schema": "fpdb-3/hand-review",
+  "source": "fpdb-3",
+  "hands": [ { ... one hand ... } ],
+  "spots": [ {"spot", "count", "decisions"} ],
+  "skipped": [ {"hand", "code", "message"} ]
+}
+```
+
+Code: `build_full_review(hand)` describes one hand, `review_hands(hands, full=True)`
+many, and `full_review_document(reviews, skipped=...)` writes the document.
+
+**Exporting a batch.** In the Hand Viewer, right-click any hand and choose
+*Export the hands in view for solver review...*. Every hand the filters leave on
+screen is written as one version 2 document, in the order shown. A message then
+says how many hands were exported and how many were left out, counted by
+refusal code; the document lists each refused hand under `skipped`. In code,
+`export_hands(hands, path)` does the same and returns the counts.
+
+A hand keeps every version 1 field except the preflop-only `actions`,
+`hero_decisions` and `selected_decision`, which are replaced by:
+
+| Field | Meaning |
+| --- | --- |
+| `board` | Every board card dealt, concatenated (`Kc7h2sJd`). |
+| `streets` | One entry per street played, `PREFLOP` first; a street dealt with nobody left to act (after an all-in) is listed with no actions. |
+| `hero_decisions` | The hero's turns, as `{"street", "index", "spot"}`: `index` into that street's `actions`, `spot` as below. |
+
+Each street:
+
+| Field | Meaning |
+| --- | --- |
+| `street` | `PREFLOP`, `FLOP`, `TURN` or `RIVER`. |
+| `cards`, `board` | The cards dealt on this street, and the whole board so far. |
+| `pot_start`, `pot_start_bb` | The pot as the street begins: blinds and antes preflop. A bet nobody matched (an all-in covered by a deeper stack) has been returned. |
+| `stacks` | Each player still in: `{"seat", "stack", "stack_bb"}`, what they had behind as the street began. |
+| `actions` | The street's actions, each as in version 1 (`index`, `seat`, `amount`, `to`, `all_in`, `pot_before`, `to_call`, `effective_stack`…). |
+
+In version 2 an action is named as it was played: `Fold`, `Check`, `Call`, `Bet` or
+`Raise`, with `all_in` saying whether it put the seat all in. Version 1 keeps
+PreflopAdvisor's spelling, where a bet is a `Raise` and an all-in raise is `AllIn`.
+Each action also has `size_pct_pot`: a bet as a share of the pot it went into, a
+raise's increment over the bet it faced as a share of the pot once that bet is
+called (so a pot-sized raise is 100), `null` for folds, checks and calls.
+
+### Spots
+
+A study tool solves a spot, not a hand. Each hero decision names its spot
+(`fpdb_3_legacy/hand_review_spots.py`), read from the document itself, so a hand
+parsed from a file and one read back from the database name it the same:
+
+| Field | Meaning |
+| --- | --- |
+| `game`, `table_size` | The game (`NL`, `PLO`…) and the players dealt in: a solver solves one game at one table size, so these are never mixed in a spot. |
+| `street` | The decision's street. |
+| `pot_type` | `unopened`, `limped`, `single_raised`, `three_bet` or `four_bet_plus`: preflop, from the actions before the decision; later, from the whole preflop. These are the situation model's words. |
+| `hero`, `aggressor` | The hero's seat and the last preflop raiser's (`null` in a limped or unopened pot). |
+| `players` | Players still in as the street began. |
+| `spr` | The stack-to-pot band as the street began: the hero's stack capped by the deepest opponent's, over the pot (`under_1`, `1_to_2`, `2_to_4`, `4_to_7`, `7_to_13`, `13_plus`). `null` preflop. |
+| `board_rank`, `board_suits`, `board_pairing` | The board so far, in the research studies' board words (`king-high`, `rainbow`, `unpaired`…). `null` preflop. |
+
+The document's `spots` groups the hero decisions of every hand by spot, most
+frequent first: `{"spot", "count", "decisions"}`, each decision being
+`{"hand_id", "street", "index"}`. "My big blind against the button,
+single-raised, on the turn" is one entry, however many hands it comes from.
+
+Version 2 refuses everything version 1 refuses, and also:
+
+| Code | When |
+| --- | --- |
+| `unsupported_board` | The board was run more than once, or a street records actions but not its cards. |
+| `ambiguous_position` | A player acts after folding. |
+
+## Transport
+
+The document goes through a `HandReviewTransport` (`send(document) -> str`):
+
+- `JsonFileTransport` writes the file PreflopAdvisor loads;
+- `PreflopAdvisorTransport` writes it, then starts PreflopAdvisor on it with
+  `--review`, detached and without a shell. A write failure raises the
+  write's `OSError`; a program that does not start raises `LaunchError`. The launcher is injected
+  (`QProcess.startDetached` in the dialog), so the module stays free of Qt.
+
+A local API, or handing the document to a PreflopAdvisor already running,
+would be another transport; the normalization does not change.

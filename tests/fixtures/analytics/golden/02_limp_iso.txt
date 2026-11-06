@@ -1,0 +1,30 @@
+PokerStars Hand #3100000002:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:01:00 ET
+Table 'Golden 02 Limp Iso' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Qd Qs]
+Frank: calls $2.00
+Anna: calls $2.00
+Boris: raises $9.00 to $11.00
+Cara: folds
+Dave: folds
+Erin: folds
+Frank: folds
+Anna: folds
+Uncalled bet ($9.00) returned to Boris
+Boris collected $9.00 from pot
+*** SUMMARY ***
+Total pot $9.00 | Rake $0.00
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($9.00)
+Seat 3: Cara (button) folded before Flop (didn't bet)
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop

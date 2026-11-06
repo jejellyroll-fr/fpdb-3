@@ -34,6 +34,10 @@ IGNORED_HAND_KEYS = {
     "runItTwice",
     "sc",
     "sessionId",
+    # The sidecars record the NULL this column held before #295 redefined it as
+    # the flop texture mask, so they cannot witness it; the features have their
+    # own corpus and unit tests instead.
+    "texture",
     "tourneyId",
 }
 IGNORED_HANDSPLAYERS_KEYS = {"tourneyTypeId", "tourneysPlayersIds"}
@@ -173,6 +177,7 @@ def _compare_hands(path: Path, hand: Any, report: ComparisonReport) -> None:
     expected = _load_sidecar(path, ".hands")
     actual = dict(hand.stats.getHands())
     actual.pop("boards", None)
+    actual.pop("boardfeatures", None)
 
     for key, actual_value in actual.items():
         if key in IGNORED_HAND_KEYS:

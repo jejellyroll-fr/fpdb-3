@@ -1,0 +1,42 @@
+# PHH's own example: a bad beat between Yockey and Arieh (results added by PokerKit).
+variant = "F2L3D"
+antes = [0, 0, 0, 0]
+blinds_or_straddles = [75000, 150000, 0, 0]
+small_bet = 150000
+big_bet = 300000
+starting_stacks = [1180000, 4340000, 5910000, 10765000]
+actions = [
+  "d dh p1 7h6c4c3d2c",
+  "d dh p2 ??????????",
+  "d dh p3 ??????????",
+  "d dh p4 AsQs6s5c3c",
+  "p3 f",
+  "p4 cbr 300000",
+  "p1 cbr 450000",
+  "p2 f",
+  "p4 cc",
+  "p1 sd",
+  "p4 sd AsQs",
+  "d dh p4 2hQh",
+  "p1 cbr 150000",
+  "p4 cc",
+  "p1 sd",
+  "p4 sd Qh",
+  "d dh p4 4d",
+  "p1 cbr 300000",
+  "p4 cc",
+  "p1 sd",
+  "p4 sd 6s",
+  "d dh p4 7c",
+  "p1 cbr 280000",
+  "p4 cc",
+  "p1 sm 7h6c4c3d2c",
+  "p4 sm 2h4d7c5c3c",
+]
+author = "Juho Kim"
+event = "2019 WSOP Event #58"
+day = 28
+month = 6
+year = 2019
+players = ["Bryce Yockey", "Phil Hui", "John Esposito", "Josh Arieh"]
+finishing_stacks = [0, 4190000, 5910000, 12095000]

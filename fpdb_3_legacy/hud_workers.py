@@ -1,0 +1,384 @@
+"""The HUD's database threads: batched reads and connection recovery."""
+
+import contextlib
+import threading
+import time
+from collections.abc import Callable
+from queue import Empty, Queue
+from typing import Any
+
+from PySide6.QtCore import QObject, QThread, Signal
+
+from fpdb_3_legacy import Configuration, Database, latency_profile
+from fpdb_3_legacy.db_reconnect import is_connection_lost
+from fpdb_3_legacy.fast_fold_engine import (
+    FastFoldEngine,
+    FastFoldStatsRequest,
+    FastFoldStatsResult,
+)
+from fpdb_3_legacy.hud_main_base import log
+from fpdb_3_legacy.hud_read_service import (
+    HudBatchReadRequest,
+    HudReadService,
+    mark_players_with_notes,
+)
+
+# How long the recovery worker waits between attempts to re-open a database
+# connection that has dropped. Database.recover_connection has its own cooldown;
+# this only decides how often we ask.
+DB_RECOVERY_INTERVAL_S = 5.0
+
+
+def _mysql_session_timeouts(database: Database.Database) -> tuple[str, ...]:
+    """Statement/lock timeouts for a MySQL-family worker session (#680).
+
+    MySQL caps a statement with max_execution_time (milliseconds); MariaDB uses
+    max_statement_time (seconds) instead, so detect the server flavor first --
+    an unknown variable would fail the whole session setup and leave MariaDB
+    users without HUD updates.
+    """
+    lock_wait = "SET SESSION innodb_lock_wait_timeout = 2"
+    try:
+        with contextlib.suppress(Exception):
+            database.connection.rollback()
+        cursor = database.connection.cursor()
+        try:
+            cursor.execute("SELECT VERSION()")
+            row = cursor.fetchone()
+            version = str(row[0]).lower() if row else ""
+        finally:
+            cursor.close()
+        if "mariadb" in version:
+            return ("SET SESSION max_statement_time = 10", lock_wait)
+        return ("SET SESSION max_execution_time = 10000", lock_wait)
+    except Exception:
+        log.debug("Could not detect MySQL flavor; using max_execution_time", exc_info=True)
+        return ("SET SESSION max_execution_time = 10000", lock_wait)
+
+
+def _merge_batch_requests(older: HudBatchReadRequest, newer: HudBatchReadRequest) -> HudBatchReadRequest:
+    """Fold a waiting batch into a newer one instead of running both (#680).
+
+    Every hand and table the waiting batch asked for is carried into the
+    merged request, so nothing is lost; the GUI already ignores snapshots whose
+    sequence is older than the last one it applied, so collapsing the two into
+    one read with the higher sequence changes only how much database work a
+    burst of new hands costs, never what is shown.
+    """
+    hand_ids = tuple(dict.fromkeys([*older.hand_ids, *newer.hand_ids]))
+    tables_by_key = {context.temp_key: context for context in older.tables}
+    for context in newer.tables:
+        tables_by_key[context.temp_key] = context
+    return HudBatchReadRequest(
+        sequence=max(older.sequence, newer.sequence),
+        hand_ids=hand_ids,
+        hud_params=newer.hud_params,
+        tables=tuple(tables_by_key.values()),
+        # The oldest wait: hud_queue_wait is what says whether the queue is growing.
+        submitted_at=min(older.submitted_at, newer.submitted_at),
+    )
+
+
+class DbRecoveryWorker(QThread):
+    """Re-opens a dropped database connection away from the UI thread.
+
+    Reconnecting costs a full connect timeout when the database is unreachable,
+    which is exactly the stall the HUD must not take on the thread that repaints
+    it. This thread owns the connection for the duration of the outage: it is
+    started only once HudMain has stopped querying (the breaker is open) and it
+    stops before HudMain resumes, so the connection still has a single user at
+    any moment despite being touched from two threads.
+    """
+
+    recovered = Signal()
+
+    def __init__(self, db_connection, parent: QObject | None = None) -> None:
+        """Initialize the recovery worker."""
+        super().__init__(parent)
+        self.db_connection = db_connection
+        # An Event rather than a sleep plus a flag, so closing the HUD during an
+        # outage does not wait out the retry interval before shutting down.
+        self._stopping = threading.Event()
+
+    def run(self) -> None:
+        """Retry the connection until it comes back or shutdown is requested."""
+        log.info("Database recovery worker started")
+        while not self._stopping.wait(DB_RECOVERY_INTERVAL_S):
+            try:
+                if self.db_connection.recover_connection():
+                    log.info("Database connection recovered; resuming HUD updates")
+                    self.recovered.emit()
+                    return
+            except Exception:
+                log.exception("Database recovery attempt failed unexpectedly")
+
+    def stop(self) -> None:
+        """Stop the worker thread."""
+        self._stopping.set()
+        # Bounded: an attempt already inside connect() has to run out its own
+        # connect timeout, but shutdown must not hang on it either.
+        if not self.wait(15000):
+            log.warning("Database recovery worker did not stop in time")
+
+
+class HudReadWorker(QThread):
+    """Own the HUD database connection and execute read batches off the UI thread."""
+
+    ready = Signal(int)
+    snapshot_ready = Signal(object)
+    unavailable = Signal(str)
+    batch_failed = Signal(object, str)
+    fast_fold_stats_ready = Signal(object)
+
+    def __init__(
+        self,
+        config: Configuration.Config,
+        parent: QObject | None = None,
+        db_factory: Callable[..., Any] = Database.Database,
+    ) -> None:
+        super().__init__(parent)
+        self.config = config
+        self.db_factory = db_factory
+        # Batch reads and Fast-Fold reads share the one queue, and one thread.
+        self._requests: Queue[HudBatchReadRequest | FastFoldStatsRequest | None] = Queue()
+        # Newest queued Fast-Fold request id per table, so the worker can drop
+        # the ones already superseded instead of reading for them. See submit().
+        self._latest_fast_fold: dict[str, int] = {}
+        self._latest_lock = threading.Lock()
+        # The batch read currently waiting in the queue, if any. A newer batch
+        # arriving while one waits is folded into it (see submit) rather than
+        # queued behind it: at six tables a burst of new hands used to cost one
+        # full database read per hand, each superseding the last (#680).
+        self._pending_batch: HudBatchReadRequest | None = None
+        self._batch_lock = threading.Lock()
+        self._stopping = threading.Event()
+
+    def submit(self, request: HudBatchReadRequest | FastFoldStatsRequest) -> None:
+        """Queue one immutable request from the Qt thread.
+
+        A Fast-Fold request also records itself as its table's newest. The ring
+        grows a player at a time, so several reads for one table can be waiting
+        at once, and every one of them but the last describes a table that has
+        already changed. They used to be executed in full and discarded on
+        arrival by request id -- the database did the work, the GUI threw the
+        answer away. Now the worker drops them before reading.
+        """
+        if isinstance(request, FastFoldStatsRequest):
+            with self._latest_lock:
+                self._latest_fast_fold[request.temp_key] = request.request_id
+            self._requests.put(request)
+            return
+        with self._batch_lock:
+            waiting = self._pending_batch
+            if waiting is None:
+                self._pending_batch = request
+                self._requests.put(request)
+            else:
+                # Absorbed by the waiting batch: nothing new enters the queue,
+                # the worker picks the merged request up when it drains the one
+                # already there.
+                self._pending_batch = _merge_batch_requests(waiting, request)
+
+    def _resolve_pending_batch(self, pending: HudBatchReadRequest) -> HudBatchReadRequest:
+        """Swap a queued batch for the newest coalesced version of it, and time the wait.
+
+        If newer batches were folded into this one while it waited in the queue,
+        the merged request runs instead: same hands and tables, one database read
+        instead of several (#680).
+        """
+        with self._batch_lock:
+            merged = self._pending_batch
+            self._pending_batch = None
+        if merged is not None and merged.sequence >= pending.sequence:
+            pending = merged
+        latency_profile.record(
+            "hud_queue_wait",
+            max(0.0, time.monotonic() - getattr(pending, "submitted_at", time.monotonic())),
+        )
+        return pending
+
+    def _is_superseded(self, request: FastFoldStatsRequest) -> bool:
+        """Whether a newer read for the same table is already queued behind this one."""
+        with self._latest_lock:
+            latest = self._latest_fast_fold.get(request.temp_key)
+        return latest is not None and latest != request.request_id
+
+    def forget_fast_fold_table(self, temp_key: str) -> None:
+        """Drop what is remembered about a table nobody is watching any more."""
+        with self._latest_lock:
+            self._latest_fast_fold.pop(temp_key, None)
+
+    @staticmethod
+    def _configure_session(database: Database.Database) -> None:
+        """Bound only the worker's session statements, never the importer's.
+
+        PostgreSQL gets statement/lock/idle-in-transaction timeouts. MySQL gets
+        the equivalents -- ``max_execution_time`` caps a statement the way
+        ``statement_timeout`` does, ``innodb_lock_wait_timeout`` caps a lock
+        wait the way ``lock_timeout`` does -- because without them one slow or
+        lock-blocked HUD read on a remote MySQL server can stall the worker
+        queue for as long as the server cares to take (#680). SQLite is local
+        and single-connection here, so there is nothing to bound.
+        """
+        statements: tuple[str, ...]
+        if database.backend == Database.Database.PGSQL:
+            statements = (
+                "SET statement_timeout = 10000",
+                "SET lock_timeout = 2000",
+                "SET idle_in_transaction_session_timeout = 30000",
+            )
+        elif database.backend == Database.Database.MYSQL_INNODB:
+            statements = _mysql_session_timeouts(database)
+        else:
+            return
+        with contextlib.suppress(Exception):
+            database.connection.rollback()
+        cursor = database.connection.cursor()
+        try:
+            for statement in statements:
+                cursor.execute(statement)  # nosemgrep
+            database.connection.commit()
+        finally:
+            cursor.close()
+
+    @staticmethod
+    def _close_database(database: Database.Database | None) -> None:
+        if database is None:
+            return
+        with contextlib.suppress(Exception):
+            database.close_connection()
+
+    @staticmethod
+    def _read_fast_fold_stats(
+        database: Database.Database,
+        request: FastFoldStatsRequest,
+    ) -> FastFoldStatsResult:
+        """Read stats for the players a Fast-Fold table currently seats.
+
+        Ends the read transaction the way HudReadService.read_batch does. On
+        PostgreSQL a SELECT opens one, and leaving it open parks the connection
+        "idle in transaction" holding its snapshot -- which stalls the importer
+        writing alongside it, and eventually trips the worker's own
+        idle_in_transaction_session_timeout.
+        """
+        try:
+            gametype_id = None
+            if request.hand_id is not None:
+                info = database.get_gameinfo_from_hid(request.hand_id)
+                gametype_id = info["gametypeId"] if info else None
+            if gametype_id is None and request.site_name and request.pool_name:
+                # A table the client log named before any of its hands was
+                # imported. Without this the statistics query below is skipped
+                # and the table's first update draws every block empty. Only
+                # this pool's own hands are consulted, and only when the pool
+                # is known: borrowing another table's stakes would be worse
+                # than showing nothing.
+                with contextlib.suppress(Exception):
+                    gametype_id = database.get_last_gametype_id_for_table(
+                        request.site_name,
+                        request.pool_name,
+                    )
+
+            stat_dict = FastFoldEngine(db_connection=database).get_player_stats_for_seat_map(
+                request.seat_map,
+                db_conn=database,
+                gametype_id=gametype_id,
+                num_seats=request.num_seats,
+            )
+            mark_players_with_notes(database, stat_dict)
+        finally:
+            with contextlib.suppress(Exception):
+                database.connection.rollback()
+
+        return FastFoldStatsResult(
+            temp_key=request.temp_key,
+            seat_map=dict(request.seat_map),
+            stat_dict=stat_dict,
+            request_id=request.request_id,
+        )
+
+    def run(self) -> None:
+        """Connect, process one request at a time, and reconnect in this thread."""
+        database: Database.Database | None = None
+        service: HudReadService | None = None
+        pending: HudBatchReadRequest | FastFoldStatsRequest | None = None
+        unavailable_announced = False
+        while not self._stopping.is_set():
+            if database is None:
+                try:
+                    database = self.db_factory(self.config)
+                    self._configure_session(database)
+                    service = HudReadService(self.config, database)
+                except Exception as exc:
+                    self._close_database(database)
+                    database = None
+                    service = None
+                    if not unavailable_announced:
+                        self.unavailable.emit(str(exc))
+                        unavailable_announced = True
+                    self._stopping.wait(DB_RECOVERY_INTERVAL_S)
+                    continue
+                unavailable_announced = False
+                self.ready.emit(database.backend)
+
+            if pending is None:
+                try:
+                    pending = self._requests.get(timeout=0.2)
+                except Empty:
+                    continue
+                if pending is None:
+                    break
+                if isinstance(pending, HudBatchReadRequest):
+                    pending = self._resolve_pending_batch(pending)
+
+            # service is set together with database above: this only narrows its type.
+            assert service is not None  # nosec B101  # nosemgrep
+            if isinstance(pending, FastFoldStatsRequest) and self._is_superseded(pending):
+                # The table has moved on while this waited its turn. Reading for
+                # it would spend a round trip on an answer the GUI discards.
+                log.debug(
+                    "Fast-Fold stats request %s for %s superseded before it ran",
+                    pending.request_id,
+                    pending.temp_key,
+                )
+                pending = None
+                continue
+            try:
+                if isinstance(pending, FastFoldStatsRequest):
+                    result = self._read_fast_fold_stats(database, pending)
+                else:
+                    with latency_profile.scope("hud_batch_total"):
+                        snapshot = service.read_batch(pending, progress_callback=self.snapshot_ready.emit)
+            except Exception as exc:
+                if database is not None and is_connection_lost(database.backend, exc):
+                    if not unavailable_announced:
+                        self.unavailable.emit(str(exc))
+                        unavailable_announced = True
+                    self._close_database(database)
+                    database = None
+                    service = None
+                    continue
+                if isinstance(pending, FastFoldStatsRequest):
+                    # Seats are refreshed on the next log line anyway, so a failed
+                    # read is not worth the batch-retry machinery.
+                    log.warning("Fast-Fold stats read failed for table %s: %s", pending.temp_key, exc)
+                else:
+                    self.batch_failed.emit(pending, str(exc))
+            else:
+                if isinstance(pending, FastFoldStatsRequest):
+                    self.fast_fold_stats_ready.emit(result)
+                else:
+                    self.snapshot_ready.emit(snapshot)
+            pending = None
+            # Emit the periodic latency report when FPDB_LATENCY_LOG_INTERVAL is
+            # set; the reporter itself decides whether the interval elapsed (#680).
+            latency_profile.maybe_log()
+
+        self._close_database(database)
+
+    def stop(self) -> None:
+        """Wake the queue and wait for the bounded statement timeout."""
+        self._stopping.set()
+        self._requests.put(None)
+        if not self.wait(15000):
+            log.warning("HUD read worker did not stop in time")

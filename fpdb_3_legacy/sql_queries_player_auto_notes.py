@@ -115,5 +115,10 @@ def player_auto_note_queries() -> dict[str, str]:
                 ) then 1
                 else 0
             end"""
-    return query
 
+    # <ids> is a bound IN clause, repeated once per branch.
+    query["players_with_any_notes"] = """select id from Players
+            where id in <ids> and comment is not null and comment <> ''
+            union
+            select playerId from PlayerAutoNotes where playerId in <ids>"""
+    return query

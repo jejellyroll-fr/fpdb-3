@@ -12,24 +12,24 @@ available.
 ## Local Python 3.13 build
 
 With a checkout of the `poker-eval` repository at
-`/Users/jde/Documents/github/poker-eval`:
+`~/src/poker-eval`:
 
 ```bash
 brew install cmake
-cmake -S /Users/jde/Documents/github/poker-eval \
-  -B /Users/jde/Documents/github/poker-eval/build \
+cmake -S ~/src/poker-eval \
+  -B ~/src/poker-eval/build \
   -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_BUILD_TYPE=Release
-cmake --build /Users/jde/Documents/github/poker-eval/build -j4
-cd /Users/jde/Documents/github/fpdb-3
+cmake --build ~/src/poker-eval/build -j4
+cd ~/src/fpdb-3
 uv pip install --python .venv/bin/python setuptools
 uv pip install --python .venv/bin/python --no-build-isolation \
-  /Users/jde/Documents/github/poker-eval
+  ~/src/poker-eval
 ```
 
 Verify the native backend with:
 
 ```bash
-.venv/bin/pytest -q test/test_equity.py
+.venv/bin/pytest -q tests/test_equity.py
 ```
 
 Community-card streets shorter than five cards are padded with explicit

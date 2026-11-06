@@ -1,0 +1,37 @@
+PokerStars Hand #3300000001: Tournament #2600000001, $10+$1 USD Hold'em No Limit - Level VIII (500/1000) - 2026/09/19 19:00:00 ET
+Table '2600000001 1' 9-max Seat #3 is the button
+Seat 1: Anna (150000 in chips)
+Seat 2: Boris (150000 in chips)
+Seat 3: Cara (150000 in chips)
+Seat 4: Dave (150000 in chips)
+Seat 5: Erin (150000 in chips)
+Seat 6: Frank (150000 in chips)
+Seat 7: Gina (150000 in chips)
+Seat 8: Hugo (150000 in chips)
+Seat 9: Iris (150000 in chips)
+Dave: posts small blind 500
+Erin: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to Boris [As Kd]
+Frank: folds
+Gina: folds
+Hugo: folds
+Iris: folds
+Anna: folds
+Boris: raises 1200 to 2200
+Cara: folds
+Dave: folds
+Erin: folds
+Uncalled bet (1200) returned to Boris
+Boris collected 2500 from pot
+*** SUMMARY ***
+Total pot 2500 | Rake 0
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected (2500)
+Seat 3: Cara (button) folded before Flop (didn't bet)
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)
+Seat 7: Gina folded before Flop (didn't bet)
+Seat 8: Hugo folded before Flop (didn't bet)
+Seat 9: Iris folded before Flop (didn't bet)

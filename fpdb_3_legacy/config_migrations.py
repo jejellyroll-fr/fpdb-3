@@ -67,6 +67,40 @@ def _merge_83_to_84(doc, template) -> None:
     _repair_renamed_references(doc)
 
 
+def _preserve_84_to_85(doc, template) -> None:
+    """Advance to v85 without replacing a user's customized HUD positions.
+
+    Version 85 ships corrected layout reference sizes and adds a runtime guard for
+    impossible reference/position pairs. Existing layouts are user-editable, so
+    copying the template's coordinates during migration would destroy personal
+    HUD placement. The safe migration is therefore deliberately conservative:
+    preserve the document and only apply the already-safe alias repair before the
+    common reference validation stamps the new version.
+    """
+    del template
+    _repair_renamed_references(doc)
+
+
+def _preserve_85_to_86(doc, template) -> None:
+    """Advance to v86 without changing user-defined HUD panel settings.
+
+    Dynamic panel rules are opt-in and disabled in the shipped template, so an
+    existing configuration must keep its document intact while acquiring the
+    new schema version.
+    """
+    del doc, template
+
+
+def _preserve_86_to_87(doc, template) -> None:
+    """Advance to v87 without touching user settings (#680).
+
+    v87 only adds optional database attributes (local_first/local_path) that
+    default to off when absent, so an existing configuration keeps its document
+    intact and simply gains the new schema version.
+    """
+    del doc, template
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {n.getAttribute("name") for n in doc.getElementsByTagName("aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -81,7 +115,12 @@ def _repair_renamed_references(doc) -> None:
                 node.setAttribute("ls", "bovada_default")
 
 
-MIGRATIONS = ((83, 84, _merge_83_to_84),)
+MIGRATIONS = (
+    (83, 84, _merge_83_to_84),
+    (84, 85, _preserve_84_to_85),
+    (85, 86, _preserve_85_to_86),
+    (86, 87, _preserve_86_to_87),
+)
 
 
 def upgrade_document(doc, template, target_version: int):

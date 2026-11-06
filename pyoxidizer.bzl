@@ -135,6 +135,10 @@ def make_exe(dist):
         "if os.path.isdir(lib_dir):",
         "    sys.path.insert(0, lib_dir)",
         "os.chdir(root)",
+        # A multiprocessing worker (the bulk import's equity workers, #443) is
+        # this binary started with --multiprocessing-fork; run it, never the GUI.
+        "from fpdb_3_legacy.subprocess_launch import dispatch_multiprocessing",
+        "dispatch_multiprocessing()",
         "if len(sys.argv) > 1 and sys.argv[1] == '--hud':",
         "    sys.argv.pop(1)",
         "    runpy.run_path(os.path.join(legacy_dir, 'HUD_main.pyw'), run_name='__main__')",
@@ -206,6 +210,10 @@ def make_install(exe):
             CWD + "/fpdb_3_legacy/**/*.toml",
             CWD + "/fpdb_3_legacy/**/*.xml",
             CWD + "/fpdb_3_legacy/**/*.sql",
+            # The bundled stat and filter definitions (#306) live in
+            # fpdb_3_legacy/analytics_definitions.d/*.json: without them the
+            # registry is empty and every shipped stat disappears.
+            CWD + "/fpdb_3_legacy/**/*.json",
             CWD + "/fpdb_3_legacy/**/*.md",
             CWD + "/fpdb_3_legacy/**/*.sh",
             CWD + "/gfx/**/*.png",

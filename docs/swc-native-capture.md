@@ -1,8 +1,47 @@
-# Native SwC Poker capture on macOS
+# Native SwC Poker capture
 
-The downloaded SwC macOS client does not write hand-history files for every
-game family. Stud, draw, mixed games such as Drawmaha, and OFC therefore need a
-capture path independent from the normal FPDB auto-import directory.
+The downloaded SwC client does not write hand-history files for every game
+family, and even for Hold'em/Omaha the text history omits data the client had --
+for example the second board of a double-board bomb pot (the room writes one
+board and pays out for two). Stud, draw, mixed games such as Drawmaha, and OFC
+therefore need a capture path independent from the normal FPDB auto-import
+directory. This works on macOS, Linux, and Windows; the mechanism differs by
+platform (see "Loading the tap" below) but the archive format and decoder are
+shared.
+
+The tap is off until you turn it on in **Tools ▸ Live capture…**, after reading
+what it does and the account risk; the capture command asks on the terminal.
+See [live-capture.md](live-capture.md).
+
+## Loading the tap
+
+The tap is a small C library that records the plaintext OpenSSL hands back to
+the client. How it gets in front of OpenSSL depends on the platform:
+
+- **macOS / Linux** launch the client with the tap interposed --
+  `DYLD_INSERT_LIBRARIES` / `LD_PRELOAD` -- so it must be started *through* the
+  capture command (below). The client's own OpenSSL symbols are then overridden
+  at load time.
+- **Windows** has no launch-time interposition, and its client is a 32-bit Qt
+  app that resolves OpenSSL dynamically (through `ssleay32.dll`), so nothing is
+  in any import table to redirect. Instead the tap DLL is **injected** into the
+  already-running `SwCPoker.exe` by a small same-bitness injector, and inside the
+  client it installs an inline hook over `SSL_read`/`SSL_write` in `ssleay32.dll`.
+  You therefore start the SwC client normally, then attach:
+
+  ```bash
+  uv run python -m fpdb_3_legacy.capture.swc_client --build   # first time only
+  uv run python -m fpdb_3_legacy.capture.swc_client           # inject + follow
+  ```
+
+  Once the tap is turned on, starting Auto Import in the GUI does the same thing
+  for an enabled SwC site: it builds the tap and injector and injects into the
+  running client. The
+  `swc-native.status` file records `tap-loaded` when the DLL is in and
+  `tap-hooked` once SSL is hooked; capture begins on the client's next secure
+  read. Both artifacts are 32-bit to match the client, built with clang (or a
+  32-bit MinGW gcc); on a machine with only clang, the Windows SDK and MSVC x86
+  import libraries are located automatically.
 
 ## Why this capture path
 
@@ -33,8 +72,8 @@ values. This mirrors the environment used when the application starts from
 Finder.
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py --build
-uv run python fpdb_3_legacy/swc_native_capture.py
+uv run python -m fpdb_3_legacy.capture.swc_client --build
+uv run python -m fpdb_3_legacy.capture.swc_client
 ```
 
 New native dealer messages are printed live with an `[SWC]` prefix. Qt window
@@ -43,7 +82,7 @@ diagnostics may still appear on stderr; they are unrelated to the capture.
 Play one complete hand, close SwC normally, then validate the archive:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --inspect ~/.fpdb/swc-native-capture/swc-native.raw
 ```
 
@@ -51,7 +90,7 @@ Dealer messages can be rendered separately while native state-snapshot decoding
 is being developed:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --dealer-history ~/.fpdb/swc-native-capture/swc-native.raw
 ```
 
@@ -59,7 +98,7 @@ Stable table ids, hand ids, round numbers, player identities, and snapshot
 counts can be inspected without guessing undecoded action fields:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --session-summary ~/.fpdb/swc-native-capture/swc-native.raw
 ```
 
@@ -68,7 +107,7 @@ They are useful for correlating a seat with a player, but they are not monetary
 amounts and must not be used as bets, stacks, or collections:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --stack-history ~/.fpdb/swc-native-capture/swc-native.raw
 ```
 
@@ -77,7 +116,7 @@ useful evidence for action decoding, but they are still reported as native
 fields rather than FPDB actions:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --animation-events ~/.fpdb/swc-native-capture/swc-native.raw
 ```
 
@@ -86,7 +125,7 @@ They include raw payload hashes, snapshot diffs, and per-snapshot native
 animation events, but remain explicitly `capture_only`:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --normalized-json ~/.fpdb/swc-native-capture/swc-native.raw
 ```
 
@@ -233,7 +272,7 @@ complete for the entire hand.
 An evidence audit can be printed without expanding the full normalized JSON:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --importability-audit ~/.fpdb/swc-native-capture/test3.raw
 ```
 
@@ -273,7 +312,7 @@ actions or monetary collections.
 A compact JSON-lines export avoids parsing the full snapshot envelope:
 
 ```bash
-uv run python fpdb_3_legacy/swc_native_capture.py \
+uv run python -m fpdb_3_legacy.capture.swc_client \
   --ofc-summary ~/.fpdb/swc-native-capture/test3.raw
 ```
 

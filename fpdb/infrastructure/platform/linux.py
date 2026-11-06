@@ -64,11 +64,12 @@ class LinuxTableDetector:
         """Get the current platform"""
         return self._platform
 
-    def find_tables(self, search_string: str = "") -> list[TableInfo]:
+    def find_tables(self, search_string: str = "", *, allow_fallback: bool = True) -> list[TableInfo]:
         """Find all windows matching the search string
 
         Args:
             search_string: String to search for in window titles
+            allow_fallback: Accepted for the protocol; X11 has one source only.
 
         Returns:
             List of TableInfo for matching windows

@@ -1,0 +1,23 @@
+﻿GAME #9020276514 Version:26.1.1.31 Uncalled:Y Texas Hold'em NL  Tournament 2026-07-16 23:16:53/GMT
+Table Info: Size: 3, Blinds: 10/20
+Table Twister 0.25€, 1192589979, 1192577340 (Tournament: Twister 0.25€ Buy-In: €0.23 + €0.02)
+Seat 3: carol (€500.00 in chips)
+Seat 6: bob (€500.00 in chips)  DEALER
+Seat 10: dave (€500.00 in chips)
+dave: Post SB €10.00
+carol: Post BB €20.00
+*** HOLE CARDS ***
+Dealt to bob [D8 H6]
+bob: Raise (NF) €40.00
+dave: Call €30.00
+carol: Fold
+*** FLOP *** [H3 H7 H9]
+dave: Bet €460.00
+bob: Allin €460.00
+*** TURN *** [C9]
+*** RIVER *** [DJ]
+*** SUMMARY ***
+Total pot €1,020.00 Rake €0.00
+bob: Mucks [D8 H6] One Pair, Nines
+dave: Shows [DQ S9] Three of a Kind, Nines
+dave: wins €1,020.00

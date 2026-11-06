@@ -1,0 +1,43 @@
+PokerStars Hand #3300000012: Tournament #2600000001, $10+$1 USD Hold'em No Limit - Level VIII (500/1000) - 2026/09/19 19:33:00 ET
+Table '2600000001 12' 9-max Seat #3 is the button
+Seat 1: Anna (50000 in chips)
+Seat 2: Boris (50000 in chips)
+Seat 3: Cara (20000 in chips)
+Seat 4: Dave (50000 in chips)
+Seat 5: Erin (50000 in chips)
+Seat 6: Frank (50000 in chips)
+Seat 7: Gina (50000 in chips)
+Seat 8: Hugo (50000 in chips)
+Seat 9: Iris (50000 in chips)
+Dave: posts small blind 500
+Erin: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to Boris [7h 2d]
+Frank: folds
+Gina: folds
+Hugo: folds
+Iris: folds
+Anna: folds
+Boris: folds
+Cara: raises 19000 to 20000 and is all-in
+Dave: folds
+Erin: calls 19000
+*** FLOP *** [Js 6h 5c]
+*** TURN *** [Js 6h 5c] [9d]
+*** RIVER *** [Js 6h 5c 9d] [4s]
+*** SHOW DOWN ***
+Cara: shows [Ac Qs] (high card Ace)
+Erin: shows [Kd Ks] (a pair of Kings)
+Erin collected 40500 from pot
+*** SUMMARY ***
+Total pot 40500 | Rake 0
+Board [Js 6h 5c 9d 4s]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris folded before Flop (didn't bet)
+Seat 3: Cara (button) showed [Ac Qs] and lost with high card Ace
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) showed [Kd Ks] and won (40500) with a pair of Kings
+Seat 6: Frank folded before Flop (didn't bet)
+Seat 7: Gina folded before Flop (didn't bet)
+Seat 8: Hugo folded before Flop (didn't bet)
+Seat 9: Iris folded before Flop (didn't bet)

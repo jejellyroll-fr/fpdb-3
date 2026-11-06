@@ -9,7 +9,8 @@ from __future__ import annotations
 
 import ctypes
 from collections import Counter, OrderedDict
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterator, Sequence
+from contextlib import contextmanager
 from dataclasses import dataclass
 from decimal import Decimal
 from importlib import import_module
@@ -100,6 +101,40 @@ class WeightedPocket:
     weight: Decimal = Decimal(1)
 
 
+# Exact (exhaustive) results the bulk import's workers computed ahead of the
+# sequential pass (#443), and the recorder those workers fill. Exhaustive
+# enumeration is deterministic, so a stored result is the one the engine would
+# return: the import's output does not depend on whether a worker got there first.
+ExactKey = tuple[str, tuple[tuple[str, ...], ...], tuple[str, ...], tuple[str, ...]]
+_known_exact: dict[ExactKey, EquityResult] = {}
+_recorded_exact: dict[ExactKey, EquityResult] | None = None
+
+
+def remember_exact(results: dict[ExactKey, EquityResult]) -> None:
+    """Make exact results computed elsewhere available to :func:`calculate_equity`."""
+    _known_exact.update(results)
+
+
+def forget_exact() -> None:
+    _known_exact.clear()
+
+
+@contextmanager
+def recording_exact() -> Iterator[dict[ExactKey, EquityResult]]:
+    """Collect every exact result computed inside the block, keyed as calculate_equity looks them up."""
+    global _recorded_exact
+    recorded: dict[ExactKey, EquityResult] = {}
+    previous, _recorded_exact = _recorded_exact, recorded
+    try:
+        yield recorded
+    finally:
+        _recorded_exact = previous
+
+
+def _exact_key(game: str, pockets: list[list[str]], board: list[str], dead: list[str]) -> ExactKey:
+    return (game, tuple(tuple(pocket) for pocket in pockets), tuple(board), tuple(dead))
+
+
 def load_poker_eval() -> PokerEvalBackend | None:
     """Return a pypoker-eval instance, or ``None`` when it is not installed."""
     try:
@@ -148,6 +183,9 @@ def calculate_equity(
         # three-card board, even when ``iterations`` is provided.
         board.extend(["__"] * (5 - len(board)))
     _validate_cards(pockets, board, dead)
+    key = _exact_key(game, pockets, board, dead) if iterations is None and seed is None else None
+    if key is not None and key in _known_exact:
+        return _known_exact[key]
 
     engine = backend or load_poker_eval()
     if engine is None:
@@ -173,7 +211,10 @@ def calculate_equity(
         )
         for item in raw["eval"]
     )
-    return EquityResult(players=players, samples=samples, exhaustive=iterations is None)
+    result = EquityResult(players=players, samples=samples, exhaustive=iterations is None)
+    if key is not None and _recorded_exact is not None:
+        _recorded_exact[key] = result
+    return result
 
 
 def expected_pot_share(equity: Decimal, pot: Decimal, rake: Decimal = Decimal(0)) -> Decimal:

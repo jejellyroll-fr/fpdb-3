@@ -67,6 +67,18 @@ def language_options(available: list[str], current: str | None) -> list[tuple[st
     return options
 
 
+def language_label(name: str, completion: tuple[int, int] | None) -> str:
+    """A language's menu label, with how much of the interface it translates (#444).
+
+    ``completion`` is ``(translated, total)``; None (English, System default)
+    leaves the name alone.
+    """
+    if not completion or not completion[1]:
+        return name
+    translated, total = completion
+    return f"{name} ({translated * 100 // total} %)"
+
+
 def menu_layout() -> tuple[Menu, ...]:
     """Return the menu bar grouped by user intent (File / Import / analysis / DB…)."""
     return (
@@ -88,6 +100,11 @@ def menu_layout() -> tuple[Menu, ...]:
                 MenuItem(N_("Site Settings"), "dia_site_preferences"),
                 MenuItem(N_("Seat Settings"), "dia_site_preferences_seat"),
                 MenuItem(N_("HUD Preferences"), "dia_hud_preferences"),
+                MenuItem(
+                    N_("HUD Options"),
+                    "dia_hud_options",
+                    tip=N_("Choose the blinds, seats and period that new HUD tables start with"),
+                ),
                 MenuItem(N_("Manage HUD Sites"), "dia_manage_hud_sites"),
                 MenuItem(
                     N_("Auto Note Rules"),
@@ -103,9 +120,20 @@ def menu_layout() -> tuple[Menu, ...]:
                     separator_before=True,
                 ),
                 MenuItem(
+                    N_("Convert PT4 HUD to .fpdbhud…"),
+                    "dia_convert_pt4hud",
+                    tip=N_("Save a PokerTracker 4 HUD layout as a package you can share or re-import"),
+                ),
+                MenuItem(
                     N_("Import PT4 Stats (.pt4stat)"),
                     "dia_import_pt4stat",
                     tip=N_("Import PokerTracker 4 custom statistics as declarative stat descriptors"),
+                ),
+                MenuItem(
+                    N_("Stat Packs"),
+                    "dia_stat_packs",
+                    tip=N_("Import, enable, disable, uninstall and export declarative stat packs"),
+                    separator_before=True,
                 ),
             ),
         ),
@@ -114,6 +142,11 @@ def menu_layout() -> tuple[Menu, ...]:
             (
                 MenuItem(N_("Bulk Import"), "tab_bulk_import", "Ctrl+B"),
                 MenuItem(N_("HUD and Auto Import"), "tab_auto_import", "Ctrl+A"),
+                MenuItem(
+                    N_("From Another Tracker…"),
+                    "dia_tracker_migration",
+                    tip=N_("Bring your hands over from PokerTracker 4 or Holdem Manager 3"),
+                ),
                 # The capture tab exists only to feed CoinPoker; it stays out of
                 # the menu while that room's support is switched off.
                 *(
@@ -129,6 +162,8 @@ def menu_layout() -> tuple[Menu, ...]:
                 MenuItem(N_("Graphs"), "tabGraphViewer", "Ctrl+G"),
                 MenuItem(N_("Ring Player Stats"), "tab_ring_player_stats", "Ctrl+P"),
                 MenuItem(N_("Opponents Report"), "tab_opponents_report", "Ctrl+O"),
+                MenuItem(N_("Study Explorer"), "tab_study_explorer"),
+                MenuItem(N_("Research Browser"), "tab_research_browser"),
                 MenuItem(N_("Hand Viewer"), "tab_hand_viewer"),
                 MenuItem(N_("Session Stats"), "tab_session_stats", "Ctrl+S"),
             ),
@@ -149,6 +184,11 @@ def menu_layout() -> tuple[Menu, ...]:
                 MenuItem(N_("Rebuild HUD Cache"), "dia_recreate_hudcache"),
                 MenuItem(N_("Rebuild DB Indexes"), "dia_rebuild_indexes"),
                 MenuItem(
+                    N_("Rebuild Analytics Data"),
+                    "dia_rebuild_analytics",
+                    tip=N_("Re-derive the situations and hand states the Research Browser and HUD read"),
+                ),
+                MenuItem(
                     N_("Dump Database to Textfile"),
                     "dia_dump_db",
                     tip=N_("Export the whole database to a text file (slow)"),
@@ -160,7 +200,27 @@ def menu_layout() -> tuple[Menu, ...]:
             N_("Tools"),
             (
                 MenuItem(N_("Auto Notes Workbench"), "tab_auto_notes_workbench"),
+                MenuItem(
+                    N_("Get packs"),
+                    "dia_get_packs",
+                    tip=N_("Install HUDs and stat packs shared by other players"),
+                ),
+                MenuItem(
+                    N_("Share a HUD or pack"),
+                    "dia_share_pack",
+                    tip=N_("Write a HUD profile or a stat pack ready to submit to the pack gallery"),
+                ),
+                MenuItem(
+                    N_("Session Guard"),
+                    "dia_session_guard",
+                    tip=N_("Alerts for the session being played: loss, win, duration, hands, drawdown"),
+                ),
                 MenuItem(N_("Launch SwC HTTP Capture"), "launch_swc_capture"),
+                MenuItem(
+                    N_("Live capture…"),
+                    "dia_live_capture",
+                    tip=N_("Turn on or off the captures that read hands from a poker client itself"),
+                ),
                 MenuItem(
                     N_("Logger Dev Tool"),
                     "show_logger_dev_tool",
@@ -185,7 +245,22 @@ def menu_layout() -> tuple[Menu, ...]:
                     "tab_version_info",
                     tip=N_("Version, packaging and runtime environment details"),
                 ),
+                MenuItem(
+                    N_("Check for updates"),
+                    "check_for_updates",
+                    tip=N_("Ask GitHub whether a newer fpdb release is out"),
+                ),
                 MenuItem(N_("Stats Guide"), "tabStatsInfo"),
+                MenuItem(
+                    N_("What fpdb does while you play"),
+                    "help_fair_play",
+                    tip=N_("What runs during play, what only runs afterwards, and where rooms draw the line"),
+                ),
+                MenuItem(
+                    N_("Research Browser for Omaha"),
+                    "help_research_omaha",
+                    tip=N_("What every filter is for in a four-card game, and the two that are not"),
+                ),
                 MenuItem(N_("Log Messages"), "dia_logs", tip=N_("Log and debug messages")),
                 MenuItem(N_("About"), "dia_about", tip=N_("About the program"), separator_before=True),
             ),

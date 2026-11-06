@@ -1,0 +1,63 @@
+PokerStars Hand #261462002611: Tournament #4016724563, €4.50+€0.50 EUR Hold'em No Limit - Level I (25/50) - 2026/07/17 21:02:10 CET [2026/07/17 15:02:10 ET]
+Table '4016724563 1' 6-max Seat #4 is the button
+Seat 1: Villain2 (1500 in chips)
+Seat 2: Hero (1500 in chips)
+Seat 3: Villain3 (1500 in chips)
+Seat 4: Villain4 (1500 in chips)
+Seat 5: Villain5 (1500 in chips)
+Seat 6: Villain1 (1500 in chips)
+Villain5: posts small blind 25
+Villain1: posts big blind 50
+*** HOLE CARDS ***
+Dealt to Hero [7c 2d]
+Villain2: folds
+Hero: folds
+Villain3: folds
+Villain4: folds
+Villain5: folds
+Uncalled bet (25) returned to Villain1
+Villain1 collected 50 from pot
+Villain1: doesn't show hand
+*** SUMMARY ***
+Total pot 50 | Rake 0
+Seat 1: Villain2 folded before Flop (didn't bet)
+Seat 2: Hero folded before Flop (didn't bet)
+Seat 3: Villain3 folded before Flop (didn't bet)
+Seat 4: Villain4 (button) folded before Flop (didn't bet)
+Seat 5: Villain5 (small blind) folded before Flop
+Seat 6: Villain1 (big blind) collected (50)
+
+
+
+PokerStars Hand #261462025102: Tournament #4016724563, €4.50+€0.50 EUR Hold'em No Limit - Level II (30/60) - 2026/07/17 21:14:43 CET [2026/07/17 15:14:43 ET]
+Table '4016724563 1' 6-max Seat #6 is the button
+Seat 1: Villain2 (1470 in chips)
+Seat 2: Villain3 (1530 in chips)
+Seat 3: Hero (1850 in chips)
+Seat 4: Villain4 (1440 in chips)
+Seat 5: Villain5 (1385 in chips)
+Seat 6: Villain1 (1625 in chips)
+Villain2: posts small blind 30
+Villain3: posts big blind 60
+*** HOLE CARDS ***
+Dealt to Hero [Ah Qs]
+Hero: raises 1790 to 1850 and is all-in
+Villain4: folds
+Villain5: folds
+Villain1: folds
+Villain2: folds
+Villain3: folds
+Uncalled bet (1790) returned to Hero
+Hero collected 150 from pot
+Hero: doesn't show hand
+*** SUMMARY ***
+Total pot 150 | Rake 0
+Seat 1: Villain2 (small blind) folded before Flop
+Seat 2: Villain3 (big blind) folded before Flop
+Seat 3: Hero collected (150)
+Seat 4: Villain4 folded before Flop (didn't bet)
+Seat 5: Villain5 folded before Flop (didn't bet)
+Seat 6: Villain1 (button) folded before Flop (didn't bet)
+
+
+
