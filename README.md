@@ -1,9 +1,10 @@
 # FPDB-3 Standalone Legacy (Python)
 
-Version 3.9.1 — release preparation.
+Version 3.10.0 — release preparation.
 
-See the [3.9.1 release notes](docs/RELEASE_NOTES_3.9.1.md) for the latest HUD,
-parser, configuration and packaging changes.
+See the [3.10.0 release notes](docs/RELEASE_NOTES_3.10.0.md) for tournament ICM,
+the PokerTracker 4 and Holdem Manager 3 import, the research and study tools,
+pack sharing and the HUD reliability work.
 
 The original FPDB-3 Python application: hand-history parsers, PySide6 GUI, statistics engine, and the HUD overlay. This repository hosts the standalone, self-contained legacy Python stack. It has been separated from the `fpdb-new` monorepo by removing all Rust and modern FastAPI components to keep it lightweight, fast, and easy to run.
 

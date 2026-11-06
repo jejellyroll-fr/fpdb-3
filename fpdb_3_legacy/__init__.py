@@ -20,7 +20,7 @@ from typing import Any
 if not hasattr(datetime, "UTC"):
     datetime.UTC = datetime.timezone.utc
 
-__version__ = "3.9.1"
+__version__ = "3.10.0"
 
 
 def _is_directory(entry: object, directory: str) -> bool:
