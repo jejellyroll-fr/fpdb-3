@@ -1,10 +1,22 @@
-# FPDB-3 Standalone Legacy (Python)
+# FPDB-3 — Free Poker Database
 
-Version 3.10.0 — release preparation.
+[![Release](https://img.shields.io/github/v/release/jejellyroll-fr/fpdb-3?sort=semver)](https://github.com/jejellyroll-fr/fpdb-3/releases/latest)
+[![CI](https://github.com/jejellyroll-fr/fpdb-3/actions/workflows/ci.yml/badge.svg?branch=development)](https://github.com/jejellyroll-fr/fpdb-3/actions/workflows/ci.yml?query=branch%3Adevelopment)
+[![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjejellyroll-fr%2Ffpdb-3%2Fbadges%2Fcoverage.json)](https://github.com/jejellyroll-fr/fpdb-3/actions/workflows/ci.yml?query=branch%3Adevelopment)
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
+[![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey)](#-prebuilt-downloads)
+[![Downloads](https://img.shields.io/github/downloads/jejellyroll-fr/fpdb-3/total)](https://github.com/jejellyroll-fr/fpdb-3/releases)
+[![Discord](https://img.shields.io/badge/chat-Discord-5865F2?logo=discord&logoColor=white)](https://discord.gg/XTA3kdKKG)
 
-See the [3.10.0 release notes](docs/RELEASE_NOTES_3.10.0.md) for tournament ICM,
-the PokerTracker 4 and Holdem Manager 3 import, the research and study tools,
-pack sharing and the HUD reliability work.
+A free, open-source poker tracker and HUD. fpdb imports your hand histories from 26 rooms into a
+database you own, shows a real-time HUD over your tables, and gives you reports, graphs, a hand
+replayer, tournament ICM and study tools afterwards. No account, no upload, no telemetry.
+
+**Version 3.10.0 — released 6 November 2026.** Download it from the
+[3.10.0 release](https://github.com/jejellyroll-fr/fpdb-3/releases/tag/v3.10.0), and see the
+[release notes](docs/RELEASE_NOTES_3.10.0.md) for tournament ICM, the PokerTracker 4 and Holdem
+Manager 3 import, the research and study tools, pack sharing and the HUD reliability work.
 
 The original FPDB-3 Python application: hand-history parsers, PySide6 GUI, statistics engine, and the HUD overlay. This repository hosts the standalone, self-contained legacy Python stack. It has been separated from the `fpdb-new` monorepo by removing all Rust and modern FastAPI components to keep it lightweight, fast, and easy to run.
 
@@ -206,6 +218,20 @@ To translate:
 
 Developers who add or change a translatable string run `python tools/update_pot.py --merge`; CI
 fails when the template or a catalogue lags the source.
+
+## 🔗 Related projects
+
+- [poker-eval](https://github.com/jejellyroll-fr/poker-eval) — the C hand evaluator behind fpdb's
+  equity calculations, used through its `pypoker-eval` binding (see
+  [Native equity engine](#native-equity-engine)).
+- [PreflopAdvisor](https://github.com/jejellyroll-fr/PreflopAdvisor) — reads PLO and PLO8 Monker
+  preflop simulations. fpdb sends a replayed hand to it for a solver review.
+- [fpdb-3-packs](https://github.com/jejellyroll-fr/fpdb-3-packs) — the gallery of HUD packages and
+  stat packs that *Tools ▸ Get packs* installs from. Share yours there.
+- [PokerKit](https://github.com/uoftcprg/pokerkit) — defines the PHH hand-history format fpdb
+  imports, and is the reference fpdb follows for PHH betting rules.
+- [FPDB on SourceForge](https://sourceforge.net/projects/fpdb/) — the original Free Poker Database,
+  which fpdb-3 continues.
 
 ## Credits
 
