@@ -5,22 +5,25 @@ international "Bet365 Poker" (site 63): every bet365.fr path also contains
 "bet365", so the order of the skin registry decides. Its client must be found
 on Windows without any hardcoded path (environment folders, name patterns, the
 uninstall and App Paths registry entries), and on macOS in a sandbox container
-whose exact name is not confirmed yet.
+whose exact name is not confirmed yet. Whatever folder detection finds, the
+importer must file its hands under the same room.
 """
 
 from __future__ import annotations
 
 import os
-import xml.dom.minidom
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+import defusedxml.minidom
 import pytest
 
 import fpdb_3_legacy.DetectInstalledSites as detect_module
 from fpdb.infrastructure.platform.macos import MacOSTableDetector
+from fpdb_3_legacy.config_migrations import reference_errors, upgrade_document
+from fpdb_3_legacy.Configuration import CONFIG_VERSION
 from fpdb_3_legacy.DetectInstalledSites import (
     APP_PATHS_KEY,
     IPOKER_CLIENT_NAME_PATTERNS,
@@ -29,6 +32,7 @@ from fpdb_3_legacy.DetectInstalledSites import (
     _folder_of_executable,
     iPokerDetector,
     matching_subfolders,
+    routed_to,
     windows_registry_install_dirs,
 )
 from fpdb_3_legacy.iPoker.base import iPoker
@@ -45,13 +49,21 @@ SITE = "Bet365.fr Poker"
 SITE_ID = 132
 NOT_DETECTED = {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
 REPO = Path(__file__).resolve().parents[1]
+PATTERNS = IPOKER_CLIENT_NAME_PATTERNS[SITE]
+
+SELECT_SITE = "SELECT name, code FROM Sites WHERE id = 132"
 
 WINDOWS_FR_PATH = r"C:\Users\al\AppData\Local\bet365 Poker France\data\hero\History\Data\Tables\5869857694.xml"
 WINDOWS_GENERIC_PATH = r"C:\Users\al\AppData\Local\bet365 Poker\data\hero\History\Data\Tables\5869857694.xml"
 
 
-def same_path(left: str, right: Path | str) -> bool:
-    return os.path.normcase(os.path.normpath(left)) == os.path.normcase(os.path.normpath(str(right)))
+def same_path(found: str, expected: Path) -> bool:
+    """Whether ``found`` is the folder ``expected``.
+
+    Compared on disk: macOS and Windows file systems ignore case, so detection
+    may spell a folder differently from how the test created it.
+    """
+    return Path(found).samefile(expected)
 
 
 def tree(root: Path, *parts: str) -> Path:
@@ -114,6 +126,36 @@ def detect_on_macos(detector: iPokerDetector, root: Path, skin: str = SITE) -> d
         return detector._detect_skin(skin)
 
 
+def converter(path: str, sitename: str) -> iPoker:
+    """The iPoker converter the importer builds for ``path``, watched by the configured ``sitename``."""
+    config = MagicMock()
+    config.supported_sites = {sitename: SimpleNamespace(network="iPoker")}
+    return get_parser_class_for_path(path)(
+        config,
+        in_path=path,
+        index=0,
+        autostart=False,
+        starsArchive=False,
+        ftpArchive=False,
+        sitename=sitename,
+    )
+
+
+def assert_found_french(found: dict[str, Any], tables: Path) -> None:
+    """The client was found there, and the importer files its hands under the French room.
+
+    A path naming no skin at all (a registry install folder) keeps the room
+    the configuration gives it; one naming another skin would not.
+    """
+    assert found["detected"] is True
+    assert found["skin"] == SITE
+    assert same_path(found["hhpath"], tables)
+    assert detect_skin(found["hhpath"]) in {SITE, "iPoker"}
+    hhc = converter(str(Path(found["hhpath"]) / "1.xml"), SITE)
+    hhc._apply_skin_from_input_path()  # what determineGameType() does for every hand
+    assert (hhc.sitename, hhc.site_id) == (SITE, SITE_ID)
+
+
 # --------------------------------------------------------------------------
 # Which room a file is filed under
 # --------------------------------------------------------------------------
@@ -126,6 +168,9 @@ def detect_on_macos(detector: iPokerDetector, root: Path, skin: str = SITE) -> d
         r"C:\Users\al\AppData\Local\bet365.fr Poker\data\hero\History\Data\Tables\1.xml",
         r"C:\Users\al\AppData\Roaming\bet365fr\data\hero\History\Data\Tables\1.xml",
         r"D:\Jeux\bet365-fr\data\hero\History\Data\Tables\1.xml",
+        # Folders only the name patterns recognise (Codex review on #718).
+        r"C:\Users\al\AppData\Local\fr.bet365\data\hero\History\Data\Tables\1.xml",
+        r"C:\Users\al\AppData\Local\Bet365 Poker France 2026\data\hero\History\Data\Tables\1.xml",
         "/Users/x/Library/Containers/fr.bet365.poker/Data/Library/Application Support/"
         "bet365.fr Online Poker/hero/History/Data/Tables/1.xml",
     ],
@@ -140,6 +185,9 @@ def test_a_bet365_fr_path_is_filed_under_the_french_room(path: str) -> None:
     [
         WINDOWS_GENERIC_PATH,
         "/Users/x/Library/Application Support/Bet365 Poker/data/hero/History/Data/Tables/1.xml",
+        # "fr" and "bet365" in different folders say nothing about the room.
+        "/Users/fred/Library/Application Support/Bet365 Poker/data/hero/History/Data/Tables/1.xml",
+        r"C:\Users\fr\AppData\Local\bet365 Poker\data\hero\History\Data\Tables\1.xml",
     ],
 )
 def test_an_international_bet365_path_stays_with_bet365_poker(path: str) -> None:
@@ -153,6 +201,10 @@ def test_the_french_skin_is_checked_before_the_generic_bet365_one() -> None:
     # French hands under the international room.
     names = [skin.site_name for skin in IPOKER_SKINS]
     assert names.index(SITE) < names.index("Bet365 Poker")
+
+
+def test_detection_and_routing_share_the_same_patterns() -> None:
+    assert PATTERNS == DEFAULT_DISPATCHER.get_by_site_name(SITE).folder_patterns
 
 
 def test_the_french_skin_is_its_own_site() -> None:
@@ -182,73 +234,61 @@ def test_a_converter_of_a_bet365_fr_file_files_it_under_the_french_room(parser_c
     assert hhc.site_id == SITE_ID
 
 
+def test_a_generic_bet365_folder_overrides_the_configured_french_room() -> None:
+    # Why detection must never offer such a folder for bet365.fr: the path wins.
+    hhc = converter(WINDOWS_GENERIC_PATH, SITE)
+
+    assert hhc.sitename == "Bet365 Poker"
+
+
 # --------------------------------------------------------------------------
 # The site is known everywhere a site has to be declared
 # --------------------------------------------------------------------------
 
 
-def test_a_new_database_holds_the_site(tmp_path: Path) -> None:
+@pytest.fixture
+def database(tmp_path: Path) -> Any:
     from fpdb_3_legacy.Database import Database
     from tests.helpers import analytics_golden as golden
 
     db = Database(golden.build_config(tmp_path))
-    try:
-        db.recreate_tables()
-        cursor = db.get_cursor()
-        cursor.execute(f"SELECT name, code FROM Sites WHERE id = {SITE_ID}")  # nosemgrep
-        assert cursor.fetchone() == (SITE, "IP")
-    finally:
-        db.disconnect()
+    db.recreate_tables()
+    yield db
+    db.disconnect()
 
 
-def test_an_existing_database_gains_the_site_on_connect(tmp_path: Path) -> None:
+def test_a_new_database_holds_the_site(database) -> None:
+    cursor = database.get_cursor()
+    cursor.execute(SELECT_SITE)
+
+    assert cursor.fetchall() == [(SITE, "IP")]
+
+
+def test_an_existing_database_gains_the_site_on_connect(database) -> None:
     # A database created before the site existed has no row 132, and a hand
     # filed there would break the Sites foreign key.
-    from fpdb_3_legacy.Database import Database
-    from tests.helpers import analytics_golden as golden
+    database.get_cursor().execute("DELETE FROM Sites WHERE id = 132")
+    database.commit()
 
-    db = Database(golden.build_config(tmp_path))
-    try:
-        db.recreate_tables()
-        cursor = db.get_cursor()
-        cursor.execute(f"DELETE FROM Sites WHERE id = {SITE_ID}")  # nosemgrep
-        db.commit()
+    database.ensure_feature_tables()
+    database.ensure_feature_tables()  # running it again is a no-op, not a duplicate
 
-        db.ensure_feature_tables()
-        db.ensure_feature_tables()  # running it again is a no-op, not a duplicate
-
-        cursor = db.get_cursor()
-        cursor.execute(f"SELECT name, code FROM Sites WHERE id = {SITE_ID}")  # nosemgrep
-        assert cursor.fetchall() == [(SITE, "IP")]
-    finally:
-        db.disconnect()
+    cursor = database.get_cursor()
+    cursor.execute(SELECT_SITE)
+    assert cursor.fetchall() == [(SITE, "IP")]
 
 
-def test_an_empty_sites_table_is_left_to_the_default_data() -> None:
+def test_an_empty_sites_table_is_left_to_the_default_data(database) -> None:
     # fillDefaultData inserts every site into the empty table right after it
     # is created: a row added first would make it fail on a duplicate id.
-    from fpdb_3_legacy.Database import Database
+    database.get_cursor().execute("DELETE FROM Sites")
+    database.commit()
 
-    class Cursor:
-        def __init__(self) -> None:
-            self.statements: list[str] = []
+    database.ensure_sites_rows()
 
-        def execute(self, statement: str, *_params: Any) -> None:
-            self.statements.append(statement)
-
-        def fetchall(self) -> list[tuple[int]]:
-            return []
-
-    cursor = Cursor()
-    db = Database.__new__(Database)
-    db.get_cursor = lambda: cursor
-    db.commit = MagicMock()
-    db.rollback = MagicMock()
-
-    db.ensure_sites_rows()
-
-    assert cursor.statements == ["SELECT id FROM Sites"]
-    db.commit.assert_not_called()
+    cursor = database.get_cursor()
+    cursor.execute("SELECT COUNT(*) FROM Sites")
+    assert cursor.fetchall() == [(0,)]
 
 
 def test_the_configuration_knows_the_site_id_without_a_database() -> None:
@@ -266,11 +306,9 @@ def test_the_preferences_detect_the_site_with_the_ipoker_network() -> None:
     assert ModernSiteCard.get_network_for_skin(None, SITE) == "iPoker"
 
 
-@pytest.mark.parametrize(
-    "example", ["HUD_config.xml", "HUD_config.xml.example", "fpdb_3_legacy/HUD_config.xml.example"]
-)
-def test_the_example_configuration_declares_the_site(example: str) -> None:
-    doc = xml.dom.minidom.parse(str(REPO / example))
+@pytest.mark.parametrize("name", ["HUD_config.xml", "HUD_config.xml.example", "fpdb_3_legacy/HUD_config.xml.example"])
+def test_the_shipped_configurations_declare_the_site(name: str) -> None:
+    doc = defusedxml.minidom.parse(str(REPO / name))
     [site] = [node for node in doc.getElementsByTagName("site") if node.getAttribute("site_name") == SITE]
     [hhc] = [node for node in doc.getElementsByTagName("hhc") if node.getAttribute("site") == SITE]
 
@@ -292,6 +330,64 @@ def test_the_macos_hud_follows_a_bet365_client_window() -> None:
 
 
 # --------------------------------------------------------------------------
+# An existing configuration gains the room on upgrade (version 88)
+# --------------------------------------------------------------------------
+
+V87_CONFIG = """<FreePokerToolsConfig><general version="87"/>
+<supported_sites>{sites}<site site_name="PokerStars" HH_path="/mine"><layout_set ls="mine"/></site></supported_sites>
+<layout_sets><ls name="mine"/></layout_sets>
+<hhcs><hhc site="PokerStars" converter="PokerStarsToFpdb"/></hhcs>
+</FreePokerToolsConfig>"""
+
+
+def template() -> Any:
+    return defusedxml.minidom.parse(str(REPO / "HUD_config.xml.example"))
+
+
+def entries(doc: Any, tag: str, key: str) -> list[Any]:
+    return [node for node in doc.getElementsByTagName(tag) if node.getAttribute(key) == SITE]
+
+
+def test_an_upgraded_configuration_gains_the_room() -> None:
+    old = defusedxml.minidom.parseString(V87_CONFIG.format(sites=""))
+
+    updated = upgrade_document(old, template(), CONFIG_VERSION)
+
+    assert CONFIG_VERSION == 88
+    [site] = entries(updated, "site", "site_name")
+    [hhc] = entries(updated, "hhc", "site")
+    assert site.getAttribute("network") == "iPoker"
+    assert hhc.getAttribute("converter") == "iPokerToFpdb"
+    # The layout set it uses comes along, so the upgrade's reference check passes.
+    assert "ipoker_default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
+    assert reference_errors(updated) == []
+    # The user's own entries are kept as they were, first in place.
+    assert updated.getElementsByTagName("site")[0].getAttribute("HH_path") == "/mine"
+    # Running the upgrade again changes nothing.
+    assert upgrade_document(updated, template(), CONFIG_VERSION).toxml() == updated.toxml()
+
+
+def test_a_room_the_user_already_declared_is_kept_as_it_is() -> None:
+    own = f'<site site_name="{SITE}" HH_path="/my/bet365"><layout_set ls="mine"/></site>'
+    old = defusedxml.minidom.parseString(V87_CONFIG.format(sites=own))
+
+    updated = upgrade_document(old, template(), CONFIG_VERSION)
+
+    [site] = entries(updated, "site", "site_name")
+    assert site.getAttribute("HH_path") == "/my/bet365"
+    assert site.getElementsByTagName("layout_set")[0].getAttribute("ls") == "mine"
+
+
+def test_a_configuration_without_a_sites_section_is_upgraded_untouched() -> None:
+    old = defusedxml.minidom.parseString('<FreePokerToolsConfig><general version="87"/></FreePokerToolsConfig>')
+
+    updated = upgrade_document(old, template(), CONFIG_VERSION)
+
+    assert updated.getElementsByTagName("site") == []
+    assert updated.getElementsByTagName("general")[0].getAttribute("version") == str(CONFIG_VERSION)
+
+
+# --------------------------------------------------------------------------
 # Finding the client on Windows, with no hardcoded path
 # --------------------------------------------------------------------------
 
@@ -302,13 +398,9 @@ def test_the_client_is_found_under_its_local_appdata_folder(config, tmp_path, fo
 
     found = detect_on_windows(config, tmp_path)
 
-    assert found["detected"] is True
-    assert found["skin"] == SITE
+    assert_found_french(found, tables)
     assert found["heroname"] == "alice"
-    assert same_path(found["hhpath"], tables)
     assert same_path(found["tspath"], tables.parent / "Tournaments")
-    # The hands found there are filed under the French room too.
-    assert detect_skin(found["hhpath"]) == SITE
 
 
 @pytest.mark.parametrize(
@@ -318,10 +410,7 @@ def test_the_client_is_found_under_its_local_appdata_folder(config, tmp_path, fo
 def test_a_folder_named_otherwise_is_found_by_its_name_pattern(config, tmp_path, root_key, folder) -> None:
     tables = account(Path(windows_paths(tmp_path)[root_key]) / folder / "data")
 
-    found = detect_on_windows(config, tmp_path)
-
-    assert found["detected"] is True
-    assert same_path(found["hhpath"], tables)
+    assert_found_french(detect_on_windows(config, tmp_path), tables)
 
 
 @pytest.mark.parametrize("layout", [("data",), (SITE, "data"), ("bet365 Poker France", "data")])
@@ -330,15 +419,35 @@ def test_the_client_is_found_where_the_registry_says_it_was_installed(config, tm
     tables = account(install.joinpath(*layout))
     no_registry.return_value = [str(install)]
 
-    found = detect_on_windows(config, tmp_path)
+    assert_found_french(detect_on_windows(config, tmp_path), tables)
+    no_registry.assert_called_once_with(PATTERNS)
 
-    assert found["detected"] is True
-    assert same_path(found["hhpath"], tables)
-    no_registry.assert_called_once_with(IPOKER_CLIENT_NAME_PATTERNS[SITE])
+
+def test_an_install_folder_the_importer_would_file_elsewhere_is_skipped(config, tmp_path, no_registry) -> None:
+    # The registry names the French client, installed in a folder called after
+    # the international one: its hands there would go to "Bet365 Poker".
+    install = tmp_path / "Games" / "bet365"
+    account(install / "data")
+    no_registry.return_value = [str(install)]
+
+    assert detect_on_windows(config, tmp_path) == NOT_DETECTED
+
+    # Its French-named data folder, though, is filed under the French room.
+    tables = account(install / "bet365 Poker France" / "data")
+    assert_found_french(detect_on_windows(config, tmp_path), tables)
+
+
+def test_only_candidates_routed_elsewhere_are_dropped() -> None:
+    kept = routed_to(
+        SITE,
+        [r"E:\Games\bet365\data", r"E:\Games\bet365.fr\data", r"E:\Games\somewhere\data", r"E:\pmu\data"],
+    )
+
+    assert kept == [r"E:\Games\bet365.fr\data", r"E:\Games\somewhere\data"]
 
 
 def test_the_international_client_is_not_taken_for_the_french_one(config, tmp_path) -> None:
-    account(Path(windows_paths(tmp_path)["local_appdata"]) / "bet365 Poker" / "data")
+    account(Path(windows_paths(tmp_path)["local_appdata"]) / "Bet365 Poker" / "data")
 
     assert detect_on_windows(config, tmp_path) == NOT_DETECTED
     assert detect_on_windows(config, tmp_path, "Bet365 Poker")["detected"] is True
@@ -388,11 +497,11 @@ def test_folder_patterns_ignore_case_and_files(tmp_path) -> None:
     tree(tmp_path, "bet365 Poker")
     (tmp_path / "bet365fr.log").write_text("")
 
-    found = matching_subfolders(tmp_path, IPOKER_CLIENT_NAME_PATTERNS[SITE])
+    found = matching_subfolders(tmp_path, PATTERNS)
 
     assert [path.name for path in found] == ["BET365 POKER FRANCE"]
-    assert matching_subfolders(tmp_path / "missing", IPOKER_CLIENT_NAME_PATTERNS[SITE]) == []
-    assert matching_subfolders("", IPOKER_CLIENT_NAME_PATTERNS[SITE]) == []
+    assert not matching_subfolders(tmp_path / "missing", PATTERNS)
+    assert not matching_subfolders("", PATTERNS)
 
 
 # --------------------------------------------------------------------------
@@ -412,41 +521,42 @@ class FakeKey:
         return False
 
 
-class FakeWinreg:
-    """The part of ``winreg`` the detector uses, answering from a dict."""
+def fake_winreg(roots: dict[tuple[str, str], dict[str, dict[str, str]]], unreadable: tuple[str, ...] = ()) -> Any:
+    """The part of ``winreg`` the detector uses, answering from ``roots``."""
 
-    HKEY_CURRENT_USER = "HKCU"
-    HKEY_LOCAL_MACHINE = "HKLM"
-
-    def __init__(self, roots: dict[tuple[str, str], dict[str, dict[str, str]]]) -> None:
-        self.roots = roots
-
-    def OpenKey(self, parent: Any, name: str) -> FakeKey:  # noqa: N802 - winreg's name
+    def open_key(parent: Any, name: str) -> FakeKey:
+        if name in unreadable:
+            raise PermissionError(name)
         if isinstance(parent, FakeKey):
             if name not in parent.children:
                 raise FileNotFoundError(name)
             return FakeKey(values=parent.children[name])
-        if (parent, name) not in self.roots:
+        if (parent, name) not in roots:
             raise FileNotFoundError(name)
-        return FakeKey(children=self.roots[(parent, name)])
+        return FakeKey(children=roots[(parent, name)])
 
-    def EnumKey(self, key: FakeKey, index: int) -> str:  # noqa: N802 - winreg's name
+    def enum_key(key: FakeKey, index: int) -> str:
         names = list(key.children)
         if index >= len(names):
             raise OSError("no more data")
         return names[index]
 
-    def QueryValueEx(self, key: FakeKey, name: str) -> tuple[str, int]:  # noqa: N802 - winreg's name
+    def query_value(key: FakeKey, name: str) -> tuple[str, int]:
         if name not in key.values:
             raise FileNotFoundError(name)
         return key.values[name], 1
 
-
-PATTERNS = IPOKER_CLIENT_NAME_PATTERNS[SITE]
+    return SimpleNamespace(
+        HKEY_CURRENT_USER="HKCU",
+        HKEY_LOCAL_MACHINE="HKLM",
+        OpenKey=open_key,
+        EnumKey=enum_key,
+        QueryValueEx=query_value,
+    )
 
 
 def test_the_install_location_of_a_matching_uninstall_entry_is_returned() -> None:
-    winreg = FakeWinreg(
+    winreg = fake_winreg(
         {
             ("HKCU", UNINSTALL_KEY): {
                 "{1}": {"DisplayName": "bet365 Poker France", "InstallLocation": r"E:\Poker\bet365 France"},
@@ -460,21 +570,19 @@ def test_the_install_location_of_a_matching_uninstall_entry_is_returned() -> Non
 
 
 def test_the_icon_folder_stands_in_for_a_missing_install_location() -> None:
-    winreg = FakeWinreg(
+    winreg = fake_winreg(
         {
             ("HKLM", UNINSTALL_KEY_WOW64): {
-                "bet365.fr": {"DisplayName": "bet365.fr Poker", "DisplayIcon": '"E:\\Poker\\b365fr\\client.exe",0'},
+                "bet365.fr": {"DisplayName": "bet365.fr Poker", "DisplayIcon": r'"E:\Poker\b365fr\client.exe",0'},
             },
         },
     )
 
-    [location] = windows_registry_install_dirs(PATTERNS, winreg)
-
-    assert same_path(location, Path("E:\\Poker\\b365fr"))
+    assert windows_registry_install_dirs(PATTERNS, winreg) == [r"E:\Poker\b365fr"]
 
 
 def test_an_app_paths_executable_gives_its_folder() -> None:
-    winreg = FakeWinreg(
+    winreg = fake_winreg(
         {
             ("HKCU", APP_PATHS_KEY): {
                 "bet365fr.exe": {"": r"E:\Poker\b365\bet365fr.exe"},
@@ -486,38 +594,29 @@ def test_an_app_paths_executable_gives_its_folder() -> None:
         },
     )
 
-    found = windows_registry_install_dirs(PATTERNS, winreg)
-
-    assert len(found) == 2
-    assert same_path(found[0], Path("E:\\Poker\\b365"))
-    assert found[1] == r"E:\Poker\b365 path"
+    assert windows_registry_install_dirs(PATTERNS, winreg) == [r"E:\Poker\b365", r"E:\Poker\b365 path"]
 
 
 def test_the_same_location_is_returned_once() -> None:
     entry = {"DisplayName": "bet365 Poker France", "InstallLocation": r"E:\Poker\bet365 France"}
-    winreg = FakeWinreg({("HKCU", UNINSTALL_KEY): {"a": entry}, ("HKLM", UNINSTALL_KEY): {"b": entry}})
+    winreg = fake_winreg({("HKCU", UNINSTALL_KEY): {"a": entry}, ("HKLM", UNINSTALL_KEY): {"b": entry}})
 
     assert windows_registry_install_dirs(PATTERNS, winreg) == [r"E:\Poker\bet365 France"]
 
 
 def test_an_empty_registry_yields_nothing() -> None:
-    assert windows_registry_install_dirs(PATTERNS, FakeWinreg({})) == []
+    assert not windows_registry_install_dirs(PATTERNS, fake_winreg({}))
 
 
 def test_an_unreadable_entry_is_skipped() -> None:
-    class Flaky(FakeWinreg):
-        def OpenKey(self, parent: Any, name: str) -> FakeKey:  # noqa: N802
-            if name == "{broken}":
-                raise PermissionError(name)
-            return super().OpenKey(parent, name)
-
-    winreg = Flaky(
+    winreg = fake_winreg(
         {
             ("HKCU", UNINSTALL_KEY): {
                 "{broken}": {},
                 "{ok}": {"DisplayName": "bet365.fr", "InstallLocation": r"E:\b365fr"},
             },
         },
+        unreadable=("{broken}",),
     )
 
     assert windows_registry_install_dirs(PATTERNS, winreg) == [r"E:\b365fr"]
@@ -526,19 +625,16 @@ def test_an_unreadable_entry_is_skipped() -> None:
 def test_without_winreg_nothing_is_read(monkeypatch) -> None:
     monkeypatch.setitem(__import__("sys").modules, "winreg", None)
 
-    assert windows_registry_install_dirs(PATTERNS) == []
+    assert not windows_registry_install_dirs(PATTERNS)
 
 
 @pytest.mark.parametrize(
-    ("value", "expected"),
-    [
-        ('"E:\\Poker\\b365\\client.exe",0', "E:\\Poker\\b365"),
-        ("E:\\Poker\\b365\\client.exe,0", "E:\\Poker\\b365"),
-        ("E:\\Poker\\b365\\client.exe", "E:\\Poker\\b365"),
-    ],
+    "value",
+    [r'"E:\Poker\b365\client.exe",0', r"E:\Poker\b365\client.exe,0", r"E:\Poker\b365\client.exe"],
 )
-def test_the_folder_of_an_executable_value(value: str, expected: str) -> None:
-    assert same_path(_folder_of_executable(value), Path(expected))
+def test_the_folder_of_an_executable_value_is_read_the_windows_way(value: str) -> None:
+    # A registry value is a Windows path even when the code runs elsewhere.
+    assert _folder_of_executable(value) == r"E:\Poker\b365"
 
 
 def test_an_empty_executable_value_has_no_folder() -> None:
@@ -560,17 +656,14 @@ def test_a_known_folder_name_is_found_in_a_bet365_container(config, tmp_path, bu
 
     found = detect_on_macos(iPokerDetector(config), tmp_path)
 
-    assert found["detected"] is True
+    assert_found_french(found, tables)
     assert found["heroname"] == "alice"
-    assert same_path(found["hhpath"], tables)
 
 
 def test_an_unknown_french_folder_is_found_when_the_container_can_be_listed(config, tmp_path) -> None:
     tables = account(container_support(tmp_path, "com.bet365.poker") / "bet365 Poker FR 2")
 
-    found = detect_on_macos(iPokerDetector(config), tmp_path)
-
-    assert same_path(found["hhpath"], tables)
+    assert_found_french(detect_on_macos(iPokerDetector(config), tmp_path), tables)
 
 
 def test_the_international_container_folder_is_not_taken_for_the_french_one(config, tmp_path) -> None:
@@ -582,9 +675,7 @@ def test_the_international_container_folder_is_not_taken_for_the_french_one(conf
 def test_the_plain_application_support_folder_is_the_fallback(config, tmp_path) -> None:
     tables = account(Path(mac_paths(tmp_path)["app_support"]) / SITE / "data")
 
-    found = detect_on_macos(iPokerDetector(config), tmp_path)
-
-    assert same_path(found["hhpath"], tables)
+    assert_found_french(detect_on_macos(iPokerDetector(config), tmp_path), tables)
 
 
 def test_a_protected_container_is_found_by_the_configured_screen_name(config, tmp_path) -> None:

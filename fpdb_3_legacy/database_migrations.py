@@ -57,6 +57,8 @@ WIDEN_GAMETYPE_CATEGORY_SQL = "ALTER TABLE Gametypes ALTER COLUMN category TYPE 
 # when the tables are created, so an older database lacks these rows, and its
 # hands would break the Sites foreign key once a parser files them there.
 SITES_ADDED_LATER: tuple[tuple[int, str, str], ...] = ((132, "Bet365.fr Poker", "IP"),)
+INSERT_SITE_QMARK = "INSERT INTO Sites (id,name,code) VALUES (?,?,?)"
+INSERT_SITE_FORMAT = "INSERT INTO Sites (id,name,code) VALUES (%s,%s,%s)"
 
 COLUMN_WIDTH_SQL = (
     "SELECT character_maximum_length FROM information_schema.columns "
@@ -679,8 +681,9 @@ class DatabaseMigrationsMixin:
             missing = [row for row in SITES_ADDED_LATER if present and row[0] not in present]
             if not missing:
                 return
-            ph = self.sql.query.get("placeholder", "%s")
-            insert = f"INSERT INTO Sites (id,name,code) VALUES ({ph},{ph},{ph})"  # nosemgrep
+            # A constant statement per paramstyle: SQLite takes "?", the servers "%s".
+            uses_qmark = self.sql.query.get("placeholder") == "?"
+            insert = INSERT_SITE_QMARK if uses_qmark else INSERT_SITE_FORMAT
             for site_id, name, code in missing:
                 c.execute(insert, (site_id, name, code))
                 log.info("Registered site %s as id %s", name, site_id)

@@ -38,6 +38,7 @@ Usage:
 from __future__ import annotations
 
 import fnmatch
+import ntpath
 import os
 import platform
 from collections.abc import Iterable
@@ -45,6 +46,7 @@ from pathlib import Path
 from typing import Any
 
 from fpdb_3_legacy import Configuration
+from fpdb_3_legacy.iPoker.dispatcher import IPOKER_SKINS
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("detect_installed_sites")
@@ -348,10 +350,12 @@ WINDOWS_IPOKER_DATA_DIR_ALIASES: dict[str, tuple[str, ...]] = {
 # known exactly. Each pattern is matched case-insensitively (fnmatch) against:
 # the folders of %LOCALAPPDATA% and %APPDATA%, the DisplayName of the Windows
 # uninstall entries and the App Paths executables, and the macOS containers.
-# The patterns require the French marker so the international "Bet365 Poker"
-# client is never taken for bet365.fr.
+# They are the iPoker dispatcher's own folder patterns, so a folder found here
+# is one whose hands the importer files under the same skin. bet365.fr's
+# require the French marker: the international "Bet365 Poker" client is never
+# taken for it.
 IPOKER_CLIENT_NAME_PATTERNS: dict[str, tuple[str, ...]] = {
-    "Bet365.fr Poker": ("*bet365*fr*", "*fr*bet365*"),
+    skin.site_name: skin.folder_patterns for skin in IPOKER_SKINS if skin.folder_patterns
 }
 
 # Folders that can hold the iPoker data directory inside a macOS sandbox
@@ -418,13 +422,40 @@ def _registry_subkeys(winreg: Any, key: Any) -> list[str]:
 
 
 def _folder_of_executable(value: str) -> str:
-    """The folder of the executable a registry value names, as in ``"<dir>/client.exe",0``."""
+    """The folder of the executable a registry value names, as in ``"<dir>/client.exe",0``.
+
+    A registry value is a Windows path whatever platform reads it, so it is
+    split the Windows way.
+    """
     path = value.strip()
     if path.startswith('"'):
         path = path[1:].split('"', 1)[0]
     else:
         path = path.split(",", 1)[0].strip()
-    return str(Path(path).parent) if path else ""
+    return ntpath.dirname(path) if path else ""
+
+
+def ipoker_skin_of(path: str) -> str | None:
+    """The iPoker skin the importer files the hands under ``path`` under, if any names it."""
+    path_lower = path.lower()
+    return next((skin.site_name for skin in IPOKER_SKINS if skin.matches(path_lower)), None)
+
+
+def routed_to(skin: str, candidates: Iterable[str]) -> list[str]:
+    """The ``candidates`` whose hands would not be filed under another skin than ``skin``.
+
+    A folder found by name pattern or through the registry may sit under a
+    generic one ("<install>/bet365/data"): offering it would import the French
+    hands under the international room.
+    """
+    kept = []
+    for candidate in candidates:
+        owner = ipoker_skin_of(candidate)
+        if owner is None or owner == skin:
+            kept.append(candidate)
+        else:
+            log.info("Skipping %s for %s: its hands would be filed under %s", candidate, skin, owner)
+    return kept
 
 
 def windows_registry_install_dirs(patterns: Iterable[str], winreg: Any = None) -> list[str]:
@@ -810,7 +841,7 @@ class iPokerDetector(SiteDetector):  # noqa: N801
             candidates.extend(
                 str(install / folder / "data") for folder in (skin, *WINDOWS_IPOKER_DATA_DIR_ALIASES.get(skin, ()))
             )
-        return candidates
+        return routed_to(skin, candidates)
 
     def _mac_container_candidate(self, skin: str, containers_path: str, paths: dict[str, str]) -> str | None:
         """The data folder of ``skin`` in its macOS sandbox container, else in Application Support."""
@@ -827,7 +858,7 @@ class iPokerDetector(SiteDetector):  # noqa: N801
         for name in (skin, *support_dirs):
             candidates.append(str(Path(paths["app_support"]) / name / "data"))
             candidates.append(str(Path(paths["app_support"]) / name))
-        return self._check_path_exists(*candidates)
+        return self._check_path_exists(*routed_to(skin, candidates))
 
     def _found(self, skin: str, base_path: str, result: dict[str, Any]) -> dict[str, Any]:
         """Return a detected hero folder, recording ``skin`` as protected if its hands cannot be listed."""

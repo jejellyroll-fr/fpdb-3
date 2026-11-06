@@ -101,6 +101,56 @@ def _preserve_86_to_87(doc, template) -> None:
     del doc, template
 
 
+# Rooms each version adds: an upgrade gives them to a configuration lacking them.
+SITES_ADDED_IN_88 = ("Bet365.fr Poker",)  # #717
+
+
+def _child_section(doc, section: str):
+    found = doc.getElementsByTagName(section)
+    return found[0] if found else None
+
+
+def _add_sites(doc, template, names) -> None:
+    """Give ``doc`` the template's <site> and <hhc> of each room in ``names`` it lacks.
+
+    A room the configuration already declares keeps its entry as it is. The
+    layout sets the new entry uses come along when the configuration lacks
+    them, so the upgrade's reference check still passes.
+    """
+    for section, tag, key in (("supported_sites", "site", "site_name"), ("hhcs", "hhc", "site")):
+        target = _child_section(doc, section)
+        source = _child_section(template, section)
+        if target is None or source is None:
+            continue
+        existing = {node.getAttribute(key) for node in target.getElementsByTagName(tag)}
+        for node in source.getElementsByTagName(tag):
+            if node.getAttribute(key) in names and node.getAttribute(key) not in existing:
+                target.appendChild(doc.importNode(node, True))
+                existing.add(node.getAttribute(key))
+                _add_missing_layout_sets(doc, template, node)
+
+
+def _add_missing_layout_sets(doc, template, site) -> None:
+    target = _child_section(doc, "layout_sets")
+    source = _child_section(template, "layout_sets")
+    if target is None or source is None:
+        return
+    defined = {node.getAttribute("name") for node in target.getElementsByTagName("ls")}
+    wanted = {node.getAttribute("ls") for node in site.getElementsByTagName("layout_set")} - defined
+    for node in source.getElementsByTagName("ls"):
+        if node.getAttribute("name") in wanted:
+            target.appendChild(doc.importNode(node, True))
+
+
+def _add_sites_87_to_88(doc, template) -> None:
+    """Advance to v88, adding the bet365.fr room (#717) to a configuration lacking it.
+
+    Everything else is kept as the user left it, their own entry for that room
+    included.
+    """
+    _add_sites(doc, template, SITES_ADDED_IN_88)
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {n.getAttribute("name") for n in doc.getElementsByTagName("aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -120,6 +170,7 @@ MIGRATIONS = (
     (84, 85, _preserve_84_to_85),
     (85, 86, _preserve_85_to_86),
     (86, 87, _preserve_86_to_87),
+    (87, 88, _add_sites_87_to_88),
 )
 
 
