@@ -287,6 +287,9 @@ jobs:
 
   coverage:
     runs-on: ubuntu-latest
+    # Write access for the badge step only, which runs on development pushes.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -327,6 +330,25 @@ jobs:
           python -m coverage report --skip-covered
       - name: Enforce coverage ratchet
         run: python tools/coverage_ratchet.py --check coverage.json
+      # The README's coverage badge reads coverage.json on the orphan `badges`
+      # branch through shields.io. One commit, replaced on each push to
+      # development, so the branch only ever holds the latest figure.
+      - name: Publish the coverage badge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/development'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          badge_dir="$RUNNER_TEMP/badges"
+          mkdir -p "$badge_dir"
+          python tools/coverage_badge.py coverage.json "$badge_dir/coverage.json"
+          cd "$badge_dir"
+          git init -q -b badges
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add coverage.json
+          git commit -q -m "Coverage badge for ${GITHUB_SHA::8}"
+          git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" badges
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v4
