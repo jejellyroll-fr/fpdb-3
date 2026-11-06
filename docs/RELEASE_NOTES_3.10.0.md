@@ -101,6 +101,9 @@ takes the minor number rather than a patch.
 - Release artefacts are built only for releases (or on demand), not on every
   push. This release ships five archives: PyInstaller for Linux x64 and
   Windows x64, PyOxidizer for Linux x64, Windows x64 and macOS ARM64.
+- Pushing a version tag now cuts the release: CI drafts it with these notes,
+  attaches the archives, and publishes it once the builds and tests pass.
+  Before, only publishing a GitHub release started the builds.
 - The macOS bundle is still ad-hoc signed (#441).
 - Split `Database.py`, `Configuration.py`, `HUD_main.pyw` and `DerivedStats.py`
   into modules by concern, merge the `test/` tree into `tests/`, and type-check

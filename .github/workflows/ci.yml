@@ -3,12 +3,15 @@ name: CI
 on:
   push:
     branches: [ bigbang, main, development ]
+    # Pushing a version tag cuts a release: the release job below drafts it,
+    # the build jobs attach their archives, and it is published once they
+    # and the tests pass. `gh release create vX.Y.Z` and the GitHub release
+    # form create the tag too, so they go through the same path.
+    tags: [ 'v*' ]
   pull_request:
     # Feature branches too: a stacked pull request targets its parent branch,
     # and without this it would merge having never run a single test.
     branches: [ bigbang, main, development, 'feature/**', 'fix/**', 'release/**' ]
-  release:
-    types: [ published ]
   workflow_dispatch:
 
 env:
@@ -17,6 +20,10 @@ env:
   UV_VERSION: "0.12.7"
   # Constraints every `uv pip install` below applies (PySide6 below 6.12: see the file).
   UV_CONSTRAINT: .github/ci-constraints.txt
+  # The release this run builds for: the version tag it runs on, or empty for
+  # a branch. A run started by hand on a tag (`gh workflow run CI --ref vX.Y.Z`)
+  # rebuilds that release's archives.
+  FPDB_RELEASE_TAG: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
 
 jobs:
   config-version:
@@ -388,12 +395,51 @@ jobs:
           tests/test_hud_postgresql_integration.py
           tests/test_import_round_trips_postgres.py
 
+  release:
+    name: Draft the GitHub release
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      drafted: ${{ steps.draft.outputs.drafted }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Draft the release unless the tag already has one
+        id: draft
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$FPDB_RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "$FPDB_RELEASE_TAG already has a release; the builds attach to it."
+            echo "drafted=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          version="${FPDB_RELEASE_TAG#v}"
+          notes="docs/RELEASE_NOTES_${version}.md"
+          args=(--draft --verify-tag --title "FPDB ${version}")
+          if [[ -f "$notes" ]]; then
+            args+=(--notes-file "$notes")
+          else
+            echo "::warning::$notes not found; the release gets GitHub's generated notes"
+            args+=(--generate-notes)
+          fi
+          # v3.10.0-rc1 and the like are prereleases.
+          if [[ "$version" == *-* ]]; then
+            args+=(--prerelease)
+          fi
+          gh release create "$FPDB_RELEASE_TAG" "${args[@]}" --repo "$GITHUB_REPOSITORY"
+          echo "drafted=true" >> "$GITHUB_OUTPUT"
+
   build:
     name: Build with PyInstaller (${{ matrix.label }})
-    # Release artefacts only (#669). A push or a pull request runs the checks
-    # above; these builds run for a published release, which uploads them, or
-    # by hand from the Actions tab (workflow_dispatch).
-    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    # Release artefacts only (#669). A branch push or a pull request runs the
+    # checks above; these builds run for a version tag, which attaches them
+    # to its release, or by hand from the Actions tab (workflow_dispatch).
+    # `release` is skipped on a branch, hence the explicit status check.
+    needs: release
+    if: ${{ !cancelled() && !failure() && (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch') }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -460,20 +506,22 @@ jobs:
       # macOS is distributed only by build-pyoxidizer. Keep the runner guard as
       # defense in depth if a macOS entry is ever accidentally reintroduced.
       - name: Attach PyInstaller build to the release
-        if: github.event_name == 'release' && runner.os != 'macOS'
+        if: env.FPDB_RELEASE_TAG != '' && runner.os != 'macOS'
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ env.FPDB_RELEASE_TAG }}
           ASSET: ${{ matrix.artifact }}.tar.gz
         run: gh release upload "$RELEASE_TAG" "$ASSET" --clobber --repo "$GITHUB_REPOSITORY"
 
   build-pyoxidizer:
     name: Build with PyOxidizer (${{ matrix.label }})
-    # Release artefacts only (#669). A push or a pull request runs the checks
-    # above; these builds run for a published release, which uploads them, or
-    # by hand from the Actions tab (workflow_dispatch).
-    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    # Release artefacts only (#669). A branch push or a pull request runs the
+    # checks above; these builds run for a version tag, which attaches them
+    # to its release, or by hand from the Actions tab (workflow_dispatch).
+    # `release` is skipped on a branch, hence the explicit status check.
+    needs: release
+    if: ${{ !cancelled() && !failure() && (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch') }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     # Needed by the release-asset upload step below; read-only elsewhere.
@@ -483,8 +531,8 @@ jobs:
     # emitted by `cargo init` since Rust 1.85.
     env:
       RUSTUP_TOOLCHAIN: "1.83.0"
-      # release/published covers both final releases and published prereleases
-      # (including RCs), so neither may fall back to an ad-hoc identity.
+      # A version tag covers both final releases and prereleases (including
+      # RCs), so neither may fall back to an ad-hoc identity once one is set.
       FPDB_MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY || '-' }}
       FPDB_REQUIRE_STABLE_MACOS_SIGNING: ${{ secrets.MACOS_SIGNING_IDENTITY != '' && '1' || '0' }}
     strategy:
@@ -521,7 +569,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate macOS release credentials
-        if: runner.os == 'macOS' && github.event_name == 'release'
+        if: runner.os == 'macOS' && env.FPDB_RELEASE_TAG != ''
         shell: bash
         env:
           MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
@@ -560,7 +608,7 @@ jobs:
           fi
           exit "$missing"
       - name: Import Developer ID certificate
-        if: runner.os == 'macOS' && github.event_name == 'release' && env.FPDB_REQUIRE_STABLE_MACOS_SIGNING == '1'
+        if: runner.os == 'macOS' && env.FPDB_RELEASE_TAG != '' && env.FPDB_REQUIRE_STABLE_MACOS_SIGNING == '1'
         uses: apple-actions/import-codesign-certs@7abe6dfe88f6bf6b1fa06e6a5704a2605d897418 # v7
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
@@ -696,7 +744,7 @@ jobs:
           # This module is intentionally absent from the pre-sign smoke list.
           dist/fpdb.app/Contents/MacOS/fpdb --run-module fpdb_3_legacy.winamax_ax_seats
           codesign --verify --deep --strict dist/fpdb.app
-          if [[ "${{ github.event_name }}" == "release" && "$FPDB_REQUIRE_STABLE_MACOS_SIGNING" == "1" ]]; then
+          if [[ -n "$FPDB_RELEASE_TAG" && "$FPDB_REQUIRE_STABLE_MACOS_SIGNING" == "1" ]]; then
             codesign -dv --verbose=4 dist/fpdb.app 2> "$RUNNER_TEMP/fpdb-signature.txt"
             codesign -dr - dist/fpdb.app 2> "$RUNNER_TEMP/fpdb-requirement.txt"
             codesign -d --entitlements :- dist/fpdb.app > "$RUNNER_TEMP/fpdb-entitlements.plist" 2>/dev/null
@@ -726,7 +774,7 @@ jobs:
             grep -q 'com.apple.security.automation.apple-events' "$RUNNER_TEMP/fpdb-entitlements.plist"
           fi
       - name: Notarize and staple PyOxidizer macOS release
-        if: runner.os == 'macOS' && github.event_name == 'release' && env.FPDB_REQUIRE_STABLE_MACOS_SIGNING == '1'
+        if: runner.os == 'macOS' && env.FPDB_RELEASE_TAG != '' && env.FPDB_REQUIRE_STABLE_MACOS_SIGNING == '1'
         shell: bash
         env:
           MACOS_NOTARY_API_KEY_P8_BASE64: ${{ secrets.MACOS_NOTARY_API_KEY_P8_BASE64 }}
@@ -751,7 +799,7 @@ jobs:
             verify_dir="$(mktemp -d "$RUNNER_TEMP/fpdb-pyoxidizer-artifact.XXXXXX")"
             tar -xzf "${{ matrix.artifact }}.tar.gz" -C "$verify_dir"
             codesign --verify --deep --strict --verbose=2 "$verify_dir/fpdb.app"
-            if [[ "${{ github.event_name }}" == "release" && "$FPDB_MACOS_SIGNING_IDENTITY" != "-" ]]; then
+            if [[ -n "$FPDB_RELEASE_TAG" && "$FPDB_MACOS_SIGNING_IDENTITY" != "-" ]]; then
               xcrun stapler validate "$verify_dir/fpdb.app"
               spctl --assess --type execute --verbose=4 "$verify_dir/fpdb.app"
             fi
@@ -764,13 +812,29 @@ jobs:
           name: ${{ matrix.artifact }}
           path: ${{ matrix.artifact }}.tar.gz
           compression-level: 0
-      # On a published release, the same tarball also becomes a downloadable
-      # release asset, so users do not need a GitHub account to fetch a build.
+      # On a version tag, the same tarball also becomes a downloadable release
+      # asset, so users do not need a GitHub account to fetch a build.
       - name: Attach PyOxidizer build to the release
-        if: github.event_name == 'release'
+        if: env.FPDB_RELEASE_TAG != ''
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ env.FPDB_RELEASE_TAG }}
           ASSET: ${{ matrix.artifact }}.tar.gz
         run: gh release upload "$RELEASE_TAG" "$ASSET" --clobber --repo "$GITHUB_REPOSITORY"
+
+  publish-release:
+    name: Publish the GitHub release
+    # Only a release this run drafted: one made by hand stays as its author
+    # left it. A failed build or test leaves the draft unpublished, with
+    # whatever archives did build, for a look before publishing by hand.
+    needs: [ release, build, build-pyoxidizer, quality, test ]
+    if: needs.release.outputs.drafted == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish the drafted release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "$FPDB_RELEASE_TAG" --draft=false --repo "$GITHUB_REPOSITORY"
