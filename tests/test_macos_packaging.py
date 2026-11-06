@@ -222,7 +222,7 @@ def test_ci_distributes_macos_only_with_pyoxidizer() -> None:
     assert "fpdb-pyinstaller-macos" not in workflow
     assert "fpdb.app" not in pyinstaller
     assert "if: runner.os != 'macOS'" in pyinstaller
-    assert "if: github.event_name == 'release' && runner.os != 'macOS'" in pyinstaller
+    assert "if: env.FPDB_RELEASE_TAG != '' && runner.os != 'macOS'" in pyinstaller
 
     assert "os: macos-latest" in pyoxidizer
     assert "artifact: fpdb-pyoxidizer-macos-arm64" in pyoxidizer
@@ -243,14 +243,12 @@ def test_release_and_rc_pyoxidizer_artifacts_require_stable_developer_id() -> No
     workflow = CI_WORKFLOW.read_text()
     pyoxidizer = _workflow_job(workflow, "build-pyoxidizer")
 
-    # GitHub sends release/published for public prereleases (including RCs) as
-    # well as final releases, so this is the shared distribution gate.
-    assert "release:\n    types: [ published ]" in workflow
+    # A version tag cuts final releases and prereleases (including RCs) alike,
+    # so it is the shared distribution gate.
+    assert "tags: [ 'v*' ]" in workflow
+    assert "FPDB_RELEASE_TAG: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}" in workflow
     assert "FPDB_REQUIRE_STABLE_MACOS_SIGNING: ${{ secrets.MACOS_SIGNING_IDENTITY != '' && '1' || '0' }}" in pyoxidizer
-    assert (
-        'if [[ "${{ github.event_name }}" == "release" && "$FPDB_REQUIRE_STABLE_MACOS_SIGNING" == "1" ]]; then'
-        in pyoxidizer
-    )
+    assert 'if [[ -n "$FPDB_RELEASE_TAG" && "$FPDB_REQUIRE_STABLE_MACOS_SIGNING" == "1" ]]; then' in pyoxidizer
     assert '"Developer ID Application: "*' in pyoxidizer
     assert 'grep -Fqx "Authority=$FPDB_MACOS_SIGNING_IDENTITY"' in pyoxidizer
     assert 'grep -Fqx "TeamIdentifier=$expected_team_id"' in pyoxidizer
@@ -285,7 +283,7 @@ def test_a_release_with_no_signing_identity_warns_and_ships_ad_hoc() -> None:
     """
     gate = _signing_gate()
 
-    assert "if: runner.os == 'macOS' && github.event_name == 'release'" in gate
+    assert "if: runner.os == 'macOS' && env.FPDB_RELEASE_TAG != ''" in gate
     assert "::warning::MACOS_SIGNING_IDENTITY is not configured" in gate
     missing_branch = gate[gate.index('if [[ -z "${FPDB_MACOS_SIGNING_IDENTITY}"') :]
     unconfigured = missing_branch[: missing_branch.index("\n          fi\n")]
