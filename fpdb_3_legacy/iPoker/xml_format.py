@@ -5,7 +5,12 @@ import re
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
+from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter
+from fpdb_3_legacy.iPoker.gametype_text import read_gametype
 from fpdb_3_legacy.loggingFpdb import get_logger
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 log = get_logger("ipoker_parser")
 
@@ -23,7 +28,9 @@ class IPokerXMLFormatMixin:
 
         def _filename_game_info_source(self) -> str: ...
 
-    def _parse_xml_format(self, hand_text: str) -> dict | None:  # noqa: ARG002, PLR0912, PLR0915, C901
+        _fix_limit_blinds: Callable[[dict, str], bool]
+
+    def _parse_xml_format(self, hand_text: str) -> dict | None:  # noqa: PLR0912, PLR0915, C901
         """Parse XML format by combining session and game level information."""
         log.debug("Parsing XML format")
 
@@ -55,38 +62,43 @@ class IPokerXMLFormatMixin:
         # Initialize info directly from XML data
         self.info = {}
 
-        # Parse gametype string - handle both formats
+        # The header regex reads the first hand of the file; this path reads
+        # every later one. Both read the value with the gametype_text module,
+        # or one table imports under two gametypes: PMU's "Omaha PL
+        # 0,01€/0,02€" (currency after the amount) used to miss the patterns
+        # below and fall to the filename fallback, i.e. no limit, 0.01/0.02
+        # (#715). The same reader names 5 card Omaha, which iPoker leaves
+        # unnamed ("PL €1/€2").
+        gametype = read_gametype(gametype_text)
+
+        # Older patterns, for a value the shared reader does not know.
         gametype_pattern_with_blinds = (
             r"(\w+(?:\s+\w+)*)\s+" r"(NL|PL|L|SL|БЛ|LP|No\s+limit|Pot\s+limit|Limit)\s*" r"[^\d]*([0-9.,]+)/[^\d]*([0-9.,]+)"
         )
         gametype_pattern_no_blinds = r"(\w+(?:\s+\w+)*)\s+" r"(NL|PL|L|SL|БЛ|LP|No\s+limit|Pot\s+limit|Limit)\s*$"
 
-        # iPoker names the game for every variant except 5 card Omaha, whose
-        # gametype carries the limit and blinds alone ("PL €1/€2"). Both patterns
-        # above require a name, so those sessions reached the filename fallback
-        # below and imported as NL Holdem 0.01/0.02 -- every hand except the
-        # first, which still carries the session header and is read by base.py.
-        # Only the pot limit markers are accepted: 5 card Omaha is pot limit
-        # only, and a nameless "NL €1/€2" is not a game that exists.
-        gametype_pattern_five_card_omaha = r"(PL|Pot\s+limit|LP)\s*[^\d]*([0-9.,]+)/[^\d]*([0-9.,]+)\s*$"
+        gametype_match = None
+        if gametype is None:
+            gametype_match = re.match(gametype_pattern_with_blinds, gametype_text) or re.match(
+                gametype_pattern_no_blinds,
+                gametype_text,
+            )
 
-        gametype_match = re.match(gametype_pattern_with_blinds, gametype_text)
-        if not gametype_match:
-            gametype_match = re.match(gametype_pattern_no_blinds, gametype_text)
-
-        five_card_omaha_match = None
-        if not gametype_match:
-            five_card_omaha_match = re.match(gametype_pattern_five_card_omaha, gametype_text)
-
-        if five_card_omaha_match:
-            # base.py reads a missing category the same way when it parses the
-            # session header (_determine_base_category), and the two paths have
-            # to agree or one table imports under two gametype ids.
-            self.info["base"] = "hold"
-            self.info["category"] = "5_omahahi"
-            self.info["limitType"] = "pl"
-            self.info["sb"] = five_card_omaha_match.group(2).replace(",", ".")
-            self.info["bb"] = five_card_omaha_match.group(3).replace(",", ".")
+        if gametype is not None:
+            self.info["base"] = gametype["base"]
+            self.info["category"] = gametype["category"]
+            self.info["limitType"] = gametype["limitType"]
+            if gametype["SB"] and gametype["BB"]:
+                self.info["sb"] = HandHistoryConverter.clearMoneyString(gametype["SB"])
+                self.info["bb"] = HandHistoryConverter.clearMoneyString(gametype["BB"])
+            elif gametype["base"] == "stud":
+                # For stud tournaments, use ante-based structure
+                self.info["sb"] = "0"
+                self.info["bb"] = "0"
+            else:
+                # For hold'em/omaha tournaments, use default blind structure
+                self.info["sb"] = "10"
+                self.info["bb"] = "20"
         elif gametype_match:
             game_name = gametype_match.group(1)
             limit_type = gametype_match.group(2)
@@ -204,6 +216,10 @@ class IPokerXMLFormatMixin:
             log.debug("No tournament markers found - setting type to ring")
             self.info["type"] = "ring"
             self.info["currency"] = session_info.get("currency", "USD")
+            if gametype is not None:
+                # The header path turns a limit game's stakes into its blinds
+                # for ring games (_handle_ring_game_logic); do the same here.
+                self._fix_limit_blinds({"BB": gametype["BB"]}, hand_text)
         self.tablename = session_info.get("tablename", "Unknown")
 
         # <tablesize> only exists in the session header, never in a <game>

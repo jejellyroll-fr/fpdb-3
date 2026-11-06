@@ -2429,7 +2429,7 @@
   },
   "regression/iPoker/Flop/LHE-10max-USD-0.10-0.20-201107.player.sitting.out.xml": {
     "hand_count": 30,
-    "sha256": "e2c9f4392f2e1d3cdda7cf22d6a1eb7ff60de37a722871dba83f514c6e005206"
+    "sha256": "9af350e1fb710ff9f5f706eb40caa36972859a435c40144bff67f36b70991417"
   },
   "regression/iPoker/Flop/LHE-5-10-10-20-USD-201103.HEM.archive.txt": {
     "hand_count": 2,
@@ -2449,7 +2449,7 @@
   },
   "regression/iPoker/Flop/NLHE-6max-EUR-0.01-0.02-202607.tablesize.in.session.header.xml": {
     "hand_count": 2,
-    "sha256": "9297c88d82cb66898de65c5b4ba3d1597c5585ccba95f37bd335cb5d19a5f420"
+    "sha256": "010bffaf629c773d22951d2893fe040b14cc760b814a75a2554d60673d1e5a15"
   },
   "regression/iPoker/Flop/NLHE-6max-USD-0.01-0.02-201111.Spanish.sample.xml": {
     "hand_count": 1,
@@ -2529,11 +2529,11 @@
   },
   "regression/iPoker/Stud/7-StudHL-EUR-0.05-0.10-201405.txt": {
     "hand_count": 5,
-    "sha256": "3a9feda66ef3578c2644b78217055aa8f45801f5fc7abe444dfc8dad622b3790"
+    "sha256": "e79c0fa2e1fc485e309cab057b0d18c89a110e665639bae1146b41afc0568cda"
   },
   "regression/iPoker/Stud/7-StudL-USD-0.05-0.10-201009.txt": {
     "hand_count": 2,
-    "sha256": "41d12e0cd22708cc790f1fcaa672cbcde646208b4acabd5bfa916fb9249f4c66"
+    "sha256": "197868530dc965e84040e0a4bf1aaf63ee68171c5afe71f8e0c1dcb01a934383"
   },
   "unibet/banzai.txt": {
     "hand_count": 1,
