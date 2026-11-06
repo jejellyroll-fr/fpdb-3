@@ -33,9 +33,10 @@ class ProfitGraphWidget(pg.PlotWidget):
         grid_color = c.get("grid", "#4a5568")
 
         self.setBackground(bg_color)
-        self.setTitle(f"<span style='color:{text_color}; font-size:10pt; font-weight:bold;'>Évolution du Profit</span>")
+        title = _("Profit over time")
+        self.setTitle(f"<span style='color:{text_color}; font-size:10pt; font-weight:bold;'>{title}</span>")
         self.setLabel("left", "Profit ($ / BB)", **{"color": text_color, "font-size": "8pt"})
-        self.setLabel("bottom", "Mains Jouées", **{"color": text_color, "font-size": "8pt"})
+        self.setLabel("bottom", _("Hands played"), **{"color": text_color, "font-size": "8pt"})
         axis_pen = pg.mkPen(color=grid_color, width=1)
         self.getAxis("left").setPen(axis_pen)
         self.getAxis("bottom").setPen(axis_pen)
@@ -115,12 +116,12 @@ class DashboardTab(QWidget):
         self.kpi_layout.setSpacing(12)
 
         # KPI Cards individuelles
-        self.card_hands = KpiCard("Mains Jouées", "0")
-        self.card_net = KpiCard("Profit Net", "0.00 €", value_type="normal")
+        self.card_hands = KpiCard(_("Hands played"), "0")
+        self.card_net = KpiCard(_("Net profit"), "0.00", value_type="normal")
         self.card_vpip = KpiCard("VPIP", "0.0%")
         self.card_pfr = KpiCard("PFR", "0.0%")
         self.card_3bet = KpiCard("3Bet", "0.0%")
-        self.card_agg = KpiCard("Agression (AF)", "0.00")
+        self.card_agg = KpiCard(_("Aggression (AF)"), "0.00")
 
         # Placement dans la grille (2 lignes, 3 colonnes)
         self.kpi_layout.addWidget(self.card_hands, 0, 0)

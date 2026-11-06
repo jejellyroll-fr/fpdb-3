@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 14:27+0100\n"
+"POT-Creation-Date: 2026-11-06 11:18+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -5755,6 +5755,14 @@ msgstr ""
 msgid "Restrict to hand types:"
 msgstr ""
 
+#: fpdb_3_legacy/ring_stats/base.py
+msgid "Database error"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/base.py
+msgid "The statistics could not be loaded:"
+msgstr ""
+
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Game type (Hold'em, Omaha, etc.)"
 msgstr ""
@@ -5940,6 +5948,23 @@ msgid "Measure of uncertainty"
 msgstr ""
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+msgid "Profit over time"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+msgid "Hands played"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+msgid "Net profit"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+msgid "Aggression (AF)"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 msgid "Preflop Profile (VPIP vs PFR)"
 msgstr ""
 
@@ -5961,6 +5986,10 @@ msgstr ""
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 msgid "Color the grid by:"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+msgid "VPIP (%)"
 msgstr ""
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
@@ -5996,6 +6025,26 @@ msgstr ""
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 msgid "Omaha Texture Analysis"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Essentials"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Preflop detail"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Postflop detail"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Showdown and winnings"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Show all"
 msgstr ""
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 14:27+0100\n"
+"POT-Creation-Date: 2026-11-06 11:18+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -6936,6 +6936,18 @@ msgstr "和"
 msgid "between"
 msgstr "介于"
 
+#: fpdb_3_legacy/ring_stats/base.py
+#, fuzzy
+msgid "Database error"
+msgstr "数据库"
+
+#: fpdb_3_legacy/ring_stats/base.py
+#, fuzzy
+msgid "The statistics could not be loaded:"
+msgstr ""
+"无法渲染此手牌:\n"
+"%s"
+
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
 msgid "% Big Blind fold to steal"
@@ -7167,9 +7179,29 @@ msgid "Voluntarily put money in pot preflop"
 msgstr "翻牌前主动入池"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+msgid "Aggression (AF)"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
+msgid "Hands played"
+msgstr "此手牌之后"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
+msgid "Net profit"
+msgstr "总净利润"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
 msgstr "翻牌前风格 (VPIP 对 PFR)"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
+msgid "Profit over time"
+msgstr "每手利润"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy, python-brace-format
@@ -7227,6 +7259,11 @@ msgstr "起手牌分析"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy
+msgid "VPIP (%)"
+msgstr "VPIP"
+
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "min sample:"
 msgstr "最小样本:"
 
@@ -7238,9 +7275,33 @@ msgid ""
 msgstr "此选择中有 {0} 个决策的底牌未知，未包含在网格中"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Essentials"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy
 msgid "Hand Breakdown"
 msgstr "手牌明细"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Postflop detail"
+msgstr "翻牌后"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Preflop detail"
+msgstr "翻牌前加注"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Show all"
+msgstr "显示为"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Showdown and winnings"
+msgstr "摊牌赢利"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy

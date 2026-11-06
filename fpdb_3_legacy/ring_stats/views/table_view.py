@@ -9,9 +9,22 @@ from __future__ import annotations
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QSplitter, QTableView, QVBoxLayout, QWidget
 
+from fpdb_3_legacy.i18n import N_
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 from fpdb_3_legacy.table_export import install_table_export
+
+ALL_COLUMNS = "all"
+
+#: The column presets of the stats tables: a stable key, and the label shown
+#: (marked with ``N_`` here, translated when the combo box is filled).
+COLUMN_PRESETS: tuple[tuple[str, str], ...] = (
+    ("essential", N_("Essentials")),
+    ("preflop", N_("Preflop detail")),
+    ("postflop", N_("Postflop detail")),
+    ("showdown", N_("Showdown and winnings")),
+    (ALL_COLUMNS, N_("Show all")),
+)
 
 
 class StatsTableView(QWidget):
@@ -33,13 +46,9 @@ class StatsTableView(QWidget):
         preset_layout.addWidget(self.preset_label)
 
         self.preset_combo = QComboBox()
-        self.preset_combo.addItems([
-            "Essentiel",
-            "Préflop détaillé",
-            "Postflop détaillé",
-            "Showdown & Gains",
-            "Tout afficher"
-        ])
+        # The column set is chosen by key, never by the shown (translated) label.
+        for key, label in COLUMN_PRESETS:
+            self.preset_combo.addItem(_(label), key)
         self.preset_combo.currentIndexChanged.connect(self.apply_preset)
         self.preset_combo.setMinimumWidth(180)
         preset_layout.addWidget(self.preset_combo)
@@ -93,21 +102,21 @@ class StatsTableView(QWidget):
 
     def apply_preset(self) -> None:
         """Filtre les colonnes à afficher en fonction du preset sélectionné."""
-        preset_name = self.preset_combo.currentText()
+        preset_name = self.preset_combo.currentData() or ALL_COLUMNS
 
         presets = {
-            "Essentiel": {
+            "essential": {
                 "game", "hand", "plposition", "pname", "n", "vpip", "pfr", "pf3", "net", "bbper100"
             },
-            "Préflop détaillé": {
+            "preflop": {
                 "game", "hand", "plposition", "pname", "n", "vpip", "pfr", "rfi", "steals",
                 "raisetosteal", "foldsbtosteal", "foldbbtosteal", "pf3", "pf4", "pff3", "pff4", "car0"
             },
-            "Postflop détaillé": {
+            "postflop": {
                 "game", "hand", "plposition", "pname", "n", "conbet", "aggfac", "aggfrq", "flopen",
                 "tnopen", "rvopen", "flafq", "tuafq", "rvafq", "fl3", "tn3", "rv3"
             },
-            "Showdown & Gains": {
+            "showdown": {
                 "game", "hand", "plposition", "pname", "n", "saw_f", "sawsd", "wtsdwsf", "wmsf", "wmsd",
                 "net", "bbper100", "rake", "variance", "stddev"
             }
@@ -128,8 +137,8 @@ class StatsTableView(QWidget):
                 if not alias:
                     continue
 
-                # Affiche toujours la colonne si "Tout afficher" ou si l'alias fait partie du preset
-                if preset_name == "Tout afficher" or alias in preset_cols:
+                # Every column under "Show all", otherwise only the preset's own.
+                if preset_name == ALL_COLUMNS or alias in preset_cols:
                     table.setColumnHidden(col, False)
                 else:
                     table.setColumnHidden(col, True)

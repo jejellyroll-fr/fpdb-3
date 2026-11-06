@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 14:27+0100\n"
+"POT-Creation-Date: 2026-11-06 11:18+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -6926,6 +6926,19 @@ msgstr "und"
 msgid "between"
 msgstr "zwischen"
 
+#: fpdb_3_legacy/ring_stats/base.py
+#, fuzzy
+#| msgid "*** Database Error: "
+msgid "Database error"
+msgstr "*** Datenbankfehler: "
+
+#: fpdb_3_legacy/ring_stats/base.py
+#, fuzzy
+msgid "The statistics could not be loaded:"
+msgstr ""
+"Diese Hand konnte nicht dargestellt werden:\n"
+"%s"
+
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
 msgid "% Big Blind fold to steal"
@@ -7156,8 +7169,30 @@ msgstr "Freiwillig preflop Geld in den Pot gelegt"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #, fuzzy
+#| msgid "Aggression Factor"
+msgid "Aggression (AF)"
+msgstr "Aggressionsfaktor"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
+msgid "Hands played"
+msgstr "Hände nach"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
+msgid "Net profit"
+msgstr "Gesamter Nettogewinn"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
 msgstr "Preflop-Profil (VPIP vs PFR)"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
+msgid "Profit over time"
+msgstr "Gewinn pro Hand"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy, python-brace-format
@@ -7215,6 +7250,11 @@ msgstr "Starthand-Analyse"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy
+msgid "VPIP (%)"
+msgstr "VPIP"
+
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "min sample:"
 msgstr "Min. Stichprobe:"
 
@@ -7228,9 +7268,34 @@ msgstr ""
 "nicht im Raster"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Essentials"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy
 msgid "Hand Breakdown"
 msgstr "Handaufschlüsselung"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Postflop detail"
+msgstr "Postflop"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Preflop detail"
+msgstr "Preflop-Raise"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Show all"
+msgstr "anzeigen als"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+#| msgid "Showdown Winnings"
+msgid "Showdown and winnings"
+msgstr "Showdown Gewinn"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy
@@ -7994,9 +8059,6 @@ msgstr ""
 #~ msgid "*** %s was not found"
 #~ msgstr "%s was not found"
 
-#~ msgid "*** Database Error: "
-#~ msgstr "*** Datenbankfehler: "
-
 #~ msgid "*** Database get_last_insert_id error: "
 #~ msgstr "*** Datenbank get_last_insert_id Fehler: "
 
@@ -8141,9 +8203,6 @@ msgstr ""
 
 #~ msgid "After import took %s seconds"
 #~ msgstr "Bearbeitung nach Import dauerte %s Sekunden:"
-
-#~ msgid "Aggression Factor"
-#~ msgstr "Aggressionsfaktor"
 
 #~ msgid "Aggression factor"
 #~ msgstr "Aggressionsfaktor"

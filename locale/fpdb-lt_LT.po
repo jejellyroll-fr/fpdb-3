@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 14:27+0100\n"
+"POT-Creation-Date: 2026-11-06 11:18+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -6993,6 +6993,18 @@ msgstr "ir"
 msgid "between"
 msgstr "tarp"
 
+#: fpdb_3_legacy/ring_stats/base.py
+#, fuzzy
+msgid "Database error"
+msgstr "Duomenų bazė"
+
+#: fpdb_3_legacy/ring_stats/base.py
+#, fuzzy
+msgid "The statistics could not be loaded:"
+msgstr ""
+"Šios rankos nepavyko atvaizduoti:\n"
+"%s"
+
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
 msgid "% Big Blind fold to steal"
@@ -7224,9 +7236,29 @@ msgid "Voluntarily put money in pot preflop"
 msgstr "Savanoriškai įdėta pinigų į banką preflope"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+msgid "Aggression (AF)"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
+msgid "Hands played"
+msgstr "Rankos po"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
+msgid "Net profit"
+msgstr "Bendras grynasis pelnas"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
 msgstr "Preflopo profilis (VPIP prieš PFR)"
+
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#, fuzzy
+msgid "Profit over time"
+msgstr "Pelnas per ranką"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy, python-brace-format
@@ -7284,6 +7316,11 @@ msgstr "Pradinių rankų analizė"
 
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy
+msgid "VPIP (%)"
+msgstr "VPIP"
+
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
 msgid "min sample:"
 msgstr "min. imtis:"
 
@@ -7296,9 +7333,34 @@ msgstr ""
 "{0} šios atrankos sprendimų neturi žinomų savų kortų ir nėra tinklelyje"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
+msgid "Essentials"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy
 msgid "Hand Breakdown"
 msgstr "Rankų suskirstymas"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Postflop detail"
+msgstr "Postflopas"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Preflop detail"
+msgstr "Pakėlimas preflope"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+msgid "Show all"
+msgstr "rodyti kaip"
+
+#: fpdb_3_legacy/ring_stats/views/table_view.py
+#, fuzzy
+#| msgid "Showdown Winnings"
+msgid "Showdown and winnings"
+msgstr "Laimėjimai po bendrų kortų atvertimo"
 
 #: fpdb_3_legacy/ring_stats/views/table_view.py
 #, fuzzy

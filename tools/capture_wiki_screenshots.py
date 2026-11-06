@@ -113,7 +113,43 @@ DRILL_GROUP: Final[dict[str, Any]] = {"street": "flop"}
 WORKER_TIMEOUT: Final = 60.0
 
 
+#: The themes ``--theme rotate`` cycles through, so the wiki shows fpdb under
+#: several palettes rather than one palette 35 times. Dark ones only: several
+#: views (the opponents report, the filter headings) carry styles written for a
+#: dark background and are hard to read under a light theme. Stock qt_material
+#: themes only: one from someone's ``~/.fpdb/themes`` would make the run differ
+#: from one machine to the next.
+ROTATION_THEMES: Final[tuple[str, ...]] = (
+    "dark_purple.xml",
+    "dark_teal.xml",
+    "dark_blue.xml",
+    "dark_amber.xml",
+    "dark_cyan.xml",
+    "dark_red.xml",
+    "dark_pink.xml",
+    "dark_lightgreen.xml",
+    "dark_yellow.xml",
+)
+
+
+def theme_for(index: int, requested: str) -> str:
+    """The theme of the ``index``-th capture: the requested one, or the rotation's."""
+    if requested != "rotate":
+        return requested
+    return ROTATION_THEMES[index % len(ROTATION_THEMES)]
+
+
 def theme_colors() -> dict[str, str]:
+    """The graph colours of the theme currently applied, as the application derives them."""
+    try:
+        from fpdb_3_legacy.ThemeManager import ThemeManager
+
+        return ThemeManager().get_theme_colors()
+    except Exception:  # noqa: BLE001 - fall back to the application's default palette
+        return default_theme_colors()
+
+
+def default_theme_colors() -> dict[str, str]:
     """The colour set the graph views expect, matching the application default."""
     return {
         "background": "#1E222A",
@@ -172,6 +208,27 @@ def settle(widget: Any, attribute: str, timeout: float = WORKER_TIMEOUT) -> bool
     return getattr(widget, attribute, None) is None
 
 
+def wait_for_workers(view: Any, timeout: float = WORKER_TIMEOUT) -> None:
+    """Spin the event loop until no database worker of the ring stats view runs.
+
+    The ring stats dashboard is filled by database workers; grabbed before
+    they answer, it shows zero hands. Their results then need a few more turns
+    of the loop to reach the widgets.
+    """
+    from PySide6.QtWidgets import QApplication
+
+    def running() -> bool:
+        owners = (view.controller, view.stats_tabs)
+        return any(worker.isRunning() for owner in owners for worker in getattr(owner, "_workers", ()))
+
+    deadline = monotonic() + timeout
+    while running() and monotonic() < deadline:
+        QApplication.processEvents()
+        sleep(0.01)
+    for _ in range(5):
+        QApplication.processEvents()
+
+
 def view_index(widget: Any, view_id: str) -> int:
     """The view picker's index for one view id, or ``-1`` when it has none."""
     for index in range(widget.view_combo.count()):
@@ -224,6 +281,7 @@ def build_views(config, sql, window, config_path: Path):  # noqa: C901 - each sm
     def ring_player_stats():
         view = GuiRingPlayerStats(config, sql, window)
         view.refreshStats()
+        wait_for_workers(view)
         return view
 
     def graph_viewer():
@@ -312,7 +370,95 @@ def build_views(config, sql, window, config_path: Path):  # noqa: C901 - each sm
         views
         + build_research_views(config, sql, window, config_path)
         + build_study_views(config, sql, window, config_path)
+        + build_release_views(config, sql, window, config_path)
     )
+
+
+# Dialogs are drawn at their own size: stretched to the full SIZE they read as
+# mostly empty space.
+DIALOG_SIZE: Final = (900, 620)
+
+#: The folder the wizard's first picture shows: where PokerTracker 4 keeps its
+#: archive by default, with no user name in it.
+PT4_ARCHIVE_EXAMPLE: Final = r"C:\PokerTracker 4\Processed"
+
+
+def build_release_views(config, sql, window, config_path: Path):
+    """The 3.10.0 screens: the tracker migration wizard, the pack gallery and the language menu.
+
+    The wizard is shown on the page that says where a tracker keeps its hands,
+    the one a reader needs first. The gallery is the project's real one, read
+    over the network; its cache, its record of what is installed and its pack
+    folder live in the workspace, never in the user's ``~/.fpdb``. Offline, that
+    view is skipped like any other.
+    """
+    workspace = config_path.parent
+
+    def tracker_wizard():
+        from fpdb_3_legacy.GuiTrackerMigration import GuiTrackerMigration
+
+        wizard = GuiTrackerMigration({}, config, sql, window)
+        wizard.resize(*DIALOG_SIZE)
+        wizard.show()
+        wizard.next()  # tracker -> where the hand histories are
+        # Only the picture needs a folder, and it must not show the path of
+        # whoever ran the capture: PT4's usual archive folder stands in.
+        wizard.source_page.folder.setText(PT4_ARCHIVE_EXAMPLE)
+        return wizard, DIALOG_SIZE
+
+    def pack_gallery():
+        from fpdb_3_legacy.pack_gallery_dialog import PackGalleryDialog
+
+        gallery_dir = workspace / "pack-gallery"
+        dialog = PackGalleryDialog(
+            config,
+            window,
+            cache_dir=gallery_dir / "cache",
+            record=gallery_dir / "installed.json",
+            packs_dir=gallery_dir / "packs",
+        )
+        if not dialog.index.entries:
+            msg = "the pack gallery could not be read (offline?)"
+            raise RuntimeError(msg)
+        dialog.table.selectRow(0)
+        return dialog, DIALOG_SIZE
+
+    def language_menu():
+        """*View ▸ Language*: every catalogue fpdb ships, with how much of it is translated.
+
+        Built from the same helpers the main window's submenu uses
+        (``menu_layout.language_options`` and ``language_label``, fed by
+        ``i18n_compile.completion``), so the percentages are the ones a user sees.
+        """
+        from PySide6.QtCore import QLocale
+        from PySide6.QtGui import QAction
+        from PySide6.QtWidgets import QMenu
+
+        from fpdb_3_legacy import menu_layout
+        from fpdb_3_legacy.i18n_compile import available_locales, completion
+
+        locale_dir = REPO / "locale"
+        menu = QMenu(menu_layout.translate("Language"), window)
+        for code, checked in menu_layout.language_options(available_locales(locale_dir), "en"):
+            if code == menu_layout.SYSTEM_LANGUAGE:
+                label = menu_layout.translate("System default")
+            elif code == menu_layout.SOURCE_LANGUAGE:
+                label = "English"
+            else:
+                name = QLocale(code).nativeLanguageName().capitalize() or code
+                label = menu_layout.language_label(name, completion(locale_dir / f"fpdb-{code}.po"))
+            action = QAction(label, menu, checkable=True)
+            action.setChecked(checked)
+            menu.addAction(action)
+        menu.ensurePolished()
+        hint = menu.sizeHint()
+        return menu, (max(hint.width(), 320), hint.height())
+
+    return [
+        ("tracker-migration.png", tracker_wizard),
+        ("pack-gallery.png", pack_gallery),
+        ("language-menu.png", language_menu),
+    ]
 
 
 def workspace_questions(config_path: Path) -> dict[str, dict[str, Any]]:
@@ -503,12 +649,32 @@ def build_study_views(config, sql, window, _config_path: Path):  # noqa: C901 - 
 RESEARCH_SHOT_VIEWS: Final[dict[str, str]] = dict(RESEARCH_SHOTS)
 
 
+def use_english(config) -> None:
+    """Draw every capture in English, with English number and money formats.
+
+    The wiki is in English, and the demo configuration is copied from the
+    repository's ``HUD_config.xml``, whose ``ui_language`` is whatever the last
+    developer chose. Without this a capture comes out half translated.
+    """
+    import gettext
+
+    from fpdb_3_legacy.localized_formats import set_format_locale
+
+    config.general["ui_language"] = "en"
+    gettext.NullTranslations().install()
+    set_format_locale("en")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG, help="demo HUD_config.xml")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT, help="where to write the PNGs")
     parser.add_argument("--only", help="substring: capture only views whose filename contains it")
-    parser.add_argument("--theme", default="dark_purple.xml", help="qt_material theme used for every capture")
+    parser.add_argument(
+        "--theme",
+        default="rotate",
+        help="qt_material theme for every capture, or 'rotate' (default) for a different one each time",
+    )
     args = parser.parse_args(argv)
 
     if not args.config.is_file():
@@ -526,20 +692,30 @@ def main(argv: list[str] | None = None) -> int:
     from fpdb_3_legacy.ThemeManager import ThemeManager
 
     app = QApplication.instance() or QApplication([])
-    if not ThemeManager().set_qt_material_theme(args.theme, save=False, apply_to_ui=True):
+    themes = ThemeManager()
+    if args.theme != "rotate" and not themes.set_qt_material_theme(args.theme, save=False, apply_to_ui=True):
         print(f"unable to apply theme {args.theme}", file=sys.stderr)
         return 1
     config = Config(file=str(args.config))
+    use_english(config)
     params = config.get_db_parameters()
     sql = SQL.Sql(db_server=params["db-server"])
     window = make_stub_window(config, sql)
 
     captured, skipped = 0, 0
-    for filename, factory in build_views(config, sql, window, args.config):
+    for index, (filename, factory) in enumerate(build_views(config, sql, window, args.config)):
         if args.only and args.only not in filename:
             continue
+        theme = theme_for(index, args.theme)
+        if args.theme == "rotate" and not themes.set_qt_material_theme(theme, save=False, apply_to_ui=True):
+            print(f"  skipped {filename}: unable to apply theme {theme}")
+            skipped += 1
+            continue
         try:
-            grab(factory(), out_dir / filename)
+            built = factory()
+            # A factory returns a widget, or ``(widget, size)`` for a dialog.
+            widget, size = built if isinstance(built, tuple) else (built, SIZE)
+            grab(widget, out_dir / filename, size)
         except Exception as exc:  # noqa: BLE001 - a view that will not build is data, not a crash
             print(f"  skipped {filename}: {type(exc).__name__}: {exc}")
             if os.environ.get("CAPTURE_DEBUG"):
@@ -547,7 +723,7 @@ def main(argv: list[str] | None = None) -> int:
             skipped += 1
             continue
         size = (out_dir / filename).stat().st_size
-        print(f"  {filename}  ({size // 1024} KB)")
+        print(f"  {filename}  ({size // 1024} KB, {theme})")
         captured += 1
 
     print(f"\n{captured} captured, {skipped} skipped -> {out_dir}")
