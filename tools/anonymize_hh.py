@@ -221,6 +221,10 @@ class Anonymizer:
     def _summary_name_matches(self, text: str) -> list:
         return [match for pattern in self.extras.summary_names for match in pattern.finditer(text)]
 
+    def _rename_player_keys(self, players: dict) -> dict:
+        """Rename player keys while leaving card data untouched."""
+        return {self.mapping.names.get(name, name): cards for name, cards in players.items()}
+
     def collect(self, path: Path, hero: str | None) -> Parsed:
         """Learn the names and tokens of one file; returns what the converter made of it."""
         parsed = _parse(self.converter, self.config, path)
@@ -288,6 +292,16 @@ class Anonymizer:
         is_summary = bool(self._summary_name_matches(rewritten)) and not again.hands
         expected = [{self.mapping.names.get(player[1], player[1]) for player in hand.players} for hand in parsed.hands]
         expected_gametypes = [hand.gametype for hand in parsed.hands]
+        expected_boards = [hand.board for hand in parsed.hands]
+        expected_holecards = [
+            {street: self._rename_player_keys(players) for street, players in hand.holecards.items()}
+            for hand in parsed.hands
+        ]
+        expected_discards = [
+            {street: self._rename_player_keys(players) for street, players in hand.discards.items()}
+            for hand in parsed.hands
+        ]
+        expected_winning_hands = [self._rename_player_keys(hand.winningHand) for hand in parsed.hands]
         expected_actions = [
             {
                 street: [
@@ -306,8 +320,12 @@ class Anonymizer:
             or again.seated != [self.mapping.names.get(name, name) for name in parsed.seated]
             or [hand.gametype for hand in again.hands] != expected_gametypes
             or [hand.actions for hand in again.hands] != expected_actions
+            or [hand.board for hand in again.hands] != expected_boards
+            or [hand.holecards for hand in again.hands] != expected_holecards
+            or [hand.discards for hand in again.hands] != expected_discards
+            or [hand.winningHand for hand in again.hands] != expected_winning_hands
         ):
-            msg = f"{source.name}: the anonymised file no longer parses into the same hands, players, game types and actions"
+            msg = f"{source.name}: the anonymised file no longer parses into the same hands, players, game types, actions and cards"
             raise ValueError(msg)
         return Result(source, target, len(again.hands))
 
