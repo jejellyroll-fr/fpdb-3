@@ -120,6 +120,51 @@ class ThemeManager:
         return "#f8fafc" if cls._is_dark(background) else "#101820"
 
     @staticmethod
+    def _rgb(color: str) -> tuple[int, int, int]:
+        value = color.lstrip("#")
+        return int(value[0:2], 16), int(value[2:4], 16), int(value[4:6], 16)
+
+    @classmethod
+    def _relative_luminance(cls, color: str) -> float:
+        """WCAG relative luminance of a #RRGGBB color."""
+        linear = []
+        for channel in cls._rgb(color):
+            c = channel / 255
+            linear.append(c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4)
+        return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+
+    @classmethod
+    def contrast_ratio(cls, first: str, second: str) -> float:
+        """WCAG contrast ratio between two #RRGGBB colors, from 1 to 21."""
+        light, dark = sorted((cls._relative_luminance(first), cls._relative_luminance(second)), reverse=True)
+        return (light + 0.05) / (dark + 0.05)
+
+    @classmethod
+    def _readable_accent(cls, accent: str, background: str, min_ratio: float = 4.5) -> str:
+        """The accent as text on ``background``: itself, or the nearest shade that reads.
+
+        A light theme's yellow or amber accent is unreadable as text on its
+        near-white panels. Mixing it toward black (or white on a dark
+        background) keeps the hue while reaching the WCAG ratio.
+        """
+        try:
+            if cls.contrast_ratio(accent, background) >= min_ratio:
+                return accent
+            # Toward whichever of white and black stands out more on the background.
+            target = 255 if cls.contrast_ratio("#ffffff", background) > cls.contrast_ratio("#000000", background) else 0
+            red, green, blue = cls._rgb(accent)
+        except (ValueError, IndexError, TypeError, AttributeError):
+            return accent
+        shade = accent
+        for step in range(1, 21):
+            weight = step / 20
+            mixed = [round(channel + (target - channel) * weight) for channel in (red, green, blue)]
+            shade = f"#{mixed[0]:02x}{mixed[1]:02x}{mixed[2]:02x}"
+            if cls.contrast_ratio(shade, background) >= min_ratio:
+                break
+        return shade
+
+    @staticmethod
     def _stylesheet_property(stylesheet: str, selector: str, prop: str) -> str | None:
         """Extract the first hex color property from a Qt stylesheet rule."""
         match = re.search(rf"{re.escape(selector)}\s*\{{(?P<body>.*?)\}}", stylesheet, flags=re.DOTALL)
@@ -214,8 +259,11 @@ class ThemeManager:
             "app_header": self._tone(window, 88 if dark else 108),
             "sidebar": sidebar,
             "sidebar_panel": sidebar_panel,
-            "surface": "#222b32",
-            "surface_panel": "#222b32",
+            # Graph, stats and hands surfaces. They were a fixed #222b32, which
+            # only matched dark_teal: grey on every other dark theme, and dark
+            # under a light theme whose text and grid are dark too (#712).
+            "surface": self._tone(window, 84 if dark else 104),
+            "surface_panel": self._tone(window, 80 if dark else 108),
             "panel": self._tone(window, 112 if dark else 96),
             "panel_alt": self._tone(window, 126 if dark else 92),
             "button": button,
@@ -224,6 +272,7 @@ class ThemeManager:
             "muted_text": self._tone(text, 74 if dark else 130),
             "window_text": window_text,
             "accent": highlight,
+            "accent_text": self._readable_accent(highlight, window),
             "accent_soft": self._tone(highlight, 64 if dark else 170),
             "accent_hover": self._tone(highlight, 122 if dark else 88),
             "highlighted_text": highlighted_text,
@@ -278,6 +327,11 @@ class ThemeManager:
                 border-top: 1px solid {c["border"]};
                 font-weight: 600;
             }}
+            /* qt_material writes button labels in the raw accent, unreadable
+               when a light theme's accent is yellow or amber (#712). */
+            QPushButton, QPushButton:flat {{
+                color: {c["accent_text"]};
+            }}
             QWidget#customTitleBar {{
                 background-color: {c["app_header"]};
                 border-bottom: 1px solid {c["border"]};
@@ -288,7 +342,7 @@ class ThemeManager:
             }}
             QPushButton#titleBarButton {{
                 background-color: transparent;
-                color: {c["accent"]};
+                color: {c["accent_text"]};
                 border: 1px solid {c["accent"]};
                 border-radius: 4px;
                 padding: 0;
@@ -317,7 +371,7 @@ class ThemeManager:
                 text-transform: uppercase;
             }}
             QTabBar::tab:selected {{
-                color: {c["accent"]};
+                color: {c["accent_text"]};
                 border-bottom-color: {c["accent"]};
             }}
             QTabBar::tab:hover {{
@@ -413,7 +467,7 @@ class ThemeManager:
                 subcontrol-origin: margin;
                 left: 10px;
                 padding: 0 4px;
-                color: {c["accent"]};
+                color: {c["accent_text"]};
                 font-weight: 700;
             }}
             QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QDateEdit, QSpinBox {{
@@ -492,15 +546,24 @@ class ThemeManager:
         """Build theme-aware styling for the legacy filter sidebar."""
         c = self.get_legacy_palette()
         dark = self._is_dark(c["window"])
-        sidebar = "#20262b" if dark else c["sidebar"]
-        card = "#222b32" if dark else c["sidebar_panel"]
-        card_hover = "#2f3740" if dark else c["panel_alt"]
-        input_bg = "#20262b" if dark else c["input"]
-        text = "#eef3f7" if dark else c["text"]
-        muted = "#aeb8c2" if dark else c["muted_text"]
+        # Every colour comes from the theme: fixed dark greys here made the
+        # sidebar grey on any dark theme but dark_teal (#712).
+        sidebar = c["sidebar"]
+        card = c["sidebar_panel"]
+        card_hover = c["panel_alt"]
+        input_bg = c["input"]
+        text = c["text"]
+        muted = c["muted_text"]
         accent = c["accent"]
         accent_hover = c["accent_hover"]
         accent_panel = c["accent_soft"]
+        # The accent as text, on the background it is drawn over.
+        heading = self._readable_accent(accent, sidebar)
+        group_title = self._readable_accent(accent_hover, sidebar)
+        hover_text = self._readable_accent(accent, card_hover)
+        on_accent = self._readable_text_for(accent)
+        on_accent_hover = self._readable_text_for(accent_hover)
+        on_accent_panel = self._readable_text_for(accent_panel)
 
         # Transparent border styles that scale naturally with dark/light themes
         border_rgba = "rgba(255, 255, 255, 0.08)" if dark else "rgba(0, 0, 0, 0.08)"
@@ -510,6 +573,12 @@ class ThemeManager:
                 background-color: {sidebar};
                 color: {text};
                 font-size: 13px;
+            }}
+            /* Labels and plain containers sit on their card: painting them
+               with the sidebar colour drew a darker box behind "Min # Hands:",
+               the dates and each site row (#712). */
+            QLabel, QGroupBox .QWidget, QGroupBox .QFrame {{
+                background-color: transparent;
             }}
 
             /* Cadres et Groupes */
@@ -524,7 +593,7 @@ class ThemeManager:
                 subcontrol-origin: margin;
                 subcontrol-position: top left;
                 padding: 2px 8px;
-                color: {accent_hover};
+                color: {group_title};
                 font-weight: bold;
                 font-size: 11px;
                 text-transform: uppercase;
@@ -541,7 +610,7 @@ class ThemeManager:
             /* Titres de section épurés (plus de boîte verte opaque avec bordure) */
             QLabel#filterTitle {{
                 background-color: transparent;
-                color: {accent};
+                color: {heading};
                 border: none;
                 border-radius: 0;
                 padding: 0;
@@ -557,7 +626,7 @@ class ThemeManager:
             /* Boutons d'action principaux (au bas de la sidebar) */
             #filterSidebar QPushButton {{
                 background-color: {accent};
-                color: #ffffff;
+                color: {on_accent};
                 border: none;
                 border-radius: 5px;
                 padding: 8px 16px;
@@ -569,7 +638,7 @@ class ThemeManager:
             }}
             #filterSidebar QPushButton:hover {{
                 background-color: {accent_hover};
-                color: #ffffff;
+                color: {on_accent_hover};
             }}
             #filterSidebar QPushButton:pressed {{
                 background-color: {accent_panel};
@@ -591,11 +660,11 @@ class ThemeManager:
             #filterSidebar QGroupBox QPushButton:hover {{
                 background-color: {card_hover};
                 border-color: {accent};
-                color: {accent};
+                color: {hover_text};
             }}
             #filterSidebar QGroupBox QPushButton:pressed {{
                 background-color: {accent_panel};
-                color: #ffffff;
+                color: {on_accent_panel};
             }}
 
             /* Cases à cocher et boutons radio modernisés */
@@ -661,7 +730,7 @@ class ThemeManager:
                 background-color: {input_bg};
                 border: 1px solid {border_rgba};
                 selection-background-color: {accent};
-                selection-color: {text};
+                selection-color: {on_accent};
                 color: {text};
                 padding: 4px;
                 outline: 0px;
