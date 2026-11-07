@@ -2273,7 +2273,7 @@
   },
   "regression/Winning/Flop/NLHE-9max-USD-0.01-0.02-201911.CASHID-TN-Miramar (Cap) GAMETYPE.txt": {
     "hand_count": 1,
-    "sha256": "745b33fc81d33b4c9db578975494d16ece6beb823ae3f160a225b901177e80df"
+    "sha256": "46779426c2bb9f2022230c59bac56b30cfb4dfa3f2eea80d5303a563df506df3"
   },
   "regression/Winning/Flop/NLHE-9max-USD-0.02-0.05-202104.post.dead.txt": {
     "hand_count": 1,
@@ -2305,7 +2305,7 @@
   },
   "regression/Winning/Flop/PLO-6max-USD-5.00-10.00-201504.capped.HH00000000 G0.txt": {
     "hand_count": 1,
-    "sha256": "a15e303fdb43b323294d0d8afe317b4895d9e2e65a417118468f335974132462"
+    "sha256": "782fe313cf91a9b1a46503836edd8d8f3fff6bca6dbdb75623913e5d4069d627"
   },
   "regression/Winning/Flop/PLO-USD-2.50-5.00-201505.no.hero.HH00000000 G0.txt": {
     "hand_count": 1,
@@ -2357,7 +2357,7 @@
   },
   "regression/Winning/NLHE-9max-USD-0.01-0.02-201911.CASHID-TN-Miramar (Cap) GAMETYPE.txt": {
     "hand_count": 1,
-    "sha256": "745b33fc81d33b4c9db578975494d16ece6beb823ae3f160a225b901177e80df"
+    "sha256": "46779426c2bb9f2022230c59bac56b30cfb4dfa3f2eea80d5303a563df506df3"
   },
   "regression/Winning/NLHE-9max-USD-1.00-2.00-201612.Unknown.Player.Acts.HH20160621 G30997753.txt": {
     "hand_count": 2,
@@ -2373,7 +2373,7 @@
   },
   "regression/Winning/PLO-6max-USD-5.00-10.00-201504.capped.HH00000000 G0.txt": {
     "hand_count": 1,
-    "sha256": "a15e303fdb43b323294d0d8afe317b4895d9e2e65a417118468f335974132462"
+    "sha256": "782fe313cf91a9b1a46503836edd8d8f3fff6bca6dbdb75623913e5d4069d627"
   },
   "regression/Winning/PLO-USD-2.50-5.00-201505.no.hero.HH00000000 G0.txt": {
     "hand_count": 1,
@@ -2545,11 +2545,11 @@
   },
   "winning/modern_cash.txt": {
     "hand_count": 1,
-    "sha256": "745b33fc81d33b4c9db578975494d16ece6beb823ae3f160a225b901177e80df"
+    "sha256": "46779426c2bb9f2022230c59bac56b30cfb4dfa3f2eea80d5303a563df506df3"
   },
   "winning/plo8_cap_2026.txt": {
     "hand_count": 1,
-    "sha256": "1fe55c5cf0e4bcadcb0ffa6c6b924c899e0b53d40126871384e851d757127972"
+    "sha256": "c854664333379479371581837171846f225a47ac5c1e2102aa6ec65523706d89"
   },
   "regression/GGPoker/Flop/PLO-6max-USD-0.05-0.10-202611.ev.cashout.cash.drop.txt": {
     "hand_count": 5,

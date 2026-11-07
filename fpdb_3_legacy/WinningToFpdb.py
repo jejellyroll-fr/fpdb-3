@@ -1482,6 +1482,30 @@ class Winning(HandHistoryConverter):
 
         log.debug("Finished readAction")
 
+    # A cap table ("Miramar (Cap)") limits what a player may put in one hand.
+    # The player who reaches the limit "caps", and whoever then calls up to it
+    # is capped too. Neither can bet again, so the hand runs out as an all-in
+    # would, though their stacks still hold chips: the converter cannot see it
+    # from the stacks, so it flags those actions all-in itself. The action keeps
+    # its type -- capping raises the bet, and the stats count it as a raise.
+    def _mark_cap_reached(self, hand, street, player) -> None:
+        """Record the cap the player just reached and flag the action all-in."""
+        hand.capAmount = hand.pot.committed[player]
+        self._flag_last_action_all_in(hand, street)
+
+    def _mark_call_to_cap(self, hand, street, player) -> None:
+        """Flag a call that brings the player's total in the hand up to the cap."""
+        cap = getattr(hand, "capAmount", None)
+        if cap is not None and hand.pot.committed.get(player) == cap:
+            self._flag_last_action_all_in(hand, street)
+
+    @staticmethod
+    def _flag_last_action_all_in(hand, street) -> None:
+        # Every action tuple ends with its all-in flag.
+        last = hand.actions[street][-1]
+        if last[-1] is not True:
+            hand.actions[street][-1] = (*last[:-1], True)
+
     def _readAction1(self, hand, street) -> None:
         log.debug(f"Executing _readAction1 for street: {street}")
         m = self.re_Action1.finditer(hand.streets[street])
@@ -1509,12 +1533,15 @@ class Winning(HandHistoryConverter):
             elif action_type == "calls":
                 amount = self.clearMoneyString(action.group("BET"))
                 hand.addCall(street, player, amount)
+                self._mark_call_to_cap(hand, street, player)
                 log.debug(
                     f"Added call action: Player={player}, Amount={amount}, Street={street}",
                 )
             elif action_type in ("raises", "straddle", "caps", "cap"):
                 amount = self.clearMoneyString(action.group("BET"))
                 hand.addCallandRaise(street, player, amount)
+                if action_type in ("caps", "cap"):
+                    self._mark_cap_reached(hand, street, player)
                 log.debug(
                     f"Added raise action: Player={player}, Amount={amount}, Street={street}",
                 )
@@ -1591,6 +1618,7 @@ class Winning(HandHistoryConverter):
             elif action_type == "calls":
                 amount = self.clearMoneyString(action.group("BET"))
                 hand.addCall(street, player, amount)
+                self._mark_call_to_cap(hand, street, player)
                 log.debug(
                     f"Added call action: Player={player}, Amount={amount}, Street={street}",
                 )
@@ -1607,6 +1635,8 @@ class Winning(HandHistoryConverter):
                     log.debug(
                         f"Added call and raise action: Player={player}, Amount={amount}, Street={street}",
                     )
+                if action_type in ("caps", "cap"):
+                    self._mark_cap_reached(hand, street, player)
             elif action_type == "bets":
                 amount = self.clearMoneyString(action.group("BET"))
                 hand.addBet(street, player, amount)
