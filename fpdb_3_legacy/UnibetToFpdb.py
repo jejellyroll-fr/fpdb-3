@@ -1013,8 +1013,24 @@ class Unibet(HandHistoryConverter):
         pass
 
     @staticmethod
-    def getTableTitleRe(type, table_name=None, tournament=None, table_number=None) -> None:
-        pass
+    def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
+        """Search string for the 2026 client's table windows.
+
+        A table window is titled e.g. "Omaha - PL5 (99465067)" (the lobby is
+        "Unibet Poker v3.58.0"): the id in parentheses is the hand's
+        ``Table "99465067"`` id -- the cash ``table_name``, or the tournament
+        ``table_number``.
+        """
+        table_id = table_number if type == "tour" and table_number is not None else table_name
+        if table_id is None:
+            return None
+        return rf"\({re.escape(str(table_id))}\)"
+
+    @staticmethod
+    def getTableNoRe(tournament) -> str:
+        # The 2026 client's window titles carry the table id in parentheses
+        # ("Omaha - PL5 (99465067)"); "Table N" never appears in them.
+        return r"\((\d+)\)"
 
     def readSTP(self, hand) -> None:
         """Read Splash the Pot - not implemented for Unibet."""
