@@ -2,7 +2,7 @@ Unibet Hand #1756096430 - 0.03/0.05 - Pot Limit Omaha - UTC 13:23:13 2026/11/07
 Table "99433705" 6-max
 *** Seated players ***
 Seat 1: alice (€5.58)
-Seat 2: goka (€4.77) (sitting out)
+Seat 2: niaj (€4.77) (sitting out)
 Seat 3: bob (€9.50)
 Seat 4: Hero[Unibet_0000000000000001] (€5.24)
 Seat 5: carol (€3.27)
@@ -48,7 +48,7 @@ Unibet Hand #1756097299 - 0.03/0.05 - Pot Limit Omaha - UTC 13:23:58 2026/11/07
 Table "99433705" 6-max
 *** Seated players ***
 Seat 1: alice (€5.58)
-Seat 2: goka (€4.77) (sitting out)
+Seat 2: niaj (€4.77) (sitting out)
 Seat 3: bob (€9.24)
 Seat 4: Hero[Unibet_0000000000000001] (€5.51)
 Seat 5: carol (€3.22)

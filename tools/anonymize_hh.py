@@ -8,11 +8,14 @@ the day it is. A few things a converter never reports are added per room:
 names in tournament summaries, and account tokens such as Unibet's
 ``name[Unibet_<hex>]``.
 
-The hero becomes ``Hero`` and the others ``alice``, ``bob``, ... in the order
-they first appear, consistently across every file of one run (and of later runs
-given the same mapping file). Before anything is written the result is parsed
-again: it must give the same hands, with exactly the renamed players, and no
-real name or token may survive anywhere in it. Otherwise nothing is written.
+The names are the seats the converter reads, so a player who sits out a whole
+hand is renamed too. The hero becomes ``Hero`` and the others ``alice``,
+``bob``, ... in the order they first appear, consistently across every file of
+one run (and of later runs given the same mapping file). A file the converter
+cannot read completely is refused: a dropped hand's names would survive
+unnoticed. Before anything is written the result is parsed again: it must give
+the same hands, with exactly the renamed players, and no real name or token may
+survive anywhere in it. Otherwise nothing is written.
 
 The real-to-fake mapping is written to ``--map``, which must lie outside the
 repository: it is the one file that undoes the anonymisation.
@@ -37,6 +40,7 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from fpdb_3_legacy.Configuration import Config  # noqa: E402  # pylint: disable=wrong-import-position
+from fpdb_3_legacy.Hand import Hand  # noqa: E402  # pylint: disable=wrong-import-position
 from fpdb_3_legacy.parser_registry import get_parser_class  # noqa: E402  # pylint: disable=wrong-import-position
 
 HERO = "Hero"
@@ -155,19 +159,43 @@ def _temp_config(directory: Path) -> Config:
     return config
 
 
-def _parse(converter, config: Config, path: Path) -> list:
-    return converter(config=config, in_path=str(path), autostart=True).getProcessedHands()
+@dataclass
+class Parsed:
+    """What a converter made of one file."""
+
+    hands: list
+    # Every name the converter seated, in order. A cash player who sits out
+    # the whole hand is seated, then removed from ``hand.players``: their name
+    # is in the file all the same.
+    seated: list[str]
+    # Hands the converter could not read (errors and partial hands): their
+    # players may appear nowhere else.
+    failed: int
+
+    def players(self) -> list[tuple[str, bool]]:
+        """Each seated player once, in order, with whether they are the hero."""
+        seen = dict.fromkeys(self.seated, False)
+        for hand in self.hands:
+            if hand.hero:
+                seen[hand.hero] = True
+        return list(seen.items())
 
 
-def _players(hands: list) -> list[tuple[str, bool]]:
-    """Each player once, in order of appearance, with whether they are the hero."""
-    seen: dict[str, bool] = {}
-    for hand in hands:
-        for player in hand.players:
-            seen.setdefault(player[1], False)
-        if hand.hero:
-            seen[hand.hero] = True
-    return list(seen.items())
+def _parse(converter, config: Config, path: Path) -> Parsed:
+    seated: list[str] = []
+    add_player = Hand.addPlayer
+
+    def record(hand, seat, name, *args, **kwargs):
+        seated.append(name)
+        return add_player(hand, seat, name, *args, **kwargs)
+
+    Hand.addPlayer = record  # type: ignore[assignment]
+    try:
+        parser = converter(config=config, in_path=str(path), autostart=True)
+    finally:
+        Hand.addPlayer = add_player  # type: ignore[assignment]
+    failed = int(getattr(parser, "numErrors", 0) or 0) + int(getattr(parser, "numPartial", 0) or 0)
+    return Parsed(parser.getProcessedHands(), list(dict.fromkeys(seated)), failed)
 
 
 @dataclass
@@ -186,27 +214,36 @@ class Anonymizer:
         self.config = _temp_config(workdir)
         self.workdir = workdir
 
-    def collect(self, path: Path, hero: str | None) -> list:
-        """Learn the names and tokens of one file; returns its parsed hands."""
-        hands = _parse(self.converter, self.config, path)
+    def collect(self, path: Path, hero: str | None) -> Parsed:
+        """Learn the names and tokens of one file; returns what the converter made of it."""
+        parsed = _parse(self.converter, self.config, path)
+        if parsed.failed:
+            # A hand the converter drops is a hand whose names it never reads.
+            msg = f"{path.name}: {parsed.failed} hand(s) could not be read; remove them or fix the converter first"
+            raise ValueError(msg)
         _, text, _ = _decode(path.read_bytes())
-        players = _players(hands)
+        players = parsed.players()
         if hero:
             players = [(name, name == hero or is_hero) for name, is_hero in players]
         for name, is_hero in players:
             self.mapping.add_name(name, hero=is_hero)
+        summary_names = 0
         for pattern in self.extras.summary_names:
             for match in pattern.finditer(text):
+                summary_names += 1
                 name = match.group("NAME")
                 stripped = name
                 if self.extras.token is not None:
                     stripped = re.sub(rf"\[{self.extras.token.pattern}\]$", "", name)
                 # A room whose tokens mark the hero marks them in summaries too.
                 self.mapping.add_name(stripped, hero=stripped == hero or stripped != name)
+        if not parsed.hands and not summary_names:
+            msg = f"{path.name}: neither a hand nor a tournament summary this room's tools recognise"
+            raise ValueError(msg)
         if self.extras.token is not None:
             for match in self.extras.token.finditer(text):
                 self.mapping.add_token(match.group("TOKEN"), self.extras.fake_token)
-        return hands
+        return parsed
 
     def rewrite(self, text: str) -> str:
         # One pass each, longest first: replacing names one after another would
@@ -226,7 +263,7 @@ class Anonymizer:
         found += [real for real in self.mapping.tokens if real not in fake_tokens and real in text]
         return found
 
-    def anonymize(self, source: Path, target: Path, hands: list) -> Result:
+    def anonymize(self, source: Path, target: Path, parsed: Parsed) -> Result:
         bom, text, codec = _decode(source.read_bytes())
         rewritten = self.rewrite(text)
         left = self.leftovers(rewritten)
@@ -236,11 +273,15 @@ class Anonymizer:
         staged = self.workdir / target.name
         staged.write_bytes(bom + rewritten.encode(codec))
         again = _parse(self.converter, self.config, staged)
-        expected = [{self.mapping.names.get(player[1], player[1]) for player in hand.players} for hand in hands]
-        if [{player[1] for player in hand.players} for hand in again] != expected:
+        expected = [{self.mapping.names.get(player[1], player[1]) for player in hand.players} for hand in parsed.hands]
+        if (
+            again.failed
+            or [{player[1] for player in hand.players} for hand in again.hands] != expected
+            or again.seated != [self.mapping.names.get(name, name) for name in parsed.seated]
+        ):
             msg = f"{source.name}: the anonymised file no longer parses into the same hands and players"
             raise ValueError(msg)
-        return Result(source, target, len(again))
+        return Result(source, target, len(again.hands))
 
 
 def _inputs(paths: Iterable[Path]) -> list[Path]:

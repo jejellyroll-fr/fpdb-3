@@ -28,6 +28,14 @@ def _seat_names(text: str) -> set[str]:
     return names
 
 
+def _sitting_out_names(text: str) -> set[str]:
+    return {
+        line.split(": ", 1)[1].split(" (", 1)[0].split("[", 1)[0]
+        for line in text.splitlines()
+        if line.startswith("Seat ") and "(sitting out)" in line
+    }
+
+
 @pytest.fixture
 def export(tmp_path: Path) -> Path:
     """A Manual export, hands and summaries, as the client names it."""
@@ -88,6 +96,60 @@ def test_line_endings_and_byte_order_mark_are_kept(tmp_path: Path) -> None:
     assert raw.startswith(b"\xef\xbb\xbf")
     assert raw.count(b"\r\n") == text.count("\r\n")
     assert b"\n" not in raw.replace(b"\r\n", b"")
+
+
+def test_a_player_who_sits_out_the_whole_hand_is_renamed_too(tmp_path: Path) -> None:
+    # A cash player sitting out the whole hand is removed from ``hand.players``;
+    # their name is in the file's seat lines all the same and must be renamed.
+    folder = tmp_path / "in"
+    folder.mkdir()
+    (folder / "cash.txt").write_text(CASH.read_text(encoding="utf-8"), encoding="utf-8")
+    sitting_out = _sitting_out_names(CASH.read_text(encoding="utf-8"))
+    assert sitting_out
+
+    anonymize_hh.run("Unibet", [folder], tmp_path / "out", tmp_path / "map.json")
+
+    mapping = json.loads((tmp_path / "map.json").read_text(encoding="utf-8"))
+    assert sitting_out <= set(mapping["names"])
+    out = (tmp_path / "out" / "cash.txt").read_text(encoding="utf-8")
+    assert all(name not in out for name in sitting_out)
+    assert _sitting_out_names(out) == {mapping["names"][name] for name in sitting_out}
+
+
+def test_an_unreadable_hand_refuses_the_whole_run(tmp_path: Path) -> None:
+    # A hand the converter drops is a hand whose names it never reads: fail
+    # closed instead of writing a file that still names them.
+    folder = tmp_path / "in"
+    folder.mkdir()
+    lines = HANDS.read_text(encoding="utf-8").splitlines(keepends=True)
+    (folder / "truncated.txt").write_text("".join(lines[: len(lines) // 2 + 5]), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="could not be read"):
+        anonymize_hh.run("Unibet", [folder], tmp_path / "out", tmp_path / "map.json")
+
+    assert not (tmp_path / "out").exists()
+    assert not (tmp_path / "map.json").exists()
+
+
+def test_a_file_with_neither_a_hand_nor_a_summary_is_refused(tmp_path: Path) -> None:
+    folder = tmp_path / "in"
+    folder.mkdir()
+    (folder / "garbage.txt").write_text("hello world\nnot a hand history\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="neither a hand nor a tournament summary"):
+        anonymize_hh.run("Unibet", [folder], tmp_path / "out", tmp_path / "map.json")
+
+    assert not (tmp_path / "out").exists()
+
+
+def test_a_summary_only_file_is_accepted(tmp_path: Path) -> None:
+    folder = tmp_path / "in"
+    folder.mkdir()
+    (folder / "summaries.txt").write_text(SUMMARIES.read_text(encoding="utf-8"), encoding="utf-8")
+
+    results = anonymize_hh.run("Unibet", [folder], tmp_path / "out", tmp_path / "map.json")
+
+    assert [(result.target.name, result.hands) for result in results] == [("summaries.txt", 0)]
 
 
 def test_names_are_replaced_in_one_pass() -> None:
