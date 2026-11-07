@@ -77,6 +77,10 @@
 
   "expressions": {
     "_comment": "Sub-expressions of a PT4 value expression that fpdb answers with one column of its own, under the definition the note states.",
+    "cnt_hands - cnt_walks - cnt_p_no_action": {
+      "fpdb": "street0VPIChance",
+      "note": "PT4's VPIP opportunity is every hand but a walk or a hand the player saw the flop without acting preflop, which since PT4 4.19 leaves bomb pots out; fpdb counts a bomb pot as a VPIP opportunity, and leaves out a blind that is all-in before acting, or folds without having called or raised."
+    },
     "cnt_hands - cnt_walks": {
       "fpdb": "street0VPIChance",
       "note": "PT4's VPIP opportunity is every hand but a walk; fpdb's also leaves out a blind that is all-in before acting, or folds without having called or raised."

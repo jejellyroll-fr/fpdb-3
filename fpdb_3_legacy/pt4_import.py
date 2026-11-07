@@ -441,10 +441,16 @@ def _resolve_fact(col_sql: str) -> tuple[str, dict[str, Any] | None, float]:
 
 
 def _apply_expression_aliases(expr: str) -> tuple[str, list[str], list[str]]:
-    """Replace the PT4 sub-expressions FPDB answers with one column: ``(expr, fpdb inputs, notes)``."""
+    """Replace the PT4 sub-expressions FPDB answers with one column: ``(expr, fpdb inputs, notes)``.
+
+    The longest alias goes first: PT4 4.19's VPIP denominator ``cnt_hands -
+    cnt_walks - cnt_p_no_action`` starts with the older ``cnt_hands - cnt_walks``,
+    which would otherwise leave its bomb-pot term behind, unmapped (#727).
+    """
     inputs: list[str] = []
     notes: list[str] = []
-    for alias, spec in PT4_EXPRESSION_ALIASES.items():
+    by_length = sorted(PT4_EXPRESSION_ALIASES.items(), key=lambda item: len(item[0].split()), reverse=True)
+    for alias, spec in by_length:
         pattern = r"\s*".join(re.escape(token) for token in alias.split())
         if re.search(pattern, expr):
             expr = re.sub(pattern, spec["fpdb"], expr)
