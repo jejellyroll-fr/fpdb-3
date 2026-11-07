@@ -109,3 +109,17 @@ def test_power_spin_hands_are_a_lottery_sit_and_go() -> None:
 
     assert hands
     assert {(hand.isSng, hand.isLottery, hand.tourneyMultiplier) for hand in hands} == {(True, True, 3)}
+
+
+def test_banzai_is_a_shallow_buy_in_and_plo_a_regular_one() -> None:
+    # Banzai caps the buy-in at ten big blinds: its all-in or fold play is kept
+    # apart from deep-stacked cash, as WPN's Short tables are.
+    path = ROOT / "tests" / "fixtures" / "hands" / "unibet" / "manual_export_cash_plo_banzai_2026.txt"
+
+    hands = Unibet(config=Config(), in_path=str(path), autostart=True).getProcessedHands()
+
+    games: dict[tuple[str, str], int] = {}
+    for hand in hands:
+        key = (hand.gametype["category"], hand.gametype.get("buyinType", "regular"))
+        games[key] = games.get(key, 0) + 1
+    assert games == {("holdem", "shallow"): 8, ("omahahi", "regular"): 3}

@@ -1,0 +1,156 @@
+=== HAND HISTORIES ===
+
+Unibet Hand #1558006464, Tournament #85614762, €0.93 + €0.07 - 25.00/50.00 - No Limit Hold'Em - Total prize €4 - UTC 21:59:56 2026/06/05
+Table "86116111" 3-max
+*** Seated players ***
+Seat 1: player1 (415)
+Seat 3: player2 (315)
+Seat 5: Hero[Unibet_0000000000000001] (770)
+*** Blinds and button ***
+player2 has the button
+Hero[Unibet_0000000000000001] posts small blind 25
+player1 posts big blind 50
+*** Hole cards ***
+Dealt to Hero[Unibet_0000000000000001] [8c Jc]
+Dealt to player1 [Qc Kh]
+Dealt in player2
+*** Preflop ***
+player2 folds
+Hero[Unibet_0000000000000001] calls 25
+player1 checks
+*** Flop *** [4s Tc 8d]
+Hero[Unibet_0000000000000001] bets 50
+player1 calls 50
+*** Turn *** [4s Tc 8d] [Ac]
+Hero[Unibet_0000000000000001] bets 50
+player1 calls 50
+*** River *** [4s Tc 8d] [Ac] [9d]
+Hero[Unibet_0000000000000001] checks
+player1 checks
+*** Showdown ***
+player1 shows [Qc Kh], High card
+Hero[Unibet_0000000000000001] shows [8c Jc], A Pair of Eights
+Hero[Unibet_0000000000000001] wins 300
+*** Summary ***
+Total pot 300
+Seat 1: player1: bet 150 and won 0, net result: -150
+Seat 5: Hero[Unibet_0000000000000001]: bet 150 and won 300, net result: 150
+
+
+Unibet Hand #1558007351, Tournament #85614762, €0.93 + €0.07 - 25.00/50.00 - No Limit Hold'Em - Total prize €4 - UTC 22:00:30 2026/06/05
+Table "86116111" 3-max
+*** Seated players ***
+Seat 1: player1 (265)
+Seat 3: player2 (315)
+Seat 5: Hero[Unibet_0000000000000001] (920)
+*** Blinds and button ***
+Hero[Unibet_0000000000000001] has the button
+player1 posts small blind 25
+player2 posts big blind 50
+*** Hole cards ***
+Dealt in player1
+Dealt to player2 [Kd Td]
+Dealt to Hero[Unibet_0000000000000001] [6d Ks]
+*** Preflop ***
+Hero[Unibet_0000000000000001] calls 50
+player1 calls 25
+player2 checks
+*** Flop *** [3h 2d 6h]
+player1 checks
+player2 checks
+Hero[Unibet_0000000000000001] bets 50
+player1 folds
+player2 calls 50
+*** Turn *** [3h 2d 6h] [9s]
+player2 checks
+Hero[Unibet_0000000000000001] bets 50
+player2 calls 50
+*** River *** [3h 2d 6h] [9s] [Ac]
+player2 checks
+Hero[Unibet_0000000000000001] checks
+*** Showdown ***
+player2 shows [Kd Td], High card
+Hero[Unibet_0000000000000001] shows [6d Ks], A Pair of Sixes
+Hero[Unibet_0000000000000001] wins 350
+*** Summary ***
+Total pot 350
+Seat 1: player1: bet 50 and won 0, net result: -50
+Seat 3: player2: bet 150 and won 0, net result: -150
+Seat 5: Hero[Unibet_0000000000000001]: bet 150 and won 350, net result: 200
+
+
+Unibet Hand #1558008554, Tournament #85614762, €0.93 + €0.07 - 25.00/50.00 - No Limit Hold'Em - Total prize €4 - UTC 22:01:14 2026/06/05
+Table "86116111" 3-max
+*** Seated players ***
+Seat 1: player1 (215)
+Seat 3: player2 (165)
+Seat 5: Hero[Unibet_0000000000000001] (1120)
+*** Blinds and button ***
+player1 has the button
+player2 posts small blind 25
+Hero[Unibet_0000000000000001] posts big blind 50
+*** Hole cards ***
+Dealt to player2 [Qh Jd]
+Dealt to Hero[Unibet_0000000000000001] [Js 2c]
+Dealt to player1 [7h 8s]
+*** Preflop ***
+player1 raises 100 to 100
+player2 calls 75
+Hero[Unibet_0000000000000001] folds
+*** Flop *** [4c As 3s]
+player2 checks
+player1 bets 50
+player2 calls 50
+*** Turn *** [4c As 3s] [Kc]
+player2 bets 15, and is all-in
+player1 calls 15
+*** Showdown ***
+*** River *** [4c As 3s] [Kc] [Tc]
+player1 shows [7h 8s], High card
+player2 shows [Qh Jd], A Straight
+player2 wins 380
+*** Summary ***
+Total pot 380
+Seat 1: player1: bet 165 and won 0, net result: -165
+Seat 3: player2: bet 165 and won 380, net result: 215
+Seat 5: Hero[Unibet_0000000000000001]: bet 50 and won 0, net result: -50
+
+
+Unibet Hand #1558009284, Tournament #85614762, €0.93 + €0.07 - 25.00/50.00 - No Limit Hold'Em - Total prize €4 - UTC 22:01:41 2026/06/05
+Table "86116111" 3-max
+*** Seated players ***
+Seat 1: player1 (50)
+Seat 3: player2 (380)
+Seat 5: Hero[Unibet_0000000000000001] (1070)
+*** Blinds and button ***
+player2 has the button
+Hero[Unibet_0000000000000001] posts small blind 25
+player1 posts big blind 50, and is all-in
+*** Hole cards ***
+Dealt to Hero[Unibet_0000000000000001] [Qd Ac]
+Dealt to player1 [Jd 6c]
+Dealt to player2 [3s Ts]
+*** Preflop ***
+player2 calls 50
+Hero[Unibet_0000000000000001] raises 1045 to 1070, and is all-in
+player2 calls 330, and is all-in
+Uncalled bet returned to Hero[Unibet_0000000000000001]: 690
+*** Showdown ***
+*** Flop *** [Js 8h Th]
+*** Turn *** [Js 8h Th] [Ks]
+*** River *** [Js 8h Th] [Ks] [Jh]
+player1 shows [Jd 6c], Three of a kind, Jacks
+player2 shows [3s Ts], Two pairs, Jacks up
+Hero[Unibet_0000000000000001] shows [Qd Ac], A Straight
+Hero[Unibet_0000000000000001] wins main pot, 150
+Hero[Unibet_0000000000000001] wins side pot #1, 660
+player1 finished the tournament in 3rd place
+player2 finished the tournament in 2nd place
+Hero[Unibet_0000000000000001] finished the tournament in 1st place, and won €4
+*** Summary ***
+Total pot 810
+Seat 1: player1: bet 50 and won 0, net result: -50
+Seat 3: player2: bet 380 and won 0, net result: -380
+Seat 5: Hero[Unibet_0000000000000001]: bet 1070 and won 1500, net result: 430
+
+

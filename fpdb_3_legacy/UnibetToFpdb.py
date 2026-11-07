@@ -479,6 +479,15 @@ class Unibet(HandHistoryConverter):
 
     _CURRENCY_SYMBOLS = {"€": "EUR", "$": "USD", "£": "GBP"}
 
+    @staticmethod
+    def _is_banzai(game: str) -> bool:
+        """Banzai is a short-stack cash game: a buy-in capped at ten big blinds.
+
+        Filed as a "shallow" buy-in, as WPN's Short tables are, so its all-in or
+        fold play stays out of the statistics of ordinary deep-stacked cash.
+        """
+        return game.strip().endswith("Banzai")
+
     def _determineGameTypeUnibet(self, m, handText):
         """Build the gametype dict for the 2026 'Unibet Hand #' cash format.
 
@@ -491,6 +500,8 @@ class Unibet(HandHistoryConverter):
         info["limitType"], info["category"] = self._unibetLimitCategory(mg["GAME"])
         info["sb"] = mg["SB"]
         info["bb"] = mg["BB"]
+        if self._is_banzai(mg["GAME"]):
+            info["buyinType"] = "shallow"
 
         for sym, iso in self._CURRENCY_SYMBOLS.items():
             if sym in handText:
@@ -547,6 +558,7 @@ class Unibet(HandHistoryConverter):
                 info["category"] = "holdem"
                 info["type"] = "ring"
                 info["split"] = False
+                info["buyinType"] = "shallow"
             elif mg["GAME"] == "Pot Limit Omaha":
                 info["base"] = "hold"
                 info["category"] = "omahahi"

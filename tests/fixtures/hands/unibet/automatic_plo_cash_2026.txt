@@ -1,0 +1,104 @@
+Unibet Hand #1756096430 - 0.03/0.05 - Pot Limit Omaha - UTC 13:23:13 2026/11/07
+Table "99433705" 6-max
+*** Seated players ***
+Seat 1: alice (€5.58)
+Seat 2: niaj (€4.77) (sitting out)
+Seat 3: bob (€9.50)
+Seat 4: Hero[Unibet_0000000000000001] (€5.24)
+Seat 5: carol (€3.27)
+*** Blinds and button ***
+alice has the button
+bob posts small blind €0.03
+Hero[Unibet_0000000000000001] posts big blind €0.05
+*** Hole cards ***
+Dealt to bob [Ah 3h Jc 7c]
+Dealt to Hero[Unibet_0000000000000001] [Ks 3s Tc Ad]
+Dealt in carol
+Dealt in alice
+*** Preflop ***
+carol calls €0.05
+alice folds
+bob calls €0.02
+Hero[Unibet_0000000000000001] checks
+*** Flop *** [Ac 5d 7h]
+bob checks
+Hero[Unibet_0000000000000001] bets €0.07
+carol folds
+bob calls €0.07
+*** Turn *** [Ac 5d 7h] [5s]
+bob checks
+Hero[Unibet_0000000000000001] bets €0.14
+bob calls €0.14
+*** River *** [Ac 5d 7h] [5s] [5c]
+bob checks
+Hero[Unibet_0000000000000001] checks
+*** Showdown ***
+bob shows [Ah 3h Jc 7c], Three of a kind, Fives with a Jack kicker
+Hero[Unibet_0000000000000001] shows [Ks 3s Tc Ad], Three of a kind, Fives with a King kicker
+Hero[Unibet_0000000000000001] wins €0.53
+*** Summary ***
+Total pot €0.57 Rake €0.04
+Seat 3: bob: bet €0.26 and won €0, net result: €-0.26
+Seat 4: Hero[Unibet_0000000000000001]: bet €0.26 and won €0.53, net result: €0.27
+Seat 5: carol: bet €0.05 and won €0, net result: €-0.05
+
+
+
+Unibet Hand #1756097299 - 0.03/0.05 - Pot Limit Omaha - UTC 13:23:58 2026/11/07
+Table "99433705" 6-max
+*** Seated players ***
+Seat 1: alice (€5.58)
+Seat 2: niaj (€4.77) (sitting out)
+Seat 3: bob (€9.24)
+Seat 4: Hero[Unibet_0000000000000001] (€5.51)
+Seat 5: carol (€3.22)
+Seat 6: dave (€3.64)
+*** Blinds and button ***
+bob has the button
+dave posts new player's blind €0.05
+Hero[Unibet_0000000000000001] posts small blind €0.03
+carol posts big blind €0.05
+*** Hole cards ***
+Dealt to Hero[Unibet_0000000000000001] [4h 5h 2s 9d]
+Dealt in carol
+Dealt in dave
+Dealt to alice [Td 8s 8d As]
+Dealt to bob [4s 9h Ac Qd]
+*** Preflop ***
+dave checks
+alice calls €0.05
+bob raises €0.28 to €0.28
+Hero[Unibet_0000000000000001] folds
+carol folds
+dave calls €0.23
+alice calls €0.23
+*** Flop *** [7d 2c Ad]
+dave checks
+alice checks
+bob checks
+*** Turn *** [7d 2c Ad] [Kd]
+dave checks
+alice checks
+bob bets €0.65
+dave calls €0.65
+alice calls €0.65
+*** River *** [7d 2c Ad] [Kd] [Jh]
+dave checks
+alice checks
+bob bets €2.69
+dave folds
+alice calls €2.69
+*** Showdown ***
+alice shows [Td 8s 8d As], A Flush
+bob shows [4s 9h Ac Qd], A Pair of Aces
+alice wins €7.72
+*** Summary ***
+Total pot €8.25 Rake €0.53
+Seat 1: alice: bet €3.62 and won €7.72, net result: €4.10
+Seat 3: bob: bet €3.62 and won €0, net result: €-3.62
+Seat 4: Hero[Unibet_0000000000000001]: bet €0.03 and won €0, net result: €-0.03
+Seat 5: carol: bet €0.05 and won €0, net result: €-0.05
+Seat 6: dave: bet €0.93 and won €0, net result: €-0.93
+
+
+

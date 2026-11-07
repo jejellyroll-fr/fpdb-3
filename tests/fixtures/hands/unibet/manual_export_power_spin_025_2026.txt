@@ -1,0 +1,71 @@
+=== HAND HISTORIES ===
+
+Unibet Hand #1615952919, Tournament #89646001, €0.23 + €0.02 - 10.00/20.00 - No Limit Hold'Em - Total prize €0.50 - UTC 09:54:16 2026/07/17
+Table "90126840" 3-max
+*** Seated players ***
+Seat 1: heidi (200)
+Seat 3: Hero[Unibet_0000000000000001] (200)
+Seat 5: ivan (200)
+*** Blinds and button ***
+ivan has the button
+heidi posts small blind 10
+Hero[Unibet_0000000000000001] posts big blind 20
+*** Hole cards ***
+Dealt in heidi
+Dealt to Hero[Unibet_0000000000000001] [6s 9s]
+Dealt to ivan [Ac 2h]
+*** Preflop ***
+ivan raises 200 to 200, and is all-in
+heidi folds
+Hero[Unibet_0000000000000001] calls 180, and is all-in
+*** Showdown ***
+*** Flop *** [7d Ah 9c]
+*** Turn *** [7d Ah 9c] [8h]
+*** River *** [7d Ah 9c] [8h] [7s]
+Hero[Unibet_0000000000000001] shows [6s 9s], Two pairs, Nines up
+ivan shows [Ac 2h], Two pairs, Aces up
+ivan wins 410
+Hero[Unibet_0000000000000001] finished the tournament in 3rd place
+*** Summary ***
+Total pot 410
+Seat 1: heidi: bet 10 and won 0, net result: -10
+Seat 3: Hero[Unibet_0000000000000001]: bet 200 and won 0, net result: -200
+Seat 5: ivan: bet 200 and won 410, net result: 210
+
+
+Unibet Hand #1615953806, Tournament #89646054, €0.23 + €0.02 - 10.00/20.00 - No Limit Hold'Em - Total prize €0.50 - UTC 09:55:18 2026/07/17
+Table "90126895" 3-max
+*** Seated players ***
+Seat 1: judy (200)
+Seat 3: mallory (200)
+Seat 5: Hero[Unibet_0000000000000001] (200)
+*** Blinds and button ***
+Hero[Unibet_0000000000000001] has the button
+judy posts small blind 10
+mallory posts big blind 20
+*** Hole cards ***
+Dealt to judy [6d 3h]
+Dealt to mallory [6c Ad]
+Dealt to Hero[Unibet_0000000000000001] [Qh Ah]
+*** Preflop ***
+Hero[Unibet_0000000000000001] raises 200 to 200, and is all-in
+judy calls 190, and is all-in
+mallory calls 180, and is all-in
+*** Showdown ***
+*** Flop *** [As 2c Tc]
+*** Turn *** [As 2c Tc] [7d]
+*** River *** [As 2c Tc] [7d] [Qc]
+judy shows [6d 3h], High card
+mallory shows [6c Ad], A Pair of Aces
+Hero[Unibet_0000000000000001] shows [Qh Ah], Two pairs, Aces up
+Hero[Unibet_0000000000000001] wins 600
+judy finished the tournament in 3rd place
+mallory finished the tournament in 2nd place
+Hero[Unibet_0000000000000001] finished the tournament in 1st place, and won 2 x 0.25€ Power Spin Ticket
+*** Summary ***
+Total pot 600
+Seat 1: judy: bet 200 and won 0, net result: -200
+Seat 3: mallory: bet 200 and won 0, net result: -200
+Seat 5: Hero[Unibet_0000000000000001]: bet 200 and won 600, net result: 400
+
+
