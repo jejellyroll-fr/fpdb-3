@@ -43,41 +43,41 @@ Table "86113818" 6-max
 Seat 1: lembourou (€0) (sitting out)
 Seat 2: cla17 (€1.53)
 Seat 3: Savy-95 (€4.86)
-Seat 4: hero[Unibet_28204e083c0fb55a] (€3.84)
+Seat 4: hero[Unibet_0123456789abcdef] (€3.84)
 *** Blinds and button ***
 cla17 has the button
 Savy-95 posts small blind €0.03
-hero[Unibet_28204e083c0fb55a] posts big blind €0.05
+hero[Unibet_0123456789abcdef] posts big blind €0.05
 *** Hole cards ***
 Dealt to Savy-95 [Ts Kd 4c Td]
-Dealt to hero[Unibet_28204e083c0fb55a] [5h 9c Qc 7h]
+Dealt to hero[Unibet_0123456789abcdef] [5h 9c Qc 7h]
 Dealt to cla17 [9h 8d 2s Tc]
 *** Preflop ***
 cla17 calls €0.05
 Savy-95 calls €0.02
-hero[Unibet_28204e083c0fb55a] checks
+hero[Unibet_0123456789abcdef] checks
 *** Flop *** [2h 3s 6s]
 Savy-95 checks
-hero[Unibet_28204e083c0fb55a] checks
+hero[Unibet_0123456789abcdef] checks
 cla17 checks
 *** Turn *** [2h 3s 6s] [Qs]
 Savy-95 checks
-hero[Unibet_28204e083c0fb55a] checks
+hero[Unibet_0123456789abcdef] checks
 cla17 checks
 *** River *** [2h 3s 6s] [Qs] [4d]
 Savy-95 checks
-hero[Unibet_28204e083c0fb55a] checks
+hero[Unibet_0123456789abcdef] checks
 cla17 checks
 *** Showdown ***
 cla17 shows [9h 8d 2s Tc], A Pair of Deuces
 Savy-95 shows [Ts Kd 4c Td], A Pair of Tens
-hero[Unibet_28204e083c0fb55a] shows [5h 9c Qc 7h], A Straight
-hero[Unibet_28204e083c0fb55a] wins €0.14
+hero[Unibet_0123456789abcdef] shows [5h 9c Qc 7h], A Straight
+hero[Unibet_0123456789abcdef] wins €0.14
 *** Summary ***
 Total pot €0.15 Rake €0.01
 Seat 2: cla17: bet €0.05 and won €0, net result: €-0.05
 Seat 3: Savy-95: bet €0.05 and won €0, net result: €-0.05
-Seat 4: hero[Unibet_28204e083c0fb55a]: bet €0.05 and won €0.14, net result: €0.09
+Seat 4: hero[Unibet_0123456789abcdef]: bet €0.05 and won €0.14, net result: €0.09
 
 
 Unibet Hand #1558007138 - 0.03/0.05 - Pot Limit Omaha - UTC 22:00:21 2026/06/05
@@ -85,20 +85,20 @@ Table "86113818" 6-max
 *** Seated players ***
 Seat 2: cla17 (€1.48)
 Seat 3: Savy-95 (€4.81)
-Seat 4: hero[Unibet_28204e083c0fb55a] (€3.93)
+Seat 4: hero[Unibet_0123456789abcdef] (€3.93)
 *** Blinds and button ***
 Savy-95 has the button
-hero[Unibet_28204e083c0fb55a] posts small blind €0.03
+hero[Unibet_0123456789abcdef] posts small blind €0.03
 cla17 posts big blind €0.05
 *** Hole cards ***
-Dealt to hero[Unibet_28204e083c0fb55a] [6c 9c 8s Ad]
+Dealt to hero[Unibet_0123456789abcdef] [6c 9c 8s Ad]
 Dealt in cla17
 Dealt in Savy-95
 *** Preflop ***
-hero[Unibet_28204e083c0fb55a] folds
+hero[Unibet_0123456789abcdef] folds
 *** Summary ***
 Total pot €0.08 Rake €0
-Seat 4: hero[Unibet_28204e083c0fb55a]: bet €0.03 and won €0, net result: €-0.03
+Seat 4: hero[Unibet_0123456789abcdef]: bet €0.03 and won €0, net result: €-0.03
 """
 
 
@@ -183,7 +183,7 @@ def test_full_import_2026() -> None:
 
 def test_hero_token_is_stripped() -> None:
     parser = Unibet(Config(), autostart=False)
-    cleaned = parser.re_HeroToken.sub("", "hero[Unibet_28204e083c0fb55a] posts big blind €0.05")
+    cleaned = parser.re_HeroToken.sub("", "hero[Unibet_0123456789abcdef] posts big blind €0.05")
     assert cleaned == "hero posts big blind €0.05"
 
 
@@ -217,36 +217,36 @@ Table "86116111" 3-max
 *** Seated players ***
 Seat 1: evymm (415)
 Seat 3: DrikC79 (315)
-Seat 5: hero[Unibet_28204e083c0fb55a] (770)
+Seat 5: hero[Unibet_0123456789abcdef] (770)
 *** Blinds and button ***
 DrikC79 has the button
-hero[Unibet_28204e083c0fb55a] posts small blind 25
+hero[Unibet_0123456789abcdef] posts small blind 25
 evymm posts big blind 50
 *** Hole cards ***
-Dealt to hero[Unibet_28204e083c0fb55a] [8c Jc]
+Dealt to hero[Unibet_0123456789abcdef] [8c Jc]
 Dealt to evymm [Qc Kh]
 Dealt in DrikC79
 *** Preflop ***
 DrikC79 folds
-hero[Unibet_28204e083c0fb55a] calls 25
+hero[Unibet_0123456789abcdef] calls 25
 evymm checks
 *** Flop *** [4s Tc 8d]
-hero[Unibet_28204e083c0fb55a] bets 50
+hero[Unibet_0123456789abcdef] bets 50
 evymm calls 50
 *** Turn *** [4s Tc 8d] [Ac]
-hero[Unibet_28204e083c0fb55a] bets 50
+hero[Unibet_0123456789abcdef] bets 50
 evymm calls 50
 *** River *** [4s Tc 8d] [Ac] [9d]
-hero[Unibet_28204e083c0fb55a] checks
+hero[Unibet_0123456789abcdef] checks
 evymm checks
 *** Showdown ***
 evymm shows [Qc Kh], High card
-hero[Unibet_28204e083c0fb55a] shows [8c Jc], A Pair of Eights
-hero[Unibet_28204e083c0fb55a] wins 300
+hero[Unibet_0123456789abcdef] shows [8c Jc], A Pair of Eights
+hero[Unibet_0123456789abcdef] wins 300
 *** Summary ***
 Total pot 300
 Seat 1: evymm: bet 150 and won 0, net result: -150
-Seat 5: hero[Unibet_28204e083c0fb55a]: bet 150 and won 300, net result: 150
+Seat 5: hero[Unibet_0123456789abcdef]: bet 150 and won 300, net result: 150
 """
 
 
@@ -384,7 +384,7 @@ Buy-In: €0.93 + €0.07
 3 players
 Total Prize Pool: €4.00
 Tournament started 2026/06/05 21:50:39 UTC
-1: Unibet_28204e083c0fb55a finished €4.00
+1: Unibet_0123456789abcdef finished €4.00
 2: DrikC79 finished
 3: evymm finished
 You finished in 1st place.
@@ -411,4 +411,4 @@ def test_unibet_summary_parses_and_maps_hero() -> None:
     # The bare "Unibet_<id>" winner token is mapped to the configured hero name.
     assert ts.ranks["hero"] == [1]
     assert ts.winnings["hero"] == [400]
-    assert "Unibet_28204e083c0fb55a" not in ts.players
+    assert "Unibet_0123456789abcdef" not in ts.players

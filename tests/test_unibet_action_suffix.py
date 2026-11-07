@@ -24,9 +24,9 @@ def _action(line: str) -> tuple[str, str] | None:
 
 def test_a_timed_out_fold_is_read():
     # Two spaces before the note, as Unibet writes it.
-    line = "kokosat[Unibet_28204e083c0fb55a] folds  (timed out)"
+    line = "kokosat[Unibet_0123456789abcdef] folds  (timed out)"
 
-    assert _action(line) == ("kokosat[Unibet_28204e083c0fb55a]", "folds")
+    assert _action(line) == ("kokosat[Unibet_0123456789abcdef]", "folds")
 
 
 def test_a_disconnected_fold_is_still_read():
