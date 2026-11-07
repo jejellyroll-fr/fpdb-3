@@ -79,6 +79,8 @@ def test_expresso_is_one_lottery_tournament(tmp_path: Path, files: tuple[Path, P
 def test_power_spin_result_goes_to_the_hands_player(tmp_path: Path) -> None:
     db = _import(tmp_path, POWER_SPIN_HANDS, POWER_SPIN_SUMMARY)
 
+    # A 30 EUR pool for a 10 EUR spin: a x3 lottery sit-and-go (#729).
+    assert _rows(db, TOURNEY_TYPES) == [(930, 70, 3, 1, 1, 3)]
     assert _rows(db, TOURNEYS) == [(83499742, None, 3, 3000)]
     assert _rows(db, RESULTS) == [("Hero", 1, 3000), ("bob", 2, 0), ("alice", 3, 0)]
     # One hero, whose hands and result are the same player's.

@@ -103,6 +103,7 @@ def _preserve_86_to_87(doc, template) -> None:
 
 # Rooms each version adds: an upgrade gives them to a configuration lacking them.
 SITES_ADDED_IN_88 = ("Bet365.fr Poker",)  # #717
+SITES_ADDED_IN_90 = ("Unibet",)  # #729: the 2026 Relax Gaming client
 
 
 def _child_section(doc, section: str):
@@ -174,6 +175,16 @@ def _add_summary_importers_88_to_89(doc, template) -> None:
             node.setAttribute("summaryImporter", importer)
 
 
+def _add_sites_89_to_90(doc, template) -> None:
+    """Advance to v90, adding the current Unibet room (#729) to a configuration lacking it.
+
+    Configurations had its converter but no <site>, so it could be neither
+    enabled nor given a hand-history folder. Its "Unibet_default" layout set
+    comes along. A configuration that already declares the room keeps it.
+    """
+    _add_sites(doc, template, SITES_ADDED_IN_90)
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {n.getAttribute("name") for n in doc.getElementsByTagName("aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -195,6 +206,7 @@ MIGRATIONS = (
     (86, 87, _preserve_86_to_87),
     (87, 88, _add_sites_87_to_88),
     (88, 89, _add_summary_importers_88_to_89),
+    (89, 90, _add_sites_89_to_90),
 )
 
 

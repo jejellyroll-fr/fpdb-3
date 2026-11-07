@@ -27,6 +27,7 @@ from typing import Any
 
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.UnibetSummary import power_spin_multiplier
 
 # Unibet HH Format
 log = get_logger("unibet_parser")
@@ -691,6 +692,16 @@ class Unibet(HandHistoryConverter):
             if key == "MAX" and info[key] is not None:
                 hand.maxseats = int(info[key])
                 hand.gametype["maxSeats"] = hand.maxseats
+        if info.get("TBUYIN") is not None and info.get("PRIZE") is not None:
+            # A hand states its table size and the prize pool, not the entries;
+            # a Power Spin always seats three, all of them registered.
+            multiplier = power_spin_multiplier(
+                hand.maxseats, hand.buyin, hand.fee, int(round(100 * Decimal(info["PRIZE"])))
+            )
+            if multiplier is not None:
+                hand.isSng = True
+                hand.isLottery = True
+                hand.tourneyMultiplier = multiplier
         log.info(f"read Hand Info: {hand}")
         if self.re_Cancelled.search(hand.handText):
             msg = f"Hand '{hand.handid}' was cancelled."
