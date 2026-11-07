@@ -2546,5 +2546,13 @@
   "winning/modern_cash.txt": {
     "hand_count": 1,
     "sha256": "5c3575eec4c082691bf8f66a0de83770d7593ca5a458d2d7b930f7062b22d414"
+  },
+  "regression/GGPoker/Flop/PLO-6max-USD-0.05-0.10-202611.ev.cashout.cash.drop.txt": {
+    "hand_count": 5,
+    "sha256": "ee3b1bd84c58b63989dcbba9240e03dd62375d03b3781922940a38c48643d7de"
+  },
+  "regression/GGPoker/Flop/PLO-6max-USD-0.05-0.10-202611.past.midnight.cashout.rit.txt": {
+    "hand_count": 5,
+    "sha256": "789cee24f6942e1d274228c6096935321591ce8f405b0dc14bf65ced657447d6"
   }
 }

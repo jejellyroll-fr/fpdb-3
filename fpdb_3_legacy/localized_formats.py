@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from decimal import Decimal
 from threading import RLock
 
@@ -86,3 +86,19 @@ def format_datetime(value: datetime, *, long: bool = False) -> str:
     )
     format_type = QLocale.FormatType.LongFormat if long else QLocale.FormatType.ShortFormat
     return _locale_copy().toString(qdatetime, format_type)
+
+
+def format_utc_datetime(value: datetime, *, long: bool = False) -> str:
+    """Format a time the database stores in UTC as this computer's local time.
+
+    Hand and tournament start times are stored as naive UTC. Shown as they are,
+    a hand played at 18:59 in Paris read 17:59 -- or the wrong day near midnight.
+    The pattern (day/month order, 12 or 24 hours) still follows the UI language.
+    """
+    utc = value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
+    try:
+        local = utc.astimezone()
+    except (OverflowError, OSError, ValueError):
+        # Outside the platform's time range (before 1970 on Windows).
+        local = utc
+    return format_datetime(local, long=long)

@@ -191,6 +191,10 @@ POT_EQUATION_EXCEPTIONS = {
     "pokerstars/holdem/cashed_out.txt",
     "regression/BetOnline/Flop/NLHE-10max-USD-0.01-0.02-201605.winner.no.show.txt",
     "regression/BetOnline/Flop/PLO-10max-USD-0.05-0.10-201209.txt",
+    # EV Cashout: like PokerStars, the pot is not credited to the player who
+    # cashed out -- the cash-out is, outside the pot.
+    "regression/GGPoker/Flop/PLO-6max-USD-0.05-0.10-202611.ev.cashout.cash.drop.txt",
+    "regression/GGPoker/Flop/PLO-6max-USD-0.05-0.10-202611.past.midnight.cashout.rit.txt",
     "regression/Stars/Flop/2025-NL-6max-USD-0.05-0.10.cashout.txt",
     "regression/Stars/Flop/6+Holdem-6max-USD-0.25-0.25.multiple.Cash.Out.txt",
     "regression/Stars/Flop/6-Card-PLO-6max-USD-0.05-0.10-202111.cash.out.txt",

@@ -26,7 +26,10 @@ Handles Hold'em, Omaha, Short Deck and other game types from GGPoker.
 import datetime
 import re
 from decimal import Decimal
+from pathlib import Path
 from typing import Any, ClassVar, TypeAlias
+
+import pytz
 
 from fpdb_3_legacy.autonotes_aof import is_aof_category
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
@@ -36,6 +39,63 @@ Hand: TypeAlias = Any
 
 # GGpoker HH Format
 log = get_logger("ggpoker_parser")
+
+# GGPoker names a hand-history file after the session start in UTC
+# ("GG20261106-1747 - RushAndCash3490473 - ..."), but stamps the hands inside
+# with the player's local wall-clock time, with no zone: that session's first
+# hand reads 18:47 in Paris. The parser used to read the stamps as US Eastern
+# time, which put every hand five or six hours late -- and on the next day for
+# anything played in the evening.
+RE_FILE_SESSION_START = re.compile(r"^GG(?P<STAMP>\d{8}-\d{4})\b")
+RE_HAND_TIME = re.compile(r"^Poker Hand #.* - (?P<TIME>\d{4}/\d{2}/\d{2} \d{1,2}:\d{2}:\d{2})\s*$", re.MULTILINE)
+HAND_TIME_FORMAT = "%Y/%m/%d %H:%M:%S"
+# The first hand follows the session start by seconds, a few minutes at most.
+SESSION_START_LAG = datetime.timedelta(minutes=30)
+# Zone offsets are whole quarter hours, from UTC-12 to UTC+14.
+OFFSET_STEP = datetime.timedelta(minutes=15)
+MIN_OFFSET = datetime.timedelta(hours=-12)
+MAX_OFFSET = datetime.timedelta(hours=14)
+
+
+def local_utc_offset(wall_clock: datetime.datetime) -> datetime.timedelta:
+    """Offset of this computer's time zone at a naive local wall-clock time."""
+    return wall_clock.astimezone().utcoffset() or datetime.timedelta(0)
+
+
+def hand_time_offset(file_name: str, first_hand: datetime.datetime | None) -> datetime.timedelta | None:
+    """UTC offset of the hand times in a GGPoker file, or None for this computer's zone.
+
+    The file name holds the session start in UTC and the first hand its local
+    time, so the gap between them is the zone offset plus the few seconds
+    before the first deal. When this computer's zone explains that gap, it is
+    used (None) so a session that spans a daylight-saving change follows it;
+    otherwise -- a file written on another computer, or a test run in UTC --
+    the gap rounded down to a quarter hour is the offset. Without a GG file
+    name there is nothing to compare: the client writes local time, so the
+    local zone is the best guess.
+    """
+    m = RE_FILE_SESSION_START.match(Path(file_name).name)
+    if not m or first_hand is None:
+        return None
+    try:
+        session_start = datetime.datetime.strptime(m.group("STAMP"), "%Y%m%d-%H%M")  # noqa: DTZ007 - UTC
+    except ValueError:
+        return None
+    gap = first_hand - session_start
+    if datetime.timedelta(0) <= gap - local_utc_offset(first_hand) < SESSION_START_LAG:
+        return None
+    offset = (gap // OFFSET_STEP) * OFFSET_STEP
+    if MIN_OFFSET <= offset <= MAX_OFFSET:
+        return offset
+    log.warning("GGPoker file %s: first hand %s is too far from the session start", file_name, first_hand)
+    return None
+
+
+def hand_time_to_utc(wall_clock: datetime.datetime, offset: datetime.timedelta | None) -> datetime.datetime:
+    """Convert a naive GGPoker hand time to UTC, from a fixed offset or the local zone."""
+    if offset is None:
+        return wall_clock.astimezone().astimezone(pytz.utc)
+    return (wall_clock - offset).replace(tzinfo=pytz.utc)
 
 
 class GGPoker(HandHistoryConverter):
@@ -509,11 +569,27 @@ class GGPoker(HandHistoryConverter):
                 a.group("MIN"),
                 a.group("S"),
             )
-        hand.startTime = datetime.datetime.strptime(  # noqa: DTZ007
-            datetimestr,
-            "%Y/%m/%d %H:%M:%S",
-        )
-        hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
+        wall_clock = datetime.datetime.strptime(datetimestr, HAND_TIME_FORMAT)  # noqa: DTZ007 - zone resolved below
+        hand.startTime = hand_time_to_utc(wall_clock, self._file_time_offset())
+
+    def _file_time_offset(self) -> datetime.timedelta | None:
+        """The UTC offset of this file's hand times, worked out once per file."""
+        in_path = str(getattr(self, "in_path", "") or "")
+        cached = getattr(self, "_time_offset_cache", None)
+        if cached is not None and cached[0] == in_path:
+            return cached[1]
+        # The whole file, not self.obs: an auto-import pass only reads the hands
+        # appended since the last one, and the session's first hand is not there.
+        text = getattr(self, "whole_file", "") or getattr(self, "obs", "") or ""
+        times = []
+        for m in RE_HAND_TIME.finditer(text):
+            try:
+                times.append(datetime.datetime.strptime(m.group("TIME"), HAND_TIME_FORMAT))  # noqa: DTZ007
+            except ValueError:
+                continue
+        offset = hand_time_offset(in_path, min(times) if times else None)
+        self._time_offset_cache = (in_path, offset)
+        return offset
 
     def _detect_currency(self, buyin_str: str, hand: Hand) -> None:
         """Detect and set currency from buyin string."""
@@ -819,6 +895,10 @@ class GGPoker(HandHistoryConverter):
         m = self.re_stp.search(hand.handText)
         if m:
             hand.tourneyTypeId = 0
+            # "Cash Drop to Pot : total $1" is house money seeded into the pot:
+            # nobody posts it, but the summary's total pot and the winner's
+            # collection include it, so without it the hand did not balance.
+            hand.addSTP(self.clearMoneyString(m.group("AMOUNT")))
 
     def readAntes(self, hand: Hand) -> None:
         """Read and add ante information from hand text."""
@@ -1139,13 +1219,6 @@ class GGPoker(HandHistoryConverter):
         pre, post = hand.handText.split("*** SUMMARY ***")
         hand.cashedOut = self.re_cashed_out.search(pre) is not None
 
-        # Capture per-player cashout amounts (and the cashout risk/fee) so the
-        # hand viewer and replayer can show them.
-        for m in self.re_collect_pot3.finditer(pre):
-            hand.cashOutAmounts[m.group("PNAME")] = Decimal(self.clearMoneyString(m.group("POT")))
-        for m in self.re_collect_pot4.finditer(pre):
-            hand.cashOutFees[m.group("PNAME")] = Decimal(self.clearMoneyString(m.group("POT")))
-
         if hand.runItTimes == 0 and hand.cashedOut is False:
             for line in post.splitlines():
                 if not line.startswith("Seat "):
@@ -1159,12 +1232,57 @@ class GGPoker(HandHistoryConverter):
                         hand.addCollectPot(player=player, pot=pot)
                         i += 1
         if i == 0:
-            # Handle regular pot collections only - ignore cashouts for pot accounting
-            # Cashouts are separate transactions that don't affect the main pot distribution
+            risks = self._cashout_risks(pre)
+            won_by_cashed_out: dict[str, Decimal] = {}
             for m in self.re_collect_pot2.finditer(pre):
                 player = m.group("PNAME")
                 pot = self.clearMoneyString(m.group("POT"))
+                if player in risks:
+                    # A cashed-out player is not awarded the pot (see below).
+                    won_by_cashed_out[player] = won_by_cashed_out.get(player, Decimal(0)) + Decimal(pot)
+                    continue
                 hand.addCollectPot(player=player, pot=pot)
+            self._read_ev_cashouts(hand, pre, risks, won_by_cashed_out)
+
+    def _cashout_risks(self, pre: str) -> dict[str, Decimal]:
+        """The "Pays Cashout Risk" of each player who cashed out and won the pot."""
+        risks: dict[str, Decimal] = {}
+        for m in self.re_collect_pot4.finditer(pre):
+            player = m.group("PNAME")
+            risks[player] = risks.get(player, Decimal(0)) + Decimal(self.clearMoneyString(m.group("POT")))
+        return risks
+
+    def _read_ev_cashouts(
+        self,
+        hand: Hand,
+        pre: str,
+        risks: dict[str, Decimal],
+        won_by_cashed_out: dict[str, Decimal],
+    ) -> None:
+        """Credit each EV Cashout the way PokerStars' "cashed out the hand" is.
+
+        PokerStars does not award the pot to a player who cashed out: the
+        cash-out amount is their only collection, recorded with addCashOutPot
+        (collectees and cashOutAmounts, never totalcollected). A GGPoker player
+        who cashes out is likewise paid their equity whatever the river brings,
+        written one of two ways:
+        - losing the pot: "Receives Cashout ($6.72)" -- the cash-out is $6.72;
+        - winning it: "collected $20.85 from pot", then "Pays Cashout Risk
+          ($3.89)" handed back -- the cash-out is the $16.96 left.
+        Crediting the pot instead gave the winner the risk they paid back, and
+        the loser nothing for the stake their cash-out had saved.
+
+        GGPoker prints no cash-out fee (it is taken out of the equity), and the
+        risk is not one, so cashOutFees stays empty.
+        """
+        for m in self.re_collect_pot3.finditer(pre):
+            hand.addCashOutPot(m.group("PNAME"), self.clearMoneyString(m.group("POT")))
+        for player, risk in risks.items():
+            won = won_by_cashed_out.get(player)
+            if won is None:
+                log.warning("Hand %s: %s pays a cashout risk without winning the pot", hand.handid, player)
+                continue
+            hand.addCashOutPot(player, str(won - risk))
 
     def readOther(self, hand: Hand) -> None:
         """Read other information from hand text."""

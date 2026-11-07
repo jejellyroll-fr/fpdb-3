@@ -179,6 +179,10 @@ class DerivedStatsAllInMixin(DerivedStatsBase):
             and evalgame
             and (len(hand.pot.pots) > 1 or (showdown and (hilo == "s" or hand.runItTimes >= MIN_RUN_IT_TIMES)))
             and not allin_ante
+            # The rake is zeroed below and rebuilt pot by pot. A parser that
+            # takes the pot and rake from the summary (GGPoker) leaves no pots
+            # to rebuild from, so every hand run twice lost its rake.
+            and hand.pot.pots
         ):
             # print 'DEBUG hand.collected', hand.collected
             # print 'DEBUG hand.collectees', hand.collectees
