@@ -425,6 +425,30 @@ class TestCommonCashIdioms:
         assert len(result.notes) == 1 and note in result.notes[0]
         assert "Differs from PT4:" in result.descriptor["description"]
 
+    def test_pt4_4_19_vpip_imports_and_lists_bomb_pots_as_a_difference(self):
+        # PT4 4.19 (2026-08-31) took bomb pots out of VPIP; its stock definition, verbatim.
+        vpip = pt4.DecodedStat(
+            path=Path("StatDefinitions.pt4"),
+            columns={
+                "cnt_vpip": "sum(if[cash_hand_player_statistics.flg_vpip, 1, 0])",
+                "cnt_hands": "sum(if[cash_hand_player_statistics.id_hand > 0, 1, 0])",
+                "cnt_walks": "sum(if[lookup_actions_p.action = '' AND cash_hand_summary.cnt_players_f < 2, 1, 0])",
+                "cnt_p_no_action": (
+                    "sum(if[lookup_actions_p.action = '' AND cash_hand_summary.cnt_players_f >= 2, 1, 0])"
+                ),
+            },
+            value_expr="(cnt_vpip / (cnt_hands - cnt_walks - cnt_p_no_action)) * 100",
+            label="VPIP",
+            category="Cash Player",
+        )
+
+        result = pt4.translate(vpip)
+
+        assert result.supported, result.warnings
+        assert result.descriptor["value"] == "(street0VPI / (street0VPIChance)) * 100"
+        assert result.descriptor["inputs"] == ["street0VPIChance", "street0VPI"]
+        assert len(result.notes) == 1 and "bomb pot" in result.notes[0]
+
     def test_afq_translates_through_fpdb_s_own_fold_flags(self):
         result = pt4.translate(
             _stock(
