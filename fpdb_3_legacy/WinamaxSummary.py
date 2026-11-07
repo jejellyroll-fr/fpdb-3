@@ -108,17 +108,6 @@ class WinamaxSummary(TourneySummary):
     codepage: ClassVar = ("utf8", "cp1252")
     hhtype: ClassVar = "summary"
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """Initializes a WinamaxSummary instance.
-
-        Sets up the tournament summary parser and initializes lottery-related fields to their default values.
-
-        """
-        super().__init__(*args, **kwargs)
-        # Initialize lottery fields with default values
-        self.isLottery = False
-        self.tourneyMultiplier = 1
-
     def getSplitRe(self, head: str) -> re.Pattern[str]:
         """Returns the regular expression pattern used to split Winamax tournament summaries.
 
@@ -433,6 +422,14 @@ class WinamaxSummary(TourneySummary):
             ).replace(tzinfo=datetime.UTC)
         if "TOURNO" in mg:
             self.tourNo = mg["TOURNO"]
+        # The tournament's name is what the header puts before its number
+        # ("Expresso(1096047576)", "No Limit Hold'em(39203383)"). Only the
+        # fallback game type set it before, so a summary whose game came from
+        # its Levels line -- every recent one -- had no name, and an Expresso
+        # was never recognised as a lottery.
+        name = " ".join(part.strip() for part in (mg.get("LIMIT"), mg.get("GAME")) if part and part.strip())
+        if name:
+            self.tourneyName = name
 
     def _parse_buyin_info(self, mg: dict) -> None:
         """Parses buy-in and fee information from the match group dictionary.
@@ -685,4 +682,6 @@ class WinamaxSummary(TourneySummary):
 
             log.info("Lottery tournament: lottery=%s, multiplier=%s", self.isLottery, self.tourneyMultiplier)
         else:
+            self.isLottery = False
+            self.tourneyMultiplier = 1
             log.debug("Not an Expresso tournament: %s", tournament_name)

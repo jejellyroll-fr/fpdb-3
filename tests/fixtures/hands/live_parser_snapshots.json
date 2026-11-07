@@ -2539,6 +2539,10 @@
     "hand_count": 1,
     "sha256": "4a46ad4a0cde22fe2cac2dcb0264b85fae8e3351b65e9673480379805d56ad7e"
   },
+  "unibet/power_spin_2026.txt": {
+    "hand_count": 8,
+    "sha256": "ccbdceabcf0968972dcae3da90e1aed0a4361ee395b92b9090098aae82e704ab"
+  },
   "winamax/nlhe_cash.txt": {
     "hand_count": 1,
     "sha256": "7567b14fbf6f000eff68721181848e3da2b052ad816bbfe9b14aea748a7aa9cf"

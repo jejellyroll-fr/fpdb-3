@@ -117,6 +117,10 @@ class DatabaseTournamentsMixin:
             or (field, value1) == ("buyinCurrency", "NA")
             or (field, value1) == ("stack", "Regular")
             or (field, value1) == ("speed", "Normal")
+            # A hand only knows a lottery tournament is one; its multiplier
+            # comes from the prize pool in the summary. Left as 1, the hands'
+            # value would keep the summary's from ever reaching the type.
+            or (field == "tourneyMultiplier" and value1 == 1)
             or (field == "koBounty" and value1)
         )
     @contextmanager

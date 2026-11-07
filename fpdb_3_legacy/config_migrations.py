@@ -151,6 +151,29 @@ def _add_sites_87_to_88(doc, template) -> None:
     _add_sites(doc, template, SITES_ADDED_IN_88)
 
 
+def _add_summary_importers_88_to_89(doc, template) -> None:
+    """Advance to v89, giving each room the summary importer the template declares (#725).
+
+    A configuration written from the development HUD_config.xml declared the
+    Unibet converter without "UnibetSummary", so its tournament summaries were
+    never recognised. A room whose <hhc> names no summary importer gains the
+    template's, when both name the same converter; one the user set is kept.
+    """
+    target = _child_section(doc, "hhcs")
+    source = _child_section(template, "hhcs")
+    if target is None or source is None:
+        return
+    declared = {
+        (node.getAttribute("site"), node.getAttribute("converter")): node.getAttribute("summaryImporter")
+        for node in source.getElementsByTagName("hhc")
+        if node.getAttribute("summaryImporter")
+    }
+    for node in target.getElementsByTagName("hhc"):
+        importer = declared.get((node.getAttribute("site"), node.getAttribute("converter")))
+        if importer and not node.getAttribute("summaryImporter"):
+            node.setAttribute("summaryImporter", importer)
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {n.getAttribute("name") for n in doc.getElementsByTagName("aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -171,6 +194,7 @@ MIGRATIONS = (
     (85, 86, _preserve_85_to_86),
     (86, 87, _preserve_86_to_87),
     (87, 88, _add_sites_87_to_88),
+    (88, 89, _add_summary_importers_88_to_89),
 )
 
 

@@ -18,6 +18,10 @@ Sample summary:
 The hero is listed by their bare account token ("Unibet_<id>"), which is the
 same token appended to the hero name in the hand histories. It is replaced with
 the configured screen name so the summary result links to the imported hands.
+
+Later summaries name the hero with the token appended, as the hand histories
+do ("3: kokosat[Unibet_b3081becc3e7563f] finished"). The token is stripped, as
+the hand converter strips it, so both files name the same player.
 """
 
 from __future__ import annotations
@@ -56,6 +60,8 @@ class UnibetSummary(TourneySummary):
     re_split_tourneys = re.compile(r"Unibet\sTournament\s\#")
     # Bare hero token used as a player name in summaries.
     re_HeroToken = re.compile(r"^Unibet_[0-9a-fA-F]+$")
+    # Hero name with its token appended, as in the hand histories.
+    re_TokenSuffix = re.compile(r"^(?P<PNAME>.+?)\[Unibet_[0-9a-fA-F]+\]$")
 
     # The importer splits the file on "Unibet Tournament #" (see getSplitRe), so
     # each summary text starts at the tournament number.
@@ -128,6 +134,9 @@ class UnibetSummary(TourneySummary):
             # configured screen name so it matches the hand-history hero.
             if hero_name and self.re_HeroToken.match(name):
                 name = hero_name
+            suffixed = self.re_TokenSuffix.match(name)
+            if suffixed:
+                name = suffixed.group("PNAME")
             winnings = 0
             if pmg.get("WINNINGS"):
                 winnings = int(round(100 * Decimal(pmg["WINNINGS"])))
