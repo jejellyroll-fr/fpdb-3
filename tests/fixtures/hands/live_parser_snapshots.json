@@ -2543,6 +2543,26 @@
     "hand_count": 8,
     "sha256": "ccbdceabcf0968972dcae3da90e1aed0a4361ee395b92b9090098aae82e704ab"
   },
+  "unibet/automatic_plo_cash_2026.txt": {
+    "hand_count": 2,
+    "sha256": "5deb580f682ee35286b61639d071ee45d9cabd9e714b2fde94e09a6922bacb89"
+  },
+  "unibet/manual_export_cash_plo_banzai_2026.txt": {
+    "hand_count": 11,
+    "sha256": "c49973debdbefc9cff7146bbc5b42ca917df988665ebe345aa55ddfd1fed7504"
+  },
+  "unibet/manual_export_plo_cash_sitting_out_2026.txt": {
+    "hand_count": 5,
+    "sha256": "8b92a698872c7cf234caedbf7cd02f49377593719bdbff60101236ef7a90632b"
+  },
+  "unibet/manual_export_power_spin_025_2026.txt": {
+    "hand_count": 2,
+    "sha256": "ea36993313b43059b43453e40b25d55ba35c94cc457b36ea45ba265933efd7a4"
+  },
+  "unibet/manual_export_power_spin_1_2026.txt": {
+    "hand_count": 4,
+    "sha256": "47c7055f136a47a3f1bbc317bba0404f46b3cde0a6a68632215c5ddbc21153f4"
+  },
   "winamax/nlhe_cash.txt": {
     "hand_count": 1,
     "sha256": "7567b14fbf6f000eff68721181848e3da2b052ad816bbfe9b14aea748a7aa9cf"

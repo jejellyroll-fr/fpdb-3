@@ -1,0 +1,313 @@
+"""Turn real hand-history files into fixtures that name nobody (#735).
+
+A parser fixture has to stay in the room's own format, byte for byte, or it no
+longer tests the parser: only the names may change. The names are not guessed
+with patterns of our own -- the room's fpdb converter reads each file and says
+who sat at the table and who the hero was, so every room fpdb parses is covered
+the day it is. A few things a converter never reports are added per room:
+names in tournament summaries, and account tokens such as Unibet's
+``name[Unibet_<hex>]``.
+
+The hero becomes ``Hero`` and the others ``alice``, ``bob``, ... in the order
+they first appear, consistently across every file of one run (and of later runs
+given the same mapping file). Before anything is written the result is parsed
+again: it must give the same hands, with exactly the renamed players, and no
+real name or token may survive anywhere in it. Otherwise nothing is written.
+
+The real-to-fake mapping is written to ``--map``, which must lie outside the
+repository: it is the one file that undoes the anonymisation.
+
+    python tools/anonymize_hh.py --room Unibet --map ~/hh-maps/unibet.json \\
+        --out tests/fixtures/hands/unibet  path/to/export.txt  path/to/folder
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import shutil
+import sys
+import tempfile
+from collections.abc import Iterable
+from dataclasses import dataclass, field
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO))
+
+from fpdb_3_legacy.Configuration import Config  # noqa: E402  # pylint: disable=wrong-import-position
+from fpdb_3_legacy.parser_registry import get_parser_class  # noqa: E402  # pylint: disable=wrong-import-position
+
+HERO = "Hero"
+FAKE_NAMES = (
+    "alice",
+    "bob",
+    "carol",
+    "dave",
+    "erin",
+    "frank",
+    "grace",
+    "heidi",
+    "ivan",
+    "judy",
+    "mallory",
+    "niaj",
+    "olivia",
+    "peggy",
+    "rupert",
+    "sybil",
+    "trent",
+    "victor",
+    "walter",
+)
+BOM = b"\xef\xbb\xbf"
+
+
+@dataclass(frozen=True)
+class RoomExtras:
+    """What a room's converter does not report but a file may still carry."""
+
+    # Lines naming players outside the hands: tournament summaries.
+    summary_names: tuple[re.Pattern[str], ...] = ()
+    # An account token: a match's "TOKEN" group is replaced wherever it occurs.
+    token: re.Pattern[str] | None = None
+    # What a fake token's "TOKEN" group becomes, given its number (1, 2, ...).
+    fake_token: str = "{:016x}"
+
+
+ROOMS: dict[str, RoomExtras] = {
+    "Unibet": RoomExtras(
+        summary_names=(
+            re.compile(r"^[0-9]+:\s(?P<NAME>.+?)\sfinished\b", re.MULTILINE),
+            re.compile(r"^-:\s(?P<NAME>.+?)\sstill_playing\b", re.MULTILINE),
+            re.compile(r"^(?P<NAME>\S+?)\sfinished\sthe\stournament\b", re.MULTILINE),
+        ),
+        token=re.compile(r"Unibet_(?P<TOKEN>[0-9a-fA-F]{8,})"),
+    ),
+    "Winamax": RoomExtras(summary_names=(re.compile(r"^Player\s:\s(?P<NAME>.+?)\s*$", re.MULTILINE),)),
+}
+
+
+@dataclass
+class Mapping:
+    """Real names and tokens to fake ones, shared by every file of a run."""
+
+    names: dict[str, str] = field(default_factory=dict)
+    tokens: dict[str, str] = field(default_factory=dict)
+
+    @classmethod
+    def load(cls, path: Path) -> Mapping:
+        if not path.exists():
+            return cls()
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return cls(names=dict(data.get("names", {})), tokens=dict(data.get("tokens", {})))
+
+    def save(self, path: Path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps({"names": self.names, "tokens": self.tokens}, indent=2) + "\n", encoding="utf-8")
+
+    def add_name(self, real: str, *, hero: bool = False) -> None:
+        if real in self.names or not real.strip():
+            return
+        if hero:
+            self.names[real] = HERO
+            return
+        # A fake name is never one a real player goes by.
+        taken = set(self.names.values()) | set(self.names)
+        fake = next((name for name in FAKE_NAMES if name not in taken), None)
+        n = 0
+        while fake is None or fake in taken:
+            n += 1
+            fake = f"player{n}"
+        self.names[real] = fake
+
+    def add_token(self, real: str, template: str) -> None:
+        if real not in self.tokens:
+            self.tokens[real] = template.format(len(self.tokens) + 1)
+
+
+def _decode(raw: bytes) -> tuple[bytes, str, str]:
+    """Split a file into its BOM, its text and the codec that reads it back."""
+    if raw.startswith(BOM):
+        return BOM, raw[len(BOM) :].decode("utf-8"), "utf-8"
+    if raw[:2] in (b"\xff\xfe", b"\xfe\xff"):
+        return b"", raw.decode("utf-16"), "utf-16"
+    for codec in ("utf-8", "cp1252"):
+        try:
+            return b"", raw.decode(codec), codec
+        except UnicodeDecodeError:
+            continue
+    raise ValueError("unreadable file")
+
+
+def _name_pattern(name: str) -> re.Pattern[str]:
+    # Screen names carry letters, digits, "-" and "_": a name must not match
+    # inside a longer one ("Jo" in "Jo128").
+    return re.compile(rf"(?<![\w-]){re.escape(name)}(?![\w-])")
+
+
+def _temp_config(directory: Path) -> Config:
+    """A throwaway configuration: never the user's own HUD_config.xml."""
+    shutil.copy(REPO / "HUD_config.xml.example", directory / "HUD_config.xml")
+    config = Config(file=str(directory / "HUD_config.xml"))
+    config.dir_database = str(directory)
+    return config
+
+
+def _parse(converter, config: Config, path: Path) -> list:
+    return converter(config=config, in_path=str(path), autostart=True).getProcessedHands()
+
+
+def _players(hands: list) -> list[tuple[str, bool]]:
+    """Each player once, in order of appearance, with whether they are the hero."""
+    seen: dict[str, bool] = {}
+    for hand in hands:
+        for player in hand.players:
+            seen.setdefault(player[1], False)
+        if hand.hero:
+            seen[hand.hero] = True
+    return list(seen.items())
+
+
+@dataclass
+class Result:
+    source: Path
+    target: Path
+    hands: int
+
+
+class Anonymizer:
+    def __init__(self, room: str, mapping: Mapping, workdir: Path) -> None:
+        self.room = room
+        self.extras = ROOMS.get(room, RoomExtras())
+        self.converter = get_parser_class(room)
+        self.mapping = mapping
+        self.config = _temp_config(workdir)
+        self.workdir = workdir
+
+    def collect(self, path: Path, hero: str | None) -> list:
+        """Learn the names and tokens of one file; returns its parsed hands."""
+        hands = _parse(self.converter, self.config, path)
+        _, text, _ = _decode(path.read_bytes())
+        players = _players(hands)
+        if hero:
+            players = [(name, name == hero or is_hero) for name, is_hero in players]
+        for name, is_hero in players:
+            self.mapping.add_name(name, hero=is_hero)
+        for pattern in self.extras.summary_names:
+            for match in pattern.finditer(text):
+                name = match.group("NAME")
+                stripped = name
+                if self.extras.token is not None:
+                    stripped = re.sub(rf"\[{self.extras.token.pattern}\]$", "", name)
+                # A room whose tokens mark the hero marks them in summaries too.
+                self.mapping.add_name(stripped, hero=stripped == hero or stripped != name)
+        if self.extras.token is not None:
+            for match in self.extras.token.finditer(text):
+                self.mapping.add_token(match.group("TOKEN"), self.extras.fake_token)
+        return hands
+
+    def rewrite(self, text: str) -> str:
+        # One pass each, longest first: replacing names one after another would
+        # rename again a name another one had just become.
+        if self.mapping.tokens:
+            tokens = "|".join(re.escape(real) for real in sorted(self.mapping.tokens, key=len, reverse=True))
+            text = re.sub(tokens, lambda match: self.mapping.tokens[match.group(0)], text)
+        if self.mapping.names:
+            names = "|".join(re.escape(real) for real in sorted(self.mapping.names, key=len, reverse=True))
+            text = re.sub(rf"(?<![\w-])(?:{names})(?![\w-])", lambda match: self.mapping.names[match.group(0)], text)
+        return text
+
+    def leftovers(self, text: str) -> list[str]:
+        fakes = set(self.mapping.names.values())
+        found = [real for real in self.mapping.names if real not in fakes and _name_pattern(real).search(text)]
+        fake_tokens = set(self.mapping.tokens.values())
+        found += [real for real in self.mapping.tokens if real not in fake_tokens and real in text]
+        return found
+
+    def anonymize(self, source: Path, target: Path, hands: list) -> Result:
+        bom, text, codec = _decode(source.read_bytes())
+        rewritten = self.rewrite(text)
+        left = self.leftovers(rewritten)
+        if left:
+            msg = f"{source.name}: {len(left)} real name(s) or token(s) would survive"
+            raise ValueError(msg)
+        staged = self.workdir / target.name
+        staged.write_bytes(bom + rewritten.encode(codec))
+        again = _parse(self.converter, self.config, staged)
+        expected = [{self.mapping.names.get(player[1], player[1]) for player in hand.players} for hand in hands]
+        if [{player[1] for player in hand.players} for hand in again] != expected:
+            msg = f"{source.name}: the anonymised file no longer parses into the same hands and players"
+            raise ValueError(msg)
+        return Result(source, target, len(again))
+
+
+def _inputs(paths: Iterable[Path]) -> list[Path]:
+    files: list[Path] = []
+    for path in paths:
+        if path.is_dir():
+            files += sorted(p for p in path.rglob("*") if p.is_file() and p.suffix.lower() in (".txt", ".xml"))
+        elif path.is_file():
+            files.append(path)
+        else:
+            msg = f"no such file or folder: {path}"
+            raise SystemExit(msg)
+    return files
+
+
+def _inside_repo(path: Path) -> bool:
+    try:
+        path.resolve().relative_to(REPO)
+    except ValueError:
+        return False
+    return True
+
+
+def run(room: str, inputs: list[Path], out: Path, map_path: Path, hero: str | None = None) -> list[Result]:
+    """Anonymise ``inputs`` into ``out``; writes nothing unless every file passes."""
+    if _inside_repo(map_path):
+        msg = f"the mapping undoes the anonymisation: keep it outside the repository, not at {map_path}"
+        raise SystemExit(msg)
+    files = _inputs(inputs)
+    mapping = Mapping.load(map_path)
+    with tempfile.TemporaryDirectory() as tmp:
+        anonymizer = Anonymizer(room, mapping, Path(tmp))
+        parsed = {path: anonymizer.collect(path, hero) for path in files}
+        results = []
+        for path in files:
+            name = anonymizer.rewrite(path.name)
+            results.append(anonymizer.anonymize(path, out / name, parsed[path]))
+        if len({result.target for result in results}) != len(results):
+            raise SystemExit("two inputs would be written to the same file name")
+        out.mkdir(parents=True, exist_ok=True)
+        for result in results:
+            shutil.copyfile(Path(tmp) / result.target.name, result.target)
+    mapping.save(map_path)
+    return results
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("inputs", nargs="+", type=Path, help="hand-history files or folders (.txt, .xml)")
+    parser.add_argument("--room", required=True, help="the fpdb converter's name, e.g. Unibet, Winamax, PokerStars")
+    parser.add_argument("--out", required=True, type=Path, help="folder the anonymised files are written to")
+    parser.add_argument("--map", required=True, type=Path, help="real-to-fake mapping (JSON), outside the repository")
+    parser.add_argument("--hero", help="the hero's real name, when the files do not say")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    try:
+        results = run(args.room, args.inputs, args.out, args.map.expanduser(), args.hero)
+    except ValueError as error:
+        print(f"Nothing written: {error}", file=sys.stderr)
+        return 1
+    for result in results:
+        print(f"{result.hands:>5} hands  {result.source.name} -> {result.target}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

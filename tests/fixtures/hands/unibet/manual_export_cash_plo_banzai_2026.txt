@@ -1,0 +1,465 @@
+=== HAND HISTORIES ===
+
+Unibet Hand #1615946136 - 0.03/0.05 - Pot Limit Omaha - UTC 09:45:45 2026/07/17
+Table "90125936" 6-max
+*** Seated players ***
+Seat 1: erin (€5.81)
+Seat 2: frank (€4.86)
+Seat 3: Hero[Unibet_0000000000000001] (€5)
+Seat 4: grace (€3.05)
+*** Blinds and button ***
+erin has the button
+frank posts small blind €0.03
+Hero[Unibet_0000000000000001] posts big blind €0.05
+*** Hole cards ***
+Dealt in frank
+Dealt to Hero[Unibet_0000000000000001] [5c Jc Td Kh]
+Dealt to grace [9c 8s Qd Tc]
+Dealt to erin [5h 5s Jd 7c]
+*** Preflop ***
+grace raises €0.10 to €0.10
+erin calls €0.10
+frank calls €0.07
+Hero[Unibet_0000000000000001] calls €0.05
+*** Flop *** [7s Jh 6d]
+frank checks
+Hero[Unibet_0000000000000001] bets €0.19
+grace calls €0.19
+erin calls €0.19
+frank folds
+*** Turn *** [7s Jh 6d] [2h]
+Hero[Unibet_0000000000000001] checks
+grace checks
+erin checks
+*** River *** [7s Jh 6d] [2h] [Qh]
+Hero[Unibet_0000000000000001] checks
+grace checks
+erin checks
+*** Showdown ***
+erin shows [5h 5s Jd 7c], Two pairs, Jacks up
+Hero[Unibet_0000000000000001] shows [5c Jc Td Kh], A Pair of Jacks
+grace shows [9c 8s Qd Tc], A Pair of Queens
+erin wins €0.91
+*** Summary ***
+Total pot €0.97 Rake €0.06
+Seat 1: erin: bet €0.29 and won €0.91, net result: €0.62
+Seat 2: frank: bet €0.10 and won €0, net result: €-0.10
+Seat 3: Hero[Unibet_0000000000000001]: bet €0.29 and won €0, net result: €-0.29
+Seat 4: grace: bet €0.29 and won €0, net result: €-0.29
+
+
+Unibet Hand #1615946806 - 0.03/0.05 - Pot Limit Omaha - UTC 09:46:36 2026/07/17
+Table "90125936" 6-max
+*** Seated players ***
+Seat 1: erin (€6.43)
+Seat 2: frank (€4.76)
+Seat 3: Hero[Unibet_0000000000000001] (€4.71)
+Seat 4: grace (€2.76)
+*** Blinds and button ***
+frank has the button
+Hero[Unibet_0000000000000001] posts small blind €0.03
+grace posts big blind €0.05
+*** Hole cards ***
+Dealt to Hero[Unibet_0000000000000001] [9s 8c Ac 5d]
+Dealt to grace [3s 4d 8d Kc]
+Dealt in erin
+Dealt to frank [Ks Qc Jc Qh]
+*** Preflop ***
+erin folds
+frank calls €0.05
+Hero[Unibet_0000000000000001] calls €0.02
+grace checks
+*** Flop *** [6h Kd 3d]
+Hero[Unibet_0000000000000001] checks
+grace bets €0.05
+frank calls €0.05
+Hero[Unibet_0000000000000001] folds
+*** Turn *** [6h Kd 3d] [As]
+grace checks
+frank checks
+*** River *** [6h Kd 3d] [As] [8s]
+grace checks
+frank checks
+*** Showdown ***
+frank shows [Ks Qc Jc Qh], A Pair of Kings
+grace shows [3s 4d 8d Kc], Two pairs, Kings up
+grace wins €0.23
+*** Summary ***
+Total pot €0.25 Rake €0.02
+Seat 2: frank: bet €0.10 and won €0, net result: €-0.10
+Seat 3: Hero[Unibet_0000000000000001]: bet €0.05 and won €0, net result: €-0.05
+Seat 4: grace: bet €0.10 and won €0.23, net result: €0.13
+
+
+Unibet Hand #1615947388 - 0.03/0.05 - Pot Limit Omaha - UTC 09:47:22 2026/07/17
+Table "90125936" 6-max
+*** Seated players ***
+Seat 1: erin (€6.43)
+Seat 2: frank (€4.66)
+Seat 3: Hero[Unibet_0000000000000001] (€4.66)
+Seat 4: grace (€2.89)
+*** Blinds and button ***
+Hero[Unibet_0000000000000001] has the button
+grace posts small blind €0.03
+erin posts big blind €0.05
+*** Hole cards ***
+Dealt in grace
+Dealt in erin
+Dealt in frank
+Dealt to Hero[Unibet_0000000000000001] [Kd 9d 5s 9h]
+*** Preflop ***
+frank calls €0.05
+Hero[Unibet_0000000000000001] folds
+grace calls €0.02
+erin checks
+*** Flop *** [7s Kc 4d]
+grace checks
+erin bets €0.14
+frank calls €0.14
+grace calls €0.14
+*** Turn *** [7s Kc 4d] [9c]
+grace checks
+erin bets €0.53
+frank folds
+grace folds
+Uncalled bet returned to erin: €0.53
+erin wins €0.53
+*** Summary ***
+Total pot €0.57 Rake €0.04
+Seat 1: erin: bet €0.72 and won €1.06, net result: €0.34
+Seat 2: frank: bet €0.19 and won €0, net result: €-0.19
+Seat 4: grace: bet €0.19 and won €0, net result: €-0.19
+
+
+Unibet Hand #1615955170 - 0.05/0.10 - No Limit Hold'Em Banzai - UTC 09:57:01 2026/07/17
+Table "90119397" 5-max
+*** Seated players ***
+Seat 1: olivia (€0.90)
+Seat 2: Hero[Unibet_0000000000000001] (€1)
+Seat 3: peggy (€5.23)
+Seat 4: rupert (€1.86)
+Seat 5: sybil (€1.13)
+*** Blinds and button ***
+sybil has the button
+olivia posts small blind €0.05
+Hero[Unibet_0000000000000001] posts big blind €0.10
+*** Hole cards ***
+Dealt in olivia
+Dealt to Hero[Unibet_0000000000000001] [Qh 3h]
+Dealt in peggy
+Dealt in rupert
+Dealt in sybil
+*** Preflop ***
+peggy calls €0.10
+rupert folds
+sybil calls €0.10
+olivia calls €0.05
+Hero[Unibet_0000000000000001] checks
+*** Flop *** [Jd 2s Qc]
+olivia checks
+Hero[Unibet_0000000000000001] bets €0.90, and is all-in
+peggy folds
+sybil folds
+olivia folds
+Uncalled bet returned to Hero[Unibet_0000000000000001]: €0.90
+Hero[Unibet_0000000000000001] wins €0.37
+*** Summary ***
+Total pot €0.40 Rake €0.03
+Seat 1: olivia: bet €0.10 and won €0, net result: €-0.10
+Seat 2: Hero[Unibet_0000000000000001]: bet €1 and won €1.27, net result: €0.27
+Seat 3: peggy: bet €0.10 and won €0, net result: €-0.10
+Seat 5: sybil: bet €0.10 and won €0, net result: €-0.10
+
+
+Unibet Hand #1615955461 - 0.05/0.10 - No Limit Hold'Em Banzai - UTC 09:57:24 2026/07/17
+Table "90119397" 5-max
+*** Seated players ***
+Seat 1: olivia (€0.80)
+Seat 2: Hero[Unibet_0000000000000001] (€1.27)
+Seat 3: peggy (€5.13)
+Seat 4: rupert (€1.86)
+Seat 5: sybil (€1.03)
+*** Blinds and button ***
+olivia has the button
+Hero[Unibet_0000000000000001] posts small blind €0.05
+peggy posts big blind €0.10
+*** Hole cards ***
+Dealt to Hero[Unibet_0000000000000001] [7s 4s]
+Dealt in peggy
+Dealt in rupert
+Dealt in sybil
+Dealt in olivia
+*** Preflop ***
+rupert folds
+sybil calls €0.10
+olivia calls €0.10
+Hero[Unibet_0000000000000001] folds  (timed out)
+peggy checks
+*** Flop *** [2c 4d Qh]
+peggy checks
+sybil checks
+olivia checks
+*** Turn *** [2c 4d Qh] [Ah]
+peggy checks
+sybil checks
+olivia checks
+*** River *** [2c 4d Qh] [Ah] [Jh]
+peggy bets €0.10
+sybil folds
+olivia folds
+Uncalled bet returned to peggy: €0.10
+peggy wins €0.33
+*** Summary ***
+Total pot €0.35 Rake €0.02
+Seat 1: olivia: bet €0.10 and won €0, net result: €-0.10
+Seat 2: Hero[Unibet_0000000000000001]: bet €0.05 and won €0, net result: €-0.05
+Seat 3: peggy: bet €0.20 and won €0.43, net result: €0.23
+Seat 5: sybil: bet €0.10 and won €0, net result: €-0.10
+
+
+Unibet Hand #1615956059 - 0.05/0.10 - No Limit Hold'Em Banzai - UTC 09:58:13 2026/07/17
+Table "90119397" 5-max
+*** Seated players ***
+Seat 1: olivia (€0.70)
+Seat 2: Hero[Unibet_0000000000000001] (€1.22)
+Seat 3: peggy (€5.36)
+Seat 4: rupert (€1.86)
+Seat 5: sybil (€0.93)
+*** Blinds and button ***
+Hero[Unibet_0000000000000001] has the button
+peggy posts small blind €0.05
+rupert posts big blind €0.10
+*** Hole cards ***
+Dealt in peggy
+Dealt in rupert
+Dealt in sybil
+Dealt in olivia
+Dealt to Hero[Unibet_0000000000000001] [9d 8c]
+*** Preflop ***
+sybil folds
+olivia raises €0.20 to €0.20
+Hero[Unibet_0000000000000001] folds
+peggy folds
+rupert folds
+olivia wins €0.35
+*** Summary ***
+Total pot €0.35 Rake €0
+Seat 1: olivia: bet €0.20 and won €0.35, net result: €0.15
+Seat 3: peggy: bet €0.05 and won €0, net result: €-0.05
+Seat 4: rupert: bet €0.10 and won €0, net result: €-0.10
+
+
+Unibet Hand #1615956280 - 0.05/0.10 - No Limit Hold'Em Banzai - UTC 09:58:32 2026/07/17
+Table "90119397" 5-max
+*** Seated players ***
+Seat 1: olivia (€0.85)
+Seat 2: Hero[Unibet_0000000000000001] (€1.22)
+Seat 3: peggy (€5.31)
+Seat 4: rupert (€1.76)
+Seat 5: sybil (€0.93)
+*** Blinds and button ***
+peggy has the button
+rupert posts small blind €0.05
+sybil posts big blind €0.10
+*** Hole cards ***
+Dealt in rupert
+Dealt to sybil [8d 9d]
+Dealt in olivia
+Dealt to Hero[Unibet_0000000000000001] [Js Jh]
+Dealt in peggy
+*** Preflop ***
+olivia folds
+Hero[Unibet_0000000000000001] raises €1.22 to €1.22, and is all-in
+peggy folds
+rupert folds
+sybil calls €0.83, and is all-in
+Uncalled bet returned to Hero[Unibet_0000000000000001]: €0.29
+*** Showdown ***
+*** Flop *** [7d Ts Ks]
+*** Turn *** [7d Ts Ks] [2s]
+*** River *** [7d Ts Ks] [2s] [2h]
+Hero[Unibet_0000000000000001] shows [Js Jh], Two pairs, Jacks up
+sybil shows [8d 9d], A Pair of Deuces
+Hero[Unibet_0000000000000001] wins €1.79
+*** Summary ***
+Total pot €1.91 Rake €0.12
+Seat 2: Hero[Unibet_0000000000000001]: bet €1.22 and won €2.08, net result: €0.86
+Seat 4: rupert: bet €0.05 and won €0, net result: €-0.05
+Seat 5: sybil: bet €0.93 and won €0, net result: €-0.93
+
+
+Unibet Hand #1615956690 - 0.05/0.10 - No Limit Hold'Em Banzai - UTC 09:59:05 2026/07/17
+Table "90119397" 5-max
+*** Seated players ***
+Seat 1: olivia (€0.85)
+Seat 2: Hero[Unibet_0000000000000001] (€2.08)
+Seat 3: peggy (€5.31)
+Seat 4: rupert (€1.71)
+Seat 5: sybil (€1)
+*** Blinds and button ***
+rupert has the button
+sybil posts small blind €0.05
+olivia posts big blind €0.10
+*** Hole cards ***
+Dealt in sybil
+Dealt in olivia
+Dealt to Hero[Unibet_0000000000000001] [8d Jc]
+Dealt in peggy
+Dealt in rupert
+*** Preflop ***
+Hero[Unibet_0000000000000001] folds
+peggy raises €0.20 to €0.20
+rupert calls €0.20
+sybil calls €0.15
+olivia folds
+*** Flop *** [Kh Qh 6s]
+sybil checks
+peggy checks
+rupert checks
+*** Turn *** [Kh Qh 6s] [4c]
+sybil bets €0.10
+peggy calls €0.10
+rupert folds
+*** River *** [Kh Qh 6s] [4c] [8h]
+sybil bets €0.10
+peggy folds
+Uncalled bet returned to sybil: €0.10
+sybil wins €0.84
+*** Summary ***
+Total pot €0.90 Rake €0.06
+Seat 1: olivia: bet €0.10 and won €0, net result: €-0.10
+Seat 3: peggy: bet €0.30 and won €0, net result: €-0.30
+Seat 4: rupert: bet €0.20 and won €0, net result: €-0.20
+Seat 5: sybil: bet €0.40 and won €0.94, net result: €0.54
+
+
+Unibet Hand #1615957259 - 0.05/0.10 - No Limit Hold'Em Banzai - UTC 09:59:48 2026/07/17
+Table "90119397" 5-max
+*** Seated players ***
+Seat 1: olivia (€0.75)
+Seat 2: Hero[Unibet_0000000000000001] (€2.08)
+Seat 3: peggy (€5.01)
+Seat 4: rupert (€1.51)
+Seat 5: sybil (€1.54)
+*** Blinds and button ***
+sybil has the button
+olivia posts small blind €0.05
+Hero[Unibet_0000000000000001] posts big blind €0.10
+*** Hole cards ***
+Dealt in olivia
+Dealt to Hero[Unibet_0000000000000001] [4s Ks]
+Dealt in peggy
+Dealt in rupert
+Dealt in sybil
+*** Preflop ***
+peggy folds
+rupert folds
+sybil folds
+olivia calls €0.05
+Hero[Unibet_0000000000000001] checks
+*** Flop *** [Qd 8s 4c]
+olivia checks
+Hero[Unibet_0000000000000001] bets €0.10
+olivia folds
+Uncalled bet returned to Hero[Unibet_0000000000000001]: €0.10
+Hero[Unibet_0000000000000001] wins €0.19
+*** Summary ***
+Total pot €0.20 Rake €0.01
+Seat 1: olivia: bet €0.10 and won €0, net result: €-0.10
+Seat 2: Hero[Unibet_0000000000000001]: bet €0.20 and won €0.29, net result: €0.09
+
+
+Unibet Hand #1615957492 - 0.05/0.10 - No Limit Hold'Em Banzai - UTC 10:00:05 2026/07/17
+Table "90119397" 5-max
+*** Seated players ***
+Seat 1: olivia (€0.65)
+Seat 2: Hero[Unibet_0000000000000001] (€2.17)
+Seat 4: rupert (€1.51)
+Seat 5: sybil (€1.54)
+*** Blinds and button ***
+olivia has the button
+Hero[Unibet_0000000000000001] posts small blind €0.05
+rupert posts big blind €0.10
+*** Hole cards ***
+Dealt to Hero[Unibet_0000000000000001] [3d 2d]
+Dealt in rupert
+Dealt in sybil
+Dealt in olivia
+*** Preflop ***
+sybil calls €0.10
+olivia calls €0.10
+Hero[Unibet_0000000000000001] calls €0.05
+rupert checks
+*** Flop *** [As 2h Qc]
+Hero[Unibet_0000000000000001] checks
+rupert checks
+sybil checks
+olivia checks
+*** Turn *** [As 2h Qc] [6h]
+Hero[Unibet_0000000000000001] bets €0.10
+rupert calls €0.10
+sybil calls €0.10
+olivia folds
+*** River *** [As 2h Qc] [6h] [9c]
+Hero[Unibet_0000000000000001] checks
+rupert checks
+sybil bets €0.26
+Hero[Unibet_0000000000000001] folds
+rupert folds
+Uncalled bet returned to sybil: €0.26
+sybil wins €0.66
+*** Summary ***
+Total pot €0.70 Rake €0.04
+Seat 1: olivia: bet €0.10 and won €0, net result: €-0.10
+Seat 2: Hero[Unibet_0000000000000001]: bet €0.20 and won €0, net result: €-0.20
+Seat 4: rupert: bet €0.20 and won €0, net result: €-0.20
+Seat 5: sybil: bet €0.46 and won €0.92, net result: €0.46
+
+
+Unibet Hand #1615957954 - 0.05/0.10 - No Limit Hold'Em Banzai - UTC 10:00:43 2026/07/17
+Table "90119397" 5-max
+*** Seated players ***
+Seat 1: olivia (€0.55)
+Seat 2: Hero[Unibet_0000000000000001] (€1.97)
+Seat 4: rupert (€1.31)
+Seat 5: sybil (€2)
+*** Blinds and button ***
+Hero[Unibet_0000000000000001] has the button
+rupert posts small blind €0.05
+sybil posts big blind €0.10
+*** Hole cards ***
+Dealt to rupert [As 4c]
+Dealt to sybil [7s 9h]
+Dealt to olivia [Qc Ad]
+Dealt to Hero[Unibet_0000000000000001] [Td 3c]
+*** Preflop ***
+olivia calls €0.10
+Hero[Unibet_0000000000000001] folds
+rupert calls €0.05
+sybil checks
+*** Flop *** [7d 2d 4h]
+rupert is reconnected
+rupert bets €0.10
+sybil calls €0.10
+olivia calls €0.10
+*** Turn *** [7d 2d 4h] [Jd]
+rupert bets €0.10
+sybil calls €0.10
+olivia calls €0.10
+*** River *** [7d 2d 4h] [Jd] [Js]
+rupert checks
+sybil bets €0.10
+olivia calls €0.10
+rupert calls €0.10
+*** Showdown ***
+olivia shows [Qc Ad], A Pair of Jacks
+rupert shows [As 4c], Two pairs, Jacks and Fours
+sybil shows [7s 9h], Two pairs, Jacks and Sevens
+sybil wins €1.12
+*** Summary ***
+Total pot €1.20 Rake €0.08
+Seat 1: olivia: bet €0.40 and won €0, net result: €-0.40
+Seat 4: rupert: bet €0.40 and won €0, net result: €-0.40
+Seat 5: sybil: bet €0.40 and won €1.12, net result: €0.72
+
+

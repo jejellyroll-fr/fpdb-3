@@ -1,0 +1,210 @@
+=== HAND HISTORIES ===
+
+Unibet Hand #1558006027 - 0.03/0.05 - Pot Limit Omaha - UTC 21:59:40 2026/06/05
+Table "86113818" 6-max
+*** Seated players ***
+Seat 1: trent (€0) (sitting out)
+Seat 2: victor (€1.53)
+Seat 3: walter (€4.86)
+Seat 4: Hero[Unibet_0000000000000001] (€3.84)
+*** Blinds and button ***
+victor has the button
+walter posts small blind €0.03
+Hero[Unibet_0000000000000001] posts big blind €0.05
+*** Hole cards ***
+Dealt to walter [Ts Kd 4c Td]
+Dealt to Hero[Unibet_0000000000000001] [5h 9c Qc 7h]
+Dealt to victor [9h 8d 2s Tc]
+*** Preflop ***
+victor calls €0.05
+walter calls €0.02
+Hero[Unibet_0000000000000001] checks
+*** Flop *** [2h 3s 6s]
+walter checks
+Hero[Unibet_0000000000000001] checks
+victor checks
+*** Turn *** [2h 3s 6s] [Qs]
+walter checks
+Hero[Unibet_0000000000000001] checks
+victor checks
+*** River *** [2h 3s 6s] [Qs] [4d]
+walter checks
+Hero[Unibet_0000000000000001] checks
+victor checks
+*** Showdown ***
+victor shows [9h 8d 2s Tc], A Pair of Deuces
+walter shows [Ts Kd 4c Td], A Pair of Tens
+Hero[Unibet_0000000000000001] shows [5h 9c Qc 7h], A Straight
+Hero[Unibet_0000000000000001] wins €0.14
+*** Summary ***
+Total pot €0.15 Rake €0.01
+Seat 2: victor: bet €0.05 and won €0, net result: €-0.05
+Seat 3: walter: bet €0.05 and won €0, net result: €-0.05
+Seat 4: Hero[Unibet_0000000000000001]: bet €0.05 and won €0.14, net result: €0.09
+
+
+Unibet Hand #1558007138 - 0.03/0.05 - Pot Limit Omaha - UTC 22:00:21 2026/06/05
+Table "86113818" 6-max
+*** Seated players ***
+Seat 1: trent (€0) (sitting out)
+Seat 2: victor (€1.48)
+Seat 3: walter (€4.81)
+Seat 4: Hero[Unibet_0000000000000001] (€3.93)
+*** Blinds and button ***
+walter has the button
+Hero[Unibet_0000000000000001] posts small blind €0.03
+victor posts big blind €0.05
+*** Hole cards ***
+Dealt to Hero[Unibet_0000000000000001] [6c 9c 8s Ad]
+Dealt in victor
+Dealt in walter
+*** Preflop ***
+walter calls €0.05
+Hero[Unibet_0000000000000001] folds
+victor checks
+*** Flop *** [Jh 3c 2h]
+victor checks
+walter bets €0.06
+victor calls €0.06
+*** Turn *** [Jh 3c 2h] [Tc]
+victor checks
+walter checks
+*** River *** [Jh 3c 2h] [Tc] [2d]
+victor checks
+walter bets €0.07
+victor folds
+Uncalled bet returned to walter: €0.07
+walter wins €0.23
+*** Summary ***
+Total pot €0.25 Rake €0.02
+Seat 2: victor: bet €0.11 and won €0, net result: €-0.11
+Seat 3: walter: bet €0.18 and won €0.30, net result: €0.12
+Seat 4: Hero[Unibet_0000000000000001]: bet €0.03 and won €0, net result: €-0.03
+
+
+Unibet Hand #1558008046 - 0.03/0.05 - Pot Limit Omaha - UTC 22:00:55 2026/06/05
+Table "86113818" 6-max
+*** Seated players ***
+Seat 1: trent (€0) (sitting out)
+Seat 2: victor (€1.37)
+Seat 3: walter (€4.93)
+Seat 4: Hero[Unibet_0000000000000001] (€3.90)
+*** Blinds and button ***
+Hero[Unibet_0000000000000001] has the button
+victor posts small blind €0.03
+walter posts big blind €0.05
+*** Hole cards ***
+Dealt to victor [2h 2d 5c Kc]
+Dealt in walter
+Dealt to Hero[Unibet_0000000000000001] [6d 7d 6s 9s]
+*** Preflop ***
+Hero[Unibet_0000000000000001] calls €0.05
+victor calls €0.02
+walter checks
+*** Flop *** [5h 5d 4d]
+victor checks
+walter checks
+Hero[Unibet_0000000000000001] bets €0.05
+victor calls €0.05
+walter folds
+*** Turn *** [5h 5d 4d] [Kd]
+victor checks
+Hero[Unibet_0000000000000001] bets €0.05
+victor calls €0.05
+*** River *** [5h 5d 4d] [Kd] [4s]
+victor checks
+Hero[Unibet_0000000000000001] checks
+*** Showdown ***
+victor shows [2h 2d 5c Kc], Full House
+Hero[Unibet_0000000000000001] shows [6d 7d 6s 9s], A Flush
+victor wins €0.33
+*** Summary ***
+Total pot €0.35 Rake €0.02
+Seat 2: victor: bet €0.15 and won €0.33, net result: €0.18
+Seat 3: walter: bet €0.05 and won €0, net result: €-0.05
+Seat 4: Hero[Unibet_0000000000000001]: bet €0.15 and won €0, net result: €-0.15
+
+
+Unibet Hand #1558008873 - 0.03/0.05 - Pot Limit Omaha - UTC 22:01:25 2026/06/05
+Table "86113818" 6-max
+*** Seated players ***
+Seat 1: trent (€0) (sitting out)
+Seat 2: victor (€1.55)
+Seat 3: walter (€4.88)
+Seat 4: Hero[Unibet_0000000000000001] (€3.75)
+*** Blinds and button ***
+victor has the button
+walter posts small blind €0.03
+Hero[Unibet_0000000000000001] posts big blind €0.05
+*** Hole cards ***
+Dealt to walter [Kc 5h 4d Qc]
+Dealt to Hero[Unibet_0000000000000001] [4c 2c 6h 3s]
+Dealt to victor [Kd 4s Qs 6s]
+*** Preflop ***
+victor calls €0.05
+walter calls €0.02
+Hero[Unibet_0000000000000001] checks
+*** Flop *** [7s 9c Ad]
+walter checks
+Hero[Unibet_0000000000000001] checks
+victor checks
+*** Turn *** [7s 9c Ad] [9d]
+walter checks
+Hero[Unibet_0000000000000001] checks
+victor checks
+*** River *** [7s 9c Ad] [9d] [7d]
+walter checks
+Hero[Unibet_0000000000000001] checks
+victor checks
+*** Showdown ***
+victor shows [Kd 4s Qs 6s], A Pair of Nines, tied
+walter shows [Kc 5h 4d Qc], A Pair of Nines, tied
+Hero[Unibet_0000000000000001] shows [4c 2c 6h 3s], A Pair of Nines with a Six kicker
+victor wins €0.07 from main pot
+walter wins €0.07 from main pot
+*** Summary ***
+Total pot €0.15 Rake €0.01
+Seat 2: victor: bet €0.05 and won €0.07, net result: €0.02
+Seat 3: walter: bet €0.05 and won €0.07, net result: €0.02
+Seat 4: Hero[Unibet_0000000000000001]: bet €0.05 and won €0, net result: €-0.05
+
+
+Unibet Hand #1558010171 - 0.03/0.05 - Pot Limit Omaha - UTC 22:02:12 2026/06/05
+Table "86113818" 6-max
+*** Seated players ***
+Seat 2: victor (€1.57)
+Seat 3: walter (€4.90)
+Seat 4: Hero[Unibet_0000000000000001] (€3.70)
+*** Blinds and button ***
+walter has the button
+Hero[Unibet_0000000000000001] posts small blind €0.03
+victor posts big blind €0.05
+*** Hole cards ***
+Dealt to Hero[Unibet_0000000000000001] [Qc 2h Ts 5d]
+Dealt to victor [Ks Qs 8d Kh]
+Dealt to walter [6c 8c Qh Ah]
+*** Preflop ***
+walter raises €0.10 to €0.10
+Hero[Unibet_0000000000000001] folds
+victor calls €0.05
+*** Flop *** [Jd Th Jc]
+victor checks
+walter checks
+*** Turn *** [Jd Th Jc] [7s]
+victor checks
+walter bets €0.05
+victor calls €0.05
+*** River *** [Jd Th Jc] [7s] [5h]
+victor checks
+walter checks
+*** Showdown ***
+victor shows [Ks Qs 8d Kh], Two pairs, Kings up
+walter shows [6c 8c Qh Ah], A Pair of Jacks
+victor wins €0.31
+*** Summary ***
+Total pot €0.33 Rake €0.02
+Seat 2: victor: bet €0.15 and won €0.31, net result: €0.16
+Seat 3: walter: bet €0.15 and won €0, net result: €-0.15
+Seat 4: Hero[Unibet_0000000000000001]: bet €0.03 and won €0, net result: €-0.03
+
+

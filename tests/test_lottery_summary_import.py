@@ -26,6 +26,8 @@ REPO = Path(__file__).resolve().parent.parent
 EXPRESSO_HANDS = REPO / "tests" / "fixtures" / "hands" / "winamax" / "expresso_2026.txt"
 EXPRESSO_SUMMARY = REPO / "regression-test-files" / "summaries" / "Winamax" / "NLHE-EUR-Expresso-1-202604.lottery.txt"
 POWER_SPIN_HANDS = REPO / "tests" / "fixtures" / "hands" / "unibet" / "power_spin_2026.txt"
+MANUAL_SPIN_HANDS = REPO / "tests" / "fixtures" / "hands" / "unibet" / "manual_export_power_spin_025_2026.txt"
+MANUAL_SPIN_SUMMARIES = REPO / "tests" / "fixtures" / "summaries" / "unibet" / "manual_export_power_spin_025_2026.txt"
 POWER_SPIN_SUMMARY = (
     REPO / "regression-test-files" / "summaries" / "Unibet" / "NLHE-EUR-PowerSpin-10-202605.lottery.txt"
 )
@@ -43,8 +45,10 @@ HERO_HANDS = (
 )
 
 
-def _import(directory: Path, *files: Path):
+def _import(directory: Path, *files: Path, unibet_hero: str | None = None):
     config = golden.build_config(directory)
+    if unibet_hero:
+        config.supported_sites["Unibet"].screen_name = unibet_hero
     Database(config).recreate_tables()
     db = Database(config)
     importer = Importer(caller=None, settings={"testData": False, "threads": 1}, config=config, sql=None)
@@ -86,3 +90,20 @@ def test_power_spin_result_goes_to_the_hands_player(tmp_path: Path) -> None:
     # One hero, whose hands and result are the same player's.
     assert _rows(db, PLAYER_NAMES) == [("Hero",), ("alice",), ("bob",)]
     assert _rows(db, HERO_HANDS) == [(8,)]
+
+
+def test_a_manual_export_holds_several_power_spins(tmp_path: Path) -> None:
+    # The History tab's export (#729): a banner, then every tournament of the
+    # period. Its summaries name the hero by account token alone, so the
+    # configured screen name links them to the hands.
+    db = _import(tmp_path, MANUAL_SPIN_HANDS, MANUAL_SPIN_SUMMARIES, unibet_hero="Hero")
+
+    # 0.23 + 0.02 for a 0.50 pool: a x2 lottery.
+    assert _rows(db, TOURNEY_TYPES) == [(23, 2, 3, 1, 1, 2)]
+    assert sorted(_rows(db, TOURNEYS)) == [(89646001, None, 3, 50), (89646054, None, 3, 50)]
+    hero_results = _rows(
+        db,
+        "SELECT t.siteTourneyNo, tp.rank FROM TourneysPlayers tp JOIN Players p ON p.id = tp.playerId "
+        "JOIN Tourneys t ON t.id = tp.tourneyId WHERE p.name = 'Hero' ORDER BY t.siteTourneyNo",
+    )
+    assert hero_results == [(89646001, 3), (89646054, 1)]
