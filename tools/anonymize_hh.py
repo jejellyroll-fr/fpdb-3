@@ -112,13 +112,15 @@ class Mapping:
         path.write_text(json.dumps({"names": self.names, "tokens": self.tokens}, indent=2) + "\n", encoding="utf-8")
 
     def add_name(self, real: str, *, hero: bool = False) -> None:
-        if real in self.names or not real.strip():
+        if not real.strip():
+            return
+        if real in self.names and self.names[real] != real:
             return
         if hero:
             self.names[real] = HERO
             return
         # A fake name is never one a real player goes by.
-        taken = set(self.names.values()) | set(self.names)
+        taken = set(self.names.values()) | set(self.names) | {real}
         fake = next((name for name in FAKE_NAMES if name not in taken), None)
         n = 0
         while fake is None or fake in taken:
@@ -286,13 +288,26 @@ class Anonymizer:
         is_summary = bool(self._summary_name_matches(rewritten)) and not again.hands
         expected = [{self.mapping.names.get(player[1], player[1]) for player in hand.players} for hand in parsed.hands]
         expected_gametypes = [hand.gametype for hand in parsed.hands]
+        expected_actions = [
+            {
+                street: [
+                    (self.mapping.names.get(action[0], action[0]), *action[1:])
+                    if isinstance(action, tuple) and action
+                    else action
+                    for action in actions
+                ]
+                for street, actions in hand.actions.items()
+            }
+            for hand in parsed.hands
+        ]
         if (
             (again.failed and not is_summary)
             or [{player[1] for player in hand.players} for hand in again.hands] != expected
             or again.seated != [self.mapping.names.get(name, name) for name in parsed.seated]
             or [hand.gametype for hand in again.hands] != expected_gametypes
+            or [hand.actions for hand in again.hands] != expected_actions
         ):
-            msg = f"{source.name}: the anonymised file no longer parses into the same hands, players and game types"
+            msg = f"{source.name}: the anonymised file no longer parses into the same hands, players, game types and actions"
             raise ValueError(msg)
         return Result(source, target, len(again.hands))
 
