@@ -51,12 +51,12 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from fpdb_3_legacy import analytics_cache  # noqa: E402
-from fpdb_3_legacy.Configuration import Config  # noqa: E402
-from fpdb_3_legacy.Database import Database  # noqa: E402
-from fpdb_3_legacy.WinningToFpdb import Winning  # noqa: E402
-from tools.cleanup_ipoker_anon_players import _sql  # noqa: E402
-from tools.repair_session_gametypes import backup_sqlite  # noqa: E402
+from fpdb_3_legacy import analytics_cache  # noqa: E402  # pylint: disable=wrong-import-position
+from fpdb_3_legacy.Configuration import Config  # noqa: E402  # pylint: disable=wrong-import-position
+from fpdb_3_legacy.Database import Database  # noqa: E402  # pylint: disable=wrong-import-position
+from fpdb_3_legacy.WinningToFpdb import Winning  # noqa: E402  # pylint: disable=wrong-import-position
+from tools.cleanup_ipoker_anon_players import _sql  # noqa: E402  # pylint: disable=wrong-import-position
+from tools.repair_session_gametypes import backup_sqlite  # noqa: E402  # pylint: disable=wrong-import-position
 
 # Every column of a Gametypes row but its id, in the order of the
 # "insertGameTypes" query.
