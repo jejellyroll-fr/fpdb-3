@@ -29,7 +29,7 @@ import pytest
 from fpdb_3_legacy import DerivedStats as derived_stats_module
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.DerivedStats import DerivedStats
-from fpdb_3_legacy.GGPokerToFpdb import GGPoker, hand_time_offset
+from fpdb_3_legacy.GGPokerToFpdb import GGPoker, hand_time_offset, session_hand_times
 
 FLOP = Path(__file__).resolve().parents[1] / "regression-test-files/cash/GGPoker/Flop"
 # Each file keeps its session's first hand: the time zone is read off it.
@@ -105,6 +105,33 @@ def test_a_half_hour_zone_is_kept() -> None:
     assert offset == datetime.timedelta(hours=5, minutes=30) or (
         offset is None and local == datetime.timedelta(hours=5, minutes=30)
     )
+
+
+@pytest.mark.skipif(not hasattr(time, "tzset"), reason="needs time.tzset to switch the process zone")
+def test_a_session_across_the_clocks_going_back_keeps_its_order(monkeypatch) -> None:
+    # Paris, 25 October 2026: at 03:00 CEST the clocks go back to 02:00 CET.
+    # The session starts 00:50 UTC (02:50 CEST); hand 3, at 02:00, is CET --
+    # the lowest wall-clock time of the file, but not its first hand.
+    monkeypatch.setenv("TZ", "Europe/Paris")
+    time.tzset()
+    try:
+        stamps = [
+            (3, datetime.datetime(2026, 10, 25, 2, 0, 30)),
+            (1, datetime.datetime(2026, 10, 25, 2, 50, 10)),
+            (4, datetime.datetime(2026, 10, 25, 2, 55, 0)),
+            (2, datetime.datetime(2026, 10, 25, 2, 59, 40)),
+        ]
+        times = session_hand_times("GG20261025-0050 - RushAndCash1 - 0.05 - 0.1 - 6max.txt", stamps)
+    finally:
+        monkeypatch.undo()
+        time.tzset()
+
+    assert times == {
+        1: _utc(2026, 10, 25, 0, 50, 10),  # was 01:50: hand 3 taken for the first, a fixed UTC+1 offset
+        2: _utc(2026, 10, 25, 0, 59, 40),
+        3: _utc(2026, 10, 25, 1, 0, 30),
+        4: _utc(2026, 10, 25, 1, 55, 0),  # the second 02:55 of the night, not the first
+    }
 
 
 def test_without_a_gg_file_name_the_local_zone_is_used() -> None:

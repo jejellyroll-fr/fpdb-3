@@ -68,7 +68,8 @@ def paris_time(monkeypatch) -> Iterator[None]:
     time.tzset()
 
 
-def test_hand_history_datetime_follows_active_locale(paris_time) -> None:
+@pytest.mark.usefixtures("paris_time")
+def test_hand_history_datetime_follows_active_locale() -> None:
     set_format_locale("fr_FR")
     # Stored in UTC; 12:30 UTC is 14:30 in Paris in July.
     hand = type("Hand", (), {"startTime": datetime(2026, 7, 16, 12, 30)})()
@@ -76,7 +77,8 @@ def test_hand_history_datetime_follows_active_locale(paris_time) -> None:
     assert GuiHandViewer._format_datetime(object(), hand) == "16/07/2026 14:30"
 
 
-def test_stored_utc_times_show_in_local_time_and_the_ui_languages_pattern(paris_time) -> None:
+@pytest.mark.usefixtures("paris_time")
+def test_stored_utc_times_show_in_local_time_and_the_ui_languages_pattern() -> None:
     # A hand played at 00:55 in Paris on 7 November is stored 23:55 UTC on the 6th.
     stored = datetime(2026, 11, 6, 23, 55)
 

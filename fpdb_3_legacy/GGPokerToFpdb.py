@@ -1,9 +1,8 @@
-from __future__ import annotations
-
 """GGPoker hand history parser for FPDB.
 This module provides parsing functionality for GGPoker hand history files.
 Handles Hold'em, Omaha, Short Deck and other game types from GGPoker.
 """
+
 #
 #    Copyright 2008-2011, Carl Gherardi
 #
@@ -22,6 +21,7 @@ Handles Hold'em, Omaha, Short Deck and other game types from GGPoker.
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
 
+from __future__ import annotations
 
 import datetime
 import re
@@ -47,7 +47,11 @@ log = get_logger("ggpoker_parser")
 # time, which put every hand five or six hours late -- and on the next day for
 # anything played in the evening.
 RE_FILE_SESSION_START = re.compile(r"^GG(?P<STAMP>\d{8}-\d{4})\b")
-RE_HAND_TIME = re.compile(r"^Poker Hand #.* - (?P<TIME>\d{4}/\d{2}/\d{2} \d{1,2}:\d{2}:\d{2})\s*$", re.MULTILINE)
+RE_HAND_NUMBER = re.compile(r"^Poker Hand #[A-Z]{0,2}(?P<HID>\d+):", re.MULTILINE)
+RE_HAND_TIME = re.compile(
+    r"^Poker Hand #[A-Z]{0,2}(?P<HID>\d+):.* - (?P<TIME>\d{4}/\d{2}/\d{2} \d{1,2}:\d{2}:\d{2})\s*$",
+    re.MULTILINE,
+)
 HAND_TIME_FORMAT = "%Y/%m/%d %H:%M:%S"
 # The first hand follows the session start by seconds, a few minutes at most.
 SESSION_START_LAG = datetime.timedelta(minutes=30)
@@ -91,11 +95,44 @@ def hand_time_offset(file_name: str, first_hand: datetime.datetime | None) -> da
     return None
 
 
-def hand_time_to_utc(wall_clock: datetime.datetime, offset: datetime.timedelta | None) -> datetime.datetime:
-    """Convert a naive GGPoker hand time to UTC, from a fixed offset or the local zone."""
-    if offset is None:
-        return wall_clock.astimezone().astimezone(pytz.utc)
-    return (wall_clock - offset).replace(tzinfo=pytz.utc)
+def hand_time_to_utc(
+    wall_clock: datetime.datetime,
+    offset: datetime.timedelta | None,
+    not_before: datetime.datetime | None = None,
+) -> datetime.datetime:
+    """Convert a naive GGPoker hand time to UTC, from a fixed offset or the local zone.
+
+    When the clocks go back, the local zone reads one hour twice. The first
+    reading is taken unless it falls before ``not_before`` -- the hand dealt
+    just before this one -- which makes it the second.
+    """
+    if offset is not None:
+        return (wall_clock - offset).replace(tzinfo=pytz.utc)
+    first = wall_clock.replace(fold=0).astimezone().astimezone(pytz.utc)
+    if not_before is not None and first < not_before:
+        second = wall_clock.replace(fold=1).astimezone().astimezone(pytz.utc)
+        if second >= not_before:
+            return second
+    return first
+
+
+def session_hand_times(file_name: str, stamps: list[tuple[int, datetime.datetime]]) -> dict[int, datetime.datetime]:
+    """The UTC start of every hand in a GGPoker file, by hand number.
+
+    Hand numbers follow the order the hands are dealt in, wall-clock times do
+    not: when the clocks go back, a hand at 02:00 CET follows one at 02:50
+    CEST. So the session's first hand is its lowest number, and each repeated
+    hour is placed after the hand before it.
+    """
+    if not stamps:
+        return {}
+    ordered = sorted(stamps, key=lambda stamp: stamp[0])
+    offset = hand_time_offset(file_name, ordered[0][1])
+    times: dict[int, datetime.datetime] = {}
+    previous = None
+    for number, wall_clock in ordered:
+        previous = times[number] = hand_time_to_utc(wall_clock, offset, previous)
+    return times
 
 
 class GGPoker(HandHistoryConverter):
@@ -209,6 +246,8 @@ class GGPoker(HandHistoryConverter):
 
     currencies: ClassVar[dict[str, str]] = {"$": "USD", "": "T$", "¥": "CNY"}
     compiledPlayers: set[str] = set()
+    # (in_path, {hand number: UTC start}) of the file being read; see _session_time.
+    _session_times: tuple[str, dict[int, datetime.datetime]] | None = None
 
     # Poker Hand #TM316262814: Tournament #9364957, WSOP #77: $5,000 No Limit Hold'em Main Event [Flight W],
     # $25M GTD Hold'em No Limit - Level10 (1,000/2,000) - 2020/08/30 15:49:08
@@ -570,26 +609,28 @@ class GGPoker(HandHistoryConverter):
                 a.group("S"),
             )
         wall_clock = datetime.datetime.strptime(datetimestr, HAND_TIME_FORMAT)  # noqa: DTZ007 - zone resolved below
-        hand.startTime = hand_time_to_utc(wall_clock, self._file_time_offset())
+        m = RE_HAND_NUMBER.match(hand.handText)
+        utc = self._session_time(int(m.group("HID"))) if m else None
+        hand.startTime = utc if utc is not None else hand_time_to_utc(wall_clock, None)
 
-    def _file_time_offset(self) -> datetime.timedelta | None:
-        """The UTC offset of this file's hand times, worked out once per file."""
+    def _session_time(self, number: int) -> datetime.datetime | None:
+        """The UTC start of hand ``number``, from its file's session (worked out once per file)."""
         in_path = str(getattr(self, "in_path", "") or "")
-        cached = getattr(self, "_time_offset_cache", None)
-        if cached is not None and cached[0] == in_path:
-            return cached[1]
-        # The whole file, not self.obs: an auto-import pass only reads the hands
-        # appended since the last one, and the session's first hand is not there.
-        text = getattr(self, "whole_file", "") or getattr(self, "obs", "") or ""
-        times = []
-        for m in RE_HAND_TIME.finditer(text):
-            try:
-                times.append(datetime.datetime.strptime(m.group("TIME"), HAND_TIME_FORMAT))  # noqa: DTZ007
-            except ValueError:
-                continue
-        offset = hand_time_offset(in_path, min(times) if times else None)
-        self._time_offset_cache = (in_path, offset)
-        return offset
+        cached = self._session_times
+        # A hand not seen yet was appended since: an auto-import pass rereads the file.
+        if cached is None or cached[0] != in_path or number not in cached[1]:
+            # The whole file, not self.obs: an auto-import pass only reads the
+            # hands appended since the last one, and the first hand is not there.
+            text = getattr(self, "whole_file", "") or getattr(self, "obs", "") or ""
+            stamps = []
+            for m in RE_HAND_TIME.finditer(text):
+                try:
+                    wall_clock = datetime.datetime.strptime(m.group("TIME"), HAND_TIME_FORMAT)  # noqa: DTZ007
+                except ValueError:
+                    continue
+                stamps.append((int(m.group("HID")), wall_clock))
+            cached = self._session_times = (in_path, session_hand_times(in_path, stamps))
+        return cached[1].get(number)
 
     def _detect_currency(self, buyin_str: str, hand: Hand) -> None:
         """Detect and set currency from buyin string."""
