@@ -43,7 +43,8 @@ def test_english_default_style_and_grouping_control() -> None:
     set_format_locale("en_US")
     assert format_number(1234.5) == "1,234.50"
     assert format_number(1234.5, 1, grouping=False) == "1234.5"
-    assert format_currency(-12.5, "USD") == "($12.50)"
+    assert format_currency(-12.5, "USD") == "-$12.50"  # was "($12.50)", Qt's accounting style
+    assert format_currency(-0.001, "USD") == "$0.00"
     assert format_date(date(2026, 7, 16)) == "7/16/26"
 
 

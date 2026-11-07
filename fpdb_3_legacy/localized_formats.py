@@ -61,7 +61,12 @@ def format_currency(value: Number, currency: str = "USD", decimals: int = 2, *, 
     """Format money using locale placement and the requested ISO currency symbol."""
     code = currency.upper()
     symbol = _CURRENCY_SYMBOLS.get(code, code)
-    formatted = _locale_copy().toCurrencyString(float(value), symbol, decimals)
+    locale = _locale_copy()
+    # A loss is written with a minus sign. Qt's en_US currency pattern is the
+    # accounting one, "($55.59)", which read as a typo next to "+$4.81".
+    formatted = locale.toCurrencyString(abs(float(value)), symbol, decimals)
+    if value < 0 and round(abs(float(value)), decimals) > 0:
+        return f"{locale.negativeSign()}{formatted}"
     return f"+{formatted}" if show_plus and value > 0 else formatted
 
 
