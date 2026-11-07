@@ -15,6 +15,7 @@ UNIBET = ROOT / "tests" / "fixtures" / "hands" / "unibet"
 HANDS = UNIBET / "manual_export_power_spin_025_2026.txt"
 SUMMARIES = ROOT / "tests" / "fixtures" / "summaries" / "unibet" / "manual_export_power_spin_025_2026.txt"
 CASH = UNIBET / "automatic_plo_cash_2026.txt"
+WINAMAX_SUMMARY = ROOT / "regression-test-files" / "summaries" / "Winamax" / "NLHE-EUR-Expresso-1-202604.lottery.txt"
 # The fixtures are anonymised already; a token of their own makes them "real".
 REAL_TOKEN = "deadbeefdeadbeef"
 FAKE_TOKEN = "0000000000000001"
@@ -152,6 +153,34 @@ def test_a_summary_only_file_is_accepted(tmp_path: Path) -> None:
     assert [(result.target.name, result.hands) for result in results] == [("summaries.txt", 0)]
 
 
+def test_a_summary_the_converter_misclassifies_is_still_accepted(tmp_path: Path) -> None:
+    # Winamax writes "Tournament summary" (lowercase s), which the converter's
+    # isSummary() misses: the file counts as a failed hand, but its
+    # "Player : name" lines say it is a supported summary.
+    folder = tmp_path / "in"
+    folder.mkdir()
+    shutil.copyfile(WINAMAX_SUMMARY, folder / "expresso.txt")
+
+    results = anonymize_hh.run("Winamax", [folder], tmp_path / "out", tmp_path / "map.json")
+
+    assert [(result.target.name, result.hands) for result in results] == [("expresso.txt", 0)]
+
+
+def test_a_player_name_in_the_file_name_is_renamed_too(tmp_path: Path) -> None:
+    # In a file name "_" and "-" are separators, not name characters:
+    # "hands_heidi.txt" must not publish "heidi".
+    folder = tmp_path / "in"
+    folder.mkdir()
+    (folder / "19247-hands_heidi.txt").write_text(HANDS.read_text(encoding="utf-8"), encoding="utf-8")
+
+    results = anonymize_hh.run("Unibet", [folder], tmp_path / "out", tmp_path / "map.json")
+
+    assert len(results) == 1
+    mapping = json.loads((tmp_path / "map.json").read_text(encoding="utf-8"))
+    assert "heidi" not in results[0].target.name
+    assert results[0].target.name == f"19247-hands_{mapping['names']['heidi']}.txt"
+
+
 def test_names_are_replaced_in_one_pass() -> None:
     # Real "alice" becoming "bob" while real "bob" becomes "alice" must not
     # turn both into the same player.
@@ -166,7 +195,7 @@ def test_names_are_replaced_in_one_pass() -> None:
 def test_nothing_is_written_when_a_name_would_survive(
     export: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(anonymize_hh.Anonymizer, "rewrite", lambda self, text: text)
+    monkeypatch.setattr(anonymize_hh.Anonymizer, "rewrite", lambda self, text, **kwargs: text)
 
     with pytest.raises(ValueError, match="would survive"):
         anonymize_hh.run("Unibet", [export], tmp_path / "out", tmp_path / "map.json")

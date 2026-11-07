@@ -15,7 +15,7 @@ one run (and of later runs given the same mapping file). A file the converter
 cannot read completely is refused: a dropped hand's names would survive
 unnoticed. Before anything is written the result is parsed again: it must give
 the same hands, with exactly the renamed players, and no real name or token may
-survive anywhere in it. Otherwise nothing is written.
+survive anywhere in it or in its file name. Otherwise nothing is written.
 
 The real-to-fake mapping is written to ``--map``, which must lie outside the
 repository: it is the one file that undoes the anonymisation.
@@ -145,10 +145,12 @@ def _decode(raw: bytes) -> tuple[bytes, str, str]:
     raise ValueError("unreadable file")
 
 
-def _name_pattern(name: str) -> re.Pattern[str]:
+def _name_pattern(name: str, *, filename: bool = False) -> re.Pattern[str]:
     # Screen names carry letters, digits, "-" and "_": a name must not match
-    # inside a longer one ("Jo" in "Jo128").
-    return re.compile(rf"(?<![\w-]){re.escape(name)}(?![\w-])")
+    # inside a longer one ("Jo" in "Jo128"). In a file name, though, "_" and
+    # "-" are separators: "hands_Jo.txt" must not keep "Jo".
+    boundary = r"[0-9A-Za-z]" if filename else r"[\w-]"
+    return re.compile(rf"(?<!{boundary}){re.escape(name)}(?!{boundary})")
 
 
 def _temp_config(directory: Path) -> Config:
@@ -214,30 +216,35 @@ class Anonymizer:
         self.config = _temp_config(workdir)
         self.workdir = workdir
 
+    def _summary_name_matches(self, text: str) -> list:
+        return [match for pattern in self.extras.summary_names for match in pattern.finditer(text)]
+
     def collect(self, path: Path, hero: str | None) -> Parsed:
         """Learn the names and tokens of one file; returns what the converter made of it."""
         parsed = _parse(self.converter, self.config, path)
-        if parsed.failed:
+        _, text, _ = _decode(path.read_bytes())
+        summaries = self._summary_name_matches(text)
+        # A summary the converter's own isSummary() misses (Winamax writes
+        # "Tournament summary", not " Tournament Summary ") registers as a
+        # failed hand; recognise it by its summary lines before rejecting.
+        is_summary = bool(summaries) and not parsed.hands
+        if parsed.failed and not is_summary:
             # A hand the converter drops is a hand whose names it never reads.
             msg = f"{path.name}: {parsed.failed} hand(s) could not be read; remove them or fix the converter first"
             raise ValueError(msg)
-        _, text, _ = _decode(path.read_bytes())
         players = parsed.players()
         if hero:
             players = [(name, name == hero or is_hero) for name, is_hero in players]
         for name, is_hero in players:
             self.mapping.add_name(name, hero=is_hero)
-        summary_names = 0
-        for pattern in self.extras.summary_names:
-            for match in pattern.finditer(text):
-                summary_names += 1
-                name = match.group("NAME")
-                stripped = name
-                if self.extras.token is not None:
-                    stripped = re.sub(rf"\[{self.extras.token.pattern}\]$", "", name)
-                # A room whose tokens mark the hero marks them in summaries too.
-                self.mapping.add_name(stripped, hero=stripped == hero or stripped != name)
-        if not parsed.hands and not summary_names:
+        for match in summaries:
+            name = match.group("NAME")
+            stripped = name
+            if self.extras.token is not None:
+                stripped = re.sub(rf"\[{self.extras.token.pattern}\]$", "", name)
+            # A room whose tokens mark the hero marks them in summaries too.
+            self.mapping.add_name(stripped, hero=stripped == hero or stripped != name)
+        if not parsed.hands and not summaries:
             msg = f"{path.name}: neither a hand nor a tournament summary this room's tools recognise"
             raise ValueError(msg)
         if self.extras.token is not None:
@@ -245,7 +252,7 @@ class Anonymizer:
                 self.mapping.add_token(match.group("TOKEN"), self.extras.fake_token)
         return parsed
 
-    def rewrite(self, text: str) -> str:
+    def rewrite(self, text: str, *, filename: bool = False) -> str:
         # One pass each, longest first: replacing names one after another would
         # rename again a name another one had just become.
         if self.mapping.tokens:
@@ -253,12 +260,15 @@ class Anonymizer:
             text = re.sub(tokens, lambda match: self.mapping.tokens[match.group(0)], text)
         if self.mapping.names:
             names = "|".join(re.escape(real) for real in sorted(self.mapping.names, key=len, reverse=True))
-            text = re.sub(rf"(?<![\w-])(?:{names})(?![\w-])", lambda match: self.mapping.names[match.group(0)], text)
+            boundary = r"[0-9A-Za-z]" if filename else r"[\w-]"
+            text = re.sub(rf"(?<!{boundary})(?:{names})(?!{boundary})", lambda match: self.mapping.names[match.group(0)], text)
         return text
 
-    def leftovers(self, text: str) -> list[str]:
+    def leftovers(self, text: str, *, filename: bool = False) -> list[str]:
         fakes = set(self.mapping.names.values())
-        found = [real for real in self.mapping.names if real not in fakes and _name_pattern(real).search(text)]
+        found = [
+            real for real in self.mapping.names if real not in fakes and _name_pattern(real, filename=filename).search(text)
+        ]
         fake_tokens = set(self.mapping.tokens.values())
         found += [real for real in self.mapping.tokens if real not in fake_tokens and real in text]
         return found
@@ -273,9 +283,10 @@ class Anonymizer:
         staged = self.workdir / target.name
         staged.write_bytes(bom + rewritten.encode(codec))
         again = _parse(self.converter, self.config, staged)
+        is_summary = bool(self._summary_name_matches(rewritten)) and not again.hands
         expected = [{self.mapping.names.get(player[1], player[1]) for player in hand.players} for hand in parsed.hands]
         if (
-            again.failed
+            (again.failed and not is_summary)
             or [{player[1] for player in hand.players} for hand in again.hands] != expected
             or again.seated != [self.mapping.names.get(name, name) for name in parsed.seated]
         ):
@@ -317,7 +328,11 @@ def run(room: str, inputs: list[Path], out: Path, map_path: Path, hero: str | No
         parsed = {path: anonymizer.collect(path, hero) for path in files}
         results = []
         for path in files:
-            name = anonymizer.rewrite(path.name)
+            name = anonymizer.rewrite(path.name, filename=True)
+            left = anonymizer.leftovers(name, filename=True)
+            if left:
+                msg = f"{path.name}: {len(left)} real name(s) or token(s) would survive in the output file name"
+                raise ValueError(msg)
             results.append(anonymizer.anonymize(path, out / name, parsed[path]))
         if len({result.target for result in results}) != len(results):
             raise SystemExit("two inputs would be written to the same file name")
