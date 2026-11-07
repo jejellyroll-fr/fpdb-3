@@ -1,0 +1,37 @@
+Hand #2790000001 - Omaha H/L (Pot Limit) - $0.50/$1.00 - 2026/05/12 18:04:11 UTC
+Vesta (Cap) 6-max Seat #2 is the button
+Seat 1: Hero ($41.20)
+Seat 2: bob ($25.00)
+Seat 4: carol ($52.75)
+Seat 5: dave ($38.40)
+carol posts the small blind $0.50
+dave posts the big blind $1.00
+*** HOLE CARDS ***
+Dealt to Hero [Ah 2c 5d Kh]
+Hero raises $3.50 to $3.50
+bob folds
+carol calls $3.00
+dave raises $9.50 to $10.50
+Hero raises $21.00 to $24.50
+carol folds
+dave caps $19.50
+Hero calls $5.50
+*** FLOP *** [3s 7h Kd]
+Main pot $61.95 | Rake $1.55
+*** TURN *** [3s 7h Kd] [4c]
+Main pot $61.95 | Rake $1.55
+*** RIVER *** [3s 7h Kd 4c] [Qs]
+Main pot $61.95 | Rake $1.55
+*** SHOW DOWN ***
+Main pot $61.95 | Rake $1.55
+Hero shows [Ah 2c 5d Kh] (HI - a pair of Kings [Kh Kd Ah Qs 7h] | LO - [7,4,3,2,1])
+dave shows [Kc Ks Jd Td] (HI - three of a kind, Kings [Ks Kc Kd Qs 7h] | LO - [])
+dave collected $30.98 from main pot
+Hero collected $30.97 from main pot
+*** SUMMARY ***
+Total pot $61.95 | Rake $1.51 | JP Fee $0.04
+Board [3s 7h Kd 4c Qs]
+Seat 1: Hero showed [Ah 2c 5d Kh] and won $30.97 with HI - a pair of Kings [Kh Kd Ah Qs 7h] | LO - [7,4,3,2,1]
+Seat 2: bob (button) folded on the Pre-Flop and did not bet
+Seat 4: carol (small blind) folded on the Pre-Flop
+Seat 5: dave (big blind) showed [Kc Ks Jd Td] and won $30.98 with HI - three of a kind, Kings [Ks Kc Kd Qs 7h] | LO - []

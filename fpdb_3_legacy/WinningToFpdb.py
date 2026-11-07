@@ -94,7 +94,9 @@ class Winning(HandHistoryConverter):
         "All-in or Fold Limit": "al",
     }
     speeds = {"Turbo": "Turbo", "Hyper Turbo": "Hyper", "Regular": "Normal"}
-    buyin = {"CAP": "cap", "Short": "shallow"}
+    # Keyed upper case: the old format names a table "... (CAP)", the current
+    # one "Miramar (Cap)".
+    buyin = {"CAP": "cap", "SHORT": "shallow"}
 
     SnG_Fee = {
         50: {"Hyper": 0, "Turbo": 0, "Normal": 5},
@@ -173,7 +175,7 @@ class Winning(HandHistoryConverter):
         4Card\sOmaha\sH/L\sReshuffle|4Card\sOmaha\sReshuffle|5Card\sOmaha\sH/L\sReshuffle|5Card\sOmaha\sReshuffle|7Stud|7Stud\sH/L)\s?
         \((?P<LIMIT>No\sLimit|Fixed\sLimit|Pot\sLimit|All\-in\sor\sFold\sLimit)\)\s-\s
         (Level\s(?P<LEVEL>[IVXLC\d]+)\s)?
-        \(?\$?(?P<SB>[.0-9]+)/\$?(?P<BB>[.0-9]+)\)?\s?-\s?
+        \(?(?P<CURRENCY>\$)?(?P<SB>[.0-9]+)/\$?(?P<BB>[.0-9]+)\)?\s?-\s?
         (?P<DATETIME>\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2}\sUTC)
         """,
         re.MULTILINE | re.VERBOSE,
@@ -253,7 +255,7 @@ class Winning(HandHistoryConverter):
     re_TourneyName1 = re.compile(r"(?P<TOURNAME>.*),\sTable\s\d+")
     re_TourneyName2 = re.compile(r"TN\-(?P<TOURNAME>.+?)\sGAMETYPE")
     re_GTD = re.compile(r"(?P<GTD>[{NUM}]+)\sGTD".format(**substitutions))
-    re_buyinType = re.compile(r"\((?P<BUYINTYPE>CAP|Short)\)", re.MULTILINE)
+    re_buyinType = re.compile(r"\((?P<BUYINTYPE>CAP|Short)\)", re.MULTILINE | re.IGNORECASE)
     re_buyin = re.compile("{CUR}(?P<BUYIN>[,.0-9]+)".format(**substitutions), re.MULTILINE)
     re_Step = re.compile(r"\sStep\s(?P<STEPNO>\d+)")
 
@@ -600,6 +602,10 @@ class Winning(HandHistoryConverter):
             info["type"] = "tour"
             log.debug("Game type is 'tour'")
 
+        # A real-money table writes its blinds in dollars ("$0.01/$0.02"); only
+        # a blind with no currency sign is play money. The "$" used to be
+        # matched without being captured, so every hand of this format, real
+        # money included, was filed as play money.
         if info.get("currency") in ("T$", None) and info["type"] == "ring":
             info["currency"] = "play"
             log.debug("Currency set to 'play' for ring games")
@@ -779,10 +785,7 @@ class Winning(HandHistoryConverter):
                 log.debug(f"Table name: {hand.tablename}")
 
                 # Parse buyin type for cash games
-                buyin_type = self.re_buyinType.search(info["TABLE"])
-                if buyin_type:
-                    hand.gametype["buyinType"] = self.buyin[buyin_type.group("BUYINTYPE")]
-                    log.debug(f"Buyin type: {hand.gametype['buyinType']}")
+                self._read_buyin_type(hand, info["TABLE"])
         else:
             # Set default table values for cash games
             hand.buyin = 0
@@ -792,6 +795,13 @@ class Winning(HandHistoryConverter):
             log.debug("Default table settings applied for cash game")
 
         log.debug("Finished _readHandInfo1")
+
+    def _read_buyin_type(self, hand, table_name: str) -> None:
+        """File a "(Cap)" or "(Short)" cash table under its own buy-in type."""
+        buyin_type = self.re_buyinType.search(table_name)
+        if buyin_type:
+            hand.gametype["buyinType"] = self.buyin[buyin_type.group("BUYINTYPE").upper()]
+            log.debug(f"Buyin type: {hand.gametype['buyinType']}")
 
     def _readHandInfo2(self, hand) -> None:
         log.debug("Starting _readHandInfo2")
@@ -861,6 +871,7 @@ class Winning(HandHistoryConverter):
                 else:
                     hand.tablename = info[key]
                     log.debug(f"Table name: {hand.tablename}")
+                    self._read_buyin_type(hand, info[key])
             if key == "BUTTON":
                 hand.buttonpos = info[key]
                 log.debug(f"Button position: {hand.buttonpos}")
@@ -1471,6 +1482,30 @@ class Winning(HandHistoryConverter):
 
         log.debug("Finished readAction")
 
+    # A cap table ("Miramar (Cap)") limits what a player may put in one hand.
+    # The player who reaches the limit "caps", and whoever then calls up to it
+    # is capped too. Neither can bet again, so the hand runs out as an all-in
+    # would, though their stacks still hold chips: the converter cannot see it
+    # from the stacks, so it flags those actions all-in itself. The action keeps
+    # its type -- capping raises the bet, and the stats count it as a raise.
+    def _mark_cap_reached(self, hand, street, player) -> None:
+        """Record the cap the player just reached and flag the action all-in."""
+        hand.capAmount = hand.pot.committed[player]
+        self._flag_last_action_all_in(hand, street)
+
+    def _mark_call_to_cap(self, hand, street, player) -> None:
+        """Flag a call that brings the player's total in the hand up to the cap."""
+        cap = getattr(hand, "capAmount", None)
+        if cap is not None and hand.pot.committed.get(player) == cap:
+            self._flag_last_action_all_in(hand, street)
+
+    @staticmethod
+    def _flag_last_action_all_in(hand, street) -> None:
+        # Every action tuple ends with its all-in flag.
+        last = hand.actions[street][-1]
+        if last[-1] is not True:
+            hand.actions[street][-1] = (*last[:-1], True)
+
     def _readAction1(self, hand, street) -> None:
         log.debug(f"Executing _readAction1 for street: {street}")
         m = self.re_Action1.finditer(hand.streets[street])
@@ -1498,12 +1533,15 @@ class Winning(HandHistoryConverter):
             elif action_type == "calls":
                 amount = self.clearMoneyString(action.group("BET"))
                 hand.addCall(street, player, amount)
+                self._mark_call_to_cap(hand, street, player)
                 log.debug(
                     f"Added call action: Player={player}, Amount={amount}, Street={street}",
                 )
             elif action_type in ("raises", "straddle", "caps", "cap"):
                 amount = self.clearMoneyString(action.group("BET"))
                 hand.addCallandRaise(street, player, amount)
+                if action_type in ("caps", "cap"):
+                    self._mark_cap_reached(hand, street, player)
                 log.debug(
                     f"Added raise action: Player={player}, Amount={amount}, Street={street}",
                 )
@@ -1580,6 +1618,7 @@ class Winning(HandHistoryConverter):
             elif action_type == "calls":
                 amount = self.clearMoneyString(action.group("BET"))
                 hand.addCall(street, player, amount)
+                self._mark_call_to_cap(hand, street, player)
                 log.debug(
                     f"Added call action: Player={player}, Amount={amount}, Street={street}",
                 )
@@ -1596,6 +1635,8 @@ class Winning(HandHistoryConverter):
                     log.debug(
                         f"Added call and raise action: Player={player}, Amount={amount}, Street={street}",
                     )
+                if action_type in ("caps", "cap"):
+                    self._mark_cap_reached(hand, street, player)
             elif action_type == "bets":
                 amount = self.clearMoneyString(action.group("BET"))
                 hand.addBet(street, player, amount)
