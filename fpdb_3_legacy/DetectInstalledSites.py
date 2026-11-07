@@ -25,6 +25,7 @@ Features:
 - iPoker network (all major skins including French FDJ, PMU, Italian, etc.)
 - Americas Cardroom (ACR) and WPN network
 - SealsWithClubs (SwC)
+- Unibet (2026 Relax Gaming client, not the historical iPoker skin)
 - Improved error handling and logging
 - Cross-platform compatibility
 - Multiple hero detection
@@ -41,6 +42,7 @@ import fnmatch
 import ntpath
 import os
 import platform
+import re
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
@@ -1440,6 +1442,75 @@ class PartyGamingDetector(SiteDetector):
         return detected
 
 
+class UnibetDetector(SiteDetector):
+    """The current Unibet client (2026, Relax Gaming), not the historical iPoker skin "Unibet Poker".
+
+    With "Store hand history locally" turned on, the client writes one file per
+    table or tournament ("H<date> T<table or tournament> ....txt") and the
+    tournament summaries ("TS<date> T<tournament> ....txt") to
+    ``Documents/Unibet Poker/History/Exports/Automatic``, on Windows and macOS
+    alike. Hands requested from the client's History tab land in the
+    ``Manual`` folder beside it, which auto-import must not watch: they repeat
+    hands the Automatic folder already holds.
+
+    The hero is the one player whose name carries the account token,
+    ``name[Unibet_<hex>]``, so the newest files name them.
+    """
+
+    AUTOMATIC = ("Unibet Poker", "History", "Exports", "Automatic")
+    RE_HERO = re.compile(r"^Seat\s[0-9]+:\s(?P<NAME>[^\s\[]+)\[Unibet_[0-9a-fA-F]+\]", re.MULTILINE)
+    # How many of the newest files to read, and how much of each, to name the hero.
+    HERO_FILES = 20
+    HERO_BYTES = 16384
+
+    def _documents_dirs(self) -> list[Path]:
+        """Where the player's Documents folder may be."""
+        candidates = [Path.home() / "Documents"]
+        if self.platform == "Windows":
+            profile = get_windows_paths()["userprofile"]
+            if profile:
+                # OneDrive commonly redirects Documents on Windows.
+                candidates[:0] = [Path(profile) / "Documents", Path(profile) / "OneDrive" / "Documents"]
+        return list(dict.fromkeys(candidates))
+
+    def detect(self) -> dict[str, Any]:
+        """Find the Automatic export folder and the hero who plays from it."""
+        for documents in self._documents_dirs():
+            folder = documents.joinpath(*self.AUTOMATIC)
+            try:
+                if not folder.is_dir():
+                    continue
+            except OSError as e:
+                log.debug("Cannot access %s: %s", folder, e)
+                continue
+            log.info("Found Unibet hand histories at %s", folder)
+            return {"detected": True, "hhpath": str(folder), "heroname": self._hero(folder), "tspath": str(folder)}
+        return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
+
+    def _hero(self, folder: Path) -> str:
+        """The hero named in the newest hand-history files, or "" when none says."""
+        try:
+            files = sorted(
+                (path for path in folder.iterdir() if path.suffix.lower() == ".txt" and path.is_file()),
+                key=lambda path: path.stat().st_mtime,
+                reverse=True,
+            )
+        except OSError as e:
+            log.debug("Cannot list %s: %s", folder, e)
+            return ""
+        for path in files[: self.HERO_FILES]:
+            try:
+                with path.open("rb") as handle:
+                    head = handle.read(self.HERO_BYTES).decode("utf-8", errors="replace")
+            except OSError as e:
+                log.debug("Cannot read %s: %s", path, e)
+                continue
+            match = self.RE_HERO.search(head)
+            if match:
+                return match.group("NAME")
+        return ""
+
+
 class CPNDetector(SiteDetector):
     """CPN/Everygame network detector (anciennement Cake Poker Network)."""
 
@@ -1655,6 +1726,7 @@ class DetectInstalledSites:
             "CPN": CPNDetector(self.config),
             "Cake": CPNDetector(self.config),
             "Everygame": CPNDetector(self.config),
+            "Unibet": UnibetDetector(self.config),
         }
 
         # Run detection
