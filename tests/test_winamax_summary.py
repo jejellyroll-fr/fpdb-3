@@ -1036,19 +1036,35 @@ You finished in 50th place
         assert WinamaxSummary.hhtype == "summary"
         assert WinamaxSummary.codepage == ("utf8", "cp1252")
 
-    def test_initialization(self) -> None:
-        """Test __init__ method and lottery initialization."""
-        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
-            summary = WinamaxSummary(
-                config=self.config,
-                db=self.db,
-                siteName="Winamax",
-                summaryText="test",
-            )
+    def test_initialization_keeps_what_parsing_found(self) -> None:
+        """Constructing a summary parses it; nothing afterwards resets the lottery fields.
 
-            # Verify lottery fields are initialized
-            assert summary.isLottery is False
-            assert summary.tourneyMultiplier == 1
+        WinamaxSummary used to set isLottery and tourneyMultiplier back to their
+        defaults after TourneySummary.__init__ had parsed the summary, so an
+        imported Expresso was never a lottery.
+        """
+        text = (
+            "Winamax Poker - Tournament summary : Expresso(1096056742)\n"
+            "Player : Hero\n"
+            "Buy-In : 0.93€ + 0.07€\n"
+            "Registered players : 3\n"
+            "Mode : sng\n"
+            "Type : sitngo\n"
+            "Speed : turbo\n"
+            "Flight ID : 0\n"
+            "Levels : Levels : [10-20:0:90:holdem-no-limit,15-30:0:90:holdem-no-limit]\n"
+            "Prizepool : 3€\n"
+            "Tournament started 2026/04/15 14:08:30 UTC\n"
+            "You played 3min 28s \n"
+            "You finished in 1st place\n"
+            "You won 3€\n"
+        )
+
+        summary = WinamaxSummary(config=self.config, db=self.db, siteName="Winamax", summaryText=text, builtFrom="file")
+
+        assert summary.tourneyName == "Expresso"
+        assert summary.isLottery is True
+        assert summary.tourneyMultiplier == 3
 
     def _classify(self, mode: str | None, entries: str) -> bool:
         """Run the format classification in isolation."""

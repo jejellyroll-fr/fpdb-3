@@ -4643,7 +4643,7 @@
         <hhc site="Ya Poker" converter="WinningToFpdb" summaryImporter="WinningSummary"/>
         <hhc site="KingsClub" converter="KingsClubToFpdb"/>
         <hhc site="GGPoker" converter="GGPokerToFpdb"/>
-        <hhc site="Unibet" converter="UnibetToFpdb"/>
+        <hhc site="Unibet" converter="UnibetToFpdb" summaryImporter="UnibetSummary"/>
         <hhc site="Absolute" converter="AbsoluteToFpdb"/>
         <hhc site="UltimateBet" converter="AbsoluteToFpdb"/>
         <hhc site="Boss" converter="BossToFpdb"/>

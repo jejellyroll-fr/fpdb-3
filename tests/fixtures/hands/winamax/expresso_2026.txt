@@ -1,0 +1,220 @@
+Winamax Poker - Tournament "Expresso" buyIn: 0.93€ + 0.07€ level: 1 - HandId: #4707527861450309633-1-1776262121 - Holdem no limit (10/20) - 2026/04/15 14:08:41 UTC
+Table: 'Expresso(1096056742)#0' 3-max (real money) Seat #1 is the button
+Seat 1: alice (500)
+Seat 2: Hero (500)
+Seat 3: bob (500)
+*** ANTE/BLINDS ***
+Hero posts small blind 10
+bob posts big blind 20
+Dealt to Hero [6h Tc]
+*** PRE-FLOP *** 
+alice folds
+Hero calls 10
+bob checks
+*** FLOP *** [5d Jc 2d]
+Hero bets 20
+bob calls 20
+*** TURN *** [5d Jc 2d][Js]
+Hero checks
+bob checks
+*** RIVER *** [5d Jc 2d Js][As]
+Hero bets 44
+bob folds
+Hero collected 124 from pot
+*** SUMMARY ***
+Total pot 124 | No rake
+Board: [5d Jc 2d Js As]
+Seat 2: Hero (small blind) won 124
+
+
+Winamax Poker - Tournament "Expresso" buyIn: 0.93€ + 0.07€ level: 1 - HandId: #4707527861450309633-2-1776262151 - Holdem no limit (10/20) - 2026/04/15 14:09:11 UTC
+Table: 'Expresso(1096056742)#0' 3-max (real money) Seat #2 is the button
+Seat 1: alice (500)
+Seat 2: Hero (540)
+Seat 3: bob (460)
+*** ANTE/BLINDS ***
+bob posts small blind 10
+alice posts big blind 20
+Dealt to Hero [3d 3h]
+*** PRE-FLOP *** 
+Hero raises 20 to 40
+bob calls 30
+alice folds
+*** FLOP *** [6d 5d As]
+bob bets 20
+Hero calls 20
+*** TURN *** [6d 5d As][Ad]
+bob bets 20
+Hero calls 20
+*** RIVER *** [6d 5d As Ad][Kc]
+bob bets 20
+Hero calls 20
+*** SHOW DOWN ***
+bob shows [2h 2c] (Two pairs : Aces and 2)
+Hero shows [3d 3h] (Two pairs : Aces and 3)
+Hero collected 220 from pot
+*** SUMMARY ***
+Total pot 220 | No rake
+Board: [6d 5d As Ad Kc]
+Seat 2: Hero (button) showed [3d 3h] and won 220 with Two pairs : Aces and 3
+Seat 3: bob (small blind) showed [2h 2c] and lost with Two pairs : Aces and 2
+
+
+Winamax Poker - Tournament "Expresso" buyIn: 0.93€ + 0.07€ level: 1 - HandId: #4707527861450309633-3-1776262185 - Holdem no limit (10/20) - 2026/04/15 14:09:45 UTC
+Table: 'Expresso(1096056742)#0' 3-max (real money) Seat #3 is the button
+Seat 1: alice (480)
+Seat 2: Hero (660)
+Seat 3: bob (360)
+*** ANTE/BLINDS ***
+alice posts small blind 10
+Hero posts big blind 20
+Dealt to Hero [4d 8c]
+*** PRE-FLOP *** 
+bob raises 20 to 40
+alice calls 30
+Hero folds
+*** FLOP *** [Td 8h 7d]
+alice bets 100
+bob raises 220 to 320 and is all-in
+alice calls 220
+*** TURN *** [Td 8h 7d][As]
+*** RIVER *** [Td 8h 7d As][7s]
+*** SHOW DOWN ***
+bob shows [Jd Th] (Two pairs : Tens and 7)
+alice shows [Ad 8d] (Two pairs : Aces and 8)
+alice collected 740 from pot
+*** SUMMARY ***
+Total pot 740 | No rake
+Board: [Td 8h 7d As 7s]
+Seat 1: alice (small blind) showed [Ad 8d] and won 740 with Two pairs : Aces and 8
+Seat 3: bob (button) showed [Jd Th] and lost with Two pairs : Tens and 7
+
+
+Winamax Poker - Tournament "Expresso" buyIn: 0.93€ + 0.07€ level: 2 - HandId: #4707527861450309633-4-1776262211 - Holdem no limit (15/30) - 2026/04/15 14:10:11 UTC
+Table: 'Expresso(1096056742)#0' 3-max (real money) Seat #2 is the button
+Seat 1: alice (860)
+Seat 2: Hero (640)
+*** ANTE/BLINDS ***
+Hero posts small blind 15
+alice posts big blind 30
+Dealt to Hero [8s As]
+*** PRE-FLOP *** 
+Hero raises 30 to 60
+alice folds
+Hero collected 90 from pot
+*** SUMMARY ***
+Total pot 90 | No rake
+Seat 2: Hero (small blind) (button) won 90
+
+
+Winamax Poker - Tournament "Expresso" buyIn: 0.93€ + 0.07€ level: 2 - HandId: #4707527861450309633-5-1776262231 - Holdem no limit (15/30) - 2026/04/15 14:10:31 UTC
+Table: 'Expresso(1096056742)#0' 3-max (real money) Seat #1 is the button
+Seat 1: alice (830)
+Seat 2: Hero (670)
+*** ANTE/BLINDS ***
+alice posts small blind 15
+Hero posts big blind 30
+Dealt to Hero [2d 6c]
+*** PRE-FLOP *** 
+alice folds
+Hero collected 45 from pot
+*** SUMMARY ***
+Total pot 45 | No rake
+Seat 2: Hero (big blind) won 45
+
+
+Winamax Poker - Tournament "Expresso" buyIn: 0.93€ + 0.07€ level: 2 - HandId: #4707527861450309633-6-1776262236 - Holdem no limit (15/30) - 2026/04/15 14:10:36 UTC
+Table: 'Expresso(1096056742)#0' 3-max (real money) Seat #2 is the button
+Seat 1: alice (815)
+Seat 2: Hero (685)
+*** ANTE/BLINDS ***
+Hero posts small blind 15
+alice posts big blind 30
+Dealt to Hero [8h Ac]
+*** PRE-FLOP *** 
+Hero raises 30 to 60
+alice folds
+Hero collected 90 from pot
+*** SUMMARY ***
+Total pot 90 | No rake
+Seat 2: Hero (small blind) (button) won 90
+
+
+Winamax Poker - Tournament "Expresso" buyIn: 0.93€ + 0.07€ level: 2 - HandId: #4707527861450309633-7-1776262247 - Holdem no limit (15/30) - 2026/04/15 14:10:47 UTC
+Table: 'Expresso(1096056742)#0' 3-max (real money) Seat #1 is the button
+Seat 1: alice (785)
+Seat 2: Hero (715)
+*** ANTE/BLINDS ***
+alice posts small blind 15
+Hero posts big blind 30
+Dealt to Hero [Ks 7c]
+*** PRE-FLOP *** 
+alice raises 30 to 60
+Hero calls 30
+*** FLOP *** [8c 2h 9c]
+Hero checks
+alice bets 120
+Hero folds
+alice collected 240 from pot
+*** SUMMARY ***
+Total pot 240 | No rake
+Board: [8c 2h 9c]
+Seat 1: alice (small blind) (button) won 240
+
+
+Winamax Poker - Tournament "Expresso" buyIn: 0.93€ + 0.07€ level: 2 - HandId: #4707527861450309633-8-1776262264 - Holdem no limit (15/30) - 2026/04/15 14:11:04 UTC
+Table: 'Expresso(1096056742)#0' 3-max (real money) Seat #2 is the button
+Seat 1: alice (845)
+Seat 2: Hero (655)
+*** ANTE/BLINDS ***
+Hero posts small blind 15
+alice posts big blind 30
+Dealt to Hero [5h Ts]
+*** PRE-FLOP *** 
+Hero calls 15
+alice checks
+*** FLOP *** [2s Td 4h]
+alice checks
+Hero bets 30
+alice calls 30
+*** TURN *** [2s Td 4h][8c]
+alice bets 120
+Hero raises 475 to 595 and is all-in
+alice calls 475
+*** RIVER *** [2s Td 4h 8c][4s]
+*** SHOW DOWN ***
+alice shows [2c 8d] (Two pairs : 8 and 4)
+Hero shows [5h Ts] (Two pairs : Tens and 4)
+Hero collected 1310 from pot
+*** SUMMARY ***
+Total pot 1310 | No rake
+Board: [2s Td 4h 8c 4s]
+Seat 1: alice (big blind) showed [2c 8d] and lost with Two pairs : 8 and 4
+Seat 2: Hero (small blind) (button) showed [5h Ts] and won 1310 with Two pairs : Tens and 4
+
+
+Winamax Poker - Tournament "Expresso" buyIn: 0.93€ + 0.07€ level: 2 - HandId: #4707527861450309633-9-1776262296 - Holdem no limit (15/30) - 2026/04/15 14:11:36 UTC
+Table: 'Expresso(1096056742)#0' 3-max (real money) Seat #1 is the button
+Seat 1: alice (190)
+Seat 2: Hero (1310)
+*** ANTE/BLINDS ***
+alice posts small blind 15
+Hero posts big blind 30
+Dealt to Hero [Td Tc]
+*** PRE-FLOP *** 
+alice raises 160 to 190 and is all-in
+Hero raises 160 to 350
+*** FLOP *** [Kh Ts Qh]
+*** TURN *** [Kh Ts Qh][6s]
+*** RIVER *** [Kh Ts Qh 6s][2h]
+*** SHOW DOWN ***
+alice shows [2s Ad] (One pair : 2)
+Hero shows [Td Tc] (Trips of Tens)
+Hero collected 540 from pot
+*** SUMMARY ***
+Total pot 540 | No rake
+Board: [Kh Ts Qh 6s 2h]
+Seat 1: alice (small blind) (button) showed [2s Ad] and lost with One pair : 2
+Seat 2: Hero (big blind) showed [Td Tc] and won 540 with Trips of Tens
+
+

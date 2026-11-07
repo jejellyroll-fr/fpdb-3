@@ -20,6 +20,7 @@ from fpdb_3_legacy.FullTiltPokerSummary import FullTiltPokerSummary
 from fpdb_3_legacy.PacificPokerSummary import PacificPokerSummary
 from fpdb_3_legacy.PokerStarsSummary import PokerStarsSummary
 from fpdb_3_legacy.PokerTrackerSummary import PokerTrackerSummary
+from fpdb_3_legacy.UnibetSummary import UnibetSummary
 from fpdb_3_legacy.WinamaxSummary import WinamaxSummary
 from fpdb_3_legacy.WinningSummary import WinningSummary
 from tests.helpers.parser_regression import snapshot_digest
@@ -40,6 +41,7 @@ SITES = {
     "PacificPoker": (PacificPokerSummary, "PacificPoker", 15),
     "PokerTracker": (PokerTrackerSummary, "PokerTracker", 22),
     "Stars": (PokerStarsSummary, "PokerStars", 2),
+    "Unibet": (UnibetSummary, "Unibet", 30),
     "Winamax": (WinamaxSummary, "Winamax", 15),
     "Winning": (WinningSummary, "WinningPoker", 24),
 }

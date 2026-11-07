@@ -1,0 +1,256 @@
+Unibet Hand #1526895874, Tournament #83499742, €9.30 + €0.70 - 10.00/20.00 - No Limit Hold'Em - Total prize €30 - UTC 15:36:14 2026/05/12
+Table "83998820" 3-max
+*** Seated players ***
+Seat 1: Hero[Unibet_0123456789abcdef] (500)
+Seat 3: alice (500)
+Seat 5: bob (500)
+*** Blinds and button ***
+bob has the button
+Hero[Unibet_0123456789abcdef] posts small blind 10
+alice posts big blind 20
+*** Hole cards ***
+Dealt to Hero[Unibet_0123456789abcdef] [Td Qs]
+Dealt in alice
+Dealt in bob
+*** Preflop ***
+bob folds
+Hero[Unibet_0123456789abcdef] raises 30 to 40
+alice calls 20
+*** Flop *** [6c As Qh]
+Hero[Unibet_0123456789abcdef] bets 32
+alice calls 32
+*** Turn *** [6c As Qh] [Kc]
+Hero[Unibet_0123456789abcdef] checks
+alice checks
+*** River *** [6c As Qh] [Kc] [5d]
+Hero[Unibet_0123456789abcdef] checks
+alice bets 100
+Hero[Unibet_0123456789abcdef] folds
+Uncalled bet returned to alice: 100
+alice wins 144
+*** Summary ***
+Total pot 144
+Seat 1: Hero[Unibet_0123456789abcdef]: bet 72 and won 0, net result: -72
+Seat 3: alice: bet 172 and won 244, net result: 72
+
+
+
+Unibet Hand #1526896470, Tournament #83499742, €9.30 + €0.70 - 10.00/20.00 - No Limit Hold'Em - Total prize €30 - UTC 15:36:41 2026/05/12
+Table "83998820" 3-max
+*** Seated players ***
+Seat 1: Hero[Unibet_0123456789abcdef] (428)
+Seat 3: alice (572)
+Seat 5: bob (500)
+*** Blinds and button ***
+Hero[Unibet_0123456789abcdef] has the button
+alice posts small blind 10
+bob posts big blind 20
+*** Hole cards ***
+Dealt to alice [3c Ac]
+Dealt in bob
+Dealt to Hero[Unibet_0123456789abcdef] [Qd Qs]
+*** Preflop ***
+Hero[Unibet_0123456789abcdef] raises 40 to 40
+alice raises 96 to 106
+bob folds
+Hero[Unibet_0123456789abcdef] raises 388 to 428, and is all-in
+alice calls 322
+*** Showdown ***
+*** Flop *** [5h 4s 7s]
+*** Turn *** [5h 4s 7s] [Qh]
+*** River *** [5h 4s 7s] [Qh] [Kd]
+Hero[Unibet_0123456789abcdef] shows [Qd Qs], Three of a kind, Queens
+alice shows [3c Ac], High card
+Hero[Unibet_0123456789abcdef] wins 876
+*** Summary ***
+Total pot 876
+Seat 1: Hero[Unibet_0123456789abcdef]: bet 428 and won 876, net result: 448
+Seat 3: alice: bet 428 and won 0, net result: -428
+Seat 5: bob: bet 20 and won 0, net result: -20
+
+
+
+Unibet Hand #1526896957, Tournament #83499742, €9.30 + €0.70 - 10.00/20.00 - No Limit Hold'Em - Total prize €30 - UTC 15:37:05 2026/05/12
+Table "83998820" 3-max
+*** Seated players ***
+Seat 1: Hero[Unibet_0123456789abcdef] (876)
+Seat 3: alice (144)
+Seat 5: bob (480)
+*** Blinds and button ***
+alice has the button
+bob posts small blind 10
+Hero[Unibet_0123456789abcdef] posts big blind 20
+*** Hole cards ***
+Dealt in bob
+Dealt to Hero[Unibet_0123456789abcdef] [7s 4c]
+Dealt in alice
+*** Preflop ***
+alice folds
+bob calls 10
+Hero[Unibet_0123456789abcdef] checks
+*** Flop *** [7d 4d Ts]
+bob checks
+Hero[Unibet_0123456789abcdef] bets 30
+bob folds
+Uncalled bet returned to Hero[Unibet_0123456789abcdef]: 30
+Hero[Unibet_0123456789abcdef] wins 40
+*** Summary ***
+Total pot 40
+Seat 1: Hero[Unibet_0123456789abcdef]: bet 50 and won 70, net result: 20
+Seat 5: bob: bet 20 and won 0, net result: -20
+
+
+
+Unibet Hand #1526897436, Tournament #83499742, €9.30 + €0.70 - 10.00/20.00 - No Limit Hold'Em - Total prize €30 - UTC 15:37:28 2026/05/12
+Table "83998820" 3-max
+*** Seated players ***
+Seat 1: Hero[Unibet_0123456789abcdef] (896)
+Seat 3: alice (144)
+Seat 5: bob (460)
+*** Blinds and button ***
+bob has the button
+Hero[Unibet_0123456789abcdef] posts small blind 10
+alice posts big blind 20
+*** Hole cards ***
+Dealt to Hero[Unibet_0123456789abcdef] [2s 7c]
+Dealt to alice [Qh Kc]
+Dealt to bob [6d Kh]
+*** Preflop ***
+bob calls 20
+Hero[Unibet_0123456789abcdef] folds
+alice raises 124 to 144, and is all-in
+bob calls 124
+*** Showdown ***
+*** Flop *** [Qd Ts 9h]
+*** Turn *** [Qd Ts 9h] [7d]
+*** River *** [Qd Ts 9h] [7d] [Jd]
+alice shows [Qh Kc], A Straight, tied
+bob shows [6d Kh], A Straight, tied
+alice wins 149 from main pot
+bob wins 149 from main pot
+*** Summary ***
+Total pot 298
+Seat 1: Hero[Unibet_0123456789abcdef]: bet 10 and won 0, net result: -10
+Seat 3: alice: bet 144 and won 149, net result: 5
+Seat 5: bob: bet 144 and won 149, net result: 5
+
+
+
+Unibet Hand #1526898077, Tournament #83499742, €9.30 + €0.70 - 10.00/20.00 - No Limit Hold'Em - Total prize €30 - UTC 15:37:58 2026/05/12
+Table "83998820" 3-max
+*** Seated players ***
+Seat 1: Hero[Unibet_0123456789abcdef] (886)
+Seat 3: alice (149)
+Seat 5: bob (465)
+*** Blinds and button ***
+Hero[Unibet_0123456789abcdef] has the button
+alice posts small blind 10
+bob posts big blind 20
+*** Hole cards ***
+Dealt to alice [4h 8d]
+Dealt to bob [As 9s]
+Dealt to Hero[Unibet_0123456789abcdef] [Td 4s]
+*** Preflop ***
+Hero[Unibet_0123456789abcdef] folds
+alice calls 10
+bob raises 248 to 268
+alice calls 129, and is all-in
+Uncalled bet returned to bob: 119
+*** Showdown ***
+*** Flop *** [6c 3d 8s]
+*** Turn *** [6c 3d 8s] [Ac]
+*** River *** [6c 3d 8s] [Ac] [Ad]
+alice shows [4h 8d], Two pairs, Aces up
+bob shows [As 9s], Three of a kind, Aces
+bob wins 298
+alice finished the tournament in 3rd place
+*** Summary ***
+Total pot 298
+Seat 3: alice: bet 149 and won 0, net result: -149
+Seat 5: bob: bet 268 and won 417, net result: 149
+
+
+
+Unibet Hand #1526898652, Tournament #83499742, €9.30 + €0.70 - 15.00/30.00 - No Limit Hold'Em - Total prize €30 - UTC 15:38:24 2026/05/12
+Table "83998820" 3-max
+*** Seated players ***
+Seat 1: Hero[Unibet_0123456789abcdef] (886)
+Seat 5: bob (614)
+*** Blinds and button ***
+bob has the button
+bob posts small blind 15
+Hero[Unibet_0123456789abcdef] posts big blind 30
+*** Hole cards ***
+Dealt to Hero[Unibet_0123456789abcdef] [3s 7s]
+Dealt in bob
+*** Preflop ***
+bob calls 15
+Hero[Unibet_0123456789abcdef] checks
+*** Flop *** [Ks Jd Tc]
+Hero[Unibet_0123456789abcdef] checks
+bob bets 30
+Hero[Unibet_0123456789abcdef] folds
+Uncalled bet returned to bob: 30
+bob wins 60
+*** Summary ***
+Total pot 60
+Seat 1: Hero[Unibet_0123456789abcdef]: bet 30 and won 0, net result: -30
+Seat 5: bob: bet 60 and won 90, net result: 30
+
+
+
+Unibet Hand #1526899182, Tournament #83499742, €9.30 + €0.70 - 15.00/30.00 - No Limit Hold'Em - Total prize €30 - UTC 15:38:50 2026/05/12
+Table "83998820" 3-max
+*** Seated players ***
+Seat 1: Hero[Unibet_0123456789abcdef] (856)
+Seat 5: bob (644)
+*** Blinds and button ***
+Hero[Unibet_0123456789abcdef] has the button
+Hero[Unibet_0123456789abcdef] posts small blind 15
+bob posts big blind 30
+*** Hole cards ***
+Dealt in bob
+Dealt to Hero[Unibet_0123456789abcdef] [4c 9h]
+*** Preflop ***
+Hero[Unibet_0123456789abcdef] folds
+bob wins 45
+*** Summary ***
+Total pot 45
+Seat 1: Hero[Unibet_0123456789abcdef]: bet 15 and won 0, net result: -15
+Seat 5: bob: bet 30 and won 45, net result: 15
+
+
+
+Unibet Hand #1526899357, Tournament #83499742, €9.30 + €0.70 - 15.00/30.00 - No Limit Hold'Em - Total prize €30 - UTC 15:38:57 2026/05/12
+Table "83998820" 3-max
+*** Seated players ***
+Seat 1: Hero[Unibet_0123456789abcdef] (841)
+Seat 5: bob (659)
+*** Blinds and button ***
+bob has the button
+bob posts small blind 15
+Hero[Unibet_0123456789abcdef] posts big blind 30
+*** Hole cards ***
+Dealt to Hero[Unibet_0123456789abcdef] [2d As]
+Dealt to bob [Jc Ks]
+*** Preflop ***
+bob calls 15
+Hero[Unibet_0123456789abcdef] raises 811 to 841, and is all-in
+bob calls 629, and is all-in
+Uncalled bet returned to Hero[Unibet_0123456789abcdef]: 182
+*** Showdown ***
+*** Flop *** [5d 6d Ts]
+*** Turn *** [5d 6d Ts] [9d]
+*** River *** [5d 6d Ts] [9d] [9h]
+Hero[Unibet_0123456789abcdef] shows [2d As], A Pair of Nines with an Ace kicker
+bob shows [Jc Ks], A Pair of Nines with a King kicker
+Hero[Unibet_0123456789abcdef] wins 1318
+bob finished the tournament in 2nd place
+Hero[Unibet_0123456789abcdef] finished the tournament in 1st place, and won €30
+*** Summary ***
+Total pot 1318
+Seat 1: Hero[Unibet_0123456789abcdef]: bet 841 and won 1500, net result: 659
+Seat 5: bob: bet 659 and won 0, net result: -659
+
+
+

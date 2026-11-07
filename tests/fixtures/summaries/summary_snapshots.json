@@ -379,6 +379,10 @@
     "player_count": 10,
     "sha256": "8ec96b2a37713b0b1d8f0f53d05da39f155e0f840e437e4546f2dbc070136776"
   },
+  "Unibet/NLHE-EUR-PowerSpin-10-202605.lottery.txt": {
+    "player_count": 3,
+    "sha256": "21e1852358758a5ddb0534fd82408b4532def488e5d0604b9266a2ed45fe2723"
+  },
   "Winamax/20110305_Freeroll 150%80(5142226)_real_holdem_no-limit_summary.txt": {
     "player_count": 0,
     "sha256": "c3ea948eb0d677c7f0dc2fd39a907db738e74d789e45cf3aa7af3a08e2525dcf"
@@ -391,25 +395,29 @@
     "player_count": 1,
     "sha256": "e217b6b26240e56e0acf4c20f72ccda6198f77982270ccad18239c681c829bdd"
   },
+  "Winamax/NLHE-EUR-Expresso-1-202604.lottery.txt": {
+    "player_count": 1,
+    "sha256": "9061785a35f28e1067d2caea461e6700ff375596c837ddf699efd721b33c1fa9"
+  },
   "Winamax/NLHE-EUR-HUSNG-4.70-201302.semiturbo.txt": {
     "player_count": 0,
-    "sha256": "8acd12c25f61f7e3df308917d87793a25472152a479ed265361a5e4d36ce0985"
+    "sha256": "cd57423e07436719ee7f09a53deedd5eed561c1770cd3b64c000a5b0c26ac133"
   },
   "Winamax/NLHE-EUR-MTT-0.90-201302.flight.txt": {
     "player_count": 1,
-    "sha256": "eed0de7efc233c63b5c4197402b92d22e8c05710c1ab9259421a118286691e0d"
+    "sha256": "db8ba0692eca205384df2eb54708865fcf938d7e9c55b80f66a69e2fbd3e9b37"
   },
   "Winamax/NLHE-EUR-MTT-10-201704.rebuys.addons.txt": {
     "player_count": 1,
-    "sha256": "f17f1604cf9c5d03cdd359db0df3ad19794537a02848d384d64bbd1bf1044f80"
+    "sha256": "b6706ae59164f327530658163acb5b9f24ee6ceccf3fbfe82724db5a083ab655"
   },
   "Winamax/NLHE-EUR-SNG-25-201704.new.format.txt": {
     "player_count": 1,
-    "sha256": "6ae040d80d1a817abf4d8b0e7b7f8891750883a8c788a8be5b19fcaf3a336cf3"
+    "sha256": "c0e1e3313da2700595955900fb8b1f31faa43abca41a295503d9ba9cdaa8a5e4"
   },
   "Winamax/NLHE-Freeroll-201206.new.info.txt": {
     "player_count": 1,
-    "sha256": "b8f1413fc8d597907147e1f82fc9c7c8cac3d969e844de4f8e049bb30c7e9a90"
+    "sha256": "7d5419639639d828ba1f580cd368681bf166396f5a00af888b6cb412bf678dca"
   },
   "Winamax/NLHE-Freeroll-Ticket-STT-201208.txt": {
     "player_count": 1,
@@ -421,6 +429,6 @@
   },
   "Winamax/PLO5-EUR-50-HUSNG-202003.txt": {
     "player_count": 1,
-    "sha256": "ff02b8046603503c40be35f74b0435cfde75bf6b381061c22f6a87c666bf96d6"
+    "sha256": "fc40ebf614683dfa44a0f922fc324ad558b053bc75510045e7feeefbb7c41cd4"
   }
 }
