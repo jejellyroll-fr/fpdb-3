@@ -67,12 +67,12 @@ class DerivedStatsPlayersMixin(DerivedStatsBase):
 
             # Cash out fees - convert from Decimal to cents for database storage
             # and set cash out flag
-            if hasattr(hand, "cashOutFees") and player_name in hand.cashOutFees:
-                player_stats["cashOutFee"] = int(CENTS_MULTIPLIER * hand.cashOutFees[player_name])
-                player_stats["isCashOut"] = True
-            else:
-                player_stats["cashOutFee"] = 0
-                player_stats["isCashOut"] = False
+            # A cash-out is flagged by its amount as well as its fee: GGPoker and
+            # PartyPoker print no fee, and their cash-outs were never flagged.
+            fees = getattr(hand, "cashOutFees", None) or {}
+            amounts = getattr(hand, "cashOutAmounts", None) or {}
+            player_stats["cashOutFee"] = int(CENTS_MULTIPLIER * fees[player_name]) if player_name in fees else 0
+            player_stats["isCashOut"] = player_name in fees or player_name in amounts
 
     def _assemblePlayerActionCounts(self, hand: Any) -> None:
         """Count each player's actions on every street after preflop."""

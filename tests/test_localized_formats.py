@@ -1,7 +1,8 @@
 """Locale-sensitive formatting contracts."""
 
+import time
 from collections.abc import Iterator
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 import pytest
 
@@ -12,6 +13,7 @@ from fpdb_3_legacy.localized_formats import (
     format_date,
     format_datetime,
     format_number,
+    format_utc_datetime,
     get_format_locale,
     set_format_locale,
 )
@@ -41,7 +43,8 @@ def test_english_default_style_and_grouping_control() -> None:
     set_format_locale("en_US")
     assert format_number(1234.5) == "1,234.50"
     assert format_number(1234.5, 1, grouping=False) == "1234.5"
-    assert format_currency(-12.5, "USD") == "($12.50)"
+    assert format_currency(-12.5, "USD") == "-$12.50"  # was "($12.50)", Qt's accounting style
+    assert format_currency(-0.001, "USD") == "$0.00"
     assert format_date(date(2026, 7, 16)) == "7/16/26"
 
 
@@ -55,8 +58,33 @@ def test_financial_stat_and_override_follow_active_locale() -> None:
     assert overridden[1] == "12,5"
 
 
+@pytest.fixture
+def paris_time(monkeypatch) -> Iterator[None]:
+    if not hasattr(time, "tzset"):
+        pytest.skip("needs time.tzset to switch the process zone")
+    monkeypatch.setenv("TZ", "Europe/Paris")
+    time.tzset()
+    yield
+    monkeypatch.undo()
+    time.tzset()
+
+
+@pytest.mark.usefixtures("paris_time")
 def test_hand_history_datetime_follows_active_locale() -> None:
     set_format_locale("fr_FR")
-    hand = type("Hand", (), {"startTime": datetime(2026, 7, 16, 14, 30)})()
+    # Stored in UTC; 12:30 UTC is 14:30 in Paris in July.
+    hand = type("Hand", (), {"startTime": datetime(2026, 7, 16, 12, 30)})()
 
     assert GuiHandViewer._format_datetime(object(), hand) == "16/07/2026 14:30"
+
+
+@pytest.mark.usefixtures("paris_time")
+def test_stored_utc_times_show_in_local_time_and_the_ui_languages_pattern() -> None:
+    # A hand played at 00:55 in Paris on 7 November is stored 23:55 UTC on the 6th.
+    stored = datetime(2026, 11, 6, 23, 55)
+
+    set_format_locale("fr_FR")
+    assert format_utc_datetime(stored) == "07/11/2026 00:55"
+    set_format_locale("en_US")
+    assert format_utc_datetime(stored) == "11/7/26 12:55 AM"
+    assert format_utc_datetime(stored.replace(tzinfo=timezone.utc)) == "11/7/26 12:55 AM"

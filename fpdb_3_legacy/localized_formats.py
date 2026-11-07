@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from decimal import Decimal
 from threading import RLock
 
@@ -61,7 +61,14 @@ def format_currency(value: Number, currency: str = "USD", decimals: int = 2, *, 
     """Format money using locale placement and the requested ISO currency symbol."""
     code = currency.upper()
     symbol = _CURRENCY_SYMBOLS.get(code, code)
-    formatted = _locale_copy().toCurrencyString(float(value), symbol, decimals)
+    locale = _locale_copy()
+    # A loss is written with a minus sign. Qt's en_US currency pattern is the
+    # accounting one, "($55.59)", which read as a typo next to "+$4.81".
+    magnitude = abs(float(value))
+    formatted = locale.toCurrencyString(magnitude, symbol, decimals)
+    shows_a_loss = value < 0 and bool(round(magnitude, decimals))
+    if shows_a_loss:
+        return f"{locale.negativeSign()}{formatted}"
     return f"+{formatted}" if show_plus and value > 0 else formatted
 
 
@@ -86,3 +93,19 @@ def format_datetime(value: datetime, *, long: bool = False) -> str:
     )
     format_type = QLocale.FormatType.LongFormat if long else QLocale.FormatType.ShortFormat
     return _locale_copy().toString(qdatetime, format_type)
+
+
+def format_utc_datetime(value: datetime, *, long: bool = False) -> str:
+    """Format a time the database stores in UTC as this computer's local time.
+
+    Hand and tournament start times are stored as naive UTC. Shown as they are,
+    a hand played at 18:59 in Paris read 17:59 -- or the wrong day near midnight.
+    The pattern (day/month order, 12 or 24 hours) still follows the UI language.
+    """
+    utc = value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
+    try:
+        local = utc.astimezone()
+    except (OverflowError, OSError, ValueError):
+        # Outside the platform's time range (before 1970 on Windows).
+        local = utc
+    return format_datetime(local, long=long)

@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 # import Charset
 from fpdb_3_legacy import Filters, GuiTourHandViewer, gui_empty_state
 from fpdb_3_legacy.i18n import gettext as _
-from fpdb_3_legacy.localized_formats import format_currency, format_datetime, format_number
+from fpdb_3_legacy.localized_formats import format_currency, format_number, format_utc_datetime
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.table_export import install_table_export
 
@@ -295,7 +295,7 @@ class GuiTourneyPlayerStats(QSplitter):
         table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         for r, (tid, tno, start, rank, winnings, hands, currency, bounties) in enumerate(tournaments):
-            display_start = format_datetime(start) if hasattr(start, "year") else str(start or "")
+            display_start = format_utc_datetime(start) if hasattr(start, "year") else str(start or "")
             cells = [
                 str(tno) if tno is not None else "",
                 display_start,

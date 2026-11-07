@@ -65,7 +65,7 @@ from fpdb_3_legacy.hand_share_dialog import add_share_actions
 from fpdb_3_legacy.hand_viewer_filters import build_filter_clauses, required_analytics_subsystems
 from fpdb_3_legacy.holdem_classes import RANKS, grid_labels
 from fpdb_3_legacy.i18n import gettext as _
-from fpdb_3_legacy.localized_formats import format_currency, format_datetime, format_number
+from fpdb_3_legacy.localized_formats import format_currency, format_number, format_utc_datetime
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_hand_viewer")
@@ -949,7 +949,7 @@ class GuiHandViewer(QSplitter):
         if not st:
             return ""
         try:
-            return format_datetime(st)
+            return format_utc_datetime(st)
         except (AttributeError, TypeError, ValueError):
             return str(st)
 
