@@ -215,7 +215,7 @@ class Unibet(HandHistoryConverter):
         r"|Unibet\sHand\s\#\d+(\s-\s|,\sTournament\s\#)",
     )
     # The 2026 client appends a per-session token to the hero's name, e.g.
-    # "kokosat[Unibet_28204e083c0fb55a]". Strip it so the hero name is stable
+    # "kokosat[Unibet_0123456789abcdef]". Strip it so the hero name is stable
     # and matches the configured screen name. re_HeroName captures the hero's
     # name from that token (the token also identifies who the hero is).
     re_HeroToken = re.compile(r"\[Unibet_[^\]]+\]")

@@ -10,7 +10,7 @@ Sample summary:
     3 players
     Total Prize Pool: €4.00
     Tournament started 2026/06/05 21:50:39 UTC
-    1: Unibet_28204e083c0fb55a finished €4.00
+    1: Unibet_0123456789abcdef finished €4.00
     2: DrikC79 finished
     3: evymm finished
     You finished in 1st place.
