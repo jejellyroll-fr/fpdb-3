@@ -158,9 +158,8 @@ class ThemeManager:
         shade = accent
         for step in range(1, 21):
             weight = step / 20
-            shade = "#{:02x}{:02x}{:02x}".format(
-                *(round(channel + (target - channel) * weight) for channel in (red, green, blue))
-            )
+            mixed = [round(channel + (target - channel) * weight) for channel in (red, green, blue)]
+            shade = f"#{mixed[0]:02x}{mixed[1]:02x}{mixed[2]:02x}"
             if cls.contrast_ratio(shade, background) >= min_ratio:
                 break
         return shade

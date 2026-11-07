@@ -703,6 +703,7 @@ class GuiHandViewer(QSplitter):
         progress = QProgressDialog("Loading hands", "Abort", 0, len(page_ids), self)
         progress.setValue(0)
         progress.show()
+        self._cell_colors = self._result_colors()
         try:
             for idx, handid in enumerate(page_ids):
                 if progress.wasCanceled():
@@ -738,6 +739,31 @@ class GuiHandViewer(QSplitter):
         if self.page < self.page_count() - 1:
             self.page += 1
             self.render_page()
+
+    @staticmethod
+    def _result_colors() -> dict[str, QColor]:
+        """Won/Net and Flags text colours that read on the hands table.
+
+        The table follows the theme since #712, near-white under a light
+        theme, where the former fixed yellow flags and pale grey zero results
+        were nearly invisible.
+        """
+        colors = {"win": "#3fb56b", "lose": "#d66b6b", "neutral": "#c4cdd4", "flags": "#ffd34d"}
+        try:
+            from fpdb_3_legacy.ThemeManager import ThemeManager
+
+            manager = ThemeManager()
+            palette = manager.get_legacy_palette()
+            background = palette["surface_panel"]
+            colors = {
+                "win": manager._readable_accent(palette["graph_up"], background),
+                "lose": manager._readable_accent(palette["graph_down"], background),
+                "neutral": palette["muted_text"],
+                "flags": manager._readable_accent("#ffd34d", background),
+            }
+        except Exception:  # noqa: BLE001 - keep the default colours rather than fail a page
+            log.debug("Unable to read theme colours for the hands table", exc_info=True)
+        return {name: QColor(value) for name, value in colors.items()}
 
     def addHandRow(self, handid, hand) -> None:
         hero = hand.hero or self.filters.get_hero_for_site(hand.sitename, hand)
@@ -836,7 +862,8 @@ class GuiHandViewer(QSplitter):
             net_f = float(net)
         except (TypeError, ValueError):
             net_f = 0.0
-        win_color, lose_color, neutral = QColor("#3fb56b"), QColor("#d66b6b"), QColor("#c4cdd4")
+        colors = getattr(self, "_cell_colors", None) or self._result_colors()
+        win_color, lose_color, neutral = colors["win"], colors["lose"], colors["neutral"]
 
         for name, idx in ordered:
             item = modelrow[idx]
@@ -869,7 +896,7 @@ class GuiHandViewer(QSplitter):
                 except (TypeError, ValueError):
                     pass
             elif name == "Flags":
-                item.setForeground(QBrush(QColor("#ffd34d")))
+                item.setForeground(QBrush(colors["flags"]))
             elif name == "Game":
                 # Keep the raw category for the card filter / sorting.
                 item.setData(category, Qt.ItemDataRole.UserRole)

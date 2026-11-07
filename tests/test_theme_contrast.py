@@ -93,3 +93,11 @@ def test_surfaces_follow_the_theme_and_read(theme):
     heading = manager._stylesheet_property(filters, "QLabel#filterTitle", "color")
     assert heading is not None
     assert manager.contrast_ratio(heading, palette["sidebar"]) >= MIN_TEXT_RATIO
+
+    # The hands table sets its own foreground on Won/Net and Flags cells.
+    from fpdb_3_legacy.GuiHandViewer import GuiHandViewer
+
+    for name, color in GuiHandViewer._result_colors().items():
+        assert manager.contrast_ratio(color.name(), palette["surface_panel"]) >= MIN_TEXT_RATIO, (
+            f"hands table {name} {color.name()} on {palette['surface_panel']}"
+        )
