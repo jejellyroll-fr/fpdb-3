@@ -285,12 +285,14 @@ class Anonymizer:
         again = _parse(self.converter, self.config, staged)
         is_summary = bool(self._summary_name_matches(rewritten)) and not again.hands
         expected = [{self.mapping.names.get(player[1], player[1]) for player in hand.players} for hand in parsed.hands]
+        expected_gametypes = [hand.gametype for hand in parsed.hands]
         if (
             (again.failed and not is_summary)
             or [{player[1] for player in hand.players} for hand in again.hands] != expected
             or again.seated != [self.mapping.names.get(name, name) for name in parsed.seated]
+            or [hand.gametype for hand in again.hands] != expected_gametypes
         ):
-            msg = f"{source.name}: the anonymised file no longer parses into the same hands and players"
+            msg = f"{source.name}: the anonymised file no longer parses into the same hands, players and game types"
             raise ValueError(msg)
         return Result(source, target, len(again.hands))
 
