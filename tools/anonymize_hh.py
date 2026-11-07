@@ -74,6 +74,8 @@ class RoomExtras:
 
     # Lines naming players outside the hands: tournament summaries.
     summary_names: tuple[re.Pattern[str], ...] = ()
+    # Player names in room events the converter does not add to the seating.
+    event_names: tuple[re.Pattern[str], ...] = ()
     # An account token: a match's "TOKEN" group is replaced wherever it occurs.
     token: re.Pattern[str] | None = None
     # What a fake token's "TOKEN" group becomes, given its number (1, 2, ...).
@@ -90,6 +92,9 @@ ROOMS: dict[str, RoomExtras] = {
         token=re.compile(r"Unibet_(?P<TOKEN>[0-9a-fA-F]{8,})"),
     ),
     "Winamax": RoomExtras(summary_names=(re.compile(r"^Player\s:\s(?P<NAME>.+?)\s*$", re.MULTILINE),)),
+    "PokerStars": RoomExtras(
+        event_names=(re.compile(r"^(?P<NAME>.+?) joins the table at seat #\d+\s*$", re.MULTILINE),),
+    ),
 }
 
 
@@ -221,6 +226,9 @@ class Anonymizer:
     def _summary_name_matches(self, text: str) -> list:
         return [match for pattern in self.extras.summary_names for match in pattern.finditer(text)]
 
+    def _event_name_matches(self, text: str) -> list:
+        return [match for pattern in self.extras.event_names for match in pattern.finditer(text)]
+
     def _rename_player_keys(self, players: dict) -> dict:
         """Rename player keys while leaving card data untouched."""
         return {self.mapping.names.get(name, name): cards for name, cards in players.items()}
@@ -230,6 +238,7 @@ class Anonymizer:
         parsed = _parse(self.converter, self.config, path)
         _, text, _ = _decode(path.read_bytes())
         summaries = self._summary_name_matches(text)
+        event_names = self._event_name_matches(text)
         # A summary the converter's own isSummary() misses (Winamax writes
         # "Tournament summary", not " Tournament Summary ") registers as a
         # failed hand; recognise it by its summary lines before rejecting.
@@ -250,6 +259,9 @@ class Anonymizer:
                 stripped = re.sub(rf"\[{self.extras.token.pattern}\]$", "", name)
             # A room whose tokens mark the hero marks them in summaries too.
             self.mapping.add_name(stripped, hero=stripped == hero or stripped != name)
+        for match in event_names:
+            name = match.group("NAME")
+            self.mapping.add_name(name, hero=name == hero)
         if not parsed.hands and not summaries:
             msg = f"{path.name}: neither a hand nor a tournament summary this room's tools recognise"
             raise ValueError(msg)
@@ -314,16 +326,27 @@ class Anonymizer:
             }
             for hand in parsed.hands
         ]
-        if (
-            (again.failed and not is_summary)
-            or [{player[1] for player in hand.players} for hand in again.hands] != expected
-            or again.seated != [self.mapping.names.get(name, name) for name in parsed.seated]
-            or [hand.gametype for hand in again.hands] != expected_gametypes
-            or [hand.actions for hand in again.hands] != expected_actions
-            or [hand.board for hand in again.hands] != expected_boards
-            or [hand.holecards for hand in again.hands] != expected_holecards
-            or [hand.discards for hand in again.hands] != expected_discards
-            or [hand.winningHand for hand in again.hands] != expected_winning_hands
+        no_failed_hands = not again.failed or is_summary
+        same_players = [{player[1] for player in hand.players} for hand in again.hands] == expected
+        same_seated_players = again.seated == [self.mapping.names.get(name, name) for name in parsed.seated]
+        same_gametypes = [hand.gametype for hand in again.hands] == expected_gametypes
+        same_actions = [hand.actions for hand in again.hands] == expected_actions
+        same_boards = [hand.board for hand in again.hands] == expected_boards
+        same_holecards = [hand.holecards for hand in again.hands] == expected_holecards
+        same_discards = [hand.discards for hand in again.hands] == expected_discards
+        same_winning_hands = [hand.winningHand for hand in again.hands] == expected_winning_hands
+        if not all(
+            (
+                no_failed_hands,
+                same_players,
+                same_seated_players,
+                same_gametypes,
+                same_actions,
+                same_boards,
+                same_holecards,
+                same_discards,
+                same_winning_hands,
+            )
         ):
             msg = f"{source.name}: the anonymised file no longer parses into the same hands, players, game types, actions and cards"
             raise ValueError(msg)
