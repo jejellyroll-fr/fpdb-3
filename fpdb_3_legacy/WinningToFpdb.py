@@ -94,7 +94,9 @@ class Winning(HandHistoryConverter):
         "All-in or Fold Limit": "al",
     }
     speeds = {"Turbo": "Turbo", "Hyper Turbo": "Hyper", "Regular": "Normal"}
-    buyin = {"CAP": "cap", "Short": "shallow"}
+    # Keyed upper case: the old format names a table "... (CAP)", the current
+    # one "Miramar (Cap)".
+    buyin = {"CAP": "cap", "SHORT": "shallow"}
 
     SnG_Fee = {
         50: {"Hyper": 0, "Turbo": 0, "Normal": 5},
@@ -173,7 +175,7 @@ class Winning(HandHistoryConverter):
         4Card\sOmaha\sH/L\sReshuffle|4Card\sOmaha\sReshuffle|5Card\sOmaha\sH/L\sReshuffle|5Card\sOmaha\sReshuffle|7Stud|7Stud\sH/L)\s?
         \((?P<LIMIT>No\sLimit|Fixed\sLimit|Pot\sLimit|All\-in\sor\sFold\sLimit)\)\s-\s
         (Level\s(?P<LEVEL>[IVXLC\d]+)\s)?
-        \(?\$?(?P<SB>[.0-9]+)/\$?(?P<BB>[.0-9]+)\)?\s?-\s?
+        \(?(?P<CURRENCY>\$)?(?P<SB>[.0-9]+)/\$?(?P<BB>[.0-9]+)\)?\s?-\s?
         (?P<DATETIME>\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2}\sUTC)
         """,
         re.MULTILINE | re.VERBOSE,
@@ -253,7 +255,7 @@ class Winning(HandHistoryConverter):
     re_TourneyName1 = re.compile(r"(?P<TOURNAME>.*),\sTable\s\d+")
     re_TourneyName2 = re.compile(r"TN\-(?P<TOURNAME>.+?)\sGAMETYPE")
     re_GTD = re.compile(r"(?P<GTD>[{NUM}]+)\sGTD".format(**substitutions))
-    re_buyinType = re.compile(r"\((?P<BUYINTYPE>CAP|Short)\)", re.MULTILINE)
+    re_buyinType = re.compile(r"\((?P<BUYINTYPE>CAP|Short)\)", re.MULTILINE | re.IGNORECASE)
     re_buyin = re.compile("{CUR}(?P<BUYIN>[,.0-9]+)".format(**substitutions), re.MULTILINE)
     re_Step = re.compile(r"\sStep\s(?P<STEPNO>\d+)")
 
@@ -600,6 +602,10 @@ class Winning(HandHistoryConverter):
             info["type"] = "tour"
             log.debug("Game type is 'tour'")
 
+        # A real-money table writes its blinds in dollars ("$0.01/$0.02"); only
+        # a blind with no currency sign is play money. The "$" used to be
+        # matched without being captured, so every hand of this format, real
+        # money included, was filed as play money.
         if info.get("currency") in ("T$", None) and info["type"] == "ring":
             info["currency"] = "play"
             log.debug("Currency set to 'play' for ring games")
@@ -779,10 +785,7 @@ class Winning(HandHistoryConverter):
                 log.debug(f"Table name: {hand.tablename}")
 
                 # Parse buyin type for cash games
-                buyin_type = self.re_buyinType.search(info["TABLE"])
-                if buyin_type:
-                    hand.gametype["buyinType"] = self.buyin[buyin_type.group("BUYINTYPE")]
-                    log.debug(f"Buyin type: {hand.gametype['buyinType']}")
+                self._read_buyin_type(hand, info["TABLE"])
         else:
             # Set default table values for cash games
             hand.buyin = 0
@@ -792,6 +795,13 @@ class Winning(HandHistoryConverter):
             log.debug("Default table settings applied for cash game")
 
         log.debug("Finished _readHandInfo1")
+
+    def _read_buyin_type(self, hand, table_name: str) -> None:
+        """File a "(Cap)" or "(Short)" cash table under its own buy-in type."""
+        buyin_type = self.re_buyinType.search(table_name)
+        if buyin_type:
+            hand.gametype["buyinType"] = self.buyin[buyin_type.group("BUYINTYPE").upper()]
+            log.debug(f"Buyin type: {hand.gametype['buyinType']}")
 
     def _readHandInfo2(self, hand) -> None:
         log.debug("Starting _readHandInfo2")
@@ -861,6 +871,7 @@ class Winning(HandHistoryConverter):
                 else:
                     hand.tablename = info[key]
                     log.debug(f"Table name: {hand.tablename}")
+                    self._read_buyin_type(hand, info[key])
             if key == "BUTTON":
                 hand.buttonpos = info[key]
                 log.debug(f"Button position: {hand.buttonpos}")

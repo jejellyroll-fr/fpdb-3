@@ -2237,7 +2237,7 @@
   },
   "regression/Winning/7Stud-8max-USD-0.04-0.08-201907.CASHID-TN-Gorham GAMETYPE.txt": {
     "hand_count": 1,
-    "sha256": "888f6e42f419ddff6e2c80a325866bec4603335c963769c59fb40fb3be3cd011"
+    "sha256": "d1245772832408b4822cf32fd11734832fc7198387d5b6a2fa42996870706721"
   },
   "regression/Winning/Flop/6+Holdem-6-max-USD-0.02-0.05-201902.HH00000000 G0.txt": {
     "hand_count": 1,
@@ -2249,7 +2249,7 @@
   },
   "regression/Winning/Flop/LO8-6max-USD-20-40-201907.CASHID-TN-St{FULLSTOP} Lucie GAMETYPE.txt": {
     "hand_count": 1,
-    "sha256": "a3d89139e858e91077783e4b34abb2a452f29cf2d21155b81320c27e682113e3"
+    "sha256": "67d53c717045382169d28f733a42e20ddc41e54a1775403cd1639c02a4c1e87e"
   },
   "regression/Winning/Flop/NLHE-6max-USD-0.01-0.02-201608.Cap.HH00000000 G0.txt": {
     "hand_count": 3,
@@ -2265,7 +2265,7 @@
   },
   "regression/Winning/Flop/NLHE-6max-USD-0.05-0.10-201906.RUSHID-TN-Blitz Poker GAMETYPE.txt": {
     "hand_count": 1,
-    "sha256": "aecc88195dcf7f65fa469a49ad608a99b2897b968f0b59274ed158e69a06d1b5"
+    "sha256": "c33006ba0d82dac65ec3b50eb1f4143b83a053eb905af9ef48336ae337d9ec22"
   },
   "regression/Winning/Flop/NLHE-6max-play-5.00-10.00-201608.HH00000000 G0.txt": {
     "hand_count": 1,
@@ -2273,15 +2273,15 @@
   },
   "regression/Winning/Flop/NLHE-9max-USD-0.01-0.02-201911.CASHID-TN-Miramar (Cap) GAMETYPE.txt": {
     "hand_count": 1,
-    "sha256": "5c3575eec4c082691bf8f66a0de83770d7593ca5a458d2d7b930f7062b22d414"
+    "sha256": "745b33fc81d33b4c9db578975494d16ece6beb823ae3f160a225b901177e80df"
   },
   "regression/Winning/Flop/NLHE-9max-USD-0.02-0.05-202104.post.dead.txt": {
     "hand_count": 1,
-    "sha256": "f6313a28fb234cb6394259bcd6d91773e5ea1c0614b22db34f226297274552fe"
+    "sha256": "60d709948befb766061cbf7c5b3b1c44aaf3fa59872a8e0ab221914d6202407d"
   },
   "regression/Winning/Flop/NLHE-9max-USD-0.02-0.05-202104.walk.txt": {
     "hand_count": 1,
-    "sha256": "002a75c9ea801c51d0a3f05ff1a00a9d90f130cdbd876427026d81750ae26ba5"
+    "sha256": "2ee6df888d93ef80fd5f2f66887f017b4c133da651bd7f74521ffef471ce4749"
   },
   "regression/Winning/Flop/NLHE-9max-USD-1.00-2.00-201612.Unknown.Player.Acts.HH20160621 G30997753.txt": {
     "hand_count": 2,
@@ -2293,11 +2293,11 @@
   },
   "regression/Winning/Flop/NLO8-6max-USD-3-6-202104.RIT.txt": {
     "hand_count": 1,
-    "sha256": "a08637a8c4295be811b8ae1fc7a998560395b76618216adc8a26374a434e2154"
+    "sha256": "aefc9f7e1c3ee7212744136f7382a5af59402bdeff5caaf7167403017e7b8bfa"
   },
   "regression/Winning/Flop/NLO8-6max-USD-3-6-202104.walk.txt": {
     "hand_count": 1,
-    "sha256": "3fc7059dcd4184e3254887d5a142d0e86471c65ea242acbe812eefe58f2a591a"
+    "sha256": "b1223a999bb9c2f66e5610c43c665c1048c45edfb1784f6eab43d2d2c871c7b8"
   },
   "regression/Winning/Flop/PLO-6max-USD-0.01-0.02-201608.Short.HH00000000 G0.txt": {
     "hand_count": 2,
@@ -2333,7 +2333,7 @@
   },
   "regression/Winning/LO8-6max-USD-20-40-201907.CASHID-TN-St{FULLSTOP} Lucie GAMETYPE.txt": {
     "hand_count": 1,
-    "sha256": "a3d89139e858e91077783e4b34abb2a452f29cf2d21155b81320c27e682113e3"
+    "sha256": "67d53c717045382169d28f733a42e20ddc41e54a1775403cd1639c02a4c1e87e"
   },
   "regression/Winning/NLHE-6max-USD-0.01-0.02-201608.Cap.HH00000000 G0.txt": {
     "hand_count": 3,
@@ -2349,7 +2349,7 @@
   },
   "regression/Winning/NLHE-6max-USD-0.05-0.10-201906.RUSHID-TN-Blitz Poker GAMETYPE.txt": {
     "hand_count": 1,
-    "sha256": "aecc88195dcf7f65fa469a49ad608a99b2897b968f0b59274ed158e69a06d1b5"
+    "sha256": "c33006ba0d82dac65ec3b50eb1f4143b83a053eb905af9ef48336ae337d9ec22"
   },
   "regression/Winning/NLHE-6max-play-5.00-10.00-201608.HH00000000 G0.txt": {
     "hand_count": 1,
@@ -2357,7 +2357,7 @@
   },
   "regression/Winning/NLHE-9max-USD-0.01-0.02-201911.CASHID-TN-Miramar (Cap) GAMETYPE.txt": {
     "hand_count": 1,
-    "sha256": "5c3575eec4c082691bf8f66a0de83770d7593ca5a458d2d7b930f7062b22d414"
+    "sha256": "745b33fc81d33b4c9db578975494d16ece6beb823ae3f160a225b901177e80df"
   },
   "regression/Winning/NLHE-9max-USD-1.00-2.00-201612.Unknown.Player.Acts.HH20160621 G30997753.txt": {
     "hand_count": 2,
@@ -2405,11 +2405,11 @@
   },
   "regression/Winning/Stud/7Stud-8max-USD-0.04-0.08-201907.CASHID-TN-Gorham GAMETYPE.txt": {
     "hand_count": 1,
-    "sha256": "888f6e42f419ddff6e2c80a325866bec4603335c963769c59fb40fb3be3cd011"
+    "sha256": "d1245772832408b4822cf32fd11734832fc7198387d5b6a2fa42996870706721"
   },
   "regression/Winning/Stud/7StudHL-8max-USD-0.10-0.20-202607.six.card.showdown.CASHID-TN-Braselton GAMETYPE.txt": {
     "hand_count": 1,
-    "sha256": "a438dee49cf21cf6eaa874edaa9062fe76f55fb8d41293637be33054f7b4a0ba"
+    "sha256": "615bcbc8fb72d71a360e9253e4b7ef44b650d7fd5d47edcbc2fb1a4853084eea"
   },
   "regression/iPoker/Flop/5CPLO-EUR-0.05-0.10-202105.new.date.format.txt": {
     "hand_count": 1,
@@ -2545,7 +2545,11 @@
   },
   "winning/modern_cash.txt": {
     "hand_count": 1,
-    "sha256": "5c3575eec4c082691bf8f66a0de83770d7593ca5a458d2d7b930f7062b22d414"
+    "sha256": "745b33fc81d33b4c9db578975494d16ece6beb823ae3f160a225b901177e80df"
+  },
+  "winning/plo8_cap_2026.txt": {
+    "hand_count": 1,
+    "sha256": "1fe55c5cf0e4bcadcb0ffa6c6b924c899e0b53d40126871384e851d757127972"
   },
   "regression/GGPoker/Flop/PLO-6max-USD-0.05-0.10-202611.ev.cashout.cash.drop.txt": {
     "hand_count": 5,
