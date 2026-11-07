@@ -45,7 +45,9 @@ def test_templates_have_current_version_and_resolve(name):
 
 
 def test_package_template_stays_synchronized_with_root_template():
-    assert (ROOT / "fpdb_3_legacy/HUD_config.xml.example").read_bytes() == (ROOT / "HUD_config.xml.example").read_bytes()
+    assert (ROOT / "fpdb_3_legacy/HUD_config.xml.example").read_bytes() == (
+        ROOT / "HUD_config.xml.example"
+    ).read_bytes()
 
 
 def test_upgrade_preserves_personal_settings_and_repairs_alias():
@@ -133,8 +135,10 @@ def test_upgrade_config_can_be_reloaded_and_does_not_repeat(tmp_path, monkeypatc
     monkeypatch.setattr(configuration, "CONFIG_PATH", str(tmp_path))
     monkeypatch.setattr(configuration, "_find_example_config", lambda _: str(ROOT / "HUD_config.xml.example"))
     path = tmp_path / "HUD_config.xml"
-    old = (ROOT / "HUD_config.xml.example").read_text(encoding="utf-8").replace(
-        f'version="{CONFIG_VERSION}"', 'version="83"', 1
+    old = (
+        (ROOT / "HUD_config.xml.example")
+        .read_text(encoding="utf-8")
+        .replace(f'version="{CONFIG_VERSION}"', 'version="83"', 1)
     )
     old = old.replace('aux="ClassicHud, mucked"', 'aux="Classic_HUD, mucked"')
     path.write_text(old, encoding="utf-8")
@@ -219,3 +223,42 @@ def test_adding_general_defaults_does_not_hide_missing_version(tmp_path, monkeyp
     reloaded = configuration.Config(file=str(path))
     assert reloaded.general["version"] == 0
     assert reloaded.wrongConfigVersion
+
+
+def _v88(hhcs: str):
+    return parse(f"""<FreePokerToolsConfig><general version="88"/>
+      <hhcs>{hhcs}</hhcs></FreePokerToolsConfig>""")
+
+
+def _importers(doc) -> dict:
+    return {node.getAttribute("site"): node.getAttribute("summaryImporter") for node in doc.getElementsByTagName("hhc")}
+
+
+def test_v89_gives_unibet_its_summary_importer():
+    # The development HUD_config.xml declared Unibet without it (#725), so its
+    # tournament summaries were never recognised.
+    template = defusedxml.minidom.parse(str(ROOT / "HUD_config.xml.example"))
+    old = _v88(
+        '<hhc site="Unibet" converter="UnibetToFpdb"/>'
+        '<hhc site="Winamax" converter="WinamaxToFpdb" summaryImporter="MySummary"/>'
+        '<hhc site="mine" converter="UnibetToFpdb"/>'
+    )
+
+    updated = upgrade_document(old, template, CONFIG_VERSION)
+
+    assert _importers(updated) == {
+        "Unibet": "UnibetSummary",
+        # An importer the user named is kept; a room the template lacks is left alone.
+        "Winamax": "MySummary",
+        "mine": "",
+    }
+    assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
+
+
+def test_v89_leaves_a_room_on_another_converter_alone():
+    template = defusedxml.minidom.parse(str(ROOT / "HUD_config.xml.example"))
+    old = _v88('<hhc site="Unibet" converter="SomethingElse"/>')
+
+    updated = upgrade_document(old, template, CONFIG_VERSION)
+
+    assert _importers(updated) == {"Unibet": ""}

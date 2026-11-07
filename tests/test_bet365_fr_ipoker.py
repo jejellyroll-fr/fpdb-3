@@ -353,7 +353,7 @@ def test_an_upgraded_configuration_gains_the_room() -> None:
 
     updated = upgrade_document(old, template(), CONFIG_VERSION)
 
-    assert CONFIG_VERSION == 88
+    assert CONFIG_VERSION >= 88
     [site] = entries(updated, "site", "site_name")
     [hhc] = entries(updated, "hhc", "site")
     assert site.getAttribute("network") == "iPoker"
