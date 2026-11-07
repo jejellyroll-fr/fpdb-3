@@ -37,6 +37,26 @@ from fpdb_3_legacy.TourneySummary import TourneySummary
 
 log = get_logger("unibet_summary_parser")
 
+# Power Spins are Unibet's lottery sit-and-gos: three players, and a prize pool
+# drawn as a multiple of the buy-in. Neither a hand nor a summary names them
+# (only an automatic export's file name says "Power Spin"); what marks them is
+# the money: a three-handed tournament whose prize pool is not the buy-ins it
+# collected.
+POWER_SPIN_PLAYERS = 3
+
+
+def power_spin_multiplier(players: int, buyin: int, fee: int, prizepool: int) -> int | None:
+    """The lottery multiplier of a Power Spin, or None for another tournament.
+
+    Amounts are in hundredths. The multiplier is the prize pool over the full
+    entry, as Winamax Expresso's is: a 30 EUR pool for a 10 EUR spin is x3.
+    """
+    if players != POWER_SPIN_PLAYERS or buyin <= 0 or prizepool <= 0:
+        return None
+    if prizepool == players * buyin:
+        return None
+    return max(1, round(prizepool / (buyin + fee)))
+
 
 class UnibetSummary(TourneySummary):
     """Unibet 2026 tournament summary parser."""
@@ -118,6 +138,11 @@ class UnibetSummary(TourneySummary):
         self.currency = self.buyinCurrency
         self.entries = int(mg["ENTRIES"])
         self.prizepool = int(round(100 * Decimal(mg["PRIZEPOOL"])))
+        multiplier = power_spin_multiplier(self.entries, self.buyin, self.fee, self.prizepool)
+        if multiplier is not None:
+            self.isSng = True
+            self.isLottery = True
+            self.tourneyMultiplier = multiplier
 
         self.startTime = datetime.datetime.strptime(  # noqa: DTZ007
             mg["DATETIME"],

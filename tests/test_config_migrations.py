@@ -262,3 +262,26 @@ def test_v89_leaves_a_room_on_another_converter_alone():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     assert _importers(updated) == {"Unibet": ""}
+
+
+def test_v90_adds_the_current_unibet_room():
+    # The converter was declared but no <site> (#729), so the room could be
+    # neither enabled nor given a folder.
+    template = defusedxml.minidom.parse(str(ROOT / "HUD_config.xml.example"))
+    old = parse("""<FreePokerToolsConfig><general version="89"/>
+      <supported_sites><site site_name="mine"><layout_set ls="custom"/></site></supported_sites>
+      <layout_sets><ls name="custom"/></layout_sets>
+      <hhcs><hhc site="Unibet" converter="UnibetToFpdb" summaryImporter="UnibetSummary"/></hhcs>
+      </FreePokerToolsConfig>""")
+
+    updated = upgrade_document(old, template, CONFIG_VERSION)
+
+    sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
+    assert set(sites) == {"mine", "Unibet"}
+    assert sites["Unibet"].getAttribute("network") == "Unibet"
+    assert sites["Unibet"].getAttribute("enabled") == "False"
+    assert "Unibet_default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
+    # The converter entry the configuration had is kept, not duplicated.
+    assert len([n for n in updated.getElementsByTagName("hhc") if n.getAttribute("site") == "Unibet"]) == 1
+    assert reference_errors(updated) == []
+    assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
