@@ -296,6 +296,8 @@ class GuiHandViewer(QSplitter):
         self.all_handids: list[Any] = []
         self.page = 0
         self.page_size = 100
+        # Won/Net and Flags text colours, read from the theme once per page.
+        self._cell_colors: dict[str, QColor] | None = None
 
         self.pagerBox = QHBoxLayout()
         self.prevPageButton = QPushButton(_("◀ Prev"))
@@ -862,7 +864,7 @@ class GuiHandViewer(QSplitter):
             net_f = float(net)
         except (TypeError, ValueError):
             net_f = 0.0
-        colors = getattr(self, "_cell_colors", None) or self._result_colors()
+        colors = self._cell_colors or self._result_colors()
         win_color, lose_color, neutral = colors["win"], colors["lose"], colors["neutral"]
 
         for name, idx in ordered:
