@@ -1057,7 +1057,9 @@ class GuiAutoImport(QWidget):
                             "warning",
                         )
                     else:
-                        self.swc_client_process = launch_client(DEFAULT_ARCHIVE, consent=consent)
+                        self.swc_client_process = launch_client(
+                            DEFAULT_ARCHIVE, include_outbound=True, consent=consent
+                        )
                         self.addText(
                             _("\nSwC launched with the capture tap preloaded; waiting for table traffic."),
                             "info",
