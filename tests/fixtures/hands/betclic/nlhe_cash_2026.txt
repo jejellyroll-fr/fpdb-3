@@ -1,0 +1,130 @@
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Cash Game
+Game Type: NL Texas Hold'em
+Game Name: NLHE 0.02/0.05 6 Max
+Game ID: 01M6VPJJ906W7R7CGX43BF2VAS
+Hand ID: 01M6W1RC356D3WPPC822JZVFJQ
+Date & Time: 2026-11-07 22:23:37 (UTC)
+Table ID: 01M6VPJJ907NT0MBMFDBKDZYMZ
+Blinds: €0.02/€0.05
+Total Pot: €0.22
+Rake: €0.00
+*** PLAYERS ***
+Seat 1: Villain1 (€9.62) [BB]
+Seat 3: Villain2 (€7.23)
+Seat 4: Hero (€5.00) [Hero]
+Seat 5: Villain3 (€5.76) [BTN]
+Seat 6: Villain4 (€3.11) [SB]
+*** HOLE CARDS ***
+Hero: [Qh 9s]
+*** PRE-FLOP ***
+22:23:37 - Villain4: Posts SB €0.02
+22:23:37 - Villain1: Posts BB €0.05
+22:23:40 - Villain2: Folds
+22:23:59 - Hero: Folds
+22:24:03 - Hero: Sits out
+22:24:16 - Villain3: Raises to €0.15
+22:24:16 - Villain4: Folds
+22:24:22 - Villain1: Folds
+*** SUMMARY ***
+Villain3 wins main pot of €0.22
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Cash Game
+Game Type: NL Texas Hold'em
+Game Name: NLHE 0.02/0.05 6 Max
+Game ID: 01M6VPJJ906W7R7CGX43BF2VAS
+Hand ID: 01M6W1QE4TV30M99477TTDEYVB
+Date & Time: 2026-11-07 22:23:06 (UTC)
+Table ID: 01M6VPJJ907NT0MBMFDBKDZYMZ
+Blinds: €0.02/€0.05
+Total Pot: €0.24
+Rake: €0.00
+*** PLAYERS ***
+Seat 1: Villain1 (€9.62)
+Seat 3: Villain2 (€7.16)
+Seat 4: Hero (€5.00) [BTN Hero]
+Seat 5: Villain3 (€5.78) [SB]
+Seat 6: Villain4 (€3.16) [BB]
+*** HOLE CARDS ***
+Hero: [Td 3h]
+*** PRE-FLOP ***
+22:23:06 - Villain3: Posts SB €0.02
+22:23:06 - Villain4: Posts BB €0.05
+22:23:19 - Villain1: Folds
+22:23:22 - Villain2: Raises to €0.17
+22:23:24 - Hero: Folds
+22:23:33 - Villain3: Folds
+22:23:34 - Villain4: Folds
+*** SUMMARY ***
+Villain2 wins main pot of €0.24
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Cash Game
+Game Type: NL Texas Hold'em
+Game Name: NLHE 0.02/0.05 6 Max
+Game ID: 01M6VPJJ906W7R7CGX43BF2VAS
+Hand ID: 01M6W1PFW45A5BSEAYGTCA5KN8
+Date & Time: 2026-11-07 22:22:35 (UTC)
+Table ID: 01M6VPJJ907NT0MBMFDBKDZYMZ
+Blinds: €0.02/€0.05
+Total Pot: €0.24
+Rake: €0.00
+*** PLAYERS ***
+Seat 1: Villain1 (€9.62)
+Seat 3: Villain2 (€7.09) [BTN]
+Seat 4: Hero (€5.02) [SB Hero]
+Seat 5: Villain3 (€5.83) [BB]
+Seat 6: Villain4 (€3.16)
+*** HOLE CARDS ***
+Hero: [9h Ks]
+*** PRE-FLOP ***
+22:22:35 - Hero: Posts SB €0.02
+22:22:35 - Villain3: Posts BB €0.05
+22:22:39 - Villain4: Folds
+22:22:49 - Villain1: Folds
+22:22:54 - Villain2: Raises to €0.17
+22:23:01 - Hero: Folds
+22:23:03 - Villain3: Folds
+*** SUMMARY ***
+Villain2 wins main pot of €0.24
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Cash Game
+Game Type: NL Texas Hold'em
+Game Name: NLHE 0.02/0.05 6 Max
+Game ID: 01M6VPJJ906W7R7CGX43BF2VAS
+Hand ID: 01M6W1P02ZFHJTC4RK7PRQNE1N
+Date & Time: 2026-11-07 22:22:19 (UTC)
+Table ID: 01M6VPJJ907NT0MBMFDBKDZYMZ
+Blinds: €0.02/€0.05
+Total Pot: €0.07
+Rake: €0.00
+*** PLAYERS ***
+Seat 1: Villain1 (€9.62) [BTN]
+Seat 3: Villain2 (€7.11) [SB]
+Seat 4: Hero (€5.00) [BB Hero]
+Seat 5: Villain3 (€5.83)
+Seat 6: Villain4 (€3.16)
+*** HOLE CARDS ***
+Hero: [9h 7c]
+*** PRE-FLOP ***
+22:22:19 - Villain2: Posts SB €0.02
+22:22:19 - Hero: Posts BB €0.05
+22:22:26 - Villain3: Folds
+22:22:28 - Villain2: Sits in
+22:22:30 - Villain4: Folds
+22:22:30 - Villain1: Folds
+22:22:32 - Villain2: Folds
+*** SUMMARY ***
+Hero wins main pot of €0.07

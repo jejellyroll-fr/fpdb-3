@@ -1,0 +1,370 @@
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Cash Game
+Game Type: PLO Omaha
+Game Name: PLO 0.02/0.05 6 Max
+Game ID: 01M6RMBV2FTHQPW4GM3ZHBAV8J
+Hand ID: 01M6RNZYVQ1F26CEP29KNT6EEG
+Date & Time: 2026-11-06 15:00:19 (UTC)
+Table ID: 01M6RMBV2FHJ17J1ARFN8ZJ8DE
+Blinds: €0.02/€0.05
+Total Pot: €0.80
+Rake: €0.04
+*** PLAYERS ***
+Seat 2: Hero (€5.31) [BTN Hero]
+Seat 3: Villain1 (€6.77) [SB]
+Seat 4: Villain2 (€1.50) [BB]
+Seat 5: Villain3 (€0.70)
+Seat 6: Villain4 (€5.69)
+*** HOLE CARDS ***
+Hero: [4c 4d Kh 3c]
+Villain3: [Ah Ks 4s 3h]
+Villain4: [2c Kc Td As]
+*** PRE-FLOP ***
+15:00:19 - Villain1: Posts SB €0.02
+15:00:19 - Villain2: Posts BB €0.05
+15:00:30 - Villain3: Calls €0.05
+15:00:33 - Villain4: Calls €0.05
+15:00:33 - Hero: Disconnected
+15:00:43 - Hero: Sits out
+15:00:43 - Hero: Folds
+15:00:45 - Villain1: Calls €0.03
+15:00:53 - Villain2: Checks
+*** FLOP *** [2d Jh Ac]
+15:00:58 - Villain1: Checks
+15:01:02 - Villain2: Checks
+15:01:06 - Hero: Reconnected
+15:01:11 - Villain3: Checks
+15:01:13 - Villain4: Bets €0.10
+15:01:16 - Villain1: Folds
+15:01:21 - Villain2: Folds
+15:01:37 - Villain3: Calls €0.10
+*** TURN *** [2d Jh Ac 9s]
+15:01:42 - Villain3: Checks
+15:01:44 - Villain4: Bets €0.20
+15:01:56 - Villain3: Calls €0.20
+*** RIVER *** [2d Jh Ac 9s 8h]
+15:02:03 - Villain3: Checks
+15:02:06 - Villain4: Checks
+*** SHOWDOWN ***
+Villain3 shows [Ah Ks 4s 3h] (Pair) [Ah Ac Ks Jh 9s]
+Villain4 shows [2c Kc Td As] (Two Pair) [As Ac 2d 2c Jh]
+*** SUMMARY ***
+Villain4 wins main pot of €0.76
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Cash Game
+Game Type: PLO Omaha
+Game Name: PLO 0.02/0.05 6 Max
+Game ID: 01M6W4HNSFPTGDZTZ0WG9QZNVP
+Hand ID: 01M6W6HA4NAY62JJR994N24TK0
+Date & Time: 2026-11-07 23:47:09 (UTC)
+Table ID: 01M6W4HNSF5NMA28VB85H88J58
+Blinds: €0.02/€0.05
+Total Pot: €4.89
+Rake: €0.26
+*** PLAYERS ***
+Seat 2: Hero (€17.85) [BTN Hero]
+Seat 4: Villain5 (€3.76) [SB]
+Seat 5: Villain6 (€3.20) [BB]
+Seat 6: Villain7 (€4.93)
+*** HOLE CARDS ***
+Hero: [2h Ks 6c Ah]
+Villain5: [3s 7d 8c 7c]
+Villain7: [Ac 2d 6h 5c]
+*** PRE-FLOP ***
+23:47:09 - Villain5: Posts SB €0.02
+23:47:09 - Villain6: Posts BB €0.05
+23:47:14 - Villain7: Calls €0.05
+23:47:15 - Hero: Calls €0.05
+23:47:17 - Villain5: Raises to €0.10
+23:47:18 - Villain6: Calls €0.05
+23:47:21 - Villain7: Calls €0.05
+23:47:24 - Hero: Calls €0.05
+*** FLOP *** [2c 7s 8h]
+23:47:29 - Villain5: Bets €0.26
+23:47:31 - Villain6: Calls €0.26
+23:47:37 - Villain7: Calls €0.26
+23:47:39 - Hero: Disconnected
+23:47:55 - Hero: Reconnected
+23:47:58 - Hero: Folds
+*** TURN *** [2c 7s 8h 3d]
+23:48:02 - Villain5: Bets €0.59
+23:48:04 - Villain6: Calls €0.59
+23:48:12 - Villain7: Calls €0.59
+*** RIVER *** [2c 7s 8h 3d As]
+23:48:16 - Villain5: Bets €0.97
+23:48:18 - Villain6: Folds
+23:48:23 - Villain7: Calls €0.97
+*** SHOWDOWN ***
+Villain5 shows [3s 7d 8c 7c] (Three of a Kind) [7s 7d 7c As 8h]
+Villain7 shows [Ac 2d 6h 5c] (Two Pair) [As Ac 2d 2c 8h]
+*** SUMMARY ***
+Villain5 wins main pot of €4.63
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Cash Game
+Game Type: PLO Omaha
+Game Name: PLO 0.02/0.05 6 Max
+Game ID: 01M6RMBV2FTHQPW4GM3ZHBAV8J
+Hand ID: 01M6RNEHEWV0ZEBYR0AE7Q3S0D
+Date & Time: 2026-11-06 14:50:49 (UTC)
+Table ID: 01M6RMBV2FHJ17J1ARFN8ZJ8DE
+Blinds: €0.02/€0.05
+Total Pot: €5.93
+Rake: €0.32
+*** PLAYERS ***
+Seat 2: Hero (€2.88) [BTN Hero]
+Seat 3: Villain1 (€5.33) [SB]
+Seat 6: Villain4 (€6.52) [BB]
+*** HOLE CARDS ***
+Hero: [Ah Js Kd Kh]
+Villain4: [Ad Qh 8d As]
+*** PRE-FLOP ***
+14:50:49 - Villain1: Posts SB €0.02
+14:50:49 - Villain4: Posts BB €0.05
+14:50:52 - Hero: Raises to €0.17
+14:50:54 - Villain1: Calls €0.15
+14:50:57 - Villain4: Raises to €0.68
+14:51:06 - Hero: Calls €0.51
+14:51:06 - Villain1: Folds
+*** FLOP *** [7d 6c Ts]
+14:51:13 - Villain4: Bets €0.50
+14:51:15 - Hero: Raises to €2.20 and is all-in
+14:51:18 - Villain4: Calls €1.70
+*** TURN *** [7d 6c Ts 3s]
+*** RIVER *** [7d 6c Ts 3s Ks]
+*** SHOWDOWN ***
+Villain4 shows [Ad Qh 8d As] (Pair) [As Ad Ks Ts 7d]
+Hero shows [Ah Js Kd Kh] (Three of a Kind) [Ks Kh Kd Ts 7d]
+*** SUMMARY ***
+Hero wins main pot of €5.61
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Cash Game
+Game Type: PLO Omaha
+Game Name: PLO 0.02/0.05 6 Max
+Game ID: 01M6RMBV2FTHQPW4GM3ZHBAV8J
+Hand ID: 01M6RNW1CFYT2WEHZX8KX9XP8S
+Date & Time: 2026-11-06 14:58:11 (UTC)
+Table ID: 01M6RMBV2FHJ17J1ARFN8ZJ8DE
+Blinds: €0.02/€0.05
+Total Pot: €0.96
+Rake: €0.05
+*** PLAYERS ***
+Seat 2: Hero (€5.33) [SB Hero]
+Seat 3: Villain1 (€7.19) [BB]
+Seat 5: Villain3 (€0.80)
+Seat 6: Villain4 (€5.20) [BTN]
+*** HOLE CARDS ***
+Hero: [Kc 6h 4c 6d]
+Villain1: [8c Ah 6c 4h]
+Villain4: [Td 8h Kd Jd]
+*** PRE-FLOP ***
+14:58:11 - Hero: Posts SB €0.02
+14:58:11 - Villain1: Posts BB €0.05
+14:58:31 - Villain3: Calls €0.05
+14:58:33 - Villain4: Calls €0.05
+14:58:33 - Hero: Folds
+14:58:35 - Villain1: Checks
+*** FLOP *** [3h 9d 5s]
+14:58:39 - Villain1: Bets €0.05
+14:58:50 - Villain3: Calls €0.05
+14:58:54 - Villain4: Calls €0.05
+*** TURN *** [3h 9d 5s 8d]
+14:58:57 - Villain1: Checks
+14:59:09 - Villain3: Checks
+14:59:14 - Villain4: Checks
+*** RIVER *** [3h 9d 5s 8d 7h]
+14:59:17 - Villain1: Checks
+14:59:41 - Villain3: Checks
+14:59:44 - Villain4: Bets €0.32
+14:59:53 - Villain1: Calls €0.32
+15:00:14 - Villain3: Folds
+*** SHOWDOWN ***
+Villain1 shows [8c Ah 6c 4h] (Straight) [9d 8c 7h 6c 5s]
+Villain4 shows [Td 8h Kd Jd] (Straight) [Jd Td 9d 8d 7h]
+*** SUMMARY ***
+Villain4 wins main pot of €0.91
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Cash Game
+Game Type: PLO Omaha
+Game Name: PLO 0.02/0.05 6 Max
+Game ID: 01M6RMBV2FTHQPW4GM3ZHBAV8J
+Hand ID: 01M6RN634P1MXRBR7KJMM24YMJ
+Date & Time: 2026-11-06 14:46:12 (UTC)
+Table ID: 01M6RMBV2FHJ17J1ARFN8ZJ8DE
+Blinds: €0.02/€0.05
+Total Pot: €0.57
+Rake: €0.03
+*** PLAYERS ***
+Seat 1: Villain8 (€0.25)
+Seat 2: Hero (€2.20) [BTN Hero]
+Seat 4: Villain9 (€3.14) [SB]
+Seat 5: Villain3 (€1.18) [BB]
+Seat 6: Villain4 (€9.96)
+*** HOLE CARDS ***
+Villain8: [Tc 9h As 7h]
+Hero: [3s 6h 3h Qc]
+Villain4: [Ac 8c 3c Ah]
+*** PRE-FLOP ***
+14:46:12 - Villain9: Posts SB €0.02
+14:46:12 - Villain3: Posts BB €0.05
+14:46:16 - Villain4: Raises to €0.17
+14:46:16 - Villain9: Sits in
+14:46:24 - Villain8: Raises to €0.25 and is all-in
+14:46:24 - Hero: Folds
+14:46:26 - Villain9: Folds
+14:46:29 - Villain9: Sits out
+14:46:49 - Villain3: Folds
+14:46:51 - Villain4: Calls €0.08
+*** FLOP *** [Jh 6c 9c]
+*** TURN *** [Jh 6c 9c Ad]
+*** RIVER *** [Jh 6c 9c Ad Jc]
+*** SHOWDOWN ***
+Villain4 shows [Ac 8c 3c Ah] (Full House) [Ah Ad Ac Jh Jc]
+Villain8 shows [Tc 9h As 7h] (Two Pair) [As Ad Jh Jc Tc]
+*** SUMMARY ***
+Villain4 wins main pot of €0.54
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Cash Game
+Game Type: PLO Omaha
+Game Name: PLO 0.02/0.05 6 Max
+Game ID: 01M6RMBV2FTHQPW4GM3ZHBAV8J
+Hand ID: 01M6RNTG951A7TMJ475WFRKWVY
+Date & Time: 2026-11-06 14:57:21 (UTC)
+Table ID: 01M6RMBV2FHJ17J1ARFN8ZJ8DE
+Blinds: €0.02/€0.05
+Total Pot: €0.36
+Rake: €0.01
+*** PLAYERS ***
+Seat 2: Hero (€5.44) [BB Hero]
+Seat 3: Villain1 (€7.19)
+Seat 5: Villain3 (€0.80) [BTN]
+Seat 6: Villain4 (€5.10) [SB]
+*** HOLE CARDS ***
+Hero: [7c Kc Ks Ac]
+*** PRE-FLOP ***
+14:57:21 - Villain4: Posts SB €0.02
+14:57:21 - Hero: Posts BB €0.05
+14:57:23 - Villain1: Folds
+14:57:33 - Villain3: Folds
+14:57:38 - Villain4: Calls €0.03
+14:57:40 - Hero: Checks
+*** FLOP *** [9h Qc 8c]
+14:57:49 - Villain4: Checks
+14:57:50 - Hero: Checks
+*** TURN *** [9h Qc 8c 5d]
+14:57:57 - Villain4: Bets €0.06
+14:57:58 - Hero: Calls €0.06
+*** RIVER *** [9h Qc 8c 5d 7h]
+14:58:04 - Villain4: Bets €0.14
+14:58:08 - Hero: Folds
+*** SUMMARY ***
+Villain4 wins main pot of €0.35
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Cash Game
+Game Type: PLO Omaha
+Game Name: PLO 0.02/0.05 6 Max
+Game ID: 01M6RMBV2FTHQPW4GM3ZHBAV8J
+Hand ID: 01M6RNQP3D7C55NMR00F6EYFJH
+Date & Time: 2026-11-06 14:55:48 (UTC)
+Table ID: 01M6RMBV2FHJ17J1ARFN8ZJ8DE
+Blinds: €0.02/€0.05
+Total Pot: €0.53
+Rake: €0.01
+*** PLAYERS ***
+Seat 2: Hero (€5.49) [Hero]
+Seat 3: Villain1 (€7.24) [BTN]
+Seat 5: Villain3 (€0.91) [SB]
+Seat 6: Villain4 (€4.90) [BB]
+*** HOLE CARDS ***
+Hero: [6c Kc Ac 2s]
+*** PRE-FLOP ***
+14:55:48 - Villain3: Posts SB €0.02
+14:55:48 - Villain4: Posts BB €0.05
+14:55:51 - Hero: Calls €0.05
+14:55:54 - Villain1: Calls €0.05
+14:55:56 - Villain3: Calls €0.03
+14:55:58 - Villain4: Checks
+*** FLOP *** [7d Kd 5h]
+14:56:03 - Villain3: Checks
+14:56:06 - Villain4: Bets €0.06
+14:56:10 - Hero: Folds
+14:56:10 - Villain1: Folds
+14:56:29 - Villain3: Calls €0.06
+*** TURN *** [7d Kd 5h 8s]
+14:56:43 - Villain3: Checks
+14:56:48 - Villain4: Checks
+*** RIVER *** [7d Kd 5h 8s 8h]
+14:56:53 - Villain3: Checks
+14:56:56 - Villain4: Bets €0.21
+14:57:17 - Villain3: Folds
+*** SUMMARY ***
+Villain4 wins main pot of €0.52
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Cash Game
+Game Type: PLO Omaha
+Game Name: PLO 0.02/0.05 6 Max
+Game ID: 01M6RMBV2FTHQPW4GM3ZHBAV8J
+Hand ID: 01M6RNP9FDGYHKY32RN170NKR7
+Date & Time: 2026-11-06 14:55:03 (UTC)
+Table ID: 01M6RMBV2FHJ17J1ARFN8ZJ8DE
+Blinds: €0.02/€0.05
+Total Pot: €0.10
+Rake: €0.00
+*** PLAYERS ***
+Seat 2: Hero (€5.49) [BTN Hero]
+Seat 3: Villain1 (€7.19) [SB]
+Seat 5: Villain3 (€0.96) [BB]
+Seat 6: Villain4 (€4.90)
+*** HOLE CARDS ***
+Hero: [3c 8h 4c Ad]
+Villain1: [Tc 7s 2c Qd]
+Villain3: [8s Qs 7c Jh]
+*** PRE-FLOP ***
+14:55:03 - Villain1: Posts SB €0.02
+14:55:03 - Villain3: Posts BB €0.05
+14:55:07 - Villain4: Folds
+14:55:07 - Hero: Folds
+14:55:09 - Villain1: Calls €0.03
+14:55:13 - Villain3: Checks
+*** FLOP *** [Kh 2h 3h]
+14:55:16 - Villain1: Checks
+14:55:19 - Villain3: Checks
+*** TURN *** [Kh 2h 3h 6d]
+14:55:23 - Villain1: Checks
+14:55:37 - Villain3: Checks
+*** RIVER *** [Kh 2h 3h 6d 7h]
+14:55:41 - Villain1: Checks
+14:55:42 - Villain3: Checks
+*** SHOWDOWN ***
+Villain1 shows [Tc 7s 2c Qd] (Two Pair) [7s 7h 2h 2c Kh]
+Villain3 shows [8s Qs 7c Jh] (Pair) [7h 7c Kh Qs 6d]
+*** SUMMARY ***
+Villain1 wins main pot of €0.10

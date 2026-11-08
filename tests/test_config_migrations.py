@@ -251,6 +251,8 @@ def test_v89_gives_unibet_its_summary_importer():
         # An importer the user named is kept; a room the template lacks is left alone.
         "Winamax": "MySummary",
         "mine": "",
+        # v91 adds the 2025+ Betclic room (#730) with the template's converter.
+        "Betclic": "",
     }
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
 
@@ -261,7 +263,7 @@ def test_v89_leaves_a_room_on_another_converter_alone():
 
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
-    assert _importers(updated) == {"Unibet": ""}
+    assert _importers(updated) == {"Unibet": "", "Betclic": ""}
 
 
 def test_v90_adds_the_current_unibet_room():
@@ -277,11 +279,34 @@ def test_v90_adds_the_current_unibet_room():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    assert set(sites) == {"mine", "Unibet"}
+    assert set(sites) == {"mine", "Unibet", "Betclic"}  # v91 adds Betclic (#730)
     assert sites["Unibet"].getAttribute("network") == "Unibet"
     assert sites["Unibet"].getAttribute("enabled") == "False"
     assert "Unibet_default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
     # The converter entry the configuration had is kept, not duplicated.
     assert len([n for n in updated.getElementsByTagName("hhc") if n.getAttribute("site") == "Unibet"]) == 1
     assert reference_errors(updated) == []
+    assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
+
+
+def test_v91_adds_the_betclic_2025_room():
+    # The 2025+ in-house Betclic client is a new room (#730), separate from the
+    # iPoker skin "Betclic Poker": every configuration lacks it, so the <site>,
+    # its <hhc> entry and the layout set it references come from the template.
+    template = defusedxml.minidom.parse(str(ROOT / "HUD_config.xml.example"))
+    old = parse("""<FreePokerToolsConfig><general version="90"/>
+      <supported_sites><site site_name="mine"><layout_set ls="custom"/></site></supported_sites>
+      <layout_sets><ls name="custom"/><ls name="default"/></layout_sets>
+      <hhcs><hhc site="Betclic Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/></hhcs>
+      </FreePokerToolsConfig>""")
+
+    updated = upgrade_document(old, template, CONFIG_VERSION)
+
+    sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
+    assert set(sites) == {"mine", "Betclic"}
+    assert sites["Betclic"].getAttribute("network") == "Betclic"
+    assert sites["Betclic"].getAttribute("enabled") == "False"
+    hhcs = {node.getAttribute("site"): node.getAttribute("converter") for node in updated.getElementsByTagName("hhc")}
+    assert hhcs == {"Betclic Poker": "iPokerToFpdb", "Betclic": "BetclicToFpdb"}
+    assert not reference_errors(updated)
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()

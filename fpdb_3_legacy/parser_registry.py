@@ -9,6 +9,7 @@ from types import ModuleType
 from typing import cast
 
 from fpdb_3_legacy.AbsoluteToFpdb import Absolute
+from fpdb_3_legacy.BetclicToFpdb import Betclic
 from fpdb_3_legacy.BetfairToFpdb import Betfair
 from fpdb_3_legacy.BetOnlineToFpdb import BetOnline
 from fpdb_3_legacy.BossToFpdb import Boss
@@ -51,6 +52,7 @@ from fpdb_3_legacy.WinningToFpdb import Winning
 LEGACY_MODULE_REGISTRY: dict[str, str] = {
     "AbsoluteToFpdb": "fpdb_3_legacy.AbsoluteToFpdb",
     "BetfairToFpdb": "fpdb_3_legacy.BetfairToFpdb",
+    "BetclicToFpdb": "fpdb_3_legacy.BetclicToFpdb",
     "BetOnlineToFpdb": "fpdb_3_legacy.BetOnlineToFpdb",
     "BossToFpdb": "fpdb_3_legacy.BossToFpdb",
     "BovadaSummary": "fpdb_3_legacy.BovadaSummary",
@@ -91,6 +93,7 @@ LEGACY_MODULE_REGISTRY: dict[str, str] = {
 
 PARSER_CLASS_REGISTRY: dict[str, type[HandHistoryConverter]] = {
     "Absolute": Absolute,
+    "Betclic": Betclic,
     "BetOnline": BetOnline,
     "Betfair": Betfair,
     "Boss": Boss,

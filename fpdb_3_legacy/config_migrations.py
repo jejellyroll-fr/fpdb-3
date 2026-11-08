@@ -104,6 +104,7 @@ def _preserve_86_to_87(doc, template) -> None:
 # Rooms each version adds: an upgrade gives them to a configuration lacking them.
 SITES_ADDED_IN_88 = ("Bet365.fr Poker",)  # #717
 SITES_ADDED_IN_90 = ("Unibet",)  # #729: the 2026 Relax Gaming client
+SITES_ADDED_IN_91 = ("Betclic",)  # #730: the 2025+ in-house client, apart from the iPoker skin
 
 
 def _child_section(doc, section: str):
@@ -185,6 +186,16 @@ def _add_sites_89_to_90(doc, template) -> None:
     _add_sites(doc, template, SITES_ADDED_IN_90)
 
 
+def _add_sites_90_to_91(doc, template) -> None:
+    """Advance to v91, adding the 2025+ Betclic room (#730) to a configuration lacking it.
+
+    The room is new, so every configuration lacks it: the <site>, its <hhc>
+    converter entry and the layout set it references all come from the
+    template. A configuration that already declares the room keeps it.
+    """
+    _add_sites(doc, template, SITES_ADDED_IN_91)
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {n.getAttribute("name") for n in doc.getElementsByTagName("aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -207,6 +218,7 @@ MIGRATIONS = (
     (87, 88, _add_sites_87_to_88),
     (88, 89, _add_summary_importers_88_to_89),
     (89, 90, _add_sites_89_to_90),
+    (90, 91, _add_sites_90_to_91),
 )
 
 
