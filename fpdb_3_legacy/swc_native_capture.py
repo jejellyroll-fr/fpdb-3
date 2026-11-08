@@ -1903,6 +1903,11 @@ def _native_table_max_seats_for_hand(table: NativeTableInfo, players: list[dict]
 def _native_table_family(name: str, searchable: str, trailer: bytes) -> str:
     """Classify a native table name before applying generic trailer signatures."""
     lowered = searchable.lower()
+    # Drawmadugi is not one of the confirmed SwC game definitions. Do not let
+    # the generic "draw" fallback mislabel it as 2-7 single draw; retain it as
+    # unknown until a native game code and truthful FPDB category are verified.
+    if "drawmadugi" in lowered or "drawmagi" in lowered:
+        return "unknown"
     if "drawmaha" in lowered:
         return "drawmaha"
     if "ofc" in lowered or "chinese" in lowered:

@@ -165,6 +165,13 @@ class MacOSTableDetector:
         tables = []
         import re
 
+        if not isinstance(search_string, str):
+            logger.error(
+                "Cannot search macOS poker windows with a non-string search pattern: %r",
+                search_string,
+            )
+            return tables
+
         try:
             pattern = re.compile(search_string, re.IGNORECASE)
         except re.error:
