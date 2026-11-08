@@ -253,14 +253,24 @@ def swc_game_definition_by_name(name: str | None) -> CapturedGameDefinition:
     if not name:
         return UNKNOWN_GAME
     normalized = _normalize_swc_game_name(name)
+
+    # Mixed-game announcements use the room's wire labels, which are not all
+    # spelled like the public rules catalogue (e.g. "OFC/P" and "6 Card Omaha
+    # H/L"). Keep those confirmed labels ahead of broader public-name matches.
+    wire_labels = {
+        _normalize_swc_game_name(definition.label): definition for definition in SWC_GAME_DEFINITIONS.values()
+    }
+    if definition := wire_labels.get(normalized):
+        return definition
     if definition := SWC_GAME_NAME_DEFINITIONS.get(normalized):
         return definition
 
     # Native table names add stakes and table descriptors around the game title.
     padded_name = f" {normalized} "
-    for title in sorted(SWC_GAME_NAME_DEFINITIONS, key=len, reverse=True):
+    titles = set(SWC_GAME_NAME_DEFINITIONS) | set(wire_labels)
+    for title in sorted(titles, key=len, reverse=True):
         if f" {title} " in padded_name:
-            return SWC_GAME_NAME_DEFINITIONS[title]
+            return wire_labels.get(title, SWC_GAME_NAME_DEFINITIONS.get(title, UNKNOWN_GAME))
     return UNKNOWN_GAME
 
 

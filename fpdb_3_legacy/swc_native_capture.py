@@ -2871,6 +2871,10 @@ def promote_native_omaha_importability(hands: list[dict]) -> None:
     for hand in hands:
         if hand["game"]["category"] != "omahahi" or len(hand["players"]) != 2:
             continue
+        # Hand.getGameTypeAsString indexes its limit map directly; an inferred
+        # category with no confirmed betting structure must remain capture-only.
+        if hand["gametype"].get("limitType") not in {"nl", "pl", "fl", "cn", "cp"}:
+            continue
         audit = hand["metadata"]["importability"]
         small_blind = next((action for action in hand["actions"] if action["type"] == "small blind"), None)
         button_player = small_blind and next(
