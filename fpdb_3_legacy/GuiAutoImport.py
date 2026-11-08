@@ -528,6 +528,7 @@ class GuiAutoImport(QWidget):
         self.importtimer: QTimer | None = None
         self.import_thread: AutoImportThread | None = None
         self.swc_tailing_thread: SwCNativeTailingThread | None = None
+        self.swc_client_process: subprocess.Popen[Any] | None = None
         self.swc_attach_thread: SwCWindowsAttachThread | None = None
         # Cancelled attach workers still unwinding. They are parentless -- CLI
         # mode skips QWidget.__init__, so nothing but a reference can own one --
@@ -1035,8 +1036,49 @@ class GuiAutoImport(QWidget):
                     self.swc_attach_thread.attached.connect(self._on_swc_tap_attached)
                     self.swc_attach_thread.start()
             else:
-                build_tap(check_executable=False)
+                if _platform.system() == "Darwin":
+                    # macOS uses launch-time interposition. Building the library
+                    # and tailing the archive cannot attach it to a client that
+                    # is already open, so start the client with the capture
+                    # environment when it is not running. Never close an active
+                    # client on the user's behalf: a table may be in play.
+                    from fpdb_3_legacy.capture.swc_client import launch_client, running_client_pids
 
+                    active_pids = running_client_pids()
+                    if active_pids:
+                        joined = ", ".join(str(pid) for pid in active_pids)
+                        self.addText(
+                            _(
+                                "\nSwC is already running (pid {pids}). On macOS the capture tap is loaded "
+                                "only when SwC starts, so this client cannot be newly attached. The raw-file "
+                                "reader will monitor for data; if the archive does not grow, close SwC after "
+                                "the game and start it again through FPDB."
+                            ).format(pids=joined),
+                            "warning",
+                        )
+                    else:
+                        self.swc_client_process = launch_client(
+                            DEFAULT_ARCHIVE, include_outbound=True, consent=consent
+                        )
+                        self.addText(
+                            _("\nSwC launched with the capture tap preloaded; waiting for table traffic."),
+                            "info",
+                        )
+                else:
+                    # Linux also needs launch-time interposition. Build the tap
+                    # here for the externally launched client, but make clear
+                    # that neither building it nor starting the reader loads it
+                    # into an already-running process.
+                    build_tap(check_executable=False)
+                    self.addText(
+                        _(
+                            "\nSwC tap built. Linux must start SwC with the capture preload; "
+                            "the raw-file reader alone does not confirm capture."
+                        ),
+                        "info",
+                    )
+
+            reader_started = False
             tailer = self.swc_tailing_thread
             if tailer is None or not tailer.isRunning() or tailer.stopping:
                 # A thread still draining its last poll is finished with, not
@@ -1046,7 +1088,12 @@ class GuiAutoImport(QWidget):
                 self.swc_tailing_thread = SwCNativeTailingThread(DEFAULT_ARCHIVE, parent=self)
                 self.swc_tailing_thread.hand_imported.connect(self._on_swc_native_hand_imported)
                 self.swc_tailing_thread.start()
-                self.addText(_("\nSwC Native Live HUD tailing thread started."), "poker")
+                reader_started = True
+            if reader_started:
+                self.addText(
+                    _("\nSwC raw-file reader started; this alone does not confirm that the client tap is writing."),
+                    "poker",
+                )
         except Exception as e:
             log.warning("Could not start SwC native capture: %s", e)
             self.addText(

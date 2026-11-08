@@ -21,6 +21,8 @@ from typing import Any
 
 from fpdb_3_legacy.action_events import (
     action_chips,
+    cap_limit_cents,
+    cap_remaining,
     effective_stack_cents,
 )
 from fpdb_3_legacy.derived_stats_base import (
@@ -382,6 +384,9 @@ class DerivedStatsFacingMixin(DerivedStatsBase):
                 if pot > 0 and len(active) >= 2:
                     cnt_key, val_key = targets[street]
                     rem = {p: start_cash[p] - committed[p] for p in active}
+                    # A cap table caps what a player may commit, so the SPR is
+                    # read off the capped remainder (#734).
+                    rem = cap_remaining(rem, committed, cap_limit_cents(hand))
                     for p in active:
                         eff = effective_stack_cents(rem, p, active)
                         if eff <= 0:

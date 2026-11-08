@@ -70,6 +70,16 @@ FIRST_ROUND_STREETS = frozenset({"BLINDSANTES", PREFLOP_STREET, "DEAL", "SECOND"
 DEAD_MONEY_ACTIONS = frozenset({"ante", "secondsb"})
 PART_DEAD_ACTIONS = frozenset({"both"})
 
+#: ACR/WPN cap tables ("Miramar (Cap)") limit what a player may put into one
+#: hand to this many big blinds -- 30 in the samples seen (#734). The
+#: inference is WPN-only: other sites' cap tables cap at their own amount
+#: (Stars' $0.25/$0.50 cap table caps at $10 = 20bb, FTP's at 40bb), which
+#: their hand histories do not state up front.
+CAP_TABLE_BIG_BLINDS = 30
+#: ``hand.sitename`` of ACR/WPN hands, the only site whose cap tables cap at
+#: ``CAP_TABLE_BIG_BLINDS`` big blinds.
+WPN_SITENAME = "WinningPoker"
+
 # Position encoding of the events' ``position`` column. It is the
 # HandsPlayers position code (0 = button, 1 = cutoff, 2 = hijack ...) with the
 # two blind seats written as the only negative values it can take.
@@ -163,6 +173,39 @@ def effective_stack_cents(remaining: dict[str, int], player: str, contenders: Se
     if not others:
         return own
     return min(own, max(others))
+
+
+def cap_limit_cents(hand: Any) -> int:
+    """The most a player may put into one hand on a cap table, in cents.
+
+    0 when the hand is not from a cap table (``buyinType`` is not ``cap``) or
+    when the cap is not known, in which case the stack is left uncapped. On
+    ACR/WPN the cap is known from the table's blinds -- a cap table caps the
+    action at ``CAP_TABLE_BIG_BLINDS`` big blinds. Everywhere else the cap is
+    known only once a player "caps", which the parser records as
+    ``hand.capAmount`` (#734).
+    """
+    gametype = getattr(hand, "gametype", None)
+    if not isinstance(gametype, dict) or gametype.get("buyinType") != "cap":
+        return 0
+    if str(getattr(hand, "sitename", "") or "") == WPN_SITENAME:
+        big_blind = big_blind_cents(hand)
+        if big_blind > 0:
+            return CAP_TABLE_BIG_BLINDS * big_blind
+    return chips_to_cents(getattr(hand, "capAmount", 0))
+
+
+def cap_remaining(remaining: dict[str, int], committed: dict[str, int], cap: int) -> dict[str, int]:
+    """Remaining stacks as a cap table sees them.
+
+    Nobody can commit more than the cap in one hand, so what is left to commit
+    is the smaller of the chips behind and the part of the cap not yet reached:
+    the effective stack of the hand is ``min(stack, cap)`` less what is already
+    in (#734).
+    """
+    if cap <= 0:
+        return remaining
+    return {player: max(0, min(chips, cap - committed.get(player, 0))) for player, chips in remaining.items()}
 
 
 def position_code(value: Any) -> int | None:
@@ -284,6 +327,7 @@ class _EventWalk:
         self.actions_by_street = _actions(hand)
         self.start_cash = {name: int(row.get("startCash") or 0) for name, row in handsplayers.items()}
         self.big_blind = big_blind_cents(hand)
+        self.cap = cap_limit_cents(hand)
         self.seed = pot_seed_cents(hand)
         self.events: dict[int, dict[str, Any]] = {}
         self.committed: dict[str, int] = dict.fromkeys(handsplayers, 0)
@@ -400,7 +444,10 @@ class _EventWalk:
 
         remaining = self.remaining()
         relative = self.relative_position(name, remaining)
-        effective = effective_stack_cents(remaining, name, list(remaining))
+        # On a cap table nobody can commit more than the cap, so the effective
+        # stack is read off the capped remainder, not the full stack (#734).
+        capped = cap_remaining(remaining, self.committed, self.cap)
+        effective = effective_stack_cents(capped, name, list(capped))
 
         event = dict(ACTION_EVENT_DEFAULTS)
         event.update(

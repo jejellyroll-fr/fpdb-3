@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-06 11:18+0100\n"
+"POT-Creation-Date: 2026-11-08 17:11+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -682,13 +682,20 @@ msgstr ""
 "Leállítás kérve, miközben egy importálás még futott; a háttérben befejeződik."
 
 #: fpdb_3_legacy/GuiAutoImport.py
-#, fuzzy
+#, python-brace-format
 msgid ""
 "\n"
-"SwC Native Live HUD tailing thread started."
+"SwC is already running (pid {pids}). On macOS the capture tap is loaded only "
+"when SwC starts, so this client cannot be newly attached. The raw-file "
+"reader will monitor for data; if the archive does not grow, close SwC after "
+"the game and start it again through FPDB."
 msgstr ""
+
+#: fpdb_3_legacy/GuiAutoImport.py
+msgid ""
 "\n"
-"Az SwC natív élő HUD követő szála elindult."
+"SwC launched with the capture tap preloaded; waiting for table traffic."
+msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
@@ -722,6 +729,20 @@ msgstr ""
 "\n"
 "Az SwC élő rögzítés nem érhető el: {reason}. Az SwC leosztástörténetek "
 "importálása továbbra is működik."
+
+#: fpdb_3_legacy/GuiAutoImport.py
+msgid ""
+"\n"
+"SwC raw-file reader started; this alone does not confirm that the client tap "
+"is writing."
+msgstr ""
+
+#: fpdb_3_legacy/GuiAutoImport.py
+msgid ""
+"\n"
+"SwC tap built. Linux must start SwC with the capture preload; the raw-file "
+"reader alone does not confirm capture."
+msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
@@ -7837,6 +7858,14 @@ msgstr ""
 #~ msgstr ""
 #~ "\n"
 #~ "Auto Import leállítása - globális zárolás feloldva."
+
+#, fuzzy
+#~ msgid ""
+#~ "\n"
+#~ "SwC Native Live HUD tailing thread started."
+#~ msgstr ""
+#~ "\n"
+#~ "Az SwC natív élő HUD követő szála elindult."
 
 #~ msgid " "
 #~ msgstr " "

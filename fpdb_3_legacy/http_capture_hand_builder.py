@@ -364,6 +364,9 @@ def _board_streets(hand_data: dict[str, Any]) -> dict[str, list[str]]:
         return _community_cards_by_street(hand_data)
 
     streets: dict[str, list[str]] = {}
+    community = hand_data.get("community")
+    if isinstance(community, dict) and community.get("PREFLOP"):
+        streets["PREFLOP"] = list(community["PREFLOP"])
     for index, board in enumerate(boards):
         if not isinstance(board, dict):
             continue
