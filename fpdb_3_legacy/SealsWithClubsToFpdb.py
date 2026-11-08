@@ -712,6 +712,15 @@ class SealsWithClubs(HandHistoryConverter):
                 hand.addRaiseTo(street, action.group("PNAME"), action.group("POT") or action.group("BET"))
             elif action.group("ATYPE") == " bets":
                 hand.addBet(street, action.group("PNAME"), action.group("BET"))
+            elif action.group("ATYPE") == " discards":
+                # Draw games: "Player: discards 2" (cards are not written).
+                hand.addDiscard(street, action.group("PNAME"), action.group("BET") or "0")
+            elif action.group("ATYPE") == " stands pat":
+                # Stud/draw: the player keeps all cards. The regex matches the
+                # action but this branch used to be missing, so every stand-pat
+                # was dropped with an "Unimplemented" debug line and the imported
+                # hand lost the draw-round record.
+                hand.addStandsPat(street, action.group("PNAME"))
             else:
                 log.debug(
                     f"DEBUG: Unimplemented {action.group('ATYPE')}: '{action.group('PNAME')}'",
