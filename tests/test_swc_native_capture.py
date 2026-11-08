@@ -23,6 +23,8 @@ from fpdb_3_legacy.swc_native_capture import (
     _collect_native_game_changes,
     _native_board_output,
     _native_street_profile,
+    _native_table_family,
+    _resolve_native_hand_game,
     _retain_bijective_native_seat_evidence,
     add_native_funds_byte_amounts_if_conserved,
     audit_native_hand,
@@ -336,6 +338,69 @@ def test_extract_table_info_keeps_drawmaha_separate_from_single_draw():
     info = extract_table_info(NativeProtocolMessage(datetime.now(UTC), payload))
 
     assert info.family == "drawmaha"
+
+
+def test_drawmadugi_is_a_drawmaha_family_with_a_distinct_capture_only_category():
+    table_id = 238733637
+    name = b"No-Rake Micro Stakes Drawmadugi"
+    payload = (
+        b"\x22\0"
+        + (123).to_bytes(4, "little")
+        + table_id.to_bytes(4, "little")
+        + b"\x01"
+        + (0).to_bytes(4, "little")
+        + b"D"
+        + len(name).to_bytes(2, "little")
+        + name
+    )
+
+    info = extract_table_info(NativeProtocolMessage(datetime.now(UTC), payload))
+
+    assert info is not None
+    assert info.family == "drawmaha"
+    assert _resolve_native_hand_game(None, info, table_id, set()) == (
+        "drawmaha",
+        "draw",
+        "drawmadugi",
+        "unknown",
+    )
+
+
+@pytest.mark.parametrize(
+    ("name", "family"),
+    [
+        ("2-7 Pineapple OFC Poker", "ofc"),
+        ("Progressive Pineapple OFC Poker", "ofc"),
+        ("Pineapple OFC Poker", "ofc"),
+        ("Open Face Chinese Poker", "ofc"),
+        ("Chinese Poker", "ofc"),
+        ("Badacey Poker", "draw"),
+        ("Badeucy Poker", "draw"),
+        ("Badugi Poker", "draw"),
+        ("2-7 Single Draw Poker", "draw"),
+        ("2-7 Triple Draw Poker", "draw"),
+        ("5-Card Draw Poker", "draw"),
+        ("Drawmaha Poker", "drawmaha"),
+        ("Drawmaha 2-7", "drawmaha"),
+        ("Sviten Special", "drawmaha"),
+        ("6-Card Omaha Hi/Lo Poker", "omaha"),
+        ("6-Card Omaha Poker", "omaha"),
+        ("Courchevel Hi/Lo Poker", "omaha"),
+        ("Courchevel Poker", "omaha"),
+        ("Big O Poker", "omaha"),
+        ("5-Card Omaha Poker", "omaha"),
+        ("Omaha Hi/Lo Poker", "omaha"),
+        ("Omaha Poker", "omaha"),
+        ("Pineapple Hold'em Poker", "holdem"),
+        ("Short Deck Hold'em Poker", "holdem"),
+        ("Texas Hold'em Poker", "holdem"),
+        ("Razz Poker", "stud"),
+        ("7-Card Stud Hi/Lo Poker", "stud"),
+        ("7-Card Stud Poker", "stud"),
+    ],
+)
+def test_native_table_family_covers_swc_rules_families(name: str, family: str) -> None:
+    assert _native_table_family(name, name, b"") == family
 
 
 def test_native_action_street_maps_observed_drawmaha_rounds():

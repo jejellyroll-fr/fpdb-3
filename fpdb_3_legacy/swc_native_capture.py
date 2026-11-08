@@ -1573,6 +1573,11 @@ def _resolve_native_hand_game(
         return native_game["family"], native_game["base"], native_game["category"], native_game["limit_type"]
     family = "ofc" if table_id in ofc_table_ids else table.family
     base, category, limit_type = _native_family_gametype(family)
+    if family == "drawmaha" and "drawmadugi" in table.name.lower():
+        # Drawmadugi shares Drawmaha's Omaha board + draw structure, but its
+        # draw half is Badugi. Keep that subtype explicit and capture-only;
+        # mapping it to the generic drawmaha category would claim 2-7 rules.
+        category = "drawmadugi"
     return family, base, category, limit_type
 
 
@@ -1903,27 +1908,38 @@ def _native_table_max_seats_for_hand(table: NativeTableInfo, players: list[dict]
 def _native_table_family(name: str, searchable: str, trailer: bytes) -> str:
     """Classify a native table name before applying generic trailer signatures."""
     lowered = searchable.lower()
-    # Drawmadugi is not one of the confirmed SwC game definitions. Do not let
-    # the generic "draw" fallback mislabel it as 2-7 single draw; retain it as
-    # unknown until a native game code and truthful FPDB category are verified.
-    if "drawmadugi" in lowered or "drawmagi" in lowered:
-        return "unknown"
-    if "drawmaha" in lowered:
+    # SWC lists these as Drawmaha variants. Their Omaha board + draw structure
+    # belongs to this family; _resolve_native_hand_game preserves Drawmadugi's
+    # Badugi subtype so it cannot be mislabeled as 2-7 Drawmaha.
+    if any(token in lowered for token in ("drawmadugi", "drawmagi", "drawmaha", "sviten")):
         return "drawmaha"
     if "ofc" in lowered or "chinese" in lowered:
         return "ofc"
-    if "plo" in lowered or "omaha" in lowered:
+    if any(token in lowered for token in ("plo", "omaha", "courchevel", "big o")):
         return "omaha"
-    if "single draw" in lowered or "2-7" in lowered or "deuce to seven" in lowered:
+    if any(
+        token in lowered
+        for token in (
+            "single draw",
+            "triple draw",
+            "2-7",
+            "deuce to seven",
+            "5-card draw",
+            "5 card draw",
+            "badugi",
+            "badacey",
+            "badeucy",
+        )
+    ):
         return "draw"
     if "hold'em" in lowered or "holdem" in lowered:
         return "holdem"
+    if "stud" in lowered or "razz" in lowered:
+        return "stud"
     if b"UR" in trailer and "plo" not in name.lower():
         # Observed native cash-table signature for NL Hold'em. PLO tables use
         # PR here; keep unobserved signatures unknown rather than generalizing.
         return "holdem"
-    if "stud" in lowered:
-        return "stud"
     if "draw" in lowered:
         return "draw"
     return "unknown"
