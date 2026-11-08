@@ -18,12 +18,14 @@ import pytest
 
 from fpdb_3_legacy.action_events import (
     CAP_TABLE_BIG_BLINDS,
+    WPN_SITENAME,
     cap_limit_cents,
     cap_remaining,
 )
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.DerivedStats import DerivedStats
 from fpdb_3_legacy.hud_situation import stack_bucket_for
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 from fpdb_3_legacy.WinningToFpdb import Winning
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,6 +39,10 @@ MIRAMAR_CAP = (
     / "NLHE-9max-USD-0.01-0.02-201911.CASHID-TN-Miramar (Cap) GAMETYPE.txt"
 )
 REGULAR = ROOT / "regression-test-files" / "cash" / "Winning" / "NLHE-6max-USD-0.02-0.05-201608.HH00000000 G0.txt"
+# A PokerStars cap table: "$0.25/$0.50 - $10 Cap", i.e. a 20bb cap, not WPN's 30.
+STARS_CAP = (
+    ROOT / "regression-test-files" / "cash" / "Stars" / "Flop" / "NLHE-CAP-9max-USD-0.25-0.50-201011.Capped.preflop.txt"
+)
 
 # plo8_cap_2026: $0.50/$1.00 "Vesta (Cap)", dave "caps $19.50" on top of his
 # $10.50 raise -> the cap is $30 = 30 big blinds. Stacks: Hero $41.20,
@@ -80,18 +86,52 @@ def test_cap_is_known_from_the_tables_blinds(config: Config) -> None:
 
 
 def test_cap_falls_back_to_the_hands_caps_action() -> None:
-    # No usable big blind: the "caps" action the parser recorded is the cap.
-    hand = SimpleNamespace(gametype={"buyinType": "cap", "bb": None}, capAmount=Decimal("12.34"))
+    # WPN, but no usable big blind: the "caps" action the parser recorded is the cap.
+    hand = SimpleNamespace(gametype={"buyinType": "cap", "bb": None}, sitename=WPN_SITENAME, capAmount=Decimal("12.34"))
 
     assert cap_limit_cents(hand) == 1234
 
 
 def test_no_cap_off_cap_tables() -> None:
     assert cap_limit_cents(SimpleNamespace(gametype={"buyinType": "regular", "bb": "1.00"})) == 0
-    assert (
-        cap_limit_cents(SimpleNamespace(gametype={"buyinType": "cap", "bb": "1.00"}, capAmount=Decimal("30"))) == 3000
-    )
     assert cap_limit_cents(SimpleNamespace(gametype={})) == 0
+
+
+def test_the_30bb_inference_is_wpn_only() -> None:
+    # A WPN cap table: the cap is 30 big blinds, known from the blinds.
+    wpn = SimpleNamespace(gametype={"buyinType": "cap", "bb": "1.00"}, sitename=WPN_SITENAME)
+    assert cap_limit_cents(wpn) == CAP_TABLE_BIG_BLINDS * 100
+
+    # Another site's cap table caps at its own amount (Stars' $0.25/$0.50 caps
+    # at $10 = 20bb); its hand history does not state the cap up front, so the
+    # stack is left uncapped unless a "caps" action recorded one.
+    stars = SimpleNamespace(gametype={"buyinType": "cap", "bb": "0.50"}, sitename="PokerStars.COM")
+    assert cap_limit_cents(stars) == 0
+    assert (
+        cap_limit_cents(
+            SimpleNamespace(
+                gametype={"buyinType": "cap", "bb": "0.50"}, sitename="PokerStars.COM", capAmount=Decimal("10")
+            )
+        )
+        == 1000
+    )
+
+
+def test_other_sites_cap_tables_keep_their_existing_behaviour(config: Config) -> None:
+    hands = PokerStars(config=config, in_path=str(STARS_CAP), autostart=True).getProcessedHands()
+    assert len(hands) == 1
+    hand = hands[0]
+    stats = DerivedStats()
+    stats.getStats(hand)
+
+    assert hand.gametype["buyinType"] == "cap"
+    assert hand.gametype["bb"] == "0.50"
+    # The $10 Cap of this table (20bb) is not WPN's 30bb ($15): no cap is applied.
+    assert cap_limit_cents(hand) == 0
+    # Player3's $35.30 is measured against the deepest opponent ($28.60),
+    # not against a 30bb cap ($15).
+    assert stats.handsplayers["Player3"]["effStack"] == 2860
+    assert stats.handsplayers["Player3"]["startCash"] == 3530
 
 
 def test_cap_remaining_is_the_cap_not_yet_reached() -> None:

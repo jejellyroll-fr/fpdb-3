@@ -70,9 +70,15 @@ FIRST_ROUND_STREETS = frozenset({"BLINDSANTES", PREFLOP_STREET, "DEAL", "SECOND"
 DEAD_MONEY_ACTIONS = frozenset({"ante", "secondsb"})
 PART_DEAD_ACTIONS = frozenset({"both"})
 
-#: A cap table (ACR/WPN's "Miramar (Cap)") limits what a player may put into one
-#: hand to this many big blinds -- 30 in the samples seen (#734).
+#: ACR/WPN cap tables ("Miramar (Cap)") limit what a player may put into one
+#: hand to this many big blinds -- 30 in the samples seen (#734). The
+#: inference is WPN-only: other sites' cap tables cap at their own amount
+#: (Stars' $0.25/$0.50 cap table caps at $10 = 20bb, FTP's at 40bb), which
+#: their hand histories do not state up front.
 CAP_TABLE_BIG_BLINDS = 30
+#: ``hand.sitename`` of ACR/WPN hands, the only site whose cap tables cap at
+#: ``CAP_TABLE_BIG_BLINDS`` big blinds.
+WPN_SITENAME = "WinningPoker"
 
 # Position encoding of the events' ``position`` column. It is the
 # HandsPlayers position code (0 = button, 1 = cutoff, 2 = hijack ...) with the
@@ -172,17 +178,20 @@ def effective_stack_cents(remaining: dict[str, int], player: str, contenders: Se
 def cap_limit_cents(hand: Any) -> int:
     """The most a player may put into one hand on a cap table, in cents.
 
-    0 when the hand is not from a cap table (``buyinType`` is not ``cap``).
-    The cap is known from the table's blinds -- a cap table caps the action at
-    ``CAP_TABLE_BIG_BLINDS`` big blinds -- or, failing that, from the hand's own
-    "caps" action, which the parser records as ``hand.capAmount`` (#734).
+    0 when the hand is not from a cap table (``buyinType`` is not ``cap``) or
+    when the cap is not known, in which case the stack is left uncapped. On
+    ACR/WPN the cap is known from the table's blinds -- a cap table caps the
+    action at ``CAP_TABLE_BIG_BLINDS`` big blinds. Everywhere else the cap is
+    known only once a player "caps", which the parser records as
+    ``hand.capAmount`` (#734).
     """
     gametype = getattr(hand, "gametype", None)
     if not isinstance(gametype, dict) or gametype.get("buyinType") != "cap":
         return 0
-    big_blind = big_blind_cents(hand)
-    if big_blind > 0:
-        return CAP_TABLE_BIG_BLINDS * big_blind
+    if str(getattr(hand, "sitename", "") or "") == WPN_SITENAME:
+        big_blind = big_blind_cents(hand)
+        if big_blind > 0:
+            return CAP_TABLE_BIG_BLINDS * big_blind
     return chips_to_cents(getattr(hand, "capAmount", 0))
 
 
