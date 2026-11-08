@@ -1,0 +1,69 @@
+SwCPoker Hand #305152125: Tournament (Hourly Freeroll - Pineapple NLH [10 Chips])#305147875, 0+0 Pineapple Hold'em No Limit - Level I (10/20) - 2026/11/08 17:30:23 UTC
+Table '305147875 4'(305152112) 8-max Seat #3 is the button
+Seat 1: Player0 (1,500 in chips)
+Seat 2: Player1 (1,500 in chips)
+Seat 3: Player2 (1,500 in chips)
+Seat 4: Player3 (1,500 in chips)
+Seat 5: Player4 (1,500 in chips)
+Seat 6: Player5 (1,500 in chips)
+Seat 7: Hero (1,500 in chips)
+Seat 8: Player6 (1,500 in chips)
+Player0: posts the ante 4
+Player1: posts the ante 4
+Player2: posts the ante 4
+Player3: posts the ante 4
+Player4: posts the ante 4
+Player5: posts the ante 4
+Hero: posts the ante 4
+Player6: posts the ante 4
+Player3: posts small blind 10
+Player4: posts big blind 20
+*** HOLE CARDS ***
+Dealt to Hero [9s 6c]
+Player5: calls 20
+Hero has timed out
+Hero: folds
+Hero: sits out 
+Player6 has timed out
+Player6: folds
+Player6: sits out 
+Player0: calls 20
+Player1: folds
+Player2: folds
+Player3: calls 10
+Player4: checks
+*** FLOP *** [9h 2d 7s]
+Player3: checks
+Player4: checks
+Player5: bets 20
+Player0: calls 20
+Player3: calls 20
+Player4: calls 20
+Player3: Discard Cards 0
+Player4: Discard Cards 0
+Player5: Discard Cards 0
+Player0: Discard Cards 0
+*** TURN *** [9h 2d 7s] [8h]
+Player3: bets 192
+Player4: calls 192
+Player5: folds
+Player0: folds
+*** RIVER *** [9h 2d 7s 8h] [Kd]
+Player3: bets 576
+Player4: folds
+Uncalled bet (576) returned to Player3
+*** SHOW DOWN ***
+Player3: doesn't show hand
+Player3 collected 576 from pot
+*** SUMMARY ***
+Total pot 576 | Rake 0 
+Board [9h 2d 7s 8h Kd]
+Seat 1: Player0 folded on the Turn 
+Seat 2: Player1 folded before Flop 
+Seat 3: Player2 (button) folded before Flop 
+Seat 4: Player3 (small blind) collected (576)
+Seat 5: Player4 (big blind) folded on the River 
+Seat 6: Player5 folded on the Turn 
+Seat 7: Hero folded before Flop 
+Seat 8: Player6 folded before Flop 
+

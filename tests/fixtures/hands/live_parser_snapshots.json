@@ -1727,6 +1727,10 @@
     "hand_count": 1,
     "sha256": "34220ca06981ece42e67f62aae80713211d7ed803fca7b2bc14a07baa5ff5912"
   },
+  "regression/SealsWithClubs/Flop/Pineapple-8max-tour-20261108.txt": {
+    "hand_count": 1,
+    "sha256": "80458aa6ef7a1053df9ff52ed6cf6dd404803f40900c1f0d1d00dbae7d148ce3"
+  },
   "regression/Stars/Draw/2-7 Single Draw-NL-USD-0.25-0.50-201106.allin.txt": {
     "hand_count": 1,
     "sha256": "6da8b231be9442ad0816c938e1e19d03132cb37ab8f3f748230d7e179b65de1b"

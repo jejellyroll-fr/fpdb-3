@@ -65,7 +65,7 @@ class SealsWithClubs(HandHistoryConverter):
 
     # Static regexes
     re_GameInfo = re.compile(
-        r"""SwCPoker\sHand\s*\#(?P<HID>\d+):\s((Tournament|Cashgame|sitngo)\s\(((?P<TABLE2>.*?))\)\#(?P<TOURNO>\d+),\s(?P<BUYIN>(?P<BIAMT>\d+(\.\d+)?))\+(?P<BIRAKE>\d+(\.\d+)?)\s|\s)(?P<GAME>(Hold\'em|Omaha|Omaha\s5\sCards|Short\sDeck\sHold\'em))\s(?P<LIMIT>(NL|Fixed\sLimit|PL|Limit|Pot\sLimit|No\sLimit))\s((-\sLevel\s\w+\s)|)\((?P<SB>\d+(\.\d+)?(\,\d+)?)/(?P<BB>\d+(\.\d+)?(\,\d+)?)\)\s-\s(?P<DATETIME>.*)""",
+        r"""SwCPoker\sHand\s*\#(?P<HID>\d+):\s((Tournament|Cashgame|sitngo)\s\(((?P<TABLE2>.*?))\)\#(?P<TOURNO>\d+),\s(?P<BUYIN>(?P<BIAMT>\d+(\.\d+)?))\+(?P<BIRAKE>\d+(\.\d+)?)\s|\s)(?P<GAME>(Pineapple\s)?(Hold\'em|Omaha|Omaha\s5\sCards|Short\sDeck\sHold\'em))\s(?P<LIMIT>(NL|Fixed\sLimit|PL|Limit|Pot\sLimit|No\sLimit))\s((-\sLevel\s\w+\s)|)\((?P<SB>\d+(\.\d+)?(\,\d+)?)/(?P<BB>\d+(\.\d+)?(\,\d+)?)\)\s-\s(?P<DATETIME>.*)""",
         re.VERBOSE,
     )
 
@@ -293,7 +293,12 @@ class SealsWithClubs(HandHistoryConverter):
         if "LIMIT" in mg:
             info["limitType"] = self.limits[mg["LIMIT"]]
         if "GAME" in mg:
-            (info["base"], info["category"]) = self.games[mg["GAME"]]
+            # "Pineapple Hold'em"/"Pineapple Omaha" are the room's labelled
+            # variants of the base game; the hand text below them is the base
+            # game's (two/four hole cards, board, ordinary streets), so map
+            # them to the base game's entry rather than rejecting the hand.
+            game = re.sub(r"^Pineapple\s+", "", mg["GAME"])
+            (info["base"], info["category"]) = self.games[game]
         if "SB" in mg:
             if "," in mg["SB"]:
                 mg["SB"] = mg["SB"].replace(",", "")
