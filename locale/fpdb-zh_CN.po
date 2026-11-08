@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-06 11:18+0100\n"
+"POT-Creation-Date: 2026-11-08 17:11+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -725,13 +725,20 @@ msgstr ""
 "在导入进行时请求了停止；导入将在后台完成。"
 
 #: fpdb_3_legacy/GuiAutoImport.py
-#, fuzzy
+#, python-brace-format
 msgid ""
 "\n"
-"SwC Native Live HUD tailing thread started."
+"SwC is already running (pid {pids}). On macOS the capture tap is loaded only "
+"when SwC starts, so this client cannot be newly attached. The raw-file "
+"reader will monitor for data; if the archive does not grow, close SwC after "
+"the game and start it again through FPDB."
 msgstr ""
+
+#: fpdb_3_legacy/GuiAutoImport.py
+msgid ""
 "\n"
-"已启动 SwC 原生 HUD 监视线程。"
+"SwC launched with the capture tap preloaded; waiting for table traffic."
+msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
@@ -761,6 +768,20 @@ msgid ""
 msgstr ""
 "\n"
 "SwC 实时捕获不可用: {reason}。SwC 手牌历史导入仍然可用。"
+
+#: fpdb_3_legacy/GuiAutoImport.py
+msgid ""
+"\n"
+"SwC raw-file reader started; this alone does not confirm that the client tap "
+"is writing."
+msgstr ""
+
+#: fpdb_3_legacy/GuiAutoImport.py
+msgid ""
+"\n"
+"SwC tap built. Linux must start SwC with the capture preload; the raw-file "
+"reader alone does not confirm capture."
+msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, fuzzy
@@ -7777,6 +7798,14 @@ msgid ""
 "\n"
 "Check for updates automatically?"
 msgstr ""
+
+#, fuzzy
+#~ msgid ""
+#~ "\n"
+#~ "SwC Native Live HUD tailing thread started."
+#~ msgstr ""
+#~ "\n"
+#~ "已启动 SwC 原生 HUD 监视线程。"
 
 #, fuzzy
 #~ msgid "%s not found in %s..."
