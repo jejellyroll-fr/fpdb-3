@@ -7,7 +7,7 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey)](#-prebuilt-downloads)
 [![Downloads](https://img.shields.io/github/downloads/jejellyroll-fr/fpdb-3/total)](https://github.com/jejellyroll-fr/fpdb-3/releases)
-[![Discord](https://img.shields.io/badge/chat-Discord-5865F2?logo=discord&logoColor=white)](https://discord.gg/XTA3kdKKG)
+[![Discord](https://img.shields.io/badge/chat-Discord-5865F2?logo=discord&logoColor=white)](https://discord.gg/mQJwt4NpUz)
 
 A free, open-source poker tracker and HUD. fpdb imports your hand histories from 26 rooms into a
 database you own, shows a real-time HUD over your tables, and gives you reports, graphs, a hand
