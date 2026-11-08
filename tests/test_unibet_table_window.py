@@ -52,14 +52,31 @@ def _group1(pattern: str, title: str) -> str:
     return match.group(1)
 
 
-def test_table_no_re_only_flags_an_id_different_from_the_tournament() -> None:
+def test_table_no_re_captures_any_id_for_baseline_and_switch_detection() -> None:
     pattern = Unibet.getTableNoRe(99007080)
 
-    # The window's own id is the tournament's: not a table move.
-    assert re.search(pattern, TOUR_TITLE) is None
-    # A different id in parentheses (a real table move) is caught.
-    assert _group1(pattern, "0,25€ Power Spin Flash - 10/20 (99503253)") == "99503253"
+    # The attach baseline: the tournament id the title carries.
+    assert _group1(pattern, TOUR_TITLE) == "99007080"
+    # A different id (a real table move) is captured too.
+    assert _group1(pattern, "0,25€ Power Spin Flash - 10/20 (99503999)") == "99503999"
     assert re.search(pattern, LOBBY_TITLE) is None
+
+
+def test_a_title_showing_the_tournament_id_is_not_a_table_change(monkeypatch: pytest.MonkeyPatch) -> None:
+    from fpdb_3_legacy.TableWindow import Table_Window
+
+    tw = Table_Window.__new__(Table_Window)
+    tw.tournament = 99007080
+    tw.table = 99503253  # the hand's Table "99503253" id
+    tw.tableno_re = Unibet.getTableNoRe(99007080)
+    hud = object()
+
+    monkeypatch.setattr(Table_Window, "get_window_title", lambda self: TOUR_TITLE)
+    assert tw.has_table_title_changed(hud) is False
+
+    # A genuinely different id in the title is a table switch.
+    monkeypatch.setattr(Table_Window, "get_window_title", lambda self: "0,25€ Power Spin Flash - 10/20 (99503999)")
+    assert tw.has_table_title_changed(hud) is True
 
 
 def test_the_hhc_config_entry_dispatches_to_the_unibet_converter() -> None:
@@ -68,8 +85,7 @@ def test_the_hhc_config_entry_dispatches_to_the_unibet_converter() -> None:
 
     assert re.search(getTableTitleRe(config, "Unibet", "cash", table_name="99465067"), TABLE_TITLE)
     assert re.search(getTableTitleRe(config, "Unibet", "tour", tournament=99007080, table_number=99503253), TOUR_TITLE)
-    assert getTableNoRe(config, "Unibet", tournament=99007080) is not None
-    assert re.search(getTableNoRe(config, "Unibet", tournament=99007080), TOUR_TITLE) is None
+    assert _group1(getTableNoRe(config, "Unibet", tournament=99007080), TOUR_TITLE) == "99007080"
 
 
 def test_unibet_is_a_target_process_for_the_macos_applescript_fallback() -> None:

@@ -1033,10 +1033,14 @@ class Unibet(HandHistoryConverter):
 
     @staticmethod
     def getTableNoRe(tournament) -> str:
-        # A tournament window's title carries the tournament id in parentheses,
-        # so it always equals ``tournament``; only an id that differs from it
-        # (a real table move) counts as a change. Cash windows never use this.
-        return rf"\((?!{re.escape(str(tournament))}\))(\d+)\)"
+        # A 2026 tournament window's title carries an id in parentheses
+        # ("0,25€ Power Spin Flash - 10/20 - Prize pool 5€ (99007080)"), the
+        # tournament number rather than the hand's Table "..." id. Capture any
+        # id: seed_title_table_no() uses this to baseline the attach, and a
+        # later id is a real table switch. Whether the title's tournament id
+        # counts as a table *change* is decided in Table_Window's comparison,
+        # not here. Cash windows never use this pattern.
+        return r"\((\d+)\)"
 
     def readSTP(self, hand) -> None:
         """Read Splash the Pot - not implemented for Unibet."""

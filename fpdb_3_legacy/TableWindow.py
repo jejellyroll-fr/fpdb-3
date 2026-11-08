@@ -401,6 +401,11 @@ class Table_Window:
         log.debug("before get_table_no()")
         result = self.get_table_no()
         log.debug(f"tb has change nb {result}")
+        if result is not False and result == self.tournament:
+            # The title carries the tournament id (2026 Unibet client titles
+            # do), not a table id: that is not a table switch.
+            log.debug("title shows the tournament number; not a table change")
+            return False
         if result is not False and result != self.table:
             log.debug(f"compare result and self.table {result} {self.table}")
             self.table = result
