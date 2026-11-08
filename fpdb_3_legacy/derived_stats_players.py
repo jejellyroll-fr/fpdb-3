@@ -21,6 +21,7 @@ from decimal import Decimal
 from typing import Any
 
 from fpdb_3_legacy import Card
+from fpdb_3_legacy.action_events import cap_limit_cents
 from fpdb_3_legacy.derived_stats_base import (
     ANTE_ALL_IN_POSITION,
     CENTS_MULTIPLIER,
@@ -408,6 +409,21 @@ class DerivedStatsPlayersMixin(DerivedStatsBase):
                     # Update the player's startCash if it wasn't set
                     if self.handsplayers[player_name].get("startCash", 0) == 0:
                         self.handsplayers[player_name]["startCash"] = stack
+
+        # On a cap table nobody can put more than the cap into one hand, so the
+        # effective stack of the hand is min(starting stack, cap) (#734).
+        # ``hand.stacks`` has already been drawn down by the action, so the
+        # starting stack is read from the player tuple; the stored startCash
+        # stays the real one.
+        cap = cap_limit_cents(hand)
+        if cap > 0:
+            for player in hand.players:
+                name = player[1]
+                if name in player_stacks and len(player) > MIN_PLAYER_TUPLE_LENGTH:
+                    with contextlib.suppress(ValueError, TypeError, IndexError):
+                        start = int(CENTS_MULTIPLIER * Decimal(str(player[2])))
+                        if start > 0:
+                            player_stacks[name] = min(start, cap)
 
         # Calculate effective stack for each player individually
         # Using formula: min(player_stack, max(opponent_stacks))
