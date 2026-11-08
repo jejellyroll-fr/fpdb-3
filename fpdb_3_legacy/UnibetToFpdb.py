@@ -1013,8 +1013,34 @@ class Unibet(HandHistoryConverter):
         pass
 
     @staticmethod
-    def getTableTitleRe(type, table_name=None, tournament=None, table_number=None) -> None:
-        pass
+    def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
+        """Search string for the 2026 client's table windows.
+
+        A table window is titled e.g. "Omaha - PL5 (99465067)" for cash or
+        "0,25€ Power Spin Flash - 10/20 - Prize pool 5€ (99007080)" for a
+        tournament: the id in parentheses is the one that names the automatic
+        export file ("H20261107 T99465067 ...txt"), i.e. the cash
+        ``table_name``, or the tournament number. The lobby
+        ("Unibet Poker v3.58.0") carries no id and never matches.
+        """
+        if type == "tour":
+            table_id = tournament if tournament is not None else table_number
+        else:
+            table_id = table_name
+        if table_id is None:
+            return None
+        return rf"\({re.escape(str(table_id))}\)"
+
+    @staticmethod
+    def getTableNoRe(tournament) -> str:
+        # A 2026 tournament window's title carries an id in parentheses
+        # ("0,25€ Power Spin Flash - 10/20 - Prize pool 5€ (99007080)"), the
+        # tournament number rather than the hand's Table "..." id. Capture any
+        # id: seed_title_table_no() uses this to baseline the attach, and a
+        # later id is a real table switch. Whether the title's tournament id
+        # counts as a table *change* is decided in Table_Window's comparison,
+        # not here. Cash windows never use this pattern.
+        return r"\((\d+)\)"
 
     def readSTP(self, hand) -> None:
         """Read Splash the Pot - not implemented for Unibet."""

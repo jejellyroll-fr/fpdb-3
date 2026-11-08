@@ -50,6 +50,10 @@ class MacOSTableDetector:
         "Winamax",
         "CoinPoker",
         "coinpoker",
+        # 2026 Relax Gaming client: process "UnibetPoker", window owner
+        # "Unibet Poker" (also the historical iPoker skin's app name; the
+        # "(<table id>)" window title tells the two apart).
+        "Unibet",
         "Full Tilt",
         "Party",
         "888",
