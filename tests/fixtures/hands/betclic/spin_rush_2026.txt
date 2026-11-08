@@ -1,0 +1,3217 @@
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9R6V3EPAM1T2XH79MQD2
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KE0EDG34XV4VC4QTCRWKWSPT
+Date & Time: 2026-01-02 22:49:24 (UTC)
+Table ID: 01KE0E9R776PER95KCYA7PB4HK
+Blinds: 15/30
+Total Pot: 650
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (630) [BTN]
+Seat 2: Villain2 (560) [SB]
+Seat 3: Hero (310) [BB Hero]
+*** HOLE CARDS ***
+Villain1: [Jc 3h]
+Hero: [Kc As]
+*** PRE-FLOP ***
+22:49:24 - Villain2: Posts SB 15
+22:49:24 - Hero: Posts BB 30
+22:49:26 - Villain1: Calls 30
+22:49:34 - Villain2: Calls 15
+22:49:36 - Hero: Raises to 310 and is all-in
+22:49:42 - Villain1: Calls 280
+22:49:42 - Villain2: Folds
+*** FLOP *** [Qh 8h Th]
+*** TURN *** [Qh 8h Th 9d]
+*** RIVER *** [Qh 8h Th 9d 9c]
+*** SHOWDOWN ***
+Hero shows [Kc As] (Pair) [9d 9c As Kc Qh]
+Villain1 shows [Jc 3h] (Straight) [Qh Jc Th 9d 8h]
+*** SUMMARY ***
+Villain1 wins main pot of 650
+Hero finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9R6V3EPAM1T2XH79MQD2
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KE0ECWKSW3BKQXZZGACWARS3
+Date & Time: 2026-01-02 22:49:04 (UTC)
+Table ID: 01KE0E9R776PER95KCYA7PB4HK
+Blinds: 10/20
+Total Pot: 130
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (570) [SB]
+Seat 2: Villain2 (580) [BB]
+Seat 3: Hero (350) [BTN Hero]
+*** HOLE CARDS ***
+Hero: [Ks Th]
+*** PRE-FLOP ***
+22:49:04 - Villain1: Posts SB 10
+22:49:04 - Villain2: Posts BB 20
+22:49:07 - Hero: Raises to 40
+22:49:09 - Villain1: Calls 30
+22:49:12 - Villain2: Folds
+*** FLOP *** [Jc 2h Jh]
+22:49:19 - Villain1: Bets 30
+22:49:21 - Hero: Folds
+*** SUMMARY ***
+Villain1 wins main pot of 130
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9R6V3EPAM1T2XH79MQD2
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KE0EBP9PAK0QE0HV80AJG6M5
+Date & Time: 2026-01-02 22:48:25 (UTC)
+Table ID: 01KE0E9R776PER95KCYA7PB4HK
+Blinds: 10/20
+Total Pot: 260
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (440) [BB]
+Seat 2: Villain2 (580) [BTN]
+Seat 3: Hero (480) [SB Hero]
+*** HOLE CARDS ***
+Villain1: [Ac Qc]
+Hero: [Kc 7c]
+*** PRE-FLOP ***
+22:48:25 - Hero: Posts SB 10
+22:48:25 - Villain1: Posts BB 20
+22:48:27 - Villain2: Folds
+22:48:28 - Hero: Raises to 40
+22:48:30 - Villain1: Calls 20
+*** FLOP *** [2c 6c 2h]
+22:48:36 - Hero: Bets 20
+22:48:39 - Villain1: Raises to 50
+22:48:46 - Hero: Calls 30
+*** TURN *** [2c 6c 2h 3d]
+22:48:48 - Hero: Checks
+22:48:52 - Villain1: Bets 40
+22:48:55 - Hero: Calls 40
+*** RIVER *** [2c 6c 2h 3d 9s]
+22:48:57 - Hero: Checks
+22:48:58 - Villain1: Checks
+*** SHOWDOWN ***
+Hero shows [Kc 7c] (Pair) [2h 2c Kc 9s 7c]
+Villain1 shows [Ac Qc] (Pair) [2h 2c Ac Qc 9s]
+*** SUMMARY ***
+Villain1 wins main pot of 260
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9R6V3EPAM1T2XH79MQD2
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KE0EA52XMFKY88RWHGRXTKSB
+Date & Time: 2026-01-02 22:47:35 (UTC)
+Table ID: 01KE0E9R776PER95KCYA7PB4HK
+Blinds: 10/20
+Total Pot: 140
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain1 (500) [BTN]
+Seat 2: Villain2 (500) [SB]
+Seat 3: Hero (500) [BB Hero]
+*** HOLE CARDS ***
+Villain1: [9d 7h]
+Villain2: [Jd Jc]
+Hero: [8h 5c]
+*** PRE-FLOP ***
+22:47:35 - Villain2: Posts SB 10
+22:47:35 - Hero: Posts BB 20
+22:47:39 - Villain1: Calls 20
+22:47:41 - Villain2: Calls 10
+22:47:43 - Hero: Checks
+*** FLOP *** [5d 2h Ad]
+22:47:56 - Villain2: Checks
+22:47:58 - Hero: Checks
+22:48:00 - Villain1: Checks
+*** TURN *** [5d 2h Ad 9s]
+22:48:03 - Villain2: Bets 20
+22:48:06 - Hero: Folds
+22:48:10 - Villain1: Calls 20
+*** RIVER *** [5d 2h Ad 9s 6d]
+22:48:13 - Villain2: Bets 20
+22:48:19 - Villain1: Calls 20
+*** SHOWDOWN ***
+Villain2 shows [Jd Jc] (Pair) [Jd Jc Ad 9s 6d]
+Villain1 shows [9d 7h] (Pair) [9s 9d Ad 7h 6d]
+*** SUMMARY ***
+Villain2 wins main pot of 140
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EM78GQ5YJ5JGPZKQKTVCA
+Date & Time: 2026-01-02 22:53:05 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 50/100
+Total Pot: 1360
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (680) [BTN SB Hero]
+Seat 3: Villain3 (820) [BB]
+*** HOLE CARDS ***
+Hero: [Kc 2d]
+Villain3: [Jc Ah]
+*** PRE-FLOP ***
+22:53:05 - Hero: Posts SB 50
+22:53:05 - Villain3: Posts BB 100
+22:53:09 - Hero: Raises to 680 and is all-in
+22:53:11 - Villain3: Calls 580
+*** FLOP *** [3c 9s Js]
+*** TURN *** [3c 9s Js 2c]
+*** RIVER *** [3c 9s Js 2c 7h]
+*** SHOWDOWN ***
+Villain3 shows [Jc Ah] (Pair) [Js Jc Ah 9s 7h]
+Hero shows [Kc 2d] (Pair) [2d 2c Kc Js 9s]
+*** SUMMARY ***
+Villain3 wins main pot of 1360
+Villain3 finished 1st and wins 4.00 EUR
+Hero finished 2nd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EKWA83BQ7A10VZCDE2BPR
+Date & Time: 2026-01-02 22:52:53 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 50/100
+Total Pot: 820
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (780) [BB Hero]
+Seat 3: Villain3 (720) [BTN SB]
+*** HOLE CARDS ***
+Hero: [Qs 4h]
+*** PRE-FLOP ***
+22:52:53 - Villain3: Posts SB 50
+22:52:53 - Hero: Posts BB 100
+22:52:57 - Villain3: Raises to 720 and is all-in
+22:53:01 - Hero: Folds
+*** SUMMARY ***
+Villain3 wins main pot of 820
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EKARRH1FMPKE2EGSMZE8F
+Date & Time: 2026-01-02 22:52:35 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 40/80
+Total Pot: 240
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (860) [BTN SB Hero]
+Seat 3: Villain3 (640) [BB]
+*** HOLE CARDS ***
+Hero: [Tc 5c]
+*** PRE-FLOP ***
+22:52:35 - Hero: Posts SB 40
+22:52:35 - Villain3: Posts BB 80
+22:52:37 - Hero: Calls 40
+22:52:39 - Villain3: Checks
+*** FLOP *** [8h 2h 9s]
+22:52:49 - Villain3: Bets 80
+22:52:50 - Hero: Folds
+*** SUMMARY ***
+Villain3 wins main pot of 240
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EJR5QV7BG69K65E1TB017
+Date & Time: 2026-01-02 22:52:16 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 40/80
+Total Pot: 120
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (820) [BB Hero]
+Seat 3: Villain3 (680) [BTN SB]
+*** HOLE CARDS ***
+Hero: [4s Qd]
+*** PRE-FLOP ***
+22:52:16 - Villain3: Posts SB 40
+22:52:16 - Hero: Posts BB 80
+22:52:32 - Villain3: Sits out
+22:52:32 - Villain3: Folds
+*** SUMMARY ***
+Hero wins main pot of 120
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EJ461NZAFG05BD91BQC9V
+Date & Time: 2026-01-02 22:51:56 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 40/80
+Total Pot: 240
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (740) [BTN SB Hero]
+Seat 3: Villain3 (760) [BB]
+*** HOLE CARDS ***
+Hero: [Tc 4h]
+*** PRE-FLOP ***
+22:51:56 - Hero: Posts SB 40
+22:51:56 - Villain3: Posts BB 80
+22:52:00 - Hero: Calls 40
+22:52:03 - Villain3: Checks
+*** FLOP *** [2s 3c 3h]
+22:52:07 - Villain3: Checks
+22:52:09 - Hero: Bets 80
+22:52:13 - Villain3: Folds
+*** SUMMARY ***
+Hero wins main pot of 240
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EHP4JPKQ8X99MBB776DQ9
+Date & Time: 2026-01-02 22:51:42 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 30/60
+Total Pot: 740
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (680) [BB Hero]
+Seat 3: Villain3 (820) [BTN SB]
+*** HOLE CARDS ***
+Hero: [8h Kc]
+*** PRE-FLOP ***
+22:51:42 - Villain3: Posts SB 30
+22:51:42 - Hero: Posts BB 60
+22:51:49 - Villain3: Calls 30
+22:51:50 - Hero: Raises to 680 and is all-in
+22:51:53 - Villain3: Folds
+*** SUMMARY ***
+Hero wins main pot of 740
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EH9XNJX3W8Z7EQV8AJT1T
+Date & Time: 2026-01-02 22:51:29 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 30/60
+Total Pot: 680
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (620) [BTN SB Hero]
+Seat 3: Villain3 (880) [BB]
+*** HOLE CARDS ***
+Hero: [Qh Ac]
+*** PRE-FLOP ***
+22:51:29 - Hero: Posts SB 30
+22:51:29 - Villain3: Posts BB 60
+22:51:34 - Hero: Raises to 620 and is all-in
+22:51:38 - Villain3: Folds
+*** SUMMARY ***
+Hero wins main pot of 680
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EH14X4G92EGB80TVXF1A9
+Date & Time: 2026-01-02 22:51:20 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 30/60
+Total Pot: 210
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (680) [BB Hero]
+Seat 3: Villain3 (820) [BTN SB]
+*** HOLE CARDS ***
+Hero: [Td 5s]
+*** PRE-FLOP ***
+22:51:20 - Villain3: Posts SB 30
+22:51:20 - Hero: Posts BB 60
+22:51:24 - Villain3: Raises to 150
+22:51:26 - Hero: Folds
+*** SUMMARY ***
+Villain3 wins main pot of 210
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EGK6RDWNTYGRK97YR324N
+Date & Time: 2026-01-02 22:51:06 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 30/60
+Total Pot: 820
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (1090) [BTN SB Hero]
+Seat 3: Villain3 (410) [BB]
+*** HOLE CARDS ***
+Hero: [As Th]
+Villain3: [Qd Qs]
+*** PRE-FLOP ***
+22:51:06 - Hero: Posts SB 30
+22:51:06 - Villain3: Posts BB 60
+22:51:07 - Hero: Raises to 1090 and is all-in
+22:51:08 - Villain3: Calls 350 and is all-in
+*** FLOP *** [5h 4s Jd]
+*** TURN *** [5h 4s Jd 3s]
+*** RIVER *** [5h 4s Jd 3s Kd]
+*** SHOWDOWN ***
+Villain3 shows [Qd Qs] (Pair) [Qs Qd Kd Jd 5h]
+Hero shows [As Th] (High Card) [As Kd Jd Th 5h]
+*** SUMMARY ***
+Villain3 wins main pot of 820
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EG4YCP99Z0P41SZGK7C4B
+Date & Time: 2026-01-02 22:50:51 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 30/60
+Total Pot: 240
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (1150) [BB Hero]
+Seat 3: Villain3 (350) [BTN SB]
+*** HOLE CARDS ***
+Hero: [Kc 9s]
+*** PRE-FLOP ***
+22:50:51 - Villain3: Posts SB 30
+22:50:51 - Hero: Posts BB 60
+22:50:59 - Villain3: Raises to 180
+22:51:02 - Hero: Folds
+*** SUMMARY ***
+Villain3 wins main pot of 240
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EEM10B6K0HTQ0GFP1A8YM
+Date & Time: 2026-01-02 22:50:01 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 20/40
+Total Pot: 280
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (1070) [BTN SB Hero]
+Seat 3: Villain3 (430) [BB]
+*** HOLE CARDS ***
+Hero: [5c Jc]
+*** PRE-FLOP ***
+22:50:01 - Hero: Posts SB 20
+22:50:01 - Villain3: Posts BB 40
+22:50:05 - Hero: Calls 20
+22:50:07 - Villain3: Checks
+*** FLOP *** [3s Kd 2c]
+22:50:11 - Villain3: Checks
+22:50:15 - Hero: Bets 40
+22:50:30 - Villain3: Calls 40
+*** TURN *** [3s Kd 2c Tc]
+22:50:34 - Villain3: Checks
+22:50:43 - Hero: Bets 120
+22:50:48 - Villain3: Folds
+*** SUMMARY ***
+Hero wins main pot of 280
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EDMC9M5BHR6Y8Q209C47B
+Date & Time: 2026-01-02 22:49:29 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 15/30
+Total Pot: 120
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (1040) [BB Hero]
+Seat 3: Villain3 (460) [BTN SB]
+*** HOLE CARDS ***
+Hero: [8s 9s]
+*** PRE-FLOP ***
+22:49:29 - Villain3: Posts SB 15
+22:49:29 - Hero: Posts BB 30
+22:49:32 - Villain3: Calls 15
+22:49:34 - Hero: Checks
+*** FLOP *** [Qh 3c 4c]
+22:49:37 - Hero: Checks
+22:49:41 - Villain3: Checks
+*** TURN *** [Qh 3c 4c 4s]
+22:49:44 - Hero: Checks
+22:49:48 - Villain3: Checks
+*** RIVER *** [Qh 3c 4c 4s 2h]
+22:49:55 - Hero: Bets 60
+22:49:58 - Villain3: Folds
+*** SUMMARY ***
+Hero wins main pot of 120
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0ECZNMPHNAWRVY59KQ03W0
+Date & Time: 2026-01-02 22:49:08 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 15/30
+Total Pot: 300
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (875) [BTN Hero]
+Seat 2: Villain4 (135) [SB]
+Seat 3: Villain3 (490) [BB]
+*** HOLE CARDS ***
+Hero: [Ah 8c]
+Villain4: [Ks As]
+*** PRE-FLOP ***
+22:49:08 - Villain4: Posts SB 15
+22:49:08 - Villain3: Posts BB 30
+22:49:10 - Hero: Raises to 60
+22:49:11 - Villain4: Raises to 135 and is all-in
+22:49:15 - Villain3: Folds
+22:49:17 - Hero: Calls 75
+*** FLOP *** [8d 3s Ad]
+*** TURN *** [8d 3s Ad 5h]
+*** RIVER *** [8d 3s Ad 5h 3c]
+*** SHOWDOWN ***
+Villain4 shows [Ks As] (Two Pair) [As Ad 3s 3c Ks]
+Hero shows [Ah 8c] (Two Pair) [Ah Ad 8d 8c 5h]
+*** SUMMARY ***
+Hero wins main pot of 300
+Villain4 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EBTGBDJJACF32F6DABXA8
+Date & Time: 2026-01-02 22:48:29 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 10/20
+Total Pot: 750
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (500) [SB Hero]
+Seat 2: Villain4 (510) [BB]
+Seat 3: Villain3 (490) [BTN]
+*** HOLE CARDS ***
+Hero: [Th Qc]
+Villain4: [6s 6c]
+*** PRE-FLOP ***
+22:48:29 - Hero: Posts SB 10
+22:48:29 - Villain4: Posts BB 20
+22:48:33 - Villain3: Folds
+22:48:35 - Hero: Raises to 40
+22:48:37 - Villain4: Calls 20
+*** FLOP *** [Qs 2h 8s]
+22:48:48 - Hero: Bets 20
+22:48:50 - Villain4: Calls 20
+*** TURN *** [Qs 2h 8s Qh]
+22:48:54 - Hero: Bets 90
+22:48:55 - Villain4: Calls 90
+*** RIVER *** [Qs 2h 8s Qh 2s]
+22:49:00 - Hero: Bets 225
+22:49:02 - Villain4: Calls 225
+*** SHOWDOWN ***
+Hero shows [Th Qc] (Full House) [Qs Qh Qc 2s 2h]
+Villain4 shows [6s 6c] (Two Pair) [Qs Qh 6s 6c 8s]
+*** SUMMARY ***
+Hero wins main pot of 750
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EBHV79X4R7FNR15381JJP
+Date & Time: 2026-01-02 22:48:21 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 10/20
+Total Pot: 90
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (520) [BB Hero]
+Seat 2: Villain4 (480) [BTN]
+Seat 3: Villain3 (500) [SB]
+*** HOLE CARDS ***
+Hero: [9d 8s]
+*** PRE-FLOP ***
+22:48:21 - Villain3: Posts SB 10
+22:48:21 - Hero: Posts BB 20
+22:48:23 - Villain4: Raises to 60
+22:48:25 - Villain3: Folds
+22:48:26 - Hero: Folds
+*** SUMMARY ***
+Villain4 wins main pot of 90
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EB74PDB16TMN5MK502PG8
+Date & Time: 2026-01-02 22:48:10 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 10/20
+Total Pot: 60
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (520) [BTN Hero]
+Seat 2: Villain4 (460) [SB]
+Seat 3: Villain3 (520) [BB]
+*** HOLE CARDS ***
+Hero: [Qd 3h]
+*** PRE-FLOP ***
+22:48:10 - Villain4: Posts SB 10
+22:48:10 - Villain3: Posts BB 20
+22:48:12 - Hero: Folds
+22:48:14 - Villain4: Raises to 40
+22:48:17 - Villain3: Folds
+*** SUMMARY ***
+Villain4 wins main pot of 60
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EANCE4EAB420WFC5SENHA
+Date & Time: 2026-01-02 22:47:51 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 10/20
+Total Pot: 100
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (480) [SB Hero]
+Seat 2: Villain4 (500) [BB]
+Seat 3: Villain3 (520) [BTN]
+*** HOLE CARDS ***
+Hero: [5h 6s]
+*** PRE-FLOP ***
+22:47:51 - Hero: Posts SB 10
+22:47:51 - Villain4: Posts BB 20
+22:47:54 - Villain3: Folds
+22:47:57 - Hero: Raises to 40
+22:48:00 - Villain4: Calls 20
+*** FLOP *** [Jd 4s 2d]
+22:48:03 - Hero: Bets 20
+22:48:06 - Villain4: Folds
+*** SUMMARY ***
+Hero wins main pot of 100
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9VW7KKPNRM9PYPG9D7A5
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EA8Q4MAZ7993AE0E9YJ6D
+Date & Time: 2026-01-02 22:47:38 (UTC)
+Table ID: 01KE0E9VWGGSCNGV98FEW34PMH
+Blinds: 10/20
+Total Pot: 70
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (500) [BB Hero]
+Seat 2: Villain4 (500) [BTN]
+Seat 3: Villain3 (500) [SB]
+*** HOLE CARDS ***
+Hero: [Qs 3h]
+*** PRE-FLOP ***
+22:47:38 - Villain3: Posts SB 10
+22:47:38 - Hero: Posts BB 20
+22:47:40 - Villain4: Folds
+22:47:47 - Villain3: Raises to 50
+22:47:48 - Hero: Folds
+*** SUMMARY ***
+Villain3 wins main pot of 70
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0NBWNDGNCDXSKXR0ZYRSBG
+Prize pool: 200.00€
+Multiplier: x100
+Buy In: 2.00€
+Hand ID: 01KE0NHKVNFF5N02CGS4F27HRS
+Date & Time: 2026-01-03 00:53:59 (UTC)
+Table ID: 01KE0NBWNQ9H058JQEGCJ4PN6W
+Blinds: 15/30
+Total Pot: 610
+Rake: 0
+*** PLAYERS ***
+Seat 2: Hero (305) [BB Hero]
+Seat 3: Villain5 (1195) [BTN SB]
+*** HOLE CARDS ***
+Hero: [6c Ad]
+Villain5: [Jc 5c]
+*** PRE-FLOP ***
+00:53:59 - Villain5: Posts SB 15
+00:53:59 - Hero: Posts BB 30
+00:54:02 - Villain5: Raises to 60
+00:54:03 - Hero: Raises to 305 and is all-in
+00:54:08 - Villain5: Calls 245
+*** FLOP *** [Kc 5s 5h]
+*** TURN *** [Kc 5s 5h 4h]
+*** RIVER *** [Kc 5s 5h 4h Tc]
+*** SHOWDOWN ***
+Hero shows [6c Ad] (Pair) [5s 5h Ad Kc Tc]
+Villain5 shows [Jc 5c] (Three of a Kind) [5s 5h 5c Kc Jc]
+*** SUMMARY ***
+Villain5 wins main pot of 610
+Villain5 finished 1st and wins 150.00 EUR
+Hero finished 2nd and wins 30.00 EUR
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0NBWNDGNCDXSKXR0ZYRSBG
+Prize pool: 200.00€
+Multiplier: x100
+Buy In: 2.00€
+Hand ID: 01KE0NGVDGDH08C1CZGX7BA11D
+Date & Time: 2026-01-03 00:53:34 (UTC)
+Table ID: 01KE0NBWNQ9H058JQEGCJ4PN6W
+Blinds: 15/30
+Total Pot: 400
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain6 (200) [BB]
+Seat 2: Hero (305) [BTN Hero]
+Seat 3: Villain5 (995) [SB]
+*** HOLE CARDS ***
+Villain6: [7h 6s]
+Hero: [3c 9h]
+Villain5: [6d 8c]
+*** PRE-FLOP ***
+00:53:34 - Villain5: Posts SB 15
+00:53:34 - Villain6: Posts BB 30
+00:53:35 - Hero: Folds
+00:53:36 - Villain5: Calls 15
+00:53:38 - Villain6: Checks
+*** FLOP *** [5d 7d 6c]
+00:53:42 - Villain5: Bets 30
+00:53:44 - Villain6: Raises to 60
+00:53:45 - Villain5: Calls 30
+*** TURN *** [5d 7d 6c 9c]
+00:53:48 - Villain5: Bets 60
+00:53:50 - Villain6: Raises to 110 and is all-in
+00:53:51 - Villain5: Calls 50
+*** RIVER *** [5d 7d 6c 9c Ad]
+*** SHOWDOWN ***
+Villain5 shows [6d 8c] (Straight) [9c 8c 7d 6d 5d]
+Villain6 shows [7h 6s] (Two Pair) [7h 7d 6s 6c Ad]
+*** SUMMARY ***
+Villain5 wins main pot of 400
+Villain6 finished 3rd and wins 20.00 EUR
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0NBWNDGNCDXSKXR0ZYRSBG
+Prize pool: 200.00€
+Multiplier: x100
+Buy In: 2.00€
+Hand ID: 01KE0NGKGWDVWN8MAJJM5AMRND
+Date & Time: 2026-01-03 00:53:26 (UTC)
+Table ID: 01KE0NBWNQ9H058JQEGCJ4PN6W
+Blinds: 15/30
+Total Pot: 45
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain6 (200) [BTN]
+Seat 2: Hero (320) [SB Hero]
+Seat 3: Villain5 (980) [BB]
+*** HOLE CARDS ***
+Hero: [Qs 2h]
+*** PRE-FLOP ***
+00:53:26 - Hero: Posts SB 15
+00:53:26 - Villain5: Posts BB 30
+00:53:31 - Villain6: Folds
+00:53:31 - Hero: Folds
+*** SUMMARY ***
+Villain5 wins main pot of 45
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0NBWNDGNCDXSKXR0ZYRSBG
+Prize pool: 200.00€
+Multiplier: x100
+Buy In: 2.00€
+Hand ID: 01KE0NFHM7Y8P4QG6RQ2VFMC22
+Date & Time: 2026-01-03 00:52:51 (UTC)
+Table ID: 01KE0NBWNQ9H058JQEGCJ4PN6W
+Blinds: 10/20
+Total Pot: 380
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain6 (220) [SB]
+Seat 2: Hero (500) [BB Hero]
+Seat 3: Villain5 (780) [BTN]
+*** HOLE CARDS ***
+Hero: [7h Kc]
+Villain5: [4h Qh]
+*** PRE-FLOP ***
+00:52:51 - Villain6: Posts SB 10
+00:52:51 - Hero: Posts BB 20
+00:52:53 - Villain5: Calls 20
+00:52:55 - Villain6: Calls 10
+00:52:55 - Hero: Checks
+*** FLOP *** [8h 9d Ac]
+00:52:59 - Villain6: Checks
+00:53:02 - Hero: Checks
+00:53:03 - Villain5: Checks
+*** TURN *** [8h 9d Ac Js]
+00:53:06 - Villain6: Checks
+00:53:07 - Hero: Checks
+00:53:09 - Villain5: Checks
+*** RIVER *** [8h 9d Ac Js Td]
+00:53:12 - Villain6: Checks
+00:53:15 - Hero: Bets 45
+00:53:18 - Villain5: Raises to 160
+00:53:19 - Villain6: Folds
+00:53:20 - Hero: Calls 115
+*** SHOWDOWN ***
+Hero shows [7h Kc] (Straight) [Js Td 9d 8h 7h]
+Villain5 shows [4h Qh] (Straight) [Qh Js Td 9d 8h]
+*** SUMMARY ***
+Villain5 wins main pot of 380
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0NBWNDGNCDXSKXR0ZYRSBG
+Prize pool: 200.00€
+Multiplier: x100
+Buy In: 2.00€
+Hand ID: 01KE0NEFJB7AMZNVEHDEQHFVP3
+Date & Time: 2026-01-03 00:52:17 (UTC)
+Table ID: 01KE0NBWNQ9H058JQEGCJ4PN6W
+Blinds: 10/20
+Total Pot: 220
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain6 (110) [BB]
+Seat 2: Hero (500) [BTN Hero]
+Seat 3: Villain5 (890) [SB]
+*** HOLE CARDS ***
+Villain6: [Ac 8h]
+Hero: [Qh 9c]
+Villain5: [Kd 6c]
+*** PRE-FLOP ***
+00:52:17 - Villain5: Posts SB 10
+00:52:17 - Villain6: Posts BB 20
+00:52:19 - Hero: Folds
+00:52:23 - Villain5: Calls 10
+00:52:24 - Villain6: Checks
+*** FLOP *** [Qd Td 5d]
+00:52:36 - Villain5: Bets 40
+00:52:37 - Villain6: Calls 40
+*** TURN *** [Qd Td 5d 9s]
+00:52:41 - Villain5: Bets 40
+00:52:42 - Villain6: Raises to 50 and is all-in
+00:52:43 - Villain5: Calls 10
+*** RIVER *** [Qd Td 5d 9s 3h]
+*** SHOWDOWN ***
+Villain5 shows [Kd 6c] (High Card) [Kd Qd Td 9s 6c]
+Villain6 shows [Ac 8h] (High Card) [Ac Qd Td 9s 8h]
+*** SUMMARY ***
+Villain6 wins main pot of 220
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0NBWNDGNCDXSKXR0ZYRSBG
+Prize pool: 200.00€
+Multiplier: x100
+Buy In: 2.00€
+Hand ID: 01KE0NDFFS0KJBPRS6VTX7FYCV
+Date & Time: 2026-01-03 00:51:44 (UTC)
+Table ID: 01KE0NBWNQ9H058JQEGCJ4PN6W
+Blinds: 10/20
+Total Pot: 650
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain6 (430) [BTN]
+Seat 2: Hero (510) [SB Hero]
+Seat 3: Villain5 (560) [BB]
+*** HOLE CARDS ***
+Villain6: [Td Jc]
+Hero: [4d 9c]
+Villain5: [As 4c]
+*** PRE-FLOP ***
+00:51:44 - Hero: Posts SB 10
+00:51:44 - Villain5: Posts BB 20
+00:51:46 - Villain6: Calls 20
+00:51:48 - Hero: Folds
+00:51:50 - Villain5: Raises to 70
+00:51:51 - Villain6: Calls 50
+*** FLOP *** [3h 2c 9h]
+00:51:55 - Villain5: Bets 20
+00:51:56 - Villain6: Calls 20
+*** TURN *** [3h 2c 9h 5d]
+00:52:00 - Villain5: Bets 80
+00:52:04 - Villain6: Calls 80
+*** RIVER *** [3h 2c 9h 5d Kh]
+00:52:08 - Villain5: Bets 150
+00:52:11 - Villain6: Calls 150
+*** SHOWDOWN ***
+Villain5 shows [As 4c] (Straight) [As 5d 4c 3h 2c]
+Villain6 shows [Td Jc] (High Card) [Kh Jc Td 9h 5d]
+*** SUMMARY ***
+Villain5 wins main pot of 650
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0NBWNDGNCDXSKXR0ZYRSBG
+Prize pool: 200.00€
+Multiplier: x100
+Buy In: 2.00€
+Hand ID: 01KE0NCSD73VPZD039FM6CB0J3
+Date & Time: 2026-01-03 00:51:21 (UTC)
+Table ID: 01KE0NBWNQ9H058JQEGCJ4PN6W
+Blinds: 10/20
+Total Pot: 150
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain6 (480) [SB]
+Seat 2: Hero (460) [BB Hero]
+Seat 3: Villain5 (560) [BTN]
+*** HOLE CARDS ***
+Hero: [6s Kh]
+*** PRE-FLOP ***
+00:51:21 - Villain6: Posts SB 10
+00:51:21 - Hero: Posts BB 20
+00:51:23 - Villain5: Folds
+00:51:25 - Villain6: Calls 10
+00:51:27 - Hero: Checks
+*** FLOP *** [5h Jh 9d]
+00:51:31 - Villain6: Checks
+00:51:33 - Hero: Bets 30
+00:51:34 - Villain6: Calls 30
+*** TURN *** [5h Jh 9d 3d]
+00:51:37 - Villain6: Checks
+00:51:39 - Hero: Bets 50
+00:51:40 - Villain6: Folds
+*** SUMMARY ***
+Hero wins main pot of 150
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0NBWNDGNCDXSKXR0ZYRSBG
+Prize pool: 200.00€
+Multiplier: x100
+Buy In: 2.00€
+Hand ID: 01KE0NC9TFX06EDWDPGW2NBSWE
+Date & Time: 2026-01-03 00:51:05 (UTC)
+Table ID: 01KE0NBWNQ9H058JQEGCJ4PN6W
+Blinds: 10/20
+Total Pot: 140
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain6 (500) [BB]
+Seat 2: Hero (500) [BTN Hero]
+Seat 3: Villain5 (500) [SB]
+*** HOLE CARDS ***
+Hero: [Qd 9h]
+*** PRE-FLOP ***
+00:51:05 - Villain5: Posts SB 10
+00:51:05 - Villain6: Posts BB 20
+00:51:07 - Hero: Raises to 40
+00:51:13 - Villain5: Raises to 80
+00:51:15 - Villain6: Folds
+00:51:18 - Hero: Folds
+*** SUMMARY ***
+Villain5 wins main pot of 140
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9W1SKZWJKX7RM6VE2N1S
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EHV8J3SNNWHB1CSJDY91C
+Date & Time: 2026-01-02 22:51:47 (UTC)
+Table ID: 01KE0E9W25JY3EJTDTA5ZAGYN7
+Blinds: 40/80
+Total Pot: 141
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (975) [SB Hero]
+Seat 2: Villain7 (504) [BB]
+Seat 3: Villain8 (21) [BTN]
+*** HOLE CARDS ***
+Hero: [Jd 2s]
+Villain7: [7s Ah]
+Villain8: [Td Kh]
+*** PRE-FLOP ***
+22:51:47 - Hero: Posts SB 40
+22:51:47 - Villain7: Posts BB 80
+22:51:49 - Villain8: Calls 21 and is all-in
+22:51:51 - Hero: Folds
+*** FLOP *** [As Kd 8h]
+*** TURN *** [As Kd 8h 5c]
+*** RIVER *** [As Kd 8h 5c 7c]
+*** SHOWDOWN ***
+Villain7 shows [7s Ah] (Two Pair) [As Ah 7s 7c Kd]
+Villain8 shows [Td Kh] (Pair) [Kh Kd As Td 8h]
+*** SUMMARY ***
+Villain7 wins main pot of 63
+Villain7 wins 1st side pot of 78
+Villain8 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0E9W1SKZWJKX7RM6VE2N1S
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0EGAE9ZJRW15E7WNATP2YK
+Date & Time: 2026-01-02 22:50:57 (UTC)
+Table ID: 01KE0E9W25JY3EJTDTA5ZAGYN7
+Blinds: 30/60
+Total Pot: 1257
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (345) [BTN Hero]
+Seat 2: Villain7 (456) [SB]
+Seat 3: Villain8 (699) [BB]
+*** HOLE CARDS ***
+Hero: [Jd Qs]
+Villain7: [2h 6h]
+Villain8: [Qd Ad]
+*** PRE-FLOP ***
+22:50:57 - Villain7: Posts SB 30
+22:50:57 - Villain8: Posts BB 60
+22:51:00 - Hero: Raises to 345 and is all-in
+22:51:02 - Villain7: Calls 315
+22:51:04 - Villain8: Calls 285
+*** FLOP *** [7d Ts 6c]
+22:51:08 - Villain7: Checks
+22:51:10 - Villain8: Bets 60
+22:51:12 - Villain7: Raises to 111 and is all-in
+22:51:14 - Villain8: Calls 51
+*** TURN *** [7d Ts 6c 4c]
+*** RIVER *** [7d Ts 6c 4c Js]
+*** SHOWDOWN ***
+Villain7 shows [2h 6h] (Pair) [6h 6c Js Ts 7d]
+Villain8 shows [Qd Ad] (High Card) [Ad Qd Js Ts 7d]
+Hero shows [Jd Qs] (Pair) [Js Jd Qs Ts 7d]
+*** SUMMARY ***
+Hero wins main pot of 1035
+Villain7 wins 1st side pot of 222
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE073CF6FQGP1GN4FEP09HFZ
+Prize pool: 8.00€
+Multiplier: x4
+Buy In: 2.00€
+Hand ID: 01KE07AK30ND74ASJY171CVR6M
+Date & Time: 2026-01-02 20:45:29 (UTC)
+Table ID: 01KE073CFHCCPFWDKQ3R793CDX
+Blinds: 15/30
+Total Pot: 621
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain9 (255) [SB]
+Seat 2: Hero (111) [BB Hero]
+Seat 3: Villain10 (1134) [BTN]
+*** HOLE CARDS ***
+Villain9: [As Jd]
+Hero: [Ah 2h]
+Villain10: [Qs 7d]
+*** PRE-FLOP ***
+20:45:29 - Villain9: Posts SB 15
+20:45:29 - Hero: Posts BB 30
+20:45:31 - Villain10: Raises to 60
+20:45:32 - Villain9: Raises to 255 and is all-in
+20:45:33 - Hero: Calls 81 and is all-in
+20:45:35 - Villain10: Calls 195
+*** FLOP *** [5h 3h Qh]
+*** TURN *** [5h 3h Qh 5d]
+*** RIVER *** [5h 3h Qh 5d 8d]
+*** SHOWDOWN ***
+Villain9 shows [As Jd] (Pair) [5h 5d As Qh Jd]
+Villain10 shows [Qs 7d] (Two Pair) [Qs Qh 5h 5d 8d]
+Hero shows [Ah 2h] (Flush) [Ah Qh 5h 3h 2h]
+*** SUMMARY ***
+Hero wins main pot of 333
+Villain10 wins 1st side pot of 288
+Villain9 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE06YJ37F2DXVNM1G19WSPQZ
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE072FQFWMZH3D6NWDNSJSFP
+Date & Time: 2026-01-02 20:41:03 (UTC)
+Table ID: 01KE06YJ3HCANMKQK4H8J815JY
+Blinds: 15/30
+Total Pot: 1430
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (490) [SB Hero]
+Seat 2: Villain11 (560) [BB]
+Seat 3: Villain12 (450) [BTN]
+*** HOLE CARDS ***
+Hero: [6d As]
+Villain11: [Kd Ah]
+Villain12: [7h 7s]
+*** PRE-FLOP ***
+20:41:03 - Hero: Posts SB 15
+20:41:03 - Villain11: Posts BB 30
+20:41:06 - Villain12: Calls 30
+20:41:09 - Hero: Raises to 490 and is all-in
+20:41:12 - Villain11: Calls 460
+20:41:16 - Villain12: Calls 420 and is all-in
+*** FLOP *** [8d 7c Kh]
+*** TURN *** [8d 7c Kh 4s]
+*** RIVER *** [8d 7c Kh 4s 8s]
+*** SHOWDOWN ***
+Hero shows [6d As] (Pair) [8s 8d As Kh 7c]
+Villain11 shows [Kd Ah] (Two Pair) [Kh Kd 8s 8d Ah]
+Villain12 shows [7h 7s] (Full House) [8s 8d 7s 7h 7c]
+*** SUMMARY ***
+Villain12 wins main pot of 1350
+Villain11 wins 1st side pot of 80
+Hero finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0447AX7T87K067B89T6FDX
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE046EB41QWVGK5PKTZWHS2R
+Date & Time: 2026-01-02 19:50:47 (UTC)
+Table ID: 01KE0447BFD8YA7N9WGE3B3PGN
+Blinds: 10/20
+Total Pot: 920
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (380) [BB Hero]
+Seat 2: Villain13 (960) [BTN]
+Seat 3: Villain14 (160) [SB]
+*** HOLE CARDS ***
+Hero: [Ac Qs]
+Villain13: [5h 5s]
+Villain14: [Ks Jh]
+*** PRE-FLOP ***
+19:50:47 - Villain14: Posts SB 10
+19:50:47 - Hero: Posts BB 20
+19:50:49 - Villain13: Calls 20
+19:50:50 - Villain14: Raises to 160 and is all-in
+19:50:51 - Hero: Raises to 380 and is all-in
+19:50:52 - Villain13: Calls 360
+*** FLOP *** [As Qh 5d]
+*** TURN *** [As Qh 5d Qd]
+*** RIVER *** [As Qh 5d Qd 2s]
+*** SHOWDOWN ***
+Hero shows [Ac Qs] (Full House) [As Ac Qs Qh Qd]
+Villain13 shows [5h 5s] (Full House) [Qh Qd 5s 5h 5d]
+Villain14 shows [Ks Jh] (Pair) [Qh Qd As Ks Jh]
+*** SUMMARY ***
+Hero wins main pot of 480
+Hero wins 1st side pot of 440
+Villain14 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE02QNHXCMQZ9ZE27Q18F4Y0
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE02XJ9W9PWSBZCNSJHP4T3J
+Date & Time: 2026-01-02 19:28:28 (UTC)
+Table ID: 01KE02QNJCDM4ZD0D4KGN8DZGK
+Blinds: 20/40
+Total Pot: 625
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (155) [SB Hero]
+Seat 2: Villain15 (545) [BB]
+Seat 3: Villain16 (800) [BTN]
+*** HOLE CARDS ***
+Hero: [Ad 5s]
+Villain15: [Ah 9s]
+Villain16: [As Jc]
+*** PRE-FLOP ***
+19:28:28 - Hero: Posts SB 20
+19:28:28 - Villain15: Posts BB 40
+19:28:30 - Villain16: Calls 40
+19:28:31 - Hero: Raises to 155 and is all-in
+19:28:32 - Villain15: Calls 115
+19:28:33 - Villain16: Calls 115
+*** FLOP *** [3s Kh Ks]
+19:28:36 - Villain15: Checks
+19:28:37 - Villain16: Checks
+*** TURN *** [3s Kh Ks 3h]
+19:28:39 - Villain15: Bets 40
+19:28:40 - Villain16: Calls 40
+*** RIVER *** [3s Kh Ks 3h Tc]
+19:28:42 - Villain15: Bets 40
+19:28:43 - Villain16: Calls 40
+*** SHOWDOWN ***
+Villain15 shows [Ah 9s] (Two Pair) [Ks Kh 3s 3h Ah]
+Villain16 shows [As Jc] (Two Pair) [Ks Kh 3s 3h As]
+Hero shows [Ad 5s] (Two Pair) [Ks Kh 3s 3h Ad]
+*** SUMMARY ***
+Hero wins main pot of 155
+Villain15 wins main pot of 155
+Villain16 wins main pot of 155
+Villain15 wins 1st side pot of 80
+Villain16 wins 1st side pot of 80
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE01K7HJ5S8ZDRQ0DZVDNNGG
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KE01YZ0E6M0JWV6JVPV487Y1
+Date & Time: 2026-01-02 19:11:45 (UTC)
+Table ID: 01KE01K7HYRGAXZ3DVVWKTB3CW
+Blinds: 40/80
+Total Pot: 1040
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (850) [BTN Hero]
+Seat 2: Villain17 (260) [SB]
+Seat 3: Villain18 (390) [BB]
+*** HOLE CARDS ***
+Hero: [Qs Tc]
+Villain17: [3h Js]
+Villain18: [Kc Td]
+*** PRE-FLOP ***
+19:11:45 - Villain17: Posts SB 40
+19:11:45 - Villain18: Posts BB 80
+19:11:48 - Hero: Raises to 850 and is all-in
+19:11:49 - Villain17: Calls 220 and is all-in
+19:11:50 - Villain18: Calls 310 and is all-in
+*** FLOP *** [3d Qc 7s]
+*** TURN *** [3d Qc 7s 6c]
+*** RIVER *** [3d Qc 7s 6c 7c]
+*** SHOWDOWN ***
+Villain18 shows [Kc Td] (Pair) [7s 7c Kc Qc Td]
+Hero shows [Qs Tc] (Two Pair) [Qs Qc 7s 7c Tc]
+Villain17 shows [3h Js] (Two Pair) [7s 7c 3h 3d Qc]
+*** SUMMARY ***
+Hero wins main pot of 780
+Hero wins 1st side pot of 260
+Hero finished 1st and wins 6.00 EUR
+Villain17 finished 3rd
+Villain18 finished 2nd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE00J0SDT1ZPCHZZZAXP74SJ
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE00NZ1FANJHTF84CYBXAMZZ
+Date & Time: 2026-01-02 18:49:22 (UTC)
+Table ID: 01KE00J0SST1X0NASHKQDYDDCR
+Blinds: 15/30
+Total Pot: 1410
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain19 (745) [BB]
+Seat 2: Villain20 (100) [BTN]
+Seat 3: Hero (655) [SB Hero]
+*** HOLE CARDS ***
+Villain19: [Jd Js]
+Villain20: [Th 9c]
+Hero: [Qc As]
+*** PRE-FLOP ***
+18:49:22 - Hero: Posts SB 15
+18:49:22 - Villain19: Posts BB 30
+18:49:24 - Villain20: Calls 30
+18:49:28 - Hero: Raises to 655 and is all-in
+18:49:30 - Villain19: Raises to 745 and is all-in
+18:49:31 - Villain20: Calls 70 and is all-in
+*** FLOP *** [Qd 5c Ad]
+*** TURN *** [Qd 5c Ad 2c]
+*** RIVER *** [Qd 5c Ad 2c 2d]
+*** SHOWDOWN ***
+Hero shows [Qc As] (Two Pair) [As Ad Qd Qc 5c]
+Villain19 shows [Jd Js] (Two Pair) [Js Jd 2d 2c Ad]
+Villain20 shows [Th 9c] (Pair) [2d 2c Ad Qd Th]
+*** SUMMARY ***
+Hero wins main pot of 300
+Hero wins 1st side pot of 1110
+Villain20 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE00GZM5YDA26ES02TR380DM
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KE00NPQHDK8V6VJ9FHJBQWXN
+Date & Time: 2026-01-02 18:49:13 (UTC)
+Table ID: 01KE00GZMJX3MBC8KJ4QXZJ554
+Blinds: 15/30
+Total Pot: 1422
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (520) [SB Hero]
+Seat 2: Villain21 (598) [BB]
+Seat 3: Villain22 (382) [BTN]
+*** HOLE CARDS ***
+Hero: [As Ac]
+Villain21: [Ks 7c]
+Villain22: [2h Jh]
+*** PRE-FLOP ***
+18:49:13 - Hero: Posts SB 15
+18:49:13 - Villain21: Posts BB 30
+18:49:15 - Villain22: Calls 30
+18:49:18 - Hero: Raises to 120
+18:49:19 - Villain21: Calls 90
+18:49:21 - Villain22: Calls 90
+*** FLOP *** [Qh Ts Kc]
+18:49:23 - Hero: Bets 400 and is all-in
+18:49:24 - Villain21: Calls 400
+18:49:26 - Villain22: Calls 262 and is all-in
+*** TURN *** [Qh Ts Kc Kh]
+*** RIVER *** [Qh Ts Kc Kh 4c]
+*** SHOWDOWN ***
+Hero shows [As Ac] (Two Pair) [As Ac Kh Kc Qh]
+Villain21 shows [Ks 7c] (Three of a Kind) [Ks Kh Kc Qh Ts]
+Villain22 shows [2h Jh] (Pair) [Kh Kc Qh Jh Ts]
+*** SUMMARY ***
+Villain21 wins main pot of 1146
+Villain21 wins 1st side pot of 276
+Villain21 finished 1st and wins 6.00 EUR
+Hero finished 2nd
+Villain22 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE00C77YC10N7ETCQ1B6F2QZ
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE00HF03A6DR0WFAFV7TS7DQ
+Date & Time: 2026-01-02 18:46:54 (UTC)
+Table ID: 01KE00C78ANM1VJ6TTMJSZ5PAA
+Blinds: 20/40
+Total Pot: 110
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain23 (10) [BB]
+Seat 2: Villain24 (690) [BTN]
+Seat 3: Hero (800) [SB Hero]
+*** HOLE CARDS ***
+Villain23: [8d 5d]
+Villain24: [4d Qd]
+Hero: [Jh 4c]
+*** PRE-FLOP ***
+18:46:54 - Hero: Posts SB 20
+18:46:54 - Villain23: Posts BB 10 and is all-in
+18:46:56 - Villain24: Raises to 80
+18:47:01 - Hero: Folds
+*** FLOP *** [Qh 3c Th]
+*** TURN *** [Qh 3c Th 5s]
+*** RIVER *** [Qh 3c Th 5s 3h]
+*** SHOWDOWN ***
+Villain24 shows [4d Qd] (Two Pair) [Qh Qd 3h 3c Th]
+Villain23 shows [8d 5d] (Two Pair) [5s 5d 3h 3c Qh]
+*** SUMMARY ***
+Villain24 wins main pot of 30
+Villain24 wins 1st side pot of 80
+Villain23 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZZSHJ8MG4A1N17QGJQ48KH
+Prize pool: 8.00€
+Multiplier: x4
+Buy In: 2.00€
+Hand ID: 01KE0022SZKFJZGM8MKNTM600J
+Date & Time: 2026-01-02 18:38:30 (UTC)
+Table ID: 01KDZZSHJMQD369MZQMMG2J6SX
+Blinds: 20/40
+Total Pot: 1387
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (1174) [SB Hero]
+Seat 2: Villain25 (13) [BB]
+Seat 3: Villain26 (313) [BTN]
+*** HOLE CARDS ***
+Hero: [Jd 9c]
+Villain25: [8d As]
+*** PRE-FLOP ***
+18:38:30 - Hero: Posts SB 20
+18:38:30 - Villain25: Posts BB 13 and is all-in
+18:38:39 - Villain26: Calls 40
+18:38:43 - Hero: Calls 20
+*** FLOP *** [Td 5s Qd]
+18:38:46 - Hero: Checks
+18:38:50 - Villain26: Bets 40
+18:38:52 - Hero: Calls 40
+*** TURN *** [Td 5s Qd 8h]
+18:38:56 - Hero: Checks
+18:38:57 - Villain26: Bets 40
+18:39:02 - Hero: Raises to 120
+18:39:05 - Villain26: Calls 80
+*** RIVER *** [Td 5s Qd 8h 9s]
+18:39:08 - Hero: Bets 974 and is all-in
+18:39:10 - Villain26: Folds
+*** SHOWDOWN ***
+Hero shows [Jd 9c] (Straight) [Qd Jd Td 9c 8h]
+Villain25 shows [8d As] (Pair) [8h 8d As Qd Td]
+*** SUMMARY ***
+Hero wins main pot of 39
+Hero wins 1st side pot of 1348
+Villain25 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZZE4AJBGTPWMGX7CHXJ0W0
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KDZZH8DDB5SFCZDW4BVGSFDD
+Date & Time: 2026-01-02 18:29:19 (UTC)
+Table ID: 01KDZZE4AZVYEQPHH2R2CD4Z4S
+Blinds: 15/30
+Total Pot: 1460
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain27 (570) [BTN]
+Seat 2: Villain28 (610) [SB]
+Seat 3: Hero (320) [BB Hero]
+*** HOLE CARDS ***
+Villain27: [7s Ad]
+Villain28: [Jc Qc]
+Hero: [Kc Kd]
+*** PRE-FLOP ***
+18:29:19 - Villain28: Posts SB 15
+18:29:19 - Hero: Posts BB 30
+18:29:21 - Villain27: Raises to 570 and is all-in
+18:29:22 - Villain28: Raises to 610 and is all-in
+18:29:25 - Hero: Calls 290 and is all-in
+*** FLOP *** [9c 5d 6s]
+*** TURN *** [9c 5d 6s 8d]
+*** RIVER *** [9c 5d 6s 8d 7c]
+*** SHOWDOWN ***
+Villain28 shows [Jc Qc] (Straight) [9c 8d 7c 6s 5d]
+Villain27 shows [7s Ad] (Straight) [9c 8d 7s 6s 5d]
+Hero shows [Kc Kd] (Straight) [9c 8d 7c 6s 5d]
+*** SUMMARY ***
+Villain27 wins main pot of 320
+Villain28 wins main pot of 320
+Hero wins main pot of 320
+Villain28 wins 1st side pot of 250
+Villain27 wins 1st side pot of 250
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZYS88SEW6DNVN5PKX3S9YG
+Prize pool: 10.00€
+Multiplier: x5
+Buy In: 2.00€
+Hand ID: 01KDZZ2FSV8CR9YDZE8ZGETX0W
+Date & Time: 2026-01-02 18:21:15 (UTC)
+Table ID: 01KDZYS895E193P1RJ56EMSXT6
+Blinds: 20/40
+Total Pot: 1483
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain29 (361) [BB]
+Seat 2: Hero (561) [BTN Hero]
+Seat 3: Villain30 (578) [SB]
+*** HOLE CARDS ***
+Villain29: [8s Js]
+Hero: [Jh Kh]
+Villain30: [8c 5c]
+*** PRE-FLOP ***
+18:21:15 - Villain30: Posts SB 20
+18:21:15 - Villain29: Posts BB 40
+18:21:20 - Hero: Raises to 80
+18:21:22 - Villain30: Calls 60
+18:21:24 - Villain29: Calls 40
+*** FLOP *** [8h 5h 6c]
+18:21:27 - Villain30: Bets 240
+18:21:29 - Villain29: Raises to 281 and is all-in
+18:21:32 - Hero: Raises to 481 and is all-in
+18:21:32 - Villain30: Calls 241
+*** TURN *** [8h 5h 6c 7s]
+*** RIVER *** [8h 5h 6c 7s 5s]
+*** SHOWDOWN ***
+Villain30 shows [8c 5c] (Full House) [8h 8c 5s 5h 5c]
+Hero shows [Jh Kh] (Pair) [5s 5h Kh Jh 8h]
+Villain29 shows [8s Js] (Two Pair) [8s 8h 5s 5h Js]
+*** SUMMARY ***
+Villain30 wins main pot of 1083
+Villain30 wins 1st side pot of 400
+Villain30 finished 1st and wins 10.00 EUR
+Villain29 finished 3rd
+Hero finished 2nd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZYJNBPWE9AB5C7N1HHQ7CE
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KDZYY57EXZF4H35SQJ1NBQEV
+Date & Time: 2026-01-02 18:18:53 (UTC)
+Table ID: 01KDZYJNC2D2N9X40X7335CKCK
+Blinds: 50/100
+Total Pot: 180
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (910) [SB Hero]
+Seat 2: Villain31 (30) [BB]
+Seat 3: Villain32 (560) [BTN]
+*** HOLE CARDS ***
+Hero: [2c Ks]
+Villain31: [5d 3c]
+Villain32: [9s 6s]
+*** PRE-FLOP ***
+18:18:53 - Hero: Posts SB 50
+18:18:53 - Villain31: Posts BB 30 and is all-in
+18:18:58 - Villain32: Calls 100
+18:18:59 - Hero: Folds
+*** FLOP *** [Tc 5h Kh]
+*** TURN *** [Tc 5h Kh 9d]
+*** RIVER *** [Tc 5h Kh 9d 8d]
+*** SHOWDOWN ***
+Villain32 shows [9s 6s] (Pair) [9s 9d Kh Tc 8d]
+Villain31 shows [5d 3c] (Pair) [5h 5d Kh Tc 9d]
+*** SUMMARY ***
+Villain32 wins main pot of 90
+Villain32 wins 1st side pot of 90
+Villain31 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZYJNBPWE9AB5C7N1HHQ7CE
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KDZYX2D90RMYEA3XEPXMXG2F
+Date & Time: 2026-01-02 18:18:17 (UTC)
+Table ID: 01KDZYJNC2D2N9X40X7335CKCK
+Blinds: 50/100
+Total Pot: 210
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (920) [BB Hero]
+Seat 2: Villain31 (10) [BTN]
+Seat 3: Villain32 (570) [SB]
+*** HOLE CARDS ***
+Hero: [Td 3d]
+Villain31: [Th Kd]
+Villain32: [3s Ts]
+*** PRE-FLOP ***
+18:18:17 - Villain32: Posts SB 50
+18:18:17 - Hero: Posts BB 100
+18:18:19 - Villain31: Calls 10 and is all-in
+18:18:21 - Villain32: Calls 50
+18:18:26 - Hero: Checks
+*** FLOP *** [Ks Qh 2c]
+18:18:29 - Villain32: Checks
+18:18:30 - Hero: Checks
+*** TURN *** [Ks Qh 2c Jc]
+18:18:33 - Villain32: Checks
+18:18:38 - Hero: Checks
+*** RIVER *** [Ks Qh 2c Jc Js]
+18:18:42 - Villain32: Checks
+18:18:46 - Hero: Checks
+*** SHOWDOWN ***
+Villain32 shows [3s Ts] (Pair) [Js Jc Ks Qh Ts]
+Hero shows [Td 3d] (Pair) [Js Jc Ks Qh Td]
+Villain31 shows [Th Kd] (Two Pair) [Ks Kd Js Jc Qh]
+*** SUMMARY ***
+Villain31 wins main pot of 30
+Villain32 wins 1st side pot of 90
+Hero wins 1st side pot of 90
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZXT27QXX7FRHVKG3ZMDVWQ
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KDZY4FJD4GRBW3505YF2QY5Q
+Date & Time: 2026-01-02 18:04:52 (UTC)
+Table ID: 01KDZXT282WTMQE539X3VMGV2Z
+Blinds: 50/100
+Total Pot: 312
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain33 (1196) [SB]
+Seat 2: Hero (12) [BB Hero]
+Seat 3: Villain34 (292) [BTN]
+*** HOLE CARDS ***
+Villain33: [9h 6s]
+Hero: [6c Tc]
+*** PRE-FLOP ***
+18:04:52 - Villain33: Posts SB 50
+18:04:52 - Hero: Posts BB 12 and is all-in
+18:04:54 - Villain34: Calls 100
+18:05:05 - Villain33: Calls 50
+*** FLOP *** [3d 9d 7s]
+18:05:09 - Villain33: Bets 100
+18:05:11 - Villain34: Folds
+*** TURN *** [3d 9d 7s Qd]
+*** RIVER *** [3d 9d 7s Qd As]
+*** SHOWDOWN ***
+Villain33 shows [9h 6s] (Pair) [9h 9d As Qd 7s]
+Hero shows [6c Tc] (High Card) [As Qd Tc 9d 7s]
+*** SUMMARY ***
+Villain33 wins main pot of 36
+Villain33 wins 1st side pot of 276
+Hero finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZXT27QXX7FRHVKG3ZMDVWQ
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KDZY3V4X437MA2GVZCRYHHC6
+Date & Time: 2026-01-02 18:04:31 (UTC)
+Table ID: 01KDZXT282WTMQE539X3VMGV2Z
+Blinds: 50/100
+Total Pot: 304
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain33 (1104) [BB]
+Seat 2: Hero (4) [BTN Hero]
+Seat 3: Villain34 (392) [SB]
+*** HOLE CARDS ***
+Villain33: [5d 6s]
+Hero: [Kd Js]
+*** PRE-FLOP ***
+18:04:31 - Villain34: Posts SB 50
+18:04:31 - Villain33: Posts BB 100
+18:04:32 - Hero: Calls 4 and is all-in
+18:04:33 - Villain34: Calls 50
+18:04:34 - Villain33: Checks
+*** FLOP *** [4h 7s 2d]
+18:04:38 - Villain34: Checks
+18:04:39 - Villain33: Bets 100
+18:04:41 - Villain34: Folds
+*** TURN *** [4h 7s 2d Jc]
+*** RIVER *** [4h 7s 2d Jc 7d]
+*** SHOWDOWN ***
+Villain33 shows [5d 6s] (Pair) [7s 7d Jc 6s 5d]
+Hero shows [Kd Js] (Two Pair) [Js Jc 7s 7d Kd]
+*** SUMMARY ***
+Hero wins main pot of 12
+Villain33 wins 1st side pot of 292
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZXT2CRRTZYH2EFK7BRR317
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KDZY20SKEKEWG8MA6XPYM3D0
+Date & Time: 2026-01-02 18:03:31 (UTC)
+Table ID: 01KDZXT2D45MZTV92PTNTH7FK8
+Blinds: 20/40
+Total Pot: 1482
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (695) [BB Hero]
+Seat 2: Villain33 (128) [BTN]
+Seat 3: Villain35 (677) [SB]
+*** HOLE CARDS ***
+Hero: [Kd Qs]
+Villain33: [5h Ac]
+Villain35: [Qc Ks]
+*** PRE-FLOP ***
+18:03:31 - Villain35: Posts SB 20
+18:03:31 - Hero: Posts BB 40
+18:03:36 - Villain33: Raises to 128 and is all-in
+18:03:39 - Villain35: Calls 108
+18:03:45 - Hero: Calls 88
+*** FLOP *** [2c Kc Ts]
+18:03:50 - Villain35: Checks
+18:03:51 - Hero: Bets 153
+18:03:55 - Villain35: Calls 153
+*** TURN *** [2c Kc Ts 4h]
+18:03:59 - Villain35: Checks
+18:03:59 - Hero: Bets 414 and is all-in
+18:04:06 - Villain35: Calls 396 and is all-in
+*** RIVER *** [2c Kc Ts 4h 9d]
+*** SHOWDOWN ***
+Villain35 shows [Qc Ks] (Pair) [Ks Kc Qc Ts 9d]
+Hero shows [Kd Qs] (Pair) [Kd Kc Qs Ts 9d]
+Villain33 shows [5h Ac] (High Card) [Ac Kc Ts 9d 5h]
+*** SUMMARY ***
+Hero wins main pot of 192
+Villain35 wins main pot of 192
+Villain35 wins 1st side pot of 549
+Hero wins 1st side pot of 549
+Villain33 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZBJFDASDH9CJV191K1SQTE
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KDZBVK5ZW89CS7TYANRQTSPJ
+Date & Time: 2026-01-02 12:45:26 (UTC)
+Table ID: 01KDZBJFDN7T0TG9K2P1QQCEDY
+Blinds: 30/60
+Total Pot: 450
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (1240) [BB Hero]
+Seat 2: Villain36 (190) [BTN]
+Seat 3: Villain37 (70) [SB]
+*** HOLE CARDS ***
+Hero: [Ad Kc]
+Villain36: [4h 4d]
+Villain37: [3h Ts]
+*** PRE-FLOP ***
+12:45:26 - Villain37: Posts SB 30
+12:45:26 - Hero: Posts BB 60
+12:45:33 - Villain36: Raises to 120
+12:45:34 - Villain37: Calls 40 and is all-in
+12:45:38 - Hero: Raises to 1240 and is all-in
+12:45:40 - Villain36: Calls 70 and is all-in
+*** FLOP *** [3c 2c 9d]
+*** TURN *** [3c 2c 9d Ah]
+*** RIVER *** [3c 2c 9d Ah 8d]
+*** SHOWDOWN ***
+Hero shows [Ad Kc] (Pair) [Ah Ad Kc 9d 8d]
+Villain36 shows [4h 4d] (Pair) [4h 4d Ah 9d 8d]
+Villain37 shows [3h Ts] (Pair) [3h 3c Ah Ts 9d]
+*** SUMMARY ***
+Hero wins main pot of 210
+Hero wins 1st side pot of 240
+Hero finished 1st and wins 6.00 EUR
+Villain36 finished 2nd
+Villain37 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZBM215BTR9VP9C5SH3Q45S
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KDZBTZ7H6TVAYYHHXHNVVCNK
+Date & Time: 2026-01-02 12:45:06 (UTC)
+Table ID: 01KDZBM21H79HXP1NCNBSAQEBA
+Blinds: 20/40
+Total Pot: 1240
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain38 (120) [BTN]
+Seat 2: Hero (560) [SB Hero]
+Seat 3: Villain39 (820) [BB]
+*** HOLE CARDS ***
+Villain38: [Kh 6s]
+Hero: [5d 5c]
+Villain39: [Qh 6h]
+*** PRE-FLOP ***
+12:45:06 - Hero: Posts SB 20
+12:45:06 - Villain39: Posts BB 40
+12:45:08 - Villain38: Raises to 120 and is all-in
+12:45:12 - Hero: Raises to 560 and is all-in
+12:45:15 - Villain39: Calls 520
+*** FLOP *** [Ts 8h Jd]
+*** TURN *** [Ts 8h Jd 4s]
+*** RIVER *** [Ts 8h Jd 4s 3c]
+*** SHOWDOWN ***
+Hero shows [5d 5c] (Pair) [5d 5c Jd Ts 8h]
+Villain39 shows [Qh 6h] (High Card) [Qh Jd Ts 8h 6h]
+Villain38 shows [Kh 6s] (High Card) [Kh Jd Ts 8h 6s]
+*** SUMMARY ***
+Hero wins main pot of 360
+Hero wins 1st side pot of 880
+Villain38 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZB92EZWQCR0QRY9XJ0P71F
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KDZBEYZW2WW9MZF4YX1TDTFC
+Date & Time: 2026-01-02 12:38:32 (UTC)
+Table ID: 01KDZB92F9YPEB0SF6765Y4REF
+Blinds: 20/40
+Total Pot: 1225
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain40 (760) [SB]
+Seat 2: Villain41 (255) [BB]
+Seat 3: Hero (485) [BTN Hero]
+*** HOLE CARDS ***
+Villain40: [6d 6c]
+Villain41: [Tc Td]
+Hero: [Ks Js]
+*** PRE-FLOP ***
+12:38:32 - Villain40: Posts SB 20
+12:38:32 - Villain41: Posts BB 40
+12:38:37 - Hero: Raises to 80
+12:38:38 - Villain40: Raises to 760 and is all-in
+12:38:39 - Villain41: Calls 215 and is all-in
+12:38:42 - Hero: Calls 405 and is all-in
+*** FLOP *** [3s 4d Kh]
+*** TURN *** [3s 4d Kh 5h]
+*** RIVER *** [3s 4d Kh 5h 4h]
+*** SHOWDOWN ***
+Villain40 shows [6d 6c] (Two Pair) [6d 6c 4h 4d Kh]
+Hero shows [Ks Js] (Two Pair) [Ks Kh 4h 4d Js]
+Villain41 shows [Tc Td] (Two Pair) [Td Tc 4h 4d Kh]
+*** SUMMARY ***
+Hero wins main pot of 765
+Hero wins 1st side pot of 460
+Villain41 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZB6Y2ZEXB9N2S8ANP5YV37
+Prize pool: 10.00€
+Multiplier: x5
+Buy In: 2.00€
+Hand ID: 01KDZBC91M312818NWNGPQS78T
+Date & Time: 2026-01-02 12:37:04 (UTC)
+Table ID: 01KDZB6Y3B1DGJFGCCKGRFFWY4
+Blinds: 15/30
+Total Pot: 1305
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (570) [SB Hero]
+Seat 2: Villain42 (165) [BB]
+Seat 3: Villain43 (765) [BTN]
+*** HOLE CARDS ***
+Hero: [Jc Ad]
+Villain42: [Ah 4d]
+Villain43: [Tc Qc]
+*** PRE-FLOP ***
+12:37:04 - Hero: Posts SB 15
+12:37:04 - Villain42: Posts BB 30
+12:37:06 - Villain43: Calls 30
+12:37:09 - Hero: Raises to 180
+12:37:12 - Villain42: Calls 135 and is all-in
+12:37:13 - Villain43: Calls 150
+*** FLOP *** [Qh 7c 5h]
+12:37:16 - Hero: Bets 390 and is all-in
+12:37:17 - Villain43: Calls 390
+*** TURN *** [Qh 7c 5h 5d]
+*** RIVER *** [Qh 7c 5h 5d 5c]
+*** SHOWDOWN ***
+Hero shows [Jc Ad] (Three of a Kind) [5h 5d 5c Ad Qh]
+Villain43 shows [Tc Qc] (Full House) [Qh Qc 5h 5d 5c]
+Villain42 shows [Ah 4d] (Three of a Kind) [5h 5d 5c Ah Qh]
+*** SUMMARY ***
+Villain43 wins main pot of 495
+Villain43 wins 1st side pot of 810
+Villain43 finished 1st and wins 10.00 EUR
+Hero finished 2nd
+Villain42 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZB57H0445QX8ZPW054R5XY
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KDZBBKZT0AA75V7JY7Q0ZM2M
+Date & Time: 2026-01-02 12:36:43 (UTC)
+Table ID: 01KDZB57HAZ3VPARJSPX37BM3K
+Blinds: 30/60
+Total Pot: 985
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (385) [SB Hero]
+Seat 2: Villain44 (215) [BB]
+Seat 3: Villain45 (900) [BTN]
+*** HOLE CARDS ***
+Hero: [As 9d]
+Villain44: [4s Ad]
+Villain45: [Ah Ks]
+*** PRE-FLOP ***
+12:36:43 - Hero: Posts SB 30
+12:36:43 - Villain44: Posts BB 60
+12:36:45 - Villain45: Calls 60
+12:36:46 - Hero: Raises to 385 and is all-in
+12:36:47 - Villain44: Calls 155 and is all-in
+12:36:48 - Villain45: Calls 325
+*** FLOP *** [Js 4h Jh]
+*** TURN *** [Js 4h Jh Qs]
+*** RIVER *** [Js 4h Jh Qs 7d]
+*** SHOWDOWN ***
+Hero shows [As 9d] (Pair) [Js Jh As Qs 9d]
+Villain45 shows [Ah Ks] (Pair) [Js Jh Ah Ks Qs]
+Villain44 shows [4s Ad] (Two Pair) [Js Jh 4s 4h Ad]
+*** SUMMARY ***
+Villain44 wins main pot of 645
+Villain45 wins 1st side pot of 340
+Hero finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZB09607TEA0F8W32NCK2ZJ
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KDZB3JKXYR9VMRMAZCWS44Z1
+Date & Time: 2026-01-02 12:32:19 (UTC)
+Table ID: 01KDZB096CFXT4TEA6FHFDWDP8
+Blinds: 10/20
+Total Pot: 180
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain40 (1000) [BB]
+Seat 2: Hero (460) [BTN Hero]
+Seat 3: Villain46 (40) [SB]
+*** HOLE CARDS ***
+Villain40: [3h 8h]
+Hero: [Th Ah]
+Villain46: [3d 6c]
+*** PRE-FLOP ***
+12:32:19 - Villain46: Posts SB 10
+12:32:19 - Villain40: Posts BB 20
+12:32:21 - Hero: Raises to 40
+12:32:24 - Villain46: Calls 30 and is all-in
+12:32:26 - Villain40: Calls 20
+*** FLOP *** [5d Qh 4h]
+12:32:29 - Villain40: Checks
+12:32:30 - Hero: Bets 30
+12:32:31 - Villain40: Calls 30
+*** TURN *** [5d Qh 4h 3c]
+12:32:33 - Villain40: Checks
+12:32:39 - Hero: Checks
+*** RIVER *** [5d Qh 4h 3c Jc]
+12:32:42 - Villain40: Checks
+12:32:44 - Hero: Checks
+*** SHOWDOWN ***
+Villain40 shows [3h 8h] (Pair) [3h 3c Qh Jc 8h]
+Hero shows [Th Ah] (High Card) [Ah Qh Jc Th 5d]
+Villain46 shows [3d 6c] (Pair) [3d 3c Qh Jc 6c]
+*** SUMMARY ***
+Villain40 wins main pot of 120
+Villain40 wins 1st side pot of 60
+Villain46 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZ97PK1SZ80PCCQBGS6095N
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KDZ9KHBJ48VNH3N43SGH0WAE
+Date & Time: 2026-01-02 12:06:05 (UTC)
+Table ID: 01KDZ97PKFG0A2GZDK0W02JX5B
+Blinds: 40/80
+Total Pot: 1080
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain47 (528) [BB]
+Seat 2: Hero (948) [BTN Hero]
+Seat 3: Villain48 (24) [SB]
+*** HOLE CARDS ***
+Villain47: [Ac Kd]
+Hero: [6h Kh]
+Villain48: [Ts 5d]
+*** PRE-FLOP ***
+12:06:05 - Villain48: Posts SB 24 and is all-in
+12:06:05 - Villain47: Posts BB 80
+12:06:07 - Hero: Raises to 948 and is all-in
+12:06:08 - Villain47: Calls 448 and is all-in
+*** FLOP *** [Tc 5s 7h]
+*** TURN *** [Tc 5s 7h 3s]
+*** RIVER *** [Tc 5s 7h 3s Js]
+*** SHOWDOWN ***
+Villain47 shows [Ac Kd] (High Card) [Ac Kd Js Tc 7h]
+Hero shows [6h Kh] (High Card) [Kh Js Tc 7h 6h]
+Villain48 shows [Ts 5d] (Two Pair) [Ts Tc 5s 5d Js]
+*** SUMMARY ***
+Villain48 wins main pot of 72
+Villain47 wins 1st side pot of 1008
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZ97PK1SZ80PCCQBGS6095N
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KDZ9J9V2PACVAF6428CWX90R
+Date & Time: 2026-01-02 12:05:24 (UTC)
+Table ID: 01KDZ97PKFG0A2GZDK0W02JX5B
+Blinds: 30/60
+Total Pot: 334
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain47 (416) [SB]
+Seat 2: Hero (1080) [BB Hero]
+Seat 3: Villain48 (4) [BTN]
+*** HOLE CARDS ***
+Villain47: [6s Ac]
+Hero: [6d 8c]
+Villain48: [9d 5d]
+*** PRE-FLOP ***
+12:05:24 - Villain47: Posts SB 30
+12:05:24 - Hero: Posts BB 60
+12:05:26 - Villain48: Calls 4 and is all-in
+12:05:28 - Villain47: Raises to 120
+12:05:35 - Hero: Calls 60
+*** FLOP *** [5c 9s Kc]
+12:05:38 - Villain47: Checks
+12:05:38 - Hero: Checks
+*** TURN *** [5c 9s Kc Th]
+12:05:40 - Villain47: Bets 90
+12:05:42 - Hero: Folds
+*** RIVER *** [5c 9s Kc Th 6c]
+*** SHOWDOWN ***
+Villain47 shows [6s Ac] (Pair) [6s 6c Ac Kc Th]
+Villain48 shows [9d 5d] (Two Pair) [9s 9d 5d 5c Kc]
+*** SUMMARY ***
+Villain48 wins main pot of 12
+Villain47 wins 1st side pot of 322
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZ94YMWAEZWYFMPG600Q5CT
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KDZ97KF32C9VHPS7AJVHWXK0
+Date & Time: 2026-01-02 11:59:34 (UTC)
+Table ID: 01KDZ94YN7FDP80K2TM9FG25QP
+Blinds: 15/30
+Total Pot: 1137
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain49 (465) [BTN]
+Seat 2: Villain50 (207) [SB]
+Seat 3: Hero (828) [BB Hero]
+*** HOLE CARDS ***
+Villain49: [Qc Jd]
+Villain50: [Ad Ah]
+Hero: [8c 8d]
+*** PRE-FLOP ***
+11:59:34 - Villain50: Posts SB 15
+11:59:34 - Hero: Posts BB 30
+11:59:36 - Villain49: Raises to 90
+11:59:38 - Villain50: Raises to 207 and is all-in
+11:59:38 - Hero: Raises to 828 and is all-in
+11:59:39 - Villain49: Calls 375 and is all-in
+*** FLOP *** [4d Jc Kd]
+*** TURN *** [4d Jc Kd 9s]
+*** RIVER *** [4d Jc Kd 9s 7s]
+*** SHOWDOWN ***
+Hero shows [8c 8d] (Pair) [8d 8c Kd Jc 9s]
+Villain49 shows [Qc Jd] (Pair) [Jd Jc Kd Qc 9s]
+Villain50 shows [Ad Ah] (Pair) [Ah Ad Kd Jc 9s]
+*** SUMMARY ***
+Villain50 wins main pot of 621
+Villain49 wins 1st side pot of 516
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZ8PDS2QVNR30K8TM8T98BF
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KDZ8YZDCVZFP3FAQRMHCWRRM
+Date & Time: 2026-01-02 11:54:51 (UTC)
+Table ID: 01KDZ8PDSDSPRXVVAWSEWMM531
+Blinds: 20/40
+Total Pot: 100
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (790) [SB Hero]
+Seat 2: Villain51 (690) [BB]
+Seat 3: Villain52 (20) [BTN]
+*** HOLE CARDS ***
+Hero: [Qc Tc]
+Villain51: [Ts 4d]
+Villain52: [6d 3c]
+*** PRE-FLOP ***
+11:54:51 - Hero: Posts SB 20
+11:54:51 - Villain51: Posts BB 40
+11:54:53 - Villain52: Calls 20 and is all-in
+11:54:58 - Hero: Calls 20
+11:55:00 - Villain51: Checks
+*** FLOP *** [2s 8h 5h]
+11:55:06 - Hero: Checks
+11:55:07 - Villain51: Checks
+*** TURN *** [2s 8h 5h 2c]
+11:55:16 - Hero: Checks
+11:55:17 - Villain51: Checks
+*** RIVER *** [2s 8h 5h 2c 7s]
+11:55:22 - Hero: Checks
+11:55:22 - Villain51: Checks
+*** SHOWDOWN ***
+Hero shows [Qc Tc] (Pair) [2s 2c Qc Tc 8h]
+Villain51 shows [Ts 4d] (Pair) [2s 2c Ts 8h 7s]
+Villain52 shows [6d 3c] (Pair) [2s 2c 8h 7s 6d]
+*** SUMMARY ***
+Hero wins main pot of 60
+Hero wins 1st side pot of 40
+Villain52 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZ7BMP53D8C6NCN0XKYS4D7
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KDZ7MVJNA59NH1AKW2FKM66Y
+Date & Time: 2026-01-02 11:31:51 (UTC)
+Table ID: 01KDZ7BMPFX7S64DZT5MQFSJDT
+Blinds: 30/60
+Total Pot: 306
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain53 (1110) [BB]
+Seat 2: Hero (62) [BTN Hero]
+Seat 3: Villain54 (328) [SB]
+*** HOLE CARDS ***
+Villain53: [9h Ts]
+Hero: [Tc Qs]
+Villain54: [Kc 3h]
+*** PRE-FLOP ***
+11:31:51 - Villain54: Posts SB 30
+11:31:51 - Villain53: Posts BB 60
+11:31:56 - Hero: Raises to 62 and is all-in
+11:32:00 - Villain54: Calls 32
+11:32:02 - Villain53: Calls 2
+*** FLOP *** [Ad 4s 7s]
+11:32:06 - Villain54: Checks
+11:32:09 - Villain53: Checks
+*** TURN *** [Ad 4s 7s 5s]
+11:32:12 - Villain54: Checks
+11:32:13 - Villain53: Checks
+*** RIVER *** [Ad 4s 7s 5s Ks]
+11:32:16 - Villain54: Bets 60
+11:32:17 - Villain53: Calls 60
+*** SHOWDOWN ***
+Villain54 shows [Kc 3h] (Pair) [Ks Kc Ad 7s 5s]
+Villain53 shows [9h Ts] (Flush) [Ks Ts 7s 5s 4s]
+Hero shows [Tc Qs] (Flush) [Ks Qs 7s 5s 4s]
+*** SUMMARY ***
+Hero wins main pot of 186
+Villain53 wins 1st side pot of 120
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZ79XV5BVM5B6GDA71MV1Z5
+Prize pool: 8.00€
+Multiplier: x4
+Buy In: 2.00€
+Hand ID: 01KDZ7GQGHXF263K1CMDBN0YQ8
+Date & Time: 2026-01-02 11:29:36 (UTC)
+Table ID: 01KDZ79XVGZJ9XHC7M9X58XT3M
+Blinds: 15/30
+Total Pot: 1065
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (830) [BB Hero]
+Seat 2: Villain55 (275) [BTN]
+Seat 3: Villain56 (395) [SB]
+*** HOLE CARDS ***
+Hero: [Ts Jc]
+Villain55: [Td Qd]
+Villain56: [Kh 9c]
+*** PRE-FLOP ***
+11:29:36 - Villain56: Posts SB 15
+11:29:36 - Hero: Posts BB 30
+11:29:42 - Villain55: Calls 30
+11:29:42 - Villain56: Calls 15
+11:29:45 - Hero: Raises to 830 and is all-in
+11:29:49 - Villain55: Calls 245 and is all-in
+11:29:52 - Villain56: Calls 365 and is all-in
+*** FLOP *** [5c As Kd]
+*** TURN *** [5c As Kd 4h]
+*** RIVER *** [5c As Kd 4h 2c]
+*** SHOWDOWN ***
+Villain56 shows [Kh 9c] (Pair) [Kh Kd As 9c 5c]
+Hero shows [Ts Jc] (High Card) [As Kd Jc Ts 5c]
+Villain55 shows [Td Qd] (High Card) [As Kd Qd Td 5c]
+*** SUMMARY ***
+Villain56 wins main pot of 825
+Villain56 wins 1st side pot of 240
+Villain55 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZ6NBMZ5PER8PAZKSFPGE45
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KDZ6TDFC2YC141VDBA6DS32M
+Date & Time: 2026-01-02 11:17:25 (UTC)
+Table ID: 01KDZ6NBNA3ZZQRQ3SDPS8WHXD
+Blinds: 20/40
+Total Pot: 105
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain57 (545) [SB]
+Seat 2: Villain58 (5) [BB]
+Seat 3: Hero (950) [BTN Hero]
+*** HOLE CARDS ***
+Villain58: [5d 8s]
+Hero: [Kh Kd]
+*** PRE-FLOP ***
+11:17:25 - Villain57: Posts SB 20
+11:17:25 - Villain58: Posts BB 5 and is all-in
+11:17:28 - Hero: Raises to 80
+11:17:33 - Villain57: Folds
+*** FLOP *** [Ks Jd Ad]
+*** TURN *** [Ks Jd Ad 5s]
+*** RIVER *** [Ks Jd Ad 5s 9d]
+*** SHOWDOWN ***
+Hero shows [Kh Kd] (Three of a Kind) [Ks Kh Kd Ad Jd]
+Villain58 shows [5d 8s] (Pair) [5s 5d Ad Ks Jd]
+*** SUMMARY ***
+Hero wins main pot of 15
+Hero wins 1st side pot of 90
+Villain58 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZ6HTATBYR253EWZ3NR91HP
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KDZ6MD4RSAGEHZCR5SW2SZPW
+Date & Time: 2026-01-02 11:14:08 (UTC)
+Table ID: 01KDZ6HTB6W7V4SPVDRH1VX8JS
+Blinds: 15/30
+Total Pot: 1250
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (420) [BB Hero]
+Seat 2: Villain59 (410) [BTN]
+Seat 3: Villain60 (670) [SB]
+*** HOLE CARDS ***
+Hero: [9d As]
+Villain59: [6c 2s]
+Villain60: [Kc Ks]
+*** PRE-FLOP ***
+11:14:08 - Villain60: Posts SB 15
+11:14:08 - Hero: Posts BB 30
+11:14:12 - Villain59: Calls 30
+11:14:14 - Villain60: Calls 15
+11:14:15 - Hero: Raises to 420 and is all-in
+11:14:18 - Villain59: Calls 380 and is all-in
+11:14:22 - Villain60: Calls 390
+*** FLOP *** [8h 5c 3d]
+*** TURN *** [8h 5c 3d 9h]
+*** RIVER *** [8h 5c 3d 9h Kh]
+*** SHOWDOWN ***
+Villain60 shows [Kc Ks] (Three of a Kind) [Ks Kh Kc 9h 8h]
+Hero shows [9d As] (Pair) [9h 9d As Kh 8h]
+Villain59 shows [6c 2s] (High Card) [Kh 9h 8h 6c 5c]
+*** SUMMARY ***
+Villain60 wins main pot of 1230
+Villain60 wins 1st side pot of 20
+Villain60 finished 1st and wins 4.00 EUR
+Hero finished 2nd
+Villain59 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KDZ49VFMK1SS55NP019NA9DD
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KDZ4F9Z6C0Z54A3W073P12XK
+Date & Time: 2026-01-02 10:36:23 (UTC)
+Table ID: 01KDZ49VFZTRTS24J4C5NWR1F4
+Blinds: 20/40
+Total Pot: 128
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain61 (8) [SB]
+Seat 2: Hero (962) [BB Hero]
+Seat 3: Villain62 (530) [BTN]
+*** HOLE CARDS ***
+Villain61: [8s 6d]
+Hero: [Qs 3d]
+Villain62: [9h Tc]
+*** PRE-FLOP ***
+10:36:23 - Villain61: Posts SB 8 and is all-in
+10:36:23 - Hero: Posts BB 40
+10:36:29 - Villain62: Calls 40
+10:36:34 - Hero: Checks
+*** FLOP *** [2c 7s 8c]
+10:36:42 - Hero: Checks
+10:36:43 - Villain62: Checks
+*** TURN *** [2c 7s 8c Td]
+10:36:48 - Hero: Checks
+10:36:49 - Villain62: Checks
+*** RIVER *** [2c 7s 8c Td 5c]
+10:36:56 - Hero: Checks
+10:36:58 - Villain62: Bets 40
+10:37:00 - Hero: Folds
+*** SHOWDOWN ***
+Villain62 shows [9h Tc] (Pair) [Td Tc 9h 8c 7s]
+Villain61 shows [8s 6d] (Pair) [8s 8c Td 7s 6d]
+*** SUMMARY ***
+Villain62 wins main pot of 24
+Villain62 wins 1st side pot of 104
+Villain61 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0SC6D90P4PS9C28MT8F42T
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0SED0T57X819DCJ5CTBGJ0
+Date & Time: 2026-01-03 02:02:08 (UTC)
+Table ID: 01KE0SC6DP5RWKEMXDY18WVE8N
+Blinds: 10/20
+Total Pot: 1045
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain63 (65) [BTN]
+Seat 2: Villain64 (945) [SB]
+Seat 3: Hero (490) [BB Hero]
+*** HOLE CARDS ***
+Villain63: [2d Ad]
+Villain64: [6h 6c]
+Hero: [Ac 3c]
+*** PRE-FLOP ***
+02:02:08 - Villain64: Posts SB 10
+02:02:08 - Hero: Posts BB 20
+02:02:11 - Villain63: Calls 20
+02:02:12 - Villain64: Raises to 40
+02:02:13 - Hero: Raises to 490 and is all-in
+02:02:15 - Villain63: Calls 45 and is all-in
+02:02:15 - Villain64: Calls 450
+*** FLOP *** [2s 6d Ks]
+*** TURN *** [2s 6d Ks 9h]
+*** RIVER *** [2s 6d Ks 9h 8d]
+*** SHOWDOWN ***
+Villain64 shows [6h 6c] (Three of a Kind) [6h 6d 6c Ks 9h]
+Hero shows [Ac 3c] (High Card) [Ac Ks 9h 8d 6d]
+Villain63 shows [2d Ad] (Pair) [2s 2d Ad Ks 9h]
+*** SUMMARY ***
+Villain64 wins main pot of 195
+Villain64 wins 1st side pot of 850
+Villain64 finished 1st and wins 4.00 EUR
+Villain63 finished 3rd
+Hero finished 2nd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0RK7FW66AD7V73PPH3VFS7
+Prize pool: 8.00€
+Multiplier: x4
+Buy In: 2.00€
+Hand ID: 01KE0RM824DQAXS36DECJ6NA9N
+Date & Time: 2026-01-03 01:47:51 (UTC)
+Table ID: 01KE0RK7G5EYGCSKYA848ZVX2N
+Blinds: 10/20
+Total Pot: 1400
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain65 (500) [BB]
+Seat 2: Villain66 (600) [BTN]
+Seat 3: Hero (400) [SB Hero]
+*** HOLE CARDS ***
+Villain65: [Ac Js]
+Villain66: [4c Kc]
+Hero: [Jd Ah]
+*** PRE-FLOP ***
+01:47:51 - Hero: Posts SB 10
+01:47:51 - Villain65: Posts BB 20
+01:47:53 - Villain66: Raises to 40
+01:47:56 - Hero: Raises to 400 and is all-in
+01:48:01 - Villain65: Raises to 500 and is all-in
+01:48:02 - Villain66: Calls 460
+*** FLOP *** [5s 7h 4h]
+*** TURN *** [5s 7h 4h 6h]
+*** RIVER *** [5s 7h 4h 6h 3c]
+*** SHOWDOWN ***
+Villain65 shows [Ac Js] (Straight) [7h 6h 5s 4h 3c]
+Villain66 shows [4c Kc] (Straight) [7h 6h 5s 4c 3c]
+Hero shows [Jd Ah] (Straight) [7h 6h 5s 4h 3c]
+*** SUMMARY ***
+Villain65 wins main pot of 400
+Villain66 wins main pot of 400
+Hero wins main pot of 400
+Villain65 wins 1st side pot of 100
+Villain66 wins 1st side pot of 100
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0R7PF629JXM89TNX976DD0
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KE0RCCH9C3B8YHCGQVR9KKTJ
+Date & Time: 2026-01-03 01:43:34 (UTC)
+Table ID: 01KE0R7PFGAK0X73PE40GQ6P1D
+Blinds: 15/30
+Total Pot: 240
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain67 (400) [BTN]
+Seat 2: Hero (60) [SB Hero]
+Seat 3: Villain68 (1040) [BB]
+*** HOLE CARDS ***
+Villain67: [Ks 2c]
+Hero: [5h 7s]
+Villain68: [2s 6s]
+*** PRE-FLOP ***
+01:43:34 - Hero: Posts SB 15
+01:43:34 - Villain68: Posts BB 30
+01:43:35 - Villain67: Calls 30
+01:43:36 - Hero: Raises to 60 and is all-in
+01:43:39 - Villain68: Calls 30
+01:43:40 - Villain67: Calls 30
+*** FLOP *** [7c Tc 3d]
+01:43:44 - Villain68: Checks
+01:43:44 - Villain67: Checks
+*** TURN *** [7c Tc 3d Jc]
+01:43:47 - Villain68: Checks
+01:43:48 - Villain67: Checks
+*** RIVER *** [7c Tc 3d Jc 8h]
+01:43:52 - Villain68: Bets 30
+01:43:54 - Villain67: Calls 30
+*** SHOWDOWN ***
+Villain68 shows [2s 6s] (High Card) [Jc Tc 8h 7c 6s]
+Villain67 shows [Ks 2c] (High Card) [Ks Jc Tc 8h 7c]
+Hero shows [5h 7s] (Pair) [7s 7c Jc Tc 8h]
+*** SUMMARY ***
+Hero wins main pot of 180
+Villain67 wins 1st side pot of 60
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0QX0J947MP6F15X1478SFQ
+Prize pool: 8.00€
+Multiplier: x4
+Buy In: 2.00€
+Hand ID: 01KE0R394VVHH65T8DZWJ89VRC
+Date & Time: 2026-01-03 01:38:35 (UTC)
+Table ID: 01KE0QX0JJH9DRKCEFEM9TQDC1
+Blinds: 15/30
+Total Pot: 335
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain69 (1195) [SB]
+Seat 2: Hero (295) [BB Hero]
+Seat 3: Villain70 (10) [BTN]
+*** HOLE CARDS ***
+Hero: [3d Ad]
+Villain70: [6s 9h]
+*** PRE-FLOP ***
+01:38:35 - Villain69: Posts SB 15
+01:38:35 - Hero: Posts BB 30
+01:38:42 - Villain70: Calls 10 and is all-in
+01:38:44 - Villain69: Calls 15
+01:38:45 - Hero: Raises to 295 and is all-in
+01:38:48 - Villain69: Folds
+*** FLOP *** [Jd 5c 8h]
+*** TURN *** [Jd 5c 8h 3h]
+*** RIVER *** [Jd 5c 8h 3h Td]
+*** SHOWDOWN ***
+Hero shows [3d Ad] (Pair) [3h 3d Ad Jd Td]
+Villain70 shows [6s 9h] (High Card) [Jd Td 9h 8h 6s]
+*** SUMMARY ***
+Hero wins main pot of 30
+Hero wins 1st side pot of 305
+Villain70 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0QSWYNQ6T7K1B8E98B4JC9
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KE0QXW8QPRJ56HPJW8MSED7X
+Date & Time: 2026-01-03 01:35:38 (UTC)
+Table ID: 01KE0QSWYYE1DJH26M0G8QZP7G
+Blinds: 15/30
+Total Pot: 1493
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (526) [BB Hero]
+Seat 2: Villain71 (441) [BTN]
+Seat 3: Villain72 (533) [SB]
+*** HOLE CARDS ***
+Hero: [Kc As]
+Villain71: [5d 5s]
+Villain72: [4c Ac]
+*** PRE-FLOP ***
+01:35:38 - Villain72: Posts SB 15
+01:35:38 - Hero: Posts BB 30
+01:35:40 - Villain71: Raises to 60
+01:35:42 - Villain72: Raises to 180
+01:35:44 - Hero: Raises to 526 and is all-in
+01:35:45 - Villain71: Calls 381 and is all-in
+01:35:47 - Villain72: Calls 346
+*** FLOP *** [4s Th Kd]
+*** TURN *** [4s Th Kd 6c]
+*** RIVER *** [4s Th Kd 6c Ah]
+*** SHOWDOWN ***
+Villain72 shows [4c Ac] (Two Pair) [Ah Ac 4s 4c Kd]
+Hero shows [Kc As] (Two Pair) [As Ah Kd Kc Th]
+Villain71 shows [5d 5s] (Pair) [5s 5d Ah Kd Th]
+*** SUMMARY ***
+Hero wins main pot of 1323
+Hero wins 1st side pot of 170
+Villain71 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0PPVW39Z48P0QBCRFSZ6T9
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0PTW26JFQCAYZ74598R4KJ
+Date & Time: 2026-01-03 01:16:31 (UTC)
+Table ID: 01KE0PPVWDBDF7W2V5AQG10GJT
+Blinds: 15/30
+Total Pot: 770
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (1010) [BB Hero]
+Seat 2: Villain73 (210) [BTN]
+Seat 3: Villain74 (280) [SB]
+*** HOLE CARDS ***
+Hero: [As 6h]
+Villain73: [5d Td]
+Villain74: [Ah 9d]
+*** PRE-FLOP ***
+01:16:31 - Villain74: Posts SB 15
+01:16:31 - Hero: Posts BB 30
+01:16:34 - Villain73: Raises to 210 and is all-in
+01:16:35 - Villain74: Calls 195
+01:16:39 - Hero: Raises to 1010 and is all-in
+01:16:41 - Villain74: Calls 70 and is all-in
+*** FLOP *** [9h 8c Kd]
+*** TURN *** [9h 8c Kd 5h]
+*** RIVER *** [9h 8c Kd 5h Jh]
+*** SHOWDOWN ***
+Villain74 shows [Ah 9d] (Pair) [9h 9d Ah Kd Jh]
+Hero shows [As 6h] (High Card) [As Kd Jh 9h 8c]
+Villain73 shows [5d Td] (Pair) [5h 5d Kd Jh Td]
+*** SUMMARY ***
+Villain74 wins main pot of 630
+Villain74 wins 1st side pot of 140
+Villain73 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0NSP2WS031NA09RVF41EB1
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0NZHHM1AAYFJCVDF0CZMFJ
+Date & Time: 2026-01-03 01:01:36 (UTC)
+Table ID: 01KE0NSP382QB3QKHQFHMCKFQN
+Blinds: 20/40
+Total Pot: 73
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain75 (912) [BB]
+Seat 2: Villain76 (13) [BTN]
+Seat 3: Hero (575) [SB Hero]
+*** HOLE CARDS ***
+Villain75: [2d 3h]
+Villain76: [Qs 7s]
+Hero: [Th 6c]
+*** PRE-FLOP ***
+01:01:36 - Hero: Posts SB 20
+01:01:36 - Villain75: Posts BB 40
+01:01:38 - Villain76: Calls 13 and is all-in
+01:01:40 - Hero: Folds
+*** FLOP *** [6d Ad Jc]
+*** TURN *** [6d Ad Jc Ah]
+*** RIVER *** [6d Ad Jc Ah Kd]
+*** SHOWDOWN ***
+Villain75 shows [2d 3h] (Pair) [Ah Ad Kd Jc 6d]
+Villain76 shows [Qs 7s] (Pair) [Ah Ad Kd Qs Jc]
+*** SUMMARY ***
+Villain76 wins main pot of 39
+Villain75 wins 1st side pot of 34
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0NFKVESHWQ657ZAC6HQCZN
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0NPBGJQPA1TFZBJ1J3W60F
+Date & Time: 2026-01-03 00:56:35 (UTC)
+Table ID: 01KE0NFKVSTAEJ0FBPNSZDX9R1
+Blinds: 30/60
+Total Pot: 1192
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain77 (302) [BTN]
+Seat 2: Hero (753) [SB Hero]
+Seat 3: Villain78 (445) [BB]
+*** HOLE CARDS ***
+Villain77: [Qc 8s]
+Hero: [2s 2h]
+Villain78: [Ks Ah]
+*** PRE-FLOP ***
+00:56:35 - Hero: Posts SB 30
+00:56:35 - Villain78: Posts BB 60
+00:56:42 - Villain77: Calls 60
+00:56:45 - Hero: Raises to 753 and is all-in
+00:56:47 - Villain78: Calls 385 and is all-in
+00:56:53 - Villain77: Calls 242 and is all-in
+*** FLOP *** [4c 3d Th]
+*** TURN *** [4c 3d Th Qd]
+*** RIVER *** [4c 3d Th Qd 4s]
+*** SHOWDOWN ***
+Hero shows [2s 2h] (Two Pair) [4s 4c 2s 2h Qd]
+Villain78 shows [Ks Ah] (Pair) [4s 4c Ah Ks Qd]
+Villain77 shows [Qc 8s] (Two Pair) [Qd Qc 4s 4c Th]
+*** SUMMARY ***
+Villain77 wins main pot of 906
+Hero wins 1st side pot of 286
+Villain78 finished 3rd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0N03QCWR7W2KWFYHXFJG9X
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KE0N7WWGWWDFMFZM9MZWSYFM
+Date & Time: 2026-01-03 00:48:41 (UTC)
+Table ID: 01KE0N03QQXT2ZCR74WXG79F6C
+Blinds: 20/40
+Total Pot: 455
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain79 (531) [BB]
+Seat 2: Hero (912) [BTN Hero]
+Seat 3: Villain77 (57) [SB]
+*** HOLE CARDS ***
+Hero: [Qd Th]
+Villain77: [3d Qc]
+*** PRE-FLOP ***
+00:48:41 - Villain77: Posts SB 20
+00:48:41 - Villain79: Posts BB 40
+00:48:42 - Hero: Raises to 80
+00:48:44 - Villain77: Calls 37 and is all-in
+00:48:44 - Villain79: Calls 40
+*** FLOP *** [Qs 6c 6h]
+00:48:47 - Villain79: Checks
+00:48:48 - Hero: Bets 54
+00:48:49 - Villain79: Calls 54
+*** TURN *** [Qs 6c 6h 7d]
+00:48:51 - Villain79: Checks
+00:48:54 - Hero: Bets 130
+00:48:55 - Villain79: Folds
+*** RIVER *** [Qs 6c 6h 7d Ks]
+*** SHOWDOWN ***
+Hero shows [Qd Th] (Two Pair) [Qs Qd 6h 6c Ks]
+Villain77 shows [3d Qc] (Two Pair) [Qs Qc 6h 6c Ks]
+*** SUMMARY ***
+Hero wins main pot of 85
+Villain77 wins main pot of 86
+Hero wins 1st side pot of 284
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0J53F95PNA3T4RD2WAF9YD
+Prize pool: 6.00€
+Multiplier: x3
+Buy In: 2.00€
+Hand ID: 01KE0J876XG32VQF3YQNPWBSWR
+Date & Time: 2026-01-02 23:56:26 (UTC)
+Table ID: 01KE0J53FN98CNGZJGVX453JCY
+Blinds: 10/20
+Total Pot: 940
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain80 (20) [SB]
+Seat 2: Hero (460) [BB Hero]
+Seat 3: Villain81 (1020) [BTN]
+*** HOLE CARDS ***
+Villain80: [5c 5d]
+Hero: [Js Jh]
+Villain81: [Qc As]
+*** PRE-FLOP ***
+23:56:26 - Villain80: Posts SB 10
+23:56:26 - Hero: Posts BB 20
+23:56:27 - Villain81: Calls 20
+23:56:28 - Villain80: Calls 10 and is all-in
+23:56:33 - Hero: Raises to 150
+23:56:34 - Villain81: Calls 130
+*** FLOP *** [2c 3c Kd]
+23:56:36 - Hero: Bets 310 and is all-in
+23:56:37 - Villain81: Calls 310
+*** TURN *** [2c 3c Kd 3d]
+*** RIVER *** [2c 3c Kd 3d Ah]
+*** SHOWDOWN ***
+Hero shows [Js Jh] (Two Pair) [Js Jh 3d 3c Ah]
+Villain81 shows [Qc As] (Two Pair) [As Ah 3d 3c Kd]
+Villain80 shows [5c 5d] (Two Pair) [5d 5c 3d 3c Ah]
+*** SUMMARY ***
+Villain81 wins main pot of 60
+Villain81 wins 1st side pot of 880
+Villain81 finished 1st and wins 6.00 EUR
+Villain80 finished 3rd
+Hero finished 2nd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0H3WVY6AXT5QT16EZE0Y8Q
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0HDKKZ1TTN9FPW0W2EH9T7
+Date & Time: 2026-01-02 23:41:54 (UTC)
+Table ID: 01KE0H3WWAASAHH5Y96ZKCD8W3
+Blinds: 50/100
+Total Pot: 396
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain82 (670) [BTN]
+Seat 2: Villain83 (96) [SB]
+Seat 3: Hero (734) [BB Hero]
+*** HOLE CARDS ***
+Villain82: [Ah 9c]
+Villain83: [2c 7h]
+Hero: [6d 3h]
+*** PRE-FLOP ***
+23:41:54 - Villain83: Posts SB 50
+23:41:54 - Hero: Posts BB 100
+23:41:55 - Villain82: Calls 100
+23:41:55 - Villain83: Calls 46 and is all-in
+23:41:56 - Hero: Checks
+*** FLOP *** [4s 3s 4c]
+23:42:00 - Hero: Checks
+23:42:01 - Villain82: Checks
+*** TURN *** [4s 3s 4c 5c]
+23:42:06 - Hero: Checks
+23:42:07 - Villain82: Checks
+*** RIVER *** [4s 3s 4c 5c As]
+23:42:09 - Hero: Checks
+23:42:10 - Villain82: Bets 100
+23:42:18 - Hero: Folds
+*** SHOWDOWN ***
+Villain82 shows [Ah 9c] (Two Pair) [As Ah 4s 4c 9c]
+Villain83 shows [2c 7h] (Straight) [As 5c 4s 3s 2c]
+*** SUMMARY ***
+Villain83 wins main pot of 288
+Villain82 wins 1st side pot of 108
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0H2J0XRN8QHDBFXCKBA0M2
+Prize pool: 4.00€
+Multiplier: x2
+Buy In: 2.00€
+Hand ID: 01KE0H5TDFWABRM144BGWRGV3T
+Date & Time: 2026-01-02 23:37:38 (UTC)
+Table ID: 01KE0H2J19YVYJNW9D693HAXTA
+Blinds: 15/30
+Total Pot: 1430
+Rake: 0
+*** PLAYERS ***
+Seat 1: Villain84 (430) [SB]
+Seat 2: Villain85 (570) [BB]
+Seat 3: Hero (500) [BTN Hero]
+*** HOLE CARDS ***
+Villain84: [Js Jh]
+Villain85: [7c Ac]
+Hero: [6s 6c]
+*** PRE-FLOP ***
+23:37:38 - Villain84: Posts SB 15
+23:37:38 - Villain85: Posts BB 30
+23:37:41 - Hero: Raises to 60
+23:37:42 - Villain84: Raises to 430 and is all-in
+23:37:44 - Villain85: Calls 400
+23:37:46 - Hero: Raises to 500 and is all-in
+23:37:48 - Villain85: Calls 70
+*** FLOP *** [Qd Qc Ad]
+*** TURN *** [Qd Qc Ad 4s]
+*** RIVER *** [Qd Qc Ad 4s 9d]
+*** SHOWDOWN ***
+Villain85 shows [7c Ac] (Two Pair) [Ad Ac Qd Qc 9d]
+Hero shows [6s 6c] (Two Pair) [Qd Qc 6s 6c Ad]
+Villain84 shows [Js Jh] (Two Pair) [Qd Qc Js Jh Ad]
+*** SUMMARY ***
+Villain85 wins main pot of 1290
+Villain85 wins 1st side pot of 140
+Villain85 finished 1st and wins 4.00 EUR
+Villain84 finished 3rd
+Hero finished 2nd
+
+------------
+
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 2€
+Game ID: 01KE0GTE6G18G4A4XAJKSTP98N
+Prize pool: 8.00€
+Multiplier: x4
+Buy In: 2.00€
+Hand ID: 01KE0H0ZP9M8YN3KK3GDH7GRHP
+Date & Time: 2026-01-02 23:35:00 (UTC)
+Table ID: 01KE0GTE6VQHG8RXPPMAY47QFA
+Blinds: 15/30
+Total Pot: 570
+Rake: 0
+*** PLAYERS ***
+Seat 1: Hero (30) [BTN Hero]
+Seat 2: Villain86 (420) [SB]
+Seat 3: Villain87 (1050) [BB]
+*** HOLE CARDS ***
+Hero: [2d Ah]
+Villain86: [Ad 4s]
+Villain87: [Kh 5s]
+*** PRE-FLOP ***
+23:35:00 - Villain86: Posts SB 15
+23:35:00 - Villain87: Posts BB 30
+23:35:01 - Hero: Calls 30 and is all-in
+23:35:03 - Villain86: Raises to 60
+23:35:04 - Villain87: Calls 30
+*** FLOP *** [3h 6h 5c]
+23:35:08 - Villain86: Checks
+23:35:10 - Villain87: Bets 150
+23:35:12 - Villain86: Calls 150
+*** TURN *** [3h 6h 5c 8c]
+23:35:18 - Villain86: Bets 30
+23:35:19 - Villain87: Calls 30
+*** RIVER *** [3h 6h 5c 8c 7c]
+23:35:22 - Villain86: Bets 30
+23:35:23 - Villain87: Calls 30
+*** SHOWDOWN ***
+Villain86 shows [Ad 4s] (Straight) [8c 7c 6h 5c 4s]
+Villain87 shows [Kh 5s] (Pair) [5s 5c Kh 8c 7c]
+Hero shows [2d Ah] (High Card) [Ah 8c 7c 6h 5c]
+*** SUMMARY ***
+Villain86 wins main pot of 90
+Villain86 wins 1st side pot of 480
+Hero finished 3rd

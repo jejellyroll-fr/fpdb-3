@@ -96,7 +96,7 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 # config version is used to flag a warning at runtime if the users config is
 #  out of date.
 # Increment with shipped template changes; add an explicit migration when needed.
-CONFIG_VERSION = 90
+CONFIG_VERSION = 91
 SOURCE_DIR = Path(__file__).resolve().parent
 SOURCE_ROOT_PATH = SOURCE_DIR.parent
 

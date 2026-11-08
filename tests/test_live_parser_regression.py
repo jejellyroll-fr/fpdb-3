@@ -10,6 +10,7 @@ from types import SimpleNamespace
 import pytest
 
 from fpdb_3_legacy.AbsoluteToFpdb import Absolute
+from fpdb_3_legacy.BetclicToFpdb import Betclic
 from fpdb_3_legacy.BetfairToFpdb import Betfair
 from fpdb_3_legacy.BetOnlineToFpdb import BetOnline
 from fpdb_3_legacy.BossToFpdb import Boss
@@ -45,6 +46,7 @@ TOUR_REGRESSION_FILES = ROOT / "regression-test-files" / "tour"
 MANIFEST_PATH = FIXTURES / "live_parser_snapshots.json"
 
 ROOMS = {
+    "betclic": (Betclic, sorted((FIXTURES / "betclic").rglob("*.txt"))),
     "bovada": (Bovada, sorted((FIXTURES / "bovada").rglob("*.txt"))),
     "cake": (Cake, sorted((FIXTURES / "cake").rglob("*.txt"))),
     "ggpoker": (GGPoker, sorted((FIXTURES / "ggpoker").rglob("*.txt"))),

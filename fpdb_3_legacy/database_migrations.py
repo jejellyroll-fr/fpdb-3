@@ -56,7 +56,10 @@ WIDEN_GAMETYPE_CATEGORY_SQL = "ALTER TABLE Gametypes ALTER COLUMN category TYPE 
 # Sites registered after databases already existed. fillDefaultData only runs
 # when the tables are created, so an older database lacks these rows, and its
 # hands would break the Sites foreign key once a parser files them there.
-SITES_ADDED_LATER: tuple[tuple[int, str, str], ...] = ((132, "Bet365.fr Poker", "IP"),)
+SITES_ADDED_LATER: tuple[tuple[int, str, str], ...] = (
+    (132, "Bet365.fr Poker", "IP"),
+    (142, "Betclic", "BC"),  # #730: the 2025+ in-house client
+)
 INSERT_SITE_QMARK = "INSERT INTO Sites (id,name,code) VALUES (?,?,?)"
 INSERT_SITE_FORMAT = "INSERT INTO Sites (id,name,code) VALUES (%s,%s,%s)"
 

@@ -1,4 +1,16 @@
 {
+  "betclic/nlhe_cash_2026.txt": {
+    "hand_count": 4,
+    "sha256": "de8a7b09455901cf3d5c65d496272b1000d29391ee969a1e50e6bc81ba54d22e"
+  },
+  "betclic/plo_cash_2026.txt": {
+    "hand_count": 8,
+    "sha256": "1f3a36f998367251a005074f04ba65418a5ac17e3481b4d89e7abd9b48989643"
+  },
+  "betclic/spin_rush_2026.txt": {
+    "hand_count": 76,
+    "sha256": "23f1c621973569fc9d21b592bc3e0ccb13ea93ba37ea08adf7b61e6644051948"
+  },
   "bovada/ignition.txt": {
     "hand_count": 1,
     "sha256": "b24ae7da9bb643f0de505b79148a7d82382230007451eb71459017a9d7518478"
@@ -826,6 +838,14 @@
   "regression/GGPoker/Flop/PLO-6max-USD-0.01-0.02-202104.STP.txt": {
     "hand_count": 1,
     "sha256": "b4ec9948c65e94af0da7a3ea080769d92030f0090ac656092b27138c3208c5ed"
+  },
+  "regression/GGPoker/Flop/PLO-6max-USD-0.05-0.10-202611.ev.cashout.cash.drop.txt": {
+    "hand_count": 5,
+    "sha256": "ee3b1bd84c58b63989dcbba9240e03dd62375d03b3781922940a38c48643d7de"
+  },
+  "regression/GGPoker/Flop/PLO-6max-USD-0.05-0.10-202611.past.midnight.cashout.rit.txt": {
+    "hand_count": 5,
+    "sha256": "789cee24f6942e1d274228c6096935321591ce8f405b0dc14bf65ced657447d6"
   },
   "regression/GGPoker/Flop/PLO-6max-USD-0.5-1.00-202006.txt": {
     "hand_count": 13,
@@ -2535,17 +2555,13 @@
     "hand_count": 2,
     "sha256": "197868530dc965e84040e0a4bf1aaf63ee68171c5afe71f8e0c1dcb01a934383"
   },
-  "unibet/banzai.txt": {
-    "hand_count": 1,
-    "sha256": "4a46ad4a0cde22fe2cac2dcb0264b85fae8e3351b65e9673480379805d56ad7e"
-  },
-  "unibet/power_spin_2026.txt": {
-    "hand_count": 8,
-    "sha256": "ccbdceabcf0968972dcae3da90e1aed0a4361ee395b92b9090098aae82e704ab"
-  },
   "unibet/automatic_plo_cash_2026.txt": {
     "hand_count": 2,
     "sha256": "5deb580f682ee35286b61639d071ee45d9cabd9e714b2fde94e09a6922bacb89"
+  },
+  "unibet/banzai.txt": {
+    "hand_count": 1,
+    "sha256": "4a46ad4a0cde22fe2cac2dcb0264b85fae8e3351b65e9673480379805d56ad7e"
   },
   "unibet/manual_export_cash_plo_banzai_2026.txt": {
     "hand_count": 11,
@@ -2563,6 +2579,10 @@
     "hand_count": 4,
     "sha256": "47c7055f136a47a3f1bbc317bba0404f46b3cde0a6a68632215c5ddbc21153f4"
   },
+  "unibet/power_spin_2026.txt": {
+    "hand_count": 8,
+    "sha256": "ccbdceabcf0968972dcae3da90e1aed0a4361ee395b92b9090098aae82e704ab"
+  },
   "winamax/nlhe_cash.txt": {
     "hand_count": 1,
     "sha256": "7567b14fbf6f000eff68721181848e3da2b052ad816bbfe9b14aea748a7aa9cf"
@@ -2574,13 +2594,5 @@
   "winning/plo8_cap_2026.txt": {
     "hand_count": 1,
     "sha256": "c854664333379479371581837171846f225a47ac5c1e2102aa6ec65523706d89"
-  },
-  "regression/GGPoker/Flop/PLO-6max-USD-0.05-0.10-202611.ev.cashout.cash.drop.txt": {
-    "hand_count": 5,
-    "sha256": "ee3b1bd84c58b63989dcbba9240e03dd62375d03b3781922940a38c48643d7de"
-  },
-  "regression/GGPoker/Flop/PLO-6max-USD-0.05-0.10-202611.past.midnight.cashout.rit.txt": {
-    "hand_count": 5,
-    "sha256": "789cee24f6942e1d274228c6096935321591ce8f405b0dc14bf65ced657447d6"
   }
 }

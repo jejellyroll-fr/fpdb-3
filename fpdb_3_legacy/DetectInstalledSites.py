@@ -1511,6 +1511,120 @@ class UnibetDetector(SiteDetector):
         return ""
 
 
+class BetclicDetector(SiteDetector):
+    """The 2025+ in-house Betclic client, not the historical iPoker skin "Betclic Poker".
+
+    Since its in-house software launched (December 2024), the client no longer
+    saves hands to a fixed local folder: exports are requested from the site
+    and land as ``<account id>_ExportHH_<date>.txt`` in whatever folder the
+    browser downloads to (or wherever the player moves them). The detector
+    therefore scans the usual download/document folders, plus the client's
+    own data folders, for ``*_ExportHH_*.txt`` files whose first lines are a
+    Betclic ``*** HEADER ***`` block.
+
+    The hero is the one player whose seat carries the ``Hero`` tag, so the
+    newest export files name them.
+    """
+
+    EXPORT_GLOB = "*_ExportHH_*.txt"
+    RE_EXPORT_HEAD = re.compile(r"^\*\*\* HEADER \*\*\*\nSite: Betclic", re.MULTILINE)
+    RE_HERO = re.compile(r"^Seat [0-9]+: (?P<NAME>.+) \([^)]*\) \[[^\]]*\bHero\b\]", re.MULTILINE)
+    # How many of the newest files to read, and how much of each, to name the hero.
+    HERO_FILES = 20
+    HERO_BYTES = 16384
+
+    def _candidate_dirs(self) -> list[Path]:
+        candidates: list[Path] = []
+        home = Path.home()
+        if self.platform == "Windows":
+            paths = get_windows_paths()
+            profile = Path(paths["userprofile"]) if paths["userprofile"] else home
+            # OneDrive commonly redirects Documents and Downloads on Windows.
+            candidates += [
+                profile / "Downloads",
+                profile / "Documents",
+                profile / "OneDrive" / "Downloads",
+                profile / "OneDrive" / "Documents",
+            ]
+            for root in (paths["local_appdata"], paths["appdata"]):
+                if root:
+                    candidates += list(Path(root).glob("Betclic*/HandHistory"))
+                    candidates += list(Path(root).glob("Betclic*/History"))
+        elif self.platform == "Darwin":
+            paths = get_mac_paths()
+            candidates += [
+                home / "Downloads",
+                Path(paths["documents"]),
+                home / "Downloads" / "Betclic",
+                Path(paths["app_support"]) / "Betclic Poker" / "HandHistory",
+            ]
+            containers = home / "Library" / "Containers"
+            if containers.is_dir():
+                candidates += list(containers.glob("*betclic*/Data/Documents"))
+                candidates += list(containers.glob("*betclic*/Data/Downloads"))
+        else:
+            candidates += [home / "Downloads", home / "Documents"]
+            share = home / ".local" / "share"
+            if share.is_dir():
+                candidates += list(share.glob("*betclic*/HandHistory"))
+        return list(dict.fromkeys(candidates))
+
+    def _export_files(self, folder: Path) -> list[Path]:
+        try:
+            files = [p for p in folder.glob(self.EXPORT_GLOB) if p.is_file()]
+        except OSError as e:
+            log.debug("Cannot list %s: %s", folder, e)
+            return []
+        confirmed = []
+        for path in files:
+            try:
+                with path.open("rb") as handle:
+                    # Windows exports carry CRLF; normalise before matching the
+                    # header, as the hand-history converter does when reading.
+                    head = handle.read(256).decode("utf-8", errors="replace").replace("\r\n", "\n")
+            except OSError as e:
+                log.debug("Cannot read %s: %s", path, e)
+                continue
+            if self.RE_EXPORT_HEAD.search(head):
+                confirmed.append(path)
+        return confirmed
+
+    def detect(self) -> dict[str, Any]:
+        """Find a folder holding Betclic ``*** HEADER ***`` exports, and the hero."""
+        for folder in self._candidate_dirs():
+            try:
+                if not folder.is_dir():
+                    continue
+            except OSError as e:
+                log.debug("Cannot access %s: %s", folder, e)
+                continue
+            files = self._export_files(folder)
+            if not files:
+                continue
+            log.info("Found Betclic hand-history exports at %s", folder)
+            return {"detected": True, "hhpath": str(folder), "heroname": self._hero(files), "tspath": str(folder)}
+        return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
+
+    def _hero(self, files: list[Path]) -> str:
+        """The hero named in the newest export files, or "" when none says."""
+        try:
+            files = sorted(files, key=lambda path: path.stat().st_mtime, reverse=True)
+        except OSError as e:
+            log.debug("Cannot stat export files: %s", e)
+            return ""
+        for path in files[: self.HERO_FILES]:
+            try:
+                with path.open("rb") as handle:
+                    head = handle.read(self.HERO_BYTES).decode("utf-8", errors="replace").replace("\r\n", "\n")
+            except OSError as e:
+                log.debug("Cannot read %s: %s", path, e)
+                continue
+            match = self.RE_HERO.search(head)
+            if match:
+                return match.group("NAME").strip()
+        return ""
+
+
 class CPNDetector(SiteDetector):
     """CPN/Everygame network detector (anciennement Cake Poker Network)."""
 
@@ -1686,6 +1800,7 @@ SUPPORTED_SITES = (
     "Unibet",
     "KingsClub",
     "BetOnline",
+    "Betclic",
 )
 
 
@@ -1727,6 +1842,7 @@ class DetectInstalledSites:
             "Cake": CPNDetector(self.config),
             "Everygame": CPNDetector(self.config),
             "Unibet": UnibetDetector(self.config),
+            "Betclic": BetclicDetector(self.config),
         }
 
         # Run detection

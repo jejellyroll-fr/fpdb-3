@@ -261,9 +261,11 @@ class Winning(HandHistoryConverter):
 
     # Anchor the bare "Hand #" / "Game Hand #" header to the start of a line so it
     # does not also match other rooms whose header is "<Room> Hand #..." (e.g.
-    # Unibet's "Unibet Hand #1558006027 - ...").
-    re_identify = re.compile(r"Game\sID:\s\d+|^(?:Game\s)?Hand\s\#\d+\s\-\s", re.MULTILINE)
-    re_identify_old = re.compile(r"Game\sID:\s\d+")
+    # Unibet's "Unibet Hand #1558006027 - ..."). The Game ID must be all digits:
+    # a ULID like Betclic's "Game ID: 01KE0E9V..." starts with digits but is not
+    # a WPN id, and would otherwise claim the 2026 Betclic exports (#730).
+    re_identify = re.compile(r"Game\sID:\s\d+(?=\s|$)|^(?:Game\s)?Hand\s\#\d+\s\-\s", re.MULTILINE)
+    re_identify_old = re.compile(r"Game\sID:\s\d+(?=\s|$)")
     re_SplitHands = re.compile("\n\n")
     re_Button1 = re.compile(r"Seat (?P<BUTTON>\d+) is the button")
     re_Button2 = re.compile(r"Seat #(?P<BUTTON>\d+) is the button")

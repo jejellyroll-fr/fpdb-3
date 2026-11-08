@@ -327,6 +327,8 @@ class DatabaseSchemaMixin(DatabaseMigrationsMixin, DatabaseIndexesMixin):
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('131', 'Betclic Poker', 'IP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('132', 'Bet365.fr Poker', 'IP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('140', 'CoinPoker', 'CP')")
+        # The 2025+ in-house client, separate from the iPoker skin 'Betclic Poker' (131) (#730)
+        c.execute("INSERT INTO Sites (id,name,code) VALUES ('142', 'Betclic', 'BC')")
         c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('59', 'NetBet Poker', 'IP')",
         )

@@ -592,6 +592,7 @@ class ConfigSitesMixin(ConfigBase):
                 "Redbet Poker": 91,
                 "Betclic Poker": 131,
                 "Bet365.fr Poker": 132,
+                "Betclic": 142,
             }
             return fallbacks.get(site, 2)
         return self.site_ids[site]
