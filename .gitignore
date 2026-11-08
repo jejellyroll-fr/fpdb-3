@@ -255,3 +255,9 @@ CoinPoker_*_Cash.txt
 
 # Reproducible wiki screenshot output
 /wiki-images/
+
+# private files
+/regression-test-files/unsupported-sites/Exports-unibet-fr/
+/regression-test-files/unsupported-sites/ggpoker_layorx_corpus
+/regression-test-files/unsupported-sites/hh_2026_anonymized 2
+/regression-test-files/unsupported-sites/hh-2026-corpus
