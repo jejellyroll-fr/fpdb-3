@@ -165,6 +165,13 @@ class MacOSTableDetector:
         tables = []
         import re
 
+        # search_string is None when the caller's site has no title regex or no
+        # table name to build one from; re.compile(None) raises TypeError, which
+        # the re.error handler below does not catch, and the exception escaped
+        # find_tables and took down table-window construction. None means "no
+        # filter", which is what the empty-string default already expresses.
+        if not isinstance(search_string, str):
+            search_string = ""
         try:
             pattern = re.compile(search_string, re.IGNORECASE)
         except re.error:

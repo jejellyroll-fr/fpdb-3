@@ -1719,6 +1719,10 @@
     "hand_count": 1,
     "sha256": "fd1327a6341047c698ec065358d054a358a8e41b3a94038dee44eac6e5211b28"
   },
+  "regression/SealsWithClubs/Flop/PLO-8max-mBTC-0.04-0.08-double-board-bomb-pot-20261108.txt": {
+    "hand_count": 1,
+    "sha256": "6fc94336dae9e90172dd070126a21e48064a468e7cc1f2324169bf88db90d0d2"
+  },
   "regression/SealsWithClubs/Flop/PLO-9max-mBTC-1.00-1.00-201304.txt": {
     "hand_count": 1,
     "sha256": "34220ca06981ece42e67f62aae80713211d7ed803fca7b2bc14a07baa5ff5912"

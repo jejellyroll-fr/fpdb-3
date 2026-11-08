@@ -1,0 +1,38 @@
+SwCPoker Hand #305151201:  Omaha Pot Limit (0.04/0.08) - 2026/11/08 16:56:19 UTC
+Table 'No-Rake Micro Stakes PLO Double Board Bomb Pots #1'(299672838) 8-max (Real Money) Seat #5 is the button
+Seat 3: Player0 (4.14 in chips)
+Seat 4: Player1 (10.51 in chips)
+Seat 5: Player2 (8.04 in chips)
+Seat 6: Hero (11.83 in chips)
+Player2: posts the ante 0.12
+Hero: posts the ante 0.12
+Player0: posts the ante 0.12
+Player1: posts the ante 0.12
+*** HOLE CARDS ***
+Dealt to Hero [9s 6d 7s 8s]
+*** FLOP *** [8d 9d Kd]
+Hero: checks
+Player0: bets 0.12
+Player1: calls 0.12
+Player2: calls 0.12
+Hero: folds
+*** TURN *** [8d 9d Kd] [9h]
+Player0: bets 0.08
+Player1: calls 0.08
+Player2: calls 0.08
+*** RIVER *** [8d 9d Kd 9h] [Ah]
+Player0: bets 0.16
+Player1: folds
+Player2: calls 0.16
+*** SHOW DOWN ***
+Player0: shows [Tc Kc 7d Qs] (two pair, Kings and Nines)
+Player2: shows [4d 5h Td 8h] (a flush, King high)
+Player2 collected 0.70 from pot
+Player0 collected 0.70 from pot
+*** SUMMARY ***
+Total pot 1.40 | Rake 0
+Board [8d 9d Kd 9h Ah]
+Seat 3: Player0 showed [Tc Kc 7d Qs] and won (0.70) with two pair, Kings and Nines
+Seat 4: Player1 folded on the River
+Seat 5: Player2 (button) showed [4d 5h Td 8h] and won (0.70) with a flush, King high
+Seat 6: Hero folded on the Flop
