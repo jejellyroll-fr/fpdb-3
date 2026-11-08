@@ -85,27 +85,37 @@ def _start_capture(config, *, supported=True):
     with (
         patch.object(swc_client, "build_tap") as build_tap,
         patch.object(swc_client, "attach_to_windows_client", return_value="mock status") as attach,
+        patch.object(swc_client, "launch_client") as launch,
+        patch.object(swc_client, "running_client_pids", return_value=[]) as running_pids,
         patch.object(swc_client, "native_capture_supported", return_value=supported),
         patch.object(GuiAutoImport, "SwCNativeTailingThread") as thread,
         patch.object(GuiAutoImport, "SwCWindowsAttachThread") as attach_thread,
     ):
         gui.start_swc_native_capture()
-    return build_tap, attach, thread, attach_thread
+    return build_tap, attach, launch, running_pids, thread, attach_thread
 
 
 def test_a_site_that_is_not_configured_builds_nothing() -> None:
     """The reported case: no SealsWithClubs entry, so no compiler is invoked."""
-    build_tap, attach, thread, attach_thread = _start_capture(_make_config(KeyError("SealsWithClubs")))
+    build_tap, attach, launch, running_pids, thread, attach_thread = _start_capture(
+        _make_config(KeyError("SealsWithClubs"))
+    )
     build_tap.assert_not_called()
     attach.assert_not_called()
+    launch.assert_not_called()
+    running_pids.assert_not_called()
     thread.assert_not_called()
     attach_thread.assert_not_called()
 
 
 def test_a_configured_but_disabled_site_builds_nothing() -> None:
-    build_tap, attach, thread, attach_thread = _start_capture(_make_config({"enabled": False}))
+    build_tap, attach, launch, running_pids, thread, attach_thread = _start_capture(
+        _make_config({"enabled": False})
+    )
     build_tap.assert_not_called()
     attach.assert_not_called()
+    launch.assert_not_called()
+    running_pids.assert_not_called()
     thread.assert_not_called()
     attach_thread.assert_not_called()
 
@@ -113,11 +123,22 @@ def test_a_configured_but_disabled_site_builds_nothing() -> None:
 def test_the_capture_still_starts_for_a_swc_player() -> None:
     import platform
 
-    build_tap, attach, thread, attach_thread = _start_capture(_make_config({"enabled": True}))
+    build_tap, attach, launch, running_pids, thread, attach_thread = _start_capture(
+        _make_config({"enabled": True})
+    )
     # Whichever path this platform uses, the live tailing thread must start.
     thread.assert_called_once()
     thread.return_value.start.assert_called_once()
-    if platform.system() == "Windows":
+    if platform.system() == "Darwin":
+        # macOS loads the tap at process startup, so Auto Import launches SwC
+        # with bidirectional capture instead of trying to attach to a running client.
+        launch.assert_called_once()
+        assert launch.call_args.kwargs["include_outbound"] is True
+        running_pids.assert_called_once_with()
+        build_tap.assert_not_called()
+        attach.assert_not_called()
+        attach_thread.assert_not_called()
+    elif platform.system() == "Windows":
         # Windows injects into the running client. The build happens inside the
         # attach, and the attach happens on its own thread: doing it here spent
         # up to ten seconds inside startClicked with the Qt event loop stopped,
@@ -129,6 +150,8 @@ def test_the_capture_still_starts_for_a_swc_player() -> None:
     else:
         build_tap.assert_called_once()
         attach.assert_not_called()
+        launch.assert_not_called()
+        running_pids.assert_not_called()
         attach_thread.assert_not_called()
 
 
@@ -158,9 +181,13 @@ def test_a_swc_player_who_has_not_turned_it_on_gets_nothing_loaded(monkeypatch, 
 
 def test_nothing_is_built_on_an_unsupported_platform() -> None:
     """A platform with neither interposition nor injection builds and starts nothing."""
-    build_tap, attach, thread, attach_thread = _start_capture(_make_config({"enabled": True}), supported=False)
+    build_tap, attach, launch, running_pids, thread, attach_thread = _start_capture(
+        _make_config({"enabled": True}), supported=False
+    )
     build_tap.assert_not_called()
     attach.assert_not_called()
+    launch.assert_not_called()
+    running_pids.assert_not_called()
     thread.assert_not_called()
     attach_thread.assert_not_called()
 

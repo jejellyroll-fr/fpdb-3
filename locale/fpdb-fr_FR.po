@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-06 11:18+0100\n"
+"POT-Creation-Date: 2026-11-08 17:11+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -652,12 +652,20 @@ msgstr ""
 "plan."
 
 #: fpdb_3_legacy/GuiAutoImport.py
+#, python-brace-format
 msgid ""
 "\n"
-"SwC Native Live HUD tailing thread started."
+"SwC is already running (pid {pids}). On macOS the capture tap is loaded only "
+"when SwC starts, so this client cannot be newly attached. The raw-file "
+"reader will monitor for data; if the archive does not grow, close SwC after "
+"the game and start it again through FPDB."
 msgstr ""
+
+#: fpdb_3_legacy/GuiAutoImport.py
+msgid ""
 "\n"
-"Thread de suivi du HUD natif SwC démarré."
+"SwC launched with the capture tap preloaded; waiting for table traffic."
+msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid ""
@@ -691,6 +699,20 @@ msgstr ""
 "\n"
 "Capture en direct SwC indisponible : {reason}. L'import des fichiers "
 "d'historique SwC fonctionne toujours."
+
+#: fpdb_3_legacy/GuiAutoImport.py
+msgid ""
+"\n"
+"SwC raw-file reader started; this alone does not confirm that the client tap "
+"is writing."
+msgstr ""
+
+#: fpdb_3_legacy/GuiAutoImport.py
+msgid ""
+"\n"
+"SwC tap built. Linux must start SwC with the capture preload; the raw-file "
+"reader alone does not confirm capture."
+msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid "Auto Import Ready.\n"
@@ -6856,6 +6878,13 @@ msgstr ""
 "des mises à jour.\n"
 "\n"
 "Rechercher les mises à jour automatiquement ?"
+
+#~ msgid ""
+#~ "\n"
+#~ "SwC Native Live HUD tailing thread started."
+#~ msgstr ""
+#~ "\n"
+#~ "Thread de suivi du HUD natif SwC démarré."
 
 #, fuzzy
 #~ msgid "    drop index failed: "

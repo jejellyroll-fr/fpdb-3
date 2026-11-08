@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import BinaryIO
 
 from fpdb_3_legacy.http_capture_diff import diff_snapshot_steps
-from fpdb_3_legacy.http_capture_models import SWC_GAME_DEFINITIONS, CapturedGameDefinition
+from fpdb_3_legacy.http_capture_models import swc_game_definition_by_name
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.swc_http_adapter import card_id_to_str
 
@@ -1542,20 +1542,24 @@ def parse_native_dealer_draw(text: str) -> dict | None:
 
 
 # A mixed-game table announces each rotation with a class-26 message shaped
-# "Game changes to <NL|PL|FL> <game label> <small>/<big>". The game label matches
-# a SWC_GAME_DEFINITIONS label exactly, so the shared HTTP-adapter table resolves
-# the FPDB base/category without decoding the opaque native game-type code.
+# "Game changes to <NL|PL|FL> <game label> <small>/<big>". Resolve the public
+# game label without guessing the unseen numeric `gt` code.
 _GAME_CHANGE_TEXT = re.compile(r"^Game changes to (?P<limit>NL|PL|FL) (?P<game>.+?) (?P<sb>\d+)/(?P<bb>\d+)$")
 _NATIVE_LIMIT_TYPES = {"NL": "nl", "PL": "pl", "FL": "fl"}
-_SWC_LABEL_TO_DEFINITION: dict[str, CapturedGameDefinition] = {}
-for _swc_definition in SWC_GAME_DEFINITIONS.values():
-    _SWC_LABEL_TO_DEFINITION.setdefault(_swc_definition.label, _swc_definition)
 
 
 def _native_family_from_definition(base: str, category: str) -> str:
     """Map an FPDB base/category to the native decoder's family label."""
     if base == "hold":
-        return "omaha" if "omaha" in category else "holdem"
+        return "omaha" if "omaha" in category or category in {"cour_hi", "cour_hilo"} else "holdem"
+    if base == "draw" and category in {
+        "drawmaha",
+        "drawmaha_27",
+        "drawmaha_high",
+        "drawmadugi",
+        "sviten",
+    }:
+        return "drawmaha"
     if base in {"stud", "draw", "ofc"}:
         return base
     return "unknown"
@@ -1573,14 +1577,19 @@ def _resolve_native_hand_game(
         return native_game["family"], native_game["base"], native_game["category"], native_game["limit_type"]
     family = "ofc" if table_id in ofc_table_ids else table.family
     base, category, limit_type = _native_family_gametype(family)
+    definition = swc_game_definition_by_name(table.name)
+    if definition.base != "unknown":
+        # Public labels refine the broad family (e.g. Badugi vs 2-7 Single
+        # Draw). The table name does not identify its betting limit reliably.
+        base, category, limit_type = definition.base, definition.category, "unknown"
     return family, base, category, limit_type
 
 
 def parse_native_game_change(payload: bytes) -> dict | None:
     """Parse a class-26 'Game changes to ...' mixed-game rotation announcement.
 
-    Resolves the announced game label through the shared SWC_GAME_DEFINITIONS
-    table. Returns ``None`` for any other message or an unrecognised label.
+    Resolves the announced game label through the SWC public game catalogue.
+    Returns ``None`` for any other message or an unrecognised label.
     """
     if len(payload) < 14 or int.from_bytes(payload[:2], "little") != 26:
         return None
@@ -1588,8 +1597,8 @@ def parse_native_game_change(payload: bytes) -> dict | None:
     match = _GAME_CHANGE_TEXT.match(text)
     if match is None:
         return None
-    definition = _SWC_LABEL_TO_DEFINITION.get(match.group("game"))
-    if definition is None:
+    definition = swc_game_definition_by_name(match.group("game"))
+    if definition.base == "unknown":
         return None
     return {
         "table_id": int.from_bytes(payload[6:10], "little"),
@@ -1903,22 +1912,38 @@ def _native_table_max_seats_for_hand(table: NativeTableInfo, players: list[dict]
 def _native_table_family(name: str, searchable: str, trailer: bytes) -> str:
     """Classify a native table name before applying generic trailer signatures."""
     lowered = searchable.lower()
-    if "drawmaha" in lowered:
+    # SWC lists these as Drawmaha variants. Their Omaha board + draw structure
+    # belongs to this family; _resolve_native_hand_game preserves Drawmadugi's
+    # Badugi subtype so it cannot be mislabeled as 2-7 Drawmaha.
+    if any(token in lowered for token in ("drawmadugi", "drawmagi", "drawmaha", "sviten")):
         return "drawmaha"
     if "ofc" in lowered or "chinese" in lowered:
         return "ofc"
-    if "plo" in lowered or "omaha" in lowered:
+    if any(token in lowered for token in ("plo", "omaha", "courchevel", "big o")):
         return "omaha"
-    if "single draw" in lowered or "2-7" in lowered or "deuce to seven" in lowered:
+    if any(
+        token in lowered
+        for token in (
+            "single draw",
+            "triple draw",
+            "2-7",
+            "deuce to seven",
+            "5-card draw",
+            "5 card draw",
+            "badugi",
+            "badacey",
+            "badeucy",
+        )
+    ):
         return "draw"
     if "hold'em" in lowered or "holdem" in lowered:
         return "holdem"
+    if "stud" in lowered or "razz" in lowered:
+        return "stud"
     if b"UR" in trailer and "plo" not in name.lower():
         # Observed native cash-table signature for NL Hold'em. PLO tables use
         # PR here; keep unobserved signatures unknown rather than generalizing.
         return "holdem"
-    if "stud" in lowered:
-        return "stud"
     if "draw" in lowered:
         return "draw"
     return "unknown"
@@ -2846,6 +2871,10 @@ def promote_native_omaha_importability(hands: list[dict]) -> None:
     for hand in hands:
         if hand["game"]["category"] != "omahahi" or len(hand["players"]) != 2:
             continue
+        # Hand.getGameTypeAsString indexes its limit map directly; an inferred
+        # category with no confirmed betting structure must remain capture-only.
+        if hand["gametype"].get("limitType") not in {"nl", "pl", "fl", "cn", "cp"}:
+            continue
         audit = hand["metadata"]["importability"]
         small_blind = next((action for action in hand["actions"] if action["type"] == "small blind"), None)
         button_player = small_blind and next(
@@ -2899,17 +2928,22 @@ def _native_bomb_pot_amount(action_evidence: list[dict]) -> int:
 def _native_board_output(
     final_boards: tuple[tuple[str, ...], ...],
     action_evidence: list[dict] | None = None,
+    *,
+    courchevel: bool = False,
 ) -> dict:
-    """Build the compatibility board plus the complete parallel-board view."""
+    """Build board streets, keeping Courchevel's exposed flopet on preflop."""
     final_board = final_boards[0] if final_boards else ()
     community: dict[str, list[str]] = {}
     board_dicts = []
     for board_index, board in enumerate(final_boards, start=1):
         suffix = "" if board_index == 1 else str(board_index)
         board_dict = {}
+        if courchevel and board_index == 1 and board:
+            community["PREFLOP"] = [board[0]]
         if len(board) >= 3:
-            community[f"FLOP{suffix}"] = list(board[:3])
-            board_dict["FLOP"] = list(board[:3])
+            flop = board[1:3] if courchevel else board[:3]
+            community[f"FLOP{suffix}"] = list(flop)
+            board_dict["FLOP"] = list(flop)
         if len(board) >= 4:
             community[f"TURN{suffix}"] = [board[3]]
             board_dict["TURN"] = [board[3]]
@@ -3386,7 +3420,11 @@ def _normalize_native_hands_one_source(  # noqa: PLR0915 - protocol normalizatio
             dealer_hand_started=any(event["text"] == "New hand started" for event in dealer_events),
             dealer_hand_complete=any(event["text"] == "Hand complete" for event in dealer_events),
         )
-        board_output = _native_board_output(final_boards, action_evidence)
+        board_output = _native_board_output(
+            final_boards,
+            action_evidence,
+            courchevel=category in {"cour_hi", "cour_hilo"},
+        )
         native_players = [
             {
                 "player_id": player.player_id,

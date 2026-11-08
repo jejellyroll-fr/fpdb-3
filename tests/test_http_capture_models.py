@@ -26,7 +26,11 @@ from fpdb_3_legacy.http_capture_hand_builder import (
     validate_hand_operations,
 )
 from fpdb_3_legacy.http_capture_importability import evaluate_capture_importability
-from fpdb_3_legacy.http_capture_models import RawCaptureMessage, swc_game_definition
+from fpdb_3_legacy.http_capture_models import (
+    RawCaptureMessage,
+    swc_game_definition,
+    swc_game_definition_by_name,
+)
 from fpdb_3_legacy.http_capture_ofc import (
     build_ofc_hand,
     import_ofc_hand,
@@ -126,6 +130,57 @@ def test_observed_swc_capture_only_game_codes_are_named():
     assert ofc_short_variant.base == "ofc"
     assert ofc_short_variant.category == "ofc"
     assert ofc_short_variant.fpdb_supported is False
+
+
+@pytest.mark.parametrize(
+    ("label", "base", "category"),
+    [
+        ("2-7 Pineapple OFC Poker", "ofc", "ofcp_27"),
+        ("Progressive Pineapple OFC Poker", "ofc", "ofcp"),
+        ("Pineapple OFC Poker", "ofc", "ofcp"),
+        ("Open Face Chinese Poker", "ofc", "ofc"),
+        ("Chinese Poker", "ofc", "ofc"),
+        ("Drawmaha Poker", "draw", "drawmaha_high"),
+        ("5-Card Draw Poker", "draw", "fivedraw"),
+        ("2-7 Single Draw Poker", "draw", "27_1draw"),
+        ("Badacey Poker", "draw", "badacey"),
+        ("Badeucy Poker", "draw", "badeucey"),
+        ("Badugi Poker", "draw", "badugi"),
+        ("2-7 Triple Draw Poker", "draw", "27_3draw"),
+        ("6-Card Omaha Poker", "hold", "6_omahahi"),
+        ("6-Card Omaha Hi/Lo Poker", "hold", "6_omaha8"),
+        ("Courchevel Hi/Lo Poker", "hold", "cour_hilo"),
+        ("Courchevel Poker", "hold", "cour_hi"),
+        ("Big O Poker", "hold", "5_omaha8"),
+        ("5-Card Omaha Poker", "hold", "5_omahahi"),
+        ("Omaha Hi/Lo Poker", "hold", "omahahilo"),
+        ("Omaha Poker", "hold", "omahahi"),
+        ("Pineapple Hold’em Poker", "hold", "holdem"),
+        ("Short Deck Hold’em Poker", "hold", "holdem"),
+        ("Texas Hold’em Poker", "hold", "holdem"),
+        ("Mixed Games", "unknown", "unknown"),
+        ("Razz Poker", "stud", "razz"),
+        ("7-Card Stud Hi/Lo Poker", "stud", "studhilo"),
+        ("7-Card Stud Poker", "stud", "studhi"),
+        ("Drawmadugi", "draw", "drawmadugi"),
+    ],
+)
+def test_every_swc_rules_page_game_has_a_name_definition(label: str, base: str, category: str) -> None:
+    definition = swc_game_definition_by_name(label)
+
+    assert definition.label != "Unknown"
+    assert definition.base == base
+    assert definition.category == category
+
+
+def test_drawmaha_variants_remain_capture_only_in_the_name_catalogue() -> None:
+    for label in ("Drawmaha", "Drawmaha 2-7", "Sviten Special", "Drawmadugi"):
+        assert swc_game_definition_by_name(label).fpdb_supported is False
+    assert swc_game_definition_by_name("Drawmaha 2-7").category == "drawmaha"
+
+
+def test_name_catalogue_does_not_guess_native_game_codes() -> None:
+    assert swc_game_definition(9999).label == "Unknown"
 
 
 def _socketio_frame(game_state):
