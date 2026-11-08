@@ -155,7 +155,7 @@ def test_merge_native_boards_keeps_the_most_complete_board_per_index():
     # A single-board hand is unchanged.
     assert merge_native_boards([(board1_full,)]) == (board1_full,)
     assert merge_native_boards([(), (board1_short,)]) == (board1_short,)
-    assert merge_native_boards([]) == ()
+    assert not merge_native_boards([])
 
 
 def test_normalize_native_hands_omaha_double_board_envelope_has_both_boards():
@@ -394,11 +394,18 @@ def test_tap_repair_is_skipped_when_a_board_is_incomplete(config: Config, tmp_pa
 def test_macos_find_tables_tolerates_a_none_search_string(monkeypatch) -> None:
     """getTableTitleRe returns None when no table name/regex exists; the old
     code passed None to re.compile, whose TypeError escaped find_tables and
-    killed table-window construction (seen in HUD-crash.txt)."""
+    killed table-window construction (seen in HUD-crash.txt).
+
+    The detector is built with __new__ so the test needs no pyobjc (CI runs
+    ubuntu/windows too): find_tables only touches the Quartz entry points,
+    which are stubbed here.
+    """
     from fpdb.infrastructure.platform.macos import MacOSTableDetector
 
-    detector = MacOSTableDetector()
-    monkeypatch.setattr(detector, "_CGWindowListCopyWindowInfo", lambda *_args, **_kwargs: [])
-    monkeypatch.setattr(detector, "_find_tables_without_titles", lambda *a, **k: None)
+    detector = MacOSTableDetector.__new__(MacOSTableDetector)
+    detector._kCGNullWindowID = 0
+    detector._kCGWindowListOptionOnScreenOnly = 1
+    monkeypatch.setattr(detector, "_CGWindowListCopyWindowInfo", lambda *_args, **_kwargs: [], raising=False)
+    monkeypatch.setattr(detector, "_find_tables_without_titles", lambda *a, **k: None, raising=False)
     assert detector.find_tables(None) == []  # type: ignore[arg-type]
     assert detector.find_tables("") == []
