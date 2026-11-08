@@ -1016,21 +1016,27 @@ class Unibet(HandHistoryConverter):
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
         """Search string for the 2026 client's table windows.
 
-        A table window is titled e.g. "Omaha - PL5 (99465067)" (the lobby is
-        "Unibet Poker v3.58.0"): the id in parentheses is the hand's
-        ``Table "99465067"`` id -- the cash ``table_name``, or the tournament
-        ``table_number``.
+        A table window is titled e.g. "Omaha - PL5 (99465067)" for cash or
+        "0,25€ Power Spin Flash - 10/20 - Prize pool 5€ (99007080)" for a
+        tournament: the id in parentheses is the one that names the automatic
+        export file ("H20261107 T99465067 ...txt"), i.e. the cash
+        ``table_name``, or the tournament number. The lobby
+        ("Unibet Poker v3.58.0") carries no id and never matches.
         """
-        table_id = table_number if type == "tour" and table_number is not None else table_name
+        if type == "tour":
+            table_id = tournament if tournament is not None else table_number
+        else:
+            table_id = table_name
         if table_id is None:
             return None
         return rf"\({re.escape(str(table_id))}\)"
 
     @staticmethod
     def getTableNoRe(tournament) -> str:
-        # The 2026 client's window titles carry the table id in parentheses
-        # ("Omaha - PL5 (99465067)"); "Table N" never appears in them.
-        return r"\((\d+)\)"
+        # A tournament window's title carries the tournament id in parentheses,
+        # so it always equals ``tournament``; only an id that differs from it
+        # (a real table move) counts as a change. Cash windows never use this.
+        return rf"\((?!{re.escape(str(tournament))}\))(\d+)\)"
 
     def readSTP(self, hand) -> None:
         """Read Splash the Pot - not implemented for Unibet."""
