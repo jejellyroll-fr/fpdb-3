@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import SQL, Database, GuiReplayer
 from fpdb_3_legacy.http_capture_db_import import import_http_capture_directory, import_http_capture_hand
+from fpdb_3_legacy.http_capture_models import SWC_GAME_DEFINITIONS
 from fpdb_3_legacy.i18n import gettext as _
 
 log = logging.getLogger(__name__)
@@ -39,14 +40,7 @@ SUIT_COLORS = {
 }
 
 GAME_NAME_MAPPING = {
-    "poker (type 72)": "Hold'em",
-    "poker (type 79)": "Omaha",
-    "poker (type 88)": "5 Card Omaha",
-    "poker (type 76)": "OFC/P 2-7",
-    "poker (type 75)": "OFC/P Progressive",
-    "poker (type 74)": "OFC/P",
-    "poker (type 73)": "Turbo OFC",
-    "poker (type 70)": "OFC",
+    f"poker (type {game_code})": definition.label for game_code, definition in SWC_GAME_DEFINITIONS.items()
 }
 
 

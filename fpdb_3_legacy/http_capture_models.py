@@ -7,6 +7,7 @@ the same game taxonomy and street names as Hand.py.
 from __future__ import annotations
 
 import datetime
+import re
 from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 from typing import Any
@@ -52,6 +53,21 @@ TRIPLE_DRAW_STREETS = StreetProfile(
     action_streets=("BLINDSANTES", "DEAL", "DRAWONE", "DRAWTWO", "DRAWTHREE"),
     hole_streets=("DEAL", "DRAWONE", "DRAWTWO", "DRAWTHREE"),
     discard_streets=("DEAL", "DRAWONE", "DRAWTWO", "DRAWTHREE"),
+)
+
+DRAWMAHA_STREETS = StreetProfile(
+    all_streets=("BLINDSANTES", "PREFLOP", "FLOP", "DRAWONE", "TURN", "RIVER"),
+    action_streets=("BLINDSANTES", "PREFLOP", "FLOP", "DRAWONE", "TURN", "RIVER"),
+    hole_streets=("PREFLOP", "DRAWONE"),
+    community_streets=("FLOP", "TURN", "RIVER"),
+    discard_streets=("DRAWONE",),
+)
+
+COURCHEVEL_STREETS = StreetProfile(
+    all_streets=("BLINDSANTES", "PREFLOP", "FLOP", "TURN", "RIVER"),
+    action_streets=("BLINDSANTES", "PREFLOP", "FLOP", "TURN", "RIVER"),
+    hole_streets=("PREFLOP",),
+    community_streets=("PREFLOP", "FLOP", "TURN", "RIVER"),
 )
 
 STUD_STREETS = StreetProfile(
@@ -147,6 +163,105 @@ SWC_GAME_DEFINITIONS: dict[int, CapturedGameDefinition] = {
     84: CapturedGameDefinition("OFC Variant", "ofc", "ofc", "pl", SINGLE_DRAW_STREETS, fpdb_supported=False),
     88: CapturedGameDefinition("5 Card Omaha", "hold", "5_omahahi", "pl", HOLDEM_OMAHA_STREETS),
 }
+
+# The public rules page names games, while Socket.IO game states identify them
+# with numeric `gt` codes. Keep name-only aliases separate from that wire-code
+# table: these titles can classify native table names and announced game labels
+# without inventing numeric codes that have not been observed on the wire.
+SWC_GAME_NAME_DEFINITIONS: dict[str, CapturedGameDefinition] = {
+    # Chinese / OFC variants.
+    "2 7 pineapple ofc": SWC_GAME_DEFINITIONS[76],
+    "progressive pineapple ofc": SWC_GAME_DEFINITIONS[75],
+    "pineapple ofc": SWC_GAME_DEFINITIONS[74],
+    "open face chinese": SWC_GAME_DEFINITIONS[70],
+    "open face chinese poker": SWC_GAME_DEFINITIONS[70],
+    "chinese": SWC_GAME_DEFINITIONS[84],
+    "chinese poker": SWC_GAME_DEFINITIONS[84],
+    # Draw games already represented by a confirmed wire-code definition.
+    "5 card draw": SWC_GAME_DEFINITIONS[20],
+    "2 7 single draw": SWC_GAME_DEFINITIONS[22],
+    "badacey": SWC_GAME_DEFINITIONS[25],
+    "badeucy": SWC_GAME_DEFINITIONS[24],
+    "badugi": SWC_GAME_DEFINITIONS[23],
+    "2 7 triple draw": SWC_GAME_DEFINITIONS[21],
+    # Drawmaha variants have no confirmed numeric `gt` values yet. They are
+    # named and structurally described, but remain capture-only because the
+    # importer cannot represent their Omaha + draw split pot faithfully.
+    "drawmaha": CapturedGameDefinition(
+        "Drawmaha", "draw", "drawmaha_high", "unknown", DRAWMAHA_STREETS, fpdb_supported=False
+    ),
+    "drawmaha sviten": CapturedGameDefinition(
+        "Sviten Special", "draw", "sviten", "unknown", DRAWMAHA_STREETS, fpdb_supported=False
+    ),
+    "sviten special": CapturedGameDefinition(
+        "Sviten Special", "draw", "sviten", "unknown", DRAWMAHA_STREETS, fpdb_supported=False
+    ),
+    "drawmaha 2 7": CapturedGameDefinition(
+        "Drawmaha 2-7", "draw", "drawmaha", "unknown", DRAWMAHA_STREETS, fpdb_supported=False
+    ),
+    "drawmadugi": CapturedGameDefinition(
+        "Drawmadugi", "draw", "drawmadugi", "unknown", DRAWMAHA_STREETS, fpdb_supported=False
+    ),
+    # Flop games with known FPDB categories. Courchevel and Big O remain
+    # capture-only until their distinct dealing/street rules are verified.
+    "6 card omaha": SWC_GAME_DEFINITIONS[50],
+    "6 card omaha hi lo": SWC_GAME_DEFINITIONS[6],
+    "courchevel hi lo": CapturedGameDefinition(
+        "Courchevel Hi/Lo", "hold", "cour_hilo", "unknown", COURCHEVEL_STREETS, fpdb_supported=False
+    ),
+    "courchevel": CapturedGameDefinition(
+        "Courchevel", "hold", "cour_hi", "unknown", COURCHEVEL_STREETS, fpdb_supported=False
+    ),
+    "big o": CapturedGameDefinition(
+        "Big O", "hold", "5_omaha8", "unknown", HOLDEM_OMAHA_STREETS, fpdb_supported=False
+    ),
+    "5 card omaha": SWC_GAME_DEFINITIONS[88],
+    "omaha hi lo": SWC_GAME_DEFINITIONS[2],
+    "omaha h l": SWC_GAME_DEFINITIONS[2],
+    "omaha": SWC_GAME_DEFINITIONS[79],
+    "pineapple holdem": CapturedGameDefinition(
+        "Pineapple Hold'em", "hold", "holdem", "unknown", HOLDEM_OMAHA_STREETS, fpdb_supported=False
+    ),
+    "short deck holdem": SWC_GAME_DEFINITIONS[30],
+    "texas holdem": SWC_GAME_DEFINITIONS[72],
+    "holdem": SWC_GAME_DEFINITIONS[72],
+    # A mixed-game table is resolved per hand from the room's game-change
+    # message; it is not a single hand category.
+    "mixed games": CapturedGameDefinition(
+        "Mixed Games", "unknown", "unknown", "unknown", HOLDEM_OMAHA_STREETS, fpdb_supported=False
+    ),
+    # Stud games.
+    "razz": SWC_GAME_DEFINITIONS[12],
+    "7 card stud hi lo": SWC_GAME_DEFINITIONS[11],
+    "7 card stud": SWC_GAME_DEFINITIONS[10],
+    "stud hi lo": SWC_GAME_DEFINITIONS[11],
+    "stud h l": SWC_GAME_DEFINITIONS[11],
+    "stud": SWC_GAME_DEFINITIONS[10],
+}
+
+
+def _normalize_swc_game_name(name: str) -> str:
+    name = name.lower().replace("'", "").replace("’", "")
+    normalized = " ".join(re.findall(r"[a-z0-9]+", name))
+    if normalized.endswith(" poker"):
+        normalized = normalized[:-6]
+    return normalized
+
+
+def swc_game_definition_by_name(name: str | None) -> CapturedGameDefinition:
+    """Resolve a public/native SwC game label without guessing a numeric code."""
+    if not name:
+        return UNKNOWN_GAME
+    normalized = _normalize_swc_game_name(name)
+    if definition := SWC_GAME_NAME_DEFINITIONS.get(normalized):
+        return definition
+
+    # Native table names add stakes and table descriptors around the game title.
+    padded_name = f" {normalized} "
+    for title in sorted(SWC_GAME_NAME_DEFINITIONS, key=len, reverse=True):
+        if f" {title} " in padded_name:
+            return SWC_GAME_NAME_DEFINITIONS[title]
+    return UNKNOWN_GAME
 
 
 @dataclass

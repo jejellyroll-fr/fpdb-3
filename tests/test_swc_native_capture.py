@@ -754,12 +754,21 @@ def test_parse_native_game_change_maps_each_family():
     cases = {
         "Game changes to NL Hold'em 25/50": ("hold", "holdem", "nl"),
         "Game changes to PL Omaha 15/30": ("hold", "omahahi", "pl"),
+        "Game changes to PL Courchevel 15/30": ("hold", "cour_hi", "pl"),
+        "Game changes to PL Big O 15/30": ("hold", "5_omaha8", "pl"),
         "Game changes to FL Razz 25/50": ("stud", "razz", "fl"),
         "Game changes to FL Badugi 75/150": ("draw", "badugi", "fl"),
+        "Game changes to PL Drawmaha 25/50": ("draw", "drawmaha_high", "pl"),
+        "Game changes to PL Drawmaha 2-7 25/50": ("draw", "drawmaha", "pl"),
+        "Game changes to PL Drawmadugi 25/50": ("draw", "drawmadugi", "pl"),
     }
     for text, (base, category, limit) in cases.items():
         parsed = parse_native_game_change(_game_change_msg(1, text).payload)
         assert (parsed["base"], parsed["category"], parsed["limit_type"]) == (base, category, limit)
+        if category in {"cour_hi", "5_omaha8"}:
+            assert parsed["family"] == "omaha"
+        if category.startswith("drawmaha") or category in {"drawmadugi", "sviten"}:
+            assert parsed["family"] == "drawmaha"
 
 
 def test_parse_native_game_change_ignores_other_messages():

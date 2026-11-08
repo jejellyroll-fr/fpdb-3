@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import BinaryIO
 
 from fpdb_3_legacy.http_capture_diff import diff_snapshot_steps
-from fpdb_3_legacy.http_capture_models import SWC_GAME_DEFINITIONS, CapturedGameDefinition
+from fpdb_3_legacy.http_capture_models import swc_game_definition_by_name
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.swc_http_adapter import card_id_to_str
 
@@ -1542,20 +1542,24 @@ def parse_native_dealer_draw(text: str) -> dict | None:
 
 
 # A mixed-game table announces each rotation with a class-26 message shaped
-# "Game changes to <NL|PL|FL> <game label> <small>/<big>". The game label matches
-# a SWC_GAME_DEFINITIONS label exactly, so the shared HTTP-adapter table resolves
-# the FPDB base/category without decoding the opaque native game-type code.
+# "Game changes to <NL|PL|FL> <game label> <small>/<big>". Resolve the public
+# game label without guessing the unseen numeric `gt` code.
 _GAME_CHANGE_TEXT = re.compile(r"^Game changes to (?P<limit>NL|PL|FL) (?P<game>.+?) (?P<sb>\d+)/(?P<bb>\d+)$")
 _NATIVE_LIMIT_TYPES = {"NL": "nl", "PL": "pl", "FL": "fl"}
-_SWC_LABEL_TO_DEFINITION: dict[str, CapturedGameDefinition] = {}
-for _swc_definition in SWC_GAME_DEFINITIONS.values():
-    _SWC_LABEL_TO_DEFINITION.setdefault(_swc_definition.label, _swc_definition)
 
 
 def _native_family_from_definition(base: str, category: str) -> str:
     """Map an FPDB base/category to the native decoder's family label."""
     if base == "hold":
-        return "omaha" if "omaha" in category else "holdem"
+        return "omaha" if "omaha" in category or category in {"cour_hi", "cour_hilo"} else "holdem"
+    if base == "draw" and category in {
+        "drawmaha",
+        "drawmaha_27",
+        "drawmaha_high",
+        "drawmadugi",
+        "sviten",
+    }:
+        return "drawmaha"
     if base in {"stud", "draw", "ofc"}:
         return base
     return "unknown"
@@ -1573,19 +1577,19 @@ def _resolve_native_hand_game(
         return native_game["family"], native_game["base"], native_game["category"], native_game["limit_type"]
     family = "ofc" if table_id in ofc_table_ids else table.family
     base, category, limit_type = _native_family_gametype(family)
-    if family == "drawmaha" and "drawmadugi" in table.name.lower():
-        # Drawmadugi shares Drawmaha's Omaha board + draw structure, but its
-        # draw half is Badugi. Keep that subtype explicit and capture-only;
-        # mapping it to the generic drawmaha category would claim 2-7 rules.
-        category = "drawmadugi"
+    definition = swc_game_definition_by_name(table.name)
+    if definition.base != "unknown":
+        # Public labels refine the broad family (e.g. Badugi vs 2-7 Single
+        # Draw). The table name does not identify its betting limit reliably.
+        base, category, limit_type = definition.base, definition.category, "unknown"
     return family, base, category, limit_type
 
 
 def parse_native_game_change(payload: bytes) -> dict | None:
     """Parse a class-26 'Game changes to ...' mixed-game rotation announcement.
 
-    Resolves the announced game label through the shared SWC_GAME_DEFINITIONS
-    table. Returns ``None`` for any other message or an unrecognised label.
+    Resolves the announced game label through the SWC public game catalogue.
+    Returns ``None`` for any other message or an unrecognised label.
     """
     if len(payload) < 14 or int.from_bytes(payload[:2], "little") != 26:
         return None
@@ -1593,8 +1597,8 @@ def parse_native_game_change(payload: bytes) -> dict | None:
     match = _GAME_CHANGE_TEXT.match(text)
     if match is None:
         return None
-    definition = _SWC_LABEL_TO_DEFINITION.get(match.group("game"))
-    if definition is None:
+    definition = swc_game_definition_by_name(match.group("game"))
+    if definition.base == "unknown":
         return None
     return {
         "table_id": int.from_bytes(payload[6:10], "little"),
