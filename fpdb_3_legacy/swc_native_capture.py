@@ -2924,17 +2924,22 @@ def _native_bomb_pot_amount(action_evidence: list[dict]) -> int:
 def _native_board_output(
     final_boards: tuple[tuple[str, ...], ...],
     action_evidence: list[dict] | None = None,
+    *,
+    courchevel: bool = False,
 ) -> dict:
-    """Build the compatibility board plus the complete parallel-board view."""
+    """Build board streets, keeping Courchevel's exposed flopet on preflop."""
     final_board = final_boards[0] if final_boards else ()
     community: dict[str, list[str]] = {}
     board_dicts = []
     for board_index, board in enumerate(final_boards, start=1):
         suffix = "" if board_index == 1 else str(board_index)
         board_dict = {}
+        if courchevel and board_index == 1 and board:
+            community["PREFLOP"] = [board[0]]
         if len(board) >= 3:
-            community[f"FLOP{suffix}"] = list(board[:3])
-            board_dict["FLOP"] = list(board[:3])
+            flop = board[1:3] if courchevel else board[:3]
+            community[f"FLOP{suffix}"] = list(flop)
+            board_dict["FLOP"] = list(flop)
         if len(board) >= 4:
             community[f"TURN{suffix}"] = [board[3]]
             board_dict["TURN"] = [board[3]]
@@ -3411,7 +3416,11 @@ def _normalize_native_hands_one_source(  # noqa: PLR0915 - protocol normalizatio
             dealer_hand_started=any(event["text"] == "New hand started" for event in dealer_events),
             dealer_hand_complete=any(event["text"] == "Hand complete" for event in dealer_events),
         )
-        board_output = _native_board_output(final_boards, action_evidence)
+        board_output = _native_board_output(
+            final_boards,
+            action_evidence,
+            courchevel=category in {"cour_hi", "cour_hilo"},
+        )
         native_players = [
             {
                 "player_id": player.player_id,
