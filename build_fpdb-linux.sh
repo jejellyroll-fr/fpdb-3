@@ -164,7 +164,7 @@ generate_pyinstaller_command() {
         "qt_material" "qt_material.resources" "xcffib" "xcffib.xproto"
         "gevent" "gevent-websocket" "uvicorn" "requests" "numpy" "pandas" "sqlalchemy"
         "jinja2" "werkzeug" "flask" "fastapi" "orjson" "beautifulsoup4"
-        "six" "pycparser"
+        "six" "pycparser" "pokereval" "fpdb_3_legacy.equity_smoke"
     )
     for import in "${hidden_imports[@]}"; do
         command+=" --hidden-import=$import"
