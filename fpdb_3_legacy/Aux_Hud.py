@@ -2137,6 +2137,10 @@ class SimpleTablePopupMenu(QWidget):
         hud.supported_games_parameters = dict(hud.supported_games_parameters)
         hud.supported_games_parameters["game_stat_set"] = stat_set
         hud.position_scope = HudPositionScope.from_hud(hud)
+        # #741: remember the content now on the felt, the same way HUD
+        # creation and a rebuild do, so HUD_main can tell a later edit of this
+        # profile in the file from a layout-only write.
+        hud.applied_stat_set_signature = (new_stat_set, hud.config.stat_set_signature(new_stat_set))
 
         overrides = getattr(hud.parent, "_table_stat_set_overrides", None)
         if isinstance(overrides, dict):

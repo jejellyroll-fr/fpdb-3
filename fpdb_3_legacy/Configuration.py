@@ -1243,6 +1243,18 @@ class Config(
         """
         return _file_fingerprint(self.file) != getattr(self, "_loaded_file_fingerprint", None)
 
+    def stat_set_signature(self, name: str) -> str | None:
+        """The XML of one HUD profile, or None if the file has no such <ss>.
+
+        What HUD_main serializes to compare profiles, offered here so the
+        places that apply a profile -- HUD creation, the table menu, a
+        rebuild -- can record which content they put on the felt (#741).
+        """
+        for ss_node in self.doc.getElementsByTagName("ss"):
+            if ss_node.getAttribute("name") == name:
+                return ss_node.toxml()
+        return None
+
     def save(self, file=None) -> None:
         """Write the configuration so that a failed save leaves the previous file whole (#642).
 

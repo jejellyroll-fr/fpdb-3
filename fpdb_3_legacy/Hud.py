@@ -160,6 +160,14 @@ class Hud:
                 self.supported_games_parameters = dict(self.supported_games_parameters)
                 self.supported_games_parameters["game_stat_set"] = override_stat_set
                 log.info("Applying table-local HUD profile %s to %s", override_name, self.table.key)
+        # The profile content this HUD puts on the felt, for the #741 change
+        # detection in HUD_main: the file may be reloaded behind the tables'
+        # back, so what they display has to be remembered where it is applied.
+        applied_stat_set = (self.supported_games_parameters or {}).get("game_stat_set")
+        applied_name = getattr(applied_stat_set, "name", None)
+        self.applied_stat_set_signature: tuple[str, str | None] | None = (
+            (applied_name, config.stat_set_signature(applied_name)) if applied_name is not None else None
+        )
         self.layout_set = config.get_layout(self.table.site, self.game_type)
 
         # Just throw error and die if any serious config issues are discovered

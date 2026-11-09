@@ -357,13 +357,21 @@ def test_table_stat_set_override_is_scoped_by_table_and_game(hud_main) -> None:
 
 
 def _ss_doc(stat_xml: str, *, profile: str = "ProfileA", extra: str = ""):
-    from xml.dom import minidom
+    import defusedxml.minidom
 
-    return minidom.parseString(
+    return defusedxml.minidom.parseString(
         "<FreePokerToolsConfig><stat_sets>"
         f'<ss name="{profile}" rows="5" cols="5">{stat_xml}</ss>'
         f"</stat_sets>{extra}</FreePokerToolsConfig>"
     )
+
+
+def _applied_signature(doc, profile: str = "ProfileA") -> tuple[str, str | None]:
+    """The (name, content) a HUD displays, recorded when its profile is applied."""
+    for node in doc.getElementsByTagName("ss"):
+        if node.getAttribute("name") == profile:
+            return (profile, node.toxml())
+    return (profile, None)
 
 
 def _profile_refresh_setup(hud_main, monkeypatch, tmp_path, *, old_doc, new_doc, resolved_name="ProfileA"):
@@ -385,15 +393,26 @@ def _profile_refresh_setup(hud_main, monkeypatch, tmp_path, *, old_doc, new_doc,
     hud_main.config.reload = fake_reload
 
     rebuilt: list[str] = []
-    monkeypatch.setattr(hud_main, "_rebuild_hud_with_stat_set", lambda _hud, ss: rebuilt.append(ss.name))
+
+    def fake_rebuild(target_hud, ss):
+        rebuilt.append(ss.name)
+        # The real code records what the rebuild applied, read back at the next refresh.
+        target_hud.applied_stat_set_signature = _applied_signature(hud_main.config.doc, ss.name)
+
+    monkeypatch.setattr(hud_main, "_rebuild_hud_with_stat_set", fake_rebuild)
     return rebuilt, stat_set
 
 
-def _table_hud(temp_key: str = "t1", profile_name: str = "ProfileA") -> SimpleNamespace:
+def _table_hud(
+    temp_key: str = "t1",
+    profile_name: str = "ProfileA",
+    applied: tuple[str, str | None] | None = None,
+) -> SimpleNamespace:
     return SimpleNamespace(
         hud_context=object(),
         table=SimpleNamespace(key=temp_key),
         supported_games_parameters={"game_stat_set": SimpleNamespace(name=profile_name)},
+        applied_stat_set_signature=applied,
         poker_game="holdem",
         game_type="ring",
     )
@@ -404,7 +423,7 @@ def test_refresh_rebuilds_when_profile_content_changes_under_the_same_name(hud_m
     old_doc = _ss_doc('<stat row="0" col="0" stat_name="vpip"/>')
     new_doc = _ss_doc('<stat row="0" col="0" stat_name="pfr"/>')
     rebuilt, _ss = _profile_refresh_setup(hud_main, monkeypatch, tmp_path, old_doc=old_doc, new_doc=new_doc)
-    hud_main.hud_dict = {"t1": _table_hud()}
+    hud_main.hud_dict = {"t1": _table_hud(applied=_applied_signature(old_doc))}
 
     assert hud_main.refresh_profiles_from_config() == 1
     assert rebuilt == ["ProfileA"]
@@ -416,10 +435,10 @@ def test_refresh_ignores_layout_only_writes(hud_main, monkeypatch, tmp_path) -> 
     old_doc = _ss_doc(ss)
     new_doc = _ss_doc(ss, extra="<layout_sets><ls name='l' x='1' y='2'/></layout_sets>")
     rebuilt, _ss = _profile_refresh_setup(hud_main, monkeypatch, tmp_path, old_doc=old_doc, new_doc=new_doc)
-    hud_main.hud_dict = {"t1": _table_hud()}
+    hud_main.hud_dict = {"t1": _table_hud(applied=_applied_signature(old_doc))}
 
     assert hud_main.refresh_profiles_from_config() == 0
-    assert rebuilt == []
+    assert not rebuilt
 
 
 def test_refresh_rebuilds_when_the_profile_name_changes(hud_main, monkeypatch, tmp_path) -> None:
@@ -428,7 +447,7 @@ def test_refresh_rebuilds_when_the_profile_name_changes(hud_main, monkeypatch, t
     rebuilt, _ss = _profile_refresh_setup(
         hud_main, monkeypatch, tmp_path, old_doc=old_doc, new_doc=new_doc, resolved_name="ProfileB"
     )
-    hud_main.hud_dict = {"t1": _table_hud(profile_name="ProfileA")}
+    hud_main.hud_dict = {"t1": _table_hud(profile_name="ProfileA", applied=_applied_signature(old_doc, "ProfileA"))}
 
     assert hud_main.refresh_profiles_from_config() == 1
     assert rebuilt == ["ProfileB"]
@@ -442,7 +461,7 @@ def test_refresh_rebuilds_an_overridden_table_when_its_profile_content_changes(h
     rebuilt, _ss = _profile_refresh_setup(hud_main, monkeypatch, tmp_path, old_doc=old_doc, new_doc=new_doc)
     hud_main.set_table_stat_set_override("t1", "holdem", "ring", "ProfileA")
     hud_main.config.get_supported_games_parameters.return_value = {}  # rules must not override the menu choice
-    hud_main.hud_dict = {"t1": _table_hud()}
+    hud_main.hud_dict = {"t1": _table_hud(applied=_applied_signature(old_doc))}
 
     assert hud_main.refresh_profiles_from_config() == 1
     assert rebuilt == ["ProfileA"]
@@ -454,10 +473,39 @@ def test_refresh_leaves_an_overridden_table_alone_when_content_is_unchanged(hud_
     new_doc = _ss_doc(ss, extra="<layout_sets><ls name='l' x='1' y='2'/></layout_sets>")
     rebuilt, _ss = _profile_refresh_setup(hud_main, monkeypatch, tmp_path, old_doc=old_doc, new_doc=new_doc)
     hud_main.set_table_stat_set_override("t1", "holdem", "ring", "ProfileA")
-    hud_main.hud_dict = {"t1": _table_hud()}
+    hud_main.hud_dict = {"t1": _table_hud(applied=_applied_signature(old_doc))}
 
     assert hud_main.refresh_profiles_from_config() == 0
-    assert rebuilt == []
+    assert not rebuilt
+
+
+def test_a_layout_save_reload_does_not_hide_a_saved_profile_edit(hud_main, monkeypatch, tmp_path) -> None:
+    # Codex review on #752: Hud.save_layout reloads the config before the next
+    # poll, so the DOM already holds the new content when the refresh runs. A
+    # table still showing the old content must be rebuilt all the same.
+    old_doc = _ss_doc('<stat row="0" col="0" stat_name="vpip"/>')
+    new_doc = _ss_doc('<stat row="0" col="0" stat_name="pfr"/>')
+    rebuilt, _ss = _profile_refresh_setup(hud_main, monkeypatch, tmp_path, old_doc=old_doc, new_doc=new_doc)
+    hud_main.hud_dict = {"t1": _table_hud(applied=_applied_signature(old_doc))}
+
+    # The layout save moved the DOM on to the new file content before the poll.
+    hud_main.config.doc = new_doc
+
+    assert hud_main.refresh_profiles_from_config() == 1
+    assert rebuilt == ["ProfileA"]
+
+
+def test_a_rebuilt_table_is_not_rebuilt_again_for_the_same_content(hud_main, monkeypatch, tmp_path) -> None:
+    old_doc = _ss_doc('<stat row="0" col="0" stat_name="vpip"/>')
+    new_doc = _ss_doc('<stat row="0" col="0" stat_name="pfr"/>')
+    rebuilt, _ss = _profile_refresh_setup(hud_main, monkeypatch, tmp_path, old_doc=old_doc, new_doc=new_doc)
+    cfg_file = tmp_path / "HUD_config.xml"
+    hud_main.hud_dict = {"t1": _table_hud(applied=_applied_signature(old_doc))}
+
+    assert hud_main.refresh_profiles_from_config() == 1
+    os.utime(cfg_file, (time.time() + 5, time.time() + 5))
+    assert hud_main.refresh_profiles_from_config() == 0
+    assert rebuilt == ["ProfileA"]
 
 
 # Ensures that the handle_message method correctly calls read_stdin when provided with a hand ID.
@@ -2230,6 +2278,9 @@ def _profile_hud(profile_name: str, *, game: str = "aof_omaha", table_key: str =
     hud.table_name = table_key
     hud.hud_context = HUD_main.HudContext(site="CoinPoker", game=game, game_type="ring", max_seats=6)
     hud.supported_games_parameters = {"game_stat_set": _named_stat_set(profile_name)}
+    # A MagicMock invents attributes on access, so the recorded profile content
+    # has to be set explicitly for the tests that expect no rebuild.
+    hud.applied_stat_set_signature = (profile_name, None)
     hud.aux_windows = []
     hud.stat_dict = {}
     return hud

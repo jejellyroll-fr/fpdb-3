@@ -210,6 +210,10 @@ def test_a_theme_change_leaves_the_open_table_overlays_alone(app, config_file) -
         aux_windows=[aux],
         supported_games_parameters={"game_stat_set": stat_set},
     )
+    # The content the table displays, as recorded where a profile is applied
+    # (#741): a MagicMock invents the attribute on access, and the test is that
+    # a theme-only change rebuilds nothing.
+    table.applied_stat_set_signature = (stat_set.name, hud.config.stat_set_signature(stat_set.name))
     hud.hud_dict["table-a"] = table
 
     _save_theme_as_fpdb_would(config_file, CUSTOM_THEME)

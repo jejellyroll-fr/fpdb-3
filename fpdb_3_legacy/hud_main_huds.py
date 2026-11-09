@@ -88,6 +88,10 @@ class HudMainHudsMixin(HudMainBase):
         the signal. Rebuilding a HUD destroys and recreates its windows, which
         the player sees, so only tables whose effective profile actually
         changed are touched -- saving an unrelated preference rebuilds nothing.
+        The comparison is against the content each HUD displays, recorded
+        where it was applied, not against the DOM: a layout save can reload
+        the file ahead of this poll (#741), and the DOM would then already
+        hold the new content.
 
         Returns the number of tables rebuilt.
         """
@@ -95,10 +99,6 @@ class HudMainHudsMixin(HudMainBase):
         if fingerprint is None or fingerprint == self._config_fingerprint:
             return 0
         self._config_fingerprint = fingerprint
-        # Capture each profile's content before reloading: a table whose
-        # effective profile kept its name but changed content has to be
-        # rebuilt too, not only one whose profile name changed (#741).
-        previous_signatures = self._stat_set_signatures()
         if self.config.reload() is False:
             log.warning("HUD_config.xml changed but could not be reloaded; keeping the profiles in use")
             return 0
@@ -114,7 +114,7 @@ class HudMainHudsMixin(HudMainBase):
         new_signatures = self._stat_set_signatures()
         rebuilt = 0
         for temp_key, hud in list(self.hud_dict.items()):
-            if self._reapply_profile(temp_key, hud, previous_signatures, new_signatures):
+            if self._reapply_profile(temp_key, hud, new_signatures):
                 rebuilt += 1
         if rebuilt:
             log.info("Config change applied: %d table(s) rebuilt with a new HUD profile", rebuilt)
@@ -124,17 +124,22 @@ class HudMainHudsMixin(HudMainBase):
         self,
         temp_key: str,
         hud: Hud.Hud,
-        previous_signatures: dict[str, str] | None = None,
         new_signatures: dict[str, str] | None = None,
     ) -> bool:
-        """Rebuild one table if its effective profile changed name or content."""
+        """Rebuild one table if its effective profile changed name or content.
+
+        The content a table already displays is what its HUD recorded where
+        the profile was applied -- creation, the table menu, a rebuild. The
+        DOM cannot serve as the "before" half of the comparison: a layout
+        save also reloads the file, which would make an already saved edit
+        look applied before any table saw it (#741).
+        """
         context = getattr(hud, "hud_context", None)
         if context is None:
             return False
-        if previous_signatures is None:
-            previous_signatures = {}
         if new_signatures is None:
             new_signatures = self._stat_set_signatures()
+        applied = getattr(hud, "applied_stat_set_signature", None)
 
         table_key = getattr(getattr(hud, "table", None), "key", None)
         override = None
@@ -149,9 +154,9 @@ class HudMainHudsMixin(HudMainBase):
             new_stat_set = self.config.stat_sets.get(override)
             if new_stat_set is None:
                 return False
-            if new_signatures.get(override) == previous_signatures.get(override):
+            if applied == (override, new_signatures.get(override)):
                 return False
-            new_name = override
+            new_name: str | None = override
         else:
             params = self.config.get_supported_games_parameters(hud.poker_game, hud.game_type, context)
             new_stat_set = params.get("game_stat_set") if isinstance(params, dict) else None
@@ -159,10 +164,12 @@ class HudMainHudsMixin(HudMainBase):
                 return False
             current = (hud.supported_games_parameters or {}).get("game_stat_set")
             new_name = getattr(new_stat_set, "name", None)
-            if new_name != getattr(current, "name", None):
-                pass  # different profile: rebuild below
-            elif new_signatures.get(new_name) == previous_signatures.get(new_name):
-                # Same profile, same content: a layout-only write rebuilds nothing.
+            # Same profile, same content as displayed: a layout-only write rebuilds nothing.
+            if (
+                new_name is not None
+                and new_name == getattr(current, "name", None)
+                and applied == (new_name, new_signatures.get(new_name))
+            ):
                 return False
 
         try:
@@ -170,6 +177,13 @@ class HudMainHudsMixin(HudMainBase):
         except Exception:  # intentional broad catch: a failed rebuild must leave no orphan windows
             log.exception("Rebuilding %s for profile %s failed; restarting it", temp_key, new_name)
             self.kill_hud(None, temp_key)
+            return True  # the table was restarted, not left on the old profile
+        # What the table displays now, so the next refresh compares against
+        # this instead of trusting the DOM to still be what was applied (#741).
+        if new_name is not None:
+            hud.applied_stat_set_signature = (new_name, new_signatures.get(new_name))
+        else:
+            hud.applied_stat_set_signature = None
         return True
 
     @staticmethod

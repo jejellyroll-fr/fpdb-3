@@ -318,24 +318,27 @@ class ConfigurationManager:
         into the same object instead of replacing it; the attribute copy is the
         fallback when reload() is unavailable.
         """
-        if hasattr(self._config, "reload"):
+        config = self._config
+        if config is None:
+            return
+        if hasattr(config, "reload"):
             log.info("Using Config.reload() method")
-            self._config.reload()
+            config.reload()
         else:
             # Fallback: copy important attributes
             log.warning("Config.reload() not available, copying attributes")
             if hasattr(new_config, "ui"):
-                self._config.ui = new_config.ui
+                config.ui = new_config.ui
             if hasattr(new_config, "doc"):
-                self._config.doc = new_config.doc
+                config.doc = new_config.doc
             if hasattr(new_config, "supported_sites"):
-                self._config.supported_sites = new_config.supported_sites
+                config.supported_sites = new_config.supported_sites
             if hasattr(new_config, "supported_games"):
-                self._config.supported_games = new_config.supported_games
+                config.supported_games = new_config.supported_games
             if hasattr(new_config, "supported_databases"):
-                self._config.supported_databases = new_config.supported_databases
+                config.supported_databases = new_config.supported_databases
             if hasattr(new_config, "stat_sets"):
-                self._config.stat_sets = new_config.stat_sets
+                config.stat_sets = new_config.stat_sets
 
     def _identify_changes(
         self,

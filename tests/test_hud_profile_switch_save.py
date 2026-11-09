@@ -27,7 +27,7 @@ def _open(tmp_path):
     from fpdb_3_legacy import ModernHudPreferences as M
     from fpdb_3_legacy import dynamic_panels_consent
 
-    QApplication.instance() or QApplication([])
+    _app = QApplication.instance() or QApplication([])
     config_path = tmp_path / "HUD_config.xml"
     if not config_path.exists():
         shutil.copy(EXAMPLE, config_path)
