@@ -1053,7 +1053,7 @@ class Unibet(HandHistoryConverter):
         pass
 
     @staticmethod
-    def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
+    def getTableTitleRe(_game_type, table_name=None, tournament=None, table_number=None):
         """Search string for the 2026 client's table windows.
 
         A table window is titled e.g. "Omaha - PL5 (99465067)" for cash or
@@ -1063,7 +1063,7 @@ class Unibet(HandHistoryConverter):
         ``table_name``, or the tournament number. The lobby
         ("Unibet Poker v3.58.0") carries no id and never matches.
         """
-        if type == "tour":
+        if _game_type == "tour":
             table_id = tournament if tournament is not None else table_number
         else:
             table_id = table_name
