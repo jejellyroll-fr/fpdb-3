@@ -299,7 +299,7 @@ def test_a_same_name_profile_edit_invalidates_the_block_position_cache() -> None
 
     signature["value"] = "sig-v2"  # the profile was edited in preferences and reloaded
     aux._keep_block_positions_for_this_table()
-    assert aux.block_positions == {}, "changed content: the cache must be dropped"
+    assert not aux.block_positions, "changed content: the cache must be dropped"
 
 
 @pytest.mark.usefixtures("store")
