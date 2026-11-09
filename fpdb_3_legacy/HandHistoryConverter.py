@@ -1146,10 +1146,8 @@ def getTableTitleRe(config, sitename, *args, **kwargs):
         # A converter that stubs getTableTitleRe returns None; leaving that
         # None in Table_Window.search_string crashes window detection later
         # (e.g. "x in None"). Fall back to the table/tournament id instead.
-        import re as _re
-
         fallback = kwargs.get("table_name") or kwargs.get("tournament") or ""
-        return _re.escape(str(fallback))
+        return re.escape(str(fallback))
     return result
 
 

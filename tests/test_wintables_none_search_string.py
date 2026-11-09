@@ -10,15 +10,16 @@ window.
 from __future__ import annotations
 
 import os
+from unittest.mock import MagicMock
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from unittest.mock import MagicMock  # noqa: E402
 
-from fpdb_3_legacy import WinTables  # noqa: E402
+def _table(search_string):
+    # Imported here, not at module level: WinTables creates the QApplication at
+    # import time, which must happen after QT_QPA_PLATFORM is set above.
+    from fpdb_3_legacy import WinTables
 
-
-def _table(search_string) -> WinTables.Table:
     t = object.__new__(WinTables.Table)
     t.site = "Unibet"
     t.name = "99620854"

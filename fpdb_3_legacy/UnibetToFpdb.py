@@ -382,7 +382,7 @@ class Unibet(HandHistoryConverter):
     # Unlike the legacy "wins the €0.27 bounty for eliminating X" shape, no
     # eliminated player is named, and the amount is real money, not chips.
     re_Bounty2026 = re.compile(
-        r"^{PLYR}\swins\s(?:the\s)?bounty,\s(€|\$|£)?(?P<AMT>[,\.0-9]+)\s*$".format(**substitutions),
+        rf"^{substitutions['PLYR']}\swins\s(?:the\s)?bounty,\s(€|\$|£)?(?P<AMT>[,\.0-9]+)\s*$",
         re.MULTILINE,
     )
     re_Rake = re.compile(
@@ -1016,16 +1016,23 @@ class Unibet(HandHistoryConverter):
             log.info(f"read Showdown Actions('{cards}','{shows.group('PNAME')}')")
 
     def readTourneyResults(self, hand) -> None:
-        """Reads knockout bounties and add them to the koCounts dict."""
-        ko_amounts: dict[str, int] = {}
+        """Reads knockout bounties: a KO count in koCounts, the money in koWinnings.
+
+        koCounts feeds TourneysPlayers.koCount (a count), while the amount won
+        goes to koWinnings, which the profit queries read first
+        (COALESCE(koWinnings, koCount * koBounty)) -- storing the cents in
+        koCounts would turn €0.23 into 23 knockouts and lose the money.
+        """
+        found = False
         for m in self.re_Bounty2026.finditer(hand.handText):
             player = m.group("PNAME")
-            ko_amounts[player] = ko_amounts.get(player, 0) + int(round(100 * Decimal(m.group("AMT"))))
-        if ko_amounts:
+            hand.koCounts[player] = hand.koCounts.get(player, 0) + 1
+            hand.koWinnings[player] = hand.koWinnings.get(player, 0) + int(round(100 * Decimal(m.group("AMT"))))
+            found = True
+        if found:
             # Called after readHandInfo, so this overrides its isKO = False:
             # a hand that pays a bounty is a KO tournament hand.
             hand.isKO = True
-            hand.koCounts.update(ko_amounts)
 
     def readCollectPot(self, hand) -> None:
         for m in self.re_CollectPot.finditer(hand.handText):

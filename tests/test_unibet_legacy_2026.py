@@ -425,10 +425,13 @@ def test_full_import_sprint_ko_mtt() -> None:
         # The pot taken, not the summary's "won" (which adds the uncalled bet
         # back); the bounty line is not a pot.
         assert hand.collected == [["hero", "80"]]
-        # "hero wins bounty, €0.45" marks the hand as a KO hand and files the
-        # bounty in koCounts (hundredths), like the other KO sites do.
+        # "hero wins bounty, €0.45" marks the hand as a KO hand. koCounts gets
+        # the knockout *count*, the €0.45 in hundredths goes to koWinnings:
+        # the reports read koWinnings first (COALESCE ahead of
+        # koCount * koBounty), so the money is not turned into 45 KOs.
         assert hand.isKO is True
-        assert hand.koCounts == {"hero": 45}
+        assert hand.koCounts == {"hero": 1}
+        assert hand.koWinnings == {"hero": 45}
     finally:
         Path(tmp).unlink(missing_ok=True)
 
