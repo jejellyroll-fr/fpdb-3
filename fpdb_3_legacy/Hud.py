@@ -160,6 +160,14 @@ class Hud:
                 self.supported_games_parameters = dict(self.supported_games_parameters)
                 self.supported_games_parameters["game_stat_set"] = override_stat_set
                 log.info("Applying table-local HUD profile %s to %s", override_name, self.table.key)
+        # The profile content this HUD puts on the felt, for the #741 change
+        # detection in HUD_main: the file may be reloaded behind the tables'
+        # back, so what they display has to be remembered where it is applied.
+        applied_stat_set = (self.supported_games_parameters or {}).get("game_stat_set")
+        applied_name = getattr(applied_stat_set, "name", None)
+        self.applied_stat_set_signature: tuple[str, str | None] | None = (
+            (applied_name, config.stat_set_signature(applied_name)) if applied_name is not None else None
+        )
         self.layout_set = config.get_layout(self.table.site, self.game_type)
 
         # Just throw error and die if any serious config issues are discovered
@@ -362,6 +370,14 @@ class Hud:
 
     def save_layout(self) -> None:
         """Ask each aux to save its layout back to the config object."""
+        # The preferences dialog runs in the fpdb process and may have written
+        # the file since this config was loaded; saving now would write this
+        # stale DOM over those edits (#741). Reload first, then lay out on top,
+        # and skip the write entirely if the file cannot be re-read.
+        changed_on_disk = getattr(self.config, "changed_on_disk", None)
+        if callable(changed_on_disk) and changed_on_disk() and self.config.reload() is False:
+            log.warning("HUD_config.xml changed on disk but could not be reloaded; layout not saved over it")
+            return
         for aux in self.aux_windows:
             try:
                 aux.save_layout(self.layout)
