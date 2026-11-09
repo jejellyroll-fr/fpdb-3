@@ -2097,6 +2097,30 @@ def extract_native_board(snapshot: NativeGameStateSnapshot, family: str) -> tupl
     return boards[0] if boards else ()
 
 
+def merge_native_boards(
+    board_lists: list[tuple[tuple[str, ...], ...]],
+) -> tuple[tuple[str, ...], ...]:
+    """Merge per-snapshot board extractions into the most complete board set.
+
+    Each board of a multi-board hand (double-board bomb pot, run-it-twice) is
+    board *n* in every snapshot that carried it, growing as the runout is dealt.
+    Taking, per board index, the longest extraction seen across all snapshots
+    yields a board set at least as complete as any single one -- the previous
+    ``max`` by (board count, total cards) picked one snapshot wholesale, so a
+    final snapshot in which the second board was still short made the whole
+    hand lose both boards, and with them the ``Boards``-table repair that is
+    the only source of the second board the text history never writes.
+    """
+    merged: list[tuple[str, ...]] = []
+    for boards in board_lists:
+        for index, board in enumerate(boards):
+            if index == len(merged):
+                merged.append(board)
+            elif len(board) > len(merged[index]):
+                merged[index] = board
+    return tuple(merged)
+
+
 def _parse_type_10_event(payload: bytes, cursor: int) -> tuple[int, str | None]:
     """Return the end and optional mnemonic for an observed type-10 event."""
     if cursor + 8 > len(payload) or payload[cursor + 4 : cursor + 6] != b"\0" * 2:
@@ -3360,10 +3384,8 @@ def _normalize_native_hands_one_source(  # noqa: PLR0915 - protocol normalizatio
             dealer_collections_by_hand.get((table_id, hand_id), []),
         )
         evaluated_hands = evaluated_cards_by_hand.get((table_id, hand_id), set())
-        final_boards = max(
-            (extract_native_boards(snapshot, family) for snapshot in snapshots),
-            key=lambda bs: (len(bs), sum(len(b) for b in bs)),
-            default=(),
+        final_boards = merge_native_boards(
+            [extract_native_boards(snapshot, family) for snapshot in snapshots],
         )
         final_board = final_boards[0] if final_boards else ()
         showdown = _build_native_showdown(collections, evaluated_hands, final_board)
