@@ -152,9 +152,7 @@ class HudMainHudsMixin(HudMainBase):
             # still has to reach the table (#741). The signature is keyed by the
             # override name, not by the stat set object's own name attribute.
             new_stat_set = self.config.stat_sets.get(override)
-            if new_stat_set is None:
-                return False
-            if applied == (override, new_signatures.get(override)):
+            if new_stat_set is None or applied == (override, new_signatures.get(override)):
                 return False
             new_name: str | None = override
         else:

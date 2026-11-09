@@ -369,8 +369,11 @@ class fpdb(QMainWindow):
                 pending_changes = config_manager.check_pending_changes(self.config)
                 config_manager._pending_changes = pending_changes
 
-            self.save_config()
-            self.reload_config()
+            # Reload only when the write persisted: a failed save keeps the
+            # edits in memory for a retry, and reloading the unchanged file
+            # would discard them (#752).
+            if self.save_config():
+                self.reload_config()
 
     def dia_auto_note_rules(self, widget, data=None) -> None:
         """Open the automatic-note rule configuration dialog."""
@@ -473,8 +476,8 @@ class fpdb(QMainWindow):
             from fpdb_3_legacy import pt4hud
 
             summary = pt4hud.import_to_config(path, self.config)
-            self.save_config()
-            self.reload_config()
+            if self.save_config():
+                self.reload_config()
         except Exception as e:
             log.exception("Failed to import .pt4hud")
             QMessageBox.critical(self, "Import failed", f"Could not import {path}:\n{e}")
@@ -713,8 +716,8 @@ class fpdb(QMainWindow):
                 pending_changes = config_manager.check_pending_changes(self.config)
                 config_manager._pending_changes = pending_changes
 
-            self.save_config()
-            self.reload_config()
+            if self.save_config():
+                self.reload_config()
 
     def update_site_stats(self, checkboxes) -> None:
         """Update the statistics label."""
@@ -1316,8 +1319,8 @@ class fpdb(QMainWindow):
                 pending_changes = config_manager.check_pending_changes(self.config)
                 config_manager._pending_changes = pending_changes
 
-            self.save_config()
-            self.reload_config()
+            if self.save_config():
+                self.reload_config()
 
     # The following methods are now managed by ModernSitePreferences
     # but are kept for compatibility with other part of code
