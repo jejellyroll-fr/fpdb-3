@@ -197,15 +197,19 @@ class Unibet(HandHistoryConverter):
         r'Table\s"(?P<TABLE>[^"]+)"\s(?P<MAX>[0-9]+)-max',
         re.MULTILINE,
     )
-    # 2026 tournament header, e.g.:
+    # 2026 tournament header, e.g. a Power Spin:
     #   Unibet Hand #1558006464, Tournament #85614762, €0.93 + €0.07 - 25.00/50.00
     #   - No Limit Hold'Em - Total prize €4 - UTC 21:59:56 2026/06/05
+    # Regular MTTs (e.g. SPRINT, a KO format) carry no prize line:
+    #   Unibet Hand #1758650782, Tournament #99042656, €0.90 + €0.10 - 10.00/20.00
+    #   - No Limit Hold'Em - UTC 14:09:16 2026/11/09
     re_GameInfoUnibetTour = re.compile(
         r"""
           Unibet\sHand\s\#(?P<HID>[0-9]+),\sTournament\s\#(?P<TOURNO>[0-9]+),\s
           (?P<TCURRENCY>[€$£])(?P<TBUYIN>[.0-9]+)\s\+\s[€$£](?P<TFEE>[.0-9]+)\s-\s
           (?P<SB>[.0-9]+)/(?P<BB>[.0-9]+)\s-\s(?P<GAME>.+?)\s-\s
-          Total\sprize\s[€$£]?(?P<PRIZE>[.0-9]+)\s-\sUTC\s
+          (?:Total\sprize\s[€$£]?(?P<PRIZE>[.0-9]+)\s-\s)?
+          UTC\s
           (?P<DATETIME>[0-9]+:[0-9]+:[0-9]+\s[0-9]{4}/[0-9]{2}/[0-9]{2})""",
         re.MULTILINE | re.VERBOSE,
     )
@@ -372,6 +376,14 @@ class Unibet(HandHistoryConverter):
             **substitutions
         ),
         re.MULTILINE | re.VERBOSE,
+    )
+    # 2026 KO tournaments (e.g. SPRINT) state the bounty taken in the hand body:
+    #   "jejesat wins bounty, €0.23"
+    # Unlike the legacy "wins the €0.27 bounty for eliminating X" shape, no
+    # eliminated player is named, and the amount is real money, not chips.
+    re_Bounty2026 = re.compile(
+        r"^{PLYR}\swins\s(?:the\s)?bounty,\s(€|\$|£)?(?P<AMT>[,\.0-9]+)\s*$".format(**substitutions),
+        re.MULTILINE,
     )
     re_Rake = re.compile(
         r"""
@@ -1005,6 +1017,15 @@ class Unibet(HandHistoryConverter):
 
     def readTourneyResults(self, hand) -> None:
         """Reads knockout bounties and add them to the koCounts dict."""
+        ko_amounts: dict[str, int] = {}
+        for m in self.re_Bounty2026.finditer(hand.handText):
+            player = m.group("PNAME")
+            ko_amounts[player] = ko_amounts.get(player, 0) + int(round(100 * Decimal(m.group("AMT"))))
+        if ko_amounts:
+            # Called after readHandInfo, so this overrides its isKO = False:
+            # a hand that pays a bounty is a KO tournament hand.
+            hand.isKO = True
+            hand.koCounts.update(ko_amounts)
 
     def readCollectPot(self, hand) -> None:
         for m in self.re_CollectPot.finditer(hand.handText):
@@ -1025,8 +1046,34 @@ class Unibet(HandHistoryConverter):
         pass
 
     @staticmethod
-    def getTableTitleRe(type, table_name=None, tournament=None, table_number=None) -> None:
-        pass
+    def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
+        """Search string for the 2026 client's table windows.
+
+        A table window is titled e.g. "Omaha - PL5 (99465067)" for cash or
+        "0,25€ Power Spin Flash - 10/20 - Prize pool 5€ (99007080)" for a
+        tournament: the id in parentheses is the one that names the automatic
+        export file ("H20261107 T99465067 ...txt"), i.e. the cash
+        ``table_name``, or the tournament number. The lobby
+        ("Unibet Poker v3.58.0") carries no id and never matches.
+        """
+        if type == "tour":
+            table_id = tournament if tournament is not None else table_number
+        else:
+            table_id = table_name
+        if table_id is None:
+            return None
+        return rf"\({re.escape(str(table_id))}\)"
+
+    @staticmethod
+    def getTableNoRe(tournament) -> str:
+        # A 2026 tournament window's title carries an id in parentheses
+        # ("0,25€ Power Spin Flash - 10/20 - Prize pool 5€ (99007080)"), the
+        # tournament number rather than the hand's Table "..." id. Capture any
+        # id: seed_title_table_no() uses this to baseline the attach, and a
+        # later id is a real table switch. Whether the title's tournament id
+        # counts as a table *change* is decided in Table_Window's comparison,
+        # not here. Cash windows never use this pattern.
+        return r"\((\d+)\)"
 
     def readSTP(self, hand) -> None:
         """Read Splash the Pot - not implemented for Unibet."""

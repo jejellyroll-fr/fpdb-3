@@ -327,6 +327,112 @@ def test_full_import_tournament() -> None:
         Path(tmp).unlink(missing_ok=True)
 
 
+# --- 2026 regular MTT format (SPRINT, a KO tournament) ------------------------
+#
+# Unlike Power Spins, a regular MTT header carries no "Total prize" segment:
+#   Unibet Hand #1758650782, Tournament #99042656, €0.90 + €0.10 - 10.00/20.00
+#   - No Limit Hold'Em - UTC 14:09:16 2026/11/09
+# KO seats also show the player's bounty after the stack: "(470) - €0.45".
+SPRINT_SAMPLE = """=== HAND HISTORIES ===
+
+Unibet Hand #1758650782, Tournament #99042656, €0.90 + €0.10 - 10.00/20.00 - No Limit Hold'Em - UTC 14:09:16 2026/11/09
+Table "99620854" 6-max
+*** Seated players ***
+Seat 1: user92741758 (470) - €0.45 bounty
+Seat 3: villain22 (315)
+Seat 5: hero[Unibet_0123456789abcdef] (770)
+*** Blinds and button ***
+villain22 has the button
+hero[Unibet_0123456789abcdef] posts small blind 10
+user92741758 posts big blind 20
+*** Hole cards ***
+Dealt to hero[Unibet_0123456789abcdef] [8c Jc]
+Dealt to user92741758 [Qc Kh]
+Dealt in villain22
+*** Preflop ***
+villain22 folds
+hero[Unibet_0123456789abcdef] calls 10
+user92741758 checks
+*** Flop *** [4s Tc 8d]
+user92741758 checks
+hero[Unibet_0123456789abcdef] bets 20
+user92741758 calls 20
+*** Turn *** [4s Tc 8d] [Ac]
+user92741758 checks
+hero[Unibet_0123456789abcdef] bets 40
+user92741758 folds
+*** River *** [4s Tc 8d] [Ac] [9d]
+hero[Unibet_0123456789abcdef] wins 80
+hero[Unibet_0123456789abcdef] wins bounty, €0.45
+*** Summary ***
+Total pot 80
+Seat 1: user92741758: bet 40 and won 0, net result: -40
+Seat 5: hero[Unibet_0123456789abcdef]: bet 80 and won 80, net result: 0
+"""
+
+
+def test_tournament_header_without_total_prize_still_matches() -> None:
+    m = Unibet.re_GameInfoUnibetTour.search(SPRINT_SAMPLE)
+    assert m is not None
+    assert m.group("HID") == "1758650782"
+    assert m.group("TOURNO") == "99042656"
+    assert m.group("GAME") == "No Limit Hold'Em"
+    assert m.group("PRIZE") is None
+    # The Power Spin header keeps its prize captured.
+    m_spin = Unibet.re_GameInfoUnibetTour.search(TOUR_SAMPLE)
+    assert m_spin is not None
+    assert m_spin.group("PRIZE") == "4"
+
+
+def test_determine_game_type_sprint_ko_mtt() -> None:
+    parser = Unibet(Config(), autostart=False)
+    info = parser.determineGameType(SPRINT_SAMPLE)
+    assert info["type"] == "tour"
+    assert info["category"] == "holdem"
+    assert info["limitType"] == "nl"
+    assert info["currency"] == "EUR"
+    assert info["sb"] == "10.00"
+    assert info["bb"] == "20.00"
+
+
+def test_full_import_sprint_ko_mtt() -> None:
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", encoding="utf-8", delete=False) as fh:
+        fh.write(SPRINT_SAMPLE)
+        tmp = fh.name
+    try:
+        hhc = Unibet(Config(), in_path=tmp, autostart=True)
+        assert hhc.numErrors == 0
+        assert hhc.numPartial == 0
+        assert len(hhc.processedHands) == 1
+        hand = hhc.processedHands[0]
+        assert hand.handid == "1758650782"
+        assert hand.tourNo == "99042656"
+        # Tournament tables are named "<tourNo> <table id>" (Hand.py), as on
+        # every other site.
+        assert hand.tablename == "99042656 99620854"
+        assert hand.maxseats == 6
+        assert hand.buyin == 90  # €0.90 in cents
+        assert hand.fee == 10
+        assert hand.buyinCurrency == "EUR"
+        assert hand.gametype["type"] == "tour"
+        # No prize line in a regular MTT header: not filed as a spin/lottery.
+        assert not hand.isSng
+        assert not hand.isLottery
+        assert hand.hero == "hero"
+        # The KO bounty suffix on a seat line ("(470) - €0.45 bounty") does not
+        # leak into the stack: chips are read from the parentheses only.
+        assert dict((p[1], p[2]) for p in hand.players)["user92741758"] == "470"
+        # The pot taken, not the summary's "won" (which adds the uncalled bet
+        # back); the bounty line is not a pot.
+        assert hand.collected == [["hero", "80"]]
+        # "hero wins bounty, €0.45" marks the hand as a KO hand and files the
+        # bounty in koCounts (hundredths), like the other KO sites do.
+        assert hand.isKO is True
+        assert hand.koCounts == {"hero": 45}
+    finally:
+        Path(tmp).unlink(missing_ok=True)
+
+
 def test_bulk_import_2026_exports_ignore_non_hand_banner() -> None:
     config = Config()
     db_file = tempfile.NamedTemporaryFile(suffix=".sqlite3", delete=False)
@@ -412,3 +518,54 @@ def test_unibet_summary_parses_and_maps_hero() -> None:
     assert ts.ranks["hero"] == [1]
     assert ts.winnings["hero"] == [400]
     assert "Unibet_0123456789abcdef" not in ts.players
+
+
+# --- 2026 regular MTT summary (SPRINT KO) -------------------------------------
+#
+# A regular MTT summary carries no "Total Prize Pool" line, lists players still
+# in the tournament as "-: name still_playing", and appends a re-entry marker
+# "R[n]" to some names. Shape observed on the live client (anonymised):
+SPRINT_SUMMARY_SAMPLE = """Unibet Tournament #99042656, No Limit Holdem
+Buy-In: €0.90 + €0.10
+21 players
+Tournament started 2026/11/09 14:00:00 UTC
+-: Lynx-Sociable still_playing
+-: Blackasss R[1] still_playing
+-: user92741758 R[2] still_playing
+23: VidrX finished
+26: jejesat[Unibet_28204e083c0fb55a] finished
+29: BobKemper R[1] finished
+You finished in 26th place (eliminated at hand #1758674618).
+"""
+
+
+def test_unibet_summary_regular_mtt_without_prize_pool() -> None:
+    config = MagicMock()
+    config.get_import_parameters.return_value = {}
+    config.get_site_parameters.return_value = {"screen_name": "jejesat"}
+    db = MagicMock()
+    db.get_site_id.return_value = [[30]]
+
+    ts = UnibetSummary(
+        db=db, config=config, siteName="Unibet", summaryText=SPRINT_SUMMARY_SAMPLE, builtFrom="file",
+    )
+
+    assert ts.tourNo == "99042656"
+    assert ts.buyin == 90
+    assert ts.fee == 10
+    assert ts.buyinCurrency == "EUR"
+    assert ts.entries == 21
+    # No prize-pool line in a regular MTT summary; and 21 entries can never be
+    # a Power Spin, so the summary is not filed as a lottery.
+    assert ts.prizepool == 0
+    assert not ts.isSng
+    assert not ts.isLottery
+    # Finished players only: the "still_playing" rows carry no rank.
+    assert ts.ranks["VidrX"] == [23]
+    assert ts.winnings["VidrX"] == [0]
+    # The hero's token suffix is stripped, as the hand converter strips it.
+    assert ts.ranks["jejesat"] == [26]
+    # The re-entry marker "R[1]" is not part of the player name.
+    assert ts.ranks["BobKemper"] == [29]
+    assert "Lynx-Sociable" not in ts.players
+    assert "Blackasss" not in ts.players
