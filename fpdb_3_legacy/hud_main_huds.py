@@ -15,7 +15,7 @@ from PySide6.QtWidgets import QLabel
 from fpdb_3_legacy import Aux_Base, Configuration, Hud, db_profile
 from fpdb_3_legacy.hud_diagnostics import session_id
 from fpdb_3_legacy.hud_main_base import HUDCreationArgs, HudMainBase, log
-from fpdb_3_legacy.hud_profiles import HudContext, HudPositionScope
+from fpdb_3_legacy.hud_profiles import HudContext
 from fpdb_3_legacy.hud_window_registry import ClaimOutcome
 from fpdb_3_legacy.loggingFpdb import hud_trace
 from fpdb_3_legacy.SmartHudManager import RestartReason
@@ -188,23 +188,13 @@ class HudMainHudsMixin(HudMainBase):
     def _rebuild_hud_with_stat_set(hud: Hud.Hud, stat_set: Any) -> None:
         """Swap a HUD onto another profile, the way the table menu does.
 
-        The scope is recomputed with the profile because saved positions are
-        filed under it: a table that changes profile has to read the positions
-        belonging to the new one, not keep pointing at the old one's.
+        Delegates to Hud.rebuild_with_stat_set so the config poll and the
+        table menu share one rebuild: the scope is recomputed with the profile
+        because saved positions are filed under it, and the live layout is
+        reset from the shared layout set so the new profile starts from its
+        own defaults instead of the previous profile's dragged positions.
         """
-        hud.supported_games_parameters = dict(hud.supported_games_parameters)
-        hud.supported_games_parameters["game_stat_set"] = stat_set
-        hud.position_scope = HudPositionScope.from_hud(hud)
-        for aux in list(getattr(hud, "aux_windows", [])):
-            if not hasattr(aux, "refresh_stats_layout"):
-                continue  # Mucked and friends carry no stat-set layout
-            aux.game_params = stat_set
-            aux.destroy()
-            aux.refresh_stats_layout()
-            aux.create()
-            if getattr(hud, "stat_dict", None):
-                aux.update_gui(None)
-        log.info("Table %s rebuilt with HUD profile %s", getattr(hud, "table_name", "?"), stat_set.name)
+        Hud.rebuild_with_stat_set(hud, stat_set)
 
     def create_HUD(self, args: HUDCreationArgs) -> None:
         """Create a new HUD for a table.

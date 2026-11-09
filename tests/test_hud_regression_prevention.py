@@ -36,6 +36,9 @@ class TestHudRestartRegression(unittest.TestCase):
         aux_window.refresh_stats_layout = Mock()
         aux_window.stat_windows = {}
         aux_window.update = Mock()
+        # The rebuild path drives the aux windows through hud.aux_windows.
+        hud.aux_windows = [aux_window]
+        hud.supported_games_parameters = {"game_stat_set": Mock()}
 
         parent_window = Mock()
         parent_window.hud = hud
@@ -80,6 +83,8 @@ class TestHudRestartRegression(unittest.TestCase):
         hud.table.key = "test_table"
 
         aux_window = Mock()
+        hud.aux_windows = [aux_window]
+        hud.supported_games_parameters = {"game_stat_set": Mock()}
         parent_window = Mock()
         parent_window.hud = hud
         parent_window.aw = aux_window
