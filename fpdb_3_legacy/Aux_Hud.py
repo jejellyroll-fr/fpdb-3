@@ -21,8 +21,6 @@ from __future__ import annotations
 
 #    Standard Library modules
 import contextlib
-import copy
-import time
 from functools import partial
 from pathlib import Path
 from typing import Any
@@ -127,6 +125,8 @@ class HUDLayoutPositionsStore:
                 if attempt == self.SAVE_RETRIES:
                     log.exception("Error saving HUD layout positions JSON after %d attempts", attempt)
                     return False
+                import time  # local import: keeps the module's import block untouched
+
                 time.sleep(self.RETRY_DELAY_S * attempt)
             except Exception:
                 log.exception("Error saving HUD layout positions JSON")
@@ -334,7 +334,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
         # from profile A must not be written under profile B's name.
         self._dragged_block_keys: set[BlockKey] = set()
         self._dragged_classic_slots: set[Any] = set()
-        self._dragged_marks_profile: tuple[str, str, int] | None = None
+        self._dragged_marks_profile: tuple[str, str, int, str | None] | None = None
 
     @staticmethod
     def _hud_font_scale(value: Any, default: float) -> float:
@@ -848,7 +848,8 @@ class SimpleHUD(Aux_Base.AuxSeats):
         if not getattr(hud, "ref_layout_locations", None):
             location = getattr(hud.layout, "location", None)
             if location is not None:
-                hud.ref_layout_locations = copy.deepcopy(location)
+                # list() is enough: the entries are immutable (int, int) tuples
+                hud.ref_layout_locations = list(location)
         if getattr(hud, "ref_layout_common", None) is None:
             common = getattr(hud.layout, "common", None)
             if common is not None:
@@ -937,16 +938,35 @@ class SimpleHUD(Aux_Base.AuxSeats):
         """
         return getattr(getattr(self.hud, "layout_set", None), "name", "default")
 
-    def _block_profile(self) -> tuple[str, str, int]:
+    def _stat_set_signature(self) -> str | None:
+        """Content signature of the active profile, for cache invalidation.
+
+        Best-effort: a config that cannot answer just means the block-position
+        cache is keyed by name only, as before.
+        """
+        sig_fn = getattr(getattr(self, "config", None), "stat_set_signature", None)
+        if callable(sig_fn):
+            try:
+                return sig_fn(getattr(self.game_params, "name", "default"))
+            except Exception:  # intentional broad catch: signature is best-effort
+                log.debug("Could not compute the stat-set signature", exc_info=True)
+                return None
+        return None
+
+    def _block_profile(self) -> tuple[str, str, int, str | None]:
         """What a remembered block position belongs to.
 
         Block keys are (seat, block index), which mean different things under a
         different stat set: block 2 of one profile is not block 2 of another.
+        The content signature is part of the identity too, so an edit of the
+        profile that keeps its name (reordered blocks, changed offsets) still
+        invalidates positions remembered for the previous content.
         """
         return (
             self._layout_name(),
             getattr(self.game_params, "name", "default"),
             self.hud.max,
+            self._stat_set_signature(),
         )
 
     def _keep_block_positions_for_this_table(self) -> None:
@@ -964,13 +984,31 @@ class SimpleHUD(Aux_Base.AuxSeats):
         rule: what the player moved on this table stays on this table, and the
         shared store only seeds blocks this table has no position for yet.
 
-        The positions are dropped when the profile changes, since the keys no
-        longer describe the same blocks.
+        The positions are dropped when the profile changes -- by name or by
+        content -- since the keys no longer describe the same blocks.
         """
         profile = self._block_profile()
         if getattr(self, "_block_positions_profile", None) != profile or not hasattr(self, "block_positions"):
             self.block_positions: dict[BlockKey, tuple[int, int]] = {}
             self._block_positions_profile = profile
+
+    def _note_dragged(self, *, block_key: BlockKey | None = None, classic_slot: Any = None) -> None:
+        """Record an explicit drag under the current profile identity.
+
+        Marks left over from a different profile (different name or different
+        content) are dropped first, so a drag made under profile A is never
+        persisted under profile B's name by save_layout() -- which would pin
+        a computed default of B the player never customized there.
+        """
+        profile = self._block_profile()
+        if getattr(self, "_dragged_marks_profile", None) != profile:
+            self._dragged_block_keys = set()
+            self._dragged_classic_slots = set()
+            self._dragged_marks_profile = profile
+        if block_key is not None:
+            self._dragged_block_keys.add(block_key)
+        if classic_slot is not None:
+            self._dragged_classic_slots.add(classic_slot)
 
     def _canonical_for(self, key: BlockKey) -> tuple[int, int]:
         """Canonical position for a block window.
@@ -1061,11 +1099,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
         stat_set = getattr(self.game_params, "name", "default")
         game = getattr(self.hud, "poker_game", "all")
         game_type = getattr(self.hud, "game_type", "all")
-        dragged = getattr(self, "_dragged_classic_slots", None)
-        if dragged is None:
-            dragged = self._dragged_classic_slots = set()
-        dragged.add(seat)
-        self._dragged_marks_profile = self._block_profile()
+        self._note_dragged(classic_slot=seat)
         persisted = get_positions_store().set_position(
             self.hud.site,
             self._layout_name(),
@@ -1146,6 +1180,8 @@ class SimpleHUD(Aux_Base.AuxSeats):
         ref_common = getattr(self.hud, "ref_layout_common", None)
         live_locations = getattr(self.hud.layout, "location", None)
         anchor_source = ref_locations if ref_locations is not None else live_locations
+        if anchor_source is None:
+            anchor_source = [(0, 0)] * (self.hud.max + 1)
 
         x, y = ref_common if ref_common is not None else getattr(self.hud.layout, "common", (0, 0))
         self.m_windows["common"] = self.create_common(x, y)
@@ -1329,11 +1365,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
                 block_id,
             )
 
-        dragged = getattr(self, "_dragged_block_keys", None)
-        if dragged is None:
-            dragged = self._dragged_block_keys = set()
-        dragged.add((seat, block_index))
-        self._dragged_marks_profile = self._block_profile()
+        self._note_dragged(block_key=(seat, block_index))
         self.block_positions[(seat, block_index)] = (canonical_x, canonical_y)
         self._propagate_block_position(seat, block_index, (canonical_x, canonical_y))
         self._log_block_window_position(
@@ -1374,12 +1406,13 @@ class SimpleHUD(Aux_Base.AuxSeats):
         """
         if isinstance(getattr(self.hud, "position_scope", None), HudPositionScope):
             marks_current = getattr(self, "_dragged_marks_profile", None) == self._block_profile()
+            dragged_blocks: set[Any] = getattr(self, "_dragged_block_keys", set()) if marks_current else set()
+            dragged_slots: set[Any] = getattr(self, "_dragged_classic_slots", set()) if marks_current else set()
             if self._uses_block_windows():
                 store = get_positions_store()
                 stat_set = getattr(self.game_params, "name", "default")
-                dragged = getattr(self, "_dragged_block_keys", set()) if marks_current else set()
                 for (seat, block_index), position in self.block_positions.items():
-                    if (seat, block_index) not in dragged:
+                    if (seat, block_index) not in dragged_blocks:
                         continue  # not dragged: the XML default stays authoritative
                     persisted = store.set_position(
                         self.hud.site,
@@ -1396,10 +1429,9 @@ class SimpleHUD(Aux_Base.AuxSeats):
                     if not persisted:
                         log.warning("Block position %s/%s not persisted to disk", seat, block_index)
             else:
-                dragged = getattr(self, "_dragged_classic_slots", set()) if marks_current else set()
                 for display_seat, position in self.positions.items():
                     slot = "common" if display_seat == "common" else self.adj[int(display_seat)]
-                    if slot not in dragged:
+                    if slot not in dragged_slots:
                         continue  # not dragged: the XML default stays authoritative
                     if not self._persist_position_override(slot, position):
                         log.warning("Classic position for slot %s not persisted to disk", slot)

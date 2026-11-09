@@ -157,7 +157,8 @@ def test_a_resize_after_a_profile_change_scales_from_the_xml_reference() -> None
     assert hud.layout.location[3] == XML_LOCATIONS[3]
 
 
-def test_a_to_b_to_a_restores_each_profiles_own_positions(store) -> None:
+@pytest.mark.usefixtures("store")
+def test_a_to_b_to_a_restores_each_profiles_own_positions() -> None:
     """Classic HUD: A's dragged slot comes back when A is re-selected, B never sees it."""
     hud = _make_hud()
 
@@ -204,7 +205,9 @@ def test_the_table_menu_uses_the_same_rebuild(monkeypatch) -> None:
     aux = _RecordingAux(hud)
     hud.aux_windows = [aux]
     parentwin = SimpleNamespace(hud=hud, aw=aux)
-    popup = Aux_Hud.SimpleTablePopupMenu.__new__(Aux_Hud.SimpleTablePopupMenu)
+    popup = Aux_Hud.SimpleTablePopupMenu.__new__(  # pylint: disable=no-value-for-parameter
+        Aux_Hud.SimpleTablePopupMenu
+    )
     popup.parentwin = parentwin
     popup.delete_event = lambda: None
 
@@ -216,7 +219,7 @@ def test_the_table_menu_uses_the_same_rebuild(monkeypatch) -> None:
         real(h, ss)
 
     monkeypatch.setattr(Aux_Hud.Hud, "rebuild_with_stat_set", staticmethod(spy))
-    popup._update_stat_set_in_config = lambda name: _stat_set(name)
+    popup._update_stat_set_in_config = _stat_set
 
     popup.change_stat_set(0, {0: ("ProfileB", "ProfileB")})
 
@@ -274,11 +277,48 @@ def test_save_layout_ignores_drag_marks_from_another_profile(store) -> None:
     aux = _multi_block_aux(hud)
     hud.aux_windows = [aux]
     aux._dragged_block_keys = {(3, 0)}
-    aux._dragged_marks_profile = ("default", "SomeOtherProfile", MAX)
+    aux._dragged_marks_profile = ("default", "SomeOtherProfile", MAX, None)
 
     aux.save_layout()
 
     assert store.data["positions"] == {}, "a mark from profile A must not be written under B"
+
+
+def test_a_same_name_profile_edit_invalidates_the_block_position_cache() -> None:
+    """Editing a profile's content (offsets, block order) must drop remembered geometry."""
+    hud = _make_hud()
+    aux = _multi_block_aux(hud)
+    signature = {"value": "sig-v1"}
+    aux.config = SimpleNamespace(stat_set_signature=lambda name: signature["value"])
+    hud.aux_windows = [aux]
+
+    aux.block_positions = {(3, 0): (111, 222)}
+    aux._block_positions_profile = aux._block_profile()  # as a first create() would leave it
+    aux._keep_block_positions_for_this_table()
+    assert aux.block_positions == {(3, 0): (111, 222)}, "same content: the cache survives"
+
+    signature["value"] = "sig-v2"  # the profile was edited in preferences and reloaded
+    aux._keep_block_positions_for_this_table()
+    assert aux.block_positions == {}, "changed content: the cache must be dropped"
+
+
+@pytest.mark.usefixtures("store")
+def test_drag_marks_are_reset_when_the_profile_changes() -> None:
+    """A drag made under profile A must not be persisted under profile B's name."""
+    hud = _make_hud()
+    aux = _multi_block_aux(hud)
+    aux.config = SimpleNamespace(stat_set_signature=lambda name: f"sig-{name}")
+    hud.aux_windows = [aux]
+
+    aux._note_dragged(block_key=(3, 0))  # dragged under ProfileA
+    assert aux._dragged_block_keys == {(3, 0)}
+
+    aux.game_params = _stat_set("ProfileB")  # switch profile, drag another block
+    aux._note_dragged(block_key=(4, 1))
+
+    assert aux._dragged_block_keys == {(4, 1)}, "A's mark must be dropped, not relabelled as B's"
+    assert aux._dragged_marks_profile == aux._block_profile()
+    assert aux._dragged_marks_profile[1] == "ProfileB"
 
 
 def test_block_store_id_falls_back_to_the_index_and_old_entries_still_apply(store) -> None:
@@ -331,7 +371,7 @@ def test_a_failed_write_is_reported(tmp_path, monkeypatch) -> None:
     instance = _bare_store(path)
     assert instance.load() is True  # absent file is fine
 
-    monkeypatch.setattr(Aux_Hud.time, "sleep", lambda _s: None)
+    monkeypatch.setattr("time.sleep", lambda _s: None)
     monkeypatch.setattr(Aux_Hud.os, "replace", lambda *a, **k: (_ for _ in ()).throw(PermissionError("locked")))
 
     assert instance.set_position("TestSite", "default", "P", MAX, 3, "classic", 1, 2) is False
@@ -351,7 +391,7 @@ def test_retries_are_bounded(tmp_path, monkeypatch) -> None:
             raise PermissionError("locked")
         return real_replace(src, dst)
 
-    monkeypatch.setattr(Aux_Hud.time, "sleep", lambda _s: None)
+    monkeypatch.setattr("time.sleep", lambda _s: None)
     monkeypatch.setattr(Aux_Hud.os, "replace", flaky)
 
     assert instance.set_position("TestSite", "default", "P", MAX, 3, "classic", 7, 8) is True
