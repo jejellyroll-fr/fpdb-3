@@ -231,11 +231,14 @@ class TestHudStatSetSwitching(unittest.TestCase):
         # Mock aux window
         self.aux_window = Mock()
         self.aux_window.hud = self.hud
+        # The rebuild path drives the aux windows through hud.aux_windows.
+        self.hud.aux_windows = [self.aux_window]
+        self.hud.supported_games_parameters = {"game_stat_set": Mock()}
 
         # Mock parent window
         self.parent_window = Mock()
         self.parent_window.hud = self.hud
-        self.parent_window.aw = Mock()
+        self.parent_window.aw = self.aux_window
         self.parent_window.aw.game_params = Mock()
         self.parent_window.aw.refresh_stats_layout = Mock()
         self.parent_window.aw.stat_windows = {}
@@ -343,6 +346,8 @@ class TestHudRegressionPrevention(unittest.TestCase):
         parent_window.aw.stat_windows = {}
         parent_window.aw.update = Mock()
         parent_window.aw.game_params = Mock()
+        hud.aux_windows = [parent_window.aw]
+        hud.supported_games_parameters = {"game_stat_set": Mock()}
 
         popup_menu = Aux_Hud.SimpleTablePopupMenu.__new__(Aux_Hud.SimpleTablePopupMenu)
         popup_menu.parentwin = parent_window

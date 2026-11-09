@@ -40,6 +40,8 @@ class TestStatSetSwitching(unittest.TestCase):
         self.aux_window.refresh_stats_layout = Mock()
         self.aux_window.stat_windows = {1: Mock(), 2: Mock()}
         self.aux_window.update = Mock()
+        # The rebuild path drives the aux windows through hud.aux_windows.
+        self.hud.aux_windows = [self.aux_window]
 
         # Mock parent window
         self.parent_window = Mock()
@@ -321,6 +323,7 @@ class TestStatSetSwitchingIntegration(unittest.TestCase):
         hud.poker_game = "holdem"
         hud.game_type = "ring"
         hud.stat_dict = {"player1": {"vpip": 25.0}}
+        hud.supported_games_parameters = {"game_stat_set": Mock()}
 
         # Mock successful stat set change
         new_game_params = Mock()
@@ -334,6 +337,7 @@ class TestStatSetSwitchingIntegration(unittest.TestCase):
         aux_window.refresh_stats_layout = Mock()
         aux_window.stat_windows = {1: Mock(), 2: Mock()}
         aux_window.update = Mock()
+        hud.aux_windows = [aux_window]
 
         parent_window = Mock()
         parent_window.hud = hud

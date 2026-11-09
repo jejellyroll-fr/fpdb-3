@@ -288,6 +288,48 @@ class Hud:
                 log.exception("Error closing the legacy HUD database connection")
             self.db_hud_connection = None
 
+    def reset_layout_geometry(self) -> None:
+        """Rebuild the live layout from the shared layout set and re-freeze the reference.
+
+        Called when the HUD profile changes. The live ``layout`` may hold
+        positions dragged under the previous profile and dimensions already
+        scaled to the table, and ``resize_windows()`` would keep treating those
+        as the reference, so the new profile would inherit them. Drags survive
+        the reset because they are persisted in the positions store and
+        re-applied by the renderer on create().
+
+        The layout set is re-read from the config first: a reload there (HUD
+        Preferences runs in the fpdb process, this is the HUD subprocess) must
+        reach the open tables, and ``save_layout`` has to write into the live
+        DOM, not a stale one.
+        """
+        config = getattr(self, "config", None)
+        get_layout = getattr(config, "get_layout", None)
+        if callable(get_layout):
+            try:
+                fresh = get_layout(self.table.site, self.game_type)
+            except Exception:  # intentional broad catch: a config hiccup must not kill the rebuild
+                log.exception("Could not re-read the layout set for %s; keeping the current one", self.table.site)
+                fresh = None
+            if fresh is not None:
+                self.layout_set = fresh
+        shared = getattr(getattr(self, "layout_set", None), "layout", {}).get(self.max)
+        if shared is not None:
+            self.layout = copy.deepcopy(shared)
+        else:
+            log.warning(
+                "No layout for %d-max on layout set %r; keeping the current geometry",
+                self.max,
+                getattr(getattr(self, "layout_set", None), "name", "?"),
+            )
+            return
+        # Freeze the reference from the pristine layout, so a later resize
+        # scales from the XML geometry and not from already-scaled values.
+        self.ref_layout_width = self.layout.width or 792
+        self.ref_layout_height = self.layout.height or 546
+        self.ref_layout_locations = copy.deepcopy(self.layout.location)
+        self.ref_layout_common = self.layout.common
+
     def resize_windows(self) -> None:
         """Resize the windows based on the table size."""
         # resize self.layout object; this will then be picked-up
@@ -605,3 +647,36 @@ class Hud:
         except Exception:  # intentional broad catch: HUD card lookup spans DB backends.
             log.exception("Error getting cards for hand %d", hand)
             return {}
+
+
+def rebuild_with_stat_set(hud: Hud, stat_set: Any) -> None:
+    """Swap a HUD onto another profile, the way the table menu does.
+
+    Single entry point for both profile-change paths -- the config poll in
+    HUD_main and the table's own menu -- so both rebuild the geometry the same
+    way. The scope is recomputed with the profile because saved positions are
+    filed under it, and the live layout is reset from the shared layout set
+    first: a table that changes profile has to read the new profile's own
+    defaults, not keep the previous one's dragged or already-scaled positions
+    (which ``resize_windows`` would then keep treating as the reference).
+    """
+    hud.supported_games_parameters = dict(hud.supported_games_parameters or {})
+    hud.supported_games_parameters["game_stat_set"] = stat_set
+    hud.position_scope = HudPositionScope.from_hud(hud)
+    reset = getattr(hud, "reset_layout_geometry", None)
+    if callable(reset):
+        reset()
+    for aux in list(getattr(hud, "aux_windows", [])):
+        if not hasattr(aux, "refresh_stats_layout"):
+            continue  # Mucked and friends carry no stat-set layout
+        aux.game_params = stat_set
+        aux.destroy()
+        aux.refresh_stats_layout()
+        aux.create()
+        if getattr(hud, "stat_dict", None):
+            aux.update_gui(None)
+    log.info(
+        "Table %s rebuilt with HUD profile %s",
+        getattr(hud, "table_name", "?"),
+        getattr(stat_set, "name", stat_set),
+    )

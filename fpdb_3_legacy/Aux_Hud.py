@@ -21,6 +21,8 @@ from __future__ import annotations
 
 #    Standard Library modules
 import contextlib
+import copy
+import time
 from functools import partial
 from pathlib import Path
 from typing import Any
@@ -39,7 +41,7 @@ from PySide6.QtWidgets import (
 )
 
 #    FreePokerTools modules
-from fpdb_3_legacy import Aux_Base, Configuration, Popup, Stats
+from fpdb_3_legacy import Aux_Base, Configuration, Hud, Popup, Stats
 from fpdb_3_legacy.hud_options_panel import COMPACT_STYLE, HudOptionsPanel, bound_combo, fit_to_content
 from fpdb_3_legacy.hud_profiles import HudPositionScope
 from fpdb_3_legacy.i18n import gettext as _
@@ -58,28 +60,78 @@ import os
 
 
 class HUDLayoutPositionsStore:
+    """On-disk store of user-dragged HUD positions, in canonical coordinates.
+
+    Writes go through a temp file plus os.replace(), with bounded retries for
+    the transient locks Windows puts on files (antivirus, search indexer,
+    another process mid-read). Every failure is reported to the caller:
+    set_position() returns whether the write actually landed, and a file that
+    could not be parsed at load time is moved aside instead of being silently
+    overwritten by the next save, which would destroy every saved position.
+    """
+
+    SAVE_RETRIES = 3
+    RETRY_DELAY_S = 0.05
+
     def __init__(self) -> None:
         self.path = os.path.join(os.path.expanduser("~"), ".fpdb", "HUD_layout_positions.json")
         self.data: dict[str, Any] = {"version": 2, "positions": {}}
+        self.load_error = False
         self.load()
 
-    def load(self) -> None:
-        if os.path.exists(self.path):
-            try:
-                with open(self.path, encoding="utf-8") as f:
-                    self.data = json.load(f)
-            except Exception:
-                log.exception("Error loading HUD layout positions JSON")
+    def load(self) -> bool:
+        """Read the positions file. Returns False when it exists but cannot be parsed.
 
-    def save(self) -> None:
+        On failure the store stays empty but remembers the failure: save()
+        then preserves the unreadable file under a .corrupt name rather than
+        replacing it with an empty store.
+        """
+        if not os.path.exists(self.path):
+            self.load_error = False
+            return True
         try:
-            os.makedirs(os.path.dirname(self.path), exist_ok=True)
-            temp_path = self.path + ".tmp"
-            with open(temp_path, "w", encoding="utf-8") as f:
-                json.dump(self.data, f, indent=2)
-            os.replace(temp_path, self.path)
+            with open(self.path, encoding="utf-8") as f:
+                data = json.load(f)
+            if not isinstance(data, dict):
+                msg = "positions file is not a JSON object"
+                raise ValueError(msg)
+            data.setdefault("positions", {})
+            self.data = data
+            self.load_error = False
+            return True
         except Exception:
-            log.exception("Error saving HUD layout positions JSON")
+            self.load_error = True
+            log.exception("Error loading HUD layout positions JSON; the file is kept untouched")
+            return False
+
+    def save(self) -> bool:
+        """Write the store atomically. Returns True only when the file on disk holds the data."""
+        for attempt in range(1, self.SAVE_RETRIES + 1):
+            try:
+                os.makedirs(os.path.dirname(self.path), exist_ok=True)
+                if getattr(self, "load_error", False) and os.path.exists(self.path):
+                    # Never overwrite a file we could not parse: move it aside
+                    # so the positions in it stay recoverable.
+                    aside = f"{self.path}.corrupt"
+                    os.replace(self.path, aside)
+                    log.warning("Unreadable HUD layout positions file moved to %s", aside)
+                temp_path = self.path + ".tmp"
+                with open(temp_path, "w", encoding="utf-8") as f:
+                    json.dump(self.data, f, indent=2)
+                os.replace(temp_path, self.path)
+                self.load_error = False
+                return True
+            except (PermissionError, OSError):
+                # Windows locks the file transiently (antivirus, indexer, a
+                # second process reading it); retry briefly before giving up.
+                if attempt == self.SAVE_RETRIES:
+                    log.exception("Error saving HUD layout positions JSON after %d attempts", attempt)
+                    return False
+                time.sleep(self.RETRY_DELAY_S * attempt)
+            except Exception:
+                log.exception("Error saving HUD layout positions JSON")
+                return False
+        return False
 
     @staticmethod
     def _v1_key(site: str, layout: str, stat_set: str, max_seats: int, seat: str | int, block_id: str | int) -> str:
@@ -162,7 +214,8 @@ class HUDLayoutPositionsStore:
         *,
         game: str = "all",
         game_type: str = "all",
-    ) -> None:
+    ) -> bool:
+        """Record a position. Returns False when it could not be persisted."""
         if game == "all" and game_type == "all":
             # Compatibility seam for old callers and, more importantly, for
             # loading files produced by fpdb versions before scoped positions.
@@ -172,7 +225,7 @@ class HUDLayoutPositionsStore:
             key = scope.key(seat, block_id)
             self.data["version"] = 2
         self.data.setdefault("positions", {})[key] = {"x": x, "y": y}
-        self.save()
+        return self.save()
 
 
 # Block positions used to be filed under this instead of the layout set's own
@@ -273,6 +326,15 @@ class SimpleHUD(Aux_Base.AuxSeats):
 
         self._build_legacy_grid_arrays()
         self._build_block_layouts()
+
+        # Which positions the player explicitly dragged, so "Save layout"
+        # pins only those to the positions store instead of freezing every
+        # computed default (which would make later XML edits ineffective).
+        # The profile the marks were made under is remembered too: a mark
+        # from profile A must not be written under profile B's name.
+        self._dragged_block_keys: set[BlockKey] = set()
+        self._dragged_classic_slots: set[Any] = set()
+        self._dragged_marks_profile: tuple[str, str, int] | None = None
 
     @staticmethod
     def _hud_font_scale(value: Any, default: float) -> float:
@@ -687,6 +749,20 @@ class SimpleHUD(Aux_Base.AuxSeats):
         blk = self.block_layouts[block_index]
         return int(blk.get("x", 0) or 0), int(blk.get("y", 0) or 0)
 
+    def _block_store_id(self, block_index: int) -> str | int:
+        """Stable store identity of a block: its configured ``id`` when it has
+        one, else its index.
+
+        The index is only a fallback: a profile that is edited without being
+        renamed can reorder or delete its blocks, and an index-keyed position
+        would then land on a different panel. Blocks without an id keep the
+        historical index behaviour.
+        """
+        blocks = getattr(self, "block_layouts", None) or []
+        if not isinstance(block_index, int) or block_index >= len(blocks):
+            return block_index
+        return blocks[block_index].get("id") or block_index
+
     def _hero_display_seat(self) -> int | None:
         fav_seat = self.hud.site_parameters["fav_seat"].get(self.hud.max, 0)
         for key in self.hud.stat_dict:
@@ -757,14 +833,26 @@ class SimpleHUD(Aux_Base.AuxSeats):
     # layout size), a resize A->B->A round-trips a window back to exactly A.
 
     def _ensure_reference(self) -> None:
-        """Freeze the reference layout size once, from the config layout.
+        """Freeze the reference layout geometry once, from the config layout.
 
         Shared with Hud.resize_windows via hud.ref_layout_*, so both the resize
-        path and the block windows divide by the same stable denominator.
+        path and the block windows divide by the same stable denominator. The
+        locations and common are frozen too (not just the size), so seat anchors
+        read back from ref_layout_locations stay in the unscaled reference space
+        even after the live layout has been scaled or dragged.
         """
-        if not getattr(self.hud, "ref_layout_width", None):
-            self.hud.ref_layout_width = self.hud.layout.width or 792
-            self.hud.ref_layout_height = self.hud.layout.height or 546
+        hud = self.hud
+        if not getattr(hud, "ref_layout_width", None):
+            hud.ref_layout_width = getattr(hud.layout, "width", None) or 792
+            hud.ref_layout_height = getattr(hud.layout, "height", None) or 546
+        if not getattr(hud, "ref_layout_locations", None):
+            location = getattr(hud.layout, "location", None)
+            if location is not None:
+                hud.ref_layout_locations = copy.deepcopy(location)
+        if getattr(hud, "ref_layout_common", None) is None:
+            common = getattr(hud.layout, "common", None)
+            if common is not None:
+                hud.ref_layout_common = common
 
     @property
     def scale_factors(self) -> tuple[float, float]:
@@ -902,7 +990,12 @@ class SimpleHUD(Aux_Base.AuxSeats):
         return self._default_canonical(key)
 
     def _stored_position(self, seat: int | str, block_index: int) -> tuple[int, int] | None:
-        """A block's saved position, if one was ever saved."""
+        """A block's saved position, if one was ever saved.
+
+        Looked up under the block's stable id when it has one, with the
+        historical index-keyed entry as a read-only fallback so positions
+        saved before a block gained its id still apply.
+        """
         game = getattr(self.hud, "poker_game", "all")
         game_type = getattr(self.hud, "game_type", "all")
         kwargs = {
@@ -910,18 +1003,26 @@ class SimpleHUD(Aux_Base.AuxSeats):
             "game_type": game_type if isinstance(game_type, str) else "all",
         }
         store = get_positions_store()
+        block_id = self._block_store_id(block_index)
         args = (
             self.hud.site,
             self._layout_name(),
             getattr(self.game_params, "name", "default"),
             self.hud.max,
             seat,
-            block_index,
+            block_id,
         )
         try:
-            return store.get_position(*args, **kwargs)  # type: ignore[arg-type]
+            position = store.get_position(*args, **kwargs)  # type: ignore[arg-type]
         except TypeError:
-            return store.get_position(*args)
+            position = store.get_position(*args)
+        if position is None and block_id != block_index:
+            args = (*args[:5], block_index)
+            try:
+                position = store.get_position(*args, **kwargs)  # type: ignore[arg-type]
+            except TypeError:
+                position = store.get_position(*args)
+        return position
 
     def _claim_legacy_block_positions(self) -> None:
         """Take over the blocks saved before layouts were told apart.
@@ -948,7 +1049,11 @@ class SimpleHUD(Aux_Base.AuxSeats):
             log.info("Moved %d saved block position(s) onto layout %s", moved, layout_name)
 
     def _persist_position_override(self, seat: Any, position: tuple[int, int]) -> bool:
-        """Persist classic HUD drags in the same scoped v2 store as blocks."""
+        """Persist classic HUD drags in the same scoped v2 store as blocks.
+
+        Returns whether the write landed on disk; False lets the base class
+        fall back to writing the shared XML layout instead of losing the drag.
+        """
         if self._uses_block_windows():
             return False
         shared = getattr(getattr(self.hud, "layout_set", None), "layout", {}).get(self.hud.max)
@@ -956,7 +1061,12 @@ class SimpleHUD(Aux_Base.AuxSeats):
         stat_set = getattr(self.game_params, "name", "default")
         game = getattr(self.hud, "poker_game", "all")
         game_type = getattr(self.hud, "game_type", "all")
-        get_positions_store().set_position(
+        dragged = getattr(self, "_dragged_classic_slots", None)
+        if dragged is None:
+            dragged = self._dragged_classic_slots = set()
+        dragged.add(seat)
+        self._dragged_marks_profile = self._block_profile()
+        persisted = get_positions_store().set_position(
             self.hud.site,
             self._layout_name(),
             stat_set,
@@ -968,10 +1078,18 @@ class SimpleHUD(Aux_Base.AuxSeats):
             game=game if isinstance(game, str) else "all",
             game_type=game_type if isinstance(game_type, str) else "all",
         )
-        return True
+        if not persisted:
+            log.warning("Classic HUD position for seat %s kept in memory but not persisted to disk", seat)
+        return persisted
 
     def _apply_classic_position_overrides(self) -> None:
-        """Overlay scoped user positions on top of the shipped XML layout."""
+        """Overlay scoped user positions on top of the shipped XML layout.
+
+        The overrides are written into the frozen reference as well as the
+        live layout: Hud.resize_windows() rebuilds layout.location from
+        ref_layout_locations, so an override present only in the live layout
+        would be wiped by the next table move/resize.
+        """
         store = get_positions_store()
         stat_set = getattr(self.game_params, "name", "default")
         game = getattr(self.hud, "poker_game", "all")
@@ -980,21 +1098,30 @@ class SimpleHUD(Aux_Base.AuxSeats):
             "game": game if isinstance(game, str) else "all",
             "game_type": game_type if isinstance(game_type, str) else "all",
         }
+        ref_locations = getattr(self.hud, "ref_layout_locations", None)
         for seat in range(1, self.hud.max + 1):
             position = store.get_position(
                 self.hud.site, self._layout_name(), stat_set, self.hud.max, seat, "classic", **kwargs
             )
             if position is not None:
                 self.hud.layout.location[seat] = position
+                if ref_locations is not None and 0 <= seat < len(ref_locations):
+                    ref_locations[seat] = position
         common = store.get_position(
             self.hud.site, self._layout_name(), stat_set, self.hud.max, "common", "classic", **kwargs
         )
         if common is not None:
             self.hud.layout.common = common
+            if getattr(self.hud, "ref_layout_common", None) is not None:
+                self.hud.ref_layout_common = common
 
     def create(self) -> None:
         """Create classic one-window seats or PT4-style one-window-per-block seats."""
         if not self._uses_block_windows():
+            # Freeze the reference before scaling anything, so the JSON
+            # overrides below land in both the live layout and the frozen
+            # reference that resize_windows() rebuilds from.
+            self._ensure_reference()
             self._apply_classic_position_overrides()
             super().create()
             return
@@ -1008,19 +1135,25 @@ class SimpleHUD(Aux_Base.AuxSeats):
         self._discard_previous_windows()
         self._keep_block_positions_for_this_table()
         self._claim_legacy_block_positions()
-        # Unscaled reference seat anchors, captured once. Kept separate from the
-        # live layout.location (which Hud.resize_windows rescales) so canonical
-        # defaults stay stable across resizes.
+        # Unscaled reference seat anchors, captured once. Read from the frozen
+        # reference (not the live layout.location, which resize_windows
+        # rescales) so canonical defaults stay stable across resizes and
+        # rebuilds -- reading them off the live layout after a resize made a
+        # rebuild apply the scale factor a second time.
         self._seat_anchor_ref: dict[int, tuple[int, int]] = {}
         self._ensure_reference()
+        ref_locations = getattr(self.hud, "ref_layout_locations", None)
+        ref_common = getattr(self.hud, "ref_layout_common", None)
+        live_locations = getattr(self.hud.layout, "location", None)
+        anchor_source = ref_locations if ref_locations is not None else live_locations
 
-        x, y = self.hud.layout.common
+        x, y = ref_common if ref_common is not None else getattr(self.hud.layout, "common", (0, 0))
         self.m_windows["common"] = self.create_common(x, y)
         self.hud.layout.common = self.create_scale_position(x, y)
 
         # Create player seat windows
         for seat in range(1, self.hud.max + 1):
-            anchor = self.hud.layout.location[self.adj[seat]]
+            anchor = anchor_source[self.adj[seat]]
             self._seat_anchor_ref[seat] = anchor
             self.positions[seat] = self.create_scale_position(*anchor)
             for block_index, blk in enumerate(self.block_layouts):
@@ -1179,16 +1312,28 @@ class SimpleHUD(Aux_Base.AuxSeats):
         stat_set = getattr(self.game_params, "name", "default")
         game = getattr(self.hud, "poker_game", "all")
         game_type = getattr(self.hud, "game_type", "all")
-        args = (self.hud.site, layout_name, stat_set, self.hud.max, seat, block_index, canonical_x, canonical_y)
+        block_id = self._block_store_id(block_index)
+        args = (self.hud.site, layout_name, stat_set, self.hud.max, seat, block_id, canonical_x, canonical_y)
         kwargs = {
             "game": game if isinstance(game, str) else "all",
             "game_type": game_type if isinstance(game_type, str) else "all",
         }
         try:
-            store.set_position(*args, **kwargs)  # type: ignore[arg-type]
+            persisted = store.set_position(*args, **kwargs)  # type: ignore[arg-type]
         except TypeError:
-            store.set_position(*args)
+            persisted = store.set_position(*args)
+        if not persisted:
+            log.warning(
+                "Block position for seat %s block %r kept in memory but not persisted to disk",
+                seat,
+                block_id,
+            )
 
+        dragged = getattr(self, "_dragged_block_keys", None)
+        if dragged is None:
+            dragged = self._dragged_block_keys = set()
+        dragged.add((seat, block_index))
+        self._dragged_marks_profile = self._block_profile()
         self.block_positions[(seat, block_index)] = (canonical_x, canonical_y)
         self._propagate_block_position(seat, block_index, (canonical_x, canonical_y))
         self._log_block_window_position(
@@ -1219,30 +1364,45 @@ class SimpleHUD(Aux_Base.AuxSeats):
     def save_layout(self, *_args: Any) -> None:
         """Save the current HUD layout configuration.
 
-        This method saves the positions of all HUD elements for the current table layout to the configuration.
+        Only positions the player actually dragged are pinned to the positions
+        store: writing every computed default would freeze them into the JSON,
+        after which edits of the XML offsets would never show up. Profile
+        definitions (block x/y offsets) are deliberately NOT rewritten here --
+        they belong to the profile in HUD_config.xml, and the renderer's
+        block_layouts never change, so rewriting them could only resurrect
+        stale values over newer XML edits.
         """
         if isinstance(getattr(self.hud, "position_scope", None), HudPositionScope):
+            marks_current = getattr(self, "_dragged_marks_profile", None) == self._block_profile()
             if self._uses_block_windows():
                 store = get_positions_store()
                 stat_set = getattr(self.game_params, "name", "default")
+                dragged = getattr(self, "_dragged_block_keys", set()) if marks_current else set()
                 for (seat, block_index), position in self.block_positions.items():
-                    store.set_position(
+                    if (seat, block_index) not in dragged:
+                        continue  # not dragged: the XML default stays authoritative
+                    persisted = store.set_position(
                         self.hud.site,
                         self._layout_name(),
                         stat_set,
                         self.hud.max,
                         seat,
-                        block_index,
+                        self._block_store_id(block_index),
                         position[0],
                         position[1],
                         game=self.hud.poker_game,
                         game_type=self.hud.game_type,
                     )
+                    if not persisted:
+                        log.warning("Block position %s/%s not persisted to disk", seat, block_index)
             else:
+                dragged = getattr(self, "_dragged_classic_slots", set()) if marks_current else set()
                 for display_seat, position in self.positions.items():
                     slot = "common" if display_seat == "common" else self.adj[int(display_seat)]
-                    self._persist_position_override(slot, position)
-            self._save_block_offsets()
+                    if slot not in dragged:
+                        continue  # not dragged: the XML default stays authoritative
+                    if not self._persist_position_override(slot, position):
+                        log.warning("Classic position for slot %s not persisted to disk", slot)
             log.info("Scoped HUD layout saved successfully")
             return
 
@@ -1255,21 +1415,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
             self.hud.table.width,
             self.hud.table.height,
         )
-        self._save_block_offsets()
         log.info("Layout saved successfully")
-
-    def _save_block_offsets(self) -> None:
-        if not self._uses_block_windows():
-            return
-        stat_set_node = self.config.get_stat_set_node(self.game_params.name)
-        if stat_set_node is None:
-            return
-        block_nodes = stat_set_node.getElementsByTagName("block")
-        for idx, block_node in enumerate(block_nodes):
-            if idx >= len(self.block_layouts):
-                break
-            block_node.setAttribute("x", str(int(self.block_layouts[idx].get("x", 0) or 0)))
-            block_node.setAttribute("y", str(int(self.block_layouts[idx].get("y", 0) or 0)))
 
 
 class SimpleStatWindow(Aux_Base.SeatWindow):
@@ -2100,12 +2246,10 @@ class SimpleTablePopupMenu(QWidget):
         self.delete_event()
 
         try:
-            self.parentwin.aw.game_params = new_game_params
-            self.parentwin.aw.destroy()
-            self.parentwin.aw.refresh_stats_layout()
-            self.parentwin.aw.create()
-            if hasattr(self.parentwin.hud, "stat_dict"):
-                self.parentwin.aw.update_gui(None)
+            # One rebuild path for the table menu and the config poll alike:
+            # it recomputes the position scope, resets the layout geometry
+            # from the shared layout set, and recreates the aux windows.
+            Hud.rebuild_with_stat_set(self.parentwin.hud, new_game_params)
             log.info("HUD rebuilt with new stat set: %s", new_stat_set)
         except Exception as e:  # intentional broad catch: switch fallback must leave no duplicate windows.
             log.info("Rebuilding HUD failed, restarting to apply stat set '%s': %s", new_stat_set, e)
