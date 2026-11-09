@@ -242,6 +242,10 @@ class Hand:
         self.collected: list[Any] = []
         self.collectees: dict[str, Decimal] = {}
         self.koCounts: dict[str, int] = {}
+        # Bounty money actually won, in hundredths -- kept apart from koCounts
+        # (a knockout *count*): reports read koWinnings first and fall back to
+        # koCount * koBounty, so mixing the two double-counts or loses the money.
+        self.koWinnings: dict[str, int] = {}
         self.endBounty: dict[str, Decimal] = {}
 
         # Sets of players

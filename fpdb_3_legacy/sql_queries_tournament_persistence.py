@@ -100,6 +100,15 @@ def tournament_persistence_queries(db_server: str = "") -> dict[str, str]:
                                              WHERE id=%s
     """
 
+    # Same additive shape as updateTourneysPlayerBounties, for the money side:
+    # koWinnings holds bounty winnings in hundredths (the reports coalesce it
+    # ahead of koCount * koBounty), and a hand that states the amount won --
+    # e.g. Unibet 2026 "wins bounty, €0.23" -- is where that money is known.
+    query["updateTourneysPlayerKoWinnings"] = """UPDATE TourneysPlayers
+                                             SET koWinnings = case when koWinnings is null then %s else koWinnings+%s end
+                                             WHERE id=%s
+    """
+
     # A summary's bounty total covers the player's whole tournament (#447): once one entry has
     # it, their other entries hold no bounty money of their own, so koCount x koBounty is not
     # added on top. Two statements because MySQL cannot select from the table it updates.

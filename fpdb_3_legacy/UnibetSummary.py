@@ -85,12 +85,14 @@ class UnibetSummary(TourneySummary):
 
     # The importer splits the file on "Unibet Tournament #" (see getSplitRe), so
     # each summary text starts at the tournament number.
+    # Regular MTTs (e.g. SPRINT KO) carry no "Total Prize Pool" line, and their
+    # still-playing rows ("-: name still_playing") never match re_player.
     re_tourney_info = re.compile(
         r"""
           (?:Unibet\sTournament\s\#)?(?P<TOURNO>[0-9]+),\s(?P<GAME>[^\n]+?)\s*\n
           Buy-In:\s(?P<CURRENCY>[€$£])(?P<BUYIN>[.0-9]+)\s\+\s[€$£](?P<FEE>[.0-9]+)\s*\n
           (?P<ENTRIES>[0-9]+)\splayers\s*\n
-          Total\sPrize\sPool:\s[€$£](?P<PRIZEPOOL>[.0-9]+)\s*\n
+          (?:Total\sPrize\sPool:\s[€$£](?P<PRIZEPOOL>[.0-9]+)\s*\n)?
           Tournament\sstarted\s(?P<DATETIME>[0-9]{4}/[0-9]{2}/[0-9]{2}\s[0-9]+:[0-9]+:[0-9]+)\sUTC
         """,
         re.VERBOSE | re.MULTILINE,
@@ -99,6 +101,9 @@ class UnibetSummary(TourneySummary):
         r"^(?P<RANK>[0-9]+):\s(?P<PNAME>.+?)\sfinished(\s(?P<CURRENCY>[€$£])(?P<WINNINGS>[.0-9]+))?\s*$",
         re.MULTILINE,
     )
+    # Re-entry marker a KO summary appends to a player's name ("BobKemper R[1]"):
+    # it is not part of the name the hand histories use.
+    re_RebuySuffix = re.compile(r"\s+R\[\d+\]$")
     re_hero_finished = re.compile(r"You\sfinished\sin\s(?P<RANK>[0-9]+)(?:st|nd|rd|th)\splace")
 
     def getSplitRe(self, head: str) -> re.Pattern[str]:
@@ -137,7 +142,8 @@ class UnibetSummary(TourneySummary):
         self.buyinCurrency = self.currencies.get(mg["CURRENCY"], "EUR")
         self.currency = self.buyinCurrency
         self.entries = int(mg["ENTRIES"])
-        self.prizepool = int(round(100 * Decimal(mg["PRIZEPOOL"])))
+        # Regular MTT summaries state no prize pool; it stays 0 then.
+        self.prizepool = int(round(100 * Decimal(mg["PRIZEPOOL"]))) if mg["PRIZEPOOL"] else 0
         multiplier = power_spin_multiplier(self.entries, self.buyin, self.fee, self.prizepool)
         if multiplier is not None:
             self.isSng = True
@@ -154,7 +160,7 @@ class UnibetSummary(TourneySummary):
         for pm in self.re_player.finditer(self.summaryText):
             pmg = pm.groupdict()
             rank = int(pmg["RANK"])
-            name = pmg["PNAME"].strip()
+            name = self.re_RebuySuffix.sub("", pmg["PNAME"].strip())
             # The hero appears as a bare "Unibet_<id>" token; map it to the
             # configured screen name so it matches the hand-history hero.
             if hero_name and self.re_HeroToken.match(name):

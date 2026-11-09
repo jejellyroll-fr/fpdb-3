@@ -7,7 +7,7 @@ from fpdb_3_legacy.sql_queries_tournament_persistence import tournament_persiste
 def test_tournament_persistence_queries_are_installed_with_sqlite_placeholders() -> None:
     for backend in ("mysql", "postgresql"):
         expected = tournament_persistence_queries(backend)
-        assert len(expected) == 21
+        assert len(expected) == 22
         assert expected.items() <= Sql(db_server=backend).query.items()
     expected = tournament_persistence_queries("sqlite")
     sqlite_expected = {key: value.replace("%s", "?") for key, value in expected.items()}
@@ -21,6 +21,8 @@ def test_tournament_persistence_keeps_results_and_bounties() -> None:
         assert column in queries["updateTourneysPlayer"]
         assert column in queries["insertTourneysPlayer"]
     assert "koCount = case when koCount is null" in queries["updateTourneysPlayerBounties"]
+    # The money side of a hand-stated bounty rides the same additive shape.
+    assert "koWinnings = case when koWinnings is null" in queries["updateTourneysPlayerKoWinnings"]
     assert "COALESCE(%s, rank)" in queries["updateTourneysPlayerResults"]
 
 

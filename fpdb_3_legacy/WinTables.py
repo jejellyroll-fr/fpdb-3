@@ -158,6 +158,12 @@ class Table(Table_Window):
         search on the client name and filter the matches afterwards.
         """
         search_str = self.search_string
+        if not search_str:
+            # A converter whose getTableTitleRe is a stub (or failed to build
+            # one) leaves search_string None/empty: match nothing rather than
+            # crash on the substring tests below.
+            log.warning("No search string for site %r; cannot detect the table window.", getattr(self, "site", None))
+            return ""
         if "Winamax" in search_str:
             log.debug("Winamax detected, adjusted search string to: Winamax")
             return "Winamax"
@@ -282,7 +288,9 @@ class Table(Table_Window):
                     return
 
         search_str = self._detection_search_string()
-        tables = self._detector.find_tables(search_str)
+        # An empty search string would compile to a pattern that matches every
+        # visible window; treat it as "no candidates" instead.
+        tables = self._detector.find_tables(search_str) if search_str else []
         log.debug("Found %d matching windows", len(tables))
 
         match = self._select_window(tables, search_str)

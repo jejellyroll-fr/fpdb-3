@@ -682,10 +682,19 @@ class DatabaseTournamentsMixin:
             "%s",
             self.sql.query["placeholder"],
         )
+        ko_winnings_query = self.sql.query["updateTourneysPlayerKoWinnings"].replace(
+            "%s",
+            self.sql.query["placeholder"],
+        )
         result_query = self.sql.query["updateTourneysPlayerResults"].replace(
             "%s",
             self.sql.query["placeholder"],
         )
+        # koCounts is a knockout count; the money a hand states goes to
+        # koWinnings, which the profit queries read first (COALESCE ahead of
+        # koCount * koBounty). getattr: older callers build hand stand-ins
+        # without the attribute.
+        hand_ko_winnings = getattr(hand, "koWinnings", {})
         for player, tourneysPlayersId in list(hand.tourneysPlayersIds.items()):
             if player in hand.koCounts:
                 cursor.execute(
@@ -694,6 +703,12 @@ class DatabaseTournamentsMixin:
                 )
                 if hand.tourneyId is not None and player in hand.playerIds:
                     self._settle_bounty_money(cursor, hand.tourneyId, hand.playerIds[player])
+                updateDb = True
+            if player in hand_ko_winnings:
+                cursor.execute(
+                    ko_winnings_query,
+                    (hand_ko_winnings[player], hand_ko_winnings[player], tourneysPlayersId),
+                )
                 updateDb = True
             if player in getattr(hand, "tourneyRanks", {}):
                 winnings = getattr(hand, "tourneyWinnings", {}).get(player)

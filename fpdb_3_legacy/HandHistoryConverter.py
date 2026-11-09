@@ -1141,7 +1141,14 @@ def getTableTitleRe(config, sitename, *args, **kwargs):
         filtered_kwargs = kwargs
     else:
         filtered_kwargs = {k: v for k, v in kwargs.items() if k in sig.parameters}
-    return func(*args, **filtered_kwargs)
+    result = func(*args, **filtered_kwargs)
+    if result is None:
+        # A converter that stubs getTableTitleRe returns None; leaving that
+        # None in Table_Window.search_string crashes window detection later
+        # (e.g. "x in None"). Fall back to the table/tournament id instead.
+        fallback = kwargs.get("table_name") or kwargs.get("tournament") or ""
+        return re.escape(str(fallback))
+    return result
 
 
 def getTableNoRe(config, sitename, *args, **kwargs):
