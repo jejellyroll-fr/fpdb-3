@@ -356,6 +356,110 @@ def test_table_stat_set_override_is_scoped_by_table_and_game(hud_main) -> None:
     assert hud_main.get_table_stat_set_override("table-a", "omahahi", "ring") is None
 
 
+def _ss_doc(stat_xml: str, *, profile: str = "ProfileA", extra: str = ""):
+    from xml.dom import minidom
+
+    return minidom.parseString(
+        "<FreePokerToolsConfig><stat_sets>"
+        f'<ss name="{profile}" rows="5" cols="5">{stat_xml}</ss>'
+        f"</stat_sets>{extra}</FreePokerToolsConfig>"
+    )
+
+
+def _profile_refresh_setup(hud_main, monkeypatch, tmp_path, *, old_doc, new_doc, resolved_name="ProfileA"):
+    """Point the hud_main fixture at two DOMs; reload swaps one for the other."""
+    cfg_file = tmp_path / "HUD_config.xml"
+    cfg_file.write_text("<FreePokerToolsConfig/>", encoding="utf-8")
+    hud_main.config.doc = old_doc
+    hud_main.config.file = str(cfg_file)
+    hud_main._theme_manager = None
+    hud_main._config_fingerprint = None
+    stat_set = SimpleNamespace(name=resolved_name)
+    hud_main.config.stat_sets = {resolved_name: stat_set}
+    hud_main.config.get_supported_games_parameters.return_value = {"game_stat_set": stat_set}
+
+    def fake_reload():
+        hud_main.config.doc = new_doc
+        return True
+
+    hud_main.config.reload = fake_reload
+
+    rebuilt: list[str] = []
+    monkeypatch.setattr(hud_main, "_rebuild_hud_with_stat_set", lambda _hud, ss: rebuilt.append(ss.name))
+    return rebuilt, stat_set
+
+
+def _table_hud(temp_key: str = "t1", profile_name: str = "ProfileA") -> SimpleNamespace:
+    return SimpleNamespace(
+        hud_context=object(),
+        table=SimpleNamespace(key=temp_key),
+        supported_games_parameters={"game_stat_set": SimpleNamespace(name=profile_name)},
+        poker_game="holdem",
+        game_type="ring",
+    )
+
+
+def test_refresh_rebuilds_when_profile_content_changes_under_the_same_name(hud_main, monkeypatch, tmp_path) -> None:
+    # #741: same profile name, edited content -- the table must be rebuilt.
+    old_doc = _ss_doc('<stat row="0" col="0" stat_name="vpip"/>')
+    new_doc = _ss_doc('<stat row="0" col="0" stat_name="pfr"/>')
+    rebuilt, _ss = _profile_refresh_setup(hud_main, monkeypatch, tmp_path, old_doc=old_doc, new_doc=new_doc)
+    hud_main.hud_dict = {"t1": _table_hud()}
+
+    assert hud_main.refresh_profiles_from_config() == 1
+    assert rebuilt == ["ProfileA"]
+
+
+def test_refresh_ignores_layout_only_writes(hud_main, monkeypatch, tmp_path) -> None:
+    # A layout write does not touch <ss>, so no table is rebuilt.
+    ss = '<stat row="0" col="0" stat_name="vpip"/>'
+    old_doc = _ss_doc(ss)
+    new_doc = _ss_doc(ss, extra="<layout_sets><ls name='l' x='1' y='2'/></layout_sets>")
+    rebuilt, _ss = _profile_refresh_setup(hud_main, monkeypatch, tmp_path, old_doc=old_doc, new_doc=new_doc)
+    hud_main.hud_dict = {"t1": _table_hud()}
+
+    assert hud_main.refresh_profiles_from_config() == 0
+    assert rebuilt == []
+
+
+def test_refresh_rebuilds_when_the_profile_name_changes(hud_main, monkeypatch, tmp_path) -> None:
+    old_doc = _ss_doc('<stat row="0" col="0" stat_name="vpip"/>', profile="ProfileA")
+    new_doc = _ss_doc('<stat row="0" col="0" stat_name="vpip"/>', profile="ProfileB")
+    rebuilt, _ss = _profile_refresh_setup(
+        hud_main, monkeypatch, tmp_path, old_doc=old_doc, new_doc=new_doc, resolved_name="ProfileB"
+    )
+    hud_main.hud_dict = {"t1": _table_hud(profile_name="ProfileA")}
+
+    assert hud_main.refresh_profiles_from_config() == 1
+    assert rebuilt == ["ProfileB"]
+
+
+def test_refresh_rebuilds_an_overridden_table_when_its_profile_content_changes(hud_main, monkeypatch, tmp_path) -> None:
+    # #741: a table whose profile was picked from the table menu keeps that
+    # profile, but a content edit of it in the file still reaches the table.
+    old_doc = _ss_doc('<stat row="0" col="0" stat_name="vpip"/>')
+    new_doc = _ss_doc('<stat row="0" col="1" stat_name="vpip"/>')
+    rebuilt, _ss = _profile_refresh_setup(hud_main, monkeypatch, tmp_path, old_doc=old_doc, new_doc=new_doc)
+    hud_main.set_table_stat_set_override("t1", "holdem", "ring", "ProfileA")
+    hud_main.config.get_supported_games_parameters.return_value = {}  # rules must not override the menu choice
+    hud_main.hud_dict = {"t1": _table_hud()}
+
+    assert hud_main.refresh_profiles_from_config() == 1
+    assert rebuilt == ["ProfileA"]
+
+
+def test_refresh_leaves_an_overridden_table_alone_when_content_is_unchanged(hud_main, monkeypatch, tmp_path) -> None:
+    ss = '<stat row="0" col="0" stat_name="vpip"/>'
+    old_doc = _ss_doc(ss)
+    new_doc = _ss_doc(ss, extra="<layout_sets><ls name='l' x='1' y='2'/></layout_sets>")
+    rebuilt, _ss = _profile_refresh_setup(hud_main, monkeypatch, tmp_path, old_doc=old_doc, new_doc=new_doc)
+    hud_main.set_table_stat_set_override("t1", "holdem", "ring", "ProfileA")
+    hud_main.hud_dict = {"t1": _table_hud()}
+
+    assert hud_main.refresh_profiles_from_config() == 0
+    assert rebuilt == []
+
+
 # Ensures that the handle_message method correctly calls read_stdin when provided with a hand ID.
 def test_handle_message(hud_main) -> None:
     """A hand is held for the batch rather than processed where it arrives."""

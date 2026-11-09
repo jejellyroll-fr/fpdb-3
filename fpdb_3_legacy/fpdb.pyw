@@ -369,7 +369,7 @@ class fpdb(QMainWindow):
                 pending_changes = config_manager.check_pending_changes(self.config)
                 config_manager._pending_changes = pending_changes
 
-            self.config.save()
+            self.save_config()
             self.reload_config()
 
     def dia_auto_note_rules(self, widget, data=None) -> None:
@@ -436,7 +436,9 @@ class fpdb(QMainWindow):
                 pending_changes = config_manager.check_pending_changes(self.config)
                 config_manager._pending_changes = pending_changes
 
-            self.config.save()
+            # No second save here: save_changes already persisted the dialog's
+            # DOM, and writing again from a config that reload_config is about
+            # to replace would risk rewriting a stale DOM (#741).
             self.reload_config()
 
     def dia_hud_options(self, widget, data=None) -> None:
@@ -447,7 +449,7 @@ class fpdb(QMainWindow):
         dia = HudOptionsDialog(self.config.get_hud_ui_parameters(), self)
         if dia.exec():
             self.config.set_hud_ui_parameters(dia.option_values())
-            self.config.save()
+            self.save_config()
         dia.deleteLater()
 
     def dia_import_pt4hud(self, widget, data=None) -> None:
@@ -471,7 +473,7 @@ class fpdb(QMainWindow):
             from fpdb_3_legacy import pt4hud
 
             summary = pt4hud.import_to_config(path, self.config)
-            self.config.save()
+            self.save_config()
             self.reload_config()
         except Exception as e:
             log.exception("Failed to import .pt4hud")
@@ -711,7 +713,7 @@ class fpdb(QMainWindow):
                 pending_changes = config_manager.check_pending_changes(self.config)
                 config_manager._pending_changes = pending_changes
 
-            self.config.save()
+            self.save_config()
             self.reload_config()
 
     def update_site_stats(self, checkboxes) -> None:
@@ -952,7 +954,7 @@ class fpdb(QMainWindow):
                 if cb.isChecked():
                     filterGames.append(game)
             self.config.editImportFilters(",".join(filterGames))
-            self.config.save()
+            self.save_config()
 
     def dia_dump_db(self, widget, data=None) -> None:
         filename = "database-dump.sql"
@@ -1314,7 +1316,7 @@ class fpdb(QMainWindow):
                 pending_changes = config_manager.check_pending_changes(self.config)
                 config_manager._pending_changes = pending_changes
 
-            self.config.save()
+            self.save_config()
             self.reload_config()
 
     # The following methods are now managed by ModernSitePreferences
@@ -1325,22 +1327,30 @@ class fpdb(QMainWindow):
         checkbox.setChecked(True)
 
     def reload_hud_displays(self) -> None:
-        """Reloads all active HUD displays."""
-        log.info("Reloading all active HUD displays...")
-        reloaded_huds = 0
-        for thread in self.threads:
-            if isinstance(thread, GuiAutoImport.GuiAutoImport):
-                try:
-                    thread.reload_hud_config()
-                    reloaded_huds += 1
-                except Exception as e:
-                    log.error(f"Error reloading HUD in thread {thread}: {e}", exc_info=True)
+        """Tell the user that HUD displays pick up config changes on their own.
 
-        if reloaded_huds > 0:
-            log.info(f"Successfully reloaded {reloaded_huds} HUD displays.")
-            self.statusBar().showMessage(f"{reloaded_huds} HUD displays reloaded", 3000)
-        else:
-            log.info("No active HUD displays found to reload.")
+        The HUD subprocesses poll HUD_config.xml (fingerprint check with the
+        tables) and rebuild the affected tables themselves, so there is no
+        per-thread entry point to call here; reload_hud_config() never existed
+        on GuiAutoImport and only logged an AttributeError (#741).
+        """
+        log.info("HUD displays reload HUD_config.xml changes on their own file poll.")
+        self.statusBar().showMessage("HUD displays pick up config changes automatically", 3000)
+
+    def save_config(self) -> bool:
+        """Persist self.config, telling the user when the write failed.
+
+        A failed write must not pass silently: the in-memory edits would then
+        look saved while the file keeps the old content, and a later save from
+        a stale DOM would wipe them (#741).
+        """
+        try:
+            self.config.save()
+            return True
+        except OSError as e:
+            log.exception("Could not save %s", self.config.file)
+            self.warning_box(f"Could not save the configuration to {self.config.file}:\n{e}")
+            return False
 
     def reload_config(self) -> None:
         """Reloads the configuration with dynamic reload support."""

@@ -27,6 +27,7 @@ import platform
 import re
 import shutil
 import sys
+import time
 import traceback
 import uuid
 import xml.parsers.expat
@@ -439,6 +440,15 @@ ENTAIN_FR_WINDOWS_DATA_DIRS: dict[str, tuple[str, ...]] = {
 }
 
 
+def _file_fingerprint(path: str) -> tuple[float, int] | None:
+    """Cheap change detector for a file on disk: (mtime, size), None if gone."""
+    try:
+        stat = os.stat(path)
+    except OSError:
+        return None
+    return (stat.st_mtime, stat.st_size)
+
+
 def _replace_with(path: str, data: bytes, *, permissions_of: str | None = None) -> None:
     """Make ``path`` hold ``data``, or leave it exactly as it was if anything fails.
 
@@ -467,7 +477,20 @@ def _replace_with(path: str, data: bytes, *, permissions_of: str | None = None) 
             os.fsync(stream.fileno())
         if mode is not None and not hasattr(os, "fchmod"):
             os.chmod(temporary, mode)  # Windows: only the read-only flag
-        os.replace(temporary, target)
+        # Another process (the HUD writing its layout, or the OS indexing the
+        # file) can hold the target open for a moment, and on Windows
+        # os.replace then fails with PermissionError; retry briefly before
+        # giving up (#741).
+        delay = 0.05
+        for attempt in range(5):
+            try:
+                os.replace(temporary, target)
+                break
+            except PermissionError:
+                if attempt == 4:
+                    raise
+                time.sleep(delay)
+                delay *= 2
     finally:
         Path(temporary).unlink(missing_ok=True)
 
@@ -745,7 +768,9 @@ class Config(
         for raw_tourneys_node in doc.getElementsByTagName("raw_tourneys"):
             self.raw_tourneys = RawTourneys(raw_tourneys_node)
 
-        # print ""
+        # What this object last read from (or wrote to) the file, so callers in
+        # another process's shadow can tell the file moved on (#741).
+        self._loaded_file_fingerprint = _file_fingerprint(self.file)
 
     # end def __init__
 
@@ -1206,8 +1231,17 @@ class Config(
         if ui is not None:
             self.ui = ui
 
+        self._loaded_file_fingerprint = _file_fingerprint(self.file)
         log.info("Configuration reloaded successfully")
         return True
+
+    def changed_on_disk(self) -> bool:
+        """True when the config file changed since this object last read or wrote it.
+
+        The HUD process and the fpdb process each hold their own Config; this is
+        how one notices the other wrote the file in between (#741).
+        """
+        return _file_fingerprint(self.file) != getattr(self, "_loaded_file_fingerprint", None)
 
     def save(self, file=None) -> None:
         """Write the configuration so that a failed save leaves the previous file whole (#642).
@@ -1224,6 +1258,8 @@ class Config(
                 log.exception(f"Failed to copy file {file} to backup. Exception: {e}")
 
         _replace_with(file, self.wrap_long_lines(self.doc.toxml()).encode("utf-8"))
+        if file == self.file:
+            self._loaded_file_fingerprint = _file_fingerprint(self.file)
 
     def wrap_long_lines(self, s):
         lines = [self.wrap_long_line(line) for line in s.splitlines()]

@@ -70,6 +70,16 @@ class HudMainHudsMixin(HudMainBase):
             return None
         return (stat.st_mtime, stat.st_size)
 
+    def _stat_set_signatures(self) -> dict[str, str]:
+        """Serialize every <ss> of the current DOM, keyed by profile name."""
+        signatures: dict[str, str] = {}
+        doc = getattr(self.config, "doc", None)
+        if doc is None:
+            return signatures
+        for ss_node in doc.getElementsByTagName("ss"):
+            signatures[ss_node.getAttribute("name")] = ss_node.toxml()
+        return signatures
+
     def refresh_profiles_from_config(self) -> int:
         """Re-apply the profile rules to open tables after a config change.
 
@@ -85,6 +95,10 @@ class HudMainHudsMixin(HudMainBase):
         if fingerprint is None or fingerprint == self._config_fingerprint:
             return 0
         self._config_fingerprint = fingerprint
+        # Capture each profile's content before reloading: a table whose
+        # effective profile kept its name but changed content has to be
+        # rebuilt too, not only one whose profile name changed (#741).
+        previous_signatures = self._stat_set_signatures()
         if self.config.reload() is False:
             log.warning("HUD_config.xml changed but could not be reloaded; keeping the profiles in use")
             return 0
@@ -97,36 +111,64 @@ class HudMainHudsMixin(HudMainBase):
         # player may have changed from the table menu, so they keep it.
         self.hud_params = self.config.get_hud_ui_parameters()
 
+        new_signatures = self._stat_set_signatures()
         rebuilt = 0
         for temp_key, hud in list(self.hud_dict.items()):
-            if self._reapply_profile(temp_key, hud):
+            if self._reapply_profile(temp_key, hud, previous_signatures, new_signatures):
                 rebuilt += 1
         if rebuilt:
             log.info("Config change applied: %d table(s) rebuilt with a new HUD profile", rebuilt)
         return rebuilt
 
-    def _reapply_profile(self, temp_key: str, hud: Hud.Hud) -> bool:
-        """Rebuild one table if the rules now select a different profile."""
+    def _reapply_profile(
+        self,
+        temp_key: str,
+        hud: Hud.Hud,
+        previous_signatures: dict[str, str] | None = None,
+        new_signatures: dict[str, str] | None = None,
+    ) -> bool:
+        """Rebuild one table if its effective profile changed name or content."""
         context = getattr(hud, "hud_context", None)
         if context is None:
             return False
-        table_key = getattr(getattr(hud, "table", None), "key", None)
-        if table_key is not None and self.get_table_stat_set_override(table_key, hud.poker_game, hud.game_type):
-            # The table menu is an explicit, session-only choice by the player.
-            return False
+        if previous_signatures is None:
+            previous_signatures = {}
+        if new_signatures is None:
+            new_signatures = self._stat_set_signatures()
 
-        params = self.config.get_supported_games_parameters(hud.poker_game, hud.game_type, context)
-        new_stat_set = params.get("game_stat_set") if isinstance(params, dict) else None
-        if new_stat_set is None:
-            return False
-        current = (hud.supported_games_parameters or {}).get("game_stat_set")
-        if getattr(new_stat_set, "name", None) == getattr(current, "name", None):
-            return False
+        table_key = getattr(getattr(hud, "table", None), "key", None)
+        override = None
+        if table_key is not None:
+            override = self.get_table_stat_set_override(table_key, hud.poker_game, hud.game_type)
+
+        if override is not None:
+            # The table menu is an explicit, session-only choice by the player:
+            # the profile stays, but a content edit of that profile in the file
+            # still has to reach the table (#741). The signature is keyed by the
+            # override name, not by the stat set object's own name attribute.
+            new_stat_set = self.config.stat_sets.get(override)
+            if new_stat_set is None:
+                return False
+            if new_signatures.get(override) == previous_signatures.get(override):
+                return False
+            new_name = override
+        else:
+            params = self.config.get_supported_games_parameters(hud.poker_game, hud.game_type, context)
+            new_stat_set = params.get("game_stat_set") if isinstance(params, dict) else None
+            if new_stat_set is None:
+                return False
+            current = (hud.supported_games_parameters or {}).get("game_stat_set")
+            new_name = getattr(new_stat_set, "name", None)
+            if new_name != getattr(current, "name", None):
+                pass  # different profile: rebuild below
+            elif new_signatures.get(new_name) == previous_signatures.get(new_name):
+                # Same profile, same content: a layout-only write rebuilds nothing.
+                return False
 
         try:
             self._rebuild_hud_with_stat_set(hud, new_stat_set)
         except Exception:  # intentional broad catch: a failed rebuild must leave no orphan windows
-            log.exception("Rebuilding %s for profile %s failed; restarting it", temp_key, new_stat_set.name)
+            log.exception("Rebuilding %s for profile %s failed; restarting it", temp_key, new_name)
             self.kill_hud(None, temp_key)
         return True
 

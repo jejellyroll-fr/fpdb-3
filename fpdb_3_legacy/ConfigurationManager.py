@@ -100,6 +100,9 @@ class ConfigurationManager:
         "data_sources.*",  # A data source's hero aliases (#423)
         "hero_profiles.*",  # Multiroom hero profiles
         "hud_ui.*",  # HUD UI settings
+        "stat_sets.*",  # HUD profile (stat set) content (#741)
+        "popup_windows.*",  # Popup window definitions (#741)
+        "hud_profile_rules",  # HUD profile selection rules (#741)
         "general.qt_material_theme",  # Qt material theme
         "general.popup_theme",  # Popup theme
     ]
@@ -247,6 +250,12 @@ class ConfigurationManager:
                         self._pending_changes = []
                         log.debug(f"Using pending changes: {len(changes)}")
                     else:
+                        # "No detected change" does not mean the file is unchanged:
+                        # sections _identify_changes does not compare may still
+                        # differ, and a later save() from this stale DOM would
+                        # write them away (#741). Follow the file either way.
+                        self._adopt_config(new_config)
+                        self._capture_current_state()
                         return True, "No changes detected", []
 
                 # Separate changes requiring restart
@@ -270,27 +279,8 @@ class ConfigurationManager:
                             restart_changes,
                         )
 
-                # Use reload() method of existing Config object
-                # This avoids creating a new object and allows components
-                # with a reference to the old object to see the changes
-                if hasattr(self._config, "reload"):
-                    log.info("Using Config.reload() method")
-                    self._config.reload()
-                else:
-                    # Fallback: copy important attributes
-                    log.warning("Config.reload() not available, copying attributes")
-                    if hasattr(new_config, "ui"):
-                        self._config.ui = new_config.ui
-                    if hasattr(new_config, "doc"):
-                        self._config.doc = new_config.doc
-                    if hasattr(new_config, "supported_sites"):
-                        self._config.supported_sites = new_config.supported_sites
-                    if hasattr(new_config, "supported_games"):
-                        self._config.supported_games = new_config.supported_games
-                    if hasattr(new_config, "supported_databases"):
-                        self._config.supported_databases = new_config.supported_databases
-                    if hasattr(new_config, "stat_sets"):
-                        self._config.stat_sets = new_config.stat_sets
+                # Follow the reloaded file, keeping the Config object's identity
+                self._adopt_config(new_config)
 
                 # Capture new state
                 self._capture_current_state()
@@ -320,6 +310,32 @@ class ConfigurationManager:
 
                 traceback.print_exc()
                 return False, f"Error: {e!s}", []
+
+    def _adopt_config(self, new_config: Configuration.Config) -> None:
+        """Point the live config object at the reloaded file content.
+
+        Components hold a reference to the Config object, so reload() re-parses
+        into the same object instead of replacing it; the attribute copy is the
+        fallback when reload() is unavailable.
+        """
+        if hasattr(self._config, "reload"):
+            log.info("Using Config.reload() method")
+            self._config.reload()
+        else:
+            # Fallback: copy important attributes
+            log.warning("Config.reload() not available, copying attributes")
+            if hasattr(new_config, "ui"):
+                self._config.ui = new_config.ui
+            if hasattr(new_config, "doc"):
+                self._config.doc = new_config.doc
+            if hasattr(new_config, "supported_sites"):
+                self._config.supported_sites = new_config.supported_sites
+            if hasattr(new_config, "supported_games"):
+                self._config.supported_games = new_config.supported_games
+            if hasattr(new_config, "supported_databases"):
+                self._config.supported_databases = new_config.supported_databases
+            if hasattr(new_config, "stat_sets"):
+                self._config.stat_sets = new_config.stat_sets
 
     def _identify_changes(
         self,
@@ -494,12 +510,66 @@ class ConfigurationManager:
             except CONFIG_ACCESS_ERRORS as e:
                 log.debug(f"Error comparing HUD UI parameters: {e}")
 
+            # Compare the HUD profile content itself (stat sets, popups, profile
+            # rules). The HUD preferences dialog writes exactly these, so without
+            # this a profile-only edit is invisible here and the manager keeps a
+            # stale DOM that a later save() writes back over the edit (#741).
+            changes.extend(self._hud_content_changes(old_config, new_config))
+
         except CONFIG_ACCESS_ERRORS as e:
             log.exception(f"Error identifying changes: {e}")
             import traceback
 
             traceback.print_exc()
 
+        return changes
+
+    @staticmethod
+    def _xml_node_signatures(config: Configuration.Config, tag: str, name_attr: str) -> dict[str, str]:
+        """Serialize each ``<tag>`` node of a config's DOM, keyed by its name attribute."""
+        signatures: dict[str, str] = {}
+        doc = getattr(config, "doc", None)
+        if doc is None:
+            return signatures
+        for node in doc.getElementsByTagName(tag):
+            signatures[node.getAttribute(name_attr)] = node.toxml()
+        return signatures
+
+    def _hud_content_changes(
+        self,
+        old_config: Configuration.Config,
+        new_config: Configuration.Config,
+    ) -> list[ConfigChange]:
+        """The HUD profile sections that differ between two configurations."""
+        changes: list[ConfigChange] = []
+        for tag, name_attr, prefix in (
+            ("ss", "name", "stat_sets"),
+            ("pu", "pu_name", "popup_windows"),
+        ):
+            old_sigs = self._xml_node_signatures(old_config, tag, name_attr)
+            new_sigs = self._xml_node_signatures(new_config, tag, name_attr)
+            for name in sorted(set(old_sigs) | set(new_sigs)):
+                if old_sigs.get(name) != new_sigs.get(name):
+                    changes.append(
+                        ConfigChange(
+                            ChangeType.HUD_SETTINGS,
+                            f"{prefix}.{name}",
+                            old_sigs.get(name),
+                            new_sigs.get(name),
+                        )
+                    )
+
+        old_rules = [rule.as_xml_attributes() for rule in getattr(old_config, "hud_profile_rules", None) or []]
+        new_rules = [rule.as_xml_attributes() for rule in getattr(new_config, "hud_profile_rules", None) or []]
+        if old_rules != new_rules:
+            changes.append(
+                ConfigChange(
+                    ChangeType.HUD_SETTINGS,
+                    "hud_profile_rules",
+                    old_rules,
+                    new_rules,
+                )
+            )
         return changes
 
     @staticmethod
@@ -637,7 +707,7 @@ class ConfigurationManager:
     def _capture_current_state(self) -> None:
         """Captures the current configuration state for future comparison."""
         config = self.get_config()
-        self._last_saved_state = {"sites": {}, "import": {}, "database": {}, "hud_ui": {}, "general": {}}
+        self._last_saved_state = {"sites": {}, "import": {}, "database": {}, "hud_ui": {}, "general": {}, "stat_sets": {}}
 
         # Capture site state
         if hasattr(config, "supported_sites"):
@@ -684,6 +754,13 @@ class ConfigurationManager:
                 log.debug(f"Captured theme state: {self._last_saved_state['general']}")
         except CONFIG_ACCESS_ERRORS as e:
             log.warning("Error capturing theme state: %s", e)
+
+        # Capture HUD profile (stat set) content, so a pending profile edit is
+        # reported by check_pending_changes instead of being invisible (#741).
+        try:
+            self._last_saved_state["stat_sets"] = self._xml_node_signatures(config, "ss", "name")
+        except CONFIG_ACCESS_ERRORS as e:
+            log.warning("Error capturing stat set state: %s", e)
 
     def detect_changes_from_saved_state(self, current_config) -> list[ConfigChange]:
         """Detects configuration changes by comparing the current state to the last saved state.
@@ -848,5 +925,22 @@ class ConfigurationManager:
 
         except CONFIG_ACCESS_ERRORS as e:
             log.warning("Error comparing theme parameters: %s", e)
+
+        # Compare HUD profile (stat set) content against the saved state
+        try:
+            current_stat_sets = self._xml_node_signatures(current_config, "ss", "name")
+            saved_stat_sets = self._last_saved_state.get("stat_sets", {})
+            for name in sorted(set(current_stat_sets) | set(saved_stat_sets)):
+                if current_stat_sets.get(name) != saved_stat_sets.get(name):
+                    changes.append(
+                        ConfigChange(
+                            ChangeType.HUD_SETTINGS,
+                            f"stat_sets.{name}",
+                            saved_stat_sets.get(name),
+                            current_stat_sets.get(name),
+                        )
+                    )
+        except CONFIG_ACCESS_ERRORS as e:
+            log.warning("Error comparing stat sets: %s", e)
 
         return changes

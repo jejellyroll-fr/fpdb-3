@@ -362,6 +362,14 @@ class Hud:
 
     def save_layout(self) -> None:
         """Ask each aux to save its layout back to the config object."""
+        # The preferences dialog runs in the fpdb process and may have written
+        # the file since this config was loaded; saving now would write this
+        # stale DOM over those edits (#741). Reload first, then lay out on top,
+        # and skip the write entirely if the file cannot be re-read.
+        changed_on_disk = getattr(self.config, "changed_on_disk", None)
+        if callable(changed_on_disk) and changed_on_disk() and self.config.reload() is False:
+            log.warning("HUD_config.xml changed on disk but could not be reloaded; layout not saved over it")
+            return
         for aux in self.aux_windows:
             try:
                 aux.save_layout(self.layout)
