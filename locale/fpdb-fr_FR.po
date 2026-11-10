@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-08 17:11+0100\n"
+"POT-Creation-Date: 2026-11-10 16:29+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -6235,6 +6235,17 @@ msgid "% Won money at showdown"
 msgstr "% gagné de l'argent au showdown"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+msgid "All-in EV in big blinds per 100 hands"
+msgstr "EV des tapis en grosses blindes pour 100 mains"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"All-in hands for which equity was successfully calculated (new imports only)"
+msgstr ""
+"Mains à tapis dont l'équité a été calculée avec succès (nouvelles "
+"importations uniquement)"
+
+#: fpdb_3_legacy/ring_stats/controller.py
 msgid "Big Blinds won per 100 hands"
 msgstr "Grosses blindes gagnées pour 100 mains"
 
@@ -6251,8 +6262,12 @@ msgid "Game type (Hold'em, Omaha, etc.)"
 msgstr "Type de jeu (Hold'em, Omaha, etc.)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
-msgid "Measure of uncertainty"
-msgstr "Mesure d'incertitude"
+msgid ""
+"Net profit adjusted for all-in equity; uncalculated hands retain realized "
+"results"
+msgstr ""
+"Profit net ajusté à l'équité des tapis ; pour les mains non calculées, le "
+"résultat réel est conservé"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Number of hands played"
@@ -6265,6 +6280,12 @@ msgstr "Nombre de sièges à la table"
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Player name"
 msgstr "Nom du joueur"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Player-hands marked all-in or included in a successful all-in equity "
+"calculation"
+msgstr "Mains-joueurs marquées à tapis ou incluses dans un calcul d'équité réussi"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Position at the table"
@@ -6295,12 +6316,36 @@ msgid "Rake paid"
 msgstr "Rake payé"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Realized net profit minus all-in EV; positive means results ran above all-in "
+"equity"
+msgstr ""
+"Profit net réalisé moins EV des tapis ; une valeur positive signifie que le "
+"résultat dépasse l'équité"
+
+#: fpdb_3_legacy/ring_stats/controller.py
 msgid "River aggression frequency"
 msgstr "Fréquence d'agression à la river"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Standard deviation of per-hand net results in the selected currency; this is "
+"not session volatility"
+msgstr ""
+"Écart-type des résultats nets par main dans la devise choisie ; ce n'est pas "
+"la volatilité des sessions"
+
+#: fpdb_3_legacy/ring_stats/controller.py
 msgid "Starting cards (Hole cards)"
 msgstr "Cartes de départ (cartes privatives)"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Successful all-in equity calculations divided by all-in or successfully "
+"evaluated player-hands (new imports only)"
+msgstr ""
+"Calculs d'équité des tapis réussis divisés par les mains-joueurs parties à "
+"tapis ou évaluées avec succès (nouvelles importations uniquement)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Total net profit"
@@ -6309,6 +6354,10 @@ msgstr "Profit net total"
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Turn aggression frequency"
 msgstr "Fréquence d'agression à la turn"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid "Variance of per-hand net results, in squared currency units"
+msgstr "Variance des résultats nets par main, en unités monétaires au carré"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Voluntarily put money in pot preflop"
@@ -7866,6 +7915,9 @@ msgstr ""
 #~ msgstr ""
 #~ "[ERREUR] Tentative d'ajout de cartes privatives pour un joueur inconnu: %s"
 
+#~ msgid "Hands marked as all-in"
+#~ msgstr "Mains marquées comme tapis"
+
 #~ msgid "Hands/file:"
 #~ msgstr "Mains/fichier :"
 
@@ -8036,6 +8088,9 @@ msgstr ""
 
 #~ msgid "Maintain Databases"
 #~ msgstr "Maintenance des Bases de Données"
+
+#~ msgid "Measure of uncertainty"
+#~ msgstr "Mesure d'incertitude"
 
 #, fuzzy
 #~ msgid ""

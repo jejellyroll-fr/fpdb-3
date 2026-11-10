@@ -141,6 +141,15 @@ def player_detailed_report_queries(db_server: str) -> dict[str, str]:
                                    / (sum(cast(hp.street1CBChance as SIGNED))+ sum(cast(hp.street2CBChance as SIGNED))+ sum(cast(hp.street3CBChance as SIGNED))+ sum(cast(hp.street4CBChance as SIGNED)))
                                                                                                 AS conbet
                         ,sum(hp.totalProfit)/100.0                                              AS net
+                        ,sum(hp.allInEV)/100.0                                                   AS evnet
+                        ,100.0*avg(hp.allInEV/(gt.bigBlind+0.0))                                AS evbbper100
+                        ,sum(hp.totalProfit-hp.allInEV)/100.0                                   AS luck
+                        ,sum(case when hp.allInEVCalculated then 1 else 0 end)                    AS evhands
+                        ,sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end)    AS allinhands
+                        ,case when sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end) = 0 then -999
+                              else 100.0*sum(case when hp.allInEVCalculated then 1 else 0 end)/
+                                   sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end)
+                         end                                                                    AS evcoverage
                         ,sum(hp.rake)/100.0                                                     AS rake
                         ,100.0*avg(hp.totalProfit/(gt.bigBlind+0.0))                            AS bbper100
                         ,avg(hp.totalProfit)/100.0                                              AS profitperhand
@@ -333,6 +342,15 @@ def player_detailed_report_queries(db_server: str) -> dict[str, str]:
                                    / (sum(cast(hp.street1CBChance as <signed>integer))+ sum(cast(hp.street2CBChance as <signed>integer))+ sum(cast(hp.street3CBChance as <signed>integer))+ sum(cast(hp.street4CBChance as <signed>integer)))
                         end                                                                     AS conbet
                         ,sum(hp.totalProfit)/100.0                                              AS net
+                        ,sum(hp.allInEV)/100.0                                                   AS evnet
+                        ,100.0*avg(hp.allInEV/(gt.bigBlind+0.0))                                AS evbbper100
+                        ,sum(hp.totalProfit-hp.allInEV)/100.0                                   AS luck
+                        ,sum(case when hp.allInEVCalculated then 1 else 0 end)                    AS evhands
+                        ,sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end)    AS allinhands
+                        ,case when sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end) = 0 then -999
+                              else 100.0*sum(case when hp.allInEVCalculated then 1 else 0 end)/
+                                   sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end)
+                         end                                                                    AS evcoverage
                         ,sum(hp.rake)/100.0                                                     AS rake
                         ,100.0*avg(hp.totalProfit/(gt.bigBlind+0.0))                            AS bbper100
                         ,avg(hp.totalProfit)/100.0                                              AS profitperhand
@@ -516,6 +534,15 @@ def player_detailed_report_queries(db_server: str) -> dict[str, str]:
                                    / (sum(cast(hp.street1CBChance as <signed>integer))+ sum(cast(hp.street2CBChance as <signed>integer))+ sum(cast(hp.street3CBChance as <signed>integer))+ sum(cast(hp.street4CBChance as <signed>integer)))
                                                                                                 AS conbet
                         ,sum(hp.totalProfit)/100.0                                              AS net
+                        ,sum(hp.allInEV)/100.0                                                   AS evnet
+                        ,100.0*avg(hp.allInEV/(gt.bigBlind+0.0))                                AS evbbper100
+                        ,sum(hp.totalProfit-hp.allInEV)/100.0                                   AS luck
+                        ,sum(case when hp.allInEVCalculated then 1 else 0 end)                    AS evhands
+                        ,sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end)    AS allinhands
+                        ,case when sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end) = 0 then -999
+                              else 100.0*sum(case when hp.allInEVCalculated then 1 else 0 end)/
+                                   sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end)
+                         end                                                                    AS evcoverage
                         ,sum(hp.rake)/100.0                                                     AS rake
                         ,100.0*avg(hp.totalProfit/(gt.bigBlind+0.0))                            AS bbper100
                         ,avg(hp.totalProfit)/100.0                                              AS profitperhand

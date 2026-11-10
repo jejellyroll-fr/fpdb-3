@@ -105,13 +105,19 @@ onlinehelp = {
     "TuAFq": _("Turn aggression frequency"),
     "RvAFq": _("River aggression frequency"),
     "Net($)": _("Total net profit"),
+    "All-in EV($)": _("Net profit adjusted for all-in equity; uncalculated hands retain realized results"),
+    "EV bb/100": _("All-in EV in big blinds per 100 hands"),
+    "Net − EV($)": _("Realized net profit minus all-in EV; positive means results ran above all-in equity"),
+    "EV hands": _("All-in hands for which equity was successfully calculated (new imports only)"),
+    "EV eligible": _("Player-hands marked all-in or included in a successful all-in equity calculation"),
+    "EV coverage %": _("Successful all-in equity calculations divided by all-in or successfully evaluated player-hands (new imports only)"),
     "bb/100": _("Big Blinds won per 100 hands"),
     "Profit/Hnd": _("Profit per hand"),
     "Rake($)": _("Rake paid"),
     "bbxr/100": _("Big Blinds won per 100 hands excluding rake"),
     "ProfitHndXR": _("Profit per hand excluding rake"),
-    "Variance": _("Measure of uncertainty"),
-    "Std. Dev.": _("Measure of uncertainty")
+    "Variance / hand²": _("Variance of per-hand net results, in squared currency units"),
+    "Std Dev / hand": _("Standard deviation of per-hand net results in the selected currency; this is not session volatility")
 }
 
 

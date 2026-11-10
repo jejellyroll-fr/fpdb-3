@@ -499,20 +499,27 @@ jobs:
       - name: Build with PyInstaller
         shell: bash
         run: |
-          # numpy is only reached through import_module() in Database.py, so
-          # PyInstaller cannot see it. Without the explicit hidden import the
-          # HUD build ships none of its Python modules while the merged
-          # distribution still exposes numpy's compiled sub-packages, and
-          # "import numpy" then yields an empty namespace package.
+          # numpy and pokereval are reached through import_module(), so
+          # PyInstaller cannot reliably see them. Include both explicitly; the
+          # equity smoke module below then proves the frozen native backend can
+          # evaluate a PLO5 hand instead of silently falling back to no EV.
           if [ "${{ runner.os }}" = "Windows" ]; then
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import comtypes --hidden-import comtypes.client --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/fpdb.pyw"
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import comtypes --hidden-import comtypes.client --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/HUD_main.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import pokereval --hidden-import fpdb_3_legacy.equity_smoke --hidden-import comtypes --hidden-import comtypes.client --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/fpdb.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import pokereval --hidden-import fpdb_3_legacy.equity_smoke --hidden-import comtypes --hidden-import comtypes.client --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/HUD_main.pyw"
           else
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/fpdb.pyw"
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/HUD_main.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import pokereval --hidden-import fpdb_3_legacy.equity_smoke --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/fpdb.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import pokereval --hidden-import fpdb_3_legacy.equity_smoke --hidden-import fpdb_3_legacy.capture.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/HUD_main.pyw"
           fi
       - name: Bundle HUD inside fpdb
         run: python tools/bundle_pyinstaller_hud.py dist
+      - name: Smoke-test packaged PLO5 equity backend
+        shell: bash
+        run: |
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            dist/fpdb/fpdb.exe --run-module fpdb_3_legacy.equity_smoke
+          else
+            dist/fpdb/fpdb --run-module fpdb_3_legacy.equity_smoke
+          fi
       - name: Package build artifact
         shell: bash
         env:

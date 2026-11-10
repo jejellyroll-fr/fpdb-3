@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-08 17:11+0100\n"
+"POT-Creation-Date: 2026-11-10 16:29+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -7062,6 +7062,16 @@ msgstr "% ショーダウンで勝った"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
+msgid "All-in EV in big blinds per 100 hands"
+msgstr "100 ハンドあたりの獲得ビッグブラインド"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"All-in hands for which equity was successfully calculated (new imports only)"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Big Blinds won per 100 hands"
 msgstr "100 ハンドあたりの獲得ビッグブラインド"
 
@@ -7081,8 +7091,10 @@ msgid "Game type (Hold'em, Omaha, etc.)"
 msgstr "ゲームの種類 (ホールデム、オマハなど)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
-msgid "Measure of uncertainty"
-msgstr "バラツキの尺度"
+msgid ""
+"Net profit adjusted for all-in equity; uncalculated hands retain realized "
+"results"
+msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -7097,6 +7109,12 @@ msgstr "テーブルの席数"
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Player name"
 msgstr "プレイヤー名"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Player-hands marked all-in or included in a successful all-in equity "
+"calculation"
+msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -7134,14 +7152,32 @@ msgid "Rake paid"
 msgstr "支払ったレーキ"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Realized net profit minus all-in EV; positive means results ran above all-in "
+"equity"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
 msgid "River aggression frequency"
 msgstr "リバーのアグレッション頻度"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Standard deviation of per-hand net results in the selected currency; this is "
+"not session volatility"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
 msgid "Starting cards (Hole cards)"
 msgstr "スターティングカード (ホールカード)"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Successful all-in equity calculations divided by all-in or successfully "
+"evaluated player-hands (new imports only)"
+msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -7152,6 +7188,10 @@ msgstr "総純利益"
 #, fuzzy
 msgid "Turn aggression frequency"
 msgstr "ターンのアグレッション頻度"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid "Variance of per-hand net results, in squared currency units"
+msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -8709,6 +8749,9 @@ msgstr ""
 
 #~ msgid "Maintenance"
 #~ msgstr "保守"
+
+#~ msgid "Measure of uncertainty"
+#~ msgstr "バラツキの尺度"
 
 #~ msgid "MergeToFpdb.determineGameType: '%s'"
 #~ msgstr "MergeToFpdb.determineGameType: '%s'"

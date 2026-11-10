@@ -327,16 +327,16 @@ STATS_DATA = {
         {
             "name": "Variance",
             "abbr": "Variance",
-            "desc": "Variance of outcomes in the selected sample.",
-            "formula": "Variance = Average squared deviation from the mean result",
-            "sql": "Computed from aggregate result dispersion"
+            "desc": "Variance of individual hand results, in squared currency units per hand.",
+            "formula": "Variance = Average squared deviation of per-hand net results",
+            "sql": "variance(totalProfit / 100.0)"
         },
         {
-            "name": "Standard Deviation / Variance",
+            "name": "Standard Deviation per Hand",
             "abbr": "Std. Dev.",
-            "desc": "A statistical measure of the dispersion of session outcomes around the mean winrate, representing variance.",
-            "formula": "Standard Deviation = Square Root of Variance(bb/100)",
-            "sql": "Computed variance across session aggregates"
+            "desc": "The spread of individual hand results, measured in the configured currency per hand. It is not session volatility or the standard error of bb/100.",
+            "formula": "Std Dev = Square Root of Variance(net result per hand)",
+            "sql": "sqrt(variance(totalProfit / 100.0))"
         }
     ],
     "Tournaments": [

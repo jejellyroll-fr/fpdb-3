@@ -118,13 +118,19 @@ class GUICashStats(list):
         ["rvafq", "RvAFq", True, True, "%3.1f", "str", 1.0],
         ["pofafq", "PoFAFq", False, False, "%3.1f", "str", 1.0],
         ["net", "Net($)", True, True, "%6.2f", "cash", 1.0],
+        ["evnet", "All-in EV($)", True, True, "%6.2f", "cash", 1.0],
+        ["evbbper100", "EV bb/100", True, True, "%4.2f", "str", 1.0],
+        ["luck", "Net − EV($)", True, True, "%6.2f", "cash", 1.0],
+        ["evhands", "EV hands", True, True, "%1.0f", "str", 1.0],
+        ["allinhands", "EV eligible", True, True, "%1.0f", "str", 1.0],
+        ["evcoverage", "EV coverage %", True, True, "%4.1f", "str", 1.0],
         ["bbper100", "bb/100", True, True, "%4.2f", "str", 1.0],
         ["profitperhand", "Profit/Hnd", False, False, "%6.2f", "cash", 1.0],
         ["rake", "Rake($)", True, True, "%6.2f", "cash", 1.0],
         ["bb100xr", "bbxr/100", True, True, "%4.2f", "str", 1.0],
         ["profhndxr", "ProfitHndXR", False, False, "%6.2f", "cash", 1.0],
-        ["variance", "Variance", False, False, "%5.2f", "str", 1.0],
-        ["stddev", "Standard Deviation", True, True, "%5.2f", "str", 1.0],
+        ["variance", "Variance / hand²", False, False, "%5.2f", "str", 1.0],
+        ["stddev", "Std Dev / hand", True, True, "%5.2f", "str", 1.0],
     ]
 
     def __init__(self) -> None:

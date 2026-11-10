@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-08 17:11+0100\n"
+"POT-Creation-Date: 2026-11-10 16:29+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -7158,6 +7158,16 @@ msgstr "% laimėjo pinigų per showdown"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
+msgid "All-in EV in big blinds per 100 hands"
+msgstr "Laimėta didžiųjų blindų per 100 rankų"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"All-in hands for which equity was successfully calculated (new imports only)"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Big Blinds won per 100 hands"
 msgstr "Laimėta didžiųjų blindų per 100 rankų"
 
@@ -7177,9 +7187,10 @@ msgid "Game type (Hold'em, Omaha, etc.)"
 msgstr "Žaidimo tipas (Hold'em, Omaha ir kt.)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
-#, fuzzy
-msgid "Measure of uncertainty"
-msgstr "Neapibrėžtumo matas"
+msgid ""
+"Net profit adjusted for all-in equity; uncalculated hands retain realized "
+"results"
+msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -7195,6 +7206,12 @@ msgstr "Vietų prie stalo skaičius"
 #, fuzzy
 msgid "Player name"
 msgstr "Naudotojo vardas"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Player-hands marked all-in or included in a successful all-in equity "
+"calculation"
+msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -7232,14 +7249,32 @@ msgid "Rake paid"
 msgstr "Sumokėtas rake"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Realized net profit minus all-in EV; positive means results ran above all-in "
+"equity"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
 msgid "River aggression frequency"
 msgstr "Agresijos dažnis riveryje"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Standard deviation of per-hand net results in the selected currency; this is "
+"not session volatility"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
 msgid "Starting cards (Hole cards)"
 msgstr "Pradinės kortos (savos kortos)"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Successful all-in equity calculations divided by all-in or successfully "
+"evaluated player-hands (new imports only)"
+msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -7250,6 +7285,10 @@ msgstr "Bendras grynasis pelnas"
 #, fuzzy
 msgid "Turn aggression frequency"
 msgstr "Agresijos dažnis tėrne"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid "Variance of per-hand net results, in squared currency units"
+msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -8227,6 +8266,10 @@ msgstr ""
 
 #~ msgid "MUCKED"
 #~ msgstr "NUMESTA NERODŽIUS"
+
+#, fuzzy
+#~ msgid "Measure of uncertainty"
+#~ msgstr "Neapibrėžtumo matas"
 
 #~ msgid ""
 #~ "MySQL Server reports: Access denied. Are your permissions set correctly?"
