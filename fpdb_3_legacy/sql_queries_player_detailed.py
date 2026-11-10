@@ -145,10 +145,10 @@ def player_detailed_report_queries(db_server: str) -> dict[str, str]:
                         ,100.0*avg(hp.allInEV/(gt.bigBlind+0.0))                                AS evbbper100
                         ,sum(hp.totalProfit-hp.allInEV)/100.0                                   AS luck
                         ,sum(case when hp.allInEVCalculated then 1 else 0 end)                    AS evhands
-                        ,sum(case when hp.wentAllIn then 1 else 0 end)                           AS allinhands
-                        ,case when sum(case when hp.wentAllIn then 1 else 0 end) = 0 then -999
+                        ,sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end)    AS allinhands
+                        ,case when sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end) = 0 then -999
                               else 100.0*sum(case when hp.allInEVCalculated then 1 else 0 end)/
-                                   sum(case when hp.wentAllIn then 1 else 0 end)
+                                   sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end)
                          end                                                                    AS evcoverage
                         ,sum(hp.rake)/100.0                                                     AS rake
                         ,100.0*avg(hp.totalProfit/(gt.bigBlind+0.0))                            AS bbper100
@@ -346,10 +346,10 @@ def player_detailed_report_queries(db_server: str) -> dict[str, str]:
                         ,100.0*avg(hp.allInEV/(gt.bigBlind+0.0))                                AS evbbper100
                         ,sum(hp.totalProfit-hp.allInEV)/100.0                                   AS luck
                         ,sum(case when hp.allInEVCalculated then 1 else 0 end)                    AS evhands
-                        ,sum(case when hp.wentAllIn then 1 else 0 end)                           AS allinhands
-                        ,case when sum(case when hp.wentAllIn then 1 else 0 end) = 0 then -999
+                        ,sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end)    AS allinhands
+                        ,case when sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end) = 0 then -999
                               else 100.0*sum(case when hp.allInEVCalculated then 1 else 0 end)/
-                                   sum(case when hp.wentAllIn then 1 else 0 end)
+                                   sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end)
                          end                                                                    AS evcoverage
                         ,sum(hp.rake)/100.0                                                     AS rake
                         ,100.0*avg(hp.totalProfit/(gt.bigBlind+0.0))                            AS bbper100
@@ -538,10 +538,10 @@ def player_detailed_report_queries(db_server: str) -> dict[str, str]:
                         ,100.0*avg(hp.allInEV/(gt.bigBlind+0.0))                                AS evbbper100
                         ,sum(hp.totalProfit-hp.allInEV)/100.0                                   AS luck
                         ,sum(case when hp.allInEVCalculated then 1 else 0 end)                    AS evhands
-                        ,sum(case when hp.wentAllIn then 1 else 0 end)                           AS allinhands
-                        ,case when sum(case when hp.wentAllIn then 1 else 0 end) = 0 then -999
+                        ,sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end)    AS allinhands
+                        ,case when sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end) = 0 then -999
                               else 100.0*sum(case when hp.allInEVCalculated then 1 else 0 end)/
-                                   sum(case when hp.wentAllIn then 1 else 0 end)
+                                   sum(case when hp.wentAllIn or hp.allInEVCalculated then 1 else 0 end)
                          end                                                                    AS evcoverage
                         ,sum(hp.rake)/100.0                                                     AS rake
                         ,100.0*avg(hp.totalProfit/(gt.bigBlind+0.0))                            AS bbper100

@@ -122,7 +122,7 @@ class GUICashStats(list):
         ["evbbper100", "EV bb/100", True, True, "%4.2f", "str", 1.0],
         ["luck", "Net − EV($)", True, True, "%6.2f", "cash", 1.0],
         ["evhands", "EV hands", True, True, "%1.0f", "str", 1.0],
-        ["allinhands", "All-in hands", True, True, "%1.0f", "str", 1.0],
+        ["allinhands", "EV eligible", True, True, "%1.0f", "str", 1.0],
         ["evcoverage", "EV coverage %", True, True, "%4.1f", "str", 1.0],
         ["bbper100", "bb/100", True, True, "%4.2f", "str", 1.0],
         ["profitperhand", "Profit/Hnd", False, False, "%6.2f", "cash", 1.0],

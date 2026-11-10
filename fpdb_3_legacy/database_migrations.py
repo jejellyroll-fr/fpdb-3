@@ -723,6 +723,7 @@ class DatabaseMigrationsMixin:
         definitions = {column: "INT DEFAULT 0" for column in HANDS_PLAYERS_KEYS}
         # The PT4 action enums store a single response char, not a counter.
         definitions.update({column: "CHAR(1) DEFAULT 'N'" for column in ACTION_ENUM_COLUMNS})
+        definitions["allInEVCalculated"] = "BOOLEAN DEFAULT FALSE"
         definitions["handString"] = "TEXT"
         definitions["cashOutFee"] = "INT DEFAULT 0"
         definitions["isCashOut"] = "BOOLEAN DEFAULT 0"

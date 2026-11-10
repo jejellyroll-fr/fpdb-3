@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 16:13+0100\n"
+"POT-Creation-Date: 2026-11-10 16:29+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -7129,10 +7129,6 @@ msgid "Game type (Hold'em, Omaha, etc.)"
 msgstr "Játéktípus (Hold'em, Omaha stb.)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
-msgid "Hands marked as all-in"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
 msgid ""
 "Net profit adjusted for all-in equity; uncalculated hands retain realized "
 "results"
@@ -7151,6 +7147,12 @@ msgstr "Helyek száma az asztalnál"
 #, fuzzy
 msgid "Player name"
 msgstr "Játékosok"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Player-hands marked all-in or included in a successful all-in equity "
+"calculation"
+msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -7211,8 +7213,8 @@ msgstr "Kezdőlapok (kézben tartott lapok)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid ""
-"Successfully calculated all-in EV hands divided by all-in hands (new imports "
-"only)"
+"Successful all-in equity calculations divided by all-in or successfully "
+"evaluated player-hands (new imports only)"
 msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py

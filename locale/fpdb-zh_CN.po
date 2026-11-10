@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 16:13+0100\n"
+"POT-Creation-Date: 2026-11-10 16:29+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -7130,10 +7130,6 @@ msgid "Game type (Hold'em, Omaha, etc.)"
 msgstr "游戏类型（德州扑克、奥马哈等）"
 
 #: fpdb_3_legacy/ring_stats/controller.py
-msgid "Hands marked as all-in"
-msgstr ""
-
-#: fpdb_3_legacy/ring_stats/controller.py
 msgid ""
 "Net profit adjusted for all-in equity; uncalculated hands retain realized "
 "results"
@@ -7153,6 +7149,12 @@ msgstr "牌桌座位数"
 #, fuzzy
 msgid "Player name"
 msgstr "文件名：%s"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Player-hands marked all-in or included in a successful all-in equity "
+"calculation"
+msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -7213,8 +7215,8 @@ msgstr "起手牌（底牌）"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid ""
-"Successfully calculated all-in EV hands divided by all-in hands (new imports "
-"only)"
+"Successful all-in equity calculations divided by all-in or successfully "
+"evaluated player-hands (new imports only)"
 msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py

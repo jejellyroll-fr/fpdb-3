@@ -1,5 +1,7 @@
 """Regression tests for detailed cash-player report queries."""
 
+import re
+
 from fpdb_3_legacy.SQL import Sql
 from fpdb_3_legacy.sql_queries_player_detailed import player_detailed_report_queries
 
@@ -36,3 +38,13 @@ def test_player_detailed_bet_stats_include_tournament_linked_hands() -> None:
         assert "tourneysplayersid is null" not in normalized
         for alias in aliases:
             assert f"as {alias}" in normalized
+
+
+def test_all_in_ev_coverage_uses_the_same_eligible_player_hand_population() -> None:
+    for backend in ("mysql", "postgresql", "sqlite"):
+        query = re.sub(r"\s+", " ", player_detailed_report_queries(backend)["playerDetailedStats"].lower())
+
+        assert "sum(case when hp.wentallin or hp.allinevcalculated then 1 else 0 end) as allinhands" in query
+        assert "sum(case when hp.wentallin or hp.allinevcalculated then 1 else 0 end) = 0 then -999" in query
+        assert "sum(case when hp.allinevcalculated then 1 else 0 end)/" in query
+        assert query.count("sum(case when hp.wentallin or hp.allinevcalculated then 1 else 0 end)") >= 3

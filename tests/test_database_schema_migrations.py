@@ -37,6 +37,21 @@ def migration_db(backend: int, cursor: RecordingCursor, width: int | None = NARR
     return db, events
 
 
+def test_handsplayers_ev_marker_migrates_as_boolean() -> None:
+    db = Database.__new__(Database)
+    captured: dict[str, str] = {}
+
+    def capture_columns(table: str, definitions: dict[str, str]) -> None:
+        if table == "HandsPlayers":
+            captured.update(definitions)
+
+    db._ensure_table_columns = capture_columns
+
+    db.ensure_handsplayers_columns()
+
+    assert captured["allInEVCalculated"] == "BOOLEAN DEFAULT FALSE"
+
+
 @pytest.mark.parametrize(
     ("backend", "expected"),
     [
