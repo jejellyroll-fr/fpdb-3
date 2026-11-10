@@ -196,6 +196,16 @@ def _add_sites_90_to_91(doc, template) -> None:
     _add_sites(doc, template, SITES_ADDED_IN_91)
 
 
+def _preserve_91_to_92(doc, template) -> None:
+    """Advance to v92 while retaining user settings.
+
+    The shipped Ring Player Stats column defaults are appended by
+    ``GUICashStats.add_missing_defaults`` when the configuration loads; no
+    document rewrite is needed for this version.
+    """
+    del doc, template
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {n.getAttribute("name") for n in doc.getElementsByTagName("aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -219,6 +229,7 @@ MIGRATIONS = (
     (88, 89, _add_summary_importers_88_to_89),
     (89, 90, _add_sites_89_to_90),
     (90, 91, _add_sites_90_to_91),
+    (91, 92, _preserve_91_to_92),
 )
 
 
