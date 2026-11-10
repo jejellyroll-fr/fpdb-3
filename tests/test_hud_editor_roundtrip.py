@@ -32,8 +32,8 @@ def _round_trip(node):
     return stat_set_snapshot(before), stat_set_snapshot(after)
 
 
-@pytest.mark.parametrize(("source", "node"), SHIPPED, ids=[source for source, _node in SHIPPED])
-def test_an_unedited_shipped_stat_set_survives_the_editor(source, node) -> None:
+@pytest.mark.parametrize("node", [pytest.param(node, id=source) for source, node in SHIPPED])
+def test_an_unedited_shipped_stat_set_survives_the_editor(node) -> None:
     before, after = _round_trip(node)
     assert after == before
     assert before["blocks"] and any(block["stats"] for block in before["blocks"]), "empty snapshot"

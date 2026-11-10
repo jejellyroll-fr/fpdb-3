@@ -94,11 +94,11 @@ def test_opening_the_editor_reports_no_unsaved_change(tmp_path, monkeypatch) -> 
     assert not dialog.has_unsaved_changes()
 
 
-EXAMPLE_SETS = [(source, node) for source, node in shipped_stat_sets() if source.startswith("example:")]
+EXAMPLE_SETS = [pytest.param(node, id=source) for source, node in shipped_stat_sets() if source.startswith("example:")]
 
 
-@pytest.mark.parametrize(("source", "node"), EXAMPLE_SETS, ids=[source for source, _node in EXAMPLE_SETS])
-def test_saving_without_editing_keeps_every_example_stat_set(tmp_path, monkeypatch, source, node) -> None:
+@pytest.mark.parametrize("node", EXAMPLE_SETS)
+def test_saving_without_editing_keeps_every_example_stat_set(tmp_path, monkeypatch, node) -> None:
     from fpdb_3_legacy import Configuration
 
     name = node.getAttribute("name")
@@ -112,14 +112,14 @@ B10_STACKED_SIZE = pytest.mark.xfail(
     strict=True, reason="B10: the <ss> rows/cols of a multi-panel set are rewritten from the stacked total"
 )
 PACKAGE_SETS = [
-    pytest.param(source, node, id=source, marks=[B10_STACKED_SIZE] if node.getElementsByTagName("block") else [])
+    pytest.param(node, id=source, marks=[B10_STACKED_SIZE] if node.getElementsByTagName("block") else [])
     for source, node in shipped_stat_sets()
     if not source.startswith("example:")
 ]
 
 
-@pytest.mark.parametrize(("source", "node"), PACKAGE_SETS)
-def test_saving_without_editing_keeps_every_package_stat_set(tmp_path, monkeypatch, source, node) -> None:
+@pytest.mark.parametrize("node", PACKAGE_SETS)
+def test_saving_without_editing_keeps_every_package_stat_set(tmp_path, monkeypatch, node) -> None:
     from fpdb_3_legacy import Configuration
 
     name = node.getAttribute("name")

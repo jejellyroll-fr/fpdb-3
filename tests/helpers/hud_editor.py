@@ -207,7 +207,8 @@ def install_modals(monkeypatch: Any) -> Modals:
         return modals._next(modals.dialogs, f"dialog {type(dialog).__name__}")(dialog)
 
     def record(kind: str) -> Callable[..., Any]:
-        def show(_parent: Any, title: str, text: str = "", *_a: Any, **_k: Any) -> Any:
+        def show(_parent: Any, title: str, *args: Any, **_k: Any) -> Any:
+            text = args[0] if args else ""
             modals.messages.append((kind, f"{title}: {text}"))
             return QMessageBox.StandardButton.Ok
 
@@ -229,6 +230,10 @@ def install_modals(monkeypatch: Any) -> Modals:
     return modals
 
 
+# Keeps the application this module created alive for the rest of the session.
+_APP: Any = None
+
+
 def open_editor(config_path: Path, monkeypatch: Any) -> tuple[Any, Modals]:
     """The real HUD Preferences dialog on ``config_path``, offscreen."""
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -237,7 +242,9 @@ def open_editor(config_path: Path, monkeypatch: Any) -> tuple[Any, Modals]:
     from fpdb_3_legacy import Configuration, dynamic_panels_consent
     from fpdb_3_legacy.modern_hud_preferences import ModernHudPreferences
 
-    QApplication.instance() or QApplication([])
+    global _APP
+    if QApplication.instance() is None:
+        _APP = QApplication([])
     modals = install_modals(monkeypatch)
     dynamic_panels_consent.confirm(dynamic_panels_consent.consent_path(config_path))
     config = Configuration.Config(file=str(config_path))
