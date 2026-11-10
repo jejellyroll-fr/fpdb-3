@@ -35,6 +35,7 @@ def _initMoneyAndResults(init: dict[str, Any]) -> None:
     init["rakeWeighted"] = 0
     init["totalProfit"] = 0
     init["allInEV"] = 0
+    init["allInEVCalculated"] = False
     init["showdownWinnings"] = 0
     init["nonShowdownWinnings"] = 0
     init["cashOutAmount"] = 0  # Insurance payout (not pot winnings)

@@ -44,6 +44,7 @@ def hand_player_persistence_queries() -> dict[str, str]:
             rakeWeighted,
             totalProfit,
             allInEV,
+            allInEVCalculated,
             street0VPIChance,
             street0VPI,
             street1Seen,
@@ -390,7 +391,7 @@ def hand_player_persistence_queries() -> dict[str, str]:
                  %s, %s, %s, %s, %s, %s,
                  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
             %s, %s, %s, %s,
-            %s, %s, %s, %s
+            %s, %s, %s, %s, %s
             ,
                  %s,
                  %s, %s, %s, %s, %s,

@@ -22,8 +22,11 @@ def cash_profit_queries() -> dict[str, str]:
         GROUP BY h.startTime, hp.handId, hp.sawShowdown, hp.totalProfit, hp.splashWinnings
         ORDER BY h.startTime"""
 
+    # GraphViewer divides every result series by 100 before plotting. Return
+    # hundredths of a big blind here; totalProfit, allInEV and bigBlind already
+    # use the same currency units, so the BB conversion is amount / bigBlind.
     query["getRingProfitAllHandsPlayerIdSiteInBB"] = """
-        SELECT hp.handId, ( hp.totalProfit / ( gt.bigBlind  * 2.0 ) ) * 100 , hp.sawShowdown, ( hp.allInEV / ( gt.bigBlind * 2.0 ) ) * 100, ( COALESCE(hp.splashWinnings, 0) / ( gt.bigBlind * 2.0 ) ) * 100
+        SELECT hp.handId, ( hp.totalProfit / ( gt.bigBlind + 0.0 ) ) * 100 , hp.sawShowdown, ( hp.allInEV / ( gt.bigBlind + 0.0 ) ) * 100, ( COALESCE(hp.splashWinnings, 0) / ( gt.bigBlind + 0.0 ) ) * 100
         FROM HandsPlayers hp
         INNER JOIN Players pl      ON  (pl.id = hp.playerId)
         INNER JOIN Hands h         ON  (h.id  = hp.handId)

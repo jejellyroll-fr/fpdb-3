@@ -163,6 +163,7 @@ HANDS_PLAYERS_KEYS = [
     "rakeWeighted",
     "totalProfit",
     "allInEV",
+    "allInEVCalculated",
     "street0VPIChance",
     "street0VPI",
     "street1Seen",

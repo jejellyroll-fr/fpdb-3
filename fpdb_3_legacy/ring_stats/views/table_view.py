@@ -106,7 +106,8 @@ class StatsTableView(QWidget):
 
         presets = {
             "essential": {
-                "game", "hand", "plposition", "pname", "n", "vpip", "pfr", "pf3", "net", "bbper100"
+                "game", "hand", "plposition", "pname", "n", "vpip", "pfr", "pf3", "net", "bbper100",
+                "evnet", "evbbper100", "luck", "evhands", "allinhands", "evcoverage"
             },
             "preflop": {
                 "game", "hand", "plposition", "pname", "n", "vpip", "pfr", "rfi", "steals",
@@ -118,7 +119,8 @@ class StatsTableView(QWidget):
             },
             "showdown": {
                 "game", "hand", "plposition", "pname", "n", "saw_f", "sawsd", "wtsdwsf", "wmsf", "wmsd",
-                "net", "bbper100", "rake", "variance", "stddev"
+                "net", "bbper100", "evnet", "evbbper100", "luck", "evhands", "allinhands", "evcoverage",
+                "rake", "variance", "stddev"
             }
         }
 

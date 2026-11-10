@@ -466,6 +466,7 @@ class DerivedStatsAllInMixin(DerivedStatsBase):
                                     )
                                     expected = expected_pot_share(player_result.equity, pot, rake)
                                     self.handsplayers[player]["allInEV"] = int(100 * (expected - committed))
+                                    self.handsplayers[player]["allInEVCalculated"] = True
                                     log.debug(
                                         "Player %s all-in equity=%s expected-profit=%s",
                                         player,
@@ -558,6 +559,7 @@ class DerivedStatsAllInMixin(DerivedStatsBase):
 
                             # Set all-in EV
                             self.handsplayers[player]["allInEV"] = int(ev - committed)
+                            self.handsplayers[player]["allInEVCalculated"] = True
                             log.debug(
                                 "Draw game - Player %s all-in EV: %s",
                                 player,
