@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-08 17:11+0100\n"
+"POT-Creation-Date: 2026-11-10 16:13+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -7195,6 +7195,16 @@ msgstr "% ha guanyat diners al showdown"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
+msgid "All-in EV in big blinds per 100 hands"
+msgstr "Cegues grans guanyades per 100 mans"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"All-in hands for which equity was successfully calculated (new imports only)"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
+#, fuzzy
 msgid "Big Blinds won per 100 hands"
 msgstr "Cegues grans guanyades per 100 mans"
 
@@ -7214,9 +7224,14 @@ msgid "Game type (Hold'em, Omaha, etc.)"
 msgstr "Tipus de joc (Hold'em, Omaha, etc.)"
 
 #: fpdb_3_legacy/ring_stats/controller.py
-#, fuzzy
-msgid "Measure of uncertainty"
-msgstr "Mesura d'incertesa"
+msgid "Hands marked as all-in"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Net profit adjusted for all-in equity; uncalculated hands retain realized "
+"results"
+msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -7269,14 +7284,32 @@ msgid "Rake paid"
 msgstr "Rake pagat"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Realized net profit minus all-in EV; positive means results ran above all-in "
+"equity"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
 msgid "River aggression frequency"
 msgstr "Freqüència d'agressió al river"
 
 #: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Standard deviation of per-hand net results in the selected currency; this is "
+"not session volatility"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
 msgid "Starting cards (Hole cards)"
 msgstr "Cartes inicials (cartes pròpies)"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Successfully calculated all-in EV hands divided by all-in hands (new imports "
+"only)"
+msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -7287,6 +7320,10 @@ msgstr "Benefici net total"
 #, fuzzy
 msgid "Turn aggression frequency"
 msgstr "Freqüència d'agressió al turn"
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid "Variance of per-hand net results, in squared currency units"
+msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
 #, fuzzy
@@ -7992,6 +8029,10 @@ msgstr ""
 #, fuzzy
 #~ msgid "INFO: No positions returned from database"
 #~ msgstr "INFO: No s'han trobat partides a la base de dades"
+
+#, fuzzy
+#~ msgid "Measure of uncertainty"
+#~ msgstr "Mesura d'incertesa"
 
 #, fuzzy
 #~ msgid "No positions returned from database"

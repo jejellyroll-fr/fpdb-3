@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-08 17:11+0100\n"
+"POT-Creation-Date: 2026-11-10 16:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -5948,6 +5948,37 @@ msgid "Total net profit"
 msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Net profit adjusted for all-in equity; uncalculated hands retain realized "
+"results"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid "All-in EV in big blinds per 100 hands"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Realized net profit minus all-in EV; positive means results ran above all-in "
+"equity"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"All-in hands for which equity was successfully calculated (new imports only)"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid "Hands marked as all-in"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Successfully calculated all-in EV hands divided by all-in hands (new imports "
+"only)"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
 msgid "Big Blinds won per 100 hands"
 msgstr ""
 
@@ -5968,7 +5999,13 @@ msgid "Profit per hand excluding rake"
 msgstr ""
 
 #: fpdb_3_legacy/ring_stats/controller.py
-msgid "Measure of uncertainty"
+msgid "Variance of per-hand net results, in squared currency units"
+msgstr ""
+
+#: fpdb_3_legacy/ring_stats/controller.py
+msgid ""
+"Standard deviation of per-hand net results in the selected currency; this is "
+"not session volatility"
 msgstr ""
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
