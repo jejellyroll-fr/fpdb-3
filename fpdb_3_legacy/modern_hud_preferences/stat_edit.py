@@ -16,6 +16,7 @@ changed the number shown, and otherwise keeps the stored string as it was.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
 from typing import Any
 
@@ -43,9 +44,7 @@ def parse(text: Any) -> float | None:
         value = float(str(text).strip())
     except ValueError:
         return None
-    if value != value or value in (float("inf"), float("-inf")):  # NaN, infinities
-        return None
-    return value
+    return value if math.isfinite(value) else None  # not NaN or an infinity
 
 
 def format_value(value: float, decimals: int = DECIMALS) -> str:
