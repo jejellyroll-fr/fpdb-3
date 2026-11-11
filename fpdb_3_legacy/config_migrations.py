@@ -206,6 +206,21 @@ def _preserve_91_to_92(doc, template) -> None:
     del doc, template
 
 
+def _zero_padding_92_to_93(doc, template) -> None:
+    """Keep every HUD looking as it did when ``xpad`` / ``ypad`` start to count.
+
+    Up to v92 the HUD parsed both attributes and drew nothing with them, so the
+    values a configuration holds (``xpad="1"`` in every shipped profile) never
+    reached the screen. From v93 they add to the grid's gaps (#770): an upgrade
+    sets them to 0, the spacing those HUDs have always had.
+    """
+    del template
+    for node in doc.getElementsByTagName("ss"):
+        for attr in ("xpad", "ypad"):
+            if node.hasAttribute(attr):
+                node.setAttribute(attr, "0")
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {n.getAttribute("name") for n in doc.getElementsByTagName("aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -230,6 +245,7 @@ MIGRATIONS = (
     (89, 90, _add_sites_89_to_90),
     (90, 91, _add_sites_90_to_91),
     (91, 92, _preserve_91_to_92),
+    (92, 93, _zero_padding_92_to_93),
 )
 
 

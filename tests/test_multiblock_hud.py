@@ -1163,3 +1163,25 @@ def test_nothing_to_move_writes_nothing(table, shared_store):
         aux._claim_legacy_block_positions()
 
     assert not saved.called
+
+
+# ---------------------------------------------------------------------------
+# A profile's xpad / ypad widen the seat's grid (#770)
+# ---------------------------------------------------------------------------
+def _grid_gaps(blocks, **padding):
+    aw = _fake_aw(blocks)
+    for attr, value in padding.items():
+        setattr(aw, attr, value)
+    win = Aux_Hud.SimpleStatWindow(aw=aw, seat=1)
+    win.create_contents(1)
+    return {(grid.horizontalSpacing(), grid.verticalSpacing()) for grid in win.findChildren(QGridLayout)}
+
+
+def test_a_seat_grid_without_padding_keeps_its_gaps():
+    assert _grid_gaps([_block("", [["vpip", "pfr"]])]) == {(4, 1)}
+    assert _grid_gaps([_block("A", [["vpip"]]), _block("B", [["pfr"]])]) == {(2, 1)}
+
+
+def test_padding_widens_every_grid_of_the_seat():
+    assert _grid_gaps([_block("", [["vpip", "pfr"]])], xpad=3, ypad=2) == {(7, 3)}
+    assert _grid_gaps([_block("A", [["vpip"]]), _block("B", [["pfr"]])], xpad=3, ypad=2) == {(5, 3)}

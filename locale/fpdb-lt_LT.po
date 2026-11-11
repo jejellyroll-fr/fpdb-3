@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:34+0100\n"
+"POT-Creation-Date: 2026-11-11 20:54+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -4921,6 +4921,10 @@ msgid " pt"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid " px"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr ""
 
@@ -5088,6 +5092,11 @@ msgstr "Klasė:"
 #, fuzzy
 msgid "Color Ranges"
 msgstr "Spalvų intervalai"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Column gap:"
+msgstr "Stulpelis:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5381,6 +5390,14 @@ msgid "Pick a HUD profile first."
 msgstr "Pirmiausia pasirinkite HUD profilį."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Pixels added to the HUD's default gap between columns."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Pixels added to the HUD's default gap between rows."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Players"
@@ -5455,6 +5472,10 @@ msgstr "Paprastas tekstas"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "Rich text draws each value in bold with a smaller, dimmed prefix and suffix."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Row gap:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py

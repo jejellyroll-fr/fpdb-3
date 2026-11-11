@@ -56,7 +56,7 @@
     The profile the user selects for a 6-max Hold'em table: the always-visible
     surface. The resolver adds the contextual panels below on top of it.
   -->
-  <ss name="nlhe_6max_dynamic" rows="2" cols="2" xpad="1" ypad="0" rich_text="True" font_size="10" title_font_scale="0.82" heading_font_scale="0.60">
+  <ss name="nlhe_6max_dynamic" rows="2" cols="2" xpad="0" ypad="0" rich_text="True" font_size="10" title_font_scale="0.82" heading_font_scale="0.60">
 
     <!--
       The panels. Each is a block of THIS profile, because that is what the

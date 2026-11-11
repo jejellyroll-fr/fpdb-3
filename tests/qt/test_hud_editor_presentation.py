@@ -84,12 +84,57 @@ def test_changing_a_control_is_an_unsaved_change(tmp_path, monkeypatch) -> None:
     assert not dialog.unsaved_label.isHidden()
 
 
-def test_padding_has_no_control_and_is_kept(tmp_path, monkeypatch) -> None:
-    """The live HUD never applies xpad/ypad, so the editor offers no control for them."""
+def _preview_gaps(dialog) -> tuple[int, int]:
+    from PySide6.QtWidgets import QGridLayout
+
+    grid = dialog.preview.hud_window.findChildren(QGridLayout)[0]
+    return grid.horizontalSpacing(), grid.verticalSpacing()
+
+
+@pytest.mark.parametrize("mode", ["standard", "rich"])
+def test_the_padding_controls_show_in_both_modes(tmp_path, monkeypatch, mode) -> None:
     dialog, _modals, _path = _editor(tmp_path, monkeypatch)
     select_profile(dialog, "holdem_ring")
-    assert not hasattr(dialog, "xpad_spin")
-    assert not hasattr(dialog, "ypad_spin")
+    dialog.presentation_mode_combo.setCurrentIndex(dialog.presentation_mode_combo.findData(mode))
+    for attr in ("xpad", "ypad"):
+        assert not dialog.padding_spins[attr].isHidden()
+        assert not dialog.padding_labels[attr].isHidden()
+        assert dialog.padding_spins[attr].value() == 0
+
+
+def test_padding_widens_the_preview_and_is_an_unsaved_change(tmp_path, monkeypatch) -> None:
+    dialog, _modals, _path = _editor(tmp_path, monkeypatch)
+    profile = select_profile(dialog, "holdem_ring")
+    before = _preview_gaps(dialog)
+
+    dialog.padding_spins["xpad"].setValue(4)
+    dialog.padding_spins["ypad"].setValue(3)
+    assert (profile["xpad"], profile["ypad"]) == (4, 3)
+    after = _preview_gaps(dialog)
+    assert after[0] > before[0] and after[1] > before[1]
+    assert dialog.has_unsaved_changes()
+    assert not dialog.unsaved_label.isHidden()
+
+    dialog.padding_spins["xpad"].setValue(0)
+    dialog.padding_spins["ypad"].setValue(0)
+    assert _preview_gaps(dialog) == before
+    assert not dialog.has_unsaved_changes()
+
+
+def test_padding_is_saved_and_reloaded(tmp_path, monkeypatch) -> None:
+    dialog, modals, path = _editor(tmp_path, monkeypatch)
+    select_profile(dialog, "holdem_ring")
+    dialog.padding_spins["xpad"].setValue(5)
+    dialog.padding_spins["ypad"].setValue(2)
+    _save(dialog, modals)
+
+    saved = reload_stat_set(path, "holdem_ring")
+    assert (saved.xpad, saved.ypad) == (5, 2)
+
+    dialog, _modals, _path = _editor(tmp_path, monkeypatch, path)
+    select_profile(dialog, "holdem_ring")
+    assert (dialog.padding_spins["xpad"].value(), dialog.padding_spins["ypad"].value()) == (5, 2)
+    assert not dialog.has_unsaved_changes()
 
 
 def test_rich_text_settings_are_saved_reloaded_and_cleared(tmp_path, monkeypatch) -> None:
@@ -100,7 +145,7 @@ def test_rich_text_settings_are_saved_reloaded_and_cleared(tmp_path, monkeypatch
     _save(dialog, modals)
 
     saved = reload_stat_set(path, "holdem_ring")
-    assert (saved.rich_text, saved.font_size, saved.xpad, saved.ypad) == ("True", "12", 1, 0)
+    assert (saved.rich_text, saved.font_size, saved.xpad, saved.ypad) == ("True", "12", 0, 0)
 
     dialog, modals, _path = _editor(tmp_path, monkeypatch, path)
     select_profile(dialog, "holdem_ring")
@@ -117,7 +162,7 @@ def test_rich_text_settings_are_saved_reloaded_and_cleared(tmp_path, monkeypatch
     node = next(n for n in doc.getElementsByTagName("ss") if n.getAttribute("name") == "holdem_ring")
     assert not node.hasAttribute("rich_text")
     assert not node.hasAttribute("font_size")
-    assert node.getAttribute("xpad") == "1"
+    assert node.getAttribute("xpad") == "0"
 
 
 def test_the_rich_text_warning_shows_only_in_rich_mode(tmp_path, monkeypatch) -> None:

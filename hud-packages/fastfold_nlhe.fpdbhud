@@ -14,7 +14,7 @@
 -->
 <fpdb_hud_package version="1.1">
 
-  <ss name="fastfold_nlhe" rows="4" cols="4" xpad="1" ypad="0" rich_text="True" font_size="10">
+  <ss name="fastfold_nlhe" rows="4" cols="4" xpad="0" ypad="0" rich_text="True" font_size="10">
 
     <!-- Row 1: who they are, and how much to trust the rest of the block. -->
     <stat _rowcol="(1,1)" _stat_name="playershort" popup="fastfold_preflop"

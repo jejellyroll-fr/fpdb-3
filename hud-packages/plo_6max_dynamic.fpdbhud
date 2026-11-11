@@ -19,7 +19,7 @@
   Stats appear only where the imported database has the underlying sample.
 -->
 <fpdb_hud_package version="1.1">
-  <ss name="plo_6max_dynamic" rows="2" cols="2" xpad="1" ypad="0" rich_text="True" font_size="10" title_font_scale="0.82" heading_font_scale="0.68">
+  <ss name="plo_6max_dynamic" rows="2" cols="2" xpad="0" ypad="0" rich_text="True" font_size="10" title_font_scale="0.82" heading_font_scale="0.68">
     <block id="core" label="Core" rows="2" cols="2" title_bgcolor="#312E81" title_fgcolor="#E6EDF3">
       <stat _rowcol="(1,1)" _stat_name="n" popup="plo_dynamic_core" hudprefix="H " tip="Hands seen" hudbgcolor="#0F172A" stat_loth="25" stat_locolor="#FF6B6B" stat_midcolor="#F2F4E6" stat_hith="200" stat_hicolor="#4ADE80"/>
       <stat _rowcol="(1,2)" _stat_name="vpip" popup="plo_dynamic_core" hudprefix="VP " tip="Voluntarily put money in pot" display_label="VPIP" hudbgcolor="#1E1B4B" stat_loth="28" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="45" stat_hicolor="#FF6B6B"/>

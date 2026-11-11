@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:34+0100\n"
+"POT-Creation-Date: 2026-11-11 20:54+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -4860,6 +4860,10 @@ msgid " pt"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid " px"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr "#"
 
@@ -5027,6 +5031,11 @@ msgstr "Osztály:"
 #, fuzzy
 msgid "Color Ranges"
 msgstr "Színtartományok"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Column gap:"
+msgstr "Oszlop:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5322,6 +5331,14 @@ msgid "Pick a HUD profile first."
 msgstr "Előbb válasszon egy HUD-profilt."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Pixels added to the HUD's default gap between columns."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Pixels added to the HUD's default gap between rows."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
 msgid "Players"
 msgstr "Játékosok"
@@ -5395,6 +5412,10 @@ msgstr "Egyszerű szöveg"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "Rich text draws each value in bold with a smaller, dimmed prefix and suffix."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Row gap:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py

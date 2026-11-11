@@ -8,9 +8,9 @@ A ``<ss>`` carries a few presentation attributes the live HUD reads:
 * ``font_size`` -- read by ``Aux_Hud.SimpleHUD`` as an integer point size. An
   empty or unreadable value falls back to the ``font_size`` of the ``<aw>`` that
   draws the HUD.
-* ``xpad`` / ``ypad`` -- parsed as integers by ``Stat_sets`` and stored by
-  ``SimpleHUD``, but no layout applies them, so the editor offers no control
-  for them; ``profile_io`` still writes them back unchanged.
+* ``xpad`` / ``ypad`` -- parsed as integers by ``Stat_sets``; the seat's stat
+  grid adds them, in pixels, to its default gaps between columns and between
+  rows (``config_hud_layouts.grid_spacing``). 0 draws the grid as it always was.
 
 The editor keeps these as strings in the profile dict (see ``profile_io``) and
 writes a cleared one back as a removed attribute. The helpers below read and
@@ -44,12 +44,18 @@ RICH_TEXT_CLASS = "ClassicHud"
 #: Upper bound of the editor's control. The HUD itself takes any integer.
 FONT_SIZE_MAX = 48
 
-#: Profile fields shown for each mode. Both modes use the font size; the
-#: rich-text warning only means something in rich-text mode.
+#: Upper bound of the padding controls, in pixels. The HUD takes any value.
+PADDING_MAX = 20
+
+#: Profile fields shown for each mode. Both modes use the font size and the
+#: padding; the rich-text warning only means something in rich-text mode.
 FIELDS_BY_MODE = {
-    MODE_STANDARD: ("font_size",),
-    MODE_RICH: ("font_size", "rich_text_support"),
+    MODE_STANDARD: ("font_size", "xpad", "ypad"),
+    MODE_RICH: ("font_size", "xpad", "ypad", "rich_text_support"),
 }
+
+#: The two padding attributes of a ``<ss>``.
+PADDING_ATTRS = ("xpad", "ypad")
 
 
 # --- Mode --------------------------------------------------------------------
@@ -100,6 +106,21 @@ def set_font_size(profile: dict[str, Any], size: int) -> None:
     if int(size) == font_size_of(profile):
         return
     profile["font_size"] = str(int(size)) if int(size) > 0 else ""
+
+
+# --- Padding -----------------------------------------------------------------
+def padding_of(profile: Any, attr: str) -> int:
+    """The profile's ``xpad`` or ``ypad`` as the HUD applies it: never negative."""
+    if attr not in PADDING_ATTRS:
+        raise ValueError(f"not a padding attribute: {attr}")
+    return _positive_int(_attr(profile, attr))
+
+
+def set_padding(profile: dict[str, Any], attr: str, pixels: int) -> None:
+    """Set ``xpad`` or ``ypad``, leaving an unchanged value as it was stored."""
+    if int(pixels) == padding_of(profile, attr):
+        return
+    profile[attr] = max(int(pixels), 0)
 
 
 # --- Window handlers ---------------------------------------------------------

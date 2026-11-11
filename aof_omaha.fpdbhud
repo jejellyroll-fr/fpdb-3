@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <fpdb_hud_package version="1.6">
-    <ss name="aof_default" rows="4" cols="4" xpad="1" ypad="0" rich_text="True" font_size="10">
+    <ss name="aof_default" rows="4" cols="4" xpad="0" ypad="0" rich_text="True" font_size="10">
         <stat _rowcol="(1,1)" _stat_name="playershort" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog" hudcolor="#98FFB0"/>
         <stat _rowcol="(1,2)" _stat_name="player_note" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="Notes" click="open_comment_dialog"/>
         <stat _rowcol="(1,3)" _stat_name="n" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="H " hudsuffix="" tip="" click=""/>
@@ -17,7 +17,7 @@
         <stat _rowcol="(4,2)" _stat_name="aof_splash_freq" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="Spl% " hudsuffix="" tip="" click=""/>
         <stat _rowcol="(4,3)" _stat_name="aof_showdowns" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="sd " hudsuffix="" tip="" click=""/>
     </ss>
-    <ss name="aof_advanced" rows="6" cols="4" xpad="1" ypad="0" rich_text="True" font_size="10">
+    <ss name="aof_advanced" rows="6" cols="4" xpad="0" ypad="0" rich_text="True" font_size="10">
         <stat _rowcol="(1,1)" _stat_name="playershort" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog" hudcolor="#98FFB0"/>
         <stat _rowcol="(1,2)" _stat_name="player_note" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="Notes" click="open_comment_dialog"/>
         <stat _rowcol="(1,3)" _stat_name="n" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="H " hudsuffix="" tip="" click=""/>

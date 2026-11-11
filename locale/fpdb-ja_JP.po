@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:34+0100\n"
+"POT-Creation-Date: 2026-11-11 20:54+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -4832,6 +4832,10 @@ msgid " pt"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid " px"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr ""
 
@@ -4998,6 +5002,11 @@ msgstr "クラス:"
 #, fuzzy
 msgid "Color Ranges"
 msgstr "色の範囲"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Column gap:"
+msgstr "列:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5290,6 +5299,14 @@ msgid "Pick a HUD profile first."
 msgstr "先に HUD プロフィールを選択してください。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Pixels added to the HUD's default gap between columns."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Pixels added to the HUD's default gap between rows."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
 msgid "Players"
 msgstr "プレイヤー"
@@ -5363,6 +5380,10 @@ msgstr "プレーンテキスト"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "Rich text draws each value in bold with a smaller, dimmed prefix and suffix."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Row gap:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
