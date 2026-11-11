@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 08:52+0100\n"
+"POT-Creation-Date: 2026-11-11 13:54+0100\n"
 "PO-Revision-Date: 2012-02-17 20:03+0000\n"
 "Last-Translator: seppone1991 <seppone1991@gmail.com>\n"
 "Language-Team: Italian (Italy) (http://www.transifex.net/projects/p/fpdb/"
@@ -4785,6 +4785,10 @@ msgid "➖ Remove Stat"
 msgstr "➖ Rimuovi statistica"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid " pt"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr "#"
 
@@ -4949,6 +4953,11 @@ msgid "Conditions"
 msgstr "Condizioni"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Default ({size} pt)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Design"
 msgstr "Design"
@@ -5009,6 +5018,11 @@ msgid "Fallback"
 msgstr "Ripiego"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Font size:"
+msgstr "Dimensione della puntata"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Game"
@@ -5051,9 +5065,24 @@ msgid "HUD profile"
 msgstr "Profilo HUD"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"HUD window: no game is mapped to this profile (a profile rule may still pick "
+"it). The window handler is set per game, not here."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "HUD window: {handlers}. The window handler is set per game, not here."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Hands for this seat"
 msgstr "Mani per questo posto"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Horizontal padding:"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5115,6 +5144,10 @@ msgid "Minimum hands required for profiling:"
 msgstr "Mani minime per la profilazione:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Mode:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Move down"
 msgstr "Sposta giù"
@@ -5152,6 +5185,13 @@ msgstr ""
 "Disattivato per impostazione predefinita. Se attivo, vengono mostrati i "
 "pannelli indicati da una regola e ogni altro blocco mantiene la regola di "
 "posizione di sempre."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Only {rich} draws rich text: {handlers} will show this profile as standard "
+"text."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5206,6 +5246,12 @@ msgid "Players"
 msgstr "Giocatori"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Point size of this profile's cells. The lowest value uses the HUD window's "
+"size."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Popup Conflict"
 msgstr "Conflitto di popup"
@@ -5219,6 +5265,11 @@ msgstr "Anteprima del popup"
 #, fuzzy
 msgid "Positional panels:"
 msgstr "Pannelli per posizione:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Presentation"
+msgstr "Azione precedente"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5249,6 +5300,16 @@ msgstr ""
 #, fuzzy
 msgid "Remove"
 msgstr "Rimuovi"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Rich text"
+msgstr "Testo semplice"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Rich text draws each value in bold with a smaller, dimmed prefix and suffix."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
@@ -5302,6 +5363,10 @@ msgstr ""
 #, fuzzy
 msgid "Speed"
 msgstr "Velocità"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Standard"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5384,6 +5449,10 @@ msgstr "Aggiorna regola"
 #, fuzzy
 msgid "Update selected"
 msgstr "Aggiorna selezionata"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Vertical padding:"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
