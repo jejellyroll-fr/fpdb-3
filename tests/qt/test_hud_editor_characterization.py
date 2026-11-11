@@ -4,7 +4,7 @@ Two kinds of test live here:
 
 * the safety net: opening the dialog and saving without editing must leave
   every shipped stat-set as the HUD reads it;
-* the known defects of docs/hud-editor-improvement-plan.md (B1-B10, B14), each
+* the known defects of docs/hud-editor-improvement-plan.md (B1-B12, B14, B17), each
   written as the behaviour the editor *should* have and marked
   ``xfail(strict=True)``. A fix makes its test pass, which fails the run until
   the marker is removed -- so no defect is fixed silently or left behind.
@@ -249,7 +249,6 @@ def test_b6_a_line_added_to_a_flat_profile_takes_a_free_row(tmp_path, monkeypatc
     assert saved.blocks[0].rows == 3
 
 
-@pytest.mark.xfail(strict=True, reason="B7: Cancel discards edits without asking")
 def test_b7_cancel_asks_before_discarding_edits(tmp_path, monkeypatch) -> None:
     from PySide6.QtWidgets import QMessageBox
 
@@ -261,7 +260,6 @@ def test_b7_cancel_asks_before_discarding_edits(tmp_path, monkeypatch) -> None:
     assert not modals.questions, "no confirmation was asked"
 
 
-@pytest.mark.xfail(strict=True, reason="B8: profile-rule edits are not counted as unsaved changes")
 def test_b8_a_new_profile_rule_is_an_unsaved_change(tmp_path, monkeypatch) -> None:
     dialog, _modals, _path = _editor(tmp_path, monkeypatch)
     count = len(dialog.profile_rules)
@@ -297,6 +295,92 @@ def test_b10_the_status_bar_counts_a_stat_added_to_a_panel(tmp_path, monkeypatch
     assert "Statistics: 3" in dialog.status_label.text()
 
 
+def _items(dialog) -> list:
+    return [item for _kind, item in dialog._group_item_refs]
+
+
+def _assert_selected(dialog, ref) -> None:
+    """The one selection, the same in the Items list, the table and the canvas."""
+    assert dialog._current_item()[1] is ref
+    assert dialog._selected_row_item()[2] is ref
+    assert all(canvas.selected_ref is ref for canvas in dialog._design_canvases)
+
+
+def test_b11_editing_an_item_keeps_it_selected(tmp_path, monkeypatch) -> None:
+    dialog, modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
+    profile = select_profile(dialog, "hole")
+    wtsd = profile["stats"][2]
+    _select_item(dialog, wtsd)
+    modals.dialogs.append(lambda _d: ACCEPT)
+    dialog.edit_stat()
+    _assert_selected(dialog, wtsd)
+    assert _items(dialog)[0] is not wtsd
+
+
+def test_b11_a_new_item_becomes_the_selection(tmp_path, monkeypatch) -> None:
+    dialog, modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
+    profile = select_profile(dialog, "hole")
+
+    def free_cell(d) -> int:
+        d.row_input.setCurrentText("1")
+        d.col_input.setCurrentText("1")
+        d.stat_input.setCurrentText("cb1")
+        return ACCEPT
+
+    modals.dialogs.append(free_cell)
+    dialog.add_stat()
+    added = profile["stats"][-1]
+    assert added["stat"] == "cb1"
+    _assert_selected(dialog, added)
+
+
+def test_b11_picking_an_item_of_another_panel_shows_that_panel(tmp_path, monkeypatch) -> None:
+    dialog, _modals, _path = _editor(tmp_path, monkeypatch, TWO_BLOCKS)
+    profile = select_profile(dialog, "two_blocks")
+    assert dialog.group_list.currentRow() == 0
+    cb1 = profile["blocks"][1]["stats"][0]
+    _select_table_row(dialog, cb1)
+    assert dialog.group_list.currentRow() == 1
+    _assert_selected(dialog, cb1)
+
+
+def test_b11_a_chip_click_selects_the_item_everywhere(tmp_path, monkeypatch) -> None:
+    dialog, _modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
+    profile = select_profile(dialog, "hole")
+    pfr = profile["stats"][1]
+    dialog._design_canvases[0].item_selected.emit((0, "stat", pfr))
+    _assert_selected(dialog, pfr)
+
+
+def test_b11_removing_the_selected_item_selects_the_first_one(tmp_path, monkeypatch) -> None:
+    dialog, _modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
+    profile = select_profile(dialog, "hole")
+    _select_item(dialog, profile["stats"][1])
+    dialog.remove_stat()
+    assert len(profile["stats"]) == 2
+    _assert_selected(dialog, _items(dialog)[0])
+
+
+def test_b12_editing_an_item_of_a_flat_profile_keeps_the_single_grid_entry(tmp_path, monkeypatch) -> None:
+    dialog, _modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
+    profile = select_profile(dialog, "hole")
+    assert dialog.group_list.item(0).text() == "(single grid)"
+    _select_item(dialog, profile["stats"][0])
+    dialog.ip_text.setText("vpip")
+    dialog._item_prop_changed()
+    assert [dialog.group_list.item(i).text() for i in range(dialog.group_list.count())] == ["(single grid)"]
+
+
+def test_b12_an_unnamed_panel_is_still_called_so(tmp_path, monkeypatch) -> None:
+    dialog, _modals, _path = _editor(tmp_path, monkeypatch, TWO_BLOCKS)
+    profile = select_profile(dialog, "two_blocks")
+    dialog.group_list.setCurrentRow(1)
+    dialog.gp_name.setText("")
+    dialog._group_prop_changed()
+    assert profile["blocks"][1]["label"] == ""
+    assert dialog.group_list.item(1).text() == "(unnamed)"
+
+
 def test_b14_an_analytics_stat_fills_the_first_free_cell(tmp_path, monkeypatch) -> None:
     dialog, _modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
     profile = select_profile(dialog, "hole")
@@ -306,3 +390,47 @@ def test_b14_an_analytics_stat_fills_the_first_free_cell(tmp_path, monkeypatch) 
     dialog._add_panel_stat_to_block()
     assert _cells(profile)[-1] == (1, 1)
     assert profile["rows"] == 2
+
+
+def _name_new_profile(name: str):
+    def answer(dialog) -> int:
+        from PySide6.QtWidgets import QLineEdit
+
+        dialog.findChild(QLineEdit).setText(name)
+        return ACCEPT
+
+    return answer
+
+
+@pytest.mark.parametrize(
+    ("name", "why"), [("", "needs a name"), ("  ", "needs a name"), ("hole", '"hole" already exists')]
+)
+def test_b17_a_new_profile_that_cannot_be_named_so_says_why(tmp_path, monkeypatch, name, why) -> None:
+    dialog, modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
+    before = list(dialog.hud_profiles)
+    modals.dialogs.append(_name_new_profile(name))
+    dialog.add_profile()
+    assert list(dialog.hud_profiles) == before
+    assert [kind for kind, _text in modals.messages] == ["warning"]
+    assert why in modals.messages[0][1]
+
+
+@pytest.mark.parametrize(("name", "why"), [("", "needs a name"), ("aof_default", '"aof_default" already exists')])
+def test_b17_a_duplicate_that_cannot_be_named_so_says_why(tmp_path, monkeypatch, name, why) -> None:
+    dialog, modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
+    select_profile(dialog, "hole")
+    before = list(dialog.hud_profiles)
+    modals.texts.append((name, True))
+    dialog.duplicate_profile()
+    assert list(dialog.hud_profiles) == before
+    assert [kind for kind, _text in modals.messages] == ["warning"]
+    assert why in modals.messages[0][1]
+
+
+def test_b17_a_new_profile_name_loses_its_surrounding_spaces(tmp_path, monkeypatch) -> None:
+    dialog, modals, _path = _editor(tmp_path, monkeypatch)
+    modals.dialogs.append(_name_new_profile("  bob  "))
+    dialog.add_profile()
+    assert dialog.profile_combo.currentText() == "bob"
+    assert "bob" in dialog.hud_profiles
+    assert not modals.messages

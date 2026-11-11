@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 08:52+0100\n"
+"POT-Creation-Date: 2026-11-11 13:57+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -3305,7 +3305,7 @@ msgstr "Le guide est publié sur {url}"
 msgid "Unknown Site"
 msgstr "Site inconnu"
 
-#: fpdb_3_legacy/fpdb.pyw
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Unsaved Changes"
 msgstr "Modifications non enregistrées"
 
@@ -4285,6 +4285,51 @@ msgstr "➕ Ajouter une stat"
 msgid "➖ Remove Stat"
 msgstr "➖ Retirer la stat"
 
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "(single grid)"
+msgstr "(grille unique)"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "(unnamed)"
+msgstr "(sans nom)"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, python-brace-format
+msgid "A profile named \"{name}\" already exists. Choose another name."
+msgstr "Un profil nommé « {name} » existe déjà. Choisissez un autre nom."
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "A profile needs a name."
+msgstr "Un profil doit avoir un nom."
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "HUD profiles"
+msgstr "profils de HUD"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "dynamic panels"
+msgstr "panneaux dynamiques"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "general settings"
+msgstr "paramètres généraux"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "panel fallback"
+msgstr "panneau de repli"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "panel rules"
+msgstr "règles des panneaux"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "popup windows"
+msgstr "fenêtres popup"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "profile rules"
+msgstr "règles de profil"
+
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr "#"
@@ -4390,6 +4435,14 @@ msgid "Cannot add this rule"
 msgstr "Impossible d'ajouter cette règle"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cannot create the profile"
+msgstr "Impossible de créer le profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cannot duplicate the profile"
+msgstr "Impossible de dupliquer le profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cannot export"
 msgstr "Export impossible"
 
@@ -4398,12 +4451,21 @@ msgid "Cannot import"
 msgstr "Import impossible"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cannot rename the profile"
+msgstr "Impossible de renommer le profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cannot update this rule"
 msgstr "Impossible de mettre à jour cette règle"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell already used"
 msgstr "Case déjà occupée"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Changed since the last save: {parts}"
+msgstr "Modifié depuis le dernier enregistrement : {parts}"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Class:"
@@ -4568,6 +4630,10 @@ msgid "New Profile"
 msgstr "Nouveau profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "New profile name:"
+msgstr "Nouveau nom du profil :"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "No HUD profile of this name exists; the game default will be used instead."
 msgstr ""
@@ -4667,6 +4733,10 @@ msgstr "Profil : {name} | {layout} | Statistiques : {count}"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Remove"
 msgstr "Retirer"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Rename Profile"
+msgstr "Renommer le profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
@@ -4801,6 +4871,10 @@ msgid "Wrote {path}"
 msgstr "{path} écrit"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "You have unsaved changes. Do you want to save before closing?"
+msgstr "Vous avez des modifications non enregistrées. Voulez-vous les enregistrer avant de fermer ?"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "a separator line"
 msgstr "une ligne de séparation"
 
@@ -4845,8 +4919,16 @@ msgid "↓ Down"
 msgstr "↓ Descendre"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "● Unsaved changes"
+msgstr "● Modifications non enregistrées"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "⚙️ General Settings"
 msgstr "⚙️ Paramètres généraux"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "✏️ Rename"
+msgstr "✏️ Renommer"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "➕ Add"
@@ -8009,10 +8091,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Si cette option est utilisée l'arrêt se faite avec un message d'erreur "
 #~ "explicite si un problème se produit"
-
-#~ msgid "If you change the config you must save before importing"
-#~ msgstr ""
-#~ "Si vous changez la configuration vous devez sauvegarder avant d'importer"
 
 #~ msgid ""
 #~ "If you had previously opened any tabs they cannot use the new settings "

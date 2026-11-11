@@ -42,7 +42,7 @@ from fpdb_3_legacy.hud_profiles import HudContext, HudProfileResolver, HudProfil
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.i18n import translate_hud_category
 from fpdb_3_legacy.loggingFpdb import get_logger
-from fpdb_3_legacy.modern_hud_preferences import layout_model, profile_io
+from fpdb_3_legacy.modern_hud_preferences import editor_state, layout_model, profile_io
 from fpdb_3_legacy.modern_hud_preferences.design_canvas import HudDesignCanvas
 from fpdb_3_legacy.modern_hud_preferences.dialogs import (
     AddStatDialog,
@@ -74,11 +74,12 @@ log = get_logger("modern_hud_preferences.main_dialog")
 #: column at the end so no selector is ever squeezed out of view.
 PANEL_FIELD_BREAKPOINTS = ((1000, 4), (840, 3), (600, 2))
 
-#: Width below which the five profile buttons of the header give way to a single
-#: menu. The five buttons and the profile combo are what set the dialog's
-#: minimum width at 890 px, so the swap has to happen above that or the window
-#: could never be narrowed to the width that needs it.
-NARROW_HEADER_WIDTH = 900
+#: Width below which the six profile buttons of the header give way to a single
+#: menu. The six buttons and the profile combo are what set the dialog's
+#: minimum width, at 986 px with the macOS fonts, so the swap has to happen
+#: above that or the window could never be narrowed to the width that needs
+#: it. It stays below 1024 so a 1024-wide window still shows the buttons.
+NARROW_HEADER_WIDTH = 1010
 
 
 def confirm_dynamic_panels(parent: QWidget | None, path: Any) -> bool:
@@ -101,6 +102,11 @@ def confirm_dynamic_panels(parent: QWidget | None, path: Any) -> bool:
 
 
 class ModernHudPreferences(QDialog):
+    #: The selected item of the current profile, by identity (B11).
+    _selected_item: dict | None = None
+    #: True while the stat table is refilled, so its signals are not a selection.
+    _building_table = False
+
     def __init__(self, config, parent=None) -> None:
         super().__init__(parent)
         self.config = config
@@ -133,7 +139,7 @@ class ModernHudPreferences(QDialog):
         profile_bar.addWidget(profile_label)
 
         self.profile_combo = QComboBox()
-        # Wide enough to read a profile name, small enough that the five action
+        # Wide enough to read a profile name, small enough that the six action
         # buttons beside it still fit a 1024-wide window. The buttons below take
         # their natural width instead of a 120 px floor each: five floors were
         # the single largest contributor to the dialog's minimum width.
@@ -153,6 +159,9 @@ class ModernHudPreferences(QDialog):
         self.dup_profile_btn = QPushButton(_("📋 Duplicate"))
         self.dup_profile_btn.clicked.connect(self.duplicate_profile)
 
+        self.rename_profile_btn = QPushButton(_("✏️ Rename"))
+        self.rename_profile_btn.clicked.connect(self.rename_profile)
+
         self.del_profile_btn = QPushButton(_("🗑️ Delete"))
         self.del_profile_btn.clicked.connect(self.delete_profile)
 
@@ -164,13 +173,14 @@ class ModernHudPreferences(QDialog):
 
         profile_bar.addWidget(self.add_profile_btn)
         profile_bar.addWidget(self.dup_profile_btn)
+        profile_bar.addWidget(self.rename_profile_btn)
         profile_bar.addWidget(self.del_profile_btn)
         profile_bar.addWidget(self.export_profile_btn)
         profile_bar.addWidget(self.import_profile_btn)
 
-        # The same five actions behind one button, for a window too narrow to
-        # hold them. Five buttons are what set the dialog's minimum width at
-        # 890 px, so a reader who wants the preferences beside their table could
+        # The same six actions behind one button, for a window too narrow to
+        # hold them. Six buttons are what set the dialog's minimum width at
+        # 986 px, so a reader who wants the preferences beside their table could
         # not narrow the window. ``_fit_profile_actions`` swaps between the two
         # as the width changes.
         self.profile_actions_btn = QToolButton()
@@ -240,6 +250,11 @@ class ModernHudPreferences(QDialog):
         # PT4-style panel (group) management: list + inline Group Properties.
         self._loading_group = False
         self._current_block_index = 0
+        # The one selected item (B11): every refresh selects it again by
+        # identity, in the Items list, the canvas and the table alike.
+        self._selected_item = None
+        # Renamed profiles: current name -> name of its <ss> in the file.
+        self._renamed: dict[str, str] = {}
         # The four property zones live in a horizontal splitter so they never
         # overlap (a QHBoxLayout can collide when min widths exceed the width)
         # and can be resized like PT4.
@@ -395,6 +410,7 @@ class ModernHudPreferences(QDialog):
         self.stat_table.setHorizontalHeaderLabels(["Type", "Row", "Col", "Item", "Span", "Click Action", "Popup"])
         self.stat_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.stat_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.stat_table.currentCellChanged.connect(self._on_table_item_selected)
         self.stat_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.stat_table.setAlternatingRowColors(True)
         self.stat_table.hide()
@@ -686,7 +702,7 @@ class ModernHudPreferences(QDialog):
         popup_top_splitter.addWidget(popup_info_group)
 
         # PT4-style Item Properties for the selected popup item/cell.
-        self._popup_group = None  # loaded BlockPopup group (editable cells)
+        self._popup_group: dict | None = None  # loaded BlockPopup group (editable cells)
         self._popup_item_cell: dict[str, Any] | None = None  # the selected cell dict
         self._popup_item_mode: str | None = None
         self.pi_props_box = QGroupBox("Item Properties")
@@ -849,6 +865,13 @@ class ModernHudPreferences(QDialog):
         self.status_label.setProperty("class", "caption")
         bottom_layout.addWidget(self.status_label)
 
+        # Says that Save has something to write, and what (in the tooltip).
+        self.unsaved_label = QLabel()
+        self.unsaved_label.setProperty("class", "caption")
+        self.unsaved_label.setStyleSheet("font-weight: bold;")
+        self.unsaved_label.setVisible(False)
+        bottom_layout.addWidget(self.unsaved_label)
+
         bottom_layout.addStretch()
 
         # Dialog buttons
@@ -879,10 +902,12 @@ class ModernHudPreferences(QDialog):
         self.profiling_checkbox.setChecked(self.original_player_profiling)
         self.profile_in_name_checkbox.setChecked(self.original_profile_in_name)
         self.profile_min_hands_spin.setValue(self.original_profile_min_hands)
+        self.profiling_checkbox.toggled.connect(self._refresh_unsaved_indicator)
+        self.profile_in_name_checkbox.toggled.connect(self._refresh_unsaved_indicator)
+        self.profile_min_hands_spin.valueChanged.connect(self._refresh_unsaved_indicator)
 
-        # Track changes
-        self.original_profiles = self._deep_copy_profiles(self.hud_profiles)
-        self.original_popups = self._deep_copy_popups(self.popup_windows)
+        # Track changes: what Save would write, as it stands now.
+        self._saved_state = self._editor_state(keep=True)
 
         # Update status
         self.update_status()
@@ -909,6 +934,51 @@ class ModernHudPreferences(QDialog):
         self.status_label.setText(
             _("Profile: {name} | {layout} | Statistics: {count}").format(name=profile_name, layout=layout, count=count)
         )
+        self._refresh_unsaved_indicator()
+
+    def _general_settings(self) -> tuple[Any, ...]:
+        """The General Settings tab's values, in the order they are compared."""
+        widgets = (
+            getattr(self, "profiling_checkbox", None),
+            getattr(self, "profile_in_name_checkbox", None),
+            getattr(self, "profile_min_hands_spin", None),
+        )
+        return tuple(None if w is None else (w.isChecked() if isinstance(w, QCheckBox) else w.value()) for w in widgets)
+
+    def _editor_state(self, *, keep: bool) -> editor_state.EditorState:
+        """Everything Save writes; ``keep`` copies it to compare against later."""
+        enabled = getattr(self, "panel_rules_enabled", None)
+        return editor_state.EditorState.capture(
+            profiles=getattr(self, "hud_profiles", None),
+            popups=getattr(self, "popup_windows", None),
+            settings=self._general_settings(),
+            profile_rules=getattr(self, "profile_rules", ()),
+            panel_rules=getattr(self, "panel_rules", ()),
+            panel_rules_enabled=enabled.isChecked() if enabled is not None else False,
+            panel_fallback=getattr(self, "panel_rules_fallback", ""),
+            keep=keep,
+        )
+
+    def _unsaved_parts(self) -> list[str]:
+        """What changed since the editor opened or last saved."""
+        saved = getattr(self, "_saved_state", None)
+        if saved is None:
+            return []
+        return editor_state.differences(saved, self._editor_state(keep=False))
+
+    def _refresh_unsaved_indicator(self, *_args: Any) -> None:
+        """Show or hide the "unsaved changes" mark of the status bar."""
+        label = getattr(self, "unsaved_label", None)
+        if label is None or getattr(self, "_saved_state", None) is None:
+            return
+        parts = self._unsaved_parts()
+        label.setVisible(bool(parts))
+        label.setText(_("● Unsaved changes") if parts else "")
+        label.setToolTip(
+            _("Changed since the last save: {parts}").format(parts=editor_state.describe_differences(parts))
+            if parts
+            else ""
+        )
 
     def _deep_copy_profiles(self, profiles):
         """Create a deep copy of profiles for change detection."""
@@ -922,18 +992,9 @@ class ModernHudPreferences(QDialog):
 
         return copy.deepcopy(popups)
 
-    def has_unsaved_changes(self):
-        """Check if there are unsaved changes."""
-        profiling_changed = (
-            self.profiling_checkbox.isChecked() != self.original_player_profiling
-            or self.profile_in_name_checkbox.isChecked() != self.original_profile_in_name
-            or self.profile_min_hands_spin.value() != self.original_profile_min_hands
-        )
-        return (
-            self.hud_profiles != self.original_profiles
-            or self.popup_windows != self.original_popups
-            or profiling_changed
-        )
+    def has_unsaved_changes(self) -> bool:
+        """Whether Save would write anything: profiles, popups, settings or rules (B8)."""
+        return bool(self._unsaved_parts())
 
     def _hud_preview_params(self) -> dict[str, str]:
         ui = getattr(self.config, "ui", None)
@@ -944,26 +1005,35 @@ class ModernHudPreferences(QDialog):
             "font_size": getattr(ui, "font_size", "8") or "8",
         }
 
+    def _settle_unsaved_changes(self) -> str:
+        """Ask what to do with unsaved changes before the editor closes.
+
+        ``"clean"`` (nothing to ask), ``"saved"`` (saved, and the dialog
+        accepted), ``"discard"``, or ``"stay"`` (Cancel, or a failed save).
+        """
+        if not self.has_unsaved_changes():
+            return "clean"
+        reply = QMessageBox.question(
+            self,
+            _("Unsaved Changes"),
+            _("You have unsaved changes. Do you want to save before closing?"),
+            QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
+        )
+        if reply == QMessageBox.Save:
+            return "saved" if self.save_changes() else "stay"
+        if reply == QMessageBox.Discard:
+            return "discard"
+        return "stay"
+
+    def reject(self) -> None:
+        """Cancel and Esc ask before losing edits, like closing the window (B7)."""
+        if self._settle_unsaved_changes() in ("clean", "discard"):
+            super().reject()
+
     def closeEvent(self, event) -> None:
         """Handle window close event."""
-        if self.has_unsaved_changes():
-            reply = QMessageBox.question(
-                self,
-                "Unsaved Changes",
-                "You have unsaved changes. Do you want to save before closing?",
-                QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
-            )
-
-            if reply == QMessageBox.Save:
-                self.save_changes()
-                if self.result() == QDialog.DialogCode.Accepted:
-                    event.accept()
-                else:
-                    event.ignore()
-            elif reply == QMessageBox.Discard:
-                event.accept()
-            else:
-                event.ignore()
+        if self._settle_unsaved_changes() == "stay":
+            event.ignore()
         else:
             event.accept()
 
@@ -1364,6 +1434,7 @@ class ModernHudPreferences(QDialog):
             self.update_popup_preview()
 
     def update_popup_preview(self) -> None:
+        self._refresh_unsaved_indicator()
         """Update the popup preview display."""
         if self.popup_combo.currentIndex() < 0:
             return
@@ -1412,6 +1483,7 @@ class ModernHudPreferences(QDialog):
         profile = self.hud_profiles.get(name) if self.hud_profiles else None
         if isinstance(profile, dict):
             profile["positional_mode"] = self.positional_mode_combo.currentData() or "current"
+        self._refresh_unsaved_indicator()
 
     def _on_show_hero_changed(self, checked: bool) -> None:
         """Store the hero-HUD visibility on the current profile."""
@@ -1419,6 +1491,7 @@ class ModernHudPreferences(QDialog):
         profile = self.hud_profiles.get(name) if self.hud_profiles else None
         if isinstance(profile, dict):
             profile["show_hero_hud"] = "true" if checked else "false"
+        self._refresh_unsaved_indicator()
 
     def on_profile_selected(self, index) -> None:
         if index < 0 or index >= self.profile_combo.count():
@@ -1511,8 +1584,10 @@ class ModernHudPreferences(QDialog):
         table_rows = [(gr, gc, disp) for gr, gc, disp, _bi, _k, _r in entries]
         self._row_items = [(bi, kind, ref) for _gr, _gc, _d, bi, kind, ref in entries]
 
-        # Update table
+        # Update table. Its selection signal is ignored meanwhile: a half-built
+        # table would report a row whose item is not the one shown.
         row_items = getattr(self, "_row_items", [])
+        self._building_table = True
         self.stat_table.setRowCount(len(table_rows))
         for i, (_r, _c, stat) in enumerate(table_rows):
             kind = row_items[i][1] if i < len(row_items) else "stat"
@@ -1550,6 +1625,7 @@ class ModernHudPreferences(QDialog):
                     f"Colors configured: Low={stat.get('stat_locolor', 'none')}, "
                     f"High={stat.get('stat_hicolor', 'none')}",
                 )
+        self._building_table = False
 
         # Multi-panel profile -> render stacked, coloured, titled boxes; otherwise
         # the classic single grid. Never let a preview failure leave it blank:
@@ -1622,18 +1698,57 @@ class ModernHudPreferences(QDialog):
         canvas.item_selected.connect(self._on_canvas_item_selected)
         canvas.add_to_row.connect(lambda row, b=canvas_index: self._canvas_add_item(b, row))
         canvas.remove_from_row.connect(lambda row, b=canvas_index: self._canvas_remove_item(b, row))
+        if self._selected_item is not None:
+            canvas.select_ref(self._selected_item)
         self._design_layout.addWidget(canvas)
         self._design_canvases.append(canvas)
         self._design_layout.addStretch()
 
+    def _refresh_profile(self, select: dict | None = None) -> None:
+        """Redraw the current profile after an edit, keeping the selection (B11).
+
+        ``select`` makes another item the selection, typically the one just
+        added. The panel that holds the selected item is shown, and the item is
+        selected again by identity once the views are rebuilt.
+        """
+        if select is not None:
+            self._selected_item = select
+        _name, profile = self._current_profile()
+        where = editor_state.locate(profile, self._selected_item)
+        if where is not None and where[0] is not None:
+            self._current_block_index = where[0]
+        self.on_profile_selected(self.profile_combo.currentIndex())
+
+    def _select_item(self, ref) -> None:
+        """Make ``ref`` the selection, from whichever view picked it."""
+        if ref is None or ref is self._selected_item:
+            return
+        _name, profile = self._current_profile()
+        where = editor_state.locate(profile, ref)
+        if where is None:
+            return
+        self._selected_item = ref
+        block_index = where[0]
+        if block_index is not None and block_index != self._current_block_index and hasattr(self, "group_list"):
+            # Showing another panel rebuilds its Items list, which selects
+            # the item again by identity.
+            self.group_list.setCurrentRow(block_index)
+            return
+        for row, (_kind, item) in enumerate(getattr(self, "_group_item_refs", [])):
+            if item is ref:
+                self.group_items_list.setCurrentRow(row)
+                return
+
     def _on_canvas_item_selected(self, payload) -> None:
-        """A chip was clicked -> select the matching row in the stat table."""
+        """A chip was clicked -> it becomes the selection everywhere."""
         _bi, _kind, ref = payload
+        self._select_item(ref)
+
+    def _on_table_item_selected(self, row: int, *_args: Any) -> None:
+        """A table row was picked -> its item becomes the selection everywhere."""
         items = getattr(self, "_row_items", [])
-        for row, (_b, _k, r) in enumerate(items):
-            if r is ref:
-                self.stat_table.setCurrentCell(row, 0)
-                break
+        if not self._building_table and 0 <= row < len(items):
+            self._select_item(items[row][2])
 
     def _canvas_add_item(self, block_index, row) -> None:
         """+ on a canvas row: add a stat into that block's row (next free col)."""
@@ -1653,7 +1768,7 @@ class ModernHudPreferences(QDialog):
             if self._refuse_taken_cell(container, stat):
                 return
             layout_model.add(container, "stat", stat, int(stat["row"]), int(stat["col"]))
-            self.on_profile_selected(self.profile_combo.currentIndex())
+            self._refresh_profile(select=stat)
 
     def _canvas_remove_item(self, block_index, row) -> None:
         """− on a canvas row: remove the right-most item of that row."""
@@ -1671,7 +1786,7 @@ class ModernHudPreferences(QDialog):
             return
         _c, key, victim = max(candidates, key=lambda x: x[0])
         container[key].remove(victim)
-        self.on_profile_selected(self.profile_combo.currentIndex())
+        self._refresh_profile()
 
     # --- PT4-style group (panel) list + Group Properties -----------------
     def _group_color_btn(self, attr: str) -> QPushButton:
@@ -1714,12 +1829,7 @@ class ModernHudPreferences(QDialog):
     def _populate_group_list(self, profile) -> None:
         self._loading_group = True
         self.group_list.clear()
-        blocks = profile.get("blocks") if isinstance(profile, dict) else None
-        if blocks:
-            for b in blocks:
-                self.group_list.addItem(b.get("label") or "(unnamed)")
-        else:
-            self.group_list.addItem("(single grid)")
+        self.group_list.addItems(editor_state.panel_labels(profile))
         count = self.group_list.count()
         bi = self._current_block_index if 0 <= self._current_block_index < count else 0
         self.group_list.setCurrentRow(bi)
@@ -1811,13 +1921,18 @@ class ModernHudPreferences(QDialog):
         without rebuilding the table or resetting the group selection."""
         _name, profile = self._current_profile()
         item = self.group_list.currentItem()
-        if item is not None:
-            item.setText(self.gp_name.text() or "(unnamed)")
+        labels = editor_state.panel_labels(profile)
+        row = self.group_list.currentRow()
+        if item is not None and 0 <= row < len(labels):
+            # From the profile, not the name field: a flat profile has no
+            # panel name, and its entry stays "(single grid)" (B12).
+            item.setText(labels[row])
         try:
             self._rebuild_design_canvas(profile)
         except Exception:
             log.exception("design canvas refresh failed")
         self._preview_selected_block()
+        self.update_status()
 
     def _preview_selected_block(self) -> None:
         """Show only the selected panel in the HUD preview (matches the canvas)."""
@@ -1851,7 +1966,7 @@ class ModernHudPreferences(QDialog):
             return
         del blocks[bi]
         self._current_block_index = max(0, bi - 1)
-        self.on_profile_selected(self.profile_combo.currentIndex())
+        self._refresh_profile()
 
     # --- PT4-style Group Items list + Item Properties --------------------
     def _item_color_btn(self, role: str) -> QPushButton:
@@ -1903,7 +2018,9 @@ class ModernHudPreferences(QDialog):
             self._group_item_refs.append((kind, ref))
         self._loading_item = False
         if self._group_item_refs:
-            self.group_items_list.setCurrentRow(0)
+            # The selected item again if this panel still holds it, else the first.
+            keep = next((i for i, (_k, ref) in enumerate(self._group_item_refs) if ref is self._selected_item), 0)
+            self.group_items_list.setCurrentRow(keep)
         else:
             self._clear_item_props()
 
@@ -1917,6 +2034,7 @@ class ModernHudPreferences(QDialog):
         if row is None or not (0 <= row < len(self._group_item_refs)):
             return
         kind, ref = self._group_item_refs[row]
+        self._selected_item = ref
         self._load_item_props(kind, ref)
         for cv in getattr(self, "_design_canvases", []):
             cv.select_ref(ref)
@@ -2051,16 +2169,25 @@ class ModernHudPreferences(QDialog):
         layout.addRow(btn_box)
 
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            name = name_input.text()
-            if name and name not in self.hud_profiles:
-                rows = rows_input.value()
-                cols = cols_input.value()
-                # Store profile with matrix size info
-                self.hud_profiles[name] = {"rows": rows, "cols": cols, "stats": []}
-                self.profile_combo.addItem(name)
-                self.profile_combo.setCurrentIndex(self.profile_combo.count() - 1)
-                # Update preview grid size
-                self.preview.set_grid(rows, cols)
+            name = name_input.text().strip()
+            if self._refuse_profile_name(name, _("Cannot create the profile")):
+                return
+            rows = rows_input.value()
+            cols = cols_input.value()
+            # Store profile with matrix size info
+            self.hud_profiles[name] = {"rows": rows, "cols": cols, "stats": []}
+            self.profile_combo.addItem(name)
+            self.profile_combo.setCurrentIndex(self.profile_combo.count() - 1)
+            # Update preview grid size
+            self.preview.set_grid(rows, cols)
+
+    def _refuse_profile_name(self, name: str, title: str, current: str | None = None) -> bool:
+        """Say why ``name`` cannot name a profile and return True; False when it can (B17)."""
+        problem = editor_state.name_problem(name, self.hud_profiles, current=current)
+        if problem is None:
+            return False
+        QMessageBox.warning(self, title, problem)
+        return True
 
     def duplicate_profile(self) -> None:
         if self.profile_combo.currentIndex() < 0:
@@ -2069,12 +2196,52 @@ class ModernHudPreferences(QDialog):
         from PySide6.QtWidgets import QInputDialog
 
         new_name, ok = QInputDialog.getText(self, "Duplicate Profile", "New profile name:")
-        if ok and new_name and new_name not in self.hud_profiles:
-            import copy
+        if not ok:
+            return
+        new_name = new_name.strip()
+        if self._refuse_profile_name(new_name, _("Cannot duplicate the profile")):
+            return
+        import copy
 
-            self.hud_profiles[new_name] = copy.deepcopy(self.hud_profiles[name])
-            self.profile_combo.addItem(new_name)
-            self.profile_combo.setCurrentIndex(self.profile_combo.count() - 1)
+        self.hud_profiles[new_name] = copy.deepcopy(self.hud_profiles[name])
+        self.profile_combo.addItem(new_name)
+        self.profile_combo.setCurrentIndex(self.profile_combo.count() - 1)
+
+    def rename_profile(self) -> None:
+        """Give the current profile another name; the rules that name it follow.
+
+        The profile keeps its place, its ``<ss>`` is renamed on Save, and the
+        game defaults that name it are pointed at the new name then too.
+        """
+        from PySide6.QtWidgets import QInputDialog
+
+        index = self.profile_combo.currentIndex()
+        if index < 0:
+            return
+        old = self.profile_combo.currentText()
+        new_name, ok = QInputDialog.getText(self, _("Rename Profile"), _("New profile name:"), text=old)
+        if not ok:
+            return
+        new = new_name.strip()
+        if new == old or self._refuse_profile_name(new, _("Cannot rename the profile"), current=old):
+            return
+        editor_state.rename_profile(self.hud_profiles, old, new)
+        editor_state.record_rename(self._renamed, old, new)
+        for attribute in ("profile_rules", "panel_rules"):
+            rules = getattr(self, attribute, None)
+            if rules is not None:
+                rules[:] = editor_state.rename_in_rules(rules, old, new)
+        self.profile_combo.setItemText(index, new)
+        for combo in (getattr(self, "rule_profile_combo", None), getattr(self, "panel_rule_profile_combo", None)):
+            found = combo.findData(old) if combo is not None else -1
+            if combo is not None and found >= 0:
+                combo.setItemText(found, new)
+                combo.setItemData(found, new)
+        if hasattr(self, "profile_rules_table"):
+            self._refresh_profile_rules_table()
+        if hasattr(self, "panel_rules_table"):
+            self._refresh_panel_rules_table()
+        self.update_status()
 
     def delete_profile(self) -> None:
         if self.profile_combo.currentIndex() < 0:
@@ -2086,6 +2253,7 @@ class ModernHudPreferences(QDialog):
         ):
             current_index = self.profile_combo.currentIndex()
             del self.hud_profiles[name]
+            editor_state.forget_profile(self._renamed, name)
             self.profile_combo.removeItem(current_index)
             if self.profile_combo.count() > 0:
                 self.profile_combo.setCurrentIndex(0)
@@ -2649,7 +2817,7 @@ class ModernHudPreferences(QDialog):
             if self._refuse_taken_cell(container, stat):
                 return
             layout_model.add(container, "stat", stat, int(stat["row"]), int(stat["col"]))
-            self.on_profile_selected(self.profile_combo.currentIndex())
+            self._refresh_profile(select=stat)
 
     def _refuse_taken_cell(self, container, stat: dict, ignore: dict | None = None) -> bool:
         """Say so and return True when ``stat`` would cover a cell another item holds.
@@ -2690,7 +2858,7 @@ class ModernHudPreferences(QDialog):
             new_label, ok = QInputDialog.getText(self, "Edit Text Label", "Label:", text=ref.get("label", ""))
             if ok:
                 ref["label"] = new_label
-                self.on_profile_selected(self.profile_combo.currentIndex())
+                self._refresh_profile()
             return
         if kind == "hline":
             from PySide6.QtGui import QColor
@@ -2699,7 +2867,7 @@ class ModernHudPreferences(QDialog):
             col = QColorDialog.getColor(QColor(ref.get("color") or "#d7b500"), self, "Line colour")
             if col.isValid():
                 ref["color"] = col.name()
-                self.on_profile_selected(self.profile_combo.currentIndex())
+                self._refresh_profile()
             return
         container = self._item_container(profile, block_index)
         max_rows = int(container.get("rows", 5)) or 5
@@ -2711,7 +2879,7 @@ class ModernHudPreferences(QDialog):
                 return
             ref.update(edited)  # ref is the block's stat dict -> edit persists
             layout_model.grow_to_fit(container, "stat", ref)
-            self.on_profile_selected(self.profile_combo.currentIndex())
+            self._refresh_profile()
 
     def remove_stat(self) -> None:
         name, profile = self._current_profile()
@@ -2725,7 +2893,7 @@ class ModernHudPreferences(QDialog):
         lst = container.get({"text": "texts", "hline": "hlines"}.get(kind, "stats"), [])
         if ref in lst:
             lst.remove(ref)
-        self.on_profile_selected(self.profile_combo.currentIndex())
+        self._refresh_profile()
 
     def _next_free_cell(self, container) -> tuple[int, int]:
         """First free (row, col) in a block/profile container."""
@@ -2758,7 +2926,7 @@ class ModernHudPreferences(QDialog):
         r, cc = layout_model.first_free_cell(container)
         text = {"label": label.strip(), "colspan": 1, "align": "center", "fgcolor": "", "bgcolor": ""}
         layout_model.add(container, "text", text, r, cc)
-        self.on_profile_selected(self.profile_combo.currentIndex())
+        self._refresh_profile(select=text)
 
     def add_hline(self) -> None:
         name, profile = self._current_profile()
@@ -2768,8 +2936,9 @@ class ModernHudPreferences(QDialog):
         block_index = sel[0] if sel else (0 if isinstance(profile, dict) and profile.get("blocks") else None)
         container = self._block_container(profile, block_index)
         # A separator takes its own row and spans the whole panel width (colspan 0).
-        layout_model.add(container, "hline", {"colspan": 0, "color": ""}, layout_model.first_free_row(container), 0)
-        self.on_profile_selected(self.profile_combo.currentIndex())
+        hline = {"colspan": 0, "color": ""}
+        layout_model.add(container, "hline", hline, layout_model.first_free_row(container), 0)
+        self._refresh_profile(select=hline)
 
     def add_block(self) -> None:
         from PySide6.QtWidgets import QInputDialog
@@ -2822,7 +2991,7 @@ class ModernHudPreferences(QDialog):
             }
         )
         profile["multiblock"] = True
-        self.on_profile_selected(self.profile_combo.currentIndex())
+        self._refresh_profile()
 
     def edit_block_properties(self) -> None:
         from PySide6.QtWidgets import QMessageBox
@@ -2839,7 +3008,7 @@ class ModernHudPreferences(QDialog):
         dlg = BlockPropertiesDialog(blocks[bi], parent=self)
         if dlg.exec():
             blocks[bi].update(dlg.get_props())
-            self.on_profile_selected(self.profile_combo.currentIndex())
+            self._refresh_profile()
 
     def _append_stat_node(self, parent_node, stat: dict, row: int, col: int) -> None:
         profile_io.append_stat_node(self.config.doc, parent_node, stat, row, col)
@@ -2993,8 +3162,12 @@ class ModernHudPreferences(QDialog):
             ]
             self._refresh_profile_rules_table()
 
+    def _known_profile_names(self) -> set[str]:
+        """The profiles a rule may name: the editor's, renames and all, once loaded."""
+        return set(getattr(self, "hud_profiles", None) or getattr(self.config, "stat_sets", {}) or {})
+
     def _refresh_profile_rules_table(self) -> None:
-        known_profiles = set(getattr(self.config, "stat_sets", {}) or {})
+        known_profiles = self._known_profile_names()
         self.profile_rules_table.setRowCount(len(self.profile_rules))
         for row, rule in enumerate(self.profile_rules):
             self.profile_rules_table.setRowHeight(row, 36)
@@ -3074,7 +3247,7 @@ class ModernHudPreferences(QDialog):
             return
         context = self._preview_context()
         winner = HudProfileResolver(self.profile_rules).matching_rule(context)
-        known_profiles = set(getattr(self.config, "stat_sets", {}) or {})
+        known_profiles = self._known_profile_names()
 
         if winner is not None:
             text = _("{profile} — from the rule {selectors}").format(
@@ -3088,6 +3261,7 @@ class ModernHudPreferences(QDialog):
             if default is None:
                 text += "\n" + _("Pick a Game (and Format) to see the default that would apply.")
         self.profile_preview_label.setText(text)
+        self._refresh_unsaved_indicator()
 
     # ------------------------------------------------------------------ #
     # Dynamic panels (#309): the panel rules of #298, editable.
@@ -3341,15 +3515,16 @@ class ModernHudPreferences(QDialog):
         return (
             self.add_profile_btn,
             self.dup_profile_btn,
+            self.rename_profile_btn,
             self.del_profile_btn,
             self.export_profile_btn,
             self.import_profile_btn,
         )
 
     def _fit_profile_actions(self, width: int) -> None:
-        """Five buttons, or one menu when the window cannot hold them.
+        """Six buttons, or one menu when the window cannot hold them.
 
-        Both arrangements carry the same five actions; the menu only changes how
+        Both arrangements carry the same six actions; the menu only changes how
         many clicks they cost, and it is what lets the dialog be narrowed past
         the width the buttons need.
         """
@@ -3746,6 +3921,7 @@ class ModernHudPreferences(QDialog):
                 mark = "✔" if outcome.shown else ("∅" if not outcome.matched else "⊘")
                 lines.append(f"{mark} {outcome.panel}: {outcome.reason}")
         self.panel_preview_label.setText("\n".join(lines))
+        self._refresh_unsaved_indicator()
 
     def _refresh_panel_stat_choices(self) -> None:
         from fpdb_3_legacy import hud_panel_editor as editor
@@ -3819,7 +3995,7 @@ class ModernHudPreferences(QDialog):
         for key, value in attributes.items():
             item[key if key != "name" else "stat"] = value
         layout_model.add(container, "stat", item, row, col)
-        self.on_profile_selected(self.profile_combo.currentIndex())
+        self._refresh_profile(select=item)
 
     def _import_panel_rules(self) -> None:
         from PySide6.QtWidgets import QFileDialog
@@ -3931,18 +4107,18 @@ class ModernHudPreferences(QDialog):
             item.update(editor.stat_entry_attributes(choice, grid=(row, col)))
             item.update({key: value for key, value in entry.items() if key.startswith("data_")})
             layout_model.add(container, "stat", item, row, col)
-        self.on_profile_selected(self.profile_combo.currentIndex())
+        self._refresh_profile()
 
     def _dynamic_panels_answers(self) -> Any:
         return dynamic_panels_consent.consent_path(getattr(self.config, "file", None))
 
     def _dynamic_panels_toggled(self, on: bool) -> None:
         """Ticking -- or importing rules, which ticks -- asks first; a no unticks."""
-        if not on or confirm_dynamic_panels(self, self._dynamic_panels_answers()):
-            return
-        self.panel_rules_enabled.blockSignals(True)
-        self.panel_rules_enabled.setChecked(False)
-        self.panel_rules_enabled.blockSignals(False)
+        if on and not confirm_dynamic_panels(self, self._dynamic_panels_answers()):
+            self.panel_rules_enabled.blockSignals(True)
+            self.panel_rules_enabled.setChecked(False)
+            self.panel_rules_enabled.blockSignals(False)
+        self._refresh_unsaved_indicator()
 
     def _persist_panel_rules(self) -> None:
         """Hand the rules to the configuration, or leave it exactly as it was.
@@ -3964,7 +4140,8 @@ class ModernHudPreferences(QDialog):
             raise ValueError(duplicates[0].message)
         setter(self.panel_rules, fallback=self.panel_rules_fallback, enabled=enabled)
 
-    def save_changes(self) -> None:
+    def save_changes(self) -> bool:
+        """Write everything and close; False (and a message) when it failed."""
         try:
             # We need to update the XML directly for the stat sets
             if hasattr(self.config, "doc") and self.config.doc:
@@ -3978,14 +4155,22 @@ class ModernHudPreferences(QDialog):
                 else:
                     stat_sets_node = stat_sets_nodes[0]
 
+                # A renamed profile keeps its <ss>, renamed in place, and the
+                # game defaults that named it follow. The nodes are found by
+                # their names in the file before any of them is renamed.
+                renames = getattr(self, "_renamed", {})
+                existing: dict[str, Any] = {}
+                for ss_node in self.config.doc.getElementsByTagName("ss"):
+                    existing.setdefault(ss_node.getAttribute("name"), ss_node)
+                editor_state.follow_renames(self.config.doc, renames)
+                editor_state.follow_renames_in_games(getattr(self.config, "supported_games", None), renames)
+
                 # For each profile, update or create the stat set in XML
                 for profile_name, profile_data in self.hud_profiles.items():
-                    # Find or create the stat set node
-                    stat_set_node = None
-                    for ss_node in self.config.doc.getElementsByTagName("ss"):
-                        if ss_node.getAttribute("name") == profile_name:
-                            stat_set_node = ss_node
-                            break
+                    source = editor_state.file_name_for(profile_name, renames)
+                    stat_set_node = existing.get(source) if source is not None else None
+                    if stat_set_node is not None:
+                        stat_set_node.setAttribute("name", profile_name)
 
                     if stat_set_node is None:
                         # Create new stat set node if it doesn't exist
@@ -4000,6 +4185,7 @@ class ModernHudPreferences(QDialog):
                     profile_io.write_stat_set_attributes(stat_set_node, profile_data)
                     rows, cols = profile_io.stat_set_size(profile_data)
                     self._write_profile_stats(stat_set_node, profile_data, rows, cols)
+                self._renamed = {}
 
                 # Add final newline after all stat sets
                 if (
@@ -4117,20 +4303,19 @@ class ModernHudPreferences(QDialog):
             # Save to file
             if hasattr(self.config, "save"):
                 self.config.save()
-                # Update original profiles and popups after successful save
-                self.original_profiles = self._deep_copy_profiles(self.hud_profiles)
-                self.original_popups = self._deep_copy_popups(self.popup_windows)
-                self.original_player_profiling = self.profiling_checkbox.isChecked()
-                self.original_profile_in_name = self.profile_in_name_checkbox.isChecked()
-                self.original_profile_min_hands = self.profile_min_hands_spin.value()
+                # What is on disk now is what later edits are compared with.
+                self._saved_state = self._editor_state(keep=True)
+                self._refresh_unsaved_indicator()
                 QMessageBox.information(self, "Success", "HUD configuration saved successfully!")
             else:
                 QMessageBox.warning(self, "Warning", "Could not save to file. Config save method not available.")
 
             self.accept()
+            return True
 
         except Exception as e:  # intentional broad catch: GUI save-profiles boundary surfaces failure in a dialog
             QMessageBox.critical(self, "Error", f"Failed to save HUD profiles:\n{e!s}")
+            return False
 
     def add_popup(self) -> None:
         """Add a new popup window."""
