@@ -251,3 +251,38 @@ def test_editing_an_unknown_stat_without_renaming_it_is_allowed(tmp_path, monkey
     dialog.edit_stat()
     assert (odd["stat"], odd["click"]) == ("not_a_stat", "tooltip")
     assert not [m for m in modals.messages if m[0] == "warning"]
+
+
+def test_another_stat_in_the_dialog_takes_its_whole_binding(tmp_path, monkeypatch) -> None:
+    """The cell's own data_* values belonged to the old stat, not to the one picked."""
+    xml = (
+        '<ss name="tuned" rows="1" cols="1">'
+        '<stat _rowcol="(1,1)" _stat_name="fold_to_3bet_preflop" data_source="analytics"'
+        ' data_definition="fold_to_3bet_preflop" data_format="count" data_min_sample="100"/>'
+        "</ss>"
+    )
+    dialog, modals, _path = _editor(tmp_path, monkeypatch, xml)
+    profile = select_profile(dialog, "tuned")
+    cell = profile["stats"][0]
+    _select(dialog, cell)
+    entry = dialog._stat_catalog().get("analytics:fold_to_cbet_flop")
+    assert entry is not None
+
+    def keep(dlg) -> int:
+        dlg.click_input.setText("tooltip")
+        dlg.accept()
+        return dlg.result()
+
+    modals.dialogs.append(keep)
+    dialog.edit_stat()
+    assert (cell["data_format"], cell["data_min_sample"]) == ("count", "100")
+
+    def switch(dlg) -> int:
+        dlg.stat_input.setCurrentText("fold_to_cbet_flop (analytics)")
+        dlg.accept()
+        return dlg.result()
+
+    modals.dialogs.append(switch)
+    dialog.edit_stat()
+    assert cell["stat"] == "fold_to_cbet_flop"
+    assert {key: cell[key] for key in entry.attributes} == dict(entry.attributes)

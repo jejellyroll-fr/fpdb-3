@@ -208,7 +208,7 @@ def test_the_popup_list_keeps_a_missing_popup_and_stays_quiet_while_filled(qtbot
     combo.currentIndexChanged.connect(changes.append)
 
     combo.set_options(["default", "Multicol"], "gone")
-    assert changes == []
+    assert not changes
     assert (combo.currentText(), combo.value()) == ("gone (missing)", "gone")
 
     combo.set_options(["default"], "")

@@ -453,7 +453,14 @@ class AddStatDialog(QDialog):
         """
         values = self._form_values()
         if self._stored:
-            return stat_edit.changes(self._at_load, values)
+            changed = stat_edit.changes(self._at_load, values)
+            # Another stat takes its whole binding: the data_* values the cell
+            # held were the old stat's, even where they match the new entry's
+            # catalogue defaults. The same stat keeps the cell's own values.
+            entry = self.stat_input.chosen_entry()
+            if entry is not None and entry != self.catalog.entry_for_item(self._stored):
+                changed.update(stat_catalog.stat_values(entry))
+            return changed
         return {key: value for key, value in values.items() if value != "" or key in ("click", "popup")}
 
 
