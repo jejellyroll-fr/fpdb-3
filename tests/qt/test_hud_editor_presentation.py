@@ -145,3 +145,18 @@ def test_a_profile_no_game_uses_says_so(tmp_path, monkeypatch) -> None:
     dialog, _modals, _path = _editor(tmp_path, monkeypatch, config_copy(tmp_path, [node]))
     select_profile(dialog, "orphan")
     assert "no game is mapped" in dialog.hud_handler_label.text()
+
+
+def test_changing_the_mode_keeps_a_font_size_above_the_usual_range(tmp_path, monkeypatch) -> None:
+    import defusedxml.minidom
+
+    node = defusedxml.minidom.parseString(
+        '<ss name="huge" rows="1" cols="1" font_size="60"><stat _rowcol="(1,1)" _stat_name="vpip"/></ss>'
+    ).documentElement
+    dialog, _modals, _path = _editor(tmp_path, monkeypatch, config_copy(tmp_path, [node]))
+    profile = select_profile(dialog, "huge")
+    # Shown as it is, not clamped to the usual bound.
+    assert dialog.font_size_spin.value() == 60
+    dialog.presentation_mode_combo.setCurrentIndex(dialog.presentation_mode_combo.findData("rich"))
+    assert profile["font_size"] == "60"
+    assert profile["rich_text"] == "True"

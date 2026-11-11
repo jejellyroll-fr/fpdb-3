@@ -1443,7 +1443,7 @@ class ModernHudPreferences(QDialog):
         self.presentation_mode_combo.setToolTip(
             _("Rich text draws each value in bold with a smaller, dimmed prefix and suffix.")
         )
-        self.presentation_mode_combo.currentIndexChanged.connect(self._on_presentation_changed)
+        self.presentation_mode_combo.currentIndexChanged.connect(self._on_presentation_mode_changed)
         grid.addWidget(QLabel(_("Mode:")), 0, 0)
         grid.addWidget(self.presentation_mode_combo, 0, 1)
 
@@ -1454,7 +1454,7 @@ class ModernHudPreferences(QDialog):
         self.font_size_spin.setToolTip(
             _("Point size of this profile's cells. The lowest value uses the HUD window's size.")
         )
-        self.font_size_spin.valueChanged.connect(self._on_presentation_changed)
+        self.font_size_spin.valueChanged.connect(self._on_presentation_font_size_changed)
         grid.addWidget(self.font_size_label, 0, 2)
         grid.addWidget(self.font_size_spin, 0, 3)
 
@@ -1513,7 +1513,11 @@ class ModernHudPreferences(QDialog):
             mode = presentation.mode_of(profile)
             self.presentation_mode_combo.setCurrentIndex(max(0, self.presentation_mode_combo.findData(mode)))
             self.font_size_spin.setSpecialValueText(_("Default ({size} pt)").format(size=default_size))
-            self.font_size_spin.setValue(presentation.font_size_of(profile))
+            size = presentation.font_size_of(profile)
+            # A size above the usual bound is still one the HUD draws: widen the
+            # range rather than show (and later save) a clamped value.
+            self.font_size_spin.setMaximum(max(presentation.FONT_SIZE_MAX, size))
+            self.font_size_spin.setValue(size)
         finally:
             self._loading_presentation = False
         self.hud_handler_label.setText(self._describe_handlers(uses))
@@ -1535,18 +1539,33 @@ class ModernHudPreferences(QDialog):
             )
         self.rich_text_support_label.setVisible(show_support)
 
-    def _on_presentation_changed(self, *_args: Any) -> None:
-        """Store the controls on the current profile and redraw the preview."""
+    def _edited_presentation_profile(self) -> tuple[str, dict[str, Any]] | None:
+        """The current profile, unless the controls are only being loaded."""
         if getattr(self, "_loading_presentation", False):
-            return
+            return None
         name = self.profile_combo.currentText()
         profile = self.hud_profiles.get(name) if self.hud_profiles else None
-        if not isinstance(profile, dict):
+        return (name, profile) if isinstance(profile, dict) else None
+
+    def _on_presentation_mode_changed(self, _index: int) -> None:
+        """Store the mode alone: the other fields keep what they hold."""
+        edited = self._edited_presentation_profile()
+        if edited is None:
             return
         mode = self.presentation_mode_combo.currentData() or presentation.MODE_STANDARD
-        presentation.set_mode(profile, mode)
-        presentation.set_font_size(profile, self.font_size_spin.value())
+        presentation.set_mode(edited[1], mode)
         self._apply_presentation_visibility(mode)
+        self._redraw_presentation_preview(*edited)
+
+    def _on_presentation_font_size_changed(self, value: int) -> None:
+        """Store the font size alone."""
+        edited = self._edited_presentation_profile()
+        if edited is None:
+            return
+        presentation.set_font_size(edited[1], value)
+        self._redraw_presentation_preview(*edited)
+
+    def _redraw_presentation_preview(self, name: str, profile: dict[str, Any]) -> None:
         self.preview.set_hud_params(
             xpad=profile.get("xpad", 0),
             ypad=profile.get("ypad", 0),

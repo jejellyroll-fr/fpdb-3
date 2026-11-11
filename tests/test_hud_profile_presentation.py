@@ -152,7 +152,7 @@ def test_a_profile_mapped_to_a_dedicated_window_gets_its_font(example_config) ->
 
 
 def test_a_profile_no_game_uses_has_no_handler(example_config) -> None:
-    assert presentation.hud_handlers_for(example_config, "no-such-profile") == []
+    assert not presentation.hud_handlers_for(example_config, "no-such-profile")
 
 
 def _fake_config(**aux_windows):
@@ -180,4 +180,4 @@ def test_handlers_are_read_from_aux_windows_without_a_lookup_method() -> None:
 
 
 def test_no_configuration_means_no_handler() -> None:
-    assert presentation.hud_handlers_for(None, "p") == []
+    assert not presentation.hud_handlers_for(None, "p")
