@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+from functools import partial
 from typing import Any
 
 from PySide6.QtCore import Qt
@@ -1504,12 +1505,7 @@ class ModernHudPreferences(QDialog):
 
     # --- Profile presentation (#764) ------------------------------------------
     def _create_presentation_box(self) -> QGroupBox:
-        """The profile's presentation controls and its read-only HUD window.
-
-        ``xpad`` / ``ypad`` have no control: the live HUD parses them but never
-        applies them, so a control would change nothing on screen. They are
-        still read and written back unchanged by ``profile_io``.
-        """
+        """The profile's presentation controls and its read-only HUD window."""
         box = QGroupBox(_("Presentation"))
         self.presentation_box = box
         grid = QGridLayout(box)
@@ -1536,16 +1532,38 @@ class ModernHudPreferences(QDialog):
         grid.addWidget(self.font_size_label, 0, 2)
         grid.addWidget(self.font_size_spin, 0, 3)
 
+        # xpad / ypad: pixels the HUD adds to its default gaps (#770).
+        self.padding_labels: dict[str, QLabel] = {}
+        self.padding_spins: dict[str, QSpinBox] = {}
+        for column, (attr, label, tip) in enumerate(
+            (
+                ("xpad", _("Column gap:"), _("Pixels added to the HUD's default gap between columns.")),
+                ("ypad", _("Row gap:"), _("Pixels added to the HUD's default gap between rows.")),
+            )
+        ):
+            spin = QSpinBox()
+            spin.setRange(0, presentation.PADDING_MAX)
+            spin.setPrefix("+")
+            spin.setSuffix(_(" px"))
+            spin.setToolTip(tip)
+            spin.valueChanged.connect(partial(self._on_presentation_padding_changed, attr))
+            caption = QLabel(label)
+            caption.setToolTip(tip)
+            grid.addWidget(caption, 1, column * 2)
+            grid.addWidget(spin, 1, column * 2 + 1)
+            self.padding_labels[attr] = caption
+            self.padding_spins[attr] = spin
+
         self.hud_handler_label = QLabel()
         self.hud_handler_label.setWordWrap(True)
         self.hud_handler_label.setProperty("class", "caption")
-        grid.addWidget(self.hud_handler_label, 1, 0, 1, 4)
+        grid.addWidget(self.hud_handler_label, 2, 0, 1, 4)
 
         self.rich_text_support_label = QLabel()
         self.rich_text_support_label.setWordWrap(True)
         self.rich_text_support_label.setProperty("class", "caption")
         self.rich_text_support_label.hide()
-        grid.addWidget(self.rich_text_support_label, 2, 0, 1, 4)
+        grid.addWidget(self.rich_text_support_label, 3, 0, 1, 4)
 
         grid.setColumnStretch(1, 1)
         grid.setColumnStretch(3, 1)
@@ -1596,6 +1614,10 @@ class ModernHudPreferences(QDialog):
             # range rather than show (and later save) a clamped value.
             self.font_size_spin.setMaximum(max(presentation.FONT_SIZE_MAX, size))
             self.font_size_spin.setValue(size)
+            for attr, spin in self.padding_spins.items():
+                pixels = presentation.padding_of(profile, attr)
+                spin.setMaximum(max(presentation.PADDING_MAX, pixels))
+                spin.setValue(pixels)
         finally:
             self._loading_presentation = False
         self.hud_handler_label.setText(self._describe_handlers(uses))
@@ -1607,6 +1629,9 @@ class ModernHudPreferences(QDialog):
         fields = presentation.visible_fields(mode)
         self.font_size_label.setVisible("font_size" in fields)
         self.font_size_spin.setVisible("font_size" in fields)
+        for attr, spin in self.padding_spins.items():
+            self.padding_labels[attr].setVisible(attr in fields)
+            spin.setVisible(attr in fields)
         plain = presentation.handlers_without_rich_text(self._presentation_handlers)
         show_support = "rich_text_support" in fields and bool(plain)
         if show_support:
@@ -1641,6 +1666,14 @@ class ModernHudPreferences(QDialog):
         if edited is None:
             return
         presentation.set_font_size(edited[1], value)
+        self._redraw_presentation_preview(*edited)
+
+    def _on_presentation_padding_changed(self, attr: str, value: int) -> None:
+        """Store one of the two paddings alone."""
+        edited = self._edited_presentation_profile()
+        if edited is None:
+            return
+        presentation.set_padding(edited[1], attr, value)
         self._redraw_presentation_preview(*edited)
 
     def _redraw_presentation_preview(self, name: str, profile: dict[str, Any]) -> None:

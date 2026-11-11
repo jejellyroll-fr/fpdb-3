@@ -95,7 +95,7 @@ def test_rich_text_and_font_size_survive_a_save_and_padding_is_kept() -> None:
     reloaded = profile_io.profile_from_stat_set(stat_set)
     assert presentation.mode_of(reloaded) == presentation.MODE_RICH
     assert presentation.font_size_of(reloaded) == 11
-    # No control edits the padding; it is written back as it was read.
+    # Padding the edit did not touch is written back as it was read.
     assert (stat_set.xpad, stat_set.ypad) == (1, 0)
 
 
@@ -181,3 +181,44 @@ def test_handlers_are_read_from_aux_windows_without_a_lookup_method() -> None:
 
 def test_no_configuration_means_no_handler() -> None:
     assert not presentation.hud_handlers_for(None, "p")
+
+
+# --- Padding (#770) ----------------------------------------------------------
+@pytest.mark.parametrize("mode", [presentation.MODE_STANDARD, presentation.MODE_RICH])
+def test_both_modes_show_the_padding(mode) -> None:
+    assert {"xpad", "ypad"} <= set(presentation.visible_fields(mode))
+
+
+@pytest.mark.parametrize(
+    ("stored", "pixels"),
+    [(None, 0), ("", 0), ("3", 3), (2, 2), ("-4", 0), ("wide", 0)],
+)
+def test_padding_reads_as_the_hud_applies_it(stored, pixels) -> None:
+    profile = {} if stored is None else {"xpad": stored}
+    assert presentation.padding_of(profile, "xpad") == pixels
+    assert presentation.padding_of([], "ypad") == 0
+
+
+def test_an_unchanged_padding_keeps_its_stored_value() -> None:
+    profile = {"xpad": "2", "ypad": 0}
+    presentation.set_padding(profile, "xpad", 2)
+    presentation.set_padding(profile, "ypad", 0)
+    assert profile == {"xpad": "2", "ypad": 0}
+    presentation.set_padding(profile, "ypad", 5)
+    presentation.set_padding(profile, "xpad", -1)
+    assert profile == {"xpad": 0, "ypad": 5}
+
+
+def test_only_xpad_and_ypad_are_paddings() -> None:
+    with pytest.raises(ValueError, match="font_size"):
+        presentation.padding_of({}, "font_size")
+
+
+def test_padding_set_in_the_editor_survives_a_save() -> None:
+    def edit(profile) -> None:
+        presentation.set_padding(profile, "xpad", 3)
+        presentation.set_padding(profile, "ypad", 2)
+
+    stat_set, node = _write_back(STANDARD, edit)
+    assert (node.getAttribute("xpad"), node.getAttribute("ypad")) == ("3", "2")
+    assert (stat_set.xpad, stat_set.ypad) == (3, 2)

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:34+0100\n"
+"POT-Creation-Date: 2026-11-11 20:54+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -4886,6 +4886,10 @@ msgid " pt"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid " px"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr ""
 
@@ -5049,6 +5053,11 @@ msgstr "类:"
 #, fuzzy
 msgid "Color Ranges"
 msgstr "颜色范围"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Column gap:"
+msgstr "列:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5334,6 +5343,14 @@ msgid "Pick a HUD profile first."
 msgstr "请先选择一个 HUD 档案。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Pixels added to the HUD's default gap between columns."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Pixels added to the HUD's default gap between rows."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Players"
@@ -5408,6 +5425,10 @@ msgstr "纯文本"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "Rich text draws each value in bold with a smaller, dimmed prefix and suffix."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Row gap:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py

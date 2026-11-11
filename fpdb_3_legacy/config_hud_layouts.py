@@ -340,6 +340,35 @@ class StatBlock:
         return temp
 
 
+# Gaps between the cells of a seat's stat grid, in pixels, for a profile whose
+# ``xpad`` and ``ypad`` are 0. A multi-panel profile draws a frame around each
+# panel, so its columns sit closer.
+GRID_COLUMN_GAP = 4
+GRID_COLUMN_GAP_MULTI_PANEL = 2
+GRID_ROW_GAP = 1
+
+
+def _padding(value: Any) -> int:
+    """A padding as the HUD applies it: a whole number of pixels, never negative."""
+    if isinstance(value, bool) or not isinstance(value, (int, str)):
+        return 0
+    try:
+        return max(int(value), 0)
+    except ValueError:
+        return 0
+
+
+def grid_spacing(xpad: Any, ypad: Any, *, multi_panel: bool) -> tuple[int, int]:
+    """The (column, row) gaps of a seat's stat grid (#770).
+
+    A profile's ``xpad`` and ``ypad`` add to the default gaps: 0 draws the grid
+    as it always was, 3 adds 3 pixels between columns (``xpad``) or rows
+    (``ypad``). A negative or unreadable value counts as 0.
+    """
+    column = GRID_COLUMN_GAP_MULTI_PANEL if multi_panel else GRID_COLUMN_GAP
+    return column + _padding(xpad), GRID_ROW_GAP + _padding(ypad)
+
+
 class Stat_sets:
     """Representation of a HUD display configuration.
 

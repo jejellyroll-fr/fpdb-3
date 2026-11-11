@@ -40,6 +40,7 @@ from PySide6.QtWidgets import (
 
 #    FreePokerTools modules
 from fpdb_3_legacy import Aux_Base, Configuration, Hud, Popup, Stats
+from fpdb_3_legacy.config_hud_layouts import grid_spacing
 from fpdb_3_legacy.hud_options_panel import COMPACT_STYLE, HudOptionsPanel, bound_combo, fit_to_content
 from fpdb_3_legacy.hud_profiles import HudPositionScope
 from fpdb_3_legacy.i18n import gettext as _
@@ -1582,8 +1583,11 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
                 )
                 cl.addWidget(title)
             grid = QGridLayout()
-            grid.setHorizontalSpacing(2 if multi else 4)
-            grid.setVerticalSpacing(1)
+            column_gap, row_gap = grid_spacing(
+                getattr(self.aw, "xpad", 0), getattr(self.aw, "ypad", 0), multi_panel=multi
+            )
+            grid.setHorizontalSpacing(column_gap)
+            grid.setVerticalSpacing(row_gap)
             grid.setContentsMargins(1 if multi else 0, 1 if multi else 0, 1 if multi else 0, 0)
             box: list[list[SimpleStat | EmptyStat | None]] = [[None] * blk["ncols"] for _ in range(blk["nrows"])]
             btexts = blk.get("texts", [])

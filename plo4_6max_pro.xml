@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <fpdb_hud_package version="1.0">
-    <ss name="plo4_6max_pro" rows="4" cols="4" xpad="2" ypad="1" show_hero_hud="false">
+    <ss name="plo4_6max_pro" rows="4" cols="4" xpad="0" ypad="0" show_hero_hud="false">
         
             
         <block id="plo4_identity" label="PLO4 • 6-MAX" rows="1" cols="4" x="0" y="0" bgcolor="rgba(11, 18, 32, 235)" fgcolor="#E6EDF3" bordercolor="#2DD4BF" title_bgcolor="#0F766E" title_fgcolor="#F8FAFC" cell_width="44">

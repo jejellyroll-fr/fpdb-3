@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy.Aux_Classic_Hud import _compact_stat_html
 from fpdb_3_legacy.Aux_Hud import SimpleLabel
+from fpdb_3_legacy.config_hud_layouts import grid_spacing
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.i18n import translate_hud_category, translate_hud_label
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -304,6 +305,12 @@ class HudPreviewWidget(QWidget):
         except (TypeError, ValueError):
             return ""
 
+    def _apply_grid_spacing(self, grid: QGridLayout, *, multi_panel: bool) -> None:
+        """The live HUD's gaps, the profile's xpad / ypad included, at the preview's scale."""
+        column_gap, row_gap = grid_spacing(self.xpad, self.ypad, multi_panel=multi_panel)
+        grid.setHorizontalSpacing(round(column_gap * self.preview_scale))
+        grid.setVerticalSpacing(max(1, round(row_gap * self.preview_scale)))
+
     def _build_flat_grid(self) -> QWidget:
         host = QWidget()
         bg = self._qss_color(self.hud_bgcolor, "#000000")
@@ -312,8 +319,7 @@ class HudPreviewWidget(QWidget):
             "border:1px solid #4b335e;}QLabel{border:none;}QToolTip{}",
         )
         grid = QGridLayout(host)
-        grid.setHorizontalSpacing(round(4 * self.preview_scale))
-        grid.setVerticalSpacing(max(1, round(self.preview_scale)))
+        self._apply_grid_spacing(grid, multi_panel=False)
         grid.setContentsMargins(
             round(2 * self.preview_scale),
             round(2 * self.preview_scale),
@@ -356,8 +362,7 @@ class HudPreviewWidget(QWidget):
 
         grid_host = QWidget()
         grid = QGridLayout(grid_host)
-        grid.setHorizontalSpacing(round(4 * self.preview_scale))
-        grid.setVerticalSpacing(max(1, round(self.preview_scale)))
+        self._apply_grid_spacing(grid, multi_panel=len(self.blocks) > 1)
         grid.setContentsMargins(2, 2, 2, 2)
         bstats = block.get("stats", [])
         btexts = block.get("texts", [])
