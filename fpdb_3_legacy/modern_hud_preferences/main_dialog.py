@@ -237,7 +237,7 @@ class ModernHudPreferences(QDialog):
         left_layout.setContentsMargins(15, 15, 15, 15)
         left_layout.setSpacing(10)
 
-        # How the whole profile is drawn: mode, font size, padding, and which
+        # How the whole profile is drawn: mode and font size, and which
         # HUD window handler draws it (read only: it is set per game).
         left_layout.addWidget(self._create_presentation_box())
 
@@ -1426,7 +1426,12 @@ class ModernHudPreferences(QDialog):
 
     # --- Profile presentation (#764) ------------------------------------------
     def _create_presentation_box(self) -> QGroupBox:
-        """The profile's presentation controls and its read-only HUD window."""
+        """The profile's presentation controls and its read-only HUD window.
+
+        ``xpad`` / ``ypad`` have no control: the live HUD parses them but never
+        applies them, so a control would change nothing on screen. They are
+        still read and written back unchanged by ``profile_io``.
+        """
         box = QGroupBox(_("Presentation"))
         self.presentation_box = box
         grid = QGridLayout(box)
@@ -1453,30 +1458,16 @@ class ModernHudPreferences(QDialog):
         grid.addWidget(self.font_size_label, 0, 2)
         grid.addWidget(self.font_size_spin, 0, 3)
 
-        self.xpad_label = QLabel(_("Horizontal padding:"))
-        self.xpad_spin = QSpinBox()
-        self.xpad_spin.setRange(0, presentation.PADDING_MAX)
-        self.xpad_spin.valueChanged.connect(self._on_presentation_changed)
-        grid.addWidget(self.xpad_label, 1, 0)
-        grid.addWidget(self.xpad_spin, 1, 1)
-
-        self.ypad_label = QLabel(_("Vertical padding:"))
-        self.ypad_spin = QSpinBox()
-        self.ypad_spin.setRange(0, presentation.PADDING_MAX)
-        self.ypad_spin.valueChanged.connect(self._on_presentation_changed)
-        grid.addWidget(self.ypad_label, 1, 2)
-        grid.addWidget(self.ypad_spin, 1, 3)
-
         self.hud_handler_label = QLabel()
         self.hud_handler_label.setWordWrap(True)
         self.hud_handler_label.setProperty("class", "caption")
-        grid.addWidget(self.hud_handler_label, 2, 0, 1, 4)
+        grid.addWidget(self.hud_handler_label, 1, 0, 1, 4)
 
         self.rich_text_support_label = QLabel()
         self.rich_text_support_label.setWordWrap(True)
         self.rich_text_support_label.setProperty("class", "caption")
         self.rich_text_support_label.hide()
-        grid.addWidget(self.rich_text_support_label, 3, 0, 1, 4)
+        grid.addWidget(self.rich_text_support_label, 2, 0, 1, 4)
 
         grid.setColumnStretch(1, 1)
         grid.setColumnStretch(3, 1)
@@ -1523,8 +1514,6 @@ class ModernHudPreferences(QDialog):
             self.presentation_mode_combo.setCurrentIndex(max(0, self.presentation_mode_combo.findData(mode)))
             self.font_size_spin.setSpecialValueText(_("Default ({size} pt)").format(size=default_size))
             self.font_size_spin.setValue(presentation.font_size_of(profile))
-            self.xpad_spin.setValue(presentation.padding_of(profile, "xpad"))
-            self.ypad_spin.setValue(presentation.padding_of(profile, "ypad"))
         finally:
             self._loading_presentation = False
         self.hud_handler_label.setText(self._describe_handlers(uses))
@@ -1536,10 +1525,6 @@ class ModernHudPreferences(QDialog):
         fields = presentation.visible_fields(mode)
         self.font_size_label.setVisible("font_size" in fields)
         self.font_size_spin.setVisible("font_size" in fields)
-        self.xpad_label.setVisible("xpad" in fields)
-        self.xpad_spin.setVisible("xpad" in fields)
-        self.ypad_label.setVisible("ypad" in fields)
-        self.ypad_spin.setVisible("ypad" in fields)
         plain = presentation.handlers_without_rich_text(self._presentation_handlers)
         show_support = "rich_text_support" in fields and bool(plain)
         if show_support:
@@ -1561,8 +1546,6 @@ class ModernHudPreferences(QDialog):
         mode = self.presentation_mode_combo.currentData() or presentation.MODE_STANDARD
         presentation.set_mode(profile, mode)
         presentation.set_font_size(profile, self.font_size_spin.value())
-        presentation.set_padding(profile, "xpad", self.xpad_spin.value())
-        presentation.set_padding(profile, "ypad", self.ypad_spin.value())
         self._apply_presentation_visibility(mode)
         self.preview.set_hud_params(
             xpad=profile.get("xpad", 0),

@@ -8,7 +8,9 @@ A ``<ss>`` carries a few presentation attributes the live HUD reads:
 * ``font_size`` -- read by ``Aux_Hud.SimpleHUD`` as an integer point size. An
   empty or unreadable value falls back to the ``font_size`` of the ``<aw>`` that
   draws the HUD.
-* ``xpad`` / ``ypad`` -- read as integers by ``Stat_sets``.
+* ``xpad`` / ``ypad`` -- parsed as integers by ``Stat_sets`` and stored by
+  ``SimpleHUD``, but no layout applies them, so the editor offers no control
+  for them; ``profile_io`` still writes them back unchanged.
 
 The editor keeps these as strings in the profile dict (see ``profile_io``) and
 writes a cleared one back as a removed attribute. The helpers below read and
@@ -39,15 +41,14 @@ HUD_MODULES = ("Aux_Hud", "Aux_Classic_Hud")
 #: The window class that draws rich-text cells.
 RICH_TEXT_CLASS = "ClassicHud"
 
-#: Bounds of the editor's controls. The HUD itself takes any integer.
+#: Upper bound of the editor's control. The HUD itself takes any integer.
 FONT_SIZE_MAX = 48
-PADDING_MAX = 20
 
-#: Profile fields shown for each mode. Both modes use the font size and the
-#: padding; the rich-text warning only means something in rich-text mode.
+#: Profile fields shown for each mode. Both modes use the font size; the
+#: rich-text warning only means something in rich-text mode.
 FIELDS_BY_MODE = {
-    MODE_STANDARD: ("font_size", "xpad", "ypad"),
-    MODE_RICH: ("font_size", "xpad", "ypad", "rich_text_support"),
+    MODE_STANDARD: ("font_size",),
+    MODE_RICH: ("font_size", "rich_text_support"),
 }
 
 
@@ -76,7 +77,7 @@ def visible_fields(mode: str) -> tuple[str, ...]:
     return FIELDS_BY_MODE.get(mode, FIELDS_BY_MODE[MODE_STANDARD])
 
 
-# --- Font size and padding ---------------------------------------------------
+# --- Font size ---------------------------------------------------------------
 def _positive_int(text: str) -> int:
     try:
         value = int(text)
@@ -99,20 +100,6 @@ def set_font_size(profile: dict[str, Any], size: int) -> None:
     if int(size) == font_size_of(profile):
         return
     profile["font_size"] = str(int(size)) if int(size) > 0 else ""
-
-
-def padding_of(profile: Any, axis: str) -> int:
-    """``xpad`` or ``ypad`` as the HUD reads it (an empty value is 0)."""
-    return _positive_int(_attr(profile, axis) or "0")
-
-
-def set_padding(profile: dict[str, Any], axis: str, value: int) -> None:
-    """Set ``xpad`` or ``ypad``, leaving an unchanged value untouched."""
-    if axis not in ("xpad", "ypad"):
-        raise ValueError(axis)
-    if int(value) == padding_of(profile, axis):
-        return
-    profile[axis] = int(value)
 
 
 # --- Window handlers ---------------------------------------------------------

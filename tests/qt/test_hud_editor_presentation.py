@@ -49,8 +49,6 @@ def test_a_standard_profile_names_the_window_default_font(tmp_path, monkeypatch)
     assert dialog.presentation_mode_combo.currentData() == "standard"
     assert dialog.font_size_spin.value() == 0
     assert dialog.font_size_spin.text() == "Default (8 pt)"
-    assert dialog.xpad_spin.value() == 1
-    assert dialog.ypad_spin.value() == 0
     assert "ClassicHud (holdem, 2_holdem, irish" in dialog.hud_handler_label.text()
     assert not dialog.preview.rich_text
     assert not dialog.has_unsaved_changes()
@@ -74,11 +72,19 @@ def test_the_preview_follows_the_mode_and_the_font_size(tmp_path, monkeypatch) -
 def test_changing_a_control_is_an_unsaved_change(tmp_path, monkeypatch) -> None:
     dialog, _modals, _path = _editor(tmp_path, monkeypatch)
     profile = select_profile(dialog, "holdem_ring")
-    dialog.ypad_spin.setValue(3)
-    assert profile["ypad"] == 3
+    dialog.font_size_spin.setValue(11)
+    assert profile["font_size"] == "11"
     assert dialog.has_unsaved_changes()
-    dialog.ypad_spin.setValue(0)
+    dialog.font_size_spin.setValue(0)
     assert not dialog.has_unsaved_changes()
+
+
+def test_padding_has_no_control_and_is_kept(tmp_path, monkeypatch) -> None:
+    """The live HUD never applies xpad/ypad, so the editor offers no control for them."""
+    dialog, _modals, _path = _editor(tmp_path, monkeypatch)
+    select_profile(dialog, "holdem_ring")
+    assert not hasattr(dialog, "xpad_spin")
+    assert not hasattr(dialog, "ypad_spin")
 
 
 def test_rich_text_settings_are_saved_reloaded_and_cleared(tmp_path, monkeypatch) -> None:
@@ -86,17 +92,15 @@ def test_rich_text_settings_are_saved_reloaded_and_cleared(tmp_path, monkeypatch
     select_profile(dialog, "holdem_ring")
     dialog.presentation_mode_combo.setCurrentIndex(dialog.presentation_mode_combo.findData("rich"))
     dialog.font_size_spin.setValue(12)
-    dialog.xpad_spin.setValue(3)
-    dialog.ypad_spin.setValue(2)
     _save(dialog, modals)
 
     saved = reload_stat_set(path, "holdem_ring")
-    assert (saved.rich_text, saved.font_size, saved.xpad, saved.ypad) == ("True", "12", 3, 2)
+    assert (saved.rich_text, saved.font_size, saved.xpad, saved.ypad) == ("True", "12", 1, 0)
 
     dialog, modals, _path = _editor(tmp_path, monkeypatch, path)
     select_profile(dialog, "holdem_ring")
     assert dialog.presentation_mode_combo.currentData() == "rich"
-    assert (dialog.font_size_spin.value(), dialog.xpad_spin.value(), dialog.ypad_spin.value()) == (12, 3, 2)
+    assert dialog.font_size_spin.value() == 12
     assert not dialog.has_unsaved_changes()
 
     dialog.presentation_mode_combo.setCurrentIndex(dialog.presentation_mode_combo.findData("standard"))
@@ -108,7 +112,7 @@ def test_rich_text_settings_are_saved_reloaded_and_cleared(tmp_path, monkeypatch
     node = next(n for n in doc.getElementsByTagName("ss") if n.getAttribute("name") == "holdem_ring")
     assert not node.hasAttribute("rich_text")
     assert not node.hasAttribute("font_size")
-    assert node.getAttribute("xpad") == "3"
+    assert node.getAttribute("xpad") == "1"
 
 
 def test_the_rich_text_warning_shows_only_in_rich_mode(tmp_path, monkeypatch) -> None:

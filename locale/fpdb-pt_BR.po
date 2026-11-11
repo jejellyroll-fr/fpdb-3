@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 13:54+0100\n"
+"POT-Creation-Date: 2026-11-11 14:19+0100\n"
 "PO-Revision-Date: 2011-07-27 15:17+0000\n"
 "Last-Translator: pkpkpkdo <ofelipedbzgt@hotmail.com>\n"
 "Language-Team: Portuguese (Brazilian) (http://www.transifex.net/projects/p/"
@@ -5123,10 +5123,6 @@ msgid "Hands for this seat"
 msgstr "Mãos para este assento"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Horizontal padding:"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Horz Line"
 msgstr "Linha horizontal"
@@ -5485,10 +5481,6 @@ msgstr "Atualizar regra"
 #, fuzzy
 msgid "Update selected"
 msgstr "Atualizar selecionada"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Vertical padding:"
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy

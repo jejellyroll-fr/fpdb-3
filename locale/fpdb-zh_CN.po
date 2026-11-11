@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 13:54+0100\n"
+"POT-Creation-Date: 2026-11-11 14:19+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -5093,10 +5093,6 @@ msgid "Hands for this seat"
 msgstr "此座位的手数"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Horizontal padding:"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Horz Line"
 msgstr "水平线"
@@ -5448,10 +5444,6 @@ msgstr "更新规则"
 #, fuzzy
 msgid "Update selected"
 msgstr "更新所选"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Vertical padding:"
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy

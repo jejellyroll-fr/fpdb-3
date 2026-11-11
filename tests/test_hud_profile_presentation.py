@@ -62,7 +62,7 @@ def test_the_rich_text_warning_is_only_a_field_of_rich_mode() -> None:
     assert presentation.visible_fields("unknown") == presentation.visible_fields(presentation.MODE_STANDARD)
 
 
-# --- Font size and padding ---------------------------------------------------
+# --- Font size ---------------------------------------------------------------
 @pytest.mark.parametrize(("value", "size"), [("10", 10), ("", 0), ("9.5", 0), ("big", 0), ("-3", 0), (None, 0)])
 def test_the_font_size_is_what_the_hud_would_use(value, size) -> None:
     assert presentation.font_size_of({"font_size": value}) == size
@@ -85,35 +85,18 @@ def test_an_unchanged_font_size_is_left_as_written() -> None:
     assert unreadable["font_size"] == "9.5"
 
 
-def test_padding_reads_ints_and_strings() -> None:
-    assert presentation.padding_of({"xpad": 2}, "xpad") == 2
-    assert presentation.padding_of({"ypad": "3"}, "ypad") == 3
-    assert presentation.padding_of({}, "xpad") == 0
-
-
-def test_setting_padding_only_writes_a_change() -> None:
-    profile = {"xpad": 1}
-    presentation.set_padding(profile, "xpad", 1)
-    assert profile == {"xpad": 1}
-    presentation.set_padding(profile, "ypad", 4)
-    assert profile["ypad"] == 4
-    with pytest.raises(ValueError):
-        presentation.set_padding(profile, "zpad", 1)
-
-
 # --- Writing -----------------------------------------------------------------
-def test_rich_text_font_size_and_padding_survive_a_save() -> None:
+def test_rich_text_and_font_size_survive_a_save_and_padding_is_kept() -> None:
     def edit(profile) -> None:
         presentation.set_mode(profile, presentation.MODE_RICH)
         presentation.set_font_size(profile, 11)
-        presentation.set_padding(profile, "xpad", 3)
-        presentation.set_padding(profile, "ypad", 2)
 
     stat_set, _node = _write_back(STANDARD, edit)
     reloaded = profile_io.profile_from_stat_set(stat_set)
     assert presentation.mode_of(reloaded) == presentation.MODE_RICH
     assert presentation.font_size_of(reloaded) == 11
-    assert (stat_set.xpad, stat_set.ypad) == (3, 2)
+    # No control edits the padding; it is written back as it was read.
+    assert (stat_set.xpad, stat_set.ypad) == (1, 0)
 
 
 def test_switching_back_to_standard_removes_the_attribute() -> None:
@@ -134,7 +117,6 @@ def test_an_untouched_profile_writes_back_identical_attributes() -> None:
     def edit(profile) -> None:
         presentation.set_mode(profile, presentation.mode_of(profile))
         presentation.set_font_size(profile, presentation.font_size_of(profile))
-        presentation.set_padding(profile, "xpad", presentation.padding_of(profile, "xpad"))
 
     _stat_set, node = _write_back(rich, edit)
     assert node.getAttribute("rich_text") == "true"
