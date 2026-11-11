@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:30+0100\n"
+"POT-Creation-Date: 2026-11-11 20:34+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -4828,6 +4828,10 @@ msgid "profile rules"
 msgstr "プロフィール名"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid " pt"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr ""
 
@@ -5001,6 +5005,11 @@ msgid "Conditions"
 msgstr "条件"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Default ({size} pt)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Design"
 msgstr "デザイン"
@@ -5059,6 +5068,11 @@ msgid "Fallback"
 msgstr "代替表示"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Font size:"
+msgstr "ベットサイズ"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Game"
@@ -5099,6 +5113,17 @@ msgstr "HUD をインポートしました — 更新が必要です"
 #, fuzzy
 msgid "HUD profile"
 msgstr "HUD プロフィール"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"HUD window: no game is mapped to this profile (a profile rule may still pick "
+"it). The window handler is set per game, not here."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "HUD window: {handlers}. The window handler is set per game, not here."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5165,6 +5190,10 @@ msgid "Minimum hands required for profiling:"
 msgstr "プロファイリングに必要な最小ハンド数:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Mode:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Move down"
 msgstr "下へ移動"
@@ -5205,6 +5234,13 @@ msgid ""
 msgstr ""
 "デフォルトではオフです。オンにすると、ルールで指定されたパネルが表示され、そ"
 "の他のブロックは従来どおりの位置ルールを保ちます。"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Only {rich} draws rich text: {handlers} will show this profile as standard "
+"text."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5259,6 +5295,12 @@ msgid "Players"
 msgstr "プレイヤー"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Point size of this profile's cells. The lowest value uses the HUD window's "
+"size."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Popup Conflict"
 msgstr "ポップアップの競合"
@@ -5272,6 +5314,11 @@ msgstr "ポップアップのプレビュー"
 #, fuzzy
 msgid "Positional panels:"
 msgstr "ポジション別パネル:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Presentation"
+msgstr "前のアクション"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5307,6 +5354,16 @@ msgstr "削除"
 #, fuzzy
 msgid "Rename Profile"
 msgstr "新しいプロフィール"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Rich text"
+msgstr "プレーンテキスト"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Rich text draws each value in bold with a smaller, dimmed prefix and suffix."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
@@ -5360,6 +5417,10 @@ msgstr ""
 #, fuzzy
 msgid "Speed"
 msgstr "スピード"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Standard"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy

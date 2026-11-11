@@ -43,7 +43,7 @@ from fpdb_3_legacy.hud_profiles import HudContext, HudProfileResolver, HudProfil
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.i18n import translate_hud_category
 from fpdb_3_legacy.loggingFpdb import get_logger
-from fpdb_3_legacy.modern_hud_preferences import editor_state, layout_model, profile_io, stat_edit
+from fpdb_3_legacy.modern_hud_preferences import editor_state, layout_model, presentation, profile_io, stat_edit
 from fpdb_3_legacy.modern_hud_preferences.design_canvas import HudDesignCanvas
 from fpdb_3_legacy.modern_hud_preferences.dialogs import (
     AddStatDialog,
@@ -247,6 +247,10 @@ class ModernHudPreferences(QDialog):
         left_layout = QVBoxLayout(left_panel)
         left_layout.setContentsMargins(15, 15, 15, 15)
         left_layout.setSpacing(10)
+
+        # How the whole profile is drawn: mode and font size, and which
+        # HUD window handler draws it (read only: it is set per game).
+        left_layout.addWidget(self._create_presentation_box())
 
         # PT4-style panel (group) management: list + inline Group Properties.
         self._loading_group = False
@@ -1498,6 +1502,156 @@ class ModernHudPreferences(QDialog):
             profile["show_hero_hud"] = "true" if checked else "false"
         self._refresh_unsaved_indicator()
 
+    # --- Profile presentation (#764) ------------------------------------------
+    def _create_presentation_box(self) -> QGroupBox:
+        """The profile's presentation controls and its read-only HUD window.
+
+        ``xpad`` / ``ypad`` have no control: the live HUD parses them but never
+        applies them, so a control would change nothing on screen. They are
+        still read and written back unchanged by ``profile_io``.
+        """
+        box = QGroupBox(_("Presentation"))
+        self.presentation_box = box
+        grid = QGridLayout(box)
+        grid.setHorizontalSpacing(10)
+
+        self.presentation_mode_combo = QComboBox()
+        self.presentation_mode_combo.addItem(_("Standard"), presentation.MODE_STANDARD)
+        self.presentation_mode_combo.addItem(_("Rich text"), presentation.MODE_RICH)
+        self.presentation_mode_combo.setToolTip(
+            _("Rich text draws each value in bold with a smaller, dimmed prefix and suffix.")
+        )
+        self.presentation_mode_combo.currentIndexChanged.connect(self._on_presentation_mode_changed)
+        grid.addWidget(QLabel(_("Mode:")), 0, 0)
+        grid.addWidget(self.presentation_mode_combo, 0, 1)
+
+        self.font_size_label = QLabel(_("Font size:"))
+        self.font_size_spin = QSpinBox()
+        self.font_size_spin.setRange(0, presentation.FONT_SIZE_MAX)
+        self.font_size_spin.setSuffix(_(" pt"))
+        self.font_size_spin.setToolTip(
+            _("Point size of this profile's cells. The lowest value uses the HUD window's size.")
+        )
+        self.font_size_spin.valueChanged.connect(self._on_presentation_font_size_changed)
+        grid.addWidget(self.font_size_label, 0, 2)
+        grid.addWidget(self.font_size_spin, 0, 3)
+
+        self.hud_handler_label = QLabel()
+        self.hud_handler_label.setWordWrap(True)
+        self.hud_handler_label.setProperty("class", "caption")
+        grid.addWidget(self.hud_handler_label, 1, 0, 1, 4)
+
+        self.rich_text_support_label = QLabel()
+        self.rich_text_support_label.setWordWrap(True)
+        self.rich_text_support_label.setProperty("class", "caption")
+        self.rich_text_support_label.hide()
+        grid.addWidget(self.rich_text_support_label, 2, 0, 1, 4)
+
+        grid.setColumnStretch(1, 1)
+        grid.setColumnStretch(3, 1)
+        self._loading_presentation = False
+        self._presentation_handlers: list[presentation.HandlerUse] = []
+        return box
+
+    def _profile_handlers(self, name: str) -> list[presentation.HandlerUse]:
+        return presentation.hud_handlers_for(getattr(self, "config", None), name)
+
+    def _profile_preview_params(self, name: str, profile: Any) -> dict[str, Any]:
+        """The preview's HUD parameters, with this profile's mode and font size."""
+        params: dict[str, Any] = dict(self._hud_preview_params())
+        size = presentation.font_size_of(profile)
+        if not size:
+            try:
+                fallback = int(params.get("font_size") or 8)
+            except (TypeError, ValueError):
+                fallback = 8
+            size = presentation.handler_font_size(self._profile_handlers(name), fallback)
+        params["font_size"] = size
+        params["rich_text"] = presentation.mode_of(profile) == presentation.MODE_RICH
+        return params
+
+    def _describe_handlers(self, uses: list[presentation.HandlerUse]) -> str:
+        if not uses:
+            return _(
+                "HUD window: no game is mapped to this profile (a profile rule may still pick it). "
+                "The window handler is set per game, not here."
+            )
+        handlers = "; ".join(f"{use.name} ({', '.join(use.games)})" for use in uses)
+        return _("HUD window: {handlers}. The window handler is set per game, not here.").format(handlers=handlers)
+
+    def _load_presentation_controls(self, name: str, profile: Any) -> None:
+        """Show ``profile``'s presentation settings without marking an edit."""
+        if getattr(self, "presentation_box", None) is None:
+            return
+        uses = self._profile_handlers(name)
+        self._presentation_handlers = uses
+        default_size = self._profile_preview_params(name, {})["font_size"]
+        self._loading_presentation = True
+        try:
+            mode = presentation.mode_of(profile)
+            self.presentation_mode_combo.setCurrentIndex(max(0, self.presentation_mode_combo.findData(mode)))
+            self.font_size_spin.setSpecialValueText(_("Default ({size} pt)").format(size=default_size))
+            size = presentation.font_size_of(profile)
+            # A size above the usual bound is still one the HUD draws: widen the
+            # range rather than show (and later save) a clamped value.
+            self.font_size_spin.setMaximum(max(presentation.FONT_SIZE_MAX, size))
+            self.font_size_spin.setValue(size)
+        finally:
+            self._loading_presentation = False
+        self.hud_handler_label.setText(self._describe_handlers(uses))
+        self.presentation_box.setEnabled(isinstance(profile, dict))
+        self._apply_presentation_visibility(mode)
+
+    def _apply_presentation_visibility(self, mode: str) -> None:
+        """Hide what has no effect in ``mode``."""
+        fields = presentation.visible_fields(mode)
+        self.font_size_label.setVisible("font_size" in fields)
+        self.font_size_spin.setVisible("font_size" in fields)
+        plain = presentation.handlers_without_rich_text(self._presentation_handlers)
+        show_support = "rich_text_support" in fields and bool(plain)
+        if show_support:
+            self.rich_text_support_label.setText(
+                _("Only {rich} draws rich text: {handlers} will show this profile as standard text.").format(
+                    rich=presentation.RICH_TEXT_CLASS, handlers=", ".join(plain)
+                )
+            )
+        self.rich_text_support_label.setVisible(show_support)
+
+    def _edited_presentation_profile(self) -> tuple[str, dict[str, Any]] | None:
+        """The current profile, unless the controls are only being loaded."""
+        if getattr(self, "_loading_presentation", False):
+            return None
+        name = self.profile_combo.currentText()
+        profile = self.hud_profiles.get(name) if self.hud_profiles else None
+        return (name, profile) if isinstance(profile, dict) else None
+
+    def _on_presentation_mode_changed(self, _index: int) -> None:
+        """Store the mode alone: the other fields keep what they hold."""
+        edited = self._edited_presentation_profile()
+        if edited is None:
+            return
+        mode = self.presentation_mode_combo.currentData() or presentation.MODE_STANDARD
+        presentation.set_mode(edited[1], mode)
+        self._apply_presentation_visibility(mode)
+        self._redraw_presentation_preview(*edited)
+
+    def _on_presentation_font_size_changed(self, value: int) -> None:
+        """Store the font size alone."""
+        edited = self._edited_presentation_profile()
+        if edited is None:
+            return
+        presentation.set_font_size(edited[1], value)
+        self._redraw_presentation_preview(*edited)
+
+    def _redraw_presentation_preview(self, name: str, profile: dict[str, Any]) -> None:
+        """Redraw the preview after an edit and update the "unsaved changes" mark."""
+        self.preview.set_hud_params(
+            xpad=profile.get("xpad", 0),
+            ypad=profile.get("ypad", 0),
+            **self._profile_preview_params(name, profile),
+        )
+        self._refresh_unsaved_indicator()
+
     def on_profile_selected(self, index) -> None:
         if index < 0 or index >= self.profile_combo.count():
             self.stat_table.setRowCount(0)
@@ -1549,8 +1703,10 @@ class ModernHudPreferences(QDialog):
             xpad = profile.get("xpad", 0)
             ypad = profile.get("ypad", 0)
 
+        self._load_presentation_controls(name, profile)
+
         # Update grid size
-        self.preview.set_hud_params(xpad=xpad, ypad=ypad, **self._hud_preview_params())
+        self.preview.set_hud_params(xpad=xpad, ypad=ypad, **self._profile_preview_params(name, profile))
         self.preview.set_grid(rows, cols)
 
         # Build the table rows: stats plus PT4-style text-label items (column/row

@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from fpdb_3_legacy.Aux_Classic_Hud import _compact_stat_html
 from fpdb_3_legacy.Aux_Hud import SimpleLabel
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.i18n import translate_hud_category, translate_hud_label
@@ -114,6 +115,8 @@ class HudPreviewWidget(QWidget):
         self.hud_fgcolor = "#ffffff"
         self.hud_font = "Sans"
         self.hud_font_size = 8
+        # The profile's rich_text mode: cells drawn as ClassicStat draws them.
+        self.rich_text = False
         self.preview_scale = 1.45
         self.stats: list[dict[str, Any]] = []  # List of dicts: {row, col, stat, click, popup}
         self.blocks: list[dict[str, Any]] = []  # Multi-panel layout: list of block dicts (styled boxes)
@@ -211,6 +214,7 @@ class HudPreviewWidget(QWidget):
         fgcolor: str = "#ffffff",
         font: str = "Sans",
         font_size: int | str = 8,
+        rich_text: bool = False,
     ) -> None:
         self.xpad = int(xpad or 0)
         self.ypad = int(ypad or 0)
@@ -218,6 +222,7 @@ class HudPreviewWidget(QWidget):
         self.hud_fgcolor = fgcolor or "#ffffff"
         self.hud_font = font or "Sans"
         self.hud_font_size = int(font_size or 8)
+        self.rich_text = bool(rich_text)
         self._rebuild_hud_window()
 
     def _clear_hud_outer(self) -> None:
@@ -267,7 +272,11 @@ class HudPreviewWidget(QWidget):
             f"color:{fg};{bg_rule}padding:0px 3px;border:none;}}",
         )
         value = sample_value
-        if stat_name:
+        if stat_name and self.rich_text and stat_name != "player_note":
+            # The same markup the live HUD's ClassicStat uses in rich-text mode.
+            lab.setTextFormat(Qt.TextFormat.RichText)
+            value = _compact_stat_html(stat.get("hudprefix", ""), sample_value, stat.get("hudsuffix", ""), fg)
+        elif stat_name:
             value = f"{stat.get('hudprefix', '')}{value}{stat.get('hudsuffix', '')}"
         lab.setText(value)
         # The package's own tip when it has one: a preview whose cells cannot

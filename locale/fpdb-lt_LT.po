@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:30+0100\n"
+"POT-Creation-Date: 2026-11-11 20:34+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -4917,6 +4917,10 @@ msgid "profile rules"
 msgstr "Naudotojo vardas"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid " pt"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr ""
 
@@ -5091,6 +5095,11 @@ msgid "Conditions"
 msgstr "Pozicija"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Default ({size} pt)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Design"
 msgstr "Dizainas"
@@ -5150,6 +5159,11 @@ msgid "Fallback"
 msgstr "Atsarginė parinktis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Font size:"
+msgstr "Statymo dydis"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Game"
@@ -5190,6 +5204,17 @@ msgstr "HUD importuotas — reikia atnaujinti"
 #, fuzzy
 msgid "HUD profile"
 msgstr "HUD profilis"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"HUD window: no game is mapped to this profile (a profile rule may still pick "
+"it). The window handler is set per game, not here."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "HUD window: {handlers}. The window handler is set per game, not here."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5256,6 +5281,10 @@ msgid "Minimum hands required for profiling:"
 msgstr "Mažiausias profiliavimui reikalingas rankų skaičius:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Mode:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Move down"
 msgstr "Perkelti žemyn"
@@ -5296,6 +5325,13 @@ msgid ""
 msgstr ""
 "Pagal numatymą išjungta. Įjungus rodomi taisyklėje nurodyti skydeliai, o "
 "kiti blokai išlaiko savo įprastą pozicijos taisyklę."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Only {rich} draws rich text: {handlers} will show this profile as standard "
+"text."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5351,6 +5387,12 @@ msgid "Players"
 msgstr "Žaidėjai"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Point size of this profile's cells. The lowest value uses the HUD window's "
+"size."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Popup Conflict"
 msgstr "Iššokančių langų konfliktas"
@@ -5364,6 +5406,11 @@ msgstr "Iššokančio lango peržiūra"
 #, fuzzy
 msgid "Positional panels:"
 msgstr "Pozicija"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Presentation"
+msgstr "Ankstesnis veiksmas"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5399,6 +5446,16 @@ msgstr "Pašalinti"
 #, fuzzy
 msgid "Rename Profile"
 msgstr "Naujas profilis"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Rich text"
+msgstr "Paprastas tekstas"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Rich text draws each value in bold with a smaller, dimmed prefix and suffix."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
@@ -5453,6 +5510,10 @@ msgstr ""
 #, fuzzy
 msgid "Speed"
 msgstr "Greitis"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Standard"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy

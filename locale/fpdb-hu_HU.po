@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:30+0100\n"
+"POT-Creation-Date: 2026-11-11 20:34+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -4856,6 +4856,10 @@ msgid "profile rules"
 msgstr "Fájlnév:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid " pt"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr "#"
 
@@ -5030,6 +5034,11 @@ msgid "Conditions"
 msgstr "Pozíció"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Default ({size} pt)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Design"
 msgstr "Tervezés"
@@ -5090,6 +5099,11 @@ msgid "Fallback"
 msgstr "Tartalék"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Font size:"
+msgstr "Tétméret"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Game"
@@ -5130,6 +5144,17 @@ msgstr "HUD importálva — frissítés szükséges"
 #, fuzzy
 msgid "HUD profile"
 msgstr "HUD-profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"HUD window: no game is mapped to this profile (a profile rule may still pick "
+"it). The window handler is set per game, not here."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "HUD window: {handlers}. The window handler is set per game, not here."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5196,6 +5221,10 @@ msgid "Minimum hands required for profiling:"
 msgstr "A profilozáshoz szükséges minimális leosztásszám:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Mode:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Move down"
 msgstr "Lejjebb"
@@ -5237,6 +5266,13 @@ msgid ""
 msgstr ""
 "Alapból kikapcsolva. Bekapcsolva a szabály által megnevezett panelek "
 "jelennek meg, minden más blokk megtartja a korábbi pozíciószabályát."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Only {rich} draws rich text: {handlers} will show this profile as standard "
+"text."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5291,6 +5327,12 @@ msgid "Players"
 msgstr "Játékosok"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Point size of this profile's cells. The lowest value uses the HUD window's "
+"size."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Popup Conflict"
 msgstr "Felugró ablak ütközés"
@@ -5304,6 +5346,11 @@ msgstr "Felugró ablak előnézete"
 #, fuzzy
 msgid "Positional panels:"
 msgstr "Pozíciós panelek:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Presentation"
+msgstr "Előző lépés"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5339,6 +5386,16 @@ msgstr "Eltávolítás"
 #, fuzzy
 msgid "Rename Profile"
 msgstr "Új profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Rich text"
+msgstr "Egyszerű szöveg"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Rich text draws each value in bold with a smaller, dimmed prefix and suffix."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
@@ -5394,6 +5451,10 @@ msgstr ""
 #, fuzzy
 msgid "Speed"
 msgstr "Sebesség"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Standard"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy

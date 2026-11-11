@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:30+0100\n"
+"POT-Creation-Date: 2026-11-11 20:34+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -4351,6 +4351,10 @@ msgid "profile rules"
 msgstr "règles de profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid " pt"
+msgstr " pt"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr "#"
 
@@ -4496,6 +4500,11 @@ msgid "Conditions"
 msgstr "Conditions"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Default ({size} pt)"
+msgstr "Par défaut ({size} pt)"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Design"
 msgstr "Conception"
 
@@ -4546,6 +4555,10 @@ msgid "Fallback"
 msgstr "Repli"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Font size:"
+msgstr "Taille de police :"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
 msgid "Game"
 msgstr "Jeu"
@@ -4579,6 +4592,22 @@ msgstr "HUD importé — actualisation nécessaire"
 #: fpdb_3_legacy/pack_share_dialog.py
 msgid "HUD profile"
 msgstr "Profil de HUD"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"HUD window: no game is mapped to this profile (a profile rule may still pick "
+"it). The window handler is set per game, not here."
+msgstr ""
+"Fenêtre du HUD : aucun jeu n'est associé à ce profil (une règle de profil "
+"peut encore le choisir). Le gestionnaire de fenêtre se règle par jeu, pas "
+"ici."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "HUD window: {handlers}. The window handler is set per game, not here."
+msgstr ""
+"Fenêtre du HUD : {handlers}. Le gestionnaire de fenêtre se règle par jeu, "
+"pas ici."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Hands for this seat"
@@ -4634,6 +4663,10 @@ msgid "Minimum hands required for profiling:"
 msgstr "Mains minimum pour le profilage :"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Mode:"
+msgstr "Mode :"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Move down"
 msgstr "Descendre"
 
@@ -4668,6 +4701,15 @@ msgstr ""
 "Désactivé par défaut. Quand il est activé, les panneaux qu'une règle nomme "
 "sont affichés et tous les autres blocs gardent la règle de position qu'ils "
 "ont toujours eue."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Only {rich} draws rich text: {handlers} will show this profile as standard "
+"text."
+msgstr ""
+"Seul {rich} affiche le texte enrichi : {handlers} affichera ce profil en "
+"texte standard."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Open preview at 100% real size in a new window"
@@ -4714,6 +4756,14 @@ msgid "Players"
 msgstr "Joueurs"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Point size of this profile's cells. The lowest value uses the HUD window's "
+"size."
+msgstr ""
+"Taille en points des cellules de ce profil. La valeur la plus basse reprend "
+"la taille de la fenêtre du HUD."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Popup Conflict"
 msgstr "Conflit de popup"
 
@@ -4724,6 +4774,10 @@ msgstr "Aperçu du popup"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Positional panels:"
 msgstr "Panneaux par position :"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Presentation"
+msgstr "Présentation"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Preview, by the same resolver the HUD uses"
@@ -4753,6 +4807,17 @@ msgstr "Retirer"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Rename Profile"
 msgstr "Renommer le profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Rich text"
+msgstr "Texte enrichi"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Rich text draws each value in bold with a smaller, dimmed prefix and suffix."
+msgstr ""
+"Le texte enrichi affiche chaque valeur en gras, avec un préfixe et un "
+"suffixe plus petits et atténués."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
@@ -4805,6 +4870,10 @@ msgstr ""
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Speed"
 msgstr "Vitesse"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Standard"
+msgstr "Standard"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Stats whose value comes from the analytics layer rather than a column."
@@ -4892,7 +4961,9 @@ msgstr "{path} écrit"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "You have unsaved changes. Do you want to save before closing?"
-msgstr "Vous avez des modifications non enregistrées. Voulez-vous les enregistrer avant de fermer ?"
+msgstr ""
+"Vous avez des modifications non enregistrées. Voulez-vous les enregistrer "
+"avant de fermer ?"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "a separator line"
