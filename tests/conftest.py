@@ -140,3 +140,81 @@ def pytest_runtest_teardown():
 
     gc.disable()  # in case a test turned it back on
     collect_if_due()
+
+
+# --- Windows the Qt tests leave behind (#765) -----------------------------------------
+#
+# The whole Qt suite shares one process and one QApplication. A dialog a test
+# builds and never closes stays alive for the rest of the run, and every
+# ``QApplication.setStyleSheet`` (a theme change) re-polishes all the widgets
+# alive. The HUD editor has about 1,200 widgets: with a hundred of them left
+# over, the two theme test files took 93 of the 96 minutes of the Qt step.
+#
+# Only the windows of these classes are disposed. Deleting every top-level
+# widget crashes: combo-box popups, pyqtgraph's menus and the views of the
+# stats tabs are owned elsewhere, and some tests keep a window across tests.
+LEAKY_WINDOWS = frozenset({"ModernHudPreferences", "HudDesignCanvas", "_CanvasChip"})
+
+# What a healthy run leaves alive at the end is about 7,000 widgets; before the
+# fix it was 110,000. The ceiling sits between, with room for new tests.
+MAX_WIDGETS_ALIVE = 20_000
+
+
+def _qt_widgets():
+    """QApplication and the shiboken module, once PySide6 is really loaded."""
+    if isinstance(sys.modules.get("PySide6"), MagicMock):
+        return None
+    widgets = sys.modules.get("PySide6.QtWidgets")
+    if widgets is None or isinstance(widgets, MagicMock):
+        return None
+    app = widgets.QApplication.instance()
+    return (app, sys.modules["shiboken6"]) if app is not None and "shiboken6" in sys.modules else None
+
+
+def _top_levels(app, shiboken):
+    return {shiboken.getCppPointer(w)[0]: w for w in app.topLevelWidgets()}
+
+
+@pytest.fixture(autouse=True)
+def _dispose_leaked_windows():
+    """Close the HUD editor windows a test opened and did not close."""
+    qt = _qt_widgets()
+    before = _top_levels(*qt).keys() if qt else frozenset()
+    yield
+    qt = _qt_widgets()
+    if qt is None:
+        return
+    app, shiboken = qt
+    from PySide6.QtCore import QCoreApplication, QEvent
+    from PySide6.QtWidgets import QWidget
+
+    disposed = False
+    for pointer, window in _top_levels(app, shiboken).items():
+        if pointer in before or not any(cls.__name__ in LEAKY_WINDOWS for cls in type(window).__mro__):
+            continue
+        # Qt's own parent(): some windows keep their owner in a ``parent`` attribute.
+        if QWidget.parent(window) is None:
+            window.hide()
+            window.deleteLater()
+            disposed = True
+    if disposed:
+        QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_sessionfinish(session):
+    """Fail the run when widgets pile up again, before the CI slows to a crawl."""
+    qt = _qt_widgets()
+    if qt is None:
+        return
+    alive = len(qt[0].allWidgets())
+    if alive > MAX_WIDGETS_ALIVE:
+        reporter = session.config.pluginmanager.get_plugin("terminalreporter")
+        if reporter is not None:
+            reporter.write_line(
+                f"{alive} widgets are still alive after the tests (the limit is {MAX_WIDGETS_ALIVE}): "
+                "a test leaves windows open. Every theme change re-polishes them all and the Qt "
+                "suite slows down; close or delete them at the end of the test (#765).",
+                red=True,
+            )
+        session.exitstatus = pytest.ExitCode.TESTS_FAILED

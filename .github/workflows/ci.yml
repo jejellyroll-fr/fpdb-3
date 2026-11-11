@@ -161,11 +161,6 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           uv pip install --system pywin32==306
-      - name: Run tests (no GUI)
-        env:
-          QT_QPA_PLATFORM: offscreen
-        run: |
-          python -m pytest -p no:pytest-qt -m "not qt and not perf" --tb=short
       - name: Run FastHUD platform contracts
         env:
           QT_QPA_PLATFORM: offscreen
@@ -175,10 +170,14 @@ jobs:
           # runner without requiring a live poker client.
           python -m pytest -q -m "not qt" tests/test_fast_fold_replay.py tests/test_fast_fold_clockwise_mapping_and_cleanup.py tests/test_fast_fold_display_optimization.py tests/test_fast_fold_engine.py tests/test_winamax_ax_seats.py tests/test_windows_fast_fold_resolver.py
 
-      - name: Check FastHUD coverage has not dropped
+      - name: Run tests (no GUI) and check FastHUD coverage has not dropped
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
+          # This is the whole no-GUI suite, run once: it used to run a second
+          # time here just to measure these modules, which cost 10 to 28
+          # minutes on every runner (#765).
+          #
           # The Fast-Fold HUD's own modules are held at 100%, statements and
           # branches. They stand in for the platform APIs rather than calling
           # them, so this holds on every runner -- which is the point: a
@@ -188,7 +187,7 @@ jobs:
           # One line, no backslash continuations: this job also runs on
           # windows-latest, where the default shell is PowerShell and a
           # trailing "\" makes it read the next line as a unary operator.
-          python -m pytest -q -p no:pytest-qt -m "not qt and not perf" --cov=fpdb_3_legacy.fast_fold_engine --cov=fpdb_3_legacy.winamax_ax_seats --cov=fpdb_3_legacy.winamax_live_log_reader --cov=fpdb_3_legacy.winamax_pool_games --cov=fpdb_3_legacy.hud_window_registry --cov=fpdb_3_legacy.hud_diagnostics --cov=fpdb_3_legacy.OSXTables --cov=fpdb_3_legacy.interlocks --cov=tools.find_hud_windows --cov-branch --cov-report=term-missing --cov-fail-under=100
+          python -m pytest -p no:pytest-qt -m "not qt and not perf" --tb=short --cov=fpdb_3_legacy.fast_fold_engine --cov=fpdb_3_legacy.winamax_ax_seats --cov=fpdb_3_legacy.winamax_live_log_reader --cov=fpdb_3_legacy.winamax_pool_games --cov=fpdb_3_legacy.hud_window_registry --cov=fpdb_3_legacy.hud_diagnostics --cov=fpdb_3_legacy.OSXTables --cov=fpdb_3_legacy.interlocks --cov=tools.find_hud_windows --cov-branch --cov-report=term-missing --cov-fail-under=100
 
       - name: Run FastHUD Qt regression tests (offscreen)
         if: runner.os != 'Windows'
@@ -201,7 +200,7 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          python -m pytest -m "qt and not perf" --tb=short
+          python -m pytest -m "qt and not perf" --tb=short --durations=25
       # The perf tests assert wall-clock budgets, some as tight as 5 ms for a
       # loop of pure-Python work. Hosted runners are shared and noisy -- the
       # Windows ones especially -- so as a required check on all three they
@@ -322,7 +321,7 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          python -m pytest -m "qt and not perf" --cov --cov-append --cov-report= --tb=short
+          python -m pytest -m "qt and not perf" --cov --cov-append --cov-report= --tb=short --durations=25
       - name: Render coverage reports
         run: |
           python -m coverage json -o coverage.json
