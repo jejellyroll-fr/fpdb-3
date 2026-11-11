@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 08:52+0100\n"
+"POT-Creation-Date: 2026-11-11 13:54+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -863,6 +863,7 @@ msgid "Notes: 0"
 msgstr "Notes : 0"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #: fpdb_3_legacy/research_labels.py
 msgid "Player"
 msgstr "Joueur"
@@ -1634,6 +1635,7 @@ msgid "Postflop"
 msgstr "Postflop"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 msgid "Preflop"
 msgstr "Préflop"
 
@@ -1844,6 +1846,7 @@ msgstr "Montrer les résumés"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 msgid "Stat"
 msgstr "Statistiques"
 
@@ -4944,6 +4947,73 @@ msgstr ""
 msgid "Reference HUD"
 msgstr "HUD de référence"
 
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "7th street"
+msgstr "7e rue"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "All-in or Fold"
+msgstr "All-in ou Fold"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Flop / 4th street"
+msgstr "Flop / 4e rue"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#: fpdb_3_legacy/research_labels.py
+msgid "Other"
+msgstr "Autre"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Postflop, all streets"
+msgstr "Postflop, toutes les rues"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Results and showdown"
+msgstr "Résultats et abattage"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "River / 6th street"
+msgstr "River / 6e rue"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Steal and blinds"
+msgstr "Vol et blindes"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Tournament and stack"
+msgstr "Tournoi et tapis"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Turn / 5th street"
+msgstr "Turn / 5e rue"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "analytics"
+msgstr "analytique"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "classic"
+msgstr "classique"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "stats.d"
+msgstr "stats.d"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Description"
+msgstr "Description"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+msgid "Search stats"
+msgstr "Rechercher des stats"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, python-brace-format
+msgid "Showing {shown} of {total} stats"
+msgstr "{shown} stats affichées sur {total}"
+
 #: fpdb_3_legacy/pack_gallery_dialog.py
 #, python-format
 msgid "%d listed pack(s) are not shown because their entry is invalid."
@@ -5082,10 +5152,6 @@ msgstr "Un identifiant de licence SPDX ; la galerie en exige un."
 #: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
 msgid "Author"
 msgstr "Auteur"
-
-#: fpdb_3_legacy/pack_share_dialog.py
-msgid "Description"
-msgstr "Description"
 
 #: fpdb_3_legacy/pack_share_dialog.py
 msgid "For example CC-BY-4.0 or AGPL-3.0-or-later"
@@ -5629,10 +5695,6 @@ msgstr "Seulement les mains importées avant cet id de main."
 #: fpdb_3_legacy/research_labels.py
 msgid "Opponent position"
 msgstr "Position de l'adversaire"
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Other"
-msgstr "Autre"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Pair detail"
@@ -7773,9 +7835,6 @@ msgstr ""
 
 #~ msgid "Flop"
 #~ msgstr "Flop"
-
-#~ msgid "Flop/4th street seen %"
-#~ msgstr "Flop/Rivière vus %"
 
 #~ msgid "For Multiple Blind Levels:"
 #~ msgstr "Pour Plusieurs Niveaux de Blinde:"

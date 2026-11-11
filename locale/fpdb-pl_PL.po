@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 08:52+0100\n"
+"POT-Creation-Date: 2026-11-11 13:54+0100\n"
 "PO-Revision-Date: 2011-10-08 08:58+0000\n"
 "Last-Translator: greg20 <greg20@hushmail.com>\n"
 "Language-Team: Polish (Poland) (http://www.transifex.net/projects/p/fpdb/"
@@ -914,6 +914,7 @@ msgid "Notes: 0"
 msgstr "Notatki: 0"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Player"
@@ -1823,6 +1824,7 @@ msgid "Postflop"
 msgstr "Postflop"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #, fuzzy
 msgid "Preflop"
 msgstr "Preflop"
@@ -2057,6 +2059,7 @@ msgstr "Pokaż w podsumowaniu"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 msgid "Stat"
 msgstr "Statystyka"
 
@@ -5533,6 +5536,86 @@ msgstr ""
 msgid "Reference HUD"
 msgstr "Ustawienia HUD-a"
 
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "7th street"
+msgstr "ulica"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "All-in or Fold"
+msgstr "All-in"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+#| msgid "Flop/4th street seen %"
+msgid "Flop / 4th street"
+msgstr "% oglądnięć flopa (4 ulicy)"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Other"
+msgstr "Inne"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Postflop, all streets"
+msgstr "Postflop"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Results and showdown"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "River / 6th street"
+msgstr "% zakładów kontynuacyjnych na riverze (6 ulicy)"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Steal and blinds"
+msgstr "Stawka (big blindy)"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Tournament and stack"
+msgstr "Turnieje"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Turn / 5th street"
+msgstr "% zakładów kontynuacyjnych na turnie (5 ulicy)"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "analytics"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "classic"
+msgstr "Klasa:"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "stats.d"
+msgstr "Statystyki"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Description"
+msgstr "Opis"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, fuzzy
+msgid "Search stats"
+msgstr "Szukaj sal..."
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, python-brace-format
+msgid "Showing {shown} of {total} stats"
+msgstr ""
+
 #: fpdb_3_legacy/pack_gallery_dialog.py
 #, python-format
 msgid "%d listed pack(s) are not shown because their entry is invalid."
@@ -5684,10 +5767,6 @@ msgstr ""
 #, fuzzy
 msgid "Author"
 msgstr "Autor"
-
-#: fpdb_3_legacy/pack_share_dialog.py
-msgid "Description"
-msgstr "Opis"
 
 #: fpdb_3_legacy/pack_share_dialog.py
 msgid "For example CC-BY-4.0 or AGPL-3.0-or-later"
@@ -6310,11 +6389,6 @@ msgstr "Tylko rozdania zaimportowane przed tym id rozdania."
 #, fuzzy
 msgid "Opponent position"
 msgstr "Pozycja przeciwnika"
-
-#: fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Other"
-msgstr "Inne"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -7914,14 +7988,6 @@ msgstr ""
 #~ msgid "% check-raise flop/4th street"
 #~ msgstr "% zakładów kontynuacyjnych na flopie (4 ulicy)"
 
-#, fuzzy
-#~ msgid "% check-raise river/6th street"
-#~ msgstr "% zakładów kontynuacyjnych na riverze (6 ulicy)"
-
-#, fuzzy
-#~ msgid "% check-raise turn/5th street"
-#~ msgstr "% zakładów kontynuacyjnych na turnie (5 ulicy)"
-
 #~ msgid "% cold 4 bet preflop/3rd street"
 #~ msgstr "% cold 4-betów przed flopem (na 3 ulicy)"
 
@@ -8626,9 +8692,6 @@ msgstr ""
 
 #~ msgid "Flop"
 #~ msgstr "Flop"
-
-#~ msgid "Flop/4th street seen %"
-#~ msgstr "% oglądnięć flopa (4 ulicy)"
 
 #~ msgid "For Multiple Blind Levels:"
 #~ msgstr "Dla wszystkich limitów"

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 08:52+0100\n"
+"POT-Creation-Date: 2026-11-11 13:54+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -950,6 +950,7 @@ msgid "Notes: 0"
 msgstr "笔记: 0"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Player"
@@ -1862,6 +1863,7 @@ msgid "Postflop"
 msgstr "翻牌后"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #, fuzzy
 msgid "Preflop"
 msgstr "翻牌前"
@@ -2109,6 +2111,7 @@ msgstr "在摘要中显示"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 #, fuzzy
 msgid "Stat"
 msgstr "统计"
@@ -5562,6 +5565,83 @@ msgstr ""
 msgid "Reference HUD"
 msgstr "参考 HUD"
 
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "7th street"
+msgstr "街"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "All-in or Fold"
+msgstr "全下"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Flop / 4th street"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Other"
+msgstr "其他"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Postflop, all streets"
+msgstr "翻牌后"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Results and showdown"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "River / 6th street"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Steal and blinds"
+msgstr "级别（大盲注）"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Tournament and stack"
+msgstr "文件%s无法找到"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Turn / 5th street"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "analytics"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "classic"
+msgstr "类:"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "stats.d"
+msgstr "统计"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#: fpdb_3_legacy/pack_share_dialog.py
+#, fuzzy
+msgid "Description"
+msgstr "位置"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, fuzzy
+msgid "Search stats"
+msgstr "搜索站点..."
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, python-brace-format
+msgid "Showing {shown} of {total} stats"
+msgstr ""
+
 #: fpdb_3_legacy/pack_gallery_dialog.py
 #, python-format
 msgid "%d listed pack(s) are not shown because their entry is invalid."
@@ -5714,11 +5794,6 @@ msgstr ""
 #, fuzzy
 msgid "Author"
 msgstr "作者"
-
-#: fpdb_3_legacy/pack_share_dialog.py
-#, fuzzy
-msgid "Description"
-msgstr "位置"
 
 #: fpdb_3_legacy/pack_share_dialog.py
 msgid "For example CC-BY-4.0 or AGPL-3.0-or-later"
@@ -6338,11 +6413,6 @@ msgstr "仅在此手牌 ID 之前导入的手牌。"
 #, fuzzy
 msgid "Opponent position"
 msgstr "对手位置"
-
-#: fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Other"
-msgstr "其他"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
