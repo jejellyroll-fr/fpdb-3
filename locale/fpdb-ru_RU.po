@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 16:29+0100\n"
+"POT-Creation-Date: 2026-11-11 08:52+0100\n"
 "PO-Revision-Date: 2011-06-16 13:21+0000\n"
 "Last-Translator: Lexej <alexej@glyvin.com>\n"
 "Language-Team: Russian (Russia) (http://www.transifex.net/projects/p/fpdb/"
@@ -4948,6 +4948,10 @@ msgid "Cannot update this rule"
 msgstr "Невозможно обновить это правило"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cell already used"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Class:"
 msgstr "Класс:"
@@ -5031,6 +5035,11 @@ msgstr "Игра"
 #, fuzzy
 msgid "General HUD and Profiling Settings"
 msgstr "Общие настройки HUD и профилирования"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Grid: {rows}×{cols}"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5190,6 +5199,11 @@ msgid "Panels"
 msgstr "Панели"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Panels: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr ""
@@ -5243,9 +5257,21 @@ msgid "Profile actions"
 msgstr "Позиция"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Profile: {name} | {layout} | Statistics: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Remove"
 msgstr "Удалить"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Row {row}, column {col} already holds {item}. The first free cell is row "
+"{free_row}, column {free_col}."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5381,6 +5407,10 @@ msgstr "Когда ситуация такова"
 #, fuzzy, python-brace-format
 msgid "Wrote {path}"
 msgstr "Записано: {path}"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "a separator line"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy

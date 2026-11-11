@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 16:29+0100\n"
+"POT-Creation-Date: 2026-11-11 08:52+0100\n"
 "PO-Revision-Date: 2011-12-03 21:57+0000\n"
 "Last-Translator: LimburgCwboy <hdps.een@gmail.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.net/projects/p/fpdb/"
@@ -5000,6 +5000,10 @@ msgid "Cannot update this rule"
 msgstr "Deze regel kan niet worden bijgewerkt"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cell already used"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Class:"
 msgstr "Klasse:"
@@ -5083,6 +5087,11 @@ msgstr "Spel"
 #, fuzzy
 msgid "General HUD and Profiling Settings"
 msgstr "Algemene HUD- en profileringsinstellingen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Grid: {rows}×{cols}"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5242,6 +5251,11 @@ msgid "Panels"
 msgstr "Panelen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Panels: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr "Kies een spel (en formaat) om de standaard te zien die zou gelden."
@@ -5293,9 +5307,21 @@ msgid "Profile actions"
 msgstr "Toon Positie Stats"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Profile: {name} | {layout} | Statistics: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Remove"
 msgstr "Verwijderen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Row {row}, column {col} already holds {item}. The first free cell is row "
+"{free_row}, column {free_col}."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5435,6 +5461,10 @@ msgstr "Als dit de situatie is"
 #, fuzzy, python-brace-format
 msgid "Wrote {path}"
 msgstr "{path} geschreven"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "a separator line"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 16:29+0100\n"
+"POT-Creation-Date: 2026-11-11 08:52+0100\n"
 "PO-Revision-Date: 2011-07-27 15:17+0000\n"
 "Last-Translator: pkpkpkdo <ofelipedbzgt@hotmail.com>\n"
 "Language-Team: Portuguese (Brazilian) (http://www.transifex.net/projects/p/"
@@ -4974,6 +4974,10 @@ msgid "Cannot update this rule"
 msgstr "Não é possível atualizar esta regra"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cell already used"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Class:"
 msgstr "Classe:"
@@ -5056,6 +5060,11 @@ msgstr "Jogo"
 #, fuzzy
 msgid "General HUD and Profiling Settings"
 msgstr "Configurações gerais do HUD e do perfilamento"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Grid: {rows}×{cols}"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5214,6 +5223,11 @@ msgid "Panels"
 msgstr "Painéis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Panels: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr "Escolha um jogo (e um formato) para ver o padrão que se aplicaria."
@@ -5265,9 +5279,21 @@ msgid "Profile actions"
 msgstr "Posição"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Profile: {name} | {layout} | Statistics: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Remove"
 msgstr "Remover"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Row {row}, column {col} already holds {item}. The first free cell is row "
+"{free_row}, column {free_col}."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5404,6 +5430,10 @@ msgstr "Quando a situação for"
 #, fuzzy, python-brace-format
 msgid "Wrote {path}"
 msgstr "{path} gravado"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "a separator line"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy

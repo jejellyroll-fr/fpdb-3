@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 16:29+0100\n"
+"POT-Creation-Date: 2026-11-11 08:52+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -4918,6 +4918,12 @@ msgstr "Diese Regel kann nicht aktualisiert werden"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "lock already held by:"
+msgid "Cell already used"
+msgstr "Lock wird bereits gehalten durch:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Class:"
 msgstr "Klasse:"
 
@@ -5001,6 +5007,11 @@ msgstr "Spiel"
 #, fuzzy
 msgid "General HUD and Profiling Settings"
 msgstr "Allgemeine HUD- und Profiling-Einstellungen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Grid: {rows}×{cols}"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5161,6 +5172,11 @@ msgid "Panels"
 msgstr "Panels"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Panels: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr "Wählen Sie ein Spiel (und Format), um den geltenden Standard zu sehen."
@@ -5211,9 +5227,21 @@ msgid "Profile actions"
 msgstr "Profilaktionen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Profile: {name} | {layout} | Statistics: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Remove"
 msgstr "Entfernen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Row {row}, column {col} already holds {item}. The first free cell is row "
+"{free_row}, column {free_col}."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5352,6 +5380,10 @@ msgstr "Wenn dies die Situation ist"
 #, fuzzy, python-brace-format
 msgid "Wrote {path}"
 msgstr "{path} geschrieben"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "a separator line"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -10467,9 +10499,6 @@ msgstr ""
 
 #~ msgid "join_holecards: Player '%s' appears not to have been dealt a card"
 #~ msgstr "join_holecards: Spieler '%s' scheint keine Karten erhalten zu haben"
-
-#~ msgid "lock already held by:"
-#~ msgstr "Lock wird bereits gehalten durch:"
 
 #~ msgid "missing config section raw_hands"
 #~ msgstr "Konfiguration für raw_hands fehlt"

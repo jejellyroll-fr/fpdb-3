@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 16:29+0100\n"
+"POT-Creation-Date: 2026-11-11 08:52+0100\n"
 "PO-Revision-Date: 2011-11-13 01:00+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Spanish (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -4925,6 +4925,12 @@ msgstr "No se puede actualizar esta regla"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "lock already held by:"
+msgid "Cell already used"
+msgstr "bloqueo ya puesto por:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Class:"
 msgstr "Clase:"
 
@@ -5008,6 +5014,11 @@ msgstr "Juego"
 #, fuzzy
 msgid "General HUD and Profiling Settings"
 msgstr "Ajustes generales del HUD y del perfilado"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Grid: {rows}×{cols}"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5169,6 +5180,11 @@ msgid "Panels"
 msgstr "Paneles"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Panels: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr ""
@@ -5220,9 +5236,21 @@ msgid "Profile actions"
 msgstr "Posición"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Profile: {name} | {layout} | Statistics: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Remove"
 msgstr "Quitar"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Row {row}, column {col} already holds {item}. The first free cell is row "
+"{free_row}, column {free_col}."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5364,6 +5392,10 @@ msgstr "Cuando la situación es"
 #, fuzzy, python-brace-format
 msgid "Wrote {path}"
 msgstr "Escrito {path}"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "a separator line"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -9687,9 +9719,6 @@ msgstr ""
 #~ msgstr ""
 #~ "join_holecards: # de cartas privadas debería ser <4, 4 o 7 - 5 y 6 "
 #~ "deberían ser sólo posibles para el héroe"
-
-#~ msgid "lock already held by:"
-#~ msgstr "bloqueo ya puesto por:"
 
 #, fuzzy
 #~ msgid "n Days"

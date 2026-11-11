@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 16:29+0100\n"
+"POT-Creation-Date: 2026-11-11 08:52+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -4936,6 +4936,12 @@ msgstr "Regula nu poate fi actualizată"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "lock already held by:"
+msgid "Cell already used"
+msgstr "siguranta e deja detinuta de:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Class:"
 msgstr "Clasă:"
 
@@ -5018,6 +5024,11 @@ msgstr "Joc"
 #, fuzzy
 msgid "General HUD and Profiling Settings"
 msgstr "Setări generale HUD și de profilare"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Grid: {rows}×{cols}"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5177,6 +5188,11 @@ msgid "Panels"
 msgstr "Panouri"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Panels: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr ""
@@ -5228,9 +5244,21 @@ msgid "Profile actions"
 msgstr "Pozitie"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Profile: {name} | {layout} | Statistics: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Remove"
 msgstr "Elimină"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Row {row}, column {col} already holds {item}. The first free cell is row "
+"{free_row}, column {free_col}."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5368,6 +5396,10 @@ msgstr "Când situația este"
 #, fuzzy, python-brace-format
 msgid "Wrote {path}"
 msgstr "Scris {path}"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "a separator line"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -10549,9 +10581,6 @@ msgstr ""
 
 #~ msgid "limit not found in self.limits(%s). hand: '%s'"
 #~ msgstr "limita nu a fost gasita in self.limits(%s). mina: '%s'"
-
-#~ msgid "lock already held by:"
-#~ msgstr "siguranta e deja detinuta de:"
 
 #~ msgid "markStreets appeared to fail: First 100 chars: '%s'"
 #~ msgstr "markStreets pare a esua: Primele 100 caractere: '%s'"

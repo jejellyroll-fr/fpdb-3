@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 16:29+0100\n"
+"POT-Creation-Date: 2026-11-11 08:52+0100\n"
 "PO-Revision-Date: 2011-10-08 08:58+0000\n"
 "Last-Translator: greg20 <greg20@hushmail.com>\n"
 "Language-Team: Polish (Poland) (http://www.transifex.net/projects/p/fpdb/"
@@ -4905,6 +4905,12 @@ msgstr "Nie można zaktualizować tej reguły"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "lock already held by:"
+msgid "Cell already used"
+msgstr "blokada jest trzymana przez"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Class:"
 msgstr "Klasa:"
 
@@ -4986,6 +4992,11 @@ msgstr "Gra"
 #, fuzzy
 msgid "General HUD and Profiling Settings"
 msgstr "Ogólne ustawienia HUD i profilowania"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Grid: {rows}×{cols}"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5144,6 +5155,11 @@ msgid "Panels"
 msgstr "Panele"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Panels: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr ""
@@ -5195,9 +5211,21 @@ msgid "Profile actions"
 msgstr "Pozycja"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Profile: {name} | {layout} | Statistics: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Remove"
 msgstr "Usuń"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Row {row}, column {col} already holds {item}. The first free cell is row "
+"{free_row}, column {free_col}."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5334,6 +5362,10 @@ msgstr "Gdy sytuacja to"
 #, fuzzy, python-brace-format
 msgid "Wrote {path}"
 msgstr "Zapisano {path}"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "a separator line"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -9832,9 +9864,6 @@ msgstr ""
 
 #~ msgid "join_holecards: Player '%s' appears not to have been dealt a card"
 #~ msgstr "join_holecards: gracz '%s' nie otrzymał kart"
-
-#~ msgid "lock already held by:"
-#~ msgstr "blokada jest trzymana przez"
 
 #, fuzzy
 #~ msgid "n Days"
