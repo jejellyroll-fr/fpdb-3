@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 13:54+0100\n"
+"POT-Creation-Date: 2026-11-11 20:16+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -4657,9 +4657,21 @@ msgid "−"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "(none)"
+msgstr "（无）"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
 msgid "Add/Edit Statistic"
 msgstr "添加/编辑统计"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid ""
+"Below the low threshold the value takes the low colour, above the high one "
+"the high colour"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4670,6 +4682,11 @@ msgstr "区块属性"
 #, fuzzy
 msgid "Click Action:"
 msgstr "点击动作:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Colour the value by thresholds"
+msgstr "阈值之间的值使用中间色"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4814,11 +4831,6 @@ msgstr "➖ 删除统计"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "(none)"
-msgstr "（无）"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5386,6 +5398,10 @@ msgstr "更新规则"
 #, fuzzy
 msgid "Update selected"
 msgstr "更新所选"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Use thresholds"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 13:54+0100\n"
+"POT-Creation-Date: 2026-11-11 20:16+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -4626,9 +4626,21 @@ msgid "−"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "(none)"
+msgstr "(nincs)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
 msgid "Add/Edit Statistic"
 msgstr "Statisztika hozzáadása/szerkesztése"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid ""
+"Below the low threshold the value takes the low colour, above the high one "
+"the high colour"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4639,6 +4651,11 @@ msgstr "Blokk tulajdonságai"
 #, fuzzy
 msgid "Click Action:"
 msgstr "Kattintási művelet:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Colour the value by thresholds"
+msgstr "Középső szín használata a küszöbök közötti értékekhez"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4787,11 +4804,6 @@ msgstr "➖ Statisztika eltávolítása"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr "#"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "(none)"
-msgstr "(nincs)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5380,6 +5392,10 @@ msgstr "Szabály frissítése"
 #, fuzzy
 msgid "Update selected"
 msgstr "Kijelölt frissítése"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Use thresholds"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
