@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 14:19+0100\n"
+"POT-Creation-Date: 2026-11-11 20:34+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -943,6 +943,7 @@ msgid "Notes: 0"
 msgstr "Notes: 0"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Player"
@@ -1865,6 +1866,7 @@ msgid "Postflop"
 msgstr "Postflop"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #, fuzzy
 msgid "Preflop"
 msgstr "Preflop"
@@ -2117,6 +2119,7 @@ msgstr "Mostra als resums"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 #, fuzzy
 msgid "Stat"
 msgstr "Estadística"
@@ -3758,7 +3761,7 @@ msgstr ""
 msgid "Unknown Site"
 msgstr "Sala desconeguda"
 
-#: fpdb_3_legacy/fpdb.pyw
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Unsaved Changes"
 msgstr "Canvis sense desar"
@@ -4702,9 +4705,21 @@ msgid "−"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "(none)"
+msgstr "(cap)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
 msgid "Add/Edit Statistic"
 msgstr "Afegeix/edita una estadística"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid ""
+"Below the low threshold the value takes the low colour, above the high one "
+"the high colour"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4715,6 +4730,11 @@ msgstr "Propietats del bloc"
 #, fuzzy
 msgid "Click Action:"
 msgstr "Acció en fer clic:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Colour the value by thresholds"
+msgstr "Fes servir el color intermedi per als valors entre llindars"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4862,6 +4882,59 @@ msgstr "➕ Afegeix una estadística"
 msgid "➖ Remove Stat"
 msgstr "➖ Treu l'estadística"
 
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "(single grid)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "(unnamed)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, python-brace-format
+msgid "A profile named \"{name}\" already exists. Choose another name."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "A profile needs a name."
+msgstr "Nom del perfil"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "HUD profiles"
+msgstr "Perfil de HUD"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "dynamic panels"
+msgstr "🧩 Taulers dinàmics"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "general settings"
+msgstr "⚙️ Configuració general"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "panel fallback"
+msgstr "Substitut"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "panel rules"
+msgstr "Regles dels taulers"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "popup windows"
+msgstr "Finestres emergents"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "profile rules"
+msgstr "Nom del perfil"
+
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid " pt"
 msgstr ""
@@ -4869,11 +4942,6 @@ msgstr ""
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "(none)"
-msgstr "(cap)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -4995,6 +5063,16 @@ msgstr "No es pot afegir aquesta regla"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Cannot create the profile"
+msgstr "No es pot actualitzar aquesta regla"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Cannot duplicate the profile"
+msgstr "No es pot actualitzar aquesta regla"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot export"
 msgstr "No es pot exportar"
 
@@ -5005,11 +5083,21 @@ msgstr "No es pot importar"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Cannot rename the profile"
+msgstr "No es pot actualitzar aquesta regla"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot update this rule"
 msgstr "No es pot actualitzar aquesta regla"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell already used"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Changed since the last save: {parts}"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -5236,6 +5324,11 @@ msgstr "Perfil nou"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "New profile name:"
+msgstr "Nom del perfil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "No HUD profile of this name exists; the game default will be used instead."
 msgstr ""
@@ -5371,6 +5464,11 @@ msgstr ""
 #, fuzzy
 msgid "Remove"
 msgstr "Treu"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Rename Profile"
+msgstr "Perfil nou"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5524,6 +5622,10 @@ msgid "Update selected"
 msgstr "Actualitza la seleccionada"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Use thresholds"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "When this is the spot"
 msgstr "Quan la situació és"
@@ -5532,6 +5634,10 @@ msgstr "Quan la situació és"
 #, fuzzy, python-brace-format
 msgid "Wrote {path}"
 msgstr "S'ha escrit {path}"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "You have unsaved changes. Do you want to save before closing?"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "a separator line"
@@ -5585,8 +5691,17 @@ msgstr "↓ Avall"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "● Unsaved changes"
+msgstr "Canvis sense desar"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "⚙️ General Settings"
 msgstr "⚙️ Configuració general"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "✏️ Rename"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5703,6 +5818,83 @@ msgstr ""
 #, fuzzy
 msgid "Reference HUD"
 msgstr "HUD de referència"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "7th street"
+msgstr "carrer"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "All-in or Fold"
+msgstr "All-in"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Flop / 4th street"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Other"
+msgstr "Altres"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Postflop, all streets"
+msgstr "Postflop"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Results and showdown"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "River / 6th street"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Steal and blinds"
+msgstr "Stake (cegues grans)"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Tournament and stack"
+msgstr "Tornei"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Turn / 5th street"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "analytics"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "classic"
+msgstr "Classe:"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "stats.d"
+msgstr "Estadístiques"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#: fpdb_3_legacy/pack_share_dialog.py
+#, fuzzy
+msgid "Description"
+msgstr "Posició"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, fuzzy
+msgid "Search stats"
+msgstr "Cerca sales..."
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, python-brace-format
+msgid "Showing {shown} of {total} stats"
+msgstr ""
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
 #, python-format
@@ -5856,11 +6048,6 @@ msgstr ""
 #, fuzzy
 msgid "Author"
 msgstr "Autor"
-
-#: fpdb_3_legacy/pack_share_dialog.py
-#, fuzzy
-msgid "Description"
-msgstr "Posició"
 
 #: fpdb_3_legacy/pack_share_dialog.py
 msgid "For example CC-BY-4.0 or AGPL-3.0-or-later"
@@ -6487,11 +6674,6 @@ msgstr "Només les mans importades abans d'aquest id de mà."
 #, fuzzy
 msgid "Opponent position"
 msgstr "Posició del rival"
-
-#: fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Other"
-msgstr "Altres"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy

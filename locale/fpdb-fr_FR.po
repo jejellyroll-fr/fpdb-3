@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 14:19+0100\n"
+"POT-Creation-Date: 2026-11-11 20:34+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -863,6 +863,7 @@ msgid "Notes: 0"
 msgstr "Notes : 0"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #: fpdb_3_legacy/research_labels.py
 msgid "Player"
 msgstr "Joueur"
@@ -1634,6 +1635,7 @@ msgid "Postflop"
 msgstr "Postflop"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 msgid "Preflop"
 msgstr "Préflop"
 
@@ -1844,6 +1846,7 @@ msgstr "Montrer les résumés"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 msgid "Stat"
 msgstr "Statistiques"
 
@@ -3305,7 +3308,7 @@ msgstr "Le guide est publié sur {url}"
 msgid "Unknown Site"
 msgstr "Site inconnu"
 
-#: fpdb_3_legacy/fpdb.pyw
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Unsaved Changes"
 msgstr "Modifications non enregistrées"
 
@@ -4153,8 +4156,21 @@ msgid "−"
 msgstr "−"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "(none)"
+msgstr "(aucun)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Add/Edit Statistic"
 msgstr "Ajouter/modifier une statistique"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid ""
+"Below the low threshold the value takes the low colour, above the high one "
+"the high colour"
+msgstr ""
+"Sous le seuil bas, la valeur prend la couleur basse ; au-dessus du seuil "
+"haut, la couleur haute"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Block Properties"
@@ -4163,6 +4179,10 @@ msgstr "Propriétés du bloc"
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Click Action:"
 msgstr "Action au clic :"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Colour the value by thresholds"
+msgstr "Colorer la valeur selon des seuils"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Column:"
@@ -4285,6 +4305,51 @@ msgstr "➕ Ajouter une stat"
 msgid "➖ Remove Stat"
 msgstr "➖ Retirer la stat"
 
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "(single grid)"
+msgstr "(grille unique)"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "(unnamed)"
+msgstr "(sans nom)"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, python-brace-format
+msgid "A profile named \"{name}\" already exists. Choose another name."
+msgstr "Un profil nommé « {name} » existe déjà. Choisissez un autre nom."
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "A profile needs a name."
+msgstr "Un profil doit avoir un nom."
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "HUD profiles"
+msgstr "profils de HUD"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "dynamic panels"
+msgstr "panneaux dynamiques"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "general settings"
+msgstr "paramètres généraux"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "panel fallback"
+msgstr "panneau de repli"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "panel rules"
+msgstr "règles des panneaux"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "popup windows"
+msgstr "fenêtres popup"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "profile rules"
+msgstr "règles de profil"
+
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid " pt"
 msgstr " pt"
@@ -4292,10 +4357,6 @@ msgstr " pt"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr "#"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "(none)"
-msgstr "(aucun)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "A panel rule with these conditions and this profile already exists."
@@ -4394,6 +4455,14 @@ msgid "Cannot add this rule"
 msgstr "Impossible d'ajouter cette règle"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cannot create the profile"
+msgstr "Impossible de créer le profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cannot duplicate the profile"
+msgstr "Impossible de dupliquer le profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cannot export"
 msgstr "Export impossible"
 
@@ -4402,12 +4471,21 @@ msgid "Cannot import"
 msgstr "Import impossible"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cannot rename the profile"
+msgstr "Impossible de renommer le profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cannot update this rule"
 msgstr "Impossible de mettre à jour cette règle"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell already used"
 msgstr "Case déjà occupée"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Changed since the last save: {parts}"
+msgstr "Modifié depuis le dernier enregistrement : {parts}"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Class:"
@@ -4601,6 +4679,10 @@ msgid "New Profile"
 msgstr "Nouveau profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "New profile name:"
+msgstr "Nouveau nom du profil :"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "No HUD profile of this name exists; the game default will be used instead."
 msgstr ""
@@ -4721,6 +4803,10 @@ msgstr "Profil : {name} | {layout} | Statistiques : {count}"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Remove"
 msgstr "Retirer"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Rename Profile"
+msgstr "Renommer le profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Rich text"
@@ -4861,6 +4947,10 @@ msgid "Update selected"
 msgstr "Mettre à jour la sélection"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Use thresholds"
+msgstr "Utiliser des seuils"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "When this is the spot"
 msgstr "Quand la situation est"
 
@@ -4868,6 +4958,12 @@ msgstr "Quand la situation est"
 #, python-brace-format
 msgid "Wrote {path}"
 msgstr "{path} écrit"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "You have unsaved changes. Do you want to save before closing?"
+msgstr ""
+"Vous avez des modifications non enregistrées. Voulez-vous les enregistrer "
+"avant de fermer ?"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "a separator line"
@@ -4914,8 +5010,16 @@ msgid "↓ Down"
 msgstr "↓ Descendre"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "● Unsaved changes"
+msgstr "● Modifications non enregistrées"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "⚙️ General Settings"
 msgstr "⚙️ Paramètres généraux"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "✏️ Rename"
+msgstr "✏️ Renommer"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "➕ Add"
@@ -5012,6 +5116,73 @@ msgstr ""
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
 msgid "Reference HUD"
 msgstr "HUD de référence"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "7th street"
+msgstr "7e rue"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "All-in or Fold"
+msgstr "All-in ou Fold"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Flop / 4th street"
+msgstr "Flop / 4e rue"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#: fpdb_3_legacy/research_labels.py
+msgid "Other"
+msgstr "Autre"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Postflop, all streets"
+msgstr "Postflop, toutes les rues"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Results and showdown"
+msgstr "Résultats et abattage"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "River / 6th street"
+msgstr "River / 6e rue"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Steal and blinds"
+msgstr "Vol et blindes"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Tournament and stack"
+msgstr "Tournoi et tapis"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Turn / 5th street"
+msgstr "Turn / 5e rue"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "analytics"
+msgstr "analytique"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "classic"
+msgstr "classique"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "stats.d"
+msgstr "stats.d"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Description"
+msgstr "Description"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+msgid "Search stats"
+msgstr "Rechercher des stats"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, python-brace-format
+msgid "Showing {shown} of {total} stats"
+msgstr "{shown} stats affichées sur {total}"
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
 #, python-format
@@ -5151,10 +5322,6 @@ msgstr "Un identifiant de licence SPDX ; la galerie en exige un."
 #: fpdb_3_legacy/pack_share_dialog.py fpdb_3_legacy/stat_packs_dialog.py
 msgid "Author"
 msgstr "Auteur"
-
-#: fpdb_3_legacy/pack_share_dialog.py
-msgid "Description"
-msgstr "Description"
 
 #: fpdb_3_legacy/pack_share_dialog.py
 msgid "For example CC-BY-4.0 or AGPL-3.0-or-later"
@@ -5698,10 +5865,6 @@ msgstr "Seulement les mains importées avant cet id de main."
 #: fpdb_3_legacy/research_labels.py
 msgid "Opponent position"
 msgstr "Position de l'adversaire"
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Other"
-msgstr "Autre"
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Pair detail"
@@ -7843,9 +8006,6 @@ msgstr ""
 #~ msgid "Flop"
 #~ msgstr "Flop"
 
-#~ msgid "Flop/4th street seen %"
-#~ msgstr "Flop/Rivière vus %"
-
 #~ msgid "For Multiple Blind Levels:"
 #~ msgstr "Pour Plusieurs Niveaux de Blinde:"
 
@@ -8078,10 +8238,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Si cette option est utilisée l'arrêt se faite avec un message d'erreur "
 #~ "explicite si un problème se produit"
-
-#~ msgid "If you change the config you must save before importing"
-#~ msgstr ""
-#~ "Si vous changez la configuration vous devez sauvegarder avant d'importer"
 
 #~ msgid ""
 #~ "If you had previously opened any tabs they cannot use the new settings "

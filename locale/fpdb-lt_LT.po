@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 14:19+0100\n"
+"POT-Creation-Date: 2026-11-11 20:34+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -936,6 +936,7 @@ msgid "Notes: 0"
 msgstr "Pastabos: 0"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Player"
@@ -1855,6 +1856,7 @@ msgid "Postflop"
 msgstr "Postflopas"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #, fuzzy
 msgid "Preflop"
 msgstr "Preflopas"
@@ -2104,6 +2106,7 @@ msgstr "Rodyti suvestinėse"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 #, fuzzy
 msgid "Stat"
 msgstr "Statistika"
@@ -3738,7 +3741,7 @@ msgstr ""
 msgid "Unknown Site"
 msgstr "Nežinoma svetainė"
 
-#: fpdb_3_legacy/fpdb.pyw
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Unsaved Changes"
 msgstr "Neįrašyti pakeitimai"
@@ -4685,9 +4688,21 @@ msgid "−"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "(none)"
+msgstr "(nėra)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
 msgid "Add/Edit Statistic"
 msgstr "Pridėti/redaguoti statistiką"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid ""
+"Below the low threshold the value takes the low colour, above the high one "
+"the high colour"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4698,6 +4713,11 @@ msgstr "Bloko savybės"
 #, fuzzy
 msgid "Click Action:"
 msgstr "Veiksmas spustelėjus:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Colour the value by thresholds"
+msgstr "Naudoti vidurinę spalvą reikšmėms tarp ribų"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4843,6 +4863,59 @@ msgstr "➕ Pridėti statistiką"
 msgid "➖ Remove Stat"
 msgstr "➖ Pašalinti statistiką"
 
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "(single grid)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "(unnamed)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, python-brace-format
+msgid "A profile named \"{name}\" already exists. Choose another name."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "A profile needs a name."
+msgstr "Naudotojo vardas"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "HUD profiles"
+msgstr "HUD profilis"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "dynamic panels"
+msgstr "🧩 Dinaminiai skydeliai"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "general settings"
+msgstr "⚙️ Bendri nustatymai"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "panel fallback"
+msgstr "Atsarginė parinktis"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "panel rules"
+msgstr "Skydelių taisyklės"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "popup windows"
+msgstr "Iššokantys langai"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "profile rules"
+msgstr "Naudotojo vardas"
+
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid " pt"
 msgstr ""
@@ -4850,11 +4923,6 @@ msgstr ""
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "(none)"
-msgstr "(nėra)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -4974,6 +5042,16 @@ msgstr "Negalima pridėti šios taisyklės"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Cannot create the profile"
+msgstr "Negalima atnaujinti šios taisyklės"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Cannot duplicate the profile"
+msgstr "Negalima atnaujinti šios taisyklės"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot export"
 msgstr "Negalima eksportuoti"
 
@@ -4984,11 +5062,21 @@ msgstr "Negalima importuoti"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Cannot rename the profile"
+msgstr "Negalima atnaujinti šios taisyklės"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot update this rule"
 msgstr "Negalima atnaujinti šios taisyklės"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell already used"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Changed since the last save: {parts}"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -5213,6 +5301,11 @@ msgstr "Naujas profilis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "New profile name:"
+msgstr "Naudotojo vardas"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "No HUD profile of this name exists; the game default will be used instead."
 msgstr ""
@@ -5348,6 +5441,11 @@ msgstr ""
 #, fuzzy
 msgid "Remove"
 msgstr "Pašalinti"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Rename Profile"
+msgstr "Naujas profilis"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5500,6 +5598,10 @@ msgid "Update selected"
 msgstr "Atnaujinti pasirinktą"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Use thresholds"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "When this is the spot"
 msgstr "Kai situacija yra"
@@ -5508,6 +5610,12 @@ msgstr "Kai situacija yra"
 #, fuzzy, python-brace-format
 msgid "Wrote {path}"
 msgstr "Įrašyta {path}"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+#| msgid "If you change the config you must save before importing"
+msgid "You have unsaved changes. Do you want to save before closing?"
+msgstr "Jei pakeisite konfiguraciją, jūs turite ją išsaugoti prieš įkeldami."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "a separator line"
@@ -5560,8 +5668,17 @@ msgstr "↓ Žemyn"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "● Unsaved changes"
+msgstr "Neįrašyti pakeitimai"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "⚙️ General Settings"
 msgstr "⚙️ Bendri nustatymai"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "✏️ Rename"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5678,6 +5795,82 @@ msgstr ""
 #, fuzzy
 msgid "Reference HUD"
 msgstr "Pavyzdinis HUD"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "7th street"
+msgstr "gatvė"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "All-in or Fold"
+msgstr "All-in"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Flop / 4th street"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Other"
+msgstr "Kita"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Postflop, all streets"
+msgstr "Postflopas"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Results and showdown"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "River / 6th street"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Steal and blinds"
+msgstr "Statymų dydis (didžiaisiais blindais)"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Tournament and stack"
+msgstr "Turnyrai"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Turn / 5th street"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "analytics"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "classic"
+msgstr "Klasė:"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "stats.d"
+msgstr "Statistika"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Description"
+msgstr "Apibūdinimas"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, fuzzy
+msgid "Search stats"
+msgstr "Ieškoti svetainių..."
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, python-brace-format
+msgid "Showing {shown} of {total} stats"
+msgstr ""
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
 #, python-format
@@ -5830,10 +6023,6 @@ msgstr ""
 #, fuzzy
 msgid "Author"
 msgstr "Autorius"
-
-#: fpdb_3_legacy/pack_share_dialog.py
-msgid "Description"
-msgstr "Apibūdinimas"
 
 #: fpdb_3_legacy/pack_share_dialog.py
 msgid "For example CC-BY-4.0 or AGPL-3.0-or-later"
@@ -6456,11 +6645,6 @@ msgstr "Tik rankos, importuotos prieš šį rankos ID."
 #, fuzzy
 msgid "Opponent position"
 msgstr "Varžovo pozicija"
-
-#: fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Other"
-msgstr "Kita"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -8325,10 +8509,6 @@ msgstr ""
 
 #~ msgid "IS SHOOTOUT"
 #~ msgstr "YRA SHOOTOUTAS"
-
-#~ msgid "If you change the config you must save before importing"
-#~ msgstr ""
-#~ "Jei pakeisite konfiguraciją, jūs turite ją išsaugoti prieš įkeldami."
 
 #~ msgid "KO"
 #~ msgstr "MEDŽIOKLĖ"

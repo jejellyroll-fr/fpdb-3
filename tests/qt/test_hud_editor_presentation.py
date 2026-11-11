@@ -75,8 +75,13 @@ def test_changing_a_control_is_an_unsaved_change(tmp_path, monkeypatch) -> None:
     dialog.font_size_spin.setValue(11)
     assert profile["font_size"] == "11"
     assert dialog.has_unsaved_changes()
+    # The status bar's "unsaved changes" mark follows at once.
+    assert not dialog.unsaved_label.isHidden()
     dialog.font_size_spin.setValue(0)
     assert not dialog.has_unsaved_changes()
+    assert dialog.unsaved_label.isHidden()
+    dialog.presentation_mode_combo.setCurrentIndex(dialog.presentation_mode_combo.findData("rich"))
+    assert not dialog.unsaved_label.isHidden()
 
 
 def test_padding_has_no_control_and_is_kept(tmp_path, monkeypatch) -> None:

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 14:19+0100\n"
+"POT-Creation-Date: 2026-11-11 20:34+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -820,6 +820,7 @@ msgid "Idle"
 msgstr ""
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #: fpdb_3_legacy/research_labels.py
 msgid "Player"
 msgstr ""
@@ -1477,6 +1478,7 @@ msgid "Went all-in"
 msgstr ""
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 msgid "Preflop"
 msgstr ""
 
@@ -1711,6 +1713,7 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 msgid "Stat"
 msgstr ""
 
@@ -3111,7 +3114,7 @@ msgstr ""
 msgid "Back up and upgrade"
 msgstr ""
 
-#: fpdb_3_legacy/fpdb.pyw
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Unsaved Changes"
 msgstr ""
 
@@ -3944,6 +3947,16 @@ msgid "Optional: Popup to show on hover"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Colour the value by thresholds"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid ""
+"Below the low threshold the value takes the low colour, above the high one "
+"the high colour"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Low Range:"
 msgstr ""
 
@@ -3977,6 +3990,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "OK"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "(none)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
@@ -4017,6 +4035,51 @@ msgstr ""
 msgid "➖ Remove Stat"
 msgstr ""
 
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "A profile needs a name."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, python-brace-format
+msgid "A profile named \"{name}\" already exists. Choose another name."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "HUD profiles"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "popup windows"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "general settings"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "profile rules"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "panel rules"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "dynamic panels"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "panel fallback"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "(unnamed)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "(single grid)"
+msgstr ""
+
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Turn on dynamic panels?"
 msgstr ""
@@ -4035,6 +4098,10 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "➕ New Profile"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "✏️ Rename"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4067,6 +4134,10 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Item Properties"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Use thresholds"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4249,7 +4320,16 @@ msgid "Profile: {name} | {layout} | Statistics: {count}"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "(none)"
+msgid "● Unsaved changes"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Changed since the last save: {parts}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "You have unsaved changes. Do you want to save before closing?"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4324,6 +4404,26 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "New Profile"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cannot create the profile"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cannot duplicate the profile"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "New profile name:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Rename Profile"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cannot rename the profile"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4692,6 +4792,73 @@ msgid ""
 "popup library."
 msgstr ""
 
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Steal and blinds"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Flop / 4th street"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Turn / 5th street"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "River / 6th street"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "7th street"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Postflop, all streets"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Results and showdown"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "Tournament and stack"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "All-in or Fold"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#: fpdb_3_legacy/research_labels.py
+msgid "Other"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "classic"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "stats.d"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "analytics"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+msgid "Search stats"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Description"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, python-brace-format
+msgid "Showing {shown} of {total} stats"
+msgstr ""
+
 #: fpdb_3_legacy/pack_gallery_dialog.py
 msgid "Installed"
 msgstr ""
@@ -4841,10 +5008,6 @@ msgstr ""
 
 #: fpdb_3_legacy/pack_share_dialog.py
 msgid "Licence"
-msgstr ""
-
-#: fpdb_3_legacy/pack_share_dialog.py
-msgid "Description"
 msgstr ""
 
 #: fpdb_3_legacy/pack_share_dialog.py
@@ -5721,10 +5884,6 @@ msgstr ""
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Board"
-msgstr ""
-
-#: fpdb_3_legacy/research_labels.py
-msgid "Other"
 msgstr ""
 
 #: fpdb_3_legacy/research_labels.py

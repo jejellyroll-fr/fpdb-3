@@ -715,6 +715,7 @@ def test_group_items_and_item_properties(tmp_path):
     from PySide6.QtCore import Qt
     from PySide6.QtWidgets import (
         QApplication,
+        QCheckBox,
         QComboBox,
         QGroupBox,
         QLineEdit,
@@ -793,10 +794,10 @@ def test_group_items_and_item_properties(tmp_path):
     d._item_color_btns = {}
     d.ip_fg = d._item_color_btn("fg")
     d.ip_bg = d._item_color_btn("bg")
-    d.ip_loth = QSpinBox()
-    d.ip_loth.setRange(0, 100)
-    d.ip_hith = QSpinBox()
-    d.ip_hith.setRange(0, 100)
+    d.ip_use_thresholds = QCheckBox()
+    d.ip_use_thresholds.toggled.connect(d._item_thresholds_toggled)
+    d.ip_loth = d._item_threshold_input()
+    d.ip_hith = d._item_threshold_input()
     d.ip_locolor = d._item_color_btn("lo")
     d.ip_midcolor = d._item_color_btn("mid")
     d.ip_hicolor = d._item_color_btn("hi")
@@ -810,6 +811,7 @@ def test_group_items_and_item_properties(tmp_path):
     stat_row = next(i for i, (k, _r) in enumerate(d._group_item_refs) if k == "stat")
     d.group_items_list.setCurrentRow(stat_row)
     assert d.item_props_tabs.isTabEnabled(1)  # tab always clickable
+    d.ip_use_thresholds.setChecked(True)
     assert d.ip_loth.isEnabled()  # colour-range controls active for stats
     d.ip_colspan.setValue(3)
     d.ip_align.setCurrentText("left")

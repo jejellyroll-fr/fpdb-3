@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 14:19+0100\n"
+"POT-Creation-Date: 2026-11-11 20:34+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -910,6 +910,7 @@ msgid "Notes: 0"
 msgstr "Jegyzetek: 0"
 
 #: fpdb_3_legacy/GuiAutoNotesWorkbench.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
 msgid "Player"
@@ -1820,6 +1821,7 @@ msgid "Postflop"
 msgstr "Postflop"
 
 #: fpdb_3_legacy/GuiHandViewer.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #, fuzzy
 msgid "Preflop"
 msgstr "Preflop"
@@ -2054,6 +2056,7 @@ msgstr "Mutatás az összegzésekben"
 
 #: fpdb_3_legacy/GuiPrefs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 msgid "Stat"
 msgstr "Statisztika"
 
@@ -3685,7 +3688,7 @@ msgstr ""
 msgid "Unknown Site"
 msgstr "Ismeretlen terem"
 
-#: fpdb_3_legacy/fpdb.pyw
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Unsaved Changes"
 msgstr "Nem mentett változások"
@@ -4623,9 +4626,21 @@ msgid "−"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "(none)"
+msgstr "(nincs)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
 msgid "Add/Edit Statistic"
 msgstr "Statisztika hozzáadása/szerkesztése"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid ""
+"Below the low threshold the value takes the low colour, above the high one "
+"the high colour"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4636,6 +4651,11 @@ msgstr "Blokk tulajdonságai"
 #, fuzzy
 msgid "Click Action:"
 msgstr "Kattintási művelet:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Colour the value by thresholds"
+msgstr "Középső szín használata a küszöbök közötti értékekhez"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4781,6 +4801,60 @@ msgstr "➕ Statisztika hozzáadása"
 msgid "➖ Remove Stat"
 msgstr "➖ Statisztika eltávolítása"
 
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "(single grid)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "(unnamed)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, python-brace-format
+msgid "A profile named \"{name}\" already exists. Choose another name."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "A profile needs a name."
+msgstr "Fájlnév:"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "HUD profiles"
+msgstr "HUD-profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "dynamic panels"
+msgstr "🧩 Dinamikus panelek"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "general settings"
+msgstr "⚙️ Általános beállítások"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "panel fallback"
+msgstr "Tartalék"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "panel rules"
+msgstr "Panelszabályok"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+#| msgid "Popup Windows"
+msgid "popup windows"
+msgstr "Felugró ablakok"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, fuzzy
+msgid "profile rules"
+msgstr "Fájlnév:"
+
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid " pt"
 msgstr ""
@@ -4788,11 +4862,6 @@ msgstr ""
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr "#"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "(none)"
-msgstr "(nincs)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -4910,6 +4979,16 @@ msgstr "Ez a szabály nem adható hozzá"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Cannot create the profile"
+msgstr "Ez a szabály nem frissíthető"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Cannot duplicate the profile"
+msgstr "Ez a szabály nem frissíthető"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Cannot export"
 msgstr "Nem exportálható"
 
@@ -4917,6 +4996,11 @@ msgstr "Nem exportálható"
 #, fuzzy
 msgid "Cannot import"
 msgstr "Nem importálható"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Cannot rename the profile"
+msgstr "Ez a szabály nem frissíthető"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -4928,6 +5012,11 @@ msgstr "Ez a szabály nem frissíthető"
 #| msgid "lock already held by:"
 msgid "Cell already used"
 msgstr "a zárolást már elvégezte:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Changed since the last save: {parts}"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5152,6 +5241,11 @@ msgstr "Új profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "New profile name:"
+msgstr "Fájlnév:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid ""
 "No HUD profile of this name exists; the game default will be used instead."
 msgstr ""
@@ -5287,6 +5381,11 @@ msgstr ""
 #, fuzzy
 msgid "Remove"
 msgstr "Eltávolítás"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Rename Profile"
+msgstr "Új profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5440,6 +5539,10 @@ msgid "Update selected"
 msgstr "Kijelölt frissítése"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Use thresholds"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "When this is the spot"
 msgstr "Ha ez a helyzet"
@@ -5448,6 +5551,14 @@ msgstr "Ha ez a helyzet"
 #, fuzzy, python-brace-format
 msgid "Wrote {path}"
 msgstr "Kiírva: {path}"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+#| msgid "If you change the config you must save before importing"
+msgid "You have unsaved changes. Do you want to save before closing?"
+msgstr ""
+"Ha megváltoztatod a beállításokat, akkor importálás előtt előbb el kell "
+"mentened őket."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "a separator line"
@@ -5500,8 +5611,17 @@ msgstr "↓ Le"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "● Unsaved changes"
+msgstr "Nem mentett változások"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "⚙️ General Settings"
 msgstr "⚙️ Általános beállítások"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "✏️ Rename"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5618,6 +5738,88 @@ msgstr ""
 #, fuzzy
 msgid "Reference HUD"
 msgstr "HUD beállítások"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "7th street"
+msgstr "utca"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "All-in or Fold"
+msgstr "All-in"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+#| msgid "Flop/4th street seen %"
+msgid "Flop / 4th street"
+msgstr "flopot/4. utcát néz %"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#: fpdb_3_legacy/research_labels.py
+#, fuzzy
+msgid "Other"
+msgstr "Egyéb"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Postflop, all streets"
+msgstr "Postflop"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+#| msgid "% went to showdown"
+msgid "Results and showdown"
+msgstr "terítésig megy %"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "River / 6th street"
+msgstr "folytató nyitás riveren/6. utcán %"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Steal and blinds"
+msgstr "Tét (nagyvakok)"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Tournament and stack"
+msgstr "Versenyek"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "Turn / 5th street"
+msgstr "folytató nyitás turnön/5. utcán %"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+msgid "analytics"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "classic"
+msgstr "Osztály:"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
+#, fuzzy
+msgid "stats.d"
+msgstr "Statisztikák"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#: fpdb_3_legacy/pack_share_dialog.py
+msgid "Description"
+msgstr "Leírás"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, fuzzy
+msgid "Search stats"
+msgstr "Termek keresése..."
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, python-brace-format
+msgid "Showing {shown} of {total} stats"
+msgstr ""
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
 #, python-format
@@ -5772,10 +5974,6 @@ msgstr ""
 #, fuzzy
 msgid "Author"
 msgstr "Szerző"
-
-#: fpdb_3_legacy/pack_share_dialog.py
-msgid "Description"
-msgstr "Leírás"
 
 #: fpdb_3_legacy/pack_share_dialog.py
 msgid "For example CC-BY-4.0 or AGPL-3.0-or-later"
@@ -6402,11 +6600,6 @@ msgstr "Csak az ezen leosztás-azonosító előtt importált leosztások."
 #, fuzzy
 msgid "Opponent position"
 msgstr "Az ellenfél pozíciója"
-
-#: fpdb_3_legacy/research_labels.py
-#, fuzzy
-msgid "Other"
-msgstr "Egyéb"
 
 #: fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -8157,14 +8350,6 @@ msgstr ""
 #~ msgid "% check-raise flop/4th street"
 #~ msgstr "folytató nyitás flopon/4. utcán %"
 
-#, fuzzy
-#~ msgid "% check-raise river/6th street"
-#~ msgstr "folytató nyitás riveren/6. utcán %"
-
-#, fuzzy
-#~ msgid "% check-raise turn/5th street"
-#~ msgstr "folytató nyitás turnön/5. utcán %"
-
 #~ msgid "% cold 4 bet preflop/3rd street"
 #~ msgstr "hideg 4-bet preflop/3. utcán %"
 
@@ -8219,9 +8404,6 @@ msgstr ""
 
 #~ msgid "% squeeze preflop"
 #~ msgstr "squeeze preflop %"
-
-#~ msgid "% went to showdown"
-#~ msgstr "terítésig megy %"
 
 #~ msgid "% went to showdown when seen flop/4th streetp"
 #~ msgstr "terítésig megy, ha flopot/4. utcát néz %"
@@ -9314,9 +9496,6 @@ msgstr ""
 #~ "flop agresszió\n"
 #~ "bet vagy raise a flop láttán"
 
-#~ msgid "Flop/4th street seen %"
-#~ msgstr "flopot/4. utcát néz %"
-
 #~ msgid "For Multiple Blind Levels:"
 #~ msgstr "Több vakszintre:"
 
@@ -9709,11 +9888,6 @@ msgstr ""
 #~ "If you are interested in developing the code further see GuiStove.py and "
 #~ "Stove.py."
 #~ msgstr "Ebben az esetben nézz bele a GuiStove.py és Stove.py fájlokba"
-
-#~ msgid "If you change the config you must save before importing"
-#~ msgstr ""
-#~ "Ha megváltoztatod a beállításokat, akkor importálás előtt előbb el kell "
-#~ "mentened őket."
 
 #~ msgid ""
 #~ "If you had previously opened any tabs they cannot use the new settings "

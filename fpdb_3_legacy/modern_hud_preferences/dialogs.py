@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
     QDialogButtonBox,
+    QDoubleSpinBox,
     QFormLayout,
     QFrame,
     QGridLayout,
@@ -27,6 +28,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.modern_hud_preferences import stat_edit
 from fpdb_3_legacy.modern_hud_preferences.preview_widgets import ColorPreviewWidget
 
 log = get_logger("modern_hud_preferences.dialogs")
@@ -112,10 +114,12 @@ class AddStatDialog(QDialog):
         self.setWindowTitle(_("Add/Edit Statistic"))
         self.setMinimumWidth(600)
 
-        # Initialize color values
-        self.locolor = "#ff0000"
-        self.midcolor = "#ffff00"
-        self.hicolor = "#00ff00"
+        # The stat as it was, and its colours: "" is "not set", which an edit
+        # must keep (B1). Turning a colour range on fills in the usual ones.
+        self._stored = dict(stat or {})
+        self.locolor = self._stored.get("stat_locolor") or ""
+        self.midcolor = self._stored.get("stat_midcolor") or ""
+        self.hicolor = self._stored.get("stat_hicolor") or ""
 
         # Main layout
         main_layout = QVBoxLayout(self)
@@ -295,6 +299,14 @@ class AddStatDialog(QDialog):
         color_layout = QVBoxLayout()
         color_layout.setSpacing(10)
 
+        # Colour ranges are optional: a stat without thresholds keeps its
+        # plain text colour, and editing it must not give it one.
+        self.use_thresholds = QCheckBox(_("Colour the value by thresholds"))
+        self.use_thresholds.setToolTip(
+            _("Below the low threshold the value takes the low colour, above the high one the high colour")
+        )
+        color_layout.addWidget(self.use_thresholds)
+
         # Color thresholds grid
         threshold_layout = QGridLayout()
         threshold_layout.setSpacing(10)
@@ -307,17 +319,12 @@ class AddStatDialog(QDialog):
         low_layout.setContentsMargins(0, 0, 0, 0)
 
         low_layout.addWidget(QLabel(_("Values below")))
-        self.loth_input = QSpinBox()
-        self.loth_input.setRange(0, 100)
-        self.loth_input.setValue(20)
-        self.loth_input.setMinimumWidth(70)
-        self.loth_input.valueChanged.connect(self.update_preview)
+        self.loth_input = self._threshold_input(stat_edit.DEFAULT_LOW)
         low_layout.addWidget(self.loth_input)
         low_layout.addWidget(QLabel(_("show as")))
 
         self.locolor_btn = QPushButton()
         self.locolor_btn.setFixedSize(80, 30)
-        self.locolor_btn.setStyleSheet(f"background-color: {self.locolor};")
         self.locolor_btn.clicked.connect(lambda: self.choose_color("low"))
         low_layout.addWidget(self.locolor_btn)
         low_layout.addStretch()
@@ -332,17 +339,12 @@ class AddStatDialog(QDialog):
         high_layout.setContentsMargins(0, 0, 0, 0)
 
         high_layout.addWidget(QLabel(_("Values above")))
-        self.hith_input = QSpinBox()
-        self.hith_input.setRange(0, 100)
-        self.hith_input.setValue(60)
-        self.hith_input.setMinimumWidth(70)
-        self.hith_input.valueChanged.connect(self.update_preview)
+        self.hith_input = self._threshold_input(stat_edit.DEFAULT_HIGH)
         high_layout.addWidget(self.hith_input)
         high_layout.addWidget(QLabel(_("show as")))
 
         self.hicolor_btn = QPushButton()
         self.hicolor_btn.setFixedSize(80, 30)
-        self.hicolor_btn.setStyleSheet(f"background-color: {self.hicolor};")
         self.hicolor_btn.clicked.connect(lambda: self.choose_color("high"))
         high_layout.addWidget(self.hicolor_btn)
         high_layout.addStretch()
@@ -351,7 +353,6 @@ class AddStatDialog(QDialog):
 
         # Optional middle color
         self.use_midcolor = QCheckBox(_("Use middle color for values between thresholds"))
-        self.use_midcolor.toggled.connect(self.toggle_midcolor)
         threshold_layout.addWidget(self.use_midcolor, 2, 0, 1, 2)
 
         mid_frame = QFrame()
@@ -361,13 +362,19 @@ class AddStatDialog(QDialog):
         mid_layout.addWidget(QLabel(_("Middle color:")))
         self.midcolor_btn = QPushButton()
         self.midcolor_btn.setFixedSize(80, 30)
-        self.midcolor_btn.setStyleSheet(f"background-color: {self.midcolor};")
         self.midcolor_btn.clicked.connect(lambda: self.choose_color("mid"))
-        self.midcolor_btn.setEnabled(False)
         mid_layout.addWidget(self.midcolor_btn)
         mid_layout.addStretch()
 
         threshold_layout.addWidget(mid_frame, 3, 0, 1, 2)
+
+        self._threshold_widgets = (
+            self.loth_input,
+            self.hith_input,
+            self.locolor_btn,
+            self.hicolor_btn,
+            self.use_midcolor,
+        )
 
         color_layout.addLayout(threshold_layout)
         color_group.setLayout(color_layout)
@@ -409,79 +416,127 @@ class AddStatDialog(QDialog):
             self.stat_input.setCurrentText(stat["stat"])
             self.click_input.setText(stat.get("click", ""))
             self.popup_input.setText(stat.get("popup", ""))
+            self.use_thresholds.setChecked(stat_edit.has_thresholds(stat))
+            self.loth_input.setValue(stat_edit.shown_value(stat.get("stat_loth"), stat_edit.DEFAULT_LOW))
+            self.hith_input.setValue(stat_edit.shown_value(stat.get("stat_hith"), stat_edit.DEFAULT_HIGH))
+            self.use_midcolor.setChecked(bool(self.midcolor))
+        self._shown_at_load = (self.loth_input.value(), self.hith_input.value())
 
-            # Load color settings if available
-            if "stat_loth" in stat and stat["stat_loth"]:
-                self.loth_input.setValue(int(float(stat["stat_loth"])))
-            if "stat_hith" in stat and stat["stat_hith"]:
-                self.hith_input.setValue(int(float(stat["stat_hith"])))
-            if stat.get("stat_locolor"):
-                self.locolor = stat["stat_locolor"]
-                self.locolor_btn.setStyleSheet(f"background-color: {self.locolor};")
-            if stat.get("stat_hicolor"):
-                self.hicolor = stat["stat_hicolor"]
-                self.hicolor_btn.setStyleSheet(f"background-color: {self.hicolor};")
-            if stat.get("stat_midcolor"):
-                self.midcolor = stat["stat_midcolor"]
-                self.midcolor_btn.setStyleSheet(f"background-color: {self.midcolor};")
-                self.use_midcolor.setChecked(True)
-                self.midcolor_btn.setEnabled(True)
+        for colour_type in ("low", "mid", "high"):
+            self._show_color(colour_type)
+        self._enable_threshold_widgets()
+        self.loth_input.valueChanged.connect(self.update_preview)
+        self.hith_input.valueChanged.connect(self.update_preview)
+        self.use_thresholds.toggled.connect(self.toggle_thresholds)
+        self.use_midcolor.toggled.connect(self.toggle_midcolor)
+
+        # What the form says before the user touches it: get_stat() returns
+        # only what differs from it.
+        self._at_load = self._form_values()
 
         # Initial preview update
         self.update_preview()
 
+    @staticmethod
+    def _threshold_input(value: float) -> QDoubleSpinBox:
+        spin = QDoubleSpinBox()
+        spin.setDecimals(stat_edit.DECIMALS)
+        spin.setRange(stat_edit.MINIMUM, stat_edit.MAXIMUM)
+        spin.setValue(value)
+        spin.setMinimumWidth(90)
+        return spin
+
+    def _show_color(self, colour_type: str) -> None:
+        colour, btn = {
+            "low": (self.locolor, self.locolor_btn),
+            "mid": (self.midcolor, self.midcolor_btn),
+            "high": (self.hicolor, self.hicolor_btn),
+        }[colour_type]
+        btn.setText("" if colour else _("(none)"))
+        btn.setStyleSheet(f"background-color: {colour};" if colour else "")
+
+    def _enable_threshold_widgets(self) -> None:
+        on = self.use_thresholds.isChecked()
+        for widget in self._threshold_widgets:
+            widget.setEnabled(on)
+        self.midcolor_btn.setEnabled(on and self.use_midcolor.isChecked())
+
     def choose_color(self, color_type) -> None:
-        color = QColorDialog.getColor()
+        current = {"low": self.locolor, "mid": self.midcolor, "high": self.hicolor}[color_type]
+        color = QColorDialog.getColor(QColor(current) if current else QColor("#ffffff"), self)
         if color.isValid():
             if color_type == "low":
                 self.locolor = color.name()
-                self.locolor_btn.setStyleSheet(f"background-color: {self.locolor};")
             elif color_type == "mid":
                 self.midcolor = color.name()
-                self.midcolor_btn.setStyleSheet(f"background-color: {self.midcolor};")
             elif color_type == "high":
                 self.hicolor = color.name()
-                self.hicolor_btn.setStyleSheet(f"background-color: {self.hicolor};")
+            self._show_color(color_type)
             self.update_preview()
 
+    def toggle_thresholds(self, checked) -> None:
+        """Turning colour ranges on gives a stat without colours the usual red and green."""
+        if checked:
+            if not self.locolor:
+                self.locolor = stat_edit.DEFAULT_LOW_COLOR
+                self._show_color("low")
+            if not self.hicolor:
+                self.hicolor = stat_edit.DEFAULT_HIGH_COLOR
+                self._show_color("high")
+        self._enable_threshold_widgets()
+        self.update_preview()
+
     def toggle_midcolor(self, checked) -> None:
-        self.midcolor_btn.setEnabled(checked)
+        if checked and not self.midcolor:
+            self.midcolor = stat_edit.DEFAULT_MID_COLOR
+            self._show_color("mid")
+        self._enable_threshold_widgets()
         self.update_preview()
 
     def update_preview(self) -> None:
-        low_threshold = self.loth_input.value()
-        high_threshold = self.hith_input.value()
-        use_mid_color = self.use_midcolor.isChecked()
-
         self.color_preview.set_colors(
-            self.locolor,
-            self.midcolor,
-            self.hicolor,
-            low_threshold,
-            high_threshold,
-            use_mid_color,
+            self.locolor or stat_edit.DEFAULT_LOW_COLOR,
+            self.midcolor or stat_edit.DEFAULT_MID_COLOR,
+            self.hicolor or stat_edit.DEFAULT_HIGH_COLOR,
+            self.loth_input.value(),
+            self.hith_input.value(),
+            self.use_midcolor.isChecked(),
         )
 
-    def get_stat(self):
-        stat = {
+    def _form_values(self) -> dict:
+        """Every attribute the form shows, as the stat would store it."""
+        values = {
             "row": int(self.row_input.currentText()),
             "col": int(self.col_input.currentText()),
             "stat": self.stat_input.currentText(),
             "click": self.click_input.text(),
             "popup": self.popup_input.text(),
-            "stat_loth": str(self.loth_input.value()),
-            "stat_hith": str(self.hith_input.value()),
-            "stat_locolor": self.locolor,
-            "stat_hicolor": self.hicolor,
         }
+        values.update(
+            stat_edit.threshold_values(
+                self._stored,
+                self.use_thresholds.isChecked(),
+                self._shown_at_load,
+                (self.loth_input.value(), self.hith_input.value()),
+            )
+        )
+        values["stat_locolor"] = self.locolor
+        values["stat_hicolor"] = self.hicolor
+        values["stat_midcolor"] = self.midcolor if self.use_midcolor.isChecked() else ""
+        return values
 
-        # Only add midcolor if it's enabled
-        if self.use_midcolor.isChecked():
-            stat["stat_midcolor"] = self.midcolor
-        else:
-            stat["stat_midcolor"] = ""
+    def get_stat(self) -> dict:
+        """What the user set.
 
-        return stat
+        Editing a stat returns only the attributes the user changed, so that
+        applying them leaves everything else -- unset colours, a threshold
+        written ``12.5`` or ``140`` -- as it was. Adding one returns its cell,
+        name, click and popup, plus the colour range when the user set one.
+        """
+        values = self._form_values()
+        if self._stored:
+            return stat_edit.changes(self._at_load, values)
+        return {key: value for key, value in values.items() if value != "" or key in ("click", "popup")}
 
 
 # --- Layout Selection Dialog for Exporting ---
