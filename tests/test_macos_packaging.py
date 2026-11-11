@@ -423,7 +423,7 @@ def test_the_fast_hud_coverage_gate_is_wired_up() -> None:
     """The gate is what stops the Fast-Fold modules slipping below 100%."""
     workflow = CI_WORKFLOW.read_text()
     test_job = _workflow_job(workflow, "test", "native")
-    start = test_job.index("- name: Check FastHUD coverage has not dropped")
+    start = test_job.index("- name: Run tests (no GUI) and check FastHUD coverage has not dropped")
     step = test_job[start : test_job.index("\n      - name:", start + 1)]
 
     assert "--cov-fail-under=100" in step
