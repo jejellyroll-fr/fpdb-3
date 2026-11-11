@@ -22,6 +22,7 @@ from fpdb_3_legacy.Aux_Hud import SimpleLabel
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.i18n import translate_hud_category, translate_hud_label
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.modern_hud_preferences import stat_edit
 from fpdb_3_legacy.PopupIcons import get_icon_provider, get_stat_category
 from fpdb_3_legacy.PopupThemes import get_theme
 
@@ -54,47 +55,50 @@ class ColorPreviewWidget(QWidget):
         self.use_mid_color = use_mid_color
         self.update()
 
+    def positions(self) -> tuple[float, float, float, float]:
+        """(start, end, low, high): the bar's value range and where each threshold sits on it, 0-1."""
+        start, end = stat_edit.preview_span(self.low_threshold, self.high_threshold)
+        width = (end - start) or 1.0
+
+        def at(value: float) -> float:
+            return min(1.0, max(0.0, (value - start) / width))
+
+        return start, end, at(self.low_threshold), at(self.high_threshold)
+
     def paintEvent(self, event) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         width = self.width()
         height = self.height()
+        start, end, low, high = self.positions()
 
         # Draw gradient background
         gradient = QLinearGradient(0, 0, width, 0)
-
-        if self.use_mid_color:
-            # Three color gradient
-            gradient.setColorAt(0.0, self.low_color)
-            gradient.setColorAt(self.low_threshold / 100.0, self.low_color)
-            gradient.setColorAt(self.low_threshold / 100.0 + 0.01, self.mid_color)
-            gradient.setColorAt(self.high_threshold / 100.0 - 0.01, self.mid_color)
-            gradient.setColorAt(self.high_threshold / 100.0, self.high_color)
-            gradient.setColorAt(1.0, self.high_color)
-        else:
-            # Two color gradient
-            gradient.setColorAt(0.0, self.low_color)
-            gradient.setColorAt(self.low_threshold / 100.0, self.low_color)
-            gradient.setColorAt(self.high_threshold / 100.0, self.high_color)
-            gradient.setColorAt(1.0, self.high_color)
+        gradient.setColorAt(0.0, self.low_color)
+        gradient.setColorAt(low, self.low_color)
+        if self.use_mid_color and high - low > 0.02:
+            gradient.setColorAt(low + 0.01, self.mid_color)
+            gradient.setColorAt(high - 0.01, self.mid_color)
+        gradient.setColorAt(high, self.high_color)
+        gradient.setColorAt(1.0, self.high_color)
 
         painter.fillRect(0, 0, width, height, gradient)
 
         # Draw threshold markers
         painter.setPen(QPen(QColor(Qt.GlobalColor.black), 2))
-        low_x = int(width * self.low_threshold / 100)
-        high_x = int(width * self.high_threshold / 100)
+        low_x = int(width * low)
+        high_x = int(width * high)
 
         painter.drawLine(low_x, 0, low_x, height)
         painter.drawLine(high_x, 0, high_x, height)
 
         # Draw labels
         painter.setFont(QFont("Arial", 9))
-        painter.drawText(5, height - 5, "0")
-        painter.drawText(low_x - 15, height - 5, f"{self.low_threshold}")
-        painter.drawText(high_x - 15, height - 5, f"{self.high_threshold}")
-        painter.drawText(width - 25, height - 5, "100")
+        painter.drawText(5, height - 5, stat_edit.format_value(start))
+        painter.drawText(low_x - 15, height - 5, stat_edit.format_value(self.low_threshold))
+        painter.drawText(high_x - 15, height - 5, stat_edit.format_value(self.high_threshold))
+        painter.drawText(width - 35, height - 5, stat_edit.format_value(end))
 
 
 # --- Visual HUD Preview Widget ---

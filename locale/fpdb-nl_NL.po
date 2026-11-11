@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 13:54+0100\n"
+"POT-Creation-Date: 2026-11-11 20:16+0100\n"
 "PO-Revision-Date: 2011-12-03 21:57+0000\n"
 "Last-Translator: LimburgCwboy <hdps.een@gmail.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.net/projects/p/fpdb/"
@@ -4706,9 +4706,21 @@ msgid "−"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "(none)"
+msgstr "(geen)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
 msgid "Add/Edit Statistic"
 msgstr "Statistiek toevoegen/bewerken"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid ""
+"Below the low threshold the value takes the low colour, above the high one "
+"the high colour"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4719,6 +4731,11 @@ msgstr "Blokeigenschappen"
 #, fuzzy
 msgid "Click Action:"
 msgstr "Klikactie:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Colour the value by thresholds"
+msgstr "Middenkleur gebruiken voor waarden tussen de drempels"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4865,11 +4882,6 @@ msgstr "➖ Stat verwijderen"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "(none)"
-msgstr "(geen)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5454,6 +5466,10 @@ msgstr "Regel bijwerken"
 #, fuzzy
 msgid "Update selected"
 msgstr "Selectie bijwerken"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Use thresholds"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy

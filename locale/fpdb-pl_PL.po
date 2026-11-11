@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 13:54+0100\n"
+"POT-Creation-Date: 2026-11-11 20:16+0100\n"
 "PO-Revision-Date: 2011-10-08 08:58+0000\n"
 "Last-Translator: greg20 <greg20@hushmail.com>\n"
 "Language-Team: Polish (Poland) (http://www.transifex.net/projects/p/fpdb/"
@@ -4613,9 +4613,21 @@ msgid "−"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "(none)"
+msgstr "(brak)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
 msgid "Add/Edit Statistic"
 msgstr "Dodaj/edytuj statystykę"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid ""
+"Below the low threshold the value takes the low colour, above the high one "
+"the high colour"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4626,6 +4638,11 @@ msgstr "Właściwości bloku"
 #, fuzzy
 msgid "Click Action:"
 msgstr "Akcja po kliknięciu:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Colour the value by thresholds"
+msgstr "Użyj koloru środkowego dla wartości między progami"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4772,11 +4789,6 @@ msgstr "➖ Usuń statystykę"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr "#"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "(none)"
-msgstr "(brak)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5355,6 +5367,10 @@ msgstr "Zaktualizuj regułę"
 #, fuzzy
 msgid "Update selected"
 msgstr "Zaktualizuj wybraną"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Use thresholds"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
