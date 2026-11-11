@@ -1026,6 +1026,7 @@ def test_the_hud_preferences_controls_survive_a_narrow_window(qtbot, example_con
         dialog.export_profile_btn,
         dialog.add_profile_btn,
         dialog.dup_profile_btn,
+        dialog.rename_profile_btn,
         dialog.del_profile_btn,
         dialog.profile_combo,
     ):
@@ -1040,10 +1041,10 @@ def test_the_hud_preferences_controls_survive_a_narrow_window(qtbot, example_con
 
 
 def test_the_hud_profile_actions_fold_into_one_menu_when_the_window_is_narrow(qtbot, example_config) -> None:
-    """Five buttons set the dialog's minimum width; one menu gives it back.
+    """Six buttons set the dialog's minimum width; one menu gives it back.
 
     A reader who wants the preferences beside their table needs a window the
-    five buttons cannot fit in. The same five actions move behind one menu below
+    six buttons cannot fit in. The same six actions move behind one menu below
     the width that holds them, which is what lowers the dialog's minimum.
     """
     app = get_qapp()
@@ -1065,7 +1066,7 @@ def test_the_hud_profile_actions_fold_into_one_menu_when_the_window_is_narrow(qt
     assert not dialog.add_profile_btn.isVisibleTo(dialog)
     assert dialog.profile_actions_btn.isVisibleTo(dialog)
     assert dialog.minimumSizeHint().width() < NARROW_HEADER_WIDTH
-    # The menu carries the same five actions, in the same order.
+    # The menu carries the same six actions, in the same order.
     assert [action.text() for action in dialog.profile_actions_menu.actions()] == [
         button.text() for button in dialog._profile_action_buttons()
     ]

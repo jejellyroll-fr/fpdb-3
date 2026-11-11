@@ -9,10 +9,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:16+0100\n"
+"POT-Creation-Date: 2026-11-11 20:30+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
-"Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/team/fr_FR/)\n"
+"Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
+"team/fr_FR/)\n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -228,8 +229,8 @@ msgstr "EntractionToFpdb.readHandInfo : impossible de déterminer la devise."
 msgid ""
 "PokerStarsToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
 msgstr ""
-"PokerStarsToFpdb.determineGameType : Lim_Blinds n'a pas d'entrée pour '%s' -"
-" '%s'"
+"PokerStarsToFpdb.determineGameType : Lim_Blinds n'a pas d'entrée pour '%s' - "
+"'%s'"
 
 #: fpdb_3_legacy/EverestToFpdb.py
 #, python-format
@@ -643,16 +644,21 @@ msgstr ""
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid ""
 "\n"
-"Stop requested while an import was still running; it will finish in the background."
+"Stop requested while an import was still running; it will finish in the "
+"background."
 msgstr ""
 "\n"
-"Arrêt demandé alors qu'un import était en cours ; il se terminera en arrière-plan."
+"Arrêt demandé alors qu'un import était en cours ; il se terminera en arrière-"
+"plan."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, python-brace-format
 msgid ""
 "\n"
-"SwC is already running (pid {pids}). On macOS the capture tap is loaded only when SwC starts, so this client cannot be newly attached. The raw-file reader will monitor for data; if the archive does not grow, close SwC after the game and start it again through FPDB."
+"SwC is already running (pid {pids}). On macOS the capture tap is loaded only "
+"when SwC starts, so this client cannot be newly attached. The raw-file "
+"reader will monitor for data; if the archive does not grow, close SwC after "
+"the game and start it again through FPDB."
 msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
@@ -664,38 +670,48 @@ msgstr ""
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid ""
 "\n"
-"SwC live capture is not available on this platform. Importing SwC files still works."
+"SwC live capture is not available on this platform. Importing SwC files "
+"still works."
 msgstr ""
 "\n"
-"La capture en direct SwC n'est pas disponible sur cette plateforme. L'import des fichiers SwC fonctionne toujours."
+"La capture en direct SwC n'est pas disponible sur cette plateforme. L'import "
+"des fichiers SwC fonctionne toujours."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid ""
 "\n"
-"SwC live capture is off: it loads code into the SwC client. Turn it on in Tools ▸ Live capture… after reading what it does. Importing SwC hand history files still works."
+"SwC live capture is off: it loads code into the SwC client. Turn it on in "
+"Tools ▸ Live capture… after reading what it does. Importing SwC hand history "
+"files still works."
 msgstr ""
 "\n"
-"La capture en direct SwC est désactivée : elle charge du code dans le client SwC. Activez-la dans Outils ▸ Capture en direct… après avoir lu ce qu'elle fait. L'import des fichiers d'historique SwC fonctionne toujours."
+"La capture en direct SwC est désactivée : elle charge du code dans le client "
+"SwC. Activez-la dans Outils ▸ Capture en direct… après avoir lu ce qu'elle "
+"fait. L'import des fichiers d'historique SwC fonctionne toujours."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 #, python-brace-format
 msgid ""
 "\n"
-"SwC live capture unavailable: {reason}. Importing SwC hand history files still works."
+"SwC live capture unavailable: {reason}. Importing SwC hand history files "
+"still works."
 msgstr ""
 "\n"
-"Capture en direct SwC indisponible : {reason}. L'import des fichiers d'historique SwC fonctionne toujours."
+"Capture en direct SwC indisponible : {reason}. L'import des fichiers "
+"d'historique SwC fonctionne toujours."
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid ""
 "\n"
-"SwC raw-file reader started; this alone does not confirm that the client tap is writing."
+"SwC raw-file reader started; this alone does not confirm that the client tap "
+"is writing."
 msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
 msgid ""
 "\n"
-"SwC tap built. Linux must start SwC with the capture preload; the raw-file reader alone does not confirm capture."
+"SwC tap built. Linux must start SwC with the capture preload; the raw-file "
+"reader alone does not confirm capture."
 msgstr ""
 
 #: fpdb_3_legacy/GuiAutoImport.py
@@ -768,12 +784,17 @@ msgid ""
 "macOS does not let fpdb read this folder:\n"
 "%s\n"
 "\n"
-"Allow the app that launches fpdb (your terminal, or fpdb itself) in System Settings > Privacy & Security > Full Disk Access, then restart fpdb. Until then, its hands cannot be imported."
+"Allow the app that launches fpdb (your terminal, or fpdb itself) in System "
+"Settings > Privacy & Security > Full Disk Access, then restart fpdb. Until "
+"then, its hands cannot be imported."
 msgstr ""
 "macOS ne permet pas à fpdb de lire ce dossier :\n"
 "%s\n"
 "\n"
-"Autorisez l'application qui lance fpdb (votre terminal, ou fpdb lui-même) dans Réglages Système > Confidentialité et sécurité > Accès complet au disque, puis redémarrez fpdb. D'ici là, ses mains ne peuvent pas être importées."
+"Autorisez l'application qui lance fpdb (votre terminal, ou fpdb lui-même) "
+"dans Réglages Système > Confidentialité et sécurité > Accès complet au "
+"disque, puis redémarrez fpdb. D'ici là, ses mains ne peuvent pas être "
+"importées."
 
 #: fpdb_3_legacy/GuiAutoNoteRules.py
 msgid "Automatic Notes"
@@ -969,11 +990,14 @@ msgstr "Déplacer les fichiers importés vers :"
 msgid ""
 "No importable hand-history files were found in the selected directories.\n"
 "\n"
-"Check that the configured paths contain hand histories (plain text files), not just archives or exports."
+"Check that the configured paths contain hand histories (plain text files), "
+"not just archives or exports."
 msgstr ""
-"Aucun fichier d'historique importable n'a été trouvé dans les répertoires sélectionnés.\n"
+"Aucun fichier d'historique importable n'a été trouvé dans les répertoires "
+"sélectionnés.\n"
 "\n"
-"Vérifiez que les chemins configurés contiennent des historiques de mains (fichiers texte), et pas seulement des archives ou des exports."
+"Vérifiez que les chemins configurés contiennent des historiques de mains "
+"(fichiers texte), et pas seulement des archives ou des exports."
 
 #: fpdb_3_legacy/GuiBulkImport.py
 #, python-brace-format
@@ -1003,8 +1027,7 @@ msgid "Please choose the path that you want to Auto Import"
 msgstr "Choisissez le dossier où vous voulez auto-importer"
 
 #: fpdb_3_legacy/GuiBulkImport.py
-msgid ""
-"Select at least one configured directory, or choose a folder to import."
+msgid "Select at least one configured directory, or choose a folder to import."
 msgstr ""
 "Sélectionnez au moins un répertoire configuré, ou choisissez un dossier à "
 "importer."
@@ -1089,8 +1112,7 @@ msgstr "Aucune règle"
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #, python-brace-format
 msgid ""
-"Note Template (Tags: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, "
-"{spr}):"
+"Note Template (Tags: {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, {spr}):"
 msgstr ""
 "Modèle de note (balises : {player}, {hole}, {flop}, {eff_stack_bb}, {pot}, "
 "{spr}) :"
@@ -1329,8 +1351,8 @@ msgid ""
 "This is the only configured database and cannot be deleted — fpdb needs at "
 "least one. Add another database first."
 msgstr ""
-"C'est la seule base de données configurée, elle ne peut pas être supprimée —"
-" fpdb en a besoin d'au moins une. Ajoutez d'abord une autre base."
+"C'est la seule base de données configurée, elle ne peut pas être supprimée — "
+"fpdb en a besoin d'au moins une. Ajoutez d'abord une autre base."
 
 #: fpdb_3_legacy/GuiDatabase.py
 msgid "User"
@@ -1369,8 +1391,8 @@ msgid ""
 "These hands use the same filters as the other side; only the population "
 "differs."
 msgstr ""
-"Ces mains utilisent les mêmes filtres que l'autre côté ; seule la population"
-" diffère."
+"Ces mains utilisent les mêmes filtres que l'autre côté ; seule la population "
+"diffère."
 
 #: fpdb_3_legacy/GuiDrillDown.py
 msgid "Your actions"
@@ -1655,8 +1677,8 @@ msgid ""
 "results were queried; check the database and rebuild analytics data before "
 "retrying."
 msgstr ""
-"L'état des données d'analyse requis par ces filtres n'a pas pu être vérifié."
-" Aucun résultat n'a été demandé ; vérifiez la base de données et "
+"L'état des données d'analyse requis par ces filtres n'a pas pu être vérifié. "
+"Aucun résultat n'a été demandé ; vérifiez la base de données et "
 "reconstruisez les données d'analyse avant de réessayer."
 
 #: fpdb_3_legacy/GuiHandViewer.py
@@ -1675,8 +1697,7 @@ msgstr ""
 #, python-brace-format
 msgid "These filters need missing or outdated analytics data: {names}."
 msgstr ""
-"Ces filtres ont besoin de données d'analyse manquantes ou périmées : "
-"{names}."
+"Ces filtres ont besoin de données d'analyse manquantes ou périmées : {names}."
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Under 25% pot"
@@ -1689,8 +1710,8 @@ msgstr "Mettez fpdb à jour avant d'utiliser ces filtres."
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "Use Database → Rebuild Analytics Data, then retry the filter."
 msgstr ""
-"Utilisez Base de données → Reconstruire les données d'analyse, puis relancez"
-" le filtre."
+"Utilisez Base de données → Reconstruire les données d'analyse, puis relancez "
+"le filtre."
 
 #: fpdb_3_legacy/GuiHandViewer.py
 msgid "VPIP"
@@ -2179,8 +2200,7 @@ msgstr "Résultats"
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Run the same question twice -- yours and the field's -- side by side."
 msgstr ""
-"Pose deux fois la même question -- la vôtre et celle du field -- côte à "
-"côte."
+"Pose deux fois la même question -- la vôtre et celle du field -- côte à côte."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "Running…"
@@ -2217,8 +2237,8 @@ msgstr "Noms techniques"
 msgid ""
 "The Research Browser answers questions about the hands in your database. "
 "Pick a question below, change any value that should be different for you, "
-"then press Run. The sample size is always shown, and every row can be opened"
-" as the hands behind it."
+"then press Run. The sample size is always shown, and every row can be opened "
+"as the hands behind it."
 msgstr ""
 "Le Research Browser répond à des questions sur les mains de votre base. "
 "Choisissez une question ci-dessous, modifiez les valeurs qui doivent être "
@@ -2271,8 +2291,7 @@ msgstr "Essayez l'une de celles-ci :"
 #: fpdb_3_legacy/GuiResearchBrowser.py
 #, python-brace-format
 msgid "Unknown group-by dimension(s): {names}. Known: {known}."
-msgstr ""
-"Dimension(s) de regroupement inconnue(s) : {names}. Connues : {known}."
+msgstr "Dimension(s) de regroupement inconnue(s) : {names}. Connues : {known}."
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/menu_layout.py
 msgid "View"
@@ -2357,8 +2376,7 @@ msgstr "Aucune cellule n'est sous le seuil d'échantillon."
 #: fpdb_3_legacy/GuiResearchViews.py
 #, python-brace-format
 msgid ""
-"Realized {realized} over {hands} hands; EV-adjusted {ev} ({luck} of it "
-"luck)."
+"Realized {realized} over {hands} hands; EV-adjusted {ev} ({luck} of it luck)."
 msgstr ""
 "Réalisé {realized} sur {hands} mains ; ajusté à l'EV {ev} (dont {luck} de "
 "chance)."
@@ -2370,8 +2388,8 @@ msgstr "Partager"
 #: fpdb_3_legacy/GuiResearchViews.py
 #, python-brace-format
 msgid ""
-"{decisions} decisions in this selection have no known hole cards and are not"
-" in the grid; {share} of the decisions are drawn."
+"{decisions} decisions in this selection have no known hole cards and are not "
+"in the grid; {share} of the decisions are drawn."
 msgstr ""
 "{decisions} décisions de cette sélection n'ont pas de cartes privatives "
 "connues et ne sont pas dans la grille ; {share} des décisions sont "
@@ -2379,8 +2397,7 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiResearchViews.py
 #, python-brace-format
-msgid ""
-"{label}: {classified} classified decisions of {total} ({share} covered)"
+msgid "{label}: {classified} classified decisions of {total} ({share} covered)"
 msgstr ""
 "{label} : {classified} décisions classées sur {total} ({share} couvertes)"
 
@@ -2416,12 +2433,12 @@ msgstr "Session"
 #, python-brace-format
 msgid ""
 "Sessions: {sessions} · Hands: {hands} · Playing time: {duration} · Profit: "
-"{profit_bb} BB · bb/100: {bb100} · BB/hour: {bb_hour} · BB hands: "
-"{bb_hands}/{hands}"
+"{profit_bb} BB · bb/100: {bb100} · BB/hour: {bb_hour} · BB hands: {bb_hands}/"
+"{hands}"
 msgstr ""
-"Sessions : {sessions} · Mains : {hands} · Temps de jeu : {duration} · Profit"
-" : {profit_bb} BB · bb/100 : {bb100} · BB/heure : {bb_hour} · Mains en BB : "
-"{bb_hands}/{hands}"
+"Sessions : {sessions} · Mains : {hands} · Temps de jeu : {duration} · "
+"Profit : {profit_bb} BB · bb/100 : {bb100} · BB/heure : {bb_hour} · Mains en "
+"BB : {bb_hands}/{hands}"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
 #, python-brace-format
@@ -2449,8 +2466,8 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiTourneyGraphViewer.py
 msgid ""
-"The results with the luck of every priced all-in taken out, in prize equity."
-" Slower: each all-in hand is rebuilt and priced."
+"The results with the luck of every priced all-in taken out, in prize equity. "
+"Slower: each all-in hand is rebuilt and priced."
 msgstr ""
 "Les résultats sans la chance de chaque all-in chiffré, en équité de prix. "
 "Plus lent : chaque main à tapis est reconstruite et chiffrée."
@@ -2539,8 +2556,7 @@ msgid "Importing"
 msgstr "Import en cours"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
-msgid ""
-"Large archives take a while. The tracker's files are read, never moved."
+msgid "Large archives take a while. The tracker's files are read, never moved."
 msgstr ""
 "Les grosses archives prennent du temps. Les fichiers du tracker sont lus, "
 "jamais déplacés."
@@ -2571,8 +2587,8 @@ msgid ""
 "Set your screen name for %s in Configure > Site Settings before importing, "
 "or your own stats will not be told apart from your opponents'."
 msgstr ""
-"Renseignez votre pseudo pour %s dans Configurer > Paramètres des sites avant"
-" d'importer, sinon vos propres stats ne seront pas distinguées de celles de "
+"Renseignez votre pseudo pour %s dans Configurer > Paramètres des sites avant "
+"d'importer, sinon vos propres stats ne seront pas distinguées de celles de "
 "vos adversaires."
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
@@ -2586,8 +2602,8 @@ msgstr ""
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid ""
 "The files do not say which iPoker room these names played on. Choose the "
-"room of each one. Setting the name as that room's screen name in Configure >"
-" Site Settings spares you this question."
+"room of each one. Setting the name as that room's screen name in Configure > "
+"Site Settings spares you this question."
 msgstr ""
 "Les fichiers ne disent pas sur quelle room iPoker ces pseudos ont joué. "
 "Choisissez la room de chacun. Renseigner le pseudo comme screen name de "
@@ -2856,8 +2872,8 @@ msgid ""
 "the players that are you in its hands, and the reports read them as one "
 "hero, as a room's aliases are."
 msgstr ""
-"Une source de données comme PHH n'est pas une room : elle n'a pas de pseudo."
-" Indiquez les joueurs qui sont vous dans ses mains, et les rapports les "
+"Une source de données comme PHH n'est pas une room : elle n'a pas de pseudo. "
+"Indiquez les joueurs qui sont vous dans ses mains, et les rapports les "
 "lisent comme un seul héros, comme les alias d'une room."
 
 #: fpdb_3_legacy/ModernSitePreferences.py
@@ -2980,8 +2996,7 @@ msgstr "OnGameToFpdb.determineGameType : '%s'"
 msgid ""
 "OnGameToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
 msgstr ""
-"OnGameToFpdb.determineGameType : Lim_Blinds n'a pas d'entrée pour '%s' - "
-"'%s'"
+"OnGameToFpdb.determineGameType : Lim_Blinds n'a pas d'entrée pour '%s' - '%s'"
 
 #: fpdb_3_legacy/OnGameToFpdb.py
 #, python-format
@@ -3072,8 +3087,7 @@ msgstr "Rafraîchir les interfaces"
 
 #: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
 msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
-msgstr ""
-"Demande des privilèges… acceptez la demande, puis jouez sur CoinPoker."
+msgstr "Demande des privilèges… acceptez la demande, puis jouez sur CoinPoker."
 
 #: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
 msgid "Start capture"
@@ -3208,8 +3222,8 @@ msgid ""
 "shows a recommended action."
 msgstr ""
 "Avec les panneaux dynamiques, le HUD change les statistiques d'un joueur "
-"qu'il affiche selon la main en cours : panneaux préflop au préflop, panneaux"
-" de c-bet quand un c-bet est fait. Les statistiques restent l'historique du "
+"qu'il affiche selon la main en cours : panneaux préflop au préflop, panneaux "
+"de c-bet quand un c-bet est fait. Les statistiques restent l'historique du "
 "joueur ; fpdb n'affiche jamais d'action recommandée."
 
 #: fpdb_3_legacy/dynamic_panels_consent.py
@@ -3294,7 +3308,7 @@ msgstr "Le guide est publié sur {url}"
 msgid "Unknown Site"
 msgstr "Site inconnu"
 
-#: fpdb_3_legacy/fpdb.pyw
+#: fpdb_3_legacy/fpdb.pyw fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Unsaved Changes"
 msgstr "Modifications non enregistrées"
 
@@ -3311,8 +3325,8 @@ msgid ""
 "Check the hero selected in the Heroes filter and make sure hands for that "
 "player were imported for the selected site."
 msgstr ""
-"Vérifiez le héros choisi dans le filtre Heroes et assurez-vous que des mains"
-" de ce joueur ont été importées pour le site sélectionné."
+"Vérifiez le héros choisi dans le filtre Heroes et assurez-vous que des mains "
+"de ce joueur ont été importées pour le site sélectionné."
 
 #: fpdb_3_legacy/gui_empty_state.py
 msgid "No currency is selected in the filters."
@@ -3344,13 +3358,17 @@ msgstr "Aucun site n'est sélectionné dans les filtres."
 
 #: fpdb_3_legacy/gui_empty_state.py
 msgid ""
-"Nothing has been imported into this database — that is normal right after creating or recreating the tables.\n"
+"Nothing has been imported into this database — that is normal right after "
+"creating or recreating the tables.\n"
 "\n"
-"Import hand histories first (Import > Bulk Import, or start the auto-import), then refresh this tab."
+"Import hand histories first (Import > Bulk Import, or start the auto-"
+"import), then refresh this tab."
 msgstr ""
-"Rien n'a encore été importé dans cette base — c'est normal juste après avoir créé ou recréé les tables.\n"
+"Rien n'a encore été importé dans cette base — c'est normal juste après avoir "
+"créé ou recréé les tables.\n"
 "\n"
-"Importez d'abord des historiques de mains (Import > Bulk Import, ou lancez l'import automatique), puis rafraîchissez cet onglet."
+"Importez d'abord des historiques de mains (Import > Bulk Import, ou lancez "
+"l'import automatique), puis rafraîchissez cet onglet."
 
 #: fpdb_3_legacy/gui_empty_state.py
 msgid ""
@@ -3690,8 +3708,8 @@ msgstr "Tapis (bb)"
 
 #: fpdb_3_legacy/live_capture_consent.py
 msgid ""
-"Anti-cheat systems look for software that loads into a poker client or reads"
-" its traffic. A room may treat it as a breach of its terms and restrict or "
+"Anti-cheat systems look for software that loads into a poker client or reads "
+"its traffic. A room may treat it as a breach of its terms and restrict or "
 "close the account, whatever fpdb does with the data."
 msgstr ""
 "Les systèmes anti-triche recherchent les logiciels qui se chargent dans un "
@@ -3705,8 +3723,8 @@ msgstr "Capture de paquets CoinPoker"
 
 #: fpdb_3_legacy/live_capture_consent.py
 msgid ""
-"Live capture is not part of this install. From a source install: pip install"
-" -e '.[capture]'."
+"Live capture is not part of this install. From a source install: pip install "
+"-e '.[capture]'."
 msgstr ""
 "La capture en direct ne fait pas partie de cette installation. Depuis une "
 "installation des sources : pip install -e '.[capture]'."
@@ -3746,16 +3764,15 @@ msgid ""
 msgstr ""
 "fpdb charge une petite bibliothèque à lui dans le client SwC Poker : "
 "injectée dans le client en cours d'exécution sous Windows, préchargée quand "
-"fpdb lance le client sous macOS et Linux. Dans le client, elle lit le trafic"
-" des tables une fois déchiffré par le client et l'écrit dans un fichier que "
+"fpdb lance le client sous macOS et Linux. Dans le client, elle lit le trafic "
+"des tables une fois déchiffré par le client et l'écrit dans un fichier que "
 "fpdb importe. Elle reste chargée jusqu'à la fermeture du client."
 
 #: fpdb_3_legacy/live_capture_consent.py
 msgid ""
 "fpdb records the network packets exchanged by the CoinPoker client, with "
 "administrator rights (tcpdump, pkexec or a UAC prompt), and rebuilds the "
-"hands from them. It reads the traffic only; it loads nothing into the "
-"client."
+"hands from them. It reads the traffic only; it loads nothing into the client."
 msgstr ""
 "fpdb enregistre les paquets réseau échangés par le client CoinPoker, avec "
 "les droits administrateur (tcpdump, pkexec ou une invite UAC), et en "
@@ -3804,8 +3821,8 @@ msgstr "À propos du programme"
 #: fpdb_3_legacy/menu_layout.py
 msgid "Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)"
 msgstr ""
-"Ajouter, modifier, tester et choisir la base de données (SQLite / PostgreSQL"
-" / MySQL)"
+"Ajouter, modifier, tester et choisir la base de données (SQLite / "
+"PostgreSQL / MySQL)"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Advanced logger manager"
@@ -3814,8 +3831,7 @@ msgstr "Gestionnaire avancé des journaux"
 #: fpdb_3_legacy/menu_layout.py
 msgid ""
 "Alerts for the session being played: loss, win, duration, hands, drawdown"
-msgstr ""
-"Alertes pour la session en cours : perte, gain, durée, mains, drawdown"
+msgstr "Alertes pour la session en cours : perte, gain, durée, mains, drawdown"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Ask GitHub whether a newer fpdb release is out"
@@ -3925,8 +3941,7 @@ msgid "Import PT4 Stats (.pt4stat)"
 msgstr "Importer des stats PT4 (.pt4stat)"
 
 #: fpdb_3_legacy/menu_layout.py
-msgid ""
-"Import PokerTracker 4 custom statistics as declarative stat descriptors"
+msgid "Import PokerTracker 4 custom statistics as declarative stat descriptors"
 msgstr ""
 "Importer des statistiques personnalisées PokerTracker 4 comme descripteurs "
 "de stats déclaratifs"
@@ -4251,8 +4266,10 @@ msgid ""
 "Select the site layout coordinates you want to include in the package.\n"
 "This will let other users position the HUD boxes exactly like yours."
 msgstr ""
-"Sélectionnez les coordonnées de disposition des sites à inclure dans le paquet.\n"
-"Les autres utilisateurs pourront ainsi placer les blocs du HUD exactement comme les vôtres."
+"Sélectionnez les coordonnées de disposition des sites à inclure dans le "
+"paquet.\n"
+"Les autres utilisateurs pourront ainsi placer les blocs du HUD exactement "
+"comme les vôtres."
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Show this panel only for a villain in this position (blank = always)"
@@ -4287,6 +4304,51 @@ msgstr "➕ Ajouter une stat"
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "➖ Remove Stat"
 msgstr "➖ Retirer la stat"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "(single grid)"
+msgstr "(grille unique)"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "(unnamed)"
+msgstr "(sans nom)"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+#, python-brace-format
+msgid "A profile named \"{name}\" already exists. Choose another name."
+msgstr "Un profil nommé « {name} » existe déjà. Choisissez un autre nom."
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "A profile needs a name."
+msgstr "Un profil doit avoir un nom."
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "HUD profiles"
+msgstr "profils de HUD"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "dynamic panels"
+msgstr "panneaux dynamiques"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "general settings"
+msgstr "paramètres généraux"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "panel fallback"
+msgstr "panneau de repli"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "panel rules"
+msgstr "règles des panneaux"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "popup windows"
+msgstr "fenêtres popup"
+
+#: fpdb_3_legacy/modern_hud_preferences/editor_state.py
+msgid "profile rules"
+msgstr "règles de profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
@@ -4368,8 +4430,8 @@ msgstr "Stats issues de l'analyse"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
-"Append the profile emoji (e.g. 🐟, 🐌, 🎯) and color the player's name in the "
-"HUD."
+"Append the profile emoji (e.g. 🐟, 🐌, 🎯) and color the player's name in "
+"the HUD."
 msgstr ""
 "Ajoute l'emoji du profil (ex. 🐟, 🐌, 🎯) et colore le nom du joueur dans le "
 "HUD."
@@ -4389,6 +4451,14 @@ msgid "Cannot add this rule"
 msgstr "Impossible d'ajouter cette règle"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cannot create the profile"
+msgstr "Impossible de créer le profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cannot duplicate the profile"
+msgstr "Impossible de dupliquer le profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cannot export"
 msgstr "Export impossible"
 
@@ -4397,12 +4467,21 @@ msgid "Cannot import"
 msgstr "Import impossible"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cannot rename the profile"
+msgstr "Impossible de renommer le profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cannot update this rule"
 msgstr "Impossible de mettre à jour cette règle"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell already used"
 msgstr "Case déjà occupée"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Changed since the last save: {parts}"
+msgstr "Modifié depuis le dernier enregistrement : {parts}"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Class:"
@@ -4451,8 +4530,8 @@ msgid ""
 "Enable auto-classification of players into Nit, Calling Station, Fish, "
 "Maniac, LAG, Reg, TAG."
 msgstr ""
-"Activer le classement automatique des joueurs en Nit, Calling Station, Fish,"
-" Maniac, LAG, Reg, TAG."
+"Activer le classement automatique des joueurs en Nit, Calling Station, Fish, "
+"Maniac, LAG, Reg, TAG."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Export panel rules"
@@ -4567,6 +4646,10 @@ msgid "New Profile"
 msgstr "Nouveau profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "New profile name:"
+msgstr "Nouveau nom du profil :"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "No HUD profile of this name exists; the game default will be used instead."
 msgstr ""
@@ -4668,6 +4751,10 @@ msgid "Remove"
 msgstr "Retirer"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Rename Profile"
+msgstr "Renommer le profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid ""
 "Row {row}, column {col} already holds {item}. The first free cell is row "
@@ -4767,7 +4854,8 @@ msgid ""
 "Spacing, font, colors and HUD cell values come from the selected profile."
 msgstr ""
 "L'aperçu utilise la même grille compacte de libellés que le HUD en jeu.\n"
-"L'espacement, la police, les couleurs et les valeurs des cellules viennent du profil sélectionné."
+"L'espacement, la police, les couleurs et les valeurs des cellules viennent "
+"du profil sélectionné."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Theme:"
@@ -4801,6 +4889,10 @@ msgstr "Quand la situation est"
 #, python-brace-format
 msgid "Wrote {path}"
 msgstr "{path} écrit"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "You have unsaved changes. Do you want to save before closing?"
+msgstr "Vous avez des modifications non enregistrées. Voulez-vous les enregistrer avant de fermer ?"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "a separator line"
@@ -4847,8 +4939,16 @@ msgid "↓ Down"
 msgstr "↓ Descendre"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "● Unsaved changes"
+msgstr "● Modifications non enregistrées"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "⚙️ General Settings"
 msgstr "⚙️ Paramètres généraux"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "✏️ Rename"
+msgstr "✏️ Renommer"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "➕ Add"
@@ -4939,8 +5039,8 @@ msgid ""
 "popup library."
 msgstr ""
 "Tous les popups qu'ouvre une cellule de ce paquet, et tout ce vers quoi ces "
-"popups mènent. Une ligne qui se termine par une flèche quitte le paquet pour"
-" la bibliothèque de popups fournie."
+"popups mènent. Une ligne qui se termine par une flèche quitte le paquet pour "
+"la bibliothèque de popups fournie."
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
 msgid "Reference HUD"
@@ -5016,8 +5116,7 @@ msgstr "{shown} stats affichées sur {total}"
 #: fpdb_3_legacy/pack_gallery_dialog.py
 #, python-format
 msgid "%d listed pack(s) are not shown because their entry is invalid."
-msgstr ""
-"%d pack(s) listé(s) ne sont pas affichés car leur entrée est invalide."
+msgstr "%d pack(s) listé(s) ne sont pas affichés car leur entrée est invalide."
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
 #, python-format
@@ -5080,8 +5179,7 @@ msgid "Status"
 msgstr "Statut"
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
-msgid ""
-"The gallery could not be reached; showing the copy from the last visit."
+msgid "The gallery could not be reached; showing the copy from the last visit."
 msgstr ""
 "La galerie est injoignable ; affichage de la copie de la dernière visite."
 
@@ -5187,11 +5285,15 @@ msgstr "Écrire le package dans"
 msgid ""
 "Written to %(folder)s.\n"
 "\n"
-"To submit it, copy the folder's content into your copy of the packs repository (%(repository)s), add the entry in %(entry)s to index.json, and open a pull request."
+"To submit it, copy the folder's content into your copy of the packs "
+"repository (%(repository)s), add the entry in %(entry)s to index.json, and "
+"open a pull request."
 msgstr ""
 "Écrit dans %(folder)s.\n"
 "\n"
-"Pour le proposer, copiez le contenu du dossier dans votre copie du dépôt de packs (%(repository)s), ajoutez l'entrée de %(entry)s à index.json, puis ouvrez une pull request."
+"Pour le proposer, copiez le contenu du dossier dans votre copie du dépôt de "
+"packs (%(repository)s), ajoutez l'entrée de %(entry)s à index.json, puis "
+"ouvrez une pull request."
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
@@ -5201,8 +5303,7 @@ msgstr "%(stats)d stats traduites, dans %(blocks)d panneaux."
 #: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
 msgid "%d PT4 stats have no fpdb equivalent and were left out:"
-msgstr ""
-"%d stats PT4 n'ont pas d'équivalent fpdb et ont été laissées de côté :"
+msgstr "%d stats PT4 n'ont pas d'équivalent fpdb et ont été laissées de côté :"
 
 #: fpdb_3_legacy/pt4hud_dialogs.py
 msgid "Assign the new HUD profile to a game in HUD Preferences."
@@ -5283,8 +5384,8 @@ msgstr "Le paquet liste les %d stats PT4 qu'il laisse de côté."
 #: fpdb_3_legacy/pt4hud_dialogs.py
 #, python-format
 msgid ""
-"This package was converted from PokerTracker 4: %d of its stats have no fpdb"
-" equivalent and are not in it:"
+"This package was converted from PokerTracker 4: %d of its stats have no fpdb "
+"equivalent and are not in it:"
 msgstr ""
 "Ce paquet a été converti depuis PokerTracker 4 : %d de ses stats n'ont pas "
 "d'équivalent fpdb et n'y figurent pas :"
@@ -5439,8 +5540,8 @@ msgstr "Tranche de bubble factor"
 
 #: fpdb_3_legacy/research_labels.py
 msgid ""
-"Cards discarded at the draw; zero means stand pat and unknown discard counts"
-" stay unclassified."
+"Cards discarded at the draw; zero means stand pat and unknown discard counts "
+"stay unclassified."
 msgstr ""
 "Cartes défaussées au tirage ; zéro signifie servi, et les défausses "
 "inconnues restent non classées."
@@ -5511,9 +5612,9 @@ msgid ""
 "decision a 3-bet, so only this keeps it among the opens faced."
 msgstr ""
 "Toutes les situations auxquelles la décision correspond, pas seulement la "
-"plus précise. Sert à demander combien de fois une opportunité a été saisie :"
-" relancer une ouverture fait de la décision un 3-bet, seul ce filtre la "
-"garde parmi les ouvertures subies."
+"plus précise. Sert à demander combien de fois une opportunité a été saisie : "
+"relancer une ouverture fait de la décision un 3-bet, seul ce filtre la garde "
+"parmi les ouvertures subies."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Facing an all-in"
@@ -5590,8 +5691,8 @@ msgid ""
 "How much more prize equity an all-in risks than it wins (sit-and-gos and "
 "Spins with a known payout structure)."
 msgstr ""
-"Combien d'équité de prix un all-in risque de plus qu'il ne rapporte (sit-"
-"and-go et Spins dont la structure des gains est connue)."
+"Combien d'équité de prix un all-in risque de plus qu'il ne rapporte (sit-and-"
+"go et Spins dont la structure des gains est connue)."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "How much the actor had to call."
@@ -6043,8 +6144,8 @@ msgid ""
 "Which draw round the player reached; only recorded discard or stand-pat "
 "actions count."
 msgstr ""
-"Le tour de tirage atteint par le joueur ; seules les défausses ou les servis"
-" enregistrés comptent."
+"Le tour de tirage atteint par le joueur ; seules les défausses ou les servis "
+"enregistrés comptent."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Which pair the actor held: overpair, top pair, set and so on."
@@ -6056,8 +6157,7 @@ msgstr "La salle de poker où les mains ont été jouées."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Yes for knockout tournaments, No for every other hand."
-msgstr ""
-"Oui pour les tournois à élimination, Non pour toutes les autres mains."
+msgstr "Oui pour les tournois à élimination, Non pour toutes les autres mains."
 
 #: fpdb_3_legacy/research_labels.py
 msgid "Yes for tournament hands, No for cash game hands."
@@ -6411,8 +6511,8 @@ msgstr "Rake payé"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid ""
-"Realized net profit minus all-in EV; positive means results ran above all-in"
-" equity"
+"Realized net profit minus all-in EV; positive means results ran above all-in "
+"equity"
 msgstr ""
 "Profit net réalisé moins EV des tapis ; une valeur positive signifie que le "
 "résultat dépasse l'équité"
@@ -6423,11 +6523,11 @@ msgstr "Fréquence d'agression à la river"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid ""
-"Standard deviation of per-hand net results in the selected currency; this is"
-" not session volatility"
+"Standard deviation of per-hand net results in the selected currency; this is "
+"not session volatility"
 msgstr ""
-"Écart-type des résultats nets par main dans la devise choisie ; ce n'est pas"
-" la volatilité des sessions"
+"Écart-type des résultats nets par main dans la devise choisie ; ce n'est pas "
+"la volatilité des sessions"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Starting cards (Hole cards)"
@@ -6580,8 +6680,8 @@ msgstr "Acquitter"
 #: fpdb_3_legacy/session_guard_dialog.py
 msgid ""
 "Alerts only: fpdb never closes, sits out or otherwise touches a poker "
-"client. The session is the Session Viewer's: cash hands, ended by a "
-"30-minute pause."
+"client. The session is the Session Viewer's: cash hands, ended by a 30-"
+"minute pause."
 msgstr ""
 "Alertes uniquement : fpdb ne ferme jamais un client de poker, ne vous met "
 "jamais en sit-out et n'y touche d'aucune façon. La session est celle du "
@@ -6682,8 +6782,8 @@ msgstr "{value} BB"
 
 #: fpdb_3_legacy/stat_packs_dialog.py
 msgid ""
-"A stat pack adds declarative stats, and optionally Research presets, without"
-" changing fpdb. Packs are data only: no Python, no SQL."
+"A stat pack adds declarative stats, and optionally Research presets, without "
+"changing fpdb. Packs are data only: no Python, no SQL."
 msgstr ""
 "Un pack de stats ajoute des stats déclaratives, et éventuellement des "
 "presets de Research, sans modifier fpdb. Les packs ne contiennent que des "
@@ -6884,8 +6984,8 @@ msgstr "Non enregistré : %s"
 
 #: fpdb_3_legacy/tourney_payouts_dialog.py
 msgid ""
-"One place per line (\"1st  $45.00\", \"2: 30%\"), or on one line: 45, 27, 18"
-" or 50% 30% 20%"
+"One place per line (\"1st  $45.00\", \"2: 30%\"), or on one line: 45, 27, 18 "
+"or 50% 30% 20%"
 msgstr ""
 "Une place par ligne (« 1st  45,00 $ », « 2: 30% »), ou sur une ligne : 45, "
 "27, 18 ou 50% 30% 20%"
@@ -6934,11 +7034,11 @@ msgstr ""
 #: fpdb_3_legacy/tracker_migration.py
 msgid ""
 "Holdem Manager 3 can move the hand histories it imports to an archive "
-"folder, in the room's own format. Its import settings show where that folder"
-" is."
+"folder, in the room's own format. Its import settings show where that folder "
+"is."
 msgstr ""
-"Holdem Manager 3 peut déplacer les historiques qu'il importe vers un dossier"
-" d'archive, dans le format d'origine de la room. Ses réglages d'import "
+"Holdem Manager 3 peut déplacer les historiques qu'il importe vers un dossier "
+"d'archive, dans le format d'origine de la room. Ses réglages d'import "
 "indiquent où se trouve ce dossier."
 
 #: fpdb_3_legacy/tracker_migration.py
@@ -6948,8 +7048,8 @@ msgid ""
 "Preferences."
 msgstr ""
 "PokerTracker 4 archive chaque historique qu'il importe, dans le format "
-"d'origine de la room. Son dossier d'archive se règle dans Configure > Site &"
-" Import Options > Preferences."
+"d'origine de la room. Son dossier d'archive se règle dans Configure > Site & "
+"Import Options > Preferences."
 
 #: fpdb_3_legacy/tracker_migration.py
 msgid ""
@@ -6973,8 +7073,7 @@ msgid "Download %s"
 msgstr "Télécharger %s"
 
 #: fpdb_3_legacy/update_notice.py
-msgid ""
-"GitHub could not be reached. Check your connection and try again later."
+msgid "GitHub could not be reached. Check your connection and try again later."
 msgstr ""
 "GitHub est injoignable. Vérifiez votre connexion et réessayez plus tard."
 
@@ -6998,19 +7097,28 @@ msgstr "fpdb %s est la dernière version."
 
 #: fpdb_3_legacy/update_notice.py
 msgid ""
-"fpdb can check once a day whether a newer release is available on GitHub, and tell you in the status bar.\n"
+"fpdb can check once a day whether a newer release is available on GitHub, "
+"and tell you in the status bar.\n"
 "\n"
-"The check is a single anonymous request to the GitHub releases page: it sends nothing about you or your hands, and fpdb never downloads or installs anything by itself.\n"
+"The check is a single anonymous request to the GitHub releases page: it "
+"sends nothing about you or your hands, and fpdb never downloads or installs "
+"anything by itself.\n"
 "\n"
-"You can change this later in File > Preferences (general: check_for_updates), and check by hand with Help > Check for updates.\n"
+"You can change this later in File > Preferences (general: "
+"check_for_updates), and check by hand with Help > Check for updates.\n"
 "\n"
 "Check for updates automatically?"
 msgstr ""
-"fpdb peut vérifier une fois par jour si une version plus récente est disponible sur GitHub, et vous le signaler dans la barre d'état.\n"
+"fpdb peut vérifier une fois par jour si une version plus récente est "
+"disponible sur GitHub, et vous le signaler dans la barre d'état.\n"
 "\n"
-"La vérification est une simple requête anonyme vers la page des versions de GitHub : elle n'envoie rien sur vous ni sur vos mains, et fpdb ne télécharge ni n'installe jamais rien de lui-même.\n"
+"La vérification est une simple requête anonyme vers la page des versions de "
+"GitHub : elle n'envoie rien sur vous ni sur vos mains, et fpdb ne télécharge "
+"ni n'installe jamais rien de lui-même.\n"
 "\n"
-"Vous pourrez changer ce choix plus tard dans Fichier > Préférences (general : check_for_updates), et vérifier à la main avec Aide > Rechercher des mises à jour.\n"
+"Vous pourrez changer ce choix plus tard dans Fichier > Préférences "
+"(general : check_for_updates), et vérifier à la main avec Aide > Rechercher "
+"des mises à jour.\n"
 "\n"
 "Rechercher les mises à jour automatiquement ?"
 
@@ -7181,10 +7289,11 @@ msgstr ""
 #~ msgstr "*** Erreur de GuiAutoImport lors de l'ouverture du pipe:"
 
 #~ msgid ""
-#~ "*** Make sure your HandHistoryConverter is setting hand.startTime properly!"
+#~ "*** Make sure your HandHistoryConverter is setting hand.startTime "
+#~ "properly!"
 #~ msgstr ""
-#~ "*** Vérifiez que votre convertisseur d'historique de mains ait un paramètre "
-#~ "d'heure de début de main correct !"
+#~ "*** Vérifiez que votre convertisseur d'historique de mains ait un "
+#~ "paramètre d'heure de début de main correct !"
 
 #~ msgid "*** WARNING UNKNOWN MYSQL ERROR:"
 #~ msgstr "*** ALERTE ERREUR MYSQL INCONNUE:"
@@ -7322,7 +7431,8 @@ msgstr ""
 
 #, fuzzy
 #~ msgid ""
-#~ "BetOnlineToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+#~ "BetOnlineToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - "
+#~ "'%s'"
 #~ msgstr "Lim_Blinds ne retourne rien pour '%s'"
 
 #, fuzzy
@@ -7370,11 +7480,11 @@ msgstr ""
 
 #, fuzzy
 #~ msgid ""
-#~ "Bulk import done: Stored: %d, Duplicates: %d, Partial: %d, Errors: %d, Time:"
-#~ " %s seconds, Stored/second: %.0f"
+#~ "Bulk import done: Stored: %d, Duplicates: %d, Partial: %d, Errors: %d, "
+#~ "Time: %s seconds, Stored/second: %.0f"
 #~ msgstr ""
-#~ "Bulk import terminé: Stockées: %d \tDoublons: %d \tPartiels: %d \tErreurs: "
-#~ "%d en %s secondes - %.0f/sec"
+#~ "Bulk import terminé: Stockées: %d \tDoublons: %d \tPartiels: %d "
+#~ "\tErreurs: %d en %s secondes - %.0f/sec"
 
 #~ msgid "BuyIn"
 #~ msgstr "BuyIn"
@@ -7414,7 +7524,8 @@ msgstr ""
 #~ msgstr "DEVISE"
 
 #, fuzzy
-#~ msgid "CakeToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+#~ msgid ""
+#~ "CakeToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
 #~ msgstr "Lim_Blinds ne retourne rien pour '%s'"
 
 #, fuzzy
@@ -7461,7 +7572,8 @@ msgstr ""
 
 #~ msgid "Configuration file %s not found. Using defaults."
 #~ msgstr ""
-#~ "Fichier de configuration %s introuvable. Utilisation du fichier par defaut."
+#~ "Fichier de configuration %s introuvable. Utilisation du fichier par "
+#~ "defaut."
 
 #~ msgid "Confirm deleting and recreating tables"
 #~ msgstr "Confirmer la suppression et la reconstruction des tables"
@@ -7469,12 +7581,14 @@ msgstr ""
 #~ msgid "Confirm rebuilding database indexes"
 #~ msgstr "Confirmez la reconstruction des index de la base de données"
 
-#~ msgid "Conflict between buyins read in top line (%s) and in BuyIn field (%s)"
+#~ msgid ""
+#~ "Conflict between buyins read in top line (%s) and in BuyIn field (%s)"
 #~ msgstr ""
 #~ "Conflit entre le buy-in lu dans l'en-tête (%s) et dans le champ BuyIn (%s)"
 
 #~ msgid "Conflict between fees read in top line (%s) and in Fee field (%s)"
-#~ msgstr "Conflit entre le fee lu dans l'en-tête (%e) et dans le champ Fee (%s)"
+#~ msgstr ""
+#~ "Conflit entre le fee lu dans l'en-tête (%e) et dans le champ Fee (%s)"
 
 #~ msgid "Connected to SQLite: %s"
 #~ msgstr "Connecté à SQLite: %s"
@@ -7492,11 +7606,11 @@ msgstr ""
 #~ msgstr "Conversion du format des archives stars en un format lisible"
 
 #~ msgid ""
-#~ "Could not connect to mailserver: check mailserver and use SSL settings and "
-#~ "internet connectivity"
+#~ "Could not connect to mailserver: check mailserver and use SSL settings "
+#~ "and internet connectivity"
 #~ msgstr ""
-#~ "Impossible de se connecter au serveur de mail: vérifiez le serveur de mail, "
-#~ "le paramétrage SSL et la connexion internet"
+#~ "Impossible de se connecter au serveur de mail: vérifiez le serveur de "
+#~ "mail, le paramétrage SSL et la connexion internet"
 
 #~ msgid "Could not convert: \"%s\""
 #~ msgstr "Impossible de convertir: \"%s\""
@@ -7512,7 +7626,8 @@ msgstr ""
 #~ msgstr "Impossible de trouver le fichier %s"
 
 #~ msgid "Could not retrieve XID from table xwininfo. xwininfo is %s"
-#~ msgstr "Impossible de récupérer XID depuis la table xwininfo. xwininfo est %s"
+#~ msgstr ""
+#~ "Impossible de récupérer XID depuis la table xwininfo. xwininfo est %s"
 
 #, fuzzy
 #~ msgid "Could not setup log file %s"
@@ -7766,16 +7881,17 @@ msgstr ""
 #~ msgstr "Impossible de reconnaître les infos de tournoi: '%s'"
 
 #~ msgid ""
-#~ "Failed to load libs for graphing, graphing will not function. Please install"
-#~ " numpy and matplotlib if you want to use graphs."
+#~ "Failed to load libs for graphing, graphing will not function. Please "
+#~ "install numpy and matplotlib if you want to use graphs."
 #~ msgstr ""
-#~ "Echec du chargement des librairies graphiques, l'elaboration des graphes ne "
-#~ "fonctionnera pas. Il faut installer Numpy et Matplotlib si vous voulez "
+#~ "Echec du chargement des librairies graphiques, l'elaboration des graphes "
+#~ "ne fonctionnera pas. Il faut installer Numpy et Matplotlib si vous voulez "
 #~ "utiliser les graphes."
 
 #~ msgid "Failed to load numpy and/or matplotlib in Session Viewer"
 #~ msgstr ""
-#~ "Impossible de charger numpy et/ou matplotlib dans le visualiseur de session"
+#~ "Impossible de charger numpy et/ou matplotlib dans le visualiseur de "
+#~ "session"
 
 #~ msgid "Failed to read settings table."
 #~ msgstr "La lecture de la table des Settings a échouée."
@@ -7800,7 +7916,8 @@ msgstr ""
 
 #~ msgid "File to be split is a PokerStars or Full Tilt Poker archive file"
 #~ msgstr ""
-#~ "le fichier à scinder est un fichier d'archive PokerStars ou Full Tilt Poker"
+#~ "le fichier à scinder est un fichier d'archive PokerStars ou Full Tilt "
+#~ "Poker"
 
 #, fuzzy
 #~ msgid "Finished downloading emails."
@@ -7836,42 +7953,63 @@ msgstr ""
 
 #~ msgid ""
 #~ "Fpdb needs translators!\n"
-#~ "If you speak another language and have a few minutes or more to spare get in touch by emailing steffen@schaumburger.info\n"
+#~ "If you speak another language and have a few minutes or more to spare get "
+#~ "in touch by emailing steffen@schaumburger.info\n"
 #~ "\n"
 #~ "Welcome to Fpdb!\n"
-#~ "To be notified of new snapshots and releases go to https://lists.sourceforge.net/lists/listinfo/fpdb-announce and subscribe.\n"
-#~ "If you want to follow development more closely go to https://lists.sourceforge.net/lists/listinfo/fpdb-main and subscribe.\n"
+#~ "To be notified of new snapshots and releases go to https://"
+#~ "lists.sourceforge.net/lists/listinfo/fpdb-announce and subscribe.\n"
+#~ "If you want to follow development more closely go to https://"
+#~ "lists.sourceforge.net/lists/listinfo/fpdb-main and subscribe.\n"
 #~ "\n"
-#~ "This program is currently in an alpha-state, so our database format is still sometimes changed.\n"
-#~ "You should therefore always keep your hand history files so that you can re-import after an update, if necessary.\n"
+#~ "This program is currently in an alpha-state, so our database format is "
+#~ "still sometimes changed.\n"
+#~ "You should therefore always keep your hand history files so that you can "
+#~ "re-import after an update, if necessary.\n"
 #~ "\n"
-#~ "For documentation please visit our website/wiki at http://fpdb.sourceforge.net/.\n"
+#~ "For documentation please visit our website/wiki at http://"
+#~ "fpdb.sourceforge.net/.\n"
 #~ "If you need help click on Contact - Get Help on our website.\n"
-#~ "Please note that default.conf is no longer needed nor used, all configuration now happens in HUD_config.xml.\n"
+#~ "Please note that default.conf is no longer needed nor used, all "
+#~ "configuration now happens in HUD_config.xml.\n"
 #~ "\n"
-#~ "This program is free/libre open source software licensed partially under the AGPL3, and partially under GPL2 or later.\n"
-#~ "The Windows installer package includes code licensed under the MIT license.\n"
-#~ "You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt and mit.txt in the fpdb installation directory."
+#~ "This program is free/libre open source software licensed partially under "
+#~ "the AGPL3, and partially under GPL2 or later.\n"
+#~ "The Windows installer package includes code licensed under the MIT "
+#~ "license.\n"
+#~ "You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, "
+#~ "gpl-3.0.txt and mit.txt in the fpdb installation directory."
 #~ msgstr ""
 #~ "Fpdb a besoin de traducteurs !\n"
-#~ "Si vous parlez une autre langue et avez un peu de temps ou plus manifestez-vous par mail à l'adresse steffen@schaumburger.\n"
+#~ "Si vous parlez une autre langue et avez un peu de temps ou plus "
+#~ "manifestez-vous par mail à l'adresse steffen@schaumburger.\n"
 #~ "\n"
 #~ "Bienvenue sur Fpdb !\n"
-#~ "Pour être tenu informé des nouvelles copies d'écran et versions rendez-vous à\n"
-#~ "https://lists.sourceforge.net/lists/listinfo/fpdb-announce et souscrivez.\n"
+#~ "Pour être tenu informé des nouvelles copies d'écran et versions rendez-"
+#~ "vous à\n"
+#~ "https://lists.sourceforge.net/lists/listinfo/fpdb-announce et "
+#~ "souscrivez.\n"
 #~ "Si vous voulez suivre l'évolution de plus près rendez-vous à\n"
 #~ "https://lists.sourceforge.net/lists/listinfo/fpdb-main et souscrivez.\n"
 #~ "\n"
-#~ "Ce programme est actuellement au stade Alpha, donc notre format de base de données est susceptible de changer.\n"
-#~ "Vous devez donc conserver vos historiques de mains afin de pouvoir les réimporter en cas de mise à jour.\n"
+#~ "Ce programme est actuellement au stade Alpha, donc notre format de base "
+#~ "de données est susceptible de changer.\n"
+#~ "Vous devez donc conserver vos historiques de mains afin de pouvoir les "
+#~ "réimporter en cas de mise à jour.\n"
 #~ "\n"
-#~ "Pour de la documentation, veuillez consulter notre site web wiki à http://fpdb.sourceforge.net/.\n"
-#~ "Si vous avez besoin d'aide cliquez sur Contact - Obtenir de l'aide sur notre site web.\n"
-#~ "Remarquez que default.conf n'est plus utilisé ni nécessaire, toute la configuration se fait maintenant dans HUD_config.xml.\n"
+#~ "Pour de la documentation, veuillez consulter notre site web wiki à http://"
+#~ "fpdb.sourceforge.net/.\n"
+#~ "Si vous avez besoin d'aide cliquez sur Contact - Obtenir de l'aide sur "
+#~ "notre site web.\n"
+#~ "Remarquez que default.conf n'est plus utilisé ni nécessaire, toute la "
+#~ "configuration se fait maintenant dans HUD_config.xml.\n"
 #~ "\n"
-#~ "Ce programme et son code sont ouverts et libres, en partie sous licence AGPL3, et en partie sous licence GPL2 ou ultérieure.\n"
+#~ "Ce programme et son code sont ouverts et libres, en partie sous licence "
+#~ "AGPL3, et en partie sous licence GPL2 ou ultérieure.\n"
 #~ "Le package d'installation Windows contient le code sous licence MIT.\n"
-#~ "Vous pouvez retrouver l'intégralité des contrats de licence dans agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt et mit.txt dans le répertoire d'installation de fpdb."
+#~ "Vous pouvez retrouver l'intégralité des contrats de licence dans "
+#~ "agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt et mit.txt dans le répertoire "
+#~ "d'installation de fpdb."
 
 #, fuzzy
 #~ msgid "FpdbParseError for file '%s'"
@@ -7887,7 +8025,8 @@ msgstr ""
 #~ msgstr "Type de jeu"
 
 #~ msgid "Generate and print test data for regression testing"
-#~ msgstr "Générer et imprimer les jeux de données pour les tests de regréssion"
+#~ msgstr ""
+#~ "Générer et imprimer les jeux de données pour les tests de regréssion"
 
 #~ msgid "Global lock taken ... Auto Import Started."
 #~ msgstr "Verrou global pris ... Démarrage de l'Auto Import"
@@ -7901,10 +8040,11 @@ msgstr ""
 #~ msgid "Graphing Options:"
 #~ msgstr "Options de graphique :"
 
-#~ msgid "GuiStove not found. If you want to use it please install pypoker-eval."
+#~ msgid ""
+#~ "GuiStove not found. If you want to use it please install pypoker-eval."
 #~ msgstr ""
-#~ "GuiStove non trouvé. Si vous voulez l'utiliser, veuillez installer pypoker-"
-#~ "eval."
+#~ "GuiStove non trouvé. Si vous voulez l'utiliser, veuillez installer "
+#~ "pypoker-eval."
 
 #~ msgid "HAND NO."
 #~ msgstr "MAIN NO."
@@ -7990,8 +8130,8 @@ msgstr ""
 
 #~ msgid "How many hands do you want saved to each file. Default is 100"
 #~ msgstr ""
-#~ "Combien de mains voulez-vous sauvegarder par fichier ? La valeur par défaut "
-#~ "est 100."
+#~ "Combien de mains voulez-vous sauvegarder par fichier ? La valeur par "
+#~ "défaut est 100."
 
 #~ msgid "INFO: No games returned from database"
 #~ msgstr "INFO: Pas de parties retournées par la base de données"
@@ -8028,10 +8168,6 @@ msgstr ""
 #~ "Si cette option est utilisée l'arrêt se faite avec un message d'erreur "
 #~ "explicite si un problème se produit"
 
-#~ msgid "If you change the config you must save before importing"
-#~ msgstr ""
-#~ "Si vous changez la configuration vous devez sauvegarder avant d'importer"
-
 #~ msgid ""
 #~ "If you had previously opened any tabs they cannot use the new settings "
 #~ "without restart."
@@ -8052,8 +8188,8 @@ msgstr ""
 #~ msgid ""
 #~ "Indicates program was restarted with a different path (only allowed once)."
 #~ msgstr ""
-#~ "Indique que le programme a été redémarré avec un différent chemin (autorisé "
-#~ "une seule fois)"
+#~ "Indique que le programme a été redémarré avec un différent chemin "
+#~ "(autorisé une seule fois)"
 
 #~ msgid "Input directory"
 #~ msgstr "répertoire d'entrée"
@@ -8065,12 +8201,14 @@ msgstr ""
 #~ msgstr "Saisie:"
 
 #~ msgid "Invalid config value for %s, defaulting to %s"
-#~ msgstr "Valeur de configuration invalide pour %s, valeur par defaut prise %s"
+#~ msgstr ""
+#~ "Valeur de configuration invalide pour %s, valeur par defaut prise %s"
 
 #~ msgid ""
 #~ "It is not currently possible to select \"empty\" or anything else to that "
 #~ "end."
-#~ msgstr "Il est pour l'instant impossible de choisir \"vide\" ou tout autre stat."
+#~ msgstr ""
+#~ "Il est pour l'instant impossible de choisir \"vide\" ou tout autre stat."
 
 #~ msgid "KO"
 #~ msgstr "KO"
@@ -8080,12 +8218,12 @@ msgstr ""
 
 #~ msgid ""
 #~ "KeyError at the start of the for loop in update in hud_main. How this can "
-#~ "possibly happen is totally beyond my comprehension. Your HUD may be about to"
-#~ " get really weird. -Eric"
+#~ "possibly happen is totally beyond my comprehension. Your HUD may be about "
+#~ "to get really weird. -Eric"
 #~ msgstr ""
 #~ "Erreur importante au début de la boucle for dans la mise à jour du hud "
-#~ "principal. Comment cela peut arriver me dépasse complètement. Votre HUD est "
-#~ "probablement sur le point de devenir totalement cinglé. -Eric"
+#~ "principal. Comment cela peut arriver me dépasse complètement. Votre HUD "
+#~ "est probablement sur le point de devenir totalement cinglé. -Eric"
 
 #~ msgid "LEVEL"
 #~ msgstr "NIVEAU"
@@ -8108,8 +8246,8 @@ msgstr ""
 #~ msgid ""
 #~ "Login to mailserver failed: please check mailserver, username and password"
 #~ msgstr ""
-#~ "Échec de connexion au serveur de mail: veuillez vérifier le serveur de mail,"
-#~ " le nom d'utilisateur et le mot de passe"
+#~ "Échec de connexion au serveur de mail: veuillez vérifier le serveur de "
+#~ "mail, le nom d'utilisateur et le mot de passe"
 
 #~ msgid "MATRIX"
 #~ msgstr "MATRIX"
@@ -8270,8 +8408,8 @@ msgstr ""
 #~ "Not doing this will likely lead to misbehaviour including fpdb crashes, "
 #~ "corrupt data etc."
 #~ msgstr ""
-#~ "Ne pas le faire va probablement générer un comportement anormal tel que des "
-#~ "plantages de fpdb ou des corruptions de données,..."
+#~ "Ne pas le faire va probablement générer un comportement anormal tel que "
+#~ "des plantages de fpdb ou des corruptions de données,..."
 
 #~ msgid "Not using numpy to define variance in sqlite."
 #~ msgstr "N'utilise pas numpy pour définir la variance dans sqlite"
@@ -8279,7 +8417,8 @@ msgstr ""
 #~ msgid "Not using sqlalchemy connection pool."
 #~ msgstr "N'utilise pas le pool de connexion sqlalchemy"
 
-#~ msgid "Note that you may not select any stat more than once or it will crash."
+#~ msgid ""
+#~ "Note that you may not select any stat more than once or it will crash."
 #~ msgstr ""
 #~ "Remarquez que vous ne pouvez pas choisir plus d'une fois la même stat ou "
 #~ "cela va planter."
@@ -8288,8 +8427,8 @@ msgstr ""
 #~ "Note: error output is being diverted to fpdb-error-log.txt and HUD-"
 #~ "error.txt. Any major error will be reported there _only_."
 #~ msgstr ""
-#~ "Note: les erreurs sont redirigées vers fpdb-error-log.txt et HUD-error.txt. "
-#~ "Chaque erreur grave sera consignée là _uniquement_."
+#~ "Note: les erreurs sont redirigées vers fpdb-error-log.txt et HUD-"
+#~ "error.txt. Chaque erreur grave sera consignée là _uniquement_."
 
 #~ msgid "Number of threads:"
 #~ msgstr "Nombre de threads :"
@@ -8364,13 +8503,14 @@ msgstr ""
 
 #, fuzzy
 #~ msgid ""
-#~ "PartyPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+#~ "PartyPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - "
+#~ "'%s'"
 #~ msgstr "Lim_Blinds ne retourne rien pour '%s'"
 
 #, fuzzy
 #~ msgid ""
-#~ "PartyPokerToFpdb.determineGameType: NLim_Blinds_20bb has no lookup for '%s' "
-#~ "- '%s'"
+#~ "PartyPokerToFpdb.determineGameType: NLim_Blinds_20bb has no lookup for "
+#~ "'%s' - '%s'"
 #~ msgstr "Lim_Blinds ne retourne rien pour '%s'"
 
 #, fuzzy
@@ -8400,7 +8540,8 @@ msgstr ""
 #~ msgstr "Veuillez vérifier que le service PostgreSQL est démarré"
 
 #~ msgid "Please choose the directory you wish to export to:"
-#~ msgstr "Veuillez choisir le répertoire vers lequel vous souhaitez exporter :"
+#~ msgstr ""
+#~ "Veuillez choisir le répertoire vers lequel vous souhaitez exporter :"
 
 #~ msgid "Please choose the stats you wish to use in the below table."
 #~ msgstr ""
@@ -8690,7 +8831,8 @@ msgstr ""
 
 #, fuzzy
 #~ msgid "Summary file '%s' correctly parsed (took %.3f seconds)"
-#~ msgstr "Fichier de synthèse '%s' correctement récupéré  (durée %.3f secondes)"
+#~ msgstr ""
+#~ "Fichier de synthèse '%s' correctement récupéré  (durée %.3f secondes)"
 
 #~ msgid "System default"
 #~ msgstr "Langue du système"
@@ -8750,8 +8892,8 @@ msgstr ""
 #~ "Plus c'est petit, plus les sommes gagnées sont stables"
 
 #~ msgid ""
-#~ "This error is not necessarily fatal but it is strongly recommended that you "
-#~ "recreate the tables by using the Database menu."
+#~ "This error is not necessarily fatal but it is strongly recommended that "
+#~ "you recreate the tables by using the Database menu."
 #~ msgstr ""
 #~ "Cette erreur n'est pas forcément catastrophique mais il est hautement "
 #~ "préférable que vous recréiez les tables en passant par le menu Base de "
@@ -8759,8 +8901,8 @@ msgstr ""
 
 #, fuzzy
 #~ msgid ""
-#~ "This error is not necessarily fatal but it is strongly recommended that you "
-#~ "update the configuration."
+#~ "This error is not necessarily fatal but it is strongly recommended that "
+#~ "you update the configuration."
 #~ msgstr ""
 #~ "Cette erreur n'est pas forcément catastrophique mais il est hautement "
 #~ "préférable que vous recréiez les tables en passant par le menu Base de "
@@ -8770,8 +8912,8 @@ msgstr ""
 #~ "This is of no consequence for other parts of the program, e.g. import and "
 #~ "HUD are NOT affected by this problem."
 #~ msgstr ""
-#~ "Cela n'affecte en aucun cas les autres parties du logiciel, c'est à dire que"
-#~ " l'importation et le HUD ne sont pas affectés par ce problème."
+#~ "Cela n'affecte en aucun cas les autres parties du logiciel, c'est à dire "
+#~ "que l'importation et le HUD ne sont pas affectés par ce problème."
 
 #~ msgid "This may take a while."
 #~ msgstr "Cela peut durer un moment."
@@ -8793,12 +8935,12 @@ msgstr ""
 #~ msgstr "Pour annuler, fermer cette fenêtre"
 
 #~ msgid ""
-#~ "To configure things like colouring you will still have to use the Advanced "
-#~ "Preferences dialogue or manually edit your HUD_config.xml."
+#~ "To configure things like colouring you will still have to use the "
+#~ "Advanced Preferences dialogue or manually edit your HUD_config.xml."
 #~ msgstr ""
 #~ "Pour changer des paramètres comme les couleurs, vous devrez toujours "
-#~ "utiliser le menu des Péférences avancées ou éditer manuellement votre ficher"
-#~ " HUD_config.xml."
+#~ "utiliser le menu des Péférences avancées ou éditer manuellement votre "
+#~ "ficher HUD_config.xml."
 
 #~ msgid "Too many deadlocks - failed to store hand"
 #~ msgstr "Trop de deadlocks - échec du stockage de la main"
@@ -8826,8 +8968,8 @@ msgstr ""
 #, fuzzy
 #~ msgid "Tourney import done: Stored: %d, Errors: %d in %s seconds - %.0f/sec"
 #~ msgstr ""
-#~ "Bulk import terminé: Stockées: %d \tDoublons: %d \tPartiels: %d \tErreurs: "
-#~ "%d en %s secondes - %.0f/sec"
+#~ "Bulk import terminé: Stockées: %d \tDoublons: %d \tPartiels: %d "
+#~ "\tErreurs: %d en %s secondes - %.0f/sec"
 
 #, fuzzy
 #~ msgid "TourneyImport: Removing text < 100 characters from end of file"
@@ -8861,16 +9003,16 @@ msgstr ""
 
 #~ msgid "Unable to detect a buyin to this tournament : assume it's a freeroll"
 #~ msgstr ""
-#~ "Impossible d'identifier un buy-in pour ce tournoi : on suppose que c'est un "
-#~ "freeroll"
+#~ "Impossible d'identifier un buy-in pour ce tournoi : on suppose que c'est "
+#~ "un freeroll"
 
 #~ msgid "Unable to get a valid Tournament ID -- File rejected"
 #~ msgstr "Impossible d'avoir un ID de tournoi valide -- Fichier rejeté"
 
 #, fuzzy
 #~ msgid ""
-#~ "Unable to import PYTZ library. Please install PYTZ from "
-#~ "http://pypi.python.org/pypi/pytz/"
+#~ "Unable to import PYTZ library. Please install PYTZ from http://"
+#~ "pypi.python.org/pypi/pytz/"
 #~ msgstr ""
 #~ "Erreur d'importation: Impossible d'importer la librairie PYTZ.  Veuillez "
 #~ "installer PYTZ à partir de http://pypi.python.org/pypi/pytz/"
@@ -8901,8 +9043,8 @@ msgstr ""
 
 #~ msgid "Updated preferences have not been loaded because windows are open."
 #~ msgstr ""
-#~ "Les changements de préférences n'ont pas été chargées car des fenêtres sont "
-#~ "ouvertes."
+#~ "Les changements de préférences n'ont pas été chargées car des fenêtres "
+#~ "sont ouvertes."
 
 #~ msgid "Updating config file"
 #~ msgstr "Mise à jour du fichier de configuration"
@@ -8942,8 +9084,8 @@ msgstr ""
 
 #~ msgid ""
 #~ "We appear to be running in Windows, but the Windows Python Extensions are "
-#~ "not loading. Please install the PYWIN32 package from "
-#~ "http://sourceforge.net/projects/pywin32/"
+#~ "not loading. Please install the PYWIN32 package from http://"
+#~ "sourceforge.net/projects/pywin32/"
 #~ msgstr ""
 #~ "Il semble que vous soyez sous Windows, mais les Extensions de Fenêtres "
 #~ "Pyhton ne se chargent pas. Veuillez installer le package PYWIN32 depuis "
@@ -8963,8 +9105,8 @@ msgstr ""
 #~ msgstr "Position d'ouverture en X de la fenêtre"
 
 #~ msgid ""
-#~ "You are free to change, and distribute original or changed versions of fpdb "
-#~ "within the rules set out by the license"
+#~ "You are free to change, and distribute original or changed versions of "
+#~ "fpdb within the rules set out by the license"
 #~ msgstr ""
 #~ "Vous êtes libre de modifier, et distribuer les versions originales ou "
 #~ "modifiées de fpdb en respectant les règles définies par la license."
@@ -8982,8 +9124,8 @@ msgstr ""
 #~ "[ERROR] More than 1 Database ID found for %s - Multiple currencies not "
 #~ "implemented yet"
 #~ msgstr ""
-#~ "[ERREUR] Plus d'1 Id de Base de Données trouvé pour %s - Devises Multiples "
-#~ "pas encore implémenté"
+#~ "[ERREUR] Plus d'1 Id de Base de Données trouvé pour %s - Devises "
+#~ "Multiples pas encore implémenté"
 
 #~ msgid "[ERROR] Tried to add holecards for unknown player: %s"
 #~ msgstr ""
@@ -9106,11 +9248,11 @@ msgstr ""
 #~ msgstr "join_holecards: cartes privatives(%s): %s"
 
 #~ msgid ""
-#~ "join_holecards: # of holecards should be either < 4, 4 or 7 - 5 and 6 should"
-#~ " be impossible for anyone who is not a hero"
+#~ "join_holecards: # of holecards should be either < 4, 4 or 7 - 5 and 6 "
+#~ "should be impossible for anyone who is not a hero"
 #~ msgstr ""
-#~ "join_holecards:le # de cartes privatives devrait être < 4 ou égal à 4 ou à 7"
-#~ " - 5 et 6 devrait être impossible pour quiconque n'est pas le héros"
+#~ "join_holecards:le # de cartes privatives devrait être < 4 ou égal à 4 ou "
+#~ "à 7 - 5 et 6 devrait être impossible pour quiconque n'est pas le héros"
 
 #~ msgid "join_holecards: Player '%s' appears not to have been dealt a card"
 #~ msgstr "join_holecards: Le joueur '%s' semble ne pas avoir reçu de cartes"
@@ -9193,7 +9335,8 @@ msgstr ""
 
 #~ msgid "unable to read file with any codec in list!"
 #~ msgstr ""
-#~ "Impossible de lire le fichier avec aucun des codecs présents dans la liste !"
+#~ "Impossible de lire le fichier avec aucun des codecs présents dans la "
+#~ "liste !"
 
 #~ msgid "utcTime:"
 #~ msgstr "utcTime:"
@@ -9209,7 +9352,8 @@ msgstr ""
 #, fuzzy
 #~ msgid "warning: drop index %s_%s_idx failed: %s, continuing ..."
 #~ msgstr ""
-#~ "Echec de suppression de l'index %s_%s_idx: %s, poursuite des traitements ..."
+#~ "Echec de suppression de l'index %s_%s_idx: %s, poursuite des "
+#~ "traitements ..."
 
 #, fuzzy
 #~ msgid "warning: drop pg fk %s_%s_fkey failed: %s, continuing ..."
