@@ -1451,7 +1451,7 @@ class ModernHudPreferences(QDialog):
             elif raw in ("false", "no", "0", "off"):
                 show_hero = False
             else:
-                show_hero = not (isinstance(profile, dict) and profile.get("multiblock"))
+                show_hero = profile_io.hero_shown_by_default(profile)
             self.show_hero_checkbox.blockSignals(True)
             self.show_hero_checkbox.setChecked(show_hero)
             self.show_hero_checkbox.blockSignals(False)

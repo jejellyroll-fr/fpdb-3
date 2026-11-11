@@ -229,6 +229,16 @@ def test_b6_a_label_added_to_a_flat_profile_is_saved(tmp_path, monkeypatch) -> N
     assert [t["rowcol"] for t in saved.blocks[0].texts] == [(1, 1)]
 
 
+def test_a_label_on_a_flat_profile_does_not_untick_show_hero(tmp_path, monkeypatch) -> None:
+    """One block shows the hero at the table, so the checkbox must say so."""
+    dialog, modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
+    select_profile(dialog, "hole")
+    assert dialog.show_hero_checkbox.isChecked()
+    modals.texts.append(("HEADER", True))
+    dialog.add_text_label()
+    assert dialog.show_hero_checkbox.isChecked()
+
+
 def test_b6_a_line_added_to_a_flat_profile_takes_a_free_row(tmp_path, monkeypatch) -> None:
     dialog, modals, path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
     select_profile(dialog, "hole")

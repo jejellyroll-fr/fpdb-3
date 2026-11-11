@@ -138,3 +138,26 @@ def test_an_object_without_a_grid_size_reads_as_a_stat_list() -> None:
     assert profile_io.profile_from_stat_set(SimpleNamespace(stats={(0, 1): stat})) == [
         {"row": 0, "col": 1, "stat": "vpip", "click": "", "popup": ""}
     ]
+
+
+@pytest.mark.parametrize(
+    ("xml", "shown"),
+    [
+        (RICH, True),
+        (BLOCKS, False),
+        (
+            '<ss name="one" rows="1" cols="1"><block label="A"><stat _rowcol="(1,1)" _stat_name="vpip"/></block></ss>',
+            True,
+        ),
+    ],
+)
+def test_the_hero_default_follows_the_live_hud_rule(xml, shown) -> None:
+    stat_set = Configuration.Stat_sets(_node(xml))
+    assert profile_io.hero_shown_by_default(_profile(xml)) is shown is (not stat_set.is_multiblock)
+
+
+def test_a_flat_profile_turned_into_one_block_still_shows_the_hero() -> None:
+    profile = _profile(RICH.replace(' show_hero_hud="true"', ""))
+    profile_io.ensure_blocks(profile)
+    assert profile_io.hero_shown_by_default(profile)
+    assert profile_io.hero_shown_by_default([{"row": 0, "col": 0, "stat": "vpip"}])

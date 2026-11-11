@@ -168,6 +168,17 @@ def profile_stats(profile: Any) -> list[dict[str, Any]]:
     return list(profile.get("stats", [])) if isinstance(profile, dict) else []
 
 
+def hero_shown_by_default(profile: Any) -> bool:
+    """Whether the hero's HUD is drawn when ``show_hero_hud`` is not set.
+
+    The same rule as the live HUD (``Stat_sets.is_multiblock``): hidden only
+    when the set stacks several panels. A single ``<block>`` is written as a
+    block but shows the hero like a flat grid does.
+    """
+    blocks = profile.get("blocks") if isinstance(profile, dict) else None
+    return len(blocks or []) <= 1
+
+
 def new_block(label: str = "", rows: int = 1, cols: int = 1, stats: list | None = None) -> dict[str, Any]:
     """An empty editor block with every attribute the writer expects."""
     return {
