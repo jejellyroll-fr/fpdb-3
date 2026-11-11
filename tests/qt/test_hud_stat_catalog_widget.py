@@ -80,7 +80,7 @@ def test_the_search_filters_and_recounts(widget) -> None:
     assert [name for _group, names in _groups(widget) for name in names] == ["pfr", "vpip"]
 
     widget.set_filter("no such stat")
-    assert _groups(widget) == []
+    assert not _groups(widget)
     assert widget.count_label.text() == "Showing 0 of 6 stats"
 
     widget.set_filter("")

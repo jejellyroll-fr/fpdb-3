@@ -57,10 +57,10 @@ def keys_from_mime(mime: QMimeData) -> list[str]:
 class _CatalogTree(QTreeWidget):
     """The tree, whose drags carry catalogue keys rather than Qt's item format."""
 
-    def mimeTypes(self) -> list[str]:  # noqa: N802 (Qt override)
+    def mimeTypes(self) -> list[str]:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         return [MIME_TYPE]
 
-    def mimeData(self, items: Sequence[QTreeWidgetItem]) -> QMimeData:  # noqa: N802 (Qt override)
+    def mimeData(self, items: Sequence[QTreeWidgetItem]) -> QMimeData:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         keys = [str(item.data(0, KEY_ROLE)) for item in items if item.data(0, KEY_ROLE)]
         return mime_data_for(keys)
 
