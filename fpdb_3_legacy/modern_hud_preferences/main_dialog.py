@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
     QDialogButtonBox,
+    QDoubleSpinBox,
     QFormLayout,
     QFrame,
     QGridLayout,
@@ -42,7 +43,7 @@ from fpdb_3_legacy.hud_profiles import HudContext, HudProfileResolver, HudProfil
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.i18n import translate_hud_category
 from fpdb_3_legacy.loggingFpdb import get_logger
-from fpdb_3_legacy.modern_hud_preferences import editor_state, layout_model, profile_io
+from fpdb_3_legacy.modern_hud_preferences import editor_state, layout_model, profile_io, stat_edit
 from fpdb_3_legacy.modern_hud_preferences.design_canvas import HudDesignCanvas
 from fpdb_3_legacy.modern_hud_preferences.dialogs import (
     AddStatDialog,
@@ -360,14 +361,18 @@ class ModernHudPreferences(QDialog):
         crf = QFormLayout(cr_tab)
         crf.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         crf.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
-        self.ip_loth = QSpinBox()
-        self.ip_loth.setRange(0, 100)
-        self.ip_loth.valueChanged.connect(lambda _v: self._item_prop_changed())
+        self.ip_use_thresholds = QCheckBox(_("Use thresholds"))
+        self.ip_use_thresholds.toggled.connect(self._item_thresholds_toggled)
+        crf.addRow(self.ip_use_thresholds)
+        self.ip_loth = self._item_threshold_input()
         crf.addRow("Lo th:", self.ip_loth)
-        self.ip_hith = QSpinBox()
-        self.ip_hith.setRange(0, 100)
-        self.ip_hith.valueChanged.connect(lambda _v: self._item_prop_changed())
+        self.ip_hith = self._item_threshold_input()
         crf.addRow("Hi th:", self.ip_hith)
+        # The stat's thresholds when it was selected, and what the tab showed
+        # for them then: an edit writes back only what the user changed (B3).
+        self._item_thresholds_original: dict = {}
+        self._item_thresholds_at_load: dict = {}
+        self._item_thresholds_shown = (0.0, 0.0)
         self.ip_locolor = self._item_color_btn("lo")
         crf.addRow("Lo col:", self.ip_locolor)
         self.ip_midcolor = self._item_color_btn("mid")
@@ -1999,6 +2004,45 @@ class ModernHudPreferences(QDialog):
             return {"bg": "color"}.get(role)
         return None
 
+    def _item_threshold_input(self) -> QDoubleSpinBox:
+        spin = QDoubleSpinBox()
+        spin.setDecimals(stat_edit.DECIMALS)
+        spin.setRange(stat_edit.MINIMUM, stat_edit.MAXIMUM)
+        spin.valueChanged.connect(lambda _v: self._item_prop_changed())
+        return spin
+
+    def _item_threshold_values(self) -> dict:
+        """``stat_loth`` / ``stat_hith`` as the Color Ranges tab now reads them."""
+        return stat_edit.threshold_values(
+            self._item_thresholds_original,
+            self.ip_use_thresholds.isChecked(),
+            self._item_thresholds_shown,
+            (self.ip_loth.value(), self.ip_hith.value()),
+        )
+
+    def _enable_item_thresholds(self, is_stat: bool) -> None:
+        on = is_stat and self.ip_use_thresholds.isChecked()
+        self.ip_use_thresholds.setEnabled(is_stat)
+        for w in (self.ip_loth, self.ip_hith, self.ip_locolor, self.ip_midcolor, self.ip_hicolor):
+            w.setEnabled(on)
+
+    def _item_thresholds_toggled(self, checked: bool) -> None:
+        self._enable_item_thresholds(True)
+        if self._loading_item:
+            return
+        kind, ref = self._current_item()
+        if kind == "stat" and checked:
+            # A colour range needs its two colours: give a stat that has none
+            # the usual red and green, as the Edit Stat dialog does.
+            for role, key, colour in (
+                ("lo", "stat_locolor", stat_edit.DEFAULT_LOW_COLOR),
+                ("hi", "stat_hicolor", stat_edit.DEFAULT_HIGH_COLOR),
+            ):
+                if not ref.get(key):
+                    ref[key] = colour
+                    self._style_color_btn(self._item_color_btns[role], colour)
+        self._item_prop_changed()
+
     def _populate_group_items(self, block) -> None:
         if not hasattr(self, "group_items_list"):
             return
@@ -2059,9 +2103,8 @@ class ModernHudPreferences(QDialog):
         # stat-specific (disabled for text/line items, which have no thresholds).
         is_stat = kind == "stat"
         self.item_props_tabs.setTabEnabled(1, True)
-        for w in (self.ip_loth, self.ip_hith, self.ip_locolor, self.ip_midcolor, self.ip_hicolor):
-            w.setEnabled(is_stat)
         if not is_stat:
+            self.ip_use_thresholds.setChecked(False)
             for v in (self.ip_loth, self.ip_hith):
                 v.setValue(0)
             for b in (self.ip_locolor, self.ip_midcolor, self.ip_hicolor):
@@ -2073,8 +2116,12 @@ class ModernHudPreferences(QDialog):
             self._set_combo(self.ip_align, ref.get("align", "center"))
             self._style_color_btn(self.ip_fg, ref.get("hudcolor", ""))
             self._style_color_btn(self.ip_bg, ref.get("hudbgcolor", ""))
-            self.ip_loth.setValue(int(float(ref.get("stat_loth") or 0)))
-            self.ip_hith.setValue(int(float(ref.get("stat_hith") or 0)))
+            self.ip_use_thresholds.setChecked(stat_edit.has_thresholds(ref))
+            self.ip_loth.setValue(stat_edit.shown_value(ref.get("stat_loth"), stat_edit.DEFAULT_LOW))
+            self.ip_hith.setValue(stat_edit.shown_value(ref.get("stat_hith"), stat_edit.DEFAULT_HIGH))
+            self._item_thresholds_original = {key: ref.get(key, "") for key in stat_edit.THRESHOLD_KEYS}
+            self._item_thresholds_shown = (self.ip_loth.value(), self.ip_hith.value())
+            self._item_thresholds_at_load = self._item_threshold_values()
             self._style_color_btn(self.ip_locolor, ref.get("stat_locolor", ""))
             self._style_color_btn(self.ip_midcolor, ref.get("stat_midcolor", ""))
             self._style_color_btn(self.ip_hicolor, ref.get("stat_hicolor", ""))
@@ -2093,6 +2140,7 @@ class ModernHudPreferences(QDialog):
             self.ip_colspan.setValue(max(1, int(ref.get("colspan", 0) or 1)))
             self._style_color_btn(self.ip_fg, "")
             self._style_color_btn(self.ip_bg, ref.get("color", ""))
+        self._enable_item_thresholds(is_stat)
         self._loading_item = False
 
     def _item_prop_changed(self) -> None:
@@ -2106,8 +2154,12 @@ class ModernHudPreferences(QDialog):
             ref["popup"] = self.ip_popup.text()
             ref["colspan"] = self.ip_colspan.value()
             ref["align"] = self.ip_align.currentText()
-            ref["stat_loth"] = str(self.ip_loth.value()) if self.ip_loth.value() else ""
-            ref["stat_hith"] = str(self.ip_hith.value()) if self.ip_hith.value() else ""
+            stat_edit.apply_changes(
+                ref,
+                stat_edit.edit_target(
+                    self._item_thresholds_original, self._item_thresholds_at_load, self._item_threshold_values()
+                ),
+            )
         elif kind == "text":
             ref["label"] = self.ip_text.text()
             ref["colspan"] = self.ip_colspan.value()
@@ -2874,10 +2926,10 @@ class ModernHudPreferences(QDialog):
         max_cols = int(container.get("cols", 5)) or 5
         dlg = AddStatDialog(stat=ref, max_rows=max_rows, max_cols=max_cols, parent=self)
         if dlg.exec():
-            edited = {**ref, **dlg.get_stat()}
-            if self._refuse_taken_cell(container, edited, ignore=ref):
+            changed = dlg.get_stat()  # only what the user changed (B1)
+            if self._refuse_taken_cell(container, {**ref, **changed}, ignore=ref):
                 return
-            ref.update(edited)  # ref is the block's stat dict -> edit persists
+            stat_edit.apply_changes(ref, changed)  # ref is the block's stat dict -> edit persists
             layout_model.grow_to_fit(container, "stat", ref)
             self._refresh_profile()
 

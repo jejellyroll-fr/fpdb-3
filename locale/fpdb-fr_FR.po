@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:25+0100\n"
+"POT-Creation-Date: 2026-11-11 20:30+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -18,8 +18,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: pygettext.py 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"Generated-By: pygettext.py 1.5\n"
 
 #: fpdb_3_legacy/AbsoluteToFpdb.py fpdb_3_legacy/EverleafToFpdb.py
 #, python-format
@@ -4156,8 +4156,21 @@ msgid "−"
 msgstr "−"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "(none)"
+msgstr "(aucun)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Add/Edit Statistic"
 msgstr "Ajouter/modifier une statistique"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid ""
+"Below the low threshold the value takes the low colour, above the high one "
+"the high colour"
+msgstr ""
+"Sous le seuil bas, la valeur prend la couleur basse ; au-dessus du seuil "
+"haut, la couleur haute"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Block Properties"
@@ -4166,6 +4179,10 @@ msgstr "Propriétés du bloc"
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Click Action:"
 msgstr "Action au clic :"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Colour the value by thresholds"
+msgstr "Colorer la valeur selon des seuils"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Column:"
@@ -4336,10 +4353,6 @@ msgstr "règles de profil"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr "#"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "(none)"
-msgstr "(aucun)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "A panel rule with these conditions and this profile already exists."
@@ -4863,6 +4876,10 @@ msgstr "Mettre à jour la règle"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Update selected"
 msgstr "Mettre à jour la sélection"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Use thresholds"
+msgstr "Utiliser des seuils"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "When this is the spot"

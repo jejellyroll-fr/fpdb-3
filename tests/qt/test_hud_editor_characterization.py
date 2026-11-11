@@ -126,7 +126,6 @@ def test_saving_without_editing_keeps_every_package_stat_set(tmp_path, monkeypat
 
 
 # --- Defects: fixed ones guard their fix, open ones are strict xfail ---------
-@pytest.mark.xfail(strict=True, reason="B1: Edit Stat writes default thresholds and colours")
 def test_b1_editing_a_stat_without_changes_leaves_it_alone(tmp_path, monkeypatch) -> None:
     dialog, modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
     profile = select_profile(dialog, "hole")
@@ -184,7 +183,6 @@ def test_b2_editing_a_stat_in_place_is_not_a_collision(tmp_path, monkeypatch) ->
     assert not modals.messages
 
 
-@pytest.mark.xfail(strict=True, reason="B3: thresholds are integers capped at 100 and rewritten on any edit")
 def test_b3_an_unrelated_edit_keeps_decimal_and_large_thresholds(tmp_path, monkeypatch) -> None:
     dialog, _modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
     profile = select_profile(dialog, "hole")

@@ -65,7 +65,7 @@ jobs:
         # Prints each language's completion; fails when locale/fpdb.pot or a
         # catalogue lags the source (fix: python tools/update_pot.py --merge).
         run: |
-          sudo apt-get install -y gettext
+          bash .github/scripts/apt-install.sh gettext
           python tools/update_pot.py --check
       - name: Verify technical-debt inventory
         run: python tools/todo_inventory.py --check
@@ -144,16 +144,8 @@ jobs:
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
-          # The hosted image may include third-party feeds (for example
-          # packages.microsoft.com) that can return 403 and fail the whole
-          # update even though these dependencies come from Ubuntu itself.
-          if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
-            sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
-          else
-            # A runner image without the deb822 Ubuntu sources: plain update.
-            sudo apt-get update
-          fi
-          sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
+          # Ubuntu sources only, with a fallback mirror: see the script.
+          bash .github/scripts/apt-install.sh libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
       - name: Install dependencies
         run: |
           uv pip install --system -e ".[test]"
@@ -234,13 +226,7 @@ jobs:
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
-          if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
-            sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
-          else
-            # A runner image without the deb822 Ubuntu sources: plain update.
-            sudo apt-get update
-          fi
-          sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
+          bash .github/scripts/apt-install.sh libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
       - name: Install fpdb dependencies
         run: |
           uv pip install --system -e ".[test]"
@@ -300,13 +286,7 @@ jobs:
           version: ${{ env.UV_VERSION }}
       - name: Install system dependencies
         run: |
-          if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
-            sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
-          else
-            # A runner image without the deb822 Ubuntu sources: plain update.
-            sudo apt-get update
-          fi
-          sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
+          bash .github/scripts/apt-install.sh libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
       - name: Install dependencies
         run: |
           uv pip install --system -e ".[test]"
@@ -398,13 +378,7 @@ jobs:
           version: ${{ env.UV_VERSION }}
       - name: Install system dependencies
         run: |
-          if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
-            sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
-          else
-            # A runner image without the deb822 Ubuntu sources: plain update.
-            sudo apt-get update
-          fi
-          sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
+          bash .github/scripts/apt-install.sh libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
       - name: Install database test dependencies
         run: uv pip install --system -e ".[test-no-gui]"
       - name: Exercise live schemas, HUD transactions, and cross-backend migration
@@ -483,13 +457,7 @@ jobs:
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
-          if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
-            sudo apt-get update -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
-          else
-            # A runner image without the deb822 Ubuntu sources: plain update.
-            sudo apt-get update
-          fi
-          sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
+          bash .github/scripts/apt-install.sh libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
       - name: Install dependencies
         run: |
           uv pip install --system -e ".[build]"
