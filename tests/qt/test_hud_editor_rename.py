@@ -136,6 +136,29 @@ def test_two_profiles_can_swap_names(tmp_path, monkeypatch) -> None:
     assert "tmp" not in saved.stat_sets
 
 
+def test_a_new_profile_on_a_vacated_name_is_saved_apart(tmp_path, monkeypatch) -> None:
+    dialog, modals, path = _editor(tmp_path, monkeypatch)
+    draw_rows = select_profile(dialog, "draw_default")["rows"]
+    _rename(dialog, modals, "draw_bob")
+
+    def name_it(new_dialog) -> int:
+        from PySide6.QtWidgets import QLineEdit
+
+        new_dialog.findChild(QLineEdit).setText("draw_default")
+        return 1
+
+    modals.dialogs.append(name_it)
+    dialog.add_profile()
+    _rename(dialog, modals, "draw_carol")
+    dialog.save_changes()
+    saved = _reload(path)
+    assert saved.stat_sets["draw_bob"].rows == draw_rows
+    assert "draw_carol" in saved.stat_sets
+    assert "draw_default" not in saved.stat_sets
+    assert "draw_bob" in _game_bindings(saved)
+    assert "draw_carol" not in _game_bindings(saved)
+
+
 def test_a_rename_onto_a_taken_name_says_why_and_changes_nothing(tmp_path, monkeypatch) -> None:
     dialog, modals, _path = _editor(tmp_path, monkeypatch)
     select_profile(dialog, "draw_default")

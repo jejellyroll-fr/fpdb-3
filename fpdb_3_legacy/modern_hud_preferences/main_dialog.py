@@ -254,7 +254,7 @@ class ModernHudPreferences(QDialog):
         # identity, in the Items list, the canvas and the table alike.
         self._selected_item = None
         # Renamed profiles: current name -> name of its <ss> in the file.
-        self._renamed: dict[str, str] = {}
+        self._renamed: editor_state.Renames = {}
         # The four property zones live in a horizontal splitter so they never
         # overlap (a QHBoxLayout can collide when min widths exceed the width)
         # and can be resized like PT4.

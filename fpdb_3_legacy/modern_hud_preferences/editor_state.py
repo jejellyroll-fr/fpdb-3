@@ -58,24 +58,40 @@ def rename_in_rules(rules: Iterable[Any], old: str, new: str) -> list[Any]:
     return [replace(rule, profile=new) if getattr(rule, "profile", None) == old else rule for rule in rules]
 
 
-def record_rename(renames: dict[str, str], old: str, new: str) -> None:
+#: What a rename table holds: a profile's current name -> the name of the
+#: ``<ss>`` that holds it in the file, or ``None`` when it has none of its own.
+Renames = dict[str, str | None]
+
+
+def _new_for(renames: Mapping[str, str | None]) -> dict[str, str]:
+    """``<ss>`` name in the file -> the name of the profile it now holds."""
+    return {source: new for new, source in renames.items() if source is not None}
+
+
+def record_rename(renames: Renames, old: str, new: str) -> None:
     """Note that ``old`` is now called ``new``.
 
-    ``renames`` maps a profile's current name to the name of the ``<ss>`` that
-    holds it in the file. A chain of renames keeps the first name, and renaming
-    back to it forgets the entry.
+    A chain of renames keeps the first name, and renaming back to it forgets
+    the entry. A profile whose name another renamed profile came from does not
+    own the ``<ss>`` of that name, so it is recorded as owning none: two
+    profiles must never write the same node.
     """
-    source = renames.pop(old, old)
+    if old in renames:
+        source = renames.pop(old)
+    elif old in renames.values():
+        source = None
+    else:
+        source = old
     if source != new:
         renames[new] = source
 
 
-def forget_profile(renames: dict[str, str], name: str) -> None:
+def forget_profile(renames: Renames, name: str) -> None:
     """A deleted profile no longer claims the ``<ss>`` it was renamed from."""
     renames.pop(name, None)
 
 
-def file_name_for(name: str, renames: Mapping[str, str]) -> str | None:
+def file_name_for(name: str, renames: Mapping[str, str | None]) -> str | None:
     """The ``<ss>`` name that holds profile ``name``, or ``None`` for a new one.
 
     A profile that took over the name another profile was renamed from must not
@@ -88,14 +104,14 @@ def file_name_for(name: str, renames: Mapping[str, str]) -> str | None:
     return name
 
 
-def follow_renames(doc: Any, renames: Mapping[str, str]) -> int:
+def follow_renames(doc: Any, renames: Mapping[str, str | None]) -> int:
     """Point every ``stat_set="..."`` binding of ``doc`` at the new names.
 
     The game defaults (``<game_stat_set stat_set="...">``) name a profile by
     its ``<ss>`` name; without this a renamed profile would leave them naming a
     stat-set that no longer exists. Returns how many bindings moved.
     """
-    new_for = {source: new for new, source in renames.items()}
+    new_for = _new_for(renames)
     moved = 0
     for node in doc.getElementsByTagName("*"):
         if node.hasAttribute("stat_set") and node.getAttribute("stat_set") in new_for:
@@ -104,9 +120,9 @@ def follow_renames(doc: Any, renames: Mapping[str, str]) -> int:
     return moved
 
 
-def follow_renames_in_games(supported_games: Any, renames: Mapping[str, str]) -> None:
+def follow_renames_in_games(supported_games: Any, renames: Mapping[str, str | None]) -> None:
     """The same as :func:`follow_renames`, on the parsed ``Supported_games`` of a config."""
-    new_for = {source: new for new, source in renames.items()}
+    new_for = _new_for(renames)
     for game in (supported_games or {}).values():
         for binding in (getattr(game, "game_stat_set", None) or {}).values():
             if getattr(binding, "stat_set", None) in new_for:

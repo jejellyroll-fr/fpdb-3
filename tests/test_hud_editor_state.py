@@ -97,6 +97,22 @@ def test_swapping_two_names_keeps_each_profile_on_its_own_stat_set() -> None:
     assert es.file_name_for("bob", renames) == "alice"
 
 
+def test_a_new_profile_on_a_vacated_name_never_claims_its_stat_set() -> None:
+    # alice -> bob, then a new "alice" is created and renamed to carol:
+    # carol owns no stat-set, bob keeps alice's, and the game defaults follow bob.
+    renames: es.Renames = {}
+    es.record_rename(renames, "alice", "bob")
+    es.record_rename(renames, "alice", "carol")
+    assert es.file_name_for("bob", renames) == "alice"
+    assert es.file_name_for("carol", renames) is None
+    doc = defusedxml.minidom.parseString("<cfg><game_stat_set stat_set='alice'/></cfg>")
+    es.follow_renames(doc, renames)
+    assert doc.getElementsByTagName("game_stat_set")[0].getAttribute("stat_set") == "bob"
+    # Renamed back to the vacated name, it still owns none.
+    es.record_rename(renames, "carol", "alice")
+    assert es.file_name_for("alice", renames) is None
+
+
 def test_game_defaults_follow_a_renamed_profile() -> None:
     doc = defusedxml.minidom.parseString(
         "<cfg><supported_games><game game_name='holdem'>"
