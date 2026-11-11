@@ -85,8 +85,8 @@ def test_decimal_and_large_thresholds_are_shown_as_they_are(dialogs) -> None:
 
 
 def test_changing_one_field_returns_only_that_field(dialogs) -> None:
-    dialog = dialogs("AddStatDialog", stat=dict(RANGED), max_rows=3, max_cols=3)
-    dialog.popup_input.setText("Multicol")
+    dialog = dialogs("AddStatDialog", stat=dict(RANGED), max_rows=3, max_cols=3, popup_names=["default", "Multicol"])
+    dialog.popup_input.setCurrentIndex(dialog.popup_input.findData("Multicol"))
     assert dialog.get_stat() == {"popup": "Multicol"}
 
 

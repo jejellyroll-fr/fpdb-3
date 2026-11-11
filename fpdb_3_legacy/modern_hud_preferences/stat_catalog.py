@@ -281,6 +281,36 @@ class StatCatalog:
             return self.entries
         return tuple(entry for entry in self.entries if entry.matches(text))
 
+    def choices(self) -> list[tuple[str, str]]:
+        """``(label, key)`` of every entry, by label, for a list to pick from."""
+        return sorted(((choice_label(entry), entry.key) for entry in self.entries), key=lambda pair: pair[0].casefold())
+
+    def entry_for_label(self, text: str) -> CatalogEntry | None:
+        """The entry a list's text names: its exact label, or a bare stat name.
+
+        A bare name that is both a classic stat and an analytics definition is
+        the classic stat, as the HUD reads a ``<stat>`` without ``data_*``.
+        """
+        text = text.strip()
+        if not text:
+            return None
+        for entry in self.entries:
+            if choice_label(entry) == text:
+                return entry
+        for origin in ORIGINS:
+            named = self.get(make_key(origin, text))
+            if named is not None:
+                return named
+        return None
+
+    def entry_for_item(self, item: Mapping[str, Any]) -> CatalogEntry | None:
+        """The entry a stat cell of the profile shows, or None for a name the catalogue lacks."""
+        name = str(item.get("stat", "") or "")
+        if item.get("data_source") == ORIGIN_ANALYTICS:
+            definition = str(item.get("data_definition", "") or "") or name
+            return self.get(make_key(ORIGIN_ANALYTICS, definition))
+        return self.get(make_key(ORIGIN_CLASSIC, name)) or self.get(make_key(ORIGIN_REGISTRY, name))
+
     def grouped(self, entries: Sequence[CatalogEntry] | None = None) -> list[tuple[str, list[CatalogEntry]]]:
         """``(category, entries)`` pairs in display order, empty groups left out."""
         groups: dict[str, list[CatalogEntry]] = {}
@@ -288,6 +318,27 @@ class StatCatalog:
             groups.setdefault(entry.category, []).append(entry)
         order = list(CATEGORIES)
         return sorted(groups.items(), key=lambda pair: order.index(pair[0]) if pair[0] in order else len(order))
+
+
+def choice_label(entry: CatalogEntry) -> str:
+    """How a list names an entry: a classic stat by its name, the others with their origin."""
+    return entry.name if entry.origin == ORIGIN_CLASSIC else f"{entry.name} ({entry.origin_label})"
+
+
+#: The attributes that tie a cell to an analytics definition (``profile_io.DATA_ATTRS``).
+DATA_ATTRS: Final = ("data_source", "data_definition", "data_format", "data_min_sample")
+
+
+def stat_values(entry: CatalogEntry) -> dict[str, str]:
+    """What a stat cell of *entry* stores: its name and its ``data_*`` attributes.
+
+    The ``data_*`` attributes *entry* does not use are cleared, so a cell that
+    becomes a classic stat stops pointing at its old analytics definition.
+    """
+    values = {"stat": entry.name}
+    values.update(dict.fromkeys(DATA_ATTRS, ""))
+    values.update(entry.attributes)
+    return values
 
 
 def classic_entries(stat_names: Iterable[str], descriptions: Mapping[str, Any]) -> list[CatalogEntry]:

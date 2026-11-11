@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:54+0100\n"
+"POT-Creation-Date: 2026-11-11 23:37+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -4746,11 +4746,6 @@ msgstr "可选: 点击统计时的动作"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Optional: Popup to show on hover"
-msgstr "可选: 鼠标悬停时显示的弹出窗口"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Optional: Submenu name for hierarchical popups"
 msgstr "可选: 分层弹出窗口的子菜单名称"
 
@@ -4758,6 +4753,10 @@ msgstr "可选: 分层弹出窗口的子菜单名称"
 #, fuzzy
 msgid "Override the automatic section used by ModernSubmenu"
 msgstr "覆盖 ModernSubmenu 使用的自动分区"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Pick a statistic from the list."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4794,9 +4793,26 @@ msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr "仅对处于此位置的对手显示此面板（留空 = 始终显示）"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Statistic:"
 msgstr "统计:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "The popup a click on the stat opens"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "There is no statistic called \"{name}\". Pick one from the list."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Unknown statistic"
+msgstr "未知站点"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4992,6 +5008,11 @@ msgstr "在 HUD 中添加分类表情（例如 🐟, 🐌, 🎯）并为玩家�
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Available Stats"
+msgstr "现金局玩家统计"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr "手数低于此值时不显示该面板，改为显示后备内容。"
 
@@ -5078,6 +5099,11 @@ msgstr "设计"
 #, fuzzy
 msgid "Disabled: this rule never matches."
 msgstr "已禁用: 此规则永不匹配。"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Double-click a stat to add it to the panel shown in Design."
+msgstr "双击单元格以加载其背后的手牌。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5227,11 +5253,6 @@ msgstr "问题"
 #, fuzzy
 msgid "Item Properties"
 msgstr "项目属性"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Items"
-msgstr "项目"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5834,6 +5855,20 @@ msgstr "搜索站点..."
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 #, python-brace-format
 msgid "Showing {shown} of {total} stats"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, fuzzy
+msgid "Type to search the stats"
+msgstr "搜索站点..."
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+msgid "(no popup)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+#, python-brace-format
+msgid "{popup} (missing)"
 msgstr ""
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
@@ -8239,6 +8274,10 @@ msgstr ""
 #~ msgstr "无法识别的游戏类型：‘%s’"
 
 #, fuzzy
+#~ msgid "Items"
+#~ msgstr "项目"
+
+#, fuzzy
 #~ msgid "Limit not found in %s."
 #~ msgstr "文件%s无法找到"
 
@@ -8256,6 +8295,10 @@ msgstr ""
 
 #~ msgid "Not using sqlalchemy connection pool."
 #~ msgstr "请不要使用sqlalchemy连接池"
+
+#, fuzzy
+#~ msgid "Optional: Popup to show on hover"
+#~ msgstr "可选: 鼠标悬停时显示的弹出窗口"
 
 #, fuzzy
 #~ msgid "PacificPokerToFpdb.markStreets: Unable to recognise streets"

@@ -173,3 +173,45 @@ def test_without_a_catalogue_the_widget_builds_the_running_one(qtbot) -> None:
     qtbot.addWidget(view)
     assert len(view.catalog) >= len(Stats.get_valid_stats()) - 1
     assert len(view.shown_entries()) == len(view.catalog)
+
+
+# --- The lists of Item Properties and Add/Edit Statistic (B15) -----------------
+def test_the_stat_list_names_each_entry_and_finds_it_back(qtbot) -> None:
+    from PySide6.QtCore import Qt
+
+    from fpdb_3_legacy.modern_hud_preferences.stat_catalog_widget import StatChoiceCombo
+
+    combo = StatChoiceCombo(CATALOG)
+    qtbot.addWidget(combo)
+    assert combo.count() == len(CATALOG)
+    assert combo.isEditable()
+    assert combo.completer().filterMode() == Qt.MatchFlag.MatchContains
+
+    combo.show_item({"stat": "fold_to_cbet_flop", "data_source": "analytics"})
+    assert combo.currentText() == "fold_to_cbet_flop (analytics)"
+    assert combo.chosen_entry().key == "analytics:fold_to_cbet_flop"
+
+    combo.show_item({"stat": "legacy_name"})
+    assert combo.currentText() == "legacy_name"
+    assert combo.chosen_entry() is None
+
+    combo.show_item(None)
+    assert combo.currentText() == ""
+
+
+def test_the_popup_list_keeps_a_missing_popup_and_stays_quiet_while_filled(qtbot) -> None:
+    from fpdb_3_legacy.modern_hud_preferences.stat_catalog_widget import PopupChoiceCombo
+
+    combo = PopupChoiceCombo()
+    qtbot.addWidget(combo)
+    changes: list[int] = []
+    combo.currentIndexChanged.connect(changes.append)
+
+    combo.set_options(["default", "Multicol"], "gone")
+    assert changes == []
+    assert (combo.currentText(), combo.value()) == ("gone (missing)", "gone")
+
+    combo.set_options(["default"], "")
+    assert (combo.currentText(), combo.value()) == ("(no popup)", "")
+    combo.clear()
+    assert combo.value() == ""

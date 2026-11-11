@@ -17,8 +17,10 @@ changed the number shown, and otherwise keeps the stored string as it was.
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from typing import Any
+
+from fpdb_3_legacy.i18n import gettext as _
 
 #: Digits after the decimal point the threshold inputs offer.
 DECIMALS = 2
@@ -146,3 +148,16 @@ def preview_span(low: float, high: float) -> tuple[float, float]:
         start = start - margin if lo < 0.0 else start
         end = end + margin if hi > 100.0 else end
     return start, end
+
+
+def popup_options(names: Iterable[str], current: str = "") -> list[tuple[str, str]]:
+    """``(label, value)`` of the popups a stat can open, for a list to pick from (B15).
+
+    "No popup" comes first. A *current* popup the configuration does not define
+    is listed too, marked as missing, so showing a stat never changes it.
+    """
+    known = sorted({str(name) for name in names if str(name)}, key=str.casefold)
+    options = [(_("(no popup)"), "")] + [(name, name) for name in known]
+    if current and current not in known:
+        options.append((_("{popup} (missing)").format(popup=current), current))
+    return options

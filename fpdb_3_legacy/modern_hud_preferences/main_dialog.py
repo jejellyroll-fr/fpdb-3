@@ -44,7 +44,14 @@ from fpdb_3_legacy.hud_profiles import HudContext, HudProfileResolver, HudProfil
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.i18n import translate_hud_category
 from fpdb_3_legacy.loggingFpdb import get_logger
-from fpdb_3_legacy.modern_hud_preferences import editor_state, layout_model, presentation, profile_io, stat_edit
+from fpdb_3_legacy.modern_hud_preferences import (
+    editor_state,
+    layout_model,
+    presentation,
+    profile_io,
+    stat_catalog,
+    stat_edit,
+)
 from fpdb_3_legacy.modern_hud_preferences.design_canvas import HudDesignCanvas
 from fpdb_3_legacy.modern_hud_preferences.dialogs import (
     AddStatDialog,
@@ -56,6 +63,11 @@ from fpdb_3_legacy.modern_hud_preferences.preview_widgets import (
     HudPreviewWidget,
     PopupPreviewWidget,
     PopupZoomDialog,
+)
+from fpdb_3_legacy.modern_hud_preferences.stat_catalog_widget import (
+    PopupChoiceCombo,
+    StatCatalogWidget,
+    StatChoiceCombo,
 )
 from fpdb_3_legacy.PopupIcons import AVAILABLE_PROVIDERS
 from fpdb_3_legacy.PopupThemes import AVAILABLE_THEMES
@@ -325,13 +337,23 @@ class ModernHudPreferences(QDialog):
         self._group_item_refs: list = []
         items_col = QVBoxLayout()
         items_col.setContentsMargins(0, 0, 0, 0)
-        ilabel = QLabel(_("Items"))
+        ilabel = QLabel(_("Available Stats"))
         ilabel.setProperty("class", "h2")
         items_col.addWidget(ilabel)
+        # The catalogue takes the place of the Items list: the design canvas
+        # below already shows and selects the panel's items. Double-click or
+        # Enter adds a stat to the first free cell of the panel shown there.
+        self.stat_catalog_widget = StatCatalogWidget(self._stat_catalog())
+        self.stat_catalog_widget.setMinimumWidth(220)
+        self.stat_catalog_widget.setMinimumHeight(140)
+        self.stat_catalog_widget.setToolTip(_("Double-click a stat to add it to the panel shown in Design."))
+        self.stat_catalog_widget.stat_activated.connect(self._add_catalog_stat)
+        items_col.addWidget(self.stat_catalog_widget)
+        # Kept, hidden, as the selection's state until the canvas holds it alone
+        # (drag and drop, step 4 of the plan).
         self.group_items_list = QListWidget()
-        self.group_items_list.setMinimumWidth(150)
-        self.group_items_list.setMinimumHeight(140)
         self.group_items_list.currentRowChanged.connect(self._on_group_item_selected)
+        self.group_items_list.hide()
         items_col.addWidget(self.group_items_list)
 
         self.item_props_tabs = QTabWidget()
@@ -342,11 +364,18 @@ class ModernHudPreferences(QDialog):
         itf = QFormLayout(item_tab)
         itf.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         itf.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        self.item_props_form = itf
+        # A stat is picked from the catalogue, a label keeps its free text (B15).
+        self.ip_stat = StatChoiceCombo(self._stat_catalog())
+        self.ip_stat.activated.connect(lambda _i: self._item_prop_changed())
+        self.ip_stat.lineEdit().editingFinished.connect(self._item_prop_changed)
+        itf.addRow(_("Statistic:"), self.ip_stat)
         self.ip_text = QLineEdit()
         self.ip_text.editingFinished.connect(self._item_prop_changed)
         itf.addRow("Text:", self.ip_text)
-        self.ip_popup = QLineEdit()
-        self.ip_popup.editingFinished.connect(self._item_prop_changed)
+        self.ip_popup = PopupChoiceCombo()
+        self.ip_popup.setToolTip(_("The popup a click on the stat opens"))
+        self.ip_popup.currentIndexChanged.connect(lambda _i: self._item_prop_changed())
         itf.addRow("Popup:", self.ip_popup)
         self.ip_colspan = QSpinBox()
         self.ip_colspan.setRange(1, 12)
@@ -1954,7 +1983,7 @@ class ModernHudPreferences(QDialog):
         rows = max(1, int(container.get("rows", 1)))
         taken = layout_model.occupancy(container)
         col = next((c for c in range(cols) if (row, c) not in taken), cols - 1)
-        dlg = AddStatDialog(max_rows=max(rows, row + 1), max_cols=cols, parent=self)
+        dlg = AddStatDialog(max_rows=max(rows, row + 1), max_cols=cols, parent=self, **self._stat_dialog_lists())
         dlg.row_input.setCurrentText(str(row))
         dlg.col_input.setCurrentText(str(col))
         if dlg.exec():
@@ -2280,6 +2309,8 @@ class ModernHudPreferences(QDialog):
         self._loading_item = True
         self.ip_text.clear()
         self.ip_popup.clear()
+        if getattr(self, "ip_stat", None) is not None:
+            self.ip_stat.setCurrentText("")
         for btn in getattr(self, "_item_color_btns", {}).values():
             self._style_color_btn(btn, "")
         self._loading_item = False
@@ -2288,6 +2319,7 @@ class ModernHudPreferences(QDialog):
         self._loading_item = True
         for w in (self.ip_text, self.ip_popup, self.ip_align, self.ip_colspan, self.ip_fg, self.ip_bg):
             w.setEnabled(True)
+        self._show_stat_or_text_row(kind == "stat")
         # Keep the Color Ranges tab itself clickable; only its controls are
         # stat-specific (disabled for text/line items, which have no thresholds).
         is_stat = kind == "stat"
@@ -2299,8 +2331,10 @@ class ModernHudPreferences(QDialog):
             for b in (self.ip_locolor, self.ip_midcolor, self.ip_hicolor):
                 self._style_color_btn(b, "")
         if kind == "stat":
+            if getattr(self, "ip_stat", None) is not None:
+                self.ip_stat.show_item(ref)
             self.ip_text.setText(ref.get("stat", ""))
-            self.ip_popup.setText(ref.get("popup", ""))
+            self._show_popup(ref.get("popup", ""))
             self.ip_colspan.setValue(int(ref.get("colspan", 1) or 1))
             self._set_combo(self.ip_align, ref.get("align", "center"))
             self._style_color_btn(self.ip_fg, ref.get("hudcolor", ""))
@@ -2316,6 +2350,7 @@ class ModernHudPreferences(QDialog):
             self._style_color_btn(self.ip_hicolor, ref.get("stat_hicolor", ""))
         elif kind == "text":
             self.ip_text.setText(ref.get("label", ""))
+            self._show_popup("")
             self.ip_popup.setEnabled(False)
             self.ip_colspan.setValue(int(ref.get("colspan", 1) or 1))
             self._set_combo(self.ip_align, ref.get("align", "center"))
@@ -2324,6 +2359,7 @@ class ModernHudPreferences(QDialog):
         else:  # hline
             self.ip_text.setText(_("Horz Line"))
             self.ip_text.setEnabled(False)
+            self._show_popup("")
             self.ip_popup.setEnabled(False)
             self.ip_align.setEnabled(False)
             self.ip_colspan.setValue(max(1, int(ref.get("colspan", 0) or 1)))
@@ -2339,10 +2375,10 @@ class ModernHudPreferences(QDialog):
         if ref is None:
             return
         if kind == "stat":
-            ref["stat"] = self.ip_text.text()
-            ref["popup"] = self.ip_popup.text()
-            ref["colspan"] = self.ip_colspan.value()
-            ref["align"] = self.ip_align.currentText()
+            if not self._apply_item_stat(ref):
+                return
+            stat_edit.apply_changes(ref, {"popup": self._popup_value()})
+            self._apply_item_layout(ref)
             stat_edit.apply_changes(
                 ref,
                 stat_edit.edit_target(
@@ -2351,8 +2387,7 @@ class ModernHudPreferences(QDialog):
             )
         elif kind == "text":
             ref["label"] = self.ip_text.text()
-            ref["colspan"] = self.ip_colspan.value()
-            ref["align"] = self.ip_align.currentText()
+            self._apply_item_layout(ref)
         else:  # hline
             ref["colspan"] = self.ip_colspan.value()
         item = self.group_items_list.currentItem()
@@ -2362,6 +2397,97 @@ class ModernHudPreferences(QDialog):
             elif kind == "text":
                 item.setText(f"Text: {ref.get('label', '') or '(label)'}")
         self._refresh_after_group_edit()
+
+    def _apply_item_layout(self, ref: dict) -> None:
+        """Write the span and alignment only when they differ from what the item draws.
+
+        A field left without a change (focus moving through the form) must not
+        add ``colspan="1"`` or ``align="center"`` and count as an unsaved edit.
+        """
+        if self.ip_colspan.value() != int(ref.get("colspan", 1) or 1):
+            ref["colspan"] = self.ip_colspan.value()
+        if self.ip_align.currentText() != (ref.get("align") or "center"):
+            ref["align"] = self.ip_align.currentText()
+
+    # --- Stat and popup lists (B15) ----------------------------------------
+    def _stat_catalog(self) -> stat_catalog.StatCatalog:
+        """The catalogue of stats, built once per dialog."""
+        catalog = getattr(self, "_catalog", None)
+        if catalog is None:
+            catalog = stat_catalog.build_catalog()
+            self._catalog = catalog
+        return catalog
+
+    def _popup_names(self) -> list[str]:
+        return sorted(getattr(self, "popup_windows", None) or {})
+
+    def _stat_dialog_lists(self) -> dict[str, Any]:
+        """What Add/Edit Statistic offers: the catalogue and the configuration's popups."""
+        return {"catalog": self._stat_catalog(), "popup_names": self._popup_names()}
+
+    def _show_stat_or_text_row(self, is_stat: bool) -> None:
+        """A stat shows the Statistic list, a label or line the Text field."""
+        form = getattr(self, "item_props_form", None)
+        if form is None or getattr(self, "ip_stat", None) is None:
+            return
+        form.setRowVisible(self.ip_stat, is_stat)
+        form.setRowVisible(self.ip_text, not is_stat)
+
+    def _show_popup(self, current: str) -> None:
+        if isinstance(self.ip_popup, PopupChoiceCombo):
+            self.ip_popup.set_options(self._popup_names(), current)
+        else:
+            self.ip_popup.setText(current)
+
+    def _popup_value(self) -> str:
+        if isinstance(self.ip_popup, PopupChoiceCombo):
+            return self.ip_popup.value()
+        return self.ip_popup.text()
+
+    def _apply_item_stat(self, ref: dict) -> bool:
+        """Write the Statistic list's choice into the stat; False when it names no stat.
+
+        A name the catalogue lacks is refused and the list shows the stat again,
+        unless it is the name the stat already had, which is kept as it is.
+        """
+        combo = getattr(self, "ip_stat", None)
+        if combo is None:
+            return True
+        entry = combo.chosen_entry()
+        if entry is not None:
+            # The same stat again (focus left the list, say) keeps the cell's own
+            # data_* values: an analytics cell may carry its own format.
+            if entry != self._stat_catalog().entry_for_item(ref):
+                stat_edit.apply_changes(ref, stat_catalog.stat_values(entry))
+            return True
+        typed = combo.currentText().strip()
+        if typed == ref.get("stat", ""):
+            return True
+        self._loading_item = True
+        try:
+            combo.show_item(ref)
+        finally:
+            self._loading_item = False
+        self.status_label.setText(
+            _("There is no statistic called \"{name}\". Pick one from the list.").format(name=typed)
+        )
+        return False
+
+    def _add_catalog_stat(self, key: str) -> None:
+        """Put the catalogue's stat in the first free cell of the panel shown in Design."""
+        entry = self._stat_catalog().get(key)
+        name, profile = self._current_profile()
+        if entry is None or profile is None:
+            return
+        blocks = profile.get("blocks") if isinstance(profile, dict) else None
+        block_index = min(max(self._current_block_index, 0), len(blocks) - 1) if blocks else None
+        container = self._item_container(profile, block_index)
+        row, col = layout_model.first_free_cell(container)
+        stat = entry.new_item(row, col)
+        if "default" in self._popup_names():
+            stat["popup"] = "default"
+        layout_model.add(container, "stat", stat, row, col)
+        self._refresh_profile(select=stat)
 
     def _pick_item_color(self, role: str) -> None:
 
@@ -3052,7 +3178,7 @@ class ModernHudPreferences(QDialog):
         container = self._item_container(profile, block_index)
         max_rows = int(container.get("rows", 5)) or 5
         max_cols = int(container.get("cols", 5)) or 5
-        dlg = AddStatDialog(max_rows=max_rows, max_cols=max_cols, parent=self)
+        dlg = AddStatDialog(max_rows=max_rows, max_cols=max_cols, parent=self, **self._stat_dialog_lists())
         if dlg.exec():
             stat = dlg.get_stat()
             if self._refuse_taken_cell(container, stat):
@@ -3113,7 +3239,9 @@ class ModernHudPreferences(QDialog):
         container = self._item_container(profile, block_index)
         max_rows = int(container.get("rows", 5)) or 5
         max_cols = int(container.get("cols", 5)) or 5
-        dlg = AddStatDialog(stat=ref, max_rows=max_rows, max_cols=max_cols, parent=self)
+        dlg = AddStatDialog(
+            stat=ref, max_rows=max_rows, max_cols=max_cols, parent=self, **self._stat_dialog_lists()
+        )
         if dlg.exec():
             changed = dlg.get_stat()  # only what the user changed (B1)
             if self._refuse_taken_cell(container, {**ref, **changed}, ignore=ref):

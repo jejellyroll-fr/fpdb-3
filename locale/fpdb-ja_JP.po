@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:54+0100\n"
+"POT-Creation-Date: 2026-11-11 23:37+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -4690,11 +4690,6 @@ msgstr "任意: 統計をクリックしたときの動作"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Optional: Popup to show on hover"
-msgstr "任意: マウスを重ねたときに表示するポップアップ"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Optional: Submenu name for hierarchical popups"
 msgstr "任意: 階層型ポップアップのサブメニュー名"
 
@@ -4702,6 +4697,10 @@ msgstr "任意: 階層型ポップアップのサブメニュー名"
 #, fuzzy
 msgid "Override the automatic section used by ModernSubmenu"
 msgstr "ModernSubmenu が使う自動セクションを上書き"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Pick a statistic from the list."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4739,9 +4738,27 @@ msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr "このポジションの相手に対してのみこのパネルを表示 (空欄 = 常に表示)"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Statistic:"
 msgstr "統計:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "The popup a click on the stat opens"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "There is no statistic called \"{name}\". Pick one from the list."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Unknown Site"
+msgid "Unknown statistic"
+msgstr "不明なポーカーサイト"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4939,6 +4956,12 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "Ring Player Stats"
+msgid "Available Stats"
+msgstr "リングプレイヤー統計"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr "ハンド数がこれを下回るとパネルは表示されず、代替表示が使われます。"
 
@@ -5027,6 +5050,11 @@ msgstr "デザイン"
 #, fuzzy
 msgid "Disabled: this rule never matches."
 msgstr "無効: このルールは一致しません。"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Double-click a stat to add it to the panel shown in Design."
+msgstr "セルをダブルクリックすると、その元になったハンドを読み込みます。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5177,11 +5205,6 @@ msgstr "問題"
 #, fuzzy
 msgid "Item Properties"
 msgstr "項目のプロパティ"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Items"
-msgstr "項目"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5799,6 +5822,20 @@ msgstr "サイトを検索..."
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 #, python-brace-format
 msgid "Showing {shown} of {total} stats"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, fuzzy
+msgid "Type to search the stats"
+msgstr "サイトを検索..."
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+msgid "(no popup)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+#, python-brace-format
+msgid "{popup} (missing)"
 msgstr ""
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
@@ -8996,6 +9033,10 @@ msgstr ""
 #~ msgid "Invalid config value for %s, defaulting to %s"
 #~ msgstr "無効な設定値 %s を既定値 %s"
 
+#, fuzzy
+#~ msgid "Items"
+#~ msgstr "項目"
+
 #~ msgid "KO"
 #~ msgstr "KO"
 
@@ -9157,6 +9198,10 @@ msgstr ""
 
 #~ msgid "Operating System"
 #~ msgstr "OS"
+
+#, fuzzy
+#~ msgid "Optional: Popup to show on hover"
+#~ msgstr "任意: マウスを重ねたときに表示するポップアップ"
 
 #~ msgid "Out path in quiet mode"
 #~ msgstr "寡黙モードでの出力ファイル"

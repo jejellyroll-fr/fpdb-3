@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:54+0100\n"
+"POT-Creation-Date: 2026-11-11 23:37+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -4732,11 +4732,6 @@ msgstr "Opțional: acțiune la clic pe statistică"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Optional: Popup to show on hover"
-msgstr "Opțional: pop-up afișat la trecerea mouse-ului"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Optional: Submenu name for hierarchical popups"
 msgstr "Opțional: numele submeniului pentru pop-up-uri ierarhice"
 
@@ -4744,6 +4739,10 @@ msgstr "Opțional: numele submeniului pentru pop-up-uri ierarhice"
 #, fuzzy
 msgid "Override the automatic section used by ModernSubmenu"
 msgstr "Înlocuiește secțiunea automată folosită de ModernSubmenu"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Pick a statistic from the list."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4783,9 +4782,27 @@ msgstr ""
 "Arată acest panou doar pentru un adversar pe această poziție (gol = mereu)"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Statistic:"
 msgstr "Statistică:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "The popup a click on the stat opens"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "There is no statistic called \"{name}\". Pick one from the list."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Unknown Site"
+msgid "Unknown statistic"
+msgstr "Site Necunoscut"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4983,6 +5000,12 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "Ring Player Stats"
+msgid "Available Stats"
+msgstr "Statisticile jucatorului cash"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr "Sub acest număr de mâini panoul este reținut și apare înlocuitorul."
 
@@ -5071,6 +5094,11 @@ msgstr "Design"
 #, fuzzy
 msgid "Disabled: this rule never matches."
 msgstr "Dezactivată: această regulă nu se potrivește niciodată."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Double-click a stat to add it to the panel shown in Design."
+msgstr "Dublu clic pe o celulă pentru a încărca mâinile din spatele ei."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5222,11 +5250,6 @@ msgstr "Probleme"
 #, fuzzy
 msgid "Item Properties"
 msgstr "Proprietățile elementului"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Items"
-msgstr "Elemente"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5845,6 +5868,20 @@ msgstr "Caută site-uri..."
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 #, python-brace-format
 msgid "Showing {shown} of {total} stats"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, fuzzy
+msgid "Type to search the stats"
+msgstr "Caută site-uri..."
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+msgid "(no popup)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+#, python-brace-format
+msgid "{popup} (missing)"
 msgstr ""
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
@@ -9579,6 +9616,10 @@ msgstr ""
 #~ msgstr ""
 #~ "Nu este posibil a se selecta \"gol\" sau orice altceva pina la sfirsit."
 
+#, fuzzy
+#~ msgid "Items"
+#~ msgstr "Elemente"
+
 #~ msgid "KO"
 #~ msgstr "KO"
 
@@ -9888,6 +9929,10 @@ msgstr ""
 
 #~ msgid "Operating System"
 #~ msgstr "Sistem de operare"
+
+#, fuzzy
+#~ msgid "Optional: Popup to show on hover"
+#~ msgstr "Opțional: pop-up afișat la trecerea mouse-ului"
 
 #, fuzzy
 #~ msgid "Out path in quiet mode"

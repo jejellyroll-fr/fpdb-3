@@ -364,7 +364,7 @@ def test_b12_editing_an_item_of_a_flat_profile_keeps_the_single_grid_entry(tmp_p
     profile = select_profile(dialog, "hole")
     assert dialog.group_list.item(0).text() == "(single grid)"
     _select_item(dialog, profile["stats"][0])
-    dialog.ip_text.setText("vpip")
+    dialog.ip_stat.setCurrentText("vpip")
     dialog._item_prop_changed()
     assert [dialog.group_list.item(i).text() for i in range(dialog.group_list.count())] == ["(single grid)"]
 

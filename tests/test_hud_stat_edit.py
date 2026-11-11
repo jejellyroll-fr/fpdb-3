@@ -143,3 +143,18 @@ def test_preview_span_widens_for_a_negative_threshold() -> None:
     start, end = stat_edit.preview_span(-5.0, 10.0)
     assert start < -5.0
     assert end == 100.0
+
+
+# --- Popups to pick from (B15) ---------------------------------------------------
+def test_popup_options_list_none_then_the_popups() -> None:
+    assert stat_edit.popup_options(["Multicol", "default", "", "default"]) == [
+        ("(no popup)", ""),
+        ("default", "default"),
+        ("Multicol", "Multicol"),
+    ]
+
+
+def test_a_popup_the_configuration_lacks_is_kept_and_marked() -> None:
+    options = stat_edit.popup_options(["default"], "gone")
+    assert options[-1] == ("gone (missing)", "gone")
+    assert stat_edit.popup_options(["default"], "default") == [("(no popup)", ""), ("default", "default")]
