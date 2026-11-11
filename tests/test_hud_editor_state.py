@@ -71,13 +71,13 @@ def test_a_chain_of_renames_remembers_the_name_in_the_file() -> None:
     es.record_rename(renames, "bob", "carol")
     assert renames == {"carol": "alice"}
     es.record_rename(renames, "carol", "alice")
-    assert renames == {}
+    assert not renames
 
 
 def test_a_deleted_profile_gives_up_its_old_name() -> None:
     renames = {"bob": "alice"}
     es.forget_profile(renames, "bob")
-    assert renames == {}
+    assert not renames
 
 
 def test_each_profile_finds_the_stat_set_it_came_from() -> None:
