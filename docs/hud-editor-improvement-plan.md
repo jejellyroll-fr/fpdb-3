@@ -103,7 +103,7 @@ Nouveaux modules, tous dans `modern_hud_preferences/` :
 
 | Module | Rôle | Qt |
 |---|---|---|
-| `layout_model.py` | Opérations sur un panneau : cellules occupées (avec `colspan`), `can_place`, `add`, `move`, `swap`, `remove`, `insert_row/col`, `delete_row/col`, `resize`, `normalize` | non |
+| `layout_model.py` | Opérations sur un panneau : cellules occupées (avec `colspan`), `can_place`, `add`, `move` (avec échange), `remove` ; au lot 4 `insert_row/col`, `delete_row/col`, `resize` | non |
 | `profile_io.py` | `Stat_sets` ↔ dict éditeur ↔ nœuds XML, extrait de `_profile_from_stat_set` et `_write_profile_stats` | non (minidom) |
 | `stat_catalog.py` | Catalogue : `Stats.STATLIST` + `Stats.get_valid_stats()` + `hud_panel_editor.stat_choices()`, catégorisé, filtrable | non |
 | `stat_catalog_widget.py` | Recherche + arbre par catégorie, source de glisser | oui |
@@ -134,9 +134,10 @@ Un lot = une PR sur `development`, branche `feature/issues-N`.
 - Fabrique de dialogue hors écran avec `QMessageBox`, `QColorDialog`, `QInputDialog` remplacés ; aucun `.exec()` réel.
 
 ### Lot 1 — Modèle et intégrité des données
-- `layout_model.py`, `profile_io.py`.
+- `layout_model.py` (occupation avec `colspan`, `can_place`, première case libre, `add`, `remove`, `move` avec échange) et `profile_io.py`.
 - Corrige B2, B4, B5, B6, B9, B10, B14, B18.
-- Tout profil est représenté en blocs en mémoire ; un profil à un seul bloc sans titre ni couleur ni libellé reste écrit en `<stat>` plats, pour ne produire aucun diff sur les configurations existantes.
+- Un profil garde la forme de son fichier : `<stat>` plats restent plats, `<block>` restent des blocs, même seul. Un profil plat ne devient un bloc unique que lorsqu'on y ajoute un libellé ou une ligne, qui n'existent que dans un `<block>`.
+- Pour un profil multi-panneaux, `rows`/`cols` du `<ss>` sont ceux du fichier, plus le total empilé.
 - Tests purs : chaque opération, `colspan`, collisions, bornes, aller-retour XML.
 
 ### Lot 2 — Sélection, rafraîchissement, modifications non enregistrées
@@ -158,7 +159,7 @@ Un lot = une PR sur `development`, branche `feature/issues-N`.
 - Cellules vides, `QDrag` avec aperçu de la puce, surbrillance de la cible, refus visible.
 - Déplacement, échange, ajout depuis le catalogue, ajout de ligne par dépôt.
 - Clavier, annuler / rétablir.
-- `+ Row`, `+ Column`, suppression de ligne ou colonne vide ; retrait des boutons « + / − » par ligne (B13).
+- `+ Row`, `+ Column`, suppression de ligne ou colonne vide (`insert_row/col`, `delete_row/col`, `resize` dans `layout_model.py`) ; retrait des boutons « + / − » par ligne (B13 ; la borne `max_rows` fausse est déjà corrigée au lot 1).
 - Retrait de `stat_table`, `_row_items`, `group_items_list`.
 - Tests : `QDropEvent` synthétiques sur les cellules (pas de `QDrag.exec`), résultat vérifié dans le modèle **et** dans le XML enregistré.
 

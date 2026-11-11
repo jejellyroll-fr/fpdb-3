@@ -390,6 +390,9 @@ class Stat_sets:
         # readers keep working.
         self.blocks = []
         block_nodes = node.getElementsByTagName("block")
+        # A single <block> is still a block layout: it can carry a title,
+        # colours, text labels and lines that a flat grid has no place for.
+        self.has_block_nodes = bool(block_nodes)
         if block_nodes:
             self.blocks = [StatBlock(bn) for bn in block_nodes]
         else:

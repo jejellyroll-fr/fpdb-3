@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 16:29+0100\n"
+"POT-Creation-Date: 2026-11-11 08:52+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -4402,6 +4402,10 @@ msgid "Cannot update this rule"
 msgstr "Impossible de mettre à jour cette règle"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cell already used"
+msgstr "Case déjà occupée"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Class:"
 msgstr "Classe :"
 
@@ -4471,6 +4475,11 @@ msgstr "Jeu"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "General HUD and Profiling Settings"
 msgstr "Paramètres généraux du HUD et du profilage"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Grid: {rows}×{cols}"
+msgstr "Grille : {rows}×{cols}"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "HUD Preview"
@@ -4603,6 +4612,11 @@ msgid "Panels"
 msgstr "Panneaux"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Panels: {count}"
+msgstr "Panneaux : {count}"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr ""
 "Choisissez un jeu (et un format) pour voir le profil par défaut qui "
@@ -4646,8 +4660,22 @@ msgid "Profile actions"
 msgstr "Actions sur le profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Profile: {name} | {layout} | Statistics: {count}"
+msgstr "Profil : {name} | {layout} | Statistiques : {count}"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Remove"
 msgstr "Retirer"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Row {row}, column {col} already holds {item}. The first free cell is row "
+"{free_row}, column {free_col}."
+msgstr ""
+"La ligne {row}, colonne {col} contient déjà {item}. La première case libre "
+"est ligne {free_row}, colonne {free_col}."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Rule name"
@@ -4771,6 +4799,10 @@ msgstr "Quand la situation est"
 #, python-brace-format
 msgid "Wrote {path}"
 msgstr "{path} écrit"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "a separator line"
+msgstr "une ligne de séparation"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "all profiles"
@@ -6285,7 +6317,8 @@ msgstr "Nom du joueur"
 msgid ""
 "Player-hands marked all-in or included in a successful all-in equity "
 "calculation"
-msgstr "Mains-joueurs marquées à tapis ou incluses dans un calcul d'équité réussi"
+msgstr ""
+"Mains-joueurs marquées à tapis ou incluses dans un calcul d'équité réussi"
 
 #: fpdb_3_legacy/ring_stats/controller.py
 msgid "Position at the table"
@@ -9072,9 +9105,6 @@ msgstr ""
 
 #~ msgid "limit not found in self.limits(%s). hand: '%s'"
 #~ msgstr "Limite non trouvée dans self.limits(%s). Main: '%s'"
-
-#~ msgid "lock already held by:"
-#~ msgstr "Verrou déjà détenu par:"
 
 #~ msgid "markStreets appeared to fail: First 100 chars: '%s'"
 #~ msgstr "markStreets : echec : premiers 100 caractères : '%s'"

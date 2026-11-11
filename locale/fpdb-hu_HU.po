@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 16:29+0100\n"
+"POT-Creation-Date: 2026-11-11 08:52+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -4921,6 +4921,12 @@ msgstr "Ez a szabály nem frissíthető"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "lock already held by:"
+msgid "Cell already used"
+msgstr "a zárolást már elvégezte:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Class:"
 msgstr "Osztály:"
 
@@ -5004,6 +5010,11 @@ msgstr "Játék"
 #, fuzzy
 msgid "General HUD and Profiling Settings"
 msgstr "Általános HUD- és profilozási beállítások"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Grid: {rows}×{cols}"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5164,6 +5175,11 @@ msgid "Panels"
 msgstr "Panelek"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Panels: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr ""
@@ -5216,9 +5232,21 @@ msgid "Profile actions"
 msgstr "Pozíció"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Profile: {name} | {layout} | Statistics: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Remove"
 msgstr "Eltávolítás"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Row {row}, column {col} already holds {item}. The first free cell is row "
+"{free_row}, column {free_col}."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5359,6 +5387,10 @@ msgstr "Ha ez a helyzet"
 #, fuzzy, python-brace-format
 msgid "Wrote {path}"
 msgstr "Kiírva: {path}"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "a separator line"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -11262,9 +11294,6 @@ msgstr ""
 
 #~ msgid "limit not found in self.limits(%s). hand: '%s'"
 #~ msgstr "limit nem található itt: self.limits(%s). leosztás: '%s'"
-
-#~ msgid "lock already held by:"
-#~ msgstr "a zárolást már elvégezte:"
 
 #~ msgid "markStreets appeared to fail: First 100 chars: '%s'"
 #~ msgstr "markStreets nem sikerült: az első 100 karakter: '%s'"

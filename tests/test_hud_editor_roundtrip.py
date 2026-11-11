@@ -72,12 +72,9 @@ def test_the_snapshot_sees_a_lost_label() -> None:
     assert stat_set_snapshot(Configuration.Stat_sets(node)) != before
 
 
-# --- Known defects (docs/hud-editor-improvement-plan.md) -----------------------
-# Each test states the correct behaviour and is expected to fail until its fix
-# lands; strict, so the fix has to remove the marker.
+# --- Defects of docs/hud-editor-improvement-plan.md ----------------------------
 
 
-@pytest.mark.xfail(strict=True, reason="B5: a one-<block> stat-set is loaded as a flat grid")
 def test_b5_a_single_block_keeps_its_title_texts_and_lines() -> None:
     node = _parse(
         '<ss name="one" rows="3" cols="2">'
@@ -91,7 +88,6 @@ def test_b5_a_single_block_keeps_its_title_texts_and_lines() -> None:
     assert after == before
 
 
-@pytest.mark.xfail(strict=True, reason="block-level title/heading font scales are not carried by the editor")
-def test_a_block_font_scale_survives() -> None:
+def test_b18_a_block_font_scale_survives() -> None:
     before, after = _round_trip(_parse(MULTI_BLOCK))
     assert after["blocks"][0]["title_font_scale"] == before["blocks"][0]["title_font_scale"] == 0.8

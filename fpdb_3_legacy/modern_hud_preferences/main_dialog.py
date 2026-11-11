@@ -42,6 +42,7 @@ from fpdb_3_legacy.hud_profiles import HudContext, HudProfileResolver, HudProfil
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.i18n import translate_hud_category
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.modern_hud_preferences import layout_model, profile_io
 from fpdb_3_legacy.modern_hud_preferences.design_canvas import HudDesignCanvas
 from fpdb_3_legacy.modern_hud_preferences.dialogs import (
     AddStatDialog,
@@ -293,7 +294,7 @@ class ModernHudPreferences(QDialog):
         self.gp_opacity = QSlider(Qt.Orientation.Horizontal)
         self.gp_opacity.setRange(0, 255)
         self.gp_opacity.setValue(178)
-        self.gp_opacity.valueChanged.connect(lambda _v: self._group_prop_changed())
+        self.gp_opacity.valueChanged.connect(lambda _v: self._group_opacity_changed())
         gp.addRow("Opacity:", self.gp_opacity)
         group_row.addWidget(self.group_props_box)
 
@@ -894,17 +895,20 @@ class ModernHudPreferences(QDialog):
 
     def update_status(self) -> None:
         """Update status label with current profile info."""
-        if self.profile_combo.currentIndex() >= 0:
-            profile_name = self.profile_combo.currentText()
-            profile = self.hud_profiles.get(profile_name, {})
-            if isinstance(profile, dict):
-                stats = profile.get("stats", [])
-                rows = profile.get("rows", 5)
-                cols = profile.get("cols", 5)
-            else:
-                stats = profile
-                rows = cols = 5
-            self.status_label.setText(f"Profile: {profile_name} | Grid: {rows}×{cols} | Statistics: {len(stats)}")
+        if self.profile_combo.currentIndex() < 0:
+            return
+        profile_name = self.profile_combo.currentText()
+        profile = self.hud_profiles.get(profile_name, {})
+        count = len(profile_io.profile_stats(profile))
+        blocks = profile.get("blocks") if isinstance(profile, dict) else None
+        if blocks:
+            layout = _("Panels: {count}").format(count=len(blocks))
+        else:
+            rows, cols = profile_io.stat_set_size(profile)
+            layout = _("Grid: {rows}×{cols}").format(rows=rows, cols=cols)
+        self.status_label.setText(
+            _("Profile: {name} | {layout} | Statistics: {count}").format(name=profile_name, layout=layout, count=count)
+        )
 
     def _deep_copy_profiles(self, profiles):
         """Create a deep copy of profiles for change detection."""
@@ -966,112 +970,11 @@ class ModernHudPreferences(QDialog):
     @staticmethod
     def _stat_to_dict(stat, row: int, col: int, panel: str = "") -> dict:
         """Convert a Configuration.Stat into the editor's flat stat dict."""
-        d = {
-            "row": row,
-            "col": col,
-            "stat": getattr(stat, "stat_name", "unknown"),
-            "click": getattr(stat, "click", ""),
-            "popup": getattr(stat, "popup", ""),
-        }
-        if panel:
-            d["panel"] = panel
-        for attr in (
-            "stat_loth",
-            "stat_hith",
-            "stat_locolor",
-            "stat_hicolor",
-            "stat_midcolor",
-            "hudcolor",
-            "hudbgcolor",
-            "hudprefix",
-            "hudsuffix",
-            "display_label",
-            "tip",
-            # The declarative binding of an analytics-backed stat (#309). Empty
-            # for a column-backed stat, written back only when it is set.
-            "data_source",
-            "data_definition",
-            "data_format",
-            "data_min_sample",
-        ):
-            if hasattr(stat, attr):
-                d[attr] = getattr(stat, attr, "")
-        # PT4 cell layout (kept only when non-default to avoid noisy XML).
-        if getattr(stat, "colspan", 1) and int(getattr(stat, "colspan", 1)) != 1:
-            d["colspan"] = int(stat.colspan)
-        if getattr(stat, "align", "") and stat.align != "center":
-            d["align"] = stat.align
-        return d
+        return profile_io.stat_to_dict(stat, row, col, panel)
 
     def _profile_from_stat_set(self, stat_set) -> Any:
         """Convert a Configuration.Stat_sets object into the editor profile."""
-        blocks = getattr(stat_set, "blocks", None)
-        if blocks and len(blocks) > 1:
-            stats = []
-            block_meta = []
-            row_offset = 0
-            total_cols = 0
-            for blk in blocks:
-                bstats = []
-                for pos, stat in blk.stats.items():
-                    stats.append(self._stat_to_dict(stat, pos[0] + row_offset, pos[1], blk.label))
-                    bstats.append(self._stat_to_dict(stat, pos[0], pos[1], blk.label))
-                block_meta.append(
-                    {
-                        "label": blk.label,
-                        "id": getattr(blk, "id", ""),
-                        "scope": getattr(blk, "scope", "player"),
-                        "audience": getattr(blk, "audience", "everyone"),
-                        "position": getattr(blk, "position", ""),
-                        "rows": blk.rows,
-                        "cols": blk.cols,
-                        "bgcolor": getattr(blk, "bgcolor", ""),
-                        "fgcolor": getattr(blk, "fgcolor", ""),
-                        "title_bgcolor": getattr(blk, "title_bgcolor", ""),
-                        "title_fgcolor": getattr(blk, "title_fgcolor", ""),
-                        "bordercolor": getattr(blk, "bordercolor", ""),
-                        "cell_width": getattr(blk, "cell_width", 0),
-                        "x": getattr(blk, "x", 0),
-                        "y": getattr(blk, "y", 0),
-                        "stats": bstats,
-                        # PT4-style text-label items (column/row headers, captions).
-                        "texts": [dict(t) for t in getattr(blk, "texts", [])],
-                        # PT4 "Horz Line" separators.
-                        "hlines": [dict(h) for h in getattr(blk, "hlines", [])],
-                    }
-                )
-                row_offset += blk.rows
-                total_cols = max(total_cols, blk.cols)
-            return {
-                "rows": max(row_offset, 1),
-                "cols": max(total_cols, 1),
-                "xpad": getattr(stat_set, "xpad", 0),
-                "ypad": getattr(stat_set, "ypad", 0),
-                "multiblock": True,
-                # "all" = show every position panel stacked; "current" = only the
-                # panel matching the estimated live position. Editable in the UI.
-                "positional_mode": getattr(stat_set, "positional_mode", "current") or "current",
-                # "" (default), "true" or "false": whether the hero's own stat
-                # windows are drawn. Multi-block HUDs default to hidden.
-                "show_hero_hud": getattr(stat_set, "show_hero_hud", "") or "",
-                "blocks": block_meta,
-                "stats": stats,
-            }
-
-        stats = []
-        if hasattr(stat_set, "stats"):
-            for pos, stat in stat_set.stats.items():
-                stats.append(self._stat_to_dict(stat, pos[0], pos[1], ""))
-
-        if hasattr(stat_set, "rows") and hasattr(stat_set, "cols"):
-            return {
-                "rows": stat_set.rows,
-                "cols": stat_set.cols,
-                "xpad": getattr(stat_set, "xpad", 0),
-                "ypad": getattr(stat_set, "ypad", 0),
-                "stats": stats,
-            }
-        return stats
+        return profile_io.profile_from_stat_set(stat_set)
 
     def load_profiles(self) -> None:
         # Try to load HUD profiles from config (from HUD_config.xml)
@@ -1548,7 +1451,7 @@ class ModernHudPreferences(QDialog):
             elif raw in ("false", "no", "0", "off"):
                 show_hero = False
             else:
-                show_hero = not (isinstance(profile, dict) and profile.get("multiblock"))
+                show_hero = profile_io.hero_shown_by_default(profile)
             self.show_hero_checkbox.blockSignals(True)
             self.show_hero_checkbox.setChecked(show_hero)
             self.show_hero_checkbox.blockSignals(False)
@@ -1739,24 +1642,17 @@ class ModernHudPreferences(QDialog):
             return
         container = self._item_container(profile, block_index)
         cols = max(1, int(container.get("cols", 4)))
-        used = {
-            c
-            for (r, c) in (
-                [(s.get("row", 0), s.get("col", 0)) for s in container.get("stats", [])]
-                + [tuple(t["rowcol"]) for t in container.get("texts", [])]
-                + [tuple(h["rowcol"]) for h in container.get("hlines", [])]
-            )
-            if r == row
-        }
-        col = next((c for c in range(cols) if c not in used), cols - 1)
-        dlg = AddStatDialog(max_rows=max(cols, row + 1), max_cols=cols, parent=self)
+        rows = max(1, int(container.get("rows", 1)))
+        taken = layout_model.occupancy(container)
+        col = next((c for c in range(cols) if (row, c) not in taken), cols - 1)
+        dlg = AddStatDialog(max_rows=max(rows, row + 1), max_cols=cols, parent=self)
         dlg.row_input.setCurrentText(str(row))
         dlg.col_input.setCurrentText(str(col))
         if dlg.exec():
             stat = dlg.get_stat()
-            container.setdefault("stats", []).append(stat)
-            container["rows"] = max(int(container.get("rows", 1)), int(stat["row"]) + 1)
-            container["cols"] = max(int(container.get("cols", 1)), int(stat["col"]) + 1)
+            if self._refuse_taken_cell(container, stat):
+                return
+            layout_model.add(container, "stat", stat, int(stat["row"]), int(stat["col"]))
             self.on_profile_selected(self.profile_combo.currentIndex())
 
     def _canvas_remove_item(self, block_index, row) -> None:
@@ -1897,6 +1793,15 @@ class ModernHudPreferences(QDialog):
             return
         block["label"] = self.gp_name.text()
         block["position"] = self.gp_position.currentText()
+        self._refresh_after_group_edit()
+
+    def _group_opacity_changed(self) -> None:
+        """The opacity slider: the alpha of the panel background, and only that."""
+        if self._loading_group:
+            return
+        _bi, block = self._selected_block()
+        if block is None:
+            return
         r, g, b = self._rgb_of(block.get("bgcolor", ""))
         block["bgcolor"] = f"rgba({r}, {g}, {b}, {self.gp_opacity.value()})"
         self._refresh_after_group_edit()
@@ -2698,14 +2603,7 @@ class ModernHudPreferences(QDialog):
         if self.profile_combo.currentIndex() < 0:
             return None, None
         name = self.profile_combo.currentText()
-        profile = self.hud_profiles[name]
-
-        # Handle both old and new format
-        if isinstance(profile, list):
-            # Old format - return the list directly
-            return name, profile
-        # New format - return the stats list
-        return name, profile.get("stats", [])
+        return name, profile_io.profile_stats(self.hud_profiles[name])
 
     def _current_profile(self):
         """Return (name, profile) for the selected profile, or (None, None)."""
@@ -2748,10 +2646,35 @@ class ModernHudPreferences(QDialog):
         dlg = AddStatDialog(max_rows=max_rows, max_cols=max_cols, parent=self)
         if dlg.exec():
             stat = dlg.get_stat()
-            container.setdefault("stats", []).append(stat)
-            container["rows"] = max(int(container.get("rows", 1)), int(stat["row"]) + 1)
-            container["cols"] = max(int(container.get("cols", 1)), int(stat["col"]) + 1)
+            if self._refuse_taken_cell(container, stat):
+                return
+            layout_model.add(container, "stat", stat, int(stat["row"]), int(stat["col"]))
             self.on_profile_selected(self.profile_combo.currentIndex())
+
+    def _refuse_taken_cell(self, container, stat: dict, ignore: dict | None = None) -> bool:
+        """Say so and return True when ``stat`` would cover a cell another item holds.
+
+        The HUD keeps one item per cell: a second one on the same cell would be
+        written to the file and silently dropped by the next reader of it.
+        """
+        cols = int(container.get("cols", 1) or 1)
+        width = layout_model.span("stat", stat, cols)
+        row, col = int(stat["row"]), int(stat["col"])
+        if layout_model.can_place(container, row, col, width, ignore=ignore):
+            return False
+        taken = layout_model.occupancy(container, ignore=ignore)
+        kind, other = next(taken[(row, col + i)] for i in range(width) if (row, col + i) in taken)
+        what = {"stat": other.get("stat", ""), "text": other.get("label", "")}.get(kind) or _("a separator line")
+        free_row, free_col = layout_model.first_free_cell(container, width)
+        QMessageBox.warning(
+            self,
+            _("Cell already used"),
+            _(
+                "Row {row}, column {col} already holds {item}. "
+                "The first free cell is row {free_row}, column {free_col}."
+            ).format(row=row, col=col, item=what, free_row=free_row, free_col=free_col),
+        )
+        return True
 
     def edit_stat(self) -> None:
         name, profile = self._current_profile()
@@ -2783,7 +2706,11 @@ class ModernHudPreferences(QDialog):
         max_cols = int(container.get("cols", 5)) or 5
         dlg = AddStatDialog(stat=ref, max_rows=max_rows, max_cols=max_cols, parent=self)
         if dlg.exec():
-            ref.update(dlg.get_stat())  # ref is the block's stat dict -> edit persists
+            edited = {**ref, **dlg.get_stat()}
+            if self._refuse_taken_cell(container, edited, ignore=ref):
+                return
+            ref.update(edited)  # ref is the block's stat dict -> edit persists
+            layout_model.grow_to_fit(container, "stat", ref)
             self.on_profile_selected(self.profile_combo.currentIndex())
 
     def remove_stat(self) -> None:
@@ -2802,16 +2729,19 @@ class ModernHudPreferences(QDialog):
 
     def _next_free_cell(self, container) -> tuple[int, int]:
         """First free (row, col) in a block/profile container."""
-        cols = max(1, int(container.get("cols", 4)))
-        used = {(s.get("row", 0), s.get("col", 0)) for s in container.get("stats", [])}
-        used |= {tuple(t["rowcol"]) for t in container.get("texts", [])}
-        used |= {tuple(h["rowcol"]) for h in container.get("hlines", [])}
-        r = 0
-        while True:
-            for cc in range(cols):
-                if (r, cc) not in used:
-                    return r, cc
-            r += 1
+        return layout_model.first_free_cell(container)
+
+    def _block_container(self, profile, block_index):
+        """The block that receives a new label or line.
+
+        Labels and lines exist only inside a ``<block>``: a flat profile is
+        turned into a one-block profile first, so the item is shown and saved
+        instead of landing in a list nothing reads.
+        """
+        if isinstance(profile, dict) and not profile.get("blocks"):
+            self._current_block_index = 0
+            return profile_io.ensure_blocks(profile)[0]
+        return self._item_container(profile, block_index)
 
     def add_text_label(self) -> None:
         from PySide6.QtWidgets import QInputDialog
@@ -2821,15 +2751,13 @@ class ModernHudPreferences(QDialog):
             return
         sel = self._selected_row_item()
         block_index = sel[0] if sel else (0 if isinstance(profile, dict) and profile.get("blocks") else None)
-        container = self._item_container(profile, block_index)
         label, ok = QInputDialog.getText(self, "Add Text Label", "Label text (e.g. column header, caption):")
         if not ok or not label.strip():
             return
-        r, cc = self._next_free_cell(container)
-        container.setdefault("texts", []).append(
-            {"rowcol": (r, cc), "label": label.strip(), "colspan": 1, "align": "center", "fgcolor": "", "bgcolor": ""},
-        )
-        container["rows"] = max(int(container.get("rows", 1)), r + 1)
+        container = self._block_container(profile, block_index)
+        r, cc = layout_model.first_free_cell(container)
+        text = {"label": label.strip(), "colspan": 1, "align": "center", "fgcolor": "", "bgcolor": ""}
+        layout_model.add(container, "text", text, r, cc)
         self.on_profile_selected(self.profile_combo.currentIndex())
 
     def add_hline(self) -> None:
@@ -2838,11 +2766,9 @@ class ModernHudPreferences(QDialog):
             return
         sel = self._selected_row_item()
         block_index = sel[0] if sel else (0 if isinstance(profile, dict) and profile.get("blocks") else None)
-        container = self._item_container(profile, block_index)
-        r, _cc = self._next_free_cell(container)
+        container = self._block_container(profile, block_index)
         # A separator takes its own row and spans the whole panel width (colspan 0).
-        container.setdefault("hlines", []).append({"rowcol": (r, 0), "colspan": 0, "color": ""})
-        container["rows"] = max(int(container.get("rows", 1)), r + 1)
+        layout_model.add(container, "hline", {"colspan": 0, "color": ""}, layout_model.first_free_row(container), 0)
         self.on_profile_selected(self.profile_combo.currentIndex())
 
     def add_block(self) -> None:
@@ -2916,118 +2842,19 @@ class ModernHudPreferences(QDialog):
             self.on_profile_selected(self.profile_combo.currentIndex())
 
     def _append_stat_node(self, parent_node, stat: dict, row: int, col: int) -> None:
-        stat_node = self.config.doc.createElement("stat")
-        stat_node.setAttribute("_rowcol", f"({row + 1},{col + 1})")
-        stat_node.setAttribute("_stat_name", stat.get("stat", ""))
-        stat_node.setAttribute("click", stat.get("click", ""))
-        stat_node.setAttribute("popup", stat.get("popup", "default"))
-        stat_node.setAttribute("tip", stat.get("tip", ""))
-        if stat.get("display_label"):
-            stat_node.setAttribute("display_label", stat["display_label"])
-        stat_node.setAttribute("hudprefix", stat.get("hudprefix", ""))
-        stat_node.setAttribute("hudsuffix", stat.get("hudsuffix", ""))
-        stat_node.setAttribute("hudcolor", stat.get("hudcolor", ""))
-        stat_node.setAttribute("hudbgcolor", stat.get("hudbgcolor", ""))
-        stat_node.setAttribute("stat_loth", stat.get("stat_loth", ""))
-        stat_node.setAttribute("stat_hith", stat.get("stat_hith", ""))
-        stat_node.setAttribute("stat_locolor", stat.get("stat_locolor", ""))
-        stat_node.setAttribute("stat_hicolor", stat.get("stat_hicolor", ""))
-        stat_node.setAttribute("stat_midcolor", stat.get("stat_midcolor", ""))
-        # PT4 cell layout (written only when non-default to keep XML clean).
-        if int(stat.get("colspan", 1) or 1) > 1:
-            stat_node.setAttribute("colspan", str(int(stat["colspan"])))
-        if stat.get("align") and stat["align"] != "center":
-            stat_node.setAttribute("align", stat["align"])
-        # An analytics-backed stat (#309) says where its number comes from, so a
-        # configuration is self-describing rather than depending on what the
-        # build knew when it was written.
-        for attr in ("data_source", "data_definition", "data_format", "data_min_sample"):
-            if stat.get(attr):
-                stat_node.setAttribute(attr, str(stat[attr]))
-        parent_node.appendChild(stat_node)
+        profile_io.append_stat_node(self.config.doc, parent_node, stat, row, col)
 
     def _append_hline_node(self, parent_node, hline: dict) -> None:
         """Write a PT4-style <hline> separator item within a block."""
-        rc = hline.get("rowcol", (0, 0))
-        node = self.config.doc.createElement("hline")
-        node.setAttribute("_rowcol", f"({int(rc[0]) + 1},{int(rc[1]) + 1})")
-        if hline.get("colspan"):
-            node.setAttribute("colspan", str(int(hline["colspan"])))
-        if hline.get("color"):
-            node.setAttribute("color", hline["color"])
-        parent_node.appendChild(node)
+        profile_io.append_hline_node(self.config.doc, parent_node, hline)
 
     def _append_text_node(self, parent_node, text: dict) -> None:
         """Write a PT4-style <text> label item within a block."""
-        rc = text.get("rowcol", (0, 0))
-        node = self.config.doc.createElement("text")
-        node.setAttribute("_rowcol", f"({int(rc[0]) + 1},{int(rc[1]) + 1})")
-        node.setAttribute("label", text.get("label", ""))
-        if int(text.get("colspan", 1)) > 1:
-            node.setAttribute("colspan", str(int(text.get("colspan", 1))))
-        if text.get("align"):
-            node.setAttribute("align", text["align"])
-        if text.get("fgcolor"):
-            node.setAttribute("fgcolor", text["fgcolor"])
-        if text.get("bgcolor"):
-            node.setAttribute("bgcolor", text["bgcolor"])
-        parent_node.appendChild(node)
+        profile_io.append_text_node(self.config.doc, parent_node, text)
 
     def _write_profile_stats(self, stat_set_node, profile_data, rows: int, cols: int) -> None:
         """Write a profile as flat <stat> nodes or PT4-style <block> nodes."""
-        stat_set_node.setAttribute("rows", str(rows))
-        stat_set_node.setAttribute("cols", str(cols))
-
-        while stat_set_node.firstChild:
-            stat_set_node.removeChild(stat_set_node.firstChild)
-
-        blocks = profile_data.get("blocks") if isinstance(profile_data, dict) else None
-        if blocks:
-            for block in blocks:
-                stat_set_node.appendChild(self.config.doc.createTextNode("\n            "))
-                block_node = self.config.doc.createElement("block")
-                for attr in (
-                    "label",
-                    "id",
-                    "scope",
-                    "audience",
-                    "position",
-                    "bgcolor",
-                    "fgcolor",
-                    "title_bgcolor",
-                    "title_fgcolor",
-                    "bordercolor",
-                ):
-                    if block.get(attr) is not None:
-                        block_node.setAttribute(attr, str(block.get(attr, "")))
-                block_node.setAttribute("rows", str(block.get("rows", 1)))
-                block_node.setAttribute("cols", str(block.get("cols", cols)))
-                block_node.setAttribute("x", str(block.get("x", 0)))
-                block_node.setAttribute("y", str(block.get("y", 0)))
-                if int(block.get("cell_width", 0) or 0) > 0:
-                    block_node.setAttribute("cell_width", str(int(block["cell_width"])))
-
-                for text in block.get("texts", []):
-                    block_node.appendChild(self.config.doc.createTextNode("\n                "))
-                    self._append_text_node(block_node, text)
-                for hline in block.get("hlines", []):
-                    block_node.appendChild(self.config.doc.createTextNode("\n                "))
-                    self._append_hline_node(block_node, hline)
-                for stat in block.get("stats", []):
-                    block_node.appendChild(self.config.doc.createTextNode("\n                "))
-                    self._append_stat_node(block_node, stat, int(stat.get("row", 0)), int(stat.get("col", 0)))
-                if block.get("stats") or block.get("texts") or block.get("hlines"):
-                    block_node.appendChild(self.config.doc.createTextNode("\n            "))
-                stat_set_node.appendChild(block_node)
-            stat_set_node.appendChild(self.config.doc.createTextNode("\n        "))
-            return
-
-        stats = profile_data if isinstance(profile_data, list) else profile_data.get("stats", [])
-        for stat in stats:
-            stat_set_node.appendChild(self.config.doc.createTextNode("\n            "))
-            self._append_stat_node(stat_set_node, stat, int(stat["row"]), int(stat["col"]))
-        if stats:
-            stat_set_node.appendChild(self.config.doc.createTextNode("\n        "))
+        profile_io.write_profile_items(self.config.doc, stat_set_node, profile_data, rows, cols)
 
     @staticmethod
     def _fill_rule_combo(combo: QComboBox, values: list[str]) -> None:
@@ -3980,21 +3807,18 @@ class ModernHudPreferences(QDialog):
             return
         block_index = self.panel_stat_block_combo.currentData()
         container = self._item_container(profile, block_index)
-        stats = container.setdefault("stats", [])
-        row = len(stats)
-        attributes = editor.stat_entry_attributes(choice, grid=(row, 0))
+        row, col = layout_model.first_free_cell(container)
+        attributes = editor.stat_entry_attributes(choice, grid=(row, col))
         item = {
             "row": row,
-            "col": 0,
+            "col": col,
             "stat": choice.name,
             "click": "",
             "popup": "",
         }
         for key, value in attributes.items():
             item[key if key != "name" else "stat"] = value
-        stats.append(item)
-        container["rows"] = max(int(container.get("rows", 1) or 1), row + 1)
-        container["cols"] = max(int(container.get("cols", 1) or 1), 1)
+        layout_model.add(container, "stat", item, row, col)
         self.on_profile_selected(self.profile_combo.currentIndex())
 
     def _import_panel_rules(self) -> None:
@@ -4095,15 +3919,18 @@ class ModernHudPreferences(QDialog):
             except (TypeError, ValueError):
                 block_index = None
             container = self._item_container(profile, block_index)
-            stats = container.setdefault("stats", [])
-            row = int(entry.get("row", len(stats)) or len(stats))
-            col = int(entry.get("col", 0) or 0)
+            # The file's cell when it is free, else the first free one: a taken
+            # cell would hold two stats, and the HUD keeps only one of them.
+            try:
+                row, col = int(entry["row"]), int(entry["col"])
+            except (KeyError, TypeError, ValueError):
+                row, col = -1, -1
+            if not layout_model.can_place(container, row, col):
+                row, col = layout_model.first_free_cell(container)
             item = {"row": row, "col": col, "stat": choice.name, "click": "", "popup": ""}
             item.update(editor.stat_entry_attributes(choice, grid=(row, col)))
             item.update({key: value for key, value in entry.items() if key.startswith("data_")})
-            stats.append(item)
-            container["rows"] = max(int(container.get("rows", 1) or 1), row + 1)
-            container["cols"] = max(int(container.get("cols", 1) or 1), col + 1)
+            layout_model.add(container, "stat", item, row, col)
         self.on_profile_selected(self.profile_combo.currentIndex())
 
     def _dynamic_panels_answers(self) -> Any:
@@ -4170,24 +3997,8 @@ class ModernHudPreferences(QDialog):
                         stat_set_node.setAttribute("name", profile_name)
                         stat_sets_node.appendChild(stat_set_node)
 
-                    # Handle both old and new format
-                    if isinstance(profile_data, list):
-                        # Old format - list of stats
-                        rows = 5
-                        cols = 5
-                    else:
-                        # New format - dict with rows/cols/stats
-                        rows = profile_data.get("rows", 5)
-                        cols = profile_data.get("cols", 5)
-                        # Persist the positional-panel mode for multi-block HUDs.
-                        if profile_data.get("multiblock"):
-                            stat_set_node.setAttribute(
-                                "positional_mode", profile_data.get("positional_mode", "current") or "current"
-                            )
-                        # Persist hero-HUD visibility when explicitly set.
-                        if profile_data.get("show_hero_hud"):
-                            stat_set_node.setAttribute("show_hero_hud", profile_data["show_hero_hud"])
-
+                    profile_io.write_stat_set_attributes(stat_set_node, profile_data)
+                    rows, cols = profile_io.stat_set_size(profile_data)
                     self._write_profile_stats(stat_set_node, profile_data, rows, cols)
 
                 # Add final newline after all stat sets

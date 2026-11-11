@@ -108,13 +108,8 @@ def test_saving_without_editing_keeps_every_example_stat_set(tmp_path, monkeypat
     assert stat_set_snapshot(reload_stat_set(path, name)) == before
 
 
-B10_STACKED_SIZE = pytest.mark.xfail(
-    strict=True, reason="B10: the <ss> rows/cols of a multi-panel set are rewritten from the stacked total"
-)
 PACKAGE_SETS = [
-    pytest.param(node, id=source, marks=[B10_STACKED_SIZE] if node.getElementsByTagName("block") else [])
-    for source, node in shipped_stat_sets()
-    if not source.startswith("example:")
+    pytest.param(node, id=source) for source, node in shipped_stat_sets() if not source.startswith("example:")
 ]
 
 
@@ -130,7 +125,7 @@ def test_saving_without_editing_keeps_every_package_stat_set(tmp_path, monkeypat
     assert stat_set_snapshot(reload_stat_set(path, name)) == before
 
 
-# --- Known defects -----------------------------------------------------------
+# --- Defects: fixed ones guard their fix, open ones are strict xfail ---------
 @pytest.mark.xfail(strict=True, reason="B1: Edit Stat writes default thresholds and colours")
 def test_b1_editing_a_stat_without_changes_leaves_it_alone(tmp_path, monkeypatch) -> None:
     dialog, modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
@@ -143,7 +138,6 @@ def test_b1_editing_a_stat_without_changes_leaves_it_alone(tmp_path, monkeypatch
     assert ref == original
 
 
-@pytest.mark.xfail(strict=True, reason="B2: Add Stat accepts a cell that is already taken")
 def test_b2_adding_a_stat_to_a_taken_cell_is_refused(tmp_path, monkeypatch) -> None:
     dialog, modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
     profile = select_profile(dialog, "hole")
@@ -155,9 +149,39 @@ def test_b2_adding_a_stat_to_a_taken_cell_is_refused(tmp_path, monkeypatch) -> N
         return ACCEPT
 
     modals.dialogs.append(onto_vpip)
+    before = list(profile["stats"])
     dialog.add_stat()
-    cells = _cells(profile)
-    assert len(cells) == len(set(cells))
+    assert profile["stats"] == before
+    assert [kind for kind, _text in modals.messages] == ["warning"]
+    assert "row 1, column 1" in modals.messages[0][1]
+
+
+def test_b2_editing_a_stat_onto_a_taken_cell_is_refused(tmp_path, monkeypatch) -> None:
+    dialog, modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
+    profile = select_profile(dialog, "hole")
+    ref = next(s for s in profile["stats"] if s["stat"] == "wtsd")
+    _select_table_row(dialog, ref)
+
+    def onto_pfr(d) -> int:
+        d.row_input.setCurrentText("0")
+        d.col_input.setCurrentText("1")
+        return ACCEPT
+
+    modals.dialogs.append(onto_pfr)
+    dialog.edit_stat()
+    assert (ref["row"], ref["col"]) == (1, 0)
+    assert [kind for kind, _text in modals.messages] == ["warning"]
+
+
+def test_b2_editing_a_stat_in_place_is_not_a_collision(tmp_path, monkeypatch) -> None:
+    dialog, modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
+    profile = select_profile(dialog, "hole")
+    ref = next(s for s in profile["stats"] if s["stat"] == "wtsd")
+    _select_table_row(dialog, ref)
+    modals.dialogs.append(lambda _d: ACCEPT)
+    dialog.edit_stat()
+    assert (ref["row"], ref["col"]) == (1, 0)
+    assert not modals.messages
 
 
 @pytest.mark.xfail(strict=True, reason="B3: thresholds are integers capped at 100 and rewritten on any edit")
@@ -171,26 +195,58 @@ def test_b3_an_unrelated_edit_keeps_decimal_and_large_thresholds(tmp_path, monke
     assert (ref["stat_loth"], ref["stat_hith"]) == ("12.5", "140")
 
 
-@pytest.mark.xfail(strict=True, reason="B4: renaming a panel forces an rgba() background")
 def test_b4_renaming_a_panel_keeps_its_empty_background(tmp_path, monkeypatch) -> None:
     dialog, _modals, _path = _editor(tmp_path, monkeypatch, TWO_BLOCKS)
     profile = select_profile(dialog, "two_blocks")
     dialog.group_list.setCurrentRow(1)
     dialog.gp_name.setText("Postflop")
     dialog._group_prop_changed()
+    dialog.gp_position.setCurrentText("BB")
     assert profile["blocks"][1]["label"] == "Postflop"
+    assert profile["blocks"][1]["position"] == "BB"
     assert profile["blocks"][1]["bgcolor"] == ""
 
 
-@pytest.mark.xfail(strict=True, reason="B6: Add Label on a flat profile is neither shown nor saved")
+def test_b4_the_opacity_slider_still_sets_the_background_alpha(tmp_path, monkeypatch) -> None:
+    dialog, _modals, _path = _editor(tmp_path, monkeypatch, TWO_BLOCKS)
+    profile = select_profile(dialog, "two_blocks")
+    dialog.group_list.setCurrentRow(1)
+    dialog.gp_opacity.setValue(100)
+    assert profile["blocks"][1]["bgcolor"] == "rgba(0, 0, 0, 100)"
+
+
 def test_b6_a_label_added_to_a_flat_profile_is_saved(tmp_path, monkeypatch) -> None:
     dialog, modals, path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
     select_profile(dialog, "hole")
     modals.texts.append(("HEADER", True))
     dialog.add_text_label()
     _save(dialog, modals)
-    labels = [t["label"] for block in reload_stat_set(path, "hole").blocks for t in block.texts]
-    assert labels == ["HEADER"]
+    saved = reload_stat_set(path, "hole")
+    assert [t["label"] for block in saved.blocks for t in block.texts] == ["HEADER"]
+    # The stats came along into the block, at their cells, and the label took
+    # the free one.
+    assert sorted(saved.stats) == [(0, 0), (0, 1), (1, 0)]
+    assert [t["rowcol"] for t in saved.blocks[0].texts] == [(1, 1)]
+
+
+def test_a_label_on_a_flat_profile_does_not_untick_show_hero(tmp_path, monkeypatch) -> None:
+    """One block shows the hero at the table, so the checkbox must say so."""
+    dialog, modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
+    select_profile(dialog, "hole")
+    assert dialog.show_hero_checkbox.isChecked()
+    modals.texts.append(("HEADER", True))
+    dialog.add_text_label()
+    assert dialog.show_hero_checkbox.isChecked()
+
+
+def test_b6_a_line_added_to_a_flat_profile_takes_a_free_row(tmp_path, monkeypatch) -> None:
+    dialog, modals, path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
+    select_profile(dialog, "hole")
+    dialog.add_hline()
+    _save(dialog, modals)
+    saved = reload_stat_set(path, "hole")
+    assert [h["rowcol"] for block in saved.blocks for h in block.hlines] == [(2, 0)]
+    assert saved.blocks[0].rows == 3
 
 
 @pytest.mark.xfail(strict=True, reason="B7: Cancel discards edits without asking")
@@ -214,7 +270,6 @@ def test_b8_a_new_profile_rule_is_an_unsaved_change(tmp_path, monkeypatch) -> No
     assert dialog.has_unsaved_changes()
 
 
-@pytest.mark.xfail(strict=True, reason="B9: a duplicated profile loses rich_text, font_size and padding")
 def test_b9_a_duplicated_profile_keeps_its_presentation(tmp_path, monkeypatch) -> None:
     dialog, modals, path = _editor(tmp_path, monkeypatch)
     select_profile(dialog, "aof_default")
@@ -226,7 +281,6 @@ def test_b9_a_duplicated_profile_keeps_its_presentation(tmp_path, monkeypatch) -
         assert getattr(copy, name) == getattr(original, name), name
 
 
-@pytest.mark.xfail(strict=True, reason="B10: the status bar counts a stale stacked stat list")
 def test_b10_the_status_bar_counts_a_stat_added_to_a_panel(tmp_path, monkeypatch) -> None:
     dialog, modals, _path = _editor(tmp_path, monkeypatch, TWO_BLOCKS)
     select_profile(dialog, "two_blocks")
@@ -243,7 +297,6 @@ def test_b10_the_status_bar_counts_a_stat_added_to_a_panel(tmp_path, monkeypatch
     assert "Statistics: 3" in dialog.status_label.text()
 
 
-@pytest.mark.xfail(strict=True, reason="B14: an analytics stat is put on a new row instead of a free cell")
 def test_b14_an_analytics_stat_fills_the_first_free_cell(tmp_path, monkeypatch) -> None:
     dialog, _modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
     profile = select_profile(dialog, "hole")
