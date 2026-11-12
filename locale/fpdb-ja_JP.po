@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:30+0100\n"
+"POT-Creation-Date: 2026-11-12 22:56+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -5079,23 +5079,8 @@ msgstr "ブロックを追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Add Label"
-msgstr "ラベルを追加"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Line"
-msgstr "線を追加"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Add Profile Definition"
 msgstr "プロフィール定義を追加"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Stat"
-msgstr "統計を追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5111,6 +5096,11 @@ msgstr "パネルに水平区切り線 (PT4 'Horz Line') を追加"
 #, fuzzy
 msgid "Add a new panel (block) to a multi-panel HUD"
 msgstr "マルチパネル HUD に新しいパネル (ブロック) を追加"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add a stat, a text label, a separator line or a panel"
+msgstr "パネルにテキストラベル (列/行の見出しやキャプション) を追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5543,6 +5533,10 @@ msgid "Hi th:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "How this profile's cells are drawn"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "I understand, turn them on"
 msgstr ""
 
@@ -5789,6 +5783,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Panel…"
+msgstr "パネル"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr ""
 "適用されるデフォルトを確認するには、ゲーム (とフォーマット) を選んでくださ"
@@ -5947,6 +5946,15 @@ msgstr "先に更新するルールを選択してください。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Selection"
+msgstr "アクション"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Separator line"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show all (stacked)"
 msgstr "表示色"
 
@@ -5986,6 +5994,12 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "Statistics"
+msgid "Statistic…"
+msgstr "統計情報"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stats whose value comes from the analytics layer rather than a column."
 msgstr "値が列ではなく分析レイヤーから得られる統計。"
 
@@ -6007,6 +6021,11 @@ msgstr ""
 #| msgid "Text"
 msgid "Text col:"
 msgstr "ログテキスト"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Text label…"
+msgstr "ラベルを追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -9081,6 +9100,18 @@ msgstr ""
 
 #~ msgid "Add %s import directory %s"
 #~ msgstr "%s インポート対象ディレクトリに %s を追加"
+
+#, fuzzy
+#~ msgid "Add Label"
+#~ msgstr "ラベルを追加"
+
+#, fuzzy
+#~ msgid "Add Line"
+#~ msgstr "線を追加"
+
+#, fuzzy
+#~ msgid "Add Stat"
+#~ msgstr "統計を追加"
 
 #~ msgid "Aggression factor pct"
 #~ msgstr "アグレッシブ係数 pct"

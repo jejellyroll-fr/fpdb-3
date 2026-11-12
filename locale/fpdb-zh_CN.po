@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:30+0100\n"
+"POT-Creation-Date: 2026-11-12 22:56+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -5129,23 +5129,8 @@ msgstr "添加区块"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Add Label"
-msgstr "添加标签"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Line"
-msgstr "添加线条"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Add Profile Definition"
 msgstr "添加档案定义"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Stat"
-msgstr "添加统计"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5161,6 +5146,11 @@ msgstr "向面板添加水平分隔线 (PT4 'Horz Line')"
 #, fuzzy
 msgid "Add a new panel (block) to a multi-panel HUD"
 msgstr "向多面板 HUD 添加新面板（区块）"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add a stat, a text label, a separator line or a panel"
+msgstr "向面板添加文本标签（列/行标题或说明）"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5587,6 +5577,10 @@ msgid "Hi th:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "How this profile's cells are drawn"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "I understand, turn them on"
 msgstr ""
 
@@ -5829,6 +5823,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Panel…"
+msgstr "面板"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr "选择一个游戏（和格式）以查看将适用的默认档案。"
 
@@ -5985,6 +5984,15 @@ msgstr "请先选择要更新的规则。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Selection"
+msgstr "行动"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Separator line"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show all (stacked)"
 msgstr "显示为"
 
@@ -6024,6 +6032,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Statistic…"
+msgstr "统计"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stats whose value comes from the analytics layer rather than a column."
 msgstr "数值来自分析层而非数据列的统计。"
 
@@ -6045,6 +6058,11 @@ msgstr ""
 #, fuzzy
 msgid "Text col:"
 msgstr "文本"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Text label…"
+msgstr "添加标签"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -8841,6 +8859,18 @@ msgstr ""
 #, fuzzy
 #~ msgid "Add %s import directory %s"
 #~ msgstr "创建目录：‘%s’"
+
+#, fuzzy
+#~ msgid "Add Label"
+#~ msgstr "添加标签"
+
+#, fuzzy
+#~ msgid "Add Line"
+#~ msgstr "添加线条"
+
+#, fuzzy
+#~ msgid "Add Stat"
+#~ msgstr "添加统计"
 
 #, fuzzy
 #~ msgid ""

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:30+0100\n"
+"POT-Creation-Date: 2026-11-12 22:56+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -5125,23 +5125,8 @@ msgstr "Adaugă bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Add Label"
-msgstr "Adaugă etichetă"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Line"
-msgstr "Adaugă linie"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Add Profile Definition"
 msgstr "Adaugă definiție de profil"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Stat"
-msgstr "Adaugă statistică"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5157,6 +5142,11 @@ msgstr "Adaugă o linie orizontală de separare (PT4 'Horz Line') pe un panou"
 #, fuzzy
 msgid "Add a new panel (block) to a multi-panel HUD"
 msgstr "Adaugă un panou nou (bloc) la un HUD cu mai multe panouri"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add a stat, a text label, a separator line or a panel"
+msgstr "Adaugă o etichetă text (antet de coloană/rând sau legendă) pe un panou"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5589,6 +5579,10 @@ msgid "Hi th:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "How this profile's cells are drawn"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "I understand, turn them on"
 msgstr ""
 
@@ -5835,6 +5829,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Panel…"
+msgstr "Panou"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr ""
 "Alegeți un joc (și un format) pentru a vedea implicitul care s-ar aplica."
@@ -5991,6 +5990,15 @@ msgstr "Selectați mai întâi o regulă de actualizat."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Selection"
+msgstr "Acțiune"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Separator line"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show all (stacked)"
 msgstr "arata"
 
@@ -6030,6 +6038,12 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "Statistics"
+msgid "Statistic…"
+msgstr "Statistici"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stats whose value comes from the analytics layer rather than a column."
 msgstr ""
 "Statistici a căror valoare vine din stratul de analiză, nu dintr-o coloană."
@@ -6052,6 +6066,11 @@ msgstr ""
 #| msgid "Text"
 msgid "Text col:"
 msgstr "Text"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Text label…"
+msgstr "Adaugă etichetă"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -9290,6 +9309,18 @@ msgstr ""
 #, fuzzy
 #~ msgid "Add %s import directory %s"
 #~ msgstr "Creare director '%s'"
+
+#, fuzzy
+#~ msgid "Add Label"
+#~ msgstr "Adaugă etichetă"
+
+#, fuzzy
+#~ msgid "Add Line"
+#~ msgstr "Adaugă linie"
+
+#, fuzzy
+#~ msgid "Add Stat"
+#~ msgstr "Adaugă statistică"
 
 #, fuzzy
 #~ msgid "Add player: rank: %s name: %s winnings: %s"

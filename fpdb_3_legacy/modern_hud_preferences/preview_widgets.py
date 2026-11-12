@@ -108,6 +108,9 @@ class HudPreviewWidget(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setMinimumSize(360, 320)
+        #: The smallest size the widget keeps around the HUD it draws; a
+        #: preview strip lowers it to stay short (#780).
+        self.content_floor = (280, 240)
         self.grid_rows = 5
         self.grid_cols = 5
         self.xpad = 0
@@ -444,7 +447,8 @@ class HudPreviewWidget(QWidget):
         content_w = max(size.width(), self.hud_window.width(), 1)
         content_h = max(size.height(), self.hud_window.height(), 1)
         margin = 16
-        self.setMinimumSize(max(280, content_w + margin), max(240, content_h + margin))
+        floor_w, floor_h = self.content_floor
+        self.setMinimumSize(max(floor_w, content_w + margin), max(floor_h, content_h + margin))
         avail_w = max(self.width(), content_w + margin)
         avail_h = max(self.height(), content_h + margin)
         self.hud_window.setGeometry(

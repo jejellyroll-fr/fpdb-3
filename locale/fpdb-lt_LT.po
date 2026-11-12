@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:30+0100\n"
+"POT-Creation-Date: 2026-11-12 22:56+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -5164,23 +5164,8 @@ msgstr "Pridėti bloką"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Add Label"
-msgstr "Pridėti etiketę"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Line"
-msgstr "Pridėti liniją"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Add Profile Definition"
 msgstr "Pridėti profilio apibrėžimą"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Stat"
-msgstr "Pridėti statistiką"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5196,6 +5181,12 @@ msgstr "Pridėti horizontalią skiriamąją liniją (PT4 'Horz Line') į skydel�
 #, fuzzy
 msgid "Add a new panel (block) to a multi-panel HUD"
 msgstr "Pridėti naują skydelį (bloką) į kelių skydelių HUD"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add a stat, a text label, a separator line or a panel"
+msgstr ""
+"Pridėti teksto etiketę (stulpelio/eilutės antraštę ar užrašą) į skydelį"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5629,6 +5620,10 @@ msgid "Hi th:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "How this profile's cells are drawn"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "I understand, turn them on"
 msgstr ""
 
@@ -5876,6 +5871,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Panel…"
+msgstr "Skydelis"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr ""
 "Pasirinkite žaidimą (ir formatą), kad pamatytumėte taikytiną numatytąjį "
@@ -6034,6 +6034,15 @@ msgstr "Pirmiausia pasirinkite taisyklę, kurią norite atnaujinti."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Selection"
+msgstr "Veiksmas"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Separator line"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show all (stacked)"
 msgstr "rodyti kaip"
 
@@ -6074,6 +6083,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Statistic…"
+msgstr "Statistika"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stats whose value comes from the analytics layer rather than a column."
 msgstr ""
 "Statistika, kurios reikšmė gaunama iš analizės sluoksnio, o ne iš stulpelio."
@@ -6096,6 +6110,11 @@ msgstr ""
 #, fuzzy
 msgid "Text col:"
 msgstr "Tekstas"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Text label…"
+msgstr "Pridėti etiketę"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -8986,6 +9005,18 @@ msgstr ""
 
 #~ msgid "ALL STREETS"
 #~ msgstr "VISOS GATVĖS"
+
+#, fuzzy
+#~ msgid "Add Label"
+#~ msgstr "Pridėti etiketę"
+
+#, fuzzy
+#~ msgid "Add Line"
+#~ msgstr "Pridėti liniją"
+
+#, fuzzy
+#~ msgid "Add Stat"
+#~ msgstr "Pridėti statistiką"
 
 #~ msgid "Analyze took %.1f seconds"
 #~ msgstr "Analizė užtruko %.1f sekundžių"

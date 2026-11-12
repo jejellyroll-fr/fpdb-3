@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:30+0100\n"
+"POT-Creation-Date: 2026-11-12 22:56+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -5184,23 +5184,8 @@ msgstr "Afegeix un bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Add Label"
-msgstr "Afegeix una etiqueta"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Line"
-msgstr "Afegeix una línia"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Add Profile Definition"
 msgstr "Afegeix una definició de perfil"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Stat"
-msgstr "Afegeix una estadística"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5216,6 +5201,13 @@ msgstr "Afegeix una línia separadora horitzontal (PT4 'Horz Line') a un tauler"
 #, fuzzy
 msgid "Add a new panel (block) to a multi-panel HUD"
 msgstr "Afegeix un tauler (bloc) nou a un HUD de diversos taulers"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add a stat, a text label, a separator line or a panel"
+msgstr ""
+"Afegeix una etiqueta de text (capçalera de columna/fila o llegenda) a un "
+"tauler"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5653,6 +5645,10 @@ msgid "Hi th:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "How this profile's cells are drawn"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "I understand, turn them on"
 msgstr ""
 
@@ -5903,6 +5899,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Panel…"
+msgstr "Tauler"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr "Trieu un joc (i un format) per veure el predeterminat que s'aplicaria."
 
@@ -6059,6 +6060,15 @@ msgstr "Seleccioneu primer una regla per actualitzar."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Selection"
+msgstr "Acció"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Separator line"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show all (stacked)"
 msgstr "mostra com a"
 
@@ -6099,6 +6109,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Statistic…"
+msgstr "Estadístiques"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stats whose value comes from the analytics layer rather than a column."
 msgstr ""
 "Estadístiques el valor de les quals ve de la capa d'anàlisi i no d'una "
@@ -6122,6 +6137,11 @@ msgstr ""
 #, fuzzy
 msgid "Text col:"
 msgstr "Text"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Text label…"
+msgstr "Afegeix una etiqueta"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -8931,6 +8951,18 @@ msgstr ""
 
 #~ msgid "*** WARNING UNKNOWN MYSQL ERROR:"
 #~ msgstr "*** ALERTA MYSQL ERROR DESCONEGUT:"
+
+#, fuzzy
+#~ msgid "Add Label"
+#~ msgstr "Afegeix una etiqueta"
+
+#, fuzzy
+#~ msgid "Add Line"
+#~ msgstr "Afegeix una línia"
+
+#, fuzzy
+#~ msgid "Add Stat"
+#~ msgstr "Afegeix una estadística"
 
 #, fuzzy
 #~ msgid ""

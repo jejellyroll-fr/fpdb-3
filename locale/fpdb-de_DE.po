@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:30+0100\n"
+"POT-Creation-Date: 2026-11-12 22:56+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -5103,23 +5103,8 @@ msgstr "Block hinzufügen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Add Label"
-msgstr "Beschriftung hinzufügen"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Line"
-msgstr "Linie hinzufügen"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Add Profile Definition"
 msgstr "Profildefinition hinzufügen"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Stat"
-msgstr "Stat hinzufügen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5135,6 +5120,13 @@ msgstr "Einem Panel eine horizontale Trennlinie (PT4 „Horz Line“) hinzufüge
 #, fuzzy
 msgid "Add a new panel (block) to a multi-panel HUD"
 msgstr "Einem Multi-Panel-HUD ein neues Panel (Block) hinzufügen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add a stat, a text label, a separator line or a panel"
+msgstr ""
+"Einem Panel eine Textbeschriftung (Spalten-/Zeilenkopf oder Legende) "
+"hinzufügen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5575,6 +5567,10 @@ msgid "Hi th:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "How this profile's cells are drawn"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "I understand, turn them on"
 msgstr ""
 
@@ -5824,6 +5820,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Panel…"
+msgstr "Panel"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr "Wählen Sie ein Spiel (und Format), um den geltenden Standard zu sehen."
 
@@ -5980,6 +5981,15 @@ msgstr "Wählen Sie zuerst eine Regel zum Aktualisieren."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Selection"
+msgstr "Aktion"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Separator line"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show all (stacked)"
 msgstr "anzeigen als"
 
@@ -6019,6 +6029,12 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "Statistics"
+msgid "Statistic…"
+msgstr "Statistiken"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stats whose value comes from the analytics layer rather than a column."
 msgstr ""
 "Statistiken, deren Wert aus der Analyseschicht statt aus einer Spalte kommt."
@@ -6041,6 +6057,11 @@ msgstr ""
 #| msgid "Text"
 msgid "Text col:"
 msgstr "Inhalt"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Text label…"
+msgstr "Beschriftung hinzufügen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -9272,6 +9293,18 @@ msgstr ""
 
 #~ msgid "Add %s import directory %s"
 #~ msgstr "Füge für %s Import-Verzeichnis %s hinzu"
+
+#, fuzzy
+#~ msgid "Add Label"
+#~ msgstr "Beschriftung hinzufügen"
+
+#, fuzzy
+#~ msgid "Add Line"
+#~ msgstr "Linie hinzufügen"
+
+#, fuzzy
+#~ msgid "Add Stat"
+#~ msgstr "Stat hinzufügen"
 
 #~ msgid "After import took %s seconds"
 #~ msgstr "Bearbeitung nach Import dauerte %s Sekunden:"
