@@ -204,11 +204,22 @@ def _receiver(func: ast.expr) -> str:
     return ast.unparse(func.value) if isinstance(func, ast.Attribute) else ""
 
 
+def _method_arguments(name: str, args: list[ast.expr]) -> list[ast.expr]:
+    """The arguments of a call to method ``name`` whose text is shown."""
+    if name in TEXT_METHODS:
+        return list(args)
+    if name in FIRST_ARGUMENT_METHODS:
+        return args[:1]
+    if name in LIST_METHODS and args and isinstance(args[0], (ast.List, ast.Tuple)):
+        return list(args[0].elts)
+    return []
+
+
 def _shown_arguments(call: ast.Call) -> tuple[str, list[ast.expr]]:
     """The callee's name and the arguments of ``call`` whose text is shown."""
     func = call.func
-    if isinstance(func, ast.Name) and func.id in TEXT_CONSTRUCTORS:
-        return func.id, list(call.args)
+    if isinstance(func, ast.Name):
+        return (func.id, list(call.args)) if func.id in TEXT_CONSTRUCTORS else ("", [])
     if not isinstance(func, ast.Attribute):
         return "", []
     name = func.attr
@@ -216,13 +227,8 @@ def _shown_arguments(call: ast.Call) -> tuple[str, list[ast.expr]]:
     if (owner, name) in DIALOG_ARGUMENTS:
         indexes = DIALOG_ARGUMENTS[(owner, name)]
         return f"{owner}.{name}", [arg for index, arg in enumerate(call.args) if index in indexes]
-    if name in TEXT_METHODS:
-        return name, list(call.args)
-    if name in FIRST_ARGUMENT_METHODS:
-        return name, call.args[:1]
-    if name in LIST_METHODS and call.args and isinstance(call.args[0], (ast.List, ast.Tuple)):
-        return name, list(call.args[0].elts)
-    return "", []
+    arguments = _method_arguments(name, call.args)
+    return (name if arguments else ""), arguments
 
 
 def _qualified_names(tree: ast.AST) -> dict[ast.AST, str]:
