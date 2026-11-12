@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:54+0100\n"
+"POT-Creation-Date: 2026-11-11 23:37+0100\n"
 "PO-Revision-Date: 2011-06-16 13:21+0000\n"
 "Last-Translator: Lexej <alexej@glyvin.com>\n"
 "Language-Team: Russian (Russia) (http://www.transifex.net/projects/p/fpdb/"
@@ -4745,11 +4745,6 @@ msgstr "Необязательно: действие при щелчке по с
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Optional: Popup to show on hover"
-msgstr "Необязательно: окно, показываемое при наведении"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Optional: Submenu name for hierarchical popups"
 msgstr "Необязательно: имя подменю для иерархических окон"
 
@@ -4757,6 +4752,10 @@ msgstr "Необязательно: имя подменю для иерархи�
 #, fuzzy
 msgid "Override the automatic section used by ModernSubmenu"
 msgstr "Заменить раздел, который ModernSubmenu выбирает автоматически"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Pick a statistic from the list."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4795,9 +4794,27 @@ msgstr ""
 "Показывать эту панель только для соперника на этой позиции (пусто = всегда)"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Statistic:"
 msgstr "Стат:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "The popup a click on the stat opens"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "There is no statistic called \"{name}\". Pick one from the list."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Unknown Site"
+msgid "Unknown statistic"
+msgstr "Неизвестный сайт"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4995,6 +5012,12 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "Ring Player Stats"
+msgid "Available Stats"
+msgstr "Статы по кэш игрокам"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr "Ниже этого числа раздач панель скрыта и показывается запасная."
 
@@ -5081,6 +5104,11 @@ msgstr "Дизайн"
 #, fuzzy
 msgid "Disabled: this rule never matches."
 msgstr "Отключено: это правило никогда не срабатывает."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Double-click a stat to add it to the panel shown in Design."
+msgstr "Дважды щёлкните ячейку, чтобы загрузить стоящие за ней раздачи."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5232,11 +5260,6 @@ msgstr "Проблемы"
 #, fuzzy
 msgid "Item Properties"
 msgstr "Свойства элемента"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Items"
-msgstr "Элементы"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5851,6 +5874,20 @@ msgstr "Поиск румов..."
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 #, python-brace-format
 msgid "Showing {shown} of {total} stats"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, fuzzy
+msgid "Type to search the stats"
+msgstr "Поиск румов..."
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+msgid "(no popup)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+#, python-brace-format
+msgid "{popup} (missing)"
 msgstr ""
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
@@ -8719,6 +8756,10 @@ msgstr ""
 #~ msgstr "Импорт eMail/IMAP"
 
 #, fuzzy
+#~ msgid "Items"
+#~ msgstr "Элементы"
+
+#, fuzzy
 #~ msgid "Less than 2 players - Assuming hand '%s' was cancelled."
 #~ msgstr "readPlayerStacks: менее 2 игроков найдено в раздаче"
 
@@ -8854,6 +8895,10 @@ msgstr ""
 
 #~ msgid "Operating System"
 #~ msgstr "Операционная система"
+
+#, fuzzy
+#~ msgid "Optional: Popup to show on hover"
+#~ msgstr "Необязательно: окно, показываемое при наведении"
 
 #~ msgid "Outdated or too new database version (%s)."
 #~ msgstr "Устаревшая или слишком новая версия базы данных (%s)."

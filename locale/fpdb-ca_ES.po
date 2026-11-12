@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:54+0100\n"
+"POT-Creation-Date: 2026-11-11 23:37+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -4795,11 +4795,6 @@ msgstr "Opcional: acció en fer clic a l'estadística"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Optional: Popup to show on hover"
-msgstr "Opcional: finestra emergent en passar el ratolí"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Optional: Submenu name for hierarchical popups"
 msgstr "Opcional: nom del submenú per a finestres emergents jeràrquiques"
 
@@ -4807,6 +4802,10 @@ msgstr "Opcional: nom del submenú per a finestres emergents jeràrquiques"
 #, fuzzy
 msgid "Override the automatic section used by ModernSubmenu"
 msgstr "Substitueix la secció automàtica que fa servir ModernSubmenu"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Pick a statistic from the list."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4848,9 +4847,26 @@ msgstr ""
 "Mostra aquest tauler només per a un rival en aquesta posició (buit = sempre)"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Statistic:"
 msgstr "Estadística:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "The popup a click on the stat opens"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "There is no statistic called \"{name}\". Pick one from the list."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Unknown statistic"
+msgstr "Sala desconeguda"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -5051,6 +5067,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Available Stats"
+msgstr "Estadístiques de jugadors de cash"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr ""
 "Per sota d'aquest nombre de mans el tauler es reté i es mostra el substitut."
@@ -5138,6 +5159,11 @@ msgstr "Disseny"
 #, fuzzy
 msgid "Disabled: this rule never matches."
 msgstr "Desactivada: aquesta regla no coincideix mai."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Double-click a stat to add it to the panel shown in Design."
+msgstr "Feu doble clic en una cel·la per carregar les mans que la formen."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5291,11 +5317,6 @@ msgstr "Problemes"
 #, fuzzy
 msgid "Item Properties"
 msgstr "Propietats de l'element"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Items"
-msgstr "Elements"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5915,6 +5936,20 @@ msgstr "Cerca sales..."
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 #, python-brace-format
 msgid "Showing {shown} of {total} stats"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, fuzzy
+msgid "Type to search the stats"
+msgstr "Cerca sales..."
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+msgid "(no popup)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+#, python-brace-format
+msgid "{popup} (missing)"
 msgstr ""
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
@@ -8327,6 +8362,10 @@ msgstr ""
 #~ msgstr "INFO: No s'han trobat partides a la base de dades"
 
 #, fuzzy
+#~ msgid "Items"
+#~ msgstr "Elements"
+
+#, fuzzy
 #~ msgid "Measure of uncertainty"
 #~ msgstr "Mesura d'incertesa"
 
@@ -8342,6 +8381,10 @@ msgstr ""
 
 #~ msgid "ON"
 #~ msgstr "ENCÈS"
+
+#, fuzzy
+#~ msgid "Optional: Popup to show on hover"
+#~ msgstr "Opcional: finestra emergent en passar el ratolí"
 
 #, fuzzy
 #~ msgid ""

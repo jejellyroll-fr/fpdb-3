@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:54+0100\n"
+"POT-Creation-Date: 2026-11-11 23:37+0100\n"
 "PO-Revision-Date: 2011-10-08 08:58+0000\n"
 "Last-Translator: greg20 <greg20@hushmail.com>\n"
 "Language-Team: Polish (Poland) (http://www.transifex.net/projects/p/fpdb/"
@@ -4704,11 +4704,6 @@ msgstr "Opcjonalnie: akcja po kliknięciu statystyki"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Optional: Popup to show on hover"
-msgstr "Opcjonalnie: okno pokazywane po najechaniu"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Optional: Submenu name for hierarchical popups"
 msgstr "Opcjonalnie: nazwa podmenu dla hierarchicznych okien"
 
@@ -4716,6 +4711,10 @@ msgstr "Opcjonalnie: nazwa podmenu dla hierarchicznych okien"
 #, fuzzy
 msgid "Override the automatic section used by ModernSubmenu"
 msgstr "Zastąp automatyczną sekcję używaną przez ModernSubmenu"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Pick a statistic from the list."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4752,9 +4751,27 @@ msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr "Pokaż ten panel tylko dla przeciwnika na tej pozycji (puste = zawsze)"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Statistic:"
 msgstr "Statystyka:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "The popup a click on the stat opens"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "There is no statistic called \"{name}\". Pick one from the list."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Unknown Site"
+msgid "Unknown statistic"
+msgstr "Nieznany pokeroom"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4951,6 +4968,12 @@ msgstr "Dodaje emoji profilu (np. 🐟, 🐌, 🎯) i koloruje nazwę gracza w H
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "Ring Player Stats"
+msgid "Available Stats"
+msgstr "Statystyki"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr ""
 "Poniżej tej liczby rozdań panel jest wstrzymany i pokazuje się zastępczy."
@@ -5040,6 +5063,11 @@ msgstr "Projekt"
 #, fuzzy
 msgid "Disabled: this rule never matches."
 msgstr "Wyłączona: ta reguła nigdy nie pasuje."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Double-click a stat to add it to the panel shown in Design."
+msgstr "Kliknij dwukrotnie komórkę, aby wczytać rozdania, z których powstała."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5190,11 +5218,6 @@ msgstr "Problemy"
 #, fuzzy
 msgid "Item Properties"
 msgstr "Właściwości elementu"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Items"
-msgstr "Elementy"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5811,6 +5834,20 @@ msgstr "Szukaj sal..."
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 #, python-brace-format
 msgid "Showing {shown} of {total} stats"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, fuzzy
+msgid "Type to search the stats"
+msgstr "Szukaj sal..."
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+msgid "(no popup)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+#, python-brace-format
+msgid "{popup} (missing)"
 msgstr ""
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
@@ -9141,6 +9178,10 @@ msgstr ""
 #~ "end."
 #~ msgstr "Aktualnie nie jest możliwe wybranie pustego pola."
 
+#, fuzzy
+#~ msgid "Items"
+#~ msgstr "Elementy"
+
 #~ msgid "KO"
 #~ msgstr "KO"
 
@@ -9370,6 +9411,10 @@ msgstr ""
 
 #~ msgid "Operating System"
 #~ msgstr "System operacyjny"
+
+#, fuzzy
+#~ msgid "Optional: Popup to show on hover"
+#~ msgstr "Opcjonalnie: okno pokazywane po najechaniu"
 
 #~ msgid "Outdated or too new database version (%s)."
 #~ msgstr "Przestarzała lub zbyt nowa wersja bazy danych (%s)."

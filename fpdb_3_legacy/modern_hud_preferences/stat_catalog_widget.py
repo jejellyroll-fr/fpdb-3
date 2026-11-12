@@ -13,11 +13,14 @@ The editor (or its canvas) looks the key up in the same catalogue.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Iterable, Mapping, Sequence
+from typing import Any
 
 from PySide6.QtCore import QMimeData, Qt, Signal
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QComboBox,
+    QCompleter,
     QLabel,
     QLineEdit,
     QTreeWidget,
@@ -27,13 +30,14 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.modern_hud_preferences import stat_edit
 from fpdb_3_legacy.modern_hud_preferences.stat_catalog import (
     MIME_TYPE,
-    ORIGIN_CLASSIC,
     CatalogEntry,
     StatCatalog,
     build_catalog,
     category_label,
+    choice_label,
 )
 
 KEY_ROLE = Qt.ItemDataRole.UserRole
@@ -167,8 +171,7 @@ class StatCatalogWidget(QWidget):
 
     @staticmethod
     def _entry_item(entry: CatalogEntry) -> QTreeWidgetItem:
-        name = entry.name if entry.origin == ORIGIN_CLASSIC else f"{entry.name} ({entry.origin_label})"
-        item = QTreeWidgetItem([name, entry.description])
+        item = QTreeWidgetItem([choice_label(entry), entry.description])
         item.setData(0, KEY_ROLE, entry.key)
         item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsDragEnabled)
         tip = f"{entry.name}\n{entry.description}\n{entry.category_label} · {entry.origin_label}"
@@ -180,3 +183,74 @@ class StatCatalogWidget(QWidget):
         key = item.data(0, KEY_ROLE)
         if key:
             self.stat_activated.emit(str(key))
+
+
+class StatChoiceCombo(QComboBox):
+    """Pick a stat of the catalogue by typing part of its name (B15).
+
+    The list holds the catalogue only. A cell the catalogue cannot resolve can
+    still be shown -- an unknown name, or an analytics binding whose definition
+    is not installed -- and :meth:`chosen_entry` answers None for it until the
+    user picks an entry, so the caller keeps the cell as it is. Its text may
+    well be a known name (an analytics cell called ``vpip``): only an explicit
+    pick from the list turns it into that stat.
+    """
+
+    def __init__(self, catalog: StatCatalog, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.catalog = catalog
+        self.setEditable(True)
+        self.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
+        self.setMaxVisibleItems(20)
+        for label, key in catalog.choices():
+            entry = catalog.get(key)
+            self.addItem(label, key)
+            if entry is not None:
+                self.setItemData(self.count() - 1, f"{entry.description}\n{entry.category_label}", Qt.ItemDataRole.ToolTipRole)
+        completer = QCompleter(self.model(), self)
+        completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        completer.setFilterMode(Qt.MatchFlag.MatchContains)
+        completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
+        self.setCompleter(completer)
+        self.lineEdit().setPlaceholderText(_("Type to search the stats"))
+        # The text shown for a cell no entry resolves; None once the user picks.
+        self._unresolved: str | None = None
+        self.activated.connect(self._forget_unresolved)
+
+    def _forget_unresolved(self, _index: int = -1) -> None:
+        self._unresolved = None
+
+    def show_item(self, item: Mapping[str, Any] | None) -> None:
+        """Show the stat of a profile cell, by its catalogue label when it has one."""
+        item = item or {}
+        entry = self.catalog.entry_for_item(item)
+        text = choice_label(entry) if entry is not None else str(item.get("stat", "") or "")
+        self._unresolved = None if entry is not None else text.strip()
+        self.setCurrentText(text)
+
+    def chosen_entry(self) -> CatalogEntry | None:
+        """The catalogue entry the text names; None for a shown cell no entry resolves."""
+        text = self.currentText()
+        if self._unresolved is not None and text.strip() == self._unresolved:
+            return None
+        return self.catalog.entry_for_label(text)
+
+
+class PopupChoiceCombo(QComboBox):
+    """Pick one of the configuration's popups, or none (B15)."""
+
+    def set_options(self, names: Iterable[str], current: str) -> None:
+        """List *names*, with *current* selected, even when no popup has that name."""
+        self.blockSignals(True)
+        try:
+            self.clear()
+            for label, value in stat_edit.popup_options(names, current):
+                self.addItem(label, value)
+            self.setCurrentIndex(max(0, self.findData(current)))
+        finally:
+            self.blockSignals(False)
+
+    def value(self) -> str:
+        """The popup name to store; "" for none."""
+        data = self.currentData()
+        return "" if data is None else str(data)

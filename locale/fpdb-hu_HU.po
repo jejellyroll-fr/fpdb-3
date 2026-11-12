@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:54+0100\n"
+"POT-Creation-Date: 2026-11-11 23:37+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -4717,11 +4717,6 @@ msgstr "Opcionális: művelet a statisztikára kattintáskor"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Optional: Popup to show on hover"
-msgstr "Opcionális: rámutatáskor megjelenő ablak"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Optional: Submenu name for hierarchical popups"
 msgstr "Opcionális: almenünév hierarchikus felugró ablakokhoz"
 
@@ -4729,6 +4724,10 @@ msgstr "Opcionális: almenünév hierarchikus felugró ablakokhoz"
 #, fuzzy
 msgid "Override the automatic section used by ModernSubmenu"
 msgstr "A ModernSubmenu által automatikusan használt szakasz felülírása"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Pick a statistic from the list."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4767,9 +4766,27 @@ msgstr ""
 "Ez a panel csak az ezen a pozíción lévő ellenfélnél látszik (üres = mindig)"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Statistic:"
 msgstr "Statisztika:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "The popup a click on the stat opens"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "There is no statistic called \"{name}\". Pick one from the list."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Unknown Site"
+msgid "Unknown statistic"
+msgstr "Ismeretlen terem"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4968,6 +4985,12 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "Ring Player Stats"
+msgid "Available Stats"
+msgstr "Készpénzes statisztikák"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr "Ennyi leosztás alatt a panel visszatartva, és a tartalék jelenik meg."
 
@@ -5056,6 +5079,11 @@ msgstr "Tervezés"
 #, fuzzy
 msgid "Disabled: this rule never matches."
 msgstr "Letiltva: ez a szabály sosem illik."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Double-click a stat to add it to the panel shown in Design."
+msgstr "Kattintson duplán egy cellára a mögötte álló leosztások betöltéséhez."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5208,11 +5236,6 @@ msgstr "Problémák"
 #, fuzzy
 msgid "Item Properties"
 msgstr "Elem tulajdonságai"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Items"
-msgstr "Elemek"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5840,6 +5863,20 @@ msgstr "Termek keresése..."
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 #, python-brace-format
 msgid "Showing {shown} of {total} stats"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, fuzzy
+msgid "Type to search the stats"
+msgstr "Termek keresése..."
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+msgid "(no popup)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+#, python-brace-format
+msgid "{popup} (missing)"
 msgstr ""
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
@@ -9983,6 +10020,10 @@ msgstr ""
 #~ msgstr ""
 #~ "Jelenleg nem lehetséges olyat választani, hogy \"üres\" vagy hasonló."
 
+#, fuzzy
+#~ msgid "Items"
+#~ msgstr "Elemek"
+
 #~ msgid "KO"
 #~ msgstr "KIÜTÉSES"
 
@@ -10324,6 +10365,10 @@ msgstr ""
 
 #~ msgid "Operating System"
 #~ msgstr "Operációs rendszer"
+
+#, fuzzy
+#~ msgid "Optional: Popup to show on hover"
+#~ msgstr "Opcionális: rámutatáskor megjelenő ablak"
 
 #~ msgid "Out path in quiet mode"
 #~ msgstr "Kimeneti könyvtár csendes módban"

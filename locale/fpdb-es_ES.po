@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:54+0100\n"
+"POT-Creation-Date: 2026-11-11 23:37+0100\n"
 "PO-Revision-Date: 2011-11-13 01:00+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Spanish (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -4716,11 +4716,6 @@ msgstr "Opcional: acción al hacer clic en la estadística"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Optional: Popup to show on hover"
-msgstr "Opcional: ventana emergente al pasar el ratón"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Optional: Submenu name for hierarchical popups"
 msgstr "Opcional: nombre del submenú para ventanas emergentes jerárquicas"
 
@@ -4728,6 +4723,10 @@ msgstr "Opcional: nombre del submenú para ventanas emergentes jerárquicas"
 #, fuzzy
 msgid "Override the automatic section used by ModernSubmenu"
 msgstr "Sustituir la sección automática que usa ModernSubmenu"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Pick a statistic from the list."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4768,9 +4767,27 @@ msgstr ""
 "Mostrar este panel solo para un rival en esta posición (vacío = siempre)"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Statistic:"
 msgstr "Estadística:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "The popup a click on the stat opens"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "There is no statistic called \"{name}\". Pick one from the list."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Unknown Site"
+msgid "Unknown statistic"
+msgstr "Sitio desconocido"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4970,6 +4987,12 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "Ring Player Stats"
+msgid "Available Stats"
+msgstr "Estadísticas de los jugadores"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr ""
 "Por debajo de este número de manos, el panel se retiene y se muestra el "
@@ -5060,6 +5083,11 @@ msgstr "Diseño"
 #, fuzzy
 msgid "Disabled: this rule never matches."
 msgstr "Desactivada: esta regla nunca coincide."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Double-click a stat to add it to the panel shown in Design."
+msgstr "Haga doble clic en una celda para cargar las manos que la forman."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5212,11 +5240,6 @@ msgstr "Problemas"
 #, fuzzy
 msgid "Item Properties"
 msgstr "Propiedades del elemento"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Items"
-msgstr "Elementos"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5838,6 +5861,20 @@ msgstr "Buscar salas..."
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 #, python-brace-format
 msgid "Showing {shown} of {total} stats"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, fuzzy
+msgid "Type to search the stats"
+msgstr "Buscar salas..."
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+msgid "(no popup)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+#, python-brace-format
+msgid "{popup} (missing)"
 msgstr ""
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
@@ -9069,6 +9106,10 @@ msgstr ""
 #~ "Actualmente no es posible seleccionar \"vacío\" o cualquier otra cosa con "
 #~ "ese fin."
 
+#, fuzzy
+#~ msgid "Items"
+#~ msgstr "Elementos"
+
 #~ msgid "KO"
 #~ msgstr "KO"
 
@@ -9282,6 +9323,10 @@ msgstr ""
 
 #~ msgid "Operating System"
 #~ msgstr "Sistema Operativo"
+
+#, fuzzy
+#~ msgid "Optional: Popup to show on hover"
+#~ msgstr "Opcional: ventana emergente al pasar el ratón"
 
 #~ msgid "Out path in quiet mode"
 #~ msgstr "Ruta exterior en modo silencioso"

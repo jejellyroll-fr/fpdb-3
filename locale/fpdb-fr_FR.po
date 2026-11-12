@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:54+0100\n"
+"POT-Creation-Date: 2026-11-11 23:37+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/team/fr_FR/)\n"
@@ -4217,16 +4217,16 @@ msgid "Optional: Action when stat is clicked"
 msgstr "Facultatif : action quand la stat est cliquée"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Optional: Popup to show on hover"
-msgstr "Facultatif : popup à afficher au survol"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Optional: Submenu name for hierarchical popups"
 msgstr "Facultatif : nom de sous-menu pour les popups hiérarchiques"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Override the automatic section used by ModernSubmenu"
 msgstr "Remplacer la section automatique utilisée par ModernSubmenu"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Pick a statistic from the list."
+msgstr "Choisissez une statistique dans la liste."
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Popup:"
@@ -4261,8 +4261,25 @@ msgstr ""
 "toujours)"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Statistic:"
 msgstr "Statistique :"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "The popup a click on the stat opens"
+msgstr "Le popup qu'ouvre un clic sur la stat"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "There is no statistic called \"{name}\". Pick one from the list."
+msgstr ""
+"Aucune statistique ne s'appelle « {name} ». Choisissez-en une dans la liste."
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Unknown statistic"
+msgstr "Statistique inconnue"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid "Use middle color for values between thresholds"
@@ -4428,6 +4445,10 @@ msgstr ""
 "HUD."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Available Stats"
+msgstr "Statistiques disponibles"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr ""
 "En dessous de ce nombre de mains, le panneau est masqué et le repli "
@@ -4502,6 +4523,11 @@ msgstr "Conception"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Disabled: this rule never matches."
 msgstr "Désactivée : cette règle ne correspond jamais."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Double-click a stat to add it to the panel shown in Design."
+msgstr ""
+"Double-cliquez sur une stat pour l'ajouter au panneau affiché dans Design."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Duplicate rule"
@@ -4636,10 +4662,6 @@ msgstr "Problèmes"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Item Properties"
 msgstr "Propriétés de l'élément"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Items"
-msgstr "Éléments"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Layout Conflict"
@@ -5185,6 +5207,19 @@ msgstr "Rechercher des stats"
 #, python-brace-format
 msgid "Showing {shown} of {total} stats"
 msgstr "{shown} stats affichées sur {total}"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+msgid "Type to search the stats"
+msgstr "Tapez pour chercher une stat"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+msgid "(no popup)"
+msgstr "(aucun popup)"
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+#, python-brace-format
+msgid "{popup} (missing)"
+msgstr "{popup} (introuvable)"
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
 #, python-format
@@ -8241,6 +8276,9 @@ msgstr ""
 #~ "end."
 #~ msgstr "Il est pour l'instant impossible de choisir \"vide\" ou tout autre stat."
 
+#~ msgid "Items"
+#~ msgstr "Éléments"
+
 #~ msgid "KO"
 #~ msgstr "KO"
 
@@ -8477,6 +8515,9 @@ msgstr ""
 
 #~ msgid "Operating System"
 #~ msgstr "Système d'exploitation"
+
+#~ msgid "Optional: Popup to show on hover"
+#~ msgstr "Facultatif : popup à afficher au survol"
 
 #, fuzzy
 #~ msgid "Out path in quiet mode"

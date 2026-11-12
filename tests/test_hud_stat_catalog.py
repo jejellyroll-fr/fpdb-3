@@ -256,3 +256,78 @@ def test_the_default_sources_are_the_running_fpdb(monkeypatch) -> None:
     assert calls.choices == 1
     assert [entry.key for entry in catalog] == ["classic:vpip", "registry:chipev_hu_sb"]
     assert catalog.get("classic:vpip").description == Stats.get_valid_stats()["vpip"]
+
+
+# --- Picking from a list (B15) ---------------------------------------------------
+def test_choices_name_each_entry_once_by_label() -> None:
+    catalog = _small()
+    labels = [label for label, _key in catalog.choices()]
+    assert labels == sorted(labels, key=str.casefold)
+    assert len(set(labels)) == len(catalog)
+    assert ("fold_to_cbet_flop", "classic:fold_to_cbet_flop") in catalog.choices()
+    assert ("fold_to_cbet_flop (analytics)", "analytics:fold_to_cbet_flop") in catalog.choices()
+
+
+@pytest.mark.parametrize(
+    ("text", "key"),
+    [
+        ("vpip", "classic:vpip"),
+        ("  vpip ", "classic:vpip"),
+        ("fold_to_cbet_flop", "classic:fold_to_cbet_flop"),
+        ("fold_to_cbet_flop (analytics)", "analytics:fold_to_cbet_flop"),
+        ("chipev_hu_sb", "registry:chipev_hu_sb"),
+        ("chipev_hu_sb (stats.d)", "registry:chipev_hu_sb"),
+        ("no_such_stat", None),
+        ("", None),
+    ],
+)
+def test_entry_for_label(text, key) -> None:
+    entry = _small().entry_for_label(text)
+    assert (entry.key if entry else None) == key
+
+
+@pytest.mark.parametrize(
+    ("item", "key"),
+    [
+        ({"stat": "vpip"}, "classic:vpip"),
+        ({"stat": "chipev_hu_sb"}, "registry:chipev_hu_sb"),
+        ({"stat": "fold_to_cbet_flop"}, "classic:fold_to_cbet_flop"),
+        (
+            {"stat": "fold_to_cbet_flop", "data_source": "analytics", "data_definition": "fold_to_cbet_flop"},
+            "analytics:fold_to_cbet_flop",
+        ),
+        ({"stat": "fold_to_cbet_flop", "data_source": "analytics"}, "analytics:fold_to_cbet_flop"),
+        ({"stat": "3bet"}, None),
+        ({}, None),
+    ],
+)
+def test_entry_for_item(item, key) -> None:
+    entry = _small().entry_for_item(item)
+    assert (entry.key if entry else None) == key
+
+
+def test_stat_values_set_or_clear_the_data_attributes() -> None:
+    catalog = _small()
+    analytics = catalog.get("analytics:fold_to_cbet_flop")
+    classic = catalog.get("classic:vpip")
+    assert analytics is not None and classic is not None
+    assert sc.stat_values(classic) == {
+        "stat": "vpip",
+        "data_source": "",
+        "data_definition": "",
+        "data_format": "",
+        "data_min_sample": "",
+    }
+    assert sc.stat_values(analytics) == {
+        "stat": "fold_to_cbet_flop",
+        "data_source": "analytics",
+        "data_definition": "fold_to_cbet_flop",
+        "data_format": "percentage",
+        "data_min_sample": "5",
+    }
+
+
+def test_the_data_attributes_match_what_profile_io_writes() -> None:
+    from fpdb_3_legacy.modern_hud_preferences import profile_io
+
+    assert sc.DATA_ATTRS == profile_io.DATA_ATTRS

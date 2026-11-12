@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:54+0100\n"
+"POT-Creation-Date: 2026-11-11 23:37+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -4711,11 +4711,6 @@ msgstr "Optional: Aktion beim Klick auf die Stat"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Optional: Popup to show on hover"
-msgstr "Optional: Popup beim Darüberfahren"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Optional: Submenu name for hierarchical popups"
 msgstr "Optional: Untermenüname für hierarchische Popups"
 
@@ -4723,6 +4718,10 @@ msgstr "Optional: Untermenüname für hierarchische Popups"
 #, fuzzy
 msgid "Override the automatic section used by ModernSubmenu"
 msgstr "Den von ModernSubmenu automatisch verwendeten Abschnitt überschreiben"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Pick a statistic from the list."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4760,9 +4759,27 @@ msgstr ""
 "Dieses Panel nur für einen Gegner auf dieser Position anzeigen (leer = immer)"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Statistic:"
 msgstr "Statistik:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "The popup a click on the stat opens"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "There is no statistic called \"{name}\". Pick one from the list."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Unknown Site"
+msgid "Unknown statistic"
+msgstr "Unbekannte Seite"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4963,6 +4980,12 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "Ring Player Stats"
+msgid "Available Stats"
+msgstr "Cash-Spielerstatistiken"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr ""
 "Unterhalb dieser Handzahl wird das Panel zurückgehalten und der Ersatz "
@@ -5053,6 +5076,11 @@ msgstr "Design"
 #, fuzzy
 msgid "Disabled: this rule never matches."
 msgstr "Deaktiviert: diese Regel passt nie."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Double-click a stat to add it to the panel shown in Design."
+msgstr "Doppelklicken Sie auf eine Zelle, um die Hände dahinter zu laden."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5205,11 +5233,6 @@ msgstr "Probleme"
 #, fuzzy
 msgid "Item Properties"
 msgstr "Element-Eigenschaften"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Items"
-msgstr "Elemente"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5830,6 +5853,20 @@ msgstr "Seiten suchen..."
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 #, python-brace-format
 msgid "Showing {shown} of {total} stats"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, fuzzy
+msgid "Type to search the stats"
+msgstr "Seiten suchen..."
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+msgid "(no popup)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+#, python-brace-format
+msgid "{popup} (missing)"
 msgstr ""
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
@@ -9552,6 +9589,10 @@ msgstr ""
 #~ "end."
 #~ msgstr "Es ist momentan nicht möglich \"leer\" o.ä. auszuwählen."
 
+#, fuzzy
+#~ msgid "Items"
+#~ msgstr "Elemente"
+
 #~ msgid "KO"
 #~ msgstr "KO"
 
@@ -9818,6 +9859,10 @@ msgstr ""
 
 #~ msgid "Operating System"
 #~ msgstr "Betriebssystem"
+
+#, fuzzy
+#~ msgid "Optional: Popup to show on hover"
+#~ msgstr "Optional: Popup beim Darüberfahren"
 
 #~ msgid "Out path in quiet mode"
 #~ msgstr "Ausgabepfad im quiet-Modus"

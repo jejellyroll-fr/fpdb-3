@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QListWidget,
+    QMessageBox,
     QPushButton,
     QSpinBox,
     QTableWidget,
@@ -28,8 +29,9 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
-from fpdb_3_legacy.modern_hud_preferences import stat_edit
+from fpdb_3_legacy.modern_hud_preferences import stat_catalog, stat_edit
 from fpdb_3_legacy.modern_hud_preferences.preview_widgets import ColorPreviewWidget
+from fpdb_3_legacy.modern_hud_preferences.stat_catalog_widget import PopupChoiceCombo, StatChoiceCombo
 
 log = get_logger("modern_hud_preferences.dialogs")
 
@@ -109,8 +111,14 @@ class BlockPropertiesDialog(QDialog):
 
 
 class AddStatDialog(QDialog):
-    def __init__(self, stat=None, max_rows=5, max_cols=5, parent=None) -> None:
+    def __init__(  # noqa: PLR0915 - one form, built in order
+        self, stat=None, max_rows=5, max_cols=5, parent=None, *, catalog=None, popup_names=None
+    ) -> None:
         super().__init__(parent)
+        # The stat and the popup are picked from lists (B15): the catalogue of
+        # stats, and the popups the configuration defines.
+        self.catalog = catalog if catalog is not None else stat_catalog.build_catalog()
+        self.popup_names = list(popup_names or [])
         self.setWindowTitle(_("Add/Edit Statistic"))
         self.setMinimumWidth(600)
 
@@ -156,121 +164,7 @@ class AddStatDialog(QDialog):
 
         # Statistic selection
         position_layout.addWidget(QLabel(_("Statistic:")), 1, 0)
-        self.stat_input = QComboBox()
-        self.stat_input.setEditable(True)
-        stat_names = [
-            "vpip",
-            "pfr",
-            "3bet",
-            "fold_3bet",
-            "wtsd",
-            "wmsd",
-            "flafq",
-            "turn_afq",
-            "river_afq",
-            "cb1",
-            "cb2",
-            "cb3",
-            "ffreq1",
-            "ffreq2",
-            "ffreq3",
-            "agg",
-            "agg_freq",
-            "agg_fact",
-            "cbet",
-            "steal",
-            "f_steal",
-            "bbvpip",
-            "hands",
-            "balance",
-            "profit100",
-            "bb100",
-            "rake100",
-            "variance100",
-            "three_B",
-            "three_B_flop",
-            "three_B_turn",
-            "three_B_river",
-            "fold_to_three_B_flop",
-            "fold_to_three_B_turn",
-            "fold_to_three_B_river",
-            "four_B",
-            "four_B_flop",
-            "four_B_turn",
-            "four_B_river",
-            "open_flop",
-            "open_turn",
-            "open_river",
-            "float_turn",
-            "float_river",
-            "face_raise_preflop",
-            "face_raise_flop",
-            "face_raise_turn",
-            "face_raise_river",
-            "first_raise_flop",
-            "first_raise_turn",
-            "first_raise_river",
-            "fold_flop",
-            "fold_turn",
-            "fold_river",
-            "fold_to_squeeze",
-            "face_limpers",
-            "straddle",
-            "fold_to_allin",
-            "f_bet_facing",
-            "t_bet_facing",
-            "r_bet_facing",
-            "p_2bet_facing",
-            "p_3bet_facing",
-            "p_4bet_facing",
-            "f_bet_made",
-            "t_bet_made",
-            "r_bet_made",
-            "f_spr",
-            "t_spr",
-            "r_spr",
-            "p_raise_made",
-            "f_raise_made",
-            "t_raise_made",
-            "r_raise_made",
-            "f_2bet_facing",
-            "f_3bet_facing",
-            "f_4bet_facing",
-            "t_2bet_facing",
-            "t_3bet_facing",
-            "t_4bet_facing",
-            "r_2bet_facing",
-            "r_3bet_facing",
-            "r_4bet_facing",
-            "p_raise_facing",
-            "f_raise_facing",
-            "t_raise_facing",
-            "r_raise_facing",
-            "p_raise_made_2",
-            "f_raise_made_2",
-            "t_raise_made_2",
-            "r_raise_made_2",
-            "p_5bet_facing",
-            "amt_blind",
-            "amt_bet_p",
-            "amt_bet_f",
-            "amt_bet_t",
-            "amt_bet_r",
-            "amt_bet_ttl",
-            "totalprofit",
-            "playershort",
-            "n",
-            "wtsd",
-            "wmsd",
-            "saw_f",
-            "cb_flop",
-            "cb_turn",
-            "cb_river",
-            "f_cb1",
-            "f_cb2",
-            "f_cb3",
-        ]
-        self.stat_input.addItems(sorted(stat_names))
+        self.stat_input = StatChoiceCombo(self.catalog)
         position_layout.addWidget(self.stat_input, 1, 1, 1, 2)
 
         position_group.setLayout(position_layout)
@@ -287,8 +181,8 @@ class AddStatDialog(QDialog):
         actions_layout.addWidget(self.click_input, 0, 1)
 
         actions_layout.addWidget(QLabel(_("Popup:")), 1, 0)
-        self.popup_input = QLineEdit()
-        self.popup_input.setPlaceholderText(_("Optional: Popup to show on hover"))
+        self.popup_input = PopupChoiceCombo()
+        self.popup_input.setToolTip(_("The popup a click on the stat opens"))
         actions_layout.addWidget(self.popup_input, 1, 1)
 
         actions_group.setLayout(actions_layout)
@@ -410,12 +304,14 @@ class AddStatDialog(QDialog):
 
         main_layout.addLayout(button_layout)
 
+        # A new stat opens the usual popup when the configuration has it.
+        default_popup = "default" if "default" in self.popup_names else ""
+        self.popup_input.set_options(self.popup_names, stat.get("popup", "") if stat else default_popup)
         if stat:
             self.row_input.setCurrentText(str(stat["row"]))
             self.col_input.setCurrentText(str(stat["col"]))
-            self.stat_input.setCurrentText(stat["stat"])
+            self.stat_input.show_item(stat)
             self.click_input.setText(stat.get("click", ""))
-            self.popup_input.setText(stat.get("popup", ""))
             self.use_thresholds.setChecked(stat_edit.has_thresholds(stat))
             self.loth_input.setValue(stat_edit.shown_value(stat.get("stat_loth"), stat_edit.DEFAULT_LOW))
             self.hith_input.setValue(stat_edit.shown_value(stat.get("stat_hith"), stat_edit.DEFAULT_HIGH))
@@ -508,10 +404,10 @@ class AddStatDialog(QDialog):
         values = {
             "row": int(self.row_input.currentText()),
             "col": int(self.col_input.currentText()),
-            "stat": self.stat_input.currentText(),
             "click": self.click_input.text(),
-            "popup": self.popup_input.text(),
+            "popup": self.popup_input.value(),
         }
+        values.update(self._stat_values())
         values.update(
             stat_edit.threshold_values(
                 self._stored,
@@ -525,6 +421,28 @@ class AddStatDialog(QDialog):
         values["stat_midcolor"] = self.midcolor if self.use_midcolor.isChecked() else ""
         return values
 
+    def _stat_values(self) -> dict:
+        """The stat's name, and its data_* attributes when the catalogue knows it."""
+        entry = self.stat_input.chosen_entry()
+        if entry is not None:
+            return stat_catalog.stat_values(entry)
+        return {"stat": self.stat_input.currentText().strip()}
+
+    def accept(self) -> None:
+        """Refuse a stat the catalogue does not know, unless the stat already had it."""
+        text = self.stat_input.currentText().strip()
+        known = self.stat_input.chosen_entry() is not None
+        if not known and (not text or text != self._stored.get("stat", "")):
+            QMessageBox.warning(
+                self,
+                _("Unknown statistic"),
+                _("There is no statistic called \"{name}\". Pick one from the list.").format(name=text)
+                if text
+                else _("Pick a statistic from the list."),
+            )
+            return
+        super().accept()
+
     def get_stat(self) -> dict:
         """What the user set.
 
@@ -535,7 +453,14 @@ class AddStatDialog(QDialog):
         """
         values = self._form_values()
         if self._stored:
-            return stat_edit.changes(self._at_load, values)
+            changed = stat_edit.changes(self._at_load, values)
+            # Another stat takes its whole binding: the data_* values the cell
+            # held were the old stat's, even where they match the new entry's
+            # catalogue defaults. The same stat keeps the cell's own values.
+            entry = self.stat_input.chosen_entry()
+            if entry is not None and entry != self.catalog.entry_for_item(self._stored):
+                changed.update(stat_catalog.stat_values(entry))
+            return changed
         return {key: value for key, value in values.items() if value != "" or key in ("click", "popup")}
 
 

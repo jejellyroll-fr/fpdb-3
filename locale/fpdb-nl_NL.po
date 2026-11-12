@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 20:54+0100\n"
+"POT-Creation-Date: 2026-11-11 23:37+0100\n"
 "PO-Revision-Date: 2011-12-03 21:57+0000\n"
 "Last-Translator: LimburgCwboy <hdps.een@gmail.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.net/projects/p/fpdb/"
@@ -4796,11 +4796,6 @@ msgstr "Optioneel: actie bij klikken op de stat"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Optional: Popup to show on hover"
-msgstr "Optioneel: pop-up bij aanwijzen"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Optional: Submenu name for hierarchical popups"
 msgstr "Optioneel: submenunaam voor hiërarchische pop-ups"
 
@@ -4808,6 +4803,10 @@ msgstr "Optioneel: submenunaam voor hiërarchische pop-ups"
 #, fuzzy
 msgid "Override the automatic section used by ModernSubmenu"
 msgstr "De automatische sectie van ModernSubmenu overschrijven"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Pick a statistic from the list."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4845,9 +4844,26 @@ msgstr ""
 "Dit paneel alleen tonen voor een tegenstander op deze positie (leeg = altijd)"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Statistic:"
 msgstr "Statistiek:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "The popup a click on the stat opens"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "There is no statistic called \"{name}\". Pick one from the list."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Unknown statistic"
+msgstr "Onbekende site"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -5045,6 +5061,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Available Stats"
+msgstr "Cash-spelersstatistieken"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr ""
 "Onder dit aantal handen wordt het paneel achtergehouden en verschijnt de "
@@ -5133,6 +5154,11 @@ msgstr "Ontwerp"
 #, fuzzy
 msgid "Disabled: this rule never matches."
 msgstr "Uitgeschakeld: deze regel past nooit."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Double-click a stat to add it to the panel shown in Design."
+msgstr "Dubbelklik op een cel om de handen erachter te laden."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5284,11 +5310,6 @@ msgstr "Problemen"
 #, fuzzy
 msgid "Item Properties"
 msgstr "Itemeigenschappen"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Items"
-msgstr "Items"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5902,6 +5923,20 @@ msgstr "Sites zoeken..."
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
 #, python-brace-format
 msgid "Showing {shown} of {total} stats"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_catalog_widget.py
+#, fuzzy
+msgid "Type to search the stats"
+msgstr "Sites zoeken..."
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+msgid "(no popup)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/stat_edit.py
+#, python-brace-format
+msgid "{popup} (missing)"
 msgstr ""
 
 #: fpdb_3_legacy/pack_gallery_dialog.py
@@ -8282,6 +8317,10 @@ msgstr ""
 #~ msgstr "Host Computer"
 
 #, fuzzy
+#~ msgid "Items"
+#~ msgstr "Items"
+
+#, fuzzy
 #~ msgid "Measure of uncertainty"
 #~ msgstr "Maat van onzekerheid"
 
@@ -8311,6 +8350,10 @@ msgstr ""
 
 #~ msgid "Open"
 #~ msgstr "Open"
+
+#, fuzzy
+#~ msgid "Optional: Popup to show on hover"
+#~ msgstr "Optioneel: pop-up bij aanwijzen"
 
 #, fuzzy
 #~ msgid ""
