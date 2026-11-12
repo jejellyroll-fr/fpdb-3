@@ -113,7 +113,7 @@ class BlockPropertiesDialog(QDialog):
 
 class AddStatDialog(QDialog):
     def __init__(  # noqa: PLR0915 - one form, built in order
-        self, stat=None, max_rows=5, max_cols=5, parent=None, *, catalog=None, popup_names=None
+        self, stat=None, parent=None, *, catalog=None, popup_names=None
     ) -> None:
         super().__init__(parent)
         # The stat and the popup are picked from lists (B15): the catalogue of
@@ -135,38 +135,14 @@ class AddStatDialog(QDialog):
         main_layout.setSpacing(10)
         main_layout.setContentsMargins(15, 15, 15, 15)
 
-        # Position and statistic section
-        position_group = QGroupBox(_("Position and Statistic"))
+        # The statistic. Its cell is the Design canvas's business: a new stat
+        # takes the first free cell there, and is dragged from it.
+        position_group = QGroupBox(_("Statistic"))
         position_layout = QGridLayout()
         position_layout.setSpacing(10)
-
-        # Row and column selection
-        position_layout.addWidget(QLabel(_("Grid Position:")), 0, 0)
-
-        pos_frame = QFrame()
-        pos_layout = QHBoxLayout(pos_frame)
-        pos_layout.setContentsMargins(0, 0, 0, 0)
-
-        pos_layout.addWidget(QLabel(_("Row:")))
-        self.row_input = QComboBox()
-        self.row_input.addItems([str(i) for i in range(max_rows)])
-        self.row_input.setMinimumWidth(60)
-        pos_layout.addWidget(self.row_input)
-
-        pos_layout.addSpacing(20)
-        pos_layout.addWidget(QLabel(_("Column:")))
-        self.col_input = QComboBox()
-        self.col_input.addItems([str(i) for i in range(max_cols)])
-        self.col_input.setMinimumWidth(60)
-        pos_layout.addWidget(self.col_input)
-        pos_layout.addStretch()
-
-        position_layout.addWidget(pos_frame, 0, 1, 1, 2)
-
-        # Statistic selection
-        position_layout.addWidget(QLabel(_("Statistic:")), 1, 0)
+        position_layout.addWidget(QLabel(_("Statistic:")), 0, 0)
         self.stat_input = StatChoiceCombo(self.catalog)
-        position_layout.addWidget(self.stat_input, 1, 1, 1, 2)
+        position_layout.addWidget(self.stat_input, 0, 1, 1, 2)
 
         position_group.setLayout(position_layout)
         main_layout.addWidget(position_group)
@@ -309,8 +285,6 @@ class AddStatDialog(QDialog):
         default_popup = "default" if "default" in self.popup_names else ""
         self.popup_input.set_options(self.popup_names, stat.get("popup", "") if stat else default_popup)
         if stat:
-            self.row_input.setCurrentText(str(stat["row"]))
-            self.col_input.setCurrentText(str(stat["col"]))
             self.stat_input.show_item(stat)
             self.click_input.setText(stat.get("click", ""))
             self.use_thresholds.setChecked(stat_edit.has_thresholds(stat))
@@ -403,8 +377,6 @@ class AddStatDialog(QDialog):
     def _form_values(self) -> dict:
         """Every attribute the form shows, as the stat would store it."""
         values = {
-            "row": int(self.row_input.currentText()),
-            "col": int(self.col_input.currentText()),
             "click": self.click_input.text(),
             "popup": self.popup_input.value(),
         }
@@ -449,8 +421,9 @@ class AddStatDialog(QDialog):
 
         Editing a stat returns only the attributes the user changed, so that
         applying them leaves everything else -- unset colours, a threshold
-        written ``12.5`` or ``140`` -- as it was. Adding one returns its cell,
-        name, click and popup, plus the colour range when the user set one.
+        written ``12.5`` or ``140`` -- as it was. Adding one returns its name,
+        click and popup, plus the colour range when the user set one; the
+        editor gives it its cell.
         """
         values = self._form_values()
         if self._stored:

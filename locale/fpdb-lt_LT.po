@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:20+0100\n"
+"POT-Creation-Date: 2026-11-12 20:30+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -4782,6 +4782,7 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "Bloko savybės"
@@ -4817,11 +4818,6 @@ msgstr "Naudoti vidurinę spalvą reikšmėms tarp ribų"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Column:"
-msgstr "Stulpelis:"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Edit Popup Statistic"
 msgstr "Redaguoti iššokančio lango statistiką"
 
@@ -4838,15 +4834,11 @@ msgstr "Eksportuoti išdėstymo koordinates"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Grid Position:"
-msgstr "Pozicija"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "High Range:"
 msgstr "Aukštas intervalas:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Label:"
 msgstr "Pridėti etiketę"
@@ -4930,18 +4922,8 @@ msgstr "Iššokantis langas:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Position and Statistic"
-msgstr "Pozicija"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Preview shows how statistic colors will change based on values"
 msgstr "Peržiūra rodo, kaip statistikos spalvos keisis pagal reikšmes"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
-msgid "Row:"
-msgstr "Eilutė:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4974,6 +4956,11 @@ msgstr "Rodyti pozicijų statistikoje"
 #, fuzzy
 msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr "Rodyti šį skydelį tik varžovui šioje pozicijoje (tuščia = visada)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Statistic"
+msgstr "Statistika"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -5197,6 +5184,11 @@ msgstr "Pridėti statistiką"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Add Text Label"
+msgstr "Pridėti etiketę"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
 msgstr "Pridėti horizontalią skiriamąją liniją (PT4 'Horz Line') į skydelį"
 
@@ -5323,10 +5315,6 @@ msgstr "Negalima atnaujinti šios taisyklės"
 #, fuzzy
 msgid "Cannot update this rule"
 msgstr "Negalima atnaujinti šios taisyklės"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Cell already used"
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell bg:"
@@ -5460,6 +5448,11 @@ msgstr "Pasikartojanti taisyklė"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Edit"
 msgstr "Keisti"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Edit Text Label"
+msgstr "Redaguoti duomenų bazę"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5690,6 +5683,12 @@ msgstr "Elemento savybės"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Label text (e.g. column header, caption):"
+msgstr ""
+"Pridėti teksto etiketę (stulpelio/eilutės antraštę ar užrašą) į skydelį"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Layout Conflict"
 msgstr "Išdėstymų konfliktas"
 
@@ -5697,6 +5696,11 @@ msgstr "Išdėstymų konfliktas"
 #, python-brace-format
 msgid "Layout coordinates for site layout '{name}' already exist."
 msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Line colour"
+msgstr "Vidurinė spalva:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Lo col:"
@@ -5749,6 +5753,11 @@ msgstr "➕ Naujas iššokantis langas"
 #, fuzzy
 msgid "New Profile"
 msgstr "Naujas profilis"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "New panel (block) name:"
+msgstr "Naudotojo vardas"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -6000,13 +6009,6 @@ msgid "Row gap:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
-msgid ""
-"Row {row}, column {col} already holds {item}. The first free cell is row "
-"{free_row}, column {free_col}."
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Rows:"
 msgstr ""
 
@@ -6097,11 +6099,6 @@ msgstr "Tekstas"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Text label (header / caption) — not a stat"
-msgstr "Teksto etiketė (antraštė / užrašas) — ne statistika"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Text:"
 msgstr "Tekstas"
 
@@ -6161,6 +6158,10 @@ msgstr "Tema:"
 #, fuzzy
 msgid "Then show"
 msgstr "Tada rodyti"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "This profile has no panels. Use Add Block first."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -6226,10 +6227,6 @@ msgstr ""
 #| msgid "If you change the config you must save before importing"
 msgid "You have unsaved changes. Do you want to save before closing?"
 msgstr "Jei pakeisite konfiguraciją, jūs turite ją išsaugoti prieš įkeldami."
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "a separator line"
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -9031,6 +9028,10 @@ msgstr ""
 #~ msgid "Closing this window will exit from the HUD."
 #~ msgstr "Jei uždarysit šį langą, bus uždarytas ir HUD"
 
+#, fuzzy
+#~ msgid "Column:"
+#~ msgstr "Stulpelis:"
+
 #~ msgid "Converting ftpArchive format to readable"
 #~ msgstr "ftpArchive formatas verčiamas į skaitomą"
 
@@ -9162,6 +9163,10 @@ msgstr ""
 
 #~ msgid "Graph generated in: %s"
 #~ msgstr "Grafikas sugeneruotas per: %s"
+
+#, fuzzy
+#~ msgid "Grid Position:"
+#~ msgstr "Pozicija"
 
 #~ msgid "HAND NO."
 #~ msgstr "RANKOS NR."
@@ -9354,6 +9359,10 @@ msgstr ""
 #~ msgid "Please choose the directory you wish to export to:"
 #~ msgstr "Pasirinkite vietą, į kurią norite eksportuoti:"
 
+#, fuzzy
+#~ msgid "Position and Statistic"
+#~ msgstr "Pozicija"
+
 #~ msgid ""
 #~ "PostgreSQL Server reports: Access denied. Are your permissions set "
 #~ "correctly?"
@@ -9395,6 +9404,10 @@ msgstr ""
 #, fuzzy
 #~ msgid "Restart This HUD"
 #~ msgstr "Užbaigti šį HUD"
+
+#, fuzzy
+#~ msgid "Row:"
+#~ msgstr "Eilutė:"
 
 #~ msgid "SATELLITE"
 #~ msgstr "SATELITAS"
@@ -9500,6 +9513,10 @@ msgstr ""
 
 #~ msgid "TOURNEYS PLAYER IDS"
 #~ msgstr "TURNYRO ŽAIDĖJŲ ID"
+
+#, fuzzy
+#~ msgid "Text label (header / caption) — not a stat"
+#~ msgstr "Teksto etiketė (antraštė / užrašas) — ne statistika"
 
 #~ msgid "Thank you"
 #~ msgstr "Ačiū"

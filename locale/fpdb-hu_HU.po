@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:20+0100\n"
+"POT-Creation-Date: 2026-11-12 20:30+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -4720,6 +4720,7 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "Blokk tulajdonságai"
@@ -4755,11 +4756,6 @@ msgstr "Középső szín használata a küszöbök közötti értékekhez"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Column:"
-msgstr "Oszlop:"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Edit Popup Statistic"
 msgstr "Felugró ablak statisztikájának szerkesztése"
 
@@ -4776,15 +4772,11 @@ msgstr "Elrendezési koordináták exportálása"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Grid Position:"
-msgstr "Pozíció"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "High Range:"
 msgstr "Felső tartomány:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Label:"
 msgstr "Felirat hozzáadása"
@@ -4871,19 +4863,9 @@ msgstr "Felugró ablak:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Position and Statistic"
-msgstr "Pozíció és zsetonkészlet"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Preview shows how statistic colors will change based on values"
 msgstr ""
 "Az előnézet mutatja, hogyan változnak a statisztika színei az értékekkel"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
-msgid "Row:"
-msgstr "Sor:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4916,6 +4898,12 @@ msgstr "Mutatás a pozíciós statisztikákban"
 msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr ""
 "Ez a panel csak az ezen a pozíción lévő ellenfélnél látszik (üres = mindig)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Statistics"
+msgid "Statistic"
+msgstr "Statisztikák"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -5141,6 +5129,11 @@ msgstr "Statisztika hozzáadása"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Add Text Label"
+msgstr "Felirat hozzáadása"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
 msgstr "Vízszintes elválasztó vonal (PT4 'Horz Line') hozzáadása egy panelhez"
 
@@ -5267,12 +5260,6 @@ msgstr "Ez a szabály nem frissíthető"
 #, fuzzy
 msgid "Cannot update this rule"
 msgstr "Ez a szabály nem frissíthető"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-#| msgid "lock already held by:"
-msgid "Cell already used"
-msgstr "a zárolást már elvégezte:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell bg:"
@@ -5406,6 +5393,11 @@ msgstr "Ismétlődő szabály"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Edit"
 msgstr "Szerkeszt"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Edit Text Label"
+msgstr "Adatbázis szerkesztése"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5639,6 +5631,12 @@ msgstr "Elem tulajdonságai"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Label text (e.g. column header, caption):"
+msgstr ""
+"Szöveges felirat (oszlop-/sorfejléc vagy képaláírás) hozzáadása egy panelhez"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Layout Conflict"
 msgstr "Elrendezési ütközés"
 
@@ -5646,6 +5644,11 @@ msgstr "Elrendezési ütközés"
 #, python-brace-format
 msgid "Layout coordinates for site layout '{name}' already exist."
 msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Line colour"
+msgstr "Középső szín:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Lo col:"
@@ -5698,6 +5701,11 @@ msgstr "➕ Új felugró ablak"
 #, fuzzy
 msgid "New Profile"
 msgstr "Új profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "New panel (block) name:"
+msgstr "Fájlnév:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5949,13 +5957,6 @@ msgid "Row gap:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
-msgid ""
-"Row {row}, column {col} already holds {item}. The first free cell is row "
-"{free_row}, column {free_col}."
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Rows:"
 msgstr ""
 
@@ -6048,11 +6049,6 @@ msgstr "Szöveg"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Text label (header / caption) — not a stat"
-msgstr "Szöveges felirat (fejléc / képaláírás) — nem statisztika"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 #| msgid "Text"
 msgid "Text:"
 msgstr "Szöveg"
@@ -6113,6 +6109,10 @@ msgstr "Téma:"
 #, fuzzy
 msgid "Then show"
 msgstr "Akkor megjelenítés"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "This profile has no panels. Use Add Block first."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -6182,10 +6182,6 @@ msgid "You have unsaved changes. Do you want to save before closing?"
 msgstr ""
 "Ha megváltoztatod a beállításokat, akkor importálás előtt előbb el kell "
 "mentened őket."
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "a separator line"
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -9662,6 +9658,11 @@ msgstr ""
 #~ msgid "Cat."
 #~ msgstr "Kat."
 
+#, fuzzy
+#~| msgid "lock already held by:"
+#~ msgid "Cell already used"
+#~ msgstr "a zárolást már elvégezte:"
+
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Bezárva, nincs exportált grafikon"
 
@@ -9670,6 +9671,10 @@ msgstr ""
 
 #~ msgid "Closing this window will stop the Tournament Tracker"
 #~ msgstr "Ezen ablak bezárása leállítja a Versenykövetőt"
+
+#, fuzzy
+#~ msgid "Column:"
+#~ msgstr "Oszlop:"
 
 #~ msgid ""
 #~ "Coming Soon\n"
@@ -10367,6 +10372,10 @@ msgstr ""
 
 #~ msgid "Graphing Options:"
 #~ msgstr "Grafikon opciók:"
+
+#, fuzzy
+#~ msgid "Grid Position:"
+#~ msgstr "Pozíció"
 
 #~ msgid ""
 #~ "GuiBulkImport.load done: Stored: %d \tDuplicates: %d \tPartial: %d "
@@ -11247,6 +11256,10 @@ msgstr ""
 #~ msgid "PokerTrackerToFpdb.readHandInfo: Failed to detect currency."
 #~ msgstr "Nem sikerült a pénznem felismerése."
 
+#, fuzzy
+#~ msgid "Position and Statistic"
+#~ msgstr "Pozíció és zsetonkészlet"
+
 #~ msgid "Positional Stats (tabulated view)"
 #~ msgstr "Pozíciós statisztikák (táblázat)"
 
@@ -11391,6 +11404,10 @@ msgstr ""
 #~ msgstr ""
 #~ "river aggresszió\n"
 #~ "bet vagy raise a river láttán"
+
+#, fuzzy
+#~ msgid "Row:"
+#~ msgstr "Sor:"
 
 #~ msgid "SATELLITE"
 #~ msgstr "SZATELIT"
@@ -11617,6 +11634,10 @@ msgstr ""
 
 #~ msgid "Testing variance function"
 #~ msgstr "Variancia függvény tesztelése"
+
+#, fuzzy
+#~ msgid "Text label (header / caption) — not a stat"
+#~ msgstr "Szöveges felirat (fejléc / képaláírás) — nem statisztika"
 
 #~ msgid "Thank you"
 #~ msgstr "Köszönjük"

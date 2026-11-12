@@ -13,6 +13,8 @@ import shutil
 
 import pytest
 
+from fpdb_3_legacy.modern_hud_preferences import layout_model
+
 pytestmark = pytest.mark.qt
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -441,17 +443,6 @@ def test_block_aware_edit_persists(tmp_path):
 
     QApplication.instance() or QApplication([])
 
-    class FakeTable:  # headless: report a selectable current row
-        def __init__(self):
-            self._cur = -1
-        def setRowCount(self, n):
-            pass
-        def setItem(self, *a):
-            pass
-        def currentRow(self):
-            return self._cur
-        def setCurrentCell(self, r, _c):
-            self._cur = r
 
     cfg = tmp_path / "HUD_config.xml"
     shutil.copy(EXAMPLE, cfg)
@@ -463,7 +454,6 @@ def test_block_aware_edit_persists(tmp_path):
     dlg = M.ModernHudPreferences.__new__(M.ModernHudPreferences)
     dlg.config = c
     dlg.profile_combo = QComboBox()
-    dlg.stat_table = FakeTable()
     dlg.preview = type("P", (), {m: (lambda *a, **k: None) for m in
                                  ("set_hud_params", "set_grid", "set_blocks", "set_stats")})()
     dlg.update_status = lambda *a, **k: None
@@ -474,8 +464,7 @@ def test_block_aware_edit_persists(tmp_path):
 
     prof = dlg.hud_profiles[summary["name"]]
     before = sum(len(b["stats"]) for b in prof["blocks"])
-    stat_row = next(r for r, (bi, kind, ref) in enumerate(dlg._row_items) if kind == "stat")
-    dlg.stat_table.setCurrentCell(stat_row, 0)
+    dlg._selected_item = next(stat for block in prof["blocks"] for stat in block["stats"])
     dlg.remove_stat()
     after = sum(len(b["stats"]) for b in prof["blocks"])
     assert after == before - 1  # removed from the block, not a flat list
@@ -500,17 +489,6 @@ def test_add_label_block_and_props_persist(tmp_path):
 
     QApplication.instance() or QApplication([])
 
-    class FakeTable:
-        def __init__(self):
-            self._cur = -1
-        def setRowCount(self, n):
-            pass
-        def setItem(self, *a):
-            pass
-        def currentRow(self):
-            return self._cur
-        def setCurrentCell(self, r, _c):
-            self._cur = r
 
     cfg = tmp_path / "HUD_config.xml"
     shutil.copy(EXAMPLE, cfg)
@@ -522,7 +500,6 @@ def test_add_label_block_and_props_persist(tmp_path):
     dlg = M.ModernHudPreferences.__new__(M.ModernHudPreferences)
     dlg.config = c
     dlg.profile_combo = QComboBox()
-    dlg.stat_table = FakeTable()
     dlg.preview = type("P", (), {m: (lambda *a, **k: None) for m in
                                  ("set_hud_params", "set_grid", "set_blocks", "set_stats")})()
     dlg.update_status = lambda *a, **k: None
@@ -532,7 +509,7 @@ def test_add_label_block_and_props_persist(tmp_path):
     dlg.on_profile_selected(dlg.profile_combo.currentIndex())
     prof = dlg.hud_profiles[summary["name"]]
 
-    dlg.stat_table.setCurrentCell(0, 0)
+    dlg._selected_item = next(ref for _kind, ref in layout_model.items(prof["blocks"][0]))
     with mk.patch("PySide6.QtWidgets.QInputDialog.getText", return_value=("MY LABEL", True)):
         dlg.add_text_label()
     nblocks = len(prof["blocks"])
@@ -565,17 +542,6 @@ def test_add_hline_appears_and_persists(tmp_path):
 
     QApplication.instance() or QApplication([])
 
-    class FakeTable:
-        def __init__(self):
-            self._cur = -1
-        def setRowCount(self, n):
-            pass
-        def setItem(self, *a):
-            pass
-        def currentRow(self):
-            return self._cur
-        def setCurrentCell(self, r, _c):
-            self._cur = r
 
     cfg = tmp_path / "HUD_config.xml"
     shutil.copy(EXAMPLE, cfg)
@@ -587,7 +553,6 @@ def test_add_hline_appears_and_persists(tmp_path):
     dlg = M.ModernHudPreferences.__new__(M.ModernHudPreferences)
     dlg.config = c
     dlg.profile_combo = QComboBox()
-    dlg.stat_table = FakeTable()
     dlg.preview = type("P", (), {m: (lambda *a, **k: None) for m in
                                  ("set_hud_params", "set_grid", "set_blocks", "set_stats")})()
     dlg.update_status = lambda *a, **k: None
@@ -597,11 +562,11 @@ def test_add_hline_appears_and_persists(tmp_path):
     dlg.on_profile_selected(dlg.profile_combo.currentIndex())
     prof = dlg.hud_profiles[summary["name"]]
 
-    dlg.stat_table.setCurrentCell(0, 0)
+    dlg._selected_item = next(ref for _kind, ref in layout_model.items(prof["blocks"][0]))
     before = sum(len(b.get("hlines", [])) for b in prof["blocks"])
     dlg.add_hline()
     assert sum(len(b.get("hlines", [])) for b in prof["blocks"]) == before + 1
-    assert any(kind == "hline" for _bi, kind, _ref in dlg._row_items)  # shown in table
+    assert dlg._current_item()[0] == "hline"  # the new line is the selection
 
     ss_node = next(n for n in c.doc.getElementsByTagName("ss") if n.getAttribute("name") == summary["name"])
     dlg._write_profile_stats(ss_node, prof, prof["rows"], prof["cols"])
@@ -631,17 +596,6 @@ def test_group_panel_list_select_rename_delete(tmp_path):
 
     QApplication.instance() or QApplication([])
 
-    class FakeTable:
-        def __init__(self):
-            self._cur = -1
-        def setRowCount(self, n):
-            pass
-        def setItem(self, *a):
-            pass
-        def currentRow(self):
-            return self._cur
-        def setCurrentCell(self, r, _c):
-            self._cur = r
 
     cfg = tmp_path / "HUD_config.xml"
     shutil.copy(EXAMPLE, cfg)
@@ -653,7 +607,6 @@ def test_group_panel_list_select_rename_delete(tmp_path):
     d = M.ModernHudPreferences.__new__(M.ModernHudPreferences)
     d.config = c
     d.profile_combo = QComboBox()
-    d.stat_table = FakeTable()
     d.preview = type("P", (), {m: (lambda *a, **k: None) for m in
                                ("set_hud_params", "set_grid", "set_blocks", "set_stats")})()
     d.update_status = lambda *a, **k: None
@@ -733,17 +686,6 @@ def test_group_items_and_item_properties(tmp_path):
 
     QApplication.instance() or QApplication([])
 
-    class FakeTable:
-        def __init__(self):
-            self._cur = -1
-        def setRowCount(self, n):
-            pass
-        def setItem(self, *a):
-            pass
-        def currentRow(self):
-            return self._cur
-        def setCurrentCell(self, r, _c):
-            self._cur = r
 
     cfg = tmp_path / "HUD_config.xml"
     shutil.copy(EXAMPLE, cfg)
@@ -755,7 +697,6 @@ def test_group_items_and_item_properties(tmp_path):
     d = M.ModernHudPreferences.__new__(M.ModernHudPreferences)
     d.config = c
     d.profile_combo = QComboBox()
-    d.stat_table = FakeTable()
     d.preview = type("P", (), {m: (lambda *a, **k: None) for m in
                                ("set_hud_params", "set_grid", "set_blocks", "set_stats")})()
     d.update_status = lambda *a, **k: None
@@ -779,9 +720,6 @@ def test_group_items_and_item_properties(tmp_path):
     d.gp_opacity.setValue(178)
     d.group_props_box = QGroupBox()
     d._loading_item = False
-    d._group_item_refs = []
-    d.group_items_list = QListWidget()
-    d.group_items_list.currentRowChanged.connect(d._on_group_item_selected)
     d.item_props_tabs = QTabWidget()
     d.item_props_tabs.addTab(QWidget(), "Item")
     d.item_props_tabs.addTab(QWidget(), "CR")
@@ -807,9 +745,8 @@ def test_group_items_and_item_properties(tmp_path):
     d.on_profile_selected(d.profile_combo.currentIndex())
     d.group_list.setCurrentRow(1)  # BB panel
 
-    assert d.group_items_list.count() > 0
-    stat_row = next(i for i, (k, _r) in enumerate(d._group_item_refs) if k == "stat")
-    d.group_items_list.setCurrentRow(stat_row)
+    bb_panel = d.hud_profiles[summary["name"]]["blocks"][1]
+    d._select_item(next(ref for kind, ref in layout_model.items(bb_panel) if kind == "stat"))
     assert d.item_props_tabs.isTabEnabled(1)  # tab always clickable
     d.ip_use_thresholds.setChecked(True)
     assert d.ip_loth.isEnabled()  # colour-range controls active for stats
@@ -822,8 +759,7 @@ def test_group_items_and_item_properties(tmp_path):
     assert ref["colspan"] == 3 and ref["align"] == "left"
     assert ref["stat_loth"] == "20" and ref["stat_hith"] == "60"
 
-    text_row = next(i for i, (k, _r) in enumerate(d._group_item_refs) if k == "text")
-    d.group_items_list.setCurrentRow(text_row)
+    d._select_item(next(ref for kind, ref in layout_model.items(bb_panel) if kind == "text"))
     assert d.item_props_tabs.isTabEnabled(1)  # tab still clickable for text items
     assert not d.ip_loth.isEnabled()  # but colour-range controls are disabled
 
@@ -864,10 +800,10 @@ def test_full_dialog_pt4_layout_smoke(tmp_path):
     assert dlg.group_list.count() == 5               # Panels (SB/BB/BU/Villain/Min Stack)
     assert dlg.group_props_box is not None           # Group Properties
     assert dlg.item_props_tabs.count() == 2          # Item Properties + Color Ranges
-    assert not dlg.stat_table.isVisibleTo(dlg)       # flat table hidden in PT4 layout
+    assert not hasattr(dlg, "stat_table")            # no flat table: the canvas is the editor
 
     dlg.group_list.setCurrentRow(1)                  # BB panel
-    assert dlg.group_items_list.count() > 0          # Items list populated
+    assert dlg._current_item()[1] is not None        # an item of the panel is selected
     # Canvas shows only the selected panel (box-by-box, like PT4).
     assert len(dlg._design_canvases) == 1
     assert dlg._design_canvases[0].block_index == 1  # follows the selected panel

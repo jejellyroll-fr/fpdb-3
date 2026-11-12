@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:20+0100\n"
+"POT-Creation-Date: 2026-11-12 20:30+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -4751,6 +4751,7 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "区块属性"
@@ -4786,11 +4787,6 @@ msgstr "阈值之间的值使用中间色"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Column:"
-msgstr "列:"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Edit Popup Statistic"
 msgstr "编辑弹出窗口统计"
 
@@ -4807,15 +4803,11 @@ msgstr "导出布局坐标"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Grid Position:"
-msgstr "网格位置:"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "High Range:"
 msgstr "高值范围:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Label:"
 msgstr "添加标签"
@@ -4897,18 +4889,8 @@ msgstr "弹出窗口:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Position and Statistic"
-msgstr "位置与筹码"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Preview shows how statistic colors will change based on values"
 msgstr "预览显示统计颜色如何随数值变化"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
-msgid "Row:"
-msgstr "行:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4939,6 +4921,11 @@ msgstr "在位置统计中显示"
 #, fuzzy
 msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr "仅对处于此位置的对手显示此面板（留空 = 始终显示）"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Statistic"
+msgstr "统计"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -5162,6 +5149,11 @@ msgstr "添加统计"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Add Text Label"
+msgstr "添加标签"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
 msgstr "向面板添加水平分隔线 (PT4 'Horz Line')"
 
@@ -5283,10 +5275,6 @@ msgstr "无法更新此规则"
 #, fuzzy
 msgid "Cannot update this rule"
 msgstr "无法更新此规则"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Cell already used"
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell bg:"
@@ -5421,6 +5409,11 @@ msgstr "规则重复"
 #, fuzzy
 msgid "Edit"
 msgstr "编辑"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Edit Text Label"
+msgstr "编辑数据库"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5648,6 +5641,11 @@ msgstr "项目属性"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Label text (e.g. column header, caption):"
+msgstr "向面板添加文本标签（列/行标题或说明）"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Layout Conflict"
 msgstr "布局冲突"
 
@@ -5655,6 +5653,11 @@ msgstr "布局冲突"
 #, python-brace-format
 msgid "Layout coordinates for site layout '{name}' already exist."
 msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Line colour"
+msgstr "中间色:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Lo col:"
@@ -5707,6 +5710,11 @@ msgstr "➕ 新弹出窗口"
 #, fuzzy
 msgid "New Profile"
 msgstr "新档案"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "New panel (block) name:"
+msgstr "文件名：%s"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5952,13 +5960,6 @@ msgid "Row gap:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
-msgid ""
-"Row {row}, column {col} already holds {item}. The first free cell is row "
-"{free_row}, column {free_col}."
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Rows:"
 msgstr ""
 
@@ -6047,11 +6048,6 @@ msgstr "文本"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Text label (header / caption) — not a stat"
-msgstr "文本标签（标题 / 说明）— 不是统计"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Text:"
 msgstr "文本"
 
@@ -6106,6 +6102,10 @@ msgstr "主题:"
 #, fuzzy
 msgid "Then show"
 msgstr "则显示"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "This profile has no panels. Use Add Block first."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -6166,10 +6166,6 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "You have unsaved changes. Do you want to save before closing?"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "a separator line"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -8852,6 +8848,10 @@ msgstr ""
 #~ msgstr "无法识别的游戏类型：‘%s’"
 
 #, fuzzy
+#~ msgid "Column:"
+#~ msgstr "列:"
+
+#, fuzzy
 #~ msgid "Config file has been created at %r."
 #~ msgstr "配置文件建立在%s\n"
 
@@ -8929,6 +8929,10 @@ msgstr ""
 #~ msgstr "无法识别的游戏类型：‘%s’"
 
 #, fuzzy
+#~ msgid "Grid Position:"
+#~ msgstr "网格位置:"
+
+#, fuzzy
 #~ msgid "Items"
 #~ msgstr "项目"
 
@@ -8980,8 +8984,20 @@ msgstr ""
 #~ msgstr "无法识别的游戏类型：‘%s’"
 
 #, fuzzy
+#~ msgid "Position and Statistic"
+#~ msgstr "位置与筹码"
+
+#, fuzzy
 #~ msgid "Read no hands from file: '%s'"
 #~ msgstr "读取配置文件 %s"
+
+#, fuzzy
+#~ msgid "Row:"
+#~ msgstr "行:"
+
+#, fuzzy
+#~ msgid "Text label (header / caption) — not a stat"
+#~ msgstr "文本标签（标题 / 说明）— 不是统计"
 
 #, fuzzy
 #~ msgid "Tournament not found."

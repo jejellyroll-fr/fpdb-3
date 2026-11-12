@@ -65,12 +65,12 @@ def colour_picker(monkeypatch):
 # --- AddStatDialog: editing ----------------------------------------------------
 @pytest.mark.parametrize("stat", [PLAIN, RANGED], ids=["no thresholds", "decimal and above 100"])
 def test_an_unchanged_stat_comes_back_unchanged(dialogs, stat) -> None:
-    dialog = dialogs("AddStatDialog", stat=dict(stat), max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat=dict(stat))
     assert dialog.get_stat() == {}
 
 
 def test_a_stat_without_thresholds_shows_them_off_and_no_colours(dialogs) -> None:
-    dialog = dialogs("AddStatDialog", stat=dict(PLAIN), max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat=dict(PLAIN))
     assert not dialog.use_thresholds.isChecked()
     assert not dialog.loth_input.isEnabled()
     assert not dialog.locolor_btn.isEnabled()
@@ -78,45 +78,45 @@ def test_a_stat_without_thresholds_shows_them_off_and_no_colours(dialogs) -> Non
 
 
 def test_decimal_and_large_thresholds_are_shown_as_they_are(dialogs) -> None:
-    dialog = dialogs("AddStatDialog", stat=dict(RANGED), max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat=dict(RANGED))
     assert dialog.use_thresholds.isChecked()
     assert (dialog.loth_input.value(), dialog.hith_input.value()) == (12.5, 140.0)
     assert dialog.hith_input.maximum() > 100
 
 
 def test_changing_one_field_returns_only_that_field(dialogs) -> None:
-    dialog = dialogs("AddStatDialog", stat=dict(RANGED), max_rows=3, max_cols=3, popup_names=["default", "Multicol"])
+    dialog = dialogs("AddStatDialog", stat=dict(RANGED), popup_names=["default", "Multicol"])
     dialog.popup_input.setCurrentIndex(dialog.popup_input.findData("Multicol"))
     assert dialog.get_stat() == {"popup": "Multicol"}
 
 
 def test_changing_a_threshold_keeps_the_other_string(dialogs) -> None:
-    dialog = dialogs("AddStatDialog", stat=dict(RANGED), max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat=dict(RANGED))
     dialog.hith_input.setValue(250.75)
     assert dialog.get_stat() == {"stat_hith": "250.75"}
 
 
 def test_a_threshold_moved_and_moved_back_is_unchanged(dialogs) -> None:
-    dialog = dialogs("AddStatDialog", stat=dict(RANGED), max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat=dict(RANGED))
     dialog.loth_input.setValue(30)
     dialog.loth_input.setValue(12.5)
     assert dialog.get_stat() == {}
 
 
 def test_a_negative_threshold_is_accepted(dialogs) -> None:
-    dialog = dialogs("AddStatDialog", stat=dict(RANGED), max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat=dict(RANGED))
     dialog.loth_input.setValue(-5)
     assert dialog.get_stat() == {"stat_loth": "-5"}
 
 
 def test_turning_thresholds_off_clears_them_only(dialogs) -> None:
-    dialog = dialogs("AddStatDialog", stat=dict(RANGED), max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat=dict(RANGED))
     dialog.use_thresholds.setChecked(False)
     assert dialog.get_stat() == {"stat_loth": "", "stat_hith": ""}
 
 
 def test_turning_thresholds_on_sets_them_and_the_usual_colours(dialogs) -> None:
-    dialog = dialogs("AddStatDialog", stat=dict(PLAIN), max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat=dict(PLAIN))
     dialog.use_thresholds.setChecked(True)
     assert dialog.loth_input.isEnabled()
     assert dialog.get_stat() == {
@@ -129,13 +129,13 @@ def test_turning_thresholds_on_sets_them_and_the_usual_colours(dialogs) -> None:
 
 def test_turning_thresholds_on_keeps_the_stored_colours(dialogs) -> None:
     stat = {**PLAIN, "stat_locolor": "#123456", "stat_hicolor": "#654321"}
-    dialog = dialogs("AddStatDialog", stat=stat, max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat=stat)
     dialog.use_thresholds.setChecked(True)
     assert dialog.get_stat() == {"stat_loth": "20", "stat_hith": "60"}
 
 
 def test_the_mid_colour_is_set_by_its_checkbox(dialogs, colour_picker) -> None:
-    dialog = dialogs("AddStatDialog", stat=dict(RANGED), max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat=dict(RANGED))
     assert not dialog.midcolor_btn.isEnabled()
     dialog.use_midcolor.setChecked(True)
     assert dialog.midcolor_btn.isEnabled()
@@ -148,7 +148,7 @@ def test_the_mid_colour_is_set_by_its_checkbox(dialogs, colour_picker) -> None:
 
 
 def test_a_stored_mid_colour_is_shown_and_can_be_removed(dialogs) -> None:
-    dialog = dialogs("AddStatDialog", stat={**RANGED, "stat_midcolor": "#0000ff"}, max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat={**RANGED, "stat_midcolor": "#0000ff"})
     assert dialog.use_midcolor.isChecked()
     assert dialog.midcolor_btn.isEnabled()
     assert dialog.color_preview.use_mid_color
@@ -157,7 +157,7 @@ def test_a_stored_mid_colour_is_shown_and_can_be_removed(dialogs) -> None:
 
 
 def test_picking_the_low_and_high_colours(dialogs, colour_picker) -> None:
-    dialog = dialogs("AddStatDialog", stat=dict(RANGED), max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat=dict(RANGED))
     colour_picker.extend(["#111111", "#222222"])
     dialog.choose_color("low")
     dialog.choose_color("high")
@@ -170,19 +170,19 @@ def test_a_cancelled_colour_pick_changes_nothing(dialogs, monkeypatch) -> None:
     from PySide6.QtWidgets import QColorDialog
 
     monkeypatch.setattr(QColorDialog, "getColor", staticmethod(lambda *_a, **_k: QColor()))
-    dialog = dialogs("AddStatDialog", stat=dict(RANGED), max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat=dict(RANGED))
     dialog.choose_color("low")
     assert dialog.get_stat() == {}
 
 
 def test_an_unset_colour_button_says_none(dialogs) -> None:
-    dialog = dialogs("AddStatDialog", stat=dict(PLAIN), max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat=dict(PLAIN))
     assert dialog.locolor_btn.text() == "(none)"
     assert dialog.locolor_btn.styleSheet() == ""
 
 
 def test_the_preview_fits_a_threshold_above_100(dialogs) -> None:
-    dialog = dialogs("AddStatDialog", stat=dict(RANGED), max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat=dict(RANGED))
     start, end, low, high = dialog.color_preview.positions()
     assert start == 0.0
     assert end > 140
@@ -191,20 +191,19 @@ def test_the_preview_fits_a_threshold_above_100(dialogs) -> None:
 
 
 def test_the_preview_paints_a_mid_colour(dialogs) -> None:
-    dialog = dialogs("AddStatDialog", stat={**RANGED, "stat_midcolor": "#0000ff"}, max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog", stat={**RANGED, "stat_midcolor": "#0000ff"})
     assert not dialog.color_preview.grab().isNull()
 
 
 # --- AddStatDialog: adding -----------------------------------------------------
 def test_a_new_stat_has_no_colour_range_unless_asked(dialogs) -> None:
-    dialog = dialogs("AddStatDialog", max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog")
     dialog.stat_input.setCurrentText("vpip")
-    dialog.col_input.setCurrentText("2")
-    assert dialog.get_stat() == {"row": 0, "col": 2, "stat": "vpip", "click": "", "popup": ""}
+    assert dialog.get_stat() == {"stat": "vpip", "click": "", "popup": ""}
 
 
 def test_a_new_stat_with_a_colour_range(dialogs) -> None:
-    dialog = dialogs("AddStatDialog", max_rows=3, max_cols=3)
+    dialog = dialogs("AddStatDialog")
     dialog.stat_input.setCurrentText("vpip")
     dialog.use_thresholds.setChecked(True)
     dialog.loth_input.setValue(12.5)
@@ -287,11 +286,8 @@ def _editor(tmp_path, monkeypatch):
 
 
 def _select_item(dialog, ref) -> None:
-    for row, (_kind, item) in enumerate(dialog._group_item_refs):
-        if item is ref:
-            dialog.group_items_list.setCurrentRow(row)
-            return
-    raise AssertionError("item not in the Items list")
+    dialog._select_item(ref)
+    assert dialog._selected_item is ref, "item not in the shown profile"
 
 
 def _stat(profile, name):
@@ -363,9 +359,7 @@ def test_the_tab_is_off_for_a_text_label(tmp_path, monkeypatch) -> None:
 def test_edit_stat_saves_only_the_changed_threshold(tmp_path, monkeypatch) -> None:
     dialog, modals, path, profile = _editor(tmp_path, monkeypatch)
     ref = _stat(profile, "wtsd")
-    for row, (_block, _kind, item) in enumerate(dialog._row_items):
-        if item is ref:
-            dialog.stat_table.setCurrentCell(row, 0)
+    _select_item(dialog, ref)
 
     def raise_low(d) -> int:
         d.loth_input.setValue(-3.25)

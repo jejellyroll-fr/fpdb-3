@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:20+0100\n"
+"POT-Creation-Date: 2026-11-12 20:30+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -4799,6 +4799,7 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "Propietats del bloc"
@@ -4834,11 +4835,6 @@ msgstr "Fes servir el color intermedi per als valors entre llindars"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Column:"
-msgstr "Columna:"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Edit Popup Statistic"
 msgstr "Edita l'estadística de la finestra emergent"
 
@@ -4855,15 +4851,11 @@ msgstr "Exporta les coordenades de disposició"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Grid Position:"
-msgstr "Mostra Classificació"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "High Range:"
 msgstr "Rang alt:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Label:"
 msgstr "Afegeix una etiqueta"
@@ -4946,20 +4938,10 @@ msgstr "Finestra emergent:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Position and Statistic"
-msgstr "Mostra Classificació"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Preview shows how statistic colors will change based on values"
 msgstr ""
 "La previsualització mostra com canvien els colors de l'estadística segons "
 "els valors"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
-msgid "Row:"
-msgstr "Fila:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4993,6 +4975,11 @@ msgstr "Mostra a les estadístiques per posició"
 msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr ""
 "Mostra aquest tauler només per a un rival en aquesta posició (buit = sempre)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Statistic"
+msgstr "Estadístiques"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -5217,6 +5204,11 @@ msgstr "Afegeix una estadística"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Add Text Label"
+msgstr "Afegeix una etiqueta"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
 msgstr "Afegeix una línia separadora horitzontal (PT4 'Horz Line') a un tauler"
 
@@ -5345,10 +5337,6 @@ msgstr "No es pot actualitzar aquesta regla"
 #, fuzzy
 msgid "Cannot update this rule"
 msgstr "No es pot actualitzar aquesta regla"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Cell already used"
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell bg:"
@@ -5483,6 +5471,11 @@ msgstr "Regla duplicada"
 #, fuzzy
 msgid "Edit"
 msgstr "Edita"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Edit Text Label"
+msgstr "Edita la base de dades"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5714,6 +5707,13 @@ msgstr "Propietats de l'element"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Label text (e.g. column header, caption):"
+msgstr ""
+"Afegeix una etiqueta de text (capçalera de columna/fila o llegenda) a un "
+"tauler"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Layout Conflict"
 msgstr "Conflicte de disposicions"
 
@@ -5721,6 +5721,11 @@ msgstr "Conflicte de disposicions"
 #, python-brace-format
 msgid "Layout coordinates for site layout '{name}' already exist."
 msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Line colour"
+msgstr "Color intermedi:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Lo col:"
@@ -5773,6 +5778,11 @@ msgstr "➕ Finestra emergent nova"
 #, fuzzy
 msgid "New Profile"
 msgstr "Perfil nou"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "New panel (block) name:"
+msgstr "Nom del perfil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -6024,13 +6034,6 @@ msgid "Row gap:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
-msgid ""
-"Row {row}, column {col} already holds {item}. The first free cell is row "
-"{free_row}, column {free_col}."
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Rows:"
 msgstr ""
 
@@ -6122,11 +6125,6 @@ msgstr "Text"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Text label (header / caption) — not a stat"
-msgstr "Etiqueta de text (capçalera / llegenda) — no és una estadística"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Text:"
 msgstr "Text"
 
@@ -6188,6 +6186,10 @@ msgid "Then show"
 msgstr "Llavors mostra"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "This profile has no panels. Use Add Block first."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
 msgstr ""
 
@@ -6246,10 +6248,6 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "You have unsaved changes. Do you want to save before closing?"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "a separator line"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -8940,6 +8938,10 @@ msgstr ""
 #~ msgstr "Impossible reconèixer tipus de joc de: '%s'"
 
 #, fuzzy
+#~ msgid "Column:"
+#~ msgstr "Columna:"
+
+#, fuzzy
 #~ msgid "Could not identify as a %s hand"
 #~ msgstr "No es pot trobar el fitxer %s"
 
@@ -9011,6 +9013,10 @@ msgstr ""
 #~ "Les llicències completes es poden trobar a agpl-3.0.txt, gpl-2.0.txt, "
 #~ "gpl-3.0.txt i mit.txt a la carpeta d’instal•lació del fpdb."
 
+#, fuzzy
+#~ msgid "Grid Position:"
+#~ msgstr "Mostra Classificació"
+
 #~ msgid "INFO: No games returned from database"
 #~ msgstr "INFO: No s'han trobat partides a la base de dades"
 
@@ -9049,8 +9055,16 @@ msgstr ""
 #~ "'%s' - '%s'"
 #~ msgstr "Impossible reconèixer tipus de joc de: '%s'"
 
+#, fuzzy
+#~ msgid "Position and Statistic"
+#~ msgstr "Mostra Classificació"
+
 #~ msgid "Print Start/Stop Info"
 #~ msgstr "Mostra Info Inici/Parada"
+
+#, fuzzy
+#~ msgid "Row:"
+#~ msgstr "Fila:"
 
 #~ msgid "Sites:"
 #~ msgstr "Llocs:"
@@ -9058,6 +9072,10 @@ msgstr ""
 #~ msgid "Some database functions will not work without NumPy support"
 #~ msgstr ""
 #~ "Algunes funcions de la base de dades no funcionaran sense suport NumPy"
+
+#, fuzzy
+#~ msgid "Text label (header / caption) — not a stat"
+#~ msgstr "Etiqueta de text (capçalera / llegenda) — no és una estadística"
 
 #~ msgid "bad number in xalignment was ignored"
 #~ msgstr "nombre erroni en xaligment ha estat ignorat"

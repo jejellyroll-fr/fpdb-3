@@ -53,20 +53,10 @@ def _save(dialog, modals) -> None:
     assert not [m for m in modals.messages if m[0] == "critical"], modals.messages
 
 
-def _select_table_row(dialog, ref) -> None:
-    for row, (_block, _kind, item) in enumerate(dialog._row_items):
-        if item is ref:
-            dialog.stat_table.setCurrentCell(row, 0)
-            return
-    raise AssertionError("item not in the editor's table")
-
-
 def _select_item(dialog, ref) -> None:
-    for row, (_kind, item) in enumerate(dialog._group_item_refs):
-        if item is ref:
-            dialog.group_items_list.setCurrentRow(row)
-            return
-    raise AssertionError("item not in the Items list")
+    """Select an item as a click on its chip does."""
+    dialog._select_item(ref)
+    assert dialog._selected_item is ref, "item not in the shown profile"
 
 
 def _cells(container) -> list[tuple[int, int]]:
@@ -131,52 +121,49 @@ def test_b1_editing_a_stat_without_changes_leaves_it_alone(tmp_path, monkeypatch
     profile = select_profile(dialog, "hole")
     ref = profile["stats"][0]
     original = dict(ref)
-    _select_table_row(dialog, ref)
+    _select_item(dialog, ref)
     modals.dialogs.append(lambda _d: ACCEPT)
     dialog.edit_stat()
     assert ref == original
 
 
-def test_b2_adding_a_stat_to_a_taken_cell_is_refused(tmp_path, monkeypatch) -> None:
+def test_b2_a_new_stat_takes_the_first_free_cell(tmp_path, monkeypatch) -> None:
     dialog, modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
     profile = select_profile(dialog, "hole")
 
-    def onto_vpip(d) -> int:
-        d.row_input.setCurrentText("0")
-        d.col_input.setCurrentText("0")
+    def pick(d) -> int:
         d.stat_input.setCurrentText("three_B")
         return ACCEPT
 
-    modals.dialogs.append(onto_vpip)
-    before = list(profile["stats"])
+    modals.dialogs.append(pick)
     dialog.add_stat()
-    assert profile["stats"] == before
-    assert [kind for kind, _text in modals.messages] == ["warning"]
-    assert "row 1, column 1" in modals.messages[0][1]
+    assert _cells(profile) == [(0, 0), (0, 1), (1, 0), (1, 1)]
+    assert profile["stats"][-1]["stat"] == "three_B"
+    assert not modals.messages
 
 
-def test_b2_editing_a_stat_onto_a_taken_cell_is_refused(tmp_path, monkeypatch) -> None:
+def test_b2_the_stat_dialog_cannot_move_a_cell(tmp_path, monkeypatch) -> None:
     dialog, modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
     profile = select_profile(dialog, "hole")
     ref = next(s for s in profile["stats"] if s["stat"] == "wtsd")
-    _select_table_row(dialog, ref)
+    _select_item(dialog, ref)
+    shown = []
 
-    def onto_pfr(d) -> int:
-        d.row_input.setCurrentText("0")
-        d.col_input.setCurrentText("1")
+    def look(d) -> int:
+        shown.append((hasattr(d, "row_input"), hasattr(d, "col_input")))
         return ACCEPT
 
-    modals.dialogs.append(onto_pfr)
+    modals.dialogs.append(look)
     dialog.edit_stat()
+    assert shown == [(False, False)]
     assert (ref["row"], ref["col"]) == (1, 0)
-    assert [kind for kind, _text in modals.messages] == ["warning"]
 
 
 def test_b2_editing_a_stat_in_place_is_not_a_collision(tmp_path, monkeypatch) -> None:
     dialog, modals, _path = _editor(tmp_path, monkeypatch, FLAT_WITH_HOLE)
     profile = select_profile(dialog, "hole")
     ref = next(s for s in profile["stats"] if s["stat"] == "wtsd")
-    _select_table_row(dialog, ref)
+    _select_item(dialog, ref)
     modals.dialogs.append(lambda _d: ACCEPT)
     dialog.edit_stat()
     assert (ref["row"], ref["col"]) == (1, 0)
@@ -280,11 +267,9 @@ def test_b9_a_duplicated_profile_keeps_its_presentation(tmp_path, monkeypatch) -
 def test_b10_the_status_bar_counts_a_stat_added_to_a_panel(tmp_path, monkeypatch) -> None:
     dialog, modals, _path = _editor(tmp_path, monkeypatch, TWO_BLOCKS)
     select_profile(dialog, "two_blocks")
-    _select_table_row(dialog, dialog._row_items[0][2])
+    _select_item(dialog, dialog.hud_profiles["two_blocks"]["blocks"][0]["stats"][0])
 
     def free_cell(d) -> int:
-        d.row_input.setCurrentText("0")
-        d.col_input.setCurrentText("1")
         d.stat_input.setCurrentText("pfr")
         return ACCEPT
 
@@ -294,11 +279,16 @@ def test_b10_the_status_bar_counts_a_stat_added_to_a_panel(tmp_path, monkeypatch
 
 
 def _items(dialog) -> list:
-    return [item for _kind, item in dialog._group_item_refs]
+    """The items of the panel shown in Design, in reading order."""
+    from fpdb_3_legacy.modern_hud_preferences import layout_model
+
+    _profile, container = dialog._shown_container()
+    found = sorted(layout_model.items(container), key=lambda item: layout_model.position(*item))
+    return [ref for _kind, ref in found]
 
 
 def _assert_selected(dialog, ref) -> None:
-    """The one selection, the same in the Items list, the table and the canvas."""
+    """The one selection, the same in Item Properties, the editor's actions and the canvas."""
     assert dialog._current_item()[1] is ref
     assert dialog._selected_row_item()[2] is ref
     assert all(canvas.selected_ref is ref for canvas in dialog._design_canvases)
@@ -320,15 +310,13 @@ def test_b11_a_new_item_becomes_the_selection(tmp_path, monkeypatch) -> None:
     profile = select_profile(dialog, "hole")
 
     def free_cell(d) -> int:
-        d.row_input.setCurrentText("1")
-        d.col_input.setCurrentText("1")
         d.stat_input.setCurrentText("cb1")
         return ACCEPT
 
     modals.dialogs.append(free_cell)
     dialog.add_stat()
     added = profile["stats"][-1]
-    assert added["stat"] == "cb1"
+    assert (added["stat"], added["row"], added["col"]) == ("cb1", 1, 1)
     _assert_selected(dialog, added)
 
 
@@ -337,7 +325,7 @@ def test_b11_picking_an_item_of_another_panel_shows_that_panel(tmp_path, monkeyp
     profile = select_profile(dialog, "two_blocks")
     assert dialog.group_list.currentRow() == 0
     cb1 = profile["blocks"][1]["stats"][0]
-    _select_table_row(dialog, cb1)
+    _select_item(dialog, cb1)
     assert dialog.group_list.currentRow() == 1
     _assert_selected(dialog, cb1)
 

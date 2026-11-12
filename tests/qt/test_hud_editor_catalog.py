@@ -45,11 +45,8 @@ def _save(dialog, modals) -> None:
 
 
 def _select(dialog, ref) -> None:
-    for row, (_kind, item) in enumerate(dialog._group_item_refs):
-        if item is ref:
-            dialog.group_items_list.setCurrentRow(row)
-            return
-    raise AssertionError("item not in the panel")
+    dialog._select_item(ref)
+    assert dialog._selected_item is ref, "item not in the panel"
 
 
 def _stat(container, name: str) -> dict:
@@ -61,7 +58,7 @@ def test_available_stats_takes_the_place_of_the_items_list(tmp_path, monkeypatch
     dialog, _modals, _path = _editor(tmp_path, monkeypatch)
     select_profile(dialog, "holdem_ring")
     assert not dialog.stat_catalog_widget.isHidden()
-    assert dialog.group_items_list.isHidden()
+    assert not hasattr(dialog, "group_items_list")
     assert len(dialog.stat_catalog_widget.catalog) > 250
 
 
@@ -200,11 +197,9 @@ def test_a_missing_popup_is_shown_and_kept(tmp_path, monkeypatch) -> None:
 
 # --- Add/Edit Statistic ------------------------------------------------------------
 def _answer_with(text: str, popup: str | None = None):
-    """Fill the dialog for the free cell of FLAT_WITH_HOLE and press OK."""
+    """Fill the dialog and press OK; the stat goes to the free cell of FLAT_WITH_HOLE."""
 
     def answer(dlg) -> int:
-        dlg.row_input.setCurrentText("1")
-        dlg.col_input.setCurrentText("0")
         dlg.stat_input.setCurrentText(text)
         if popup is not None:
             dlg.popup_input.setCurrentIndex(dlg.popup_input.findData(popup))
