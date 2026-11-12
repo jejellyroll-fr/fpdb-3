@@ -118,10 +118,9 @@ def confirm_dynamic_panels(parent: QWidget | None, path: Any) -> bool:
 
 
 class ModernHudPreferences(QDialog):
-    #: The selected item of the current profile, by identity (B11).
+    #: The selected item of the current profile, by identity (B11). The Design
+    #: canvas shows it; nothing else holds the selection.
     _selected_item: dict | None = None
-    #: True while the stat table is refilled, so its signals are not a selection.
-    _building_table = False
 
     def __init__(self, config, parent=None) -> None:
         super().__init__(parent)
@@ -336,7 +335,6 @@ class ModernHudPreferences(QDialog):
         # PT4-style Group Items list + Item Properties / Color Ranges tabs, placed
         # in the SAME top row so the four property zones sit side-by-side (PT4).
         self._loading_item = False
-        self._group_item_refs: list = []
         items_col = QVBoxLayout()
         items_col.setContentsMargins(0, 0, 0, 0)
         ilabel = QLabel(_("Available Stats"))
@@ -351,12 +349,6 @@ class ModernHudPreferences(QDialog):
         self.stat_catalog_widget.setToolTip(_("Double-click a stat to add it to the panel shown in Design."))
         self.stat_catalog_widget.stat_activated.connect(self._add_catalog_stat)
         items_col.addWidget(self.stat_catalog_widget)
-        # Kept, hidden, as the selection's state until the canvas holds it alone
-        # (drag and drop, step 4 of the plan).
-        self.group_items_list = QListWidget()
-        self.group_items_list.currentRowChanged.connect(self._on_group_item_selected)
-        self.group_items_list.hide()
-        items_col.addWidget(self.group_items_list)
 
         self.item_props_tabs = QTabWidget()
         self.item_props_tabs.setMinimumWidth(250)
@@ -474,18 +466,6 @@ class ModernHudPreferences(QDialog):
         self.design_scroll.setWidget(self._design_host)
         left_layout.addWidget(self.design_scroll, 2)
         self._design_canvases: list = []
-
-        # Statistics table: kept for selection state + add/edit/remove logic, but
-        # hidden in the PT4 layout (the Items list + design canvas replace it).
-        self.stat_table = QTableWidget(0, 7)
-        self.stat_table.setHorizontalHeaderLabels(["Type", "Row", "Col", "Item", "Span", "Click Action", "Popup"])
-        self.stat_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.stat_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.stat_table.currentCellChanged.connect(self._on_table_item_selected)
-        self.stat_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.stat_table.setAlternatingRowColors(True)
-        self.stat_table.hide()
-        left_layout.addWidget(self.stat_table)
 
         # Statistics action buttons
         stat_btn_frame = QFrame()
@@ -1761,7 +1741,7 @@ class ModernHudPreferences(QDialog):
 
     def on_profile_selected(self, index) -> None:
         if index < 0 or index >= self.profile_combo.count():
-            self.stat_table.setRowCount(0)
+            self._selected_item = None
             self.preview.set_stats([])
             self.update_status()
             return
@@ -1817,85 +1797,6 @@ class ModernHudPreferences(QDialog):
         # Update grid size
         self.preview.set_hud_params(xpad=xpad, ypad=ypad, **self._profile_preview_params(name, profile))
         self.preview.set_grid(rows, cols)
-
-        # Build the table rows: stats plus PT4-style text-label items (column/row
-        # headers, captions). For multi-panel profiles the texts live per block
-        # with local positions, so offset them to the same stacked grid as stats.
-        # self._row_items maps each table row -> (block_index|None, kind, ref dict)
-        # so add/edit/remove operate on the actual block item (block-aware), which
-        # is what gets saved for multi-panel profiles.
-        entries: list[tuple[Any, Any, Any, int | None, str, Any]] = []
-        blocks = profile.get("blocks") if isinstance(profile, dict) else None
-        if blocks:
-            row_offset = 0
-            for bi, blk in enumerate(blocks):
-                for s in blk.get("stats", []):
-                    entries.append((s.get("row", 0) + row_offset, s.get("col", 0), s, bi, "stat", s))
-                for t in blk.get("texts", []):
-                    disp = {
-                        "row": t["rowcol"][0] + row_offset,
-                        "col": t["rowcol"][1],
-                        "stat": f"🔤 {t['label']}" if t["label"] else "🔤 (label)",
-                        "is_text": True,
-                    }
-                    entries.append((t["rowcol"][0] + row_offset, t["rowcol"][1], disp, bi, "text", t))
-                for h in blk.get("hlines", []):
-                    disp = {
-                        "row": h["rowcol"][0] + row_offset,
-                        "col": h["rowcol"][1],
-                        "stat": "──── (line)",
-                        "is_text": True,
-                    }
-                    entries.append((h["rowcol"][0] + row_offset, h["rowcol"][1], disp, bi, "hline", h))
-                row_offset += blk.get("rows", 1)
-            entries.sort(key=lambda x: (x[0], x[1]))
-        else:
-            entries = [(s.get("row", 0), s.get("col", 0), s, None, "stat", s) for s in stats]
-        table_rows = [(gr, gc, disp) for gr, gc, disp, _bi, _k, _r in entries]
-        self._row_items = [(bi, kind, ref) for _gr, _gc, _d, bi, kind, ref in entries]
-
-        # Update table. Its selection signal is ignored meanwhile: a half-built
-        # table would report a row whose item is not the one shown.
-        row_items = getattr(self, "_row_items", [])
-        self._building_table = True
-        self.stat_table.setRowCount(len(table_rows))
-        for i, (_r, _c, stat) in enumerate(table_rows):
-            kind = row_items[i][1] if i < len(row_items) else "stat"
-            ref = row_items[i][2] if i < len(row_items) else stat
-
-            type_item = QTableWidgetItem({"text": "Label", "hline": "Line"}.get(kind, "Stat"))
-            type_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.stat_table.setItem(i, 0, type_item)
-
-            row_item = QTableWidgetItem(str(stat["row"]))
-            row_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.stat_table.setItem(i, 1, row_item)
-
-            col_item = QTableWidgetItem(str(stat["col"]))
-            col_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.stat_table.setItem(i, 2, col_item)
-
-            stat_item = QTableWidgetItem(stat["stat"])
-            if stat.get("is_text"):
-                stat_item.setToolTip(_("Text label (header / caption) — not a stat"))
-            self.stat_table.setItem(i, 3, stat_item)
-
-            span_item = QTableWidgetItem(str(int(ref.get("colspan", 1) or 1)))
-            span_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.stat_table.setItem(i, 4, span_item)
-
-            click_item = QTableWidgetItem(stat.get("click", ""))
-            self.stat_table.setItem(i, 5, click_item)
-
-            popup_item = QTableWidgetItem(stat.get("popup", ""))
-            self.stat_table.setItem(i, 6, popup_item)
-
-            if stat.get("stat_locolor") or stat.get("stat_hicolor"):
-                stat_item.setToolTip(
-                    f"Colors configured: Low={stat.get('stat_locolor', 'none')}, "
-                    f"High={stat.get('stat_hicolor', 'none')}",
-                )
-        self._building_table = False
 
         # Multi-panel profile -> render stacked, coloured, titled boxes; otherwise
         # the classic single grid. Never let a preview failure leave it blank:
@@ -2006,7 +1907,7 @@ class ModernHudPreferences(QDialog):
             self._refresh_history_buttons()
 
     def _select_item(self, ref) -> None:
-        """Make ``ref`` the selection, from whichever view picked it."""
+        """Make ``ref`` the selection: the canvas marks it, Item Properties shows it."""
         if ref is None or ref is self._selected_item:
             return
         _name, profile = self._current_profile()
@@ -2014,27 +1915,17 @@ class ModernHudPreferences(QDialog):
         if where is None:
             return
         self._selected_item = ref
-        block_index = where[0]
+        block_index, kind = where
         if block_index is not None and block_index != self._current_block_index and hasattr(self, "group_list"):
-            # Showing another panel rebuilds its Items list, which selects
-            # the item again by identity.
+            # Showing another panel redraws the canvas, which marks the item.
             self.group_list.setCurrentRow(block_index)
             return
-        for row, (_kind, item) in enumerate(getattr(self, "_group_item_refs", [])):
-            if item is ref:
-                self.group_items_list.setCurrentRow(row)
-                return
+        self._show_selected_item(kind, ref)
 
     def _on_canvas_item_selected(self, payload) -> None:
         """A chip was clicked -> it becomes the selection everywhere."""
         _bi, _kind, ref = payload
         self._select_item(ref)
-
-    def _on_table_item_selected(self, row: int, *_args: Any) -> None:
-        """A table row was picked -> its item becomes the selection everywhere."""
-        items = getattr(self, "_row_items", [])
-        if not self._building_table and 0 <= row < len(items):
-            self._select_item(items[row][2])
 
     # --- Design canvas edits (#775) ------------------------------------------
     def _shown_container(self):
@@ -2223,11 +2114,11 @@ class ModernHudPreferences(QDialog):
         if blocks and row < len(blocks):
             self.group_props_box.setEnabled(True)
             self._load_group_props(blocks[row])
-            self._populate_group_items(blocks[row])
+            self._sync_item_selection(blocks[row])
         else:
             self.group_props_box.setEnabled(False)
             flat = {"stats": profile.get("stats", []) if isinstance(profile, dict) else [], "texts": [], "hlines": []}
-            self._populate_group_items(flat)
+            self._sync_item_selection(flat)
         # Show the selected panel's grid on the design canvas + preview (box-by-box).
         if profile is not None:
             try:
@@ -2416,49 +2307,41 @@ class ModernHudPreferences(QDialog):
                     self._style_color_btn(self._item_color_btns[role], colour)
         self._item_prop_changed()
 
-    def _populate_group_items(self, block) -> None:
-        if not hasattr(self, "group_items_list"):
+    def _sync_item_selection(self, block) -> None:
+        """Keep the selection when the shown panel holds it, else select its first item."""
+        items = sorted(
+            layout_model.items(block or {}),
+            key=lambda found: layout_model.position(found[0], found[1]),
+        )
+        keep = next(((kind, ref) for kind, ref in items if ref is self._selected_item), None)
+        if keep is None and items:
+            keep = items[0]
+        if keep is None:
+            self._selected_item = None
+            if self._has_item_props():
+                self._clear_item_props()
             return
-        self._loading_item = True
-        self.group_items_list.clear()
-        self._group_item_refs = []
-        rows = []
-        for s in (block or {}).get("stats", []):
-            rows.append((s.get("row", 0), s.get("col", 0), "stat", s, f"Stat: {s.get('stat', '')}"))
-        for t in (block or {}).get("texts", []):
-            rows.append((t["rowcol"][0], t["rowcol"][1], "text", t, f"Text: {t.get('label', '') or '(label)'}"))
-        for h in (block or {}).get("hlines", []):
-            rows.append((h["rowcol"][0], h["rowcol"][1], "hline", h, "Horz Line"))
-        rows.sort(key=lambda x: (x[0], x[1]))
-        for _r, _c, kind, ref, label in rows:
-            self.group_items_list.addItem(label)
-            self._group_item_refs.append((kind, ref))
-        self._loading_item = False
-        if self._group_item_refs:
-            # The selected item again if this panel still holds it, else the first.
-            keep = next((i for i, (_k, ref) in enumerate(self._group_item_refs) if ref is self._selected_item), 0)
-            self.group_items_list.setCurrentRow(keep)
-        else:
-            self._clear_item_props()
+        self._selected_item = keep[1]
+        self._show_selected_item(*keep)
 
     def _current_item(self):
-        row = self.group_items_list.currentRow()
-        if 0 <= row < len(self._group_item_refs):
-            return self._group_item_refs[row]
-        return None, None
+        """``(kind, ref)`` of the selected item; ``(None, None)`` when there is none."""
+        _name, profile = self._current_profile()
+        where = editor_state.locate(profile, self._selected_item)
+        if where is None:
+            return None, None
+        return where[1], self._selected_item
 
-    def _on_group_item_selected(self, row) -> None:
-        if row is None or not (0 <= row < len(self._group_item_refs)):
-            return
-        kind, ref = self._group_item_refs[row]
-        self._selected_item = ref
-        self._load_item_props(kind, ref)
+    def _has_item_props(self) -> bool:
+        """False for a dialog built without the Item Properties form (headless tests)."""
+        return getattr(self, "ip_text", None) is not None
+
+    def _show_selected_item(self, kind: str, ref: dict) -> None:
+        """Show the selected item in Item Properties and mark it on the canvas."""
+        if self._has_item_props():
+            self._load_item_props(kind, ref)
         for cv in getattr(self, "_design_canvases", []):
             cv.select_ref(ref)
-        for trow, (_b, _k, r) in enumerate(getattr(self, "_row_items", [])):
-            if r is ref:
-                self.stat_table.setCurrentCell(trow, 0)
-                break
 
     def _clear_item_props(self) -> None:
         self._loading_item = True
@@ -2545,12 +2428,6 @@ class ModernHudPreferences(QDialog):
             self._apply_item_layout(ref)
         else:  # hline
             ref["colspan"] = self.ip_colspan.value()
-        item = self.group_items_list.currentItem()
-        if item is not None:
-            if kind == "stat":
-                item.setText(f"Stat: {ref.get('stat', '')}")
-            elif kind == "text":
-                item.setText(f"Text: {ref.get('label', '') or '(label)'}")
         self._refresh_after_group_edit()
 
     def _apply_item_layout(self, ref: dict) -> None:
@@ -2786,7 +2663,7 @@ class ModernHudPreferences(QDialog):
             if self.profile_combo.count() > 0:
                 self.profile_combo.setCurrentIndex(0)
             else:
-                self.stat_table.setRowCount(0)
+                self._selected_item = None
                 self.preview.set_stats([])
 
     def find_popup_node(self, name):
@@ -3342,64 +3219,33 @@ class ModernHudPreferences(QDialog):
         return {"stats": profile}
 
     def _selected_row_item(self):
-        """(block_index, kind, ref) for the selected table row, or None."""
-        items = getattr(self, "_row_items", [])
-        row = self.stat_table.currentRow()
-        if 0 <= row < len(items):
-            return items[row]
-        return None
+        """``(block_index, kind, ref)`` of the selected item, or None."""
+        _name, profile = self._current_profile()
+        where = editor_state.locate(profile, self._selected_item)
+        if where is None:
+            return None
+        return where[0], where[1], self._selected_item
 
     def add_stat(self) -> None:
-        name, profile = self._current_profile()
-        if profile is None:
+        """Add a stat to the first free cell of the panel shown in Design.
+
+        The canvas places it: drag it, or move it with Alt+arrows, from there.
+        """
+        _profile, container = self._shown_container()
+        if container is None:
             return
-        # Add to the block of the selected row (or the first block / flat list).
-        sel = self._selected_row_item()
-        block_index = sel[0] if sel else (0 if isinstance(profile, dict) and profile.get("blocks") else None)
-        container = self._item_container(profile, block_index)
-        max_rows = int(container.get("rows", 5)) or 5
-        max_cols = int(container.get("cols", 5)) or 5
-        dlg = AddStatDialog(max_rows=max_rows, max_cols=max_cols, parent=self, **self._stat_dialog_lists())
+        dlg = AddStatDialog(parent=self, **self._stat_dialog_lists())
         if dlg.exec():
             stat = dlg.get_stat()
-            if self._refuse_taken_cell(container, stat):
-                return
-            layout_model.add(container, "stat", stat, int(stat["row"]), int(stat["col"]))
+            row, col = layout_model.first_free_cell(container)
+            layout_model.add(container, "stat", stat, row, col)
             self._refresh_profile(select=stat)
 
-    def _refuse_taken_cell(self, container, stat: dict, ignore: dict | None = None) -> bool:
-        """Say so and return True when ``stat`` would cover a cell another item holds.
-
-        The HUD keeps one item per cell: a second one on the same cell would be
-        written to the file and silently dropped by the next reader of it.
-        """
-        cols = int(container.get("cols", 1) or 1)
-        width = layout_model.span("stat", stat, cols)
-        row, col = int(stat["row"]), int(stat["col"])
-        if layout_model.can_place(container, row, col, width, ignore=ignore):
-            return False
-        taken = layout_model.occupancy(container, ignore=ignore)
-        kind, other = next(taken[(row, col + i)] for i in range(width) if (row, col + i) in taken)
-        what = {"stat": other.get("stat", ""), "text": other.get("label", "")}.get(kind) or _("a separator line")
-        free_row, free_col = layout_model.first_free_cell(container, width)
-        QMessageBox.warning(
-            self,
-            _("Cell already used"),
-            _(
-                "Row {row}, column {col} already holds {item}. "
-                "The first free cell is row {free_row}, column {free_col}."
-            ).format(row=row, col=col, item=what, free_row=free_row, free_col=free_col),
-        )
-        return True
-
     def edit_stat(self) -> None:
-        name, profile = self._current_profile()
-        if profile is None:
-            return
         sel = self._selected_row_item()
         if sel is None:
             return
-        block_index, kind, ref = sel
+        _block_index, kind, ref = sel
         if kind == "text":
             from PySide6.QtWidgets import QInputDialog
 
@@ -3417,18 +3263,10 @@ class ModernHudPreferences(QDialog):
                 ref["color"] = col.name()
                 self._refresh_profile()
             return
-        container = self._item_container(profile, block_index)
-        max_rows = int(container.get("rows", 5)) or 5
-        max_cols = int(container.get("cols", 5)) or 5
-        dlg = AddStatDialog(
-            stat=ref, max_rows=max_rows, max_cols=max_cols, parent=self, **self._stat_dialog_lists()
-        )
+        dlg = AddStatDialog(stat=ref, parent=self, **self._stat_dialog_lists())
         if dlg.exec():
-            changed = dlg.get_stat()  # only what the user changed (B1)
-            if self._refuse_taken_cell(container, {**ref, **changed}, ignore=ref):
-                return
-            stat_edit.apply_changes(ref, changed)  # ref is the block's stat dict -> edit persists
-            layout_model.grow_to_fit(container, "stat", ref)
+            # Only what the user changed (B1); the cell stays where the canvas put it.
+            stat_edit.apply_changes(ref, dlg.get_stat())
             self._refresh_profile()
 
     def remove_stat(self) -> None:
