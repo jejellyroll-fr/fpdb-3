@@ -188,9 +188,12 @@ class StatCatalogWidget(QWidget):
 class StatChoiceCombo(QComboBox):
     """Pick a stat of the catalogue by typing part of its name (B15).
 
-    The list holds the catalogue only. A name the catalogue lacks can still be
-    shown -- the stat a cell already has -- but :meth:`chosen_entry` answers
-    None for it, so the caller can keep it rather than write a new unknown name.
+    The list holds the catalogue only. A cell the catalogue cannot resolve can
+    still be shown -- an unknown name, or an analytics binding whose definition
+    is not installed -- and :meth:`chosen_entry` answers None for it until the
+    user picks an entry, so the caller keeps the cell as it is. Its text may
+    well be a known name (an analytics cell called ``vpip``): only an explicit
+    pick from the list turns it into that stat.
     """
 
     def __init__(self, catalog: StatCatalog, parent: QWidget | None = None) -> None:
@@ -210,16 +213,27 @@ class StatChoiceCombo(QComboBox):
         completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
         self.setCompleter(completer)
         self.lineEdit().setPlaceholderText(_("Type to search the stats"))
+        # The text shown for a cell no entry resolves; None once the user picks.
+        self._unresolved: str | None = None
+        self.activated.connect(self._forget_unresolved)
+
+    def _forget_unresolved(self, _index: int = -1) -> None:
+        self._unresolved = None
 
     def show_item(self, item: Mapping[str, Any] | None) -> None:
         """Show the stat of a profile cell, by its catalogue label when it has one."""
         item = item or {}
         entry = self.catalog.entry_for_item(item)
-        self.setCurrentText(choice_label(entry) if entry is not None else str(item.get("stat", "") or ""))
+        text = choice_label(entry) if entry is not None else str(item.get("stat", "") or "")
+        self._unresolved = None if entry is not None else text.strip()
+        self.setCurrentText(text)
 
     def chosen_entry(self) -> CatalogEntry | None:
-        """The catalogue entry the text names, or None."""
-        return self.catalog.entry_for_label(self.currentText())
+        """The catalogue entry the text names; None for a shown cell no entry resolves."""
+        text = self.currentText()
+        if self._unresolved is not None and text.strip() == self._unresolved:
+            return None
+        return self.catalog.entry_for_label(text)
 
 
 class PopupChoiceCombo(QComboBox):

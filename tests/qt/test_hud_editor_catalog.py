@@ -286,3 +286,45 @@ def test_another_stat_in_the_dialog_takes_its_whole_binding(tmp_path, monkeypatc
     dialog.edit_stat()
     assert cell["stat"] == "fold_to_cbet_flop"
     assert {key: cell[key] for key in entry.attributes} == dict(entry.attributes)
+
+
+UNINSTALLED = (
+    '<ss name="uninstalled" rows="1" cols="2">'
+    '<stat _rowcol="(1,1)" _stat_name="vpip" data_source="analytics" data_definition="not_installed"'
+    ' data_format="count"/>'
+    "</ss>"
+)
+
+
+def test_an_analytics_cell_whose_definition_is_missing_is_left_alone(tmp_path, monkeypatch) -> None:
+    dialog, modals, path = _editor(tmp_path, monkeypatch, UNINSTALLED)
+    profile = select_profile(dialog, "uninstalled")
+    cell = profile["stats"][0]
+    _select(dialog, cell)
+    assert dialog.ip_stat.currentText() == "vpip"
+
+    dialog._item_prop_changed()  # focus leaving the list
+    assert (cell["data_source"], cell["data_definition"]) == ("analytics", "not_installed")
+
+    def keep(dlg) -> int:
+        dlg.click_input.setText("tooltip")
+        dlg.accept()
+        return dlg.result()
+
+    modals.dialogs.append(keep)
+    dialog.edit_stat()
+    assert (cell["data_definition"], cell["click"]) == ("not_installed", "tooltip")
+    _save(dialog, modals)
+    saved = reload_stat_set(path, "uninstalled").stats[(0, 0)]
+    assert (saved.stat_name, saved.data_definition, saved.data_format) == ("vpip", "not_installed", "count")
+
+
+def test_picking_the_classic_stat_from_the_list_replaces_the_missing_binding(tmp_path, monkeypatch) -> None:
+    dialog, _modals, _path = _editor(tmp_path, monkeypatch, UNINSTALLED)
+    profile = select_profile(dialog, "uninstalled")
+    cell = profile["stats"][0]
+    _select(dialog, cell)
+    dialog.ip_stat.setCurrentIndex(dialog.ip_stat.findText("vpip"))
+    dialog.ip_stat.activated.emit(dialog.ip_stat.currentIndex())
+    assert cell["stat"] == "vpip"
+    assert not cell["data_source"] and not cell["data_definition"]

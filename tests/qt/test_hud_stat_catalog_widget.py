@@ -215,3 +215,25 @@ def test_the_popup_list_keeps_a_missing_popup_and_stays_quiet_while_filled(qtbot
     assert (combo.currentText(), combo.value()) == ("(no popup)", "")
     combo.clear()
     assert combo.value() == ""
+
+
+def test_an_unresolved_binding_stays_unresolved_until_a_pick(qtbot) -> None:
+    """An analytics cell named like a classic stat is not that stat until the user says so."""
+    from fpdb_3_legacy.modern_hud_preferences.stat_catalog_widget import StatChoiceCombo
+
+    combo = StatChoiceCombo(CATALOG)
+    qtbot.addWidget(combo)
+    combo.show_item({"stat": "vpip", "data_source": "analytics", "data_definition": "uninstalled"})
+    assert combo.currentText() == "vpip"
+    assert combo.chosen_entry() is None
+
+    combo.setCurrentText("pfr")
+    assert combo.chosen_entry().key == "classic:pfr"
+
+    combo.setCurrentText("vpip")
+    assert combo.chosen_entry() is None
+    combo.activated.emit(combo.findText("vpip"))
+    assert combo.chosen_entry().key == "classic:vpip"
+
+    combo.show_item({"stat": "vpip"})
+    assert combo.chosen_entry().key == "classic:vpip"
