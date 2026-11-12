@@ -464,3 +464,64 @@ def test_an_item_property_edit_can_be_undone(tmp_path, monkeypatch) -> None:
     dialog.undo_edit()
     assert [s["stat"] for s in profile["stats"]] == ["vpip", "pfr", "wtsd"]
     assert dialog._current_item()[1]["stat"] == "vpip"
+
+
+def test_the_canvas_keeps_the_focus_after_a_keyboard_move(tmp_path, monkeypatch) -> None:
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QApplication
+
+    dialog, _modals, _path = _editor(tmp_path, monkeypatch, FLAT)
+    profile = select_profile(dialog, "flat")
+    pfr = _named(profile, "pfr")
+    dialog._select_item(pfr)
+    dialog.show()
+    dialog.activateWindow()
+    _shown(dialog).setFocus()
+    QApplication.processEvents()
+    if QApplication.focusWidget() is not _shown(dialog):
+        pytest.skip("this platform gives no keyboard focus")
+
+    _key(_shown(dialog), Qt.Key.Key_Right, alt=True)
+    QApplication.processEvents()
+    assert (pfr["row"], pfr["col"]) == (0, 2)
+    assert QApplication.focusWidget() is _shown(dialog)
+
+
+def test_a_renamed_profile_keeps_its_undo_steps(tmp_path, monkeypatch) -> None:
+    dialog, modals, _path = _editor(tmp_path, monkeypatch, FLAT)
+    profile = select_profile(dialog, "flat")
+    dialog.add_col_btn.click()
+    modals.texts.append(("flat2", True))
+    dialog.rename_profile()
+    assert dialog.profile_combo.currentText() == "flat2"
+    assert dialog.undo_btn.isEnabled()
+    dialog.undo_edit()
+    assert profile["cols"] == 3
+
+
+def test_a_profile_made_again_under_an_old_name_starts_a_new_history(tmp_path, monkeypatch) -> None:
+    dialog, _modals, _path = _editor(tmp_path, monkeypatch, FLAT)
+    select_profile(dialog, "flat")
+    dialog.add_col_btn.click()
+    fresh = {"rows": 1, "cols": 1, "stats": []}
+    dialog.hud_profiles["flat"] = fresh
+    dialog.on_profile_selected(dialog.profile_combo.currentIndex())
+    assert not dialog.undo_btn.isEnabled()
+    dialog.undo_edit()
+    assert dialog.status_label.text() == "Nothing to undo."
+    assert fresh == {"rows": 1, "cols": 1, "stats": []}
+
+
+def test_presentation_and_hero_edits_can_be_undone(tmp_path, monkeypatch) -> None:
+    dialog, _modals, _path = _editor(tmp_path, monkeypatch, FLAT)
+    profile = select_profile(dialog, "flat")
+    before = dict(profile)
+    dialog.font_size_spin.setValue(dialog.font_size_spin.value() + 2)
+    assert dialog.undo_btn.isEnabled()
+    dialog.show_hero_checkbox.setChecked(not dialog.show_hero_checkbox.isChecked())
+    dialog.undo_edit()
+    dialog.undo_edit()
+    assert profile == before
+    assert not dialog.undo_btn.isEnabled() and dialog.redo_btn.isEnabled()
+    dialog.font_size_spin.setValue(dialog.font_size_spin.value() + 1)
+    assert not dialog.redo_btn.isEnabled()

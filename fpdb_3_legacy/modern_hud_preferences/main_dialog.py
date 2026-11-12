@@ -8,6 +8,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QApplication,
     QCheckBox,
     QColorDialog,
     QComboBox,
@@ -1128,6 +1129,7 @@ class ModernHudPreferences(QDialog):
     def load_profiles(self) -> None:
         # Try to load HUD profiles from config (from HUD_config.xml)
         self.hud_profiles = None
+        self._histories: dict[int, tuple[dict, undo.History]] = {}
         # Prefer stat_sets: this is the canonical HUD_config.xml representation
         # and preserves PT4 multi-block <block> panels. Some callers also expose
         # flattened hud_profiles, but those lose the block metadata needed by the
@@ -1563,6 +1565,7 @@ class ModernHudPreferences(QDialog):
         if isinstance(profile, dict):
             profile["positional_mode"] = self.positional_mode_combo.currentData() or "current"
         self._refresh_unsaved_indicator()
+        self._record_history()
 
     def _on_show_hero_changed(self, checked: bool) -> None:
         """Store the hero-HUD visibility on the current profile."""
@@ -1571,6 +1574,7 @@ class ModernHudPreferences(QDialog):
         if isinstance(profile, dict):
             profile["show_hero_hud"] = "true" if checked else "false"
         self._refresh_unsaved_indicator()
+        self._record_history()
 
     # --- Profile presentation (#764) ------------------------------------------
     def _create_presentation_box(self) -> QGroupBox:
@@ -1753,6 +1757,7 @@ class ModernHudPreferences(QDialog):
             **self._profile_preview_params(name, profile),
         )
         self._refresh_unsaved_indicator()
+        self._record_history()
 
     def on_profile_selected(self, index) -> None:
         if index < 0 or index >= self.profile_combo.count():
@@ -1763,7 +1768,7 @@ class ModernHudPreferences(QDialog):
         name = self.profile_combo.currentText()
         profile = self.hud_profiles.get(name, {})
         # The history starts from the profile as first shown, before any edit.
-        self._history(name, profile)
+        self._history(profile)
         self._refresh_panel_stat_blocks()
 
         # Reflect this profile's positional-panel mode in the combo (multi-block
@@ -1931,6 +1936,12 @@ class ModernHudPreferences(QDialog):
         """
         if not hasattr(self, "_design_layout"):
             return
+        # A keyboard edit redraws the canvas: the new one takes the focus back so
+        # the next arrow, Alt+arrow or Delete still reaches it.
+        focused = QApplication.focusWidget()
+        had_focus = focused is not None and any(
+            old is focused or old.isAncestorOf(focused) for old in getattr(self, "_design_canvases", [])
+        )
         # Clear previous canvas. Detach AND delete so an old canvas never lingers
         # as a stray top-level window (setParent(None) alone leaves it floating).
         self._design_canvases = []
@@ -1938,6 +1949,9 @@ class ModernHudPreferences(QDialog):
             item = self._design_layout.takeAt(0)
             w = item.widget()
             if w is not None:
+                # Hidden first: the show a layout queues for a widget just added
+                # would otherwise pop the detached canvas up as its own window.
+                w.hide()
                 w.setParent(None)
                 w.deleteLater()
         blocks = profile.get("blocks") if isinstance(profile, dict) else None
@@ -1966,6 +1980,11 @@ class ModernHudPreferences(QDialog):
         self._design_layout.addWidget(canvas)
         self._design_canvases.append(canvas)
         self._design_layout.addStretch()
+        if had_focus:
+            # A widget added to a shown layout appears only later, and a hidden
+            # one cannot take the focus.
+            canvas.show()
+            canvas.setFocus(Qt.FocusReason.OtherFocusReason)
 
     def _refresh_profile(self, select: dict | None = None, *, record: bool = True) -> None:
         """Redraw the current profile after an edit, keeping the selection (B11).
@@ -2083,27 +2102,35 @@ class ModernHudPreferences(QDialog):
             label.setText(text)
 
     # --- Undo and redo (#775) ------------------------------------------------
-    def _history(self, name: str, profile) -> undo.History | None:
-        """The history of a profile, started from how it is now."""
+    def _history(self, profile) -> undo.History | None:
+        """The history of a profile, started from how it is now.
+
+        Histories follow the profile dict, not its name: a rename keeps them,
+        and a profile deleted, reloaded or created again under the same name
+        starts afresh. Each entry holds its profile so its id is never reused.
+        """
         if not isinstance(profile, dict):
             return None
         histories = self.__dict__.setdefault("_histories", {})
-        history = histories.get(name)
-        if history is None:
-            history = histories[name] = undo.History(profile)
-        return history
+        entry = histories.get(id(profile))
+        if entry is None or entry[0] is not profile:
+            entry = histories[id(profile)] = (profile, undo.History(profile))
+        return entry[1]
+
+    def _forget_history(self, profile) -> None:
+        self.__dict__.get("_histories", {}).pop(id(profile), None)
 
     def _record_history(self) -> None:
         """Note the current profile as a step to undo, if it changed."""
-        name, profile = self._current_profile()
-        history = self._history(name, profile)
+        _name, profile = self._current_profile()
+        history = self._history(profile)
         if history is not None:
             history.record(profile)
         self._refresh_history_buttons()
 
     def _refresh_history_buttons(self) -> None:
-        name, profile = self._current_profile()
-        history = self._history(name, profile)
+        _name, profile = self._current_profile()
+        history = self._history(profile)
         for button, enabled in (
             (getattr(self, "undo_btn", None), history is not None and history.can_undo),
             (getattr(self, "redo_btn", None), history is not None and history.can_redo),
@@ -2121,8 +2148,8 @@ class ModernHudPreferences(QDialog):
         self._refresh_profile(record=False)
 
     def undo_edit(self) -> None:
-        name, profile = self._current_profile()
-        history = self._history(name, profile)
+        _name, profile = self._current_profile()
+        history = self._history(profile)
         state = history.undo(profile) if history is not None else None
         if state is None:
             self._show_status(_("Nothing to undo."))
@@ -2130,8 +2157,8 @@ class ModernHudPreferences(QDialog):
         self._restore_profile(state)
 
     def redo_edit(self) -> None:
-        name, profile = self._current_profile()
-        history = self._history(name, profile)
+        _name, profile = self._current_profile()
+        history = self._history(profile)
         state = history.redo(profile) if history is not None else None
         if state is None:
             self._show_status(_("Nothing to redo."))
@@ -2752,6 +2779,7 @@ class ModernHudPreferences(QDialog):
             == QMessageBox.Yes
         ):
             current_index = self.profile_combo.currentIndex()
+            self._forget_history(self.hud_profiles[name])
             del self.hud_profiles[name]
             editor_state.forget_profile(self._renamed, name)
             self.profile_combo.removeItem(current_index)
