@@ -287,7 +287,7 @@ def test_the_hud_shows_the_value_of_a_catalogue_stat_cell(monkeypatch) -> None:
     calls = []
 
     def do_stat(_stat_dict, player, stat, hand_instance=None):
-        calls.append((player, stat))
+        calls.append((player, stat, hand_instance))
         return (0.25, "25.0", "v=25.0", "vpip=25.0", "(1/4)", "desc")
 
     monkeypatch.setattr(Stats, "do_stat", do_stat)
@@ -298,7 +298,7 @@ def test_the_hud_shows_the_value_of_a_catalogue_stat_cell(monkeypatch) -> None:
     # A PT4 cell keeps its own text; so does a text cell.
     assert value(popup, {"kind": "stat", "text": "(cnt_x / cnt_y)"}) is None
     assert value(popup, {"kind": "text", "text": "Range", "stat": "vpip"}) is None
-    assert calls == [(7, "vpip")]
+    assert calls == [(7, "vpip", None)]
 
     widget = BlockPopup.build_block_popup_widget(GROUP, value_of=lambda cell: "42" if cell["text"] == "vpip" else None)
     from PySide6.QtWidgets import QLabel
@@ -331,3 +331,30 @@ def test_the_popup_canvas_and_its_preview_are_on_screen(tmp_path, monkeypatch, s
     assert catalog.mapTo(dialog, catalog.rect().topRight()).x() <= canvas.mapTo(dialog, canvas.rect().topLeft()).x()
     preview_top = dialog.popup_preview.mapTo(dialog, dialog.popup_preview.rect().topLeft()).y()
     assert preview_top > canvas.mapTo(dialog, canvas.rect().bottomLeft()).y()
+
+
+def test_duplicated_block_popups_share_their_unsaved_grid(tmp_path, monkeypatch) -> None:
+    """Two popups naming one sidecar group: edits of both are kept, written once."""
+    dialog, modals, sidecar = _block_popup_editor(tmp_path, monkeypatch)
+    dialog.popup_windows["zz_grid_copy"] = {**dialog.popup_windows["zz_grid"], "stats": []}
+    canvas = dialog.popup_canvas
+    assert _drop(canvas.cell_at(0, 1), _stat_mime("classic:cb1"))
+
+    dialog.popup_combo.addItem("zz_grid_copy")
+    dialog.popup_combo.setCurrentText("zz_grid_copy")
+    assert any(chip.item_ref["_cell"]["text"] == "cb1" for chip in dialog.popup_canvas.chips)
+    dialog.popup_catalog_widget.stat_activated.emit("classic:wtsd")
+    assert dialog.popup_windows["zz_grid"]["block_group"] is dialog.popup_windows["zz_grid_copy"]["block_group"]
+
+    _save(dialog, modals)
+    assert {"cb1", "wtsd"} <= set(_cells(sidecar))
+
+
+def test_duplicating_an_edited_block_popup_shares_its_grid(tmp_path, monkeypatch) -> None:
+    dialog, modals, sidecar = _block_popup_editor(tmp_path, monkeypatch)
+    assert _drop(dialog.popup_canvas.cell_at(0, 1), _stat_mime("classic:cb1"))
+    modals.texts.append(("zz_grid_copy", True))
+    dialog.duplicate_popup()
+    assert dialog.popup_windows["zz_grid_copy"]["block_group"] is dialog.popup_windows["zz_grid"]["block_group"]
+    _save(dialog, modals)
+    assert "cb1" in _cells(sidecar)

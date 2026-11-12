@@ -1244,7 +1244,8 @@ class ModernHudPreferences(QDialog):
 
             # An edited group stays in the popup's data until Save writes it to
             # the sidecar (#782): Cancel drops it, the unsaved mark sees it.
-            group = popup_data.get("block_group")
+            # Popups naming the same sidecar group share it.
+            group = self._pending_block_group(popup_data)
             if group is None:
                 try:
                     group = load_block_popup(popup_data["source"], popup_data["group"])
@@ -1424,19 +1425,37 @@ class ModernHudPreferences(QDialog):
         """
         popup = self._current_popup()
         if popup is not None and self._popup_group is not None:
-            popup["block_group"] = self._popup_group
+            # Every popup naming this sidecar group holds the same edited grid:
+            # Save writes it once, and no popup's edits overwrite another's.
+            key = (popup.get("source", ""), popup.get("group", ""))
+            for other in self.popup_windows.values():
+                if (other.get("source", ""), other.get("group", "")) == key:
+                    other["block_group"] = self._popup_group
         self._rebuild_popup_canvas(popup or {})
         self.update_popup_preview()
+
+    def _pending_block_group(self, popup_data: dict) -> dict | None:
+        """The edited, unsaved grid of the sidecar group ``popup_data`` names, if any."""
+        key = (popup_data.get("source", ""), popup_data.get("group", ""))
+        if popup_data.get("block_group") is not None:
+            return popup_data["block_group"]
+        for other in self.popup_windows.values():
+            if (other.get("source", ""), other.get("group", "")) == key and other.get("block_group") is not None:
+                return other["block_group"]
+        return None
 
     def _write_block_popup_groups(self) -> None:
         """Write each edited BlockPopup group into its JSON sidecar (on Save)."""
         import json
 
+        written: set[tuple[str, str]] = set()
         for popup in self.popup_windows.values():
             group = popup.get("block_group")
             source = popup.get("source", "")
-            if group is None or not source:
+            key = (source, popup.get("group", ""))
+            if group is None or not source or key in written:
                 continue
+            written.add(key)
             with open(source, encoding="utf-8") as fh:
                 data = json.load(fh)
             groups = data.setdefault("popup_groups", [])
@@ -4920,8 +4939,13 @@ class ModernHudPreferences(QDialog):
         if ok and new_name and new_name not in self.popup_windows:
             import copy
 
-            self.popup_windows[new_name] = copy.deepcopy(self.popup_windows[current_name])
+            original = self.popup_windows[current_name]
+            self.popup_windows[new_name] = copy.deepcopy(original)
             self.popup_windows[new_name]["name"] = new_name
+            # A BlockPopup copy names the same sidecar group: it shares the
+            # original's unsaved grid rather than a copy of it.
+            if original.get("block_group") is not None:
+                self.popup_windows[new_name]["block_group"] = original["block_group"]
             self.popup_combo.addItem(new_name)
             self.popup_combo.setCurrentText(new_name)
 
