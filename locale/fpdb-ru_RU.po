@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 23:51+0100\n"
+"POT-Creation-Date: 2026-11-13 00:25+0100\n"
 "PO-Revision-Date: 2011-06-16 13:21+0000\n"
 "Last-Translator: Lexej <alexej@glyvin.com>\n"
 "Language-Team: Russian (Russia) (http://www.transifex.net/projects/p/fpdb/"
@@ -5302,10 +5302,6 @@ msgid "Class:"
 msgstr "Класс:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Clear a grid cell by emptying its text in Item Properties."
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Color Ranges"
 msgstr "Цветовые диапазоны"
@@ -6163,10 +6159,6 @@ msgstr "Тема:"
 #, fuzzy
 msgid "Then show"
 msgstr "Тогда показать"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "This popup is a PokerTracker 4 grid: edit its cells in Item Properties."
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"

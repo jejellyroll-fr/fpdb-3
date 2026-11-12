@@ -1093,9 +1093,17 @@ def test_popup_item_properties_edit_persists(tmp_path):
 
     dlg.pi_text.setText("ZZZ")
     dlg._popup_item_changed()
-    data = json.load(open(dlg._popup_group_source, encoding="utf-8"))
-    grp = next(g for g in data["popup_groups"] if g["name"] == dlg._popup_group["name"])
-    assert any(cell["text"] == "ZZZ" for cell in grp["cells"])   # edit persisted to JSON
+
+    def sidecar_texts():
+        with open(dlg._popup_group_source, encoding="utf-8") as fh:
+            data = json.load(fh)
+        grp = next(g for g in data["popup_groups"] if g["name"] == dlg._popup_group["name"])
+        return [cell["text"] for cell in grp["cells"]]
+
+    assert "ZZZ" not in sidecar_texts()                 # held until Save (#782)
+    assert dlg.has_unsaved_changes()
+    dlg._write_block_popup_groups()                      # what Save does for the sidecar
+    assert "ZZZ" in sidecar_texts()                      # edit persisted to JSON
 
 
 @pytest.mark.skipif(not (os.path.exists(FIXTURE) and os.path.exists(EXAMPLE)), reason="fixtures missing")

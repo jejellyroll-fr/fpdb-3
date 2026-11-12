@@ -207,34 +207,104 @@ def _grid_chip(dialog, text: str):
     return next(chip for chip in dialog.popup_canvas.chips if chip.item_ref["_cell"]["text"] == text)
 
 
-def test_a_block_popup_cell_moves_to_a_free_cell_and_is_written_back(tmp_path, monkeypatch) -> None:
-    dialog, _modals, sidecar = _block_popup_editor(tmp_path, monkeypatch)
+def _save(dialog, modals) -> None:
+    dialog.save_changes()
+    assert not [m for m in modals.messages if m[0] == "critical"], modals.messages
+
+
+def test_a_block_popup_cell_moves_and_is_written_on_save(tmp_path, monkeypatch) -> None:
+    dialog, modals, sidecar = _block_popup_editor(tmp_path, monkeypatch)
     canvas = dialog.popup_canvas
     assert not canvas.list_mode
     assert _drop(canvas.cell_at(0, 1), canvas.mime_for(_grid_chip(dialog, "vpip").item_ref))
-    assert _cells(sidecar)["vpip"] == (0, 1)
     assert dialog._popup_selected["text"] == "vpip"
     assert dialog.pi_text.text() == "vpip"
+    # Held until Save, like every other edit.
+    assert _cells(sidecar)["vpip"] == (1, 1)
+    assert dialog.has_unsaved_changes()
+
+    _save(dialog, modals)
+    assert _cells(sidecar)["vpip"] == (0, 1)
+    assert "block_group" not in dialog.popup_windows["zz_grid"]
+    assert not dialog.has_unsaved_changes()
 
 
 def test_a_block_popup_cell_swaps_with_another(tmp_path, monkeypatch) -> None:
-    dialog, _modals, sidecar = _block_popup_editor(tmp_path, monkeypatch)
+    dialog, modals, sidecar = _block_popup_editor(tmp_path, monkeypatch)
     canvas = dialog.popup_canvas
     assert _drop(_grid_chip(dialog, "Range"), canvas.mime_for(_grid_chip(dialog, "22 hands").item_ref))
+    _save(dialog, modals)
     assert (_cells(sidecar)["Range"], _cells(sidecar)["22 hands"]) == ((1, 0), (0, 0))
 
 
-def test_a_block_popup_takes_no_catalogue_stat_and_keeps_its_cells_on_delete(tmp_path, monkeypatch) -> None:
+def test_a_catalogue_stat_goes_in_a_block_popup_cell(tmp_path, monkeypatch) -> None:
+    dialog, modals, sidecar = _block_popup_editor(tmp_path, monkeypatch)
+    canvas = dialog.popup_canvas
+    assert _drop(canvas.cell_at(0, 1), _stat_mime("classic:cb1"))
+    group = dialog.popup_windows["zz_grid"]["block_group"]
+    added = next(cell for cell in group["cells"] if cell["text"] == "cb1")
+    assert (added["kind"], added["stat"], added["row"], added["col"]) == ("stat", "cb1", 0, 1)
+    assert dialog._popup_selected is added
+    # Double-click: the first free cell, here a new row.
+    dialog.popup_catalog_widget.stat_activated.emit("classic:wtsd")
+    wtsd = next(cell for cell in group["cells"] if cell["text"] == "wtsd")
+    assert (wtsd["row"], wtsd["col"], group["rows"]) == (2, 0, 3)
+
+    _save(dialog, modals)
+    assert _cells(sidecar)["cb1"] == (0, 1)
+    assert _cells(sidecar)["wtsd"] == (2, 0)
+
+
+def test_delete_removes_a_block_popup_cell_and_cancel_keeps_the_sidecar(tmp_path, monkeypatch) -> None:
     from PySide6.QtCore import Qt
 
-    dialog, _modals, sidecar = _block_popup_editor(tmp_path, monkeypatch)
-    canvas = dialog.popup_canvas
-    _drop(canvas.cell_at(0, 1), _stat_mime("classic:cb1"))
-    assert "PokerTracker 4 grid" in dialog.status_label.text()
+    dialog, modals, sidecar = _block_popup_editor(tmp_path, monkeypatch)
     _grid_chip(dialog, "vpip").clicked.emit()
-    _key(canvas, Qt.Key.Key_Delete)
+    _key(dialog.popup_canvas, Qt.Key.Key_Delete)
+    assert "vpip" not in [chip.item_ref["_cell"]["text"] for chip in dialog.popup_canvas.chips]
+    # Not saved: the sidecar still has it (Cancel would leave it so).
     assert "vpip" in _cells(sidecar)
-    assert "emptying its text" in dialog.status_label.text()
+    _save(dialog, modals)
+    assert "vpip" not in _cells(sidecar)
+
+
+def test_the_remove_button_and_the_preview_follow_the_grid_in_memory(tmp_path, monkeypatch) -> None:
+    from PySide6.QtWidgets import QLabel
+
+    dialog, _modals, sidecar = _block_popup_editor(tmp_path, monkeypatch)
+    _grid_chip(dialog, "22 hands").clicked.emit()
+    dialog.remove_popup_stat()
+    shown = [label.text() for label in dialog.popup_preview.findChildren(QLabel)]
+    assert "22 hands" not in shown and "Range" in shown
+    assert "22 hands" in _cells(sidecar)
+
+
+def test_the_hud_shows_the_value_of_a_catalogue_stat_cell(monkeypatch) -> None:
+    from types import SimpleNamespace
+
+    from fpdb_3_legacy import BlockPopup, Stats
+
+    calls = []
+
+    def do_stat(_stat_dict, player, stat, hand_instance=None):
+        calls.append((player, stat))
+        return (0.25, "25.0", "v=25.0", "vpip=25.0", "(1/4)", "desc")
+
+    monkeypatch.setattr(Stats, "do_stat", do_stat)
+    popup = SimpleNamespace(stat_dict={7: {"seat": 3}}, seat=3, hand_instance=None)
+    popup._player_id = lambda: BlockPopup.BlockPopup._player_id(popup)
+    value = BlockPopup.BlockPopup._stat_value
+    assert value(popup, {"kind": "stat", "text": "vpip", "stat": "vpip"}) == "25.0"
+    # A PT4 cell keeps its own text; so does a text cell.
+    assert value(popup, {"kind": "stat", "text": "(cnt_x / cnt_y)"}) is None
+    assert value(popup, {"kind": "text", "text": "Range", "stat": "vpip"}) is None
+    assert calls == [(7, "vpip")]
+
+    widget = BlockPopup.build_block_popup_widget(GROUP, value_of=lambda cell: "42" if cell["text"] == "vpip" else None)
+    from PySide6.QtWidgets import QLabel
+
+    texts = [label.text() for label in widget.findChildren(QLabel)]
+    assert "42" in texts and "vpip" not in texts and "Range" in texts
 
 
 # --- Layout ---------------------------------------------------------------------------

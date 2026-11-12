@@ -1242,16 +1242,18 @@ class ModernHudPreferences(QDialog):
         if popup_data.get("class") == "BlockPopup" and popup_data.get("source") and popup_data.get("group"):
             from fpdb_3_legacy.BlockPopup import load_block_popup
 
-            try:
-                group = load_block_popup(popup_data["source"], popup_data["group"])
-            except (KeyError, OSError, TypeError, ValueError):
-                log.warning(
-                    "Unable to load block popup %s/%s", popup_data["source"], popup_data["group"], exc_info=True
-                )
-                group = None
+            # An edited group stays in the popup's data until Save writes it to
+            # the sidecar (#782): Cancel drops it, the unsaved mark sees it.
+            group = popup_data.get("block_group")
+            if group is None:
+                try:
+                    group = load_block_popup(popup_data["source"], popup_data["group"])
+                except (KeyError, OSError, TypeError, ValueError):
+                    log.warning(
+                        "Unable to load block popup %s/%s", popup_data["source"], popup_data["group"], exc_info=True
+                    )
+                    group = None
             if group:
-                # Keep the loaded group + its source so Item Properties edits the
-                # real cells and can be saved back to the JSON sidecar.
                 self._popup_group = group
                 self._popup_group_source = popup_data["source"]
                 block = {
@@ -1396,6 +1398,8 @@ class ModernHudPreferences(QDialog):
             self._after_popup_stat_edit()
         else:
             cell["text"] = self.pi_text.text()
+            if cell.get("kind") == "stat" and "stat" in cell:
+                cell["stat"] = cell["text"].strip()
             self._after_popup_item_edit()
 
     def _pick_popup_item_color(self, role: str) -> None:
@@ -1413,27 +1417,38 @@ class ModernHudPreferences(QDialog):
         self._after_popup_item_edit()
 
     def _after_popup_item_edit(self) -> None:
-        """Write the edited group back to its JSON sidecar and re-render the canvas
-        + preview (which both reload from that JSON)."""
+        """Keep the edited BlockPopup group with its popup and redraw the canvas and preview.
+
+        The sidecar is written by Save (:meth:`_write_block_popup_groups`), so an
+        edit can be cancelled like any other.
+        """
+        popup = self._current_popup()
+        if popup is not None and self._popup_group is not None:
+            popup["block_group"] = self._popup_group
+        self._rebuild_popup_canvas(popup or {})
+        self.update_popup_preview()
+
+    def _write_block_popup_groups(self) -> None:
+        """Write each edited BlockPopup group into its JSON sidecar (on Save)."""
         import json
 
-        src = getattr(self, "_popup_group_source", "")
-        grp = self._popup_group
-        if src and grp:
-            try:
-                with open(src, encoding="utf-8") as fh:
-                    data = json.load(fh)
-                for i, g in enumerate(data.get("popup_groups", [])):
-                    if g.get("name") == grp.get("name"):
-                        data["popup_groups"][i] = grp
-                        break
-                with open(src, "w", encoding="utf-8") as fh:
-                    json.dump(data, fh, indent=2)
-            except Exception:
-                log.exception("popup item edit: failed to write %s", src)
-        name = self.popup_combo.currentText()
-        self._rebuild_popup_canvas(self.popup_windows.get(name, {}))
-        self.update_popup_preview()
+        for popup in self.popup_windows.values():
+            group = popup.get("block_group")
+            source = popup.get("source", "")
+            if group is None or not source:
+                continue
+            with open(source, encoding="utf-8") as fh:
+                data = json.load(fh)
+            groups = data.setdefault("popup_groups", [])
+            index = next((i for i, g in enumerate(groups) if g.get("name") == group.get("name")), None)
+            if index is None:
+                groups.append(group)
+            else:
+                groups[index] = group
+            with open(source, "w", encoding="utf-8") as fh:
+                json.dump(data, fh, indent=2)
+        for popup in self.popup_windows.values():
+            popup.pop("block_group", None)
 
     def _after_popup_stat_edit(self) -> None:
         """Redraw the popup after an edit of its stats, keeping the selection."""
@@ -1518,35 +1533,71 @@ class ModernHudPreferences(QDialog):
         self._popup_selected = ref.get("_cell")
         self._after_popup_item_edit()
 
-    def _refuse_block_popup_stat(self) -> bool:
-        """Say so and return True when the shown popup is a BlockPopup grid."""
-        if self._popup_group is None:
-            return False
-        self._show_status(_("This popup is a PokerTracker 4 grid: edit its cells in Item Properties."))
-        return True
-
-    def _popup_canvas_stat_dropped(self, key: str, row: int, _col: int) -> None:
-        """A stat of Available Stats dropped on the popup: it goes in at that row."""
-        if not self._refuse_block_popup_stat():
-            self._insert_popup_stat(key, row)
-
-    def _append_catalog_stat_to_popup(self, key: str) -> None:
-        """Double-click or Enter in Available Stats: the stat goes at the end."""
-        popup = self._current_popup()
-        if popup is not None and not self._refuse_block_popup_stat():
-            self._insert_popup_stat(key, len(popup.get("stats", [])))
-
-    def _insert_popup_stat(self, key: str, index: int) -> None:
+    def _popup_stat_name(self, key: str) -> str | None:
+        """The fpdb name of a catalogue stat a popup can show; None (said why) otherwise."""
         entry = self._stat_catalog().get(key)
-        popup = self._current_popup()
-        if entry is None or popup is None:
-            return
+        if entry is None:
+            return None
         if entry.origin == "analytics":
             # A popup names its stats: it has nowhere to keep an analytics
             # stat's data_* binding.
             self._show_status(_("Analytics stats go in HUD panels, not in popups."))
+            return None
+        return entry.name
+
+    def _popup_canvas_stat_dropped(self, key: str, row: int, col: int) -> None:
+        """A stat of Available Stats dropped on the popup: it goes in where it fell."""
+        if self._popup_group is not None:
+            self._add_block_popup_stat(key, (row, col))
+        else:
+            self._insert_popup_stat(key, row)
+
+    def _append_catalog_stat_to_popup(self, key: str) -> None:
+        """Double-click or Enter in Available Stats: at the end, or a grid's first free cell."""
+        popup = self._current_popup()
+        if popup is None:
             return
-        stat = {"stat_name": entry.name, "submenu": ""}
+        if self._popup_group is not None:
+            self._add_block_popup_stat(key, None)
+        else:
+            self._insert_popup_stat(key, len(popup.get("stats", [])))
+
+    def _add_block_popup_stat(self, key: str, at: tuple[int, int] | None) -> None:
+        """Put a catalogue stat in a BlockPopup cell: the HUD shows its value there."""
+        name = self._popup_stat_name(key)
+        if name is not None:
+            self._add_block_popup_cell(name, at)
+
+    def _add_block_popup_cell(self, stat: str, at: tuple[int, int] | None) -> None:
+        group = self._popup_group
+        block = self.popup_canvas.container
+        if group is None:
+            return
+        row, col = at if at is not None else layout_model.first_free_cell(block)
+        if not layout_model.can_place(block, row, col):
+            self._show_status(_("Cell already used: drop the stat on an empty cell."))
+            return
+        cell = {"kind": "stat", "text": stat, "stat": stat, "row": row, "col": col, "fg": "", "bg": ""}
+        group.setdefault("cells", []).append(cell)
+        group["rows"] = max(int(group.get("rows", 1) or 1), row + 1)
+        group["cols"] = max(int(group.get("cols", 1) or 1), col + 1)
+        self._popup_selected = cell
+        self._after_popup_item_edit()
+
+    def _remove_block_popup_cell(self, cell: dict | None) -> None:
+        group = self._popup_group
+        if group is None or cell is None:
+            return
+        group["cells"] = [c for c in group.get("cells", []) if c is not cell]
+        self._popup_selected = None
+        self._after_popup_item_edit()
+
+    def _insert_popup_stat(self, key: str, index: int) -> None:
+        name = self._popup_stat_name(key)
+        popup = self._current_popup()
+        if name is None or popup is None:
+            return
+        stat = {"stat_name": name, "submenu": ""}
         stats = popup.setdefault("stats", [])
         stats.insert(max(0, min(index, len(stats))), stat)
         self._popup_selected = stat
@@ -1559,9 +1610,7 @@ class ModernHudPreferences(QDialog):
         if popup is None or entry is None:
             return
         if self._popup_group is not None:
-            # A grid cell lives in the JSON sidecar, written at once: emptying
-            # its text in Item Properties is the undoable way to clear it.
-            self._show_status(_("Clear a grid cell by emptying its text in Item Properties."))
+            self._remove_block_popup_cell(entry)
             return
         stats = popup.get("stats", [])
         popup["stats"] = [stat for stat in stats if stat is not entry]
@@ -1577,10 +1626,6 @@ class ModernHudPreferences(QDialog):
 
     def _popup_canvas_activated(self, ref) -> None:
         """Double-click or Enter on a popup chip: edit it."""
-        if self._popup_group is not None:
-            self.pi_text.setFocus()
-            self.pi_text.selectAll()
-            return
         self._popup_selected = self._popup_entry(ref)
         self.edit_popup_stat()
 
@@ -1633,6 +1678,7 @@ class ModernHudPreferences(QDialog):
             group,
             popup_data.get("theme", ""),
             popup_data.get("icon_provider", ""),
+            popup_data.get("block_group"),
         )
 
     def open_popup_zoom_window(self) -> None:
@@ -1654,6 +1700,7 @@ class ModernHudPreferences(QDialog):
             theme_name=popup_data.get("theme", ""),
             icon_provider_name=popup_data.get("icon_provider", ""),
             parent=self,
+            block_group=popup_data.get("block_group"),
         )
         dlg.exec()
 
@@ -4822,6 +4869,9 @@ class ModernHudPreferences(QDialog):
 
             self._persist_panel_rules()
 
+            # Edited BlockPopup grids live in their JSON sidecars.
+            self._write_block_popup_groups()
+
             # Save to file
             if hasattr(self.config, "save"):
                 self.config.save()
@@ -4902,6 +4952,12 @@ class ModernHudPreferences(QDialog):
         dialog = PopupStatEditDialog(parent=self)
         if dialog.exec():
             stat_data = dialog.get_stat_data()
+            if self._popup_group is not None:
+                # A grid takes the stat in its first free cell.
+                name = str(stat_data.get("stat_name", "")).strip()
+                if name:
+                    self._add_block_popup_cell(name, None)
+                return
             popup_name = self.popup_combo.currentText()
             self.popup_windows[popup_name]["stats"].append(stat_data)
             self._popup_selected = stat_data
@@ -4910,6 +4966,11 @@ class ModernHudPreferences(QDialog):
     def edit_popup_stat(self) -> None:
         """Edit selected stat in current popup."""
         if self.popup_combo.currentIndex() < 0:
+            return
+        if self._popup_group is not None:
+            # A grid cell is edited in Item Properties.
+            self.pi_text.setFocus()
+            self.pi_text.selectAll()
             return
 
         current_row = self._popup_selected_index()
@@ -4930,6 +4991,9 @@ class ModernHudPreferences(QDialog):
     def remove_popup_stat(self) -> None:
         """Remove selected stat from current popup."""
         if self.popup_combo.currentIndex() < 0:
+            return
+        if self._popup_group is not None:
+            self._remove_block_popup_cell(self._popup_selected)
             return
 
         current_row = self._popup_selected_index()

@@ -578,6 +578,7 @@ class PopupPreviewWidget(QWidget):
         group: str = "",
         theme_name: str = "",
         icon_provider_name: str = "",
+        block_group: dict | None = None,
     ) -> None:
         self.clear_preview()
         self.popup_frame.setStyleSheet("""
@@ -592,7 +593,7 @@ class PopupPreviewWidget(QWidget):
         # BlockPopup (imported PT4 popup group): render its text/stat grid.
         if popup_class == "BlockPopup" or (group and source):
             self.scroll_area.setWidgetResizable(False)
-            self._build_block_popup(popup_name, source, group)
+            self._build_block_popup(popup_name, source, group, block_group)
             self._finalize_popup_frame()
             return
 
@@ -685,12 +686,16 @@ class PopupPreviewWidget(QWidget):
         chart_height = 13 * cell_pitch + 30
         self.popup_frame.setMinimumSize(13 * cell_pitch + 28, len(charts) * chart_height + 18)
 
-    def _build_block_popup(self, popup_name: str, source: str, group: str) -> None:
-        """Render an imported PT4 popup group (text/stat grid) in the preview."""
+    def _build_block_popup(self, popup_name: str, source: str, group: str, block_group: dict | None = None) -> None:
+        """Render an imported PT4 popup group (text/stat grid) in the preview.
+
+        ``block_group`` is the group as the editor holds it, edited and not saved
+        yet; without it the group is read from its sidecar.
+        """
         from fpdb_3_legacy.BlockPopup import build_block_popup_widget, load_block_popup
 
-        data = None
-        if source and group:
+        data = block_group
+        if data is None and source and group:
             try:
                 data = load_block_popup(source, group)
             except Exception:
@@ -822,6 +827,7 @@ class PopupZoomDialog(QDialog):
         theme_name: str = "",
         icon_provider_name: str = "",
         parent: QWidget | None = None,
+        block_group: dict | None = None,
     ) -> None:
         super().__init__(parent)
         self.popup_name = popup_name
@@ -879,7 +885,7 @@ class PopupZoomDialog(QDialog):
         self.preview_widget = PopupPreviewWidget()
         self.preview_widget.scroll_area.setMinimumSize(0, 0)
         self.preview_widget.set_popup(
-            popup_name, popup_class, stats, source, group, theme_name, icon_provider_name
+            popup_name, popup_class, stats, source, group, theme_name, icon_provider_name, block_group
         )
 
         self.scroll_area.setWidget(self.preview_widget)
