@@ -3249,7 +3249,7 @@ class ModernHudPreferences(QDialog):
         if kind == "text":
             from PySide6.QtWidgets import QInputDialog
 
-            new_label, ok = QInputDialog.getText(self, "Edit Text Label", "Label:", text=ref.get("label", ""))
+            new_label, ok = QInputDialog.getText(self, _("Edit Text Label"), _("Label:"), text=ref.get("label", ""))
             if ok:
                 ref["label"] = new_label
                 self._refresh_profile()
@@ -3258,7 +3258,7 @@ class ModernHudPreferences(QDialog):
             from PySide6.QtGui import QColor
             from PySide6.QtWidgets import QColorDialog
 
-            col = QColorDialog.getColor(QColor(ref.get("color") or "#d7b500"), self, "Line colour")
+            col = QColorDialog.getColor(QColor(ref.get("color") or "#d7b500"), self, _("Line colour"))
             if col.isValid():
                 ref["color"] = col.name()
                 self._refresh_profile()
@@ -3307,7 +3307,7 @@ class ModernHudPreferences(QDialog):
             return
         sel = self._selected_row_item()
         block_index = sel[0] if sel else (0 if isinstance(profile, dict) and profile.get("blocks") else None)
-        label, ok = QInputDialog.getText(self, "Add Text Label", "Label text (e.g. column header, caption):")
+        label, ok = QInputDialog.getText(self, _("Add Text Label"), _("Label text (e.g. column header, caption):"))
         if not ok or not label.strip():
             return
         container = self._block_container(profile, block_index)
@@ -3334,7 +3334,7 @@ class ModernHudPreferences(QDialog):
         name, profile = self._current_profile()
         if not isinstance(profile, dict):
             return
-        label, ok = QInputDialog.getText(self, "Add Block", "New panel (block) name:")
+        label, ok = QInputDialog.getText(self, _("Add Block"), _("New panel (block) name:"))
         if not ok:
             return
         cols = int(profile.get("cols", 4)) or 4
@@ -3389,7 +3389,7 @@ class ModernHudPreferences(QDialog):
             return
         blocks = profile.get("blocks")
         if not blocks:
-            QMessageBox.information(self, "Block Properties", "This profile has no panels. Use Add Block first.")
+            QMessageBox.information(self, _("Block Properties"), _("This profile has no panels. Use Add Block first."))
             return
         sel = self._selected_row_item()
         bi = sel[0] if sel and sel[0] is not None else 0

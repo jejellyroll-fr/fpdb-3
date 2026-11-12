@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:20+0100\n"
+"POT-Creation-Date: 2026-11-12 20:30+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -4695,6 +4695,7 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "ブロックのプロパティ"
@@ -4730,11 +4731,6 @@ msgstr "しきい値の間の値に中間色を使う"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Column:"
-msgstr "列:"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Edit Popup Statistic"
 msgstr "ポップアップの統計を編集"
 
@@ -4751,15 +4747,11 @@ msgstr "レイアウト座標をエクスポート"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Grid Position:"
-msgstr "グリッド位置:"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "High Range:"
 msgstr "高い範囲:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Label:"
 msgstr "ラベルを追加"
@@ -4844,18 +4836,8 @@ msgstr "ポップアップ:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Position and Statistic"
-msgstr "ポジションとスタック"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Preview shows how statistic colors will change based on values"
 msgstr "プレビューは値に応じて統計の色がどう変わるかを示します"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
-msgid "Row:"
-msgstr "行:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4887,6 +4869,12 @@ msgstr "ポジション別統計に表示"
 #, fuzzy
 msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr "このポジションの相手に対してのみこのパネルを表示 (空欄 = 常に表示)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Statistics"
+msgid "Statistic"
+msgstr "統計情報"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -5111,6 +5099,11 @@ msgstr "統計を追加"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Add Text Label"
+msgstr "ラベルを追加"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
 msgstr "パネルに水平区切り線 (PT4 'Horz Line') を追加"
 
@@ -5235,12 +5228,6 @@ msgstr "このルールを更新できません"
 #, fuzzy
 msgid "Cannot update this rule"
 msgstr "このルールを更新できません"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-#| msgid "lock already held by:"
-msgid "Cell already used"
-msgstr "ロックは既に取得されています:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell bg:"
@@ -5374,6 +5361,11 @@ msgstr "ルールの重複"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Edit"
 msgstr "編集"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Edit Text Label"
+msgstr "データベースを編集"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5605,6 +5597,11 @@ msgstr "項目のプロパティ"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Label text (e.g. column header, caption):"
+msgstr "パネルにテキストラベル (列/行の見出しやキャプション) を追加"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Layout Conflict"
 msgstr "レイアウトの競合"
 
@@ -5612,6 +5609,11 @@ msgstr "レイアウトの競合"
 #, python-brace-format
 msgid "Layout coordinates for site layout '{name}' already exist."
 msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Line colour"
+msgstr "中間色:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Lo col:"
@@ -5664,6 +5666,11 @@ msgstr "➕ 新しいポップアップ"
 #, fuzzy
 msgid "New Profile"
 msgstr "新しいプロフィール"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "New panel (block) name:"
+msgstr "プロフィール名"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5915,13 +5922,6 @@ msgid "Row gap:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
-msgid ""
-"Row {row}, column {col} already holds {item}. The first free cell is row "
-"{free_row}, column {free_col}."
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Rows:"
 msgstr ""
 
@@ -6010,11 +6010,6 @@ msgstr "ログテキスト"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Text label (header / caption) — not a stat"
-msgstr "テキストラベル (見出し / キャプション) — 統計ではありません"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 #| msgid "Text"
 msgid "Text:"
 msgstr "ログテキスト"
@@ -6072,6 +6067,10 @@ msgstr "テーマ:"
 #, fuzzy
 msgid "Then show"
 msgstr "表示するもの"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "This profile has no panels. Use Add Block first."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -6139,10 +6138,6 @@ msgstr ""
 #| msgid "If you change the config you must save before importing"
 msgid "You have unsaved changes. Do you want to save before closing?"
 msgstr "設定変更した場合はインポートをする前に設定を保存してください"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "a separator line"
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -9236,11 +9231,20 @@ msgstr ""
 #~ "他のウィンドウが開いているため、データベースの保守ウィンドウが開けません。"
 #~ "このオプションを使うためにはFPDBを再起動してください。"
 
+#, fuzzy
+#~| msgid "lock already held by:"
+#~ msgid "Cell already used"
+#~ msgstr "ロックは既に取得されています:"
+
 #~ msgid "Click OK to close Fpdb"
 #~ msgstr "FPDBを閉じるにはOKをクリック"
 
 #~ msgid "Closing this window will exit from the HUD."
 #~ msgstr "このウィンドウを閉じるとHUDを終了"
+
+#, fuzzy
+#~ msgid "Column:"
+#~ msgstr "列:"
 
 #~ msgid "Config file has been created at %r."
 #~ msgstr "設定ファイルは %r に作成されました。"
@@ -9564,6 +9568,10 @@ msgstr ""
 
 #~ msgid "Graphing Options:"
 #~ msgstr "グラフのオプション:"
+
+#, fuzzy
+#~ msgid "Grid Position:"
+#~ msgstr "グリッド位置:"
 
 #~ msgid ""
 #~ "GuiStove not found. If you want to use it please install pypoker-eval."
@@ -10009,6 +10017,10 @@ msgstr ""
 #~ msgid "PokerTrackerToFpdb.readHandInfo: Failed to detect currency."
 #~ msgstr "PokerTrackerToFpdb.readHandInfo: 通貨の自動判別に失敗しました。"
 
+#, fuzzy
+#~ msgid "Position and Statistic"
+#~ msgstr "ポジションとスタック"
+
 #~ msgid "Positional Stats (tabulated view)"
 #~ msgstr "ポジション別統計表"
 
@@ -10086,6 +10098,10 @@ msgstr ""
 
 #~ msgid "Restart This HUD"
 #~ msgstr "このHUDを再起動する"
+
+#, fuzzy
+#~ msgid "Row:"
+#~ msgstr "行:"
 
 #~ msgid "SATELLITE"
 #~ msgstr "SATELLITE"
@@ -10248,6 +10264,10 @@ msgstr ""
 
 #~ msgid "Testing database connections ... "
 #~ msgstr "データベース接続をテスト中 ... "
+
+#, fuzzy
+#~ msgid "Text label (header / caption) — not a stat"
+#~ msgstr "テキストラベル (見出し / キャプション) — 統計ではありません"
 
 #~ msgid "Thank you"
 #~ msgstr "ありがとうございました"

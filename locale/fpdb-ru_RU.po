@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:20+0100\n"
+"POT-Creation-Date: 2026-11-12 20:30+0100\n"
 "PO-Revision-Date: 2011-06-16 13:21+0000\n"
 "Last-Translator: Lexej <alexej@glyvin.com>\n"
 "Language-Team: Russian (Russia) (http://www.transifex.net/projects/p/fpdb/"
@@ -4748,6 +4748,7 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "Свойства блока"
@@ -4783,11 +4784,6 @@ msgstr "Использовать средний цвет для значений
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Column:"
-msgstr "Столбец:"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Edit Popup Statistic"
 msgstr "Изменить стат всплывающего окна"
 
@@ -4804,15 +4800,11 @@ msgstr "Экспорт координат раскладки"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Grid Position:"
-msgstr "Позиция"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "High Range:"
 msgstr "Верхний диапазон:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Label:"
 msgstr "Добавить надпись"
@@ -4898,19 +4890,9 @@ msgstr "Всплывающее окно:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Position and Statistic"
-msgstr "Позиция и стек"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Preview shows how statistic colors will change based on values"
 msgstr ""
 "Предпросмотр показывает, как меняются цвета стата в зависимости от значений"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
-msgid "Row:"
-msgstr "Строка:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4942,6 +4924,12 @@ msgstr "Показывать в позиционной статистике"
 msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr ""
 "Показывать эту панель только для соперника на этой позиции (пусто = всегда)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Statistics"
+msgid "Statistic"
+msgstr "Статистика"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -5165,6 +5153,11 @@ msgstr "Добавить стат"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Add Text Label"
+msgstr "Добавить надпись"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
 msgstr ""
 "Добавить горизонтальную разделительную линию (PT4 'Horz Line') на панель"
@@ -5291,10 +5284,6 @@ msgstr "Невозможно обновить это правило"
 #, fuzzy
 msgid "Cannot update this rule"
 msgstr "Невозможно обновить это правило"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Cell already used"
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell bg:"
@@ -5429,6 +5418,11 @@ msgstr "Повторяющееся правило"
 #, fuzzy
 msgid "Edit"
 msgstr "Изменить"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Edit Text Label"
+msgstr "Изменить базу данных"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5658,6 +5652,12 @@ msgstr "Свойства элемента"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Label text (e.g. column header, caption):"
+msgstr ""
+"Добавить текстовую надпись (заголовок столбца/строки или подпись) на панель"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Layout Conflict"
 msgstr "Конфликт раскладок"
 
@@ -5665,6 +5665,11 @@ msgstr "Конфликт раскладок"
 #, python-brace-format
 msgid "Layout coordinates for site layout '{name}' already exist."
 msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Line colour"
+msgstr "Средний цвет:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Lo col:"
@@ -5717,6 +5722,11 @@ msgstr "➕ Новое окно"
 #, fuzzy
 msgid "New Profile"
 msgstr "Новый профиль"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "New panel (block) name:"
+msgstr "Файл:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5968,13 +5978,6 @@ msgid "Row gap:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
-msgid ""
-"Row {row}, column {col} already holds {item}. The first free cell is row "
-"{free_row}, column {free_col}."
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Rows:"
 msgstr ""
 
@@ -6064,11 +6067,6 @@ msgstr "Текст"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Text label (header / caption) — not a stat"
-msgstr "Текстовая надпись (заголовок / подпись) — не стат"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Text:"
 msgstr "Текст"
 
@@ -6125,6 +6123,10 @@ msgstr "Тема:"
 #, fuzzy
 msgid "Then show"
 msgstr "Тогда показать"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "This profile has no panels. Use Add Block first."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -6190,10 +6192,6 @@ msgstr ""
 #| msgid "If you change the config you must save before importing"
 msgid "You have unsaved changes. Do you want to save before closing?"
 msgstr "При изменении конфигурации необходимо её сохранить перед импортом"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "a separator line"
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -9039,6 +9037,10 @@ msgstr ""
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Закрыто, график не экспортирован"
 
+#, fuzzy
+#~ msgid "Column:"
+#~ msgstr "Столбец:"
+
 #~ msgid "Converting %s"
 #~ msgstr "Конвертация %s"
 
@@ -9299,6 +9301,10 @@ msgstr ""
 
 #~ msgid "Graphing Options:"
 #~ msgstr "Настройки  графика"
+
+#, fuzzy
+#~ msgid "Grid Position:"
+#~ msgstr "Позиция"
 
 #~ msgid ""
 #~ "GuiStove not found. If you want to use it please install pypoker-eval."
@@ -9633,6 +9639,10 @@ msgstr ""
 #~ msgid "PokerTrackerToFpdb.determineGameType: Microgaming not yet supported"
 #~ msgstr "Lim_Blinds не найден для '%s'"
 
+#, fuzzy
+#~ msgid "Position and Statistic"
+#~ msgstr "Позиция и стек"
+
 #~ msgid "Positional Stats page displayed in %4.2f seconds"
 #~ msgstr "Страница позиционных статов показана за %4.2f секунды"
 
@@ -9696,6 +9706,10 @@ msgstr ""
 #, fuzzy
 #~ msgid "Rebuild hudcache(cash) took %.1f seconds"
 #~ msgstr "Пересоздание hudcache заняла %.1f секунд"
+
+#, fuzzy
+#~ msgid "Row:"
+#~ msgstr "Строка:"
 
 #~ msgid "SATELLITE"
 #~ msgstr "Сателлиты"
@@ -9806,6 +9820,10 @@ msgstr ""
 
 #~ msgid "Tailing '%s'"
 #~ msgstr "Tailing '%s'"
+
+#, fuzzy
+#~ msgid "Text label (header / caption) — not a stat"
+#~ msgstr "Текстовая надпись (заголовок / подпись) — не стат"
 
 #~ msgid "Thank you"
 #~ msgstr "Спасибо"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:20+0100\n"
+"POT-Creation-Date: 2026-11-12 20:30+0100\n"
 "PO-Revision-Date: 2011-12-03 21:57+0000\n"
 "Last-Translator: LimburgCwboy <hdps.een@gmail.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.net/projects/p/fpdb/"
@@ -4800,6 +4800,7 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "Blokeigenschappen"
@@ -4835,11 +4836,6 @@ msgstr "Middenkleur gebruiken voor waarden tussen de drempels"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Column:"
-msgstr "Kolom:"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Edit Popup Statistic"
 msgstr "Pop-upstatistiek bewerken"
 
@@ -4856,15 +4852,11 @@ msgstr "Indelingscoördinaten exporteren"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Grid Position:"
-msgstr "Toon Positie Stats"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "High Range:"
 msgstr "Hoog bereik:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Label:"
 msgstr "Label toevoegen"
@@ -4947,18 +4939,8 @@ msgstr "Pop-up:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Position and Statistic"
-msgstr "Toon Positie Stats"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Preview shows how statistic colors will change based on values"
 msgstr "Het voorbeeld laat zien hoe de statkleuren met de waarden veranderen"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
-msgid "Row:"
-msgstr "Rij:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4990,6 +4972,11 @@ msgstr "Tonen in positiestatistieken"
 msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr ""
 "Dit paneel alleen tonen voor een tegenstander op deze positie (leeg = altijd)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Statistic"
+msgstr "Statistieken"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -5212,6 +5199,11 @@ msgstr "Stat toevoegen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Add Text Label"
+msgstr "Label toevoegen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
 msgstr ""
 "Een horizontale scheidingslijn (PT4 'Horz Line') aan een paneel toevoegen"
@@ -5338,10 +5330,6 @@ msgstr "Deze regel kan niet worden bijgewerkt"
 #, fuzzy
 msgid "Cannot update this rule"
 msgstr "Deze regel kan niet worden bijgewerkt"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Cell already used"
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell bg:"
@@ -5476,6 +5464,11 @@ msgstr "Dubbele regel"
 #, fuzzy
 msgid "Edit"
 msgstr "Bewerken"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Edit Text Label"
+msgstr "Database bewerken"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5705,6 +5698,11 @@ msgstr "Itemeigenschappen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Label text (e.g. column header, caption):"
+msgstr "Een tekstlabel (kolom-/rijkop of bijschrift) aan een paneel toevoegen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Layout Conflict"
 msgstr "Indelingsconflict"
 
@@ -5712,6 +5710,11 @@ msgstr "Indelingsconflict"
 #, python-brace-format
 msgid "Layout coordinates for site layout '{name}' already exist."
 msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Line colour"
+msgstr "Middenkleur:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Lo col:"
@@ -5764,6 +5767,11 @@ msgstr "➕ Nieuwe pop-up"
 #, fuzzy
 msgid "New Profile"
 msgstr "Nieuw profiel"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "New panel (block) name:"
+msgstr "Gebruikersnaam"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -6013,13 +6021,6 @@ msgid "Row gap:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
-msgid ""
-"Row {row}, column {col} already holds {item}. The first free cell is row "
-"{free_row}, column {free_col}."
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Rows:"
 msgstr ""
 
@@ -6110,11 +6111,6 @@ msgstr "Tekst"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Text label (header / caption) — not a stat"
-msgstr "Tekstlabel (kop / bijschrift) — geen stat"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Text:"
 msgstr "Tekst"
 
@@ -6174,6 +6170,10 @@ msgstr "Thema:"
 #, fuzzy
 msgid "Then show"
 msgstr "Dan tonen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "This profile has no panels. Use Add Block first."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -6236,10 +6236,6 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "You have unsaved changes. Do you want to save before closing?"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "a separator line"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -8934,6 +8930,10 @@ msgstr ""
 #~ msgstr "Speltype niet te vinden in '%s'"
 
 #, fuzzy
+#~ msgid "Column:"
+#~ msgstr "Kolom:"
+
+#, fuzzy
 #~ msgid "Could not identify as a %s hand"
 #~ msgstr "Kan bestand %s niet vinden"
 
@@ -8969,6 +8969,10 @@ msgstr ""
 
 #~ msgid "Finished recreating tables"
 #~ msgstr "Klaar met regenereren tabellen"
+
+#, fuzzy
+#~ msgid "Grid Position:"
+#~ msgstr "Toon Positie Stats"
 
 #~ msgid "Host Computer"
 #~ msgstr "Host Computer"
@@ -9024,6 +9028,10 @@ msgstr ""
 #~ msgid "Please check that the PostgreSQL service has been started"
 #~ msgstr "Controleer aub of de PostgreSQL service gestart is"
 
+#, fuzzy
+#~ msgid "Position and Statistic"
+#~ msgstr "Toon Positie Stats"
+
 #~ msgid ""
 #~ "PostgreSQL Server reports: Access denied. Are your permissions set "
 #~ "correctly?"
@@ -9040,11 +9048,19 @@ msgstr ""
 #~ msgid "Rebuild hudcache took %.1f seconds"
 #~ msgstr "Heropbouwen hudcache duurde %.1f seconden"
 
+#, fuzzy
+#~ msgid "Row:"
+#~ msgstr "Rij:"
+
 #~ msgid "Sites:"
 #~ msgstr "Sites"
 
 #~ msgid "Some database functions will not work without NumPy support"
 #~ msgstr "Sommige database-functies zullen niet werken zonder NumPy support"
+
+#, fuzzy
+#~ msgid "Text label (header / caption) — not a stat"
+#~ msgstr "Tekstlabel (kop / bijschrift) — geen stat"
 
 #~ msgid "USAGE:"
 #~ msgstr "GEBRUIK:"

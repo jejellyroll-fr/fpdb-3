@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:20+0100\n"
+"POT-Creation-Date: 2026-11-12 20:30+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -4735,6 +4735,7 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "Proprietățile blocului"
@@ -4770,11 +4771,6 @@ msgstr "Folosește culoarea de mijloc pentru valorile dintre praguri"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Column:"
-msgstr "Coloană:"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Edit Popup Statistic"
 msgstr "Editează statistica pop-up-ului"
 
@@ -4791,15 +4787,11 @@ msgstr "Exportă coordonatele aranjamentului"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Grid Position:"
-msgstr "Pozitie"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "High Range:"
 msgstr "Interval sus:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Label:"
 msgstr "Adaugă etichetă"
@@ -4886,20 +4878,10 @@ msgstr "Pop-up:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Position and Statistic"
-msgstr "Poziție și stack"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Preview shows how statistic colors will change based on values"
 msgstr ""
 "Previzualizarea arată cum se schimbă culorile statisticii în funcție de "
 "valori"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
-msgid "Row:"
-msgstr "Rând:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4932,6 +4914,12 @@ msgstr "Arata in statisticile pozitionale"
 msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr ""
 "Arată acest panou doar pentru un adversar pe această poziție (gol = mereu)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Statistics"
+msgid "Statistic"
+msgstr "Statistici"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -5157,6 +5145,11 @@ msgstr "Adaugă statistică"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Add Text Label"
+msgstr "Adaugă etichetă"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
 msgstr "Adaugă o linie orizontală de separare (PT4 'Horz Line') pe un panou"
 
@@ -5281,12 +5274,6 @@ msgstr "Regula nu poate fi actualizată"
 #, fuzzy
 msgid "Cannot update this rule"
 msgstr "Regula nu poate fi actualizată"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-#| msgid "lock already held by:"
-msgid "Cell already used"
-msgstr "siguranta e deja detinuta de:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell bg:"
@@ -5420,6 +5407,11 @@ msgstr "Regulă duplicată"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Edit"
 msgstr "Editare"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Edit Text Label"
+msgstr "Editează baza de date"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5651,6 +5643,11 @@ msgstr "Proprietățile elementului"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Label text (e.g. column header, caption):"
+msgstr "Adaugă o etichetă text (antet de coloană/rând sau legendă) pe un panou"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Layout Conflict"
 msgstr "Conflict de aranjament"
 
@@ -5658,6 +5655,11 @@ msgstr "Conflict de aranjament"
 #, python-brace-format
 msgid "Layout coordinates for site layout '{name}' already exist."
 msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Line colour"
+msgstr "Culoarea de mijloc:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Lo col:"
@@ -5710,6 +5712,11 @@ msgstr "➕ Pop-up nou"
 #, fuzzy
 msgid "New Profile"
 msgstr "Profil nou"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "New panel (block) name:"
+msgstr "Nume fisier:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5959,13 +5966,6 @@ msgid "Row gap:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
-msgid ""
-"Row {row}, column {col} already holds {item}. The first free cell is row "
-"{free_row}, column {free_col}."
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Rows:"
 msgstr ""
 
@@ -6055,11 +6055,6 @@ msgstr "Text"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Text label (header / caption) — not a stat"
-msgstr "Etichetă text (antet / legendă) — nu o statistică"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 #| msgid "Text"
 msgid "Text:"
 msgstr "Text"
@@ -6120,6 +6115,10 @@ msgstr "Temă:"
 #, fuzzy
 msgid "Then show"
 msgstr "Atunci arată"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "This profile has no panels. Use Add Block first."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -6187,10 +6186,6 @@ msgstr ""
 #| msgid "If you change the config you must save before importing"
 msgid "You have unsaved changes. Do you want to save before closing?"
 msgstr "Daca modificati configurarile trebuie sa salvati inainte de importare"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "a separator line"
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -9482,6 +9477,11 @@ msgstr ""
 #~ msgid "Cat."
 #~ msgstr "Cat."
 
+#, fuzzy
+#~| msgid "lock already held by:"
+#~ msgid "Cell already used"
+#~ msgstr "siguranta e deja detinuta de:"
+
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Inchis, nici un grafic exportat"
 
@@ -9490,6 +9490,10 @@ msgstr ""
 
 #~ msgid "Closing this window will stop the Tournament Tracker"
 #~ msgstr "Inchiderea acestei ferestre va opri Trackerul de Turneu"
+
+#, fuzzy
+#~ msgid "Column:"
+#~ msgstr "Coloană:"
 
 #~ msgid ""
 #~ "Coming Soon\n"
@@ -10037,6 +10041,10 @@ msgstr ""
 
 #~ msgid "Graphing Options:"
 #~ msgstr "Optiuni de grafica:"
+
+#, fuzzy
+#~ msgid "Grid Position:"
+#~ msgstr "Pozitie"
 
 #~ msgid ""
 #~ "GuiStove not found. If you want to use it please install pypoker-eval."
@@ -10769,6 +10777,10 @@ msgstr ""
 #~ msgid "PokerTrackerToFpdb.readHandInfo: Failed to detect currency."
 #~ msgstr "Nu pot detecta moneda."
 
+#, fuzzy
+#~ msgid "Position and Statistic"
+#~ msgstr "Poziție și stack"
+
 #~ msgid "Positional Stats (tabulated view)"
 #~ msgstr "Statistici Pozitionale (vedere tabelara)"
 
@@ -10889,6 +10901,10 @@ msgstr ""
 #, fuzzy
 #~ msgid "Restart This HUD"
 #~ msgstr "Opreste acest HUD"
+
+#, fuzzy
+#~ msgid "Row:"
+#~ msgstr "Rând:"
 
 #~ msgid "SATELLITE"
 #~ msgstr "SATELIT"
@@ -11092,6 +11108,10 @@ msgstr ""
 
 #~ msgid "Testing variance function"
 #~ msgstr "Testare functii de variatie"
+
+#, fuzzy
+#~ msgid "Text label (header / caption) — not a stat"
+#~ msgstr "Etichetă text (antet / legendă) — nu o statistică"
 
 #~ msgid "Thank you"
 #~ msgstr "Multumim"

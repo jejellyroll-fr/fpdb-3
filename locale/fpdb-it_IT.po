@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:20+0100\n"
+"POT-Creation-Date: 2026-11-12 20:30+0100\n"
 "PO-Revision-Date: 2012-02-17 20:03+0000\n"
 "Last-Translator: seppone1991 <seppone1991@gmail.com>\n"
 "Language-Team: Italian (Italy) (http://www.transifex.net/projects/p/fpdb/"
@@ -4721,6 +4721,7 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "Proprietà del blocco"
@@ -4756,11 +4757,6 @@ msgstr "Usa il colore intermedio per i valori tra le soglie"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Column:"
-msgstr "Colonna:"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Edit Popup Statistic"
 msgstr "Modifica statistica del popup"
 
@@ -4777,15 +4773,11 @@ msgstr "Esporta coordinate di layout"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Grid Position:"
-msgstr "Posizione nella griglia:"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "High Range:"
 msgstr "Intervallo alto:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Label:"
 msgstr "Aggiungi etichetta"
@@ -4872,19 +4864,9 @@ msgstr "Popup:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
-msgid "Position and Statistic"
-msgstr "Posizione e stack"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
 msgid "Preview shows how statistic colors will change based on values"
 msgstr ""
 "L'anteprima mostra come cambiano i colori della statistica in base ai valori"
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#, fuzzy
-msgid "Row:"
-msgstr "Riga:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4919,6 +4901,12 @@ msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr ""
 "Mostra questo pannello solo per un avversario in questa posizione (vuoto = "
 "sempre)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Statistics"
+msgid "Statistic"
+msgstr "Statistiche"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -5145,6 +5133,11 @@ msgstr "Aggiungi statistica"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Add Text Label"
+msgstr "Aggiungi etichetta"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Add a horizontal separator line (PT4 'Horz Line') to a panel"
 msgstr ""
 "Aggiungi una linea di separazione orizzontale (PT4 'Horz Line') a un pannello"
@@ -5278,12 +5271,6 @@ msgid "Cannot update this rule"
 msgstr "Impossibile aggiornare questa regola"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-#| msgid "lock already held by:"
-msgid "Cell already used"
-msgstr "blocco già in possesso da:"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell bg:"
 msgstr ""
 
@@ -5415,6 +5402,11 @@ msgstr "Regola duplicata"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Edit"
 msgstr "Modifica"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Edit Text Label"
+msgstr "Modifica database"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5648,6 +5640,13 @@ msgstr "Proprietà dell'elemento"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Label text (e.g. column header, caption):"
+msgstr ""
+"Aggiungi un'etichetta di testo (intestazione di colonna/riga o didascalia) a "
+"un pannello"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Layout Conflict"
 msgstr "Conflitto di layout"
 
@@ -5655,6 +5654,11 @@ msgstr "Conflitto di layout"
 #, python-brace-format
 msgid "Layout coordinates for site layout '{name}' already exist."
 msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Line colour"
+msgstr "Colore intermedio:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Lo col:"
@@ -5707,6 +5711,11 @@ msgstr "➕ Nuovo popup"
 #, fuzzy
 msgid "New Profile"
 msgstr "Nuovo profilo"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "New panel (block) name:"
+msgstr "Nome del profilo"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5960,13 +5969,6 @@ msgid "Row gap:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
-msgid ""
-"Row {row}, column {col} already holds {item}. The first free cell is row "
-"{free_row}, column {free_col}."
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Rows:"
 msgstr ""
 
@@ -6057,11 +6059,6 @@ msgstr "Testo"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Text label (header / caption) — not a stat"
-msgstr "Etichetta di testo (intestazione / didascalia) — non una statistica"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 #| msgid "Text"
 msgid "Text:"
 msgstr "Testo"
@@ -6122,6 +6119,10 @@ msgstr "Tema:"
 #, fuzzy
 msgid "Then show"
 msgstr "Allora mostra"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "This profile has no panels. Use Add Block first."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -6189,10 +6190,6 @@ msgstr ""
 #| msgid "If you change the config you must save before importing"
 msgid "You have unsaved changes. Do you want to save before closing?"
 msgstr "Se tu cambi il file di configurazione devi salvarlo prima di importare"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "a separator line"
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -9349,6 +9346,11 @@ msgstr ""
 #~ msgid "Cat."
 #~ msgstr "Cat."
 
+#, fuzzy
+#~| msgid "lock already held by:"
+#~ msgid "Cell already used"
+#~ msgstr "blocco già in possesso da:"
+
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Fermato,Nessun grafico esportato"
 
@@ -9357,6 +9359,10 @@ msgstr ""
 
 #~ msgid "Closing this window will stop the Tournament Tracker"
 #~ msgstr "Chiudi questa finestra per stoppare il Tracker di Torneo"
+
+#, fuzzy
+#~ msgid "Column:"
+#~ msgstr "Colonna:"
 
 #, fuzzy
 #~ msgid "Config file has been created at %r."
@@ -9837,6 +9843,10 @@ msgstr ""
 
 #~ msgid "Graphing Options:"
 #~ msgstr "Opzioni grafiche:"
+
+#, fuzzy
+#~ msgid "Grid Position:"
+#~ msgstr "Posizione nella griglia:"
 
 #~ msgid ""
 #~ "GuiStove not found. If you want to use it please install pypoker-eval."
@@ -10460,6 +10470,10 @@ msgstr ""
 #~ msgid "PokerTrackerToFpdb.readHandInfo: Failed to detect currency."
 #~ msgstr "PokerStarsToFpdb.readHandInfo:Rilevazione valuta fallita"
 
+#, fuzzy
+#~ msgid "Position and Statistic"
+#~ msgstr "Posizione e stack"
+
 #~ msgid "Positional Stats (tabulated view)"
 #~ msgstr "Positional Stats (tabulated view)"
 
@@ -10552,6 +10566,10 @@ msgstr ""
 #, fuzzy
 #~ msgid "Restart This HUD"
 #~ msgstr "Chiudi Questo HUD"
+
+#, fuzzy
+#~ msgid "Row:"
+#~ msgstr "Riga:"
 
 #~ msgid "SATELLITE"
 #~ msgstr "SATELLITE"
@@ -10742,6 +10760,10 @@ msgstr ""
 
 #~ msgid "Testing database connections ... "
 #~ msgstr "Test connessioni database"
+
+#, fuzzy
+#~ msgid "Text label (header / caption) — not a stat"
+#~ msgstr "Etichetta di testo (intestazione / didascalia) — non una statistica"
 
 #~ msgid "Thank you"
 #~ msgstr "Grazie"

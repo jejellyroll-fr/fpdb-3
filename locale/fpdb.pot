@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:20+0100\n"
+"POT-Creation-Date: 2026-11-12 20:30+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3981,10 +3981,12 @@ msgid "Border:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Block Properties"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Label:"
 msgstr ""
 
@@ -4029,19 +4031,7 @@ msgid "Add/Edit Statistic"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Position and Statistic"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Grid Position:"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Row:"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Column:"
+msgid "Statistic"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
@@ -4721,10 +4711,6 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Text label (header / caption) — not a stat"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid "Design — {label}"
 msgstr ""
@@ -4951,18 +4937,27 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "a separator line"
+msgid "Edit Text Label"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Cell already used"
+msgid "Line colour"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, python-brace-format
-msgid ""
-"Row {row}, column {col} already holds {item}. The first free cell is row "
-"{free_row}, column {free_col}."
+msgid "Add Text Label"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Label text (e.g. column header, caption):"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "New panel (block) name:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "This profile has no panels. Use Add Block first."
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py

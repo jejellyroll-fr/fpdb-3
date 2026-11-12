@@ -11,13 +11,9 @@ What the scan leaves alone:
 * values that are data rather than wording (stored values listed in
   ``DATA_VALUES``), default file names and default input values;
 * f-strings and concatenations whose literal parts carry no word, such as
-  ``f"{name}  ⚠"`` or ``f"🔍 {popup}"``;
-* the Design area of the Statistics tab, which step 4 of
-  ``docs/hud-editor-improvement-plan.md`` (#775, drag and drop) rewrites:
-  the functions in ``DESIGN_AREA_FUNCTIONS`` and the calls in
-  ``DESIGN_AREA_CALLS``. Step 4 removes those entries once its own
-  strings are wrapped; ``test_design_area_exclusions_are_current`` fails on
-  an entry that no longer matches anything, so the list cannot go stale.
+  ``f"{name}  ⚠"`` or ``f"🔍 {popup}"``.
+
+Every module of the editor is scanned, the Design canvas included (#775).
 """
 
 from __future__ import annotations
@@ -29,33 +25,6 @@ from pathlib import Path
 import pytest
 
 PACKAGE = Path(__file__).resolve().parent.parent / "fpdb_3_legacy" / "modern_hud_preferences"
-
-#: Files not scanned.
-EXCLUDED_FILES: frozenset[str] = frozenset()
-
-#: Design-area functions of ``main_dialog.py`` (step 4 rewrites them).
-DESIGN_AREA_FUNCTIONS = frozenset(
-    {
-        "ModernHudPreferences._populate_group_items",
-        "ModernHudPreferences.add_stat",
-        "ModernHudPreferences.edit_stat",
-        "ModernHudPreferences.remove_stat",
-        "ModernHudPreferences.add_text_label",
-        "ModernHudPreferences.add_hline",
-        "ModernHudPreferences.add_block",
-        "ModernHudPreferences.edit_block_properties",
-    },
-)
-
-#: Design-area calls inside functions that are otherwise in scope:
-#: (function, receiver of the call) -- the hidden stat table and Items list.
-DESIGN_AREA_CALLS = frozenset(
-    {
-        ("ModernHudPreferences.__init__", "self.stat_table"),
-        ("ModernHudPreferences.on_profile_selected", "stat_item"),
-        ("ModernHudPreferences._item_prop_changed", "item"),
-    },
-)
 
 #: Stored values shown as they are written in the configuration: HUD
 #: positions, popup classes and popup sections, cell alignments, and ``n``,
@@ -197,10 +166,6 @@ def _untranslated(node: ast.AST) -> list[str]:
     return []
 
 
-def _receiver(func: ast.expr) -> str:
-    return ast.unparse(func.value) if isinstance(func, ast.Attribute) else ""
-
-
 def _method_arguments(name: str, args: list[ast.expr]) -> list[ast.expr]:
     """The arguments of a call to method ``name`` whose text is shown."""
     if name in TEXT_METHODS:
@@ -244,13 +209,11 @@ def _qualified_names(tree: ast.AST) -> dict[ast.AST, str]:
     return names
 
 
-def scan_source(source: str, filename: str) -> tuple[list[Finding], set[str], set[tuple[str, str]]]:
-    """Findings in ``source``, plus the design-area exclusions that matched."""
+def scan_source(source: str, filename: str) -> list[Finding]:
+    """The untranslated texts shown by the calls in ``source``."""
     tree = ast.parse(source, filename=filename)
     names = _qualified_names(tree)
     findings: list[Finding] = []
-    functions_seen = {name for name in names.values() if name in DESIGN_AREA_FUNCTIONS}
-    calls_used: set[tuple[str, str]] = set()
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
             continue
@@ -261,38 +224,23 @@ def scan_source(source: str, filename: str) -> tuple[list[Finding], set[str], se
         texts = [text for argument in arguments for text in _untranslated(argument)]
         if not texts:
             continue
-        if function in DESIGN_AREA_FUNCTIONS:
-            continue
-        key = (function, _receiver(node.func))
-        if key in DESIGN_AREA_CALLS:
-            calls_used.add(key)
-            continue
         findings.extend(Finding(filename, node.lineno, function, callee, text) for text in texts)
-    return findings, functions_seen, calls_used
+    return findings
 
 
 def _modules() -> list[Path]:
-    return sorted(path for path in PACKAGE.glob("*.py") if path.name not in EXCLUDED_FILES)
+    return sorted(PACKAGE.glob("*.py"))
 
 
 def test_scope_covers_the_editor_package() -> None:
     names = {path.name for path in _modules()}
     assert {"main_dialog.py", "dialogs.py", "design_canvas.py", "preview_widgets.py", "reference_preview.py"} <= names
-    assert not names & EXCLUDED_FILES
 
 
 @pytest.mark.parametrize("path", _modules(), ids=lambda path: path.name)
 def test_no_untranslated_text_in_the_editor(path: Path) -> None:
-    findings, _functions, _calls = scan_source(path.read_text(encoding="utf-8"), path.name)
+    findings = scan_source(path.read_text(encoding="utf-8"), path.name)
     assert not findings, "Wrap these texts in _() (use .format() for values):\n" + "\n".join(map(str, findings))
-
-
-def test_design_area_exclusions_are_current() -> None:
-    """An exclusion that matches nothing any more is to be removed (step 4)."""
-    source = (PACKAGE / "main_dialog.py").read_text(encoding="utf-8")
-    _findings, functions, calls = scan_source(source, "main_dialog.py")
-    assert DESIGN_AREA_FUNCTIONS - functions == set(), "no such function; remove it from DESIGN_AREA_FUNCTIONS"
-    assert DESIGN_AREA_CALLS - calls == set(), "no untranslated text there any more; remove it from DESIGN_AREA_CALLS"
 
 
 @pytest.mark.parametrize(
@@ -316,5 +264,5 @@ def test_design_area_exclusions_are_current() -> None:
     ],
 )
 def test_the_scan_finds_what_it_should(snippet: str, expected: list[str]) -> None:
-    findings, _functions, _calls = scan_source(f"def f():\n    {snippet}\n", "snippet.py")
+    findings = scan_source(f"def f():\n    {snippet}\n", "snippet.py")
     assert [finding.text for finding in findings] == expected
