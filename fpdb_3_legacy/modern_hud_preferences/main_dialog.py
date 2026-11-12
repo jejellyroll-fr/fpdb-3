@@ -57,7 +57,6 @@ from fpdb_3_legacy.modern_hud_preferences import (
 from fpdb_3_legacy.modern_hud_preferences.design_canvas import HudDesignCanvas
 from fpdb_3_legacy.modern_hud_preferences.dialogs import (
     AddStatDialog,
-    BlockPropertiesDialog,
     LayoutSelectionDialog,
     PopupStatEditDialog,
 )
@@ -365,17 +364,12 @@ class ModernHudPreferences(QDialog):
         self.remove_stat_btn = QPushButton(_("Remove"))
         self.remove_stat_btn.setFixedHeight(26)
         self.remove_stat_btn.clicked.connect(self.remove_stat)
-        self.block_props_btn = QPushButton(_("Block Props"))
-        self.block_props_btn.setFixedHeight(26)
-        self.block_props_btn.setToolTip(_("Edit the selected panel's title/border colours, position and label"))
-        self.block_props_btn.clicked.connect(self.edit_block_properties)
         design_actions = QHBoxLayout()
         design_actions.setContentsMargins(0, 0, 0, 0)
         design_actions.addWidget(self.add_item_btn)
         for button in (self.edit_stat_btn, self.remove_stat_btn):
             design_actions.addWidget(button)
         design_actions.addStretch()
-        design_actions.addWidget(self.block_props_btn)
         design_layout.addLayout(design_actions)
         self.design_hint = QLabel(
             _(
@@ -536,6 +530,15 @@ class ModernHudPreferences(QDialog):
         self.gp_opacity.setValue(178)
         self.gp_opacity.valueChanged.connect(lambda _v: self._group_opacity_changed())
         gp.addRow(_("Opacity:"), self.gp_opacity)
+        self.gp_fg = self._group_color_btn("fgcolor")
+        gp.addRow(_("Panel text:"), self.gp_fg)
+        self.gp_cell_width = QSpinBox()
+        self.gp_cell_width.setRange(0, 300)
+        self.gp_cell_width.setSpecialValueText(_("Automatic"))
+        self.gp_cell_width.setSuffix(_(" px"))
+        self.gp_cell_width.setToolTip(_("Minimum width of each statistic cell; Automatic keeps the legacy default"))
+        self.gp_cell_width.valueChanged.connect(self._group_cell_width_changed)
+        gp.addRow(_("Cell width:"), self.gp_cell_width)
         inspector_layout.addWidget(self.group_props_box)
         # Set once per profile: folded, with what it holds in its header.
         self.presentation_section = CollapsibleSection(
@@ -2148,6 +2151,8 @@ class ModernHudPreferences(QDialog):
             self._style_color_btn(btn, block.get(attr, ""))
         op = self._opacity_of(block.get("bgcolor", ""))
         self.gp_opacity.setValue(op if op is not None else 178)
+        if getattr(self, "gp_cell_width", None) is not None:
+            self.gp_cell_width.setValue(int(block.get("cell_width", 0) or 0))
         self._loading_group = False
 
     def _selected_block(self):
@@ -2183,6 +2188,16 @@ class ModernHudPreferences(QDialog):
             return
         block["label"] = self.gp_name.text()
         block["position"] = self.gp_position.currentText()
+        self._refresh_after_group_edit()
+
+    def _group_cell_width_changed(self, value: int) -> None:
+        """The panel's minimum cell width; 0 is the HUD's own default."""
+        if self._loading_group:
+            return
+        _bi, block = self._selected_block()
+        if block is None or int(block.get("cell_width", 0) or 0) == value:
+            return
+        block["cell_width"] = value
         self._refresh_after_group_edit()
 
     def _group_opacity_changed(self) -> None:
@@ -3392,23 +3407,6 @@ class ModernHudPreferences(QDialog):
         )
         profile["multiblock"] = True
         self._refresh_profile()
-
-    def edit_block_properties(self) -> None:
-        from PySide6.QtWidgets import QMessageBox
-
-        name, profile = self._current_profile()
-        if not isinstance(profile, dict):
-            return
-        blocks = profile.get("blocks")
-        if not blocks:
-            QMessageBox.information(self, _("Block Properties"), _("This profile has no panels. Use Add Block first."))
-            return
-        sel = self._selected_row_item()
-        bi = sel[0] if sel and sel[0] is not None else 0
-        dlg = BlockPropertiesDialog(blocks[bi], parent=self)
-        if dlg.exec():
-            blocks[bi].update(dlg.get_props())
-            self._refresh_profile()
 
     def _append_stat_node(self, parent_node, stat: dict, row: int, col: int) -> None:
         profile_io.append_stat_node(self.config.doc, parent_node, stat, row, col)

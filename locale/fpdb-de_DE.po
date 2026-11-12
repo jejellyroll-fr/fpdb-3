@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 22:56+0100\n"
+"POT-Creation-Date: 2026-11-12 23:21+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -4703,6 +4703,7 @@ msgid "Add/Edit Statistic"
 msgstr "Statistik hinzufügen/bearbeiten"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Automatic"
 msgstr "Automatische Notizen"
@@ -4714,7 +4715,6 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "Block-Eigenschaften"
@@ -4725,6 +4725,7 @@ msgid "Border:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell width:"
 msgstr ""
 
@@ -4786,6 +4787,7 @@ msgid "Middle color:"
 msgstr "Mittlere Farbe:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid ""
 "Minimum width of each statistic cell; Automatic keeps the legacy default"
@@ -4818,6 +4820,7 @@ msgid "Panel background:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Panel text:"
 msgstr "Klartext"
@@ -5213,11 +5216,6 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Block Props"
-msgstr "Block-Eigensch."
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Cannot add this rule"
 msgstr "Diese Regel kann nicht hinzugefügt werden"
 
@@ -5388,13 +5386,6 @@ msgstr "Bearbeiten"
 #, fuzzy
 msgid "Edit Text Label"
 msgstr "Datenbank bearbeiten"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Edit the selected panel's title/border colours, position and label"
-msgstr ""
-"Titel, Rahmenfarben, Position und Beschriftung des gewählten Panels "
-"bearbeiten"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -6126,10 +6117,6 @@ msgstr "Theme:"
 #, fuzzy
 msgid "Then show"
 msgstr "Dann anzeigen"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "This profile has no panels. Use Add Block first."
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -9392,6 +9379,10 @@ msgstr ""
 #~ msgstr "Gewonnene Big Bets pro 100 Hände"
 
 #, fuzzy
+#~ msgid "Block Props"
+#~ msgstr "Block-Eigensch."
+
+#, fuzzy
 #~ msgid "BovadaSummary.parseSummary: Failed to detect currency"
 #~ msgstr "parseSummary: Konnte Währung nicht finden"
 
@@ -9772,6 +9763,12 @@ msgstr ""
 #~ msgid "ERROR: query %s result does not have player_id as first column"
 #~ msgstr ""
 #~ "Fehler: Ergebnis der Query %s hatte nicht player_id als erste Spalte"
+
+#, fuzzy
+#~ msgid "Edit the selected panel's title/border colours, position and label"
+#~ msgstr ""
+#~ "Titel, Rahmenfarben, Position und Beschriftung des gewählten Panels "
+#~ "bearbeiten"
 
 #~ msgid "Either 0 or more than one site matched (%s) - EEK"
 #~ msgstr "Entweder 0 oder mehr als eine Seite wurden (%s) erkannt"

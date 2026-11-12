@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 22:56+0100\n"
+"POT-Creation-Date: 2026-11-12 23:21+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -4740,6 +4740,7 @@ msgid "Add/Edit Statistic"
 msgstr "添加/编辑统计"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Automatic"
 msgstr "自动笔记"
@@ -4751,7 +4752,6 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "区块属性"
@@ -4762,6 +4762,7 @@ msgid "Border:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell width:"
 msgstr ""
 
@@ -4823,6 +4824,7 @@ msgid "Middle color:"
 msgstr "中间色:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid ""
 "Minimum width of each statistic cell; Automatic keeps the legacy default"
@@ -4853,6 +4855,7 @@ msgid "Panel background:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Panel text:"
 msgstr "纯文本"
@@ -5228,11 +5231,6 @@ msgstr "手数低于此值时不显示该面板，改为显示后备内容。"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Block Props"
-msgstr "区块属性"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Cannot add this rule"
 msgstr "无法添加此规则"
 
@@ -5404,11 +5402,6 @@ msgstr "编辑"
 #, fuzzy
 msgid "Edit Text Label"
 msgstr "编辑数据库"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Edit the selected panel's title/border colours, position and label"
-msgstr "编辑所选面板的标题/边框颜色、位置和标签"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -6120,10 +6113,6 @@ msgstr "主题:"
 #, fuzzy
 msgid "Then show"
 msgstr "则显示"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "This profile has no panels. Use Add Block first."
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -8873,6 +8862,10 @@ msgstr ""
 #~ msgstr "添加统计"
 
 #, fuzzy
+#~ msgid "Block Props"
+#~ msgstr "区块属性"
+
+#, fuzzy
 #~ msgid ""
 #~ "BovadaToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
 #~ msgstr "无法识别的游戏类型：‘%s’"
@@ -8944,6 +8937,10 @@ msgstr ""
 #~ msgstr ""
 #~ "默认字符集编码为US-ASCII，替换为CP1252--如果你不是Mac使用者，请报告这个问"
 #~ "题"
+
+#, fuzzy
+#~ msgid "Edit the selected panel's title/border colours, position and label"
+#~ msgstr "编辑所选面板的标题/边框颜色、位置和标签"
 
 #, fuzzy
 #~ msgid "Error copying .example config file, cannot fall back. Exiting."

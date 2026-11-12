@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 22:56+0100\n"
+"POT-Creation-Date: 2026-11-12 23:21+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -4684,6 +4684,7 @@ msgid "Add/Edit Statistic"
 msgstr "統計の追加/編集"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Automatic"
 msgstr "自動ノート"
@@ -4695,7 +4696,6 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "ブロックのプロパティ"
@@ -4706,6 +4706,7 @@ msgid "Border:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell width:"
 msgstr ""
 
@@ -4767,6 +4768,7 @@ msgid "Middle color:"
 msgstr "中間色:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid ""
 "Minimum width of each statistic cell; Automatic keeps the legacy default"
@@ -4797,6 +4799,7 @@ msgid "Panel background:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Panel text:"
 msgstr "プレーンテキスト"
@@ -5181,11 +5184,6 @@ msgstr "ハンド数がこれを下回るとパネルは表示されず、代替
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Block Props"
-msgstr "ブロック設定"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Cannot add this rule"
 msgstr "このルールを追加できません"
 
@@ -5356,11 +5354,6 @@ msgstr "編集"
 #, fuzzy
 msgid "Edit Text Label"
 msgstr "データベースを編集"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Edit the selected panel's title/border colours, position and label"
-msgstr "選択したパネルのタイトル/枠の色、位置、ラベルを編集"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -6086,10 +6079,6 @@ msgstr "テーマ:"
 #, fuzzy
 msgid "Then show"
 msgstr "表示するもの"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "This profile has no panels. Use Add Block first."
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -9185,6 +9174,10 @@ msgstr ""
 #~ msgid "Big bets won per 100 hands"
 #~ msgstr "PTBB/100ハンド"
 
+#, fuzzy
+#~ msgid "Block Props"
+#~ msgstr "ブロック設定"
+
 #~ msgid "BovadaSummary.parseSummary: '%s'"
 #~ msgstr "BovadaSummary.parseSummary: '%s'"
 
@@ -9410,6 +9403,10 @@ msgstr ""
 
 #~ msgid "ERROR: query %s result does not have player_id as first column"
 #~ msgstr "ERROR: クエリ %s の結果に player_id がありません"
+
+#, fuzzy
+#~ msgid "Edit the selected panel's title/border colours, position and label"
+#~ msgstr "選択したパネルのタイトル/枠の色、位置、ラベルを編集"
 
 #~ msgid "Enter list ID:"
 #~ msgstr "リストIDを入力:"

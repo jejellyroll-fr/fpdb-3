@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 22:56+0100\n"
+"POT-Creation-Date: 2026-11-12 23:21+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -4771,6 +4771,7 @@ msgid "Add/Edit Statistic"
 msgstr "Pridėti/redaguoti statistiką"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Automatic"
 msgstr "Automatinės pastabos"
@@ -4782,7 +4783,6 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "Bloko savybės"
@@ -4793,6 +4793,7 @@ msgid "Border:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell width:"
 msgstr ""
 
@@ -4854,6 +4855,7 @@ msgid "Middle color:"
 msgstr "Vidurinė spalva:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid ""
 "Minimum width of each statistic cell; Automatic keeps the legacy default"
@@ -4886,6 +4888,7 @@ msgid "Panel background:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Panel text:"
 msgstr "Paprastas tekstas"
@@ -5269,11 +5272,6 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Block Props"
-msgstr "Bloko savyb."
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Cannot add this rule"
 msgstr "Negalima pridėti šios taisyklės"
 
@@ -5444,12 +5442,6 @@ msgstr "Keisti"
 #, fuzzy
 msgid "Edit Text Label"
 msgstr "Redaguoti duomenų bazę"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Edit the selected panel's title/border colours, position and label"
-msgstr ""
-"Redaguoti pasirinkto skydelio pavadinimo/rėmelio spalvas, poziciją ir etiketę"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -6177,10 +6169,6 @@ msgstr "Tema:"
 #, fuzzy
 msgid "Then show"
 msgstr "Tada rodyti"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "This profile has no panels. Use Add Block first."
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -9037,6 +9025,10 @@ msgstr ""
 #~ msgstr "ĮPIRKOS VALIUTA"
 
 #, fuzzy
+#~ msgid "Block Props"
+#~ msgstr "Bloko savyb."
+
+#, fuzzy
 #~ msgid ""
 #~ "BovadaToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
 #~ msgstr "Nepavyksta atpažinti žaidimo rūšies iš: '%s'"
@@ -9123,6 +9115,12 @@ msgstr ""
 #~ msgid "ERROR: query %s result does not have player_id as first column"
 #~ msgstr ""
 #~ "KLAIDA: užklausos %s rezultatas nenurodo player_id pirmame stulpelyje"
+
+#, fuzzy
+#~ msgid "Edit the selected panel's title/border colours, position and label"
+#~ msgstr ""
+#~ "Redaguoti pasirinkto skydelio pavadinimo/rėmelio spalvas, poziciją ir "
+#~ "etiketę"
 
 #~ msgid "Either 0 or more than one site matched (%s) - EEK"
 #~ msgstr "Arba 0 arba daugiau nei vienas saitas atitiko (%s) - EEK"

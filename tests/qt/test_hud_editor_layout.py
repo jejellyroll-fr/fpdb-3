@@ -126,3 +126,66 @@ def test_the_add_menu_adds_each_kind_of_item(tmp_path, monkeypatch) -> None:
     dialog.add_hline_action.trigger()
     after = sum(len(block.get("hlines", [])) for block in profile.get("blocks", []))
     assert after == before + 1
+
+
+TWO_BLOCKS = (
+    '<ss name="two_blocks" rows="2" cols="2">'
+    '<block label="Core" rows="1" cols="2"><stat _rowcol="(1,1)" _stat_name="vpip"/></block>'
+    '<block label="Post" rows="1" cols="2"><stat _rowcol="(1,1)" _stat_name="cb1"/></block>'
+    "</ss>"
+)
+
+
+def _panels_editor(tmp_path, monkeypatch):
+    import defusedxml.minidom
+    from PySide6.QtWidgets import QApplication
+
+    path = config_copy(tmp_path, [defusedxml.minidom.parseString(TWO_BLOCKS).documentElement])
+    dialog, modals = open_editor(path, monkeypatch)
+    dialog.show()
+    dialog.resize(*DEFAULT)
+    profile = select_profile(dialog, "two_blocks")
+    QApplication.processEvents()
+    return dialog, modals, path, profile
+
+
+def test_there_is_no_block_props_button_any_more(tmp_path, monkeypatch) -> None:
+    from PySide6.QtWidgets import QPushButton
+
+    dialog = _shown(tmp_path, monkeypatch, DEFAULT)
+    assert not hasattr(dialog, "block_props_btn")
+    assert not [button for button in dialog.findChildren(QPushButton) if button.text() == "Block Props"]
+
+
+def test_group_properties_set_the_panel_text_and_cell_width(tmp_path, monkeypatch) -> None:
+    from PySide6.QtGui import QColor
+
+    from tests.helpers.hud_editor import reload_stat_set
+
+    dialog, modals, path, profile = _panels_editor(tmp_path, monkeypatch)
+    dialog.group_list.setCurrentRow(1)
+    assert dialog.gp_cell_width.value() == 0
+    assert dialog.gp_cell_width.text() == "Automatic"
+    assert not dialog.has_unsaved_changes()
+
+    dialog.gp_cell_width.setValue(48)
+    modals.colours.append(QColor("#123456"))
+    dialog.gp_fg.click()
+    post = profile["blocks"][1]
+    assert (post["cell_width"], post["fgcolor"]) == (48, "#123456")
+    assert dialog.undo_btn.isEnabled()
+
+    dialog.save_changes()
+    saved = reload_stat_set(path, "two_blocks").blocks[1]
+    assert (saved.cell_width, saved.fgcolor) == (48, "#123456")
+
+
+def test_showing_a_panel_is_not_an_edit(tmp_path, monkeypatch) -> None:
+    dialog, _modals, _path, profile = _panels_editor(tmp_path, monkeypatch)
+    profile["blocks"][1]["cell_width"] = 40
+    dialog.group_list.setCurrentRow(1)
+    assert dialog.gp_cell_width.value() == 40
+    dialog.group_list.setCurrentRow(0)
+    assert dialog.gp_cell_width.value() == 0
+    assert profile["blocks"][1]["cell_width"] == 40
+    assert profile["blocks"][0].get("cell_width", 0) == 0

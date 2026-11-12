@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 22:56+0100\n"
+"POT-Creation-Date: 2026-11-12 23:21+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -4709,6 +4709,7 @@ msgid "Add/Edit Statistic"
 msgstr "Statisztika hozzáadása/szerkesztése"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Automatic"
 msgstr "Automatikus jegyzetek"
@@ -4720,7 +4721,6 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "Blokk tulajdonságai"
@@ -4731,6 +4731,7 @@ msgid "Border:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell width:"
 msgstr ""
 
@@ -4792,6 +4793,7 @@ msgid "Middle color:"
 msgstr "Középső szín:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid ""
 "Minimum width of each statistic cell; Automatic keeps the legacy default"
@@ -4824,6 +4826,7 @@ msgid "Panel background:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Panel text:"
 msgstr "Egyszerű szöveg"
@@ -5214,11 +5217,6 @@ msgstr "Ennyi leosztás alatt a panel visszatartva, és a tartalék jelenik meg.
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Block Props"
-msgstr "Blokk tul."
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Cannot add this rule"
 msgstr "Ez a szabály nem adható hozzá"
 
@@ -5389,13 +5387,6 @@ msgstr "Szerkeszt"
 #, fuzzy
 msgid "Edit Text Label"
 msgstr "Adatbázis szerkesztése"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Edit the selected panel's title/border colours, position and label"
-msgstr ""
-"A kiválasztott panel címének, keretszíneinek, pozíciójának és feliratának "
-"szerkesztése"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -6129,10 +6120,6 @@ msgstr "Téma:"
 #, fuzzy
 msgid "Then show"
 msgstr "Akkor megjelenítés"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "This profile has no panels. Use Add Block first."
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -9574,6 +9561,10 @@ msgstr ""
 #~ msgstr "nagytét/100 leosztás"
 
 #, fuzzy
+#~ msgid "Block Props"
+#~ msgstr "Blokk tul."
+
+#, fuzzy
 #~ msgid "BovadaSummary.parseSummary: Failed to detect currency"
 #~ msgstr "parseSummary: Nem található a pénznem"
 
@@ -10007,6 +9998,12 @@ msgstr ""
 #~ msgid "ERROR: query %s result does not have player_id as first column"
 #~ msgstr ""
 #~ "ERROR: a(z) %s lekérdezés eredményének nem a player_id az első oszlopa"
+
+#, fuzzy
+#~ msgid "Edit the selected panel's title/border colours, position and label"
+#~ msgstr ""
+#~ "A kiválasztott panel címének, keretszíneinek, pozíciójának és feliratának "
+#~ "szerkesztése"
 
 #~ msgid "Edit your screen_name and hand history path in the supported_sites "
 #~ msgstr ""
