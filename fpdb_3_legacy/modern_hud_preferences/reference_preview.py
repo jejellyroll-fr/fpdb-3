@@ -46,16 +46,17 @@ from fpdb_3_legacy.hud_presentation import (
     preview_blocks,
     reference_packages,
 )
+from fpdb_3_legacy.i18n import N_
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.modern_hud_preferences.preview_widgets import HudPreviewWidget
 
 #: The order the packages are offered in: the starter first, then the
 #: specialized packages, grouped by game where possible.
 PACKAGE_ORDER: tuple[tuple[str, str], ...] = (
-    ("basic", "Basic — eight numbers, no setup"),
-    ("advanced", "Advanced — compact surface, popups behind it"),
-    ("dynamic", "Dynamic Hold'em — panels that follow the spot"),
-    ("plo_dynamic", "Dynamic PLO — Omaha stats by spot"),
+    ("basic", N_("Basic — eight numbers, no setup")),
+    ("advanced", N_("Advanced — compact surface, popups behind it")),
+    ("dynamic", N_("Dynamic Hold'em — panels that follow the spot")),
+    ("plo_dynamic", N_("Dynamic PLO — Omaha stats by spot")),
 )
 
 
@@ -84,7 +85,7 @@ class ReferenceHudPreview(QWidget):
         self.package_combo = QComboBox()
         for name, label in PACKAGE_ORDER:
             if name in self._packages:
-                self.package_combo.addItem(label, name)
+                self.package_combo.addItem(_(label), name)
         self.package_combo.currentIndexChanged.connect(self._package_changed)
         chooser.addWidget(self.package_combo, 1)
 
@@ -103,7 +104,7 @@ class ReferenceHudPreview(QWidget):
         body.addWidget(self.preview, 2)
 
         right = QVBoxLayout()
-        paths_box = QGroupBox("Popup paths")
+        paths_box = QGroupBox(_("Popup paths"))
         paths_layout = QVBoxLayout(paths_box)
         self.paths_list = QListWidget()
         self.paths_list.setToolTip(
@@ -116,7 +117,7 @@ class ReferenceHudPreview(QWidget):
         paths_layout.addWidget(self.paths_list)
         right.addWidget(paths_box, 2)
 
-        legend_box = QGroupBox("What the colours mean")
+        legend_box = QGroupBox(_("What the colours mean"))
         legend_layout = QVBoxLayout(legend_box)
         for role, description in ROLE_DESCRIPTIONS.items():
             swatch = QLabel(f"{role}: {description}")
@@ -126,10 +127,12 @@ class ReferenceHudPreview(QWidget):
             )
             legend_layout.addWidget(swatch)
         sample_rule = QLabel(
-            f"Sample: under {SAMPLE_LOW} hands a number is marked thin, over {SAMPLE_HIGH} "
-            f"it is solid, and a contextual stat needs {CONTEXTUAL_MIN_SAMPLE} before it is "
-            "shown at all. The colour is never the only signal — every cell carries its "
-            "prefix and its tooltip.",
+            _(
+                "Sample: under {low} hands a number is marked thin, over {high} "
+                "it is solid, and a contextual stat needs {contextual} before it is "
+                "shown at all. The colour is never the only signal — every cell carries its "
+                "prefix and its tooltip.",
+            ).format(low=SAMPLE_LOW, high=SAMPLE_HIGH, contextual=CONTEXTUAL_MIN_SAMPLE),
         )
         sample_rule.setWordWrap(True)
         legend_layout.addWidget(sample_rule)
@@ -173,13 +176,14 @@ class ReferenceHudPreview(QWidget):
         package = self.package
         if package is None:
             self.description_label.setText(
-                "No reference package could be read: "
-                + "; ".join(f"{name}: {why}" for name, why in self._load_failures.items()),
+                _("No reference package could be read: {failures}").format(
+                    failures="; ".join(f"{name}: {why}" for name, why in self._load_failures.items()),
+                ),
             )
             return
         self.context_combo.blockSignals(True)
         self.context_combo.clear()
-        self.context_combo.addItem("At rest (no rule matched)", "")
+        self.context_combo.addItem(_("At rest (no rule matched)"), "")
         for panel in package.dynamic_panels:
             self.context_combo.addItem(panel.label or panel_title(panel.id), panel.id)
         self.context_combo.setEnabled(self.context_combo.count() > 1)
@@ -205,18 +209,21 @@ class ReferenceHudPreview(QWidget):
             selected = next((panel for panel in context if panel.id == panel_id), None)
             title = selected.label if selected else panel_title(panel_id)
             self.description_label.setText(
-                f"{package.name} — the resolver has selected “{title}”. "
-                "At a table this panel appears when the rule that names it matches, "
-                "and disappears again when the spot changes.",
+                _(
+                    "{package} — the resolver has selected “{title}”. "
+                    "At a table this panel appears when the rule that names it matches, "
+                    "and disappears again when the spot changes.",
+                ).format(package=package.name, title=title),
             )
         else:
             blocks = preview_blocks(package)
             self.description_label.setText(
-                f"{package.name} — what a seat shows with no dynamic rule matched. "
+                _("{package} — what a seat shows with no dynamic rule matched.").format(package=package.name)
+                + " "
                 + (
-                    f"{len(package.dynamic_panels)} contextual panels are one rule away."
+                    _("{count} contextual panels are one rule away.").format(count=len(package.dynamic_panels))
                     if package.dynamic_panels
-                    else "This package has no contextual panels: the block never changes."
+                    else _("This package has no contextual panels: the block never changes.")
                 ),
             )
         self._apply_blocks(blocks)

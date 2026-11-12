@@ -655,7 +655,7 @@ class PopupPreviewWidget(QWidget):
                 widget.deleteLater()
 
     def _add_empty_state(self, popup_name: str) -> None:
-        label = QLabel(f"{popup_name}\nNo popup stats configured")
+        label = QLabel("\n".join((popup_name, _("No popup stats configured"))))
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label.setStyleSheet("color:#ffffff;font-weight:700;padding:18px;")
         self.popup_layout.addWidget(label)
@@ -672,7 +672,7 @@ class PopupPreviewWidget(QWidget):
             except Exception:
                 log.exception("popup preview: failed to load charts from %s", source)
         if not charts:
-            self._add_empty_state(f"{popup_name}\n(range chart data unavailable)")
+            self._add_empty_state("\n".join((popup_name, _("(range chart data unavailable)"))))
             return
         for chart in charts:
             self.popup_layout.addWidget(build_grid_widget(chart, cell_px=28))
@@ -692,7 +692,7 @@ class PopupPreviewWidget(QWidget):
             except Exception:
                 log.exception("popup preview: failed to load group %s from %s", group, source)
         if not data:
-            self._add_empty_state(f"{popup_name}\n(popup group data unavailable)")
+            self._add_empty_state("\n".join((popup_name, _("(popup group data unavailable)"))))
             return
         cell_px = 22 if int(data.get("cols", 1) or 1) >= 10 else 26
         self.popup_layout.addWidget(build_block_popup_widget(data, cell_px=cell_px))
