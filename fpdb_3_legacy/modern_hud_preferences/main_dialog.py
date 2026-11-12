@@ -120,6 +120,8 @@ class ModernHudPreferences(QDialog):
     #: The selected item of the current profile, by identity (B11). The Design
     #: canvas shows it; nothing else holds the selection.
     _selected_item: dict | None = None
+    #: The selected stat of the shown popup, or BlockPopup cell, by identity (#782).
+    _popup_selected: dict | None = None
 
     def __init__(self, config, parent=None) -> None:
         super().__init__(parent)
@@ -627,85 +629,158 @@ class ModernHudPreferences(QDialog):
 
         popup_layout.addWidget(popup_select_frame)
 
-        # Popup content area
+        # The same three panes as the Statistics tab (#782): the stat catalogue
+        # on the left, the popup being edited and the popup as drawn in the
+        # middle, the selection's and the popup's properties on the right.
         popup_content_splitter = QSplitter(Qt.Orientation.Horizontal)
         popup_content_splitter.setHandleWidth(8)
+        popup_content_splitter.setChildrenCollapsible(False)
+        self.popup_splitter = popup_content_splitter
 
-        # Left panel: Statistics list
-        left_popup_panel = QFrame()
-        left_popup_panel.setFrameStyle(QFrame.Shape.StyledPanel)
-        # Same reasoning as the statistics editor: the scroll area added below
-        # covers a narrow window, so the floor only has to keep the statistics
-        # list and the item properties readable side by side.
-        left_popup_panel.setMinimumWidth(560)
-        left_popup_layout = QVBoxLayout(left_popup_panel)
-        left_popup_layout.setContentsMargins(12, 12, 12, 12)
-        left_popup_layout.setSpacing(8)
+        # --- Sources: the stat catalogue -------------------------------------------
+        popup_sources = QFrame()
+        popup_sources.setFrameStyle(QFrame.Shape.StyledPanel)
+        popup_sources_layout = QVBoxLayout(popup_sources)
+        popup_sources_layout.setContentsMargins(10, 10, 10, 10)
+        popup_sources_layout.setSpacing(8)
+        popup_catalog_label = QLabel(_("Available Stats"))
+        popup_catalog_label.setProperty("class", "h2")
+        popup_sources_layout.addWidget(popup_catalog_label)
+        self.popup_catalog_widget = StatCatalogWidget(self._stat_catalog())
+        self.popup_catalog_widget.setMinimumWidth(180)
+        self.popup_catalog_widget.setMinimumHeight(100)
+        self.popup_catalog_widget.tree.setColumnHidden(1, True)
+        self.popup_catalog_widget.setToolTip(_("Drag a stat into the popup, or double-click it to add it at the end."))
+        self.popup_catalog_widget.stat_activated.connect(self._append_catalog_stat_to_popup)
+        popup_sources_layout.addWidget(self.popup_catalog_widget, 1)
+        popup_sources.setMinimumWidth(190)
+        popup_content_splitter.addWidget(popup_sources)
 
-        popup_top_splitter = QSplitter(Qt.Orientation.Horizontal)
-        popup_top_splitter.setChildrenCollapsible(False)
-        popup_top_splitter.setMaximumHeight(270)
-        popup_top_splitter.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-
-        # Statistics list
-        stats_group = QGroupBox(_("Statistics"))
-        stats_layout = QVBoxLayout()
-        stats_layout.setSpacing(6)
-
-        # Stats buttons at the top
-        stats_btn_layout = QHBoxLayout()
-        stats_btn_layout.setContentsMargins(0, 8, 0, 0)
-        stats_btn_layout.setSpacing(10)
-
+        # --- Work surface: the popup's items, then the popup as drawn ----------------
+        popup_design_pane = QWidget()
+        popup_design_layout = QVBoxLayout(popup_design_pane)
+        popup_design_layout.setContentsMargins(10, 10, 10, 6)
+        popup_design_layout.setSpacing(6)
+        popup_design_header = QHBoxLayout()
+        popup_design_header.setContentsMargins(0, 0, 0, 0)
+        design_lbl = QLabel(_("Design"))
+        design_lbl.setProperty("class", "h2")
+        popup_design_header.addWidget(design_lbl)
+        popup_design_header.addStretch()
         self.add_popup_stat_btn = QPushButton(_("➕ Add"))
-        self.add_popup_stat_btn.setMinimumHeight(34)
+        self.add_popup_stat_btn.setFixedHeight(26)
         self.add_popup_stat_btn.clicked.connect(self.add_popup_stat)
 
         self.edit_popup_stat_btn = QPushButton(_("📝 Edit"))
-        self.edit_popup_stat_btn.setMinimumHeight(34)
+        self.edit_popup_stat_btn.setFixedHeight(26)
         self.edit_popup_stat_btn.clicked.connect(self.edit_popup_stat)
 
         self.remove_popup_stat_btn = QPushButton(_("➖ Remove"))
-        self.remove_popup_stat_btn.setMinimumHeight(34)
+        self.remove_popup_stat_btn.setFixedHeight(26)
         self.remove_popup_stat_btn.clicked.connect(self.remove_popup_stat)
-
-        self.move_up_btn = QPushButton(_("↑ Up"))
-        self.move_up_btn.setMinimumHeight(34)
-        self.move_up_btn.clicked.connect(self.move_stat_up)
-
-        self.move_down_btn = QPushButton(_("↓ Down"))
-        self.move_down_btn.setMinimumHeight(34)
-        self.move_down_btn.clicked.connect(self.move_stat_down)
-
-        # PT4-style design canvas: the popup's stats as a vertical chip stack,
-        # synced with the list below and the live preview.
-        design_lbl = QLabel(_("Design"))
-        design_lbl.setProperty("class", "h2")
-        stats_layout.addWidget(design_lbl)
-        self.popup_canvas = HudDesignCanvas()
-        self.popup_canvas.setMinimumHeight(380)
+        for button in (self.add_popup_stat_btn, self.edit_popup_stat_btn, self.remove_popup_stat_btn):
+            popup_design_header.addWidget(button)
+        popup_design_layout.addLayout(popup_design_header)
+        self.popup_design_hint = QLabel(
+            _(
+                "Drag an item to move it; drop a stat from Available Stats where it should go. "
+                "Arrows select, Alt+arrows move, Delete removes, double-click edits."
+            )
+        )
+        self.popup_design_hint.setWordWrap(True)
+        self.popup_design_hint.setProperty("class", "caption")
+        popup_design_layout.addWidget(self.popup_design_hint)
+        # PT4-style design canvas: a classic popup's stats as a list of chips, an
+        # imported BlockPopup as its grid. Drag, keyboard and catalogue drops edit
+        # it (#782).
+        self.popup_canvas = HudDesignCanvas(editable=True)
+        self.popup_canvas.grid_menu = False
+        self.popup_canvas.setMinimumHeight(80)
         self.popup_canvas.item_selected.connect(self._on_popup_canvas_selected)
-        self.popup_canvas.add_to_row.connect(lambda _r: self.add_popup_stat())
-        self.popup_canvas.remove_from_row.connect(self._popup_canvas_remove_row)
-        stats_layout.addWidget(self.popup_canvas, 2)
-
-        stats_btn_layout.addWidget(self.add_popup_stat_btn)
-        stats_btn_layout.addWidget(self.edit_popup_stat_btn)
-        stats_btn_layout.addWidget(self.remove_popup_stat_btn)
-        stats_btn_layout.addWidget(self.move_up_btn)
-        stats_btn_layout.addWidget(self.move_down_btn)
-        stats_btn_layout.addStretch()
-        stats_layout.addLayout(stats_btn_layout)
-
-        # Statistics list: kept for selection state + add/edit/remove/reorder
-        # logic, but hidden — the design canvas above (with submenu labels) is the
-        # visible surface, so the two no longer overlap.
+        self.popup_canvas.item_moved.connect(self._popup_canvas_moved)
+        self.popup_canvas.stat_dropped.connect(self._popup_canvas_stat_dropped)
+        self.popup_canvas.item_removed.connect(self._popup_canvas_removed)
+        self.popup_canvas.item_activated.connect(self._popup_canvas_activated)
+        self.popup_canvas.drop_refused.connect(self._show_status)
+        popup_design_layout.addWidget(self.popup_canvas, 1)
+        # The selection's index for Edit and Remove; never shown (the canvas is).
         self.popup_stats_list = QListWidget()
-        self.popup_stats_list.setAlternatingRowColors(True)
         self.popup_stats_list.hide()
-        stats_layout.addWidget(self.popup_stats_list)
-        stats_group.setLayout(stats_layout)
+        popup_design_layout.addWidget(self.popup_stats_list)
 
+        popup_preview_pane = QWidget()
+        right_popup_layout = QVBoxLayout(popup_preview_pane)
+        right_popup_layout.setContentsMargins(10, 6, 10, 10)
+        right_popup_layout.setSpacing(6)
+        preview_header_layout = QHBoxLayout()
+        preview_label = QLabel(_("Popup Preview"))
+        preview_label.setProperty("class", "h3")
+        preview_header_layout.addWidget(preview_label)
+
+        preview_header_layout.addStretch()
+        self.zoom_popup_btn = QPushButton(_("🔍 Real Size"))
+        self.zoom_popup_btn.setToolTip(_("Open preview at 100% real size in a new window"))
+        self.zoom_popup_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.zoom_popup_btn.clicked.connect(self.open_popup_zoom_window)
+        preview_header_layout.addWidget(self.zoom_popup_btn)
+        right_popup_layout.addLayout(preview_header_layout)
+        self.popup_preview = PopupPreviewWidget()
+        self.popup_preview.setMinimumHeight(80)
+        # The preview shares the column with the canvas: its own 300x220 floor
+        # would set the dialog's minimum height.
+        self.popup_preview.scroll_area.setMinimumSize(160, 80)
+        self.popup_preview.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.popup_preview.double_clicked_callback = self.open_popup_zoom_window
+        right_popup_layout.addWidget(self.popup_preview, 1)
+
+        popup_workspace = QSplitter(Qt.Orientation.Vertical)
+        popup_workspace.setChildrenCollapsible(False)
+        popup_workspace.addWidget(popup_design_pane)
+        popup_workspace.addWidget(popup_preview_pane)
+        popup_workspace.setStretchFactor(0, 3)
+        popup_workspace.setStretchFactor(1, 2)
+        popup_workspace.setSizes([460, 320])
+        self.popup_workspace_splitter = popup_workspace
+        popup_content_splitter.addWidget(popup_workspace)
+
+        # --- Inspector: the selected item, then the popup itself ----------------------
+        popup_inspector_body = QWidget()
+        popup_inspector_layout = QVBoxLayout(popup_inspector_body)
+        popup_inspector_layout.setContentsMargins(10, 10, 10, 10)
+        popup_inspector_layout.setSpacing(10)
+        # PT4-style Item Properties for the selected popup item/cell.
+        self._popup_group: dict | None = None  # loaded BlockPopup group (editable cells)
+        self._popup_item_cell: dict[str, Any] | None = None  # the selected cell dict
+        self._popup_item_mode: str | None = None
+        self.pi_props_box = QGroupBox(_("Item Properties"))
+        pif = QFormLayout(self.pi_props_box)
+        pif.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
+        pif.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        pif.setVerticalSpacing(5)
+        pif.setContentsMargins(8, 8, 8, 8)
+        self.pi_text = QLineEdit()
+        self.pi_text.editingFinished.connect(self._popup_item_changed)
+        pif.addRow(_("Text / Stat:"), self.pi_text)
+        self.pi_submenu = QLineEdit()
+        self.pi_submenu.editingFinished.connect(self._popup_item_changed)
+        pif.addRow(_("Submenu:"), self.pi_submenu)
+        self.pi_category = QComboBox()
+        self.pi_category.addItems(
+            ["auto", "player_info", "preflop", "flop", "turn", "river", "steal", "aggression", "general"]
+        )
+        self.pi_category.currentTextChanged.connect(self._popup_item_changed)
+        pif.addRow(_("Section:"), self.pi_category)
+        self.pi_type = QLabel(_("—"))
+        pif.addRow(_("Type:"), self.pi_type)
+        self.pi_pos = QLabel(_("—"))
+        pif.addRow(_("Position:"), self.pi_pos)
+        self._popup_item_color_btns: dict[str, QPushButton] = {}
+        self.pi_fg = self._popup_item_color_btn("fg")
+        pif.addRow(_("Foreground:"), self.pi_fg)
+        self.pi_bg = self._popup_item_color_btn("bg")
+        pif.addRow(_("Background:"), self.pi_bg)
+        self.pi_props_box.setEnabled(False)
+        popup_inspector_layout.addWidget(self.pi_props_box)
         popup_info_group = QGroupBox(_("Popup Information"))
         popup_info_layout = QGridLayout()
         popup_info_layout.setSpacing(6)
@@ -753,97 +828,20 @@ class ModernHudPreferences(QDialog):
         popup_info_layout.addWidget(self.popup_icon_provider_combo, 3, 1)
 
         popup_info_group.setLayout(popup_info_layout)
-        popup_info_group.setMinimumWidth(300)
-        popup_top_splitter.addWidget(popup_info_group)
+        popup_inspector_layout.addWidget(popup_info_group)
+        popup_inspector_layout.addStretch()
+        popup_inspector = QScrollArea()
+        popup_inspector.setWidgetResizable(True)
+        popup_inspector.setFrameShape(QFrame.Shape.StyledPanel)
+        popup_inspector.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        popup_inspector.setWidget(popup_inspector_body)
+        popup_inspector.setMinimumWidth(270)
+        popup_content_splitter.addWidget(popup_inspector)
 
-        # PT4-style Item Properties for the selected popup item/cell.
-        self._popup_group: dict | None = None  # loaded BlockPopup group (editable cells)
-        self._popup_item_cell: dict[str, Any] | None = None  # the selected cell dict
-        self._popup_item_mode: str | None = None
-        self.pi_props_box = QGroupBox(_("Item Properties"))
-        self.pi_props_box.setMinimumWidth(360)
-        pif = QFormLayout(self.pi_props_box)
-        pif.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
-        pif.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
-        pif.setVerticalSpacing(5)
-        pif.setContentsMargins(8, 8, 8, 8)
-        self.pi_text = QLineEdit()
-        self.pi_text.editingFinished.connect(self._popup_item_changed)
-        pif.addRow(_("Text / Stat:"), self.pi_text)
-        self.pi_submenu = QLineEdit()
-        self.pi_submenu.editingFinished.connect(self._popup_item_changed)
-        pif.addRow(_("Submenu:"), self.pi_submenu)
-        self.pi_category = QComboBox()
-        self.pi_category.addItems(
-            ["auto", "player_info", "preflop", "flop", "turn", "river", "steal", "aggression", "general"]
-        )
-        self.pi_category.currentTextChanged.connect(self._popup_item_changed)
-        pif.addRow(_("Section:"), self.pi_category)
-        self.pi_type = QLabel(_("—"))
-        pif.addRow(_("Type:"), self.pi_type)
-        self.pi_pos = QLabel(_("—"))
-        pif.addRow(_("Position:"), self.pi_pos)
-        self._popup_item_color_btns: dict[str, QPushButton] = {}
-        self.pi_fg = self._popup_item_color_btn("fg")
-        pif.addRow(_("Foreground:"), self.pi_fg)
-        self.pi_bg = self._popup_item_color_btn("bg")
-        pif.addRow(_("Background:"), self.pi_bg)
-        self.pi_props_box.setEnabled(False)
-        popup_top_splitter.addWidget(self.pi_props_box)
-        popup_top_splitter.setStretchFactor(0, 1)
-        popup_top_splitter.setStretchFactor(1, 2)
-        popup_top_splitter.setSizes([360, 520])
-        left_popup_layout.addWidget(popup_top_splitter)
-        left_popup_layout.addWidget(stats_group, 1)
-
-        left_popup_scroll = QScrollArea()
-        left_popup_scroll.setWidgetResizable(True)
-        left_popup_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        left_popup_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        left_popup_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        left_popup_scroll.setWidget(left_popup_panel)
-        popup_content_splitter.addWidget(left_popup_scroll)
-
-        # Right panel: Popup preview
-        right_popup_panel = QFrame()
-        right_popup_panel.setFrameStyle(QFrame.Shape.StyledPanel)
-        right_popup_panel.setMinimumWidth(240)
-        right_popup_layout = QVBoxLayout(right_popup_panel)
-        right_popup_layout.setContentsMargins(12, 12, 12, 12)
-        right_popup_layout.setSpacing(8)
-
-        # Preview section
-        preview_header_layout = QHBoxLayout()
-        preview_label = QLabel(_("Popup Preview"))
-        preview_label.setProperty("class", "h3")
-        preview_header_layout.addWidget(preview_label)
-
-        preview_header_layout.addStretch()
-        self.zoom_popup_btn = QPushButton(_("🔍 Real Size"))
-        self.zoom_popup_btn.setToolTip(_("Open preview at 100% real size in a new window"))
-        self.zoom_popup_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.zoom_popup_btn.clicked.connect(self.open_popup_zoom_window)
-        preview_header_layout.addWidget(self.zoom_popup_btn)
-
-        right_popup_layout.addLayout(preview_header_layout)
-
-        self.popup_preview = PopupPreviewWidget()
-        self.popup_preview.setMinimumHeight(220)
-        self.popup_preview.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.popup_preview.double_clicked_callback = self.open_popup_zoom_window
-        right_popup_layout.addWidget(self.popup_preview, 1)
-
-        right_popup_scroll = QScrollArea()
-        right_popup_scroll.setWidgetResizable(True)
-        right_popup_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        right_popup_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        right_popup_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        right_popup_scroll.setWidget(right_popup_panel)
-        popup_content_splitter.addWidget(right_popup_scroll)
-        popup_content_splitter.setStretchFactor(0, 6)
+        popup_content_splitter.setStretchFactor(0, 0)
         popup_content_splitter.setStretchFactor(1, 1)
-        popup_content_splitter.setSizes([1280, 260])
-
+        popup_content_splitter.setStretchFactor(2, 0)
+        popup_content_splitter.setSizes([280, 780, 340])
         popup_layout.addWidget(popup_content_splitter)
 
         # Add popup tab
@@ -1201,19 +1199,22 @@ class ModernHudPreferences(QDialog):
         )
         self._loading_popup = False
 
-        # Update stats list
+        self._fill_popup_stats_list(popup_data)
+
+        # Update the WYSIWYG chip canvas + preview.
+        self._rebuild_popup_canvas(popup_data)
+        self.update_popup_preview()
+
+    def _fill_popup_stats_list(self, popup_data) -> None:
+        """The hidden list of the popup's stats: its current row is the selection's index."""
         self.popup_stats_list.clear()
         for stat in popup_data.get("stats", []):
-            stat_text = stat["stat_name"]
+            stat_text = stat.get("stat_name", "")
             if stat.get("category"):
                 stat_text = f"[{translate_hud_category(stat['category'])}] {stat_text}"
             if stat.get("submenu"):
                 stat_text += f" → {stat['submenu']}"
             self.popup_stats_list.addItem(stat_text)
-
-        # Update the WYSIWYG chip canvas + preview.
-        self._rebuild_popup_canvas(popup_data)
-        self.update_popup_preview()
 
     def _rebuild_popup_canvas(self, popup_data) -> None:
         """Render the popup as a WYSIWYG chip canvas.
@@ -1265,6 +1266,7 @@ class ModernHudPreferences(QDialog):
                             "stat": c["text"],
                             "hudcolor": c.get("fg", ""),
                             "hudbgcolor": c.get("bg", ""),
+                            "_cell": c,
                         }
                         for c in group.get("cells", [])
                         if c["kind"] == "stat"
@@ -1277,6 +1279,7 @@ class ModernHudPreferences(QDialog):
                             "align": "center",
                             "fgcolor": c.get("fg", ""),
                             "bgcolor": c.get("bg", ""),
+                            "_cell": c,
                         }
                         for c in group.get("cells", [])
                         if c["kind"] == "text"
@@ -1285,7 +1288,9 @@ class ModernHudPreferences(QDialog):
                 # Keep the imported grid editor aligned with the Statistics tab:
                 # full chips plus per-row +/- controls, even for dense PT4 grids.
                 self.popup_canvas.compact = False
+                self.popup_canvas.list_mode = False
                 self.popup_canvas.set_block(0, block)
+                self._reselect_popup_entry()
                 return
 
         stats = popup_data.get("stats", [])
@@ -1305,22 +1310,21 @@ class ModernHudPreferences(QDialog):
             "hlines": [],
         }
         self.popup_canvas.compact = False
+        self.popup_canvas.list_mode = True
         self.popup_canvas.set_block(0, block)
+        self._reselect_popup_entry()
 
     def _on_popup_canvas_selected(self, payload) -> None:
         """A popup chip was clicked -> select the list row and, for a BlockPopup,
         load the cell into the Item Properties panel."""
         _bi, kind, ref = payload
-        if kind == "text" and "rowcol" in ref:
-            row, col = ref["rowcol"]
-        else:
-            row, col = ref.get("row"), ref.get("col")
+        row = ref["rowcol"][0] if kind == "text" and "rowcol" in ref else ref.get("row")
+        self._popup_selected = self._popup_entry(ref)
         if row is not None and 0 <= row < self.popup_stats_list.count():
             self.popup_stats_list.setCurrentRow(row)
-        # BlockPopup: edit the real grid cell at (row, col).
-        if self._popup_group is not None and row is not None and col is not None:
-            cell = next((c for c in self._popup_group.get("cells", []) if c["row"] == row and c["col"] == col), None)
-            self._load_popup_item(cell)
+        # BlockPopup: edit the real grid cell the chip stands for.
+        if self._popup_group is not None:
+            self._load_popup_item(ref.get("_cell") if isinstance(ref, dict) else None)
             return
         stat = ref.get("_popup_stat") if isinstance(ref, dict) else None
         if stat is not None:
@@ -1432,33 +1436,153 @@ class ModernHudPreferences(QDialog):
         self.update_popup_preview()
 
     def _after_popup_stat_edit(self) -> None:
-        name = self.popup_combo.currentText()
-        popup_data = self.popup_windows.get(name, {})
-        current_row = self.popup_stats_list.currentRow()
-        self.popup_stats_list.clear()
-        for stat in popup_data.get("stats", []):
-            stat_text = stat.get("stat_name", "")
-            if stat.get("category"):
-                stat_text = f"[{stat['category']}] {stat_text}"
-            if stat.get("submenu"):
-                stat_text += f" → {stat['submenu']}"
-            self.popup_stats_list.addItem(stat_text)
+        """Redraw the popup after an edit of its stats, keeping the selection."""
+        popup_data = self._current_popup() or {}
+        self._fill_popup_stats_list(popup_data)
         self._rebuild_popup_canvas(popup_data)
-        if 0 <= current_row < len(popup_data.get("stats", [])):
-            self.popup_stats_list.setCurrentRow(current_row)
-            self.popup_canvas.select_ref(popup_data["stats"][current_row])
-            self._load_popup_stat_item(popup_data["stats"][current_row], current_row)
         self.update_popup_preview()
 
-    def _popup_canvas_remove_row(self, row) -> None:
-        """- on a popup chip row: remove that stat."""
+    # --- Popup canvas edits (#782) -----------------------------------------------
+    def _current_popup(self) -> dict | None:
         if self.popup_combo.currentIndex() < 0:
+            return None
+        return self.popup_windows.get(self.popup_combo.currentText())
+
+    @staticmethod
+    def _popup_entry(ref: Any) -> dict | None:
+        """The popup stat, or BlockPopup cell, a canvas chip stands for."""
+        if not isinstance(ref, dict):
+            return None
+        return ref.get("_popup_stat") or ref.get("_cell")
+
+    def _reselect_popup_entry(self) -> None:
+        """Select again, after a redraw, the chip of the selected stat or cell.
+
+        A BlockPopup is read again from its sidecar on each redraw, so its cells
+        are new dicts: the selected one is found again by its place.
+        """
+        entry = getattr(self, "_popup_selected", None)
+        if entry is None:
             return
-        popup_name = self.popup_combo.currentText()
-        stats = self.popup_windows.get(popup_name, {}).get("stats", [])
-        if 0 <= row < len(stats):
-            stats.pop(row)
-            self.on_popup_selected(self.popup_combo.currentIndex())
+        chips = self.popup_canvas.chips
+        chip = next((c for c in chips if self._popup_entry(c.item_ref) is entry), None)
+        if chip is None and "kind" in entry:
+            place = (entry.get("kind"), entry.get("row"), entry.get("col"))
+            chip = next(
+                (
+                    c
+                    for c in chips
+                    if (cell := c.item_ref.get("_cell")) is not None
+                    and (cell.get("kind"), cell.get("row"), cell.get("col")) == place
+                ),
+                None,
+            )
+        if chip is None:
+            return
+        self.popup_canvas.select_ref(chip.item_ref)
+        self._on_popup_canvas_selected((0, chip.kind, chip.item_ref))
+
+    def _popup_canvas_moved(self, ref, row: int, col: int) -> None:
+        """A chip was dropped elsewhere on the popup canvas, or moved with Alt+arrow."""
+        popup = self._current_popup()
+        entry = self._popup_entry(ref)
+        if popup is None or entry is None:
+            return
+        if self._popup_group is not None:
+            self._move_block_popup_cell(ref, row, col)
+            return
+        # A classic popup is a list: the stat takes the place it was dropped on.
+        stats = popup.get("stats", [])
+        old = next((index for index, stat in enumerate(stats) if stat is entry), None)
+        if old is None:
+            return
+        new = max(0, min(row, len(stats) - 1))
+        if new != old:
+            stats.insert(new, stats.pop(old))
+        self._popup_selected = entry
+        self._after_popup_stat_edit()
+
+    def _move_block_popup_cell(self, ref: dict, row: int, col: int) -> None:
+        """Move a BlockPopup cell on its grid, as a Statistics panel's item moves."""
+        block = self.popup_canvas.container
+        group = self._popup_group
+        if group is None or layout_model.move(block, ref, row, col) == "refused":
+            self._show_status(_("No room there: the items would overlap."))
+            return
+        for kind, item in layout_model.items(block):
+            cell = item.get("_cell")
+            if cell is not None:
+                cell["row"], cell["col"] = layout_model.position(kind, item)
+        group["rows"] = max(int(group.get("rows", 1) or 1), int(block.get("rows", 1) or 1))
+        group["cols"] = max(int(group.get("cols", 1) or 1), int(block.get("cols", 1) or 1))
+        self._popup_selected = ref.get("_cell")
+        self._after_popup_item_edit()
+
+    def _refuse_block_popup_stat(self) -> bool:
+        """Say so and return True when the shown popup is a BlockPopup grid."""
+        if self._popup_group is None:
+            return False
+        self._show_status(_("This popup is a PokerTracker 4 grid: edit its cells in Item Properties."))
+        return True
+
+    def _popup_canvas_stat_dropped(self, key: str, row: int, _col: int) -> None:
+        """A stat of Available Stats dropped on the popup: it goes in at that row."""
+        if not self._refuse_block_popup_stat():
+            self._insert_popup_stat(key, row)
+
+    def _append_catalog_stat_to_popup(self, key: str) -> None:
+        """Double-click or Enter in Available Stats: the stat goes at the end."""
+        popup = self._current_popup()
+        if popup is not None and not self._refuse_block_popup_stat():
+            self._insert_popup_stat(key, len(popup.get("stats", [])))
+
+    def _insert_popup_stat(self, key: str, index: int) -> None:
+        entry = self._stat_catalog().get(key)
+        popup = self._current_popup()
+        if entry is None or popup is None:
+            return
+        if entry.origin == "analytics":
+            # A popup names its stats: it has nowhere to keep an analytics
+            # stat's data_* binding.
+            self._show_status(_("Analytics stats go in HUD panels, not in popups."))
+            return
+        stat = {"stat_name": entry.name, "submenu": ""}
+        stats = popup.setdefault("stats", [])
+        stats.insert(max(0, min(index, len(stats))), stat)
+        self._popup_selected = stat
+        self._after_popup_stat_edit()
+
+    def _popup_canvas_removed(self, ref) -> None:
+        """Delete on the popup canvas: the selected stat goes."""
+        popup = self._current_popup()
+        entry = self._popup_entry(ref)
+        if popup is None or entry is None:
+            return
+        if self._popup_group is not None:
+            # A grid cell lives in the JSON sidecar, written at once: emptying
+            # its text in Item Properties is the undoable way to clear it.
+            self._show_status(_("Clear a grid cell by emptying its text in Item Properties."))
+            return
+        stats = popup.get("stats", [])
+        popup["stats"] = [stat for stat in stats if stat is not entry]
+        self._popup_selected = None
+        self._after_popup_stat_edit()
+
+    def _popup_selected_index(self) -> int:
+        """Where the selected stat sits in the shown popup; -1 for none."""
+        popup = self._current_popup() or {}
+        entry = self._popup_selected
+        found = next((i for i, stat in enumerate(popup.get("stats", [])) if stat is entry), None)
+        return found if found is not None else self.popup_stats_list.currentRow()
+
+    def _popup_canvas_activated(self, ref) -> None:
+        """Double-click or Enter on a popup chip: edit it."""
+        if self._popup_group is not None:
+            self.pi_text.setFocus()
+            self.pi_text.selectAll()
+            return
+        self._popup_selected = self._popup_entry(ref)
+        self.edit_popup_stat()
 
     def on_popup_class_changed(self, new_class) -> None:
         """Handle popup class change (ignored while loading to avoid corrupting
@@ -4780,14 +4904,15 @@ class ModernHudPreferences(QDialog):
             stat_data = dialog.get_stat_data()
             popup_name = self.popup_combo.currentText()
             self.popup_windows[popup_name]["stats"].append(stat_data)
-            self.on_popup_selected(self.popup_combo.currentIndex())
+            self._popup_selected = stat_data
+            self._after_popup_stat_edit()
 
     def edit_popup_stat(self) -> None:
         """Edit selected stat in current popup."""
         if self.popup_combo.currentIndex() < 0:
             return
 
-        current_row = self.popup_stats_list.currentRow()
+        current_row = self._popup_selected_index()
         if current_row < 0:
             return
 
@@ -4799,51 +4924,22 @@ class ModernHudPreferences(QDialog):
         dialog = PopupStatEditDialog(stats[current_row], parent=self)
         if dialog.exec():
             stats[current_row] = dialog.get_stat_data()
-            self.on_popup_selected(self.popup_combo.currentIndex())
+            self._popup_selected = stats[current_row]
+            self._after_popup_stat_edit()
 
     def remove_popup_stat(self) -> None:
         """Remove selected stat from current popup."""
         if self.popup_combo.currentIndex() < 0:
             return
 
-        current_row = self.popup_stats_list.currentRow()
+        current_row = self._popup_selected_index()
         if current_row < 0:
             return
 
         popup_name = self.popup_combo.currentText()
         self.popup_windows[popup_name]["stats"].pop(current_row)
-        self.on_popup_selected(self.popup_combo.currentIndex())
-
-    def move_stat_up(self) -> None:
-        """Move selected stat up in the list."""
-        if self.popup_combo.currentIndex() < 0:
-            return
-
-        current_row = self.popup_stats_list.currentRow()
-        if current_row <= 0:
-            return
-
-        popup_name = self.popup_combo.currentText()
-        stats = self.popup_windows[popup_name]["stats"]
-        stats[current_row], stats[current_row - 1] = stats[current_row - 1], stats[current_row]
-        self.on_popup_selected(self.popup_combo.currentIndex())
-        self.popup_stats_list.setCurrentRow(current_row - 1)
-
-    def move_stat_down(self) -> None:
-        """Move selected stat down in the list."""
-        if self.popup_combo.currentIndex() < 0:
-            return
-
-        current_row = self.popup_stats_list.currentRow()
-        popup_name = self.popup_combo.currentText()
-        stats = self.popup_windows[popup_name]["stats"]
-
-        if current_row < 0 or current_row >= len(stats) - 1:
-            return
-
-        stats[current_row], stats[current_row + 1] = stats[current_row + 1], stats[current_row]
-        self.on_popup_selected(self.popup_combo.currentIndex())
-        self.popup_stats_list.setCurrentRow(current_row + 1)
+        self._popup_selected = None
+        self._after_popup_stat_edit()
 
 
 # --- Popup Stat Edit Dialog ---

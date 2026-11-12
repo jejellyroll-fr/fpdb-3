@@ -173,7 +173,7 @@ def test_popup_design_canvas_mirrors_stats(tmp_path):
     dlg._popup_item_changed()
     assert dlg.popup_windows[target]["stats"][1] == {"stat_name": "vpip", "submenu": "Preflop"}
     assert "vpip → Preflop" in dlg.popup_stats_list.item(1).text()
-    dlg._popup_canvas_remove_row(0)                          # canvas - removes a stat
+    dlg.popup_canvas.item_removed.emit(dlg.popup_canvas.chips[0].item_ref)  # Delete on the canvas
     assert len(dlg.popup_windows[target]["stats"]) == n_stats - 1
 
 

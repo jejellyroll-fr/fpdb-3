@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 23:21+0100\n"
+"POT-Creation-Date: 2026-11-12 23:51+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -4607,7 +4607,6 @@ msgid "Stat Packs"
 msgstr "Paquets d'estadístiques"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Statistics"
 msgstr "Estadístiques"
@@ -4699,6 +4698,10 @@ msgid "+"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "A popup lists its stats in one column."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 #, fuzzy
 msgid "Add an item to this row"
 msgstr "Afegeix un element a aquesta fila"
@@ -4720,6 +4723,12 @@ msgstr "Perfil per defecte"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "Drag to move; drop on another item to swap them. Double-click to edit."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid ""
+"Drag to reorder: the item takes the place it is dropped on. Double-click to "
+"edit."
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
@@ -5259,6 +5268,10 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Analytics stats go in HUD panels, not in popups."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Analytics-backed stats"
 msgstr "Estadístiques basades en l'anàlisi"
@@ -5341,6 +5354,10 @@ msgstr ""
 #, fuzzy
 msgid "Class:"
 msgstr "Classe:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Clear a grid cell by emptying its text in Item Properties."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5431,10 +5448,20 @@ msgid "Double-click a stat to add it to the panel shown in Design."
 msgstr "Feu doble clic en una cel·la per carregar les mans que la formen."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Drag a stat into the popup, or double-click it to add it at the end."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "Drag an item to move it, onto another to swap them. Drop a stat from "
 "Available Stats on an empty cell. Arrows select, Alt+arrows move, Delete "
 "removes; right-click a cell for rows and columns."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Drag an item to move it; drop a stat from Available Stats where it should "
+"go. Arrows select, Alt+arrows move, Delete removes, double-click edits."
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -6197,6 +6224,10 @@ msgid "Then show"
 msgstr "Llavors mostra"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "This popup is a PokerTracker 4 grid: edit its cells in Item Properties."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
 msgstr ""
 
@@ -6302,16 +6333,6 @@ msgstr ""
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "—"
 msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "↑ Up"
-msgstr "↑ Amunt"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "↓ Down"
-msgstr "↓ Avall"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -9117,3 +9138,11 @@ msgstr ""
 
 #~ msgid "config.general: adding %s = %s"
 #~ msgstr "config.general: afegint %s = %s"
+
+#, fuzzy
+#~ msgid "↑ Up"
+#~ msgstr "↑ Amunt"
+
+#, fuzzy
+#~ msgid "↓ Down"
+#~ msgstr "↓ Avall"

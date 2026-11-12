@@ -124,7 +124,7 @@ class _CanvasChip(_DropTarget, QFrame):
         super().mouseDoubleClickEvent(event)
 
     def contextMenuEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
-        if self.canvas is not None and self.canvas.editable:
+        if self.canvas is not None and self.canvas.editable and self.canvas.grid_menu:
             self.canvas.cell_menu(self.row, self.col).exec(event.globalPos())
 
 
@@ -157,7 +157,8 @@ class _EmptyCell(_DropTarget, QFrame):
         super().mousePressEvent(event)
 
     def contextMenuEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
-        self.canvas.cell_menu(self.row, self.col).exec(event.globalPos())
+        if self.canvas.grid_menu:
+            self.canvas.cell_menu(self.row, self.col).exec(event.globalPos())
 
 
 class HudDesignCanvas(QScrollArea):  # pylint: disable=too-many-instance-attributes
@@ -210,6 +211,12 @@ class HudDesignCanvas(QScrollArea):  # pylint: disable=too-many-instance-attribu
         # Compact mode packs cells tightly (no icon/row buttons) for dense grids
         # such as 13x13 push-chart popups; off for normal HUD/popup editing.
         self.compact = False
+        # List mode (a classic popup's stats, #782): one column whose order is
+        # what counts. A drop on an item takes its place and the items below
+        # move down, instead of the grid's swap; a new stat goes in the same way.
+        self.list_mode = False
+        # Right-click a cell to insert or delete rows and columns.
+        self.grid_menu = True
         if editable:
             self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
@@ -288,7 +295,9 @@ class HudDesignCanvas(QScrollArea):  # pylint: disable=too-many-instance-attribu
         chip.setStyleSheet(self._chip_qss(kind, selected=False))
         lay = QHBoxLayout(chip)
         chip.clicked.connect(lambda c=chip: self._select(c))
-        if self.editable:
+        if self.editable and self.list_mode:
+            chip.setToolTip(_("Drag to reorder: the item takes the place it is dropped on. Double-click to edit."))
+        elif self.editable:
             chip.setToolTip(_("Drag to move; drop on another item to swap them. Double-click to edit."))
         if self.compact:
             # Dense matrix cell: no icon, small centred text, tight padding.
@@ -418,7 +427,15 @@ class HudDesignCanvas(QScrollArea):  # pylint: disable=too-many-instance-attribu
             return self._judge_new_stat(row, col)
         return False, ""
 
+    def _judge_in_list(self, col: int) -> tuple[bool, str]:
+        """List mode: any row of the one column; the column is all there is."""
+        if col == 0:
+            return True, ""
+        return False, _("A popup lists its stats in one column.")
+
     def _judge_move(self, kind: str, ref: dict, row: int, col: int) -> tuple[bool, str]:
+        if self.list_mode:
+            return self._judge_in_list(col)
         if kind == "hline":
             col = 0  # a line moves only up and down
         if not layout_model.fits_inside(self.container, kind, ref, col):
@@ -428,6 +445,8 @@ class HudDesignCanvas(QScrollArea):  # pylint: disable=too-many-instance-attribu
         return True, ""
 
     def _judge_new_stat(self, row: int, col: int) -> tuple[bool, str]:
+        if self.list_mode:
+            return self._judge_in_list(col)
         if col >= max(1, int(self.container.get("cols", 1) or 1)):
             return False, _("The stat does not fit: it would leave the panel on the right.")
         if not layout_model.can_place(self.container, row, col):

@@ -929,7 +929,8 @@ def test_blockpopup_renders_grid_in_preview(tmp_path):
     labels = [w.text() for w in dlg.popup_preview.findChildren(QLabel)]
     assert any(labels)                                    # cells rendered
     assert dlg.popup_canvas.chips                         # WYSIWYG canvas populated
-    assert dlg.popup_canvas._host.findChildren(QPushButton)  # row +/- controls like Statistics
+    assert dlg.popup_canvas.editable                      # drag and drop, like Statistics (#782)
+    assert not dlg.popup_canvas._host.findChildren(QPushButton)  # no row +/- buttons any more
     assert "No popup stats configured" not in " ".join(labels)
 
 
