@@ -214,3 +214,103 @@ def move(container: dict[str, Any], ref: dict[str, Any], row: int, col: int) -> 
     grow_to_fit(container, kind, ref)
     grow_to_fit(container, other_kind, other)
     return "swapped"
+
+
+def preview_move(container: dict[str, Any], ref: dict[str, Any], row: int, col: int) -> str:
+    """What :func:`move` would answer, leaving the panel exactly as it is.
+
+    The canvas asks while an item is dragged over a cell, to show the drop as
+    accepted or refused before it happens.
+    """
+    saved = [(kind, item, position(kind, item)) for kind, item in items(container)]
+    size = {key: container[key] for key in ("rows", "cols") if key in container}
+    try:
+        return move(container, ref, row, col)
+    finally:
+        for kind, item, (r, c) in saved:
+            _set_position(kind, item, r, c)
+        for key in ("rows", "cols"):
+            if key in size:
+                container[key] = size[key]
+            else:
+                container.pop(key, None)
+
+
+def _spans_the_row(kind: str, ref: dict[str, Any]) -> bool:
+    """A line without a span: it stretches with the panel, whatever its width."""
+    return kind == "hline" and int(ref.get("colspan", 0) or 0) <= 0
+
+
+def row_is_empty(container: dict[str, Any], row: int) -> bool:
+    return not any(r == row for r, _c in occupancy(container))
+
+
+def col_is_empty(container: dict[str, Any], col: int) -> bool:
+    """No item covers the column; a line spanning the whole row does not count."""
+    cols = _cols(container)
+    for kind, ref in items(container):
+        if _spans_the_row(kind, ref):
+            continue
+        if any(c == col for _r, c in cells_of(kind, ref, cols)):
+            return False
+    return True
+
+
+def insert_row(container: dict[str, Any], at: int) -> bool:
+    """Open an empty row at ``at``; the items from that row down move one row down."""
+    rows = _rows(container)
+    at = min(max(at, 0), rows)
+    for kind, ref in items(container):
+        row, col = position(kind, ref)
+        if row >= at:
+            _set_position(kind, ref, row + 1, col)
+    container["rows"] = rows + 1
+    return True
+
+
+def insert_col(container: dict[str, Any], at: int) -> bool:
+    """Open an empty column at ``at``; the items from that column on move right."""
+    cols = _cols(container)
+    at = min(max(at, 0), cols)
+    for kind, ref in items(container):
+        if _spans_the_row(kind, ref):
+            continue
+        row, col = position(kind, ref)
+        if col >= at:
+            _set_position(kind, ref, row, col + 1)
+    container["cols"] = cols + 1
+    return True
+
+
+def delete_row(container: dict[str, Any], at: int) -> bool:
+    """Close an empty row; refused for a row an item covers, or the last row left."""
+    rows = _rows(container)
+    if rows <= 1 or not 0 <= at < rows or not row_is_empty(container, at):
+        return False
+    for kind, ref in items(container):
+        row, col = position(kind, ref)
+        if row > at:
+            _set_position(kind, ref, row - 1, col)
+    container["rows"] = rows - 1
+    return True
+
+
+def delete_col(container: dict[str, Any], at: int) -> bool:
+    """Close an empty column; refused for a column an item covers, or the last one left."""
+    cols = _cols(container)
+    if cols <= 1 or not 0 <= at < cols or not col_is_empty(container, at):
+        return False
+    for kind, ref in items(container):
+        if _spans_the_row(kind, ref):
+            continue
+        row, col = position(kind, ref)
+        if col > at:
+            _set_position(kind, ref, row, col - 1)
+    container["cols"] = cols - 1
+    return True
+
+
+def fits_inside(container: dict[str, Any], kind: str, ref: dict[str, Any], col: int) -> bool:
+    """Whether the item, its left edge on ``col``, stays inside the panel's columns."""
+    cols = _cols(container)
+    return col >= 0 and col + span(kind, ref, cols) <= cols

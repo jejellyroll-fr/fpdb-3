@@ -231,3 +231,34 @@ def test_a_flat_profile_is_one_single_grid_entry() -> None:
 def test_only_a_panel_without_a_label_is_unnamed() -> None:
     profile = {"blocks": [{"label": "Core"}, {"label": ""}, {}]}
     assert es.panel_labels(profile) == ["Core", "(unnamed)", "(unnamed)"]
+
+
+# --- Finding an item again in a copy (undo, #775) ---------------------------------
+def test_an_item_path_finds_the_same_place_in_a_copy() -> None:
+    import copy
+
+    line = {"rowcol": (1, 0), "colspan": 0}
+    profile = {
+        "blocks": [
+            {"stats": [{"stat": "vpip", "row": 0, "col": 0}], "texts": [], "hlines": []},
+            {"stats": [{"stat": "cb1", "row": 0, "col": 0}, {"stat": "cb2", "row": 0, "col": 1}], "hlines": [line]},
+        ]
+    }
+    cb2 = profile["blocks"][1]["stats"][1]
+    assert es.item_path(profile, cb2) == (1, "stat", 1)
+    assert es.item_path(profile, line) == (1, "hline", 0)
+    copied = copy.deepcopy(profile)
+    assert es.item_at(copied, es.item_path(profile, cb2)) is copied["blocks"][1]["stats"][1]
+    assert es.item_at(copied, (5, "stat", 0)) is None
+    assert es.item_at(copied, (0, "stat", 3)) is None
+    assert es.item_at(copied, None) is None
+    assert es.item_path(profile, {"stat": "vpip"}) is None
+
+
+def test_an_item_path_in_a_flat_or_list_profile() -> None:
+    flat = {"rows": 1, "cols": 2, "stats": [{"stat": "vpip"}, {"stat": "pfr"}]}
+    assert es.item_path(flat, flat["stats"][1]) == (None, "stat", 1)
+    assert es.item_at(flat, (None, "stat", 1)) is flat["stats"][1]
+    listed = [{"stat": "vpip", "row": 0, "col": 0}]
+    assert es.item_path(listed, listed[0]) == (None, "stat", 0)
+    assert es.item_at(listed, (None, "stat", 0)) is None

@@ -194,3 +194,85 @@ def test_find_answers_by_identity() -> None:
     panel = _panel(a)
     assert lm.find(panel, a) == ("stat", a)
     assert lm.find(panel, dict(a)) is None
+
+
+# --- Previewing a drop -----------------------------------------------------------
+def test_preview_move_answers_without_moving_anything() -> None:
+    a, b = _stat("a", 0, 0), _stat("b", 1, 2)
+    panel = _panel(a, b)
+    before = (dict(a), dict(b), panel["rows"], panel["cols"])
+    assert lm.preview_move(panel, a, 1, 2) == "swapped"
+    assert lm.preview_move(panel, a, 4, 0) == "moved"
+    assert lm.preview_move(panel, a, -1, 0) == "refused"
+    assert (dict(a), dict(b), panel["rows"], panel["cols"]) == before
+
+
+def test_preview_move_leaves_a_missing_size_missing() -> None:
+    a = _stat("a", 0, 0)
+    panel = {"stats": [a]}
+    assert lm.preview_move(panel, a, 3, 3) == "moved"
+    assert "rows" not in panel and "cols" not in panel
+
+
+def test_an_item_must_fit_inside_the_columns() -> None:
+    panel = _panel(rows=1, cols=3)
+    assert lm.fits_inside(panel, "stat", {}, 2)
+    assert not lm.fits_inside(panel, "stat", {"colspan": 2}, 2)
+    assert not lm.fits_inside(panel, "stat", {}, -1)
+    assert lm.fits_inside(panel, "hline", {"colspan": 0}, 0)
+
+
+# --- Rows and columns ------------------------------------------------------------
+def test_inserting_a_row_moves_the_rows_below_down() -> None:
+    a, b = _stat("a", 0, 0), _stat("b", 1, 1)
+    line = {"rowcol": (1, 0), "colspan": 0}
+    panel = _panel(a, b, rows=2, cols=2, hlines=[line])
+    assert lm.insert_row(panel, 1)
+    assert (a["row"], b["row"], line["rowcol"], panel["rows"]) == (0, 2, (2, 0), 3)
+    assert lm.insert_row(panel, 99) and panel["rows"] == 4
+
+
+def test_inserting_a_column_moves_the_columns_right_but_not_a_full_line() -> None:
+    a, b = _stat("a", 0, 0), _stat("b", 0, 1)
+    full = {"rowcol": (1, 0), "colspan": 0}
+    short = {"rowcol": (2, 1), "colspan": 1}
+    panel = _panel(a, b, rows=3, cols=2, hlines=[full, short])
+    assert lm.insert_col(panel, 1)
+    assert (a["col"], b["col"], full["rowcol"], short["rowcol"], panel["cols"]) == (0, 2, (1, 0), (2, 2), 3)
+    assert lm.insert_col(panel, -5) and a["col"] == 1
+
+
+def test_only_an_empty_row_is_deleted() -> None:
+    a, b = _stat("a", 0, 0), _stat("b", 2, 1)
+    panel = _panel(a, b, rows=3, cols=2)
+    assert not lm.delete_row(panel, 0)
+    assert not lm.delete_row(panel, 7)
+    assert lm.delete_row(panel, 1)
+    assert (b["row"], panel["rows"]) == (1, 2)
+    assert not lm.delete_row(_panel(rows=1, cols=1), 0)
+
+
+def test_only_an_empty_column_is_deleted_and_a_full_line_does_not_hold_it() -> None:
+    a, b = _stat("a", 0, 0), _stat("b", 0, 2)
+    full = {"rowcol": (1, 0), "colspan": 0}
+    panel = _panel(a, b, rows=2, cols=3, hlines=[full])
+    assert lm.col_is_empty(panel, 1)
+    assert lm.delete_col(panel, 1)
+    assert (b["col"], full["rowcol"], panel["cols"]) == (1, (1, 0), 2)
+    assert not lm.delete_col(panel, 0)
+    assert not lm.delete_col(_panel(rows=1, cols=1), 0)
+
+
+def test_a_wide_item_holds_every_column_it_covers() -> None:
+    panel = _panel(_stat("wide", 0, 0, colspan=2), rows=1, cols=3)
+    assert not lm.col_is_empty(panel, 1)
+    assert lm.col_is_empty(panel, 2)
+    assert lm.row_is_empty(panel, 1)
+    assert not lm.row_is_empty(panel, 0)
+
+
+def test_a_short_line_is_shifted_left_when_a_column_closes() -> None:
+    short = {"rowcol": (0, 2), "colspan": 1}
+    panel = _panel(rows=1, cols=3, hlines=[short])
+    assert lm.delete_col(panel, 0)
+    assert short["rowcol"] == (0, 1)

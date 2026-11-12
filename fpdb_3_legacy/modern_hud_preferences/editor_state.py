@@ -219,6 +219,41 @@ def locate(profile: Any, ref: Any) -> tuple[int | None, str] | None:
     return (None, found[0]) if found is not None else None
 
 
+def item_path(profile: Any, ref: Any) -> tuple[int | None, str, int] | None:
+    """Where an item sits: ``(block index, kind, index in its list)``.
+
+    Undo puts back a copy of the profile, whose items are new dicts: the path
+    finds the same place in the copy, so the selection survives.
+    """
+    where = locate(profile, ref)
+    if where is None:
+        return None
+    block_index, kind = where
+    container = profile["blocks"][block_index] if block_index is not None else _flat(profile)
+    items = container.get(layout_model.KINDS[kind], [])
+    return block_index, kind, next(i for i, item in enumerate(items) if item is ref)
+
+
+def item_at(profile: Any, path: tuple[int | None, str, int] | None) -> Any:
+    """The item at ``path`` (see :func:`item_path`), or None when there is none."""
+    if path is None or not isinstance(profile, dict):
+        return None
+    block_index, kind, index = path
+    blocks = profile.get("blocks") or []
+    if block_index is not None:
+        if not 0 <= block_index < len(blocks):
+            return None
+        container = blocks[block_index]
+    else:
+        container = _flat(profile)
+    items = container.get(layout_model.KINDS.get(kind, ""), [])
+    return items[index] if 0 <= index < len(items) else None
+
+
+def _flat(profile: Any) -> dict[str, Any]:
+    return profile if isinstance(profile, dict) else {"stats": profile}
+
+
 def panel_labels(profile: Any) -> list[str]:
     """What the Panels list shows for each panel of ``profile``.
 

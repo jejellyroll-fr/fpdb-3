@@ -5,7 +5,7 @@ from functools import partial
 from typing import Any
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QColor, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
@@ -51,6 +51,7 @@ from fpdb_3_legacy.modern_hud_preferences import (
     profile_io,
     stat_catalog,
     stat_edit,
+    undo,
 )
 from fpdb_3_legacy.modern_hud_preferences.design_canvas import HudDesignCanvas
 from fpdb_3_legacy.modern_hud_preferences.dialogs import (
@@ -429,7 +430,37 @@ class ModernHudPreferences(QDialog):
         # PT4-style design canvas: shows the SELECTED panel only (box-by-box).
         self.design_label = QLabel(_("Design"))
         self.design_label.setProperty("class", "h2")
-        left_layout.addWidget(self.design_label)
+        design_header = QHBoxLayout()
+        design_header.setContentsMargins(0, 0, 0, 0)
+        design_header.addWidget(self.design_label)
+        design_header.addStretch()
+        # The grid of the panel shown below, and the history of the profile (#775).
+        self.add_row_btn = QPushButton(_("+ Row"))
+        self.add_row_btn.setToolTip(_("Add an empty row at the bottom of the panel"))
+        self.add_row_btn.clicked.connect(lambda: self._canvas_grid_edit("insert_row", -1))
+        self.add_col_btn = QPushButton(_("+ Column"))
+        self.add_col_btn.setToolTip(_("Add an empty column on the right of the panel"))
+        self.add_col_btn.clicked.connect(lambda: self._canvas_grid_edit("insert_col", -1))
+        self.undo_btn = QPushButton(_("Undo"))
+        self.undo_btn.setToolTip(_("Undo the last change to this profile (Ctrl+Z)"))
+        self.undo_btn.clicked.connect(self.undo_edit)
+        self.redo_btn = QPushButton(_("Redo"))
+        self.redo_btn.setToolTip(_("Redo the change just undone (Ctrl+Shift+Z)"))
+        self.redo_btn.clicked.connect(self.redo_edit)
+        for button in (self.add_row_btn, self.add_col_btn, self.undo_btn, self.redo_btn):
+            button.setFixedHeight(26)
+            design_header.addWidget(button)
+        left_layout.addLayout(design_header)
+        self.design_hint = QLabel(
+            _(
+                "Drag an item to move it, onto another to swap them. Drop a stat from Available Stats "
+                "on an empty cell. Arrows select, Alt+arrows move, Delete removes; right-click a cell "
+                "for rows and columns."
+            )
+        )
+        self.design_hint.setWordWrap(True)
+        self.design_hint.setProperty("class", "caption")
+        left_layout.addWidget(self.design_hint)
         self.design_scroll = QScrollArea()
         self.design_scroll.setWidgetResizable(True)
         self.design_scroll.setMinimumHeight(240)
@@ -502,6 +533,15 @@ class ModernHudPreferences(QDialog):
         stat_btn_layout.addStretch()
 
         left_layout.addWidget(stat_btn_frame)
+        # Ctrl+Z / Ctrl+Shift+Z for the profile; a text field keeps its own undo.
+        for sequence, slot in (
+            (QKeySequence(QKeySequence.StandardKey.Undo), self.undo_edit),
+            (QKeySequence(QKeySequence.StandardKey.Redo), self.redo_edit),
+            (QKeySequence("Ctrl+Shift+Z"), self.redo_edit),
+        ):
+            shortcut = QShortcut(sequence, left_panel)
+            shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+            shortcut.activated.connect(slot)
         # Wrap the editor in a scroll area: a vertical scrollbar appears when the
         # content is taller than the window, and a horizontal one when the window
         # is too narrow for the property zones. The minimum is the width at which
@@ -1722,6 +1762,8 @@ class ModernHudPreferences(QDialog):
             return
         name = self.profile_combo.currentText()
         profile = self.hud_profiles.get(name, {})
+        # The history starts from the profile as first shown, before any edit.
+        self._history(name, profile)
         self._refresh_panel_stat_blocks()
 
         # Reflect this profile's positional-panel mode in the combo (multi-block
@@ -1878,6 +1920,7 @@ class ModernHudPreferences(QDialog):
         except Exception:
             log.exception("HUD group list rebuild failed")
         self.update_status()
+        self._refresh_history_buttons()
 
     def _rebuild_design_canvas(self, profile) -> None:
         """Render the design canvas for the *currently selected* panel only.
@@ -1903,31 +1946,28 @@ class ModernHudPreferences(QDialog):
             block = blocks[bi]
             canvas_index = bi
         else:
-            block = {
-                "label": "",
-                "rows": profile.get("rows", 1) if isinstance(profile, dict) else 1,
-                "cols": profile.get("cols", 1) if isinstance(profile, dict) else 1,
-                "stats": profile.get("stats", []) if isinstance(profile, dict) else profile,
-                "texts": [],
-                "hlines": [],
-            }
+            # The profile itself: what the canvas shows is what an edit changes.
+            block = self._item_container(profile, None)
             canvas_index = 0
         # Keep the section header in sync with the selected panel.
         if hasattr(self, "design_label"):
             label = block.get("label", "")
             self.design_label.setText(f"Design — {label}" if label else "Design")
-        canvas = HudDesignCanvas()
+        canvas = HudDesignCanvas(editable=True)
+        canvas.selected_ref = self._selected_item
         canvas.set_block(canvas_index, block)
         canvas.item_selected.connect(self._on_canvas_item_selected)
-        canvas.add_to_row.connect(lambda row, b=canvas_index: self._canvas_add_item(b, row))
-        canvas.remove_from_row.connect(lambda row, b=canvas_index: self._canvas_remove_item(b, row))
-        if self._selected_item is not None:
-            canvas.select_ref(self._selected_item)
+        canvas.item_moved.connect(self._canvas_item_moved)
+        canvas.stat_dropped.connect(self._canvas_stat_dropped)
+        canvas.item_removed.connect(self._canvas_item_removed)
+        canvas.item_activated.connect(self._canvas_item_activated)
+        canvas.grid_edit.connect(self._canvas_grid_edit)
+        canvas.drop_refused.connect(self._show_status)
         self._design_layout.addWidget(canvas)
         self._design_canvases.append(canvas)
         self._design_layout.addStretch()
 
-    def _refresh_profile(self, select: dict | None = None) -> None:
+    def _refresh_profile(self, select: dict | None = None, *, record: bool = True) -> None:
         """Redraw the current profile after an edit, keeping the selection (B11).
 
         ``select`` makes another item the selection, typically the one just
@@ -1941,6 +1981,10 @@ class ModernHudPreferences(QDialog):
         if where is not None and where[0] is not None:
             self._current_block_index = where[0]
         self.on_profile_selected(self.profile_combo.currentIndex())
+        if record:
+            self._record_history()
+        else:
+            self._refresh_history_buttons()
 
     def _select_item(self, ref) -> None:
         """Make ``ref`` the selection, from whichever view picked it."""
@@ -1973,43 +2017,126 @@ class ModernHudPreferences(QDialog):
         if not self._building_table and 0 <= row < len(items):
             self._select_item(items[row][2])
 
-    def _canvas_add_item(self, block_index, row) -> None:
-        """+ on a canvas row: add a stat into that block's row (next free col)."""
-        name, profile = self._current_profile()
+    # --- Design canvas edits (#775) ------------------------------------------
+    def _shown_container(self):
+        """The panel the Design canvas shows, as ``(profile, container)``."""
+        _name, profile = self._current_profile()
         if profile is None:
-            return
-        container = self._item_container(profile, block_index)
-        cols = max(1, int(container.get("cols", 4)))
-        rows = max(1, int(container.get("rows", 1)))
-        taken = layout_model.occupancy(container)
-        col = next((c for c in range(cols) if (row, c) not in taken), cols - 1)
-        dlg = AddStatDialog(max_rows=max(rows, row + 1), max_cols=cols, parent=self, **self._stat_dialog_lists())
-        dlg.row_input.setCurrentText(str(row))
-        dlg.col_input.setCurrentText(str(col))
-        if dlg.exec():
-            stat = dlg.get_stat()
-            if self._refuse_taken_cell(container, stat):
-                return
-            layout_model.add(container, "stat", stat, int(stat["row"]), int(stat["col"]))
-            self._refresh_profile(select=stat)
+            return None, None
+        blocks = profile.get("blocks") if isinstance(profile, dict) else None
+        block_index = min(max(self._current_block_index, 0), len(blocks) - 1) if blocks else None
+        return profile, self._item_container(profile, block_index)
 
-    def _canvas_remove_item(self, block_index, row) -> None:
-        """− on a canvas row: remove the right-most item of that row."""
-        name, profile = self._current_profile()
-        if profile is None:
+    def _canvas_item_moved(self, ref, row: int, col: int) -> None:
+        """A chip was dropped on a cell, or moved with Alt+arrow."""
+        _profile, container = self._shown_container()
+        if container is None:
             return
-        container = self._item_container(profile, block_index)
-        candidates = []
-        for key in ("stats", "texts", "hlines"):
-            for it in container.get(key, []):
-                r, c = (it.get("row", 0), it.get("col", 0)) if key == "stats" else it["rowcol"]
-                if r == row:
-                    candidates.append((c, key, it))
-        if not candidates:
+        if layout_model.move(container, ref, row, col) == "refused":
+            self._show_status(_("No room there: the items would overlap."))
             return
-        _c, key, victim = max(candidates, key=lambda x: x[0])
-        container[key].remove(victim)
+        self._refresh_profile(select=ref)
+
+    def _canvas_stat_dropped(self, key: str, row: int, col: int) -> None:
+        """A stat of Available Stats was dropped on a cell."""
+        entry = self._stat_catalog().get(key)
+        _profile, container = self._shown_container()
+        if entry is None or container is None:
+            return
+        stat = entry.new_item(row, col)
+        if "default" in self._popup_names():
+            stat["popup"] = "default"
+        if not layout_model.add(container, "stat", stat, row, col):
+            self._show_status(_("Cell already used: drop the stat on an empty cell."))
+            return
+        self._refresh_profile(select=stat)
+
+    def _canvas_item_removed(self, ref) -> None:
+        """Delete on the canvas: the selected item goes."""
+        _profile, container = self._shown_container()
+        if container is None or not layout_model.remove(container, ref):
+            return
+        self._selected_item = None
         self._refresh_profile()
+
+    def _canvas_item_activated(self, ref) -> None:
+        """Double-click or Enter on a chip: edit it."""
+        self._select_item(ref)
+        self.edit_stat()
+
+    def _canvas_grid_edit(self, operation: str, index: int) -> None:
+        """Insert or delete a row or column of the shown panel; -1 is past the last one."""
+        _profile, container = self._shown_container()
+        if container is None or operation not in ("insert_row", "insert_col", "delete_row", "delete_col"):
+            return
+        if index < 0:
+            index = int(container.get("rows" if operation == "insert_row" else "cols", 1) or 1)
+        if not getattr(layout_model, operation)(container, index):
+            self._show_status(_("Only an empty row or column can be deleted."))
+            return
+        self._refresh_profile()
+
+    def _show_status(self, text: str) -> None:
+        """A message in the status bar, until the next redraw."""
+        label = getattr(self, "status_label", None)
+        if label is not None and text:
+            label.setText(text)
+
+    # --- Undo and redo (#775) ------------------------------------------------
+    def _history(self, name: str, profile) -> undo.History | None:
+        """The history of a profile, started from how it is now."""
+        if not isinstance(profile, dict):
+            return None
+        histories = self.__dict__.setdefault("_histories", {})
+        history = histories.get(name)
+        if history is None:
+            history = histories[name] = undo.History(profile)
+        return history
+
+    def _record_history(self) -> None:
+        """Note the current profile as a step to undo, if it changed."""
+        name, profile = self._current_profile()
+        history = self._history(name, profile)
+        if history is not None:
+            history.record(profile)
+        self._refresh_history_buttons()
+
+    def _refresh_history_buttons(self) -> None:
+        name, profile = self._current_profile()
+        history = self._history(name, profile)
+        for button, enabled in (
+            (getattr(self, "undo_btn", None), history is not None and history.can_undo),
+            (getattr(self, "redo_btn", None), history is not None and history.can_redo),
+        ):
+            if button is not None:
+                button.setEnabled(bool(enabled))
+
+    def _restore_profile(self, state) -> None:
+        """Put a state of the history back, keeping the profile dict itself."""
+        name, profile = self._current_profile()
+        path = editor_state.item_path(profile, self._selected_item)
+        profile.clear()
+        profile.update(state)
+        self._selected_item = editor_state.item_at(profile, path)
+        self._refresh_profile(record=False)
+
+    def undo_edit(self) -> None:
+        name, profile = self._current_profile()
+        history = self._history(name, profile)
+        state = history.undo(profile) if history is not None else None
+        if state is None:
+            self._show_status(_("Nothing to undo."))
+            return
+        self._restore_profile(state)
+
+    def redo_edit(self) -> None:
+        name, profile = self._current_profile()
+        history = self._history(name, profile)
+        state = history.redo(profile) if history is not None else None
+        if state is None:
+            self._show_status(_("Nothing to redo."))
+            return
+        self._restore_profile(state)
 
     # --- PT4-style group (panel) list + Group Properties -----------------
     def _group_color_btn(self, attr: str) -> QPushButton:
@@ -2156,6 +2283,7 @@ class ModernHudPreferences(QDialog):
             log.exception("design canvas refresh failed")
         self._preview_selected_block()
         self.update_status()
+        self._record_history()
 
     def _preview_selected_block(self) -> None:
         """Show only the selected panel in the HUD preview (matches the canvas)."""
