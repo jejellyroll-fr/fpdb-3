@@ -222,8 +222,8 @@ class ModernHudPreferences(QDialog):
         self.positional_mode_label.setProperty("class", "subtitle")
         hud_options_bar.addWidget(self.positional_mode_label)
         self.positional_mode_combo = QComboBox()
-        self.positional_mode_combo.addItem("Only current position", "current")
-        self.positional_mode_combo.addItem("Show all (stacked)", "all")
+        self.positional_mode_combo.addItem(_("Only current position"), "current")
+        self.positional_mode_combo.addItem(_("Show all (stacked)"), "all")
         self.positional_mode_combo.setMinimumWidth(180)
         self.positional_mode_combo.currentIndexChanged.connect(self._on_positional_mode_changed)
         hud_options_bar.addWidget(self.positional_mode_combo)
@@ -304,31 +304,31 @@ class ModernHudPreferences(QDialog):
         _panels_w.setLayout(group_list_col)
         group_row.addWidget(_panels_w)
 
-        self.group_props_box = QGroupBox("Group Properties")
+        self.group_props_box = QGroupBox(_("Group Properties"))
         self.group_props_box.setMinimumWidth(250)
         gp = QFormLayout(self.group_props_box)
         gp.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
         gp.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
         self.gp_name = QLineEdit()
         self.gp_name.editingFinished.connect(self._group_prop_changed)
-        gp.addRow("Name:", self.gp_name)
+        gp.addRow(_("Name:"), self.gp_name)
         self.gp_position = QComboBox()
         self.gp_position.addItems(["", "SB", "BB", "BTN", "CO", "MP", "EP"])
         self.gp_position.currentIndexChanged.connect(lambda _i: self._group_prop_changed())
-        gp.addRow("Position:", self.gp_position)
+        gp.addRow(_("Position:"), self.gp_position)
         self.gp_titlebg = self._group_color_btn("title_bgcolor")
-        gp.addRow("Title bg:", self.gp_titlebg)
+        gp.addRow(_("Title bg:"), self.gp_titlebg)
         self.gp_titlefg = self._group_color_btn("title_fgcolor")
-        gp.addRow("Title fg:", self.gp_titlefg)
+        gp.addRow(_("Title fg:"), self.gp_titlefg)
         self.gp_border = self._group_color_btn("bordercolor")
-        gp.addRow("Border:", self.gp_border)
+        gp.addRow(_("Border:"), self.gp_border)
         self.gp_bg = self._group_color_btn("bgcolor")
-        gp.addRow("Panel bg:", self.gp_bg)
+        gp.addRow(_("Panel bg:"), self.gp_bg)
         self.gp_opacity = QSlider(Qt.Orientation.Horizontal)
         self.gp_opacity.setRange(0, 255)
         self.gp_opacity.setValue(178)
         self.gp_opacity.valueChanged.connect(lambda _v: self._group_opacity_changed())
-        gp.addRow("Opacity:", self.gp_opacity)
+        gp.addRow(_("Opacity:"), self.gp_opacity)
         group_row.addWidget(self.group_props_box)
 
         # PT4-style Group Items list + Item Properties / Color Ranges tabs, placed
@@ -372,23 +372,23 @@ class ModernHudPreferences(QDialog):
         itf.addRow(_("Statistic:"), self.ip_stat)
         self.ip_text = QLineEdit()
         self.ip_text.editingFinished.connect(self._item_prop_changed)
-        itf.addRow("Text:", self.ip_text)
+        itf.addRow(_("Text:"), self.ip_text)
         self.ip_popup = PopupChoiceCombo()
         self.ip_popup.setToolTip(_("The popup a click on the stat opens"))
         self.ip_popup.currentIndexChanged.connect(lambda _i: self._item_prop_changed())
-        itf.addRow("Popup:", self.ip_popup)
+        itf.addRow(_("Popup:"), self.ip_popup)
         self.ip_colspan = QSpinBox()
         self.ip_colspan.setRange(1, 12)
         self.ip_colspan.valueChanged.connect(lambda _v: self._item_prop_changed())
-        itf.addRow("Span:", self.ip_colspan)
+        itf.addRow(_("Span:"), self.ip_colspan)
         self.ip_align = QComboBox()
         self.ip_align.addItems(["center", "left", "right"])
         self.ip_align.currentIndexChanged.connect(lambda _i: self._item_prop_changed())
-        itf.addRow("Align:", self.ip_align)
+        itf.addRow(_("Align:"), self.ip_align)
         self.ip_fg = self._item_color_btn("fg")
-        itf.addRow("Text col:", self.ip_fg)
+        itf.addRow(_("Text col:"), self.ip_fg)
         self.ip_bg = self._item_color_btn("bg")
-        itf.addRow("Cell bg:", self.ip_bg)
+        itf.addRow(_("Cell bg:"), self.ip_bg)
         self.item_props_tabs.addTab(item_tab, _("Item Properties"))
         # --- Color Ranges tab ---
         cr_tab = QWidget()
@@ -399,20 +399,20 @@ class ModernHudPreferences(QDialog):
         self.ip_use_thresholds.toggled.connect(self._item_thresholds_toggled)
         crf.addRow(self.ip_use_thresholds)
         self.ip_loth = self._item_threshold_input()
-        crf.addRow("Lo th:", self.ip_loth)
+        crf.addRow(_("Lo th:"), self.ip_loth)
         self.ip_hith = self._item_threshold_input()
-        crf.addRow("Hi th:", self.ip_hith)
+        crf.addRow(_("Hi th:"), self.ip_hith)
         # The stat's thresholds when it was selected, and what the tab showed
         # for them then: an edit writes back only what the user changed (B3).
         self._item_thresholds_original: dict = {}
         self._item_thresholds_at_load: dict = {}
         self._item_thresholds_shown = (0.0, 0.0)
         self.ip_locolor = self._item_color_btn("lo")
-        crf.addRow("Lo col:", self.ip_locolor)
+        crf.addRow(_("Lo col:"), self.ip_locolor)
         self.ip_midcolor = self._item_color_btn("mid")
-        crf.addRow("Mid col:", self.ip_midcolor)
+        crf.addRow(_("Mid col:"), self.ip_midcolor)
         self.ip_hicolor = self._item_color_btn("hi")
-        crf.addRow("Hi col:", self.ip_hicolor)
+        crf.addRow(_("Hi col:"), self.ip_hicolor)
         self.item_props_tabs.addTab(cr_tab, _("Color Ranges"))
         _items_w = QWidget()
         _items_w.setLayout(items_col)
@@ -632,7 +632,7 @@ class ModernHudPreferences(QDialog):
         popup_top_splitter.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
 
         # Statistics list
-        stats_group = QGroupBox("Statistics")
+        stats_group = QGroupBox(_("Statistics"))
         stats_layout = QVBoxLayout()
         stats_layout.setSpacing(6)
 
@@ -690,7 +690,7 @@ class ModernHudPreferences(QDialog):
         stats_layout.addWidget(self.popup_stats_list)
         stats_group.setLayout(stats_layout)
 
-        popup_info_group = QGroupBox("Popup Information")
+        popup_info_group = QGroupBox(_("Popup Information"))
         popup_info_layout = QGridLayout()
         popup_info_layout.setSpacing(6)
         popup_info_layout.setContentsMargins(8, 8, 8, 8)
@@ -722,7 +722,7 @@ class ModernHudPreferences(QDialog):
 
         popup_info_layout.addWidget(QLabel(_("Theme:")), 2, 0)
         self.popup_theme_combo = QComboBox()
-        self.popup_theme_combo.addItem("Default", "")
+        self.popup_theme_combo.addItem(_("Default"), "")
         for theme_name in sorted(AVAILABLE_THEMES):
             self.popup_theme_combo.addItem(theme_name, theme_name)
         self.popup_theme_combo.currentIndexChanged.connect(self.on_popup_theme_changed)
@@ -730,7 +730,7 @@ class ModernHudPreferences(QDialog):
 
         popup_info_layout.addWidget(QLabel(_("Icons:")), 3, 0)
         self.popup_icon_provider_combo = QComboBox()
-        self.popup_icon_provider_combo.addItem("Default", "")
+        self.popup_icon_provider_combo.addItem(_("Default"), "")
         for provider_name in sorted(AVAILABLE_PROVIDERS):
             self.popup_icon_provider_combo.addItem(provider_name, provider_name)
         self.popup_icon_provider_combo.currentIndexChanged.connect(self.on_popup_icon_provider_changed)
@@ -744,7 +744,7 @@ class ModernHudPreferences(QDialog):
         self._popup_group: dict | None = None  # loaded BlockPopup group (editable cells)
         self._popup_item_cell: dict[str, Any] | None = None  # the selected cell dict
         self._popup_item_mode: str | None = None
-        self.pi_props_box = QGroupBox("Item Properties")
+        self.pi_props_box = QGroupBox(_("Item Properties"))
         self.pi_props_box.setMinimumWidth(360)
         pif = QFormLayout(self.pi_props_box)
         pif.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
@@ -753,25 +753,25 @@ class ModernHudPreferences(QDialog):
         pif.setContentsMargins(8, 8, 8, 8)
         self.pi_text = QLineEdit()
         self.pi_text.editingFinished.connect(self._popup_item_changed)
-        pif.addRow("Text / Stat:", self.pi_text)
+        pif.addRow(_("Text / Stat:"), self.pi_text)
         self.pi_submenu = QLineEdit()
         self.pi_submenu.editingFinished.connect(self._popup_item_changed)
-        pif.addRow("Submenu:", self.pi_submenu)
+        pif.addRow(_("Submenu:"), self.pi_submenu)
         self.pi_category = QComboBox()
         self.pi_category.addItems(
             ["auto", "player_info", "preflop", "flop", "turn", "river", "steal", "aggression", "general"]
         )
         self.pi_category.currentTextChanged.connect(self._popup_item_changed)
-        pif.addRow("Section:", self.pi_category)
+        pif.addRow(_("Section:"), self.pi_category)
         self.pi_type = QLabel(_("—"))
-        pif.addRow("Type:", self.pi_type)
+        pif.addRow(_("Type:"), self.pi_type)
         self.pi_pos = QLabel(_("—"))
-        pif.addRow("Position:", self.pi_pos)
+        pif.addRow(_("Position:"), self.pi_pos)
         self._popup_item_color_btns: dict[str, QPushButton] = {}
         self.pi_fg = self._popup_item_color_btn("fg")
-        pif.addRow("Foreground:", self.pi_fg)
+        pif.addRow(_("Foreground:"), self.pi_fg)
         self.pi_bg = self._popup_item_color_btn("bg")
-        pif.addRow("Background:", self.pi_bg)
+        pif.addRow(_("Background:"), self.pi_bg)
         self.pi_props_box.setEnabled(False)
         popup_top_splitter.addWidget(self.pi_props_box)
         popup_top_splitter.setStretchFactor(0, 1)
@@ -1333,7 +1333,7 @@ class ModernHudPreferences(QDialog):
         self.pi_category.setCurrentText("auto")
         self.pi_category.setEnabled(False)
         self.pi_type.setText(_("Stat") if cell.get("kind") == "stat" else _("Text"))
-        self.pi_pos.setText(f"row {cell.get('row', 0)}, col {cell.get('col', 0)}")
+        self.pi_pos.setText(_("row {row}, col {col}").format(row=cell.get("row", 0), col=cell.get("col", 0)))
         self.pi_fg.setEnabled(True)
         self.pi_bg.setEnabled(True)
         self._style_color_btn(self.pi_fg, cell.get("fg", ""))
@@ -1352,7 +1352,7 @@ class ModernHudPreferences(QDialog):
         category = str(stat.get("category", "") or "auto")
         self.pi_category.setCurrentText(category if self.pi_category.findText(category) >= 0 else "auto")
         self.pi_type.setText(_("Stat"))
-        self.pi_pos.setText(f"row {row}, col 0" if row is not None else "row —, col 0")
+        self.pi_pos.setText(_("row {row}, col {col}").format(row="—" if row is None else row, col=0))
         self.pi_fg.setEnabled(False)
         self.pi_bg.setEnabled(False)
         self._style_color_btn(self.pi_fg, "")
@@ -1384,7 +1384,7 @@ class ModernHudPreferences(QDialog):
             return
         key = "fg" if role == "fg" else "bg"
         current = cell.get(key, "")
-        col = QColorDialog.getColor(QColor(current) if current else QColor("#ffffff"), self, "Pick colour")
+        col = QColorDialog.getColor(QColor(current) if current else QColor("#ffffff"), self, _("Pick colour"))
         if not col.isValid():
             return
         cell[key] = col.name()
@@ -2023,7 +2023,7 @@ class ModernHudPreferences(QDialog):
 
     @staticmethod
     def _style_color_btn(btn: QPushButton, colour: str) -> None:
-        btn.setText(colour or "(none)")
+        btn.setText(colour or _("(none)"))
         btn.setStyleSheet(f"background:{colour};" if colour else "")
 
     @staticmethod
@@ -2107,7 +2107,7 @@ class ModernHudPreferences(QDialog):
         if block is None:
             return
         initial = QColor(*self._rgb_of(block.get(attr, "")))
-        col = QColorDialog.getColor(initial, self, "Pick colour")
+        col = QColorDialog.getColor(initial, self, _("Pick colour"))
         if not col.isValid():
             return
         if attr == "bgcolor":
@@ -2185,7 +2185,7 @@ class ModernHudPreferences(QDialog):
         if not blocks or not (0 <= bi < len(blocks)):
             return
         if len(blocks) <= 1:
-            QMessageBox.information(self, "Delete Panel", "A profile needs at least one panel.")
+            QMessageBox.information(self, _("Delete Panel"), _("A profile needs at least one panel."))
             return
         del blocks[bi]
         self._current_block_index = max(0, bi - 1)
@@ -2498,7 +2498,7 @@ class ModernHudPreferences(QDialog):
         if key is None:
             return
         current = ref.get(key, "")
-        col = QColorDialog.getColor(QColor(current) if current else QColor("#ffffff"), self, "Pick colour")
+        col = QColorDialog.getColor(QColor(current) if current else QColor("#ffffff"), self, _("Pick colour"))
         if not col.isValid():
             return
         ref[key] = col.name()
@@ -2513,21 +2513,21 @@ class ModernHudPreferences(QDialog):
 
         # Name input
         name_input = QLineEdit()
-        layout.addRow("Profile name:", name_input)
+        layout.addRow(_("Profile name:"), name_input)
 
         # Rows input
         rows_input = QSpinBox()
         rows_input.setMinimum(1)
         rows_input.setMaximum(10)
         rows_input.setValue(3)
-        layout.addRow("Rows:", rows_input)
+        layout.addRow(_("Rows:"), rows_input)
 
         # Columns input
         cols_input = QSpinBox()
         cols_input.setMinimum(1)
         cols_input.setMaximum(10)
         cols_input.setValue(2)
-        layout.addRow("Columns:", cols_input)
+        layout.addRow(_("Columns:"), cols_input)
 
         # Buttons
         btn_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
@@ -2562,7 +2562,7 @@ class ModernHudPreferences(QDialog):
         name = self.profile_combo.currentText()
         from PySide6.QtWidgets import QInputDialog
 
-        new_name, ok = QInputDialog.getText(self, "Duplicate Profile", "New profile name:")
+        new_name, ok = QInputDialog.getText(self, _("Duplicate Profile"), _("New profile name:"))
         if not ok:
             return
         new_name = new_name.strip()
@@ -2615,7 +2615,12 @@ class ModernHudPreferences(QDialog):
             return
         name = self.profile_combo.currentText()
         if (
-            QMessageBox.question(self, "Delete Profile", f"Delete profile '{name}'?", QMessageBox.Yes | QMessageBox.No)
+            QMessageBox.question(
+                self,
+                _("Delete Profile"),
+                _("Delete profile '{name}'?").format(name=name),
+                QMessageBox.Yes | QMessageBox.No,
+            )
             == QMessageBox.Yes
         ):
             current_index = self.profile_combo.currentIndex()
@@ -2655,9 +2660,9 @@ class ModernHudPreferences(QDialog):
 
         filename, _filter = QFileDialog.getSaveFileName(
             self,
-            "Export HUD Profile",
+            _("Export HUD Profile"),
             os.path.expanduser(f"~/{profile_name}.xml"),
-            "XML Files (*.xml);;FPDB HUD Files (*.fpdbhud)",
+            _("XML Files (*.xml);;FPDB HUD Files (*.fpdbhud)"),
         )
 
         if not filename:
@@ -2683,8 +2688,11 @@ class ModernHudPreferences(QDialog):
             if ss_node is None:
                 QMessageBox.warning(
                     self,
-                    "Export Warning",
-                    "The current profile is not saved to the configuration yet. Please save your changes before exporting.",
+                    _("Export Warning"),
+                    _(
+                        "The current profile is not saved to the configuration yet. "
+                        "Please save your changes before exporting.",
+                    ),
                 )
                 return
 
@@ -2727,8 +2735,8 @@ class ModernHudPreferences(QDialog):
             if layout_sets:
                 reply = QMessageBox.question(
                     self,
-                    "Export Layout Coordinates",
-                    "Do you want to include custom table coordinates (Layout Sets) in this HUD package?",
+                    _("Export Layout Coordinates"),
+                    _("Do you want to include custom table coordinates (Layout Sets) in this HUD package?"),
                     QMessageBox.Yes | QMessageBox.No,
                 )
                 if reply == QMessageBox.Yes:
@@ -2748,10 +2756,16 @@ class ModernHudPreferences(QDialog):
                 f.write(pkg_doc.toprettyxml(indent="    "))
 
             QMessageBox.information(
-                self, "Export Successful", f"HUD profile '{profile_name}' exported successfully to:\n{filename}"
+                self,
+                _("Export Successful"),
+                _("HUD profile '{name}' exported successfully to:\n{path}").format(name=profile_name, path=filename),
             )
         except Exception as e:  # intentional broad catch
-            QMessageBox.critical(self, "Export Error", f"An error occurred while exporting HUD profile:\n{e}")
+            QMessageBox.critical(
+                self,
+                _("Export Error"),
+                _("An error occurred while exporting HUD profile:\n{error}").format(error=e),
+            )
 
     def import_profile(self) -> None:
         import os
@@ -2767,9 +2781,9 @@ class ModernHudPreferences(QDialog):
 
         filename, _filter = QFileDialog.getOpenFileName(
             self,
-            "Import HUD Profile",
+            _("Import HUD Profile"),
             os.path.expanduser("~"),
-            "PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files (*.fpdbhud);;All Files (*)",
+            _("PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files (*.fpdbhud);;All Files (*)"),
         )
 
         if not filename:
@@ -2787,20 +2801,20 @@ class ModernHudPreferences(QDialog):
             assert root is not None
             if root.tagName != "fpdb_hud_package":
                 QMessageBox.critical(
-                    self, "Import Error", "Invalid package file. The root element must be <fpdb_hud_package>."
+                    self, _("Import Error"), _("Invalid package file. The root element must be <fpdb_hud_package>.")
                 )
                 return
 
             # 1. Process ss (Stat Set)
             ss_nodes = root.getElementsByTagName("ss")
             if not ss_nodes:
-                QMessageBox.critical(self, "Import Error", "No HUD profile (stat set) found in the package.")
+                QMessageBox.critical(self, _("Import Error"), _("No HUD profile (stat set) found in the package."))
                 return
 
             ss_node = ss_nodes[0]
             imported_name = ss_node.getAttribute("name")
             if not imported_name:
-                QMessageBox.critical(self, "Import Error", "Imported HUD profile has no name.")
+                QMessageBox.critical(self, _("Import Error"), _("Imported HUD profile has no name."))
                 return
 
             overwrite_profile = False
@@ -2810,10 +2824,10 @@ class ModernHudPreferences(QDialog):
             if imported_name in self.hud_profiles:
                 msg_box = QMessageBox(self)
                 msg_box.setWindowTitle(_("Profile Conflict"))
-                msg_box.setText(f"A HUD profile named '{imported_name}' already exists.")
+                msg_box.setText(_("A HUD profile named '{name}' already exists.").format(name=imported_name))
 
-                overwrite_btn = msg_box.addButton("Overwrite", QMessageBox.ButtonRole.DestructiveRole)
-                rename_btn = msg_box.addButton("Rename", QMessageBox.ButtonRole.ActionRole)
+                overwrite_btn = msg_box.addButton(_("Overwrite"), QMessageBox.ButtonRole.DestructiveRole)
+                rename_btn = msg_box.addButton(_("Rename"), QMessageBox.ButtonRole.ActionRole)
                 cancel_btn = msg_box.addButton(QMessageBox.StandardButton.Cancel)
 
                 msg_box.setDefaultButton(rename_btn)
@@ -2825,8 +2839,8 @@ class ModernHudPreferences(QDialog):
                 elif clicked_btn == rename_btn:
                     new_name, ok = QInputDialog.getText(
                         self,
-                        "Rename Imported Profile",
-                        f"Enter new name for imported profile '{imported_name}':",
+                        _("Rename Imported Profile"),
+                        _("Enter new name for imported profile '{name}':").format(name=imported_name),
                         text=f"{imported_name}_imported",
                     )
                     if not ok or not new_name:
@@ -2834,8 +2848,8 @@ class ModernHudPreferences(QDialog):
                     while new_name in self.hud_profiles:
                         new_name, ok = QInputDialog.getText(
                             self,
-                            "Rename Imported Profile",
-                            f"Name '{new_name}' already exists. Enter another name:",
+                            _("Rename Imported Profile"),
+                            _("Name '{name}' already exists. Enter another name:").format(name=new_name),
                             text=f"{new_name}_1",
                         )
                         if not ok or not new_name:
@@ -2862,7 +2876,7 @@ class ModernHudPreferences(QDialog):
                     else:
                         msg_box = QMessageBox(self)
                         msg_box.setWindowTitle(_("Popup Conflict"))
-                        msg_box.setText(f"Popup window '{pu_name}' already exists.")
+                        msg_box.setText(_("Popup window '{name}' already exists.").format(name=pu_name))
 
                         yes_btn = msg_box.addButton(QMessageBox.StandardButton.Yes)
                         yes_to_all_btn = msg_box.addButton(QMessageBox.StandardButton.YesToAll)
@@ -2907,9 +2921,12 @@ class ModernHudPreferences(QDialog):
                     else:
                         msg_box = QMessageBox(self)
                         msg_box.setWindowTitle(_("Layout Conflict"))
-                        msg_box.setText(f"Layout coordinates for site layout '{ls_name}' already exist.")
+                        msg_box.setText(_("Layout coordinates for site layout '{name}' already exist.").format(name=ls_name))
                         msg_box.setInformativeText(
-                            "Do you want to overwrite your existing layout coordinates for this site with the imported ones?"
+                            _(
+                                "Do you want to overwrite your existing layout coordinates "
+                                "for this site with the imported ones?",
+                            ),
                         )
 
                         yes_btn = msg_box.addButton(QMessageBox.StandardButton.Yes)
@@ -3083,7 +3100,11 @@ class ModernHudPreferences(QDialog):
             show_package_import(self, new_profile_name, root)
 
         except Exception as e:  # intentional broad catch
-            QMessageBox.critical(self, "Import Error", f"An error occurred while importing HUD profile:\n{e}")
+            QMessageBox.critical(
+                self,
+                _("Import Error"),
+                _("An error occurred while importing HUD profile:\n{error}").format(error=e),
+            )
 
     def _import_pt4hud(self, filename: str) -> None:
         """Import a PokerTracker 4 .pt4hud layout into the config and refresh the UI."""
@@ -3104,7 +3125,11 @@ class ModernHudPreferences(QDialog):
             self.reload_parent_config()
         except Exception as e:  # intentional broad catch
             log.exception("PT4 .pt4hud import failed")
-            QMessageBox.critical(self, "Import Error", f"Could not import {filename}:\n{e}")
+            QMessageBox.critical(
+                self,
+                _("Import Error"),
+                _("Could not import {path}:\n{error}").format(path=filename, error=e),
+            )
             return
 
         from fpdb_3_legacy.pt4hud_dialogs import show_import_summary
@@ -3545,8 +3570,8 @@ class ModernHudPreferences(QDialog):
                 rule.game,
                 rule.game_type,
                 rule.limit_type,
-                "ANY" if rule.seats is None else str(rule.seats),
-                "ANY" if rule.players is None else str(rule.players),
+                _("ANY") if rule.seats is None else str(rule.seats),
+                _("ANY") if rule.players is None else str(rule.players),
                 rule.speed,
                 rule.profile,
             ]
@@ -4311,7 +4336,7 @@ class ModernHudPreferences(QDialog):
             self.panel_stat_combo.addItem(f"{choice.label} [{choice.origin()}]", editor.choice_key(choice))
         section = getattr(self, "panel_stat_section", None)
         if section is not None:
-            section.set_summary(f"{len(self.panel_stat_choices)} available")
+            section.set_summary(_("{count} available").format(count=len(self.panel_stat_choices)))
         self._refresh_panel_stat_blocks()
         self._update_panel_stat_detail()
 
@@ -4664,7 +4689,7 @@ class ModernHudPreferences(QDialog):
                 # runtime precedence semantics tied to one implementation.
                 duplicates = HudProfileResolver(self.profile_rules).duplicate_selectors()
                 if duplicates:
-                    raise ValueError("Duplicate HUD profile selectors")
+                    raise ValueError(_("Duplicate HUD profile selectors"))
                 self.config.set_hud_profile_rules(self.profile_rules)
 
             self._persist_panel_rules()
@@ -4675,22 +4700,26 @@ class ModernHudPreferences(QDialog):
                 # What is on disk now is what later edits are compared with.
                 self._saved_state = self._editor_state(keep=True)
                 self._refresh_unsaved_indicator()
-                QMessageBox.information(self, "Success", "HUD configuration saved successfully!")
+                QMessageBox.information(self, _("Success"), _("HUD configuration saved successfully!"))
             else:
-                QMessageBox.warning(self, "Warning", "Could not save to file. Config save method not available.")
+                QMessageBox.warning(
+                    self,
+                    _("Warning"),
+                    _("Could not save to file. Config save method not available."),
+                )
 
             self.accept()
             return True
 
         except Exception as e:  # intentional broad catch: GUI save-profiles boundary surfaces failure in a dialog
-            QMessageBox.critical(self, "Error", f"Failed to save HUD profiles:\n{e!s}")
+            QMessageBox.critical(self, _("Error"), _("Failed to save HUD profiles:\n{error}").format(error=e))
             return False
 
     def add_popup(self) -> None:
         """Add a new popup window."""
         from PySide6.QtWidgets import QInputDialog
 
-        name, ok = QInputDialog.getText(self, "New Popup", "Enter popup name:")
+        name, ok = QInputDialog.getText(self, _("New Popup"), _("Enter popup name:"))
         if ok and name and name not in self.popup_windows:
             self.popup_windows[name] = {
                 "name": name,
@@ -4709,7 +4738,7 @@ class ModernHudPreferences(QDialog):
         current_name = self.popup_combo.currentText()
         from PySide6.QtWidgets import QInputDialog
 
-        new_name, ok = QInputDialog.getText(self, "Duplicate Popup", "New popup name:")
+        new_name, ok = QInputDialog.getText(self, _("Duplicate Popup"), _("New popup name:"))
         if ok and new_name and new_name not in self.popup_windows:
             import copy
 
@@ -4725,8 +4754,8 @@ class ModernHudPreferences(QDialog):
         popup_name = self.popup_combo.currentText()
         reply = QMessageBox.question(
             self,
-            "Delete Popup",
-            f"Are you sure you want to delete the popup '{popup_name}'?",
+            _("Delete Popup"),
+            _("Are you sure you want to delete the popup '{name}'?").format(name=popup_name),
             QMessageBox.Yes | QMessageBox.No,
         )
 

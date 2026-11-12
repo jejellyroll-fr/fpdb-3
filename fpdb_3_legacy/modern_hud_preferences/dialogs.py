@@ -27,6 +27,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from fpdb_3_legacy.i18n import N_
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.modern_hud_preferences import stat_catalog, stat_edit
@@ -40,11 +41,11 @@ class BlockPropertiesDialog(QDialog):
 
     _POSITIONS = ["", "SB", "BB", "BTN", "CO", "MP", "EP"]
     _COLOR_FIELDS = (
-        ("bgcolor", "Panel background"),
-        ("fgcolor", "Panel text"),
-        ("title_bgcolor", "Title background"),
-        ("title_fgcolor", "Title text"),
-        ("bordercolor", "Border"),
+        ("bgcolor", N_("Panel background:")),
+        ("fgcolor", N_("Panel text:")),
+        ("title_bgcolor", N_("Title background:")),
+        ("title_fgcolor", N_("Title text:")),
+        ("bordercolor", N_("Border:")),
     )
 
     def __init__(self, block: dict, parent=None) -> None:
@@ -55,7 +56,7 @@ class BlockPropertiesDialog(QDialog):
 
         form = QFormLayout(self)
         self.label_input = QLineEdit(block.get("label", ""))
-        form.addRow("Label:", self.label_input)
+        form.addRow(_("Label:"), self.label_input)
 
         self.pos_combo = QComboBox()
         self.pos_combo.addItems(self._POSITIONS)
@@ -64,15 +65,15 @@ class BlockPropertiesDialog(QDialog):
             self.pos_combo.addItem(cur)
         self.pos_combo.setCurrentText(cur)
         self.pos_combo.setToolTip(_("Show this panel only for a villain in this position (blank = always)"))
-        form.addRow("Show for position:", self.pos_combo)
+        form.addRow(_("Show for position:"), self.pos_combo)
 
         self.cell_width_spin = QSpinBox()
         self.cell_width_spin.setRange(0, 300)
-        self.cell_width_spin.setSpecialValueText("Automatic")
-        self.cell_width_spin.setSuffix(" px")
+        self.cell_width_spin.setSpecialValueText(_("Automatic"))
+        self.cell_width_spin.setSuffix(_(" px"))
         self.cell_width_spin.setValue(int(block.get("cell_width", 0) or 0))
         self.cell_width_spin.setToolTip(_("Minimum width of each statistic cell; Automatic keeps the legacy default"))
-        form.addRow("Cell width:", self.cell_width_spin)
+        form.addRow(_("Cell width:"), self.cell_width_spin)
 
         self._btns = {}
         for key, caption in self._COLOR_FIELDS:
@@ -80,7 +81,7 @@ class BlockPropertiesDialog(QDialog):
             btn.clicked.connect(lambda _=False, k=key: self._pick(k))
             self._btns[key] = btn
             self._refresh_btn(key)
-            form.addRow(f"{caption}:", btn)
+            form.addRow(_(caption), btn)
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(self.accept)
@@ -90,7 +91,7 @@ class BlockPropertiesDialog(QDialog):
     def _pick(self, key: str) -> None:
 
         initial = QColor(self._colors[key]) if self._colors[key] else QColor("#ffffff")
-        col = QColorDialog.getColor(initial, self, "Pick colour")
+        col = QColorDialog.getColor(initial, self, _("Pick colour"))
         if col.isValid():
             self._colors[key] = col.name()
             self._refresh_btn(key)
@@ -98,7 +99,7 @@ class BlockPropertiesDialog(QDialog):
     def _refresh_btn(self, key: str) -> None:
         colour = self._colors[key]
         btn = self._btns[key]
-        btn.setText(colour or "(none)")
+        btn.setText(colour or _("(none)"))
         btn.setStyleSheet(f"background:{colour};" if colour else "")
 
     def get_props(self) -> dict:
@@ -135,7 +136,7 @@ class AddStatDialog(QDialog):
         main_layout.setContentsMargins(15, 15, 15, 15)
 
         # Position and statistic section
-        position_group = QGroupBox("Position and Statistic")
+        position_group = QGroupBox(_("Position and Statistic"))
         position_layout = QGridLayout()
         position_layout.setSpacing(10)
 
@@ -171,7 +172,7 @@ class AddStatDialog(QDialog):
         main_layout.addWidget(position_group)
 
         # Actions section
-        actions_group = QGroupBox("Actions")
+        actions_group = QGroupBox(_("Actions"))
         actions_layout = QGridLayout()
         actions_layout.setSpacing(10)
 
@@ -189,7 +190,7 @@ class AddStatDialog(QDialog):
         main_layout.addWidget(actions_group)
 
         # Color configuration section
-        color_group = QGroupBox("Color Configuration")
+        color_group = QGroupBox(_("Color Configuration"))
         color_layout = QVBoxLayout()
         color_layout.setSpacing(10)
 
@@ -275,7 +276,7 @@ class AddStatDialog(QDialog):
         main_layout.addWidget(color_group)
 
         # Color preview
-        preview_group = QGroupBox("Color Preview")
+        preview_group = QGroupBox(_("Color Preview"))
         preview_layout = QVBoxLayout()
         preview_layout.setContentsMargins(10, 10, 10, 5)
 
@@ -551,14 +552,14 @@ class PopupStatEditDialog(QDialog):
         self.stat_name_input = QLineEdit()
         if stat_data:
             self.stat_name_input.setText(stat_data.get("stat_name", ""))
-        layout.addRow("Statistic Name:", self.stat_name_input)
+        layout.addRow(_("Statistic Name:"), self.stat_name_input)
 
         # Submenu (optional)
         self.submenu_input = QLineEdit()
         self.submenu_input.setPlaceholderText(_("Optional: Submenu name for hierarchical popups"))
         if stat_data:
             self.submenu_input.setText(stat_data.get("submenu", ""))
-        layout.addRow("Submenu:", self.submenu_input)
+        layout.addRow(_("Submenu:"), self.submenu_input)
 
         self.category_combo = QComboBox()
         self.category_combo.addItems(
@@ -567,7 +568,7 @@ class PopupStatEditDialog(QDialog):
         if stat_data and stat_data.get("category"):
             self.category_combo.setCurrentText(stat_data["category"])
         self.category_combo.setToolTip(_("Override the automatic section used by ModernSubmenu"))
-        layout.addRow("Section:", self.category_combo)
+        layout.addRow(_("Section:"), self.category_combo)
 
         # Dialog buttons
         btn_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
@@ -599,32 +600,32 @@ class PopupEditDialog(QDialog):
         main_layout.setContentsMargins(20, 20, 20, 20)
 
         # Basic info section
-        info_group = QGroupBox("Popup Information")
+        info_group = QGroupBox(_("Popup Information"))
         info_layout = QFormLayout()
 
         # Name input
         self.name_input = QLineEdit()
         if popup_data:
             self.name_input.setText(popup_data["name"])
-        info_layout.addRow("Popup Name:", self.name_input)
+        info_layout.addRow(_("Popup Name:"), self.name_input)
 
         # Class selection
         self.class_combo = QComboBox()
         self.class_combo.addItems(["default", "Submenu", "Multicol"])
         if popup_data:
             self.class_combo.setCurrentText(popup_data["class"])
-        info_layout.addRow("Popup Class:", self.class_combo)
+        info_layout.addRow(_("Popup Class:"), self.class_combo)
 
         info_group.setLayout(info_layout)
         main_layout.addWidget(info_group)
 
         # Statistics section
-        stats_group = QGroupBox("Statistics")
+        stats_group = QGroupBox(_("Statistics"))
         stats_layout = QVBoxLayout()
 
         # Stats table
         self.stats_table = QTableWidget(0, 2)
-        self.stats_table.setHorizontalHeaderLabels(["Statistic Name", "Submenu"])
+        self.stats_table.setHorizontalHeaderLabels([_("Statistic Name"), _("Submenu")])
         self.stats_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.stats_table.setMinimumHeight(250)
         stats_layout.addWidget(self.stats_table)

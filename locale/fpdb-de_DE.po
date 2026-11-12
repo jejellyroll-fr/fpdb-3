@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 23:37+0100\n"
+"POT-Creation-Date: 2026-11-12 06:33+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -1101,6 +1101,7 @@ msgstr "+ Neue Regel"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
 msgid "Actions"
 msgstr "Aktionen"
@@ -1358,6 +1359,7 @@ msgid "Create tables"
 msgstr "Erstellen des Indexes fehlgeschlagen: "
 
 #: fpdb_3_legacy/GuiDatabase.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Default"
 msgstr "Standard"
@@ -4521,7 +4523,8 @@ msgstr "Einstellung"
 msgid "Stat Packs"
 msgstr "Stat-Pakete"
 
-#: fpdb_3_legacy/menu_layout.py
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Statistics"
 msgstr "Statistiken"
 
@@ -4621,6 +4624,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid " px"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "(none)"
 msgstr "(keine)"
@@ -4629,6 +4637,11 @@ msgstr "(keine)"
 #, fuzzy
 msgid "Add/Edit Statistic"
 msgstr "Statistik hinzufügen/bearbeiten"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Automatic"
+msgstr "Automatische Notizen"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid ""
@@ -4642,9 +4655,28 @@ msgid "Block Properties"
 msgstr "Block-Eigenschaften"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Border:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Cell width:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
 msgid "Click Action:"
 msgstr "Klickaktion:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Color Configuration"
+msgstr "Spaltenkonfiguration"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Color Preview"
+msgstr "Solver-Review"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4667,6 +4699,7 @@ msgid "Edit Popup Window"
 msgstr "Popup-Fenster bearbeiten"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Export Layout Coordinates"
 msgstr "Layout-Koordinaten exportieren"
@@ -4680,6 +4713,11 @@ msgstr "Rasterposition:"
 #, fuzzy
 msgid "High Range:"
 msgstr "Oberer Bereich:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Label:"
+msgstr "Beschriftung hinzufügen"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4720,13 +4758,51 @@ msgid "Override the automatic section used by ModernSubmenu"
 msgstr "Den von ModernSubmenu automatisch verwendeten Abschnitt überschreiben"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Pick a statistic from the list."
+msgid "Panel background:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
+msgid "Panel text:"
+msgstr "Klartext"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Pick a statistic from the list."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Pick colour"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Popup Class:"
+msgstr "Klasse:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+#| msgid "Version Information:"
+msgid "Popup Information"
+msgstr "Versionsinformationen:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Popup Name"
+msgid "Popup Name:"
+msgstr "Popup-Name"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Popup:"
 msgstr "Popup:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Position and Statistic"
+msgstr "Position und Stack"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4737,6 +4813,12 @@ msgstr "Die Vorschau zeigt, wie sich die Statistikfarben je nach Wert ändern"
 #, fuzzy
 msgid "Row:"
 msgstr "Zeile:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Section:"
+msgstr "Aktion"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4754,15 +4836,41 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
+#| msgid "Show in Position Stats"
+msgid "Show for position:"
+msgstr "In \"Statistiken nach Position\" anzeigen"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr ""
 "Dieses Panel nur für einen Gegner auf dieser Position anzeigen (leer = immer)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Stat Name"
+msgid "Statistic Name"
+msgstr "Stat-Name"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Statistic Name:"
+msgstr "Statistik:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Statistic:"
 msgstr "Statistik:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Submenu"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Submenu:"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4774,6 +4882,15 @@ msgstr ""
 #, python-brace-format
 msgid "There is no statistic called \"{name}\". Pick one from the list."
 msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Title background:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Title text:"
+msgstr "Klartext"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4870,12 +4987,13 @@ msgid " pt"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid " px"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr "#"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "A HUD profile named '{name}' already exists."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -4887,6 +5005,11 @@ msgstr ""
 #, fuzzy
 msgid "A profile definition with these selectors already exists."
 msgstr "Eine Profildefinition mit diesen Selektoren existiert bereits."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "A profile needs at least one panel."
+msgstr "Profilname"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -4965,6 +5088,24 @@ msgid "Add to block"
 msgstr "Zum Block hinzufügen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Align:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"An error occurred while exporting HUD profile:\n"
+"{error}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"An error occurred while importing HUD profile:\n"
+"{error}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Analytics-backed stats"
 msgstr "Analysegestützte Statistiken"
@@ -4979,10 +5120,20 @@ msgstr ""
 "einfärben."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy, python-brace-format
+msgid "Are you sure you want to delete the popup '{name}'?"
+msgstr "Regel '%s' wirklich löschen?"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 #| msgid "Ring Player Stats"
 msgid "Available Stats"
 msgstr "Cash-Spielerstatistiken"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Background:"
+msgstr "Backend:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5038,6 +5189,10 @@ msgid "Cell already used"
 msgstr "Lock wird bereits gehalten durch:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cell bg:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid "Changed since the last save: {parts}"
 msgstr ""
@@ -5059,13 +5214,49 @@ msgstr "Spalte:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Columns:"
+msgstr "Spalten"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Conditions"
 msgstr "Bedingungen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
+msgid ""
+"Could not import {path}:\n"
+"{error}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Could not save to file. Config save method not available."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
 msgid "Default ({size} pt)"
 msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Delete Panel"
+msgstr "Regel löschen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Delete Popup"
+msgstr "Popup wählen:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Delete Profile"
+msgstr "Standardprofil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy, python-brace-format
+msgid "Delete profile '{name}'?"
+msgstr "Profilname"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5078,9 +5269,36 @@ msgid "Disabled: this rule never matches."
 msgstr "Deaktiviert: diese Regel passt nie."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Do you want to include custom table coordinates (Layout Sets) in this HUD "
+"package?"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Do you want to overwrite your existing layout coordinates for this site with "
+"the imported ones?"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Double-click a stat to add it to the panel shown in Design."
 msgstr "Doppelklicken Sie auf eine Zelle, um die Hände dahinter zu laden."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Duplicate HUD profile selectors"
+msgstr "Wählen Sie zuerst ein HUD-Profil."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Duplicate Popup"
+msgstr "Doppelte Regel"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Duplicate Profile"
+msgstr "Doppelte Regel"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5118,6 +5336,42 @@ msgstr ""
 "LAG, Reg, TAG aktivieren."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Enter new name for imported profile '{name}':"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Enter popup name:"
+msgstr "Benutzernamen eingeben"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+#| msgid "Errors:"
+msgid "Error"
+msgstr "Fehler:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Export Error"
+msgstr "Fehler beim Massenimport"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Export HUD Profile"
+msgstr "HUD-Profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Export Successful"
+msgstr "Einstellungen importieren"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Export Warning"
+msgstr "Einstellung"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Export panel rules"
 msgstr "Panel-Regeln exportieren"
@@ -5128,6 +5382,13 @@ msgid "Export…"
 msgstr "Exportieren…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Failed to save HUD profiles:\n"
+"{error}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Fallback"
 msgstr "Ersatz"
@@ -5136,6 +5397,10 @@ msgstr "Ersatz"
 #, fuzzy
 msgid "Font size:"
 msgstr "Bet-Größe"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Foreground:"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
@@ -5155,6 +5420,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Group Properties"
+msgstr "Block-Eigenschaften"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Preview"
 msgstr "HUD-Vorschau"
 
@@ -5170,6 +5440,11 @@ msgstr "HUD-Profilkonfiguration"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "HUD configuration saved successfully!"
+msgstr "Eigene Auto-Notiz-Regeln erfolgreich gespeichert!"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD imported — refresh required"
 msgstr "HUD importiert – Aktualisierung nötig"
 
@@ -5178,6 +5453,13 @@ msgstr "HUD importiert – Aktualisierung nötig"
 #, fuzzy
 msgid "HUD profile"
 msgstr "HUD-Profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"HUD profile '{name}' exported successfully to:\n"
+"{path}"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
@@ -5197,6 +5479,15 @@ msgstr "Hände für diesen Sitz"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Hi col:"
+msgstr "Mittlere Farbe:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Hi th:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Horz Line"
 msgstr "Horizontale Linie"
 
@@ -5211,8 +5502,23 @@ msgstr "Symbole:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Import Error"
+msgstr "Fehler beim Massenimport"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Import HUD Profile"
+msgstr "HUD-Profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Import panel rules"
 msgstr "Panel-Regeln importieren"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Imported HUD profile has no name."
+msgstr "Profilname"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy, python-brace-format
@@ -5223,6 +5529,10 @@ msgstr "{count} Regel(n) importiert."
 #, fuzzy
 msgid "Import…"
 msgstr "Importieren…"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Invalid package file. The root element must be <fpdb_hud_package>."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5238,6 +5548,24 @@ msgstr "Element-Eigenschaften"
 #, fuzzy
 msgid "Layout Conflict"
 msgstr "Layout-Konflikt"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Layout coordinates for site layout '{name}' already exist."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Lo col:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Lo th:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Mid col:"
+msgstr "Mittlere Farbe:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5264,14 +5592,33 @@ msgid "Move up"
 msgstr "Nach oben"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Name '{name}' already exists. Enter another name:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "New Popup"
+msgstr "➕ Neues Popup"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "New Profile"
 msgstr "Neues Profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "New popup name:"
+msgstr "Profilname"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "New profile name:"
 msgstr "Profilname"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "No HUD profile (stat set) found in the package."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5297,10 +5644,19 @@ msgstr ""
 "Positionsregel."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Only current position"
+msgstr "Gegnerposition"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid ""
 "Only {rich} draws rich text: {handlers} will show this profile as standard "
 "text."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Opacity:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -5315,7 +5671,23 @@ msgstr "Den Leitfaden zum dynamischen HUD öffnen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Overwrite"
+msgstr "Überschreiben bestätigen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files "
+"(*.fpdbhud);;All Files (*)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel"
+msgstr "Panel"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Panel bg:"
 msgstr "Panel"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -5378,6 +5750,17 @@ msgid "Popup Preview"
 msgstr "Popup-Vorschau"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Popup window '{name}' already exists."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+#| msgid "Positions:"
+msgid "Position:"
+msgstr "Positionen:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Positional panels:"
 msgstr "Positions-Panels:"
@@ -5408,6 +5791,11 @@ msgid "Profile actions"
 msgstr "Profilaktionen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Profile name:"
+msgstr "Profilname"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid "Profile: {name} | {layout} | Statistics: {count}"
 msgstr ""
@@ -5416,6 +5804,16 @@ msgstr ""
 #, fuzzy
 msgid "Remove"
 msgstr "Entfernen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Rename"
+msgstr "Regelname"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Rename Imported Profile"
+msgstr "Neues Profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5444,6 +5842,10 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Rows:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Rule name"
 msgstr "Regelname"
@@ -5462,6 +5864,11 @@ msgstr "Popup wählen:"
 #, fuzzy
 msgid "Select a rule to update first."
 msgstr "Wählen Sie zuerst eine Regel zum Aktualisieren."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Show all (stacked)"
+msgstr "anzeigen als"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5485,6 +5892,10 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Span:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Speed"
 msgstr "Tempo"
@@ -5500,13 +5911,34 @@ msgstr ""
 "Statistiken, deren Wert aus der Analyseschicht statt aus einer Spalte kommt."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Success"
+msgstr "% Steal-Erfolg"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Text"
+msgstr "Inhalt"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Text / Stat:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+#| msgid "Text"
+msgid "Text col:"
 msgstr "Inhalt"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Text label (header / caption) — not a stat"
 msgstr "Textbeschriftung (Kopf / Legende) – keine Stat"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+#| msgid "Text"
+msgid "Text:"
+msgstr "Inhalt"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5530,6 +5962,12 @@ msgstr ""
 "einen Kontext, um das Dynamic-Paket das Panel wechseln zu sehen, und lesen "
 "Sie die Popup-Pfade, um zu wissen, wo eine Zahl steht, bevor Sie sie am "
 "Tisch suchen."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"The current profile is not saved to the configuration yet. Please save your "
+"changes before exporting."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5561,9 +5999,23 @@ msgid "Then show"
 msgstr "Dann anzeigen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Title bg:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Title fg:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Turn on dynamic panels?"
 msgstr "🧩 Dynamische Panels"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+#| msgid "Type"
+msgid "Type:"
+msgstr "Typ"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5581,6 +6033,12 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "Warning:"
+msgid "Warning"
+msgstr "Warnung:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "When this is the spot"
 msgstr "Wenn dies die Situation ist"
 
@@ -5588,6 +6046,10 @@ msgstr "Wenn dies die Situation ist"
 #, fuzzy, python-brace-format
 msgid "Wrote {path}"
 msgstr "{path} geschrieben"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "XML Files (*.xml);;FPDB HUD Files (*.fpdbhud)"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5617,9 +6079,19 @@ msgid "optional name"
 msgstr "optionaler Name"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "row {row}, col {col}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "the profile grid"
 msgstr "das Profilraster"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy, python-brace-format
+msgid "{count} available"
+msgstr "Vorschau aktualisieren"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy, python-brace-format
@@ -5726,6 +6198,16 @@ msgstr "🧩 Dynamische Panels"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, fuzzy
+msgid "(popup group data unavailable)"
+msgstr "Zwischenablage nicht verfügbar"
+
+#: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
+msgid "(range chart data unavailable)"
+msgstr "Analysedaten nicht verfügbar"
+
+#: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "100% Reset"
 msgstr "100 % zurücksetzen"
 
@@ -5733,6 +6215,10 @@ msgstr "100 % zurücksetzen"
 #, fuzzy, python-brace-format
 msgid "Natural Size: {w} × {h} px  (Scale: {scale}%)"
 msgstr "Natürliche Größe: {w} × {h} px  (Maßstab: {scale} %)"
+
+#: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+msgid "No popup stats configured"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, fuzzy
@@ -5755,9 +6241,29 @@ msgid "🔍 Popup Preview — {name} (Real Size)"
 msgstr "🔍 Popup-Vorschau – {name} (echte Größe)"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+msgid "Advanced — compact surface, popups behind it"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+msgid "At rest (no rule matched)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+msgid "Basic — eight numbers, no setup"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
 #, fuzzy
 msgid "Context"
 msgstr "Kontext"
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+msgid "Dynamic Hold'em — panels that follow the spot"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+msgid "Dynamic PLO — Omaha stats by spot"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
 #, fuzzy
@@ -5771,9 +6277,56 @@ msgstr ""
 "Richtung der mitgelieferten Popup-Bibliothek."
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, python-brace-format
+msgid "No reference package could be read: {failures}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
+#| msgid "Popup Name"
+msgid "Popup paths"
+msgstr "Popup-Name"
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
 #, fuzzy
 msgid "Reference HUD"
 msgstr "HUD-Einstellungen"
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, python-brace-format
+msgid ""
+"Sample: under {low} hands a number is marked thin, over {high} it is solid, "
+"and a contextual stat needs {contextual} before it is shown at all. The "
+"colour is never the only signal — every cell carries its prefix and its "
+"tooltip."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+msgid "This package has no contextual panels: the block never changes."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
+msgid "What the colours mean"
+msgstr "Wogegen der Handelnde stand."
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, python-brace-format
+msgid "{count} contextual panels are one rule away."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, python-brace-format
+msgid ""
+"{package} — the resolver has selected “{title}”. At a table this panel "
+"appears when the rule that names it matches, and disappears again when the "
+"spot changes."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, python-brace-format
+msgid "{package} — what a seat shows with no dynamic rule matched."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #, fuzzy
@@ -10465,9 +11018,6 @@ msgstr ""
 #~ msgid "Tried to add holecards for unknown player: %s"
 #~ msgstr "Versuchte Hole-Karten für unbekannten Spieler %s hinzuzufügen"
 
-#~ msgid "Type"
-#~ msgstr "Typ"
-
 #~ msgid "Type of Game"
 #~ msgstr "Art des Spiels"
 
@@ -10562,9 +11112,6 @@ msgstr ""
 #~ msgid "Vacuum took %.1f seconds"
 #~ msgstr "Vacuum dauerte %.1f Sekunden"
 
-#~ msgid "Version Information:"
-#~ msgstr "Versionsinformationen:"
-
 #~ msgid ""
 #~ "WARNING: Unable to find output hand history directory %s\n"
 #~ "\n"
@@ -10580,9 +11127,6 @@ msgstr ""
 
 #~ msgid "WINNINGS CURRENCY"
 #~ msgstr "PREISE WÄHRUNG"
-
-#~ msgid "Warning:"
-#~ msgstr "Warnung:"
 
 #~ msgid ""
 #~ "We appear to be running in Windows, but the Windows Python Extensions are "

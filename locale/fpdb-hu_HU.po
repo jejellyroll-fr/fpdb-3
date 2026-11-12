@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 23:37+0100\n"
+"POT-Creation-Date: 2026-11-12 06:33+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -1103,6 +1103,7 @@ msgstr "+ Új szabály"
 
 #: fpdb_3_legacy/GuiCustomAutoNotesEditor.py
 #: fpdb_3_legacy/GuiResearchBrowser.py
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
 msgid "Actions"
 msgstr "Műveletek"
@@ -1361,6 +1362,7 @@ msgid "Create tables"
 msgstr "Táblák létrehozása"
 
 #: fpdb_3_legacy/GuiDatabase.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Default"
 msgstr "Alapértelmezett"
 
@@ -4528,7 +4530,8 @@ msgstr "Beállítás"
 msgid "Stat Packs"
 msgstr "Statisztikacsomagok"
 
-#: fpdb_3_legacy/menu_layout.py
+#: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Statistics"
 msgstr "Statisztikák"
 
@@ -4627,6 +4630,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid " px"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "(none)"
 msgstr "(nincs)"
@@ -4635,6 +4643,11 @@ msgstr "(nincs)"
 #, fuzzy
 msgid "Add/Edit Statistic"
 msgstr "Statisztika hozzáadása/szerkesztése"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Automatic"
+msgstr "Automatikus jegyzetek"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 msgid ""
@@ -4648,9 +4661,28 @@ msgid "Block Properties"
 msgstr "Blokk tulajdonságai"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Border:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Cell width:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
 msgid "Click Action:"
 msgstr "Kattintási művelet:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Color Configuration"
+msgstr "Oszlopok beállítása"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Color Preview"
+msgstr "Solveres elemzés"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4673,6 +4705,7 @@ msgid "Edit Popup Window"
 msgstr "Felugró ablak szerkesztése"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Export Layout Coordinates"
 msgstr "Elrendezési koordináták exportálása"
@@ -4686,6 +4719,11 @@ msgstr "Pozíció"
 #, fuzzy
 msgid "High Range:"
 msgstr "Felső tartomány:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Label:"
+msgstr "Felirat hozzáadása"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4726,13 +4764,51 @@ msgid "Override the automatic section used by ModernSubmenu"
 msgstr "A ModernSubmenu által automatikusan használt szakasz felülírása"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-msgid "Pick a statistic from the list."
+msgid "Panel background:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
+msgid "Panel text:"
+msgstr "Egyszerű szöveg"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Pick a statistic from the list."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Pick colour"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Popup Class:"
+msgstr "Osztály:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+#| msgid "Version Information:"
+msgid "Popup Information"
+msgstr "Verzióinformáció:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Popup Name"
+msgid "Popup Name:"
+msgstr "Felugró név"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Popup:"
 msgstr "Felugró ablak:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Position and Statistic"
+msgstr "Pozíció és zsetonkészlet"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4744,6 +4820,12 @@ msgstr ""
 #, fuzzy
 msgid "Row:"
 msgstr "Sor:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Section:"
+msgstr "Lépés"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4761,15 +4843,41 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
+#| msgid "Show in Position Stats"
+msgid "Show for position:"
+msgstr "Mutatás a pozíciós statisztikákban"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
 msgid "Show this panel only for a villain in this position (blank = always)"
 msgstr ""
 "Ez a panel csak az ezen a pozíción lévő ellenfélnél látszik (üres = mindig)"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+#| msgid "Stat Name"
+msgid "Statistic Name"
+msgstr "Statisztika neve"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Statistic Name:"
+msgstr "Statisztika:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Statistic:"
 msgstr "Statisztika:"
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Submenu"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Submenu:"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4781,6 +4889,15 @@ msgstr ""
 #, python-brace-format
 msgid "There is no statistic called \"{name}\". Pick one from the list."
 msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+msgid "Title background:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#, fuzzy
+msgid "Title text:"
+msgstr "Egyszerű szöveg"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
 #, fuzzy
@@ -4877,12 +4994,13 @@ msgid " pt"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid " px"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "#"
 msgstr "#"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "A HUD profile named '{name}' already exists."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -4893,6 +5011,11 @@ msgstr "Ilyen feltételekkel és profillal már létezik panelszabály."
 #, fuzzy
 msgid "A profile definition with these selectors already exists."
 msgstr "Ilyen kiválasztókkal már létezik profildefiníció."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "A profile needs at least one panel."
+msgstr "Fájlnév:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -4970,6 +5093,24 @@ msgid "Add to block"
 msgstr "Hozzáadás a blokkhoz"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Align:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"An error occurred while exporting HUD profile:\n"
+"{error}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"An error occurred while importing HUD profile:\n"
+"{error}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Analytics-backed stats"
 msgstr "Elemzésre épülő statisztikák"
@@ -4984,10 +5125,20 @@ msgstr ""
 "HUD-ban."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy, python-brace-format
+msgid "Are you sure you want to delete the popup '{name}'?"
+msgstr "Biztosan törli a(z) '%s' szabályt?"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 #| msgid "Ring Player Stats"
 msgid "Available Stats"
 msgstr "Készpénzes statisztikák"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Background:"
+msgstr "Háttérrendszer:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5041,6 +5192,10 @@ msgid "Cell already used"
 msgstr "a zárolást már elvégezte:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cell bg:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid "Changed since the last save: {parts}"
 msgstr ""
@@ -5062,13 +5217,49 @@ msgstr "Oszlop:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Columns:"
+msgstr "Oszlopok"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Conditions"
 msgstr "Pozíció"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
+msgid ""
+"Could not import {path}:\n"
+"{error}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Could not save to file. Config save method not available."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
 msgid "Default ({size} pt)"
 msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Delete Panel"
+msgstr "Szabály törlése"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Delete Popup"
+msgstr "Felugró ablak kiválasztása:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Delete Profile"
+msgstr "Alapértelmezett profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy, python-brace-format
+msgid "Delete profile '{name}'?"
+msgstr "Fájlnév:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5081,9 +5272,36 @@ msgid "Disabled: this rule never matches."
 msgstr "Letiltva: ez a szabály sosem illik."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Do you want to include custom table coordinates (Layout Sets) in this HUD "
+"package?"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Do you want to overwrite your existing layout coordinates for this site with "
+"the imported ones?"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Double-click a stat to add it to the panel shown in Design."
 msgstr "Kattintson duplán egy cellára a mögötte álló leosztások betöltéséhez."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Duplicate HUD profile selectors"
+msgstr "Előbb válasszon egy HUD-profilt."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Duplicate Popup"
+msgstr "Ismétlődő szabály"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Duplicate Profile"
+msgstr "Ismétlődő szabály"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5121,6 +5339,42 @@ msgstr ""
 "Reg, TAG."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Enter new name for imported profile '{name}':"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Enter popup name:"
+msgstr "Adja meg a felhasználónevét"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+#| msgid "Errors:"
+msgid "Error"
+msgstr "Hibák:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Export Error"
+msgstr "Tömeges importálási hiba"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Export HUD Profile"
+msgstr "HUD-profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Export Successful"
+msgstr "Beállítások importálása"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Export Warning"
+msgstr "Beállítás"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Export panel rules"
 msgstr "Panelszabályok exportálása"
@@ -5131,6 +5385,13 @@ msgid "Export…"
 msgstr "Exportálás…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"Failed to save HUD profiles:\n"
+"{error}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Fallback"
 msgstr "Tartalék"
@@ -5139,6 +5400,10 @@ msgstr "Tartalék"
 #, fuzzy
 msgid "Font size:"
 msgstr "Tétméret"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Foreground:"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #: fpdb_3_legacy/research_labels.py
@@ -5158,6 +5423,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Group Properties"
+msgstr "Blokk tulajdonságai"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD Preview"
 msgstr "HUD előnézet"
 
@@ -5173,6 +5443,11 @@ msgstr "HUD-profilok beállítása"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "HUD configuration saved successfully!"
+msgstr "Az egyéni automatikus jegyzetszabályok mentve!"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "HUD imported — refresh required"
 msgstr "HUD importálva — frissítés szükséges"
 
@@ -5181,6 +5456,13 @@ msgstr "HUD importálva — frissítés szükséges"
 #, fuzzy
 msgid "HUD profile"
 msgstr "HUD-profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid ""
+"HUD profile '{name}' exported successfully to:\n"
+"{path}"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
@@ -5200,6 +5482,15 @@ msgstr "Leosztások ehhez a helyhez"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Hi col:"
+msgstr "Középső szín:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Hi th:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Horz Line"
 msgstr "Vízszintes vonal"
 
@@ -5214,8 +5505,23 @@ msgstr "Ikonok:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Import Error"
+msgstr "Tömeges importálási hiba"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Import HUD Profile"
+msgstr "HUD-profil"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Import panel rules"
 msgstr "Panelszabályok importálása"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Imported HUD profile has no name."
+msgstr "Fájlnév:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy, python-brace-format
@@ -5226,6 +5532,10 @@ msgstr "{count} szabály importálva."
 #, fuzzy
 msgid "Import…"
 msgstr "Importálás…"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Invalid package file. The root element must be <fpdb_hud_package>."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5241,6 +5551,24 @@ msgstr "Elem tulajdonságai"
 #, fuzzy
 msgid "Layout Conflict"
 msgstr "Elrendezési ütközés"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Layout coordinates for site layout '{name}' already exist."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Lo col:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Lo th:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Mid col:"
+msgstr "Középső szín:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5267,14 +5595,33 @@ msgid "Move up"
 msgstr "Feljebb"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Name '{name}' already exists. Enter another name:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "New Popup"
+msgstr "➕ Új felugró ablak"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "New Profile"
 msgstr "Új profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "New popup name:"
+msgstr "Fájlnév:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "New profile name:"
 msgstr "Fájlnév:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "No HUD profile (stat set) found in the package."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5300,10 +5647,19 @@ msgstr ""
 "jelennek meg, minden más blokk megtartja a korábbi pozíciószabályát."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Only current position"
+msgstr "Az ellenfél pozíciója"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid ""
 "Only {rich} draws rich text: {handlers} will show this profile as standard "
 "text."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Opacity:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -5318,7 +5674,23 @@ msgstr "A dinamikus HUD útmutatójának megnyitása"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Overwrite"
+msgstr "Felülírás megerősítése"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files "
+"(*.fpdbhud);;All Files (*)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Panel"
+msgstr "Panel"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Panel bg:"
 msgstr "Panel"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -5383,6 +5755,16 @@ msgid "Popup Preview"
 msgstr "Felugró ablak előnézete"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Popup window '{name}' already exists."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Position:"
+msgstr "Pozíció"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Positional panels:"
 msgstr "Pozíciós panelek:"
@@ -5413,6 +5795,11 @@ msgid "Profile actions"
 msgstr "Pozíció"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Profile name:"
+msgstr "Fájlnév:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid "Profile: {name} | {layout} | Statistics: {count}"
 msgstr ""
@@ -5421,6 +5808,16 @@ msgstr ""
 #, fuzzy
 msgid "Remove"
 msgstr "Eltávolítás"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Rename"
+msgstr "Szabály neve"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Rename Imported Profile"
+msgstr "Új profil"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5449,6 +5846,10 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Rows:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Rule name"
 msgstr "Szabály neve"
@@ -5467,6 +5868,11 @@ msgstr "Felugró ablak kiválasztása:"
 #, fuzzy
 msgid "Select a rule to update first."
 msgstr "Előbb válasszon ki egy frissítendő szabályt."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Show all (stacked)"
+msgstr "megjelenítés így"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5492,6 +5898,10 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Span:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Speed"
 msgstr "Sebesség"
@@ -5508,13 +5918,34 @@ msgstr ""
 "oszlopból."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Success"
+msgstr "% sikeres lopás"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Text"
+msgstr "Szöveg"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Text / Stat:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+#| msgid "Text"
+msgid "Text col:"
 msgstr "Szöveg"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Text label (header / caption) — not a stat"
 msgstr "Szöveges felirat (fejléc / képaláírás) — nem statisztika"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+#| msgid "Text"
+msgid "Text:"
+msgstr "Szöveg"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5538,6 +5969,12 @@ msgstr ""
 "környezetet, hogy lássa a Dynamic csomag panelváltását, és olvassa el a "
 "felugró ablakok útvonalait, hogy tudja, hol van egy szám, mielőtt az "
 "asztalnál keresné."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"The current profile is not saved to the configuration yet. Please save your "
+"changes before exporting."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5568,9 +6005,23 @@ msgid "Then show"
 msgstr "Akkor megjelenítés"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Title bg:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Title fg:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Turn on dynamic panels?"
 msgstr "🧩 Dinamikus panelek"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+#| msgid "Type"
+msgid "Type:"
+msgstr "Típus"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5588,6 +6039,12 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+#| msgid "Warning:"
+msgid "Warning"
+msgstr "Figyelmeztetés:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "When this is the spot"
 msgstr "Ha ez a helyzet"
 
@@ -5595,6 +6052,10 @@ msgstr "Ha ez a helyzet"
 #, fuzzy, python-brace-format
 msgid "Wrote {path}"
 msgstr "Kiírva: {path}"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "XML Files (*.xml);;FPDB HUD Files (*.fpdbhud)"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5624,9 +6085,19 @@ msgid "optional name"
 msgstr "opcionális név"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "row {row}, col {col}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "the profile grid"
 msgstr "a profilrács"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy, python-brace-format
+msgid "{count} available"
+msgstr "Előnézet frissítése"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy, python-brace-format
@@ -5734,6 +6205,16 @@ msgstr "🧩 Dinamikus panelek"
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, fuzzy
+msgid "(popup group data unavailable)"
+msgstr "A vágólap nem érhető el"
+
+#: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
+msgid "(range chart data unavailable)"
+msgstr "Az elemzési adatok nem érhetők el"
+
+#: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+#, fuzzy
 msgid "100% Reset"
 msgstr "100% visszaállítás"
 
@@ -5741,6 +6222,10 @@ msgstr "100% visszaállítás"
 #, fuzzy, python-brace-format
 msgid "Natural Size: {w} × {h} px  (Scale: {scale}%)"
 msgstr "Természetes méret: {w} × {h} px  (méretarány: {scale}%)"
+
+#: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
+msgid "No popup stats configured"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/preview_widgets.py
 #, fuzzy
@@ -5763,9 +6248,29 @@ msgid "🔍 Popup Preview — {name} (Real Size)"
 msgstr "🔍 Felugró ablak előnézete — {name} (valós méret)"
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+msgid "Advanced — compact surface, popups behind it"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+msgid "At rest (no rule matched)"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+msgid "Basic — eight numbers, no setup"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
 #, fuzzy
 msgid "Context"
 msgstr "Környezet"
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+msgid "Dynamic Hold'em — panels that follow the spot"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+msgid "Dynamic PLO — Omaha stats by spot"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
 #, fuzzy
@@ -5779,9 +6284,56 @@ msgstr ""
 "felugróablak-könyvtár felé."
 
 #: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, python-brace-format
+msgid "No reference package could be read: {failures}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
+#| msgid "Popup Name"
+msgid "Popup paths"
+msgstr "Felugró név"
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
 #, fuzzy
 msgid "Reference HUD"
 msgstr "HUD beállítások"
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, python-brace-format
+msgid ""
+"Sample: under {low} hands a number is marked thin, over {high} it is solid, "
+"and a contextual stat needs {contextual} before it is shown at all. The "
+"colour is never the only signal — every cell carries its prefix and its "
+"tooltip."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+msgid "This package has no contextual panels: the block never changes."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, fuzzy
+msgid "What the colours mean"
+msgstr "Mivel nézett szembe a lépő."
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, python-brace-format
+msgid "{count} contextual panels are one rule away."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, python-brace-format
+msgid ""
+"{package} — the resolver has selected “{title}”. At a table this panel "
+"appears when the rule that names it matches, and disappears again when the "
+"spot changes."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/reference_preview.py
+#, python-brace-format
+msgid "{package} — what a seat shows with no dynamic rule matched."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/stat_catalog.py
 #, fuzzy
@@ -11091,9 +11643,6 @@ msgstr ""
 #~ "turn aggresszió\n"
 #~ "bet vagy raise a turn láttán"
 
-#~ msgid "Type"
-#~ msgstr "Típus"
-
 #~ msgid "Type of Game"
 #~ msgstr "Játék típusa"
 
@@ -11220,9 +11769,6 @@ msgstr ""
 #~ msgid "Vacuum took %.1f seconds"
 #~ msgstr "Vacuum %.1f másodpercig tartott"
 
-#~ msgid "Version Information:"
-#~ msgstr "Verzióinformáció:"
-
 #~ msgid ""
 #~ "Voluntarily Putting In the pot\n"
 #~ "(blinds excluded)"
@@ -11256,9 +11802,6 @@ msgstr ""
 
 #~ msgid "WINNINGS CURRENCY"
 #~ msgstr "NYEREMÉNY PÉNZNEME"
-
-#~ msgid "Warning:"
-#~ msgstr "Figyelmeztetés:"
 
 #~ msgid ""
 #~ "We appear to be running in Windows, but the Windows Python Extensions are "
