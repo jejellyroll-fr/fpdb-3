@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 06:33+0100\n"
+"POT-Creation-Date: 2026-11-12 20:20+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -4143,6 +4143,10 @@ msgstr ""
 "packs"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "(label)"
+msgstr "(libellé)"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "+"
 msgstr "+"
 
@@ -4151,8 +4155,65 @@ msgid "Add an item to this row"
 msgstr "Ajouter un élément à cette ligne"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cell already used: drop the stat on an empty cell."
+msgstr "Case déjà occupée : déposez la stat sur une case vide."
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "Delete this column"
+msgstr "Supprimer cette colonne"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "Delete this row"
+msgstr "Supprimer cette ligne"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "Drag to move; drop on another item to swap them. Double-click to edit."
+msgstr ""
+"Glissez pour déplacer ; déposez sur un autre élément pour les échanger. "
+"Double-cliquez pour modifier."
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "Drop an item here to add a row"
+msgstr "Déposez un élément ici pour ajouter une ligne"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Horz Line"
+msgstr "Ligne horizontale"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "Insert a column to the left"
+msgstr "Insérer une colonne à gauche"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "Insert a column to the right"
+msgstr "Insérer une colonne à droite"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "Insert a row above"
+msgstr "Insérer une ligne au-dessus"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "Insert a row below"
+msgstr "Insérer une ligne en dessous"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "No room there: the items would overlap."
+msgstr "Pas de place ici : les éléments se chevaucheraient."
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "Remove the last item of this row"
 msgstr "Retirer le dernier élément de cette ligne"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "The item does not fit: it would leave the panel on the right."
+msgstr "L'élément ne tient pas : il dépasserait du panneau à droite."
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "The stat does not fit: it would leave the panel on the right."
+msgstr "La stat ne tient pas : elle dépasserait du panneau à droite."
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "−"
@@ -4475,6 +4536,14 @@ msgid "#"
 msgstr "#"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "+ Column"
+msgstr "+ Colonne"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "+ Row"
+msgstr "+ Ligne"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid "A HUD profile named '{name}' already exists."
 msgstr "Un profil de HUD nommé « {name} » existe déjà."
@@ -4544,6 +4613,14 @@ msgstr "Ajouter un nouveau panneau (bloc) à un HUD multi-panneaux"
 msgid "Add a text label (column/row header or caption) to a panel"
 msgstr ""
 "Ajouter un libellé texte (en-tête de colonne/ligne ou légende) à un panneau"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Add an empty column on the right of the panel"
+msgstr "Ajouter une colonne vide à droite du panneau"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Add an empty row at the bottom of the panel"
+msgstr "Ajouter une ligne vide en bas du panneau"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add stat"
@@ -4713,6 +4790,11 @@ msgid "Design"
 msgstr "Conception"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Design — {label}"
+msgstr "Conception — {label}"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Disabled: this rule never matches."
 msgstr "Désactivée : cette règle ne correspond jamais."
 
@@ -4736,6 +4818,17 @@ msgstr ""
 msgid "Double-click a stat to add it to the panel shown in Design."
 msgstr ""
 "Double-cliquez sur une stat pour l'ajouter au panneau affiché dans Design."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Drag an item to move it, onto another to swap them. Drop a stat from "
+"Available Stats on an empty cell. Arrows select, Alt+arrows move, Delete "
+"removes; right-click a cell for rows and columns."
+msgstr ""
+"Glissez un élément pour le déplacer, sur un autre pour les échanger. Déposez "
+"une stat des Statistiques disponibles sur une case vide. Les flèches "
+"sélectionnent, Alt+flèches déplacent, Suppr retire ; clic droit sur une case "
+"pour les lignes et colonnes."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Duplicate HUD profile selectors"
@@ -4918,10 +5011,6 @@ msgid "Hi th:"
 msgstr "Seuil haut :"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Horz Line"
-msgstr "Ligne horizontale"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "I understand, turn them on"
 msgstr "J'ai compris, les activer"
 
@@ -5047,6 +5136,14 @@ msgid "No HUD profile of this name exists; this rule will be ignored."
 msgstr "Aucun profil de HUD de ce nom n'existe ; cette règle sera ignorée."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Nothing to redo."
+msgstr "Rien à rétablir."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Nothing to undo."
+msgstr "Rien à annuler."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "Off by default. When it is on, the panels a rule names are shown and every "
 "other block keeps the position rule it has always had."
@@ -5054,6 +5151,10 @@ msgstr ""
 "Désactivé par défaut. Quand il est activé, les panneaux qu'une règle nomme "
 "sont affichés et tous les autres blocs gardent la règle de position qu'ils "
 "ont toujours eue."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Only an empty row or column can be deleted."
+msgstr "Seule une ligne ou une colonne vide peut être supprimée."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Only current position"
@@ -5197,6 +5298,14 @@ msgstr "Nom du profil :"
 #, python-brace-format
 msgid "Profile: {name} | {layout} | Statistics: {count}"
 msgstr "Profil : {name} | {layout} | Statistiques : {count}"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Redo"
+msgstr "Rétablir"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Redo the change just undone (Ctrl+Shift+Z)"
+msgstr "Rétablir la modification annulée (Ctrl+Maj+Z)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Remove"
@@ -5395,6 +5504,14 @@ msgstr "Activer les panneaux dynamiques ?"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Type:"
 msgstr "Type :"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Undo"
+msgstr "Annuler"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Undo the last change to this profile (Ctrl+Z)"
+msgstr "Annuler la dernière modification de ce profil (Ctrl+Z)"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Update rule"

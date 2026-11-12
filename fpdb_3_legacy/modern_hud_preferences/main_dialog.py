@@ -1966,7 +1966,7 @@ class ModernHudPreferences(QDialog):
         # Keep the section header in sync with the selected panel.
         if hasattr(self, "design_label"):
             label = block.get("label", "")
-            self.design_label.setText(f"Design — {label}" if label else "Design")
+            self.design_label.setText(_("Design — {label}").format(label=label) if label else _("Design"))
         canvas = HudDesignCanvas(editable=True)
         canvas.selected_ref = self._selected_item
         canvas.set_block(canvas_index, block)

@@ -14,8 +14,8 @@ What the scan leaves alone:
   ``f"{name}  ⚠"`` or ``f"🔍 {popup}"``;
 * the Design area of the Statistics tab, which step 4 of
   ``docs/hud-editor-improvement-plan.md`` (#775, drag and drop) rewrites:
-  ``design_canvas.py``, the functions in ``DESIGN_AREA_FUNCTIONS`` and the
-  calls in ``DESIGN_AREA_CALLS``. Step 4 removes those entries once its own
+  the functions in ``DESIGN_AREA_FUNCTIONS`` and the calls in
+  ``DESIGN_AREA_CALLS``. Step 4 removes those entries once its own
   strings are wrapped; ``test_design_area_exclusions_are_current`` fails on
   an entry that no longer matches anything, so the list cannot go stale.
 """
@@ -30,15 +30,12 @@ import pytest
 
 PACKAGE = Path(__file__).resolve().parent.parent / "fpdb_3_legacy" / "modern_hud_preferences"
 
-#: Rewritten by step 4 as a whole; not scanned.
-EXCLUDED_FILES = frozenset({"design_canvas.py"})
+#: Files not scanned.
+EXCLUDED_FILES: frozenset[str] = frozenset()
 
 #: Design-area functions of ``main_dialog.py`` (step 4 rewrites them).
 DESIGN_AREA_FUNCTIONS = frozenset(
     {
-        "ModernHudPreferences._rebuild_design_canvas",
-        "ModernHudPreferences._canvas_add_item",
-        "ModernHudPreferences._canvas_remove_item",
         "ModernHudPreferences._populate_group_items",
         "ModernHudPreferences.add_stat",
         "ModernHudPreferences.edit_stat",
@@ -280,7 +277,7 @@ def _modules() -> list[Path]:
 
 def test_scope_covers_the_editor_package() -> None:
     names = {path.name for path in _modules()}
-    assert {"main_dialog.py", "dialogs.py", "preview_widgets.py", "reference_preview.py"} <= names
+    assert {"main_dialog.py", "dialogs.py", "design_canvas.py", "preview_widgets.py", "reference_preview.py"} <= names
     assert not names & EXCLUDED_FILES
 
 
