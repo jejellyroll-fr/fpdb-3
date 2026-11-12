@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 06:33+0100\n"
+"POT-Creation-Date: 2026-11-12 20:20+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -4605,6 +4605,11 @@ msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
+msgid "(label)"
+msgstr "Beschriftung hinzufügen"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "+"
 msgstr ""
 
@@ -4614,9 +4619,68 @@ msgid "Add an item to this row"
 msgstr "Ein Element zu dieser Zeile hinzufügen"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Cell already used: drop the stat on an empty cell."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
+msgid "Delete this column"
+msgstr "Popup wählen:"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
+msgid "Delete this row"
+msgstr "Standardprofil"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "Drag to move; drop on another item to swap them. Double-click to edit."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#, fuzzy
+msgid "Drop an item here to add a row"
+msgstr "Ein Element zu dieser Zeile hinzufügen"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Horz Line"
+msgstr "Horizontale Linie"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "Insert a column to the left"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "Insert a column to the right"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "Insert a row above"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "Insert a row below"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "No room there: the items would overlap."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 #, fuzzy
 msgid "Remove the last item of this row"
 msgstr "Das letzte Element dieser Zeile entfernen"
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "The item does not fit: it would leave the panel on the right."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "The stat does not fit: it would leave the panel on the right."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "−"
@@ -4991,6 +5055,15 @@ msgid "#"
 msgstr "#"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "+ Column"
+msgstr "Spalte:"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "+ Row"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid "A HUD profile named '{name}' already exists."
 msgstr ""
@@ -5076,6 +5149,17 @@ msgid "Add a text label (column/row header or caption) to a panel"
 msgstr ""
 "Einem Panel eine Textbeschriftung (Spalten-/Zeilenkopf oder Legende) "
 "hinzufügen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add an empty column on the right of the panel"
+msgstr ""
+"Einem Panel eine Textbeschriftung (Spalten-/Zeilenkopf oder Legende) "
+"hinzufügen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Add an empty row at the bottom of the panel"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5264,6 +5348,11 @@ msgid "Design"
 msgstr "Design"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, python-brace-format
+msgid "Design — {label}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Disabled: this rule never matches."
 msgstr "Deaktiviert: diese Regel passt nie."
@@ -5284,6 +5373,13 @@ msgstr ""
 #, fuzzy
 msgid "Double-click a stat to add it to the panel shown in Design."
 msgstr "Doppelklicken Sie auf eine Zelle, um die Hände dahinter zu laden."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Drag an item to move it, onto another to swap them. Drop a stat from "
+"Available Stats on an empty cell. Arrows select, Alt+arrows move, Delete "
+"removes; right-click a cell for rows and columns."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5487,11 +5583,6 @@ msgid "Hi th:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Horz Line"
-msgstr "Horizontale Linie"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "I understand, turn them on"
 msgstr ""
 
@@ -5634,6 +5725,14 @@ msgid "No HUD profile of this name exists; this rule will be ignored."
 msgstr "Kein HUD-Profil dieses Namens existiert; diese Regel wird ignoriert."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Nothing to redo."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Nothing to undo."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid ""
 "Off by default. When it is on, the panels a rule names are shown and every "
@@ -5642,6 +5741,10 @@ msgstr ""
 "Standardmäßig aus. Wenn aktiviert, werden die von einer Regel genannten "
 "Panels angezeigt und jeder andere Block behält seine bisherige "
 "Positionsregel."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Only an empty row or column can be deleted."
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5798,6 +5901,14 @@ msgstr "Profilname"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid "Profile: {name} | {layout} | Statistics: {count}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Redo"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Redo the change just undone (Ctrl+Shift+Z)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -6016,6 +6127,14 @@ msgstr "🧩 Dynamische Panels"
 #| msgid "Type"
 msgid "Type:"
 msgstr "Typ"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Undo"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Undo the last change to this profile (Ctrl+Z)"
+msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
