@@ -66,18 +66,18 @@ class _DropTarget:
     col: int
 
     def _target_events(self) -> None:
-        self.setAcceptDrops(True)  # type: ignore[attr-defined]
+        self.setAcceptDrops(True)  # type: ignore[attr-defined]  # pylint: disable=no-member
 
-    def dragEnterEvent(self, event) -> None:  # noqa: N802 - Qt override
+    def dragEnterEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         self.canvas.drag_over(self, event)
 
-    def dragMoveEvent(self, event) -> None:  # noqa: N802 - Qt override
+    def dragMoveEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         self.canvas.drag_over(self, event)
 
-    def dragLeaveEvent(self, _event) -> None:  # noqa: N802 - Qt override
+    def dragLeaveEvent(self, _event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         self.canvas.clear_highlight()
 
-    def dropEvent(self, event) -> None:  # noqa: N802 - Qt override
+    def dropEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         self.canvas.drop_on(self, event)
 
 
@@ -96,13 +96,13 @@ class _CanvasChip(_DropTarget, QFrame):
         if canvas is not None and canvas.editable:
             self._target_events()
 
-    def mousePressEvent(self, event) -> None:  # noqa: N802 - Qt override
+    def mousePressEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         self.clicked.emit()
         if event.button() == Qt.MouseButton.LeftButton:
             self._press = event.position().toPoint()
         super().mousePressEvent(event)
 
-    def mouseMoveEvent(self, event) -> None:  # noqa: N802 - Qt override
+    def mouseMoveEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         if (
             self.canvas is not None
             and self.canvas.editable
@@ -114,16 +114,16 @@ class _CanvasChip(_DropTarget, QFrame):
             return
         super().mouseMoveEvent(event)
 
-    def mouseReleaseEvent(self, event) -> None:  # noqa: N802 - Qt override
+    def mouseReleaseEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         self._press = None
         super().mouseReleaseEvent(event)
 
-    def mouseDoubleClickEvent(self, event) -> None:  # noqa: N802 - Qt override
+    def mouseDoubleClickEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         if self.canvas is not None and self.canvas.editable:
             self.canvas.item_activated.emit(self.item_ref)
         super().mouseDoubleClickEvent(event)
 
-    def contextMenuEvent(self, event) -> None:  # noqa: N802 - Qt override
+    def contextMenuEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         if self.canvas is not None and self.canvas.editable:
             self.canvas.cell_menu(self.row, self.col).exec(event.globalPos())
 
@@ -152,15 +152,15 @@ class _EmptyCell(_DropTarget, QFrame):
             colour, style = (_VALID if valid else _REFUSED), "solid"
         self.setStyleSheet(f"QFrame#emptyCell{{border:1px {style} {colour};border-radius:5px;background:transparent;}}")
 
-    def mousePressEvent(self, event) -> None:  # noqa: N802 - Qt override
+    def mousePressEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         self.canvas.setFocus()
         super().mousePressEvent(event)
 
-    def contextMenuEvent(self, event) -> None:  # noqa: N802 - Qt override
+    def contextMenuEvent(self, event) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         self.canvas.cell_menu(self.row, self.col).exec(event.globalPos())
 
 
-class HudDesignCanvas(QScrollArea):
+class HudDesignCanvas(QScrollArea):  # pylint: disable=too-many-instance-attributes
     """WYSIWYG canvas for one panel (block), in the manner of PokerTracker 4's editor."""
 
     item_selected = Signal(object)  # (block_index, kind, item_ref)
@@ -413,21 +413,26 @@ class HudDesignCanvas(QScrollArea):
         """Whether a drop of ``mime`` on ``(row, col)`` would be taken, and why not."""
         dragged = self._dragged_item(mime)
         if dragged is not None:
-            kind, ref = dragged
-            if kind == "hline":
-                col = 0  # a line moves only up and down
-            if not layout_model.fits_inside(self.container, kind, ref, col):
-                return False, _("The item does not fit: it would leave the panel on the right.")
-            if layout_model.preview_move(self.container, ref, row, col) == "refused":
-                return False, _("No room there: the items would overlap.")
-            return True, ""
+            return self._judge_move(*dragged, row, col)
         if self._dropped_key(mime):
-            if col >= max(1, int(self.container.get("cols", 1) or 1)):
-                return False, _("The stat does not fit: it would leave the panel on the right.")
-            if not layout_model.can_place(self.container, row, col):
-                return False, _("Cell already used: drop the stat on an empty cell.")
-            return True, ""
+            return self._judge_new_stat(row, col)
         return False, ""
+
+    def _judge_move(self, kind: str, ref: dict, row: int, col: int) -> tuple[bool, str]:
+        if kind == "hline":
+            col = 0  # a line moves only up and down
+        if not layout_model.fits_inside(self.container, kind, ref, col):
+            return False, _("The item does not fit: it would leave the panel on the right.")
+        if layout_model.preview_move(self.container, ref, row, col) == "refused":
+            return False, _("No room there: the items would overlap.")
+        return True, ""
+
+    def _judge_new_stat(self, row: int, col: int) -> tuple[bool, str]:
+        if col >= max(1, int(self.container.get("cols", 1) or 1)):
+            return False, _("The stat does not fit: it would leave the panel on the right.")
+        if not layout_model.can_place(self.container, row, col):
+            return False, _("Cell already used: drop the stat on an empty cell.")
+        return True, ""
 
     def drag_over(self, target: _DropTarget, event) -> None:
         mime = event.mimeData()
@@ -488,7 +493,8 @@ class HudDesignCanvas(QScrollArea):
     def _neighbour(self, row: int, col: int, step: tuple[int, int]) -> _CanvasChip | None:
         """The nearest chip from ``(row, col)`` in the direction of ``step``."""
         d_row, d_col = step
-        best: tuple[int, int, _CanvasChip] | None = None
+        best_key: tuple[int, int] | None = None
+        best_chip: _CanvasChip | None = None
         for chip in self.chips:
             r, c = chip.row, chip.col
             if d_col:
@@ -499,11 +505,11 @@ class HudDesignCanvas(QScrollArea):
                 if (r - row) * d_row <= 0:
                     continue
                 key = (abs(r - row), abs(c - col))
-            if best is None or key < best[:2]:
-                best = (*key, chip)
-        return best[2] if best is not None else None
+            if best_key is None or key < best_key:
+                best_key, best_chip = key, chip
+        return best_chip
 
-    def keyPressEvent(self, event: QKeyEvent) -> None:  # noqa: N802 - Qt override
+    def keyPressEvent(self, event: QKeyEvent) -> None:  # noqa: N802  # pylint: disable=invalid-name  # Qt override
         if not self.editable:
             super().keyPressEvent(event)
             return
@@ -521,7 +527,7 @@ class HudDesignCanvas(QScrollArea):
         if key in _STEPS:
             step = _STEPS[key]
             if event.modifiers() & Qt.KeyboardModifier.AltModifier:
-                self._move_by_key(kind, ref, row + step[0], 0 if kind == "hline" else col + step[1])
+                self._move_by_key(ref, row + step[0], 0 if kind == "hline" else col + step[1])
             else:
                 neighbour = self._neighbour(row, col, step)
                 if neighbour is not None:
@@ -538,7 +544,7 @@ class HudDesignCanvas(QScrollArea):
             return
         super().keyPressEvent(event)
 
-    def _move_by_key(self, kind: str, ref: dict, row: int, col: int) -> None:
+    def _move_by_key(self, ref: dict, row: int, col: int) -> None:
         if row < 0 or col < 0:
             return
         mime = self.mime_for(ref)

@@ -42,7 +42,10 @@ def _drop(target, mime) -> bool:
     from PySide6.QtGui import QDropEvent
 
     event = QDropEvent(
-        QPointF(2, 2), Qt.DropAction.MoveAction | Qt.DropAction.CopyAction, mime, Qt.MouseButton.LeftButton,
+        QPointF(2, 2),
+        Qt.DropAction.MoveAction | Qt.DropAction.CopyAction,
+        mime,
+        Qt.MouseButton.LeftButton,
         Qt.KeyboardModifier.NoModifier,
     )
     event.ignore()
@@ -108,7 +111,7 @@ def test_a_read_only_canvas_keeps_its_row_buttons_and_no_empty_cell(qtbot) -> No
     canvas = HudDesignCanvas()
     qtbot.addWidget(canvas)
     canvas.set_block(0, panel)
-    assert canvas.cells == []
+    assert not canvas.cells
     assert len([b for b in canvas.findChildren(QPushButton) if b.text() in ("+", "−")]) == 4
 
 
@@ -135,7 +138,7 @@ def test_a_drop_that_would_overlap_is_refused_with_a_reason(qtbot) -> None:
     moves, refusals = _record(canvas.item_moved), _record(canvas.drop_refused)
     assert not _drop(canvas.chip_for(a), canvas.mime_for(wide))
     assert not _drop(canvas.cell_at(0, 2), canvas.mime_for(wide))
-    assert moves == []
+    assert not moves
     assert [why for (why,) in refusals] == [
         "No room there: the items would overlap.",
         "The item does not fit: it would leave the panel on the right.",
@@ -161,7 +164,7 @@ def test_a_foreign_drop_is_ignored(qtbot) -> None:
     mime.setText("vpip")
     refusals = _record(canvas.drop_refused)
     assert not _drop(canvas.cell_at(0, 2), mime)
-    assert refusals == []
+    assert not refusals
 
 
 def test_a_line_moves_only_up_and_down(qtbot) -> None:
@@ -444,9 +447,7 @@ def test_ctrl_z_undoes_the_last_change(tmp_path, monkeypatch) -> None:
     dialog, _modals, _path = _editor(tmp_path, monkeypatch, FLAT)
     profile = select_profile(dialog, "flat")
     dialog.add_col_btn.click()
-    undo_keys = [
-        s for s in dialog.findChildren(QShortcut) if s.key() == QKeySequence(QKeySequence.StandardKey.Undo)
-    ]
+    undo_keys = [s for s in dialog.findChildren(QShortcut) if s.key() == QKeySequence(QKeySequence.StandardKey.Undo)]
     assert undo_keys
     undo_keys[0].activated.emit()
     assert profile["cols"] == 3
