@@ -43,17 +43,27 @@ def test_every_hud_query_selects_the_currency(query: str) -> None:
     assert re.search(r"\bAS currency\b", _select_list(query))
 
 
+#: The pooling expression of the current and aggregated queries, written out so
+#: the test runs a fixed statement (no SQL is assembled at run time).
+POOLED_CURRENCY = "CASE WHEN MIN(gt.currency) = MAX(gt.currency) THEN MAX(gt.currency) ELSE '' END"
+POOLED_CURRENCY_QUERY = "SELECT CASE WHEN MIN(gt.currency) = MAX(gt.currency) THEN MAX(gt.currency) ELSE '' END FROM gt"
+
+
+@pytest.mark.parametrize(
+    "query",
+    [*hud_current_stats_queries().values(), *hud_aggregated_stats_queries().values()],
+)
+def test_the_pooled_queries_use_the_tested_expression(query: str) -> None:
+    assert f"{POOLED_CURRENCY} AS currency" in " ".join(_select_list(query).split())
+
+
 def test_pooled_game_types_keep_one_currency_or_none() -> None:
-    expression = re.search(
-        r"(CASE WHEN MIN\(gt\.currency\).*?END) AS currency",
-        hud_aggregated_stats_queries()["get_stats_from_hand_aggregated"],
-    ).group(1)
     with closing(sqlite3.connect(":memory:")) as db:
         db.execute("CREATE TABLE gt (currency TEXT)")
         db.executemany("INSERT INTO gt VALUES (?)", [("EUR",), ("EUR",)])
-        assert db.execute(f"SELECT {expression} FROM gt").fetchone()[0] == "EUR"  # noqa: S608 - fixed test text
+        assert db.execute(POOLED_CURRENCY_QUERY).fetchone()[0] == "EUR"
         db.execute("INSERT INTO gt VALUES ('USD')")
-        assert db.execute(f"SELECT {expression} FROM gt").fetchone()[0] == ""  # noqa: S608
+        assert db.execute(POOLED_CURRENCY_QUERY).fetchone()[0] == ""
 
 
 def test_total_profit_uses_the_selected_currency() -> None:
