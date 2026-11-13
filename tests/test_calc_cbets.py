@@ -59,8 +59,10 @@ class TestCalcCBets:
             ("player1", "calls", 200, None, False),
         ]
 
+        flop_actions = [("player1", "checks", 0, None, False), ("player2", "checks", 0, None, False)]
         hand = self.create_mock_hand(
-            action_streets=["BLINDSANTES", "PREFLOP", "FLOP"], actions={"PREFLOP": preflop_actions, "FLOP": []}
+            action_streets=["BLINDSANTES", "PREFLOP", "FLOP"],
+            actions={"PREFLOP": preflop_actions, "FLOP": flop_actions},
         )
 
         self.derived_stats.calcCBets(hand)
@@ -75,7 +77,7 @@ class TestCalcCBets:
         self.derived_stats.handsplayers = {"aggressor": {}}
 
         preflop_actions = [("aggressor", "raises", 200, None, False)]
-        flop_actions = []
+        flop_actions = [("aggressor", "checks", 0, None, False)]
 
         hand = self.create_mock_hand(
             action_streets=["BLINDSANTES", "PREFLOP", "FLOP"],
@@ -87,6 +89,42 @@ class TestCalcCBets:
         # Should initialize both chance and done stats
         assert self.derived_stats.handsplayers["aggressor"]["street1CBChance"] is True
         assert self.derived_stats.handsplayers["aggressor"]["street1CBDone"] is False
+
+    def test_no_cbet_chance_on_a_street_the_aggressor_did_not_play(self):
+        """A street with no action from the aggressor is no c-bet opportunity (#791).
+
+        It covers a hand won preflop (no flop dealt) and an aggressor all-in
+        before the street, who cannot bet it.
+        """
+        self.derived_stats.handsplayers = {"aggressor": {}, "caller": {}}
+        preflop_actions = [("aggressor", "raises", 200, None, False), ("caller", "folds")]
+        hand = self.create_mock_hand(actions={"PREFLOP": preflop_actions, "FLOP": [], "TURN": [], "RIVER": []})
+
+        self.derived_stats.calcCBets(hand)
+
+        for street in (1, 2, 3):
+            assert self.derived_stats.handsplayers["aggressor"][f"street{street}CBChance"] is False
+
+    def test_cbet_chance_stops_at_the_last_street_played(self):
+        """A hand that ends on the flop gives a flop chance only (#791)."""
+        self.derived_stats.handsplayers = {"aggressor": {}, "caller": {}}
+        preflop_actions = [("aggressor", "raises", 200, None, False), ("caller", "calls", 200, None, False)]
+        flop_actions = [
+            ("caller", "checks", 0, None, False),
+            ("aggressor", "bets", 300, None, False),
+            ("caller", "folds"),
+        ]
+        hand = self.create_mock_hand(
+            actions={"PREFLOP": preflop_actions, "FLOP": flop_actions, "TURN": [], "RIVER": []}
+        )
+
+        self.derived_stats.calcCBets(hand)
+
+        stats = self.derived_stats.handsplayers["aggressor"]
+        assert stats["street1CBChance"] is True
+        assert stats["street1CBDone"] is True
+        assert stats["street2CBChance"] is False
+        assert stats["street3CBChance"] is False
 
     def test_cbet_done_when_betting(self):
         """Test that cbet done is set when aggressor bets on flop."""

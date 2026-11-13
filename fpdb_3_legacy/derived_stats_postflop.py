@@ -62,8 +62,12 @@ class DerivedStatsPostflopMixin(DerivedStatsBase):
                 if f"street{i}CBDone" not in self.handsplayers[preflop_aggressor]:
                     self.handsplayers[preflop_aggressor][f"street{i}CBDone"] = False
 
-                # Only give CBet chance if aggressor hasn't folded yet
-                if not aggressor_folded:
+                # A chance needs the street to have been played by the aggressor:
+                # not folded earlier, and acting on it. A hand won preflop deals no
+                # flop, and an aggressor all-in before the street cannot bet it, so
+                # neither is a c-bet opportunity (#791; PT4 flg_f_cbet_opp).
+                acted_on_street = any(act[0] == preflop_aggressor for act in street_actions)
+                if not aggressor_folded and acted_on_street:
                     self.handsplayers[preflop_aggressor][f"street{i}CBChance"] = True
 
                 # Check if they bet first on this street, and track if they fold
