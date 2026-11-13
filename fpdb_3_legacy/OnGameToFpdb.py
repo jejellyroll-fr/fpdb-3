@@ -397,17 +397,14 @@ class OnGame(HandHistoryConverter):
                 re.DOTALL,
             )
         elif hand.gametype["base"] in ("draw"):
-            # isolate the first discard/stand pat line
-            discard_split = re.split(r"(?:(.+(?: changed).+))", hand.handText, flags=re.DOTALL)
-            if len(hand.handText) == len(discard_split[0]):
-                # handText was not split, no DRAW street occurred
-                pass
-            else:
-                # DRAW street found, reassemble, with DRAW marker added
-                discard_split[0] += "*** DRAW ***\r\n"
-                hand.handText = ""
-                for i in discard_split:
-                    hand.handText += i
+            # OnGame writes no draw header: the draw starts at the first
+            # "changed N cards" line, so the marker goes right before that line.
+            # The pattern must stay on one line -- under DOTALL ".+ changed .+"
+            # matched the whole hand and the marker landed before the deal (#793).
+            first_discard = re.search(r"^[^\r\n]* changed [^\r\n]*$", hand.handText, re.MULTILINE)
+            if first_discard is not None:
+                start = first_discard.start()
+                hand.handText = hand.handText[:start] + "*** DRAW ***\r\n" + hand.handText[start:]
             m = re.search(
                 r"(?P<PREDEAL>.+(?=Dealing pocket cards)|.+)"
                 r"(Dealing pocket cards(?P<DEAL>.+(?=\*\*\* DRAW \*\*\*)|.+))?"

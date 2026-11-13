@@ -1233,15 +1233,15 @@
   },
   "regression/OnGame/Draw/5-Carddraw-PL-USD-1.00-1.00-201111.No.Street.Delimiter.txt": {
     "hand_count": 1,
-    "sha256": "e2666b052c1fd3ebbffc563a054988cc0e15c3f9bd9500e1a25f3300b89cdb3d"
+    "sha256": "12c803ecb63e210e41a952dd6f0312015fc2a8a2c75097245d35484d8d7bf3c6"
   },
   "regression/OnGame/Draw/5-Carddraw-USD-0.05-0.10-201009.Sample.txt": {
     "hand_count": 4,
-    "sha256": "f1bf6e98ba1d409941417ed29c4dbfcc08294687f67c78d8061480e05c8a9661"
+    "sha256": "bb24d916de8aad199d481b407f01df6eeb52c1e09167bb536cef251855c0f8b1"
   },
   "regression/OnGame/Draw/5-Carddraw-USD-1-2-201109.Goalwin.Sample.txt": {
     "hand_count": 10,
-    "sha256": "62a974e093cbd6f25755277a812cefc43ed954f58b18766912b9efea9a99fe76"
+    "sha256": "2e289905777fb786ea4f4b13f12adfde686146c9e5039bc1a78938722cec9428"
   },
   "regression/OnGame/Flop/LHE-9max-USD-0.50-1.00-201008.All-in.with.showdown.txt": {
     "hand_count": 1,
