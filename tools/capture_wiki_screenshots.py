@@ -275,7 +275,6 @@ def build_views(config, sql, window, config_path: Path):  # noqa: C901 - each sm
         GuiSessionViewer,
         GuiStatsInfo,
     )
-    from fpdb_3_legacy.modern_hud_preferences import ModernHudPreferences
     from fpdb_3_legacy.ring_stats import GuiRingPlayerStats
 
     def ring_player_stats():
@@ -339,9 +338,6 @@ def build_views(config, sql, window, config_path: Path):  # noqa: C901 - each sm
         view.update()
         return view
 
-    def hud_preferences():
-        return ModernHudPreferences(config, window)
-
     def auto_notes():
         from PySide6.QtWidgets import QApplication
 
@@ -362,16 +358,80 @@ def build_views(config, sql, window, config_path: Path):  # noqa: C901 - each sm
         ("opponents-report.png", opponents_report),
         ("hand-viewer.png", hand_viewer),
         ("hand-replayer.png", hand_replayer),
-        ("hud-preferences.png", hud_preferences),
         ("auto-notes-workbench.png", auto_notes),
         ("stats-guide.png", lambda: GuiStatsInfo.GuiStatsInfo(config, window)),
     ]
     return (
         views
+        + build_editor_views(config, window)
         + build_research_views(config, sql, window, config_path)
         + build_study_views(config, sql, window, config_path)
         + build_release_views(config, sql, window, config_path)
     )
+
+
+def build_editor_views(config, window):
+    """The HUD editor's two design tabs (#786): Statistics, then Popup Windows."""
+    from fpdb_3_legacy.modern_hud_preferences import ModernHudPreferences
+
+    def hud_preferences():
+        """The Statistics tab on a profile made of panels, one of its stats selected."""
+        dialog = ModernHudPreferences(config, window)
+        show_hud_editor(dialog)
+        return dialog
+
+    def hud_preferences_popups():
+        """The Popup Windows tab on a classic popup, one of its stats selected."""
+        dialog = ModernHudPreferences(config, window)
+        index = tab_index(dialog.tabs, "Popup")
+        if index is not None:
+            dialog.tabs.setCurrentIndex(index)
+        show_popup_editor(dialog)
+        return dialog
+
+    return [("hud-preferences.png", hud_preferences), ("hud-preferences-popups.png", hud_preferences_popups)]
+
+
+def editor_profile(profiles: dict[str, Any]) -> str | None:
+    """The profile the HUD editor's picture shows: the first made of panels, else the first.
+
+    A profile of panels is the one whose screen holds everything the editor
+    offers -- the panel list, Group Properties, a panel on the canvas.
+    """
+    names = list(profiles)
+    return next((name for name in names if (profiles[name] or {}).get("blocks")), names[0] if names else None)
+
+
+def editor_popup(popups: dict[str, Any], minimum: int = 4) -> str | None:
+    """The popup the editor's picture shows: the first classic one with ``minimum`` stats."""
+    for name in sorted(popups):
+        popup = popups[name] or {}
+        if popup.get("class") != "BlockPopup" and len(popup.get("stats", [])) >= minimum:
+            return name
+    return None
+
+
+def show_hud_editor(dialog: Any) -> None:
+    """Select the picture's profile and the first stat of its shown panel."""
+    name = editor_profile(dialog.hud_profiles or {})
+    if name is None:
+        return
+    dialog.profile_combo.setCurrentText(name)
+    canvas = dialog._design_canvases[-1] if dialog._design_canvases else None
+    chip = next((c for c in canvas.chips if c.kind == "stat"), None) if canvas is not None else None
+    if chip is not None:
+        chip.clicked.emit()
+
+
+def show_popup_editor(dialog: Any) -> None:
+    """Select the picture's popup and its third stat, so the inspector has something to show."""
+    name = editor_popup(dialog.popup_windows or {})
+    if name is None:
+        return
+    dialog.popup_combo.setCurrentText(name)
+    chips = dialog.popup_canvas.chips
+    if chips:
+        chips[min(2, len(chips) - 1)].clicked.emit()
 
 
 # Dialogs are drawn at their own size: stretched to the full SIZE they read as
