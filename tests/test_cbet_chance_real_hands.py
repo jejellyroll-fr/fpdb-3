@@ -73,7 +73,7 @@ class _Config:
             "tourneyFilter": True,
         }
 
-    def get_site_id(self, sitename: str) -> int:
+    def get_site_id(self, _sitename: str) -> int:
         return 32
 
 
