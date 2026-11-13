@@ -11,7 +11,6 @@ This module tests the newly implemented preflop statistics:
 - Fold vs 4bet
 """
 
-
 import pytest
 
 from fpdb_3_legacy.Stats import (
@@ -151,8 +150,8 @@ class TestRFITotalStat:
     """Test suite for RFI Total statistic."""
 
     def test_rfi_total_with_no_opportunities(self) -> None:
-        """Test rfi_total returns '-' when no PFR opportunities."""
-        stat_dict = {"player1": {"pfr_opp": 0, "pfr": 0, "3bet": 0}}
+        """Test rfi_total returns '-' when the player never faced an unopened pot."""
+        stat_dict = {"player1": {"rfi_opp_0": 0, "rfi_0": 0}}
         result = rfi_total(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -161,7 +160,7 @@ class TestRFITotalStat:
 
     def test_rfi_total_with_zero_but_opportunities(self) -> None:
         """Test rfi_total returns '0.0' when player never raised first in."""
-        stat_dict = {"player1": {"pfr_opp": 15, "pfr": 0, "3bet": 0}}
+        stat_dict = {"player1": {"rfi_opp_0": 15, "rfi_0": 0}}
         result = rfi_total(stat_dict, "player1")
 
         assert result[1] == "0.0"
@@ -171,7 +170,7 @@ class TestRFITotalStat:
     def test_rfi_total_with_normal_value(self) -> None:
         """Test rfi_total returns normal percentage when player raised first in."""
         stat_dict = {
-            "player1": {"pfr_opp": 20, "pfr": 8, "3bet": 2},  # 6 RFI out of 20 opportunities
+            "player1": {"rfi_opp_0": 20, "rfi_0": 6},  # 6 RFI out of 20 unopened pots
         }
         result = rfi_total(stat_dict, "player1")
 
@@ -320,6 +319,8 @@ class TestNewPreflopStatsIntegration:
                 "vpip": 0,
                 "pfr": 0,
                 "pfr_opp": 0,
+                "rfi_opp_0": 0,
+                "rfi_0": 0,
                 "3bet": 0,
                 "3bet_opp": 0,
                 "f4b_opp_0": 0,
@@ -347,6 +348,8 @@ class TestNewPreflopStatsIntegration:
                 "vpip": 5,
                 "pfr": 5,  # Never limped (all VPIP were raises)
                 "pfr_opp": 25,
+                "rfi_opp_0": 25,
+                "rfi_0": 4,
                 "3bet": 1,
                 "3bet_opp": 10,  # Some 3bets
                 "f4b_opp_0": 3,
@@ -360,7 +363,7 @@ class TestNewPreflopStatsIntegration:
         assert fold_vs_4bet(stat_dict, "active_player")[1] == "0.0"
 
         # rfi_total is still computed; iso/3bvs/cvs are deprecated -> no-data
-        assert rfi_total(stat_dict, "active_player")[1] == "16.0"  # (5-1)/25 = 16%
+        assert rfi_total(stat_dict, "active_player")[1] == "16.0"  # 4/25 = 16%
         assert iso(stat_dict, "active_player")[1] == "-"
         assert three_bet_vs_steal(stat_dict, "active_player")[1] == "-"
         assert call_vs_steal(stat_dict, "active_player")[1] == "-"
@@ -378,6 +381,8 @@ class TestNewPreflopStatsIntegration:
                 "pfr": 8,  # 4 limps
                 # Has PFR opportunities
                 "pfr_opp": 30,
+                "rfi_opp_0": 30,
+                "rfi_0": 5,
                 "3bet": 3,
                 "3bet_opp": 8,
                 # No 4bet opportunities
@@ -389,7 +394,7 @@ class TestNewPreflopStatsIntegration:
         # Should show percentages (has data)
         assert cold_call(stat_dict, "mixed_player")[1] == "30.0"  # 3/10
         assert limp(stat_dict, "mixed_player")[1] == "13.3"  # 4/30
-        assert rfi_total(stat_dict, "mixed_player")[1] == "16.7"  # (8-3)/30
+        assert rfi_total(stat_dict, "mixed_player")[1] == "16.7"  # 5/30
         # iso/3bvs/cvs are deprecated -> no-data
         assert iso(stat_dict, "mixed_player")[1] == "-"
         assert three_bet_vs_steal(stat_dict, "mixed_player")[1] == "-"

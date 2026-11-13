@@ -50,18 +50,6 @@
       ]
     },
     {
-      "id": "iso_raise_counted_as_rfi",
-      "column": "raisedFirstIn",
-      "observed_true_rows": 30,
-      "note": [
-        "One of the 30 rows that carry raisedFirstIn is an iso-raise over limpers, and the",
-        "same row has raiseFirstInChance false: the pipeline both denies the opportunity and",
-        "records the deed. Poker (and PT4) exclude pots opened by limpers from RFI, so RFI",
-        "stats over-count limped pots, and a stat computed as raisedFirstIn over",
-        "raiseFirstInChance can exceed 100 percent. Hand 3100000002 pins it."
-      ]
-    },
-    {
       "id": "check_raise_recorded_as_cbet",
       "column": "street1CBDone",
       "observed_true_rows": 22,
@@ -241,11 +229,7 @@
                 "limpers_faced": 2,
                 "raise_made_bp_preflop": 15714,
                 "rfi_opportunity": false,
-                "rfi": {
-                  "poker": false,
-                  "current": true,
-                  "deviation": "iso_raise_counted_as_rfi"
-                }
+                "rfi": false
               }
             },
             "Frank": {

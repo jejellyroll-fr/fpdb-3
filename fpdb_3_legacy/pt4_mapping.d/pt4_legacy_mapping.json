@@ -20,6 +20,7 @@
     "flg_vpip_opp":          { "fpdb": "street0VPIChance", "scale": 1 },
     "flg_p_open":            { "fpdb": "street0Aggr", "scale": 1 },
     "flg_p_open_opp":        { "fpdb": "street0AggrChance", "scale": 1 },
+    "_note_first_raise": "FPDB raisedFirstIn is raise-first-in: the first raise into an unopened pot (#796). PT4 flg_p_first_raise also counts a first raise after limpers, so a stat built on it translates under FPDB's narrower definition.",
     "flg_p_first_raise":     { "fpdb": "raisedFirstIn", "scale": 1 },
     "flg_p_first_raise_opp": { "fpdb": "raiseFirstInChance", "scale": 1 },
     "flg_p_2bet":            { "fpdb": "street0_2BDone", "scale": 1 },

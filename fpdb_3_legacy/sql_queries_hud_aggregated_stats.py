@@ -19,6 +19,8 @@ def hud_aggregated_stats_queries() -> dict[str, str]:
                    sum(hc.street0VPI)                  AS vpip,
                    sum(hc.street0AggrChance)           AS pfr_opp,
                    sum(hc.street0Aggr)                 AS pfr,
+                   sum(hc.raiseFirstInChance)          AS rfi_opp_0,
+                   sum(hc.raisedFirstIn)               AS rfi_0,
                    sum(hc.street0CalledRaiseChance)    AS CAR_opp_0,
                    sum(hc.street0CalledRaiseDone)      AS CAR_0,
                    sum(hc.street0_3BChance)            AS TB_opp_0,

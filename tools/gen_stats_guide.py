@@ -52,7 +52,6 @@ HUD_SQL_FILES = (
 KEY_NOTES: dict[str, str] = {
     "screen_name": "the player's name (p.name)",
     "currency": "not selected by the HUD queries: always the USD default",
-    "3bet": "not selected by any HUD query: always 0",
 }
 
 # --------------------------------------------------------------------------- #
@@ -324,10 +323,7 @@ RING_NOTES: dict[str, tuple[str, str]] = {
     "aggfac": ("Postflop aggression factor", "agg_fact"),
     "aggfrq": ("Postflop aggression frequency, with folds and calls in the base", ""),
     "conbet": ("Continuation bet, all streets pooled", "cbet"),
-    "rfi": (
-        "Raise first in (raisedFirstIn / raiseFirstInChance); no HUD stat uses this exact count under one name",
-        "",
-    ),
+    "rfi": ("Raise first in: raises into an unopened pot / unopened pots", "rfi_total"),
     "steals": ("Steal attempt", "steal"),
     "car0": ("Called a raise preflop", "car0"),
     "saw_f": ("Saw the flop", "saw_f"),

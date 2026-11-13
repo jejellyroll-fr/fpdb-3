@@ -86,7 +86,8 @@ _FIXED: dict[str, str] = {
     "gp_2x": "open raises of less than 40% of the stack",
     "gp_os": "open shoves (open raises of 40% of the stack or more)",
     "gp_limp": "open limps",
-    "3bet": "preflop 3-bets under the key `3bet` (not selected by any HUD query: always 0)",
+    "rfi_0": "raises first in (the first raise, into a pot nobody had entered)",
+    "rfi_opp_0": "times the player acted while the pot was still unopened",
     "saw_f": "hands where the player saw the flop",
     "street1inposition": "flops played in position",
     "sd": "hands where the player went to showdown",
@@ -324,8 +325,8 @@ _TEXT: dict[str, tuple[str, str]] = {
     ),
     "straddle": ("Straddle", "Percentage of hands where the player posted a straddle."),
     "rfi_total": (
-        "Raise First In (total)",
-        "Meant as the percentage of the time that a player opened the pot with a raise. As written it is PFR minus a `3bet` key the HUD never fills, so in practice it equals PFR.",
+        "Raise First In (RFI)",
+        "Percentage of the time that a player raised when the pot was still unopened (nobody had called, raised or limped before). A raise after limpers (an isolation raise) is not counted.",
     ),
     "three_bet_range": (
         "3-Bet Range",
@@ -903,7 +904,6 @@ OVERRIDE_WORDS: dict[str, str] = {
     "fbr": "(Number of preflop 4-bets / Number of 4-bet opportunities) × (Number of preflop raises / Number of hands played) × 100",
     "triple_barrel": "(flop c-bets / flop c-bet chances) × (turn c-bets / turn c-bet chances) × (river c-bets / river c-bet chances) × 100",
     "resteal": "(0.7 × Number of preflop 3-bets) / (0.6 × Number of 3-bet opportunities) × 100",
-    "rfi_total": "(Number of preflop raises − Number of preflop 3-bets under the never-filled key 3bet, never below 0) / Number of preflop raise opportunities × 100",
     "vpip_pfr_ratio": "(Number of VPIP hands / VPIP opportunities) / (Number of preflop raises / raise opportunities)",
     "probe_bet": "min(flop bets, flops seen − flop c-bets) / (Number of flops seen − Number of flop c-bets) × 100",
     "probe_bet_turn": "min(turn bets, turns seen − turn c-bets) / (Number of turns seen − Number of turn c-bets) × 100",

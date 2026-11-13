@@ -28,11 +28,8 @@ HUD_QUERIES = (
 #: Keys that are not a selected column, with why each is allowed. Never add to it
 #: to make a stat pass: select the column or read the right key instead.
 KNOWN_ABSENT = {
-    # ``currency`` is read with a USD default; the HUD query does not select it.
+    # ``currency`` is read with a USD default; the HUD query does not select it (#797).
     "currency",
-    # ``rfi_total`` subtracts a ``3bet`` count nothing fills, so it equals PFR; its
-    # measured counterparts are the per-position ``rfi_*`` stats.
-    "3bet",
 }
 
 

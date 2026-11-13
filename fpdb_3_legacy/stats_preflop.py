@@ -54,7 +54,9 @@ def fold_to_allin(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> St
     return postflop_ratio(stat_dict, player, "faced_allin", "fold_allin", "FvAI", "% fold to all-in")
 
 
-def preflop_action_by_position(stat_dict: Mapping[int, Mapping[str, Any]], player: int, prefix: str, position: str, label: str) -> StatTuple:
+def preflop_action_by_position(
+    stat_dict: Mapping[int, Mapping[str, Any]], player: int, prefix: str, position: str, label: str
+) -> StatTuple:
     """Format a preflop action frequency in one HUD position bucket."""
     stat = 0.0
     try:
@@ -72,38 +74,72 @@ def preflop_action_by_position(stat_dict: Mapping[int, Mapping[str, Any]], playe
 
 def three_bet_bb(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "tb", "bb", "3B BB")
+
+
 def three_bet_sb(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "tb", "sb", "3B SB")
+
+
 def three_bet_btn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "tb", "btn", "3B BTN")
+
+
 def three_bet_co(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "tb", "co", "3B CO")
+
+
 def three_bet_mp(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "tb", "mp", "3B MP")
+
+
 def three_bet_ep(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "tb", "ep", "3B EP")
+
+
 def four_bet_bb(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "fb", "bb", "4B BB")
+
+
 def four_bet_sb(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "fb", "sb", "4B SB")
+
+
 def four_bet_btn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "fb", "btn", "4B BTN")
+
+
 def four_bet_co(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "fb", "co", "4B CO")
+
+
 def four_bet_mp(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "fb", "mp", "4B MP")
+
+
 def four_bet_ep(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "fb", "ep", "4B EP")
+
+
 def squeeze_bb(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "sqz", "bb", "SQZ BB")
+
+
 def squeeze_sb(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "sqz", "sb", "SQZ SB")
+
+
 def squeeze_btn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "sqz", "btn", "SQZ BTN")
+
+
 def squeeze_co(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "sqz", "co", "SQZ CO")
+
+
 def squeeze_mp(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "sqz", "mp", "SQZ MP")
+
+
 def squeeze_ep(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "sqz", "ep", "SQZ EP")
 
@@ -146,14 +182,12 @@ def squeeze_range(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> St
 
 
 def rfi_total(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
-    """Return the estimated total raise-first-in frequency."""
+    """Return raise-first-in: raises into an unopened pot over the unopened pots faced (#796)."""
     try:
-        opportunities = float(stat_dict[player].get("pfr_opp", 0))
-        raises = float(stat_dict[player].get("pfr", 0))
-        three_bets = float(stat_dict[player].get("3bet", 0))
+        opportunities = float(stat_dict[player].get("rfi_opp_0", 0))
+        done = float(stat_dict[player].get("rfi_0", 0))
         if opportunities == 0:
             return format_no_data_stat("rfi", "% raise first in")
-        done = max(0.0, raises - three_bets)
         stat = done / opportunities
         percent = 100.0 * stat
         display = f"rfi={percent:3.1f}%"
@@ -335,7 +369,14 @@ def _preflop_response(
         if opportunities != 0:
             stat = float(action) / opportunities
         percent = 100.0 * stat
-        return stat, f"{percent:3.1f}", f"{abbreviation}={percent:3.1f}%", f"{long_label}={percent:3.1f}%", f"({int(action)}/{int(opportunities)})", description
+        return (
+            stat,
+            f"{percent:3.1f}",
+            f"{abbreviation}={percent:3.1f}%",
+            f"{long_label}={percent:3.1f}%",
+            f"({int(action)}/{int(opportunities)})",
+            description,
+        )
     except (KeyError, TypeError, ValueError):
         return stat, "NA", f"{abbreviation}=NA", f"{long_label}=NA", "(0/0)", description
 
@@ -347,12 +388,16 @@ def car0(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
 
 def f_3bet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return fold-to-3-bet frequency preflop or on third street."""
-    return _preflop_response(stat_dict, player, "f3b_opp_0", "f3b_0", "F3B", "F3B_pf", "% fold to 3 bet preflop/3rd street")
+    return _preflop_response(
+        stat_dict, player, "f3b_opp_0", "f3b_0", "F3B", "F3B_pf", "% fold to 3 bet preflop/3rd street"
+    )
 
 
 def f_4bet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return fold-to-4-bet frequency preflop or on third street."""
-    return _preflop_response(stat_dict, player, "f4b_opp_0", "f4b_0", "F4B", "F4B_pf", "% fold to 4 bet preflop/3rd street")
+    return _preflop_response(
+        stat_dict, player, "f4b_opp_0", "f4b_0", "F4B", "F4B_pf", "% fold to 4 bet preflop/3rd street"
+    )
 
 
 def _preflop_opportunity_frequency(
@@ -373,7 +418,14 @@ def _preflop_opportunity_frequency(
             return format_no_data_stat(abbreviation, description)
         stat = action / opportunities
         percent = 100.0 * stat
-        return stat, f"{percent:3.1f}", f"{abbreviation}={percent:3.1f}%", f"{long_label}={percent:3.1f}%", f"({int(action)}/{int(opportunities)})", description
+        return (
+            stat,
+            f"{percent:3.1f}",
+            f"{abbreviation}={percent:3.1f}%",
+            f"{long_label}={percent:3.1f}%",
+            f"({int(action)}/{int(opportunities)})",
+            description,
+        )
     except (KeyError, TypeError, ValueError):
         return stat, "NA", f"{abbreviation}=NA", f"{long_label}=NA", "(0/0)", description
 
@@ -390,17 +442,23 @@ def raiseToSteal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> Sta
 
 def three_B(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return 3-bet frequency preflop or on third street."""
-    return _preflop_opportunity_frequency(stat_dict, player, "tb_opp_0", "tb_0", "3B", "3B_pf", "% 3 bet preflop/3rd street")
+    return _preflop_opportunity_frequency(
+        stat_dict, player, "tb_opp_0", "tb_0", "3B", "3B_pf", "% 3 bet preflop/3rd street"
+    )
 
 
 def four_B(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return 4-bet frequency preflop or on third street."""
-    return _preflop_opportunity_frequency(stat_dict, player, "fb_opp_0", "fb_0", "4B", "4B", "% 4 bet preflop/3rd street")
+    return _preflop_opportunity_frequency(
+        stat_dict, player, "fb_opp_0", "fb_0", "4B", "4B", "% 4 bet preflop/3rd street"
+    )
 
 
 def cfour_B(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return cold-4-bet frequency preflop or on third street."""
-    return _preflop_opportunity_frequency(stat_dict, player, "cfb_opp_0", "cfb_0", "C4B", "C4B_pf", "% cold 4 bet preflop/3rd street")
+    return _preflop_opportunity_frequency(
+        stat_dict, player, "cfb_opp_0", "cfb_0", "C4B", "C4B_pf", "% cold 4 bet preflop/3rd street"
+    )
 
 
 def fbr(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
@@ -411,9 +469,18 @@ def fbr(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
         four_bet_opportunities = float(player_stats.get("fb_opp_0", 0))
         pfr_opportunities = float(player_stats.get("n", 0))
         if four_bet_opportunities != 0 and pfr_opportunities != 0:
-            stat = (float(player_stats["fb_0"]) / four_bet_opportunities) * (float(player_stats["pfr"]) / pfr_opportunities)
+            stat = (float(player_stats["fb_0"]) / four_bet_opportunities) * (
+                float(player_stats["pfr"]) / pfr_opportunities
+            )
         percent = 100.0 * stat
-        return stat, f"{percent:3.1f}", f"fbr={percent:3.1f}%", f"4Brange={percent:3.1f}%", "(pfr*four_B)", "4 bet range"
+        return (
+            stat,
+            f"{percent:3.1f}",
+            f"fbr={percent:3.1f}%",
+            f"4Brange={percent:3.1f}%",
+            "(pfr*four_B)",
+            "4 bet range",
+        )
     except (KeyError, TypeError, ValueError):
         return stat, "NA", "fbr=NA", "fbr=NA", "(pfr*four_B)", "4 bet range"
 
@@ -425,23 +492,36 @@ def ctb(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
         player_stats = stat_dict[player]
         opportunities = float(player_stats.get("f3b_opp_0", 0))
         if opportunities != 0:
-            stat = (float(player_stats["f3b_opp_0"]) - float(player_stats["f3b_0"]) - float(player_stats["fb_0"])) / opportunities
+            stat = (
+                float(player_stats["f3b_opp_0"]) - float(player_stats["f3b_0"]) - float(player_stats["fb_0"])
+            ) / opportunities
         calls = float(player_stats["f3b_opp_0"]) - player_stats["fb_0"] - player_stats["f3b_0"]
         displayed_opportunities = player_stats["fb_opp_0"]
         percent = 100.0 * stat
-        return stat, f"{percent:3.1f}", f"ctb={percent:3.1f}%", f"call3B={percent:3.1f}%", f"({int(calls)}/{int(displayed_opportunities)})", "% call 3 bet"
+        return (
+            stat,
+            f"{percent:3.1f}",
+            f"ctb={percent:3.1f}%",
+            f"call3B={percent:3.1f}%",
+            f"({int(calls)}/{int(displayed_opportunities)})",
+            "% call 3 bet",
+        )
     except (KeyError, TypeError, ValueError):
         return stat, "NA", "ctb=NA", "ctb=NA", "(0/0)", "% call 3 bet"
 
 
 def f_SB_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return small-blind fold-to-steal frequency."""
-    return _preflop_opportunity_frequency(stat_dict, player, "sbstolen", "sbnotdef", "fSB", "fSB_s", "% folded SB to steal")
+    return _preflop_opportunity_frequency(
+        stat_dict, player, "sbstolen", "sbnotdef", "fSB", "fSB_s", "% folded SB to steal"
+    )
 
 
 def f_BB_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return big-blind fold-to-steal frequency."""
-    return _preflop_opportunity_frequency(stat_dict, player, "bbstolen", "bbnotdef", "fBB", "fBB_s", "% folded BB to steal")
+    return _preflop_opportunity_frequency(
+        stat_dict, player, "bbstolen", "bbnotdef", "fBB", "fBB_s", "% folded BB to steal"
+    )
 
 
 def f_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
@@ -455,7 +535,14 @@ def f_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTupl
             return format_no_data_stat("fB", "% folded blind to steal")
         stat = float(folded) / float(opportunities)
         percent = 100.0 * stat
-        return stat, f"{percent:3.1f}", f"fB={percent:3.1f}%", f"fB_s={percent:3.1f}%", f"({int(folded)}/{int(opportunities)})", "% folded blind to steal"
+        return (
+            stat,
+            f"{percent:3.1f}",
+            f"fB={percent:3.1f}%",
+            f"fB_s={percent:3.1f}%",
+            f"({int(folded)}/{int(opportunities)})",
+            "% folded blind to steal",
+        )
     except (KeyError, TypeError, ValueError):
         return stat, "NA", "fB=NA", "fB_s=NA", "(0/0)", "% folded blind to steal"
 
@@ -479,26 +566,41 @@ def _labeled_preflop_frequency(
             return format_no_data_stat(no_data_label, description)
         stat = action / opportunities
         percent = 100.0 * stat
-        return stat, f"{percent:3.1f}", f"{abbreviation}={percent:3.1f}%", f"{long_label}={percent:3.1f}%", f"({int(action)}/{int(opportunities)})", description
+        return (
+            stat,
+            f"{percent:3.1f}",
+            f"{abbreviation}={percent:3.1f}%",
+            f"{long_label}={percent:3.1f}%",
+            f"({int(action)}/{int(opportunities)})",
+            description,
+        )
     except (KeyError, TypeError, ValueError):
         return stat, "NA", f"{abbreviation}=NA", f"{long_label}=NA", "(0/0)", description
 
 
 def steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return attempted-steal frequency."""
-    return _labeled_preflop_frequency(stat_dict, player, "steal_opp", "steal", "steal", "st", "steal", "% steal attempted")
+    return _labeled_preflop_frequency(
+        stat_dict, player, "steal_opp", "steal", "steal", "st", "steal", "% steal attempted"
+    )
 
 
 def s_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return successful-steal frequency."""
-    return _labeled_preflop_frequency(stat_dict, player, "steal", "suc_st", "s_st", "s_st", "s_steal", "% steal success")
+    return _labeled_preflop_frequency(
+        stat_dict, player, "steal", "suc_st", "s_st", "s_st", "s_steal", "% steal success"
+    )
 
 
 def vpip(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return voluntarily-put-money-in-pot frequency."""
-    return _labeled_preflop_frequency(stat_dict, player, "vpip_opp", "vpip", "vpip", "v", "vpip", "Voluntarily put in preflop/3rd street %")
+    return _labeled_preflop_frequency(
+        stat_dict, player, "vpip_opp", "vpip", "vpip", "v", "vpip", "Voluntarily put in preflop/3rd street %"
+    )
 
 
 def pfr(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return preflop or third-street raise frequency."""
-    return _labeled_preflop_frequency(stat_dict, player, "pfr_opp", "pfr", "pfr", "p", "pfr", "Preflop/3rd street raise %")
+    return _labeled_preflop_frequency(
+        stat_dict, player, "pfr_opp", "pfr", "pfr", "p", "pfr", "Preflop/3rd street raise %"
+    )
