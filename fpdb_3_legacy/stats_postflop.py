@@ -224,19 +224,19 @@ def street_frequency(
 
 
 def bet_frequency_flop(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
-    return street_frequency(stat_dict, player, "saw_f", "street1Bets", "bet_f", "bet_freq_flop", "% bet frequency flop")
+    return street_frequency(stat_dict, player, "saw_f", "bet_1", "bet_f", "bet_freq_flop", "% bet frequency flop")
 
 
 def bet_frequency_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
-    return street_frequency(stat_dict, player, "saw_t", "street2Bets", "bet_t", "bet_freq_turn", "% bet frequency turn")
+    return street_frequency(stat_dict, player, "saw_2", "bet_2", "bet_t", "bet_freq_turn", "% bet frequency turn")
 
 
 def raise_frequency_flop(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
-    return street_frequency(stat_dict, player, "saw_f", "street1Raises", "raise_f", "raise_freq_flop", "% raise frequency flop")
+    return street_frequency(stat_dict, player, "saw_f", "raise_1", "raise_f", "raise_freq_flop", "% raise frequency flop")
 
 
 def raise_frequency_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
-    return street_frequency(stat_dict, player, "saw_t", "street2Raises", "raise_t", "raise_freq_turn", "% raise frequency turn")
+    return street_frequency(stat_dict, player, "saw_2", "raise_2", "raise_t", "raise_freq_turn", "% raise frequency turn")
 
 
 def sd_winrate(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
@@ -271,13 +271,13 @@ def float_bet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTu
     try:
         player_stats = stat_dict[player]
         opportunities = min(
-            float(player_stats.get("street1InPosition", 0)),
-            float(player_stats.get("street1Calls", 0)),
-            float(player_stats.get("saw_t", 0)),
+            float(player_stats.get("street1inposition", 0)),
+            float(player_stats.get("call_1", 0)),
+            float(player_stats.get("saw_2", 0)),
         )
         if opportunities == 0:
             return format_no_data_stat("float", "% float bet turn")
-        done = min(float(player_stats.get("street2Bets", 0)), opportunities)
+        done = min(float(player_stats.get("bet_2", 0)), opportunities)
         stat = done / opportunities
         percent = 100.0 * stat
         display = f"float={percent:3.1f}%"
@@ -293,7 +293,7 @@ def probe_bet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTu
         opportunities = float(player_stats.get("saw_f", 0)) - float(player_stats.get("cb_1", 0))
         if opportunities <= 0:
             return format_no_data_stat("probe", "% probe bet flop")
-        done = min(float(player_stats.get("street1Bets", 0)), opportunities)
+        done = min(float(player_stats.get("bet_1", 0)), opportunities)
         stat = done / opportunities
         percent = 100.0 * stat
         display = f"probe={percent:3.1f}%"
@@ -312,7 +312,7 @@ def probe_bet_street(
         opportunities = float(player_stats.get(seen_key, 0)) - float(player_stats.get(f"cb_{street}", 0))
         if opportunities <= 0:
             return format_no_data_stat(abbreviation, description)
-        done = min(float(player_stats.get(f"street{street}Bets", 0)), opportunities)
+        done = min(float(player_stats.get(f"bet_{street}", 0)), opportunities)
         stat = done / opportunities
         percent = 100.0 * stat
         return stat, f"{percent:3.1f}", f"{abbreviation}={percent:3.1f}%", f"{long_label}={percent:3.1f}%", f"({int(done)}/{int(opportunities)})", description
@@ -321,11 +321,11 @@ def probe_bet_street(
 
 
 def probe_bet_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
-    return probe_bet_street(stat_dict, player, 2, "saw_t", "probe_t", "probe_turn", "% probe bet turn")
+    return probe_bet_street(stat_dict, player, 2, "saw_2", "probe_t", "probe_turn", "% probe bet turn")
 
 
 def probe_bet_river(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
-    return probe_bet_street(stat_dict, player, 3, "saw_r", "probe_r", "probe_river", "% probe bet river")
+    return probe_bet_street(stat_dict, player, 3, "saw_3", "probe_r", "probe_river", "% probe bet river")
 
 
 def cbet_by_position(
@@ -340,7 +340,7 @@ def cbet_by_position(
         seen = float(player_stats.get("saw_f", 0))
         if seen == 0:
             return format_no_data_stat(abbreviation, description)
-        ip_hands = float(player_stats.get("street1InPosition", 0))
+        ip_hands = float(player_stats.get("street1inposition", 0))
         ratio = ip_hands / seen if in_position else (seen - ip_hands) / seen
         opportunities = float(player_stats.get("cb_opp_1", 0)) * ratio
         if opportunities == 0:

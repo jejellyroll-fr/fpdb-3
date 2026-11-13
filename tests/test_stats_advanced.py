@@ -28,7 +28,7 @@ class TestCBInPositionStat:
 
     def test_cb_ip_with_no_opportunities(self) -> None:
         """Test cb_ip returns '-' when no flop or IP opportunities."""
-        stat_dict = {"player1": {"cb_opp_1": 0, "cb_1": 0, "street1InPosition": 0, "saw_f": 0}}
+        stat_dict = {"player1": {"cb_opp_1": 0, "cb_1": 0, "street1inposition": 0, "saw_f": 0}}
         result = cb_ip(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -37,7 +37,7 @@ class TestCBInPositionStat:
 
     def test_cb_ip_with_zero_but_opportunities(self) -> None:
         """Test cb_ip returns '0.0' when player had IP opportunities but never c-bet."""
-        stat_dict = {"player1": {"cb_opp_1": 10, "cb_1": 0, "street1InPosition": 8, "saw_f": 10}}
+        stat_dict = {"player1": {"cb_opp_1": 10, "cb_1": 0, "street1inposition": 8, "saw_f": 10}}
         result = cb_ip(stat_dict, "player1")
 
         assert result[1] == "0.0"  # (0 * 0.8) / (10 * 0.8) = 0/8 = 0%
@@ -46,7 +46,7 @@ class TestCBInPositionStat:
 
     def test_cb_ip_with_normal_value(self) -> None:
         """Test cb_ip returns normal percentage when player c-bet IP."""
-        stat_dict = {"player1": {"cb_opp_1": 15, "cb_1": 9, "street1InPosition": 12, "saw_f": 15}}
+        stat_dict = {"player1": {"cb_opp_1": 15, "cb_1": 9, "street1inposition": 12, "saw_f": 15}}
         result = cb_ip(stat_dict, "player1")
 
         assert result[1] == "60.0"  # (9 * 0.8) / (15 * 0.8) = 7.2/12 = 60%
@@ -67,7 +67,7 @@ class TestCBOutOfPositionStat:
 
     def test_cb_oop_with_no_opportunities(self) -> None:
         """Test cb_oop returns '-' when no flop or OOP opportunities."""
-        stat_dict = {"player1": {"cb_opp_1": 0, "cb_1": 0, "street1InPosition": 0, "saw_f": 0}}
+        stat_dict = {"player1": {"cb_opp_1": 0, "cb_1": 0, "street1inposition": 0, "saw_f": 0}}
         result = cb_oop(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -76,7 +76,7 @@ class TestCBOutOfPositionStat:
 
     def test_cb_oop_with_normal_value(self) -> None:
         """Test cb_oop returns normal percentage when player c-bet OOP."""
-        stat_dict = {"player1": {"cb_opp_1": 20, "cb_1": 12, "street1InPosition": 8, "saw_f": 20}}
+        stat_dict = {"player1": {"cb_opp_1": 20, "cb_1": 12, "street1inposition": 8, "saw_f": 20}}
         result = cb_oop(stat_dict, "player1")
 
         assert result[1] == "60.0"  # (12 * 0.6) / (20 * 0.6) = 7.2/12 = 60%
@@ -176,7 +176,7 @@ class TestProbeBetTurnStat:
 
     def test_probe_bet_turn_with_no_opportunities(self) -> None:
         """Test probe_bet_turn returns '-' when no turn opportunities."""
-        stat_dict = {"player1": {"street2Bets": 0, "saw_t": 0, "cb_opp_2": 0, "cb_2": 0}}
+        stat_dict = {"player1": {"bet_2": 0, "saw_2": 0, "cb_opp_2": 0, "cb_2": 0}}
         result = probe_bet_turn(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -185,7 +185,7 @@ class TestProbeBetTurnStat:
 
     def test_probe_bet_turn_with_zero_but_opportunities(self) -> None:
         """Test probe_bet_turn returns '0.0' when player had opportunities but never probed turn."""
-        stat_dict = {"player1": {"street2Bets": 0, "saw_t": 12, "cb_opp_2": 10, "cb_2": 3}}
+        stat_dict = {"player1": {"bet_2": 0, "saw_2": 12, "cb_opp_2": 10, "cb_2": 3}}
         result = probe_bet_turn(stat_dict, "player1")
 
         assert result[1] == "0.0"  # 0/(12-3) = 0/9 = 0%
@@ -194,7 +194,7 @@ class TestProbeBetTurnStat:
 
     def test_probe_bet_turn_with_normal_value(self) -> None:
         """Test probe_bet_turn returns normal percentage when player probed turn."""
-        stat_dict = {"player1": {"street2Bets": 3, "saw_t": 15, "cb_opp_2": 12, "cb_2": 5}}
+        stat_dict = {"player1": {"bet_2": 3, "saw_2": 15, "cb_opp_2": 12, "cb_2": 5}}
         result = probe_bet_turn(stat_dict, "player1")
 
         assert result[1] == "30.0"  # 3/(15-5) = 3/10 = 30%
@@ -215,7 +215,7 @@ class TestProbeBetRiverStat:
 
     def test_probe_bet_river_with_no_opportunities(self) -> None:
         """Test probe_bet_river returns '-' when no river opportunities."""
-        stat_dict = {"player1": {"street3Bets": 0, "saw_r": 0, "cb_opp_3": 0, "cb_3": 0}}
+        stat_dict = {"player1": {"bet_3": 0, "saw_3": 0, "cb_opp_3": 0, "cb_3": 0}}
         result = probe_bet_river(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -224,7 +224,7 @@ class TestProbeBetRiverStat:
 
     def test_probe_bet_river_with_normal_value(self) -> None:
         """Test probe_bet_river returns normal percentage when player probed river."""
-        stat_dict = {"player1": {"street3Bets": 2, "saw_r": 10, "cb_opp_3": 8, "cb_3": 2}}
+        stat_dict = {"player1": {"bet_3": 2, "saw_3": 10, "cb_opp_3": 8, "cb_3": 2}}
         result = probe_bet_river(stat_dict, "player1")
 
         assert result[1] == "25.0"  # 2/(10-2) = 2/8 = 25%
@@ -253,12 +253,12 @@ class TestAdvancedStatsIntegration:
                 "cb_2": 0,
                 "cb_opp_3": 0,
                 "cb_3": 0,
-                "street1InPosition": 0,
+                "street1inposition": 0,
                 "saw_f": 0,
-                "saw_t": 0,
-                "saw_r": 0,
-                "street2Bets": 0,
-                "street3Bets": 0,
+                "saw_2": 0,
+                "saw_3": 0,
+                "bet_2": 0,
+                "bet_3": 0,
                 "tb_opp_0": 0,
                 "tb_0": 0,
             },
@@ -284,13 +284,13 @@ class TestAdvancedStatsIntegration:
                 "cb_opp_3": 10,
                 "cb_3": 6,
                 # Often in position
-                "street1InPosition": 14,
+                "street1inposition": 14,
                 "saw_f": 20,
-                "saw_t": 15,
-                "saw_r": 10,
+                "saw_2": 15,
+                "saw_3": 10,
                 # High betting frequency
-                "street2Bets": 8,
-                "street3Bets": 4,
+                "bet_2": 8,
+                "bet_3": 4,
                 # Active 3-betting
                 "tb_opp_0": 25,
                 "tb_0": 8,
@@ -315,13 +315,13 @@ class TestAdvancedStatsIntegration:
                 "cb_opp_3": 8,
                 "cb_3": 2,
                 # Mixed position
-                "street1InPosition": 9,
+                "street1inposition": 9,
                 "saw_f": 18,
-                "saw_t": 12,
-                "saw_r": 8,
+                "saw_2": 12,
+                "saw_3": 8,
                 # Lower betting frequency
-                "street2Bets": 2,
-                "street3Bets": 1,
+                "bet_2": 2,
+                "bet_3": 1,
                 # Conservative 3-betting
                 "tb_opp_0": 20,
                 "tb_0": 3,
@@ -359,12 +359,12 @@ class TestAdvancedStatsRegressionTests:
                 "cb_2": 8,
                 "cb_opp_3": 10,
                 "cb_3": 4,
-                "street1InPosition": 12,
+                "street1inposition": 12,
                 "saw_f": 20,
-                "saw_t": 15,
-                "saw_r": 10,
-                "street2Bets": 5,
-                "street3Bets": 3,
+                "saw_2": 15,
+                "saw_3": 10,
+                "bet_2": 5,
+                "bet_3": 3,
                 "tb_opp_0": 25,
                 "tb_0": 6,
             },

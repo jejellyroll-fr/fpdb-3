@@ -30,7 +30,7 @@ class TestColdCallStat:
 
     def test_cold_call_with_no_opportunities(self) -> None:
         """Test cold_call returns '-' when no opportunities to cold call."""
-        stat_dict = {"player1": {"CAR_opp_0": 0, "CAR_0": 0}}
+        stat_dict = {"player1": {"car_opp_0": 0, "car_0": 0}}
         result = cold_call(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -39,7 +39,7 @@ class TestColdCallStat:
 
     def test_cold_call_with_zero_but_opportunities(self) -> None:
         """Test cold_call returns '0.0' when player never cold called but had opportunities."""
-        stat_dict = {"player1": {"CAR_opp_0": 8, "CAR_0": 0}}
+        stat_dict = {"player1": {"car_opp_0": 8, "car_0": 0}}
         result = cold_call(stat_dict, "player1")
 
         assert result[1] == "0.0"
@@ -48,7 +48,7 @@ class TestColdCallStat:
 
     def test_cold_call_with_normal_value(self) -> None:
         """Test cold_call returns normal percentage when player cold called."""
-        stat_dict = {"player1": {"CAR_opp_0": 10, "CAR_0": 3}}
+        stat_dict = {"player1": {"car_opp_0": 10, "car_0": 3}}
         result = cold_call(stat_dict, "player1")
 
         assert result[1] == "30.0"
@@ -233,7 +233,7 @@ class TestCallVsStealStat:
 
     def test_call_vs_steal_with_no_opportunities(self) -> None:
         """Test call_vs_steal returns '-' when no cold call opportunities."""
-        stat_dict = {"player1": {"CAR_opp_0": 0, "CAR_0": 0}}
+        stat_dict = {"player1": {"car_opp_0": 0, "car_0": 0}}
         result = call_vs_steal(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -242,7 +242,7 @@ class TestCallVsStealStat:
 
     def test_call_vs_steal_with_zero_but_opportunities(self) -> None:
         """call_vs_steal is deprecated (needs cross-player context); returns no-data."""
-        stat_dict = {"player1": {"CAR_opp_0": 10, "CAR_0": 0}}
+        stat_dict = {"player1": {"car_opp_0": 10, "car_0": 0}}
         result = call_vs_steal(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -252,7 +252,7 @@ class TestCallVsStealStat:
     def test_call_vs_steal_with_normal_value(self) -> None:
         """call_vs_steal stays deprecated even when call data is present."""
         stat_dict = {
-            "player1": {"CAR_opp_0": 12, "CAR_0": 4},
+            "player1": {"car_opp_0": 12, "car_0": 4},
         }
         result = call_vs_steal(stat_dict, "player1")
 
@@ -273,7 +273,7 @@ class TestFoldVs4BetStat:
 
     def test_fold_vs_4bet_with_no_opportunities(self) -> None:
         """Test fold_vs_4bet returns '-' when no 4bet opportunities."""
-        stat_dict = {"player1": {"F4B_opp_0": 0, "F4B_0": 0}}
+        stat_dict = {"player1": {"f4b_opp_0": 0, "f4b_0": 0}}
         result = fold_vs_4bet(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -282,7 +282,7 @@ class TestFoldVs4BetStat:
 
     def test_fold_vs_4bet_with_zero_but_opportunities(self) -> None:
         """Test fold_vs_4bet returns '0.0' when player never folded to 4bet."""
-        stat_dict = {"player1": {"F4B_opp_0": 5, "F4B_0": 0}}
+        stat_dict = {"player1": {"f4b_opp_0": 5, "f4b_0": 0}}
         result = fold_vs_4bet(stat_dict, "player1")
 
         assert result[1] == "0.0"
@@ -291,7 +291,7 @@ class TestFoldVs4BetStat:
 
     def test_fold_vs_4bet_with_normal_value(self) -> None:
         """Test fold_vs_4bet returns normal percentage when player folded to 4bet."""
-        stat_dict = {"player1": {"F4B_opp_0": 6, "F4B_0": 4}}
+        stat_dict = {"player1": {"f4b_opp_0": 6, "f4b_0": 4}}
         result = fold_vs_4bet(stat_dict, "player1")
 
         assert result[1] == "66.7"  # 4/6 = 66.7%
@@ -314,16 +314,16 @@ class TestNewPreflopStatsIntegration:
         """Test all new preflop stats return '-' for a completely new player."""
         stat_dict = {
             "new_player": {
-                "CAR_opp_0": 0,
-                "CAR_0": 0,
+                "car_opp_0": 0,
+                "car_0": 0,
                 "vpip_opp": 0,
                 "vpip": 0,
                 "pfr": 0,
                 "pfr_opp": 0,
                 "3bet": 0,
                 "3bet_opp": 0,
-                "F4B_opp_0": 0,
-                "F4B_0": 0,
+                "f4b_opp_0": 0,
+                "f4b_0": 0,
             },
         }
 
@@ -341,16 +341,16 @@ class TestNewPreflopStatsIntegration:
         stat_dict = {
             "active_player": {
                 # Has opportunities but never performed actions
-                "CAR_opp_0": 8,
-                "CAR_0": 0,  # Never cold called
+                "car_opp_0": 8,
+                "car_0": 0,  # Never cold called
                 "vpip_opp": 25,
                 "vpip": 5,
                 "pfr": 5,  # Never limped (all VPIP were raises)
                 "pfr_opp": 25,
                 "3bet": 1,
                 "3bet_opp": 10,  # Some 3bets
-                "F4B_opp_0": 3,
-                "F4B_0": 0,  # Never folded to 4bet
+                "f4b_opp_0": 3,
+                "f4b_0": 0,  # Never folded to 4bet
             },
         }
 
@@ -370,8 +370,8 @@ class TestNewPreflopStatsIntegration:
         stat_dict = {
             "mixed_player": {
                 # Has cold call opportunities and uses them
-                "CAR_opp_0": 10,
-                "CAR_0": 3,
+                "car_opp_0": 10,
+                "car_0": 3,
                 # Has VPIP opportunities, some limps
                 "vpip_opp": 30,
                 "vpip": 12,
@@ -381,8 +381,8 @@ class TestNewPreflopStatsIntegration:
                 "3bet": 3,
                 "3bet_opp": 8,
                 # No 4bet opportunities
-                "F4B_opp_0": 0,
-                "F4B_0": 0,
+                "f4b_opp_0": 0,
+                "f4b_0": 0,
             },
         }
 
@@ -418,16 +418,16 @@ class TestNewPreflopStatsRegressionTests:
         """Test that all new stats return properly formatted 6-element tuples."""
         stat_dict = {
             "test_player": {
-                "CAR_opp_0": 10,
-                "CAR_0": 3,
+                "car_opp_0": 10,
+                "car_0": 3,
                 "vpip_opp": 20,
                 "vpip": 8,
                 "pfr": 4,
                 "pfr_opp": 20,
                 "3bet": 2,
                 "3bet_opp": 8,
-                "F4B_opp_0": 5,
-                "F4B_0": 3,
+                "f4b_opp_0": 5,
+                "f4b_0": 3,
             },
         }
 

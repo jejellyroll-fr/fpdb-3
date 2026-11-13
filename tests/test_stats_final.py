@@ -83,7 +83,7 @@ class TestAvgBetSizeStats:
 
     def test_avg_bet_size_flop_with_no_bets(self) -> None:
         """Test avg_bet_size_flop returns '-' when no flop bets."""
-        stat_dict = {"player1": {"street1Bets": 0, "saw_f": 10}}
+        stat_dict = {"player1": {"bet_1": 0, "saw_f": 10}}
         result = avg_bet_size_flop(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -92,7 +92,7 @@ class TestAvgBetSizeStats:
 
     def test_avg_bet_size_flop_with_bets(self) -> None:
         """avg_bet_size_flop is deprecated (no bet-size column); returns no-data."""
-        stat_dict = {"player1": {"street1Bets": 8, "saw_f": 20}}
+        stat_dict = {"player1": {"bet_1": 8, "saw_f": 20}}
         result = avg_bet_size_flop(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -101,7 +101,7 @@ class TestAvgBetSizeStats:
 
     def test_avg_bet_size_turn_with_bets(self) -> None:
         """avg_bet_size_turn is deprecated (no bet-size column); returns no-data."""
-        stat_dict = {"player1": {"street2Bets": 5, "saw_t": 15}}
+        stat_dict = {"player1": {"bet_2": 5, "saw_2": 15}}
         result = avg_bet_size_turn(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -110,7 +110,7 @@ class TestAvgBetSizeStats:
 
     def test_avg_bet_size_river_with_bets(self) -> None:
         """avg_bet_size_river is deprecated (no bet-size column); returns no-data."""
-        stat_dict = {"player1": {"street3Bets": 3, "saw_r": 10}}
+        stat_dict = {"player1": {"bet_3": 3, "saw_3": 10}}
         result = avg_bet_size_river(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -131,7 +131,7 @@ class TestOverbetFrequencyStats:
 
     def test_overbet_frequency_with_no_bets(self) -> None:
         """Test overbet_frequency returns '-' when no bets."""
-        stat_dict = {"player1": {"street1Bets": 0, "street2Bets": 0, "street3Bets": 0}}
+        stat_dict = {"player1": {"bet_1": 0, "bet_2": 0, "bet_3": 0}}
         result = overbet_frequency(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -140,7 +140,7 @@ class TestOverbetFrequencyStats:
 
     def test_overbet_frequency_with_bets(self) -> None:
         """Test overbet_frequency returns estimated frequency when player bet."""
-        stat_dict = {"player1": {"street1Bets": 10, "street2Bets": 8, "street3Bets": 5}}
+        stat_dict = {"player1": {"bet_1": 10, "bet_2": 8, "bet_3": 5}}
         result = overbet_frequency(stat_dict, "player1")
 
         # total_bets = 10 + 8 + 5 = 23
@@ -168,12 +168,12 @@ class TestFinalStatsIntegration:
                 "pfr_opp": 0,
                 "pfr": 0,
                 "tb_0": 0,
-                "street1Bets": 0,
-                "street2Bets": 0,
-                "street3Bets": 0,
+                "bet_1": 0,
+                "bet_2": 0,
+                "bet_3": 0,
                 "saw_f": 0,
-                "saw_t": 0,
-                "saw_r": 0,
+                "saw_2": 0,
+                "saw_3": 0,
             },
         }
 
@@ -198,9 +198,9 @@ class TestFinalStatsIntegration:
                 "rfi_opp_lp": 200,
                 "rfi_lp": 20,
                 # Conservative betting
-                "street1Bets": 6,
-                "street2Bets": 4,
-                "street3Bets": 2,
+                "bet_1": 6,
+                "bet_2": 4,
+                "bet_3": 2,
             },
         }
 
@@ -226,9 +226,9 @@ class TestFinalStatsIntegration:
                 "rfi_opp_lp": 150,
                 "rfi_lp": 39,
                 # Aggressive betting
-                "street1Bets": 20,
-                "street2Bets": 15,
-                "street3Bets": 10,
+                "bet_1": 20,
+                "bet_2": 15,
+                "bet_3": 10,
             },
         }
 
@@ -265,12 +265,12 @@ class TestFinalStatsRegressionTests:
                 "pfr_opp": 100,
                 "pfr": 20,
                 "tb_0": 5,
-                "street1Bets": 10,
-                "street2Bets": 8,
-                "street3Bets": 5,
+                "bet_1": 10,
+                "bet_2": 8,
+                "bet_3": 5,
                 "saw_f": 40,
-                "saw_t": 30,
-                "saw_r": 20,
+                "saw_2": 30,
+                "saw_3": 20,
             },
         }
 

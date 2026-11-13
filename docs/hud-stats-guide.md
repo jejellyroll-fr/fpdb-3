@@ -218,8 +218,8 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 - **HUD abbreviation**: `cc`
 - **Description**: Percentage of preflop decisions facing a raise that were calls. Reads the same counters as `car0`, so it also counts calls by a player who had already put money in.
 - **Formula**: Number of calls of a preflop raise (each call counts; after a call, counting resumes at the next raise) / Number of preflop actions the player took while facing a raise (fold, call or raise; several per hand are possible) × 100
-- **Formula (code)**: `CAR_0 / CAR_opp_0 × 100`
-- **SQL database field / logic**: CAR_opp_0 = SUM(HudCache.street0CalledRaiseChance); CAR_0 = SUM(HudCache.street0CalledRaiseDone)
+- **Formula (code)**: `car_0 / car_opp_0 × 100`
+- **SQL database field / logic**: car_opp_0 = SUM(HudCache.street0CalledRaiseChance); car_0 = SUM(HudCache.street0CalledRaiseDone)
 - **Tooltip**: % cold call preflop
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
@@ -348,8 +348,8 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 - **HUD abbreviation**: `f4b`
 - **Description**: Percentage of the time that a player other than the original raiser (usually the 3-bettor) folded when facing a 4-bet. Reads the same counters as `f_4bet`.
 - **Formula**: Number of times a player other than the original raiser folded facing a 4-bet / Number of times a player other than the original raiser acted facing a 4-bet × 100
-- **Formula (code)**: `F4B_0 / F4B_opp_0 × 100`
-- **SQL database field / logic**: F4B_opp_0 = SUM(HudCache.street0_FoldTo4BChance); F4B_0 = SUM(HudCache.street0_FoldTo4BDone)
+- **Formula (code)**: `f4b_0 / f4b_opp_0 × 100`
+- **SQL database field / logic**: f4b_opp_0 = SUM(HudCache.street0_FoldTo4BChance); f4b_0 = SUM(HudCache.street0_FoldTo4BDone)
 - **Tooltip**: % fold vs 4bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, preflop
@@ -1323,19 +1323,17 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 ### Flop Bet Frequency — `bet_frequency_flop`
 
 - **HUD abbreviation**: `bet_f`
-- **Description**: Meant as bets per flop seen. Reads keys the HUD queries do not select, so the value is not reliable.
-- **Formula**: Number of flop bets (key not selected by the HUD queries, which name it bet_1) / Number of hands where the player saw the flop × 100
-- **Formula (code)**: `street1Bets / saw_f × 100`
-- **SQL database field / logic**: saw_f = SUM(HudCache.street1Seen); street1Bets (not selected by the HUD queries)
+- **Description**: Bets made on the flop per flop seen, as a percentage.
+- **Formula**: Number of bets made on the flop (every bet counts) / Number of hands where the player saw the flop × 100
+- **Formula (code)**: `bet_1 / saw_f × 100`
+- **SQL database field / logic**: saw_f = SUM(HudCache.street1Seen); bet_1 = SUM(HudCache.street1Bets)
 - **Tooltip**: % bet frequency flop
 - **Detailed HUD text**: `bet_freq_flop`
-- **Games**: none: the stat shows no data
-- **Hold'em / Omaha (flop games)**: no data
-- **Stud / Razz**: no data
-- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
-- **Status**: input-missing
-- **Note**: An input is read under a name the HUD queries do not select, so the value is computed from a missing column. Check the HUD queries before relying on it.
 
 ### Call vs Flop 3-Bet — `call_vs_flop_3bet`
 
@@ -1411,8 +1409,8 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 - **HUD abbreviation**: `cb_ip`
 - **Description**: Meant as the flop continuation-bet rate in position. The cache has no c-bet counts by position, so the stat scales both counts by the share of flops played in position; the share cancels and the value is the overall flop c-bet (`cb1`).
 - **Formula**: (Number of flop continuation bets × r) / (Number of flop continuation-bet opportunities × r) × 100, r = share of flops in position (cancels)
-- **Formula (code)**: `(cb_1 × r) / (cb_opp_1 × r) × 100 with r = street1InPosition / saw_f; r cancels, so = cb_1 / cb_opp_1 × 100`
-- **SQL database field / logic**: cb_1 = SUM(HudCache.street1CBDone); cb_opp_1 = SUM(HudCache.street1CBChance); saw_f = SUM(HudCache.street1Seen); street1InPosition = SUM(HudCache.street1InPosition)
+- **Formula (code)**: `(cb_1 × r) / (cb_opp_1 × r) × 100 with r = street1inposition / saw_f; r cancels, so = cb_1 / cb_opp_1 × 100`
+- **SQL database field / logic**: cb_1 = SUM(HudCache.street1CBDone); cb_opp_1 = SUM(HudCache.street1CBChance); saw_f = SUM(HudCache.street1Seen); street1inposition = SUM(HudCache.street1InPosition)
 - **Tooltip**: % c-bet in position
 - **Detailed HUD text**: `cbet_in_position`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
@@ -1428,8 +1426,8 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 - **HUD abbreviation**: `cb_oop`
 - **Description**: Meant as the flop continuation-bet rate out of position. The cache has no c-bet counts by position, so the stat scales both counts by the share of flops played out of position; the share cancels and the value is the overall flop c-bet (`cb1`).
 - **Formula**: (Number of flop continuation bets × r) / (Number of flop continuation-bet opportunities × r) × 100, r = share of flops out of position (cancels)
-- **Formula (code)**: `(cb_1 × r) / (cb_opp_1 × r) × 100 with r = (saw_f − street1InPosition) / saw_f; r cancels, so = cb_1 / cb_opp_1 × 100`
-- **SQL database field / logic**: cb_1 = SUM(HudCache.street1CBDone); cb_opp_1 = SUM(HudCache.street1CBChance); saw_f = SUM(HudCache.street1Seen); street1InPosition = SUM(HudCache.street1InPosition)
+- **Formula (code)**: `(cb_1 × r) / (cb_opp_1 × r) × 100 with r = (saw_f − street1inposition) / saw_f; r cancels, so = cb_1 / cb_opp_1 × 100`
+- **SQL database field / logic**: cb_1 = SUM(HudCache.street1CBDone); cb_opp_1 = SUM(HudCache.street1CBChance); saw_f = SUM(HudCache.street1Seen); street1inposition = SUM(HudCache.street1InPosition)
 - **Tooltip**: % c-bet out of position
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes, on the flop
@@ -1835,35 +1833,33 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 ### Flop Probe Bet — `probe_bet`
 
 - **HUD abbreviation**: `probe`
-- **Description**: Meant as the percentage of flops seen without having c-bet on which the player bet. Reads `street1Bets`, which the HUD queries do not select, so the value is not reliable.
+- **Description**: Percentage of the flops seen without a c-bet on which the player bet: flop bets, capped at that number of flops. An estimate built from totals, not from the same hands.
 - **Formula**: min(flop bets, flops seen − flop c-bets) / (Number of flops seen − Number of flop c-bets) × 100
-- **Formula (code)**: `min(street1Bets, saw_f − cb_1) / (saw_f − cb_1) × 100`
-- **SQL database field / logic**: saw_f = SUM(HudCache.street1Seen); cb_1 = SUM(HudCache.street1CBDone); street1Bets = SUM(HudCache.street1Bets)
+- **Formula (code)**: `min(bet_1, saw_f − cb_1) / (saw_f − cb_1) × 100`
+- **SQL database field / logic**: saw_f = SUM(HudCache.street1Seen); cb_1 = SUM(HudCache.street1CBDone); bet_1 = SUM(HudCache.street1Bets)
 - **Tooltip**: % probe bet flop
-- **Games**: none: the stat shows no data
-- **Hold'em / Omaha (flop games)**: no data
-- **Stud / Razz**: no data
-- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 derivation tests**: `test_player_situations.py`, `test_pt4_adapter.py`
-- **Status**: input-missing
-- **Note**: Flop probe: bets over the flops seen where the player did not c-bet. Reads `street1Bets`, which the HUD queries expose as `bet_1`.
+- **Status**: estimate
+- **Note**: Flop probe: flop bets over the flops seen where the player did not c-bet. An estimate from totals, not the same hands.
 
 ### Flop Raise Frequency — `raise_frequency_flop`
 
 - **HUD abbreviation**: `raise_f`
-- **Description**: Meant as raises per flop seen. Reads keys the HUD queries do not select, so the value is not reliable.
-- **Formula**: Number of flop raises (key not selected by the HUD queries, which name it raise_1) / Number of hands where the player saw the flop × 100
-- **Formula (code)**: `street1Raises / saw_f × 100`
-- **SQL database field / logic**: saw_f = SUM(HudCache.street1Seen); street1Raises (not selected by the HUD queries)
+- **Description**: Raises made on the flop per flop seen, as a percentage. Every raise counts, a re-raise too, so it can pass 100%.
+- **Formula**: Number of raises made on the flop (every raise counts, a re-raise too) / Number of hands where the player saw the flop × 100
+- **Formula (code)**: `raise_1 / saw_f × 100`
+- **SQL database field / logic**: saw_f = SUM(HudCache.street1Seen); raise_1 = SUM(HudCache.street1Raises)
 - **Tooltip**: % raise frequency flop
 - **Detailed HUD text**: `raise_freq_flop`
-- **Games**: none: the stat shows no data
-- **Hold'em / Omaha (flop games)**: no data
-- **Stud / Razz**: no data
-- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
-- **PT4 derivation tests**: `test_pt4_adapter.py`
-- **Status**: input-missing
-- **Note**: An input is read under a name the HUD queries do not select, so the value is computed from a missing column. Check the HUD queries before relying on it.
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
+- **PT4 derivation tests**: `test_action_enum_hud_stats.py`, `test_pt4_adapter.py`
 
 ### Raise vs Flop 3-Bet — `raise_vs_flop_3bet`
 
@@ -1966,18 +1962,16 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 ### Turn Bet Frequency — `bet_frequency_turn`
 
 - **HUD abbreviation**: `bet_t`
-- **Description**: Meant as bets per turn seen. Reads keys the HUD queries do not select, so the value is not reliable.
-- **Formula**: Number of turn bets (key not selected by the HUD queries, which name it bet_2) / Number of hands where the player saw the turn (key not selected by the HUD queries) × 100
-- **Formula (code)**: `street2Bets / saw_t × 100`
-- **SQL database field / logic**: saw_t (not selected by the HUD queries); street2Bets (not selected by the HUD queries)
+- **Description**: Bets made on the turn per turn seen, as a percentage.
+- **Formula**: Number of bets made on the turn (every bet counts) / Number of hands where the player saw the turn × 100
+- **Formula (code)**: `bet_2 / saw_2 × 100`
+- **SQL database field / logic**: saw_2 = SUM(HudCache.street2Seen); bet_2 = SUM(HudCache.street2Bets)
 - **Tooltip**: % bet frequency turn
 - **Detailed HUD text**: `bet_freq_turn`
-- **Games**: none: the stat shows no data
-- **Hold'em / Omaha (flop games)**: no data
-- **Stud / Razz**: no data
-- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
-- **Status**: input-missing
-- **Note**: An input is read under a name the HUD queries do not select, so the value is computed from a missing column. Check the HUD queries before relying on it.
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the second draw (triple draw)
 
 ### Call vs Turn Barrel after Float — `call_float_turn`
 
@@ -2182,17 +2176,17 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 ### Float Bet Turn — `float_bet`
 
 - **HUD abbreviation**: `float`
-- **Description**: Meant as the percentage of turns on which the player bet after calling the flop in position. Reads keys the HUD queries do not select.
+- **Description**: Estimate of how often the player bets the turn after calling the flop in position: turn bets over the smallest of the flops played in position, the flop calls and the turns seen. Built from totals, not from the same hands.
 - **Formula**: min(Number of turn bets, opp) / opp × 100, where opp = the smallest of Number of flops in position, Number of flop calls, Number of turns seen
-- **Formula (code)**: `min(street2Bets, opp) / opp × 100 with opp = min(street1InPosition, street1Calls, saw_t)`
-- **SQL database field / logic**: street1InPosition = SUM(HudCache.street1InPosition); street1Calls = SUM(HudCache.street1Calls); saw_t = SUM(HudCache.street2Seen); street2Bets = SUM(HudCache.street2Bets)
+- **Formula (code)**: `min(bet_2, opp) / opp × 100 with opp = min(street1inposition, call_1, saw_2)`
+- **SQL database field / logic**: street1inposition = SUM(HudCache.street1InPosition); call_1 = SUM(HudCache.street1Calls); saw_2 = SUM(HudCache.street2Seen); bet_2 = SUM(HudCache.street2Bets)
 - **Tooltip**: % float bet turn
-- **Games**: none: the stat shows no data
-- **Hold'em / Omaha (flop games)**: no data
-- **Stud / Razz**: no data
-- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
-- **Status**: input-missing
-- **Note**: An estimate from totals, not the same hands: the opportunities are the smallest of flops in position, flop calls and turns seen. Several inputs use names the HUD queries expose differently (`call_1`, `saw_2`, `bet_2`).
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
+- **Status**: estimate
+- **Note**: An estimate from totals, not the same hands: the opportunities are the smallest of flops in position, flop calls and turns seen.
 
 ### Turn Float — `float_turn`
 
@@ -2349,17 +2343,17 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 ### Turn Probe Bet — `probe_bet_turn`
 
 - **HUD abbreviation**: `probe_t`
-- **Description**: Meant as the percentage of turns seen without having c-bet on which the player bet. Reads keys the HUD queries do not select.
+- **Description**: Percentage of the turns seen without a c-bet on which the player bet: turn bets, capped at that number of turns. An estimate built from totals, not from the same hands.
 - **Formula**: min(turn bets, turns seen − turn c-bets) / (Number of turns seen − Number of turn c-bets) × 100
-- **Formula (code)**: `min(street2Bets, saw_t − cb_2) / (saw_t − cb_2) × 100`
-- **SQL database field / logic**: saw_t = SUM(HudCache.street2Seen); cb_2 = SUM(HudCache.street2CBDone); street2Bets = SUM(HudCache.street2Bets)
+- **Formula (code)**: `min(bet_2, saw_2 − cb_2) / (saw_2 − cb_2) × 100`
+- **SQL database field / logic**: saw_2 = SUM(HudCache.street2Seen); cb_2 = SUM(HudCache.street2CBDone); bet_2 = SUM(HudCache.street2Bets)
 - **Tooltip**: % probe bet turn
-- **Games**: none: the stat shows no data
-- **Hold'em / Omaha (flop games)**: no data
-- **Stud / Razz**: no data
-- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
-- **Status**: input-missing
-- **Note**: Turn probe. The HUD queries name the turn-seen count `saw_2` and the bet count `bet_2`, not the keys this stat reads.
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the second draw (triple draw)
+- **Status**: estimate
+- **Note**: Turn probe: turn bets over the turns seen where the player did not c-bet. An estimate from totals, not the same hands.
 
 ### Bet the turn (as non-aggressor) after the preflop raiser checked the flop. — `probe_turn`
 
@@ -2390,18 +2384,17 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 ### Turn Raise Frequency — `raise_frequency_turn`
 
 - **HUD abbreviation**: `raise_t`
-- **Description**: Meant as raises per turn seen. Reads keys the HUD queries do not select, so the value is not reliable.
-- **Formula**: Number of turn raises (key not selected by the HUD queries, which name it raise_2) / Number of hands where the player saw the turn (key not selected by the HUD queries) × 100
-- **Formula (code)**: `street2Raises / saw_t × 100`
-- **SQL database field / logic**: saw_t (not selected by the HUD queries); street2Raises (not selected by the HUD queries)
+- **Description**: Raises made on the turn per turn seen, as a percentage. Every raise counts, a re-raise too, so it can pass 100%.
+- **Formula**: Number of raises made on the turn (every raise counts, a re-raise too) / Number of hands where the player saw the turn × 100
+- **Formula (code)**: `raise_2 / saw_2 × 100`
+- **SQL database field / logic**: saw_2 = SUM(HudCache.street2Seen); raise_2 = SUM(HudCache.street2Raises)
 - **Tooltip**: % raise frequency turn
 - **Detailed HUD text**: `raise_freq_turn`
-- **Games**: none: the stat shows no data
-- **Hold'em / Omaha (flop games)**: no data
-- **Stud / Razz**: no data
-- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
-- **Status**: input-missing
-- **Note**: An input is read under a name the HUD queries do not select, so the value is computed from a missing column. Check the HUD queries before relying on it.
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the second draw (triple draw)
+- **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
 ### Raise vs Turn 3-Bet — `raise_vs_turn_3bet`
 
@@ -2957,17 +2950,17 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 ### River Probe Bet — `probe_bet_river`
 
 - **HUD abbreviation**: `probe_r`
-- **Description**: Meant as the percentage of rivers seen without having c-bet on which the player bet. Reads keys the HUD queries do not select.
+- **Description**: Percentage of the rivers seen without a c-bet on which the player bet: river bets, capped at that number of rivers. An estimate built from totals, not from the same hands.
 - **Formula**: min(river bets, rivers seen − river c-bets) / (Number of rivers seen − Number of river c-bets) × 100
-- **Formula (code)**: `min(street3Bets, saw_r − cb_3) / (saw_r − cb_3) × 100`
-- **SQL database field / logic**: saw_r = SUM(HudCache.street3Seen); cb_3 = SUM(HudCache.street3CBDone); street3Bets = SUM(HudCache.street3Bets)
+- **Formula (code)**: `min(bet_3, saw_3 − cb_3) / (saw_3 − cb_3) × 100`
+- **SQL database field / logic**: saw_3 = SUM(HudCache.street3Seen); cb_3 = SUM(HudCache.street3CBDone); bet_3 = SUM(HudCache.street3Bets)
 - **Tooltip**: % probe bet river
-- **Games**: none: the stat shows no data
-- **Hold'em / Omaha (flop games)**: no data
-- **Stud / Razz**: no data
-- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
-- **Status**: input-missing
-- **Note**: River probe. The HUD queries name the river-seen count `saw_3` and the bet count `bet_3`, not the keys this stat reads.
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: yes, on 6th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the third draw (triple draw)
+- **Status**: estimate
+- **Note**: River probe: river bets over the rivers seen where the player did not c-bet. An estimate from totals, not the same hands.
 
 ### Price of River Raise Faced — `r_2bet_facing`
 
@@ -3363,8 +3356,8 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 - **HUD abbreviation**: `overbet`
 - **Description**: Not measured: the stat shows a fixed 15% as soon as any bet exists. Kept so old layouts load.
 - **Formula**: 15% (a constant)
-- **Formula (code)**: `constant 15 %, shown once any bet has been seen (Σ street1..3Bets > 0)`
-- **SQL database field / logic**: street1Bets, street2Bets, street3Bets = SUM(HudCache.streetNBets) (exposed by the HUD queries as bet_1..3)
+- **Formula (code)**: `constant 15 %, shown once any bet has been seen (bet_1 + bet_2 + bet_3 > 0)`
+- **SQL database field / logic**: bet_N = SUM(HudCache.streetNBets) for streets 1 to 3
 - **Tooltip**: % overbet frequency
 - **Detailed HUD text**: `overbet_freq`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)

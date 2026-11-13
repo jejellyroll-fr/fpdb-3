@@ -119,7 +119,7 @@ def test_wwsf_is_documented_as_an_alias_of_wmsf() -> None:
 def test_cb_ip_and_cb_oop_are_flagged_as_not_split_by_position() -> None:
     from fpdb_3_legacy import Stats  # noqa: PLC0415
 
-    row = {"saw_f": 50, "street1InPosition": 20, "cb_1": 9, "cb_opp_1": 30}
+    row = {"saw_f": 50, "street1inposition": 20, "cb_1": 9, "cb_opp_1": 30}
     overall = Stats.cb1({1: row}, 1)[0]
     for name in ("cb_ip", "cb_oop"):
         assert Stats.do_stat({1: row}, 1, name)[0] == pytest.approx(overall)
@@ -162,3 +162,10 @@ def test_corpus_covers_every_game_family() -> None:
     hands = GUIDE["corpus"]["hands"]
     for base in ("hold", "stud", "draw"):
         assert sum(n for kind, n in hands.items() if kind.endswith(":" + base)) > 100, base
+
+
+def test_no_stat_reads_an_input_the_hud_queries_do_not_select() -> None:
+    # #790: eight stats and two more read keys no query selects (wrong name or case).
+    assert [e["name"] for e in GUIDE["stats"] if e["status"] == "input-missing"] == []
+    for name in ("bet_frequency_flop", "raise_frequency_turn", "cold_call", "fold_vs_4bet", "float_bet"):
+        assert "not selected" not in _entry(name)["sql"], name

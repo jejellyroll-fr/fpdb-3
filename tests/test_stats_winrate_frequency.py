@@ -131,7 +131,7 @@ class TestBetFrequencyStat:
 
     def test_bet_frequency_flop_with_no_opportunities(self) -> None:
         """Test bet_frequency_flop returns '-' when no flop opportunities."""
-        stat_dict = {"player1": {"saw_f": 0, "street1Bets": 0}}
+        stat_dict = {"player1": {"saw_f": 0, "bet_1": 0}}
         result = bet_frequency_flop(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -140,7 +140,7 @@ class TestBetFrequencyStat:
 
     def test_bet_frequency_flop_with_zero_but_opportunities(self) -> None:
         """Test bet_frequency_flop returns '0.0' when player never bet flop but saw flop."""
-        stat_dict = {"player1": {"saw_f": 12, "street1Bets": 0}}
+        stat_dict = {"player1": {"saw_f": 12, "bet_1": 0}}
         result = bet_frequency_flop(stat_dict, "player1")
 
         assert result[1] == "0.0"
@@ -149,7 +149,7 @@ class TestBetFrequencyStat:
 
     def test_bet_frequency_flop_with_normal_value(self) -> None:
         """Test bet_frequency_flop returns normal percentage when player bet flop."""
-        stat_dict = {"player1": {"saw_f": 20, "street1Bets": 8}}
+        stat_dict = {"player1": {"saw_f": 20, "bet_1": 8}}
         result = bet_frequency_flop(stat_dict, "player1")
 
         assert result[1] == "40.0"  # 8/20 = 40%
@@ -158,7 +158,7 @@ class TestBetFrequencyStat:
 
     def test_bet_frequency_turn_with_normal_value(self) -> None:
         """Test bet_frequency_turn returns normal percentage when player bet turn."""
-        stat_dict = {"player1": {"saw_t": 15, "street2Bets": 6}}
+        stat_dict = {"player1": {"saw_2": 15, "bet_2": 6}}
         result = bet_frequency_turn(stat_dict, "player1")
 
         assert result[1] == "40.0"  # 6/15 = 40%
@@ -183,7 +183,7 @@ class TestRaiseFrequencyStat:
 
     def test_raise_frequency_flop_with_no_opportunities(self) -> None:
         """Test raise_frequency_flop returns '-' when no flop opportunities."""
-        stat_dict = {"player1": {"saw_f": 0, "street1Raises": 0}}
+        stat_dict = {"player1": {"saw_f": 0, "raise_1": 0}}
         result = raise_frequency_flop(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -192,7 +192,7 @@ class TestRaiseFrequencyStat:
 
     def test_raise_frequency_flop_with_zero_but_opportunities(self) -> None:
         """Test raise_frequency_flop returns '0.0' when player never raised flop but saw flop."""
-        stat_dict = {"player1": {"saw_f": 18, "street1Raises": 0}}
+        stat_dict = {"player1": {"saw_f": 18, "raise_1": 0}}
         result = raise_frequency_flop(stat_dict, "player1")
 
         assert result[1] == "0.0"
@@ -201,7 +201,7 @@ class TestRaiseFrequencyStat:
 
     def test_raise_frequency_flop_with_normal_value(self) -> None:
         """Test raise_frequency_flop returns normal percentage when player raised flop."""
-        stat_dict = {"player1": {"saw_f": 25, "street1Raises": 5}}
+        stat_dict = {"player1": {"saw_f": 25, "raise_1": 5}}
         result = raise_frequency_flop(stat_dict, "player1")
 
         assert result[1] == "20.0"  # 5/25 = 20%
@@ -210,7 +210,7 @@ class TestRaiseFrequencyStat:
 
     def test_raise_frequency_turn_with_normal_value(self) -> None:
         """Test raise_frequency_turn returns normal percentage when player raised turn."""
-        stat_dict = {"player1": {"saw_t": 12, "street2Raises": 3}}
+        stat_dict = {"player1": {"saw_2": 12, "raise_2": 3}}
         result = raise_frequency_turn(stat_dict, "player1")
 
         assert result[1] == "25.0"  # 3/12 = 25%
@@ -241,11 +241,11 @@ class TestWinrateFrequencyStatsIntegration:
                 "wmsd": 0,
                 "saw_f": 0,
                 "w_w_s_1": 0,
-                "saw_t": 0,
-                "street1Bets": 0,
-                "street2Bets": 0,
-                "street1Raises": 0,
-                "street2Raises": 0,
+                "saw_2": 0,
+                "bet_1": 0,
+                "bet_2": 0,
+                "raise_1": 0,
+                "raise_2": 0,
             },
         }
 
@@ -268,13 +268,13 @@ class TestWinrateFrequencyStatsIntegration:
                 "saw_f": 20,
                 "w_w_s_1": 12,
                 # Turn: saw 15 turns
-                "saw_t": 15,
+                "saw_2": 15,
                 # Betting: bet 8 flops, 6 turns
-                "street1Bets": 8,
-                "street2Bets": 6,
+                "bet_1": 8,
+                "bet_2": 6,
                 # Raising: raised 4 flops, 2 turns
-                "street1Raises": 4,
-                "street2Raises": 2,
+                "raise_1": 4,
+                "raise_2": 2,
             },
         }
 
@@ -296,12 +296,12 @@ class TestWinrateFrequencyStatsIntegration:
                 # Many flops seen but few wins
                 "saw_f": 30,
                 "w_w_s_1": 8,
-                "saw_t": 18,
+                "saw_2": 18,
                 # Very low betting/raising frequency
-                "street1Bets": 2,
-                "street2Bets": 1,
-                "street1Raises": 1,
-                "street2Raises": 0,
+                "bet_1": 2,
+                "bet_2": 1,
+                "raise_1": 1,
+                "raise_2": 0,
             },
         }
 
@@ -336,11 +336,11 @@ class TestWinrateFrequencyStatsRegressionTests:
                 "wmsd": 6,
                 "saw_f": 20,
                 "w_w_s_1": 12,
-                "saw_t": 15,
-                "street1Bets": 8,
-                "street2Bets": 6,
-                "street1Raises": 4,
-                "street2Raises": 2,
+                "saw_2": 15,
+                "bet_1": 8,
+                "bet_2": 6,
+                "raise_1": 4,
+                "raise_2": 2,
             },
         }
 

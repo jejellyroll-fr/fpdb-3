@@ -88,9 +88,7 @@ _FIXED: dict[str, str] = {
     "gp_limp": "open limps",
     "3bet": "preflop 3-bets under the key `3bet` (not selected by any HUD query: always 0)",
     "saw_f": "hands where the player saw the flop",
-    "saw_t": "hands where the player saw the turn (key not selected by the HUD queries)",
-    "saw_r": "hands where the player saw the river (key not selected by the HUD queries)",
-    "street1InPosition": "flops played in position",
+    "street1inposition": "flops played in position",
     "sd": "hands where the player went to showdown",
     "wmsd": "showdowns where the player won money (any share of a pot)",
     "w_w_s_1": "hands where the player saw the flop and won money (any share of a pot, with or without showdown)",
@@ -108,12 +106,6 @@ _FIXED: dict[str, str] = {
     "amt_bet_t": "sum: chips put in on the turn, in cents",
     "amt_bet_r": "sum: chips put in on the river, in cents",
     "amt_bet_ttl": "sum: chips put in over the whole hand, in cents",
-    "street1Bets": "flop bets (key not selected by the HUD queries, which name it bet_1)",
-    "street2Bets": "turn bets (key not selected by the HUD queries, which name it bet_2)",
-    "street3Bets": "river bets (key not selected by the HUD queries, which name it bet_3)",
-    "street1Raises": "flop raises (key not selected by the HUD queries, which name it raise_1)",
-    "street2Raises": "turn raises (key not selected by the HUD queries, which name it raise_2)",
-    "street1Calls": "flop calls (key not selected by the HUD queries, which name it call_1)",
     "aof_obs": "observable all-ins (decision all-in, hole cards and flop captured)",
     "aof_known": "all-ins whose callers' cards were all captured",
     "aof_known_equity_ppm": "sum: flop equity against the actual callers in parts per million",
@@ -145,6 +137,8 @@ _FIXED: dict[str, str] = {
 _PATTERNS: tuple[tuple[str, str], ...] = (
     (r"saw_([1-4])$", "hands where the player saw the {s1}"),
     (r"aggr_([1-4])$", "hands where the player bet or raised on the {s1}"),
+    (r"bet_([1-3])$", "bets made on the {s1} (every bet counts)"),
+    (r"raise_([1-3])$", "raises made on the {s1} (every raise counts, a re-raise too)"),
     (r"call_([1-4])$", "calls made on the {s1} (every call counts)"),
     (r"cb_([1-4])$", "continuation bets on the {s1} (the last preflop raiser bet or raised on the street)"),
     (r"cb_opp_([1-4])$", "{s1} continuation-bet opportunities (the last preflop raiser, not folded yet)"),
@@ -457,19 +451,19 @@ _TEXT: dict[str, tuple[str, str]] = {
     ),
     "probe_bet": (
         "Flop Probe Bet",
-        "Meant as the percentage of flops seen without having c-bet on which the player bet. Reads `street1Bets`, which the HUD queries do not select, so the value is not reliable.",
+        "Percentage of the flops seen without a c-bet on which the player bet: flop bets, capped at that number of flops. An estimate built from totals, not from the same hands.",
     ),
     "probe_bet_turn": (
         "Turn Probe Bet",
-        "Meant as the percentage of turns seen without having c-bet on which the player bet. Reads keys the HUD queries do not select.",
+        "Percentage of the turns seen without a c-bet on which the player bet: turn bets, capped at that number of turns. An estimate built from totals, not from the same hands.",
     ),
     "probe_bet_river": (
         "River Probe Bet",
-        "Meant as the percentage of rivers seen without having c-bet on which the player bet. Reads keys the HUD queries do not select.",
+        "Percentage of the rivers seen without a c-bet on which the player bet: river bets, capped at that number of rivers. An estimate built from totals, not from the same hands.",
     ),
     "float_bet": (
         "Float Bet Turn",
-        "Meant as the percentage of turns on which the player bet after calling the flop in position. Reads keys the HUD queries do not select.",
+        "Estimate of how often the player bets the turn after calling the flop in position: turn bets over the smallest of the flops played in position, the flop calls and the turns seen. Built from totals, not from the same hands.",
     ),
     "float_turn": (
         "Turn Float",
@@ -799,11 +793,11 @@ def _family_street_frequency(name: str) -> tuple[str, str] | None:
             "fold": (f"{street.title()} Fold", f"Percentage of the {street}s a player saw that they folded."),
             "bet_frequency": (
                 f"{street.title()} Bet Frequency",
-                f"Meant as bets per {street} seen. Reads keys the HUD queries do not select, so the value is not reliable.",
+                f"Bets made on the {street} per {street} seen, as a percentage.",
             ),
             "raise_frequency": (
                 f"{street.title()} Raise Frequency",
-                f"Meant as raises per {street} seen. Reads keys the HUD queries do not select, so the value is not reliable.",
+                f"Raises made on the {street} per {street} seen, as a percentage. Every raise counts, a re-raise too, so it can pass 100%.",
             ),
         }
         return texts[kind]
