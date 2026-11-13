@@ -12,11 +12,11 @@ holds open, and a UTF-8 file name.
 from __future__ import annotations
 
 import os
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from fpdb_3_legacy.Importer import Importer
 from fpdb_3_legacy.UnibetToFpdb import Unibet
-from types import SimpleNamespace
 
 
 def _importer(path, seen_size: int, offset: int) -> Importer:
