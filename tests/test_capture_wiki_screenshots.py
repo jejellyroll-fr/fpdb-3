@@ -35,3 +35,20 @@ def test_every_capture_has_a_distinct_png_name() -> None:
 
     assert len(names) == len(set(names))
     assert all(name.endswith(".png") for name in names)
+
+
+def test_the_editor_picture_shows_a_profile_made_of_panels_when_there_is_one() -> None:
+    profiles = {"flat": {"stats": []}, "panels": {"blocks": [{}]}, "other": {"blocks": [{}]}}
+    assert capture.editor_profile(profiles) == "panels"
+    assert capture.editor_profile({"flat": {"stats": []}}) == "flat"
+    assert capture.editor_profile({}) is None
+
+
+def test_the_popup_picture_shows_a_classic_popup_with_several_stats() -> None:
+    popups = {
+        "a_grid": {"class": "BlockPopup", "stats": [{}] * 9},
+        "b_short": {"class": "Submenu", "stats": [{}] * 2},
+        "c_list": {"class": "Submenu", "stats": [{}] * 6},
+    }
+    assert capture.editor_popup(popups) == "c_list"
+    assert capture.editor_popup({"a_grid": popups["a_grid"]}) is None

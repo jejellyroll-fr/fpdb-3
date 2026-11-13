@@ -66,7 +66,8 @@ tables in the images.
 | `study-hand-strength.png` | Study Explorer, Hand strength | Known-card strength composition |
 | `study-profit.png` | Study Explorer, Profit | Realized profit beside all-in EV |
 | `study-source-hands.png` | Study Explorer, Source hands | Hero and Field hands behind a comparison |
-| `hud-preferences.png` | HUD Preferences | The profile bar and the stat-set tabs |
+| `hud-preferences.png` | HUD Preferences, Statistics | Panels and stat catalogue, the Design canvas over its preview, the selection's properties |
+| `hud-preferences-popups.png` | HUD Preferences, Popup Windows | A popup's stats on the canvas, its preview, and the item and popup properties |
 | `hand-viewer.png` | Hand Viewer | A stored hand, its actions and its cards |
 | `hand-replayer.png` | Replayer | The same hand, action by action |
 | `ring-player-stats.png` | Statistics | The classic per-player reports |

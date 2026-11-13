@@ -342,10 +342,9 @@ class ModernHudPreferences(QDialog):
 
         # What to do with the panel: add an item, edit or remove the selected
         # one, grow the grid. Adding is one menu, so the row stays narrow.
-        self.add_item_btn = QToolButton()
-        self.add_item_btn.setText(_("Add"))
+        # A push button, so the theme draws it like Edit and Remove beside it.
+        self.add_item_btn = QPushButton(_("Add"))
         self.add_item_btn.setToolTip(_("Add a stat, a text label, a separator line or a panel"))
-        self.add_item_btn.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         self.add_item_btn.setFixedHeight(26)
         self.add_item_btn.setMinimumWidth(72)
         add_menu = QMenu(self.add_item_btn)
