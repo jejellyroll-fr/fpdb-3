@@ -404,6 +404,17 @@ def _record_bounds(toks: list[tuple[str, object, int]], string_idx: int) -> tupl
     return None
 
 
+def _is_font_field(strings: list[str], colors: list[int]) -> bool:
+    """Whether a "record" is only the font face of the record around it (#783).
+
+    Every visual record names its font among its strings, e.g. ``['10.3% Range',
+    '', '', '', 'Tahoma']``. The font string's own bounds also parse as a record:
+    ``['Tahoma']``, with no colours, and whatever integer comes first as its
+    kind. Taken as a cell, it puts the font name where PT4 shows nothing.
+    """
+    return not colors and len(strings) == 1 and strings[0].strip() in _FONTS
+
+
 def _visual_records(data: bytes) -> list[dict]:
     """Extract PT4 visual text records from the typed layout stream.
 
@@ -432,6 +443,8 @@ def _visual_records(data: bytes) -> list[dict]:
         colors = [v for t, v, _o in sub if t == "l" and isinstance(v, int)]
         kind = ints[0] if ints else None
         if kind not in (1, 2, 4):
+            continue
+        if _is_font_field(strings, colors):
             continue
         records.append(
             {
