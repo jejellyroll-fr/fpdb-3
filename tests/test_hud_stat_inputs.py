@@ -27,10 +27,7 @@ HUD_QUERIES = (
 
 #: Keys that are not a selected column, with why each is allowed. Never add to it
 #: to make a stat pass: select the column or read the right key instead.
-KNOWN_ABSENT = {
-    # ``currency`` is read with a USD default; the HUD query does not select it (#797).
-    "currency",
-}
+KNOWN_ABSENT: frozenset[str] = frozenset()
 
 
 class _Row(dict):  # type: ignore[type-arg]

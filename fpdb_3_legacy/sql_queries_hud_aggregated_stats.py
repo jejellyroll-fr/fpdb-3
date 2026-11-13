@@ -208,6 +208,8 @@ def hud_aggregated_stats_queries() -> dict[str, str]:
                    sum(hc.foldToStreet4CBDone)         AS f_cb_4,
                    sum(hc.totalProfit)                 AS net,
                    sum(gt.bigblind * hc.n)             AS bigblind,
+                   /* One symbol only when every pooled game type shares it; mixed is ''. */
+                   CASE WHEN MIN(gt.currency) = MAX(gt.currency) THEN MAX(gt.currency) ELSE '' END AS currency,
                    sum(hc.street1CheckCallRaiseChance) AS ccr_opp_1,
                    sum(hc.street1CheckCallDone)        AS cc_1,
                    sum(hc.street1CheckRaiseDone)       AS cr_1,

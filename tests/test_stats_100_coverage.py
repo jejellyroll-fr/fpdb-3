@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """100% coverage tests for Stats.py - targets all missing branches."""
 
-
 import pytest
 
 from fpdb_3_legacy.Stats import (
@@ -82,10 +81,16 @@ def test_do_stat_decimal_override_vpip1():
 
 
 def test_totalprofit_with_net():
-    """Test totalprofit with net value present."""
-    stat_dict = {1: {"net": 5000}}
+    """Test totalprofit with net value present, in the currency the HUD query selects (#797)."""
+    stat_dict = {1: {"net": 5000, "currency": "USD"}}
     result = do_stat(stat_dict, stat="totalprofit", player=1)
     assert result[1] == "$50.00"
+
+
+def test_totalprofit_without_a_currency_shows_no_symbol():
+    """No currency (or pooled game types that disagree) gives a plain number (#797)."""
+    result = do_stat({1: {"net": 5000}}, stat="totalprofit", player=1)
+    assert result[1] == "50.00"
 
 
 def test_totalprofit_no_net():

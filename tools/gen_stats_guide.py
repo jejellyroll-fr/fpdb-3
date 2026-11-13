@@ -51,7 +51,7 @@ HUD_SQL_FILES = (
 # Keys the HUD query does not select under that name, with what they really are.
 KEY_NOTES: dict[str, str] = {
     "screen_name": "the player's name (p.name)",
-    "currency": "not selected by the HUD queries: always the USD default",
+    "currency": "the game type's currency; empty when pooled game types differ",
 }
 
 # --------------------------------------------------------------------------- #

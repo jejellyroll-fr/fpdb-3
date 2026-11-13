@@ -3544,10 +3544,10 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 ### Total Profit — `totalprofit`
 
 - **HUD abbreviation**: `tp`
-- **Description**: The player's total profit over the aggregated hands. It is always formatted as US dollars: the HUD query does not select the game's currency. In tournaments the amount is chips.
-- **Formula**: Sum of profit in cents / 100, formatted as USD
+- **Description**: The player's total profit over the aggregated hands. It is shown in the game's currency, without a symbol when the pooled game types use different currencies. In tournaments the amount is chips (usually shown as T$).
+- **Formula**: Sum of profit in cents / 100, in the game's currency
 - **Formula (code)**: `net / 100, formatted with the game's currency`
-- **SQL database field / logic**: net = SUM(HudCache.totalProfit); currency is not selected by the HUD queries, so the USD default is used
+- **SQL database field / logic**: net = SUM(HudCache.totalProfit); currency = the game type's currency (none when pooled game types differ)
 - **Tooltip**: Total Profit
 - **Detailed HUD text**: `tot_prof`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); amounts are tournament chips there, not money
