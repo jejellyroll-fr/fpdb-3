@@ -631,14 +631,19 @@ _SIT_TITLES = {
 }
 
 
-def _family(name: str) -> tuple[str, str] | None:  # noqa: C901, PLR0911, PLR0912, PLR0915 - one branch per family
-    """Title and description of a stat that belongs to a numbered or positional family."""
+def _family_hand_class(name: str) -> tuple[str, str] | None:
+    """Title and description of the `hand_class` stat family, or None."""
     if name in _HAND_CLASSES:
         cls = _HAND_CLASSES[name]
         return (
             f"All-ins with {cls}",
             f"Percentage of the player's observable all-ins (hole cards and flop captured) where they held {cls} on the flop.",
         )
+    return None
+
+
+def _family_position(name: str) -> tuple[str, str] | None:
+    """Title and description of the `position` stat family, or None."""
     match = re.fullmatch(r"(three_bet|four_bet|squeeze)_(bb|sb|btn|co|mp|ep)", name)
     if match:
         kind, pos = match.groups()
@@ -649,6 +654,11 @@ def _family(name: str) -> tuple[str, str] | None:  # noqa: C901, PLR0911, PLR091
             "squeeze": "3-bet after a raise and at least one call",
         }[kind]
         return (f"{label} from {_POS_NAMES[pos]}", f"Percentage of the time that a player in {POSITIONS[pos]} {verb}.")
+    return None
+
+
+def _family_rfi(name: str) -> tuple[str, str] | None:
+    """Title and description of the `rfi` stat family, or None."""
     match = re.fullmatch(r"rfi_(early|middle|late)_position", name)
     if match:
         where = {"early": "early position", "middle": "middle position", "late": "the cutoff"}[match.group(1)]
@@ -657,6 +667,11 @@ def _family(name: str) -> tuple[str, str] | None:  # noqa: C901, PLR0911, PLR091
             f"Raise First In from {match.group(1).title()} Position",
             f"Percentage of the time that a player in {where} raised when the pot was unopened.{note}",
         )
+    return None
+
+
+def _family_enum(name: str) -> tuple[str, str] | None:
+    """Title and description of the `enum` stat family, or None."""
     match = re.fullmatch(r"(call|raise|fold)_vs_(preflop|flop|turn|river)_(\w+)", name)
     if match:
         verb, street, sit = match.groups()
@@ -671,6 +686,11 @@ def _family(name: str) -> tuple[str, str] | None:  # noqa: C901, PLR0911, PLR091
             title,
             f"Percentage of the time that a player {verbs[verb]} when facing {SITUATIONS.get(sit, sit)} on the {street}.{extra}",
         )
+    return None
+
+
+def _family_float(name: str) -> tuple[str, str] | None:
+    """Title and description of the `float` stat family, or None."""
     match = re.fullmatch(r"(call|raise|fold)_float_(turn|river)", name)
     if match:
         verb, street = match.groups()
@@ -680,6 +700,11 @@ def _family(name: str) -> tuple[str, str] | None:  # noqa: C901, PLR0911, PLR091
             f"{verb.title()} vs {street.title()} Barrel after Float",
             f"Percentage of the time that a player who called the {before} in position {verbs[verb]} when the aggressor bet the {street} again.",
         )
+    return None
+
+
+def _family_numbered(name: str) -> tuple[str, str] | None:
+    """Title and description of the `numbered` stat family, or None."""
     match = re.fullmatch(r"(a_freq|cb|cr|f_cb|ffreq|dbr|f_dbr)([1-4])", name)
     if match:
         kind, num = match.groups()
@@ -715,6 +740,11 @@ def _family(name: str) -> tuple[str, str] | None:  # noqa: C901, PLR0911, PLR091
             ),
         }
         return texts[kind]
+    return None
+
+
+def _family_fold_to_cbet(name: str) -> tuple[str, str] | None:
+    """Title and description of the `fold_to_cbet` stat family, or None."""
     match = re.fullmatch(r"fold_to_cbet_(flop|turn|river)", name)
     if match:
         street = match.group(1)
@@ -722,6 +752,11 @@ def _family(name: str) -> tuple[str, str] | None:  # noqa: C901, PLR0911, PLR091
             f"Fold to {street.title()} Continuation Bet",
             f"Percentage of the time that a player folded when facing a {street} continuation bet.",
         )
+    return None
+
+
+def _family_postflop_raises(name: str) -> tuple[str, str] | None:
+    """Title and description of the `postflop_raises` stat family, or None."""
     match = re.fullmatch(r"(three_B|four_B|fold_to_three_B)_(flop|turn|river)", name)
     if match:
         kind, street = match.groups()
@@ -740,6 +775,11 @@ def _family(name: str) -> tuple[str, str] | None:  # noqa: C901, PLR0911, PLR091
             ),
         }
         return texts[kind]
+    return None
+
+
+def _family_street_frequency(name: str) -> tuple[str, str] | None:
+    """Title and description of the `street_frequency` stat family, or None."""
     match = re.fullmatch(r"(open|first_raise|face_raise|fold|bet_frequency|raise_frequency)_(flop|turn|river)", name)
     if match:
         kind, street = match.groups()
@@ -767,6 +807,11 @@ def _family(name: str) -> tuple[str, str] | None:  # noqa: C901, PLR0911, PLR091
             ),
         }
         return texts[kind]
+    return None
+
+
+def _family_price(name: str) -> tuple[str, str] | None:
+    """Title and description of the `price` stat family, or None."""
     match = re.fullmatch(r"([pftr])_(bet|raise|2bet|3bet|4bet|5bet)_facing", name)
     if match:
         st, what = match.groups()
@@ -779,6 +824,11 @@ def _family(name: str) -> tuple[str, str] | None:  # noqa: C901, PLR0911, PLR091
             f"Price of {street.title()} {noun} Faced",
             f"The average price the player was offered when facing a {street} {noun.lower()}: the amount to call divided by the pot at the moment of the decision (the pot already holds the bet), as a percentage. 50% means a call of half the pot.{latest}",
         )
+    return None
+
+
+def _family_size(name: str) -> tuple[str, str] | None:
+    """Title and description of the `size` stat family, or None."""
     match = re.fullmatch(r"([pftr])_(bet|raise)_made(_2)?", name)
     if match:
         st, what, second = match.groups()
@@ -793,6 +843,11 @@ def _family(name: str) -> tuple[str, str] | None:  # noqa: C901, PLR0911, PLR091
             f"Average {street.title()} Raise Size{' (2nd raise)' if second else ''}",
             f"The average size of the player's {nth} {street} raise: the raise-to amount as a percentage of the pot before the raise.",
         )
+    return None
+
+
+def _family_spr(name: str) -> tuple[str, str] | None:
+    """Title and description of the `spr` stat family, or None."""
     match = re.fullmatch(r"([ftr])_spr", name)
     if match:
         street = STREETS[match.group(1)]
@@ -800,6 +855,31 @@ def _family(name: str) -> tuple[str, str] | None:  # noqa: C901, PLR0911, PLR091
             f"{street.title()} Stack-to-Pot Ratio",
             f"The average stack-to-pot ratio entering the {street}: the effective stack (smallest of the player's and the deepest active opponent's) divided by the pot.",
         )
+    return None
+
+
+_FAMILIES = (
+    _family_hand_class,
+    _family_position,
+    _family_rfi,
+    _family_enum,
+    _family_float,
+    _family_numbered,
+    _family_fold_to_cbet,
+    _family_postflop_raises,
+    _family_street_frequency,
+    _family_price,
+    _family_size,
+    _family_spr,
+)
+
+
+def _family(name: str) -> tuple[str, str] | None:
+    """Title and description of a stat that belongs to a numbered or positional family."""
+    for family in _FAMILIES:
+        found = family(name)
+        if found is not None:
+            return found
     return None
 
 
@@ -871,127 +951,3 @@ PT4_DIFFERENCES: dict[str, str] = {
     "a_freq1": "PT4: flop bets and raises / (flop calls + folds + bets + raises), over actions. FPDB: flops on which the player bet or raised at least once / flops seen, over hands.",
     "a_freq_123": "PT4: flop-to-river bets and raises / (calls + folds + bets + raises), over actions. FPDB: streets with a bet or raise / streets seen, over hands.",
 }
-
-
-# --------------------------------------------------------------------------- #
-# Games and variants
-# --------------------------------------------------------------------------- #
-
-BASE_LABELS = {
-    "hold": "Hold'em / Omaha (flop games)",
-    "stud": "Stud / Razz",
-    "draw": "Draw (2-7, A-5, Badugi, 5-card draw...)",
-}
-
-# What a street number of the database is, per game family (Hand.actionStreets).
-_STREET_NAMES = {
-    "hold": {0: "preflop", 1: "on the flop", 2: "on the turn", 3: "on the river"},
-    "stud": {0: "on 3rd street", 1: "on 4th street", 2: "on 5th street", 3: "on 6th street", 4: "on 7th street"},
-    "draw": {
-        0: "before the first draw",
-        1: "after the first draw",
-        2: "after the second draw (triple draw)",
-        3: "after the third draw (triple draw)",
-    },
-}
-
-TOURNAMENTS = "Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)"
-CASH = "Cash games"
-
-
-def street_label(base: str, street: int | None) -> str:
-    """ "yes", or where a street-N stat happens in this game family."""
-    if street is None:
-        return "yes"
-    name = _STREET_NAMES[base].get(street)
-    return f"yes, {name}" if name else ""
-
-
-def games_for(entry: dict) -> list[str]:
-    """Cash and/or tournaments, from the descriptor scope or the stat's nature."""
-    name = entry["name"]
-    if entry["origin"] == "registry" and name.startswith("chipev_"):
-        return [TOURNAMENTS]
-    if name in {
-        "BBper100",
-        "bbper100",
-        "profit100",
-        "totalprofit",
-        "amt_blind",
-        "amt_bet_p",
-        "amt_bet_f",
-        "amt_bet_t",
-        "amt_bet_r",
-        "amt_bet_ttl",
-    }:
-        return [CASH, TOURNAMENTS + "; amounts are tournament chips there, not money"]
-    return [CASH, TOURNAMENTS]
-
-
-_ALL = {"hold": "yes", "stud": "yes", "draw": "yes"}
-_HOLD_ONLY = {"hold": "yes", "stud": "", "draw": ""}
-
-
-def applies_override(name: str, origin: str) -> dict | None:  # noqa: C901, PLR0911 - one rule per kind of stat
-    """Applicability of the stats that do not read HudCache columns."""
-    if origin == "analytics":
-        if name == "draw_decision_distribution":
-            return {"games": [CASH, TOURNAMENTS], "variants": {"hold": "", "stud": "", "draw": "yes"}}
-        return {"games": [CASH, TOURNAMENTS], "variants": dict(_ALL)}
-    if origin != "native":
-        return None
-    if name.startswith("aof_") and name not in {"aof_splash_freq", "aof_splash_won", "aof_showdowns"}:
-        return {"games": ["All-in or Fold cash tables (AoF Hold'em and AoF Omaha)"], "variants": dict(_HOLD_ONLY)}
-    if name in {"aof_splash_freq", "aof_splash_won"}:
-        return {"games": ["Cash tables of rooms that add splash pots"], "variants": dict(_HOLD_ONLY)}
-    if name == "starthands":
-        return {
-            "games": [CASH, TOURNAMENTS],
-            "variants": {"hold": "Hold'em only (the query is limited to holdem)", "stud": "", "draw": ""},
-        }
-    if name == "bounty":
-        return {"games": ["Knockout (bounty) tournaments"], "variants": dict(_ALL)}
-    if name in {"m_ratio", "bbstack"}:
-        return {"games": [TOURNAMENTS + "; computed in cash games too, where it means less"], "variants": dict(_ALL)}
-    if name in {
-        "blank",
-        "game_abbr",
-        "player_note",
-        "playername",
-        "playershort",
-        "playerprofile",
-        "covers",
-        "stack_amount",
-        "stack_bb",
-        "stack_native_bb",
-        "n",
-    }:
-        return {"games": [CASH, TOURNAMENTS], "variants": dict(_ALL)}
-    if name in {
-        "call_vs_steal",
-        "iso",
-        "three_bet_vs_steal",
-        "avg_bet_size_flop",
-        "avg_bet_size_turn",
-        "avg_bet_size_river",
-    }:
-        return {"games": ["none (shows no data)"], "variants": {"hold": "", "stud": "", "draw": ""}}
-    return None
-
-
-def applies_lines(entry: dict, corpus: dict) -> list[tuple[str, str]]:
-    """("Games", ...) and one line per game family, for the guide and the app."""
-    applies = entry.get("applies") or {}
-    games = applies.get("games") or ["none: the stat shows no data"]
-    lines = [("Games", "; ".join(games))]
-    for base, label in BASE_LABELS.items():
-        value = applies.get("variants", {}).get(base, "")
-        if not value:
-            count = sum(n for kind, n in corpus.get("hands", {}).items() if kind.endswith(":" + base))
-            value = (
-                "no data"
-                if entry.get("status") in ("deprecated", "input-missing")
-                else f"no data (its columns stay empty on all {count} {label.split(' (')[0]} test hands)"
-            )
-        lines.append((label, value))
-    return lines

@@ -53,10 +53,10 @@ EXPECTED = {
 
 
 def test_every_translated_common_pt4_stat_is_paired() -> None:
-    PT4_EQUIVALENTS = GEN.stats_guide_text.PT4_EQUIVALENTS  # noqa: N806
+    equivalents = GEN.stats_guide_text.PT4_EQUIVALENTS
 
     for title in PT4:
-        if title in PT4_EQUIVALENTS:
+        if title in equivalents:
             assert any(pt4["stat"] == title for _name, pt4 in PAIRED), title
 
 

@@ -5,7 +5,9 @@ Do not edit by hand: change the code or the overrides in the generator and run i
 
 from __future__ import annotations
 
-GUIDE = {'categories': {'player': 'Player',
+from typing import Any
+
+GUIDE: dict[str, Any] = {'categories': {'player': 'Player',
                 'preflop': 'Preflop',
                 'steal': 'Steal and blinds',
                 'flop': 'Flop / 4th street',
