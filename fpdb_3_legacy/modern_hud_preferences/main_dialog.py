@@ -57,7 +57,6 @@ from fpdb_3_legacy.modern_hud_preferences import (
 from fpdb_3_legacy.modern_hud_preferences.design_canvas import HudDesignCanvas
 from fpdb_3_legacy.modern_hud_preferences.dialogs import (
     AddStatDialog,
-    BlockPropertiesDialog,
     LayoutSelectionDialog,
     PopupStatEditDialog,
 )
@@ -251,37 +250,28 @@ class ModernHudPreferences(QDialog):
         stats_layout = QHBoxLayout(stats_tab)
         stats_layout.setContentsMargins(0, 10, 0, 0)
 
-        # Statistics splitter
+        # Three panes, as in a design tool (#780): what can go on the HUD on
+        # the left, the panel being edited and the HUD as drawn in the middle,
+        # the selection's properties on the right.
         stats_splitter = QSplitter(Qt.Orientation.Horizontal)
         stats_splitter.setHandleWidth(8)
+        stats_splitter.setChildrenCollapsible(False)
+        self.stats_splitter = stats_splitter
 
-        # Left panel: Statistics table
-        left_panel = QFrame()
-        left_panel.setFrameStyle(QFrame.Shape.StyledPanel)
-        left_layout = QVBoxLayout(left_panel)
-        left_layout.setContentsMargins(15, 15, 15, 15)
-        left_layout.setSpacing(10)
-
-        # How the whole profile is drawn: mode and font size, and which
-        # HUD window handler draws it (read only: it is set per game).
-        left_layout.addWidget(self._create_presentation_box())
-
-        # PT4-style panel (group) management: list + inline Group Properties.
         self._loading_group = False
         self._current_block_index = 0
-        # The one selected item (B11): every refresh selects it again by
-        # identity, in the Items list, the canvas and the table alike.
+        # The one selected item (B11), by identity: the canvas marks it.
         self._selected_item = None
         # Renamed profiles: current name -> name of its <ss> in the file.
         self._renamed: editor_state.Renames = {}
-        # The four property zones live in a horizontal splitter so they never
-        # overlap (a QHBoxLayout can collide when min widths exceed the width)
-        # and can be resized like PT4.
-        group_row = QSplitter(Qt.Orientation.Horizontal)
-        group_row.setChildrenCollapsible(False)
+        self._loading_item = False
 
-        group_list_col = QVBoxLayout()
-        group_list_col.setContentsMargins(0, 0, 0, 0)
+        # --- Sources: the profile's panels and the stat catalogue ---------------
+        sources = QFrame()
+        sources.setFrameStyle(QFrame.Shape.StyledPanel)
+        sources_layout = QVBoxLayout(sources)
+        sources_layout.setContentsMargins(10, 10, 10, 10)
+        sources_layout.setSpacing(8)
         glh = QHBoxLayout()
         glabel = QLabel(_("Panels"))
         glabel.setProperty("class", "h2")
@@ -295,63 +285,161 @@ class ModernHudPreferences(QDialog):
         self.group_del_btn.clicked.connect(self._group_delete)
         glh.addWidget(self.group_new_btn)
         glh.addWidget(self.group_del_btn)
-        group_list_col.addLayout(glh)
+        sources_layout.addLayout(glh)
         self.group_list = QListWidget()
-        self.group_list.setMinimumWidth(150)
-        self.group_list.setMinimumHeight(140)
+        self.group_list.setMinimumHeight(60)
+        self.group_list.setMaximumHeight(120)
         self.group_list.currentRowChanged.connect(self._on_group_selected)
-        group_list_col.addWidget(self.group_list)
-        _panels_w = QWidget()
-        _panels_w.setLayout(group_list_col)
-        group_row.addWidget(_panels_w)
-
-        self.group_props_box = QGroupBox(_("Group Properties"))
-        self.group_props_box.setMinimumWidth(250)
-        gp = QFormLayout(self.group_props_box)
-        gp.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
-        gp.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
-        self.gp_name = QLineEdit()
-        self.gp_name.editingFinished.connect(self._group_prop_changed)
-        gp.addRow(_("Name:"), self.gp_name)
-        self.gp_position = QComboBox()
-        self.gp_position.addItems(["", "SB", "BB", "BTN", "CO", "MP", "EP"])
-        self.gp_position.currentIndexChanged.connect(lambda _i: self._group_prop_changed())
-        gp.addRow(_("Position:"), self.gp_position)
-        self.gp_titlebg = self._group_color_btn("title_bgcolor")
-        gp.addRow(_("Title bg:"), self.gp_titlebg)
-        self.gp_titlefg = self._group_color_btn("title_fgcolor")
-        gp.addRow(_("Title fg:"), self.gp_titlefg)
-        self.gp_border = self._group_color_btn("bordercolor")
-        gp.addRow(_("Border:"), self.gp_border)
-        self.gp_bg = self._group_color_btn("bgcolor")
-        gp.addRow(_("Panel bg:"), self.gp_bg)
-        self.gp_opacity = QSlider(Qt.Orientation.Horizontal)
-        self.gp_opacity.setRange(0, 255)
-        self.gp_opacity.setValue(178)
-        self.gp_opacity.valueChanged.connect(lambda _v: self._group_opacity_changed())
-        gp.addRow(_("Opacity:"), self.gp_opacity)
-        group_row.addWidget(self.group_props_box)
-
-        # PT4-style Group Items list + Item Properties / Color Ranges tabs, placed
-        # in the SAME top row so the four property zones sit side-by-side (PT4).
-        self._loading_item = False
-        items_col = QVBoxLayout()
-        items_col.setContentsMargins(0, 0, 0, 0)
+        sources_layout.addWidget(self.group_list)
         ilabel = QLabel(_("Available Stats"))
         ilabel.setProperty("class", "h2")
-        items_col.addWidget(ilabel)
-        # The catalogue takes the place of the Items list: the design canvas
-        # below already shows and selects the panel's items. Double-click or
-        # Enter adds a stat to the first free cell of the panel shown there.
+        sources_layout.addWidget(ilabel)
+        # Double-click or Enter adds a stat to the first free cell of the panel
+        # shown in Design; a drag drops it on the cell under the pointer.
         self.stat_catalog_widget = StatCatalogWidget(self._stat_catalog())
-        self.stat_catalog_widget.setMinimumWidth(220)
-        self.stat_catalog_widget.setMinimumHeight(140)
+        self.stat_catalog_widget.setMinimumWidth(180)
+        self.stat_catalog_widget.setMinimumHeight(100)
         self.stat_catalog_widget.setToolTip(_("Double-click a stat to add it to the panel shown in Design."))
         self.stat_catalog_widget.stat_activated.connect(self._add_catalog_stat)
-        items_col.addWidget(self.stat_catalog_widget)
+        # The pane is narrow: the stat names get its width, and each
+        # description stays in the stat's tooltip.
+        self.stat_catalog_widget.tree.setColumnHidden(1, True)
+        sources_layout.addWidget(self.stat_catalog_widget, 1)
+        sources.setMinimumWidth(190)
+        stats_splitter.addWidget(sources)
 
+        # --- Work surface: the panel shown in Design, then the HUD as drawn ------
+        design_pane = QWidget()
+        design_layout = QVBoxLayout(design_pane)
+        design_layout.setContentsMargins(10, 10, 10, 6)
+        design_layout.setSpacing(6)
+        # PT4-style design canvas: shows the SELECTED panel only (box-by-box).
+        self.design_label = QLabel(_("Design"))
+        self.design_label.setProperty("class", "h2")
+        design_header = QHBoxLayout()
+        design_header.setContentsMargins(0, 0, 0, 0)
+        design_header.addWidget(self.design_label)
+        design_header.addStretch()
+        # The grid of the panel shown below, and the history of the profile (#775).
+        self.add_row_btn = QPushButton(_("+ Row"))
+        self.add_row_btn.setToolTip(_("Add an empty row at the bottom of the panel"))
+        self.add_row_btn.clicked.connect(lambda: self._canvas_grid_edit("insert_row", -1))
+        self.add_col_btn = QPushButton(_("+ Column"))
+        self.add_col_btn.setToolTip(_("Add an empty column on the right of the panel"))
+        self.add_col_btn.clicked.connect(lambda: self._canvas_grid_edit("insert_col", -1))
+        self.undo_btn = QPushButton(_("Undo"))
+        self.undo_btn.setToolTip(_("Undo the last change to this profile (Ctrl+Z)"))
+        self.undo_btn.clicked.connect(self.undo_edit)
+        self.redo_btn = QPushButton(_("Redo"))
+        self.redo_btn.setToolTip(_("Redo the change just undone (Ctrl+Shift+Z)"))
+        self.redo_btn.clicked.connect(self.redo_edit)
+        for button in (self.add_row_btn, self.add_col_btn, self.undo_btn, self.redo_btn):
+            button.setFixedHeight(26)
+            design_header.addWidget(button)
+        design_layout.addLayout(design_header)
+
+        # What to do with the panel: add an item, edit or remove the selected
+        # one, grow the grid. Adding is one menu, so the row stays narrow.
+        self.add_item_btn = QToolButton()
+        self.add_item_btn.setText(_("Add"))
+        self.add_item_btn.setToolTip(_("Add a stat, a text label, a separator line or a panel"))
+        self.add_item_btn.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.add_item_btn.setFixedHeight(26)
+        self.add_item_btn.setMinimumWidth(72)
+        add_menu = QMenu(self.add_item_btn)
+        self.add_stat_action = add_menu.addAction(_("Statistic…"), self.add_stat)
+        self.add_label_action = add_menu.addAction(_("Text label…"), self.add_text_label)
+        self.add_label_action.setToolTip(_("Add a text label (column/row header or caption) to a panel"))
+        self.add_hline_action = add_menu.addAction(_("Separator line"), self.add_hline)
+        self.add_hline_action.setToolTip(_("Add a horizontal separator line (PT4 'Horz Line') to a panel"))
+        add_menu.addSeparator()
+        self.add_block_action = add_menu.addAction(_("Panel…"), self.add_block)
+        self.add_block_action.setToolTip(_("Add a new panel (block) to a multi-panel HUD"))
+        add_menu.setToolTipsVisible(True)
+        self.add_item_btn.setMenu(add_menu)
+        self.edit_stat_btn = QPushButton(_("Edit"))
+        self.edit_stat_btn.setFixedHeight(26)
+        self.edit_stat_btn.clicked.connect(self.edit_stat)
+
+        self.remove_stat_btn = QPushButton(_("Remove"))
+        self.remove_stat_btn.setFixedHeight(26)
+        self.remove_stat_btn.clicked.connect(self.remove_stat)
+        design_actions = QHBoxLayout()
+        design_actions.setContentsMargins(0, 0, 0, 0)
+        design_actions.addWidget(self.add_item_btn)
+        for button in (self.edit_stat_btn, self.remove_stat_btn):
+            design_actions.addWidget(button)
+        design_actions.addStretch()
+        design_layout.addLayout(design_actions)
+        self.design_hint = QLabel(
+            _(
+                "Drag an item to move it, onto another to swap them. Drop a stat from Available Stats "
+                "on an empty cell. Arrows select, Alt+arrows move, Delete removes; right-click a cell "
+                "for rows and columns."
+            )
+        )
+        self.design_hint.setWordWrap(True)
+        self.design_hint.setProperty("class", "caption")
+        design_layout.addWidget(self.design_hint)
+        self.design_scroll = QScrollArea()
+        self.design_scroll.setWidgetResizable(True)
+        self.design_scroll.setMinimumHeight(110)
+        self.design_scroll.setStyleSheet("QScrollArea{border:1px solid #2c3e46;background:#1d282e;}")
+        self._design_host = QWidget()
+        self._design_host.setStyleSheet("background:#1d282e;")
+        self._design_layout = QVBoxLayout(self._design_host)
+        self._design_layout.setContentsMargins(6, 6, 6, 6)
+        self._design_layout.setSpacing(10)
+        self.design_scroll.setWidget(self._design_host)
+        design_layout.addWidget(self.design_scroll, 1)
+        self._design_canvases: list = []
+
+        # The HUD as the table draws it, right under the panel being edited.
+        preview_pane = QWidget()
+        preview_layout = QVBoxLayout(preview_pane)
+        preview_layout.setContentsMargins(10, 6, 10, 10)
+        preview_layout.setSpacing(6)
+        preview_label = QLabel(_("HUD Preview"))
+        preview_label.setProperty("class", "h2")
+        preview_layout.addWidget(preview_label)
+        # In a scroll area so a large HUD (many stats/columns) scrolls instead
+        # of overflowing the strip.
+        self.preview = HudPreviewWidget()
+        self.preview.content_floor = (160, 60)
+        self.preview.setMinimumSize(160, 60)
+        preview_scroll = QScrollArea()
+        preview_scroll.setWidgetResizable(True)
+        preview_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        preview_scroll.setWidget(self.preview)
+        preview_layout.addWidget(preview_scroll, 1)
+        # What the preview is, on its title rather than in a caption that
+        # would take the strip's height.
+        preview_label.setToolTip(
+            _(
+                "The preview uses the same compact label grid as the in-game HUD.\n"
+                "Spacing, font, colors and HUD cell values come from the selected profile.",
+            ),
+        )
+
+        workspace = QSplitter(Qt.Orientation.Vertical)
+        workspace.setChildrenCollapsible(False)
+        workspace.addWidget(design_pane)
+        workspace.addWidget(preview_pane)
+        workspace.setStretchFactor(0, 3)
+        workspace.setStretchFactor(1, 1)
+        workspace.setSizes([560, 220])
+        self.workspace_splitter = workspace
+        stats_splitter.addWidget(workspace)
+
+        # --- Inspector: the selected item, its panel, the profile's presentation
+        inspector_body = QWidget()
+        inspector_layout = QVBoxLayout(inspector_body)
+        inspector_layout.setContentsMargins(10, 10, 10, 10)
+        inspector_layout.setSpacing(10)
+        item_label = QLabel(_("Selection"))
+        item_label.setProperty("class", "h2")
+        inspector_layout.addWidget(item_label)
         self.item_props_tabs = QTabWidget()
-        self.item_props_tabs.setMinimumWidth(250)
         self._item_color_btns: dict[str, QPushButton] = {}
         # --- Item tab ---
         item_tab = QWidget()
@@ -408,176 +496,83 @@ class ModernHudPreferences(QDialog):
         self.ip_hicolor = self._item_color_btn("hi")
         crf.addRow(_("Hi col:"), self.ip_hicolor)
         self.item_props_tabs.addTab(cr_tab, _("Color Ranges"))
-        _items_w = QWidget()
-        _items_w.setLayout(items_col)
-        group_row.addWidget(_items_w)
-        group_row.addWidget(self.item_props_tabs)
-        # Lists stay compact; the two property forms absorb the extra width.
-        group_row.setStretchFactor(0, 0)
-        group_row.setStretchFactor(1, 1)
-        group_row.setStretchFactor(2, 0)
-        group_row.setStretchFactor(3, 1)
-        group_row.setSizes([190, 330, 210, 360])
-        left_layout.addWidget(group_row)
-
-        # PT4-style design canvas: shows the SELECTED panel only (box-by-box).
-        self.design_label = QLabel(_("Design"))
-        self.design_label.setProperty("class", "h2")
-        design_header = QHBoxLayout()
-        design_header.setContentsMargins(0, 0, 0, 0)
-        design_header.addWidget(self.design_label)
-        design_header.addStretch()
-        # The grid of the panel shown below, and the history of the profile (#775).
-        self.add_row_btn = QPushButton(_("+ Row"))
-        self.add_row_btn.setToolTip(_("Add an empty row at the bottom of the panel"))
-        self.add_row_btn.clicked.connect(lambda: self._canvas_grid_edit("insert_row", -1))
-        self.add_col_btn = QPushButton(_("+ Column"))
-        self.add_col_btn.setToolTip(_("Add an empty column on the right of the panel"))
-        self.add_col_btn.clicked.connect(lambda: self._canvas_grid_edit("insert_col", -1))
-        self.undo_btn = QPushButton(_("Undo"))
-        self.undo_btn.setToolTip(_("Undo the last change to this profile (Ctrl+Z)"))
-        self.undo_btn.clicked.connect(self.undo_edit)
-        self.redo_btn = QPushButton(_("Redo"))
-        self.redo_btn.setToolTip(_("Redo the change just undone (Ctrl+Shift+Z)"))
-        self.redo_btn.clicked.connect(self.redo_edit)
-        for button in (self.add_row_btn, self.add_col_btn, self.undo_btn, self.redo_btn):
-            button.setFixedHeight(26)
-            design_header.addWidget(button)
-        left_layout.addLayout(design_header)
-        self.design_hint = QLabel(
-            _(
-                "Drag an item to move it, onto another to swap them. Drop a stat from Available Stats "
-                "on an empty cell. Arrows select, Alt+arrows move, Delete removes; right-click a cell "
-                "for rows and columns."
-            )
+        # The inspector is narrow: a combo sized to its longest entry (some stat
+        # labels are long) would push the form past its right edge. An editable
+        # combo reports that width as its minimum whatever its size policy, so
+        # the minimum is set outright.
+        for combo in (self.ip_stat, self.ip_popup, self.ip_align):
+            combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+            combo.setMinimumContentsLength(8)
+            combo.setMinimumWidth(100)
+        inspector_layout.addWidget(self.item_props_tabs)
+        # A panel's own settings: shown only for a profile made of panels.
+        self.group_props_box = QGroupBox(_("Group Properties"))
+        gp = QFormLayout(self.group_props_box)
+        gp.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
+        gp.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        self.gp_name = QLineEdit()
+        self.gp_name.editingFinished.connect(self._group_prop_changed)
+        gp.addRow(_("Name:"), self.gp_name)
+        self.gp_position = QComboBox()
+        self.gp_position.addItems(["", "SB", "BB", "BTN", "CO", "MP", "EP"])
+        self.gp_position.currentIndexChanged.connect(lambda _i: self._group_prop_changed())
+        gp.addRow(_("Position:"), self.gp_position)
+        self.gp_titlebg = self._group_color_btn("title_bgcolor")
+        gp.addRow(_("Title bg:"), self.gp_titlebg)
+        self.gp_titlefg = self._group_color_btn("title_fgcolor")
+        gp.addRow(_("Title fg:"), self.gp_titlefg)
+        self.gp_border = self._group_color_btn("bordercolor")
+        gp.addRow(_("Border:"), self.gp_border)
+        self.gp_bg = self._group_color_btn("bgcolor")
+        gp.addRow(_("Panel bg:"), self.gp_bg)
+        self.gp_opacity = QSlider(Qt.Orientation.Horizontal)
+        self.gp_opacity.setRange(0, 255)
+        self.gp_opacity.setValue(178)
+        self.gp_opacity.valueChanged.connect(lambda _v: self._group_opacity_changed())
+        gp.addRow(_("Opacity:"), self.gp_opacity)
+        self.gp_fg = self._group_color_btn("fgcolor")
+        gp.addRow(_("Panel text:"), self.gp_fg)
+        self.gp_cell_width = QSpinBox()
+        self.gp_cell_width.setRange(0, 300)
+        self.gp_cell_width.setSpecialValueText(_("Automatic"))
+        self.gp_cell_width.setSuffix(_(" px"))
+        self.gp_cell_width.setToolTip(_("Minimum width of each statistic cell; Automatic keeps the legacy default"))
+        self.gp_cell_width.valueChanged.connect(self._group_cell_width_changed)
+        gp.addRow(_("Cell width:"), self.gp_cell_width)
+        inspector_layout.addWidget(self.group_props_box)
+        # Set once per profile: folded, with what it holds in its header.
+        self.presentation_section = CollapsibleSection(
+            _("Presentation"), expanded=False, tooltip=_("How this profile's cells are drawn")
         )
-        self.design_hint.setWordWrap(True)
-        self.design_hint.setProperty("class", "caption")
-        left_layout.addWidget(self.design_hint)
-        self.design_scroll = QScrollArea()
-        self.design_scroll.setWidgetResizable(True)
-        self.design_scroll.setMinimumHeight(240)
-        self.design_scroll.setStyleSheet("QScrollArea{border:1px solid #2c3e46;background:#1d282e;}")
-        self._design_host = QWidget()
-        self._design_host.setStyleSheet("background:#1d282e;")
-        self._design_layout = QVBoxLayout(self._design_host)
-        self._design_layout.setContentsMargins(6, 6, 6, 6)
-        self._design_layout.setSpacing(10)
-        self.design_scroll.setWidget(self._design_host)
-        left_layout.addWidget(self.design_scroll, 2)
-        self._design_canvases: list = []
+        presentation_layout = QVBoxLayout(self.presentation_section.body())
+        presentation_layout.setContentsMargins(0, 0, 0, 0)
+        presentation_layout.addWidget(self._create_presentation_box())
+        inspector_layout.addWidget(self.presentation_section)
+        inspector_layout.addStretch()
+        inspector = QScrollArea()
+        inspector.setWidgetResizable(True)
+        inspector.setFrameShape(QFrame.Shape.StyledPanel)
+        inspector.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        inspector.setWidget(inspector_body)
+        inspector.setMinimumWidth(270)
+        stats_splitter.addWidget(inspector)
 
-        # Statistics action buttons
-        stat_btn_frame = QFrame()
-        stat_btn_layout = QHBoxLayout(stat_btn_frame)
-        stat_btn_layout.setContentsMargins(0, 10, 0, 0)
-
-        self.add_stat_btn = QPushButton(_("Add Stat"))
-        self.add_stat_btn.setMinimumHeight(35)
-        self.add_stat_btn.clicked.connect(self.add_stat)
-
-        self.edit_stat_btn = QPushButton(_("Edit"))
-        self.edit_stat_btn.setMinimumHeight(35)
-        self.edit_stat_btn.clicked.connect(self.edit_stat)
-
-        self.remove_stat_btn = QPushButton(_("Remove"))
-        self.remove_stat_btn.setMinimumHeight(35)
-        self.remove_stat_btn.clicked.connect(self.remove_stat)
-
-        self.add_label_btn = QPushButton(_("Add Label"))
-        self.add_label_btn.setMinimumHeight(35)
-        self.add_label_btn.setToolTip(_("Add a text label (column/row header or caption) to a panel"))
-        self.add_label_btn.clicked.connect(self.add_text_label)
-
-        self.add_block_btn = QPushButton(_("Add Block"))
-        self.add_block_btn.setMinimumHeight(35)
-        self.add_block_btn.setToolTip(_("Add a new panel (block) to a multi-panel HUD"))
-        self.add_block_btn.clicked.connect(self.add_block)
-
-        self.block_props_btn = QPushButton(_("Block Props"))
-        self.block_props_btn.setMinimumHeight(35)
-        self.block_props_btn.setToolTip(_("Edit the selected panel's title/border colours, position and label"))
-        self.block_props_btn.clicked.connect(self.edit_block_properties)
-
-        self.add_hline_btn = QPushButton(_("Add Line"))
-        self.add_hline_btn.setMinimumHeight(35)
-        self.add_hline_btn.setToolTip(_("Add a horizontal separator line (PT4 'Horz Line') to a panel"))
-        self.add_hline_btn.clicked.connect(self.add_hline)
-
-        stat_btn_layout.addWidget(self.add_stat_btn)
-        stat_btn_layout.addWidget(self.edit_stat_btn)
-        stat_btn_layout.addWidget(self.remove_stat_btn)
-        stat_btn_layout.addWidget(self.add_label_btn)
-        stat_btn_layout.addWidget(self.add_hline_btn)
-        stat_btn_layout.addWidget(self.add_block_btn)
-        stat_btn_layout.addWidget(self.block_props_btn)
-        stat_btn_layout.addStretch()
-
-        left_layout.addWidget(stat_btn_frame)
         # Ctrl+Z / Ctrl+Shift+Z for the profile; a text field keeps its own undo.
         for sequence, slot in (
             (QKeySequence(QKeySequence.StandardKey.Undo), self.undo_edit),
             (QKeySequence(QKeySequence.StandardKey.Redo), self.redo_edit),
             (QKeySequence("Ctrl+Shift+Z"), self.redo_edit),
         ):
-            shortcut = QShortcut(sequence, left_panel)
+            shortcut = QShortcut(sequence, stats_tab)
             shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
             shortcut.activated.connect(slot)
-        # Wrap the editor in a scroll area: a vertical scrollbar appears when the
-        # content is taller than the window, and a horizontal one when the window
-        # is too narrow for the property zones. The minimum is the width at which
-        # the four property zones stay legible, not the 1000 px the layout wanted:
-        # that floor alone forced the whole dialog wider than a laptop screen, and
-        # the scroll area already covers the rest by scrolling.
-        left_panel.setMinimumWidth(560)
-        left_scroll = QScrollArea()
-        left_scroll.setWidgetResizable(True)
-        left_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        left_scroll.setWidget(left_panel)
-        stats_splitter.addWidget(left_scroll)
 
-        # Right panel: Visual preview
-        right_panel = QFrame()
-        right_panel.setFrameStyle(QFrame.Shape.StyledPanel)
-        right_layout = QVBoxLayout(right_panel)
-        right_layout.setContentsMargins(15, 15, 15, 15)
-        right_layout.setSpacing(10)
-
-        # Preview header
-        preview_label = QLabel(_("HUD Preview"))
-        preview_label.setProperty("class", "h2")
-        right_layout.addWidget(preview_label)
-
-        # Preview widget, in a scroll area so a large HUD (many stats/columns)
-        # scrolls instead of overflowing and overlapping the preview box.
-        self.preview = HudPreviewWidget()
-        self.preview.setMinimumSize(300, 280)
-        preview_scroll = QScrollArea()
-        preview_scroll.setWidgetResizable(True)
-        preview_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        preview_scroll.setWidget(self.preview)
-        right_layout.addWidget(preview_scroll)
-
-        # Preview info
-        info_label = QLabel(
-            _(
-                "The preview uses the same compact label grid as the in-game HUD.\n"
-                "Spacing, font, colors and HUD cell values come from the selected profile.",
-            ),
-        )
-        info_label.setProperty("class", "caption")
-        info_label.setWordWrap(True)
-        right_layout.addWidget(info_label)
-
-        right_layout.addStretch()
-        stats_splitter.addWidget(right_panel)
-
-        # Give most of the width to the editor (the four property zones need room
-        # so they don't truncate); the preview is secondary. On resize the editor
-        # grows faster than the preview.
-        stats_splitter.setStretchFactor(0, 3)
+        # The canvas takes the extra width; the sources and the inspector keep
+        # theirs.
+        stats_splitter.setStretchFactor(0, 0)
         stats_splitter.setStretchFactor(1, 1)
-        stats_splitter.setSizes([1180, 420])
+        stats_splitter.setStretchFactor(2, 0)
+        stats_splitter.setSizes([280, 780, 340])
         stats_layout.addWidget(stats_splitter)
 
         # Add stats tab
@@ -1558,8 +1553,12 @@ class ModernHudPreferences(QDialog):
 
     # --- Profile presentation (#764) ------------------------------------------
     def _create_presentation_box(self) -> QGroupBox:
-        """The profile's presentation controls and its read-only HUD window."""
-        box = QGroupBox(_("Presentation"))
+        """The profile's presentation controls and its read-only HUD window.
+
+        One field per row: the box sits in the narrow inspector, under the
+        "Presentation" section that titles it.
+        """
+        box = QGroupBox()
         self.presentation_box = box
         grid = QGridLayout(box)
         grid.setHorizontalSpacing(10)
@@ -1582,13 +1581,13 @@ class ModernHudPreferences(QDialog):
             _("Point size of this profile's cells. The lowest value uses the HUD window's size.")
         )
         self.font_size_spin.valueChanged.connect(self._on_presentation_font_size_changed)
-        grid.addWidget(self.font_size_label, 0, 2)
-        grid.addWidget(self.font_size_spin, 0, 3)
+        grid.addWidget(self.font_size_label, 1, 0)
+        grid.addWidget(self.font_size_spin, 1, 1)
 
         # xpad / ypad: pixels the HUD adds to its default gaps (#770).
         self.padding_labels: dict[str, QLabel] = {}
         self.padding_spins: dict[str, QSpinBox] = {}
-        for column, (attr, label, tip) in enumerate(
+        for offset, (attr, label, tip) in enumerate(
             (
                 ("xpad", _("Column gap:"), _("Pixels added to the HUD's default gap between columns.")),
                 ("ypad", _("Row gap:"), _("Pixels added to the HUD's default gap between rows.")),
@@ -1602,24 +1601,23 @@ class ModernHudPreferences(QDialog):
             spin.valueChanged.connect(partial(self._on_presentation_padding_changed, attr))
             caption = QLabel(label)
             caption.setToolTip(tip)
-            grid.addWidget(caption, 1, column * 2)
-            grid.addWidget(spin, 1, column * 2 + 1)
+            grid.addWidget(caption, 2 + offset, 0)
+            grid.addWidget(spin, 2 + offset, 1)
             self.padding_labels[attr] = caption
             self.padding_spins[attr] = spin
 
         self.hud_handler_label = QLabel()
         self.hud_handler_label.setWordWrap(True)
         self.hud_handler_label.setProperty("class", "caption")
-        grid.addWidget(self.hud_handler_label, 2, 0, 1, 4)
+        grid.addWidget(self.hud_handler_label, 4, 0, 1, 2)
 
         self.rich_text_support_label = QLabel()
         self.rich_text_support_label.setWordWrap(True)
         self.rich_text_support_label.setProperty("class", "caption")
         self.rich_text_support_label.hide()
-        grid.addWidget(self.rich_text_support_label, 3, 0, 1, 4)
+        grid.addWidget(self.rich_text_support_label, 5, 0, 1, 2)
 
         grid.setColumnStretch(1, 1)
-        grid.setColumnStretch(3, 1)
         self._loading_presentation = False
         self._presentation_handlers: list[presentation.HandlerUse] = []
         return box
@@ -1676,6 +1674,17 @@ class ModernHudPreferences(QDialog):
         self.hud_handler_label.setText(self._describe_handlers(uses))
         self.presentation_box.setEnabled(isinstance(profile, dict))
         self._apply_presentation_visibility(mode)
+        self._refresh_presentation_summary()
+
+    def _refresh_presentation_summary(self) -> None:
+        """Say in the folded section's header what the presentation is set to."""
+        section = getattr(self, "presentation_section", None)
+        if section is None:
+            return
+        parts = [self.presentation_mode_combo.currentText()]
+        if not self.font_size_spin.isHidden():
+            parts.append(self.font_size_spin.text())
+        section.set_summary(" · ".join(part for part in parts if part))
 
     def _apply_presentation_visibility(self, mode: str) -> None:
         """Hide what has no effect in ``mode``."""
@@ -1736,6 +1745,7 @@ class ModernHudPreferences(QDialog):
             ypad=profile.get("ypad", 0),
             **self._profile_preview_params(name, profile),
         )
+        self._refresh_presentation_summary()
         self._refresh_unsaved_indicator()
         self._record_history()
 
@@ -2104,19 +2114,24 @@ class ModernHudPreferences(QDialog):
         self._loading_group = False
         self._on_group_selected(bi)
 
+    def _show_group_props(self, shown: bool) -> None:
+        """Group Properties holds a panel's settings: none for a single grid (#780)."""
+        self.group_props_box.setEnabled(shown)
+        self.group_props_box.setVisible(shown)
+
     def _on_group_selected(self, row) -> None:
         if row is None or row < 0:
-            self.group_props_box.setEnabled(False)
+            self._show_group_props(False)
             return
         self._current_block_index = row
         _name, profile = self._current_profile()
         blocks = profile.get("blocks") if isinstance(profile, dict) else None
         if blocks and row < len(blocks):
-            self.group_props_box.setEnabled(True)
+            self._show_group_props(True)
             self._load_group_props(blocks[row])
             self._sync_item_selection(blocks[row])
         else:
-            self.group_props_box.setEnabled(False)
+            self._show_group_props(False)
             flat = {"stats": profile.get("stats", []) if isinstance(profile, dict) else [], "texts": [], "hlines": []}
             self._sync_item_selection(flat)
         # Show the selected panel's grid on the design canvas + preview (box-by-box).
@@ -2136,6 +2151,8 @@ class ModernHudPreferences(QDialog):
             self._style_color_btn(btn, block.get(attr, ""))
         op = self._opacity_of(block.get("bgcolor", ""))
         self.gp_opacity.setValue(op if op is not None else 178)
+        if getattr(self, "gp_cell_width", None) is not None:
+            self.gp_cell_width.setValue(int(block.get("cell_width", 0) or 0))
         self._loading_group = False
 
     def _selected_block(self):
@@ -2171,6 +2188,16 @@ class ModernHudPreferences(QDialog):
             return
         block["label"] = self.gp_name.text()
         block["position"] = self.gp_position.currentText()
+        self._refresh_after_group_edit()
+
+    def _group_cell_width_changed(self, value: int) -> None:
+        """The panel's minimum cell width; 0 is the HUD's own default."""
+        if self._loading_group:
+            return
+        _bi, block = self._selected_block()
+        if block is None or int(block.get("cell_width", 0) or 0) == value:
+            return
+        block["cell_width"] = value
         self._refresh_after_group_edit()
 
     def _group_opacity_changed(self) -> None:
@@ -3380,23 +3407,6 @@ class ModernHudPreferences(QDialog):
         )
         profile["multiblock"] = True
         self._refresh_profile()
-
-    def edit_block_properties(self) -> None:
-        from PySide6.QtWidgets import QMessageBox
-
-        name, profile = self._current_profile()
-        if not isinstance(profile, dict):
-            return
-        blocks = profile.get("blocks")
-        if not blocks:
-            QMessageBox.information(self, _("Block Properties"), _("This profile has no panels. Use Add Block first."))
-            return
-        sel = self._selected_row_item()
-        bi = sel[0] if sel and sel[0] is not None else 0
-        dlg = BlockPropertiesDialog(blocks[bi], parent=self)
-        if dlg.exec():
-            blocks[bi].update(dlg.get_props())
-            self._refresh_profile()
 
     def _append_stat_node(self, parent_node, stat: dict, row: int, col: int) -> None:
         profile_io.append_stat_node(self.config.doc, parent_node, stat, row, col)

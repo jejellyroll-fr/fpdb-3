@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:30+0100\n"
+"POT-Creation-Date: 2026-11-12 23:21+0100\n"
 "PO-Revision-Date: 2011-12-03 21:57+0000\n"
 "Last-Translator: LimburgCwboy <hdps.een@gmail.com>\n"
 "Language-Team: Dutch (Netherlands) (http://www.transifex.net/projects/p/fpdb/"
@@ -4789,6 +4789,7 @@ msgid "Add/Edit Statistic"
 msgstr "Statistiek toevoegen/bewerken"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Automatic"
 msgstr "Automatische notities"
@@ -4800,7 +4801,6 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "Blokeigenschappen"
@@ -4811,6 +4811,7 @@ msgid "Border:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell width:"
 msgstr ""
 
@@ -4872,6 +4873,7 @@ msgid "Middle color:"
 msgstr "Middenkleur:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid ""
 "Minimum width of each statistic cell; Automatic keeps the legacy default"
@@ -4903,6 +4905,7 @@ msgid "Panel background:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Panel text:"
 msgstr "Platte tekst"
@@ -5179,23 +5182,8 @@ msgstr "Blok toevoegen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Add Label"
-msgstr "Label toevoegen"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Line"
-msgstr "Lijn toevoegen"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Add Profile Definition"
 msgstr "Profieldefinitie toevoegen"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Stat"
-msgstr "Stat toevoegen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5212,6 +5200,11 @@ msgstr ""
 #, fuzzy
 msgid "Add a new panel (block) to a multi-panel HUD"
 msgstr "Een nieuw paneel (blok) aan een HUD met meerdere panelen toevoegen"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add a stat, a text label, a separator line or a panel"
+msgstr "Een tekstlabel (kolom-/rijkop of bijschrift) aan een paneel toevoegen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5290,11 +5283,6 @@ msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr ""
 "Onder dit aantal handen wordt het paneel achtergehouden en verschijnt de "
 "terugval."
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Block Props"
-msgstr "Blokeig."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5472,11 +5460,6 @@ msgstr "Database bewerken"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Edit the selected panel's title/border colours, position and label"
-msgstr "Titel, randkleuren, positie en label van het gekozen paneel bewerken"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Effective profile for these selectors"
 msgstr "Effectief profiel voor deze selectoren"
 
@@ -5641,6 +5624,10 @@ msgstr "Middenkleur:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Hi th:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "How this profile's cells are drawn"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -5890,6 +5877,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Panel…"
+msgstr "Paneel"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr "Kies een spel (en formaat) om de standaard te zien die zou gelden."
 
@@ -6046,6 +6038,15 @@ msgstr "Kies eerst een regel om bij te werken."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Selection"
+msgstr "Actie"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Separator line"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show all (stacked)"
 msgstr "tonen als"
 
@@ -6085,6 +6086,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Statistic…"
+msgstr "Statistieken"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stats whose value comes from the analytics layer rather than a column."
 msgstr ""
 "Statistieken waarvan de waarde uit de analyselaag komt in plaats van uit een "
@@ -6108,6 +6114,11 @@ msgstr ""
 #, fuzzy
 msgid "Text col:"
 msgstr "Tekst"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Text label…"
+msgstr "Label toevoegen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -6170,10 +6181,6 @@ msgstr "Thema:"
 #, fuzzy
 msgid "Then show"
 msgstr "Dan tonen"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "This profile has no panels. Use Add Block first."
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -8921,8 +8928,24 @@ msgstr ""
 #~ msgid "*** WARNING UNKNOWN MYSQL ERROR:"
 #~ msgstr "*** WAARSCHUWING ONBEKENDE MYSQL FOUT"
 
+#, fuzzy
+#~ msgid "Add Label"
+#~ msgstr "Label toevoegen"
+
+#, fuzzy
+#~ msgid "Add Line"
+#~ msgstr "Lijn toevoegen"
+
+#, fuzzy
+#~ msgid "Add Stat"
+#~ msgstr "Stat toevoegen"
+
 #~ msgid "Analyze took %.1f seconds"
 #~ msgstr "Analyse duurde %.1f seconden"
+
+#, fuzzy
+#~ msgid "Block Props"
+#~ msgstr "Blokeig."
 
 #, fuzzy
 #~ msgid ""
@@ -8954,6 +8977,11 @@ msgstr ""
 
 #~ msgid "ERROR: query %s result does not have player_id as first column"
 #~ msgstr "FOUT: resultaat op vraag %s heeft geen speler_id als eerste kolom"
+
+#, fuzzy
+#~ msgid "Edit the selected panel's title/border colours, position and label"
+#~ msgstr ""
+#~ "Titel, randkleuren, positie en label van het gekozen paneel bewerken"
 
 #~ msgid "Error during analyze:"
 #~ msgstr "Fout tijdens analyse:"

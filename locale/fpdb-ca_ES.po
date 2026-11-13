@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:30+0100\n"
+"POT-Creation-Date: 2026-11-12 23:21+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -4788,6 +4788,7 @@ msgid "Add/Edit Statistic"
 msgstr "Afegeix/edita una estadística"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Automatic"
 msgstr "Notes automàtiques"
@@ -4799,7 +4800,6 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Block Properties"
 msgstr "Propietats del bloc"
@@ -4810,6 +4810,7 @@ msgid "Border:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell width:"
 msgstr ""
 
@@ -4871,6 +4872,7 @@ msgid "Middle color:"
 msgstr "Color intermedi:"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid ""
 "Minimum width of each statistic cell; Automatic keeps the legacy default"
@@ -4902,6 +4904,7 @@ msgid "Panel background:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Panel text:"
 msgstr "Text pla"
@@ -5184,23 +5187,8 @@ msgstr "Afegeix un bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Add Label"
-msgstr "Afegeix una etiqueta"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Line"
-msgstr "Afegeix una línia"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Add Profile Definition"
 msgstr "Afegeix una definició de perfil"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Add Stat"
-msgstr "Afegeix una estadística"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5216,6 +5204,13 @@ msgstr "Afegeix una línia separadora horitzontal (PT4 'Horz Line') a un tauler"
 #, fuzzy
 msgid "Add a new panel (block) to a multi-panel HUD"
 msgstr "Afegeix un tauler (bloc) nou a un HUD de diversos taulers"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Add a stat, a text label, a separator line or a panel"
+msgstr ""
+"Afegeix una etiqueta de text (capçalera de columna/fila o llegenda) a un "
+"tauler"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5297,11 +5292,6 @@ msgstr "Motor:"
 msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr ""
 "Per sota d'aquest nombre de mans el tauler es reté i es mostra el substitut."
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
-msgid "Block Props"
-msgstr "Props. del bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -5479,13 +5469,6 @@ msgstr "Edita la base de dades"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
-msgid "Edit the selected panel's title/border colours, position and label"
-msgstr ""
-"Edita el títol, els colors de la vora, la posició i l'etiqueta del tauler "
-"seleccionat"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-#, fuzzy
 msgid "Effective profile for these selectors"
 msgstr "Perfil efectiu per a aquests selectors"
 
@@ -5650,6 +5633,10 @@ msgstr "Color intermedi:"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Hi th:"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "How this profile's cells are drawn"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -5903,6 +5890,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Panel…"
+msgstr "Tauler"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr "Trieu un joc (i un format) per veure el predeterminat que s'aplicaria."
 
@@ -6059,6 +6051,15 @@ msgstr "Seleccioneu primer una regla per actualitzar."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Selection"
+msgstr "Acció"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Separator line"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Show all (stacked)"
 msgstr "mostra com a"
 
@@ -6099,6 +6100,11 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
+msgid "Statistic…"
+msgstr "Estadístiques"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
 msgid "Stats whose value comes from the analytics layer rather than a column."
 msgstr ""
 "Estadístiques el valor de les quals ve de la capa d'anàlisi i no d'una "
@@ -6122,6 +6128,11 @@ msgstr ""
 #, fuzzy
 msgid "Text col:"
 msgstr "Text"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+#, fuzzy
+msgid "Text label…"
+msgstr "Afegeix una etiqueta"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -6184,10 +6195,6 @@ msgstr "Tema:"
 #, fuzzy
 msgid "Then show"
 msgstr "Llavors mostra"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "This profile has no panels. Use Add Block first."
-msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -8933,6 +8940,22 @@ msgstr ""
 #~ msgstr "*** ALERTA MYSQL ERROR DESCONEGUT:"
 
 #, fuzzy
+#~ msgid "Add Label"
+#~ msgstr "Afegeix una etiqueta"
+
+#, fuzzy
+#~ msgid "Add Line"
+#~ msgstr "Afegeix una línia"
+
+#, fuzzy
+#~ msgid "Add Stat"
+#~ msgstr "Afegeix una estadística"
+
+#, fuzzy
+#~ msgid "Block Props"
+#~ msgstr "Props. del bloc"
+
+#, fuzzy
 #~ msgid ""
 #~ "BovadaToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
 #~ msgstr "Impossible reconèixer tipus de joc de: '%s'"
@@ -8955,6 +8978,12 @@ msgstr ""
 #~ msgstr ""
 #~ "ERROR: el resultat de la consulta %s no conté player_id com a primera "
 #~ "columna"
+
+#, fuzzy
+#~ msgid "Edit the selected panel's title/border colours, position and label"
+#~ msgstr ""
+#~ "Edita el títol, els colors de la vora, la posició i l'etiqueta del tauler "
+#~ "seleccionat"
 
 #~ msgid ""
 #~ "Fpdb needs translators!\n"

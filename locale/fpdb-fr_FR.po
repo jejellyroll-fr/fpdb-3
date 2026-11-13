@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 20:30+0100\n"
+"POT-Creation-Date: 2026-11-12 23:21+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -4234,6 +4234,7 @@ msgid "Add/Edit Statistic"
 msgstr "Ajouter/modifier une statistique"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Automatic"
 msgstr "Automatique"
 
@@ -4246,7 +4247,6 @@ msgstr ""
 "haut, la couleur haute"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Block Properties"
 msgstr "Propriétés du bloc"
 
@@ -4256,6 +4256,7 @@ msgid "Border:"
 msgstr "Bordure :"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cell width:"
 msgstr "Largeur de case :"
 
@@ -4306,6 +4307,7 @@ msgid "Middle color:"
 msgstr "Couleur intermédiaire :"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "Minimum width of each statistic cell; Automatic keeps the legacy default"
 msgstr ""
@@ -4333,6 +4335,7 @@ msgid "Panel background:"
 msgstr "Fond du panneau :"
 
 #: fpdb_3_legacy/modern_hud_preferences/dialogs.py
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Panel text:"
 msgstr "Texte du panneau :"
 
@@ -4575,20 +4578,8 @@ msgid "Add Block"
 msgstr "Ajouter un bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add Label"
-msgstr "Ajouter un libellé"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add Line"
-msgstr "Ajouter une ligne"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add Profile Definition"
 msgstr "Ajouter une définition de profil"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Add Stat"
-msgstr "Ajouter une stat"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add Text Label"
@@ -4602,6 +4593,11 @@ msgstr ""
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add a new panel (block) to a multi-panel HUD"
 msgstr "Ajouter un nouveau panneau (bloc) à un HUD multi-panneaux"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Add a stat, a text label, a separator line or a panel"
+msgstr ""
+"Ajouter une statistique, un libellé, une ligne de séparation ou un panneau"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Add a text label (column/row header or caption) to a panel"
@@ -4676,10 +4672,6 @@ msgid "Below this many hands the panel is withheld and the fallback shows."
 msgstr ""
 "En dessous de ce nombre de mains, le panneau est masqué et le repli "
 "s'affiche."
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Block Props"
-msgstr "Propr. du bloc"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Cannot add this rule"
@@ -4845,12 +4837,6 @@ msgid "Edit Text Label"
 msgstr "Modifier le libellé"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Edit the selected panel's title/border colours, position and label"
-msgstr ""
-"Modifier le titre, les couleurs de bordure, la position et le libellé du "
-"panneau sélectionné"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Effective profile for these selectors"
 msgstr "Profil effectif pour ces sélecteurs"
 
@@ -5003,6 +4989,10 @@ msgstr "Coul. haute :"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Hi th:"
 msgstr "Seuil haut :"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "How this profile's cells are drawn"
+msgstr "Comment les cellules de ce profil sont dessinées"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "I understand, turn them on"
@@ -5225,6 +5215,10 @@ msgid "Panels: {count}"
 msgstr "Panneaux : {count}"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Panel…"
+msgstr "Panneau…"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Pick a Game (and Format) to see the default that would apply."
 msgstr ""
 "Choisissez un jeu (et un format) pour voir le profil par défaut qui "
@@ -5365,6 +5359,14 @@ msgid "Select a rule to update first."
 msgstr "Sélectionnez d'abord une règle à mettre à jour."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Selection"
+msgstr "Sélection"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Separator line"
+msgstr "Ligne de séparation"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Show all (stacked)"
 msgstr "Tout afficher (empilés)"
 
@@ -5404,6 +5406,10 @@ msgid "Standard"
 msgstr "Standard"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Statistic…"
+msgstr "Statistique…"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Stats whose value comes from the analytics layer rather than a column."
 msgstr ""
 "Stats dont la valeur vient de la couche d'analyse plutôt que d'une colonne."
@@ -5423,6 +5429,10 @@ msgstr "Texte / stat :"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Text col:"
 msgstr "Coul. du texte :"
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Text label…"
+msgstr "Libellé…"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Text:"
@@ -5481,10 +5491,6 @@ msgstr "Thème :"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Then show"
 msgstr "Puis afficher"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "This profile has no panels. Use Add Block first."
-msgstr "Ce profil n'a aucun panneau. Utilisez d'abord Ajouter un bloc."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Title bg:"
@@ -8133,8 +8139,17 @@ msgstr ""
 #~ "AbsoluteToFpdb.readHandInfo: File name didn't match re_*InfoFromFilename"
 #~ msgstr "Le nom de fichier ne correspond pas à re_*InfoFromFilename"
 
+#~ msgid "Add Label"
+#~ msgstr "Ajouter un libellé"
+
+#~ msgid "Add Line"
+#~ msgstr "Ajouter une ligne"
+
 #~ msgid "Add New Database"
 #~ msgstr "Ajouter Nouvelle Base De Données"
+
+#~ msgid "Add Stat"
+#~ msgstr "Ajouter une stat"
 
 #, fuzzy
 #~ msgid "Add player: rank: %s name: %s winnings: %s"
@@ -8204,6 +8219,9 @@ msgstr ""
 
 #~ msgid "Big bets won per 100 hands"
 #~ msgstr "Grosses mises gagnées toutes les 100 mains"
+
+#~ msgid "Block Props"
+#~ msgstr "Propr. du bloc"
 
 #, fuzzy
 #~ msgid "BovadaSummary.parseSummary: Failed to detect currency"
@@ -8537,6 +8555,11 @@ msgstr ""
 
 #~ msgid "ERROR: query %s result does not have player_id as first column"
 #~ msgstr "ERROR: query %s le résultat n'a pas player_id en premiÃ¨re colonne"
+
+#~ msgid "Edit the selected panel's title/border colours, position and label"
+#~ msgstr ""
+#~ "Modifier le titre, les couleurs de bordure, la position et le libellé du "
+#~ "panneau sélectionné"
 
 #~ msgid "Either 0 or more than one site matched (%s) - EEK"
 #~ msgstr "0 ou plus d'un site correspondant (%s) - EEK"
@@ -9712,6 +9735,9 @@ msgstr ""
 #~ "Ce module à été développé et testé avec la version 2.8.18 de gtk.  Vous "
 #~ "utilisez la version %d.%d.%d.  Votre programme de fidélité peut varier."
 
+#~ msgid "This profile has no panels. Use Add Block first."
+#~ msgstr "Ce profil n'a aucun panneau. Utilisez d'abord Ajouter un bloc."
+
 #~ msgid "Threads: "
 #~ msgstr "Threads: "
 
@@ -9912,9 +9938,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "_Refresh Stats"
 #~ msgstr "Rafraîchir Stats"
-
-#~ msgid "a separator line"
-#~ msgstr "une ligne de séparation"
 
 #~ msgid "activesite set to %s"
 #~ msgstr "Le site actif est %s"
