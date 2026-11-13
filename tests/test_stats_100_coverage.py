@@ -304,9 +304,9 @@ def test_non_sd_winrate_stat():
 
 def test_overbet_frequency():
     """Test overbet_frequency stat."""
-    stat_dict = {1: {"overbets": 2, "street3Bets": 10}}
+    stat_dict = {1: {"overbets": 2, "bet_3": 10}}
     result = do_stat(stat_dict, stat="overbet_frequency", player=1)
-    assert result is not None
+    assert result[1] == "15.0"
 
 
 def test_river_call_efficiency():
@@ -469,16 +469,16 @@ def test_three_bet_range():
 
 def test_raise_frequency_flop():
     """Test raise_frequency_flop stat."""
-    stat_dict = {1: {"street1Raises": 5, "street1Seen": 10}}
+    stat_dict = {1: {"raise_1": 5, "saw_f": 10}}
     result = do_stat(stat_dict, stat="raise_frequency_flop", player=1)
-    assert result is not None
+    assert result[1] == "50.0"
 
 
 def test_raise_frequency_turn():
     """Test raise_frequency_turn stat."""
-    stat_dict = {1: {"street2Raises": 3, "street2Seen": 10}}
+    stat_dict = {1: {"raise_2": 3, "saw_2": 10}}
     result = do_stat(stat_dict, stat="raise_frequency_turn", player=1)
-    assert result is not None
+    assert result[1] == "30.0"
 
 
 def test_f_3bet():
@@ -698,9 +698,9 @@ def test_raiseToSteal_stat():
 
 def test_bet_frequency_flop():
     """Test bet_frequency_flop stat."""
-    stat_dict = {1: {"street1Bets": 5, "street1Seen": 10}}
+    stat_dict = {1: {"bet_1": 5, "saw_f": 10}}
     result = do_stat(stat_dict, stat="bet_frequency_flop", player=1)
-    assert result is not None
+    assert result[1] == "50.0"
 
 
 def test_probe_bet_turn():
@@ -1084,7 +1084,7 @@ def test_sd_winrate_zero_sawShowdown():
 
 def test_overbet_frequency_exception():
     """Test overbet_frequency exception."""
-    stat_dict = {1: {"overbets": "bad", "street3Bets": 10}}
+    stat_dict = {1: {"overbets": "bad", "bet_3": 10}}
     result = do_stat(stat_dict, stat="overbet_frequency", player=1)
     assert result is not None
 
@@ -1293,7 +1293,7 @@ def test_m_ratio_with_collectees():
 # Tests for more zero opportunity cases
 def test_bet_frequency_turn_zero():
     """Test bet_frequency_turn with zero opportunities."""
-    stat_dict = {1: {"street2Bets": 0, "street2Seen": 0}}
+    stat_dict = {1: {"bet_2": 0, "saw_2": 0}}
     result = do_stat(stat_dict, stat="bet_frequency_turn", player=1)
     assert result[1] == "-"
 
@@ -1735,7 +1735,7 @@ def test_float_bet_zero():
 # Test for overbet_frequency zero
 def test_overbet_frequency_zero():
     """Test overbet_frequency with zero bets."""
-    stat_dict = {1: {"overbets": 0, "street3Bets": 0}}
+    stat_dict = {1: {"overbets": 0, "bet_3": 0}}
     result = do_stat(stat_dict, stat="overbet_frequency", player=1)
     assert result[1] == "-"
 
@@ -2898,9 +2898,9 @@ def test_vpip_pfr_ratio_with_values():
 # Tests for cold_call (different name)
 def test_cold_call_with_values():
     """Test cold_call with valid values."""
-    stat_dict = {1: {"CAR_0": 5, "CAR_opp_0": 10}}
+    stat_dict = {1: {"car_0": 5, "car_opp_0": 10}}
     result = do_stat(stat_dict, stat="cold_call", player=1)
-    assert result is not None
+    assert result[1] == "50.0"
 
 
 # Tests for limp and open_limp
@@ -2951,23 +2951,23 @@ def test_bet_f_with_values():
 
 def test_bet_t_with_values():
     """Test bet_frequency_turn with valid values."""
-    stat_dict = {1: {"street2Bets": 5, "saw_t": 10}}
+    stat_dict = {1: {"bet_2": 5, "saw_2": 10}}
     result = do_stat(stat_dict, stat="bet_frequency_turn", player=1)
-    assert result is not None
+    assert result[1] == "50.0"
 
 
 def test_raise_f_with_values():
     """Test raise_frequency_flop with valid values."""
-    stat_dict = {1: {"street1Raises": 5, "saw_f": 10}}
+    stat_dict = {1: {"raise_1": 5, "saw_f": 10}}
     result = do_stat(stat_dict, stat="raise_frequency_flop", player=1)
-    assert result is not None
+    assert result[1] == "50.0"
 
 
 def test_raise_t_with_values():
     """Test raise_frequency_turn with valid values."""
-    stat_dict = {1: {"street2Raises": 5, "saw_t": 10}}
+    stat_dict = {1: {"raise_2": 5, "saw_2": 10}}
     result = do_stat(stat_dict, stat="raise_frequency_turn", player=1)
-    assert result is not None
+    assert result[1] == "50.0"
 
 
 # Tests for cb_ip with saw_1 instead of saw_f
@@ -3107,9 +3107,9 @@ def test_float_bet_with_values():
 
 def test_f4b_with_values():
     """Test fold_vs_4bet with valid values."""
-    stat_dict = {1: {"F4B_0": 3, "F4B_opp_0": 10}}
+    stat_dict = {1: {"f4b_0": 3, "f4b_opp_0": 10}}
     result = do_stat(stat_dict, stat="fold_vs_4bet", player=1)
-    assert result is not None
+    assert result[1] == "30.0"
 
 
 def test_player_note_with_values():

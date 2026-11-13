@@ -20,7 +20,7 @@ class TestFloatBetStat:
 
     def test_float_bet_with_no_opportunities(self) -> None:
         """Test float_bet returns '-' when no opportunities to float."""
-        stat_dict = {"player1": {"street1InPosition": 0, "street1Calls": 0, "street2Bets": 0, "saw_f": 0, "saw_t": 0}}
+        stat_dict = {"player1": {"street1inposition": 0, "call_1": 0, "bet_2": 0, "saw_f": 0, "saw_2": 0}}
         result = float_bet(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -29,7 +29,7 @@ class TestFloatBetStat:
 
     def test_float_bet_with_zero_but_opportunities(self) -> None:
         """Test float_bet returns '0.0' when player had opportunities but never floated."""
-        stat_dict = {"player1": {"street1InPosition": 5, "street1Calls": 5, "street2Bets": 0, "saw_f": 5, "saw_t": 5}}
+        stat_dict = {"player1": {"street1inposition": 5, "call_1": 5, "bet_2": 0, "saw_f": 5, "saw_2": 5}}
         result = float_bet(stat_dict, "player1")
 
         assert result[1] == "0.0"
@@ -38,7 +38,7 @@ class TestFloatBetStat:
 
     def test_float_bet_with_normal_value(self) -> None:
         """Test float_bet returns normal percentage when player floated."""
-        stat_dict = {"player1": {"street1InPosition": 10, "street1Calls": 8, "street2Bets": 3, "saw_f": 10, "saw_t": 8}}
+        stat_dict = {"player1": {"street1inposition": 10, "call_1": 8, "bet_2": 3, "saw_f": 10, "saw_2": 8}}
         result = float_bet(stat_dict, "player1")
 
         assert result[1] == "37.5"  # 3/8 = 37.5%
@@ -59,7 +59,7 @@ class TestProbeBetStat:
 
     def test_probe_bet_with_no_opportunities(self) -> None:
         """Test probe_bet returns '-' when no opportunities to probe."""
-        stat_dict = {"player1": {"street1Bets": 0, "saw_f": 0, "cb_opp_1": 0, "cb_1": 0}}
+        stat_dict = {"player1": {"bet_1": 0, "saw_f": 0, "cb_opp_1": 0, "cb_1": 0}}
         result = probe_bet(stat_dict, "player1")
 
         assert result[1] == "-"
@@ -70,7 +70,7 @@ class TestProbeBetStat:
         """Test probe_bet returns '0.0' when player had opportunities but never probed."""
         stat_dict = {
             "player1": {
-                "street1Bets": 0,
+                "bet_1": 0,
                 "saw_f": 10,
                 "cb_opp_1": 8,
                 "cb_1": 3,  # 7 probe opportunities (10-3)
@@ -86,7 +86,7 @@ class TestProbeBetStat:
         """Test probe_bet returns normal percentage when player probed."""
         stat_dict = {
             "player1": {
-                "street1Bets": 2,
+                "bet_1": 2,
                 "saw_f": 12,
                 "cb_opp_1": 10,
                 "cb_1": 4,  # 8 probe opportunities (12-4)
@@ -114,12 +114,12 @@ class TestNewPostflopStatsIntegration:
         """Test all new postflop stats return '-' for a completely new player."""
         stat_dict = {
             "new_player": {
-                "street1InPosition": 0,
-                "street1Calls": 0,
-                "street2Bets": 0,
+                "street1inposition": 0,
+                "call_1": 0,
+                "bet_2": 0,
                 "saw_f": 0,
-                "saw_t": 0,
-                "street1Bets": 0,
+                "saw_2": 0,
+                "bet_1": 0,
                 "cb_opp_1": 0,
                 "cb_1": 0,
             },
@@ -134,13 +134,13 @@ class TestNewPostflopStatsIntegration:
         stat_dict = {
             "active_player": {
                 # Float: has opportunities but never floated
-                "street1InPosition": 8,
-                "street1Calls": 6,
-                "street2Bets": 0,
+                "street1inposition": 8,
+                "call_1": 6,
+                "bet_2": 0,
                 "saw_f": 8,
-                "saw_t": 6,
+                "saw_2": 6,
                 # Probe: has opportunities and probed sometimes
-                "street1Bets": 1,
+                "bet_1": 1,
                 "cb_opp_1": 8,
                 "cb_1": 3,  # 5 probe opportunities
             },
@@ -155,13 +155,13 @@ class TestNewPostflopStatsIntegration:
         stat_dict = {
             "mixed_player": {
                 # Float: good opportunities and uses them
-                "street1InPosition": 15,
-                "street1Calls": 10,
-                "street2Bets": 4,
+                "street1inposition": 15,
+                "call_1": 10,
+                "bet_2": 4,
                 "saw_f": 15,
-                "saw_t": 10,
+                "saw_2": 10,
                 # Probe: moderate opportunities and uses them
-                "street1Bets": 2,
+                "bet_1": 2,
                 "cb_opp_1": 15,
                 "cb_1": 8,  # 7 probe opportunities
             },
@@ -186,12 +186,12 @@ class TestNewPostflopStatsRegressionTests:
         """Test that all new stats return properly formatted 6-element tuples."""
         stat_dict = {
             "test_player": {
-                "street1InPosition": 10,
-                "street1Calls": 8,
-                "street2Bets": 3,
+                "street1inposition": 10,
+                "call_1": 8,
+                "bet_2": 3,
                 "saw_f": 10,
-                "saw_t": 8,
-                "street1Bets": 2,
+                "saw_2": 8,
+                "bet_1": 2,
                 "cb_opp_1": 10,
                 "cb_1": 4,
             },

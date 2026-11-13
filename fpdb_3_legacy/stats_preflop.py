@@ -220,8 +220,8 @@ def call_vs_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> St
 def cold_call(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the preflop cold-call frequency."""
     try:
-        opportunities = float(stat_dict[player].get("CAR_opp_0", 0))
-        done = float(stat_dict[player].get("CAR_0", 0))
+        opportunities = float(stat_dict[player].get("car_opp_0", 0))
+        done = float(stat_dict[player].get("car_0", 0))
         if opportunities == 0:
             return format_no_data_stat("cc", "% cold call preflop")
         stat = done / opportunities
@@ -290,8 +290,8 @@ def vpip_pfr_ratio(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> S
 def fold_vs_4bet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the frequency of folding when facing a preflop 4-bet."""
     try:
-        opportunities = float(stat_dict[player].get("F4B_opp_0", 0))
-        done = float(stat_dict[player].get("F4B_0", 0))
+        opportunities = float(stat_dict[player].get("f4b_opp_0", 0))
+        done = float(stat_dict[player].get("f4b_0", 0))
         if opportunities == 0:
             return format_no_data_stat("f4b", "% fold vs 4bet")
         stat = done / opportunities

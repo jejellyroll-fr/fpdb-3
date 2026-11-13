@@ -250,7 +250,7 @@ def overbet_frequency(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -
     """Return the historical estimated overbet frequency when betting data exists."""
     try:
         total_bets = sum(
-            float(stat_dict[player].get(key, 0)) for key in ("street1Bets", "street2Bets", "street3Bets")
+            float(stat_dict[player].get(key, 0)) for key in ("bet_1", "bet_2", "bet_3")
         )
         if total_bets == 0:
             return format_no_data_stat("overbet", "% overbet frequency")
