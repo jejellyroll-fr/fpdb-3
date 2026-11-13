@@ -350,6 +350,7 @@ module = [
     "fpdb_3_legacy.stats_display",
     "fpdb_3_legacy.stats_financial",
     "fpdb_3_legacy.stats_formatting",
+    "fpdb_3_legacy.stats_guide_data",
     "fpdb_3_legacy.stats_knockout",
     "fpdb_3_legacy.stats_postflop",
     "fpdb_3_legacy.stats_preflop",

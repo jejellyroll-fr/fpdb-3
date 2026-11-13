@@ -73,10 +73,10 @@ def test_generated_files_are_not_stale() -> None:
     sys.modules["gen_stats_guide"] = module
     spec.loader.exec_module(module)
     data = module.build()
-    assert module._render_module(data) == (ROOT / "fpdb_3_legacy" / "stats_guide_data.py").read_text(), (
-        "run .venv/bin/python tools/gen_stats_guide.py"
-    )
-    assert module._render_markdown(data) == (ROOT / "docs" / "hud-stats-guide.md").read_text()
+    assert module._render_module(data) == (ROOT / "fpdb_3_legacy" / "stats_guide_data.py").read_text(
+        encoding="utf-8"
+    ), "run .venv/bin/python tools/gen_stats_guide.py"
+    assert module._render_markdown(data) == (ROOT / "docs" / "hud-stats-guide.md").read_text(encoding="utf-8")
 
 
 def test_guide_search_matches_abbreviation_and_xml_title() -> None:

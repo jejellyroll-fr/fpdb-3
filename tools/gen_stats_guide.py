@@ -162,7 +162,7 @@ def _hud_aliases() -> dict[str, str]:
     aggregate = re.compile(r"\b(sum|max|avg)\(((?:[^()]|\((?:[^()]|\([^()]*\))*\))*)\)\s+(?:AS|as)\s+(\w+)", re.S)
     plain = re.compile(r"\bhc\.(\w+)\s+AS\s+(\w+)\s*,?\s*$", re.M)
     for name in HUD_SQL_FILES:
-        text = (ROOT / "fpdb_3_legacy" / name).read_text()
+        text = (ROOT / "fpdb_3_legacy" / name).read_text(encoding="utf-8")
         for match in aggregate.finditer(text):
             expr = re.sub(r"\s+", " ", match.group(2)).strip()
             found.setdefault(match.group(3).lower(), f"{match.group(1).upper()}({expr.replace('hc.', 'HudCache.')})")
@@ -294,9 +294,9 @@ def _native_entry(name: str, fn: Any, aliases: dict[str, str]) -> dict[str, Any]
 
 def _ring_columns() -> list[dict[str, str]]:
     """The Ring Player Stats table columns: XML title and SQL logic."""
-    xml = (ROOT / "fpdb_3_legacy" / "HUD_config.xml.example").read_text()
+    xml = (ROOT / "fpdb_3_legacy" / "HUD_config.xml.example").read_text(encoding="utf-8")
     titles = dict(re.findall(r'<col col_name="([^"]+)"[^>]*?col_title="([^"]*)"', xml))
-    sql = (ROOT / "fpdb_3_legacy" / "sql_queries_player_detailed.py").read_text()
+    sql = (ROOT / "fpdb_3_legacy" / "sql_queries_player_detailed.py").read_text(encoding="utf-8")
     # first variant only: the three dialects repeat the same columns
     head = sql.split("</pre>")[0]
     columns: dict[str, str] = {}
@@ -474,7 +474,7 @@ def pt4_common_stats() -> dict[str, tuple[str, str]]:
     """PT4 title -> (formula over FPDB columns, translator note), from the coverage report."""
     rows: dict[str, tuple[str, str]] = {}
     section = False
-    for line in PT4_COVERAGE.read_text().splitlines():
+    for line in PT4_COVERAGE.read_text(encoding="utf-8").splitlines():
         if line.startswith("## "):
             section = line.startswith("## The common cash stats")
             continue
@@ -523,7 +523,7 @@ def _pt4_tests() -> dict[str, list[str]]:
     """HudCache column -> the derivation tests that check it against PT4's definition."""
     found: dict[str, list[str]] = {}
     for path in sorted((ROOT / "tests").glob("test_*.py")):
-        text = path.read_text(errors="ignore")
+        text = path.read_text(encoding="utf-8", errors="ignore")
         if "PT4" not in text and "pt4" not in text:
             continue
         for column in set(
@@ -846,11 +846,13 @@ def main(argv: list[str]) -> int:
     data = build()
     module, markdown = _render_module(data), _render_markdown(data)
     if "--check" in argv:
-        stale = DATA_FILE.read_text() != module or DOC_FILE.read_text() != markdown
+        stale = DATA_FILE.read_text(encoding="utf-8") != module or DOC_FILE.read_text(encoding="utf-8") != markdown
         print("stale" if stale else "up to date")
         return 1 if stale else 0
-    DATA_FILE.write_text(module)
-    DOC_FILE.write_text(markdown)
+    # LF on every platform: the generated files are compared byte for byte in CI.
+    for target, text in ((DATA_FILE, module), (DOC_FILE, markdown)):
+        with target.open("w", encoding="utf-8", newline="\n") as handle:
+            handle.write(text)
     print(f"{len(data['stats'])} stats, {len(data['ring_columns'])} ring columns")
     return 0
 
