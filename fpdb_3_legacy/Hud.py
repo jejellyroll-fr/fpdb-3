@@ -583,6 +583,27 @@ class Hud:
             except Exception:  # one broken overlay must not stop the others
                 log.exception("Could not redraw dynamic HUD panels after a live update")
 
+    def _room_allows_live_context(self) -> bool:
+        """Whether this table's room lets the HUD use the current hand from a live source (#756).
+
+        A live source a room does not permit is dropped here, before it reaches
+        the panels: the capture or log reader may still run (table and seat
+        identification), but nothing it says about the hand is used.
+        """
+        try:
+            from fpdb_3_legacy import hud_room_policy
+
+            refused = hud_room_policy.why_not(
+                "live_context", self.site, hud_room_policy.network_hint(getattr(self, "config", None), self.site)
+            )
+        except Exception:  # intentional broad catch: fail closed, never break the HUD
+            log.exception("HUD room policy could not be read; live context ignored")
+            refused = "the room policy could not be read"
+        if refused and refused != getattr(self, "_live_context_refusal_logged", None):
+            log.info("Live context ignored at this %s table: %s", self.site, refused)
+        self._live_context_refusal_logged = refused
+        return refused is None
+
     def live_context_session(self) -> Any:
         """This table's action-by-action live context session (#336).
 
@@ -608,10 +629,13 @@ class Hud:
         caller that knows the hand but carries an action that does not names it
         with ``hand_id``, which is stamped onto the action here. Returns the
         trace of the update, or ``None`` when the action was a duplicate, out of
-        order, or a stale delivery from the previous hand.
+        order, a stale delivery from the previous hand, or at a table whose room
+        does not permit live context (#756).
         """
         from dataclasses import replace
 
+        if not self._room_allows_live_context():
+            return None
         session = self.live_context_session()
         if hand_id and not getattr(action, "hand_id", ""):
             action = replace(action, hand_id=str(hand_id))
@@ -624,6 +648,8 @@ class Hud:
         """Publish an already-folded :class:`LiveContext` to the panels (#336)."""
         from fpdb_3_legacy import hud_live_context
 
+        if not self._room_allows_live_context():
+            return
         self.set_live_state(**hud_live_context.context_to_live_state(context))
         self.refresh_dynamic_panels()
 

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 00:25+0100\n"
+"POT-Creation-Date: 2026-11-14 00:05+0100\n"
 "PO-Revision-Date: 2011-11-13 01:00+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Spanish (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -3584,14 +3584,6 @@ msgstr "🧩 Paneles dinámicos"
 
 #: fpdb_3_legacy/dynamic_panels_consent.py
 msgid ""
-"PokerStars forbids in-game statistics that change automatically with the "
-"game state: fpdb never shows dynamic panels at PokerStars tables. Winamax "
-"lists dynamic range software and certain dynamic features of Hand2Note as "
-"prohibited: ask its integrity team before using them there."
-msgstr ""
-
-#: fpdb_3_legacy/dynamic_panels_consent.py
-msgid ""
 "With dynamic panels on, the HUD changes which of a player's statistics it "
 "shows with the hand being played: preflop panels preflop, c-bet panels when "
 "a c-bet is made. The statistics are still the player's history; fpdb never "
@@ -3602,6 +3594,18 @@ msgstr ""
 msgid ""
 "Your room's terms prevail. Read them, and turn this on only if they allow "
 "it. Help ▸ What fpdb does while you play says what each room's page says."
+msgstr ""
+
+#: fpdb_3_legacy/dynamic_panels_consent.py
+msgid ""
+"fpdb shows dynamic panels only at tables of rooms whose rules were reviewed "
+"and allow them, and your yes does not change that. PokerStars forbids in-"
+"game statistics that change automatically with the game state. Winamax lists "
+"dynamic range software and certain dynamic features of Hand2Note as "
+"prohibited, so the panels stay off there until its integrity team approves "
+"them. They stay off on the iPoker network, whose skins are documented as "
+"allowing neither positional nor dynamic HUDs, and in every room not reviewed "
+"yet. Until then, the panels can be set up and previewed in Preferences."
 msgstr ""
 
 #: fpdb_3_legacy/fpdb.pyw
@@ -6035,7 +6039,9 @@ msgstr "Mostrar los paneles que encajan con la mano"
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "Some rooms forbid statistics that change with the hand: fpdb asks once "
-"before turning them on, and never shows them at PokerStars tables."
+"before turning them on, and shows them only in rooms whose reviewed rules "
+"allow them. None does yet: you can build and preview rules here, and tables "
+"keep the static HUD."
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py

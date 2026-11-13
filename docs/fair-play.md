@@ -38,8 +38,9 @@ program.
 | **HUD** (and FastHUD on fast-fold tables) | Your database; the operating system's list of windows, for each table's title and position | Statistics on the players at the table, computed from the hands in your database: rates such as VPIP or 3-bet, sample sizes, notes |
 | **Popups** | Your database | More statistics on one player, when you click their HUD |
 | **Auto Notes** | Your database | Notes on players, from rules you wrote, built from hands already imported |
-| **Dynamic HUD panels** — off until you turn them on, never at PokerStars tables | The current hand as fpdb knows it (see below) | Which group of a player's historical statistics shows, chosen by the situation: preflop, single-raised pot, facing a c-bet… |
-| **Winamax live context** | Winamax's own client log, and the table's accessibility tree (the request a screen reader makes) | Seats and the current street, used to place the HUD and pick dynamic panels |
+| **Dynamic HUD panels** — off until you turn them on, and only in a room whose reviewed rules allow them: none yet | The current hand as fpdb knows it (see below) | Which group of a player's historical statistics shows, chosen by the situation: preflop, single-raised pot, facing a c-bet… |
+| **Position panels** | The seat's position in the hand being played | Only in a room whose reviewed rules allow a positional HUD: none yet. Elsewhere every position panel shows, stacked |
+| **Winamax live context** | Winamax's own client log, and the table's accessibility tree (the request a screen reader makes) | Seats and the current street, used to place the HUD; the street is not used to pick panels while Winamax has not approved them |
 | **Session Guard** | Your imported hands | Your session's result, duration and hands, and an alert when a limit you set is reached. Informational only ([session-guard.md](session-guard.md)) |
 | **Live capture** (SwC client tap, CoinPoker packets) — off until you turn it on, and kept in its own package | The client's own traffic | Nothing at the table: it turns the traffic into hands to import ([live-capture.md](live-capture.md)) |
 
@@ -51,11 +52,16 @@ show you. How live each source is, and what fpdb refuses to guess, is in
 
 Turning dynamic panels on asks first, with what the rooms below say about them,
 and the HUD ignores panel rules until you have said yes, whatever wrote them: a
-HUD package, the pack gallery or a hand edit of `HUD_config.xml`. At PokerStars
-tables, on every regional site (PokerStars.FR, .ES, .COM…), the HUD never shows
-them, yes or not. The answer is kept in
-`dynamic-panels-consent.json`, beside `HUD_config.xml`; deleting it turns them
-off again, at the next update of a table already showing them.
+HUD package, the pack gallery or a hand edit of `HUD_config.xml`. The answer is
+kept in `dynamic-panels-consent.json`, beside `HUD_config.xml`; deleting it
+turns them off again, at the next update of a table already showing them.
+
+A yes never overrides a room. fpdb decides, room by room and in code, whether
+the HUD may show position-bound panels, dynamic panels and live context at its
+tables, and a room nobody has reviewed gets the static HUD only. PokerStars on
+every regional site, Winamax, the iPoker network under every skin's own name,
+and every other room keep the static HUD today:
+[what the HUD does in each room](hud-room-compatibility.md).
 
 The All-in or Fold stat set includes averages of the equity and EV players had
 in their *past* all-ins (EqK, EqR and their EV stats). They describe finished
@@ -92,9 +98,10 @@ pointer, not advice: follow the link and read the current version.
 
 | Room | Its rules | What concerns fpdb |
 | --- | --- | --- |
-| PokerStars | [Prohibited programs, tools and services](https://www.pokerstars.com/poker/room/prohibited/) | Statistics shown in game may come only from hands you played, and may not change automatically with the game state: fpdb never shows dynamic panels at its tables. Equity, ICM and range tools, reference material and GTO solutions are prohibited while PokerStars runs, even with no table open. |
-| Winamax | [Règlement poker](https://www.winamax.fr/cgu-poker?LICENSE=FR), "Aide extérieure au jeu" | Trackers that store your own statistics and the opponent statistics you gathered while playing are listed as allowed. Dynamic range software, equity and ICM calculators, solvers and "certain dynamic features of Hand2Note" are listed as prohibited: **ask Winamax's integrity team before turning dynamic panels on**. Anything not listed needs their prior approval. |
+| PokerStars | [Prohibited programs, tools and services](https://www.pokerstars.com/poker/room/prohibited/) | Statistics shown in game may come only from hands you played, and may not change automatically with the game state: fpdb never shows dynamic or position-bound panels at its tables. Equity, ICM and range tools, reference material and GTO solutions are prohibited while PokerStars runs, even with no table open. |
+| Winamax | [Règlement poker](https://www.winamax.fr/cgu-poker?LICENSE=FR), "Aide extérieure au jeu" | Trackers that store your own statistics and the opponent statistics you gathered while playing are listed as allowed. Dynamic range software, equity and ICM calculators, solvers and "certain dynamic features of Hand2Note" are listed as prohibited. Anything not listed needs their prior approval: fpdb keeps dynamic and position-bound panels off at Winamax tables until its integrity team approves them. |
+| iPoker (Betclic Poker, PMU Poker, FDJ Poker, Bet365.fr Poker, Barrière Poker, Unibet Poker and the other skins) | No official network page reviewed yet | Third-party HUD documentation reports positional and dynamic HUDs as not allowed on the network: fpdb keeps them off under every skin's name. |
 | GGPoker | No official page found; [reported 18 October 2026](https://www.pokernews.com/news/2026/10/ggpoker-bans-huds-52622.htm) | Reported to prohibit all third-party poker software, HUDs included, while its client runs. Importing hand histories after the session is a separate question: check with GGPoker. |
-| Unibet.fr | [Règlement poker Unibet.fr](https://xauth.unibet.fr/fr/document/4/poker/pdf?operateur=34), article on fair play (read 13 November 2026) | Prohibits real-time assistance (advice, actions, optimal-strategy calculators), "software compiling and analysing opponents' game data (data mining…)" and seating scripts. It does not name trackers or HUDs, and the client itself offers an optional opponent-tendency service. Whether an HUD that shows statistics from your own hands counts as data mining is **not stated: ask Unibet's support before relying on it**. Keep your database to hands you played, and leave dynamic panels off. Unibet may scan for running software. |
+| Unibet.fr | [Règlement poker Unibet.fr](https://xauth.unibet.fr/fr/document/4/poker/pdf?operateur=34), article on fair play (read 13 November 2026) | Prohibits real-time assistance (advice, actions, optimal-strategy calculators), "software compiling and analysing opponents' game data (data mining…)" and seating scripts. It does not name trackers or HUDs, and the client itself offers an optional opponent-tendency service. Whether an HUD that shows statistics from your own hands counts as data mining is **not stated: ask Unibet's support before relying on it**. Keep your database to hands you played. fpdb keeps dynamic and position-bound panels off at Unibet tables until Unibet confirms what it may do. Unibet may scan for running software. |
 | CoinPoker | No official page found; [reported June 2026](https://www.pokerlistings.com/news/hud-is-done-coinpoker-updated-policies-for-third-party-tools-software) | Reported to prohibit HUD and tracking software while its client runs. fpdb's CoinPoker support is switched off. |
-| Any other room | Its terms of service, often a "third-party tools" or "fair play" page | Check before using the HUD, and again before turning on dynamic panels or a live capture. |
+| Any other room | Its terms of service, often a "third-party tools" or "fair play" page | Check before using the HUD or a live capture. Until a room is reviewed, fpdb shows only the static HUD at its tables. |

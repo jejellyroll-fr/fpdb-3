@@ -220,12 +220,12 @@ def test_simplehud_accepts_zero_sized_multiblock_profile():
 # ---------------------------------------------------------------------------
 # Aux_Hud multi-block rendering
 # ---------------------------------------------------------------------------
-def _fake_aw(block_layouts, position="", positional_mode="all"):
+def _fake_aw(block_layouts, position="", positional_mode="all", site="TestSite"):
     hud = types.SimpleNamespace(
         stat_dict={1: {"screen_name": "p", "seat": 1, "n": 0, "position": position}},
         hand_instance=None,
         layout=types.SimpleNamespace(hh_seats={1: 1}),
-        site="TestSite",
+        site=site,
     )
     game_params = types.SimpleNamespace(
         name="test", show_hero_hud="", is_multiblock=len(block_layouts) > 1,
@@ -251,6 +251,8 @@ def _fake_aw(block_layouts, position="", positional_mode="all"):
     aw._is_hero_player = types.MethodType(Aux_Hud.SimpleHUD._is_hero_player, aw)
     aw._hide_seat_for_villain_only = types.MethodType(Aux_Hud.SimpleHUD._hide_seat_for_villain_only, aw)
     aw._positional_mode = types.MethodType(Aux_Hud.SimpleHUD._positional_mode, aw)
+    aw._positional_refusal = types.MethodType(Aux_Hud.SimpleHUD._positional_refusal, aw)
+    aw._room_site = types.MethodType(Aux_Hud.SimpleHUD._room_site, aw)
     # The dynamic panel selection (#298) is part of the same call path the stat
     # window walks. The fake has no panel rules, so the real methods answer
     # "panels are off" and the position rule decides -- which is the state these
@@ -399,18 +401,36 @@ def test_block_visible_rules():
     assert Aux_Hud.block_visible("BU", 0) is True  # BU block for the button
 
 
-def test_position_conditional_blocks_show_only_matching():
+def test_position_conditional_blocks_show_only_matching(reviewed_room):
     blocks = [
         _block("SB 3h", [["vpip"]], position="SB"),
         _block("BB 3h", [["pfr"]], position="BB"),
         _block("Info", [["n"]], position=""),  # always shown
     ]
-    # "current" mode filters by the last imported position (player in SB here)
-    win = Aux_Hud.SimpleStatWindow(aw=_fake_aw(blocks, position="S", positional_mode="current"), seat=1)
+    # "current" mode filters by the last imported position (player in SB here),
+    # in a room whose policy allows a positional HUD (#756).
+    aw = _fake_aw(blocks, position="S", positional_mode="current", site=reviewed_room)
+    win = Aux_Hud.SimpleStatWindow(aw=aw, seat=1)
     win.create_contents(1)
     win.update_contents(1)
     visible = [not container.isHidden() for container, _pos in win.block_widgets]
     assert visible == [True, False, True]  # SB shown, BB hidden, Info always shown
+
+
+@pytest.mark.parametrize("site", ["PokerStars.FR", "Winamax", "Betclic Poker", "GGPoker"])
+def test_a_room_that_refuses_a_positional_hud_shows_every_position_panel(site):
+    # The profile asks for "current", but at these tables what a seat shows
+    # must not change with the hand being played (#756).
+    blocks = [
+        _block("SB 3h", [["vpip"]], position="SB"),
+        _block("BB 3h", [["pfr"]], position="BB"),
+        _block("Info", [["n"]], position=""),
+    ]
+    win = Aux_Hud.SimpleStatWindow(aw=_fake_aw(blocks, position="S", positional_mode="current", site=site), seat=1)
+    win.create_contents(1)
+    win.update_contents(1)
+    visible = [not container.isHidden() for container, _pos in win.block_widgets]
+    assert visible == [True, True, True]
 
 
 def test_all_mode_shows_every_position_panel_regardless_of_position():

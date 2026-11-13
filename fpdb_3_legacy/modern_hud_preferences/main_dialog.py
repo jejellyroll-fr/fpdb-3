@@ -3940,7 +3940,8 @@ class ModernHudPreferences(QDialog):
         rooms_note = QLabel(
             _(
                 "Some rooms forbid statistics that change with the hand: fpdb asks once before turning "
-                "them on, and never shows them at PokerStars tables."
+                "them on, and shows them only in rooms whose reviewed rules allow them. None does yet: "
+                "you can build and preview rules here, and tables keep the static HUD."
             )
         )
         rooms_note.setWordWrap(True)

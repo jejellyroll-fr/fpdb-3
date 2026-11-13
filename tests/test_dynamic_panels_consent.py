@@ -1,4 +1,4 @@
-"""Dynamic HUD panels run only after a yes, and never at PokerStars tables (#647)."""
+"""Dynamic HUD panels run only after a yes, and only where the room allows them (#647, #756)."""
 
 from __future__ import annotations
 
@@ -21,16 +21,16 @@ def test_the_answer_sits_beside_the_configuration_apart_from_the_captures(tmp_pa
     assert consent.consent_path(config) == (tmp_path / "profile" / "dynamic-panels-consent.json").resolve()
 
 
-def test_a_fresh_install_has_not_said_yes(answers) -> None:
+def test_a_fresh_install_has_not_said_yes(answers, reviewed_room) -> None:
     assert not consent.is_confirmed(answers)
-    assert "Preferences" in consent.why_not_at("Winamax", answers)
+    assert "Preferences" in consent.why_not_at(reviewed_room, answers)
 
 
-def test_a_yes_is_kept_with_its_version(answers) -> None:
+def test_a_yes_is_kept_with_its_version(answers, reviewed_room) -> None:
     consent.confirm(answers)
 
     assert consent.is_confirmed(answers)
-    assert consent.why_not_at("Winamax", answers) is None
+    assert consent.why_not_at(reviewed_room, answers) is None
     recorded = json.loads(answers.read_text(encoding="utf-8"))["accepted"][DYNAMIC_PANELS.key]
     assert recorded["version"] == DYNAMIC_PANELS.version
 
@@ -56,12 +56,56 @@ def test_pokerstars_never_gets_them_on_any_regional_site(answers, site) -> None:
     consent.confirm(answers)
 
     assert consent.forbids_them(site)
-    assert site in consent.why_not_at(site, answers)
+    assert "PokerStars" in consent.why_not_at(site, answers)
 
 
-@pytest.mark.parametrize("site", ["Winamax", "GGPoker", "iPoker", "", None])
-def test_other_rooms_are_not_mistaken_for_it(site) -> None:
-    assert not consent.forbids_them(site)
+@pytest.mark.parametrize(
+    ("site", "named"),
+    [
+        ("Winamax", "Winamax"),
+        ("iPoker", "iPoker"),
+        ("Betclic Poker", "iPoker"),
+        ("PMU Poker", "iPoker"),
+        ("Unibet Poker", "iPoker"),
+        ("Unibet", "Unibet"),
+        ("GGPoker", "GGPoker"),
+        ("CoinPoker", "CoinPoker"),
+        ("Americas Cardroom", "Americas Cardroom"),
+    ],
+)
+def test_a_yes_does_not_turn_them_on_where_the_room_has_not_allowed_them(answers, site, named) -> None:
+    # Winamax pending its integrity team's approval, iPoker under every skin's
+    # own name, and every room nobody has reviewed yet (#756).
+    consent.confirm(answers)
+
+    assert consent.forbids_them(site)
+    assert named in consent.why_not_at(site, answers)
+
+
+@pytest.mark.parametrize("site", ["", None])
+def test_a_table_with_no_room_gets_the_conservative_policy(answers, site) -> None:
+    consent.confirm(answers)
+
+    assert consent.forbids_them(site)
+    assert consent.why_not_at(site, answers) is not None
+
+
+def test_a_reviewed_room_lets_the_yes_decide(answers, reviewed_room) -> None:
+    assert not consent.forbids_them(reviewed_room)
+    assert consent.why_not_at(reviewed_room, answers) is not None
+
+    consent.confirm(answers)
+
+    assert consent.why_not_at(reviewed_room, answers) is None
+
+
+def test_a_configured_network_can_only_restrict(answers, reviewed_room) -> None:
+    # HUD_config.xml's network attribute is user-editable: a stricter network
+    # restricts a site, but naming a reviewed network never frees PokerStars.
+    consent.confirm(answers)
+
+    assert "iPoker" in consent.why_not_at(reviewed_room, answers, network="iPoker")
+    assert "PokerStars" in consent.why_not_at("PokerStars.FR", answers, network=reviewed_room)
 
 
 def test_a_rewritten_answer_file_is_read_again(answers) -> None:
@@ -82,5 +126,7 @@ def test_the_question_names_the_rooms_and_their_terms() -> None:
 
     assert "PokerStars" in text
     assert "Winamax" in text
+    assert "iPoker" in text
+    assert "does not change that" in text
     assert "terms prevail" in text
     assert "never shows a recommended action" in text

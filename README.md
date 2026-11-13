@@ -162,6 +162,7 @@ them:
 | [Analytics concepts](docs/analytics-concepts.md) | opportunity, sample, SPR, pot type, realized vs EV |
 | [Advanced HUD guide](docs/hud-advanced-guide.md) | the reference packages and popups |
 | [Dynamic HUD guide](docs/hud-dynamic-guide.md) | panels, thresholds, what is truly live |
+| [What the HUD does in each room](docs/hud-room-compatibility.md) | static, positional and dynamic HUD, room by room |
 | [Reference HUD design system](docs/hud-design-system.md) | what each colour means, samples, panel titles |
 | [Screenshots](docs/screenshots.md) | what each picture shows and how to regenerate it |
 | [research-browser.md](docs/research-browser.md), [query-engine.md](docs/query-engine.md), [dynamic-panels.md](docs/dynamic-panels.md), [stat-definitions.md](docs/stat-definitions.md), [icm.md](docs/icm.md) | implementation reference |

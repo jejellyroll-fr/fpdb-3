@@ -43,7 +43,7 @@ def store():
 
 
 @pytest.fixture
-def aw(monkeypatch, store):
+def aw(monkeypatch, store, reviewed_room):
     saved, fake_store = store
     monkeypatch.setattr(Aux_Hud, "get_positions_store", lambda: fake_store)
 
@@ -53,7 +53,9 @@ def aw(monkeypatch, store):
         layout=types.SimpleNamespace(width=792, height=546, name="L"),
         ref_layout_width=None,
         ref_layout_height=None,
-        site="Winamax",
+        # A room whose policy allows a positional HUD, so the profile's mode
+        # decides (#756); restricted rooms are tested below.
+        site=reviewed_room,
         max=3,
     )
     obj.hud = hud
@@ -154,6 +156,17 @@ def test_all_mode_stacks_player_blocks_without_overlap(aw):
     ys = [aw._default_canonical((1, i))[1] for i in range(3)]
     assert ys == sorted(ys) and len(set(ys)) == 3          # strictly increasing, no overlap
     assert aw._default_canonical(("table", 3)) == (0, 54)  # table block keeps its offset
+
+
+def test_a_room_that_refuses_a_positional_hud_lays_the_panels_out_stacked(aw):
+    # The profile asks for "current", but every position panel shows (#756).
+    aw.hud.site = "Winamax"
+    aw.game_params.positional_mode = "current"
+    aw.block_layouts = [
+        {"scope": "player", "label": "SB 3h", "nrows": 7, "x": 0, "y": 0},
+        {"scope": "player", "label": "BB 3h", "nrows": 7, "x": 0, "y": 0},
+    ]
+    assert aw._default_canonical((1, 0)) != aw._default_canonical((1, 1))
 
 
 def test_current_mode_uses_imported_offsets(aw):
