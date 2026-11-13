@@ -79,10 +79,11 @@ def test_a_file_the_client_still_locks_is_not_lost(tmp_path, monkeypatch) -> Non
     export.write_text("Unibet Hand #1 - 0.03/0.05 - Pot Limit Omaha - UTC 13:23:13 2026/11/07\n", encoding="utf-8")
     real_open = open
 
-    def locked(path, mode="r", *args, **kwargs):
+    def locked(path, *args, **kwargs):
+        mode = args[0] if args else kwargs.get("mode", "r")
         if os.fspath(path) == str(export) and "b" in mode:
             raise PermissionError(13, "The process cannot access the file")
-        return real_open(path, mode, *args, **kwargs)
+        return real_open(path, *args, **kwargs)
 
     converter = Unibet.__new__(Unibet)
     converter.in_path = str(export)
