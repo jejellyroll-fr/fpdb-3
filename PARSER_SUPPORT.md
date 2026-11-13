@@ -24,7 +24,7 @@ These converters have file-by-file semantic snapshots in
   Merge and Microgaming hands, each filed under the room in its header -- pinned
   by `tests/test_pokertracker_rooms.py`)
 - SealsWithClubs
-- Unibet
+- Unibet (the 2026 Relax Gaming client's `Unibet Hand #` exports and its tournament summaries; setup and limits in [docs/unibet-setup.md](docs/unibet-setup.md))
 - Winamax
 - Winning Poker Network
 

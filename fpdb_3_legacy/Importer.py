@@ -1422,6 +1422,13 @@ class Importer:
                 stat_info = os.stat(f)
                 if f in self.updatedsize:  # we should be able to assume that if we're in size, we're in time as well
                     if stat_info.st_size > self.updatedsize[f] or stat_info.st_mtime > self.updatedtime[f]:
+                        if stat_info.st_size < self.updatedsize[f] and f in self.pos_in_file:
+                            # The client truncated or recreated its export (#729):
+                            # the old offset points past the new content and would
+                            # skip every hand written since. Re-read from the start;
+                            # hands already stored are duplicate-safe by hand id.
+                            log.info(f"{f} shrank, re-reading it from the start")
+                            self.pos_in_file[f] = 0
                         if not os.path.isdir(f):
                             log.debug(f"os.path.basename: {os.path.basename(f)}")
                             log.debug(f"self.caller: {self.caller}")
