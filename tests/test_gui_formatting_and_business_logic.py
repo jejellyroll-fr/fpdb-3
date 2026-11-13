@@ -10,32 +10,30 @@ from fpdb_3_legacy import GuiAutoNoteRules, GuiOpponentsReport, GuiStatsInfo, Gu
 
 
 def test_stats_data_structure() -> None:
-    """Verify STATS_DATA contains required categories and valid stat dictionaries."""
-    assert "Preflop" in GuiStatsInfo.STATS_DATA
-    assert "Postflop" in GuiStatsInfo.STATS_DATA
+    """Verify the Stats Guide groups its generated entries by category, each complete."""
+    grouped = GuiStatsInfo._grouped_stats()
+    assert "Preflop" in grouped
+    assert "Flop / 4th street" in grouped
 
-    for category, stats in GuiStatsInfo.STATS_DATA.items():
+    for category, stats in grouped.items():
         assert isinstance(category, str)
         assert isinstance(stats, list)
         for stat in stats:
-            assert "name" in stat
-            assert "abbr" in stat
-            assert "desc" in stat
-            assert "formula" in stat
-            assert "sql" in stat
+            for key in ("name", "title", "abbr", "description", "detail", "formula", "sql"):
+                assert key in stat, f"{stat['name']} lacks {key}"
 
 
 def test_stats_data_search_filtering() -> None:
-    """Verify filtering logic over STATS_DATA."""
-    query = "vpip"
-    found = []
-    for cat, stats in GuiStatsInfo.STATS_DATA.items():
-        for stat in stats:
-            if query in stat["name"].lower() or query in stat["abbr"].lower() or query in stat["desc"].lower():
-                found.append(stat)
+    """Verify the guide's search finds a stat by name, abbreviation or title."""
+    found = [
+        stat
+        for stats in GuiStatsInfo._grouped_stats().values()
+        for stat in stats
+        if GuiStatsInfo._matches(stat, "vpip")
+    ]
 
     assert len(found) > 0
-    assert any(s["abbr"] == "VPIP" for s in found)
+    assert any(s["name"] == "vpip" and s["abbr"] == "v" for s in found)
 
 
 # ---------------------------------------------------------------------------
@@ -160,4 +158,3 @@ def test_autonoterules_presets_existence() -> None:
     """Verify GuiAutoNoteRules provides AutoNoteRulesDialog class and rule helpers."""
     assert hasattr(GuiAutoNoteRules, "AutoNoteRulesDialog")
     assert callable(GuiAutoNoteRules.configured_rule_summary)
-

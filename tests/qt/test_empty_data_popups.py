@@ -265,13 +265,14 @@ class TestEmptyDataPopups(unittest.TestCase):
 
     def test_gui_stats_info_guide(self):
         """Test GuiStatsInfo instantiates and filters statistics correctly."""
-        from fpdb_3_legacy.GuiStatsInfo import STATS_DATA, GuiStatsInfo
+        from fpdb_3_legacy.GuiStatsInfo import GuiStatsInfo
+        from fpdb_3_legacy.stats_guide_data import GUIDE
 
         # Instantiate guide
         guide = GuiStatsInfo(self.mock_conf, None)
 
-        # Check that it populated some stats
-        total_stats = sum(len(stats) for stats in STATS_DATA.values())
+        # Every stat of the generated guide, plus one header per category
+        total_stats = len(GUIDE["stats"])
         self.assertGreater(guide.list_widget.count(), total_stats)
 
         # Test filtering/searching
@@ -283,7 +284,7 @@ class TestEmptyDataPopups(unittest.TestCase):
 
         # Test detail display
         guide.list_widget.setCurrentItem(first_item)
-        self.assertIn("Voluntarily Put In Pot", guide.text_browser.toHtml())
+        self.assertIn("Voluntarily Put $ In Pot", guide.text_browser.toPlainText())
 
     def test_filters_get_hero_ids_variant(self):
         """Test that get_hero_ids correctly maps site variant to player ID."""
