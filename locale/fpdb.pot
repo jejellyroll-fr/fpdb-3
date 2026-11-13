@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 23:21+0100\n"
+"POT-Creation-Date: 2026-11-13 00:25+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3727,7 +3727,6 @@ msgid "Tourney Hand Viewer"
 msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Statistics"
 msgstr ""
 
@@ -3898,6 +3897,12 @@ msgid "Horz Line"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid ""
+"Drag to reorder: the item takes the place it is dropped on. Double-click to "
+"edit."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "Drag to move; drop on another item to swap them. Double-click to edit."
 msgstr ""
 
@@ -3915,6 +3920,10 @@ msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "Remove the last item of this row"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "A popup lists its stats in one column."
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
@@ -4509,6 +4518,10 @@ msgid "➕ New Popup"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Drag a stat into the popup, or double-click it to add it at the end."
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "➕ Add"
 msgstr ""
 
@@ -4521,23 +4534,21 @@ msgid "➖ Remove"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "↑ Up"
+msgid ""
+"Drag an item to move it; drop a stat from Available Stats where it should "
+"go. Arrows select, Alt+arrows move, Delete removes, double-click edits."
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "↓ Down"
+msgid "Popup Preview"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Class:"
+msgid "🔍 Real Size"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Theme:"
-msgstr ""
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Icons:"
+msgid "Open preview at 100% real size in a new window"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4561,15 +4572,15 @@ msgid "Background:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Popup Preview"
+msgid "Class:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "🔍 Real Size"
+msgid "Theme:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "Open preview at 100% real size in a new window"
+msgid "Icons:"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -4649,6 +4660,10 @@ msgstr ""
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, python-brace-format
 msgid "row {row}, col {col}"
+msgstr ""
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Analytics stats go in HUD panels, not in popups."
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py

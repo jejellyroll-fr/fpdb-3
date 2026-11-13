@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 23:21+0100\n"
+"POT-Creation-Date: 2026-11-13 00:25+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -4066,7 +4066,6 @@ msgid "Stat Packs"
 msgstr "Packs de stats"
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/modern_hud_preferences/dialogs.py
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Statistics"
 msgstr "Statistiques"
 
@@ -4151,6 +4150,10 @@ msgid "+"
 msgstr "+"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid "A popup lists its stats in one column."
+msgstr "Un popup liste ses stats sur une seule colonne."
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "Add an item to this row"
 msgstr "Ajouter un élément à cette ligne"
 
@@ -4172,6 +4175,14 @@ msgid "Drag to move; drop on another item to swap them. Double-click to edit."
 msgstr ""
 "Glissez pour déplacer ; déposez sur un autre élément pour les échanger. "
 "Double-cliquez pour modifier."
+
+#: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
+msgid ""
+"Drag to reorder: the item takes the place it is dropped on. Double-click to "
+"edit."
+msgstr ""
+"Glissez pour réordonner : l'élément prend la place où il est déposé. Double-"
+"cliquez pour modifier."
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "Drop an item here to add a row"
@@ -4643,6 +4654,11 @@ msgstr ""
 "{error}"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Analytics stats go in HUD panels, not in popups."
+msgstr ""
+"Les stats analytiques vont dans les panneaux du HUD, pas dans les popups."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Analytics-backed stats"
 msgstr "Stats issues de l'analyse"
 
@@ -4802,6 +4818,12 @@ msgstr ""
 "Double-cliquez sur une stat pour l'ajouter au panneau affiché dans Design."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid "Drag a stat into the popup, or double-click it to add it at the end."
+msgstr ""
+"Glissez une stat dans le popup, ou double-cliquez dessus pour l'ajouter à la "
+"fin."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
 "Drag an item to move it, onto another to swap them. Drop a stat from "
 "Available Stats on an empty cell. Arrows select, Alt+arrows move, Delete "
@@ -4811,6 +4833,15 @@ msgstr ""
 "une stat des Statistiques disponibles sur une case vide. Les flèches "
 "sélectionnent, Alt+flèches déplacent, Suppr retire ; clic droit sur une case "
 "pour les lignes et colonnes."
+
+#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
+msgid ""
+"Drag an item to move it; drop a stat from Available Stats where it should "
+"go. Arrows select, Alt+arrows move, Delete removes, double-click edits."
+msgstr ""
+"Glissez un élément pour le déplacer ; déposez une stat des Statistiques "
+"disponibles là où elle doit aller. Les flèches sélectionnent, Alt+flèches "
+"déplacent, Suppr retire, un double-clic modifie."
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "Duplicate HUD profile selectors"
@@ -5592,14 +5623,6 @@ msgstr ""
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "—"
 msgstr "—"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "↑ Up"
-msgstr "↑ Monter"
-
-#: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
-msgid "↓ Down"
-msgstr "↓ Descendre"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid "● Unsaved changes"
@@ -8326,6 +8349,11 @@ msgstr ""
 #~ msgid "Cell already used"
 #~ msgstr "Case déjà occupée"
 
+#~ msgid "Clear a grid cell by emptying its text in Item Properties."
+#~ msgstr ""
+#~ "Pour vider une case de la grille, effacez son texte dans les propriétés "
+#~ "de l'élément."
+
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Fermé, pas de graphique exporté"
 
@@ -9735,6 +9763,12 @@ msgstr ""
 #~ "Ce module à été développé et testé avec la version 2.8.18 de gtk.  Vous "
 #~ "utilisez la version %d.%d.%d.  Votre programme de fidélité peut varier."
 
+#~ msgid ""
+#~ "This popup is a PokerTracker 4 grid: edit its cells in Item Properties."
+#~ msgstr ""
+#~ "Ce popup est une grille PokerTracker 4 : modifiez ses cases dans les "
+#~ "propriétés de l'élément."
+
 #~ msgid "This profile has no panels. Use Add Block first."
 #~ msgstr "Ce profil n'a aucun panneau. Utilisez d'abord Ajouter un bloc."
 
@@ -10174,3 +10208,9 @@ msgstr ""
 
 #~ msgid "writers finished already"
 #~ msgstr "Les sauvegardes sont déjà finies"
+
+#~ msgid "↑ Up"
+#~ msgstr "↑ Monter"
+
+#~ msgid "↓ Down"
+#~ msgstr "↓ Descendre"

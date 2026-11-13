@@ -14,11 +14,13 @@ system.
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QGridLayout, QLabel, QVBoxLayout, QWidget
 
+from fpdb_3_legacy import Stats
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.Popup import Popup
 
@@ -35,8 +37,17 @@ def load_block_popup(source: str, group_name: str) -> dict | None:
     return None
 
 
-def build_block_popup_widget(group: dict, cell_px: int = 24, parent: QWidget | None = None) -> QWidget:
-    """Build a coloured grid widget for a popup group (text + stat cells)."""
+def build_block_popup_widget(
+    group: dict,
+    cell_px: int = 24,
+    parent: QWidget | None = None,
+    value_of: Callable[[dict], str | None] | None = None,
+) -> QWidget:
+    """Build a coloured grid widget for a popup group (text + stat cells).
+
+    ``value_of`` gives the text a cell shows instead of its own, or None to keep
+    it: the HUD passes the player's value of a cell that names an fpdb stat.
+    """
     container = QWidget(parent)
     outer = QVBoxLayout(container)
     outer.setContentsMargins(2, 2, 2, 2)
@@ -61,7 +72,8 @@ def build_block_popup_widget(group: dict, cell_px: int = 24, parent: QWidget | N
     # column; stat popups keep their natural label widths.
     dense = int(group.get("cols", 1)) >= 10
     for cell in group.get("cells", []):
-        lab = QLabel(str(cell.get("text", "")), grid_host)
+        shown = value_of(cell) if value_of is not None else None
+        lab = QLabel(str(cell.get("text", "")) if shown is None else shown, grid_host)
         lab.setFont(font)
         # Fixed height keeps the grid's total height deterministic so the scroll
         # area sizes the frame correctly (a min-height under-estimate clipped the
@@ -97,9 +109,29 @@ class BlockPopup(Popup):
         self.setLayout(layout)
         group = self._load_group()
         if group:
-            layout.addWidget(build_block_popup_widget(group, parent=self))
+            layout.addWidget(build_block_popup_widget(group, parent=self, value_of=self._stat_value))
         else:
             layout.addWidget(QLabel("No popup group data"))
+
+    def _player_id(self) -> int | None:
+        stat_dict = getattr(self, "stat_dict", None) or {}
+        for player_id, stats in stat_dict.items():
+            if isinstance(stats, dict) and stats.get("seat") == getattr(self, "seat", None):
+                return int(player_id)
+        return None
+
+    def _stat_value(self, cell: dict) -> str | None:
+        """The player's value of a cell that names an fpdb stat (#782); None otherwise.
+
+        Cells imported from PT4 hold PT4's own text and keep it; a stat put in
+        the grid from the editor's catalogue carries its fpdb name as ``stat``.
+        """
+        stat = cell.get("stat") if cell.get("kind") == "stat" else None
+        player_id = self._player_id() if stat else None
+        if not stat or player_id is None:
+            return None
+        number = Stats.do_stat(self.stat_dict, player=player_id, stat=stat, hand_instance=self.hand_instance)
+        return str(number[1]) if number else "--"
 
     def _load_group(self) -> dict | None:
         params = getattr(self.pop, "pu_class_params", None) or {}
