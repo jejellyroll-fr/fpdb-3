@@ -892,6 +892,11 @@ class DatabaseHudStatsMixin:
                             stat_dict[playerid][name.lower()] = val
                         elif name.lower() not in stat_dict[playerid]:
                             stat_dict[playerid][name.lower()] = val
+                        elif name.lower() == "currency":
+                            # Text, not a count: keep it while every hand agrees,
+                            # and drop the symbol once two currencies mix.
+                            if stat_dict[playerid]["currency"] != val:
+                                stat_dict[playerid]["currency"] = ""
                         elif name.lower() not in (
                             "hand_id",
                             "player_id",

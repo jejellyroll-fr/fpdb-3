@@ -105,7 +105,7 @@ OVERRIDES: dict[str, dict[str, str]] = {
     ),
     "totalprofit": dict(
         formula="net / 100, formatted with the game's currency",
-        sql="net = SUM(HudCache.totalProfit); currency is not selected by the HUD queries, so the USD default is used",
+        sql="net = SUM(HudCache.totalProfit); currency = the game type's currency (none when pooled game types differ)",
     ),
     "n": dict(
         formula="n (hand count; shown as 12.3k from 10 000)",

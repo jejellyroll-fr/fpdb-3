@@ -486,7 +486,7 @@ _TEXT: dict[str, tuple[str, str]] = {
     ),
     "totalprofit": (
         "Total Profit",
-        "The player's total profit over the aggregated hands. It is always formatted as US dollars: the HUD query does not select the game's currency. In tournaments the amount is chips.",
+        "The player's total profit over the aggregated hands. It is shown in the game's currency, without a symbol when the pooled game types use different currencies. In tournaments the amount is chips (usually shown as T$).",
     ),
     "amt_bet_p": (
         "Average Preflop Investment",
@@ -894,7 +894,7 @@ OVERRIDE_WORDS: dict[str, str] = {
     "BBper100": "Sum of profit in cents × 50 / Sum of big blinds in play (big blind × hands); a big bet is two big blinds",
     "bbper100": "Sum of profit in cents × 100 / Sum of big blinds in play (big blind × hands)",
     "profit100": "Sum of profit in cents / Number of hands played",
-    "totalprofit": "Sum of profit in cents / 100, formatted as USD",
+    "totalprofit": "Sum of profit in cents / 100, in the game's currency",
     "n": "Number of hands played",
     "agg_fact": "(Number of hands with a bet or raise on the flop + turn + river + 7th street) / (Number of calls on the flop + turn + river + 7th street)",
     "agg_fact_pct": "(Number of hands with a bet or raise on the flop to 7th street) / (that number + Number of calls on the flop to 7th street)",

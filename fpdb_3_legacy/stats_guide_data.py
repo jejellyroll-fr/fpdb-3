@@ -5878,16 +5878,17 @@ GUIDE: dict[str, Any] = {'categories': {'player': 'Player',
             'detail_label': 'tot_prof',
             'description': 'Total Profit',
             'formula': "net / 100, formatted with the game's currency",
-            'sql': 'net = SUM(HudCache.totalProfit); currency is not selected by the HUD queries, so the USD default '
-                   'is used',
+            'sql': "net = SUM(HudCache.totalProfit); currency = the game type's currency (none when pooled game types "
+                   'differ)',
             'note': '',
             'status': 'active',
             'xml_titles': [],
             'category': 'results',
             'title': 'Total Profit',
-            'detail': "The player's total profit over the aggregated hands. It is always formatted as US dollars: the "
-                      "HUD query does not select the game's currency. In tournaments the amount is chips.",
-            'formula_words': 'Sum of profit in cents / 100, formatted as USD',
+            'detail': "The player's total profit over the aggregated hands. It is shown in the game's currency, "
+                      'without a symbol when the pooled game types use different currencies. In tournaments the amount '
+                      'is chips (usually shown as T$).',
+            'formula_words': "Sum of profit in cents / 100, in the game's currency",
             'alias_of': '',
             'pt4': {},
             'pt4_tests': [],
