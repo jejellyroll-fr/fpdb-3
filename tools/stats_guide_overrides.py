@@ -93,11 +93,6 @@ OVERRIDES: dict[str, dict[str, str]] = {
         note="An estimate built from the 3-bet counts with fixed 0.7 and 0.6 factors (the share assumed to be from the blinds); it is not a count of re-steals. Use `raiseToSteal` for the measured value.",
         status="estimate",
     ),
-    "rfi_total": dict(
-        formula="max(0, pfr − 3bet) / pfr_opp × 100",
-        sql="pfr = SUM(HudCache.street0Aggr); pfr_opp = SUM(HudCache.street0AggrChance); 3bet is not selected by any HUD query, so it is always 0",
-        note="In practice this equals PFR. The measured raise-first-in rate is `rfi_early_position`, `rfi_middle_position` and `rfi_late_position` pooled by the position queries.",
-    ),
     "vpip_pfr_ratio": dict(
         formula="(vpip / vpip_opp) / (pfr / pfr_opp)",
         sql="vpip = SUM(HudCache.street0VPI); vpip_opp = SUM(HudCache.street0VPIChance); pfr = SUM(HudCache.street0Aggr); pfr_opp = SUM(HudCache.street0AggrChance)",

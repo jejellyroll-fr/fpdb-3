@@ -569,11 +569,17 @@ class DerivedStatsPreflopMixin(DerivedStatsBase):
             if act in ("bringin", "small blind", "big blind", "secondsb", "both", "button blind"):
                 continue
 
-            # Identify First Raise opportunity/done (matches PT4 flg_p_first_raise)
+            # Raise first in: the first raise, made into a pot nobody has entered.
+            # raisedFirstIn is the "done" half of raiseFirstInChance (set below on
+            # the same unopened pot), so a first raise after limpers -- an
+            # isolation raise -- is not one: counting it inflated every RFI by
+            # about a fifth (#796). PT4's flg_p_first_raise, which also counts
+            # it, is mapped under this narrower FPDB definition.
             if not first_raise_seen:
                 if act in ("bets", "raises", "completes"):
                     log.debug("calcSteals: Player %s made the FIRST RAISE", pname)
-                    player_stats["raisedFirstIn"] = True  # We use this key for First Raise parity
+                    if not pot_opened:
+                        player_stats["raisedFirstIn"] = True
                     first_raise_seen = True
                     # Also set stealDone if it's an RFI from steal position
                     if not pot_opened and posn in steal_positions:

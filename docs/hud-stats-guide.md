@@ -553,7 +553,7 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 - **Tooltip**: % open-shove (>=40% stack)
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
 - **Hold'em / Omaha (flop games)**: yes
-- **Stud / Razz**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Isolation Raise (deprecated) — `iso`
@@ -825,20 +825,19 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 - **Stud / Razz**: yes
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
-### Raise First In (total) — `rfi_total`
+### Raise First In (RFI) — `rfi_total`
 
 - **HUD abbreviation**: `rfi`
-- **Description**: Meant as the percentage of the time that a player opened the pot with a raise. As written it is PFR minus a `3bet` key the HUD never fills, so in practice it equals PFR.
-- **Formula**: (Number of preflop raises − Number of preflop 3-bets under the never-filled key 3bet, never below 0) / Number of preflop raise opportunities × 100
-- **Formula (code)**: `max(0, pfr − 3bet) / pfr_opp × 100`
-- **SQL database field / logic**: pfr = SUM(HudCache.street0Aggr); pfr_opp = SUM(HudCache.street0AggrChance); 3bet is not selected by any HUD query, so it is always 0
+- **Description**: Percentage of the time that a player raised when the pot was still unopened (nobody had called, raised or limped before). A raise after limpers (an isolation raise) is not counted.
+- **Formula**: Number of raises first in (the first raise, into a pot nobody had entered) / Number of times the player acted while the pot was still unopened × 100
+- **Formula (code)**: `rfi_0 / rfi_opp_0 × 100`
+- **SQL database field / logic**: rfi_opp_0 = SUM(HudCache.raiseFirstInChance); rfi_0 = SUM(HudCache.raisedFirstIn)
 - **Tooltip**: % raise first in
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: yes, preflop
-- **Stud / Razz**: yes, on 3rd street
-- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
-- **PT4 derivation tests**: `test_pt4_adapter.py`
-- **Note**: In practice this equals PFR. The measured raise-first-in rate is `rfi_early_position`, `rfi_middle_position` and `rfi_late_position` pooled by the position queries.
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
+- **XML titles**: `RFI`
 
 ### Squeeze — `squeeze`
 
