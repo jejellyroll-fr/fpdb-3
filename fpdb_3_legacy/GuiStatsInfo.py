@@ -24,11 +24,49 @@ CUSTOM_NOTE = (
     "and each one documents itself in the pack gallery."
 )
 
+ORIGIN_LABELS = {
+    "native": "Native HUD stat",
+    "registry": "Declarative stat (stats.d)",
+    "analytics": "Analytics definition",
+}
+
 STATUS_LABELS = {
     "deprecated": "Deprecated: kept so old layouts load; it shows no data.",
     "estimate": "Estimate: not a direct count (see the note).",
     "input-missing": "An input is not selected by the HUD queries (see the note).",
 }
+
+
+def _meta_rows(stat: dict) -> list[tuple[str, str]]:
+    """The label/value rows above a stat's description, already escaped."""
+
+    def esc(value: object) -> str:
+        return html_lib.escape(str(value))
+
+    origin = ORIGIN_LABELS.get(stat["origin"], stat["origin"])
+    rows = [
+        ("Code identifier", f"<code>{esc(stat['name'])}</code>"),
+        ("HUD abbreviation", esc(stat["abbr"]) or "-"),
+        ("Origin", esc(origin)),
+    ]
+    if stat["detail_label"] and stat["detail_label"] != stat["abbr"]:
+        rows.append(("Detailed HUD text", esc(stat["detail_label"])))
+    if stat["description"] != stat["detail"]:
+        rows.append(("HUD tooltip", esc(stat["description"])))
+    if stat.get("xml_titles"):
+        rows.append(("Legacy XML titles", ", ".join(esc(t) for t in stat["xml_titles"])))
+    if stat.get("alias_of"):
+        rows.append(("Alias of", f"<code>{esc(stat['alias_of'])}</code>"))
+    pt4 = stat.get("pt4")
+    if pt4:
+        rows.append(
+            ("PT4 equivalent", f"{esc(pt4['stat'])}: <code>{esc(pt4['formula'])}</code> ({esc(pt4['parity'])})")
+        )
+        if pt4.get("note"):
+            rows.append(("PT4 difference", esc(pt4["note"])))
+    if stat.get("pt4_tests"):
+        rows.append(("PT4 derivation tests", ", ".join(esc(t) for t in stat["pt4_tests"])))
+    return rows
 
 
 def _grouped_stats() -> dict[str, list[dict]]:
@@ -42,7 +80,14 @@ def _grouped_stats() -> dict[str, list[dict]]:
 
 def _matches(entry: dict, text: str) -> bool:
     haystack = " ".join(
-        [entry["name"], entry["abbr"], entry["detail_label"], entry["description"], *entry.get("xml_titles", [])]
+        [
+            entry["name"],
+            entry["title"],
+            entry["abbr"],
+            entry["detail_label"],
+            entry["description"],
+            *entry.get("xml_titles", []),
+        ]
     ).casefold()
     return all(word in haystack for word in text.casefold().split())
 
@@ -137,7 +182,7 @@ class GuiStatsInfo(QSplitter):
                     category_added = True
 
                 # The code identifier is what a layout stores; the abbreviation is what the HUD draws.
-                shown = stat["name"] if not stat["abbr"] or stat["abbr"] == stat["name"] else f"{stat['name']} ({stat['abbr']})"
+                shown = f"{stat['title']}  ({stat['name']})" if stat["title"] != stat["name"] else stat["name"]
                 item = QListWidgetItem(shown if filter_text else f"  {shown}")
                 item.setData(Qt.ItemDataRole.UserRole, stat)
                 self.list_widget.addItem(item)
@@ -168,38 +213,38 @@ class GuiStatsInfo(QSplitter):
             return html_lib.escape(str(value))
 
         name = esc(stat["name"])
+        title = esc(stat["title"])
         abbr = esc(stat["abbr"])
-        origin = {"native": "Native HUD stat", "registry": "Declarative stat (stats.d)", "analytics": "Analytics definition"}.get(
-            stat["origin"], stat["origin"]
-        )
-        rows = [("Code identifier", f"<code>{name}</code>"), ("HUD abbreviation", abbr or "-"), ("Origin", esc(origin))]
-        if stat["detail_label"] and stat["detail_label"] != stat["abbr"]:
-            rows.append(("Detailed HUD text", esc(stat["detail_label"])))
-        if stat.get("xml_titles"):
-            rows.append(("Legacy XML titles", ", ".join(esc(t) for t in stat["xml_titles"])))
         meta = "".join(
-            f"<tr><td style='color:#94a3b8; padding-right:14px;'>{label}</td><td>{value}</td></tr>" for label, value in rows
+            f"<tr><td style='color:#94a3b8; padding-right:14px;'>{label}</td><td>{value}</td></tr>"
+            for label, value in _meta_rows(stat)
         )
         status = STATUS_LABELS.get(stat["status"])
         status_html = f"<p style='color:#f87171;'><b>{esc(status)}</b></p>" if status else ""
         note_html = f"<p style='color:#cbd5e1;'>{esc(stat['note'])}</p>" if stat["note"] else ""
+        words_html = (
+            f"<p style='color:#e2e8f0; font-size: 14px; margin-top: 0;'>{esc(stat['formula_words'])}</p>"
+            if stat.get("formula_words")
+            else ""
+        )
 
         html = f"""
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; margin: 10px;">
             <h1 style="color: #60a5fa; font-size: 24px; font-weight: bold; margin-bottom: 5px; border-bottom: 2px solid #2d3748; padding-bottom: 10px;">
-                {name} <span style="color: #94a3b8; font-size: 16px; font-weight: normal;">({abbr})</span>
+                {title} <span style="color: #94a3b8; font-size: 16px; font-weight: normal;">({abbr or name})</span>
             </h1>
             <table style="margin: 10px 0;">{meta}</table>
             {status_html}
 
             <div style="margin: 20px 0;">
                 <h3 style="color: #38bdf8; font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Description</h3>
-                <p style="color: #e2e8f0; font-size: 14px; margin-top: 0;">{esc(stat["description"])}</p>
+                <p style="color: #e2e8f0; font-size: 14px; margin-top: 0;">{esc(stat["detail"])}</p>
                 {note_html}
             </div>
 
             <div style="margin: 20px 0; background-color: #1e293b; border-left: 4px solid #10b981; border-radius: 4px; padding: 15px;">
                 <h3 style="color: #10b981; font-size: 14px; font-weight: bold; text-transform: uppercase; margin-top: 0; margin-bottom: 8px; letter-spacing: 0.5px;">Formula</h3>
+                {words_html}
                 <code style="color: #a7f3d0; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: bold;">
                     {esc(stat["formula"])}
                 </code>
@@ -226,9 +271,7 @@ class GuiStatsInfo(QSplitter):
 
         # Apply clean dark blue background to details browser
         self.statsInfoFrame.setStyleSheet(f"background-color: {bg_color};")
-        self.text_browser.setStyleSheet(
-            f"background-color: {bg_color}; border: 0; color: {fg_color};"
-        )
+        self.text_browser.setStyleSheet(f"background-color: {bg_color}; border: 0; color: {fg_color};")
 
         # Apply sidebar and search colors
         self.sidebar_widget.setStyleSheet(f"background-color: {colors.get('sidebar', '#1a1e24')};")

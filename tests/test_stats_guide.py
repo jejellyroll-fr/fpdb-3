@@ -91,3 +91,37 @@ def test_guide_search_matches_abbreviation_and_xml_title() -> None:
 @pytest.mark.parametrize("name", ["vpip", "pfr", "wtsd"])
 def test_core_stats_have_a_percentage_formula(name: str) -> None:
     assert "× 100" in _entry(name)["formula"]
+
+
+def test_every_native_stat_has_a_title_and_a_detailed_description() -> None:
+    for entry in GUIDE["stats"]:
+        if entry["origin"] != "native":
+            continue
+        assert entry["title"].strip() and entry["detail"].strip(), entry["name"]
+        assert len(entry["detail"]) > len(entry["description"]) or entry["name"] in {"playername", "blank"}, entry[
+            "name"
+        ]
+
+
+def test_ratio_stats_spell_out_their_formula() -> None:
+    for entry in GUIDE["stats"]:
+        if entry["origin"] == "native" and "/" in entry["formula"] and entry["status"] != "deprecated":
+            assert entry["formula_words"], entry["name"]
+            assert "`" not in entry["formula_words"], entry["name"]
+
+
+def test_wwsf_is_documented_as_an_alias_of_wmsf() -> None:
+    assert _entry("wwsf")["alias_of"] == "WMsF"
+    assert "Alias" in _entry("wwsf")["note"]
+    assert _entry("fold_to_cbet_flop")["alias_of"] == "f_cb1"
+
+
+def test_cb_ip_and_cb_oop_are_flagged_as_not_split_by_position() -> None:
+    from fpdb_3_legacy import Stats  # noqa: PLC0415
+
+    row = {"saw_f": 50, "street1InPosition": 20, "cb_1": 9, "cb_opp_1": 30}
+    overall = Stats.cb1({1: row}, 1)[0]
+    for name in ("cb_ip", "cb_oop"):
+        assert Stats.do_stat({1: row}, 1, name)[0] == pytest.approx(overall)
+        assert _entry(name)["status"] == "estimate"
+        assert "cancels" in _entry(name)["note"]

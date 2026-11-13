@@ -20,16 +20,22 @@ Run from the repository root::
 
 from __future__ import annotations
 
+import ast
+import inspect
 import itertools
 import pprint
 import random
 import re
 import sys
+import textwrap
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tools"))
+
+import stats_guide_text  # noqa: E402
 
 DATA_FILE = ROOT / "fpdb_3_legacy" / "stats_guide_data.py"
 DOC_FILE = ROOT / "docs" / "hud-stats-guide.md"
@@ -87,7 +93,7 @@ def _call(fn: Any, values: dict[str, float]) -> tuple[Any, list[str]]:  # noqa: 
 _MULTIPLIERS = (1, 100, 0.01, 0.001, 1000, 10, 1e-4, 1e-6)
 
 
-def _solve(fn: Any, keys: list[str]) -> tuple[tuple[int, ...], tuple[int, ...], float] | None:  # noqa: ANN401, C901
+def _solve(fn: Any, keys: list[str]) -> tuple[tuple[int, ...], tuple[int, ...], float, Any] | None:  # noqa: ANN401, C901
     """The (numerator, denominator, multiplier) the function's raw value matches."""
     if not keys or len(keys) > 6:
         return None
@@ -95,13 +101,17 @@ def _solve(fn: Any, keys: list[str]) -> tuple[tuple[int, ...], tuple[int, ...], 
     trials = []
     for t in range(4):
         values = {
-            k: (1000 if ("face" in k or "opp" in k) else 1) * rng.choice([3, 5, 7, 11, 13, 17, 19, 23, 29, 31]) * rng.randint(1, 9) + t * 1000
+            k: (1000 if ("face" in k or "opp" in k) else 1)
+            * rng.choice([3, 5, 7, 11, 13, 17, 19, 23, 29, 31])
+            * rng.randint(1, 9)
+            + t * 1000
             for k in keys
         }
         result, _ = _call(fn, values)
         if result is None or not isinstance(result[0], (int, float)):
             return None
         trials.append((values, float(result[0])))
+        sample = result
     coefficients = list(itertools.product((1, 0, -1), repeat=len(keys)))
     for num in coefficients:
         if not any(num):
@@ -118,7 +128,7 @@ def _solve(fn: Any, keys: list[str]) -> tuple[tuple[int, ...], tuple[int, ...], 
                         good = False
                         break
                 if good:
-                    return num, den, mult
+                    return num, den, mult, sample
     return None
 
 
@@ -182,14 +192,16 @@ OVERRIDES: dict[str, dict[str, str]] = {
         note="Continuation bet across all four streets pooled; `cb1`..`cb4` give one street each.",
     ),
     "cb_ip": dict(
-        formula="cb_1 / cb_opp_1 × 100, only over hands played in position on the flop",
-        sql="cb_1 = SUM(HudCache.street1CBDone); cb_opp_1 = SUM(HudCache.street1CBChance); street1InPosition = SUM(HudCache.street1InPosition)",
-        note="Flop c-bet when in position. Positions are split by `cbet_by_position` (stats_postflop.py) with the in-position share of the sample.",
+        formula="(cb_1 × r) / (cb_opp_1 × r) × 100 with r = street1InPosition / saw_f; r cancels, so = cb_1 / cb_opp_1 × 100",
+        sql="cb_1 = SUM(HudCache.street1CBDone); cb_opp_1 = SUM(HudCache.street1CBChance); saw_f = SUM(HudCache.street1Seen); street1InPosition = SUM(HudCache.street1InPosition)",
+        note="Not split by position: both counts are scaled by the same in-position share of flops seen, which cancels out, so the value always equals `cb1`. HudCache has no c-bet count by position.",
+        status="estimate",
     ),
     "cb_oop": dict(
-        formula="cb_1 / cb_opp_1 × 100, only over hands played out of position on the flop",
-        sql="cb_1 = SUM(HudCache.street1CBDone); cb_opp_1 = SUM(HudCache.street1CBChance); street1InPosition = SUM(HudCache.street1InPosition)",
-        note="Flop c-bet when out of position; counterpart of `cb_ip`.",
+        formula="(cb_1 × r) / (cb_opp_1 × r) × 100 with r = (saw_f − street1InPosition) / saw_f; r cancels, so = cb_1 / cb_opp_1 × 100",
+        sql="cb_1 = SUM(HudCache.street1CBDone); cb_opp_1 = SUM(HudCache.street1CBChance); saw_f = SUM(HudCache.street1Seen); street1InPosition = SUM(HudCache.street1InPosition)",
+        note="Not split by position: both counts are scaled by the same out-of-position share of flops seen, which cancels out, so the value always equals `cb1`. HudCache has no c-bet count by position.",
+        status="estimate",
     ),
     "fbr": dict(
         formula="(fb_0 / fb_opp_0) × (pfr / n) × 100",
@@ -215,9 +227,9 @@ OVERRIDES: dict[str, dict[str, str]] = {
         status="input-missing",
     ),
     "float_bet": dict(
-        formula="floats / opportunities × 100, from street1InPosition, street1Calls, saw_t and street2Bets",
+        formula="min(street2Bets, opp) / opp × 100 with opp = min(street1InPosition, street1Calls, saw_t)",
         sql="street1InPosition = SUM(HudCache.street1InPosition); street1Calls = SUM(HudCache.street1Calls); saw_t = SUM(HudCache.street2Seen); street2Bets = SUM(HudCache.street2Bets)",
-        note="Turn bet after calling the flop in position. Several inputs use names the HUD queries expose differently (`call_1`, `saw_2`, `bet_2`).",
+        note="An estimate from totals, not the same hands: the opportunities are the smallest of flops in position, flop calls and turns seen. Several inputs use names the HUD queries expose differently (`call_1`, `saw_2`, `bet_2`).",
         status="input-missing",
     ),
     "triple_barrel": dict(
@@ -306,12 +318,30 @@ OVERRIDES: dict[str, dict[str, str]] = {
     ),
     "playername": dict(formula="the player's name", sql="screen_name = Players.name"),
     "playershort": dict(formula="the player's name, shortened to fit the cell", sql="screen_name = Players.name"),
-    "player_note": dict(formula="an icon when the player has a note", sql="screen_name = Players.name; the note is read from the notes of that player"),
-    "game_abbr": dict(formula="abbreviation of the game being played (for example Hold'em NL)", sql="read from the game type of the table; not a HudCache aggregate"),
+    "player_note": dict(
+        formula="an icon when the player has a note",
+        sql="screen_name = Players.name; the note is read from the notes of that player",
+    ),
+    "game_abbr": dict(
+        formula="abbreviation of the game being played (for example Hold'em NL)",
+        sql="read from the game type of the table; not a HudCache aggregate",
+    ),
     "blank": dict(formula="an empty cell, used as a spacer in layouts", sql="none"),
-    "call_vs_steal": dict(formula="no data (deprecated)", sql="none: needs data about other players that HudCache cannot aggregate", status="deprecated"),
-    "iso": dict(formula="no data (deprecated)", sql="none: isolation raises cannot be aggregated from HudCache", status="deprecated"),
-    "three_bet_vs_steal": dict(formula="no data (deprecated)", sql="none: needs data about other players that HudCache cannot aggregate", status="deprecated"),
+    "call_vs_steal": dict(
+        formula="no data (deprecated)",
+        sql="none: needs data about other players that HudCache cannot aggregate",
+        status="deprecated",
+    ),
+    "iso": dict(
+        formula="no data (deprecated)",
+        sql="none: isolation raises cannot be aggregated from HudCache",
+        status="deprecated",
+    ),
+    "three_bet_vs_steal": dict(
+        formula="no data (deprecated)",
+        sql="none: needs data about other players that HudCache cannot aggregate",
+        status="deprecated",
+    ),
     "avg_bet_size_flop": dict(formula="no data (deprecated); see `f_bet_made`", sql="none", status="deprecated"),
     "avg_bet_size_turn": dict(formula="no data (deprecated); see `t_bet_made`", sql="none", status="deprecated"),
     "avg_bet_size_river": dict(formula="no data (deprecated); see `r_bet_made`", sql="none", status="deprecated"),
@@ -385,7 +415,13 @@ def _native_entry(name: str, fn: Any, aliases: dict[str, str]) -> dict[str, Any]
         keys = [faced, called, raised]
         entry["formula"] = f"({faced} − {called} − {raised}) / {faced} × 100"
         entry["sql"] = "; ".join(_fmt_key(k, aliases) for k in keys)
-        entry["note"] = "The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise."
+        entry["note"] = (
+            "The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise."
+        )
+        entry["formula_words"] = (
+            stats_guide_text.words([(1, faced), (-1, called), (-1, raised)], [(1, faced)]) + " × 100"
+        )
+        entry["signature"] = entry["sql"] + "|" + entry["formula"].replace(faced, "F")
         return entry
     solved = _solve(fn, keys)
     if solved is None:
@@ -393,9 +429,9 @@ def _native_entry(name: str, fn: Any, aliases: dict[str, str]) -> dict[str, Any]
         entry["sql"] = "; ".join(_fmt_key(k, aliases) for k in keys) or "none"
         entry["status"] = "unchecked"
         return entry
-    num, den, mult = solved
+    num, den, mult, sample = solved
     ratio = f"{_humanise(num, keys)} / {_humanise(den, keys)}"
-    percent = _percent_display(result)
+    percent = _percent_display(sample)
     if mult == 1 and percent:
         entry["formula"] = f"{ratio} × 100"
     elif mult == 1:
@@ -404,11 +440,28 @@ def _native_entry(name: str, fn: Any, aliases: dict[str, str]) -> dict[str, Any]
         entry["formula"] = f"{ratio} × 100"
     elif mult == 1e-4:
         entry["formula"] = f"({ratio}) / 10 000 × 100"
-        entry["note"] = "The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot."
+        entry["note"] = (
+            "The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot."
+        )
     else:
         entry["formula"] = f"{mult:g} × {ratio}"
     used = [k for k, c in zip(keys, tuple(a or b for a, b in zip(num, den, strict=True)), strict=True) if c]
     entry["sql"] = "; ".join(_fmt_key(k, aliases) for k in used)
+    num_keys = [(c, k) for c, k in zip(num, keys, strict=True) if c]
+    den_keys = [(c, k) for c, k in zip(den, keys, strict=True) if c]
+    scale = (
+        " × 100"
+        if percent and mult in (1, 100)
+        else (" / 10 000 × 100" if mult == 1e-4 else ("" if mult == 1 else f" × {mult:g}"))
+    )
+    entry["formula_words"] = stats_guide_text.words(num_keys, den_keys) + scale
+    expr = {k: aliases.get(k.lower(), k) for k in keys}
+    entry["signature"] = (
+        "+".join(f"{c}{expr[k]}" for c, k in num_keys)
+        + "/"
+        + "+".join(f"{c}{expr[k]}" for c, k in den_keys)
+        + f"*{mult}"
+    )
     if "(not selected by the HUD queries)" in entry["sql"]:
         entry["status"] = "input-missing"
         entry["note"] = (
@@ -455,13 +508,19 @@ RING_NOTES: dict[str, tuple[str, str]] = {
     "aggfac": ("Postflop aggression factor", "agg_fact"),
     "aggfrq": ("Postflop aggression frequency, with folds and calls in the base", ""),
     "conbet": ("Continuation bet, all streets pooled", "cbet"),
-    "rfi": ("Raise first in (raisedFirstIn / raiseFirstInChance); no HUD stat uses this exact count under one name", ""),
+    "rfi": (
+        "Raise first in (raisedFirstIn / raiseFirstInChance); no HUD stat uses this exact count under one name",
+        "",
+    ),
     "steals": ("Steal attempt", "steal"),
     "car0": ("Called a raise preflop", "car0"),
     "saw_f": ("Saw the flop", "saw_f"),
     "sawsd": ("Saw showdown, over all hands (not over flops seen: that is WtSDwsF)", ""),
     "wtsdwsf": ("Went to showdown when the flop was seen (WTSD)", "wtsd"),
-    "wmsf": ("Won money when the flop was seen. Title W$wsF: this is the after-seeing-the-flop stat, not a showdown stat", "WMsF"),
+    "wmsf": (
+        "Won money when the flop was seen. Title W$wsF: this is the after-seeing-the-flop stat, not a showdown stat",
+        "WMsF",
+    ),
     "wmsd": ("Won money at showdown (W$SD)", "wmsd"),
     "flafq": ("Flop aggression frequency", "a_freq1"),
     "tuafq": ("Turn aggression frequency", "a_freq2"),
@@ -538,6 +597,154 @@ def _analytics_entries() -> list[dict[str, Any]]:
 # --------------------------------------------------------------------------- #
 
 
+def _alias_target(fn: Any, names: set[str]) -> str | None:  # noqa: ANN401
+    """The stat a thin wrapper returns unchanged (``return WMsF(stat_dict, player)``)."""
+    try:
+        tree = ast.parse(textwrap.dedent(inspect.getsource(fn)))
+    except (OSError, TypeError, SyntaxError):
+        return None
+    body = tree.body[0].body if tree.body and isinstance(tree.body[0], ast.FunctionDef) else []
+    body = [n for n in body if not (isinstance(n, ast.Expr) and isinstance(n.value, ast.Constant))]
+    if len(body) != 1 or not isinstance(body[0], ast.Return) or not isinstance(body[0].value, ast.Call):
+        return None
+    func = body[0].value.func
+    target = func.id if isinstance(func, ast.Name) else None
+    return target if target in names else None
+
+
+def _add_text_and_aliases(entries: list[dict[str, Any]]) -> None:
+    from fpdb_3_legacy import Stats  # noqa: PLC0415
+
+    natives = {e["name"] for e in entries if e["origin"] == "native"}
+    by_signature: dict[str, list[str]] = {}
+    for entry in entries:
+        title, detail = stats_guide_text.describe(entry["name"], entry["origin"], entry["description"])
+        entry["title"] = title
+        entry["detail"] = detail
+        entry.setdefault(
+            "formula_words",
+            stats_guide_text.OVERRIDE_WORDS.get(entry["name"], "") if entry["origin"] == "native" else "",
+        )
+        entry["alias_of"] = ""
+        if entry["origin"] == "native":
+            target = _alias_target(getattr(Stats, entry["name"]), natives - {entry["name"]})
+            if target:
+                entry["alias_of"] = target
+                entry["note"] = (
+                    entry["note"] + " " if entry["note"] else ""
+                ) + f"Alias: this stat calls `{target}` and returns its value unchanged."
+        signature = entry.pop("signature", "")
+        if signature:
+            by_signature.setdefault(signature, []).append(entry["origin"] + ":" + entry["name"])
+    for entry in entries:
+        if entry["alias_of"]:
+            continue
+        key = entry["origin"] + ":" + entry["name"]
+        same = [names for names in by_signature.values() if key in names and len(names) > 1]
+        others = [n.split(":", 1)[1] for n in (same[0] if same else []) if n != key]
+        if others:
+            entry["note"] = (
+                (entry["note"] + " " if entry["note"] else "")
+                + "Gives the same value as "
+                + ", ".join(f"`{n}`" for n in others)
+                + " (same counters, same formula)."
+            )
+
+
+PT4_COVERAGE = ROOT / "docs" / "pt4-stock-stat-coverage.md"
+
+
+def pt4_common_stats() -> dict[str, tuple[str, str]]:
+    """PT4 title -> (formula over FPDB columns, translator note), from the coverage report."""
+    rows: dict[str, tuple[str, str]] = {}
+    section = False
+    for line in PT4_COVERAGE.read_text().splitlines():
+        if line.startswith("## "):
+            section = line.startswith("## The common cash stats")
+            continue
+        match = re.match(r"\| (.+?) \| `(.+?)` \| (.+?) \|$", line) if section else None
+        if match:
+            status = match.group(3)
+            rows[match.group(1)] = (match.group(2), status.split(":", 1)[1].strip() if ":" in status else "")
+    return rows
+
+
+def _column_of(expr: str) -> str | None:
+    match = re.fullmatch(r"SUM\(HudCache\.(\w+)\)", expr)
+    return match.group(1) if match else None
+
+
+def pt4_parity(
+    fn: Any, pt4_formula: str, aliases: dict[str, str], trials: int = 6
+) -> tuple[bool, list[tuple[float, float]]]:  # noqa: ANN401
+    """Run the FPDB stat and PT4's formula on the same random HudCache counters.
+
+    Returns whether the displayed FPDB value equals PT4's on every trial, and the pairs.
+    """
+    from fpdb_3_legacy.stat_registry import SafeExpression  # noqa: PLC0415
+
+    columns_by_alias = {alias: _column_of(expr) for alias, expr in aliases.items()}
+    _, keys = _call(fn, {})
+    pt4_names = set(re.findall(r"[A-Za-z_]\w*", pt4_formula))
+    expression = SafeExpression(pt4_formula, frozenset(pt4_names))
+    rng = random.Random(613)  # noqa: S311 - reproducible probing
+    pairs = []
+    for _ in range(trials):
+        values: dict[str, float] = {}
+        for column in pt4_names | {c for c in columns_by_alias.values() if c}:
+            big = any(word in column for word in ("Chance", "Seen", "sawShowdown", "Calls", "Fold", "fold"))
+            values[column] = float(rng.randint(200, 400) if big else rng.randint(1, 150))
+        row = {key: values.get(columns_by_alias.get(key.lower()) or "", 0.0) for key in keys}
+        result, _ = _call(fn, row)
+        fpdb_value = float(str(result[1]).strip())
+        pt4_value = float(expression.evaluate(values))
+        pairs.append((fpdb_value, pt4_value))
+    same = all(abs(a - b) <= 0.051 + 1e-9 * abs(b) for a, b in pairs)
+    return same, pairs
+
+
+def _pt4_tests() -> dict[str, list[str]]:
+    """HudCache column -> the derivation tests that check it against PT4's definition."""
+    found: dict[str, list[str]] = {}
+    for path in sorted((ROOT / "tests").glob("test_*.py")):
+        text = path.read_text(errors="ignore")
+        if "PT4" not in text and "pt4" not in text:
+            continue
+        for column in set(
+            re.findall(
+                r"\b(street\d\w+|sawShowdown|wonAtSD|wonWhenSeenStreet\d|steal\w*|fold\w+ToSteal\w*|raiseToSteal\w*|success_Steal|cnt_\w+|val_\w+|flg_\w+|amt_\w+)\b",
+                text,
+            )
+        ):
+            found.setdefault(column, []).append(path.name)
+    return found
+
+
+def _add_pt4(entries: list[dict[str, Any]], aliases: dict[str, str]) -> None:
+    from fpdb_3_legacy import Stats  # noqa: PLC0415
+
+    natives = {e["name"]: e for e in entries if e["origin"] == "native"}
+    tests = _pt4_tests()
+    for entry in entries:
+        entry["pt4"] = {}
+        entry["pt4_tests"] = []
+        if entry["origin"] != "native":
+            continue
+        columns = sorted(set(re.findall(r"HudCache\.(\w+)", entry["sql"])))
+        entry["pt4_tests"] = sorted({name for column in columns for name in tests.get(column, [])})
+    for title, (formula, note) in pt4_common_stats().items():
+        name = stats_guide_text.PT4_EQUIVALENTS.get(title)
+        if name not in natives:
+            continue
+        same, _pairs = pt4_parity(getattr(Stats, name), formula, aliases)
+        natives[name]["pt4"] = {
+            "stat": title,
+            "formula": formula,
+            "parity": "same formula" if same else "different formula",
+            "note": note if same else stats_guide_text.PT4_DIFFERENCES.get(name, note),
+        }
+
+
 def build() -> dict[str, Any]:  # noqa: C901
     from fpdb_3_legacy import Stats  # noqa: PLC0415
     from fpdb_3_legacy.modern_hud_preferences import stat_catalog  # noqa: PLC0415
@@ -563,14 +770,23 @@ def build() -> dict[str, Any]:  # noqa: C901
         target = by_name.get(row["hud_stat"])
         if target is not None and row["xml_title"] not in target["xml_titles"]:
             target["xml_titles"].append(row["xml_title"])
+    _add_text_and_aliases(entries)
+    _add_pt4(entries, aliases)
     shared: dict[str, list[str]] = {}
     for entry in entries:
         shared.setdefault(entry["abbr"], []).append(entry["name"])
     for entry in entries:
         others = [n for n in shared[entry["abbr"]] if n != entry["name"]]
         if others and entry["abbr"] and entry["origin"] == "native":
-            entry["note"] = (entry["note"] + " " if entry["note"] else "") + f"The HUD abbreviation `{entry['abbr']}` is shared with: {', '.join(f'`{n}`' for n in others)}."
-    entries.sort(key=lambda e: (list(stat_catalog.CATEGORIES).index(e["category"]) if e["category"] in stat_catalog.CATEGORIES else 99, e["name"].casefold()))
+            entry["note"] = (
+                entry["note"] + " " if entry["note"] else ""
+            ) + f"The HUD abbreviation `{entry['abbr']}` is shared with: {', '.join(f'`{n}`' for n in others)}."
+    entries.sort(
+        key=lambda e: (
+            list(stat_catalog.CATEGORIES).index(e["category"]) if e["category"] in stat_catalog.CATEGORIES else 99,
+            e["name"].casefold(),
+        )
+    )
     return {"categories": {k: v for k, v in stat_catalog.CATEGORIES.items()}, "stats": entries, "ring_columns": ring}
 
 
@@ -585,7 +801,7 @@ def _render_module(data: dict[str, Any]) -> str:
     )
 
 
-def _render_markdown(data: dict[str, Any]) -> str:
+def _render_markdown(data: dict[str, Any]) -> str:  # noqa: C901, PLR0912
     lines = [
         "# HUD Stats Guide",
         "",
@@ -607,12 +823,26 @@ def _render_markdown(data: dict[str, Any]) -> str:
     for category, entries in by_category.items():
         lines += [f"## {data['categories'].get(category, category)}", ""]
         for entry in entries:
-            lines += [f"### `{entry['name']}` — {entry['abbr']}", ""]
-            lines.append(f"- **Description**: {entry['description']}")
-            lines.append(f"- **Formula**: `{entry['formula']}`")
+            lines += [f"### {entry['title']} — `{entry['name']}`", ""]
+            lines.append(
+                f"- **HUD abbreviation**: `{entry['abbr']}`" if entry["abbr"] else "- **HUD abbreviation**: (none)"
+            )
+            lines.append(f"- **Description**: {entry['detail']}")
+            if entry["formula_words"]:
+                lines.append(f"- **Formula**: {entry['formula_words']}")
+            lines.append(f"- **Formula (code)**: `{entry['formula']}`")
             lines.append(f"- **SQL database field / logic**: {entry['sql']}")
+            if entry["description"] != entry["detail"]:
+                lines.append(f"- **Tooltip**: {entry['description']}")
             if entry["detail_label"] and entry["detail_label"] != entry["abbr"]:
                 lines.append(f"- **Detailed HUD text**: `{entry['detail_label']}`")
+            if entry.get("pt4"):
+                pt4 = entry["pt4"]
+                lines.append(f"- **PT4 equivalent**: {pt4['stat']} — `{pt4['formula']}` ({pt4['parity']})")
+                if pt4["note"]:
+                    lines.append(f"- **PT4 difference**: {pt4['note']}")
+            if entry.get("pt4_tests"):
+                lines.append("- **PT4 derivation tests**: " + ", ".join(f"`{t}`" for t in entry["pt4_tests"]))
             if entry.get("xml_titles"):
                 lines.append("- **XML titles**: " + ", ".join(f"`{t}`" for t in entry["xml_titles"]))
             if entry["status"] != "active":
