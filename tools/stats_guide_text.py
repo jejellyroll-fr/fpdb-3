@@ -489,7 +489,10 @@ _TEXT: dict[str, tuple[str, str]] = {
         "Profit per Hand",
         "The average profit per hand, in cents. The label says per 100 hands but the formula is per hand.",
     ),
-    "totalprofit": ("Total Profit", "The player's total profit over the aggregated hands, in the game's currency."),
+    "totalprofit": (
+        "Total Profit",
+        "The player's total profit over the aggregated hands. It is always formatted as US dollars: the HUD query does not select the game's currency. In tournaments the amount is chips.",
+    ),
     "amt_bet_p": (
         "Average Preflop Investment",
         "The average amount the player put in preflop per hand, blinds included, in the table's currency.",
@@ -816,7 +819,7 @@ OVERRIDE_WORDS: dict[str, str] = {
     "BBper100": "Sum of profit in cents × 50 / Sum of big blinds in play (big blind × hands); a big bet is two big blinds",
     "bbper100": "Sum of profit in cents × 100 / Sum of big blinds in play (big blind × hands)",
     "profit100": "Sum of profit in cents / Number of hands played",
-    "totalprofit": "Sum of profit in cents / 100, in the game's currency",
+    "totalprofit": "Sum of profit in cents / 100, formatted as USD",
     "n": "Number of hands played",
     "agg_fact": "(Number of hands with a bet or raise on the flop + turn + river + 7th street) / (Number of calls on the flop + turn + river + 7th street)",
     "agg_fact_pct": "(Number of hands with a bet or raise on the flop to 7th street) / (that number + Number of calls on the flop to 7th street)",
@@ -868,3 +871,127 @@ PT4_DIFFERENCES: dict[str, str] = {
     "a_freq1": "PT4: flop bets and raises / (flop calls + folds + bets + raises), over actions. FPDB: flops on which the player bet or raised at least once / flops seen, over hands.",
     "a_freq_123": "PT4: flop-to-river bets and raises / (calls + folds + bets + raises), over actions. FPDB: streets with a bet or raise / streets seen, over hands.",
 }
+
+
+# --------------------------------------------------------------------------- #
+# Games and variants
+# --------------------------------------------------------------------------- #
+
+BASE_LABELS = {
+    "hold": "Hold'em / Omaha (flop games)",
+    "stud": "Stud / Razz",
+    "draw": "Draw (2-7, A-5, Badugi, 5-card draw...)",
+}
+
+# What a street number of the database is, per game family (Hand.actionStreets).
+_STREET_NAMES = {
+    "hold": {0: "preflop", 1: "on the flop", 2: "on the turn", 3: "on the river"},
+    "stud": {0: "on 3rd street", 1: "on 4th street", 2: "on 5th street", 3: "on 6th street", 4: "on 7th street"},
+    "draw": {
+        0: "before the first draw",
+        1: "after the first draw",
+        2: "after the second draw (triple draw)",
+        3: "after the third draw (triple draw)",
+    },
+}
+
+TOURNAMENTS = "Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)"
+CASH = "Cash games"
+
+
+def street_label(base: str, street: int | None) -> str:
+    """ "yes", or where a street-N stat happens in this game family."""
+    if street is None:
+        return "yes"
+    name = _STREET_NAMES[base].get(street)
+    return f"yes, {name}" if name else ""
+
+
+def games_for(entry: dict) -> list[str]:
+    """Cash and/or tournaments, from the descriptor scope or the stat's nature."""
+    name = entry["name"]
+    if entry["origin"] == "registry" and name.startswith("chipev_"):
+        return [TOURNAMENTS]
+    if name in {
+        "BBper100",
+        "bbper100",
+        "profit100",
+        "totalprofit",
+        "amt_blind",
+        "amt_bet_p",
+        "amt_bet_f",
+        "amt_bet_t",
+        "amt_bet_r",
+        "amt_bet_ttl",
+    }:
+        return [CASH, TOURNAMENTS + "; amounts are tournament chips there, not money"]
+    return [CASH, TOURNAMENTS]
+
+
+_ALL = {"hold": "yes", "stud": "yes", "draw": "yes"}
+_HOLD_ONLY = {"hold": "yes", "stud": "", "draw": ""}
+
+
+def applies_override(name: str, origin: str) -> dict | None:  # noqa: C901, PLR0911 - one rule per kind of stat
+    """Applicability of the stats that do not read HudCache columns."""
+    if origin == "analytics":
+        if name == "draw_decision_distribution":
+            return {"games": [CASH, TOURNAMENTS], "variants": {"hold": "", "stud": "", "draw": "yes"}}
+        return {"games": [CASH, TOURNAMENTS], "variants": dict(_ALL)}
+    if origin != "native":
+        return None
+    if name.startswith("aof_") and name not in {"aof_splash_freq", "aof_splash_won", "aof_showdowns"}:
+        return {"games": ["All-in or Fold cash tables (AoF Hold'em and AoF Omaha)"], "variants": dict(_HOLD_ONLY)}
+    if name in {"aof_splash_freq", "aof_splash_won"}:
+        return {"games": ["Cash tables of rooms that add splash pots"], "variants": dict(_HOLD_ONLY)}
+    if name == "starthands":
+        return {
+            "games": [CASH, TOURNAMENTS],
+            "variants": {"hold": "Hold'em only (the query is limited to holdem)", "stud": "", "draw": ""},
+        }
+    if name == "bounty":
+        return {"games": ["Knockout (bounty) tournaments"], "variants": dict(_ALL)}
+    if name in {"m_ratio", "bbstack"}:
+        return {"games": [TOURNAMENTS + "; computed in cash games too, where it means less"], "variants": dict(_ALL)}
+    if name in {
+        "blank",
+        "game_abbr",
+        "player_note",
+        "playername",
+        "playershort",
+        "playerprofile",
+        "covers",
+        "stack_amount",
+        "stack_bb",
+        "stack_native_bb",
+        "n",
+    }:
+        return {"games": [CASH, TOURNAMENTS], "variants": dict(_ALL)}
+    if name in {
+        "call_vs_steal",
+        "iso",
+        "three_bet_vs_steal",
+        "avg_bet_size_flop",
+        "avg_bet_size_turn",
+        "avg_bet_size_river",
+    }:
+        return {"games": ["none (shows no data)"], "variants": {"hold": "", "stud": "", "draw": ""}}
+    return None
+
+
+def applies_lines(entry: dict, corpus: dict) -> list[tuple[str, str]]:
+    """("Games", ...) and one line per game family, for the guide and the app."""
+    applies = entry.get("applies") or {}
+    games = applies.get("games") or ["none: the stat shows no data"]
+    lines = [("Games", "; ".join(games))]
+    for base, label in BASE_LABELS.items():
+        value = applies.get("variants", {}).get(base, "")
+        if not value:
+            count = sum(n for kind, n in corpus.get("hands", {}).items() if kind.endswith(":" + base))
+            value = (
+                "no data"
+                if entry.get("status") in ("deprecated", "input-missing")
+                else f"no data (its columns stay empty on all {count} {label.split(' (')[0]} test hands)"
+            )
+        lines.append((label, value))
+    return lines

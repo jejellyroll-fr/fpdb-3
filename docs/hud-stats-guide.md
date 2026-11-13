@@ -11,6 +11,31 @@ Generated from the code by `tools/gen_stats_guide.py`; do not edit by hand. The 
 
 Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are extensible and are **not** listed here.
 
+## Games and variants
+
+The HUD sums each player's history per game type: cash and tournament hands are never mixed, nor are
+two variants. Tournaments are one game type whatever their format, so MTT and SnG hands are counted
+together.
+
+The database numbers the betting rounds, and each stat reads one of those numbers. What a round is
+depends on the game family:
+
+| Round in the database | Hold'em / Omaha | Stud / Razz | Draw |
+| --- | --- | --- | --- |
+| 0 | preflop | 3rd street | before the first draw |
+| 1 | flop | 4th street | after the first draw |
+| 2 | turn | 5th street | after the second draw (triple draw only) |
+| 3 | river | 6th street | after the third draw (triple draw only) |
+| 4 | (none) | 7th street | (none) |
+
+So a "flop" stat is a 4th-street stat in stud and an after-the-first-draw stat in draw. Two exceptions:
+5-card stud starts at 2nd street (round 0 = 2nd street), and All-in or Fold Omaha has no preflop round
+(round 0 is its single flop decision).
+
+Whether a stat has data in a family is measured, not assumed: every regression hand history of the
+project is parsed and run through DerivedStats, and a stat applies to a family when all the columns
+it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring stud, 1 tour draw, 434 tour hold hands. "No data" for a family means those columns stayed empty on every test hand of it.
+
 ## Player
 
 ### Blank cell — `blank`
@@ -20,6 +45,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `an empty cell, used as a spacer in layouts`
 - **SQL database field / logic**: none
 - **Tooltip**: <blank>
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Game — `game_abbr`
 
@@ -29,6 +58,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: read from the game type of the table; not a HudCache aggregate
 - **Tooltip**: Game abbreviation
 - **Detailed HUD text**: `game_abbr`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Hands — `n`
 
@@ -38,6 +71,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `n (hand count; shown as 12.3k from 10 000)`
 - **SQL database field / logic**: n = SUM(HudCache.n)
 - **Tooltip**: Number of hands seen
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Player note — `player_note`
 
@@ -46,6 +83,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `an icon when the player has a note`
 - **SQL database field / logic**: screen_name = Players.name; the note is read from the notes of that player
 - **Tooltip**: Player note icon
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Player name — `playername`
 
@@ -54,6 +95,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `the player's name`
 - **SQL database field / logic**: screen_name = Players.name
 - **Tooltip**: Player name
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: The HUD abbreviation `1` is shared with: `playershort`.
 
 ### Player profile — `playerprofile`
@@ -64,6 +109,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: uses the HUD stat row of the player (VPIP, PFR, aggression inputs)
 - **Tooltip**: Player Profile
 - **Detailed HUD text**: `playerprofile`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: A label, not a number. The HUD abbreviation `p` is shared with: `pfr`, `profit100`.
 
 ### Player name (short) — `playershort`
@@ -73,6 +122,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `the player's name, shortened to fit the cell`
 - **SQL database field / logic**: screen_name = Players.name
 - **Tooltip**: Player Name 1-5
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: The HUD abbreviation `1` is shared with: `playername`.
 
 ### Starting hands seen — `starthands`
@@ -82,6 +135,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `lists the hands the player voluntarily played in the current history file, grouped as limped, raised, called a raise, defended the BB`
 - **SQL database field / logic**: SELECT DISTINCT startCards, street0Aggr, street0CalledRaiseDone, position FROM Hands, HandsPlayers, Gametypes WHERE street0VPI AND fileId = the current file
 - **Tooltip**: Hands seen at this table
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: Hold'em only (the query is limited to holdem)
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: Meant for popups: it reads one history file, not the cache, so it ignores the HUD's aggregation settings.
 
 ## Preflop
@@ -94,6 +151,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_p_call_3bet / cnt_p_face_3bet × 100`
 - **SQL database field / logic**: cnt_p_face_3bet = SUM(HudCache.cnt_p_face_3bet); cnt_p_call_3bet = SUM(HudCache.cnt_p_call_3bet)
 - **Tooltip**: % calling facing a preflop 3-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
 ### Call vs Preflop 4-Bet — `call_vs_preflop_4bet`
@@ -104,6 +165,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_p_call_4bet / cnt_p_face_4bet × 100`
 - **SQL database field / logic**: cnt_p_face_4bet = SUM(HudCache.cnt_p_face_4bet); cnt_p_call_4bet = SUM(HudCache.cnt_p_call_4bet)
 - **Tooltip**: % calling facing a preflop 4-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs Preflop Squeeze — `call_vs_preflop_squeeze`
 
@@ -113,6 +178,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_p_call_squeeze / cnt_p_face_squeeze × 100`
 - **SQL database field / logic**: cnt_p_face_squeeze = SUM(HudCache.cnt_p_face_squeeze); cnt_p_call_squeeze = SUM(HudCache.cnt_p_call_squeeze)
 - **Tooltip**: % calling facing a preflop squeeze
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Called a Raise Preflop — `car0`
 
@@ -123,6 +192,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: car_opp_0 = SUM(HudCache.street0CalledRaiseChance); car_0 = SUM(HudCache.street0CalledRaiseDone)
 - **Tooltip**: % called a raise preflop
 - **Detailed HUD text**: `CAR_pf`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **XML titles**: `CARpre`
 - **Note**: Gives the same value as `cold_call` (same counters, same formula).
 
@@ -135,6 +208,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: cfb_opp_0 = SUM(HudCache.street0_C4BChance); cfb_0 = SUM(HudCache.street0_C4BDone)
 - **Tooltip**: % cold 4 bet preflop/3rd street
 - **Detailed HUD text**: `C4B_pf`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 
 ### Cold Call Preflop — `cold_call`
 
@@ -144,6 +221,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `CAR_0 / CAR_opp_0 × 100`
 - **SQL database field / logic**: CAR_opp_0 = SUM(HudCache.street0CalledRaiseChance); CAR_0 = SUM(HudCache.street0CalledRaiseDone)
 - **Tooltip**: % cold call preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **Note**: Gives the same value as `car0` (same counters, same formula).
 
 ### Call Preflop 3-Bet — `ctb`
@@ -155,6 +236,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: f3b_opp_0 = SUM(HudCache.street0_FoldTo3BChance); f3b_0 = SUM(HudCache.street0_FoldTo3BDone); fb_0 = SUM(HudCache.street0_4BDone)
 - **Tooltip**: % call 3 bet
 - **Detailed HUD text**: `call3B`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 
 ### Fold to Preflop 3-Bet — `f_3bet`
 
@@ -165,6 +250,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: f3b_opp_0 = SUM(HudCache.street0_FoldTo3BChance); f3b_0 = SUM(HudCache.street0_FoldTo3BDone)
 - **Tooltip**: % fold to 3 bet preflop/3rd street
 - **Detailed HUD text**: `F3B_pf`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 equivalent**: Fold to PF 3Bet — `(street0_FoldTo3BDone / street0_FoldTo3BChance) * 100` (same formula)
 - **XML titles**: `PFF3`
 - **Note**: The HUD abbreviation `F3B` is shared with: `three_B_flop`.
@@ -178,6 +267,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: f4b_opp_0 = SUM(HudCache.street0_FoldTo4BChance); f4b_0 = SUM(HudCache.street0_FoldTo4BDone)
 - **Tooltip**: % fold to 4 bet preflop/3rd street
 - **Detailed HUD text**: `F4B_pf`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **XML titles**: `PFF4`
 - **Note**: Gives the same value as `fold_vs_4bet` (same counters, same formula). The HUD abbreviation `F4B` is shared with: `four_B_flop`.
 
@@ -189,6 +282,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `face_limpers / n`
 - **SQL database field / logic**: n = SUM(HudCache.n); face_limpers = SUM(HudCache.street0_FaceLimpers)
 - **Tooltip**: avg limpers faced preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_calc_squeeze_defense.py`
 
 ### Faced a Raise Preflop — `face_raise_preflop`
@@ -199,6 +296,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `p_face_raise / n × 100`
 - **SQL database field / logic**: n = SUM(HudCache.n); p_face_raise = SUM(HudCache.street0FaceRaise)
 - **Tooltip**: % face raise preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 
 ### 4-Bet Range (estimate) — `fbr`
 
@@ -209,6 +310,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: fb_0 = SUM(HudCache.street0_4BDone); fb_opp_0 = SUM(HudCache.street0_4BChance); pfr = SUM(HudCache.street0Aggr); n = SUM(HudCache.n)
 - **Tooltip**: 4 bet range
 - **Detailed HUD text**: `4Brange`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 - **Note**: Historical estimate of the four-bet range: the four-bet rate multiplied by the share of hands that were preflop raises.
 
@@ -218,6 +323,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: How often the player folded when facing a preflop 3-bet.
 - **Formula (code)**: `decisions matching the numerator {'response': 'fold'} / decisions matching the filters × 100`
 - **SQL database field / logic**: analytics engine over the action events (analytics_query): filters {'street': 'preflop', 'situation': 'facing_3bet'}
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Analytics definition (metric fold_frequency): a HUD cell shows it only with the data_* attributes the editor writes.
 
 ### Fold to Squeeze — `fold_to_squeeze`
@@ -228,6 +337,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `sqzdef_fold / sqzdef_opp × 100`
 - **SQL database field / logic**: sqzdef_opp = SUM(HudCache.street0_FoldToSqueezeChance); sqzdef_fold = SUM(HudCache.street0_FoldToSqueezeDone)
 - **Tooltip**: % fold to squeeze
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_squeeze_defense.py`
 
 ### Fold to Preflop 4-Bet — `fold_vs_4bet`
@@ -238,6 +351,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `F4B_0 / F4B_opp_0 × 100`
 - **SQL database field / logic**: F4B_opp_0 = SUM(HudCache.street0_FoldTo4BChance); F4B_0 = SUM(HudCache.street0_FoldTo4BDone)
 - **Tooltip**: % fold vs 4bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **Note**: Gives the same value as `f_4bet` (same counters, same formula).
 
 ### Fold vs Preflop 3-Bet — `fold_vs_preflop_3bet`
@@ -248,6 +365,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_p_face_3bet − cnt_p_call_3bet − cnt_p_raise_3bet) / cnt_p_face_3bet × 100`
 - **SQL database field / logic**: cnt_p_face_3bet = SUM(HudCache.cnt_p_face_3bet); cnt_p_call_3bet = SUM(HudCache.cnt_p_call_3bet); cnt_p_raise_3bet = SUM(HudCache.cnt_p_raise_3bet)
 - **Tooltip**: % folding facing a preflop 3-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -259,6 +380,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_p_face_4bet − cnt_p_call_4bet − cnt_p_raise_4bet) / cnt_p_face_4bet × 100`
 - **SQL database field / logic**: cnt_p_face_4bet = SUM(HudCache.cnt_p_face_4bet); cnt_p_call_4bet = SUM(HudCache.cnt_p_call_4bet); cnt_p_raise_4bet = SUM(HudCache.cnt_p_raise_4bet)
 - **Tooltip**: % folding facing a preflop 4-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
 ### Fold vs Preflop Squeeze — `fold_vs_preflop_squeeze`
@@ -269,6 +394,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_p_face_squeeze − cnt_p_call_squeeze − cnt_p_raise_squeeze) / cnt_p_face_squeeze × 100`
 - **SQL database field / logic**: cnt_p_face_squeeze = SUM(HudCache.cnt_p_face_squeeze); cnt_p_call_squeeze = SUM(HudCache.cnt_p_call_squeeze); cnt_p_raise_squeeze = SUM(HudCache.cnt_p_raise_squeeze)
 - **Tooltip**: % folding facing a preflop squeeze
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
 ### Preflop 4-Bet — `four_B`
@@ -279,6 +408,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `fb_0 / fb_opp_0 × 100`
 - **SQL database field / logic**: fb_opp_0 = SUM(HudCache.street0_4BChance); fb_0 = SUM(HudCache.street0_4BDone)
 - **Tooltip**: % 4 bet preflop/3rd street
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **XML titles**: `PF4`
 
 ### Preflop 4-bet. — `four_bet`
@@ -287,6 +420,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Preflop 4-bet.
 - **Formula (code)**: `100 * street0_4BDone / street0_4BChance   (aggregate: ratio)`
 - **SQL database field / logic**: inputs (HudCache columns): street0_4BDone, street0_4BChance
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Declarative stat of stats.d/*.toml, drawn by the HUD like a native one.
 
 ### 4-Bet from Big Blind — `four_bet_bb`
@@ -297,6 +434,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `fb_bb / fb_opp_bb × 100`
 - **SQL database field / logic**: fb_opp_bb = SUM(CASE WHEN HudCache.position = 'B' THEN HudCache.street0_4BChance ELSE 0 END); fb_bb = SUM(CASE WHEN HudCache.position = 'B' THEN HudCache.street0_4BDone ELSE 0 END)
 - **Tooltip**: % 4B BB preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 
 ### 4-Bet from Button — `four_bet_btn`
 
@@ -306,6 +447,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `fb_btn / fb_opp_btn × 100`
 - **SQL database field / logic**: fb_opp_btn = SUM(CASE WHEN HudCache.position = 'D' THEN HudCache.street0_4BChance ELSE 0 END); fb_btn = SUM(CASE WHEN HudCache.position = 'D' THEN HudCache.street0_4BDone ELSE 0 END)
 - **Tooltip**: % 4B BTN preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 
 ### 4-Bet from Cutoff — `four_bet_co`
 
@@ -315,6 +460,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `fb_co / fb_opp_co × 100`
 - **SQL database field / logic**: fb_opp_co = SUM(CASE WHEN HudCache.position = 'C' THEN HudCache.street0_4BChance ELSE 0 END); fb_co = SUM(CASE WHEN HudCache.position = 'C' THEN HudCache.street0_4BDone ELSE 0 END)
 - **Tooltip**: % 4B CO preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 
 ### 4-Bet from Early Position — `four_bet_ep`
 
@@ -324,6 +473,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `fb_ep / fb_opp_ep × 100`
 - **SQL database field / logic**: fb_opp_ep = SUM(CASE WHEN HudCache.position = 'E' THEN HudCache.street0_4BChance ELSE 0 END); fb_ep = SUM(CASE WHEN HudCache.position = 'E' THEN HudCache.street0_4BDone ELSE 0 END)
 - **Tooltip**: % 4B EP preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 
 ### 4-Bet from Middle Position — `four_bet_mp`
 
@@ -333,6 +486,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `fb_mp / fb_opp_mp × 100`
 - **SQL database field / logic**: fb_opp_mp = SUM(CASE WHEN HudCache.position = 'M' THEN HudCache.street0_4BChance ELSE 0 END); fb_mp = SUM(CASE WHEN HudCache.position = 'M' THEN HudCache.street0_4BDone ELSE 0 END)
 - **Tooltip**: % 4B MP preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 
 ### 4-Bet Range — `four_bet_range`
 
@@ -342,6 +499,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `fb_0 / n × 100`
 - **SQL database field / logic**: n = SUM(HudCache.n); fb_0 = SUM(HudCache.street0_4BDone)
 - **Tooltip**: 4-bet range
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 
 ### 4-Bet from Small Blind — `four_bet_sb`
 
@@ -351,6 +512,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `fb_sb / fb_opp_sb × 100`
 - **SQL database field / logic**: fb_opp_sb = SUM(CASE WHEN HudCache.position = 'S' THEN HudCache.street0_4BChance ELSE 0 END); fb_sb = SUM(CASE WHEN HudCache.position = 'S' THEN HudCache.street0_4BDone ELSE 0 END)
 - **Tooltip**: % 4B SB preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 
 ### Open Raise (small) — `gp_2x`
 
@@ -360,6 +525,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `gp_2x / gp_open_opp × 100`
 - **SQL database field / logic**: gp_open_opp = SUM(HudCache.cnt_gp_open_opp); gp_2x = SUM(HudCache.cnt_gp_2x)
 - **Tooltip**: % open-raise (<40% stack)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Open Limp (GP) — `gp_limp`
 
@@ -369,6 +538,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `gp_limp / gp_open_opp × 100`
 - **SQL database field / logic**: gp_open_opp = SUM(HudCache.cnt_gp_open_opp); gp_limp = SUM(HudCache.cnt_gp_limp)
 - **Tooltip**: % open-limp
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Open Shove — `gp_os`
 
@@ -378,6 +551,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `gp_os / gp_open_opp × 100`
 - **SQL database field / logic**: gp_open_opp = SUM(HudCache.cnt_gp_open_opp); gp_os = SUM(HudCache.cnt_gp_os)
 - **Tooltip**: % open-shove (>=40% stack)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Isolation Raise (deprecated) — `iso`
 
@@ -386,6 +563,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `no data (deprecated)`
 - **SQL database field / logic**: none: isolation raises cannot be aggregated from HudCache
 - **Tooltip**: % isolation raise (deprecated)
+- **Games**: none (shows no data)
+- **Hold'em / Omaha (flop games)**: no data
+- **Stud / Razz**: no data
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
 - **Status**: deprecated
 
 ### Limp — `limp`
@@ -396,6 +577,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(vpip − pfr) / vpip_opp × 100`
 - **SQL database field / logic**: vpip_opp = SUM(HudCache.street0VPIChance); vpip = SUM(HudCache.street0VPI); pfr = SUM(HudCache.street0Aggr)
 - **Tooltip**: % limp preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 
 ### Open Limp — `open_limp`
@@ -406,6 +591,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `open_limp / open_limp_opp × 100`
 - **SQL database field / logic**: open_limp_opp = SUM(HudCache.street0OpenLimpChance); open_limp = SUM(HudCache.street0OpenLimp)
 - **Tooltip**: % open limp preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 
 ### Price of Preflop Raise Faced — `p_2bet_facing`
 
@@ -415,6 +604,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(p_2bet_facing_bp / p_2bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: p_2bet_facing_cnt = SUM(HudCache.cnt_p_2bet_facing); p_2bet_facing_bp = SUM(HudCache.val_p_2bet_facing_bp)
 - **Tooltip**: avg 2bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_preflop_raise_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -426,6 +619,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(p_3bet_facing_bp / p_3bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: p_3bet_facing_cnt = SUM(HudCache.cnt_p_3bet_facing); p_3bet_facing_bp = SUM(HudCache.val_p_3bet_facing_bp)
 - **Tooltip**: avg 3bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_preflop_raise_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -437,6 +634,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(p_4bet_facing_bp / p_4bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: p_4bet_facing_cnt = SUM(HudCache.cnt_p_4bet_facing); p_4bet_facing_bp = SUM(HudCache.val_p_4bet_facing_bp)
 - **Tooltip**: avg 4bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
 ### Price of Preflop 5-Bet Faced — `p_5bet_facing`
@@ -447,6 +648,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(p_5bet_facing_bp / p_5bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: p_5bet_facing_cnt = SUM(HudCache.cnt_p_5bet_facing); p_5bet_facing_bp = SUM(HudCache.val_p_5bet_facing_bp)
 - **Tooltip**: avg 5bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -458,6 +663,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(p_raise_facing_bp / p_raise_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: p_raise_facing_cnt = SUM(HudCache.cnt_p_raise_facing); p_raise_facing_bp = SUM(HudCache.val_p_raise_facing_bp)
 - **Tooltip**: avg preflop raise faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`, `test_calc_preflop_raise_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -469,6 +678,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(p_raise_made_bp / p_raise_made_cnt) / 10 000 × 100`
 - **SQL database field / logic**: p_raise_made_cnt = SUM(HudCache.cnt_p_raise_made); p_raise_made_bp = SUM(HudCache.val_p_raise_made_bp)
 - **Tooltip**: avg preflop raise made (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`, `test_calc_raise_made.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -480,6 +693,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(p_raise_made_2_bp / p_raise_made_2_cnt) / 10 000 × 100`
 - **SQL database field / logic**: p_raise_made_2_cnt = SUM(HudCache.cnt_p_raise_made_2); p_raise_made_2_bp = SUM(HudCache.val_p_raise_made_2_bp)
 - **Tooltip**: avg 2nd preflop raise made (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -492,6 +709,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: pfr_opp = SUM(HudCache.street0AggrChance); pfr = SUM(HudCache.street0Aggr)
 - **Tooltip**: Preflop/3rd street raise %
 - **Detailed HUD text**: `pfr`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 equivalent**: PFR — `(street0Aggr / street0AggrChance) * 100` (same formula)
 - **PT4 difference**: PT4 counts a preflop raise opportunity from the player's preflop actions and stack; fpdb's street0AggrChance is any preflop decision with a raise still possible.
 - **PT4 derivation tests**: `test_pt4_adapter.py`
@@ -504,6 +725,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: How often each seat raised when it had a preflop decision.
 - **Formula (code)**: `decisions matching the numerator {'response': ['raise', 'complete']} / decisions matching the filters × 100`
 - **SQL database field / logic**: analytics engine over the action events (analytics_query): filters {'street': 'preflop'}; grouped by position
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Analytics definition (metric raise_frequency): a HUD cell shows it only with the data_* attributes the editor writes.
 
 ### Raise vs Preflop 3-Bet — `raise_vs_preflop_3bet`
@@ -514,6 +739,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_p_raise_3bet / cnt_p_face_3bet × 100`
 - **SQL database field / logic**: cnt_p_face_3bet = SUM(HudCache.cnt_p_face_3bet); cnt_p_raise_3bet = SUM(HudCache.cnt_p_raise_3bet)
 - **Tooltip**: % raising facing a preflop 3-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
 ### Raise vs Preflop 4-Bet — `raise_vs_preflop_4bet`
@@ -524,6 +753,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_p_raise_4bet / cnt_p_face_4bet × 100`
 - **SQL database field / logic**: cnt_p_face_4bet = SUM(HudCache.cnt_p_face_4bet); cnt_p_raise_4bet = SUM(HudCache.cnt_p_raise_4bet)
 - **Tooltip**: % raising facing a preflop 4-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs Preflop Squeeze — `raise_vs_preflop_squeeze`
 
@@ -533,6 +766,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_p_raise_squeeze / cnt_p_face_squeeze × 100`
 - **SQL database field / logic**: cnt_p_face_squeeze = SUM(HudCache.cnt_p_face_squeeze); cnt_p_raise_squeeze = SUM(HudCache.cnt_p_raise_squeeze)
 - **Tooltip**: % raising facing a preflop squeeze
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise first in (open raise). — `rfi`
 
@@ -540,6 +777,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Raise first in (open raise).
 - **Formula (code)**: `100 * raisedFirstIn / raiseFirstInChance   (aggregate: ratio)`
 - **SQL database field / logic**: inputs (HudCache columns): raisedFirstIn, raiseFirstInChance
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Declarative stat of stats.d/*.toml, drawn by the HUD like a native one.
 
 ### Raise First In from Early Position — `rfi_early_position`
@@ -551,6 +792,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: rfi_opp_ep = SUM(CASE WHEN HudCache.position = 'E' THEN HudCache.raiseFirstInChance ELSE 0 END); rfi_ep = SUM(CASE WHEN HudCache.position = 'E' THEN HudCache.raisedFirstIn ELSE 0 END)
 - **Tooltip**: % RFI early position
 - **Detailed HUD text**: `rfi_early_pos`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Raise First In from Late Position — `rfi_late_position`
 
@@ -561,6 +806,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: rfi_opp_lp = SUM(CASE WHEN HudCache.position = 'C' THEN HudCache.raiseFirstInChance ELSE 0 END); rfi_lp = SUM(CASE WHEN HudCache.position = 'C' THEN HudCache.raisedFirstIn ELSE 0 END)
 - **Tooltip**: % RFI late position
 - **Detailed HUD text**: `rfi_late_pos`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Raise First In from Middle Position — `rfi_middle_position`
 
@@ -571,6 +820,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: rfi_opp_mp = SUM(CASE WHEN HudCache.position = 'M' THEN HudCache.raiseFirstInChance ELSE 0 END); rfi_mp = SUM(CASE WHEN HudCache.position = 'M' THEN HudCache.raisedFirstIn ELSE 0 END)
 - **Tooltip**: % RFI middle position
 - **Detailed HUD text**: `rfi_middle_pos`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Raise First In (total) — `rfi_total`
 
@@ -580,6 +833,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `max(0, pfr − 3bet) / pfr_opp × 100`
 - **SQL database field / logic**: pfr = SUM(HudCache.street0Aggr); pfr_opp = SUM(HudCache.street0AggrChance); 3bet is not selected by any HUD query, so it is always 0
 - **Tooltip**: % raise first in
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 - **Note**: In practice this equals PFR. The measured raise-first-in rate is `rfi_early_position`, `rfi_middle_position` and `rfi_late_position` pooled by the position queries.
 
@@ -592,6 +849,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: sqz_opp_0 = SUM(HudCache.street0_SqueezeChance); sqz_0 = SUM(HudCache.street0_SqueezeDone)
 - **Tooltip**: % squeeze preflop
 - **Detailed HUD text**: `SQZ_pf`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_player_situations.py`
 
 ### Squeeze from Big Blind — `squeeze_bb`
@@ -602,6 +863,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `sqz_bb / sqz_opp_bb × 100`
 - **SQL database field / logic**: sqz_opp_bb = SUM(CASE WHEN HudCache.position = 'B' THEN HudCache.street0_SqueezeChance ELSE 0 END); sqz_bb = SUM(CASE WHEN HudCache.position = 'B' THEN HudCache.street0_SqueezeDone ELSE 0 END)
 - **Tooltip**: % SQZ BB preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_player_situations.py`
 
 ### Squeeze from Button — `squeeze_btn`
@@ -612,6 +877,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `sqz_btn / sqz_opp_btn × 100`
 - **SQL database field / logic**: sqz_opp_btn = SUM(CASE WHEN HudCache.position = 'D' THEN HudCache.street0_SqueezeChance ELSE 0 END); sqz_btn = SUM(CASE WHEN HudCache.position = 'D' THEN HudCache.street0_SqueezeDone ELSE 0 END)
 - **Tooltip**: % SQZ BTN preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_player_situations.py`
 
 ### Squeeze from Cutoff — `squeeze_co`
@@ -622,6 +891,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `sqz_co / sqz_opp_co × 100`
 - **SQL database field / logic**: sqz_opp_co = SUM(CASE WHEN HudCache.position = 'C' THEN HudCache.street0_SqueezeChance ELSE 0 END); sqz_co = SUM(CASE WHEN HudCache.position = 'C' THEN HudCache.street0_SqueezeDone ELSE 0 END)
 - **Tooltip**: % SQZ CO preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_player_situations.py`
 
 ### Squeeze from Early Position — `squeeze_ep`
@@ -632,6 +905,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `sqz_ep / sqz_opp_ep × 100`
 - **SQL database field / logic**: sqz_opp_ep = SUM(CASE WHEN HudCache.position = 'E' THEN HudCache.street0_SqueezeChance ELSE 0 END); sqz_ep = SUM(CASE WHEN HudCache.position = 'E' THEN HudCache.street0_SqueezeDone ELSE 0 END)
 - **Tooltip**: % SQZ EP preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_player_situations.py`
 
 ### Squeeze from Middle Position — `squeeze_mp`
@@ -642,6 +919,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `sqz_mp / sqz_opp_mp × 100`
 - **SQL database field / logic**: sqz_opp_mp = SUM(CASE WHEN HudCache.position = 'M' THEN HudCache.street0_SqueezeChance ELSE 0 END); sqz_mp = SUM(CASE WHEN HudCache.position = 'M' THEN HudCache.street0_SqueezeDone ELSE 0 END)
 - **Tooltip**: % SQZ MP preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_player_situations.py`
 
 ### Squeeze Range — `squeeze_range`
@@ -652,6 +933,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `sqz_0 / n × 100`
 - **SQL database field / logic**: n = SUM(HudCache.n); sqz_0 = SUM(HudCache.street0_SqueezeDone)
 - **Tooltip**: squeeze range
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_player_situations.py`
 
 ### Squeeze from Small Blind — `squeeze_sb`
@@ -662,6 +947,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `sqz_sb / sqz_opp_sb × 100`
 - **SQL database field / logic**: sqz_opp_sb = SUM(CASE WHEN HudCache.position = 'S' THEN HudCache.street0_SqueezeChance ELSE 0 END); sqz_sb = SUM(CASE WHEN HudCache.position = 'S' THEN HudCache.street0_SqueezeDone ELSE 0 END)
 - **Tooltip**: % SQZ SB preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_player_situations.py`
 
 ### Straddle — `straddle`
@@ -672,6 +961,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `straddle_done / n × 100`
 - **SQL database field / logic**: n = SUM(HudCache.n); straddle_done = SUM(HudCache.flg_blind_k)
 - **Tooltip**: % straddle
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_special_blinds.py`
 - **Note**: The HUD abbreviation `Str` is shared with: `aof_straight`.
 
@@ -684,6 +977,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: tb_opp_0 = SUM(HudCache.street0_3BChance); tb_0 = SUM(HudCache.street0_3BDone)
 - **Tooltip**: % 3 bet preflop/3rd street
 - **Detailed HUD text**: `3B_pf`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 equivalent**: 3Bet Preflop — `(street0_3BDone / street0_3BChance) * 100` (same formula)
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 - **XML titles**: `PF3`
@@ -694,6 +991,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Preflop 3-bet.
 - **Formula (code)**: `100 * street0_3BDone / street0_3BChance   (aggregate: ratio)`
 - **SQL database field / logic**: inputs (HudCache columns): street0_3BDone, street0_3BChance
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Declarative stat of stats.d/*.toml, drawn by the HUD like a native one.
 
 ### 3-Bet from Big Blind — `three_bet_bb`
@@ -704,6 +1005,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `tb_bb / tb_opp_bb × 100`
 - **SQL database field / logic**: tb_opp_bb = SUM(CASE WHEN HudCache.position = 'B' THEN HudCache.street0_3BChance ELSE 0 END); tb_bb = SUM(CASE WHEN HudCache.position = 'B' THEN HudCache.street0_3BDone ELSE 0 END)
 - **Tooltip**: % 3B BB preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 
 ### 3-Bet from Button — `three_bet_btn`
@@ -714,6 +1019,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `tb_btn / tb_opp_btn × 100`
 - **SQL database field / logic**: tb_opp_btn = SUM(CASE WHEN HudCache.position = 'D' THEN HudCache.street0_3BChance ELSE 0 END); tb_btn = SUM(CASE WHEN HudCache.position = 'D' THEN HudCache.street0_3BDone ELSE 0 END)
 - **Tooltip**: % 3B BTN preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 
 ### 3-Bet from Cutoff — `three_bet_co`
@@ -724,6 +1033,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `tb_co / tb_opp_co × 100`
 - **SQL database field / logic**: tb_opp_co = SUM(CASE WHEN HudCache.position = 'C' THEN HudCache.street0_3BChance ELSE 0 END); tb_co = SUM(CASE WHEN HudCache.position = 'C' THEN HudCache.street0_3BDone ELSE 0 END)
 - **Tooltip**: % 3B CO preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 
 ### 3-Bet from Early Position — `three_bet_ep`
@@ -734,6 +1047,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `tb_ep / tb_opp_ep × 100`
 - **SQL database field / logic**: tb_opp_ep = SUM(CASE WHEN HudCache.position = 'E' THEN HudCache.street0_3BChance ELSE 0 END); tb_ep = SUM(CASE WHEN HudCache.position = 'E' THEN HudCache.street0_3BDone ELSE 0 END)
 - **Tooltip**: % 3B EP preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 
 ### 3-Bet from Middle Position — `three_bet_mp`
@@ -744,6 +1061,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `tb_mp / tb_opp_mp × 100`
 - **SQL database field / logic**: tb_opp_mp = SUM(CASE WHEN HudCache.position = 'M' THEN HudCache.street0_3BChance ELSE 0 END); tb_mp = SUM(CASE WHEN HudCache.position = 'M' THEN HudCache.street0_3BDone ELSE 0 END)
 - **Tooltip**: % 3B MP preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 
 ### 3-Bet Range — `three_bet_range`
@@ -754,6 +1075,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `tb_0 / n × 100`
 - **SQL database field / logic**: n = SUM(HudCache.n); tb_0 = SUM(HudCache.street0_3BDone)
 - **Tooltip**: 3-bet range
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 
 ### 3-Bet from Small Blind — `three_bet_sb`
@@ -764,6 +1089,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `tb_sb / tb_opp_sb × 100`
 - **SQL database field / logic**: tb_opp_sb = SUM(CASE WHEN HudCache.position = 'S' THEN HudCache.street0_3BChance ELSE 0 END); tb_sb = SUM(CASE WHEN HudCache.position = 'S' THEN HudCache.street0_3BDone ELSE 0 END)
 - **Tooltip**: % 3B SB preflop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 
 ### Voluntarily Put $ In Pot (VPIP) — `vpip`
@@ -775,6 +1104,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: vpip_opp = SUM(HudCache.street0VPIChance); vpip = SUM(HudCache.street0VPI)
 - **Tooltip**: Voluntarily put in preflop/3rd street %
 - **Detailed HUD text**: `vpip`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 equivalent**: VPIP — `(street0VPI / (street0VPIChance)) * 100` (same formula)
 - **PT4 difference**: PT4's VPIP opportunity is every hand but a walk; fpdb's also leaves out a blind that is all-in before acting, or folds without having called or raised.
 - **PT4 derivation tests**: `test_pt4_adapter.py`
@@ -790,6 +1123,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: vpip = SUM(HudCache.street0VPI); vpip_opp = SUM(HudCache.street0VPIChance); pfr = SUM(HudCache.street0Aggr); pfr_opp = SUM(HudCache.street0AggrChance)
 - **Tooltip**: VPIP/PFR ratio
 - **Detailed HUD text**: `vpip/pfr`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 - **Note**: A plain ratio of the two percentages (not multiplied by 100); shows infinity when PFR is 0.
 
@@ -803,6 +1140,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `0.01 × amt_blind / n`
 - **SQL database field / logic**: n = SUM(HudCache.n); amt_blind = SUM(HudCache.amt_blind)
 - **Tooltip**: avg blinds posted
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); amounts are tournament chips there, not money
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`
 
 ### Call vs Steal (deprecated) — `call_vs_steal`
@@ -812,6 +1153,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `no data (deprecated)`
 - **SQL database field / logic**: none: needs data about other players that HudCache cannot aggregate
 - **Tooltip**: % call vs steal (deprecated)
+- **Games**: none (shows no data)
+- **Hold'em / Omaha (flop games)**: no data
+- **Stud / Razz**: no data
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
 - **Status**: deprecated
 
 ### Fold Big Blind to Steal — `f_BB_steal`
@@ -823,6 +1168,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: bbstolen = SUM(HudCache.foldBbToStealChance); bbnotdef = SUM(HudCache.foldedBbToSteal)
 - **Tooltip**: % folded BB to steal
 - **Detailed HUD text**: `fBB_s`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Fold Small Blind to Steal — `f_SB_steal`
 
@@ -833,6 +1182,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: sbstolen = SUM(HudCache.foldSbToStealChance); sbnotdef = SUM(HudCache.foldedSbToSteal)
 - **Tooltip**: % folded SB to steal
 - **Detailed HUD text**: `fSB_s`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Fold Blind to Steal — `f_steal`
 
@@ -843,6 +1196,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: sbnotdef = SUM(HudCache.foldedSbToSteal); bbnotdef = SUM(HudCache.foldedBbToSteal); sbstolen = SUM(HudCache.foldSbToStealChance); bbstolen = SUM(HudCache.foldBbToStealChance)
 - **Tooltip**: % folded blind to steal
 - **Detailed HUD text**: `fB_s`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **PT4 equivalent**: Fold to Steal — `((foldedSbToSteal + foldedBbToSteal) / (foldSbToStealChance + foldBbToStealChance)) * 100` (same formula)
 
 ### Fold the big blind facing a steal attempt. — `fold_bb_to_steal`
@@ -851,6 +1208,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Fold the big blind facing a steal attempt.
 - **Formula (code)**: `100 * foldedBbToSteal / foldBbToStealChance   (aggregate: ratio)`
 - **SQL database field / logic**: inputs (HudCache columns): foldedBbToSteal, foldBbToStealChance
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Declarative stat of stats.d/*.toml, drawn by the HUD like a native one.
 
 ### Re-raise Steal — `raiseToSteal`
@@ -862,6 +1223,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: rts_opp = SUM(HudCache.raiseToStealChance); rts = SUM(HudCache.raiseToStealDone)
 - **Tooltip**: % raise to steal
 - **Detailed HUD text**: `RST_pf`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Re-steal (estimate) — `resteal`
 
@@ -871,6 +1236,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(0.7 × tb_0) / (0.6 × tb_opp_0) × 100`
 - **SQL database field / logic**: tb_0 = SUM(HudCache.street0_3BDone); tb_opp_0 = SUM(HudCache.street0_3BChance)
 - **Tooltip**: % resteal
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 - **Status**: estimate
 - **Note**: An estimate built from the 3-bet counts with fixed 0.7 and 0.6 factors (the share assumed to be from the blinds); it is not a count of re-steals. Use `raiseToSteal` for the measured value.
@@ -884,6 +1253,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: steal = SUM(HudCache.stealDone); suc_st = SUM(HudCache.success_Steal)
 - **Tooltip**: % steal success
 - **Detailed HUD text**: `s_steal`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Attempt to Steal Blinds — `steal`
 
@@ -894,6 +1267,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: steal_opp = SUM(HudCache.stealChance); steal = SUM(HudCache.stealDone)
 - **Tooltip**: % steal attempted
 - **Detailed HUD text**: `steal`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **PT4 equivalent**: Att To Steal — `(stealDone / stealChance) * 100` (same formula)
 - **XML titles**: `Steals`
 
@@ -904,6 +1281,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `no data (deprecated)`
 - **SQL database field / logic**: none: needs data about other players that HudCache cannot aggregate
 - **Tooltip**: % 3bet vs steal (deprecated)
+- **Games**: none (shows no data)
+- **Hold'em / Omaha (flop games)**: no data
+- **Stud / Razz**: no data
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
 - **Status**: deprecated
 
 ## Flop / 4th street
@@ -917,6 +1298,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: saw_f = SUM(HudCache.street1Seen); aggr_1 = SUM(HudCache.street1Aggr)
 - **Tooltip**: Aggression frequency flop/4th street
 - **Detailed HUD text**: `a_fq_1`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 equivalent**: Flop AFq — `((street1Bets + street1Raises) / (street1Calls + flg_f_fold + street1Bets + street1Raises)) * 100` (different formula)
 - **PT4 difference**: PT4: flop bets and raises / (flop calls + folds + bets + raises), over actions. FPDB: flops on which the player bet or raised at least once / flops seen, over hands.
 - **PT4 derivation tests**: `test_pt4_adapter.py`
@@ -929,6 +1314,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `no data (deprecated); see `f_bet_made``
 - **SQL database field / logic**: none
 - **Tooltip**: avg bet size flop (deprecated)
+- **Games**: none (shows no data)
+- **Hold'em / Omaha (flop games)**: no data
+- **Stud / Razz**: no data
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
 - **Status**: deprecated
 
 ### Flop Bet Frequency — `bet_frequency_flop`
@@ -940,6 +1329,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: saw_f = SUM(HudCache.street1Seen); street1Bets (not selected by the HUD queries)
 - **Tooltip**: % bet frequency flop
 - **Detailed HUD text**: `bet_freq_flop`
+- **Games**: none: the stat shows no data
+- **Hold'em / Omaha (flop games)**: no data
+- **Stud / Razz**: no data
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 - **Status**: input-missing
 - **Note**: An input is read under a name the HUD queries do not select, so the value is computed from a missing column. Check the HUD queries before relying on it.
@@ -952,6 +1345,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_f_call_3bet / cnt_f_face_3bet × 100`
 - **SQL database field / logic**: cnt_f_face_3bet = SUM(HudCache.cnt_f_face_3bet); cnt_f_call_3bet = SUM(HudCache.cnt_f_call_3bet)
 - **Tooltip**: % calling facing a flop 3-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs Flop 4-Bet — `call_vs_flop_4bet`
 
@@ -961,6 +1358,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_f_call_4bet / cnt_f_face_4bet × 100`
 - **SQL database field / logic**: cnt_f_face_4bet = SUM(HudCache.cnt_f_face_4bet); cnt_f_call_4bet = SUM(HudCache.cnt_f_call_4bet)
 - **Tooltip**: % calling facing a flop 4-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs Flop C-Bet — `call_vs_flop_cbet`
 
@@ -970,6 +1371,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_f_call_cbet / cnt_f_face_cbet × 100`
 - **SQL database field / logic**: cnt_f_face_cbet = SUM(HudCache.cnt_f_face_cbet); cnt_f_call_cbet = SUM(HudCache.cnt_f_call_cbet)
 - **Tooltip**: % calling facing a flop c-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
 ### Call vs Flop Donk Bet — `call_vs_flop_donk`
@@ -980,6 +1385,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_f_call_donk / cnt_f_face_donk × 100`
 - **SQL database field / logic**: cnt_f_face_donk = SUM(HudCache.cnt_f_face_donk); cnt_f_call_donk = SUM(HudCache.cnt_f_call_donk)
 - **Tooltip**: % calling facing a flop donk bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Flop Continuation Bet — `cb1`
 
@@ -990,6 +1399,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: cb_opp_1 = SUM(HudCache.street1CBChance); cb_1 = SUM(HudCache.street1CBDone)
 - **Tooltip**: % continuation bet flop/4th street
 - **Detailed HUD text**: `cb_1`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 equivalent**: CBet Flop — `(street1CBDone / street1CBChance) * 100` (same formula)
 - **PT4 derivation tests**: `test_player_situations.py`
 
@@ -1002,6 +1415,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: cb_1 = SUM(HudCache.street1CBDone); cb_opp_1 = SUM(HudCache.street1CBChance); saw_f = SUM(HudCache.street1Seen); street1InPosition = SUM(HudCache.street1InPosition)
 - **Tooltip**: % c-bet in position
 - **Detailed HUD text**: `cbet_in_position`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 derivation tests**: `test_player_situations.py`, `test_pt4_adapter.py`
 - **Status**: estimate
 - **Note**: Not split by position: both counts are scaled by the same in-position share of flops seen, which cancels out, so the value always equals `cb1`. HudCache has no c-bet count by position.
@@ -1014,6 +1431,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cb_1 × r) / (cb_opp_1 × r) × 100 with r = (saw_f − street1InPosition) / saw_f; r cancels, so = cb_1 / cb_opp_1 × 100`
 - **SQL database field / logic**: cb_1 = SUM(HudCache.street1CBDone); cb_opp_1 = SUM(HudCache.street1CBChance); saw_f = SUM(HudCache.street1Seen); street1InPosition = SUM(HudCache.street1InPosition)
 - **Tooltip**: % c-bet out of position
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 derivation tests**: `test_player_situations.py`, `test_pt4_adapter.py`
 - **Status**: estimate
 - **Note**: Not split by position: both counts are scaled by the same out-of-position share of flops seen, which cancels out, so the value always equals `cb1`. HudCache has no c-bet count by position.
@@ -1024,6 +1445,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Continuation bet on the flop.
 - **Formula (code)**: `100 * street1CBDone / street1CBChance   (aggregate: ratio)`
 - **SQL database field / logic**: inputs (HudCache columns): street1CBDone, street1CBChance
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Declarative stat of stats.d/*.toml, drawn by the HUD like a native one.
 
 ### Flop Check-Raise — `cr1`
@@ -1035,6 +1460,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: ccr_opp_1 = SUM(HudCache.street1CheckCallRaiseChance); cr_1 = SUM(HudCache.street1CheckRaiseDone)
 - **Tooltip**: % check-raise flop/4th street
 - **Detailed HUD text**: `cr_1`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Flop Bet/Raise when not the C-Bettor — `dbr1`
 
@@ -1044,6 +1473,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(aggr_1 − cb_1) / (saw_f − cb_opp_1) × 100`
 - **SQL database field / logic**: aggr_1 = SUM(HudCache.street1Aggr); cb_1 = SUM(HudCache.street1CBDone); saw_f = SUM(HudCache.street1Seen); cb_opp_1 = SUM(HudCache.street1CBChance)
 - **Tooltip**: % DonkBetAndRaise flop/4th street
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 derivation tests**: `test_player_situations.py`, `test_pt4_adapter.py`
 
 ### Price of Flop Raise Faced — `f_2bet_facing`
@@ -1054,6 +1487,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(f_2bet_facing_bp / f_2bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: f_2bet_facing_cnt = SUM(HudCache.cnt_f_2bet_facing); f_2bet_facing_bp = SUM(HudCache.val_f_2bet_facing_bp)
 - **Tooltip**: avg flop 2bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`, `test_calc_postflop_raise_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -1065,6 +1502,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(f_3bet_facing_bp / f_3bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: f_3bet_facing_cnt = SUM(HudCache.cnt_f_3bet_facing); f_3bet_facing_bp = SUM(HudCache.val_f_3bet_facing_bp)
 - **Tooltip**: avg flop 3bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_postflop_raise_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -1076,6 +1517,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(f_4bet_facing_bp / f_4bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: f_4bet_facing_cnt = SUM(HudCache.cnt_f_4bet_facing); f_4bet_facing_bp = SUM(HudCache.val_f_4bet_facing_bp)
 - **Tooltip**: avg flop 4bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
 ### Price of Flop Bet Faced — `f_bet_facing`
@@ -1086,6 +1531,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(f_bet_facing_bp / f_bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: f_bet_facing_cnt = SUM(HudCache.cnt_f_bet_facing); f_bet_facing_bp = SUM(HudCache.val_f_bet_facing_bp)
 - **Tooltip**: avg flop bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_flop_bet_facing.py`, `test_calc_postflop_raise_facing.py`, `test_calc_turn_river_bet_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -1097,6 +1546,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(f_bet_made_bp / f_bet_made_cnt) / 10 000 × 100`
 - **SQL database field / logic**: f_bet_made_cnt = SUM(HudCache.cnt_f_bet_made); f_bet_made_bp = SUM(HudCache.val_f_bet_made_bp)
 - **Tooltip**: avg flop bet made (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_made.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -1109,6 +1562,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: f_cb_opp_1 = SUM(HudCache.foldToStreet1CBChance); f_cb_1 = SUM(HudCache.foldToStreet1CBDone)
 - **Tooltip**: % fold to continuation bet flop/4th street
 - **Detailed HUD text**: `f_cb_1`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 equivalent**: Fold to F CBet — `(foldToStreet1CBDone / foldToStreet1CBChance) * 100` (same formula)
 - **Note**: Gives the same value as `fold_to_cbet_flop` (same counters, same formula). The HUD abbreviation `f_cb1` is shared with: `fold_to_cbet_flop`.
 
@@ -1120,6 +1577,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(f_freq_1 − f_cb_1) / (was_raised_1 − f_cb_opp_1) × 100`
 - **SQL database field / logic**: f_freq_1 = SUM(HudCache.foldToOtherRaisedStreet1); f_cb_1 = SUM(HudCache.foldToStreet1CBDone); was_raised_1 = SUM(HudCache.otherRaisedStreet1); f_cb_opp_1 = SUM(HudCache.foldToStreet1CBChance)
 - **Tooltip**: % Fold to DonkBetAndRaise flop/4th street
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 
 ### Price of Flop Raise Faced — `f_raise_facing`
 
@@ -1129,6 +1590,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(f_raise_facing_bp / f_raise_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: f_raise_facing_cnt = SUM(HudCache.cnt_f_raise_facing); f_raise_facing_bp = SUM(HudCache.val_f_raise_facing_bp)
 - **Tooltip**: avg flop raise faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -1140,6 +1605,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(f_raise_made_bp / f_raise_made_cnt) / 10 000 × 100`
 - **SQL database field / logic**: f_raise_made_cnt = SUM(HudCache.cnt_f_raise_made); f_raise_made_bp = SUM(HudCache.val_f_raise_made_bp)
 - **Tooltip**: avg flop raise made (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_raise_made.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -1151,6 +1620,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(f_raise_made_2_bp / f_raise_made_2_cnt) / 10 000 × 100`
 - **SQL database field / logic**: f_raise_made_2_cnt = SUM(HudCache.cnt_f_raise_made_2); f_raise_made_2_bp = SUM(HudCache.val_f_raise_made_2_bp)
 - **Tooltip**: avg 2nd flop raise made (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
 ### Flop Stack-to-Pot Ratio — `f_spr`
@@ -1161,6 +1634,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `0.01 × f_spr_val / f_spr_cnt`
 - **SQL database field / logic**: f_spr_cnt = SUM(HudCache.cnt_f_spr); f_spr_val = SUM(HudCache.val_f_spr)
 - **Tooltip**: avg flop SPR
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Faced a Raise on the Flop — `face_raise_flop`
 
@@ -1170,6 +1647,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `f_face_raise / saw_1 × 100`
 - **SQL database field / logic**: saw_1 = SUM(HudCache.street1Seen); f_face_raise = SUM(HudCache.street1FaceRaise)
 - **Tooltip**: % face raise flop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 
 ### Flop Fold to Bet or Raise — `ffreq1`
@@ -1181,6 +1662,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: was_raised_1 = SUM(HudCache.otherRaisedStreet1); f_freq_1 = SUM(HudCache.foldToOtherRaisedStreet1)
 - **Tooltip**: % fold frequency flop/4th street
 - **Detailed HUD text**: `ff_1`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 
 ### Flop First Raise — `first_raise_flop`
 
@@ -1190,6 +1675,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `f_first_raise / saw_1 × 100`
 - **SQL database field / logic**: saw_1 = SUM(HudCache.street1Seen); f_first_raise = SUM(HudCache.street1FirstRaise)
 - **Tooltip**: % first raise flop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 
 ### Flop Fold — `fold_flop`
@@ -1200,6 +1689,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `f_fold / saw_1 × 100`
 - **SQL database field / logic**: saw_1 = SUM(HudCache.street1Seen); f_fold = SUM(HudCache.flg_f_fold)
 - **Tooltip**: % fold flop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 
 ### Fold to Flop Continuation Bet — `fold_to_cbet_flop`
@@ -1211,6 +1704,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: f_cb_opp_1 = SUM(HudCache.foldToStreet1CBChance); f_cb_1 = SUM(HudCache.foldToStreet1CBDone)
 - **Tooltip**: % fold to continuation bet flop/4th street
 - **Detailed HUD text**: `f_cb_1`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **Note**: Alias: this stat calls `f_cb1` and returns its value unchanged. The HUD abbreviation `f_cb1` is shared with: `f_cb1`.
 
 ### How often the player folded when facing a continuation bet on the flop. — `fold_to_cbet_flop`
@@ -1219,6 +1716,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: How often the player folded when facing a continuation bet on the flop.
 - **Formula (code)**: `decisions matching the numerator {'response': 'fold'} / decisions matching the filters × 100`
 - **SQL database field / logic**: analytics engine over the action events (analytics_query): filters {'street': 'flop', 'situation': 'facing_cbet'}
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Analytics definition (metric fold_frequency): a HUD cell shows it only with the data_* attributes the editor writes.
 
 ### How often the player folded to a flop c-bet, split by the size faced. — `fold_to_cbet_flop_by_size`
@@ -1227,6 +1728,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: How often the player folded to a flop c-bet, split by the size faced.
 - **Formula (code)**: `decisions matching the numerator {'response': 'fold'} / decisions matching the filters × 100`
 - **SQL database field / logic**: analytics engine over the action events (analytics_query): filters {'street': 'flop', 'situation': 'facing_cbet'}; grouped by facing_sizing_bucket
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Analytics definition (metric fold_frequency): a HUD cell shows it only with the data_* attributes the editor writes.
 
 ### Fold to Flop 3-Bet — `fold_to_three_B_flop`
@@ -1237,6 +1742,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `ff3b / ff3b_opp × 100`
 - **SQL database field / logic**: ff3b_opp = SUM(HudCache.street1_FoldTo3BChance); ff3b = SUM(HudCache.street1_FoldTo3BDone)
 - **Tooltip**: % fold to flop 3bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_3bet_postflop.py`
 
 ### Fold vs Flop 3-Bet — `fold_vs_flop_3bet`
@@ -1247,6 +1756,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_f_face_3bet − cnt_f_call_3bet − cnt_f_raise_3bet) / cnt_f_face_3bet × 100`
 - **SQL database field / logic**: cnt_f_face_3bet = SUM(HudCache.cnt_f_face_3bet); cnt_f_call_3bet = SUM(HudCache.cnt_f_call_3bet); cnt_f_raise_3bet = SUM(HudCache.cnt_f_raise_3bet)
 - **Tooltip**: % folding facing a flop 3-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
 ### Fold vs Flop 4-Bet — `fold_vs_flop_4bet`
@@ -1257,6 +1770,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_f_face_4bet − cnt_f_call_4bet − cnt_f_raise_4bet) / cnt_f_face_4bet × 100`
 - **SQL database field / logic**: cnt_f_face_4bet = SUM(HudCache.cnt_f_face_4bet); cnt_f_call_4bet = SUM(HudCache.cnt_f_call_4bet); cnt_f_raise_4bet = SUM(HudCache.cnt_f_raise_4bet)
 - **Tooltip**: % folding facing a flop 4-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
 ### Fold vs Flop C-Bet — `fold_vs_flop_cbet`
@@ -1267,6 +1784,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_f_face_cbet − cnt_f_call_cbet − cnt_f_raise_cbet) / cnt_f_face_cbet × 100`
 - **SQL database field / logic**: cnt_f_face_cbet = SUM(HudCache.cnt_f_face_cbet); cnt_f_call_cbet = SUM(HudCache.cnt_f_call_cbet); cnt_f_raise_cbet = SUM(HudCache.cnt_f_raise_cbet)
 - **Tooltip**: % folding facing a flop c-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -1278,6 +1799,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_f_face_donk − cnt_f_call_donk − cnt_f_raise_donk) / cnt_f_face_donk × 100`
 - **SQL database field / logic**: cnt_f_face_donk = SUM(HudCache.cnt_f_face_donk); cnt_f_call_donk = SUM(HudCache.cnt_f_call_donk); cnt_f_raise_donk = SUM(HudCache.cnt_f_raise_donk)
 - **Tooltip**: % folding facing a flop donk bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
 ### Flop 4-Bet — `four_B_flop`
@@ -1288,6 +1813,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `fl4b / fl4b_opp × 100`
 - **SQL database field / logic**: fl4b_opp = SUM(HudCache.street1_4BChance); fl4b = SUM(HudCache.street1_4BDone)
 - **Tooltip**: % 4 bet flop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **Note**: The HUD abbreviation `F4B` is shared with: `f_4bet`.
 
 ### Flop Open (first bet) — `open_flop`
@@ -1298,6 +1827,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `flopen / flopen_opp × 100`
 - **SQL database field / logic**: flopen_opp = SUM(HudCache.street1OpenChance); flopen = SUM(HudCache.street1OpenDone)
 - **Tooltip**: % open flop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 
 ### Flop Probe Bet — `probe_bet`
 
@@ -1307,6 +1840,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `min(street1Bets, saw_f − cb_1) / (saw_f − cb_1) × 100`
 - **SQL database field / logic**: saw_f = SUM(HudCache.street1Seen); cb_1 = SUM(HudCache.street1CBDone); street1Bets = SUM(HudCache.street1Bets)
 - **Tooltip**: % probe bet flop
+- **Games**: none: the stat shows no data
+- **Hold'em / Omaha (flop games)**: no data
+- **Stud / Razz**: no data
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
 - **PT4 derivation tests**: `test_player_situations.py`, `test_pt4_adapter.py`
 - **Status**: input-missing
 - **Note**: Flop probe: bets over the flops seen where the player did not c-bet. Reads `street1Bets`, which the HUD queries expose as `bet_1`.
@@ -1320,6 +1857,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: saw_f = SUM(HudCache.street1Seen); street1Raises (not selected by the HUD queries)
 - **Tooltip**: % raise frequency flop
 - **Detailed HUD text**: `raise_freq_flop`
+- **Games**: none: the stat shows no data
+- **Hold'em / Omaha (flop games)**: no data
+- **Stud / Razz**: no data
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 - **Status**: input-missing
 - **Note**: An input is read under a name the HUD queries do not select, so the value is computed from a missing column. Check the HUD queries before relying on it.
@@ -1332,6 +1873,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_f_raise_3bet / cnt_f_face_3bet × 100`
 - **SQL database field / logic**: cnt_f_face_3bet = SUM(HudCache.cnt_f_face_3bet); cnt_f_raise_3bet = SUM(HudCache.cnt_f_raise_3bet)
 - **Tooltip**: % raising facing a flop 3-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs Flop 4-Bet — `raise_vs_flop_4bet`
 
@@ -1341,6 +1886,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_f_raise_4bet / cnt_f_face_4bet × 100`
 - **SQL database field / logic**: cnt_f_face_4bet = SUM(HudCache.cnt_f_face_4bet); cnt_f_raise_4bet = SUM(HudCache.cnt_f_raise_4bet)
 - **Tooltip**: % raising facing a flop 4-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs Flop C-Bet — `raise_vs_flop_cbet`
 
@@ -1350,6 +1899,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_f_raise_cbet / cnt_f_face_cbet × 100`
 - **SQL database field / logic**: cnt_f_face_cbet = SUM(HudCache.cnt_f_face_cbet); cnt_f_raise_cbet = SUM(HudCache.cnt_f_raise_cbet)
 - **Tooltip**: % raising facing a flop c-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
 ### Raise vs Flop Donk Bet — `raise_vs_flop_donk`
@@ -1360,6 +1913,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_f_raise_donk / cnt_f_face_donk × 100`
 - **SQL database field / logic**: cnt_f_face_donk = SUM(HudCache.cnt_f_face_donk); cnt_f_raise_donk = SUM(HudCache.cnt_f_raise_donk)
 - **Tooltip**: % raising facing a flop donk bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Flop 3-Bet — `three_B_flop`
 
@@ -1369,6 +1926,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `fl3b / fl3b_opp × 100`
 - **SQL database field / logic**: fl3b_opp = SUM(HudCache.street1_3BChance); fl3b = SUM(HudCache.street1_3BDone)
 - **Tooltip**: % 3 bet flop
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 derivation tests**: `test_calc_3bet_postflop.py`
 - **Note**: The HUD abbreviation `F3B` is shared with: `f_3bet`.
 
@@ -1383,6 +1944,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: saw_2 = SUM(HudCache.street2Seen); aggr_2 = SUM(HudCache.street2Aggr)
 - **Tooltip**: Aggression frequency turn/5th street
 - **Detailed HUD text**: `a_fq_2`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the second draw (triple draw)
 - **XML titles**: `TuAFq`
 
 ### Average Bet Size Turn (deprecated) — `avg_bet_size_turn`
@@ -1392,6 +1957,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `no data (deprecated); see `t_bet_made``
 - **SQL database field / logic**: none
 - **Tooltip**: avg bet size turn (deprecated)
+- **Games**: none (shows no data)
+- **Hold'em / Omaha (flop games)**: no data
+- **Stud / Razz**: no data
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
 - **Status**: deprecated
 
 ### Turn Bet Frequency — `bet_frequency_turn`
@@ -1403,6 +1972,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: saw_t (not selected by the HUD queries); street2Bets (not selected by the HUD queries)
 - **Tooltip**: % bet frequency turn
 - **Detailed HUD text**: `bet_freq_turn`
+- **Games**: none: the stat shows no data
+- **Hold'em / Omaha (flop games)**: no data
+- **Stud / Razz**: no data
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
 - **Status**: input-missing
 - **Note**: An input is read under a name the HUD queries do not select, so the value is computed from a missing column. Check the HUD queries before relying on it.
 
@@ -1414,6 +1987,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_t_call_float / cnt_t_face_float × 100`
 - **SQL database field / logic**: cnt_t_face_float = SUM(HudCache.cnt_t_face_float); cnt_t_call_float = SUM(HudCache.cnt_t_call_float)
 - **Tooltip**: % calling facing the turn barrel, having called the flop c-bet in position
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
 ### Call vs Turn 3-Bet — `call_vs_turn_3bet`
@@ -1424,6 +2001,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_t_call_3bet / cnt_t_face_3bet × 100`
 - **SQL database field / logic**: cnt_t_face_3bet = SUM(HudCache.cnt_t_face_3bet); cnt_t_call_3bet = SUM(HudCache.cnt_t_call_3bet)
 - **Tooltip**: % calling facing a turn 3-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs Turn 4-Bet — `call_vs_turn_4bet`
 
@@ -1433,6 +2014,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_t_call_4bet / cnt_t_face_4bet × 100`
 - **SQL database field / logic**: cnt_t_face_4bet = SUM(HudCache.cnt_t_face_4bet); cnt_t_call_4bet = SUM(HudCache.cnt_t_call_4bet)
 - **Tooltip**: % calling facing a turn 4-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs Turn C-Bet — `call_vs_turn_cbet`
 
@@ -1442,6 +2027,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_t_call_cbet / cnt_t_face_cbet × 100`
 - **SQL database field / logic**: cnt_t_face_cbet = SUM(HudCache.cnt_t_face_cbet); cnt_t_call_cbet = SUM(HudCache.cnt_t_call_cbet)
 - **Tooltip**: % calling facing a turn c-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs Turn Donk Bet — `call_vs_turn_donk`
 
@@ -1451,6 +2040,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_t_call_donk / cnt_t_face_donk × 100`
 - **SQL database field / logic**: cnt_t_face_donk = SUM(HudCache.cnt_t_face_donk); cnt_t_call_donk = SUM(HudCache.cnt_t_call_donk)
 - **Tooltip**: % calling facing a turn donk bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
 ### Turn Continuation Bet — `cb2`
@@ -1462,6 +2055,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: cb_opp_2 = SUM(HudCache.street2CBChance); cb_2 = SUM(HudCache.street2CBDone)
 - **Tooltip**: % continuation bet turn/5th street
 - **Detailed HUD text**: `cb_2`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the second draw (triple draw)
 
 ### Continuation bet on the turn. — `cbet_turn`
 
@@ -1469,6 +2066,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Continuation bet on the turn.
 - **Formula (code)**: `100 * street2CBDone / street2CBChance   (aggregate: ratio)`
 - **SQL database field / logic**: inputs (HudCache columns): street2CBDone, street2CBChance
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Declarative stat of stats.d/*.toml, drawn by the HUD like a native one.
 
 ### Turn Check-Raise — `cr2`
@@ -1480,6 +2081,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: ccr_opp_2 = SUM(HudCache.street2CheckCallRaiseChance); cr_2 = SUM(HudCache.street2CheckRaiseDone)
 - **Tooltip**: % check-raise turn/5th street
 - **Detailed HUD text**: `cr_2`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Turn Bet/Raise when not the C-Bettor — `dbr2`
 
@@ -1489,6 +2094,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(aggr_2 − cb_2) / (saw_2 − cb_opp_2) × 100`
 - **SQL database field / logic**: aggr_2 = SUM(HudCache.street2Aggr); cb_2 = SUM(HudCache.street2CBDone); saw_2 = SUM(HudCache.street2Seen); cb_opp_2 = SUM(HudCache.street2CBChance)
 - **Tooltip**: % DonkBetAndRaise turn/5th street
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the second draw (triple draw)
 
 ### Bet the turn after checking the flop as the preflop aggressor. — `delayed_cbet_turn`
 
@@ -1496,6 +2105,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Bet the turn after checking the flop as the preflop aggressor.
 - **Formula (code)**: `100 * street2DelayedCBDone / street2DelayedCBChance   (aggregate: ratio)`
 - **SQL database field / logic**: inputs (HudCache columns): street2DelayedCBDone, street2DelayedCBChance
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Declarative stat of stats.d/*.toml, drawn by the HUD like a native one.
 
 ### Fold to Turn Continuation Bet — `f_cb2`
@@ -1507,6 +2120,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: f_cb_opp_2 = SUM(HudCache.foldToStreet2CBChance); f_cb_2 = SUM(HudCache.foldToStreet2CBDone)
 - **Tooltip**: % fold to continuation bet turn/5th street
 - **Detailed HUD text**: `f_cb_2`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the second draw (triple draw)
 - **Note**: Gives the same value as `fold_to_cbet_turn` (same counters, same formula). The HUD abbreviation `f_cb2` is shared with: `fold_to_cbet_turn`.
 
 ### Fold to Turn Bet/Raise (not a C-Bet) — `f_dbr2`
@@ -1517,6 +2134,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(f_freq_2 − f_cb_2) / (was_raised_2 − f_cb_opp_2) × 100`
 - **SQL database field / logic**: f_freq_2 = SUM(HudCache.foldToOtherRaisedStreet2); f_cb_2 = SUM(HudCache.foldToStreet2CBDone); was_raised_2 = SUM(HudCache.otherRaisedStreet2); f_cb_opp_2 = SUM(HudCache.foldToStreet2CBChance)
 - **Tooltip**: % Fold to DonkBetAndRaise turn
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the second draw (triple draw)
 
 ### Faced a Raise on the Turn — `face_raise_turn`
 
@@ -1526,6 +2147,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `t_face_raise / saw_2 × 100`
 - **SQL database field / logic**: saw_2 = SUM(HudCache.street2Seen); t_face_raise = SUM(HudCache.street2FaceRaise)
 - **Tooltip**: % face raise turn
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the second draw (triple draw)
 
 ### Turn Fold to Bet or Raise — `ffreq2`
 
@@ -1536,6 +2161,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: was_raised_2 = SUM(HudCache.otherRaisedStreet2); f_freq_2 = SUM(HudCache.foldToOtherRaisedStreet2)
 - **Tooltip**: % fold frequency turn/5th street
 - **Detailed HUD text**: `ff_2`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the second draw (triple draw)
 
 ### Turn First Raise — `first_raise_turn`
 
@@ -1545,6 +2174,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `t_first_raise / saw_2 × 100`
 - **SQL database field / logic**: saw_2 = SUM(HudCache.street2Seen); t_first_raise = SUM(HudCache.street2FirstRaise)
 - **Tooltip**: % first raise turn
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the second draw (triple draw)
 
 ### Float Bet Turn — `float_bet`
 
@@ -1554,6 +2187,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `min(street2Bets, opp) / opp × 100 with opp = min(street1InPosition, street1Calls, saw_t)`
 - **SQL database field / logic**: street1InPosition = SUM(HudCache.street1InPosition); street1Calls = SUM(HudCache.street1Calls); saw_t = SUM(HudCache.street2Seen); street2Bets = SUM(HudCache.street2Bets)
 - **Tooltip**: % float bet turn
+- **Games**: none: the stat shows no data
+- **Hold'em / Omaha (flop games)**: no data
+- **Stud / Razz**: no data
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
 - **Status**: input-missing
 - **Note**: An estimate from totals, not the same hands: the opportunities are the smallest of flops in position, flop calls and turns seen. Several inputs use names the HUD queries expose differently (`call_1`, `saw_2`, `bet_2`).
 
@@ -1565,6 +2202,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `float_turn_done / float_turn_chance × 100`
 - **SQL database field / logic**: float_turn_chance = SUM(HudCache.flg_t_float_opp); float_turn_done = SUM(HudCache.flg_t_float)
 - **Tooltip**: % float turn
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Fold vs Turn Barrel after Float — `fold_float_turn`
 
@@ -1574,6 +2215,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_t_face_float − cnt_t_call_float − cnt_t_raise_float) / cnt_t_face_float × 100`
 - **SQL database field / logic**: cnt_t_face_float = SUM(HudCache.cnt_t_face_float); cnt_t_call_float = SUM(HudCache.cnt_t_call_float); cnt_t_raise_float = SUM(HudCache.cnt_t_raise_float)
 - **Tooltip**: % folding facing the turn barrel, having called the flop c-bet in position
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -1586,6 +2231,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: f_cb_opp_2 = SUM(HudCache.foldToStreet2CBChance); f_cb_2 = SUM(HudCache.foldToStreet2CBDone)
 - **Tooltip**: % fold to continuation bet turn/5th street
 - **Detailed HUD text**: `f_cb_2`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the second draw (triple draw)
 - **Note**: Alias: this stat calls `f_cb2` and returns its value unchanged. The HUD abbreviation `f_cb2` is shared with: `f_cb2`.
 
 ### Fold to Turn 3-Bet — `fold_to_three_B_turn`
@@ -1596,6 +2245,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `ft3b / ft3b_opp × 100`
 - **SQL database field / logic**: ft3b_opp = SUM(HudCache.street2_FoldTo3BChance); ft3b = SUM(HudCache.street2_FoldTo3BDone)
 - **Tooltip**: % fold to turn 3bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Turn Fold — `fold_turn`
 
@@ -1605,6 +2258,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `t_fold / saw_2 × 100`
 - **SQL database field / logic**: saw_2 = SUM(HudCache.street2Seen); t_fold = SUM(HudCache.flg_t_fold)
 - **Tooltip**: % fold turn
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Fold vs Turn 3-Bet — `fold_vs_turn_3bet`
 
@@ -1614,6 +2271,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_t_face_3bet − cnt_t_call_3bet − cnt_t_raise_3bet) / cnt_t_face_3bet × 100`
 - **SQL database field / logic**: cnt_t_face_3bet = SUM(HudCache.cnt_t_face_3bet); cnt_t_call_3bet = SUM(HudCache.cnt_t_call_3bet); cnt_t_raise_3bet = SUM(HudCache.cnt_t_raise_3bet)
 - **Tooltip**: % folding facing a turn 3-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
 ### Fold vs Turn 4-Bet — `fold_vs_turn_4bet`
@@ -1624,6 +2285,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_t_face_4bet − cnt_t_call_4bet − cnt_t_raise_4bet) / cnt_t_face_4bet × 100`
 - **SQL database field / logic**: cnt_t_face_4bet = SUM(HudCache.cnt_t_face_4bet); cnt_t_call_4bet = SUM(HudCache.cnt_t_call_4bet); cnt_t_raise_4bet = SUM(HudCache.cnt_t_raise_4bet)
 - **Tooltip**: % folding facing a turn 4-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
 ### Fold vs Turn C-Bet — `fold_vs_turn_cbet`
@@ -1634,6 +2299,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_t_face_cbet − cnt_t_call_cbet − cnt_t_raise_cbet) / cnt_t_face_cbet × 100`
 - **SQL database field / logic**: cnt_t_face_cbet = SUM(HudCache.cnt_t_face_cbet); cnt_t_call_cbet = SUM(HudCache.cnt_t_call_cbet); cnt_t_raise_cbet = SUM(HudCache.cnt_t_raise_cbet)
 - **Tooltip**: % folding facing a turn c-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
 ### Fold vs Turn Donk Bet — `fold_vs_turn_donk`
@@ -1644,6 +2313,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_t_face_donk − cnt_t_call_donk − cnt_t_raise_donk) / cnt_t_face_donk × 100`
 - **SQL database field / logic**: cnt_t_face_donk = SUM(HudCache.cnt_t_face_donk); cnt_t_call_donk = SUM(HudCache.cnt_t_call_donk); cnt_t_raise_donk = SUM(HudCache.cnt_t_raise_donk)
 - **Tooltip**: % folding facing a turn donk bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -1655,6 +2328,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `tn4b / tn4b_opp × 100`
 - **SQL database field / logic**: tn4b_opp = SUM(HudCache.street2_4BChance); tn4b = SUM(HudCache.street2_4BDone)
 - **Tooltip**: % 4 bet turn
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the second draw (triple draw)
 
 ### Turn Open (first bet) — `open_turn`
 
@@ -1664,6 +2341,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `tnopen / tnopen_opp × 100`
 - **SQL database field / logic**: tnopen_opp = SUM(HudCache.street2OpenChance); tnopen = SUM(HudCache.street2OpenDone)
 - **Tooltip**: % open turn
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the second draw (triple draw)
 
 ### Turn Probe Bet — `probe_bet_turn`
 
@@ -1673,6 +2354,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `min(street2Bets, saw_t − cb_2) / (saw_t − cb_2) × 100`
 - **SQL database field / logic**: saw_t = SUM(HudCache.street2Seen); cb_2 = SUM(HudCache.street2CBDone); street2Bets = SUM(HudCache.street2Bets)
 - **Tooltip**: % probe bet turn
+- **Games**: none: the stat shows no data
+- **Hold'em / Omaha (flop games)**: no data
+- **Stud / Razz**: no data
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
 - **Status**: input-missing
 - **Note**: Turn probe. The HUD queries name the turn-seen count `saw_2` and the bet count `bet_2`, not the keys this stat reads.
 
@@ -1682,6 +2367,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Bet the turn (as non-aggressor) after the preflop raiser checked the flop.
 - **Formula (code)**: `100 * street2ProbeDone / street2ProbeChance   (aggregate: ratio)`
 - **SQL database field / logic**: inputs (HudCache columns): street2ProbeDone, street2ProbeChance
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Declarative stat of stats.d/*.toml, drawn by the HUD like a native one.
 
 ### Raise vs Turn Barrel after Float — `raise_float_turn`
@@ -1692,6 +2381,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_t_raise_float / cnt_t_face_float × 100`
 - **SQL database field / logic**: cnt_t_face_float = SUM(HudCache.cnt_t_face_float); cnt_t_raise_float = SUM(HudCache.cnt_t_raise_float)
 - **Tooltip**: % raising facing the turn barrel, having called the flop c-bet in position
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
 ### Turn Raise Frequency — `raise_frequency_turn`
@@ -1703,6 +2396,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: saw_t (not selected by the HUD queries); street2Raises (not selected by the HUD queries)
 - **Tooltip**: % raise frequency turn
 - **Detailed HUD text**: `raise_freq_turn`
+- **Games**: none: the stat shows no data
+- **Hold'em / Omaha (flop games)**: no data
+- **Stud / Razz**: no data
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
 - **Status**: input-missing
 - **Note**: An input is read under a name the HUD queries do not select, so the value is computed from a missing column. Check the HUD queries before relying on it.
 
@@ -1714,6 +2411,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_t_raise_3bet / cnt_t_face_3bet × 100`
 - **SQL database field / logic**: cnt_t_face_3bet = SUM(HudCache.cnt_t_face_3bet); cnt_t_raise_3bet = SUM(HudCache.cnt_t_raise_3bet)
 - **Tooltip**: % raising facing a turn 3-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs Turn 4-Bet — `raise_vs_turn_4bet`
 
@@ -1723,6 +2424,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_t_raise_4bet / cnt_t_face_4bet × 100`
 - **SQL database field / logic**: cnt_t_face_4bet = SUM(HudCache.cnt_t_face_4bet); cnt_t_raise_4bet = SUM(HudCache.cnt_t_raise_4bet)
 - **Tooltip**: % raising facing a turn 4-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs Turn C-Bet — `raise_vs_turn_cbet`
 
@@ -1732,6 +2437,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_t_raise_cbet / cnt_t_face_cbet × 100`
 - **SQL database field / logic**: cnt_t_face_cbet = SUM(HudCache.cnt_t_face_cbet); cnt_t_raise_cbet = SUM(HudCache.cnt_t_raise_cbet)
 - **Tooltip**: % raising facing a turn c-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs Turn Donk Bet — `raise_vs_turn_donk`
 
@@ -1741,6 +2450,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_t_raise_donk / cnt_t_face_donk × 100`
 - **SQL database field / logic**: cnt_t_face_donk = SUM(HudCache.cnt_t_face_donk); cnt_t_raise_donk = SUM(HudCache.cnt_t_raise_donk)
 - **Tooltip**: % raising facing a turn donk bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
 ### Price of Turn Raise Faced — `t_2bet_facing`
@@ -1751,6 +2464,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(t_2bet_facing_bp / t_2bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: t_2bet_facing_cnt = SUM(HudCache.cnt_t_2bet_facing); t_2bet_facing_bp = SUM(HudCache.val_t_2bet_facing_bp)
 - **Tooltip**: avg turn 2bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_postflop_raise_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -1762,6 +2479,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(t_3bet_facing_bp / t_3bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: t_3bet_facing_cnt = SUM(HudCache.cnt_t_3bet_facing); t_3bet_facing_bp = SUM(HudCache.val_t_3bet_facing_bp)
 - **Tooltip**: avg turn 3bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
 ### Price of Turn 4-Bet Faced — `t_4bet_facing`
@@ -1772,6 +2493,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(t_4bet_facing_bp / t_4bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: t_4bet_facing_cnt = SUM(HudCache.cnt_t_4bet_facing); t_4bet_facing_bp = SUM(HudCache.val_t_4bet_facing_bp)
 - **Tooltip**: avg turn 4bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
 ### Price of Turn Bet Faced — `t_bet_facing`
@@ -1782,6 +2507,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(t_bet_facing_bp / t_bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: t_bet_facing_cnt = SUM(HudCache.cnt_t_bet_facing); t_bet_facing_bp = SUM(HudCache.val_t_bet_facing_bp)
 - **Tooltip**: avg turn bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_turn_river_bet_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -1793,6 +2522,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(t_bet_made_bp / t_bet_made_cnt) / 10 000 × 100`
 - **SQL database field / logic**: t_bet_made_cnt = SUM(HudCache.cnt_t_bet_made); t_bet_made_bp = SUM(HudCache.val_t_bet_made_bp)
 - **Tooltip**: avg turn bet made (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_made.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -1804,6 +2537,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(t_raise_facing_bp / t_raise_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: t_raise_facing_cnt = SUM(HudCache.cnt_t_raise_facing); t_raise_facing_bp = SUM(HudCache.val_t_raise_facing_bp)
 - **Tooltip**: avg turn raise faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
 ### Average Turn Raise Size — `t_raise_made`
@@ -1814,6 +2551,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(t_raise_made_bp / t_raise_made_cnt) / 10 000 × 100`
 - **SQL database field / logic**: t_raise_made_cnt = SUM(HudCache.cnt_t_raise_made); t_raise_made_bp = SUM(HudCache.val_t_raise_made_bp)
 - **Tooltip**: avg turn raise made (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
 ### Average Turn Raise Size (2nd raise) — `t_raise_made_2`
@@ -1824,6 +2565,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(t_raise_made_2_bp / t_raise_made_2_cnt) / 10 000 × 100`
 - **SQL database field / logic**: t_raise_made_2_cnt = SUM(HudCache.cnt_t_raise_made_2); t_raise_made_2_bp = SUM(HudCache.val_t_raise_made_2_bp)
 - **Tooltip**: avg 2nd turn raise made (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
 ### Turn Stack-to-Pot Ratio — `t_spr`
@@ -1834,6 +2579,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `0.01 × t_spr_val / t_spr_cnt`
 - **SQL database field / logic**: t_spr_cnt = SUM(HudCache.cnt_t_spr); t_spr_val = SUM(HudCache.val_t_spr)
 - **Tooltip**: avg turn SPR
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Turn 3-Bet — `three_B_turn`
 
@@ -1843,6 +2592,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `tn3b / tn3b_opp × 100`
 - **SQL database field / logic**: tn3b_opp = SUM(HudCache.street2_3BChance); tn3b = SUM(HudCache.street2_3BDone)
 - **Tooltip**: % 3 bet turn
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: yes, on 5th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the second draw (triple draw)
 - **PT4 derivation tests**: `test_calc_3bet_postflop.py`
 
 ## River / 6th street
@@ -1856,6 +2609,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: saw_3 = SUM(HudCache.street3Seen); aggr_3 = SUM(HudCache.street3Aggr)
 - **Tooltip**: Aggression frequency river/6th street
 - **Detailed HUD text**: `a_fq_3`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: yes, on 6th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the third draw (triple draw)
 - **XML titles**: `RvAFq`
 
 ### Average Bet Size River (deprecated) — `avg_bet_size_river`
@@ -1865,6 +2622,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `no data (deprecated); see `r_bet_made``
 - **SQL database field / logic**: none
 - **Tooltip**: avg bet size river (deprecated)
+- **Games**: none (shows no data)
+- **Hold'em / Omaha (flop games)**: no data
+- **Stud / Razz**: no data
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
 - **Status**: deprecated
 
 ### Call vs River Barrel after Float — `call_float_river`
@@ -1875,6 +2636,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_r_call_float / cnt_r_face_float × 100`
 - **SQL database field / logic**: cnt_r_face_float = SUM(HudCache.cnt_r_face_float); cnt_r_call_float = SUM(HudCache.cnt_r_call_float)
 - **Tooltip**: % calling facing the river barrel, having called the turn bet in position
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
 ### Call vs River 3-Bet — `call_vs_river_3bet`
@@ -1885,6 +2650,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_r_call_3bet / cnt_r_face_3bet × 100`
 - **SQL database field / logic**: cnt_r_face_3bet = SUM(HudCache.cnt_r_face_3bet); cnt_r_call_3bet = SUM(HudCache.cnt_r_call_3bet)
 - **Tooltip**: % calling facing a river 3-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs River 4-Bet — `call_vs_river_4bet`
 
@@ -1894,6 +2663,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_r_call_4bet / cnt_r_face_4bet × 100`
 - **SQL database field / logic**: cnt_r_face_4bet = SUM(HudCache.cnt_r_face_4bet); cnt_r_call_4bet = SUM(HudCache.cnt_r_call_4bet)
 - **Tooltip**: % calling facing a river 4-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs River C-Bet — `call_vs_river_cbet`
 
@@ -1903,6 +2676,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_r_call_cbet / cnt_r_face_cbet × 100`
 - **SQL database field / logic**: cnt_r_face_cbet = SUM(HudCache.cnt_r_face_cbet); cnt_r_call_cbet = SUM(HudCache.cnt_r_call_cbet)
 - **Tooltip**: % calling facing a river c-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Call vs River Donk Bet — `call_vs_river_donk`
 
@@ -1912,6 +2689,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_r_call_donk / cnt_r_face_donk × 100`
 - **SQL database field / logic**: cnt_r_face_donk = SUM(HudCache.cnt_r_face_donk); cnt_r_call_donk = SUM(HudCache.cnt_r_call_donk)
 - **Tooltip**: % calling facing a river donk bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### River Continuation Bet — `cb3`
 
@@ -1922,6 +2703,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: cb_opp_3 = SUM(HudCache.street3CBChance); cb_3 = SUM(HudCache.street3CBDone)
 - **Tooltip**: % continuation bet river/6th street
 - **Detailed HUD text**: `cb_3`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: yes, on 6th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the third draw (triple draw)
 
 ### River Check-Raise — `cr3`
 
@@ -1932,6 +2717,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: ccr_opp_3 = SUM(HudCache.street3CheckCallRaiseChance); cr_3 = SUM(HudCache.street3CheckRaiseDone)
 - **Tooltip**: % check-raise river/6th street
 - **Detailed HUD text**: `cr_3`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### River Bet/Raise when not the C-Bettor — `dbr3`
 
@@ -1941,6 +2730,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(aggr_3 − cb_3) / (saw_3 − cb_opp_3) × 100`
 - **SQL database field / logic**: aggr_3 = SUM(HudCache.street3Aggr); cb_3 = SUM(HudCache.street3CBDone); saw_3 = SUM(HudCache.street3Seen); cb_opp_3 = SUM(HudCache.street3CBChance)
 - **Tooltip**: % DonkBetAndRaise river/6th street
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: yes, on 6th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the third draw (triple draw)
 
 ### Fold to River Continuation Bet — `f_cb3`
 
@@ -1951,6 +2744,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: f_cb_opp_3 = SUM(HudCache.foldToStreet3CBChance); f_cb_3 = SUM(HudCache.foldToStreet3CBDone)
 - **Tooltip**: % fold to continuation bet river/6th street
 - **Detailed HUD text**: `f_cb_3`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: yes, on 6th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the third draw (triple draw)
 - **Note**: Gives the same value as `fold_to_cbet_river` (same counters, same formula). The HUD abbreviation `f_cb3` is shared with: `fold_to_cbet_river`.
 
 ### Fold to River Bet/Raise (not a C-Bet) — `f_dbr3`
@@ -1961,6 +2758,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(f_freq_3 − f_cb_3) / (was_raised_3 − f_cb_opp_3) × 100`
 - **SQL database field / logic**: f_freq_3 = SUM(HudCache.foldToOtherRaisedStreet3); f_cb_3 = SUM(HudCache.foldToStreet3CBDone); was_raised_3 = SUM(HudCache.otherRaisedStreet3); f_cb_opp_3 = SUM(HudCache.foldToStreet3CBChance)
 - **Tooltip**: % Fold to DonkBetAndRaise river
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: yes, on 6th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the third draw (triple draw)
 
 ### Faced a Raise on the River — `face_raise_river`
 
@@ -1970,6 +2771,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `r_face_raise / saw_3 × 100`
 - **SQL database field / logic**: saw_3 = SUM(HudCache.street3Seen); r_face_raise = SUM(HudCache.street3FaceRaise)
 - **Tooltip**: % face raise river
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: yes, on 6th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the third draw (triple draw)
 
 ### River Fold to Bet or Raise — `ffreq3`
 
@@ -1980,6 +2785,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: was_raised_3 = SUM(HudCache.otherRaisedStreet3); f_freq_3 = SUM(HudCache.foldToOtherRaisedStreet3)
 - **Tooltip**: % fold frequency river/6th street
 - **Detailed HUD text**: `ff_3`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: yes, on 6th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the third draw (triple draw)
 
 ### River First Raise — `first_raise_river`
 
@@ -1989,6 +2798,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `r_first_raise / saw_3 × 100`
 - **SQL database field / logic**: saw_3 = SUM(HudCache.street3Seen); r_first_raise = SUM(HudCache.street3FirstRaise)
 - **Tooltip**: % first raise river
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: yes, on 6th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the third draw (triple draw)
 
 ### River Float — `float_river`
 
@@ -1998,6 +2811,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `float_river_done / float_river_chance × 100`
 - **SQL database field / logic**: float_river_chance = SUM(HudCache.flg_r_float_opp); float_river_done = SUM(HudCache.flg_r_float)
 - **Tooltip**: % float river
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: yes, on 6th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the third draw (triple draw)
 
 ### Fold vs River Barrel after Float — `fold_float_river`
 
@@ -2007,6 +2824,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_r_face_float − cnt_r_call_float − cnt_r_raise_float) / cnt_r_face_float × 100`
 - **SQL database field / logic**: cnt_r_face_float = SUM(HudCache.cnt_r_face_float); cnt_r_call_float = SUM(HudCache.cnt_r_call_float); cnt_r_raise_float = SUM(HudCache.cnt_r_raise_float)
 - **Tooltip**: % folding facing the river barrel, having called the turn bet in position
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
@@ -2018,6 +2839,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `r_fold / saw_3 × 100`
 - **SQL database field / logic**: saw_3 = SUM(HudCache.street3Seen); r_fold = SUM(HudCache.flg_r_fold)
 - **Tooltip**: % fold river
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: yes, on 6th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the third draw (triple draw)
 
 ### Fold to River Continuation Bet — `fold_to_cbet_river`
 
@@ -2028,6 +2853,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: f_cb_opp_3 = SUM(HudCache.foldToStreet3CBChance); f_cb_3 = SUM(HudCache.foldToStreet3CBDone)
 - **Tooltip**: % fold to continuation bet river/6th street
 - **Detailed HUD text**: `f_cb_3`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: yes, on 6th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the third draw (triple draw)
 - **Note**: Alias: this stat calls `f_cb3` and returns its value unchanged. The HUD abbreviation `f_cb3` is shared with: `f_cb3`.
 
 ### Fold to River 3-Bet — `fold_to_three_B_river`
@@ -2038,6 +2867,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `fr3b / fr3b_opp × 100`
 - **SQL database field / logic**: fr3b_opp = SUM(HudCache.street3_FoldTo3BChance); fr3b = SUM(HudCache.street3_FoldTo3BDone)
 - **Tooltip**: % fold to river 3bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Fold vs River 3-Bet — `fold_vs_river_3bet`
 
@@ -2047,6 +2880,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_r_face_3bet − cnt_r_call_3bet − cnt_r_raise_3bet) / cnt_r_face_3bet × 100`
 - **SQL database field / logic**: cnt_r_face_3bet = SUM(HudCache.cnt_r_face_3bet); cnt_r_call_3bet = SUM(HudCache.cnt_r_call_3bet); cnt_r_raise_3bet = SUM(HudCache.cnt_r_raise_3bet)
 - **Tooltip**: % folding facing a river 3-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
 ### Fold vs River 4-Bet — `fold_vs_river_4bet`
@@ -2057,6 +2894,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_r_face_4bet − cnt_r_call_4bet − cnt_r_raise_4bet) / cnt_r_face_4bet × 100`
 - **SQL database field / logic**: cnt_r_face_4bet = SUM(HudCache.cnt_r_face_4bet); cnt_r_call_4bet = SUM(HudCache.cnt_r_call_4bet); cnt_r_raise_4bet = SUM(HudCache.cnt_r_raise_4bet)
 - **Tooltip**: % folding facing a river 4-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
 ### Fold vs River C-Bet — `fold_vs_river_cbet`
@@ -2067,6 +2908,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_r_face_cbet − cnt_r_call_cbet − cnt_r_raise_cbet) / cnt_r_face_cbet × 100`
 - **SQL database field / logic**: cnt_r_face_cbet = SUM(HudCache.cnt_r_face_cbet); cnt_r_call_cbet = SUM(HudCache.cnt_r_call_cbet); cnt_r_raise_cbet = SUM(HudCache.cnt_r_raise_cbet)
 - **Tooltip**: % folding facing a river c-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
 ### Fold vs River Donk Bet — `fold_vs_river_donk`
@@ -2077,6 +2922,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(cnt_r_face_donk − cnt_r_call_donk − cnt_r_raise_donk) / cnt_r_face_donk × 100`
 - **SQL database field / logic**: cnt_r_face_donk = SUM(HudCache.cnt_r_face_donk); cnt_r_call_donk = SUM(HudCache.cnt_r_call_donk); cnt_r_raise_donk = SUM(HudCache.cnt_r_raise_donk)
 - **Tooltip**: % folding facing a river donk bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
 
 ### River 4-Bet — `four_B_river`
@@ -2087,6 +2936,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `rv4b / rv4b_opp × 100`
 - **SQL database field / logic**: rv4b_opp = SUM(HudCache.street3_4BChance); rv4b = SUM(HudCache.street3_4BDone)
 - **Tooltip**: % 4 bet river
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### River Open (first bet) — `open_river`
 
@@ -2096,6 +2949,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `rvopen / rvopen_opp × 100`
 - **SQL database field / logic**: rvopen_opp = SUM(HudCache.street3OpenChance); rvopen = SUM(HudCache.street3OpenDone)
 - **Tooltip**: % open river
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: yes, on 6th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the third draw (triple draw)
 
 ### River Probe Bet — `probe_bet_river`
 
@@ -2105,6 +2962,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `min(street3Bets, saw_r − cb_3) / (saw_r − cb_3) × 100`
 - **SQL database field / logic**: saw_r = SUM(HudCache.street3Seen); cb_3 = SUM(HudCache.street3CBDone); street3Bets = SUM(HudCache.street3Bets)
 - **Tooltip**: % probe bet river
+- **Games**: none: the stat shows no data
+- **Hold'em / Omaha (flop games)**: no data
+- **Stud / Razz**: no data
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data
 - **Status**: input-missing
 - **Note**: River probe. The HUD queries name the river-seen count `saw_3` and the bet count `bet_3`, not the keys this stat reads.
 
@@ -2116,6 +2977,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(r_2bet_facing_bp / r_2bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: r_2bet_facing_cnt = SUM(HudCache.cnt_r_2bet_facing); r_2bet_facing_bp = SUM(HudCache.val_r_2bet_facing_bp)
 - **Tooltip**: avg river 2bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
 ### Price of River 3-Bet Faced — `r_3bet_facing`
@@ -2126,6 +2991,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(r_3bet_facing_bp / r_3bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: r_3bet_facing_cnt = SUM(HudCache.cnt_r_3bet_facing); r_3bet_facing_bp = SUM(HudCache.val_r_3bet_facing_bp)
 - **Tooltip**: avg river 3bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
 ### Price of River 4-Bet Faced — `r_4bet_facing`
@@ -2136,6 +3005,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(r_4bet_facing_bp / r_4bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: r_4bet_facing_cnt = SUM(HudCache.cnt_r_4bet_facing); r_4bet_facing_bp = SUM(HudCache.val_r_4bet_facing_bp)
 - **Tooltip**: avg river 4bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
 ### Price of River Bet Faced — `r_bet_facing`
@@ -2146,6 +3019,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(r_bet_facing_bp / r_bet_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: r_bet_facing_cnt = SUM(HudCache.cnt_r_bet_facing); r_bet_facing_bp = SUM(HudCache.val_r_bet_facing_bp)
 - **Tooltip**: avg river bet faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_turn_river_bet_facing.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -2157,6 +3034,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(r_bet_made_bp / r_bet_made_cnt) / 10 000 × 100`
 - **SQL database field / logic**: r_bet_made_cnt = SUM(HudCache.cnt_r_bet_made); r_bet_made_bp = SUM(HudCache.val_r_bet_made_bp)
 - **Tooltip**: avg river bet made (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_made.py`
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
@@ -2168,6 +3049,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(r_raise_facing_bp / r_raise_facing_cnt) / 10 000 × 100`
 - **SQL database field / logic**: r_raise_facing_cnt = SUM(HudCache.cnt_r_raise_facing); r_raise_facing_bp = SUM(HudCache.val_r_raise_facing_bp)
 - **Tooltip**: avg river raise faced (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
 ### Average River Raise Size — `r_raise_made`
@@ -2178,6 +3063,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(r_raise_made_bp / r_raise_made_cnt) / 10 000 × 100`
 - **SQL database field / logic**: r_raise_made_cnt = SUM(HudCache.cnt_r_raise_made); r_raise_made_bp = SUM(HudCache.val_r_raise_made_bp)
 - **Tooltip**: avg river raise made (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
 ### Average River Raise Size (2nd raise) — `r_raise_made_2`
@@ -2188,6 +3077,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(r_raise_made_2_bp / r_raise_made_2_cnt) / 10 000 × 100`
 - **SQL database field / logic**: r_raise_made_2_cnt = SUM(HudCache.cnt_r_raise_made_2); r_raise_made_2_bp = SUM(HudCache.val_r_raise_made_2_bp)
 - **Tooltip**: avg 2nd river raise made (% pot)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The numerator is stored in basis points of the pot (10 000 = one pot), so the result is a percentage of the pot.
 
 ### River Stack-to-Pot Ratio — `r_spr`
@@ -2198,6 +3091,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `0.01 × r_spr_val / r_spr_cnt`
 - **SQL database field / logic**: r_spr_cnt = SUM(HudCache.cnt_r_spr); r_spr_val = SUM(HudCache.val_r_spr)
 - **Tooltip**: avg river SPR
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs River Barrel after Float — `raise_float_river`
 
@@ -2207,6 +3104,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_r_raise_float / cnt_r_face_float × 100`
 - **SQL database field / logic**: cnt_r_face_float = SUM(HudCache.cnt_r_face_float); cnt_r_raise_float = SUM(HudCache.cnt_r_raise_float)
 - **Tooltip**: % raising facing the river barrel, having called the turn bet in position
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_action_enum_hud_stats.py`
 
 ### Raise vs River 3-Bet — `raise_vs_river_3bet`
@@ -2217,6 +3118,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_r_raise_3bet / cnt_r_face_3bet × 100`
 - **SQL database field / logic**: cnt_r_face_3bet = SUM(HudCache.cnt_r_face_3bet); cnt_r_raise_3bet = SUM(HudCache.cnt_r_raise_3bet)
 - **Tooltip**: % raising facing a river 3-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs River 4-Bet — `raise_vs_river_4bet`
 
@@ -2226,6 +3131,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_r_raise_4bet / cnt_r_face_4bet × 100`
 - **SQL database field / logic**: cnt_r_face_4bet = SUM(HudCache.cnt_r_face_4bet); cnt_r_raise_4bet = SUM(HudCache.cnt_r_raise_4bet)
 - **Tooltip**: % raising facing a river 4-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs River C-Bet — `raise_vs_river_cbet`
 
@@ -2235,6 +3144,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_r_raise_cbet / cnt_r_face_cbet × 100`
 - **SQL database field / logic**: cnt_r_face_cbet = SUM(HudCache.cnt_r_face_cbet); cnt_r_raise_cbet = SUM(HudCache.cnt_r_raise_cbet)
 - **Tooltip**: % raising facing a river c-bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Raise vs River Donk Bet — `raise_vs_river_donk`
 
@@ -2244,6 +3157,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `cnt_r_raise_donk / cnt_r_face_donk × 100`
 - **SQL database field / logic**: cnt_r_face_donk = SUM(HudCache.cnt_r_face_donk); cnt_r_raise_donk = SUM(HudCache.cnt_r_raise_donk)
 - **Tooltip**: % raising facing a river donk bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### River Call Efficiency — `river_call_efficiency`
 
@@ -2254,6 +3171,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: call_3 = SUM(HudCache.street3Calls); wmsd = SUM(HudCache.wonAtSD)
 - **Tooltip**: River Call Efficiency
 - **Detailed HUD text**: `RiverCallEff`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: yes, on 6th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the third draw (triple draw)
 
 ### River 3-Bet — `three_B_river`
 
@@ -2263,6 +3184,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `rv3b / rv3b_opp × 100`
 - **SQL database field / logic**: rv3b_opp = SUM(HudCache.street3_3BChance); rv3b = SUM(HudCache.street3_3BDone)
 - **Tooltip**: % 3 bet river
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: yes, on 6th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_3bet_postflop.py`
 
 ## 7th street
@@ -2276,6 +3201,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: saw_4 = SUM(HudCache.street4Seen); aggr_4 = SUM(HudCache.street4Aggr)
 - **Tooltip**: Aggression frequency 7th street
 - **Detailed HUD text**: `a_fq_4`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Stud / Razz**: yes, on 7th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### 7Th Street Continuation Bet — `cb4`
 
@@ -2286,6 +3215,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: cb_opp_4 = SUM(HudCache.street4CBChance); cb_4 = SUM(HudCache.street4CBDone)
 - **Tooltip**: % continuation bet 7th street
 - **Detailed HUD text**: `cb_4`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Stud / Razz**: yes, on 7th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### 7Th Street Check-Raise — `cr4`
 
@@ -2296,6 +3229,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: ccr_opp_4 = SUM(HudCache.street4CheckCallRaiseChance); cr_4 = SUM(HudCache.street4CheckRaiseDone)
 - **Tooltip**: % check-raise 7th street
 - **Detailed HUD text**: `cr_4`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Fold to 7Th Street Continuation Bet — `f_cb4`
 
@@ -2306,6 +3243,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: f_cb_opp_4 = SUM(HudCache.foldToStreet4CBChance); f_cb_4 = SUM(HudCache.foldToStreet4CBDone)
 - **Tooltip**: % fold to continuation bet 7th street
 - **Detailed HUD text**: `f_cb_4`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Stud / Razz**: yes, on 7th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### 7Th Street Fold to Bet or Raise — `ffreq4`
 
@@ -2316,6 +3257,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: was_raised_4 = SUM(HudCache.otherRaisedStreet4); f_freq_4 = SUM(HudCache.foldToOtherRaisedStreet4)
 - **Tooltip**: % fold frequency 7th street
 - **Detailed HUD text**: `ff_4`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Stud / Razz**: yes, on 7th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ## Postflop, all streets
 
@@ -2328,6 +3273,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aggr_1 = SUM(HudCache.street1Aggr); aggr_2 = SUM(HudCache.street2Aggr); aggr_3 = SUM(HudCache.street3Aggr); saw_1 = SUM(HudCache.street1Seen); saw_2 = SUM(HudCache.street2Seen); saw_3 = SUM(HudCache.street3Seen)
 - **Tooltip**: Post-flop aggression frequency
 - **Detailed HUD text**: `post_a_fq`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **PT4 equivalent**: Total AFq — `((street1Bets + street1Raises + street2Bets + street2Raises + street3Bets + street3Raises) / (street1Calls + flg_f_fold + street2Calls + flg_t_fold + street3Calls + flg_r_fold + street1Bets + street1Raises + street2Bets + street2Raises + street3Bets + street3Raises)) * 100` (different formula)
 - **PT4 difference**: PT4: flop-to-river bets and raises / (calls + folds + bets + raises), over actions. FPDB: streets with a bet or raise / streets seen, over hands.
 - **PT4 derivation tests**: `test_pt4_adapter.py`
@@ -2342,6 +3291,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aggr_N = SUM(HudCache.streetNAggr); call_N = SUM(HudCache.streetNCalls) for streets 1 to 4 (flop to 7th street)
 - **Tooltip**: Aggression factor
 - **Detailed HUD text**: `agg_fa`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **PT4 equivalent**: Total AF — `(street1Bets + street1Raises + street2Bets + street2Raises + street3Bets + street3Raises) / (street1Calls + street2Calls + street3Calls)` (different formula)
 - **PT4 difference**: PT4 divides every flop, turn and river bet and raise by the calls on those streets. FPDB counts hands with at least one bet or raise on each street (one per street, however many raises) and adds 7th street, over every call.
 - **XML titles**: `AggFac`
@@ -2356,6 +3309,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aggr_N = SUM(HudCache.streetNAggr); call_N = SUM(HudCache.streetNCalls) for streets 1 to 4
 - **Tooltip**: Aggression factor pct
 - **Detailed HUD text**: `agg_fa_pct`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Despite its name the result is a 0..1 fraction (aggression / (aggression + calls)), not multiplied by 100.
 
 ### Continuation Bet (all streets) — `cbet`
@@ -2366,6 +3323,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(Σ cb_1..4) / (Σ cb_opp_1..4) × 100`
 - **SQL database field / logic**: cb_N = SUM(HudCache.streetNCBDone); cb_opp_N = SUM(HudCache.streetNCBChance) for streets 1 to 4
 - **Tooltip**: % continuation bet
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **XML titles**: `ContBet`
 - **Note**: Continuation bet across all four streets pooled; `cb1`..`cb4` give one street each.
 
@@ -2378,6 +3339,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: cr_1 = SUM(HudCache.street1CheckRaiseDone); cr_2 = SUM(HudCache.street2CheckRaiseDone); cr_3 = SUM(HudCache.street3CheckRaiseDone); ccr_opp_1 = SUM(HudCache.street1CheckCallRaiseChance); ccr_opp_2 = SUM(HudCache.street2CheckCallRaiseChance); ccr_opp_3 = SUM(HudCache.street3CheckCallRaiseChance)
 - **Tooltip**: Check-Raise Frequency
 - **Detailed HUD text**: `CheckRaiseFreq`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Fold to All-In — `fold_to_allin`
 
@@ -2387,6 +3352,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `fold_allin / faced_allin × 100`
 - **SQL database field / logic**: faced_allin = SUM(HudCache.flg_faced_allin); fold_allin = SUM(HudCache.flg_fold_to_allin)
 - **Tooltip**: % fold to all-in
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **PT4 derivation tests**: `test_calc_faced_allin.py`
 
 ### Overbet Frequency (fixed) — `overbet_frequency`
@@ -2398,6 +3367,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: street1Bets, street2Bets, street3Bets = SUM(HudCache.streetNBets) (exposed by the HUD queries as bet_1..3)
 - **Tooltip**: % overbet frequency
 - **Detailed HUD text**: `overbet_freq`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Status**: estimate
 - **Note**: Not measured. The function returns a fixed 15 % estimate; it is kept for old layouts.
 
@@ -2410,6 +3383,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: cb_N = SUM(HudCache.streetNCBDone); cb_opp_N = SUM(HudCache.streetNCBChance) for streets 1 to 3
 - **Tooltip**: % triple barrel
 - **Detailed HUD text**: `triple_barrel`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: An estimate: the product of the three street c-bet rates, assuming the streets are independent. It does not follow the same hands through the three streets.
 
 ## Results and showdown
@@ -2422,6 +3399,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `0.01 × amt_bet_f / n`
 - **SQL database field / logic**: n = SUM(HudCache.n); amt_bet_f = SUM(HudCache.amt_bet_f)
 - **Tooltip**: avg flop invested
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); amounts are tournament chips there, not money
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`
 
 ### Average Preflop Investment — `amt_bet_p`
@@ -2432,6 +3413,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `0.01 × amt_bet_p / n`
 - **SQL database field / logic**: n = SUM(HudCache.n); amt_bet_p = SUM(HudCache.amt_bet_p)
 - **Tooltip**: avg preflop invested
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); amounts are tournament chips there, not money
+- **Hold'em / Omaha (flop games)**: yes, preflop
+- **Stud / Razz**: yes, on 3rd street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, before the first draw
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`
 
 ### Average River Investment — `amt_bet_r`
@@ -2442,6 +3427,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `0.01 × amt_bet_r / n`
 - **SQL database field / logic**: n = SUM(HudCache.n); amt_bet_r = SUM(HudCache.amt_bet_r)
 - **Tooltip**: avg river invested
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); amounts are tournament chips there, not money
+- **Hold'em / Omaha (flop games)**: yes, on the river
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`
 
 ### Average Turn Investment — `amt_bet_t`
@@ -2452,6 +3441,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `0.01 × amt_bet_t / n`
 - **SQL database field / logic**: n = SUM(HudCache.n); amt_bet_t = SUM(HudCache.amt_bet_t)
 - **Tooltip**: avg turn invested
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); amounts are tournament chips there, not money
+- **Hold'em / Omaha (flop games)**: yes, on the turn
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`
 
 ### Average Total Investment — `amt_bet_ttl`
@@ -2462,6 +3455,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `0.01 × amt_bet_ttl / n`
 - **SQL database field / logic**: n = SUM(HudCache.n); amt_bet_ttl = SUM(HudCache.amt_bet_ttl)
 - **Tooltip**: avg total invested
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); amounts are tournament chips there, not money
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **PT4 derivation tests**: `test_calc_bet_sizing_extra.py`
 
 ### Big Bets per 100 Hands — `BBper100`
@@ -2472,6 +3469,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `50 × net / bigblind   (net in cents, bigblind = Σ big blind × hands)`
 - **SQL database field / logic**: net = SUM(HudCache.totalProfit); bigblind = SUM(Gametypes.bigblind * HudCache.n)
 - **Tooltip**: Big bets won per 100 hands
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); amounts are tournament chips there, not money
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Big *bets* per 100 hands: the 50 factor counts a big bet as two big blinds. `bbper100` is the big-blind version.
 
 ### Big Blinds per 100 Hands — `bbper100`
@@ -2482,6 +3483,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `100 × net / bigblind   (net in cents, bigblind = Σ big blind × hands)`
 - **SQL database field / logic**: net = SUM(HudCache.totalProfit); bigblind = SUM(Gametypes.bigblind * HudCache.n)
 - **Tooltip**: Big blinds won per 100 hands
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); amounts are tournament chips there, not money
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Big blinds won per 100 hands.
 
 ### Won Without Showdown — `non_sd_winrate`
@@ -2492,6 +3497,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `(w_w_s_1 − wmsd) / (saw_f − sd) × 100`
 - **SQL database field / logic**: saw_f = SUM(HudCache.street1Seen); sd = SUM(HudCache.sawShowdown); w_w_s_1 = SUM(HudCache.wonWhenSeenStreet1); wmsd = SUM(HudCache.wonAtSD)
 - **Tooltip**: % non-showdown winrate
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 
 ### Profit per Hand — `profit100`
@@ -2503,6 +3512,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: net = SUM(HudCache.totalProfit); n = SUM(HudCache.n)
 - **Tooltip**: Profit per 100 hands
 - **Detailed HUD text**: `p/100`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); amounts are tournament chips there, not money
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: The label says per 100 hands but the formula is the average profit per hand, in cents. The HUD abbreviation `p` is shared with: `pfr`, `playerprofile`.
 
 ### Saw Flop — `saw_f`
@@ -2514,6 +3527,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: saw_f = SUM(HudCache.street1Seen); n = SUM(HudCache.n)
 - **Tooltip**: Flop/4th street seen %
 - **Detailed HUD text**: `saw_f`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 - **XML titles**: `Saw_F`
 
@@ -2526,17 +3543,25 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: sd = SUM(HudCache.sawShowdown); wmsd = SUM(HudCache.wonAtSD)
 - **Tooltip**: % showdown winrate
 - **Detailed HUD text**: `showdown_winrate`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Gives the same value as `wmsd` (same counters, same formula).
 
 ### Total Profit — `totalprofit`
 
 - **HUD abbreviation**: `tp`
-- **Description**: The player's total profit over the aggregated hands, in the game's currency.
-- **Formula**: Sum of profit in cents / 100, in the game's currency
+- **Description**: The player's total profit over the aggregated hands. It is always formatted as US dollars: the HUD query does not select the game's currency. In tournaments the amount is chips.
+- **Formula**: Sum of profit in cents / 100, formatted as USD
 - **Formula (code)**: `net / 100, formatted with the game's currency`
-- **SQL database field / logic**: net = SUM(HudCache.totalProfit); currency = the game type's currency
+- **SQL database field / logic**: net = SUM(HudCache.totalProfit); currency is not selected by the HUD queries, so the USD default is used
 - **Tooltip**: Total Profit
 - **Detailed HUD text**: `tot_prof`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); amounts are tournament chips there, not money
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### Won Money at Showdown (W$SD) — `wmsd`
 
@@ -2547,6 +3572,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: sd = SUM(HudCache.sawShowdown); wmsd = SUM(HudCache.wonAtSD)
 - **Tooltip**: % won some money at showdown
 - **Detailed HUD text**: `wmsd`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **PT4 equivalent**: WSD — `(wonAtSD / sawShowdown) * 100` (same formula)
 - **XML titles**: `W$SD`
 - **Note**: Gives the same value as `sd_winrate` (same counters, same formula). The HUD abbreviation `w` is shared with: `wtsd`.
@@ -2560,6 +3589,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: saw_1 = SUM(HudCache.street1Seen); w_w_s_1 = SUM(HudCache.wonWhenSeenStreet1)
 - **Tooltip**: % won money when seen flop/4th street
 - **Detailed HUD text**: `w_w_f`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 - **XML titles**: `W$wsF`
 - **Note**: Gives the same value as `wwsf` (same counters, same formula). The HUD abbreviation `wf` is shared with: `wwsf`.
@@ -2570,6 +3603,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Won money at showdown.
 - **Formula (code)**: `100 * wonAtSD / sawShowdown   (aggregate: ratio)`
 - **SQL database field / logic**: inputs (HudCache columns): wonAtSD, sawShowdown
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Declarative stat of stats.d/*.toml, drawn by the HUD like a native one.
 
 ### Went to Showdown (WTSD) — `wtsd`
@@ -2581,6 +3618,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: saw_f = SUM(HudCache.street1Seen); sd = SUM(HudCache.sawShowdown)
 - **Tooltip**: % went to showdown when seen flop/4th street
 - **Detailed HUD text**: `wtsd`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 equivalent**: WTSD — `(sawShowdown / street1Seen) * 100` (same formula)
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 - **XML titles**: `WtSDwsF`
@@ -2595,6 +3636,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: saw_1 = SUM(HudCache.street1Seen); w_w_s_1 = SUM(HudCache.wonWhenSeenStreet1)
 - **Tooltip**: % won money when seen flop/4th street
 - **Detailed HUD text**: `w_w_f`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes, on the flop
+- **Stud / Razz**: yes, on 4th street
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes, after the first draw
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 - **Note**: Alias: this stat calls `WMsF` and returns its value unchanged. The HUD abbreviation `wf` is shared with: `WMsF`.
 
@@ -2609,6 +3654,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: not a HudCache aggregate: reconstructed from the hand being displayed (Hand object)
 - **Tooltip**: bb stack
 - **Detailed HUD text**: `vpip`
+- **Games**: Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); computed in cash games too, where it means less
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Last-hand value, not aggregated over the history. The HUD abbreviation `v` is shared with: `vpip`.
 
 ### Bounty — `bounty`
@@ -2618,6 +3667,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `the player's current bounty after the last hand`
 - **SQL database field / logic**: not a HudCache aggregate: read from the hand being displayed (Hand object)
 - **Tooltip**: bounty (last hand)
+- **Games**: Knockout (bounty) tournaments
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Knockout tournaments only.
 
 ### Chips the player was expected to win at all-in, 3-handed in the big blind. — `chipev_3h_bb`
@@ -2626,6 +3679,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Chips the player was expected to win at all-in, 3-handed in the big blind.
 - **Formula (code)**: `allInEV / 100.0   (aggregate: sum)`
 - **SQL database field / logic**: inputs (HudCache columns): allInEV
+- **Games**: Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Declarative stat of stats.d/*.toml, drawn by the HUD like a native one.
 
 ### Chips the player was expected to win at all-in, 3-handed on the button. — `chipev_3h_btn`
@@ -2634,6 +3691,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Chips the player was expected to win at all-in, 3-handed on the button.
 - **Formula (code)**: `allInEV / 100.0   (aggregate: sum)`
 - **SQL database field / logic**: inputs (HudCache columns): allInEV
+- **Games**: Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Declarative stat of stats.d/*.toml, drawn by the HUD like a native one.
 
 ### Chips the player was expected to win at all-in, 3-handed in the small blind. — `chipev_3h_sb`
@@ -2642,6 +3703,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Chips the player was expected to win at all-in, 3-handed in the small blind.
 - **Formula (code)**: `allInEV / 100.0   (aggregate: sum)`
 - **SQL database field / logic**: inputs (HudCache columns): allInEV
+- **Games**: Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Declarative stat of stats.d/*.toml, drawn by the HUD like a native one.
 
 ### Chips the player was expected to win at all-in, heads-up in the big blind. — `chipev_hu_bb`
@@ -2650,6 +3715,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Chips the player was expected to win at all-in, heads-up in the big blind.
 - **Formula (code)**: `allInEV / 100.0   (aggregate: sum)`
 - **SQL database field / logic**: inputs (HudCache columns): allInEV
+- **Games**: Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Declarative stat of stats.d/*.toml, drawn by the HUD like a native one.
 
 ### Chips the player was expected to win at all-in, heads-up in the small blind (button). — `chipev_hu_sb`
@@ -2658,6 +3727,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Chips the player was expected to win at all-in, heads-up in the small blind (button).
 - **Formula (code)**: `allInEV / 100.0   (aggregate: sum)`
 - **SQL database field / logic**: inputs (HudCache columns): allInEV
+- **Games**: Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Declarative stat of stats.d/*.toml, drawn by the HUD like a native one.
 
 ### Average all-in chip EV per tournament. — `chipev_tourney`
@@ -2666,6 +3739,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Average all-in chip EV per tournament.
 - **Formula (code)**: `allInEV / 100.0 / cnt_tourneys   (aggregate: sum)`
 - **SQL database field / logic**: inputs (HudCache columns): allInEV, cnt_tourneys
+- **Games**: Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Declarative stat of stats.d/*.toml, drawn by the HUD like a native one.
 
 ### Covers — `covers`
@@ -2675,6 +3752,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `compares the player's end stack with the hero's: +1 you cover, −1 covers you, 0 even`
 - **SQL database field / logic**: not a HudCache aggregate: read from the hand being displayed (Hand object)
 - **Tooltip**: who covers whom (last hand)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 
 ### M Ratio — `m_ratio`
 
@@ -2684,6 +3765,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `end stack / (antes + blinds posted in the hand + small blind + big blind)`
 - **SQL database field / logic**: not a HudCache aggregate: reconstructed from the hand being displayed (Hand object)
 - **Tooltip**: M ratio
+- **Games**: Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both); computed in cash games too, where it means less
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Last-hand value, not aggregated over the history.
 
 ### Stack — `stack_amount`
@@ -2693,6 +3778,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `reconstructed stack of the player, in the table's currency`
 - **SQL database field / logic**: not a HudCache aggregate: reconstructed from the hand being displayed (Hand object)
 - **Tooltip**: stack (last hand)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Last-hand value. The HUD abbreviation `stack` is shared with: `stack_native_bb`.
 
 ### Stack (bb) — `stack_bb`
@@ -2703,6 +3792,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `reconstructed stack / big blind`
 - **SQL database field / logic**: not a HudCache aggregate: reconstructed from the hand being displayed (Hand object)
 - **Tooltip**: stack in bb (last hand)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Last-hand value.
 
 ### Stack and Stack (bb) — `stack_native_bb`
@@ -2713,6 +3806,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Formula (code)**: `reconstructed stack, followed by the stack / big blind`
 - **SQL database field / logic**: not a HudCache aggregate: reconstructed from the hand being displayed (Hand object)
 - **Tooltip**: stack and bb stack (last hand)
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Last-hand value. The HUD abbreviation `stack` is shared with: `stack_amount`.
 
 ## All-in or Fold
@@ -2726,6 +3823,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: vpip_opp = SUM(HudCache.street0VPIChance); vpip = SUM(HudCache.street0VPI)
 - **Tooltip**: % all-in on the single All-in or Fold decision
 - **Detailed HUD text**: `all-in`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 - **Note**: Gives the same value as `vpip` (same counters, same formula).
 
@@ -2738,6 +3839,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs = SUM(case when d.decision='allin' and d.cardsObservable=TRUE then 1 else 0 end); aof_big_wrap13 = SUM(case when d.decision='allin' and d.cardsObservable=TRUE and d.straightOuts>=13 then 1 else 0 end)
 - **Tooltip**: % of observable all-ins with at least thirteen straight outs
 - **Detailed HUD text**: `big wrap 13+ 1/1 100.0%`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Decision EV (bb) — `aof_decision_ev`
 
@@ -2748,6 +3853,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_decision_ev = SUM(case when e.status in ('weak', 'strong', 'uncertain') then 1 else 0 end); aof_decision_ev_bb_ppm = SUM(case when e.status in ('weak', 'strong', 'uncertain') then e.evBbPpm else 0 end)
 - **Tooltip**: average modeled decision EV in big blinds, including fold/call branches; pre-rake until the room supplies a verified rake schedule
 - **Detailed HUD text**: `Decision EV`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with a flush — `aof_flush`
 
@@ -2758,6 +3867,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs = SUM(case when d.decision='allin' and d.cardsObservable=TRUE then 1 else 0 end); aof_flush = SUM(case when d.decision='allin' and d.cardsObservable=TRUE and d.madeHand='a flush' then 1 else 0 end)
 - **Tooltip**: % of observable all-ins classified as flush
 - **Detailed HUD text**: `flush 1/1 100.0%`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Fold (AoF) — `aof_fold`
 
@@ -2768,6 +3881,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: vpip_opp = SUM(HudCache.street0VPIChance); vpip = SUM(HudCache.street0VPI)
 - **Tooltip**: % folded on the single All-in or Fold decision
 - **Detailed HUD text**: `fold`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **PT4 derivation tests**: `test_pt4_adapter.py`
 
 ### All-ins with a full house — `aof_full_house`
@@ -2779,6 +3896,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs = SUM(case when d.decision='allin' and d.cardsObservable=TRUE then 1 else 0 end); aof_full_house = SUM(case when d.decision='allin' and d.cardsObservable=TRUE and d.madeHand='a full house' then 1 else 0 end)
 - **Tooltip**: % of observable all-ins classified as full house
 - **Detailed HUD text**: `full house 1/1 100.0%`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Equity vs Callers — `aof_known_equity`
 
@@ -2789,6 +3910,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_known = SUM(case when a.status='complete' then 1 else 0 end); aof_known_equity_ppm = SUM(case when a.status='complete' then a.equityPpm else 0 end)
 - **Tooltip**: average flop equity against actual callers whose complete cards were captured
 - **Detailed HUD text**: `known-card equity`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### EV vs Callers (bb) — `aof_known_ev`
 
@@ -2799,6 +3924,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_known = SUM(case when a.status='complete' then 1 else 0 end); aof_known_ev_bb_ppm = SUM(case when a.status='complete' then a.evBbPpm else 0 end)
 - **Tooltip**: average EV in BB conditional on the actual callers, using only fully known pockets
 - **Detailed HUD text**: `EV vs actual callers`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with a made hand — `aof_made`
 
@@ -2809,6 +3938,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs = SUM(case when d.decision='allin' and d.cardsObservable=TRUE then 1 else 0 end); aof_made = SUM(case when d.decision='allin' and d.cardsObservable=TRUE and d.madeHand<>'no made hand' then 1 else 0 end)
 - **Tooltip**: % of observable all-ins with a made hand
 - **Detailed HUD text**: `made hand 1/1 100.0%`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with the nut flush draw — `aof_nfd`
 
@@ -2819,6 +3952,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs = SUM(case when d.decision='allin' and d.cardsObservable=TRUE then 1 else 0 end); aof_nfd = SUM(case when d.decision='allin' and d.cardsObservable=TRUE and d.flushDraw='nut flush draw' then 1 else 0 end)
 - **Tooltip**: % of observable all-ins with the nut flush draw
 - **Detailed HUD text**: `nut flush draw 1/1 100.0%`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with no made hand — `aof_no_made`
 
@@ -2829,6 +3966,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs = SUM(case when d.decision='allin' and d.cardsObservable=TRUE then 1 else 0 end); aof_no_made = SUM(case when d.decision='allin' and d.cardsObservable=TRUE and d.madeHand='no made hand' then 1 else 0 end)
 - **Tooltip**: % of observable all-ins with no made hand
 - **Detailed HUD text**: `no made hand 1/1 100.0%`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with a non-nut flush draw — `aof_non_nfd`
 
@@ -2839,6 +3980,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs = SUM(case when d.decision='allin' and d.cardsObservable=TRUE then 1 else 0 end); aof_non_nfd = SUM(case when d.decision='allin' and d.cardsObservable=TRUE and d.flushDraw='non-nut flush draw' then 1 else 0 end)
 - **Tooltip**: % of observable all-ins with a non-nut flush draw
 - **Detailed HUD text**: `non-nut flush draw 1/1 100.0%`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Observed All-ins — `aof_observed`
 
@@ -2849,6 +3994,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs = count of all-or-fold decisions with decision = 'allin' and cardsObservable (sql_queries_aof.py)
 - **Tooltip**: all-ins with complete hole cards and flop captured
 - **Detailed HUD text**: `observed all-ins`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with one pair — `aof_pair`
 
@@ -2859,6 +4008,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs = SUM(case when d.decision='allin' and d.cardsObservable=TRUE then 1 else 0 end); aof_pair = SUM(case when d.decision='allin' and d.cardsObservable=TRUE and d.madeHand='a pair' then 1 else 0 end)
 - **Tooltip**: % of observable all-ins classified as pair
 - **Detailed HUD text**: `pair 1/1 100.0%`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with quads — `aof_quads`
 
@@ -2869,6 +4022,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs = SUM(case when d.decision='allin' and d.cardsObservable=TRUE then 1 else 0 end); aof_quads = SUM(case when d.decision='allin' and d.cardsObservable=TRUE and d.madeHand='quads' then 1 else 0 end)
 - **Tooltip**: % of observable all-ins classified as quads
 - **Detailed HUD text**: `quads 1/1 100.0%`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Equity vs Range — `aof_range_equity`
 
@@ -2879,6 +4036,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_range = SUM(case when r.status='complete' then 1 else 0 end); aof_range_equity_ppm = SUM(case when r.status='complete' then r.equityPpm else 0 end)
 - **Tooltip**: average flop equity against the room/game/role population range; showdown-biased and trained only on earlier hands
 - **Detailed HUD text**: `population-range equity`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Showdowns (AoF) — `aof_showdowns`
 
@@ -2889,6 +4050,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: sd = SUM(HudCache.sawShowdown); n = SUM(HudCache.n)
 - **Tooltip**: hands of this player that reached showdown
 - **Detailed HUD text**: `showdowns`
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: yes
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Hands that reached showdown, not hands whose cards were captured.
 
 ### Splash Share — `aof_splash_freq`
@@ -2900,6 +4065,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_splash_seen = SUM(case when h.splashPot>0 then 1 else 0 end); aof_splash_hit = SUM(case when hp.splashWinnings>0 then 1 else 0 end)
 - **Tooltip**: % of splash hands where the player took a share
 - **Detailed HUD text**: `splash taken`
+- **Games**: Cash tables of rooms that add splash pots
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Splash Collected — `aof_splash_won`
 
@@ -2910,6 +4079,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_splash_cents, aof_splash_seen and aof_splash_hit from sql_queries_aof.py (splash pot winnings)
 - **Tooltip**: amount collected from splash pots
 - **Detailed HUD text**: `splash collected`
+- **Games**: Cash tables of rooms that add splash pots
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: Money the room adds to the pot from outside; read it together with profit.
 
 ### All-ins with a straight — `aof_straight`
@@ -2921,6 +4094,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs = SUM(case when d.decision='allin' and d.cardsObservable=TRUE then 1 else 0 end); aof_straight = SUM(case when d.decision='allin' and d.cardsObservable=TRUE and d.madeHand='a straight' then 1 else 0 end)
 - **Tooltip**: % of observable all-ins classified as straight
 - **Detailed HUD text**: `straight 1/1 100.0%`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The HUD abbreviation `Str` is shared with: `straddle`.
 
 ### All-ins with a straight flush — `aof_straight_flush`
@@ -2932,6 +4109,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs = SUM(case when d.decision='allin' and d.cardsObservable=TRUE then 1 else 0 end); aof_straight_flush = SUM(case when d.decision='allin' and d.cardsObservable=TRUE and d.madeHand='a straight flush' then 1 else 0 end)
 - **Tooltip**: % of observable all-ins classified as straight flush
 - **Detailed HUD text**: `straight flush 1/1 100.0%`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-in Profile — `aof_summary`
 
@@ -2941,6 +4122,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs and one counter per marker (aof_nfd, aof_wrap9, aof_pair…) from sql_queries_aof.py
 - **Tooltip**: what this player shows up with, over observed all-ins
 - **Detailed HUD text**: `NFD×1 W13×1 W9×1 fd×1 3k×1 2p×1 1p×1 air×1 over 1 observed all-ins`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with trips — `aof_trips`
 
@@ -2951,6 +4136,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs = SUM(case when d.decision='allin' and d.cardsObservable=TRUE then 1 else 0 end); aof_trips = SUM(case when d.decision='allin' and d.cardsObservable=TRUE and d.madeHand='trips' then 1 else 0 end)
 - **Tooltip**: % of observable all-ins classified as trips
 - **Detailed HUD text**: `trips 1/1 100.0%`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with two pair — `aof_two_pair`
 
@@ -2961,6 +4150,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs = SUM(case when d.decision='allin' and d.cardsObservable=TRUE then 1 else 0 end); aof_two_pair = SUM(case when d.decision='allin' and d.cardsObservable=TRUE and d.madeHand='two pair' then 1 else 0 end)
 - **Tooltip**: % of observable all-ins classified as two pair
 - **Detailed HUD text**: `two pair 1/1 100.0%`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### Weak All-ins — `aof_weak`
 
@@ -2971,6 +4164,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_decision_ev = SUM(case when e.status in ('weak', 'strong', 'uncertain') then 1 else 0 end); aof_weak = SUM(case when e.status='weak' then 1 else 0 end)
 - **Tooltip**: all-ins whose modeled pre-rake EV is negative even at the upper 95% confidence bound; uncertain and unmodeled decisions are not counted as weak
 - **Detailed HUD text**: `Weak AI`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ### All-ins with at least nine straight outs — `aof_wrap9`
 
@@ -2981,6 +4178,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **SQL database field / logic**: aof_obs = SUM(case when d.decision='allin' and d.cardsObservable=TRUE then 1 else 0 end); aof_wrap9 = SUM(case when d.decision='allin' and d.cardsObservable=TRUE and d.straightOuts>=9 then 1 else 0 end)
 - **Tooltip**: % of observable all-ins with at least nine straight outs
 - **Detailed HUD text**: `wrap 9+ 1/1 100.0%`
+- **Games**: All-in or Fold cash tables (AoF Hold'em and AoF Omaha)
+- **Hold'em / Omaha (flop games)**: yes
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
 ## Other
 
@@ -2990,6 +4191,10 @@ Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are 
 - **Description**: Counts explicit stand-pat and discard decisions for every draw round present in the hand history. Zero means stand pat; unknown discard counts remain in an unknown group.
 - **Formula (code)**: `metric opportunities over the decisions matching the filters`
 - **SQL database field / logic**: analytics engine over the action events (analytics_query): filters {'game_base': ['draw'], 'action_taken': ['discards', 'stands pat']}; grouped by draw_number, cards_drawn
+- **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
+- **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Analytics definition (metric opportunities): a HUD cell shows it only with the data_* attributes the editor writes.
 
 ## Legacy Ring Player Stats columns

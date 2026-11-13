@@ -57,6 +57,7 @@ def _meta_rows(stat: dict) -> list[tuple[str, str]]:
         rows.append(("Legacy XML titles", ", ".join(esc(t) for t in stat["xml_titles"])))
     if stat.get("alias_of"):
         rows.append(("Alias of", f"<code>{esc(stat['alias_of'])}</code>"))
+    rows += [(esc(label), esc(value)) for label, value in _applies_rows(stat)]
     pt4 = stat.get("pt4")
     if pt4:
         rows.append(
@@ -66,6 +67,32 @@ def _meta_rows(stat: dict) -> list[tuple[str, str]]:
             rows.append(("PT4 difference", esc(pt4["note"])))
     if stat.get("pt4_tests"):
         rows.append(("PT4 derivation tests", ", ".join(esc(t) for t in stat["pt4_tests"])))
+    return rows
+
+
+BASE_LABELS = {
+    "hold": "Hold'em / Omaha",
+    "stud": "Stud / Razz",
+    "draw": "Draw",
+}
+
+
+def _applies_rows(stat: dict) -> list[tuple[str, str]]:
+    """Where the stat has data: the game types, then one row per game family."""
+    applies = stat.get("applies") or {}
+    games = applies.get("games") or ["none: the stat shows no data"]
+    rows = [("Games", "; ".join(games))]
+    hands = GUIDE.get("corpus", {}).get("hands", {})
+    for base, label in BASE_LABELS.items():
+        value = applies.get("variants", {}).get(base, "")
+        if not value:
+            count = sum(n for kind, n in hands.items() if kind.endswith(":" + base))
+            value = (
+                "no data"
+                if stat["status"] in ("deprecated", "input-missing")
+                else f"no data (empty on all {count} test hands)"
+            )
+        rows.append((label, value))
     return rows
 
 

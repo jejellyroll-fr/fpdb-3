@@ -125,3 +125,40 @@ def test_cb_ip_and_cb_oop_are_flagged_as_not_split_by_position() -> None:
         assert Stats.do_stat({1: row}, 1, name)[0] == pytest.approx(overall)
         assert _entry(name)["status"] == "estimate"
         assert "cancels" in _entry(name)["note"]
+
+
+def test_every_stat_says_which_games_and_variants_it_applies_to() -> None:
+    for entry in GUIDE["stats"]:
+        assert set(entry["applies"]["variants"]) == {"hold", "stud", "draw"}, entry["name"]
+        if entry["status"] not in ("deprecated", "input-missing"):
+            assert entry["applies"]["games"], entry["name"]
+
+
+def test_street_stats_name_the_street_of_each_game_family() -> None:
+    cb1 = _entry("cb1")["applies"]["variants"]
+    assert cb1 == {"hold": "yes, on the flop", "stud": "yes, on 4th street", "draw": "yes, after the first draw"}
+    assert _entry("vpip")["applies"]["variants"]["stud"] == "yes, on 3rd street"
+    assert _entry("a_freq4")["applies"]["variants"] == {"hold": "", "stud": "yes, on 7th street", "draw": ""}
+
+
+def test_stats_derived_from_flop_game_street_names_have_no_stud_or_draw_data() -> None:
+    # calcBetFacing and calcBetAmounts key on "FLOP": stud and draw hands never fill them.
+    for name in ("f_bet_made", "f_bet_facing", "f_spr", "amt_bet_f"):
+        variants = _entry(name)["applies"]["variants"]
+        assert variants["hold"] and not variants["stud"] and not variants["draw"], name
+
+
+def test_tournament_only_and_variant_only_stats() -> None:
+    chipev = BY_NAME[("registry", "chipev_tourney")]["applies"]["games"]
+    assert len(chipev) == 1 and chipev[0].startswith("Tournaments")
+    assert "MTT and SnG" in chipev[0]
+    starthands = _entry("starthands")["applies"]["variants"]
+    assert starthands["hold"] and not starthands["stud"] and not starthands["draw"]
+    analytics_draw = BY_NAME[("analytics", "draw_decision_distribution")]["applies"]["variants"]
+    assert analytics_draw == {"hold": "", "stud": "", "draw": "yes"}
+
+
+def test_corpus_covers_every_game_family() -> None:
+    hands = GUIDE["corpus"]["hands"]
+    for base in ("hold", "stud", "draw"):
+        assert sum(n for kind, n in hands.items() if kind.endswith(":" + base)) > 100, base

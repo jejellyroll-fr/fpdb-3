@@ -49,7 +49,7 @@ HUD_SQL_FILES = (
 # Keys the HUD query does not select under that name, with what they really are.
 KEY_NOTES: dict[str, str] = {
     "screen_name": "the player's name (p.name)",
-    "currency": "the currency of the game type",
+    "currency": "not selected by the HUD queries: always the USD default",
     "3bet": "not selected by any HUD query: always 0",
 }
 
@@ -266,7 +266,7 @@ OVERRIDES: dict[str, dict[str, str]] = {
     ),
     "totalprofit": dict(
         formula="net / 100, formatted with the game's currency",
-        sql="net = SUM(HudCache.totalProfit); currency = the game type's currency",
+        sql="net = SUM(HudCache.totalProfit); currency is not selected by the HUD queries, so the USD default is used",
     ),
     "n": dict(
         formula="n (hand count; shown as 12.3k from 10 000)",
@@ -385,7 +385,7 @@ def _percent_display(result: tuple[Any, ...]) -> bool:
     return str(result[2]).endswith("%")
 
 
-def _native_entry(name: str, fn: Any, aliases: dict[str, str]) -> dict[str, Any] | None:  # noqa: ANN401, C901
+def _native_entry(name: str, fn: Any, aliases: dict[str, str]) -> dict[str, Any] | None:  # noqa: ANN401, C901, PLR0915
     result, keys = _call(fn, {})
     if not (isinstance(result, tuple) and len(result) > 5 and isinstance(result[5], str)):
         return None
@@ -422,6 +422,7 @@ def _native_entry(name: str, fn: Any, aliases: dict[str, str]) -> dict[str, Any]
             stats_guide_text.words([(1, faced), (-1, called), (-1, raised)], [(1, faced)]) + " × 100"
         )
         entry["signature"] = entry["sql"] + "|" + entry["formula"].replace(faced, "F")
+        entry["_den_sql"] = _fmt_key(faced, aliases)
         return entry
     solved = _solve(fn, keys)
     if solved is None:
@@ -455,6 +456,7 @@ def _native_entry(name: str, fn: Any, aliases: dict[str, str]) -> dict[str, Any]
         else (" / 10 000 × 100" if mult == 1e-4 else ("" if mult == 1 else f" × {mult:g}"))
     )
     entry["formula_words"] = stats_guide_text.words(num_keys, den_keys) + scale
+    entry["_den_sql"] = "; ".join(_fmt_key(k, aliases) for _c, k in den_keys)
     expr = {k: aliases.get(k.lower(), k) for k in keys}
     entry["signature"] = (
         "+".join(f"{c}{expr[k]}" for c, k in num_keys)
@@ -745,6 +747,128 @@ def _add_pt4(entries: list[dict[str, Any]], aliases: dict[str, str]) -> None:
         }
 
 
+# --------------------------------------------------------------------------- #
+# Which games and variants a stat applies to, measured on the test corpus
+# --------------------------------------------------------------------------- #
+
+BASES = ("hold", "stud", "draw")
+
+
+def measure_corpus() -> dict[str, Any]:
+    """Parse every regression hand history and record which HandsPlayers columns get a value.
+
+    The HUD sums these columns per game type, so a column never filled for a game
+    family means the stats built on it show no data there.
+    """
+    import logging  # noqa: PLC0415
+
+    from fpdb_3_legacy.Configuration import Config  # noqa: PLC0415
+    from fpdb_3_legacy.DerivedStats import DerivedStats  # noqa: PLC0415
+    from tests.test_live_parser_regression import CASES  # noqa: PLC0415
+
+    logging.disable(logging.CRITICAL)
+    try:
+        config = Config()
+        columns: dict[str, set[str]] = {base: set() for base in BASES}
+        hands: dict[str, int] = {}
+        categories: dict[str, set[str]] = {base: set() for base in BASES}
+        positions: dict[str, set[str]] = {base: set() for base in BASES}
+        for _key, parser_class, path in CASES:
+            try:
+                parsed = parser_class(config=config, in_path=str(path), autostart=True).getProcessedHands()
+            except Exception:  # noqa: BLE001, S112 - a refused fixture is not a stat question
+                continue
+            for hand in parsed:
+                base = hand.gametype.get("base")
+                if base not in columns:
+                    continue
+                try:
+                    stats = DerivedStats()
+                    stats.getStats(hand)
+                    rows = stats.getHandsPlayers()
+                except Exception:  # noqa: BLE001, S112
+                    continue
+                kind = f"{hand.gametype.get('type')}:{base}"
+                hands[kind] = hands.get(kind, 0) + 1
+                categories[base].add(str(hand.gametype.get("category")))
+                for row in rows.values():
+                    columns[base].update(c for c, v in row.items() if v and not isinstance(v, str))
+                    positions[base].add(str(row.get("position")))
+    finally:
+        logging.disable(logging.NOTSET)
+    return {
+        "columns": {base: sorted(cols) for base, cols in columns.items()},
+        "hands": dict(sorted(hands.items())),
+        "categories": {base: sorted(cats) for base, cats in categories.items()},
+        "positions": {base: sorted(pos) for base, pos in positions.items()},
+    }
+
+
+_STREET_COLUMN = re.compile(r"(?:street|Street|OtherRaisedStreet|otherRaisedStreet|WhenSeenStreet)(\d)")
+
+
+def _street_of(columns: list[str]) -> int | None:
+    numbers = {int(m.group(1)) for c in columns for m in [_STREET_COLUMN.search(c)] if m}
+    if not numbers:
+        letters = {
+            m.group(1) for c in columns for m in [re.match(r"(?:cnt|val|flg|amt|amt_bet)_([pftr])(?:_|$)", c)] if m
+        }
+        if len(letters) == 1:
+            return {"p": 0, "f": 1, "t": 2, "r": 3}[letters.pop()]
+        if any(c == "amt_blind" for c in columns):
+            return 0
+        return None
+    return min(numbers) if len(numbers) == 1 else None
+
+
+# HandsPlayers.position -> the HudCache position bucket (database_caches.storeHudCache).
+_HUD_BUCKET = {"B": "B", "S": "S", "0": "D", "1": "C", "2": "M", "3": "M", "4": "M"}
+
+
+def _columns_in(sql: str) -> list[str]:
+    """HudCache columns an SQL description names; ``streetN`` stands for streets 1 to 4."""
+    found = set()
+    for column in re.findall(r"HudCache\.(\w+)", sql):
+        if "streetN" in column:
+            found.update(column.replace("streetN", f"street{n}") for n in range(1, 5))
+        else:
+            found.add(column)
+    return sorted(found)
+
+
+def _add_applicability(entries: list[dict[str, Any]], corpus: dict[str, Any]) -> None:
+    """Say where each stat has data: every column it reads must be filled for that game family.
+
+    HudCache.n is one per hand everywhere (it is not a HandsPlayers column), and a
+    column for a street a family does not have (7th street outside stud) is left out.
+    """
+    filled = {base: set(cols) | {"n"} for base, cols in corpus["columns"].items()}
+    buckets = {base: {_HUD_BUCKET.get(p, "E") for p in pos} for base, pos in corpus["positions"].items()}
+    last_street = {"hold": 3, "stud": 4, "draw": 3}
+    for entry in entries:
+        entry.pop("_den_sql", None)
+        fixed = stats_guide_text.applies_override(entry["name"], entry["origin"])
+        if fixed is not None:
+            entry["applies"] = fixed
+            continue
+        if entry["status"] in ("input-missing", "deprecated"):
+            entry["applies"] = {"games": [], "variants": dict.fromkeys(BASES, "")}
+            continue
+        columns = _columns_in(entry["sql"])
+        needed_positions = set(re.findall(r"HudCache\.position = '(\w)'", entry["sql"]))
+        street = _street_of(columns)
+        variants = {}
+        for base in BASES:
+            usable = [c for c in columns if not (m := _STREET_COLUMN.search(c)) or int(m.group(1)) <= last_street[base]]
+            if not columns:
+                variants[base] = stats_guide_text.street_label(base, None)
+            elif usable and all(c in filled[base] for c in usable) and needed_positions <= buckets[base]:
+                variants[base] = stats_guide_text.street_label(base, street)
+            else:
+                variants[base] = ""
+        entry["applies"] = {"games": stats_guide_text.games_for(entry), "variants": variants}
+
+
 def build() -> dict[str, Any]:  # noqa: C901
     from fpdb_3_legacy import Stats  # noqa: PLC0415
     from fpdb_3_legacy.modern_hud_preferences import stat_catalog  # noqa: PLC0415
@@ -772,6 +896,8 @@ def build() -> dict[str, Any]:  # noqa: C901
             target["xml_titles"].append(row["xml_title"])
     _add_text_and_aliases(entries)
     _add_pt4(entries, aliases)
+    corpus = measure_corpus()
+    _add_applicability(entries, corpus)
     shared: dict[str, list[str]] = {}
     for entry in entries:
         shared.setdefault(entry["abbr"], []).append(entry["name"])
@@ -787,7 +913,12 @@ def build() -> dict[str, Any]:  # noqa: C901
             e["name"].casefold(),
         )
     )
-    return {"categories": {k: v for k, v in stat_catalog.CATEGORIES.items()}, "stats": entries, "ring_columns": ring}
+    return {
+        "categories": {k: v for k, v in stat_catalog.CATEGORIES.items()},
+        "stats": entries,
+        "ring_columns": ring,
+        "corpus": {"hands": corpus["hands"], "categories": corpus["categories"], "positions": corpus["positions"]},
+    }
 
 
 def _render_module(data: dict[str, Any]) -> str:
@@ -816,6 +947,33 @@ def _render_markdown(data: dict[str, Any]) -> str:  # noqa: C901, PLR0912
         "",
         "Stats installed as user stat packs (`stat_packs`) or custom `stats.d` files are extensible and are **not** listed here.",
         "",
+        "## Games and variants",
+        "",
+        "The HUD sums each player's history per game type: cash and tournament hands are never mixed, nor are",
+        "two variants. Tournaments are one game type whatever their format, so MTT and SnG hands are counted",
+        "together.",
+        "",
+        "The database numbers the betting rounds, and each stat reads one of those numbers. What a round is",
+        "depends on the game family:",
+        "",
+        "| Round in the database | Hold'em / Omaha | Stud / Razz | Draw |",
+        "| --- | --- | --- | --- |",
+        "| 0 | preflop | 3rd street | before the first draw |",
+        "| 1 | flop | 4th street | after the first draw |",
+        "| 2 | turn | 5th street | after the second draw (triple draw only) |",
+        "| 3 | river | 6th street | after the third draw (triple draw only) |",
+        "| 4 | (none) | 7th street | (none) |",
+        "",
+        'So a "flop" stat is a 4th-street stat in stud and an after-the-first-draw stat in draw. Two exceptions:',
+        "5-card stud starts at 2nd street (round 0 = 2nd street), and All-in or Fold Omaha has no preflop round",
+        "(round 0 is its single flop decision).",
+        "",
+        "Whether a stat has data in a family is measured, not assumed: every regression hand history of the",
+        "project is parsed and run through DerivedStats, and a stat applies to a family when all the columns",
+        "it reads get a value there. The corpus: "
+        + ", ".join(f"{n} {kind.replace(':', ' ')}" for kind, n in data["corpus"]["hands"].items())
+        + ' hands. "No data" for a family means those columns stayed empty on every test hand of it.',
+        "",
     ]
     by_category: dict[str, list[dict[str, Any]]] = {}
     for entry in data["stats"]:
@@ -836,6 +994,8 @@ def _render_markdown(data: dict[str, Any]) -> str:  # noqa: C901, PLR0912
                 lines.append(f"- **Tooltip**: {entry['description']}")
             if entry["detail_label"] and entry["detail_label"] != entry["abbr"]:
                 lines.append(f"- **Detailed HUD text**: `{entry['detail_label']}`")
+            for label, value in stats_guide_text.applies_lines(entry, data["corpus"]):
+                lines.append(f"- **{label}**: {value}")
             if entry.get("pt4"):
                 pt4 = entry["pt4"]
                 lines.append(f"- **PT4 equivalent**: {pt4['stat']} — `{pt4['formula']}` ({pt4['parity']})")
