@@ -93,7 +93,8 @@ class CoinPoker(HandHistoryConverter):
         "PLO 6": ("hold", "6_omahahi", "pl"),
     }
 
-    re_identify = re.compile(r"^CoinPoker Hand #\d+:", re.MULTILINE)
+    # IdentifySite decodes as plain UTF-8, so a BOM may precede the first hand.
+    re_identify = re.compile(r"^\ufeff?CoinPoker Hand #\d+:", re.MULTILINE)
     re_SplitHands = re.compile(r"(?:\s?\n){2,}")
 
     re_GameInfo = re.compile(
