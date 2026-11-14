@@ -73,9 +73,9 @@ POKERSTARS_SKIN_IDS = {
 POKERSTARS_PATH_PATTERNS = [
     # Betfair's client writes under %LOCALAPPDATA%\Betfair.UK\HandHistory and
     # \TournSummary. Its histories name no skin, so the folder is what tells
-    # them from PokerStars' own (#733).
-    ("betfair.uk", "PokerStars on Betfair"),
-    ("betfair", "PokerStars on Betfair"),
+    # them from PokerStars' own (#733). Matched as a whole folder name: a
+    # screen name or Windows user containing "Betfair" is not the client.
+    ("/betfair.uk/", "PokerStars on Betfair"),
     ("pokerstars.fr", "PokerStars.FR"),
     ("pokerstars.it", "PokerStars.IT"),
     ("pokerstars.es", "PokerStars.ES"),

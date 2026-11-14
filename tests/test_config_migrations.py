@@ -394,5 +394,11 @@ def test_v95_adds_the_pokerstars_on_betfair_skin():
     assert "Betfair.UK/TournSummary" in betfair.getAttribute("TS_path")
     hhcs = {n.getAttribute("site"): n.getAttribute("summaryImporter") for n in updated.getElementsByTagName("hhc")}
     assert hhcs == {"PokerStars": "PokerStarsSummary", "PokerStars on Betfair": "PokerStarsSummary"}
+    # Before PokerStars' own: IdentifySite keeps the last entry of a converter,
+    # and an Excel summary is filed under it as it is.
+    assert [n.getAttribute("site") for n in updated.getElementsByTagName("hhc")] == [
+        "PokerStars on Betfair",
+        "PokerStars",
+    ]
     assert not reference_errors(updated)
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()

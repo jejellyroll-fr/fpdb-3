@@ -53,8 +53,16 @@ def test_the_betfair_folder_names_the_skin(path: str) -> None:
     assert _parser()._detectSkinByPath(path) == (SKIN, 143)
 
 
-def test_pokerstars_own_folders_are_unchanged() -> None:
-    path = r"C:\Users\alice\AppData\Local\PokerStars.FR\HandHistory\alice\HH.txt"
+@pytest.mark.parametrize(
+    "path",
+    [
+        r"C:\Users\alice\AppData\Local\PokerStars.FR\HandHistory\alice\HH.txt",
+        # "Betfair" in a screen name or a Windows user is not Betfair's client.
+        r"C:\Users\alice\AppData\Local\PokerStars.FR\HandHistory\BetfairGrinder\HH.txt",
+        r"C:\Users\betfair.uk.fan\AppData\Local\PokerStars.FR\HandHistory\alice\HH.txt",
+    ],
+)
+def test_pokerstars_own_folders_are_unchanged(path: str) -> None:
     assert _parser()._detectSkinByPath(path) == ("PokerStars.FR", 33)
 
 

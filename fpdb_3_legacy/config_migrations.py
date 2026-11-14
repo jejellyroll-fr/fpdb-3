@@ -114,12 +114,17 @@ def _child_section(doc, section: str):
     return found[0] if found else None
 
 
-def _add_sites(doc, template, names) -> None:
+def _add_sites(doc, template, names, *, before_same_converter: bool = False) -> None:
     """Give ``doc`` the template's <site> and <hhc> of each room in ``names`` it lacks.
 
     A room the configuration already declares keeps its entry as it is. The
     layout sets the new entry uses come along when the configuration lacks
     them, so the upgrade's reference check still passes.
+
+    ``before_same_converter`` puts a new <hhc> before the first one already
+    naming its converter instead of at the end. IdentifySite keeps one entry
+    per converter class, the last, so a new skin of a converter must not
+    displace the room the configuration already files that converter under.
     """
     for section, tag, key in (("supported_sites", "site", "site_name"), ("hhcs", "hhc", "site")):
         target = _child_section(doc, section)
@@ -129,7 +134,23 @@ def _add_sites(doc, template, names) -> None:
         existing = {node.getAttribute(key) for node in target.getElementsByTagName(tag)}
         for node in source.getElementsByTagName(tag):
             if node.getAttribute(key) in names and node.getAttribute(key) not in existing:
-                target.appendChild(doc.importNode(node, True))
+                imported = doc.importNode(node, True)
+                anchor = (
+                    next(
+                        (
+                            other
+                            for other in target.getElementsByTagName(tag)
+                            if other.getAttribute("converter") == node.getAttribute("converter")
+                        ),
+                        None,
+                    )
+                    if before_same_converter and tag == "hhc"
+                    else None
+                )
+                if anchor is not None:
+                    target.insertBefore(imported, anchor)
+                else:
+                    target.appendChild(imported)
                 existing.add(node.getAttribute(key))
                 _add_missing_layout_sets(doc, template, node)
 
@@ -239,9 +260,12 @@ def _add_sites_94_to_95(doc, template) -> None:
 
     The room is new, so every configuration lacks it: its <site> (off, with
     Betfair's client folders) and its <hhc> on the PokerStars converters come
-    from the template. A configuration that already declares it keeps it.
+    from the template. A configuration that already declares it keeps it. Its
+    <hhc> goes before PokerStars' own, as in the templates, so IdentifySite
+    keeps PokerStars' entry (an Excel summary is filed under that entry as it
+    is).
     """
-    _add_sites(doc, template, SITES_ADDED_IN_95)
+    _add_sites(doc, template, SITES_ADDED_IN_95, before_same_converter=True)
 
 
 def _repair_renamed_references(doc) -> None:
