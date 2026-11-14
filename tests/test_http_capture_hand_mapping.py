@@ -5,8 +5,9 @@ produces into a :class:`Hand`, renders it as text and imports it. The dicts
 under ``data/captured_*.json`` are hands CoinPoker's live capture once built
 (player names anonymised), frozen when that capture was removed (#732): they
 stay what a database written by it holds, and they still exercise the shared
-mapping -- forced straddles, run-it-twice boards, bomb and splash pots, insured
-cash-outs, tournaments, All-in or Fold.
+mapping -- forced straddles, run-it-twice boards, bomb pots, tournaments, All-in
+or Fold. Their splash and cash-out keys are no longer read: only that capture
+set them.
 """
 
 from __future__ import annotations
@@ -178,32 +179,22 @@ def test_run_it_twice_maps_to_hand_boards_and_run_count() -> None:
     assert hand.board["RIVER2"] == ["5s"]
 
 
-def test_bomb_pot_and_splash_map_to_hand_fields() -> None:
-    hand = build_fpdb_hand(_hand_with(bomb_pot=30, splash_pot=4))
+def test_bomb_pot_maps_to_hand_fields() -> None:
+    hand = build_fpdb_hand(_hand_with(bomb_pot=30))
     assert hand.bombPot == 30
-    assert hand.splashPot == 4
-
-
-def test_cashout_maps_to_hand_cashout_fields() -> None:
-    hand = build_fpdb_hand(_hand_with(cashout=[{"player": "Hero", "amount": "0.20", "fee": "0.10"}]))
-    assert hand.cashedOut is True
-    assert hand.isCashOut is True
-    assert hand.cashOutAmounts["Hero"] == Decimal("0.20")
-    assert hand.cashOutFees["Hero"] == Decimal("0.10")
 
 
 def test_derived_stats_encode_multiple_boards_and_pot_flags() -> None:
-    # End-to-end through DerivedStats: a run-it-twice hand with a bomb/splash pot
-    # must yield one encoded board per run plus the scalar pot flags that the
-    # Hand Viewer filters query.
-    hand = build_fpdb_hand(_hand_with(boards=copy.deepcopy(RUN_TWICE), run_it_times=2, bomb_pot=30, splash_pot=4))
+    # End-to-end through DerivedStats: a run-it-twice bomb pot must yield one
+    # encoded board per run plus the scalar pot flag that the Hand Viewer
+    # filters query.
+    hand = build_fpdb_hand(_hand_with(boards=copy.deepcopy(RUN_TWICE), run_it_times=2, bomb_pot=30))
     hand.totalPot()
     hand.assembleHand()
     assert hand.hands["runItTwice"] is True
     assert len(hand.hands["boards"]) == 2
     assert {b[0] for b in hand.hands["boards"]} == {1, 2}
     assert hand.hands["bombPot"] == 30
-    assert hand.hands["splashPot"] == 4
 
 
 def test_replayer_header_marks_bomb_and_splash_pots() -> None:

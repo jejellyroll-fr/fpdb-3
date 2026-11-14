@@ -612,12 +612,15 @@ def _apply_tournament_fields(hand: Any, hand_data: dict[str, Any]) -> None:
 
 
 def _apply_special_hand_fields(hand: Any, hand_data: dict[str, Any]) -> None:
-    """Copy run-it-twice / bomb-pot / splash / cashout data onto the Hand object.
+    """Copy run-it-twice and bomb-pot data onto the Hand object.
 
     The board *cards* are already placed by the operation plan; here we set the
     scalar flags DerivedStats reads at store time. ``runItTimes`` must reflect the
     real number of boards so every board is encoded into the ``Boards`` table,
     whether they come from running it twice or from a bomb-pot double board.
+
+    Splash and EV cash-out keys were set only by CoinPoker's live capture,
+    removed in #732; its text converter sets those Hand fields itself.
     """
     boards = hand_data.get("boards")
     board_count = len(boards) if isinstance(boards, list) else 0
@@ -627,41 +630,6 @@ def _apply_special_hand_fields(hand: Any, hand_data: dict[str, Any]) -> None:
     bomb_pot = hand_data.get("bomb_pot")
     if bomb_pot:
         hand.bombPot = int(bomb_pot)
-
-    splash_pot = hand_data.get("splash_pot")
-    if splash_pot:
-        hand.splashPot = int(splash_pot)
-
-    for entry in hand_data.get("cashout", []) or []:
-        player = entry.get("player")
-        if not player:
-            continue
-        try:
-            amount = Decimal(str(entry.get("amount", "0")))
-            fee = Decimal(str(entry.get("fee", "0")))
-        except (ValueError, ArithmeticError):
-            continue
-        # Added, not replaced. A player insured in a hand with a side pot is
-        # paid once per pot, and assigning kept only the last of them -- the
-        # earlier payouts vanished from their winnings.
-        hand.cashOutAmounts[player] = hand.cashOutAmounts.get(player, Decimal(0)) + amount
-        hand.cashOutFees[player] = hand.cashOutFees.get(player, Decimal(0)) + fee
-        hand.cashedOut = True
-        hand.isCashOut = True
-
-    # Splash money is paid beside the pot, so it travels beside it too: not in
-    # a bet, not in a collection, and never in the rake.
-    for entry in hand_data.get("splash_winnings") or []:
-        player = entry.get("player")
-        if not player:
-            continue
-        try:
-            amount = Decimal(str(entry.get("amount", "0")))
-        except (ValueError, ArithmeticError):
-            continue
-        if not hasattr(hand, "splashWinnings"):
-            hand.splashWinnings = {}
-        hand.splashWinnings[player] = hand.splashWinnings.get(player, Decimal(0)) + amount
 
 
 def render_fpdb_hand(hand: Any) -> str:

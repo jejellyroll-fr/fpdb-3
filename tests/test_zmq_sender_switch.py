@@ -28,7 +28,6 @@ def test_a_disabled_sender_connects_to_nothing_and_sends_nothing(monkeypatch: py
 
     sender = ZMQSender()
     sender.send_hand_id(1)
-    sender.send_live_action({"hand_id": 1})
     sender.close()
 
     context.socket.assert_not_called()
