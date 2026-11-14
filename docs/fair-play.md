@@ -117,10 +117,10 @@ ACR**: their rules prevail and may change.
 | Rule | What it says | What fpdb does | Status |
 | --- | --- | --- | --- |
 | §4.1.3 | HUDs with numeric statistics, only from hands you took part in, nothing from the hand in play | Static HUD only at WPN tables. Its statistics come from completed, imported hands that one of **your configured WPN screen names** played. Any other hand (an imported archive, someone else's history, which names its own hero) is kept but feeds no HUD statistic: not at import, not in session statistics, not when the HUD cache is rebuilt, and a database imported before this rule has its WPN rows refilled once. Without a configured WPN screen name, no WPN hand feeds the HUD | Allowed, enforced |
-| §4.1.5, §4.1.8 | Bankroll and leak tracking; automatic notes from your own hands | Reports and auto-notes after the session | Allowed |
+| §4.1.5, §4.1.8 | Bankroll and leak tracking; automatic notes from your own hands | Reports after the session. Auto-notes are written only from hands one of **your configured WPN screen names** played, like the HUD statistics; the notes a database made from other WPN hands before this rule are removed once (the hands stay) | Allowed, enforced |
 | §4.2.1–4.2.4 | No bots, live recommendations, current-hand odds or real-time ICM/Nash/EV/GTO assistance | fpdb has none at the table: the preflop advisor, ranges and solver tools are post-session study screens, not HUD panels | Not offered |
 | §4.2.5–4.2.6 | No automatic, context-sensitive chart retrieval during play | Dynamic panels, which pick statistics by situation, are off at WPN tables whatever the consent | Off |
-| §4.2.7, §4.2.10 | No mass datamining of hands you did not play; no automated seat selection | fpdb collects nothing itself and has no seating tool; hands you did not play do not reach the HUD | Not offered |
+| §4.2.7, §4.2.10 | No mass datamining of hands you did not play; no automated seat selection | fpdb collects nothing itself and has no seating tool; hands you did not play reach neither the HUD nor the auto-notes | Not offered |
 | §4.2.8 | No hotkeys conditioned on the live situation | fpdb defines no table hotkeys | Not offered |
 | §4.2.11 | Do not alter or cover the client's own table graphics | The HUD draws its own windows beside or over the table; where they sit is up to the layout you choose. Keep them off the client's graphics | Your layout |
 | §4.3.1–4.3.3 | Virtual machines, remote access and some environments are restricted | Outside fpdb's control | Your setup |

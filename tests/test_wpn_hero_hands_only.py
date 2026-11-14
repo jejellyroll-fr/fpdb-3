@@ -13,6 +13,10 @@ Every path that puts statistics in front of the HUD applies the rule:
 * the session statistics, read from ``Hands``/``HandsPlayers`` directly;
 * a database filled before the rule, whose WPN rows are refilled once.
 
+Automatic notes follow the same rule (section 4.1.8 allows them from the
+user's own hands): none is generated from another WPN hand, and the ones a
+database made before the rule are removed once.
+
 The hand in play never reaches the HUD at these tables: their statistics come
 from imported, completed hands, and the WPN policy allows no live context.
 """
@@ -70,8 +74,19 @@ def test_the_spelled_out_ids_are_every_wpn_site() -> None:
         policy._ONLY_THE_USERS_HANDS,
         database_rebuild.REFRESH_WHERE_RING,
         database_rebuild.REFRESH_WHERE_TOUR,
+        database_rebuild.DELETE_OTHERS_AUTONOTES,
+        database_rebuild.DELETE_ALL_HERO_HANDS_ONLY_AUTONOTES,
     ):
         assert f"IN ({policy.WPN_SITE_ID_SQL})" in statement
+
+
+def _always_noted() -> object:
+    from fpdb_3_legacy.AutoNotes import AutoNoteRule
+
+    return AutoNoteRule("probe_719", 1, "Probe", "{player} sat here", lambda *_: True, lambda *_: {})
+
+
+_ALWAYS = _always_noted()
 
 
 def _config(**names: str) -> SimpleNamespace:
@@ -84,6 +99,46 @@ def test_user_names_span_the_whole_network() -> None:
     config = _config(**{"Americas Cardroom": "alice", "BlackChipPoker": "bob", "PokerStars": "carol"})
     assert policy.user_names(config, "WinningPoker") == {"alice", "bob"}
     assert policy.user_names(_config(**{"ACR Poker": "YOUR SCREEN NAME HERE"}), "ACR Poker") == frozenset()
+
+
+@pytest.mark.parametrize(
+    ("hand", "kept"),
+    [
+        # A parsed hand knows its site by name...
+        (SimpleNamespace(sitename="Americas Cardroom", players=[[1, "bob", "1"], [2, "carol", "1"]]), True),
+        (SimpleNamespace(sitename="BlackChipPoker", players=[[1, "alice", "1"], [2, "bob", "1"]]), False),
+        (SimpleNamespace(sitename="PokerStars", players=[[1, "bob", "1"]]), False),
+        # ...a hand rebuilt from the database by its id, as an int or a string.
+        (SimpleNamespace(siteId=24, players=[(1, "bob", 1)]), True),
+        (SimpleNamespace(siteId="116", players=[(1, "alice", 1)]), False),
+        (SimpleNamespace(siteId=2, players=[(1, "bob", 1)]), False),
+        (SimpleNamespace(siteId=None, players=[(1, "bob", 1)]), False),
+    ],
+)
+def test_which_hands_are_kept_from_the_hud(hand, kept) -> None:
+    assert policy.kept_from_hud(hand, _config(**{"Americas Cardroom": "alice"})) is kept
+
+
+def test_without_a_configured_name_every_wpn_hand_is_kept_from_the_hud() -> None:
+    hand = SimpleNamespace(sitename="Americas Cardroom", players=[[1, "alice", "1"]])
+    assert policy.kept_from_hud(hand, None)
+    assert policy.kept_from_hud(hand, _config(**{"PokerStars": "alice"}))
+
+
+def test_no_auto_note_from_someone_elses_wpn_hand() -> None:
+    from fpdb_3_legacy.AutoNotes import generate_for_hand
+
+    def hand(*names: str) -> SimpleNamespace:
+        return SimpleNamespace(
+            sitename="Americas Cardroom",
+            dbid_hands=1,
+            players=[[seat, name, "1"] for seat, name in enumerate(names, start=1)],
+            playerIds={name: seat for seat, name in enumerate(names, start=1)},
+        )
+
+    config = _config(**{"Americas Cardroom": "alice"})
+    assert len(generate_for_hand(hand("alice", "bob"), rules=(_ALWAYS,), config=config)) == 2
+    assert generate_for_hand(hand("bob", "carol"), rules=(_ALWAYS,), config=config) == []
 
 
 def test_the_sql_condition() -> None:
@@ -208,6 +263,7 @@ def importer_for(tmp_path):
 _COUNTS = {
     "Hands": "SELECT COUNT(*) FROM Hands",
     "HudCache": "SELECT COUNT(*) FROM HudCache",
+    "PlayerAutoNotes": "SELECT COUNT(*) FROM PlayerAutoNotes",
 }
 
 
@@ -283,3 +339,70 @@ def test_a_cache_filled_before_the_rule_is_refilled_once(importer_for, monkeypat
     assert _count(importer, "HudCache") > 0
     db.refresh_hero_hands_only_hudcache()
     assert _count(importer, "HudCache") > 0
+
+
+# ---------------------------------------------------------------------------
+# Auto-notes, end to end (section 4.1.8)
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def every_hand_noted(monkeypatch):
+    """A rule that notes every player of every hand, so the import writes notes."""
+    from fpdb_3_legacy import AutoNotes
+
+    rule_set = AutoNotes.AutoNoteRuleSet("probe_719", (_ALWAYS,), lambda _hand: True)
+    monkeypatch.setattr(AutoNotes, "_rule_sets_for_hand", lambda *_args, **_kwargs: (rule_set,))
+
+
+def test_the_users_wpn_hand_gets_auto_notes(importer_for, every_hand_noted) -> None:
+    importer = importer_for(WPN_PLAYER)
+    _import(importer)
+    assert _count(importer, "PlayerAutoNotes") > 0
+
+
+def test_someone_elses_wpn_history_gets_no_auto_notes(importer_for, every_hand_noted) -> None:
+    importer = importer_for("alice")
+    _import(importer)
+    assert _count(importer, "Hands") == 1
+    assert _count(importer, "PlayerAutoNotes") == 0
+
+
+def _notes_from_before_the_rule(importer, patch) -> None:
+    importer.database.get_cursor().execute("DELETE FROM AnalyticsMeta WHERE name = 'autonotes_hero_hands_only_v1'")
+    with patch.context() as before:
+        _rule_off(before)
+        _import(importer)
+    assert _count(importer, "PlayerAutoNotes") > 0
+
+
+def test_auto_notes_from_before_the_rule_are_dropped_once(importer_for, every_hand_noted, monkeypatch) -> None:
+    importer = importer_for("alice")
+    _notes_from_before_the_rule(importer, monkeypatch)
+
+    importer.database.drop_hero_hands_only_autonotes()
+    assert _count(importer, "Hands") == 1
+    assert _count(importer, "PlayerAutoNotes") == 0
+
+    # Once: a note written afterwards is left alone.
+    cursor = importer.database.get_cursor()
+    cursor.execute("SELECT id FROM Hands")
+    hand_id = cursor.fetchone()[0]
+    cursor.execute("SELECT playerId FROM HandsPlayers WHERE handId = ?", (hand_id,))
+    player_id = cursor.fetchone()[0]
+    cursor.execute(
+        "INSERT INTO PlayerAutoNotes (playerId, handId, ruleId, ruleVersion, noteText, evidence)"
+        " VALUES (?, ?, 'probe_719', 2, 'later', '{}')",
+        (player_id, hand_id),
+    )
+    importer.database.drop_hero_hands_only_autonotes()
+    assert _count(importer, "PlayerAutoNotes") == 1
+
+
+def test_the_users_own_auto_notes_survive_the_drop(importer_for, every_hand_noted, monkeypatch) -> None:
+    importer = importer_for(WPN_PLAYER)
+    _notes_from_before_the_rule(importer, monkeypatch)
+    noted = _count(importer, "PlayerAutoNotes")
+
+    importer.database.drop_hero_hands_only_autonotes()
+    assert _count(importer, "PlayerAutoNotes") == noted

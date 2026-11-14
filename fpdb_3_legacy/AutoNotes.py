@@ -90,6 +90,11 @@ def generate_for_hand(
 ) -> list[GeneratedAutoNote]:
     if not autonotes_enabled(config):
         return []
+    # ACR/WPN allow automatic notes from the user's own hands only (§4.1.8, #719).
+    from fpdb_3_legacy.hud_room_policy import kept_from_hud
+
+    if kept_from_hud(hand, config):
+        return []
 
     context = PreflopContext.from_hand(hand)
     selected_rule_sets = _rule_sets_for_hand(

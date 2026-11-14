@@ -258,6 +258,28 @@ def user_names(config: Any, site: str | None) -> frozenset[str]:
     return frozenset(names)
 
 
+def kept_from_hud(hand: Any, config: Any) -> bool:
+    """Whether ``hand`` must feed neither HUD statistics nor auto-notes (#719).
+
+    True for a hand of a room allowing those only from the user's own hands
+    (ACR/WPN) that none of the user's configured screen names played: an
+    imported archive, someone else's history. Such a hand is still stored.
+    ``hand`` is a parsed ``Hand`` (``sitename``) or a hand rebuilt from the
+    database, which knows only its ``siteId``.
+    """
+    site = getattr(hand, "sitename", None)
+    if not site:
+        try:
+            site_id = int(getattr(hand, "siteId", None))  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            site_id = None
+        site = "WinningPoker" if site_id in WPN_SITE_IDS else None
+    if not hero_hands_only(site):
+        return False
+    names = user_names(config, site)
+    return not any(len(player) > 1 and player[1] in names for player in getattr(hand, "players", None) or [])
+
+
 def hero_hands_only_sql(user_ids: Any, hand: str = "h", gametype: str = "g") -> str:
     """A WHERE condition, to append with AND, keeping out the hero-hands-only rooms' other hands.
 
