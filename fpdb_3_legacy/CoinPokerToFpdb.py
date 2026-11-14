@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# The camelCase converter API follows the *ToFpdb convention of every
+# hand-history converter (base-class overrides cannot be renamed).
+# pylint: disable=invalid-name
 """CoinPoker text hand-history converter -- file import only (#732).
 
 CoinPoker's client exports cash-game hand histories in a PokerStars-like text
@@ -96,7 +99,7 @@ class CoinPoker(HandHistoryConverter):
     re_GameInfo = re.compile(
         rf"^CoinPoker Hand #(?P<HID>\d+):\s+(?P<GAME>[A-Za-z]+(?: \d)?)(?P<BOMB> BombPot)?\s+"
         rf"\({_CUR}(?P<SB>{_AMT})/{_CUR}(?P<BB>{_AMT})(?:/{_CUR}(?P<BOMBANTE>{_AMT}))?\)\s+"
-        r"(?P<DATETIME>\d{4}/\d{2}/\d{2} \d{1,2}:\d{2}:\d{2})(?:\s+(?P<TZ>[A-Z]+|[+-]\d{2}(?::?\d{2})?))?",
+        r"(?P<DATETIME>\d{4}/\d{2}/\d{2} \d{1,2}:\d{2}:\d{2})(?:[ \t]+(?P<TZ>[A-Z]+|[+-]\d{2}(?::?\d{2})?))?",
         re.MULTILINE,
     )
     re_HandInfo = re.compile(
@@ -118,6 +121,8 @@ class CoinPoker(HandHistoryConverter):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.compiledPlayers: set[str] = set()
         self._auto_bb: dict[str, Decimal] = {}
+        #: Patterns naming the hand's players, rebuilt when the players change.
+        self._player_re: dict[str, re.Pattern[str]] = {}
         super().__init__(*args, **kwargs)
 
     def processHand(self, handText: str) -> Hand:
@@ -143,23 +148,20 @@ class CoinPoker(HandHistoryConverter):
             return
         self.compiledPlayers = players
         plyr = "(?P<PNAME>" + "|".join(map(re.escape, sorted(players, key=len, reverse=True))) + ")"
-        self.re_PostSB = re.compile(rf"^{plyr}: posts small blind {_CUR}(?P<AMOUNT>{_AMT})", re.MULTILINE)
-        self.re_PostBB = re.compile(rf"^{plyr}: posts big blind {_CUR}(?P<AMOUNT>{_AMT})", re.MULTILINE)
-        self.re_AutoBB = re.compile(rf"^{plyr}: (?:AUTOBB|posts auto big blind) {_CUR}(?P<AMOUNT>{_AMT})", re.MULTILINE)
-        self.re_Straddle = re.compile(rf"^{plyr}: STRADDLE {_CUR}(?P<AMOUNT>{_AMT})", re.MULTILINE)
-        self.re_Ante = re.compile(rf"^{plyr}: posts ante {_CUR}(?P<AMOUNT>{_AMT})", re.MULTILINE)
-        self.re_HeroCards = re.compile(rf"^Dealt to {plyr} \[(?P<CARDS>[^\]]+)\]", re.MULTILINE)
-        self.re_Action = re.compile(
-            rf"^{plyr}: (?P<ATYPE>folds|checks|calls|bets|raises|ALLIN|RETURN)"
+        lines = {
+            "post_sb": rf"^{plyr}: posts small blind {_CUR}(?P<AMOUNT>{_AMT})",
+            "post_bb": rf"^{plyr}: posts big blind {_CUR}(?P<AMOUNT>{_AMT})",
+            "auto_bb": rf"^{plyr}: (?:AUTOBB|posts auto big blind) {_CUR}(?P<AMOUNT>{_AMT})",
+            "straddle": rf"^{plyr}: STRADDLE {_CUR}(?P<AMOUNT>{_AMT})",
+            "ante": rf"^{plyr}: posts ante {_CUR}(?P<AMOUNT>{_AMT})",
+            "hero_cards": rf"^Dealt to {plyr} \[(?P<CARDS>[^\]]+)\]",
+            "action": rf"^{plyr}: (?P<ATYPE>folds|checks|calls|bets|raises|ALLIN|RETURN)"
             rf"(?: {_CUR}(?P<BET>{_AMT}))?(?: to {_CUR}(?P<TO>{_AMT}))?\s*$",
-            re.MULTILINE,
-        )
-        self.re_ShowdownAction = re.compile(rf"^{plyr}: shows \[(?P<CARDS>[^\]]+)\]", re.MULTILINE)
-        self.re_CollectPot = re.compile(rf"^{plyr} collected {_CUR}(?P<POT>{_AMT}) from pot", re.MULTILINE)
-        self.re_ShownCards = re.compile(
-            rf"^Seat \d+: {plyr} (?P<SHOWED>showed|mucked) \[(?P<CARDS>[^\]]+)\](?P<RESULT>.*)$",
-            re.MULTILINE,
-        )
+            "shows": rf"^{plyr}: shows \[(?P<CARDS>[^\]]+)\]",
+            "collect": rf"^{plyr} collected {_CUR}(?P<POT>{_AMT}) from pot",
+            "shown_cards": rf"^Seat \d+: {plyr} (?P<SHOWED>showed|mucked) \[(?P<CARDS>[^\]]+)\](?P<RESULT>.*)$",
+        }
+        self._player_re = {name: re.compile(pattern, re.MULTILINE) for name, pattern in lines.items()}
 
     # ------------------------------------------------------------------
     # Game type and hand header
@@ -286,21 +288,21 @@ class CoinPoker(HandHistoryConverter):
     # ------------------------------------------------------------------
     def readBlinds(self, hand: Hand) -> None:
         live_sb = True
-        for m in self.re_PostSB.finditer(hand.handText):
+        for m in self._player_re["post_sb"].finditer(hand.handText):
             hand.addBlind(m.group("PNAME"), "small blind" if live_sb else "secondsb", m.group("AMOUNT"))
             live_sb = False
-        for m in self.re_PostBB.finditer(hand.handText):
+        for m in self._player_re["post_bb"].finditer(hand.handText):
             hand.addBlind(m.group("PNAME"), "big blind", m.group("AMOUNT"))
         # A joining player's live big blind, written among the preflop actions.
         self._auto_bb = {}
-        for m in self.re_AutoBB.finditer(hand.handText):
+        for m in self._player_re["auto_bb"].finditer(hand.handText):
             hand.addBlind(m.group("PNAME"), "big blind", m.group("AMOUNT"))
             self._auto_bb[m.group("PNAME")] = _money(m.group("AMOUNT"))
-        for m in self.re_Straddle.finditer(hand.handText):
+        for m in self._player_re["straddle"].finditer(hand.handText):
             hand.addBlind(m.group("PNAME"), "straddle", m.group("AMOUNT"))
 
     def readAntes(self, hand: Hand) -> None:
-        for m in self.re_Ante.finditer(hand.handText):
+        for m in self._player_re["ante"].finditer(hand.handText):
             hand.addAnte(m.group("PNAME"), m.group("AMOUNT"))
 
     def readSTP(self, hand: Hand) -> None:
@@ -308,7 +310,7 @@ class CoinPoker(HandHistoryConverter):
         game = self.re_GameInfo.search(hand.handText)
         if game is None or not game.group("BOMB"):
             return
-        total = sum((_money(m.group("AMOUNT")) for m in self.re_Ante.finditer(hand.handText)), Decimal(0))
+        total = sum((_money(m.group("AMOUNT")) for m in self._player_re["ante"].finditer(hand.handText)), Decimal(0))
         hand.bombPot = int(total * 100)
 
     def readBringIn(self, hand: Hand) -> None:
@@ -324,7 +326,7 @@ class CoinPoker(HandHistoryConverter):
         the hero is then the one named ``Hero`` when there is one, else the
         first, and the others' cards are left to the showdown.
         """
-        dealt = list(self.re_HeroCards.finditer(hand.streets.get("PREFLOP") or ""))
+        dealt = list(self._player_re["hero_cards"].finditer(hand.streets.get("PREFLOP") or ""))
         if not dealt:
             return
         hero = next((m for m in dealt if m.group("PNAME") == "Hero"), dealt[0])
@@ -339,7 +341,7 @@ class CoinPoker(HandHistoryConverter):
         )
 
     def readAction(self, hand: Hand, street: str) -> None:
-        for m in self.re_Action.finditer(hand.streets.get(street) or ""):
+        for m in self._player_re["action"].finditer(hand.streets.get(street) or ""):
             player, atype, bet = m.group("PNAME"), m.group("ATYPE"), m.group("BET")
             if atype == "folds":
                 hand.addFold(street, player)
@@ -380,12 +382,12 @@ class CoinPoker(HandHistoryConverter):
             hand.addCall(street, player, str(added))
 
     def readShowdownActions(self, hand: HoldemOmahaHand) -> None:
-        for m in self.re_ShowdownAction.finditer(hand.handText):
+        for m in self._player_re["shows"].finditer(hand.handText):
             hand.addShownCards(m.group("CARDS").split(), m.group("PNAME"))
 
     def readShownCards(self, hand: HoldemOmahaHand) -> None:
         summary = hand.handText.split("*** SUMMARY ***", 1)[-1]
-        for m in self.re_ShownCards.finditer(summary):
+        for m in self._player_re["shown_cards"].finditer(summary):
             shown = m.group("SHOWED") == "showed"
             # "won (x) with Straight, and lost with Two Pair": one result per board.
             strings = re.findall(r"with ([^,]+)", m.group("RESULT"))
@@ -411,7 +413,7 @@ class CoinPoker(HandHistoryConverter):
         hand.rake = rake
 
         played = hand.handText.split("*** SUMMARY ***", 1)[0]
-        payouts = [(m.group("PNAME"), _money(m.group("POT"))) for m in self.re_CollectPot.finditer(played)]
+        payouts = [(m.group("PNAME"), _money(m.group("POT"))) for m in self._player_re["collect"].finditer(played)]
         insured, fee = self._ev_cash_out(hand, payouts, rake)
         for player, amount in payouts:
             if player == insured:
@@ -508,7 +510,7 @@ class CoinPoker(HandHistoryConverter):
     # ------------------------------------------------------------------
     @staticmethod
     def getTableTitleRe(
-        type: Any = None,
+        game_type: Any = None,
         table_name: Any = None,
         tournament: Any = None,
         table_number: Any = None,
@@ -518,8 +520,10 @@ class CoinPoker(HandHistoryConverter):
 
         CoinPoker's window title contains the numeric table id (e.g.
         "PLO4 921140 - ..."). Tournament rows use FPDB's ``<tourNo> <tableNo>``
-        storage format, so ``table_number`` is preferred when given.
+        storage format, so ``table_number`` is preferred when given. The game
+        type and tournament name do not appear in the title.
         """
+        del game_type, tourney_name
         return re.escape(str(table_number or table_name or tournament or "CoinPoker"))
 
     @staticmethod

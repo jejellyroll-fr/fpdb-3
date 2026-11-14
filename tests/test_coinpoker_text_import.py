@@ -162,7 +162,7 @@ def test_mega_splash(hands) -> None:
     assert hand.splashWinnings == {"f982d1bf": Decimal("1.00")}
 
 
-def test_a_splash_fee_is_charged_with_the_rake(config) -> None:
+def test_a_splash_fee_is_charged_with_the_rake() -> None:
     # No export seen so far carries one; the line is read wherever the summary puts it.
     parser = CoinPoker.__new__(CoinPoker)
     text = "*** SUMMARY ***\nTotal pot ₮1.05 | Rake ₮0.05 | Splash Fee ₮0.01\n"
@@ -338,3 +338,12 @@ def test_ggpoker_still_identifies_its_own_files() -> None:
     assert GGPoker.re_identify.search("﻿Poker Hand #HD123: PLO ($0.05/$0.10)")
     assert not GGPoker.re_identify.search("CoinPoker Hand #91198200457: PLO 4 (₮0.01/₮0.02)")
     assert not GGPoker.re_identify.search("SwCPoker Hand #183411552:  Omaha Pot Limit (0.02/0.04)")
+
+
+def test_a_header_without_a_zone_does_not_borrow_the_next_line() -> None:
+    # A "\s+" before the zone crossed the newline and read the "T" of "Table".
+    header = "CoinPoker Hand #1: PLO 4 (₮0.01/₮0.02) 2026/07/17 22:15:58\nTable '1' 6-max Seat #1 is the button"
+    match = CoinPoker.re_GameInfo.search(header)
+    assert match is not None
+    assert match.group("TZ") is None
+    assert CoinPoker.re_GameInfo.search(header.replace(":58\n", ":58 CEST\n")).group("TZ") == "CEST"

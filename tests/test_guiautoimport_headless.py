@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import os
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 
@@ -562,5 +562,5 @@ def test_update_paths_never_watches_an_import_only_room(tmp_path):
 
     gui.updatePaths()
 
-    gui.importer.addImportDirectory.assert_called_once_with(str(winamax_hands), monitor=True, site=("Winamax", "hh"))
+    assert gui.importer.addImportDirectory.call_args_list == [call(str(winamax_hands), monitor=True, site=("Winamax", "hh"))]
     assert [entry.args[0] for entry in config.get_default_paths.call_args_list] == ["Winamax"]
