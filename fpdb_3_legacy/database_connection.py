@@ -221,6 +221,7 @@ class DatabaseConnectionMixin:
         get_cursor: Callable[..., Any]
         get_sites: Callable[..., None]
         recreate_tables: Callable[..., None]
+        refresh_hero_hands_only_hudcache: Callable[[], None]
 
     def connection_params_changed(self, c: Any) -> bool:
         """Return whether ``c`` points at a different database than the live one."""
@@ -291,10 +292,13 @@ class DatabaseConnectionMixin:
         # filled before the rule is refilled once for those rooms. Here rather
         # than with the schema migrations, which run before the cache settings
         # above are known.
-        refresh = getattr(self, "refresh_hero_hands_only_hudcache", None)
-        if refresh is not None and self.is_connected() and not getattr(self, "wrongDbVersion", False):
+        if (
+            hasattr(self, "refresh_hero_hands_only_hudcache")
+            and self.is_connected()
+            and not getattr(self, "wrongDbVersion", False)
+        ):
             try:
-                refresh()
+                self.refresh_hero_hands_only_hudcache()
             except Exception:  # noqa: BLE001 - best-effort like the schema migrations.
                 log.warning("Could not refresh the ACR/WPN HUD cache rows", exc_info=True)
                 self.rollback()

@@ -26,6 +26,7 @@ DELETE_HERO_HANDS_ONLY_HUDCACHE = (
     "DELETE FROM HudCache WHERE gametypeId IN (SELECT id FROM Gametypes WHERE siteId IN (24, 115, 116, 117, 118, 119))"
 )
 REFRESH_WHERE_RING = "WHERE g.type = 'ring' AND g.siteId IN (24, 115, 116, 117, 118, 119)<hero_where>"
+HERO_HANDS_ONLY_PLAYERS = "SELECT id FROM Players WHERE siteId IN (24, 115, 116, 117, 118, 119) AND name = %s"
 REFRESH_WHERE_TOUR = "WHERE g.type = 'tour' AND g.siteId IN (24, 115, 116, 117, 118, 119)<hero_where>"
 
 class DatabaseRebuildMixin:
@@ -321,25 +322,20 @@ class DatabaseRebuildMixin:
         the user. Every WPN skin is searched, since a name configured for one
         skin plays hands filed under another.
         """
-        from fpdb_3_legacy.hud_room_policy import WPN_SITE_ID_SQL, user_names
+        from fpdb_3_legacy.hud_room_policy import user_names
 
         # Looked up on every call, not remembered: the players appear as their
         # hands are imported, so an answer kept from earlier would go stale.
         names = sorted(user_names(getattr(self, "config", None), "WinningPoker"))
-        ids: list[int] = []
-        if names:
-            placeholder = self.sql.query["placeholder"]
-            query = (
-                "SELECT id FROM Players WHERE siteId IN ("  # nosec B608  # nosemgrep - constants and placeholders
-                + WPN_SITE_ID_SQL
-                + ") AND name IN ("
-                + ", ".join([placeholder] * len(names))
-                + ")"
-            )
-            cursor = self.get_cursor()
-            cursor.execute(query, names)
-            ids = sorted(int(row[0]) for row in cursor.fetchall())
-        return ids
+        if not names:
+            return []
+        query = HERO_HANDS_ONLY_PLAYERS.replace("%s", self.sql.query["placeholder"])
+        cursor = self.get_cursor()
+        ids: set[int] = set()
+        for name in names:
+            cursor.execute(query, (name,))
+            ids.update(int(row[0]) for row in cursor.fetchall())
+        return sorted(ids)
 
     def refresh_hero_hands_only_hudcache(self) -> None:
         """Rebuild, once, the HUD cache rows of the hero-hands-only rooms (#719).

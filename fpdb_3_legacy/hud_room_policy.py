@@ -261,9 +261,9 @@ def hero_hands_only_sql(user_ids: Any, hand: str = "h", gametype: str = "g") -> 
     """
     ids = sorted({int(player_id) for player_id in user_ids})
     if not ids:
-        return " AND " + gametype + ".siteId NOT IN (" + WPN_SITE_ID_SQL + ")"
+        return " AND " + gametype + ".siteId NOT IN (" + WPN_SITE_ID_SQL + ")"  # nosec B608  # nosemgrep
     id_list = ", ".join(str(player_id) for player_id in ids)
-    return (
+    return (  # nosec B608  # nosemgrep - table aliases and integers only
         " AND (" + gametype + ".siteId NOT IN (" + WPN_SITE_ID_SQL + ")"
         " OR EXISTS (SELECT 1 FROM HandsPlayers own WHERE own.handId = " + hand + ".id"
         " AND own.playerId IN (" + id_list + ")))"

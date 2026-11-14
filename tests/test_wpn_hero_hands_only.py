@@ -65,6 +65,7 @@ def test_the_spelled_out_ids_are_every_wpn_site() -> None:
     assert {int(i) for i in policy.WPN_SITE_ID_SQL.split(",")} == seeded
     for statement in (
         database_rebuild.DELETE_HERO_HANDS_ONLY_HUDCACHE,
+        database_rebuild.HERO_HANDS_ONLY_PLAYERS,
         database_rebuild.REFRESH_WHERE_RING,
         database_rebuild.REFRESH_WHERE_TOUR,
     ):
