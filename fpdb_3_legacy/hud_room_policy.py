@@ -77,6 +77,9 @@ class RoomPolicy:
     capabilities: HudCapabilities
     #: Said to the user (and logged) when a capability is refused.
     reason: str
+    #: The room allows HUD statistics only from hands the user played (#719):
+    #: a hand imported without the hero at the table does not feed the HUD.
+    hero_hands_only: bool = False
 
 
 #: The networks whose rules were read. Keyed by network, casefolded.
@@ -97,7 +100,45 @@ ROOM_POLICIES: dict[str, RoomPolicy] = {
         CONSERVATIVE,
         "positional and dynamic HUDs are documented as not allowed on the iPoker network",
     ),
+    # ACR Poker's Security & Game Integrity Policies (read 2026-11-06), §4.1.3:
+    # numeric HUD statistics only from hands the player took part in, and
+    # nothing from the hand in play (#719).
+    "wpn": RoomPolicy(
+        "WPN",
+        CONSERVATIVE,
+        "ACR/WPN allows HUD statistics only from your own completed hands, "
+        "with nothing from the hand in play (ACR security policy, section 4.1.3)",
+        hero_hands_only=True,
+    ),
 }
+
+#: Site names of the Winning Poker Network: every ``'WP'`` row of the Sites
+#: table (``database_schema``) and the names its clients go by.
+WPN_SKINS: Final = frozenset(
+    name.casefold()
+    for name in (
+        "WinningPoker",
+        "Winning Poker",
+        "Americas Cardroom",
+        "ACR Poker",
+        "ACR",
+        "BlackChipPoker",
+        "BlackChip Poker",
+        "TruePoker",
+        "True Poker",
+        "Ya Poker",
+        "WPN",
+    )
+)
+
+#: The Sites ids of those skins, for the SQL that rebuilds the HUD cache.
+WPN_SITE_IDS: Final = (24, 115, 116, 117, 118, 119)
+
+#: Appended to the HUD cache rebuild's WHERE clause: a hand of a room that
+#: allows statistics from the user's own hands only, stored without the hero
+#: at the table (``Hands.heroSeat = 0``), is left out. The ids are spelled out
+#: so the statement is a constant; a test keeps them equal to WPN_SITE_IDS.
+HERO_HANDS_ONLY_REBUILD_FILTER: Final = " AND NOT (h.heroSeat = 0 AND g.siteId IN (24, 115, 116, 117, 118, 119))"
 
 #: Site names that belong to the iPoker network: every ``'IP'`` row of the
 #: Sites table (``database_schema``), and the names its clients and
@@ -168,6 +209,8 @@ def network_of(site: str | None) -> str:
         return "pokerstars"
     if name in IPOKER_SKINS:
         return "ipoker"
+    if name in WPN_SKINS:
+        return "wpn"
     return name
 
 
@@ -183,6 +226,11 @@ def policy_for(site: str | None) -> RoomPolicy:
         CONSERVATIVE,
         f"{shown}'s rules on HUDs that change with the hand have not been reviewed",
     )
+
+
+def hero_hands_only(site: str | None) -> bool:
+    """Whether ``site``'s HUD statistics may come only from hands the user played (#719)."""
+    return policy_for(site).hero_hands_only
 
 
 def network_hint(config: Any, site: str | None) -> str:

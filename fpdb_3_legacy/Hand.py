@@ -621,7 +621,16 @@ class Hand:
         db.updateTourneyPlayerBounties(self)
 
     def updateHudCache(self, db, doinsert=False) -> None:
-        """Function to update the HudCache."""
+        """Function to update the HudCache.
+
+        At a room that allows HUD statistics only from the user's own hands
+        (ACR/WPN, #719), a hand stored without the hero at the table -- an
+        imported archive, someone else's history -- is kept in the database
+        but does not feed the HUD.
+        """
+        if self.callHud and self._hero_absent_where_required():
+            log.debug("Hand %s: no hero at a %s table, kept out of the HUD cache", self.handid, self.sitename)
+            return
         if self.callHud:
             db.storeHudCache(
                 self.dbid_gt,
@@ -631,6 +640,13 @@ class Hand:
                 self.handsplayers,
                 doinsert,
             )
+
+    def _hero_absent_where_required(self) -> bool:
+        """The hero was not at the table and the room wants the HUD fed by the hero's hands only."""
+        from fpdb_3_legacy import hud_room_policy
+
+        hands = getattr(self, "hands", None) or {}
+        return not hands.get("heroSeat") and hud_room_policy.hero_hands_only(getattr(self, "sitename", None))
 
     def updateSessionsCache(self, db, tz, doinsert=False) -> None:
         """Function to update the Sessions."""

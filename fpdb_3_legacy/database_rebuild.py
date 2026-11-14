@@ -288,7 +288,16 @@ class DatabaseRebuildMixin:
         return h_start, v_start
 
     def rebuild_sql(self, game_type: str, table: str, where: str) -> str:
-        """The INSERT ... SELECT that refills one half ("ring" or "tour") of a statistics cache."""
+        """The INSERT ... SELECT that refills one half ("ring" or "tour") of a statistics cache.
+
+        The HUD cache leaves out what the import leaves out of it: a hand of a
+        room allowing HUD statistics from the user's own hands only (ACR/WPN,
+        #719) that was stored without the hero at the table.
+        """
+        from fpdb_3_legacy.hud_room_policy import HERO_HANDS_ONLY_REBUILD_FILTER
+
+        if table == "HudCache":
+            where += HERO_HANDS_ONLY_REBUILD_FILTER
         query = self.sql.query["rebuildCache"].replace("%s", self.sql.query["placeholder"])
         tourney_join = "INNER JOIN Tourneys t ON (t.id = h.tourneyId)" if game_type == "tour" else ""
         query = query.replace("<tourney_join_clause>", tourney_join).replace("<where_clause>", where)
