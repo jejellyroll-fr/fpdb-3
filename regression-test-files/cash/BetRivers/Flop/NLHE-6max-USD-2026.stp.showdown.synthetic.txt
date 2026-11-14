@@ -1,0 +1,84 @@
+BetRivers Poker Hand #10000001: Hold'em No Limit ($0.10/$0.20) - 2026/03/02 21:15 EST
+Table ID '500001' 6-Max Seat #2 is the button
+Seat 1: alice ($20.00 in chips)
+Seat 2: bob ($18.40 in chips)
+Seat 3: carol ($25.10 in chips)
+Seat 4: dave ($20.00 in chips)
+Seat 5: Hero ($22.35 in chips) [hero]
+Seat 6: erin ($19.80 in chips)
+carol: posts small blind $0.10
+dave: posts big blind $0.20
+*** HOLE CARDS ***
+STP Added: $0.60
+Dealt to Hero [Ah Qd]
+Hero: raises $0.40 to $0.60
+erin: folds
+alice: folds
+bob: calls $0.60
+carol: folds
+dave: calls $0.40
+*** FLOP *** [Kc 7h 2s]
+dave: checks
+Hero: bets $0.90
+bob: calls $0.90
+dave: folds
+*** TURN *** [Kc 7h 2s] [Qs]
+Hero: bets $2.10
+bob: folds
+Uncalled bet ($2.10) returned to Hero
+*** SHOWDOWN ***
+Hero collected $4.11 from pot
+Hero mucks hand
+*** SUMMARY ***
+Total pot $4.30 | Main pot $3.70 | STP $0.60 | Rake $0.19
+Board [Kc 7h 2s Qs]
+Seat 1: alice folded before Flop
+Seat 2: bob (button) folded on the Turn
+Seat 3: carol (small blind) folded before Flop
+Seat 4: dave (big blind) folded on the Flop
+Seat 5: Hero mucked hand and won $4.11
+Seat 6: erin folded before Flop
+
+
+BetRivers Poker Hand #10000002: Hold'em No Limit ($0.05/$0.10) - 2026/08/12 14:03 EDT
+Table ID '500002' 6-Max Seat #4 is the button
+Seat 1: frank ($10.00 in chips)
+Seat 2: Hero ($12.50 in chips) [hero]
+Seat 3: grace ($9.70 in chips)
+Seat 4: heidi ($15.25 in chips)
+Seat 5: ivan ($8.00 in chips)
+Seat 6: judy ($11.10 in chips)
+ivan: posts small blind $0.05
+judy: posts big blind $0.10
+*** HOLE CARDS ***
+Dealt to Hero [Jh Jc]
+Dealt to heidi [Ad Kh]
+frank: folds
+Hero: raises $0.20 to $0.30
+grace: folds
+heidi: calls $0.30
+ivan: folds
+judy: folds
+*** FLOP *** [Js 9d 4c]
+Hero: bets $0.40
+heidi: calls $0.40
+*** TURN *** [Js 9d 4c] [Ac]
+Hero: bets $1.10
+heidi: calls $1.10
+*** RIVER *** [Js 9d 4c Ac] [2h]
+Hero: bets $2.50
+heidi: calls $2.50
+*** SHOWDOWN ***
+Hero shows [Jh Jc] for Three of a Kind: Jacks
+Hero collected $8.31 from pot
+heidi mucks hand
+*** SUMMARY ***
+Total pot $8.75 | Rake $0.44
+Board [Js 9d 4c Ac 2h]
+Seat 1: frank folded before Flop
+Seat 2: Hero showed [Jh Jc] and won $8.31 with Three of a Kind: Jacks
+Seat 3: grace folded before Flop
+Seat 4: heidi (button) mucked [Ad Kh] and lost with a Pair of Aces
+Seat 5: ivan (small blind) folded before Flop
+Seat 6: judy (big blind) folded before Flop
+

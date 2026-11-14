@@ -13,6 +13,7 @@ from fpdb_3_legacy.AbsoluteToFpdb import Absolute
 from fpdb_3_legacy.BetclicToFpdb import Betclic
 from fpdb_3_legacy.BetfairToFpdb import Betfair
 from fpdb_3_legacy.BetOnlineToFpdb import BetOnline
+from fpdb_3_legacy.BetRiversToFpdb import BetRivers
 from fpdb_3_legacy.BossToFpdb import Boss
 from fpdb_3_legacy.BovadaToFpdb import Bovada
 from fpdb_3_legacy.CakeToFpdb import Cake
@@ -79,6 +80,7 @@ def test_fulltilt_player_regex_compilation_does_not_mutate_class_metadata() -> N
 REGRESSION_SITES = {
     "Absolute": Absolute,
     "BetOnline": BetOnline,
+    "BetRivers": BetRivers,
     "Betfair": Betfair,
     "Boss": Boss,
     "Bovada": Bovada,
