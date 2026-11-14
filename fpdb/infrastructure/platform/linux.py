@@ -172,20 +172,6 @@ class LinuxTableDetector:
         except (AttributeError, OSError, TypeError, ValueError):
             return False
 
-    def is_window_displayed(self, window_id: int | str) -> bool:
-        """Check if window is actually shown on screen right now
-
-        X11 has no equivalent of DWM cloaking: a mapped window is shown, so
-        this mirrors is_window_visible().
-
-        Args:
-            window_id: X11 window ID
-
-        Returns:
-            True if window exists and is mapped
-        """
-        return self.is_window_visible(window_id)
-
     def get_window_title(self, window_id: int | str) -> str | None:
         """Get window title
 

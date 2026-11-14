@@ -154,8 +154,7 @@ def test_find_tables_collects_blank_target_windows() -> None:
     detector.find_tables("pokerstars")
     detector._find_tables_without_titles.assert_called_once()
     args = detector._find_tables_without_titles.call_args[0]
-    assert len(args[1]) == 2  # target_table_windows
-    assert len(args[2]) == 2  # blank_target_windows
+    assert len(args[1]) == 2  # blank_target_windows
 
 
 def test_find_tables_invalid_regex_falls_back_to_escape() -> None:
@@ -341,101 +340,6 @@ def test_run_applescript_scan_swallows_errors() -> None:
     assert detector._applescript_last_result == []
 
 
-def test_match_target_window_by_pid_exact() -> None:
-    detector = _detector()
-    windows = [
-        TableInfo(window_id=1, title="", geometry=TableGeometry(0, 0, 600, 500), process_id=101),
-        TableInfo(window_id=2, title="", geometry=TableGeometry(0, 0, 600, 500), process_id=102),
-    ]
-    with patch(
-        "fpdb.infrastructure.platform.macos_process.table_id_for_pid", side_effect={101: "922564", 102: "1"}.__getitem__
-    ):
-        assert detector._match_target_window_by_pid("922564", windows).window_id == 1
-
-
-def test_match_target_window_by_pid_insensitive_to_punctuation() -> None:
-    detector = _detector()
-    windows = [TableInfo(window_id=7, title="", geometry=TableGeometry(0, 0, 600, 500), process_id=101)]
-    with patch("fpdb.infrastructure.platform.macos_process.table_id_for_pid", return_value="922-564"):
-        assert detector._match_target_window_by_pid("922564", windows).window_id == 7
-
-
-def test_match_target_window_by_pid_no_match() -> None:
-    detector = _detector()
-    windows = [TableInfo(window_id=1, title="", geometry=TableGeometry(0, 0, 600, 500), process_id=101)]
-    with patch("fpdb.infrastructure.platform.macos_process.table_id_for_pid", return_value="999999"):
-        assert detector._match_target_window_by_pid("922564", windows) is None
-
-
-def test_match_target_window_by_pid_empty_target() -> None:
-    detector = _detector()
-    assert detector._match_target_window_by_pid("!!!", []) is None
-
-
-def test_match_target_window_by_pid_missing_module() -> None:
-    detector = _detector()
-    import sys
-    import types
-
-    import fpdb.infrastructure.platform as platform_pkg
-
-    # A module without `table_id_for_pid` forces the `from ... import` to raise
-    # ImportError, the defensive short-circuit in _match_target_window_by_pid.
-    stub = types.ModuleType("fpdb.infrastructure.platform.macos_process")
-    saved_module = sys.modules.get("fpdb.infrastructure.platform.macos_process")
-    saved_attr = platform_pkg.__dict__.get("macos_process")
-    windows = [TableInfo(window_id=1, title="", geometry=TableGeometry(0, 0, 600, 500), process_id=101)]
-
-    sys.modules["fpdb.infrastructure.platform.macos_process"] = stub
-    platform_pkg.__dict__["macos_process"] = stub
-    try:
-        # A window that would match if the lookup worked must still yield
-        # None, proving the ImportError short-circuit fired.
-        assert detector._match_target_window_by_pid("922564", windows) is None
-    finally:
-        if saved_module is not None:
-            sys.modules["fpdb.infrastructure.platform.macos_process"] = saved_module
-        else:
-            del sys.modules["fpdb.infrastructure.platform.macos_process"]
-        if saved_attr is not None:
-            platform_pkg.__dict__["macos_process"] = saved_attr
-        else:
-            platform_pkg.__dict__.pop("macos_process", None)
-
-
-def test_match_target_window_by_pid_skips_failed_lookups() -> None:
-    detector = _detector()
-    windows = [
-        TableInfo(window_id=1, title="", geometry=TableGeometry(0, 0, 600, 500), process_id=101),
-        TableInfo(window_id=2, title="", geometry=TableGeometry(0, 0, 600, 500), process_id=102),
-    ]
-
-    def lookup(pid: int) -> str:
-        if pid == 101:
-            raise RuntimeError("ps failed")
-        return "922564"
-
-    with patch("fpdb.infrastructure.platform.macos_process.table_id_for_pid", side_effect=lookup):
-        assert detector._match_target_window_by_pid("922564", windows).window_id == 2
-
-
-def test_match_target_window_by_pid_skips_empty_ids() -> None:
-    detector = _detector()
-    windows = [TableInfo(window_id=1, title="", geometry=TableGeometry(0, 0, 600, 500), process_id=101)]
-    with patch("fpdb.infrastructure.platform.macos_process.table_id_for_pid", return_value=""):
-        assert detector._match_target_window_by_pid("922564", windows) is None
-
-
-def test_match_target_window_by_pid_skips_windows_without_pid() -> None:
-    detector = _detector()
-    windows = [
-        TableInfo(window_id=1, title="", geometry=TableGeometry(0, 0, 600, 500), process_id=None),
-        TableInfo(window_id=2, title="", geometry=TableGeometry(0, 0, 600, 500), process_id=102),
-    ]
-    with patch("fpdb.infrastructure.platform.macos_process.table_id_for_pid", return_value="922564"):
-        assert detector._match_target_window_by_pid("922564", windows).window_id == 2
-
-
 def test_get_window_geometry_for_fake_id_uses_cache() -> None:
     detector = _detector()
     fake_id = detector._FAKE_ID_BASE + 5
@@ -504,14 +408,6 @@ def test_is_window_visible_false_on_error() -> None:
     detector = _detector()
     detector._CGWindowListCopyWindowInfo = Mock(side_effect=OSError("boom"))
     assert detector.is_window_visible(5) is False
-
-
-def test_is_window_displayed_mirrors_visibility() -> None:
-    detector = _detector()
-    detector.is_window_visible = Mock(return_value=True)
-    assert detector.is_window_displayed(5) is True
-    detector.is_window_visible = Mock(return_value=False)
-    assert detector.is_window_displayed(5) is False
 
 
 def test_get_window_title_fake_id() -> None:
@@ -682,55 +578,41 @@ def test_check_permissions_once_noop_when_permissions_ok() -> None:
         logger.debug.assert_called_once()
 
 
-def test_find_tables_without_titles_prefers_pid_match() -> None:
-    detector = _detector()
-    target = TableInfo(
-        window_id=1, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="CoinPoker", process_id=99
-    )
-    detector._match_target_window_by_pid = Mock(return_value=target)
-    result = detector._find_tables_without_titles("922564", [target], [], 2, 0)
-    assert result == [target]
-
-
 def test_find_tables_without_titles_falls_to_applescript() -> None:
     detector = _detector()
-    detector._match_target_window_by_pid = Mock(return_value=None)
     applescript = [TableInfo(window_id=9, title="Table 9", geometry=TableGeometry(0, 0, 600, 500))]
     detector.find_tables_applescript = Mock(return_value=applescript)
-    result = detector._find_tables_without_titles("table", [], [], 0, 0)
+    result = detector._find_tables_without_titles("table", [], 0, 0)
     assert result == applescript
 
 
 def test_find_tables_without_titles_checks_permissions_when_no_titles() -> None:
     detector = _detector()
-    detector._match_target_window_by_pid = Mock(return_value=None)
     detector.find_tables_applescript = Mock(return_value=[])
     detector._check_permissions_once = Mock()
     # total_windows > 0 but titled_windows == 0 => missing Screen Recording path.
-    result = detector._find_tables_without_titles("table", [], [], 5, 0)
+    result = detector._find_tables_without_titles("table", [], 5, 0)
     assert result is None
     detector._check_permissions_once.assert_called_once()
 
 
 def test_find_tables_without_titles_uses_sole_blank_window() -> None:
     detector = _detector()
-    detector._match_target_window_by_pid = Mock(return_value=None)
     detector.find_tables_applescript = Mock(return_value=[])
     blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="PokerStars")
-    result = detector._find_tables_without_titles("pokerstars", [], [blank], 0, 0)
+    result = detector._find_tables_without_titles("pokerstars", [blank], 0, 0)
     assert result == [blank]
 
 
 def test_find_tables_without_titles_still_scans_when_accessibility_is_missing() -> None:
     """Try once so System Events can request Automation and explain the refusal."""
     detector = _detector()
-    detector._match_target_window_by_pid = Mock(return_value=None)
     detector._check_permissions_once = Mock(return_value=Mock(accessibility=False))
     found = TableInfo(window_id=9, title="Winamax Bucarest 6", geometry=TableGeometry(0, 0, 600, 500))
     detector.find_tables_applescript = Mock(return_value=[found])
     blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="Winamax")
 
-    result = detector._find_tables_without_titles("Winamax Bucarest 6", [], [blank], 3, 0)
+    result = detector._find_tables_without_titles("Winamax Bucarest 6", [blank], 3, 0)
 
     detector.find_tables_applescript.assert_called_once_with("Winamax Bucarest 6")
     assert result == [found]
@@ -739,12 +621,11 @@ def test_find_tables_without_titles_still_scans_when_accessibility_is_missing() 
 def test_find_tables_without_titles_stops_scanning_once_system_events_refuses() -> None:
     """A refused scan costs seconds, and Fast-Fold hits this path per hand."""
     detector = _detector()
-    detector._match_target_window_by_pid = Mock(return_value=None)
     detector.find_tables_applescript = Mock(return_value=[])
     detector._system_events_blocked = True
     blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="Winamax")
 
-    result = detector._find_tables_without_titles("Winamax Bucarest 6", [], [blank], 3, 0)
+    result = detector._find_tables_without_titles("Winamax Bucarest 6", [blank], 3, 0)
 
     detector.find_tables_applescript.assert_not_called()
     # The sole-window heuristic is still allowed to answer.
@@ -753,11 +634,10 @@ def test_find_tables_without_titles_stops_scanning_once_system_events_refuses() 
 
 def test_find_tables_without_titles_rejects_cross_room_blank_window_fallback() -> None:
     detector = _detector()
-    detector._match_target_window_by_pid = Mock(return_value=None)
     detector.find_tables_applescript = Mock(return_value=[])
     winamax_blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="Winamax")
     # PartyPoker search string (#?7490030) must NOT hijack the Winamax window
-    result = detector._find_tables_without_titles("#?7490030", [], [winamax_blank], 0, 0)
+    result = detector._find_tables_without_titles("#?7490030", [winamax_blank], 0, 0)
     assert result is None
 
 
@@ -788,14 +668,13 @@ def test_a_room_keyword_is_not_matched_inside_an_ordinary_table_name() -> None:
     assert detector._is_process_matching_search("Winamax", "Winamax Coinflip 04") is True
     # The real rooms still reject each other.
     assert detector._is_process_matching_search("Winamax", "GGPoker Rush 12") is False
-    assert detector._is_process_matching_search("CoinPoker", "Winamax Casablanca 02") is False
+    assert detector._is_process_matching_search("PokerStars", "Winamax Casablanca 02") is False
 
 
 def test_find_tables_without_titles_returns_none() -> None:
     detector = _detector()
-    detector._match_target_window_by_pid = Mock(return_value=None)
     detector.find_tables_applescript = Mock(return_value=[])
-    assert detector._find_tables_without_titles("table", [], [], 0, 0) is None
+    assert detector._find_tables_without_titles("table", [], 0, 0) is None
 
 
 def test_synthetic_window_id_is_deterministic() -> None:
@@ -832,13 +711,12 @@ def test_run_applescript_scan_treats_a_hung_scan_as_blocking() -> None:
 def test_a_hung_scan_is_not_repeated_on_the_next_lookup() -> None:
     """The whole point of noticing the block: the second lookup must be free."""
     detector = _detector()
-    detector._match_target_window_by_pid = Mock(return_value=None)
     with patch(
         "fpdb.infrastructure.platform.macos.subprocess.run",
         side_effect=_hung_osascript(),
     ) as run:
-        detector._find_tables_without_titles("Winamax Colorado 6", [], [], 3, 0)
-        detector._find_tables_without_titles("Winamax Colorado 5", [], [], 3, 0)
+        detector._find_tables_without_titles("Winamax Colorado 6", [], 3, 0)
+        detector._find_tables_without_titles("Winamax Colorado 5", [], 3, 0)
 
     assert run.call_count == 1
 

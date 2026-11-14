@@ -1,0 +1,169 @@
+{
+ "site": "CoinPoker",
+ "hand_id": "97900600418",
+ "hero": "SmallBlind",
+ "table_id": "979006",
+ "timestamp": "2026-07-27T07:42:00.858000",
+ "buttonpos": 1,
+ "game": {
+  "base": "hold",
+  "category": "omahahi",
+  "fpdb_supported": true
+ },
+ "gametype": {
+  "base": "hold",
+  "category": "omahahi",
+  "type": "ring",
+  "limitType": "pl",
+  "currency": "USD",
+  "sb": "0.01",
+  "bb": "0.02",
+  "ante": "0.0",
+  "maxSeats": 6
+ },
+ "tournament": null,
+ "players": [
+  {
+   "seat_idx": 1,
+   "name": "Straddler",
+   "starting_stack": "12.57"
+  },
+  {
+   "seat_idx": 2,
+   "name": "SmallBlind",
+   "starting_stack": "0.78"
+  },
+  {
+   "seat_idx": 3,
+   "name": "BigBlindWinner",
+   "starting_stack": "2.87"
+  }
+ ],
+ "actions": [
+  {
+   "type": "small blind",
+   "player": "SmallBlind",
+   "amount": "0.01"
+  },
+  {
+   "type": "big blind",
+   "player": "BigBlindWinner",
+   "amount": "0.02"
+  },
+  {
+   "type": "straddle",
+   "player": "Straddler",
+   "amount": "0.04"
+  },
+  {
+   "type": "folds",
+   "player": "SmallBlind",
+   "street": "PREFLOP"
+  },
+  {
+   "type": "calls",
+   "player": "BigBlindWinner",
+   "street": "PREFLOP",
+   "amount": "0.02"
+  },
+  {
+   "type": "checks",
+   "player": "Straddler",
+   "street": "PREFLOP"
+  },
+  {
+   "type": "bets",
+   "player": "BigBlindWinner",
+   "street": "FLOP",
+   "amount": "0.07"
+  },
+  {
+   "type": "calls",
+   "player": "Straddler",
+   "street": "FLOP",
+   "amount": "0.07"
+  },
+  {
+   "type": "checks",
+   "player": "BigBlindWinner",
+   "street": "TURN"
+  },
+  {
+   "type": "bets",
+   "player": "Straddler",
+   "street": "TURN",
+   "amount": "0.17"
+  },
+  {
+   "type": "calls",
+   "player": "BigBlindWinner",
+   "street": "TURN",
+   "amount": "0.17"
+  },
+  {
+   "type": "checks",
+   "player": "BigBlindWinner",
+   "street": "RIVER"
+  },
+  {
+   "type": "checks",
+   "player": "Straddler",
+   "street": "RIVER"
+  }
+ ],
+ "community": {
+  "FLOP": [
+   "Kc",
+   "6d",
+   "4d"
+  ],
+  "TURN": [
+   "Ad"
+  ],
+  "RIVER": [
+   "Jd"
+  ]
+ },
+ "boards": [
+  {
+   "FLOP": [
+    "Kc",
+    "6d",
+    "4d"
+   ],
+   "TURN": [
+    "Ad"
+   ],
+   "RIVER": [
+    "Jd"
+   ]
+  }
+ ],
+ "run_it_times": 1,
+ "double_board": false,
+ "bomb_pot": 0,
+ "splash_pot": 0,
+ "mega_splash": false,
+ "cashout": [],
+ "splash_winnings": [],
+ "holecards": [
+  {
+   "player": "SmallBlind",
+   "closed": [
+    "Ts",
+    "8c",
+    "7c",
+    "2d"
+   ],
+   "dealt": true,
+   "shown": false,
+   "mucked": false
+  }
+ ],
+ "collections": [
+  {
+   "player": "BigBlindWinner",
+   "pot": "0.54"
+  }
+ ]
+}

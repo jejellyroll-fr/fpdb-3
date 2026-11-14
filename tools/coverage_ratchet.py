@@ -117,7 +117,6 @@ DOMAINS: tuple[tuple[str, tuple[str, ...]], ...] = (
         "live-capture",
         (
             "fpdb_3_legacy/*capture*.py",
-            "fpdb_3_legacy/coinpoker_*.py",
             "fpdb_3_legacy/swc_*.py",
         ),
     ),

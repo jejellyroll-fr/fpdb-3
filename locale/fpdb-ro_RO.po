@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 00:05+0100\n"
+"POT-Creation-Date: 2026-11-14 11:31+0100\n"
 "PO-Revision-Date: 2011-05-13 08:55+0000\n"
 "Last-Translator: jax <jax@netmagnet.ro>\n"
 "Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
@@ -113,8 +113,7 @@ msgstr ""
 msgid "Stat set"
 msgstr "Statistici"
 
-#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/swc_poker_console.py
 #: fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy
 msgid "Stop"
@@ -3409,71 +3408,6 @@ msgstr "Turnee"
 msgid "e.g., my_custom_theme"
 msgstr "ex. tema_mea_personala"
 
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
-msgstr ""
-"Pornește și HUD_main (debifați dacă HUD-ul/importul automat rulează deja)."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Capture failed to start — see the log above."
-msgstr "Captura nu a putut porni — vedeți jurnalul de mai sus."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Capture not started: it is off until you turn it on."
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Default game:"
-msgstr "Joc implicit:"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Dry run (no DB insert)"
-msgstr "Rulare de probă (fără inserare în BD)"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Finishing previous capture…"
-msgstr "Se încheie captura anterioară…"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Idle."
-msgstr "Inactiv."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Interface:"
-msgstr "Interfață:"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Launch HUD"
-msgstr "Pornește HUD"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Refresh interfaces"
-msgstr "Reîmprospătează interfețele"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
-msgstr "Se cer privilegii… acceptați solicitarea, apoi jucați pe CoinPoker."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Start capture"
-msgstr "Pornește captura"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Stopping…"
-msgstr "Se oprește…"
-
 #: fpdb_3_legacy/capture/swc_poker_console.py
 msgid "<"
 msgstr ""
@@ -4181,11 +4115,6 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/live_capture_consent.py
-#, fuzzy
-msgid "CoinPoker packet capture"
-msgstr "Captură live CoinPoker"
-
-#: fpdb_3_legacy/live_capture_consent.py
 msgid ""
 "Live capture is not part of this install. From a source install: pip install "
 "-e '.[capture]'."
@@ -4218,13 +4147,6 @@ msgid ""
 "on macOS and Linux. Inside the client, it reads the table traffic after the "
 "client has decrypted it, and writes it to a file fpdb imports. It stays "
 "loaded until the client exits."
-msgstr ""
-
-#: fpdb_3_legacy/live_capture_consent.py
-msgid ""
-"fpdb records the network packets exchanged by the CoinPoker client, with "
-"administrator rights (tcpdump, pkexec or a UAC prompt), and rebuilds the "
-"hands from them. It reads the traffic only; it loads nothing into the client."
 msgstr ""
 
 #: fpdb_3_legacy/live_capture_consent.py
@@ -4315,11 +4237,6 @@ msgstr ""
 #: fpdb_3_legacy/menu_layout.py
 msgid "Choose the blinds, seats and period that new HUD tables start with"
 msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-#, fuzzy
-msgid "CoinPoker Live Capture"
-msgstr "Captură live CoinPoker"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -9355,6 +9272,11 @@ msgstr ""
 #~ msgid "Alias '%s' unknown"
 #~ msgstr "Alias '%s' necunoscut"
 
+#, fuzzy
+#~ msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
+#~ msgstr ""
+#~ "Pornește și HUD_main (debifați dacă HUD-ul/importul automat rulează deja)."
+
 #~ msgid "An invalid DB version or missing tables have been detected."
 #~ msgstr "S-a detectat a versiune invalida a BD sau tabele lipsa"
 
@@ -9516,6 +9438,10 @@ msgstr ""
 #~ "Nu se poate deschide Intretinerea Bazei de Date pentru ca au fost "
 #~ "deschise alte ferestre. Reporniti fpdb pentru a folosi aceasta optiune."
 
+#, fuzzy
+#~ msgid "Capture failed to start — see the log above."
+#~ msgstr "Captura nu a putut porni — vedeți jurnalul de mai sus."
+
 #~ msgid "Cat."
 #~ msgstr "Cat."
 
@@ -9532,6 +9458,14 @@ msgstr ""
 
 #~ msgid "Closing this window will stop the Tournament Tracker"
 #~ msgstr "Inchiderea acestei ferestre va opri Trackerul de Turneu"
+
+#, fuzzy
+#~ msgid "CoinPoker Live Capture"
+#~ msgstr "Captură live CoinPoker"
+
+#, fuzzy
+#~ msgid "CoinPoker packet capture"
+#~ msgstr "Captură live CoinPoker"
 
 #, fuzzy
 #~ msgid "Column:"
@@ -9692,6 +9626,10 @@ msgstr ""
 #~ msgid "Default encoding set to US-ASCII, defaulting to CP1252 instead."
 #~ msgstr "Codarea implicita pentru US-ASCII a fost schimbata cu CP1252."
 
+#, fuzzy
+#~ msgid "Default game:"
+#~ msgstr "Joc implicit:"
+
 #~ msgid "Detect"
 #~ msgstr "Detectare"
 
@@ -9741,6 +9679,10 @@ msgstr ""
 
 #~ msgid "Dropping index:"
 #~ msgstr "Se renunta la index:"
+
+#, fuzzy
+#~ msgid "Dry run (no DB insert)"
+#~ msgstr "Rulare de probă (fără inserare în BD)"
 
 #~ msgid "END TIME"
 #~ msgstr "TIMP SFIRSIT"
@@ -9958,6 +9900,10 @@ msgstr ""
 
 #~ msgid "Finished recreating tables"
 #~ msgstr "S-a terminat recrearea tabelelor"
+
+#, fuzzy
+#~ msgid "Finishing previous capture…"
+#~ msgstr "Se încheie captura anterioară…"
 
 #~ msgid "Flop"
 #~ msgstr "Flop"
@@ -10260,6 +10206,10 @@ msgstr ""
 #~ msgstr "ITM%"
 
 #, fuzzy
+#~ msgid "Idle."
+#~ msgstr "Inactiv."
+
+#, fuzzy
 #~ msgid ""
 #~ "If there already are tables in the database %s on %s they will be deleted "
 #~ "and you will have to re-import your histories."
@@ -10330,6 +10280,10 @@ msgstr ""
 #~ "nu s-au gasit directoare pentru gtk - instalati gtk sau editati manual "
 #~ "calea\n"
 
+#, fuzzy
+#~ msgid "Interface:"
+#~ msgstr "Interfață:"
+
 #~ msgid "Invalid config value for %s, defaulting to %s"
 #~ msgstr "Valoare invalida in configurare pentru %s, schimb cu %s"
 
@@ -10364,6 +10318,10 @@ msgstr ""
 
 #~ msgid "LEVEL"
 #~ msgstr "NIVEL"
+
+#, fuzzy
+#~ msgid "Launch HUD"
+#~ msgstr "Pornește HUD"
 
 #, fuzzy
 #~ msgid "Less than 2 players - Assuming hand '%s' was cancelled."
@@ -10939,11 +10897,19 @@ msgstr ""
 #~ msgstr "Primit mina numarul %s"
 
 #, fuzzy
+#~ msgid "Refresh interfaces"
+#~ msgstr "Reîmprospătează interfețele"
+
+#, fuzzy
 #~ msgid "Removing text < 50 characters & resetting index"
 #~ msgstr "Eliminare text < 50 caractere"
 
 #~ msgid "Reposition StatWindows"
 #~ msgstr "Repozitioneaza StatWindows"
+
+#, fuzzy
+#~ msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
+#~ msgstr "Se cer privilegii… acceptați solicitarea, apoi jucați pe CoinPoker."
 
 #, fuzzy
 #~ msgid "Restart This HUD"
@@ -11055,6 +11021,10 @@ msgstr ""
 #~ msgid "Start Minimized"
 #~ msgstr "Pornire minimizata"
 
+#, fuzzy
+#~ msgid "Start capture"
+#~ msgstr "Pornește captura"
+
 #~ msgid "Started at %s -- %d files to import. indexes: %s"
 #~ msgstr "Pornit la %s -- %d fisiere de importat. indexuri: %s"
 
@@ -11066,6 +11036,10 @@ msgstr ""
 
 #~ msgid "Status: Connected to %s database named %s on host %s"
 #~ msgstr "Statut: Conectat la baza de date %s numita %s pe %s"
+
+#, fuzzy
+#~ msgid "Stopping…"
+#~ msgstr "Se oprește…"
 
 #~ msgid "Stove"
 #~ msgstr "Stove"

@@ -148,14 +148,6 @@ def test_is_window_visible_false_on_error() -> None:
     assert detector.is_window_visible(101) is False
 
 
-def test_is_window_displayed_mirrors_visibility() -> None:
-    detector = _detector()
-    detector.is_window_visible = Mock(return_value=True)
-    assert detector.is_window_displayed(101) is True
-    detector.is_window_visible = Mock(return_value=False)
-    assert detector.is_window_displayed(101) is False
-
-
 def test_get_window_title_reads_utf8_property() -> None:
     detector = _detector()
     assert detector.get_window_title(101) == ""

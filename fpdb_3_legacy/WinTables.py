@@ -56,28 +56,9 @@ def _names_table(title: str, name: str) -> bool:
     return re.search(rf"(?<!\w){re.escape(name)}(?!\w)", title) is not None
 
 
-def _window_pid(hwnd: int | None) -> int | None:
-    """Return the process id owning ``hwnd`` on Windows, or None."""
-    if sys.platform != "win32" or not hwnd:
-        return None
-    try:
-        import ctypes  # local import: ctypes.windll is Windows-only
-
-        pid = ctypes.c_ulong()
-        ctypes.windll.user32.GetWindowThreadProcessId(int(hwnd), ctypes.byref(pid))
-        return pid.value or None
-    except Exception:  # noqa: BLE001 - defensive: never break the geometry poll
-        return None
-
-
 # Global variables for window borders
 b_width = 3
 tb_height = 29
-
-# CoinPoker renders each table in a Unity window whose title is just "CoinPoker"
-# (no table number), while the lobby is a Chromium window with the *same* title.
-# The table is told apart by its native window class, not the title.
-COINPOKER_TABLE_CLASS = "UnityWndClass"
 
 
 class Table(Table_Window):
@@ -96,11 +77,6 @@ class Table(Table_Window):
         self._detector = get_table_detector()
         self._table_geometry = None
         self.gdkhandle: QWindow | None = None
-        # Set once this table's id has actually been read from a CoinPoker Unity
-        # process argv. Only then can a later "no window carries our id" be trusted
-        # to mean the table closed (rather than psutil being unable to read those
-        # processes, e.g. an elevated client).
-        self._coinpoker_argv_confirmed = False
         super().__init__(*args, **kwargs)
 
     def _matches_winamax_tournament(self, title: str) -> bool:
@@ -154,8 +130,7 @@ class Table(Table_Window):
         """Broaden the title search for clients whose title omits the table id.
 
         Winamax's title does not always match the precise getTableTitleRe regex,
-        and CoinPoker titles every window just "CoinPoker"; in both cases we
-        search on the client name and filter the matches afterwards.
+        so we search on the client name and filter the matches afterwards.
         """
         search_str = self.search_string
         if not search_str:
@@ -167,85 +142,10 @@ class Table(Table_Window):
         if "Winamax" in search_str:
             log.debug("Winamax detected, adjusted search string to: Winamax")
             return "Winamax"
-        if getattr(self, "site", "") == "CoinPoker":
-            log.debug("CoinPoker detected, adjusted search string to: CoinPoker")
-            return "CoinPoker"
         return search_str
-
-    def _is_coinpoker_table(self, table_info) -> bool:
-        """True for the CoinPoker Unity table window, False for its Chromium lobby.
-
-        Both are titled "CoinPoker"; only the native window class tells them
-        apart. If the detector could not report a class (non-Windows, or an
-        older detector), accept the window rather than hide the HUD.
-        """
-        window_class = getattr(table_info, "window_class", None)
-        if window_class is None:
-            return True
-        return window_class == COINPOKER_TABLE_CLASS
-
-    def _match_coinpoker_by_argv(self, tables):
-        """Return the CoinPoker window owning the requested table id, or None.
-
-        Each CoinPoker table is a separate Unity process whose command line
-        carries the table id (window -> PID -> argv -> id), so this tells several
-        open tables apart -- the window-class heuristic alone cannot. Returns
-        None when argv is unavailable (psutil missing / access denied), so the
-        caller falls back to the class heuristic for the single-table case.
-        """
-        try:
-            from fpdb.infrastructure.platform.windows_process import table_id_for_pid
-        except ImportError:
-            return None
-        target = "".join(ch for ch in str(self.search_string) if ch.isdigit())
-        if not target:
-            return None
-        for table_info in tables:
-            pid = getattr(table_info, "process_id", None)
-            if not pid:
-                continue
-            try:
-                if table_id_for_pid(pid) == target:
-                    # We could read this table's id from its process, so a later
-                    # absence can be trusted to mean the table was closed.
-                    self._coinpoker_argv_confirmed = True
-                    return table_info
-            except Exception as exc:  # pragma: no cover - psutil/platform dependent
-                log.debug("argv lookup failed for pid %s: %s", pid, exc)
-        return None
-
-    def _coinpoker_table_candidates(self, tables):
-        """The CoinPoker table windows (Unity), excluding the lobby and bad-word windows."""
-        return [t for t in tables if t.title and not self.check_bad_words(t.title) and self._is_coinpoker_table(t)]
-
-    def _select_coinpoker_window(self, tables):
-        """Pick this CoinPoker table's window, or None if it can't be told apart.
-
-        The process argv carries the exact table id, so it disambiguates several
-        open tables. When argv is unavailable (psutil missing / access denied) the
-        window class only separates a table from the lobby, not one table from
-        another, so fall back to it only when a single table is open -- otherwise
-        a HUD could attach to the wrong table.
-        """
-        argv_match = self._match_coinpoker_by_argv(tables)
-        if argv_match is not None:
-            return argv_match
-        candidates = self._coinpoker_table_candidates(tables)
-        if len(candidates) == 1:
-            return candidates[0]
-        if candidates:
-            log.warning(
-                "%d CoinPoker tables open but the table id could not be read from any process; "
-                "not guessing which window to attach to.",
-                len(candidates),
-            )
-        return None
 
     def _select_window(self, tables, search_str):
         """Pick the table window from candidates, or None if none qualifies."""
-        if getattr(self, "site", "") == "CoinPoker":
-            return self._select_coinpoker_window(tables)
-
         for table_info in tables:
             try:
                 title = table_info.title
@@ -309,84 +209,6 @@ class Table(Table_Window):
         except Exception as e:
             log.warning("Could not list open windows: %s", e)
 
-    def _coinpoker_live_geometry(self):
-        """Geometry for THIS CoinPoker table, re-resolving its window every poll.
-
-        CoinPoker's Unity table window stays *visible* after the table is closed
-        (so is_window_visible() never reports the close) and its HWND can also be
-        recycled or recreated. Tracking a fixed HWND is therefore unreliable.
-        Instead, re-resolve the window by this table's id each poll: if no open
-        CoinPoker window's process argv carries our id, the table has closed
-        (return None) -- this holds even when ours was the only table. The "closed"
-        decision is gated on having *ever* read this table's id from its process
-        (_coinpoker_argv_confirmed): if we never could (psutil missing, or the
-        CoinPoker processes are access-denied/elevated), we can't tell a close from
-        an unreadable process, so we fall back to the tracked HWND's visibility and
-        never kill a live HUD.
-        """
-        tables = self._detector.find_tables("CoinPoker")
-        match = self._match_coinpoker_by_argv(tables)
-        if match is not None:
-            # Do not trust PID/argv alone: Unity can keep its process and HWND
-            # after closing a table while DWM cloaks the window. The Windows
-            # detector folds Win32 visibility and DWM cloaking into
-            # is_window_displayed (CoinPoker-only: other sites' cloaked
-            # windows, e.g. on another virtual desktop, must keep their HUD).
-            if not self._detector.is_window_displayed(match.window_id):
-                log.warning(
-                    "CoinPoker table %s window %s is hidden/cloaked; closing HUD",
-                    self.search_string,
-                    match.window_id,
-                )
-                return None
-            if match.window_id != self.number:
-                # The window was recreated with a new HWND; drop the cached parent
-                # handle so topify() re-parents HUD windows to the new window.
-                self.number = match.window_id
-                self.gdkhandle = None
-            return self._detector.get_window_geometry(self.number)
-        # No open CoinPoker window carries our id. Close if we can be sure this is
-        # not our table anymore: either our id was readable before and is now gone
-        # (confirmed), or the very window we track positively resolves to a
-        # *different* table id (reused/stale window -- catches HUDs first attached
-        # via the class fallback, where confirmed is still False).
-        if self._coinpoker_argv_confirmed or self._tracked_window_belongs_elsewhere():
-            log.warning(
-                "CoinPoker table %s: no open window carries this table id among %d CoinPoker window(s); closing HUD",
-                self.search_string,
-                len(tables),
-            )
-            return None
-        # Can't tell (our id was never readable and the tracked window's argv is
-        # unreadable too): keep the tracked HWND's visibility path so a permission
-        # mismatch never kills a live HUD.
-        if self._detector.is_window_displayed(self.number):
-            return self._detector.get_window_geometry(self.number)
-        return None
-
-    def _tracked_window_belongs_elsewhere(self) -> bool:
-        """True if the tracked HWND's process argv resolves to a *different* table id.
-
-        Proves the window we hold is no longer ours (recycled for another table),
-        which is a reliable close signal even when this HUD was attached via the
-        class fallback and never had its id confirmed. Returns False whenever the
-        id can't be read, so it never causes a premature kill.
-        """
-        target = "".join(ch for ch in str(getattr(self, "search_string", "")) if ch.isdigit())
-        if not target:
-            return False
-        pid = _window_pid(self.number)
-        if not pid:
-            return False
-        try:
-            from fpdb.infrastructure.platform.windows_process import table_id_for_pid
-
-            current = table_id_for_pid(pid)
-        except Exception as exc:  # noqa: BLE001 - never break the geometry poll
-            log.debug("CoinPoker tracked-window argv check failed for pid %s: %s", pid, exc)
-            return False
-        return bool(current) and current != target
-
     def get_geometry(self):
         """Get the window geometry using platform abstraction."""
         if self._table_geometry is not None:
@@ -399,11 +221,6 @@ class Table(Table_Window):
             table_geom = self._table_geometry
             self._table_geometry = None
             log.debug("Using geometry captured during table detection for window: %s", self.number)
-        elif getattr(self, "site", "") == "CoinPoker":
-            # CoinPoker needs id-based re-resolution, not fixed-HWND visibility.
-            table_geom = self._coinpoker_live_geometry()
-            if table_geom is None:
-                return None
         else:
             # Check if window is still valid. is_window_visible ignores DWM
             # cloaking on purpose: a table on another virtual desktop is

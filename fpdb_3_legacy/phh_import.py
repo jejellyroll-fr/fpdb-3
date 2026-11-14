@@ -2093,7 +2093,7 @@ def import_file(
         # must not reserve them.
         names = [str(player[1]) for player in hand.players]
         # Each hand is stored and committed on its own: empty the shared bulk buffers first,
-        # or the previous hand's rows would be inserted again (as the CoinPoker feed does).
+        # or the previous hand's rows would be inserted again.
         db.resetBulkCache()
         try:
             import_fpdb_hand(hand, db, file_id=file_id)

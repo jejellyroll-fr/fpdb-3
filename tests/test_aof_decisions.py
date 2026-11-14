@@ -19,7 +19,6 @@ from fpdb_3_legacy.autonotes_aof import (
     extract_decisions,
 )
 from fpdb_3_legacy.backfill_aof_decisions import backfill_database
-from fpdb_3_legacy.coinpoker_hand_builder import build_hands
 from fpdb_3_legacy.Database import Database
 from fpdb_3_legacy.equity import EquityEngine
 from fpdb_3_legacy.GGPokerToFpdb import GGPoker
@@ -32,7 +31,9 @@ from fpdb_3_legacy.SQL import Sql
 from fpdb_3_legacy.sql_schema_aof import aof_schema_queries
 from fpdb_3_legacy.stats_aof import aof_splash_freq, aof_splash_won
 
-FIXTURE = Path(__file__).parent / "data" / "coinpoker_aof_hand_events.json"
+# Real All-in or Fold hands, as the capture that recorded them built them.
+FIXTURE = Path(__file__).parent / "data" / "captured_aof_omaha_hand.json"
+HOLD_EM_FIXTURE = Path(__file__).parent / "data" / "captured_aof_holdem_hand.json"
 
 
 class _MockPokerEval:
@@ -88,9 +89,6 @@ def _database() -> Database:
     return Database(_config(), Sql(db_server="sqlite"))
 
 
-SHOWDOWN_REVEALS = ("game.show_hole_cards", "game.reveal_cards")
-
-
 def _hand(site_hand_offset: int = 0, *, reveal: bool = True):
     """The captured hand, optionally as a capture that missed the showdown.
 
@@ -98,11 +96,9 @@ def _hand(site_hand_offset: int = 0, *, reveal: bool = True):
     commits without showing -- the commonest case of all, a shove that takes
     the pot uncontested -- has to be made by dropping the reveals.
     """
-    raw = json.loads(FIXTURE.read_text())
-    events = [tuple(event) for event in raw["hand"]]
+    hand_data = json.loads(FIXTURE.read_text())
     if not reveal:
-        events = [event for event in events if event[0] not in SHOWDOWN_REVEALS]
-    (hand_data,) = build_hands([tuple(raw["join"]), *events], "PLO4")
+        hand_data["holecards"] = [entry for entry in hand_data["holecards"] if not entry["shown"]]
     hand = build_fpdb_hand(
         hand_data,
         config=HttpCaptureHandConfig(site_ids={"CoinPoker": 30, "default": 30}),
@@ -1019,12 +1015,7 @@ def test_backfill_aof_analyses_commit_persists_analyses(tmp_path: Path) -> None:
 
 def test_aof_holdem_fixture_produces_holdem_decisions() -> None:
     """End-to-end: Hold'em fixture goes through build_fpdb_hand and produces AoF Hold'em decisions."""
-    HOLD_EM_FIXTURE = Path(__file__).parent / "data" / "coinpoker_aof_holdem_hand_events.json"
-    raw = json.loads(HOLD_EM_FIXTURE.read_text())
-    events = [tuple(e) for e in raw["hand"]]
-    join = tuple(raw["join"])
-
-    (hand_data,) = build_hands([join, *events], "NLHE")
+    hand_data = json.loads(HOLD_EM_FIXTURE.read_text())
     hand = build_fpdb_hand(
         hand_data,
         config=HttpCaptureHandConfig(site_ids={"CoinPoker": 30, "default": 30}),
@@ -1047,12 +1038,7 @@ def test_aof_holdem_fixture_produces_holdem_decisions() -> None:
 
 def test_aof_holdem_e2e_through_database_and_analysis(tmp_path: Path) -> None:
     """Full pipeline: Hold'em fixture → SQLite → AoF decisions → backfill → HUD read."""
-    HOLD_EM_FIXTURE = Path(__file__).parent / "data" / "coinpoker_aof_holdem_hand_events.json"
-    raw = json.loads(HOLD_EM_FIXTURE.read_text())
-    events = [tuple(e) for e in raw["hand"]]
-    join = tuple(raw["join"])
-
-    (hand_data,) = build_hands([join, *events], "NLHE")
+    hand_data = json.loads(HOLD_EM_FIXTURE.read_text())
     hand = build_fpdb_hand(
         hand_data,
         config=HttpCaptureHandConfig(site_ids={"CoinPoker": 30, "default": 30}),

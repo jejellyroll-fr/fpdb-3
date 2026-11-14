@@ -99,7 +99,6 @@ from fpdb_3_legacy import (
 from fpdb_3_legacy import __version__ as PACKAGE_VERSION
 from fpdb_3_legacy.ConfigInitializer import ensure_config_initialized
 from fpdb_3_legacy.ConfigurationManager import ConfigurationManager
-from fpdb_3_legacy.disabled_sites import allows_live_use
 from fpdb_3_legacy.Exceptions import FpdbError
 from fpdb_3_legacy.GuiConfigObserver import GuiConfigObserver
 from fpdb_3_legacy.hud_options_panel import HudOptionsDialog
@@ -1982,19 +1981,6 @@ class fpdb(QMainWindow):
         self.load_profile()
         wizard = GuiTrackerMigration(self.settings, self.config, self.sql, self)
         wizard.exec()
-
-    def tab_coinpoker_capture(self, widget, data=None) -> None:
-        """Open the CoinPoker live packet-capture tab."""
-        if not allows_live_use("CoinPoker"):
-            log.info("CoinPoker is import-only; not opening the live capture tab")
-            return
-        if self._capture_missing():
-            return
-        self.open_tab(
-            "CoinPoker Capture",
-            lambda module: module.GuiCoinPokerCapture(self.config, self),
-            module="fpdb_3_legacy.capture.GuiCoinPokerCapture",
-        )
 
     def tab_auto_notes_workbench(self, widget, data=None) -> None:
         """Open the automatic notes workbench tab."""

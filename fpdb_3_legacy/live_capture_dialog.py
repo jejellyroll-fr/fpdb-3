@@ -30,7 +30,6 @@ from fpdb_3_legacy.live_capture_consent import Mechanism
 #: capture to turn on.
 _ROOMS = {
     live_capture_consent.SWC_NATIVE.key: "SealsWithClubs",
-    live_capture_consent.COINPOKER_PACKETS.key: "CoinPoker",
 }
 
 

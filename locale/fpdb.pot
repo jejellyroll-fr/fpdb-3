@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 00:05+0100\n"
+"POT-Creation-Date: 2026-11-14 11:31+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -94,8 +94,7 @@ msgstr ""
 msgid "Save where this HUD's windows are"
 msgstr ""
 
-#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/swc_poker_console.py
 #: fpdb_3_legacy/session_guard_dialog.py
 msgid "Stop"
 msgstr ""
@@ -2873,58 +2872,6 @@ msgstr ""
 msgid "Create Theme"
 msgstr ""
 
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Interface:"
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Default game:"
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Dry run (no DB insert)"
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Launch HUD"
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Start capture"
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Refresh interfaces"
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Idle."
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Capture not started: it is off until you turn it on."
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Finishing previous capture…"
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Capture failed to start — see the log above."
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Stopping…"
-msgstr ""
-
 #: fpdb_3_legacy/capture/swc_poker_console.py
 msgid "SwC Poker - Capture Console & Replayer"
 msgstr ""
@@ -3514,17 +3461,6 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/live_capture_consent.py
-msgid "CoinPoker packet capture"
-msgstr ""
-
-#: fpdb_3_legacy/live_capture_consent.py
-msgid ""
-"fpdb records the network packets exchanged by the CoinPoker client, with "
-"administrator rights (tcpdump, pkexec or a UAC prompt), and rebuilds the "
-"hands from them. It reads the traffic only; it loads nothing into the client."
-msgstr ""
-
-#: fpdb_3_legacy/live_capture_consent.py
 #, python-brace-format
 msgid ""
 "{title} is off. Turn it on in Tools ▸ Live capture… after reading what it "
@@ -3679,10 +3615,6 @@ msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Bring your hands over from PokerTracker 4 or Holdem Manager 3"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "CoinPoker Live Capture"
 msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py

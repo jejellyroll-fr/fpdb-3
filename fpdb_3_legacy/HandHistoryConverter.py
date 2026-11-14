@@ -1127,7 +1127,7 @@ def getTableTitleRe(config, sitename, *args, **kwargs):
         hhc = getSiteHhc(config, sitename)
     except (KeyError, ImportError, AttributeError):
         # Site enabled without a usable <hhc> converter (e.g. live-capture-only
-        # sites like CoinPoker, or name-mismatched sites). Fall back to searching
+        # sites, or name-mismatched sites). Fall back to searching
         # the window title for the table name instead of aborting HUD creation.
         import re as _re
 

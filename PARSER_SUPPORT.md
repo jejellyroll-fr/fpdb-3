@@ -48,8 +48,8 @@ session; nothing runs beside its client:
   stored as USD) -- NLH, PLO 4/5/6, bomb pots on two boards, run it twice,
   Splash and Mega Splash drops, Splash Fee, all-in EV cash-outs. Golden
   snapshots in `tests/test_live_parser_regression.py`, behaviour in
-  `tests/test_coinpoker_text_import.py`. Its packet-capture pipeline and table
-  detection stay in the tree, unused.
+  `tests/test_coinpoker_text_import.py`. Its former packet capture and table
+  detection were removed; a hand that capture stored is a duplicate on import.
 
 The switch is `IMPORT_ONLY_SITES` in `fpdb_3_legacy/disabled_sites.py`: the
 room keeps its `<hhc>` converter binding and can be enabled for Bulk Import,

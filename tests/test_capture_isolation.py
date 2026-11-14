@@ -1,9 +1,9 @@
 """fpdb's core imports without the captures that reach into a client (#451).
 
-The SwC tap, its injector and the CoinPoker packet capture live in
-``fpdb_3_legacy.capture``. The core decodes what they wrote and reaches into
-that package only from the action that starts a capture, so an install that
-leaves it out still starts, imports files and runs the HUD.
+The SwC tap and its injector live in ``fpdb_3_legacy.capture``. The core
+decodes what they wrote and reaches into that package only from the action that
+starts a capture, so an install that leaves it out still starts, imports files
+and runs the HUD.
 """
 
 from __future__ import annotations
@@ -81,9 +81,6 @@ def test_the_capture_modules_left_the_core() -> None:
         "swc_native_tap.c",
         "swc_http_capture.py",
         "swc_poker_console.py",
-        "coinpoker_pcap.py",
-        "coinpoker_live_capture.py",
-        "GuiCoinPokerCapture.py",
     }
 
     assert moved <= {path.name for path in CAPTURE.iterdir()}

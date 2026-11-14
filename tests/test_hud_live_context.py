@@ -457,83 +457,11 @@ def test_live_context_repaints_enabled_dynamic_windows() -> None:
 
 
 # ---------------------------------------------------------------------------
-# The room adapter: CoinPoker's own action stream
+# The room-independent adapter: the hand builders' own action rows
 # ---------------------------------------------------------------------------
 
 
-class TestCoinPokerAdapter:
-    def test_a_raise_reads_its_raise_to_total(self) -> None:
-        action = live.coinpoker_action(
-            {"username": "Ann", "action": "RAISE", "newPlayerAction": "BET", "actionAmount": 600, "roundName": "PREFLOP"}
-        )
-        assert action is not None
-        assert (action.actor, action.action, action.to_cents) == ("Ann", "bets", 600)
-
-    def test_a_fold_and_a_check_carry_no_money(self) -> None:
-        fold = live.coinpoker_action({"username": "Ann", "action": "FOLD", "roundName": "FLOP"})
-        assert fold is not None and fold.action == "folds" and fold.amount_cents == 0
-        check = live.coinpoker_action({"username": "Bob", "action": "CHECK", "roundName": "FLOP"})
-        assert check is not None and check.action == "checks"
-
-    def test_an_all_in_is_marked(self) -> None:
-        action = live.coinpoker_action(
-            {
-                "username": "Ann",
-                "action": "ALLIN",
-                "newPlayerAction": "ALLIN",
-                "actionAmount": 10000,
-                "roundName": "PREFLOP",
-            }
-        )
-        assert action is not None and action.all_in
-
-    def test_a_record_without_a_player_is_refused(self) -> None:
-        assert live.coinpoker_action({"action": "FOLD"}) is None
-
-    def test_two_actions_in_the_same_millisecond_are_both_kept(self) -> None:
-        """Distinct actions must not share a sequence and be dropped as duplicates."""
-        events = [
-            (
-                "game.dealer_chat_action",
-                "h1",
-                {
-                    "gameActionMessagesHistory": [
-                        {"username": "Ann", "action": "RAISE", "actionAmount": 600, "roundName": "PREFLOP", "initTimestamp": 1},
-                        {"username": "Bob", "action": "FOLD", "roundName": "PREFLOP", "initTimestamp": 1},
-                    ]
-                },
-            )
-        ]
-        actions = list(live.coinpoker_actions(events, hand_id="h1"))
-        assert [action.actor for action in actions] == ["Ann", "Bob"]
-        assert len({action.sequence for action in actions}) == 2
-
-    def test_a_repeated_record_is_dropped(self) -> None:
-        record = {"username": "Ann", "action": "FOLD", "roundName": "FLOP", "initTimestamp": 7}
-        events = [("game.dealer_chat_action", "h1", {"gameActionMessagesHistory": [record, dict(record)]})]
-        assert len(list(live.coinpoker_actions(events, hand_id="h1"))) == 1
-
-    def test_a_capture_stream_becomes_actions_in_order(self) -> None:
-        events = [
-            ("game.dealer_chat_action", "h1", {}),
-            (
-                "game.dealer_chat_action",
-                "h1",
-                {
-                    "gameActionMessagesHistory": [
-                        {"username": "Ann", "action": "RAISE", "actionAmount": 600, "roundName": "PREFLOP"},
-                        {"username": "Bob", "action": "CALL", "actionAmount": 600, "roundName": "PREFLOP"},
-                        {"username": "Cara", "action": "FOLD", "roundName": "PREFLOP"},
-                    ]
-                },
-            ),
-        ]
-        actions = list(live.coinpoker_actions(events, hand_id="h1"))
-        assert [action.actor for action in actions] == ["Ann", "Bob", "Cara"]
-        # ``RAISE`` with no ``newPlayerAction`` adapts as a raise; folding it
-        # into the adapter's state is what decides it was an opening bet.
-        assert [action.action for action in actions] == ["raises", "calls", "folds"]
-
+class TestNormalizedAdapter:
     def test_the_builder_shape_is_adapted_too(self) -> None:
         rows = [
             {"type": "raises", "player": "Ann", "street": "PREFLOP", "to": "600"},
@@ -551,22 +479,14 @@ class TestCoinPokerAdapter:
         assert [adapter.apply(action) for action in live.actions_from_normalized(rows, hand_id="h1")] == [None, None]
         assert adapter.context.pot_type == "single_raised"
 
-    def test_a_coinpoker_stream_drives_the_panels(self) -> None:
+    def test_a_stream_of_rows_drives_the_panels(self) -> None:
         resolver = hs.load_default_resolver()
         adapter = _adapter()
-        events = [
-            (
-                "game.dealer_chat_action",
-                "h1",
-                {
-                    "gameActionMessagesHistory": [
-                        {"username": "P1", "action": "RAISE", "actionAmount": 600, "roundName": "PREFLOP"},
-                        {"username": "P2", "action": "CALL", "actionAmount": 600, "roundName": "PREFLOP"},
-                    ]
-                },
-            )
+        rows = [
+            {"type": "raises", "player": "P1", "street": "PREFLOP", "to": "600"},
+            {"type": "calls", "player": "P2", "street": "PREFLOP", "amount": "600"},
         ]
-        for action in live.coinpoker_actions(events, hand_id="h1"):
+        for action in live.actions_from_normalized(rows, hand_id="h1"):
             adapter.apply(action)
         assert adapter.context.pot_type == "single_raised"
         assert "srp_cbet_ip" in _panels(

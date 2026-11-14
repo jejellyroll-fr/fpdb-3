@@ -1,0 +1,139 @@
+{
+ "site": "CoinPoker",
+ "hand_id": "12314400005",
+ "hero": "hero",
+ "table_id": "123144",
+ "timestamp": "2026-07-27T15:45:20.155000",
+ "buttonpos": 1,
+ "game": {
+  "base": "hold",
+  "category": "aof_holdem",
+  "fpdb_supported": true
+ },
+ "streets": {
+  "holeStreets": [
+   "PREFLOP"
+  ]
+ },
+ "gametype": {
+  "base": "hold",
+  "category": "aof_holdem",
+  "type": "ring",
+  "limitType": "nl",
+  "currency": "USD",
+  "sb": "0.1",
+  "bb": "0.25",
+  "ante": "0.0",
+  "maxSeats": 6
+ },
+ "tournament": null,
+ "players": [
+  {
+   "seat_idx": 1,
+   "name": "villain2",
+   "starting_stack": "2.0"
+  },
+  {
+   "seat_idx": 2,
+   "name": "villain1",
+   "starting_stack": "2.0"
+  },
+  {
+   "seat_idx": 3,
+   "name": "hero",
+   "starting_stack": "2.0"
+  }
+ ],
+ "actions": [
+  {
+   "type": "small blind",
+   "player": "villain1",
+   "amount": "0.1"
+  },
+  {
+   "type": "big blind",
+   "player": "hero",
+   "amount": "0.25"
+  },
+  {
+   "type": "folds",
+   "player": "villain2",
+   "street": "FLOP"
+  },
+  {
+   "type": "raises",
+   "player": "villain1",
+   "street": "FLOP",
+   "to": "2.0"
+  },
+  {
+   "type": "calls",
+   "player": "hero",
+   "street": "FLOP",
+   "amount": "1.75"
+  }
+ ],
+ "community": {
+  "FLOP": [
+   "5h",
+   "4s",
+   "5s"
+  ],
+  "TURN": [
+   "7h"
+  ],
+  "RIVER": [
+   "Qd"
+  ]
+ },
+ "boards": [
+  {
+   "FLOP": [
+    "5h",
+    "4s",
+    "5s"
+   ],
+   "TURN": [
+    "7h"
+   ],
+   "RIVER": [
+    "Qd"
+   ]
+  }
+ ],
+ "run_it_times": 1,
+ "double_board": false,
+ "bomb_pot": 0,
+ "splash_pot": 0,
+ "mega_splash": false,
+ "cashout": [],
+ "splash_winnings": [],
+ "holecards": [
+  {
+   "player": "hero",
+   "closed": [
+    "As",
+    "Qh"
+   ],
+   "dealt": true,
+   "shown": false,
+   "mucked": false
+  },
+  {
+   "player": "villain1",
+   "closed": [
+    "Ks",
+    "9s"
+   ],
+   "dealt": true,
+   "shown": true,
+   "mucked": false
+  }
+ ],
+ "collections": [
+  {
+   "player": "hero",
+   "pot": "3.94"
+  }
+ ]
+}

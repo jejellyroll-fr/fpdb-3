@@ -1,22 +1,24 @@
 """A capture that reaches into a poker client runs only once its user said yes (#451).
 
-The SwC tap is loaded into the client and the CoinPoker capture records its
-packets. Neither may start on a fresh install: the user turns each on after
-reading what it does, and a mechanism that changes asks again.
+The SwC tap is loaded into the client. It may not start on a fresh install: the
+user turns it on after reading what it does, and a mechanism that changes asks
+again.
 """
 
 from __future__ import annotations
 
 import io
 import json
-import sys
 from pathlib import Path
 
 import pytest
 
 from fpdb_3_legacy import live_capture_consent as consent
 from fpdb_3_legacy.capture import swc_client
-from fpdb_3_legacy.live_capture_consent import COINPOKER_PACKETS, SWC_NATIVE, LiveCaptureNotAccepted
+from fpdb_3_legacy.live_capture_consent import SWC_NATIVE, LiveCaptureNotAccepted
+
+#: A second mechanism, so that answers can be shown to stay apart.
+OTHER = consent.Mechanism("other_capture", 1, "Other capture", "Reads another client.")
 
 
 @pytest.fixture
@@ -37,7 +39,7 @@ class _Terminal(io.StringIO):
 def test_a_fresh_install_has_turned_nothing_on(answers) -> None:
     assert not answers.exists()
     assert not consent.is_accepted(SWC_NATIVE, answers)
-    assert not consent.is_accepted(COINPOKER_PACKETS, answers)
+    assert not consent.is_accepted(OTHER, answers)
     with pytest.raises(LiveCaptureNotAccepted, match="Tools ▸ Live capture"):
         consent.require(SWC_NATIVE, answers)
 
@@ -46,7 +48,7 @@ def test_a_yes_turns_on_that_mechanism_only(answers) -> None:
     consent.accept(SWC_NATIVE, answers)
 
     assert consent.is_accepted(SWC_NATIVE, answers)
-    assert not consent.is_accepted(COINPOKER_PACKETS, answers)
+    assert not consent.is_accepted(OTHER, answers)
     consent.require(SWC_NATIVE, answers)
     recorded = json.loads(answers.read_text(encoding="utf-8"))["accepted"]["swc_native"]
     assert recorded["version"] == SWC_NATIVE.version
@@ -62,12 +64,24 @@ def test_a_changed_mechanism_asks_again(answers) -> None:
 
 def test_withdrawing_turns_it_off_and_keeps_the_others(answers) -> None:
     consent.accept(SWC_NATIVE, answers)
-    consent.accept(COINPOKER_PACKETS, answers)
+    consent.accept(OTHER, answers)
 
     consent.withdraw(SWC_NATIVE, answers)
 
     assert not consent.is_accepted(SWC_NATIVE, answers)
-    assert consent.is_accepted(COINPOKER_PACKETS, answers)
+    assert consent.is_accepted(OTHER, answers)
+
+
+def test_an_answer_for_the_removed_coinpoker_capture_is_ignored(answers) -> None:
+    # CoinPoker's packet capture was removed (#732); a file that still records
+    # a yes to it turns nothing on and is still read for the others.
+    answers.write_text(
+        json.dumps({"accepted": {"coinpoker_packets": {"version": 1}, "swc_native": {"version": SWC_NATIVE.version}}}),
+        encoding="utf-8",
+    )
+
+    assert "coinpoker_packets" not in consent.MECHANISMS
+    assert consent.is_accepted(SWC_NATIVE, answers)
 
 
 @pytest.mark.parametrize(
@@ -199,35 +213,6 @@ def test_the_swc_command_stops_when_the_answer_is_no(monkeypatch) -> None:
     monkeypatch.setattr(swc_client, "attach_to_windows_client", lambda **_k: pytest.fail("attached"))
 
     assert swc_client.main([]) == 2
-
-
-def test_the_coinpoker_live_command_stops_without_a_yes(tmp_path, monkeypatch, capsys) -> None:
-    from fpdb_3_legacy.capture import coinpoker_live_capture, coinpoker_pcap
-
-    config = tmp_path / "HUD_config.xml"
-    monkeypatch.setattr(sys, "argv", ["coinpoker_live_capture", "--live", "--config-file", str(config)])
-    monkeypatch.setattr(coinpoker_pcap, "capture_live", lambda *_a, **_k: pytest.fail("captured"))
-
-    with pytest.raises(SystemExit) as exited:
-        coinpoker_live_capture.main()
-
-    assert exited.value.code == 1
-    assert "CoinPoker packet capture is off" in capsys.readouterr().out
-
-
-def test_the_coinpoker_replay_needs_no_yes(tmp_path, monkeypatch) -> None:
-    # Reading a capture file back records nothing from the client.
-    from fpdb_3_legacy.capture import coinpoker_live_capture
-
-    monkeypatch.setattr(sys, "argv", ["coinpoker_live_capture", "--replay", str(tmp_path / "x.pcap"), "--dry-run"])
-    monkeypatch.setattr(coinpoker_live_capture, "_events_from_segments", lambda _s: [])
-    monkeypatch.setattr("fpdb_3_legacy.capture.coinpoker_pcap.open_offline", lambda *_a: [])
-    ran = []
-    monkeypatch.setattr(coinpoker_live_capture, "run", lambda *a, **k: ran.append(k))
-
-    coinpoker_live_capture.main()
-
-    assert ran
 
 
 def test_the_client_is_looked_for_with_a_resolved_pgrep(monkeypatch) -> None:

@@ -42,7 +42,6 @@ class WindowsTableDetector:
             self._EnumWindows = ctypes_api.windll.user32.EnumWindows
             self._GetWindowText = ctypes_api.windll.user32.GetWindowTextW
             self._GetWindowTextLength = ctypes_api.windll.user32.GetWindowTextLengthW
-            self._GetClassName = ctypes_api.windll.user32.GetClassNameW
             self._GetWindowThreadProcessId = ctypes_api.windll.user32.GetWindowThreadProcessId
             self._IsWindowVisible = ctypes_api.windll.user32.IsWindowVisible
             self._GetWindowRect = ctypes_api.windll.user32.GetWindowRect
@@ -108,8 +107,6 @@ class WindowsTableDetector:
                 if pattern is None or pattern.search(title):
                     geometry = self.get_window_geometry(hwnd)
                     if geometry:
-                        cls_buff = self._ctypes.create_unicode_buffer(256)
-                        self._GetClassName(hwnd, cls_buff, 256)
                         pid = self._wintypes.DWORD()
                         self._GetWindowThreadProcessId(hwnd, self._ctypes.byref(pid))
                         table_info = TableInfo(
@@ -117,7 +114,6 @@ class WindowsTableDetector:
                             title=title,
                             geometry=geometry,
                             process_id=pid.value or None,
-                            window_class=cls_buff.value or None,
                         )
                         tables.append(table_info)
             return True
@@ -164,7 +160,6 @@ class WindowsTableDetector:
         table moved to another virtual desktop) is still alive, and the
         generic per-site geometry poll uses this check to decide whether to
         close the HUD — treating "cloaked" as "gone" would kill live HUDs.
-        Use is_window_displayed() when cloaking must count as hidden.
 
         Args:
             window_id: Window handle
@@ -178,33 +173,12 @@ class WindowsTableDetector:
         except (AttributeError, OSError, TypeError, ValueError):
             return False
 
-    def is_window_displayed(self, window_id: int | str) -> bool:
-        """Check if window is actually shown on screen right now.
-
-        Win32-visible AND not DWM-cloaked. CoinPoker keeps its Unity window
-        "visible" but cloaked after a table closes, so its close detection
-        needs the stricter test.
-
-        Args:
-            window_id: Window handle
-
-        Returns:
-            True if window is visible and not cloaked
-        """
-        try:
-            window_id = int(window_id)
-            return self._window_is_actually_visible(window_id)
-        except (AttributeError, OSError, TypeError, ValueError):
-            return False
-
     def _window_is_actually_visible(self, window_id: int) -> bool:
         """True only when Win32 and DWM both consider the window visible.
 
-        CoinPoker's Unity host can remain ``IsWindowVisible`` after a table is
-        closed while DWM cloaks it. Such a window is not displayed but used to
-        keep the HUD alive forever because its PID/argv still carried the table
-        id. Treat DWM-cloaked windows as closed. If DWM is unavailable or the
-        query fails, preserve the legacy Win32 result.
+        A window DWM cloaks is not on screen even when Win32 calls it visible,
+        so table enumeration skips it. If DWM is unavailable or the query
+        fails, preserve the legacy Win32 result.
         """
         if not self._IsWindowVisible(window_id):
             return False

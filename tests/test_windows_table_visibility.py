@@ -43,11 +43,3 @@ def test_is_window_visible_ignores_cloaking() -> None:
 def test_is_window_visible_false_when_win32_hidden() -> None:
     detector = _detector(win32_visible=False, cloaked=False)
     assert detector.is_window_visible(123) is False
-
-
-def test_is_window_displayed_honours_cloaking() -> None:
-    """CoinPoker close detection needs cloaked windows reported as hidden."""
-    detector = _detector(win32_visible=True, cloaked=True)
-    assert detector.is_window_displayed(123) is False
-    detector = _detector(win32_visible=True, cloaked=False)
-    assert detector.is_window_displayed(123) is True
