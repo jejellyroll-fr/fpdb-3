@@ -39,6 +39,10 @@ The HUD finds a table's window by the id in its title, `Omaha - PL5 (99465067)`:
 the table id for cash games, the tournament id for tournaments and Power Spins.
 The lobby window, which carries no id, is ignored.
 
+The HUD is the static one: position-bound and dynamic panels stay off at Unibet
+tables until Unibet confirms what fpdb may do there
+([room by room](hud-room-compatibility.md#unibetfr)).
+
 * **macOS** needs the permissions described in the main HUD guide: Screen
   Recording, or Automation for the AppleScript fallback.
 * **Troubleshooting:** no HUD → check that Auto Import saw a hand from this

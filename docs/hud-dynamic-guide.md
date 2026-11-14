@@ -28,9 +28,19 @@ what they do and what rooms say about them: PokerStars forbids in-game
 statistics that change with the game state, and Winamax lists dynamic range
 tools as prohibited. Until you say yes, the HUD keeps its static grid whatever
 your configuration says, so a package or a hand-edited `HUD_config.xml` cannot
-turn them on behind your back. At **PokerStars tables they never show**, on any
-of its regional sites, yes or not. Your room's terms prevail: see
-[what fpdb does while you play](fair-play.md#rooms).
+turn them on behind your back.
+
+Your yes is not enough on its own: **the panels show only at tables of a room
+whose rules were reviewed and allow them**, and your answer never overrides a
+room. Today no room is: PokerStars (every regional site), Winamax, the iPoker
+network under every skin's name, and every room not reviewed yet keep the
+static grid. Position-bound panels are shown stacked there too, so nothing a
+seat displays changes with the hand. Which room allows what, and why, is in
+[what the HUD does in each room](hud-room-compatibility.md). Your room's terms
+prevail: see [what fpdb does while you play](fair-play.md#rooms).
+
+Until a room allows them, you can still build and preview panel rules in
+Preferences: the preview runs offline.
 
 A table running any other profile resolves **no rule** and keeps the static grid
 it always had. That is what makes turning dynamic panels off indistinguishable
@@ -86,6 +96,10 @@ fpdb is honest about this, and so should the panels be:
   *assembled* hand says. The panels are still right, they simply change when the
   hand is refreshed rather than mid-action.
 
+All three apply only where the room allows dynamic panels; a live source a
+room does not permit is ignored, whatever it reports
+([room by room](hud-room-compatibility.md)).
+
 fpdb never claims action-by-action behaviour for a source that cannot provide it.
 If the Winamax round log does not establish a fact — such as a faced bet or
 exact effective stack — rules requiring that fact do not match. Historical
@@ -119,6 +133,8 @@ lost by turning panels on or off.
 
 ## Where to go next
 
+- [What the HUD does in each room](hud-room-compatibility.md) — static,
+  positional and dynamic, room by room.
 - [Advanced HUD guide](hud-advanced-guide.md) — the reference packages.
 - [Analytics concepts](analytics-concepts.md) — pot type, SPR, IP/OOP, sizing.
 - Developer/reference: [dynamic-panels.md](dynamic-panels.md),

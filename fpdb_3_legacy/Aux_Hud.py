@@ -258,7 +258,12 @@ _ALIGN = {
 # ``hud_situation`` (#298), which the dynamic panel layer also needs. They are
 # re-exported here because this is where callers have always imported them, and
 # so the two layers cannot disagree about what "B" means.
-from fpdb_3_legacy.hud_situation import block_visible, block_visible_for, normalize_position  # noqa: E402,F401
+from fpdb_3_legacy.hud_situation import (  # noqa: E402,F401
+    block_visible,
+    block_visible_for,
+    is_dynamic_only,
+    normalize_position,
+)
 
 
 def false_attr(value: Any) -> bool:
@@ -336,6 +341,9 @@ class SimpleHUD(Aux_Base.AuxSeats):
         self._dragged_block_keys: set[BlockKey] = set()
         self._dragged_classic_slots: set[Any] = set()
         self._dragged_marks_profile: tuple[str, str, int, str | None] | None = None
+        # The last room refusal logged, so each is said once, not on every redraw.
+        self._positional_refusal_logged: str | None = None
+        self._panel_refusal_logged: str | None = None
 
     @staticmethod
     def _hud_font_scale(value: Any, default: float) -> float:
@@ -346,13 +354,44 @@ class SimpleHUD(Aux_Base.AuxSeats):
 
     def _positional_mode(self) -> str:
         """'all' (show every position panel, stacked) or 'current' (only the
-        panel matching the live position). Defaults to 'current'."""
+        panel matching the live position). Defaults to 'current'.
+
+        Always 'all' at a table of a room whose policy refuses a positional HUD
+        (#756): every position panel shows, stacked, so what a seat displays
+        does not change with the hand being played. Asked on every update, so
+        no profile switch or configuration edit gets around it.
+        """
+        if self._positional_refusal():
+            return "all"
         config_stat_set = getattr(self.config, "stat_sets", {}).get(self.game_params.name)
         for stat_set in (self.game_params, config_stat_set):
             mode = getattr(stat_set, "positional_mode", "") if stat_set is not None else ""
             if mode:
                 return str(mode).strip().lower()
         return "current"
+
+    def _room_site(self) -> tuple[str | None, str]:
+        """This table's site and the network ``HUD_config.xml`` gives it."""
+        from fpdb_3_legacy import hud_room_policy
+
+        site = getattr(getattr(self, "hud", None), "site", None)
+        return site, hud_room_policy.network_hint(getattr(self, "config", None), site)
+
+    def _positional_refusal(self) -> str | None:
+        """Why this table's room refuses a positional HUD, or None (#756)."""
+        try:
+            from fpdb_3_legacy import hud_room_policy
+
+            site, network = self._room_site()
+            refused = hud_room_policy.why_not("positional_hud", site, network)
+        except Exception:  # intentional broad catch: fail closed, never break the HUD
+            log.exception("HUD room policy could not be read; position panels shown stacked")
+            refused = "the room policy could not be read"
+        if refused and refused != getattr(self, "_positional_refusal_logged", None):
+            # Said once, not on every redraw.
+            log.info("Position panels shown stacked at this %s table: %s", getattr(self.hud, "site", ""), refused)
+        self._positional_refusal_logged = refused
+        return refused
 
     # -- context-aware dynamic panels (#298) --------------------------------
 
@@ -368,8 +407,8 @@ class SimpleHUD(Aux_Base.AuxSeats):
 
         Configured rules are still None here until the user said yes after
         reading what rooms say about them, and always at a table of a room
-        that forbids them (#647): whatever wrote the rules, this is the one
-        place every table asks.
+        whose policy does not allow them (#647, #756): whatever wrote the
+        rules, this is the one place every table asks.
         """
         profile = getattr(self.game_params, "name", "default")
         try:
@@ -379,10 +418,12 @@ class SimpleHUD(Aux_Base.AuxSeats):
             # Asked before the cache, on every update: a yes given meanwhile
             # applies, and a yes withdrawn -- the answer file deleted -- stops a
             # table that already shows panels.
+            site, network = self._room_site()
             refused = (
                 dynamic_panels_consent.why_not_at(
-                    getattr(self.hud, "site", None),
+                    site,
                     dynamic_panels_consent.consent_path(getattr(self.config, "file", None)),
+                    network,
                 )
                 if configured
                 else None
@@ -1740,8 +1781,14 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         for box, (container, block) in zip(self.stat_boxes, self.block_widgets, strict=False):
             if selection is not None:
                 visible = block_visible_for(block, selection, player_pos)
+            elif show_all_positions:
+                # "all" stacks the position panels -- the profile's choice, or a
+                # room that refuses a positional HUD (#756) -- but a dynamic-only
+                # block still waits for a selection naming it: with panels off
+                # the profile keeps its static core.
+                visible = not is_dynamic_only(block.get("position", ""))
             else:
-                visible = True if show_all_positions else block_visible(block.get("position", ""), player_pos)
+                visible = block_visible(block.get("position", ""), player_pos)
             container.setVisible(visible)
             if not visible:
                 continue

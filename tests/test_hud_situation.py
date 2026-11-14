@@ -1003,7 +1003,7 @@ def _turned_on(tmp_path) -> str:
     return str(config_file)
 
 
-def test_a_configured_profile_answers_with_the_seat_panels(tmp_path) -> None:
+def test_a_configured_profile_answers_with_the_seat_panels(tmp_path, reviewed_room) -> None:
     from types import SimpleNamespace
 
     from fpdb_3_legacy import Aux_Hud
@@ -1015,6 +1015,7 @@ def test_a_configured_profile_answers_with_the_seat_panels(tmp_path) -> None:
     )
     aux.game_params = SimpleNamespace(name="default")
     aux.hud = SimpleNamespace(
+        site=reviewed_room,
         stat_dict={7: {"live_position": "0", "street0Aggr": 1, "street1InPosition": 1, "n": 100}},
         live_state={"street": "flop", "pot_type": "single_raised"},
     )
@@ -1026,7 +1027,7 @@ def test_a_configured_profile_answers_with_the_seat_panels(tmp_path) -> None:
     assert aux.dynamic_panel_selection(3, 99) is not None
 
 
-def test_plo_live_flop_replaces_preflop_panel_with_small_sample(tmp_path) -> None:
+def test_plo_live_flop_replaces_preflop_panel_with_small_sample(tmp_path, reviewed_room) -> None:
     from dataclasses import replace
     from types import SimpleNamespace
 
@@ -1042,6 +1043,7 @@ def test_plo_live_flop_replaces_preflop_panel_with_small_sample(tmp_path) -> Non
     )
     aux.game_params = SimpleNamespace(name="plo_6max_dynamic")
     aux.hud = SimpleNamespace(
+        site=reviewed_room,
         stat_dict={1: opener, 2: caller},
         live_state={"source": "street_live", "street": "preflop", "pot_type": "unopened"},
     )
@@ -1080,11 +1082,11 @@ def test_rules_nobody_said_yes_to_keep_the_static_grid(tmp_path) -> None:
     assert aux.dynamic_panel_selection(3, 7) is None
 
 
-def test_a_yes_given_while_the_table_runs_applies_to_the_next_update(tmp_path) -> None:
+def test_a_yes_given_while_the_table_runs_applies_to_the_next_update(tmp_path, reviewed_room) -> None:
     from fpdb_3_legacy import dynamic_panels_consent
 
     config_file = tmp_path / "HUD_config.xml"
-    aux = _hud_with_rules(str(config_file))
+    aux = _hud_with_rules(str(config_file), site=reviewed_room)
     assert aux.dynamic_panel_selection(3, 7) is None
 
     dynamic_panels_consent.confirm(dynamic_panels_consent.consent_path(config_file))
@@ -1118,9 +1120,9 @@ def test_a_regional_pokerstars_table_keeps_the_static_grid_too(tmp_path, site) -
     assert aux.dynamic_panel_selection(3, 7) is None
 
 
-def test_withdrawing_the_yes_stops_a_table_already_showing_panels(tmp_path) -> None:
+def test_withdrawing_the_yes_stops_a_table_already_showing_panels(tmp_path, reviewed_room) -> None:
     config_file = _turned_on(tmp_path)
-    aux = _hud_with_rules(config_file)
+    aux = _hud_with_rules(config_file, site=reviewed_room)
     assert aux.dynamic_panel_selection(3, 7) is not None
 
     (tmp_path / "dynamic-panels-consent.json").unlink()

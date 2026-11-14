@@ -218,3 +218,24 @@ def pytest_sessionfinish(session):
                 red=True,
             )
         session.exitstatus = pytest.ExitCode.TESTS_FAILED
+
+
+#: The site name :func:`reviewed_room` registers.
+REVIEWED_TEST_ROOM = "Reviewed Test Room"
+
+
+@pytest.fixture
+def reviewed_room(monkeypatch):
+    """A room whose reviewed policy allows every HUD capability (#756).
+
+    No real room does yet: every live table gets the static HUD. Tests of the
+    dynamic and positional paths themselves seat their HUD in this room.
+    """
+    from fpdb_3_legacy import hud_room_policy
+
+    monkeypatch.setitem(
+        hud_room_policy.ROOM_POLICIES,
+        REVIEWED_TEST_ROOM.casefold(),
+        hud_room_policy.RoomPolicy(REVIEWED_TEST_ROOM, hud_room_policy.UNRESTRICTED, "allowed for tests"),
+    )
+    return REVIEWED_TEST_ROOM
