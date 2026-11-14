@@ -127,8 +127,6 @@ class Hud:
         # unknown street never matches a flop rule by accident. The feed writes
         # it through set_live_state; nothing here depends on it being filled.
         self.live_state: dict[str, Any] = {}
-        # The last room refusal of live context logged, said once per table (#756).
-        self._live_context_refusal_logged: str | None = None
         self.is_loading = False
         self.is_fast_fold = False
         # Which build of this table's HUD this object is. HUD_main hands out a
@@ -518,17 +516,6 @@ class Hud:
             # cannot make this old hand look newer than another import.
             self._winamax_live_hand_id = None
             self.live_state.clear()
-        live_session = getattr(self, "_live_context_session", None)
-        if live_session is not None and live_session.adapter.hand_id != str(context_hand_id):
-            # One hand's live context must never leak into the next. A hand the
-            # session is already following is left alone: an import that lands
-            # after its own live events must not wipe the live context. Nor may
-            # a hand it has already left be started again: the live stream runs
-            # ahead of the import (actions are published before the hand is even
-            # built), so a notification for a finished hand arriving while the
-            # next one is being played would show a pot nobody is in.
-            if not live_session.adapter.has_left(str(context_hand_id)):
-                live_session.start_hand(str(context_hand_id))
         if not keep_live_round:
             try:
                 from fpdb_3_legacy import hud_situation
@@ -584,82 +571,6 @@ class Hud:
                     aux.update_gui(getattr(self, "_winamax_live_hand_id", "live"))
             except Exception:  # one broken overlay must not stop the others
                 log.exception("Could not redraw dynamic HUD panels after a live update")
-
-    def _room_allows_live_context(self) -> bool:
-        """Whether this table's room lets the HUD use the current hand from a live source (#756).
-
-        A live source a room does not permit is dropped here, before it reaches
-        the panels: the capture or log reader may still run (table and seat
-        identification), but nothing it says about the hand is used.
-        """
-        try:
-            from fpdb_3_legacy import hud_room_policy
-
-            refused = hud_room_policy.why_not(
-                "live_context", self.site, hud_room_policy.network_hint(getattr(self, "config", None), self.site)
-            )
-        except Exception:  # intentional broad catch: fail closed, never break the HUD
-            log.exception("HUD room policy could not be read; live context ignored")
-            refused = "the room policy could not be read"
-        if refused and refused != getattr(self, "_live_context_refusal_logged", None):
-            log.info("Live context ignored at this %s table: %s", self.site, refused)
-        self._live_context_refusal_logged = refused
-        return refused is None
-
-    def live_context_session(self) -> Any:
-        """This table's action-by-action live context session (#336).
-
-        Created on first use, so a table with no live source never has one and
-        every existing path is unchanged. The session publishes through
-        :meth:`set_live_state`, so the resolver and the redraw are the ones the
-        classic path already uses.
-        """
-        session = getattr(self, "_live_context_session", None)
-        if session is None:
-            from fpdb_3_legacy import hud_live_context
-
-            session = hud_live_context.LiveContextSession(self)
-            self._live_context_session = session
-        return session
-
-    def accept_live_action(self, action: Any, *, hand_id: str = "") -> Any:
-        """Feed one action from a live source into the dynamic panels.
-
-        The session's adapter owns the hand boundary: an action naming a newer
-        hand starts the next hand, and a late delivery from the previous one is
-        dropped, so live state never moves backwards on a replayed sweep. A
-        caller that knows the hand but carries an action that does not names it
-        with ``hand_id``, which is stamped onto the action here. Returns the
-        trace of the update, or ``None`` when the action was a duplicate, out of
-        order, a stale delivery from the previous hand, or at a table whose room
-        does not permit live context (#756).
-        """
-        from dataclasses import replace
-
-        if not self._room_allows_live_context():
-            return None
-        session = self.live_context_session()
-        if hand_id and not getattr(action, "hand_id", ""):
-            action = replace(action, hand_id=str(hand_id))
-        trace = session.update(action)
-        if trace is not None:
-            self.refresh_dynamic_panels()
-        return trace
-
-    def accept_live_context(self, context: Any) -> None:
-        """Publish an already-folded :class:`LiveContext` to the panels (#336)."""
-        from fpdb_3_legacy import hud_live_context
-
-        if not self._room_allows_live_context():
-            return
-        self.set_live_state(**hud_live_context.context_to_live_state(context))
-        self.refresh_dynamic_panels()
-
-    def end_live_context(self) -> None:
-        """The table closed or the stream stopped: clear what it published."""
-        session = getattr(self, "_live_context_session", None)
-        if session is not None:
-            session.close()
 
     def get_cards(self, hand: int | str) -> dict[str, Any]:
         """Get the cards for a given hand."""

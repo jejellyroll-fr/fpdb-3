@@ -11,10 +11,10 @@ The HUD can do four things that rooms rule on separately:
 * **live context** (#336): using what is happening in the current hand, from a
   live source, to pick those panels.
 
-This module is the policy only: what a room *permits*. Whether a technical
-source can *deliver* the current hand is :mod:`fpdb_3_legacy.hud_live_context`'s
-business (``SOURCE_ACTION_STREAM``, ``SOURCE_STREET_LIVE``,
-``SOURCE_HAND_REFRESH``), and whether the user said yes to dynamic panels is
+This module is the policy only: what a room *permits*. Whether a source can
+*deliver* the current hand is the source's business -- no action-by-action
+source is wired in since CoinPoker's capture, the only one, was removed (#732)
+-- and whether the user said yes to dynamic panels is
 :mod:`fpdb_3_legacy.dynamic_panels_consent`'s. A yes never overrides a room.
 
 Rooms are identified by network, not by site name: an iPoker skin reaches the

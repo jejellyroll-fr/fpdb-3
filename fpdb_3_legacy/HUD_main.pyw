@@ -108,8 +108,6 @@ from fpdb_3_legacy.fast_fold_engine import build_seat_map as build_seat_map
 from fpdb_3_legacy.fast_fold_engine import is_fast_fold_table as is_fast_fold_table
 from fpdb_3_legacy.hud_ipc import ZMQReceiver as ZMQReceiver
 from fpdb_3_legacy.hud_ipc import ZMQWorker as ZMQWorker
-from fpdb_3_legacy.hud_ipc import parse_live_message as parse_live_message
-from fpdb_3_legacy.hud_ipc import route_live_action as route_live_action
 from fpdb_3_legacy.hud_main_base import FAST_FOLD_POOL_PREFIX as FAST_FOLD_POOL_PREFIX
 from fpdb_3_legacy.hud_main_base import HUDCreationArgs as HUDCreationArgs
 from fpdb_3_legacy.hud_main_base import TableReadState as TableReadState
@@ -132,7 +130,6 @@ from fpdb_3_legacy.hud_window_registry import ClaimOutcome as ClaimOutcome
 from fpdb_3_legacy.hud_workers import DB_RECOVERY_INTERVAL_S as DB_RECOVERY_INTERVAL_S
 from fpdb_3_legacy.hud_workers import DbRecoveryWorker as DbRecoveryWorker
 from fpdb_3_legacy.hud_workers import HudReadWorker as HudReadWorker
-from fpdb_3_legacy.Importer import LIVE_ACTION_PREFIX as LIVE_ACTION_PREFIX
 from fpdb_3_legacy.loggingFpdb import get_logger as get_logger
 from fpdb_3_legacy.SmartHudManager import RestartReason as RestartReason
 
@@ -354,10 +351,6 @@ class HudMain(
         try:
             # HUD dictionary and parameters
             self.hud_dict: dict[str, Hud.Hud] = {}
-            # Tables that have shown a hand, by the id a live capture names them
-            # by (#336). Filled as hands are imported; a live action for a table
-            # that has not imported one yet has no HUD to go to.
-            self._live_tables: dict[str, str] = {}
             # Canonical window_id -> temp_key -> generation mapping. hud_dict is
             # keyed by a table's text name, which a Fast-Fold pool shares across
             # several windows; this is what makes "one renderer per window"
@@ -540,7 +533,6 @@ class HudMain(
             self.zmq_receiver: ZMQReceiver | None = ZMQReceiver(parent=self)
             log.info("ZMQ receiver created successfully")
             self.zmq_receiver.message_received.connect(self.handle_message)
-            self.zmq_receiver.live_action_received.connect(self.handle_live_action)
             self.zmq_worker: ZMQWorker | None = ZMQWorker(self.zmq_receiver)
             self.zmq_worker.error_occurred.connect(self.handle_worker_error)
             log.info("Starting ZMQ worker...")
@@ -686,60 +678,6 @@ class HudMain(
         """Handle the close event of the main window."""
         self.destroy()
         event.accept()
-
-    def _remember_live_table(self, temp_key: str, table_name: Any) -> None:
-        """Learn which HUD serves a table id, so live actions can be routed.
-
-        A capture names a table by the id read off its hand numbers; the table
-        name the database spells carries that same id as its last token -- the
-        whole name for a cash game, the trailing number for a tournament. The
-        first imported hand of a table is what teaches this, which is why a
-        table's very first hand is played without live panels.
-        """
-        token = str(table_name or "").strip().split()[-1] if str(table_name or "").strip() else ""
-        if token:
-            self._live_tables[token] = temp_key
-
-    def handle_live_action(self, payload: dict[str, Any]) -> None:
-        """Route one live action to the HUD whose table it belongs to (#336).
-
-        The capture sends actions as they are played, so the dynamic panels can
-        move at the decision instead of one hand behind. Everything here is
-        best-effort: a payload no table claims is dropped with a debug line,
-        and a HUD that rejects the action keeps the context it had.
-        """
-        try:
-            hud = route_live_action(payload, self._live_tables, self.hud_dict)
-            if hud is None:
-                log.debug(
-                    "Live action for table %s has no HUD yet (hand %s)",
-                    payload.get("table"),
-                    payload.get("hand_id"),
-                )
-                return
-            action = self._live_action_from_payload(payload)
-            if action is not None:
-                hud.accept_live_action(action, hand_id=str(payload.get("hand_id") or ""))
-        except Exception:  # noqa: BLE001 - a live feed must never break the HUD loop
-            log.exception("Could not route a live action to its HUD")
-
-    def _live_action_from_payload(self, payload: dict[str, Any]) -> Any:
-        """The action row as the live-context module reads it.
-
-        A publisher sends the room-independent row the capture hand builders
-        produce (``{"type", "player", "street", "amount"/"to"}``). CoinPoker's
-        packet capture, which sent its own records, was removed in #732.
-        """
-        from fpdb_3_legacy import hud_live_context
-
-        record = payload.get("record")
-        if not isinstance(record, dict):
-            return None
-        return hud_live_context.normalized_action(
-            record,
-            hand_id=str(payload.get("hand_id") or ""),
-            sequence=int(payload.get("sequence") or 0),
-        )
 
     def handle_message(self, hand_id: str) -> None:
         """Handle an incoming message from the ZMQ receiver."""
@@ -922,7 +860,6 @@ class HudMain(
             self._create_new_hud(new_hand_id, temp_key, table_info, site_id, num_seats, hud_site_name)
             if temp_key in self.hud_dict:
                 self._last_processed_hands[temp_key] = new_hand_id
-                self._remember_live_table(temp_key, table_name)
                 return temp_key
             return None
 
@@ -962,7 +899,6 @@ class HudMain(
         if temp_key not in self.hud_dict:
             return None
         self._last_processed_hands[temp_key] = new_hand_id
-        self._remember_live_table(temp_key, table_name)
         if info.fast:
             # Past the idempotence check and past creation: this hand really
             # reached the screen, which is the only case worth announcing.
