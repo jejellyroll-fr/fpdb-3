@@ -19,7 +19,9 @@ These converters have file-by-file semantic snapshots in
 - KingsClub
 - PacificPoker/888
 - PartyPoker
-- PokerStars
+- PokerStars (and its regional sites, and the PokerStars on Betfair skin, whose
+  histories are filed under their own room from the `Betfair.UK` folder its
+  client writes them to; no real Betfair export is in the corpus yet)
 - PokerTracker (its own export format, cash and tournaments: Everest, iPoker,
   Merge and Microgaming hands, each filed under the room in its header -- pinned
   by `tests/test_pokertracker_rooms.py`)

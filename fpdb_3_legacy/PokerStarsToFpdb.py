@@ -51,6 +51,8 @@ SITE_POKERSTARS_ES = 35
 SITE_POKERSTARS_PT = 36
 SITE_POKERSTARS_EU = 37
 SITE_POKERSTARS_DE = 130
+# PokerStars on Betfair (2026): native PokerStars histories from Betfair's client (#733).
+SITE_POKERSTARS_BETFAIR = 143
 SITE_BOVADA = 19
 SITE_MERGE = 26
 STUD_HOLE_CARDS_COUNT = 3
@@ -64,10 +66,16 @@ POKERSTARS_SKIN_IDS = {
     "PokerStars.PT": SITE_POKERSTARS_PT,
     "PokerStars.EU": SITE_POKERSTARS_EU,
     "PokerStars.DE": SITE_POKERSTARS_DE,
+    "PokerStars on Betfair": SITE_POKERSTARS_BETFAIR,
 }
 
 # Path patterns for skin detection
 POKERSTARS_PATH_PATTERNS = [
+    # Betfair's client writes under %LOCALAPPDATA%\Betfair.UK\HandHistory and
+    # \TournSummary. Its histories name no skin, so the folder is what tells
+    # them from PokerStars' own (#733).
+    ("betfair.uk", "PokerStars on Betfair"),
+    ("betfair", "PokerStars on Betfair"),
     ("pokerstars.fr", "PokerStars.FR"),
     ("pokerstars.it", "PokerStars.IT"),
     ("pokerstars.es", "PokerStars.ES"),

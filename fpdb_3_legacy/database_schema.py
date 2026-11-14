@@ -229,6 +229,7 @@ class DatabaseSchemaMixin(DatabaseMigrationsMixin, DatabaseIndexesMixin):
         c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('130', 'PokerStars.DE', 'PS')",
         )
+        c.execute("INSERT INTO Sites (id,name,code) VALUES ('143', 'PokerStars on Betfair', 'PS')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('3', 'Everleaf', 'EV')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('4', 'Boss', 'BM')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('5', 'OnGame', 'OG')")
