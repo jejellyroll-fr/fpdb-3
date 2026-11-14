@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 00:05+0100\n"
+"POT-Creation-Date: 2026-11-14 11:31+0100\n"
 "PO-Revision-Date: 2014-06-15 03:46+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Fpdb\n"
@@ -120,8 +120,7 @@ msgstr ""
 msgid "Stat set"
 msgstr "統計"
 
-#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/swc_poker_console.py
 #: fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy
 msgid "Stop"
@@ -3377,73 +3376,6 @@ msgstr "あなたの名前"
 msgid "e.g., my_custom_theme"
 msgstr "例: my_custom_theme"
 
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
-msgstr ""
-"HUD_main も起動します (HUD/自動インポートが既に実行中の場合はチェックを外して"
-"ください)。"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Capture failed to start — see the log above."
-msgstr "キャプチャを開始できませんでした — 上のログを参照してください。"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Capture not started: it is off until you turn it on."
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Default game:"
-msgstr "デフォルトのゲーム:"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Dry run (no DB insert)"
-msgstr "ドライラン (DB に書き込まない)"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Finishing previous capture…"
-msgstr "前回のキャプチャを終了中…"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Idle."
-msgstr "待機中。"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Interface:"
-msgstr "インターフェース:"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Launch HUD"
-msgstr "HUD を起動"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Refresh interfaces"
-msgstr "インターフェースを更新"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
-msgstr ""
-"権限を要求中… プロンプトを承認してから CoinPoker をプレイしてください。"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Start capture"
-msgstr "キャプチャを開始"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Stopping…"
-msgstr "停止中…"
-
 #: fpdb_3_legacy/capture/swc_poker_console.py
 msgid "<"
 msgstr ""
@@ -4155,11 +4087,6 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/live_capture_consent.py
-#, fuzzy
-msgid "CoinPoker packet capture"
-msgstr "CoinPoker ライブキャプチャ"
-
-#: fpdb_3_legacy/live_capture_consent.py
 msgid ""
 "Live capture is not part of this install. From a source install: pip install "
 "-e '.[capture]'."
@@ -4192,13 +4119,6 @@ msgid ""
 "on macOS and Linux. Inside the client, it reads the table traffic after the "
 "client has decrypted it, and writes it to a file fpdb imports. It stays "
 "loaded until the client exits."
-msgstr ""
-
-#: fpdb_3_legacy/live_capture_consent.py
-msgid ""
-"fpdb records the network packets exchanged by the CoinPoker client, with "
-"administrator rights (tcpdump, pkexec or a UAC prompt), and rebuilds the "
-"hands from them. It reads the traffic only; it loads nothing into the client."
 msgstr ""
 
 #: fpdb_3_legacy/live_capture_consent.py
@@ -4286,11 +4206,6 @@ msgstr ""
 #: fpdb_3_legacy/menu_layout.py
 msgid "Choose the blinds, seats and period that new HUD tables start with"
 msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-#, fuzzy
-msgid "CoinPoker Live Capture"
-msgstr "CoinPoker ライブキャプチャ"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Configure"
@@ -9139,6 +9054,12 @@ msgstr ""
 #~ msgid "Alias '%s' unknown"
 #~ msgstr "ポーカーサイトの別名 '%s' は不明です"
 
+#, fuzzy
+#~ msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
+#~ msgstr ""
+#~ "HUD_main も起動します (HUD/自動インポートが既に実行中の場合はチェックを外"
+#~ "してください)。"
+
 #~ msgid "An invalid DB version or missing tables have been detected."
 #~ msgstr "無効なデータベースバージョンかDBテーブルの欠落を検出しました"
 
@@ -9275,6 +9196,10 @@ msgstr ""
 #~ "このオプションを使うためにはFPDBを再起動してください。"
 
 #, fuzzy
+#~ msgid "Capture failed to start — see the log above."
+#~ msgstr "キャプチャを開始できませんでした — 上のログを参照してください。"
+
+#, fuzzy
 #~| msgid "lock already held by:"
 #~ msgid "Cell already used"
 #~ msgstr "ロックは既に取得されています:"
@@ -9284,6 +9209,14 @@ msgstr ""
 
 #~ msgid "Closing this window will exit from the HUD."
 #~ msgstr "このウィンドウを閉じるとHUDを終了"
+
+#, fuzzy
+#~ msgid "CoinPoker Live Capture"
+#~ msgstr "CoinPoker ライブキャプチャ"
+
+#, fuzzy
+#~ msgid "CoinPoker packet capture"
+#~ msgstr "CoinPoker ライブキャプチャ"
 
 #, fuzzy
 #~ msgid "Column:"
@@ -9375,6 +9308,10 @@ msgstr ""
 #~ msgid "Default encoding set to US-ASCII, defaulting to CP1252 instead."
 #~ msgstr "既定の文字エンコーディングをUS-ASCIIからCP1252に変更します。"
 
+#, fuzzy
+#~ msgid "Default game:"
+#~ msgstr "デフォルトのゲーム:"
+
 #~ msgid "Detect"
 #~ msgstr "自動判別"
 
@@ -9410,6 +9347,10 @@ msgstr ""
 
 #~ msgid "Dropping index:"
 #~ msgstr "indexドロップ中:"
+
+#, fuzzy
+#~ msgid "Dry run (no DB insert)"
+#~ msgstr "ドライラン (DB に書き込まない)"
 
 #~ msgid "END TIME"
 #~ msgstr "END TIME"
@@ -9508,6 +9449,10 @@ msgstr ""
 
 #~ msgid "Finished recreating tables"
 #~ msgstr "DBテーブル再生成が完了しました"
+
+#, fuzzy
+#~ msgid "Finishing previous capture…"
+#~ msgstr "前回のキャプチャを終了中…"
 
 #~ msgid "First 100 characters: %s"
 #~ msgstr "最初の100文字: %s"
@@ -9719,6 +9664,10 @@ msgstr ""
 #~ msgid "ITM%"
 #~ msgstr "ITM%"
 
+#, fuzzy
+#~ msgid "Idle."
+#~ msgstr "待機中。"
+
 #~ msgid ""
 #~ "If there already are tables in the database %s on %s they will be deleted "
 #~ "and you will have to re-import your histories."
@@ -9750,6 +9699,10 @@ msgstr ""
 #~ msgid "Install gtk or edit the path manually."
 #~ msgstr "GTKをインストールするか、環境変数PATHを編集してください。"
 
+#, fuzzy
+#~ msgid "Interface:"
+#~ msgstr "インターフェース:"
+
 #~ msgid "Invalid config value for %s, defaulting to %s"
 #~ msgstr "無効な設定値 %s を既定値 %s"
 
@@ -9768,6 +9721,10 @@ msgstr ""
 
 #~ msgid "LEVEL"
 #~ msgstr "LEVEL"
+
+#, fuzzy
+#~ msgid "Launch HUD"
+#~ msgstr "HUD を起動"
 
 #~ msgid "Less than 2 players found in hand %s."
 #~ msgstr "2名以下のハンド %s が見つかりました。"
@@ -10140,8 +10097,17 @@ msgstr ""
 #~ msgid "Received hand no %s"
 #~ msgstr "ハンドNO %s を受信しました"
 
+#, fuzzy
+#~ msgid "Refresh interfaces"
+#~ msgstr "インターフェースを更新"
+
 #~ msgid "Reposition StatWindows"
 #~ msgstr "統計ウィンドウの再配置"
+
+#, fuzzy
+#~ msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
+#~ msgstr ""
+#~ "権限を要求中… プロンプトを承認してから CoinPoker をプレイしてください。"
 
 #~ msgid "Restart This HUD"
 #~ msgstr "このHUDを再起動する"
@@ -10234,6 +10200,10 @@ msgstr ""
 #~ msgid "Start Minimized"
 #~ msgstr "最小化して起動"
 
+#, fuzzy
+#~ msgid "Start capture"
+#~ msgstr "キャプチャを開始"
+
 #~ msgid "Starting import. Please wait."
 #~ msgstr "インポート開始。お待ちください。"
 
@@ -10242,6 +10212,10 @@ msgstr ""
 
 #~ msgid "Status: Connected to %s database named %s on host %s"
 #~ msgstr "Status: %s のデータベース %s に接続しました、ホストは%sです"
+
+#, fuzzy
+#~ msgid "Stopping…"
+#~ msgstr "停止中…"
 
 #~ msgid "Stove"
 #~ msgstr "ストーブ"

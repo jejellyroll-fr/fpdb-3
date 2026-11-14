@@ -9,7 +9,7 @@ import pytest
 pytest.importorskip("PySide6.QtWidgets")
 
 from fpdb_3_legacy import live_capture_consent, live_capture_dialog  # noqa: E402
-from fpdb_3_legacy.live_capture_consent import COINPOKER_PACKETS, SWC_NATIVE  # noqa: E402
+from fpdb_3_legacy.live_capture_consent import SWC_NATIVE  # noqa: E402
 from fpdb_3_legacy.live_capture_dialog import LiveCaptureDialog, confirm  # noqa: E402
 
 pytestmark = pytest.mark.qt
@@ -82,13 +82,13 @@ def test_the_window_starts_with_everything_off(qtbot, config) -> None:
     assert not any(box.isChecked() for box in window.boxes.values())
 
 
-def test_a_room_whose_support_is_off_has_no_box(qtbot, config) -> None:
-    # CoinPoker support is switched off (disabled_sites): nothing of it to turn on.
+def test_a_room_whose_support_is_off_has_no_box(qtbot, config, monkeypatch) -> None:
+    # A disabled or import-only room (disabled_sites) has no live capture to turn on.
+    monkeypatch.setattr(live_capture_dialog, "allows_live_use", lambda room: room != "SealsWithClubs")
     window = LiveCaptureDialog(config)
     qtbot.addWidget(window)
 
-    assert SWC_NATIVE.key in window.boxes
-    assert COINPOKER_PACKETS.key not in window.boxes
+    assert SWC_NATIVE.key not in window.boxes
 
 
 def test_ticking_asks_and_a_yes_turns_it_on(qtbot, config, answers, answer) -> None:

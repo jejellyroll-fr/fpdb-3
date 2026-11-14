@@ -27,16 +27,18 @@ them, are in [what fpdb does while you play](fair-play.md#rooms).
 | Winamax | ✔ | — | — | — | Prohibits dynamic range software and certain dynamic HUD features; off until its integrity team approves fpdb's |
 | iPoker network, under every skin's own name (Betclic Poker, PMU Poker, FDJ Poker, Bet365.fr Poker, Barrière Poker, Unibet Poker…) | ✔ | — | — | — | Positional and dynamic HUDs documented as not allowed on the network |
 | Unibet (the 2026 Relax Gaming client, Unibet.fr) | ✔ | — | — | — | Not reviewed: its rules do not mention HUDs, see below |
-| Any other room (GGPoker, CoinPoker, WPN/ACR…) | ✔ | — | — | — | Not reviewed: the conservative default |
+| Any other room (GGPoker, WPN/ACR…) | ✔ | — | — | — | Not reviewed: the conservative default |
+| CoinPoker | — | — | — | — | Import-only: hand histories are imported after the session, no HUD at all |
 
 No room is reviewed as allowing more than the static HUD yet, so **every live
 table shows the static HUD**. A room moves to a more permissive row only once
 its rules have been read and, where they are unclear, confirmed by the room
 itself; a third-party tool's compatibility page is not a room's authorization.
 
-GGPoker and CoinPoker are reported to prohibit HUDs altogether. fpdb keeps their
-static HUD available and says so in [fair-play.md](fair-play.md#rooms): the
-decision to run one there is yours.
+GGPoker and CoinPoker are reported to prohibit HUDs altogether. fpdb keeps
+GGPoker's static HUD available and says so in [fair-play.md](fair-play.md#rooms):
+the decision to run one there is yours. CoinPoker is import-only: fpdb shows no
+HUD at its tables at all (see [PARSER_SUPPORT.md](../PARSER_SUPPORT.md#import-only)).
 
 ### What a restricted table shows
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?><FreePokerToolsConfig>
-    <general version="93" config_wrap_len="-1" day_start="5" ui_language="fr_FR" config_difficulty="expert" qt_material_theme="dark_purple.xml" popup_theme="material_dark"/>
+    <general version="94" config_wrap_len="-1" day_start="5" ui_language="fr_FR" config_difficulty="expert" qt_material_theme="dark_purple.xml" popup_theme="material_dark"/>
     <site_ids>
         <site_id site="Full Tilt Poker" id="1"/>
         <site_id site="PokerStars" id="2"/>
@@ -124,6 +124,7 @@
         <site_id site="BlackChipPoker" id="117"/>
         <site_id site="TruePoker" id="118"/>
         <site_id site="Ya Poker" id="119"/>
+        <site_id site="CoinPoker" id="140"/>
         <site_id site="PokerMaster" id="25"/>
         <site_id site="Run It Once Poker" id="26"/>
         <site_id site="GGPoker" id="27"/>
@@ -4544,6 +4545,14 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
+        <!-- CoinPoker is import-only (#732): Bulk Import reads its exported
+             hand histories; no HUD, auto-import or live capture runs for it. -->
+        <site site_name="CoinPoker" enabled="False" screen_name="Hero" site_path="" HH_path="" TS_path="" aux_enabled="False" hud_menu_xshift="0" hud_menu_yshift="0" network="CoinPoker">
+            <layout_set game_type="all" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+        </site>
     </supported_sites>
     <hhcs>
         <hhc site="PokerStars.COM" converter="PokerStarsToFpdb" summaryImporter="PokerStarsSummary"/>
@@ -4670,6 +4679,7 @@
         <hhc site="Microgaming" converter="MicrogamingToFpdb"/>
         <hhc site="PKR" converter="PkrToFpdb"/>
         <hhc site="Full Tilt Poker" converter="FulltiltToFpdb" summaryImporter="FullTiltPokerSummary"/>
+        <hhc site="CoinPoker" converter="CoinPokerToFpdb"/>
     </hhcs>
     <!-- HUD profile rules: choose which stat set (HUD profile) a table gets,
          the way PokerTracker's "Profile Select" tab does.

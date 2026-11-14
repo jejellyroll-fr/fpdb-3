@@ -585,9 +585,9 @@ def actions_from_normalized(actions: Iterable[Mapping[str, Any]], *, hand_id: st
     """Adapt the hand-builder's own normalized action rows to the contract.
 
     The room-independent shape ``{"type", "player", "street", "amount"/"to"}``
-    is what :func:`coinpoker_hand_builder._explicit_betting_actions` already
-    produces and what the assembled hand stores, so every builder fpdb has can
-    feed the contract without a second parser.
+    is what the capture hand builders produce and what the assembled hand
+    stores, so every builder fpdb has can feed the contract without a second
+    parser.
     """
     # Sequenced from 1: the adapter reads a ``0`` sequence as "the source gave no
     # ordering" and trusts the event, so starting at 0 would make the first
@@ -611,88 +611,6 @@ def normalized_action(row: Mapping[str, Any], *, hand_id: str = "", sequence: in
         hand_id=hand_id,
         sequence=sequence,
     )
-
-
-#: CoinPoker's authoritative action record, by the field it arrives in.
-_COINPOKER_ACTION_FIELDS: Final[tuple[str, ...]] = ("newPlayerAction", "action")
-
-
-def coinpoker_action(record: Mapping[str, Any], *, hand_id: str = "", sequence: int = 0) -> LiveAction | None:
-    """One CoinPoker ``game.dealer_chat_action`` record as a :class:`LiveAction`.
-
-    The room spells a bet and a raise apart by the record's own ``action`` field
-    and gives the raise-to total where it has one, so the adapter reads both
-    rather than guessing which a number means.
-    """
-    raw = str(record.get("action") or "").strip().upper()
-    effective = str(record.get("newPlayerAction") or raw).strip().upper()
-    actor = str(record.get("username") or record.get("player") or "").strip()
-    if not actor or not (raw or effective):
-        return None
-    amount = _cents(record.get("actionAmount"))
-    street = str(record.get("roundName") or "PREFLOP")
-    all_in = effective in {"ALLIN", "ALL_IN"} or raw in {"ALLIN", "ALL_IN"}
-    if effective == "FOLD":
-        kind, amount = "folds", 0
-    elif effective == "CHECK":
-        kind, amount = "checks", 0
-    elif effective == "CALL":
-        kind = "calls"
-    elif raw == "RAISE" and effective in {"BET", ""}:
-        kind = "bets"
-    elif raw == "RAISE":
-        kind = "raises"
-    elif all_in:
-        kind = "raises" if raw == "RAISE" else "calls"
-    else:
-        kind = effective.lower() or "checks"
-    return LiveAction(
-        actor=actor,
-        action=kind,
-        street=street,
-        amount_cents=amount,
-        to_cents=amount if kind in _AGGRESSIVE else None,
-        all_in=all_in,
-        hand_id=hand_id,
-        sequence=sequence,
-    )
-
-
-def coinpoker_actions(events: Iterable[tuple], *, hand_id: str = "") -> Iterator[LiveAction]:
-    """Every CoinPoker live action in a capture's event stream, in order.
-
-    Reads ``game.dealer_chat_action`` payloads, which the room publishes as each
-    action is taken -- this is the live source #336 asks the adapter boundary to
-    accept.
-
-    Duplicate records are dropped here, by the same key the hand builder dedupes
-    on (``initTimestamp``/player/action/round/amount), and the sequence handed to
-    the adapter is a strict ordinal. Using the room's ``initTimestamp`` directly
-    would have made two *distinct* actions taken in the same millisecond share a
-    sequence -- and the adapter would have dropped the second as a duplicate.
-    """
-    seen: set[tuple] = set()
-    sequence = 0
-    for name, _hid, payload in events:
-        if name != "game.dealer_chat_action" or not isinstance(payload, Mapping):
-            continue
-        for record in payload.get("gameActionMessagesHistory") or []:
-            if not isinstance(record, Mapping):
-                continue
-            key = (
-                record.get("initTimestamp"),
-                record.get("username"),
-                record.get("action"),
-                record.get("roundName"),
-                record.get("actionAmount"),
-            )
-            if key in seen:
-                continue
-            seen.add(key)
-            sequence += 1
-            action = coinpoker_action(record, hand_id=hand_id, sequence=sequence)
-            if action is not None:
-                yield action
 
 
 # ---------------------------------------------------------------------------
@@ -853,8 +771,6 @@ __all__ = [
     "LiveContextSession",
     "LiveTrace",
     "actions_from_normalized",
-    "coinpoker_action",
-    "coinpoker_actions",
     "context_to_live_state",
     "describe_source",
     "is_action_live",

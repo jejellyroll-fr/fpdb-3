@@ -1,0 +1,172 @@
+{
+ "site": "CoinPoker",
+ "hand_id": "91426500343",
+ "hero": "Hero",
+ "table_id": "914265",
+ "timestamp": "2026-07-17T23:54:45.561000",
+ "buttonpos": 2,
+ "game": {
+  "base": "hold",
+  "category": "omahahi",
+  "fpdb_supported": true
+ },
+ "gametype": {
+  "base": "hold",
+  "category": "omahahi",
+  "type": "ring",
+  "limitType": "pl",
+  "currency": "USD",
+  "sb": "0.01",
+  "bb": "0.02",
+  "ante": "0.0",
+  "maxSeats": 6
+ },
+ "tournament": null,
+ "players": [
+  {
+   "seat_idx": 2,
+   "name": "Villain3",
+   "starting_stack": "2.43"
+  },
+  {
+   "seat_idx": 3,
+   "name": "Villain4",
+   "starting_stack": "2.05"
+  },
+  {
+   "seat_idx": 4,
+   "name": "Villain1",
+   "starting_stack": "2.2"
+  },
+  {
+   "seat_idx": 5,
+   "name": "Villain2",
+   "starting_stack": "4.69"
+  },
+  {
+   "seat_idx": 6,
+   "name": "Hero",
+   "starting_stack": "4.19"
+  }
+ ],
+ "actions": [
+  {
+   "type": "small blind",
+   "player": "Villain4",
+   "amount": "0.01"
+  },
+  {
+   "type": "big blind",
+   "player": "Villain1",
+   "amount": "0.02"
+  },
+  {
+   "type": "raises",
+   "player": "Villain2",
+   "street": "PREFLOP",
+   "to": "0.07"
+  },
+  {
+   "type": "folds",
+   "player": "Hero",
+   "street": "PREFLOP"
+  },
+  {
+   "type": "folds",
+   "player": "Villain3",
+   "street": "PREFLOP"
+  },
+  {
+   "type": "calls",
+   "player": "Villain4",
+   "street": "PREFLOP",
+   "amount": "0.06"
+  },
+  {
+   "type": "calls",
+   "player": "Villain1",
+   "street": "PREFLOP",
+   "amount": "0.05"
+  },
+  {
+   "type": "checks",
+   "player": "Villain4",
+   "street": "FLOP"
+  },
+  {
+   "type": "checks",
+   "player": "Villain1",
+   "street": "FLOP"
+  },
+  {
+   "type": "checks",
+   "player": "Villain2",
+   "street": "FLOP"
+  },
+  {
+   "type": "bets",
+   "player": "Villain4",
+   "street": "TURN",
+   "amount": "0.16"
+  },
+  {
+   "type": "folds",
+   "player": "Villain1",
+   "street": "TURN"
+  },
+  {
+   "type": "folds",
+   "player": "Villain2",
+   "street": "TURN"
+  }
+ ],
+ "community": {
+  "FLOP": [
+   "Qc",
+   "9s",
+   "6c"
+  ],
+  "TURN": [
+   "5s"
+  ]
+ },
+ "boards": [
+  {
+   "FLOP": [
+    "Qc",
+    "9s",
+    "6c"
+   ],
+   "TURN": [
+    "5s"
+   ]
+  }
+ ],
+ "run_it_times": 1,
+ "double_board": false,
+ "bomb_pot": 0,
+ "splash_pot": 0,
+ "mega_splash": false,
+ "cashout": [],
+ "splash_winnings": [],
+ "holecards": [
+  {
+   "player": "Hero",
+   "closed": [
+    "Js",
+    "8s",
+    "7s",
+    "4d"
+   ],
+   "dealt": true,
+   "shown": false,
+   "mucked": false
+  }
+ ],
+ "collections": [
+  {
+   "player": "Villain4",
+   "pot": "0.2"
+  }
+ ]
+}

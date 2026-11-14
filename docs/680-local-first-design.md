@@ -80,7 +80,7 @@ Not synced yet, because the outbox only carries hands:
   the server if more of its hands are pushed afterwards.
 
 Hands stored outside `Importer` never reach the outbox: the HTTP capture and the
-CoinPoker and SwC live captures write to the local file and stay there.
+SwC live capture write to the local file and stay there.
 
 ## Metrics to watch (extend latency_profile if needed)
 

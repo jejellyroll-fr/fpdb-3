@@ -19,18 +19,17 @@ from pathlib import Path
 
 import pytest
 
-from fpdb_3_legacy.capture.coinpoker_live_capture import COINPOKER_SITE_ID
-from fpdb_3_legacy.coinpoker_hand_builder import build_hands
 from fpdb_3_legacy.http_capture_hand_builder import HttpCaptureHandConfig, build_fpdb_hand
 
-FIXTURE = Path(__file__).parent / "data" / "coinpoker_hand_events.json"
+# One of those CoinPoker hands, as the live capture built it (removed in #732).
+FIXTURE = Path(__file__).parent / "data" / "captured_plo_hand.json"
+COINPOKER_SITE_ID = 140
 
 
 @pytest.fixture
 def first_captured_hand():
-    events = [tuple(e) for e in json.loads(FIXTURE.read_text())]
     config = HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
-    hand_data = next(iter(build_hands(events, "PLO4")))
+    hand_data = json.loads(FIXTURE.read_text())
     hand = build_fpdb_hand(hand_data, config=config)
     hand.totalPot()
     return hand

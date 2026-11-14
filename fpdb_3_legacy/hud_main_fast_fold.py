@@ -13,6 +13,7 @@ from typing import Any
 from PySide6.QtCore import QTimer
 
 from fpdb_3_legacy import Hud
+from fpdb_3_legacy.disabled_sites import allows_live_use
 from fpdb_3_legacy.fast_fold_engine import (
     FastFoldEngine,
     FastFoldStatsRequest,
@@ -54,6 +55,8 @@ class HudMainFastFoldMixin(HudMainBase):
         info = TableInfo.coerce(table_info)
         table_name = info.table_name
         if not isinstance(table_name, str) or not table_name.strip():
+            return None
+        if not allows_live_use(str(info.site_name)):
             return None
 
         enabled_sites = self.config.get_supported_sites()
