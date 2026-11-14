@@ -139,6 +139,14 @@ WPN_SITE_IDS: Final = (24, 115, 116, 117, 118, 119)
 #: made of constants and integers; a test keeps the two equal.
 WPN_SITE_ID_SQL: Final = "24, 115, 116, 117, 118, 119"
 
+#: The condition hero_hands_only_sql fills in: <g> and <h> become the aliases
+#: of the Gametypes and Hands tables, <ids> the user's player ids (integers).
+_NONE_OF_THE_ROOMS = " AND <g>.siteId NOT IN (24, 115, 116, 117, 118, 119)"
+_ONLY_THE_USERS_HANDS = (
+    " AND (<g>.siteId NOT IN (24, 115, 116, 117, 118, 119)"
+    " OR EXISTS (SELECT 1 FROM HandsPlayers own WHERE own.handId = <h>.id AND own.playerId IN (<ids>)))"
+)
+
 #: Site names that belong to the iPoker network: every ``'IP'`` row of the
 #: Sites table (``database_schema``), and the names its clients and
 #: ``DetectInstalledSites`` use. ``Unibet Poker`` is the historical iPoker skin;
@@ -261,13 +269,9 @@ def hero_hands_only_sql(user_ids: Any, hand: str = "h", gametype: str = "g") -> 
     """
     ids = sorted({int(player_id) for player_id in user_ids})
     if not ids:
-        return " AND " + gametype + ".siteId NOT IN (" + WPN_SITE_ID_SQL + ")"  # nosec B608  # nosemgrep
+        return _NONE_OF_THE_ROOMS.replace("<g>", gametype)
     id_list = ", ".join(str(player_id) for player_id in ids)
-    return (  # nosec B608  # nosemgrep - table aliases and integers only
-        " AND (" + gametype + ".siteId NOT IN (" + WPN_SITE_ID_SQL + ")"
-        " OR EXISTS (SELECT 1 FROM HandsPlayers own WHERE own.handId = " + hand + ".id"
-        " AND own.playerId IN (" + id_list + ")))"
-    )
+    return _ONLY_THE_USERS_HANDS.replace("<g>", gametype).replace("<h>", hand).replace("<ids>", id_list)
 
 
 def network_hint(config: Any, site: str | None) -> str:

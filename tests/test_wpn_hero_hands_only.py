@@ -66,6 +66,8 @@ def test_the_spelled_out_ids_are_every_wpn_site() -> None:
     for statement in (
         database_rebuild.DELETE_HERO_HANDS_ONLY_HUDCACHE,
         database_rebuild.HERO_HANDS_ONLY_PLAYERS,
+        policy._NONE_OF_THE_ROOMS,
+        policy._ONLY_THE_USERS_HANDS,
         database_rebuild.REFRESH_WHERE_RING,
         database_rebuild.REFRESH_WHERE_TOUR,
     ):
