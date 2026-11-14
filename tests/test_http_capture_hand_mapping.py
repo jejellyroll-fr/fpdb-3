@@ -116,6 +116,29 @@ def test_tournament_hand_maps_mtt_metadata_and_imports_into_sqlite() -> None:
     assert cursor.fetchone()[0] == 1
 
 
+def test_a_hand_is_stored_whole_or_not_at_all(monkeypatch) -> None:
+    """Its Hands row used to be committed before its players and actions (#684).
+
+    A failure in between left a hand with no players, and the local-first
+    worker's reconciliation could push it to the server in that state.
+    """
+    hand = build_fpdb_hand(_captured("tournament"), config=SITE_IDS)
+    db = _sqlite()
+
+    def players_refused(*_args: Any, **_kwargs: Any) -> None:
+        msg = "HandsPlayers insert failed"
+        raise RuntimeError(msg)
+
+    monkeypatch.setattr(hand, "insertHandsPlayers", players_refused)
+
+    with pytest.raises(RuntimeError, match="HandsPlayers"):
+        import_fpdb_hand(hand, db, file_id=1, doinsert=True, printtest=False, starting_hand_id=1)
+
+    cursor = db.get_cursor()
+    cursor.execute("select count(*) from Hands")
+    assert cursor.fetchone()[0] == 0
+
+
 def test_straddle_hand_conserves_pot_rake_and_player_results() -> None:
     hand = build_fpdb_hand(_captured("straddle"))
 
