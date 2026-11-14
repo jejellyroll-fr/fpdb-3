@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 22:17+0100\n"
+"POT-Creation-Date: 2026-11-14 23:46+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -2659,6 +2659,10 @@ msgid "… and %d more"
 msgstr "… et %d de plus"
 
 #: fpdb_3_legacy/GuiTrackerNotes.py
+msgid "Also import PT4's automatic notes"
+msgstr "Importer aussi les notes automatiques de PT4"
+
+#: fpdb_3_legacy/GuiTrackerNotes.py
 #, python-format
 msgid ""
 "Could not read PokerTracker 4's database:\n"
@@ -2683,6 +2687,16 @@ msgstr "Importer les notes de PokerTracker 4"
 #: fpdb_3_legacy/GuiTrackerNotes.py
 msgid "Leave players who already have an fpdb note alone"
 msgstr "Ne pas toucher aux joueurs qui ont déjà une note dans fpdb"
+
+#: fpdb_3_legacy/GuiTrackerNotes.py
+msgid ""
+"PT4 rewrites its automatic notes as it imports hands, so fpdb keeps them in "
+"a section of their own and replaces that section on each import. Your own "
+"text stays as it is."
+msgstr ""
+"PT4 réécrit ses notes automatiques à mesure qu'il importe des mains : fpdb "
+"les range donc dans une section à part qu'il remplace à chaque import. Votre "
+"propre texte reste tel quel."
 
 #: fpdb_3_legacy/GuiTrackerNotes.py
 msgid "Password"
@@ -7851,21 +7865,23 @@ msgstr ""
 #: fpdb_3_legacy/tracker_notes.py
 #, python-format
 msgid ""
-"%(added)d notes added, %(appended)d appended, %(already)d already in fpdb, "
-"%(skipped)d skipped, %(unmatched)d not matched."
+"%(added)d notes added, %(appended)d appended, %(updated)d updated, "
+"%(already)d already in fpdb, %(skipped)d skipped, %(unmatched)d not matched."
 msgstr ""
-"%(added)d notes ajoutées, %(appended)d complétées, %(already)d déjà dans "
-"fpdb, %(skipped)d ignorées, %(unmatched)d sans correspondance."
+"%(added)d notes ajoutées, %(appended)d complétées, %(updated)d mises à jour, "
+"%(already)d déjà dans fpdb, %(skipped)d ignorées, %(unmatched)d sans "
+"correspondance."
 
 #: fpdb_3_legacy/tracker_notes.py
 #, python-format
 msgid ""
 "Preview, nothing written: %(added)d notes to add, %(appended)d to append, "
-"%(already)d already in fpdb, %(skipped)d to skip, %(unmatched)d not matched."
+"%(updated)d to update, %(already)d already in fpdb, %(skipped)d to skip, "
+"%(unmatched)d not matched."
 msgstr ""
 "Aperçu, rien n'est écrit : %(added)d notes à ajouter, %(appended)d à "
-"compléter, %(already)d déjà dans fpdb, %(skipped)d à ignorer, %(unmatched)d "
-"sans correspondance."
+"compléter, %(updated)d à mettre à jour, %(already)d déjà dans fpdb, "
+"%(skipped)d à ignorer, %(unmatched)d sans correspondance."
 
 #: fpdb_3_legacy/tracker_notes.py
 msgid "added"
@@ -7878,6 +7894,10 @@ msgstr "déjà dans fpdb"
 #: fpdb_3_legacy/tracker_notes.py
 msgid "appended to the fpdb note"
 msgstr "ajoutée à la suite de la note fpdb"
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "auto-notes updated"
+msgstr "notes automatiques mises à jour"
 
 #: fpdb_3_legacy/tracker_notes.py
 msgid "not in fpdb: import the player's hands first"

@@ -15,6 +15,15 @@ player is skipped when the user asked for that. A block already in the note is
 not added twice, so importing again only brings what is new. A note on a
 player fpdb has no hands of is reported, not created: import the hands first.
 
+PT4's automatic notes (``notes_auto``), on request, go in a section of their
+own that the import owns. PT4 rewrites them as it imports hands, so the
+section is replaced on each import instead of growing; nothing outside it is
+touched::
+
+    [PokerTracker 4 auto-notes]
+    - Folds to 3-bet out of position (x4, 2024-03-02)
+    [end of PokerTracker 4 auto-notes]
+
 Holdem Manager 3 exports its notes as a ``.playernotes`` file whose format is
 not documented; no reader exists for it yet.
 
@@ -37,6 +46,9 @@ from fpdb_3_legacy.i18n import N_
 from fpdb_3_legacy.i18n import gettext as _
 
 __all__ = [
+    "AUTO_SECTION_END",
+    "AUTO_SECTION_START",
+    "PT4_PLAYER_AUTO_NOTES",
     "PT4_PLAYER_NOTES",
     "PT4_PLAYER_TAGS",
     "SOURCE_PT4",
@@ -44,6 +56,7 @@ __all__ = [
     "NotesReport",
     "TrackerNote",
     "apply_notes",
+    "auto_section",
     "format_report",
     "group_notes",
     "ipoker_rooms_of",
@@ -72,6 +85,17 @@ LEFT JOIN lookup_sites ls ON ls.id_site = p.id_site
 WHERE t.enum_type = 'P'
 ORDER BY p.id_player, lt.id_tag
 """
+
+PT4_PLAYER_AUTO_NOTES = """
+SELECT p.id_site, ls.site_name, p.player_name, na.date_updated, na.cnt_times, na.note
+FROM notes_auto na
+JOIN player p ON p.id_player = na.id_player
+LEFT JOIN lookup_sites ls ON ls.id_site = p.id_site
+ORDER BY p.id_player, na.id_autonote
+"""
+
+AUTO_SECTION_START = "[" + SOURCE_PT4 + " auto-notes]"
+AUTO_SECTION_END = "[end of " + SOURCE_PT4 + " auto-notes]"
 
 # PT4 room names whose fpdb name is not found by comparing the two (see ``_key``).
 _WPN = ("WinningPoker", "Americas Cardroom", "ACR Poker", "BlackChipPoker", "TruePoker", "Ya Poker")
@@ -107,6 +131,18 @@ class TrackerNote:
     labels: tuple[str, ...] = ()
     when: date | datetime | None = None
     source: str = SOURCE_PT4
+    auto: bool = False  # a tracker's automatic note: kept in the section the import refreshes
+    times: int | None = None  # how often an automatic note's situation was seen
+
+    def line(self) -> str:
+        """An automatic note as one line of its section: text, then how often and when last seen."""
+        details = []
+        if self.times is not None and self.times > 1:
+            details.append(f"x{self.times}")
+        if self.when is not None:
+            details.append(self.when.strftime("%Y-%m-%d"))
+        text = " ".join(self.text.split())
+        return "- " + text + (" (" + ", ".join(details) + ")" if details else "")
 
     def block(self) -> str:
         """The note as fpdb shows it: a header naming source, date and labels, then the text."""
@@ -138,13 +174,25 @@ def _pt4_site(id_site: Any, site_name: Any) -> str:
     return str(site_name).strip() if site_name else f"PT4 site {id_site}"
 
 
-def read_pt4_notes(conn: Any) -> list[TrackerNote]:
+def read_pt4_notes(conn: Any, *, auto_notes: bool = False) -> list[TrackerNote]:
     """Every player note and player label in a PT4 database, as ``TrackerNote``s.
 
     ``conn`` is a psycopg connection, read-only (``pt4_adapter.connect_pt4``).
     A player's labels go on its first note; a labelled player without a note
-    gets a note of its labels alone, so a *Fish* tag is not lost.
+    gets a note of its labels alone, so a *Fish* tag is not lost. With
+    ``auto_notes``, PT4's automatic notes come too, marked ``auto``.
     """
+    notes = _pt4_manual_notes(conn)
+    if auto_notes:
+        notes.extend(
+            TrackerNote(_pt4_site(id_site, site_name), str(player), str(text), (), when, auto=True, times=times)
+            for id_site, site_name, player, when, times, text in _rows(conn, PT4_PLAYER_AUTO_NOTES)
+            if player and (text or "").strip()
+        )
+    return notes
+
+
+def _pt4_manual_notes(conn: Any) -> list[TrackerNote]:
     labels: dict[tuple[str, str], list[str]] = {}
     for id_site, site_name, player, tag in _rows(conn, PT4_PLAYER_TAGS):
         if player and tag:
@@ -205,7 +253,7 @@ class NoteOutcome:
 
     site: str
     player: str
-    status: str  # added | appended | already | skipped | unknown_player | unknown_site
+    status: str  # added | appended | updated | already | skipped | unknown_player | unknown_site
     fpdb_site: str | None = None
     blocks: int = 0
 
@@ -224,16 +272,57 @@ class NotesReport:
         return [outcome for outcome in self.outcomes if outcome.status == status]
 
 
-def _merge(existing: str, blocks: Sequence[str], on_existing: str) -> tuple[str, str, int]:
-    """What becomes of one fpdb note: its status, its new text and how many blocks it gains."""
-    new = [block for block in blocks if block not in existing]
-    if not new:
-        return "already", existing, 0
+def auto_section(notes: Sequence[TrackerNote]) -> str | None:
+    """The section holding a player's automatic notes, or None when there are none."""
+    if not notes:
+        return None
+    return "\n".join([AUTO_SECTION_START, *(note.line() for note in notes), AUTO_SECTION_END])
+
+
+def _split_section(note: str) -> tuple[str, str | None, str]:
+    """The note before the auto-notes section, the section itself (None if absent), and after it."""
+    start = note.find(AUTO_SECTION_START)
+    end = note.find(AUTO_SECTION_END, start) if start >= 0 else -1
+    if end < 0:
+        return note, None, ""
+    end += len(AUTO_SECTION_END)
+    return note[:start], note[start:end], note[end:]
+
+
+def _join(*parts: str) -> str:
+    return "\n\n".join(part.strip("\n") for part in parts if part.strip())
+
+
+def _merge(existing: str, blocks: Sequence[str], section: str | None, on_existing: str) -> tuple[str, str, int]:
+    """What becomes of one fpdb note: its status, its new text and how many blocks it gains.
+
+    ``blocks`` are appended unless the note holds them already; ``section``
+    replaces the auto-notes section the note has, or is added. With "skip", a
+    note the user wrote (anything outside the section) gains nothing, but a
+    section an earlier import added is still refreshed: it is the import's own.
+    """
+    before, old_section, after = _split_section(existing)
+    written = (before + after).strip()
+    keep_out = on_existing == "skip" and bool(written)
+    new_blocks = [block for block in blocks if block not in before + after]
+    add_blocks = [] if keep_out else new_blocks
+    held_back = bool(new_blocks and keep_out) or (section is not None and old_section is None and keep_out)
+    if old_section is not None:
+        merged = before + (section or old_section) + after
+    elif section is not None and not keep_out:
+        merged = _join(existing, section)
+    else:
+        merged = existing
+    if add_blocks:
+        merged = _join(merged, *add_blocks)
+    if merged == existing:
+        return ("skipped" if held_back else "already"), existing, 0
+    gained = len(add_blocks) + (1 if section is not None and section != old_section else 0)
     if not existing.strip():
-        return "added", "\n\n".join(new), len(new)
-    if on_existing == "skip":
-        return "skipped", existing, 0
-    return "appended", "\n\n".join([existing.rstrip(), *new]), len(new)
+        return "added", merged, gained
+    if old_section is not None and not add_blocks:
+        return "updated", merged, gained
+    return "appended", merged, gained
 
 
 # fpdb's own tables; ``%s`` becomes the backend's placeholder, as for ``SQL.query``.
@@ -257,7 +346,8 @@ def apply_notes(
     its bind marker. A note goes to every fpdb player of that name on the
     room's candidate sites (an iPoker name belongs to the whole network). An
     existing note is appended to (``on_existing="append"``) or left alone
-    (``"skip"``); blocks it already holds are never added again. With
+    (``"skip"``); blocks it already holds are never added again. Automatic
+    notes replace the auto-notes section an earlier import added. With
     ``dry_run`` nothing is written and the report says what would be.
     """
     if on_existing not in ("append", "skip"):
@@ -279,9 +369,10 @@ def apply_notes(
         if not rows:
             report.outcomes.append(NoteOutcome(site, player, "unknown_player" if candidates else "unknown_site"))
             continue
-        blocks = [note.block() for note in player_notes]
+        blocks = [note.block() for note in player_notes if not note.auto]
+        section = auto_section([note for note in player_notes if note.auto])
         for player_id, site_id, comment in rows:
-            status, merged, added = _merge(comment or "", blocks, on_existing)
+            status, merged, added = _merge(comment or "", blocks, section, on_existing)
             if added and not dry_run:
                 cursor.execute(set_comment, (merged, player_id))
             report.outcomes.append(NoteOutcome(site, player, status, fpdb_sites.get(int(site_id)), added))
@@ -293,6 +384,7 @@ def apply_notes(
 _STATUS_TEXT = {
     "added": N_("added"),
     "appended": N_("appended to the fpdb note"),
+    "updated": N_("auto-notes updated"),
     "already": N_("already in fpdb"),
     "skipped": N_("skipped: fpdb already has a note"),
     "unknown_player": N_("not in fpdb: import the player's hands first"),
@@ -305,18 +397,19 @@ def format_report(report: NotesReport) -> str:
     counts = {
         "added": report.count("added"),
         "appended": report.count("appended"),
+        "updated": report.count("updated"),
         "already": report.count("already"),
         "skipped": report.count("skipped"),
         "unmatched": report.count("unknown_player") + report.count("unknown_site"),
     }
     if report.dry_run:
         headline = _(
-            "Preview, nothing written: %(added)d notes to add, %(appended)d to append, "
+            "Preview, nothing written: %(added)d notes to add, %(appended)d to append, %(updated)d to update, "
             "%(already)d already in fpdb, %(skipped)d to skip, %(unmatched)d not matched.",
         )
     else:
         headline = _(
-            "%(added)d notes added, %(appended)d appended, %(already)d already in fpdb, "
+            "%(added)d notes added, %(appended)d appended, %(updated)d updated, %(already)d already in fpdb, "
             "%(skipped)d skipped, %(unmatched)d not matched.",
         )
     lines = [headline % counts]
@@ -349,13 +442,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--user", default=defaults.user)
     parser.add_argument("--database", default=defaults.database, help="PT4 database name (default: %(default)s)")
     parser.add_argument("--skip-existing", action="store_true", help="leave players who have an fpdb note alone")
+    parser.add_argument(
+        "--auto-notes",
+        action="store_true",
+        help="also import PT4's automatic notes, in a section each import refreshes",
+    )
     parser.add_argument("--dry-run", action="store_true", help="report what would change, write nothing")
     args = parser.parse_args(argv)
 
     password = os.environ.get("PT4_PASSWORD") or getpass.getpass("PT4 database password: ")
     pt4 = Pt4Config(args.host, args.port, args.user, password, args.database)
     with connect_pt4(pt4) as conn:
-        notes = read_pt4_notes(conn)
+        notes = read_pt4_notes(conn, auto_notes=args.auto_notes)
 
     from fpdb_3_legacy import Configuration, Database
 

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 22:17+0100\n"
+"POT-Creation-Date: 2026-11-14 23:46+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -2942,6 +2942,11 @@ msgid "… and %d more"
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerNotes.py
+#, fuzzy
+msgid "Also import PT4's automatic notes"
+msgstr "Automatikus jegyzetek készítése"
+
+#: fpdb_3_legacy/GuiTrackerNotes.py
 #, fuzzy, python-format
 msgid ""
 "Could not read PokerTracker 4's database:\n"
@@ -2968,6 +2973,13 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerNotes.py
 msgid "Leave players who already have an fpdb note alone"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerNotes.py
+msgid ""
+"PT4 rewrites its automatic notes as it imports hands, so fpdb keeps them in "
+"a section of their own and replaces that section on each import. Your own "
+"text stays as it is."
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerNotes.py
@@ -8818,15 +8830,16 @@ msgstr ""
 #: fpdb_3_legacy/tracker_notes.py
 #, python-format
 msgid ""
-"%(added)d notes added, %(appended)d appended, %(already)d already in fpdb, "
-"%(skipped)d skipped, %(unmatched)d not matched."
+"%(added)d notes added, %(appended)d appended, %(updated)d updated, "
+"%(already)d already in fpdb, %(skipped)d skipped, %(unmatched)d not matched."
 msgstr ""
 
 #: fpdb_3_legacy/tracker_notes.py
 #, python-format
 msgid ""
 "Preview, nothing written: %(added)d notes to add, %(appended)d to append, "
-"%(already)d already in fpdb, %(skipped)d to skip, %(unmatched)d not matched."
+"%(updated)d to update, %(already)d already in fpdb, %(skipped)d to skip, "
+"%(unmatched)d not matched."
 msgstr ""
 
 #: fpdb_3_legacy/tracker_notes.py
@@ -8839,6 +8852,10 @@ msgstr ""
 
 #: fpdb_3_legacy/tracker_notes.py
 msgid "appended to the fpdb note"
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "auto-notes updated"
 msgstr ""
 
 #: fpdb_3_legacy/tracker_notes.py

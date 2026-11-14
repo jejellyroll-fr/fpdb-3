@@ -16,6 +16,9 @@ import pytest
 
 from fpdb_3_legacy.sql_schema_player import player_schema_queries
 from fpdb_3_legacy.tracker_notes import (
+    AUTO_SECTION_END,
+    AUTO_SECTION_START,
+    PT4_PLAYER_AUTO_NOTES,
     PT4_PLAYER_NOTES,
     PT4_PLAYER_TAGS,
     TrackerNote,
@@ -27,7 +30,14 @@ from fpdb_3_legacy.tracker_notes import (
 )
 
 PT4_COLUMNS_FILE = Path(__file__).parent / "fixtures" / "pt4_schema_columns.txt"
-PT4_ALIASES = {"n": "notes", "p": "player", "ls": "lookup_sites", "t": "tags", "lt": "lookup_tags"}
+PT4_ALIASES = {
+    "n": "notes",
+    "na": "notes_auto",
+    "p": "player",
+    "ls": "lookup_sites",
+    "t": "tags",
+    "lt": "lookup_tags",
+}
 
 SITES = {
     2: "PokerStars",
@@ -63,10 +73,12 @@ class Pt4Cursor:
 
 
 class Pt4Connection:
-    """A psycopg-shaped PT4 connection that answers the two notes queries."""
+    """A psycopg-shaped PT4 connection that answers the notes queries; an unexpected query fails."""
 
-    def __init__(self, notes: list[tuple], tags: list[tuple]) -> None:
+    def __init__(self, notes: list[tuple], tags: list[tuple], auto: list[tuple] | None = None) -> None:
         self.answers = {PT4_PLAYER_NOTES: notes, PT4_PLAYER_TAGS: tags}
+        if auto is not None:
+            self.answers[PT4_PLAYER_AUTO_NOTES] = auto
 
     def cursor(self):
         return Pt4Cursor(self.answers)
@@ -101,14 +113,14 @@ def _apply(connection, notes, **kwargs):
 class TestPt4Schema:
     """The notes SQL must name columns PT4 has: no PT4 database in CI would reject it."""
 
-    @pytest.mark.parametrize("query", [PT4_PLAYER_NOTES, PT4_PLAYER_TAGS])
+    @pytest.mark.parametrize("query", [PT4_PLAYER_NOTES, PT4_PLAYER_TAGS, PT4_PLAYER_AUTO_NOTES])
     def test_reads_only_columns_pt4_has(self, query: str) -> None:
         known = {
             line.strip()
             for line in PT4_COLUMNS_FILE.read_text(encoding="utf-8").splitlines()
             if line.strip() and not line.startswith("#")
         }
-        used = {f"{PT4_ALIASES[alias]}.{column}" for alias, column in re.findall(r"\b(n|p|ls|t|lt)\.(\w+)", query)}
+        used = {f"{PT4_ALIASES[alias]}.{column}" for alias, column in re.findall(r"\b(na|n|p|ls|t|lt)\.(\w+)", query)}
         assert len(used) >= 6
         assert used <= known, sorted(used - known)
 
@@ -278,7 +290,80 @@ def test_the_report_names_every_player_not_simply_added(fpdb) -> None:
     )
 
     assert format_report(report).splitlines() == [
-        "1 notes added, 1 appended, 0 already in fpdb, 0 skipped, 1 not matched.",
+        "1 notes added, 1 appended, 0 updated, 0 already in fpdb, 0 skipped, 1 not matched.",
         "  PokerStars / bob -> PokerStars: appended to the fpdb note",
         "  PokerStars / zed: not in fpdb: import the player's hands first",
     ]
+
+
+def _auto(player: str, text: str, times: int | None = 2, when: datetime | None = datetime(2024, 3, 2)) -> TrackerNote:
+    return TrackerNote("PokerStars", player, text, (), when, auto=True, times=times)
+
+
+def _section(*lines: str) -> str:
+    return "\n".join([AUTO_SECTION_START, *lines, AUTO_SECTION_END])
+
+
+class TestPt4AutoNotes:
+    """PT4's automatic notes (notes_auto), on request: a section each import replaces."""
+
+    def test_they_are_read_only_on_request(self) -> None:
+        rows = [(100, "PokerStars", "alice", datetime(2024, 3, 2), 4, "Folds to   3-bet\nout of position")]
+        conn = Pt4Connection(notes=[], tags=[], auto=rows)
+
+        assert read_pt4_notes(Pt4Connection(notes=[], tags=[])) == []
+        (note,) = read_pt4_notes(conn, auto_notes=True)
+
+        assert note.auto
+        assert note.line() == "- Folds to 3-bet out of position (x4, 2024-03-02)"
+
+    def test_a_note_seen_once_or_undated_says_so_briefly(self) -> None:
+        assert _auto("alice", "Limps", times=1, when=None).line() == "- Limps"
+
+    def test_a_section_is_added_after_the_users_own_text(self, fpdb) -> None:
+        report = _apply(fpdb, [_auto("bob", "Limps"), TrackerNote("PokerStars", "bob", "Bluffs")])
+
+        assert _comment(fpdb, "bob") == "\n\n".join(
+            ["Plays every hand.", _section("- Limps (x2, 2024-03-02)"), "[PokerTracker 4]\nBluffs"],
+        )
+        assert report.outcomes[0].status == "appended"
+
+    def test_reimporting_replaces_the_section_in_place(self, fpdb) -> None:
+        _apply(fpdb, [_auto("bob", "Limps"), TrackerNote("PokerStars", "bob", "Bluffs")])
+        fpdb.execute("UPDATE Players SET comment = comment || '\n\nMy own line.' WHERE name = 'bob'")
+
+        assert (
+            _apply(fpdb, [_auto("bob", "Limps"), TrackerNote("PokerStars", "bob", "Bluffs")]).outcomes[0].status
+            == "already"
+        )
+        report = _apply(fpdb, [_auto("bob", "Limps", times=5), _auto("bob", "Min-raises")])
+
+        assert report.outcomes[0].status == "updated"
+        assert _comment(fpdb, "bob") == "\n\n".join(
+            [
+                "Plays every hand.",
+                _section("- Limps (x5, 2024-03-02)", "- Min-raises (x2, 2024-03-02)"),
+                "[PokerTracker 4]\nBluffs",
+                "My own line.",
+            ],
+        )
+
+    def test_skip_adds_no_section_to_a_users_note_but_refreshes_its_own(self, fpdb) -> None:
+        skipped = _apply(fpdb, [_auto("bob", "Limps")], on_existing="skip")
+        _apply(fpdb, [_auto("alice", "Limps")], on_existing="skip")
+        fpdb.execute("UPDATE Players SET comment = 'Mine.\n\n' || comment WHERE name = 'alice'")
+        refreshed = _apply(fpdb, [_auto("alice", "Limps", times=3)], on_existing="skip")
+
+        assert skipped.outcomes[0].status == "skipped"
+        assert _comment(fpdb, "bob") == "Plays every hand."
+        assert refreshed.outcomes[0].status == "updated"
+        assert _comment(fpdb, "alice") == "Mine.\n\n" + _section("- Limps (x3, 2024-03-02)")
+
+    def test_without_the_option_a_section_is_left_alone(self, fpdb) -> None:
+        _apply(fpdb, [_auto("alice", "Limps")])
+        before = _comment(fpdb, "alice")
+
+        report = _apply(fpdb, [TrackerNote("PokerStars", "alice", "Nit")])
+
+        assert report.outcomes[0].status == "appended"
+        assert _comment(fpdb, "alice") == before + "\n\n[PokerTracker 4]\nNit"

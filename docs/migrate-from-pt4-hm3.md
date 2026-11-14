@@ -105,7 +105,7 @@ the colour number PT4 gave the note:
 
 - **An fpdb note is never overwritten.** The PT4 block goes after the note you already have. Tick
   *Leave players who already have an fpdb note alone* to skip those players instead. The report
-  names every player whose note was appended to or skipped.
+  names every player whose note was appended to, updated or skipped.
 - **Importing again is safe.** A block already in the note is not added a second time, so only new
   PT4 notes come over.
 - **Players fpdb does not know are listed, not created.** Import the hands they played, then import
@@ -115,11 +115,31 @@ the colour number PT4 gave the note:
 - fpdb has no note colours, so a colour is kept as its PT4 number in the block's header: PT4's
   database stores only that number, not the colour.
 
+### PT4's automatic notes
+
+PT4's auto-note rules write notes of their own, apart from the ones you type. On some databases
+they are the only notes there are. Tick *Also import PT4's automatic notes* to bring them too. PT4
+rewrites them as it imports hands, a count going up for instance, so fpdb keeps them in a section
+of their own, one line per auto-note with how often it was seen and when:
+
+```
+[PokerTracker 4 auto-notes]
+- Folds to 3-bet out of position (x4, 2024-03-02)
+[end of PokerTracker 4 auto-notes]
+```
+
+Each import replaces that section with what PT4 holds now, so it never piles up. Everything
+outside the section, your own text and your imported PT4 notes, is left as it is. Do not edit
+inside the section: the next import replaces it. With *Leave players who already have an fpdb
+note alone*, a player with a note of their own gets no new section, but a section an earlier
+import added is still kept up to date.
+
 From the command line, with the fpdb configuration of the current user:
 
 ```
 python -m fpdb_3_legacy.tracker_notes --dry-run
 python -m fpdb_3_legacy.tracker_notes --skip-existing
+python -m fpdb_3_legacy.tracker_notes --auto-notes
 ```
 
 It asks for the PT4 password, or reads it from `PT4_PASSWORD`. `--host`, `--port`, `--user` and

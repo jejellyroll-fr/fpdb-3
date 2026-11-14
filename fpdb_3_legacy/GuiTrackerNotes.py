@@ -80,6 +80,14 @@ class GuiTrackerNotes(QDialog):
 
         self.skip_existing = QCheckBox(_("Leave players who already have an fpdb note alone"))
         layout.addWidget(self.skip_existing)
+        self.auto_notes = QCheckBox(_("Also import PT4's automatic notes"))
+        self.auto_notes.setToolTip(
+            _(
+                "PT4 rewrites its automatic notes as it imports hands, so fpdb keeps them in a section "
+                "of their own and replaces that section on each import. Your own text stays as it is.",
+            ),
+        )
+        layout.addWidget(self.auto_notes)
 
         self.report = QPlainTextEdit()
         self.report.setReadOnly(True)
@@ -107,7 +115,7 @@ class GuiTrackerNotes(QDialog):
             self.database.text().strip(),
         )
         with connect_pt4(pt4) as conn:
-            return tracker_notes.read_pt4_notes(conn)
+            return tracker_notes.read_pt4_notes(conn, auto_notes=self.auto_notes.isChecked())
 
     def _open_fpdb(self) -> Any:
         from fpdb_3_legacy import Database

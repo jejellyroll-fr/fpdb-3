@@ -97,3 +97,25 @@ def test_a_pt4_that_cannot_be_read_is_reported_and_fpdb_untouched(qtbot, fpdb) -
     assert "connection refused" in dialog.report.toPlainText()
     assert _comment(fpdb) == "Old note"
     assert db.closed == 0
+
+
+def test_the_auto_notes_box_reaches_the_pt4_reader(qtbot, fpdb, monkeypatch) -> None:
+    from contextlib import nullcontext
+
+    from fpdb_3_legacy import pt4_adapter, tracker_notes
+
+    asked = []
+    monkeypatch.setattr(pt4_adapter, "connect_pt4", lambda _config: nullcontext("pt4"))
+    monkeypatch.setattr(
+        tracker_notes,
+        "read_pt4_notes",
+        lambda conn, *, auto_notes: asked.append((conn, auto_notes)) or [],
+    )
+    dialog = GuiTrackerNotes(SimpleNamespace(supported_sites={}), open_db=lambda: FakeDb(fpdb))
+    qtbot.addWidget(dialog)
+
+    dialog.preview_button.click()
+    dialog.auto_notes.setChecked(True)
+    dialog.preview_button.click()
+
+    assert asked == [("pt4", False), ("pt4", True)]

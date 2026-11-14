@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 22:17+0100\n"
+"POT-Creation-Date: 2026-11-14 23:46+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -2938,6 +2938,11 @@ msgid "… and %d more"
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerNotes.py
+#, fuzzy
+msgid "Also import PT4's automatic notes"
+msgstr "Automatische Notizen erzeugen"
+
+#: fpdb_3_legacy/GuiTrackerNotes.py
 #, fuzzy, python-format
 msgid ""
 "Could not read PokerTracker 4's database:\n"
@@ -2963,6 +2968,13 @@ msgstr "Ein PokerTracker 4-HUD-Layout importieren (Statistiken + Range-Charts)"
 
 #: fpdb_3_legacy/GuiTrackerNotes.py
 msgid "Leave players who already have an fpdb note alone"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerNotes.py
+msgid ""
+"PT4 rewrites its automatic notes as it imports hands, so fpdb keeps them in "
+"a section of their own and replaces that section on each import. Your own "
+"text stays as it is."
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerNotes.py
@@ -8812,15 +8824,16 @@ msgstr ""
 #: fpdb_3_legacy/tracker_notes.py
 #, python-format
 msgid ""
-"%(added)d notes added, %(appended)d appended, %(already)d already in fpdb, "
-"%(skipped)d skipped, %(unmatched)d not matched."
+"%(added)d notes added, %(appended)d appended, %(updated)d updated, "
+"%(already)d already in fpdb, %(skipped)d skipped, %(unmatched)d not matched."
 msgstr ""
 
 #: fpdb_3_legacy/tracker_notes.py
 #, python-format
 msgid ""
 "Preview, nothing written: %(added)d notes to add, %(appended)d to append, "
-"%(already)d already in fpdb, %(skipped)d to skip, %(unmatched)d not matched."
+"%(updated)d to update, %(already)d already in fpdb, %(skipped)d to skip, "
+"%(unmatched)d not matched."
 msgstr ""
 
 #: fpdb_3_legacy/tracker_notes.py
@@ -8833,6 +8846,10 @@ msgstr ""
 
 #: fpdb_3_legacy/tracker_notes.py
 msgid "appended to the fpdb note"
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "auto-notes updated"
 msgstr ""
 
 #: fpdb_3_legacy/tracker_notes.py

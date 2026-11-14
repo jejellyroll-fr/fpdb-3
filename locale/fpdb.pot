@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 22:17+0100\n"
+"POT-Creation-Date: 2026-11-14 23:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2525,6 +2525,17 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerNotes.py
 msgid "Leave players who already have an fpdb note alone"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerNotes.py
+msgid "Also import PT4's automatic notes"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerNotes.py
+msgid ""
+"PT4 rewrites its automatic notes as it imports hands, so fpdb keeps them in "
+"a section of their own and replaces that section on each import. Your own "
+"text stays as it is."
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerNotes.py
@@ -7400,6 +7411,10 @@ msgid "appended to the fpdb note"
 msgstr ""
 
 #: fpdb_3_legacy/tracker_notes.py
+msgid "auto-notes updated"
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes.py
 msgid "already in fpdb"
 msgstr ""
 
@@ -7419,14 +7434,15 @@ msgstr ""
 #, python-format
 msgid ""
 "Preview, nothing written: %(added)d notes to add, %(appended)d to append, "
-"%(already)d already in fpdb, %(skipped)d to skip, %(unmatched)d not matched."
+"%(updated)d to update, %(already)d already in fpdb, %(skipped)d to skip, "
+"%(unmatched)d not matched."
 msgstr ""
 
 #: fpdb_3_legacy/tracker_notes.py
 #, python-format
 msgid ""
-"%(added)d notes added, %(appended)d appended, %(already)d already in fpdb, "
-"%(skipped)d skipped, %(unmatched)d not matched."
+"%(added)d notes added, %(appended)d appended, %(updated)d updated, "
+"%(already)d already in fpdb, %(skipped)d skipped, %(unmatched)d not matched."
 msgstr ""
 
 #: fpdb_3_legacy/update_notice.py
