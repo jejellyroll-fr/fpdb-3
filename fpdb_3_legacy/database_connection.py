@@ -221,6 +221,7 @@ class DatabaseConnectionMixin:
         get_cursor: Callable[..., Any]
         get_sites: Callable[..., None]
         recreate_tables: Callable[..., None]
+        refresh_hero_hands_only_hudcache: Callable[[], None]
 
     def connection_params_changed(self, c: Any) -> bool:
         """Return whether ``c`` points at a different database than the live one."""
@@ -286,6 +287,21 @@ class DatabaseConnectionMixin:
         self.build_full_hudcache = not self.import_options["fastStoreHudCache"]
         self.cacheSessions = self.import_options["cacheSessions"]
         self.callHud = self.import_options["callFpdbHud"]
+
+        # ACR/WPN statistics from the user's own hands only (#719): a cache
+        # filled before the rule is refilled once for those rooms. Here rather
+        # than with the schema migrations, which run before the cache settings
+        # above are known.
+        if (
+            hasattr(self, "refresh_hero_hands_only_hudcache")
+            and self.is_connected()
+            and not getattr(self, "wrongDbVersion", False)
+        ):
+            try:
+                self.refresh_hero_hands_only_hudcache()
+            except Exception:  # noqa: BLE001 - best-effort like the schema migrations.
+                log.warning("Could not refresh the ACR/WPN HUD cache rows", exc_info=True)
+                self.rollback()
 
         # self.hud_hero_style = 'T'  # Duplicate set of vars just for hero - not used yet.
         # self.hud_hero_hands = 2000 # Idea is that you might want all-time stats for others
