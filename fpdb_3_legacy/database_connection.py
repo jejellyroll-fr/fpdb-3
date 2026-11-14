@@ -287,6 +287,18 @@ class DatabaseConnectionMixin:
         self.cacheSessions = self.import_options["cacheSessions"]
         self.callHud = self.import_options["callFpdbHud"]
 
+        # ACR/WPN statistics from the user's own hands only (#719): a cache
+        # filled before the rule is refilled once for those rooms. Here rather
+        # than with the schema migrations, which run before the cache settings
+        # above are known.
+        refresh = getattr(self, "refresh_hero_hands_only_hudcache", None)
+        if refresh is not None and self.is_connected() and not getattr(self, "wrongDbVersion", False):
+            try:
+                refresh()
+            except Exception:  # noqa: BLE001 - best-effort like the schema migrations.
+                log.warning("Could not refresh the ACR/WPN HUD cache rows", exc_info=True)
+                self.rollback()
+
         # self.hud_hero_style = 'T'  # Duplicate set of vars just for hero - not used yet.
         # self.hud_hero_hands = 2000 # Idea is that you might want all-time stats for others
         # self.hud_hero_days  = 30   # but last T days or last H hands for yourself

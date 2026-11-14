@@ -18,6 +18,16 @@ from fpdb_3_legacy.sql_queries_cache_rebuild import HAND_TIME_RANGE
 log = get_logger("database")
 
 
+# The one-time refresh of the hero-hands-only rooms' HUD cache rows (#719):
+# their ids are spelled out (constants), and a test keeps them equal to
+# hud_room_policy.WPN_SITE_IDS.
+HERO_HANDS_ONLY_REFRESHED = "hudcache_hero_hands_only_v1"
+DELETE_HERO_HANDS_ONLY_HUDCACHE = (
+    "DELETE FROM HudCache WHERE gametypeId IN (SELECT id FROM Gametypes WHERE siteId IN (24, 115, 116, 117, 118, 119))"
+)
+REFRESH_WHERE_RING = "WHERE g.type = 'ring' AND g.siteId IN (24, 115, 116, 117, 118, 119)<hero_where>"
+REFRESH_WHERE_TOUR = "WHERE g.type = 'tour' AND g.siteId IN (24, 115, 116, 117, 118, 119)<hero_where>"
+
 class DatabaseRebuildMixin:
     """Rebuild the caches from the hands they summarise."""
 
@@ -292,16 +302,65 @@ class DatabaseRebuildMixin:
 
         The HUD cache leaves out what the import leaves out of it: a hand of a
         room allowing HUD statistics from the user's own hands only (ACR/WPN,
-        #719) that was stored without the hero at the table.
+        #719) that none of the user's configured screen names played.
         """
-        from fpdb_3_legacy.hud_room_policy import HERO_HANDS_ONLY_REBUILD_FILTER
+        from fpdb_3_legacy.hud_room_policy import hero_hands_only_sql
 
         if table == "HudCache":
-            where += HERO_HANDS_ONLY_REBUILD_FILTER
+            where += hero_hands_only_sql(self.hero_hands_only_user_ids())
         query = self.sql.query["rebuildCache"].replace("%s", self.sql.query["placeholder"])
         tourney_join = "INNER JOIN Tourneys t ON (t.id = h.tourneyId)" if game_type == "tour" else ""
         query = query.replace("<tourney_join_clause>", tourney_join).replace("<where_clause>", where)
         return self.replace_statscache(game_type, table, query)
+
+    def hero_hands_only_user_ids(self) -> list[int]:
+        """The players the user's configured names are in the hero-hands-only rooms (ACR/WPN).
+
+        Configured names and aliases only: ``Players.hero`` marks whoever a
+        history showed hole cards for, which for someone else's history is not
+        the user. Every WPN skin is searched, since a name configured for one
+        skin plays hands filed under another.
+        """
+        from fpdb_3_legacy.hud_room_policy import WPN_SITE_ID_SQL, user_names
+
+        # Looked up on every call, not remembered: the players appear as their
+        # hands are imported, so an answer kept from earlier would go stale.
+        names = sorted(user_names(getattr(self, "config", None), "WinningPoker"))
+        ids: list[int] = []
+        if names:
+            placeholder = self.sql.query["placeholder"]
+            query = (
+                "SELECT id FROM Players WHERE siteId IN ("  # nosec B608  # nosemgrep - constants and placeholders
+                + WPN_SITE_ID_SQL
+                + ") AND name IN ("
+                + ", ".join([placeholder] * len(names))
+                + ")"
+            )
+            cursor = self.get_cursor()
+            cursor.execute(query, names)
+            ids = sorted(int(row[0]) for row in cursor.fetchall())
+        return ids
+
+    def refresh_hero_hands_only_hudcache(self) -> None:
+        """Rebuild, once, the HUD cache rows of the hero-hands-only rooms (#719).
+
+        A database imported before the rule holds statistics from hands the
+        user did not play. Only those rooms' rows are dropped and refilled, so
+        the rest of the cache is untouched; the AnalyticsMeta flag makes it a
+        one-time step.
+        """
+        from fpdb_3_legacy import analytics_lifecycle
+
+        analytics_lifecycle.ensure_analytics_meta(self)
+        if HERO_HANDS_ONLY_REFRESHED in analytics_lifecycle._read_meta(self):
+            return
+        self._rebuild_prepare_heroes(None, None)
+        cursor = self.get_cursor()
+        cursor.execute(DELETE_HERO_HANDS_ONLY_HUDCACHE)
+        cursor.execute(self.rebuild_sql("ring", "HudCache", REFRESH_WHERE_RING))
+        cursor.execute(self.rebuild_sql("tour", "HudCache", REFRESH_WHERE_TOUR))
+        analytics_lifecycle._write_meta(self, {HERO_HANDS_ONLY_REFRESHED: "1"})
+        self.commit()
 
     def _rebuild_ring_cache(self, table: Any, h_start: Any, v_start: Any, wmid: Any, commit: bool = True) -> None:
         """Rebuild the cash half of a statistics cache."""

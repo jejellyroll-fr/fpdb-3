@@ -202,6 +202,7 @@ def hud_session_stats_queries(db_server: str) -> dict[str, str]:
                 /* check activeseats once this data returned (don't want to do that here as it might
                    assume a session ended just because the number of seats dipped for a few hands)
                 */
+                <hero_hands_only>
                 AND   (   /* 2 separate parts for hero and opponents */
                           (    hp2.playerId != %s
                            AND h2.seats between %s and %s
@@ -413,6 +414,7 @@ def hud_session_stats_queries(db_server: str) -> dict[str, str]:
                 /* check activeseats once this data returned (don't want to do that here as it might
                    assume a session ended just because the number of seats dipped for a few hands)
                 */
+                <hero_hands_only>
                 AND   (   /* 2 separate parts for hero and opponents */
                           (    hp2.playerId != %s
                            AND h2.seats between %s and %s
@@ -624,6 +626,7 @@ def hud_session_stats_queries(db_server: str) -> dict[str, str]:
                 /* check activeseats once this data returned (don't want to do that here as it might
                    assume a session ended just because the number of seats dipped for a few hands)
                 */
+                <hero_hands_only>
                 AND   (   /* 2 separate parts for hero and opponents */
                           (    hp2.playerId != %s
                            AND h2.seats between %s and %s

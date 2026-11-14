@@ -27,7 +27,7 @@ them, are in [what fpdb does while you play](fair-play.md#rooms).
 | Winamax | ✔ | — | — | — | Prohibits dynamic range software and certain dynamic HUD features; off until its integrity team approves fpdb's |
 | iPoker network, under every skin's own name (Betclic Poker, PMU Poker, FDJ Poker, Bet365.fr Poker, Barrière Poker, Unibet Poker…) | ✔ | — | — | — | Positional and dynamic HUDs documented as not allowed on the network |
 | Unibet (the 2026 Relax Gaming client, Unibet.fr) | ✔ | — | — | — | Not reviewed: its rules do not mention HUDs, see below |
-| ACR / WPN (Americas Cardroom, BlackChipPoker, TruePoker, Ya Poker, WinningPoker) | ✔ | — | — | — | Statistics only from your own completed hands (ACR policy §4.1.3): a hand imported without you at the table feeds no HUD statistic. See [fair-play.md](fair-play.md#acr--wpn-in-detail) |
+| ACR / WPN (Americas Cardroom, BlackChipPoker, TruePoker, Ya Poker, WinningPoker) | ✔ | — | — | — | Statistics only from your own completed hands (ACR policy §4.1.3): a hand none of your configured WPN screen names played feeds no HUD statistic. See [fair-play.md](fair-play.md#acr--wpn-in-detail) |
 | Any other room (GGPoker…) | ✔ | — | — | — | Not reviewed: the conservative default |
 | CoinPoker | — | — | — | — | Import-only: hand histories are imported after the session, no HUD at all |
 | BetRivers | — | — | — | — | Import-only: third-party HUDs are not permitted; hand histories are imported after the session |

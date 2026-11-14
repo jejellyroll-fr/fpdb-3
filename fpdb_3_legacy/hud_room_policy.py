@@ -131,14 +131,13 @@ WPN_SKINS: Final = frozenset(
     )
 )
 
-#: The Sites ids of those skins, for the SQL that rebuilds the HUD cache.
+#: The Sites ids of those skins, for the SQL that keeps their hands out of
+#: the HUD unless the user played them.
 WPN_SITE_IDS: Final = (24, 115, 116, 117, 118, 119)
 
-#: Appended to the HUD cache rebuild's WHERE clause: a hand of a room that
-#: allows statistics from the user's own hands only, stored without the hero
-#: at the table (``Hands.heroSeat = 0``), is left out. The ids are spelled out
-#: so the statement is a constant; a test keeps them equal to WPN_SITE_IDS.
-HERO_HANDS_ONLY_REBUILD_FILTER: Final = " AND NOT (h.heroSeat = 0 AND g.siteId IN (24, 115, 116, 117, 118, 119))"
+#: The same ids as SQL text, spelled out so every statement built from them is
+#: made of constants and integers; a test keeps the two equal.
+WPN_SITE_ID_SQL: Final = "24, 115, 116, 117, 118, 119"
 
 #: Site names that belong to the iPoker network: every ``'IP'`` row of the
 #: Sites table (``database_schema``), and the names its clients and
@@ -231,6 +230,44 @@ def policy_for(site: str | None) -> RoomPolicy:
 def hero_hands_only(site: str | None) -> bool:
     """Whether ``site``'s HUD statistics may come only from hands the user played (#719)."""
     return policy_for(site).hero_hands_only
+
+
+def user_names(config: Any, site: str | None) -> frozenset[str]:
+    """The screen names the user configured in ``site``'s network, aliases included.
+
+    "The user played this hand" is decided against these names only, never
+    against the player a hand history shows hole cards for: a history someone
+    else exported names *them* as its hero (#719). WPN skins share one network,
+    so a name configured for any of them counts at every one.
+    """
+    network = network_of(site)
+    names: set[str] = set()
+    for name, site_config in (getattr(config, "supported_sites", None) or {}).items():
+        if network_of(name) != network:
+            continue
+        aliases = getattr(site_config, "hero_aliases", None) or [getattr(site_config, "screen_name", "")]
+        names.update(alias for alias in aliases if alias and alias != "YOUR SCREEN NAME HERE")
+    return frozenset(names)
+
+
+def hero_hands_only_sql(user_ids: Any, hand: str = "h", gametype: str = "g") -> str:
+    """A WHERE condition, to append with AND, keeping out the hero-hands-only rooms' other hands.
+
+    A hand of such a room passes only when one of ``user_ids`` (the players the
+    user's configured names resolve to) took part in it. With no such id, none
+    of those rooms' hands pass. ``hand`` and ``gametype`` are the aliases of
+    the Hands and Gametypes tables in the statement; every other part is a
+    constant or an integer.
+    """
+    ids = sorted({int(player_id) for player_id in user_ids})
+    if not ids:
+        return " AND " + gametype + ".siteId NOT IN (" + WPN_SITE_ID_SQL + ")"
+    id_list = ", ".join(str(player_id) for player_id in ids)
+    return (
+        " AND (" + gametype + ".siteId NOT IN (" + WPN_SITE_ID_SQL + ")"
+        " OR EXISTS (SELECT 1 FROM HandsPlayers own WHERE own.handId = " + hand + ".id"
+        " AND own.playerId IN (" + id_list + ")))"
+    )
 
 
 def network_hint(config: Any, site: str | None) -> str:
