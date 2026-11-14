@@ -11,11 +11,14 @@
   prize pool, multiplier, and each player's finishing place and winnings all
   come from the header and the summary.
 * ``Game Mode: Cash Game`` hands (PLO Omaha, NLHE) carry euro amounts.
+* ``Game Mode: Tournament`` hands of a progressive knockout (``Tournament
+  Type: SKO``) carry antes, a bounty on every seat and one summary line per
+  knockout (#804).
 * Fixtures under ``tests/fixtures/hands/betclic`` are anonymised (Hero /
   VillainN); the spin one is sliced from the public MIT-licensed
   florentvdry/spintracker corpus (4,416 hands, 300 tournaments), and the cash
-  ones from a real 2026 export, so parsed totals are cross-checked against the
-  raw text here.
+  and SKO ones from real 2026 exports, so parsed totals are cross-checked
+  against the raw text here.
 """
 
 from __future__ import annotations
@@ -37,6 +40,7 @@ FIXTURES = ROOT / "tests" / "fixtures" / "hands" / "betclic"
 SPIN = FIXTURES / "spin_rush_2026.txt"
 PLO_CASH = FIXTURES / "plo_cash_2026.txt"
 NLHE_CASH = FIXTURES / "nlhe_cash_2026.txt"
+SKO = FIXTURES / "sko_tournament_2026.txt"
 
 IPOKER_XML = """<?xml version="1.0" encoding="utf-8"?>
 <session><game gamecode="1"><general><nickname>jejellyroll</nickname></general></game></session>
@@ -77,7 +81,7 @@ def test_ulid_mapping_orders_by_timestamp_and_separates_same_millisecond_ids() -
 
 
 def test_ulid_mapping_is_unique_over_every_fixture_id() -> None:
-    for fixture in (SPIN, PLO_CASH, NLHE_CASH):
+    for fixture in (SPIN, PLO_CASH, NLHE_CASH, SKO):
         text = fixture.read_text(encoding="utf-8")
         ulids = set(re.findall(r"^(?:Hand|Game|Table) ID: (\S+)$", text, re.MULTILINE))
         mapped = [ulid_to_int(u) for u in ulids]
@@ -250,6 +254,86 @@ def test_nlhe_cash_hands_parse() -> None:
     assert all(len(h.holecards["PREFLOP"].get("Hero", [[], []])[1]) == 2 for h in hands)
 
 
+# --- Progressive knockout tournaments (#804) ----------------------------------
+
+
+def _ko_lines(text: str) -> list[tuple[str, Decimal]]:
+    return [
+        (winner, _amount(amount))
+        for winner, amount in re.findall(r"^(\S+) wins (\S+) for eliminating \S+", text, re.MULTILINE)
+    ]
+
+
+def test_sko_hands_are_one_progressive_knockout_tournament() -> None:
+    hands = _parse(SKO)
+    assert len(hands) == 29
+    assert {h.gametype["type"] for h in hands} == {"tour"}
+    assert {h.gametype["currency"] for h in hands} == {"T$"}
+    # One Game ID -> one tournament.
+    raw_game_id = re.search(r"^Game ID: (\S+)$", SKO.read_text(encoding="utf-8"), re.MULTILINE).group(1)
+    assert {h.tourNo for h in hands} == {str(ulid_to_int(raw_game_id))}
+    assert {h.tourneyName for h in hands} == {"ONE BY ONE"}
+    # isKO / isProgressive key the TourneyTypes row: every hand carries the same
+    # values, including the 27 hands in which nobody is knocked out.
+    assert {(h.isKO, h.isProgressive, h.isSng, h.isLottery) for h in hands} == {(True, True, False, False)}
+    assert {(h.buyin, h.fee, h.buyinCurrency) for h in hands} == {(100, 0, "EUR")}
+
+
+def test_sko_seat_lines_split_the_stack_from_the_bounty_and_antes_are_posted() -> None:
+    first = _parse(SKO)[0]
+    # "Seat 1: Villain1 (79307, €0.60 bounty) [BB]": the stack is 79307 chips,
+    # never 793070.60, and the bounty rides along in euros.
+    assert first.players[0] == [1, "Villain1", "79307", None, "0.60"]
+    assert {p[1]: p[4] for p in first.players}["Hero"] == "0.50"
+    antes = [a for a in first.actions["BLINDSANTES"] if a[1] == "ante"]
+    assert len(antes) == 6 and {a[2] for a in antes} == {Decimal("120")}
+    assert first.gametype["ante"] == Decimal("120")
+
+
+def test_sko_knockouts_count_one_each_and_pay_their_cash() -> None:
+    hands = _parse(SKO)
+    ko_hands = [h for h in hands if h.koCounts]
+    assert len(ko_hands) == 2
+    hero_bust = next(h for h in ko_hands if "Hero" in h.tourneyRanks)
+    # "Villain3 wins €0.10 for eliminating Hero (x0.4), Villain3 own bounty
+    # increases from €0.50 to €0.60"
+    assert hero_bust.tourneyRanks == {"Hero": 445}
+    assert hero_bust.tourneyWinnings == {"Hero": 0}
+    assert hero_bust.koCounts == {"Villain3": 1}
+    assert hero_bust.koWinnings == {"Villain3": 10}  # hundredths of a euro
+    assert hero_bust.endBounty == {"Villain3": Decimal("60")}
+    other = next(h for h in ko_hands if h is not hero_bust)
+    assert other.koCounts == {"Villain5": 1}
+    assert other.tourneyRanks == {"Villain6": 509}
+
+
+def test_sko_totals_match_the_raw_export_text() -> None:
+    text = SKO.read_text(encoding="utf-8")
+    hands = _parse(SKO)
+    raw_kos = _ko_lines(text)
+    assert sum(sum(h.koCounts.values()) for h in hands) == len(raw_kos) == 2
+    assert sum(sum(h.koWinnings.values()) for h in hands) == sum(int(a * 100) for _w, a in raw_kos)
+    for hand in hands:
+        collected = sum(hand.collectees.values(), Decimal(0))
+        assert collected + Decimal(str(hand.rake)) == Decimal(str(hand.totalpot))
+
+
+def test_repeated_knockouts_of_the_same_value_are_each_counted(tmp_path: Path) -> None:
+    # Two identical knockout lines (same winner, victim and amount) are two
+    # knockouts: PT4 4.19.1 had to fix exactly this for Betclic. The hand is the
+    # fixture's hero bust with its knockout line written twice.
+    text = SKO.read_text(encoding="utf-8")
+    ko_line = next(line for line in text.splitlines() if " for eliminating Hero " in line)
+    hand_text = next(chunk for chunk in text.split("------------") if ko_line in chunk)
+    doubled = tmp_path / "repeated_ko.txt"
+    doubled.write_text(hand_text.strip() + "\n" + ko_line + "\n", encoding="utf-8")
+
+    (hand,) = _parse(doubled)
+
+    assert hand.koCounts == {"Villain3": 2}
+    assert hand.koWinnings == {"Villain3": 20}
+
+
 # --- Re-import stores nothing twice ------------------------------------------
 
 
@@ -276,6 +360,36 @@ def test_reimporting_a_file_stores_nothing_twice(tmp_path, legacy_config, fresh_
     cursor.execute("SELECT COUNT(*) FROM Hands")
     (still,) = cursor.fetchone()
     assert still == stored
+    del importer
+
+
+def test_sko_import_stores_one_tournament_with_its_knockouts_once(tmp_path, legacy_config, fresh_db) -> None:
+    from fpdb_3_legacy.Importer import Importer
+
+    importer = Importer(caller=None, settings={"testData": False, "threads": 1}, config=legacy_config, sql=None)
+    importer.database = fresh_db
+    for copy_name in ("sko_a.txt", "sko_b.txt"):  # the second copy must change nothing
+        copy = tmp_path / copy_name
+        copy.write_bytes(SKO.read_bytes())
+        importer.addImportFile(str(copy), "Betclic")
+        importer.runImport()
+
+    cursor = fresh_db.get_cursor()
+    cursor.execute("SELECT COUNT(*) FROM Hands")
+    assert cursor.fetchone()[0] == 29
+    cursor.execute("SELECT COUNT(*) FROM Tourneys")
+    assert cursor.fetchone()[0] == 1
+    cursor.execute("SELECT knockout, progressive, buyin, currency FROM TourneyTypes")
+    knockout, progressive, buyin, currency = cursor.fetchone()
+    assert (bool(knockout), bool(progressive), buyin, currency) == (True, True, 100, "EUR")
+    cursor.execute(
+        "SELECT p.name, tp.koCount, tp.koWinnings FROM TourneysPlayers tp JOIN Players p ON p.id = tp.playerId"
+        " WHERE tp.koCount > 0 ORDER BY p.name"
+    )
+    assert [(name, int(count), int(won)) for name, count, won in cursor.fetchall()] == [
+        ("Villain3", 1, 10),
+        ("Villain5", 1, 10),
+    ]
     del importer
 
 

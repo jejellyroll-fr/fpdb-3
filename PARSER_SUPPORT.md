@@ -9,7 +9,8 @@ These converters have file-by-file semantic snapshots in
 `tests/test_live_parser_regression.py`:
 
 - Betclic (the 2025+ in-house client's `*** HEADER ***` text format: Spin & Rush
-  lottery sit-and-gos and cash games; the legacy iPoker skin "Betclic Poker" is
+  lottery sit-and-gos, progressive knockout (`SKO`) tournaments and cash games;
+  re-entry is not covered yet; the legacy iPoker skin "Betclic Poker" is
   covered under iPoker)
 - Bovada/Ignition
 - BetOnline
