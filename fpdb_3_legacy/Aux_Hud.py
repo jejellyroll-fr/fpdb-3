@@ -258,7 +258,12 @@ _ALIGN = {
 # ``hud_situation`` (#298), which the dynamic panel layer also needs. They are
 # re-exported here because this is where callers have always imported them, and
 # so the two layers cannot disagree about what "B" means.
-from fpdb_3_legacy.hud_situation import block_visible, block_visible_for, normalize_position  # noqa: E402,F401
+from fpdb_3_legacy.hud_situation import (  # noqa: E402,F401
+    block_visible,
+    block_visible_for,
+    is_dynamic_only,
+    normalize_position,
+)
 
 
 def false_attr(value: Any) -> bool:
@@ -336,6 +341,9 @@ class SimpleHUD(Aux_Base.AuxSeats):
         self._dragged_block_keys: set[BlockKey] = set()
         self._dragged_classic_slots: set[Any] = set()
         self._dragged_marks_profile: tuple[str, str, int, str | None] | None = None
+        # The last room refusal logged, so each is said once, not on every redraw.
+        self._positional_refusal_logged: str | None = None
+        self._panel_refusal_logged: str | None = None
 
     @staticmethod
     def _hud_font_scale(value: Any, default: float) -> float:
@@ -1773,8 +1781,14 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         for box, (container, block) in zip(self.stat_boxes, self.block_widgets, strict=False):
             if selection is not None:
                 visible = block_visible_for(block, selection, player_pos)
+            elif show_all_positions:
+                # "all" stacks the position panels -- the profile's choice, or a
+                # room that refuses a positional HUD (#756) -- but a dynamic-only
+                # block still waits for a selection naming it: with panels off
+                # the profile keeps its static core.
+                visible = not is_dynamic_only(block.get("position", ""))
             else:
-                visible = True if show_all_positions else block_visible(block.get("position", ""), player_pos)
+                visible = block_visible(block.get("position", ""), player_pos)
             container.setVisible(visible)
             if not visible:
                 continue

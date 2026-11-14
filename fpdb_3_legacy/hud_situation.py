@@ -204,6 +204,11 @@ def normalize_position(raw: Any) -> str:
     return after_bb.get(text, text)
 
 
+def is_dynamic_only(block_position: Any) -> bool:
+    """Whether a block shows only when a dynamic selection names its panel."""
+    return str(block_position or "").strip().lower() == DYNAMIC_ONLY_POSITION
+
+
 def block_visible(block_position: str, player_position: Any) -> bool:
     """Whether a panel bound to ``block_position`` shows for ``player_position``.
 

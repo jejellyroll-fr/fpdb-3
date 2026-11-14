@@ -417,6 +417,24 @@ def test_position_conditional_blocks_show_only_matching(reviewed_room):
     assert visible == [True, False, True]  # SB shown, BB hidden, Info always shown
 
 
+@pytest.mark.parametrize("mode", ["current", "all"])
+def test_dynamic_only_blocks_stay_hidden_in_a_restricted_room(mode):
+    # A dynamic HUD package at a table whose room refuses positional and
+    # dynamic panels: the position panels stack, but the contextual panels do
+    # not all appear at once -- the profile keeps its static core (#756).
+    blocks = [
+        _block("Core", [["vpip"]], position=""),
+        _block("SB 3h", [["pfr"]], position="SB"),
+        _block("C-bet IP", [["n"]], position="dynamic"),
+        _block("Facing 3-bet", [["n"]], position="Dynamic"),
+    ]
+    win = Aux_Hud.SimpleStatWindow(aw=_fake_aw(blocks, position="B", positional_mode=mode, site="Winamax"), seat=1)
+    win.create_contents(1)
+    win.update_contents(1)
+    visible = [not container.isHidden() for container, _pos in win.block_widgets]
+    assert visible == [True, True, False, False]
+
+
 @pytest.mark.parametrize("site", ["PokerStars.FR", "Winamax", "Betclic Poker", "GGPoker"])
 def test_a_room_that_refuses_a_positional_hud_shows_every_position_panel(site):
     # The profile asks for "current", but at these tables what a seat shows

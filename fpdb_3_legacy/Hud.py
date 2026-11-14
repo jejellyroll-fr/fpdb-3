@@ -127,6 +127,8 @@ class Hud:
         # unknown street never matches a flop rule by accident. The feed writes
         # it through set_live_state; nothing here depends on it being filled.
         self.live_state: dict[str, Any] = {}
+        # The last room refusal of live context logged, said once per table (#756).
+        self._live_context_refusal_logged: str | None = None
         self.is_loading = False
         self.is_fast_fold = False
         # Which build of this table's HUD this object is. HUD_main hands out a

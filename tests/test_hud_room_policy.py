@@ -216,7 +216,7 @@ def test_a_folded_live_context_is_dropped_where_the_room_refuses_it() -> None:
     hud = _hud("Winamax")
     hud.accept_live_context(live.LiveContext(street="flop"))
 
-    assert hud.live_state == {}
+    assert not hud.live_state
 
 
 def test_a_reviewed_room_takes_live_actions(reviewed_room) -> None:
