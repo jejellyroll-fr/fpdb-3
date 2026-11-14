@@ -355,13 +355,15 @@ def every_hand_noted(monkeypatch):
     monkeypatch.setattr(AutoNotes, "_rule_sets_for_hand", lambda *_args, **_kwargs: (rule_set,))
 
 
-def test_the_users_wpn_hand_gets_auto_notes(importer_for, every_hand_noted) -> None:
+@pytest.mark.usefixtures("every_hand_noted")
+def test_the_users_wpn_hand_gets_auto_notes(importer_for) -> None:
     importer = importer_for(WPN_PLAYER)
     _import(importer)
     assert _count(importer, "PlayerAutoNotes") > 0
 
 
-def test_someone_elses_wpn_history_gets_no_auto_notes(importer_for, every_hand_noted) -> None:
+@pytest.mark.usefixtures("every_hand_noted")
+def test_someone_elses_wpn_history_gets_no_auto_notes(importer_for) -> None:
     importer = importer_for("alice")
     _import(importer)
     assert _count(importer, "Hands") == 1
@@ -376,7 +378,8 @@ def _notes_from_before_the_rule(importer, patch) -> None:
     assert _count(importer, "PlayerAutoNotes") > 0
 
 
-def test_auto_notes_from_before_the_rule_are_dropped_once(importer_for, every_hand_noted, monkeypatch) -> None:
+@pytest.mark.usefixtures("every_hand_noted")
+def test_auto_notes_from_before_the_rule_are_dropped_once(importer_for, monkeypatch) -> None:
     importer = importer_for("alice")
     _notes_from_before_the_rule(importer, monkeypatch)
 
@@ -399,7 +402,8 @@ def test_auto_notes_from_before_the_rule_are_dropped_once(importer_for, every_ha
     assert _count(importer, "PlayerAutoNotes") == 1
 
 
-def test_the_users_own_auto_notes_survive_the_drop(importer_for, every_hand_noted, monkeypatch) -> None:
+@pytest.mark.usefixtures("every_hand_noted")
+def test_the_users_own_auto_notes_survive_the_drop(importer_for, monkeypatch) -> None:
     importer = importer_for(WPN_PLAYER)
     _notes_from_before_the_rule(importer, monkeypatch)
     noted = _count(importer, "PlayerAutoNotes")
