@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import os
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 
@@ -557,10 +557,12 @@ def test_update_paths_never_watches_an_import_only_room(tmp_path):
     config.get_default_paths.side_effect = lambda site: {"hud-defaultPath": str(tmp_path / site)}
     gui = _make_gui(_make_settings(MagicMock()), config)
     gui.importer.dirlist = {}
+    watched = MagicMock()
+    gui.importer.addImportDirectory = watched
     gui.addText = MagicMock()
     gui.doAutoImportBool = True
 
     gui.updatePaths()
 
-    gui.importer.addImportDirectory.assert_called_once_with(str(winamax_hands), monitor=True, site=("Winamax", "hh"))
+    assert watched.call_args_list == [call(str(winamax_hands), monitor=True, site=("Winamax", "hh"))]
     assert [entry.args[0] for entry in config.get_default_paths.call_args_list] == ["Winamax"]
