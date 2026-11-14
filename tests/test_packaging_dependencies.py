@@ -13,12 +13,10 @@ why it is one.
 from __future__ import annotations
 
 import re
+import tomllib
 from pathlib import Path
 
 import pytest
-
-# Stdlib from 3.11, and the project still claims 3.10.
-tomllib = pytest.importorskip("tomllib")
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -27,8 +25,6 @@ NOT_PACKAGED = {
     # A meta-package pulling in every Objective-C framework binding. The macOS
     # section names the three fpdb actually imports instead, which is smaller.
     "pyobjc": "the macOS section names the individual pyobjc frameworks",
-    # Only for Python 3.10, which briefcase never builds with; there tomllib is stdlib.
-    "tomli": "tomllib's backport, needed only by the Python 3.10 PyOxidizer builds",
 }
 
 
@@ -79,8 +75,8 @@ def test_a_deliberate_omission_is_still_a_real_dependency(pyproject) -> None:
 
 
 def test_pyoxidizer_dependency_file_matches_project(pyproject, pyoxidizer_requirements) -> None:
-    # pypoker-eval is installed separately with the Python-version exception
-    # needed by PyOxidizer's embedded Python 3.10.
+    # pypoker-eval is installed separately, with the CMAKE_ARGS that keep the
+    # runner's CPU features out of the release.
     wanted = {
         spec
         for spec in pyproject["project"]["dependencies"]

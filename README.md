@@ -282,10 +282,8 @@ The available packagers depend on the platform:
 ## 🔧 Requirements
 
 - Source installation: Python 3.11+ (3.13 recommended).
-- PyOxidizer binaries: no system Python is required; the current PyOxidizer
-  0.24 configuration embeds CPython 3.10.14 because it cannot link CPython
-  3.11+. This is an implementation detail of the bundle, not the supported
-  source-installation minimum.
+- PyOxidizer binaries: no system Python is required; they embed CPython
+  3.11.10, the newest PyOxidizer 0.24 can link (see `pyoxidizer.bzl`).
 - OS: Linux, Windows, macOS
 - HUD: X11 (Linux), native window support (Windows/macOS)
 - A C compiler and CMake — the equity engine is a native extension built at install time (see below)

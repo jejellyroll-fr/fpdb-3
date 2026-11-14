@@ -1,6 +1,6 @@
 # Keep this list synchronized with [project].dependencies in pyproject.toml.
-# pypoker-eval is installed separately in pyoxidizer.bzl because its metadata
-# requires Python 3.11 while PyOxidizer 0.24 embeds Python 3.10.
+# pypoker-eval is installed separately in pyoxidizer.bzl, which builds it with
+# CMAKE_ARGS that keep the runner's CPU features out of the release.
 beautifulsoup4==4.12.3
 pandas>=2.2.2
 psutil>=5.9.0
@@ -19,4 +19,3 @@ pymysql>=1.1.0
 defusedxml>=0.7.1
 pyqtgraph>=0.13.0
 psycopg[binary]>=3.1.0
-tomli>=2.0.1; python_version < '3.11'
