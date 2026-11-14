@@ -9,7 +9,7 @@ files as they are, so moving over amounts to one import of the right folder.
 | Hands | Yes, with this guide | #612 |
 | Stats (`.pt4stat`) | ChipEV and the common cash stats (VPIP, PFR, 3-bet, c-bet, WTSD, W$SD, AF, steal and the folds to them); see [the coverage of PT4's stock stats](pt4-stock-stat-coverage.md) | #613 |
 | HUD layout (`.pt4hud`) | Yes: *Configure ▸ Import PT4 HUD*. Stats with no fpdb equivalent are listed; *Convert PT4 HUD to .fpdbhud* makes a shareable package | #614 |
-| Reading the tracker's database directly | Being evaluated | #615 |
+| Reading the tracker's database directly | PT4: possible, importer not written yet ([findings](pt4-database-spike.md)). HM3: not evaluated | #615 |
 | Player notes | Not yet | #618 |
 
 ## 1. Find the hand histories
