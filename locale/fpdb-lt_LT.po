@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 00:05+0100\n"
+"POT-Creation-Date: 2026-11-14 11:31+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -114,8 +114,7 @@ msgstr ""
 msgid "Stat set"
 msgstr "Statistika"
 
-#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/swc_poker_console.py
 #: fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy
 msgid "Stop"
@@ -3440,72 +3439,6 @@ msgstr "Turnyrai"
 msgid "e.g., my_custom_theme"
 msgstr "pvz., mano_tema"
 
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
-msgstr ""
-"Taip pat paleisti HUD_main (nužymėkite, jei HUD/automatinis importas jau "
-"veikia)."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Capture failed to start — see the log above."
-msgstr "Fiksavimas nepasileido — žr. žurnalą aukščiau."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Capture not started: it is off until you turn it on."
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Default game:"
-msgstr "Numatytasis žaidimas:"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Dry run (no DB insert)"
-msgstr "Bandomasis vykdymas (be įrašymo į DB)"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Finishing previous capture…"
-msgstr "Baigiamas ankstesnis fiksavimas…"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Idle."
-msgstr "Neaktyvus."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Interface:"
-msgstr "Sąsaja:"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Launch HUD"
-msgstr "Paleisti HUD"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Refresh interfaces"
-msgstr "Atnaujinti sąsajas"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
-msgstr "Prašoma teisių… patvirtinkite užklausą, tada žaiskite CoinPoker."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Start capture"
-msgstr "Pradėti fiksavimą"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Stopping…"
-msgstr "Stabdoma…"
-
 #: fpdb_3_legacy/capture/swc_poker_console.py
 msgid "<"
 msgstr ""
@@ -4215,11 +4148,6 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/live_capture_consent.py
-#, fuzzy
-msgid "CoinPoker packet capture"
-msgstr "CoinPoker tiesioginis fiksavimas"
-
-#: fpdb_3_legacy/live_capture_consent.py
 msgid ""
 "Live capture is not part of this install. From a source install: pip install "
 "-e '.[capture]'."
@@ -4252,13 +4180,6 @@ msgid ""
 "on macOS and Linux. Inside the client, it reads the table traffic after the "
 "client has decrypted it, and writes it to a file fpdb imports. It stays "
 "loaded until the client exits."
-msgstr ""
-
-#: fpdb_3_legacy/live_capture_consent.py
-msgid ""
-"fpdb records the network packets exchanged by the CoinPoker client, with "
-"administrator rights (tcpdump, pkexec or a UAC prompt), and rebuilds the "
-"hands from them. It reads the traffic only; it loads nothing into the client."
 msgstr ""
 
 #: fpdb_3_legacy/live_capture_consent.py
@@ -4350,11 +4271,6 @@ msgstr ""
 #: fpdb_3_legacy/menu_layout.py
 msgid "Choose the blinds, seats and period that new HUD tables start with"
 msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-#, fuzzy
-msgid "CoinPoker Live Capture"
-msgstr "CoinPoker tiesioginis fiksavimas"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -9025,6 +8941,12 @@ msgstr ""
 #~ msgid "Add Stat"
 #~ msgstr "Pridėti statistiką"
 
+#, fuzzy
+#~ msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
+#~ msgstr ""
+#~ "Taip pat paleisti HUD_main (nužymėkite, jei HUD/automatinis importas jau "
+#~ "veikia)."
+
 #~ msgid "Analyze took %.1f seconds"
 #~ msgstr "Analizė užtruko %.1f sekundžių"
 
@@ -9064,11 +8986,23 @@ msgstr ""
 #~ msgid "CURRENCY"
 #~ msgstr "VALIUTA"
 
+#, fuzzy
+#~ msgid "Capture failed to start — see the log above."
+#~ msgstr "Fiksavimas nepasileido — žr. žurnalą aukščiau."
+
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Uždaryta, jokių grafikų neeksportuota"
 
 #~ msgid "Closing this window will exit from the HUD."
 #~ msgstr "Jei uždarysit šį langą, bus uždarytas ir HUD"
+
+#, fuzzy
+#~ msgid "CoinPoker Live Capture"
+#~ msgstr "CoinPoker tiesioginis fiksavimas"
+
+#, fuzzy
+#~ msgid "CoinPoker packet capture"
+#~ msgstr "CoinPoker tiesioginis fiksavimas"
 
 #, fuzzy
 #~ msgid "Column:"
@@ -9113,6 +9047,10 @@ msgstr ""
 #~ msgid "DISCARDS"
 #~ msgstr "NUMESTOS KORTOS"
 
+#, fuzzy
+#~ msgid "Default game:"
+#~ msgstr "Numatytasis žaidimas:"
+
 #~ msgid "Detect Directories"
 #~ msgstr "Aptikti direktorijas"
 
@@ -9124,6 +9062,10 @@ msgstr ""
 
 #~ msgid "Do you want to try again?"
 #~ msgstr "Ar norite bandyti dar kartą?"
+
+#, fuzzy
+#~ msgid "Dry run (no DB insert)"
+#~ msgstr "Bandomasis vykdymas (be įrašymo į DB)"
 
 #~ msgid "END TIME"
 #~ msgstr "BAIGIMO LAIKAS"
@@ -9196,6 +9138,10 @@ msgstr ""
 
 #~ msgid "Finished recreating tables"
 #~ msgstr "Lentelių atkūrimas baigtas."
+
+#, fuzzy
+#~ msgid "Finishing previous capture…"
+#~ msgstr "Baigiamas ankstesnis fiksavimas…"
 
 #~ msgid "For Multiple Blind Levels:"
 #~ msgstr "Keliems statymų lygiams:"
@@ -9278,6 +9224,14 @@ msgstr ""
 #~ msgstr "YRA SHOOTOUTAS"
 
 #, fuzzy
+#~ msgid "Idle."
+#~ msgstr "Neaktyvus."
+
+#, fuzzy
+#~ msgid "Interface:"
+#~ msgstr "Sąsaja:"
+
+#, fuzzy
 #~ msgid "Items"
 #~ msgstr "Elementai"
 
@@ -9289,6 +9243,10 @@ msgstr ""
 
 #~ msgid "LEVEL"
 #~ msgstr "LYGIS"
+
+#, fuzzy
+#~ msgid "Launch HUD"
+#~ msgstr "Paleisti HUD"
 
 #, fuzzy
 #~ msgid "Limit not found in %s."
@@ -9443,11 +9401,19 @@ msgstr ""
 #~ msgstr "Atsipirkimas"
 
 #, fuzzy
+#~ msgid "Refresh interfaces"
+#~ msgstr "Atnaujinti sąsajas"
+
+#, fuzzy
 #~ msgid "Removing text < 50 characters & resetting index"
 #~ msgstr "Panaikinamas tekstas < 50 simbolių"
 
 #~ msgid "Reposition StatWindows"
 #~ msgstr "Perstatyti StatWindows"
+
+#, fuzzy
+#~ msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
+#~ msgstr "Prašoma teisių… patvirtinkite užklausą, tada žaiskite CoinPoker."
 
 #, fuzzy
 #~ msgid "Restart This HUD"
@@ -9516,11 +9482,19 @@ msgstr ""
 #~ msgid "Specifies the full path to a configuration file."
 #~ msgstr "Nurodo nustatymų failą"
 
+#, fuzzy
+#~ msgid "Start capture"
+#~ msgstr "Pradėti fiksavimą"
+
 #~ msgid "Starting import. Please wait."
 #~ msgstr "Pradedamas įkėlimas. Palaukite."
 
 #~ msgid "Stats page displayed in %4.2f seconds"
 #~ msgstr "Rodiklių puslapis atidarytas per %4.2f sekundes"
+
+#, fuzzy
+#~ msgid "Stopping…"
+#~ msgstr "Stabdoma…"
 
 #, fuzzy
 #~ msgid "Summary file '%s' correctly parsed (took %.3f seconds)"

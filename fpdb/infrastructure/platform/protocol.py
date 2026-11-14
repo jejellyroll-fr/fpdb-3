@@ -76,10 +76,6 @@ class TableInfo:
         geometry: Window position and size
         process_name: Name of the owning process (e.g., "PokerStars")
         process_id: Platform-specific process identifier
-        window_class: Native window class name, when the platform exposes it
-            (Win32 GetClassName). Used to disambiguate clients that give every
-            window the same title -- e.g. CoinPoker, whose Unity table window
-            and Chromium lobby are both titled "CoinPoker". None elsewhere.
     """
 
     window_id: int | str
@@ -87,7 +83,6 @@ class TableInfo:
     geometry: TableGeometry
     process_name: str | None = None
     process_id: int | None = None
-    window_class: str | None = None
 
     def matches_search(self, search_string: str) -> bool:
         """Check if this table matches a search string
@@ -146,27 +141,6 @@ class TableDetector(Protocol):
 
         Returns:
             True if window exists and is visible
-        """
-        ...
-
-    def is_window_displayed(self, window_id: int | str) -> bool:
-        """Check if a window is actually shown on screen right now
-
-        Stricter than is_window_visible(): a window the compositor hides while
-        the platform still reports it as visible must return False here. On
-        Windows that is DWM cloaking (a closed CoinPoker Unity host stays
-        "visible" but cloaked); platforms with no such concept simply mirror
-        is_window_visible().
-
-        Use is_window_visible() for the generic geometry poll -- treating a
-        merely cloaked window (e.g. a table on another virtual desktop) as gone
-        would kill live HUDs.
-
-        Args:
-            window_id: Platform-specific window identifier
-
-        Returns:
-            True if the window exists and is really shown on screen
         """
         ...
 

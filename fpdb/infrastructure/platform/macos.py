@@ -48,8 +48,6 @@ class MacOSTableDetector:
         "pokerstars.pt",
         "pokerstars.de",
         "Winamax",
-        "CoinPoker",
-        "coinpoker",
         # 2026 Relax Gaming client: process "UnibetPoker", window owner
         # "Unibet Poker" (also the historical iPoker skin's app name; the
         # "(<table id>)" window title tells the two apart).
@@ -159,7 +157,7 @@ class MacOSTableDetector:
 
         Args:
             search_string: String to search for in window titles
-            allow_fallback: Whether argv/System Events may be used when Quartz
+            allow_fallback: Whether System Events may be used when Quartz
                 exposes no matching title. Fast Fold disables this for its
                 first pass so Accessibility can answer before any Apple Event.
 
@@ -184,7 +182,6 @@ class MacOSTableDetector:
         total_windows = 0
         titled_windows = 0
         blank_target_windows = []
-        target_table_windows = []
         quartz_listed = False
         try:
             # Get list of all on-screen windows
@@ -210,19 +207,16 @@ class MacOSTableDetector:
                 )
 
                 if search_string and self._is_target_process(owner_name) and self._looks_like_table_window(geometry):
-                    candidate = TableInfo(
-                        window_id=window_number,
-                        title=window_title,
-                        geometry=geometry,
-                        process_name=owner_name,
-                        process_id=pid,
-                    )
-                    # Every target poker table window, whatever its title. Used to
-                    # resolve the real table id from the owning process's argv
-                    # (CoinPoker) when the title doesn't carry it.
-                    target_table_windows.append(candidate)
                     if not window_title:
-                        blank_target_windows.append(candidate)
+                        blank_target_windows.append(
+                            TableInfo(
+                                window_id=window_number,
+                                title=window_title,
+                                geometry=geometry,
+                                process_name=owner_name,
+                                process_id=pid,
+                            )
+                        )
 
                 # Check if matches search using regex
                 if not search_string or pattern.search(window_title):
@@ -251,14 +245,13 @@ class MacOSTableDetector:
             search_string,
         )
 
-        # Fallback to AppleScript / argv when Quartz produced no usable match:
+        # Fallback to AppleScript when Quartz produced no usable match:
         # either no window matched, or none exposed a title at all (most often
         # missing Screen Recording permission).
         has_only_empty_titles = len(tables) > 0 and all(t.title == "" for t in tables)
         if allow_fallback and (len(tables) == 0 or has_only_empty_titles):
             fallback = self._find_tables_without_titles(
                 search_string,
-                target_table_windows,
                 blank_target_windows,
                 total_windows,
                 titled_windows,
@@ -273,7 +266,6 @@ class MacOSTableDetector:
     def _find_tables_without_titles(
         self,
         search_string: str,
-        target_table_windows: list[TableInfo],
         blank_target_windows: list[TableInfo],
         total_windows: int,
         titled_windows: int,
@@ -282,30 +274,12 @@ class MacOSTableDetector:
     ) -> list[TableInfo] | None:
         """Resolve tables when Quartz exposed no usable title, else return None.
 
-        Tried in order: the owning process's argv (deterministic, no Screen
-        Recording), then AppleScript, then the sole blank target window.
+        Tried in order: AppleScript, then the sole blank target window.
 
         ``quartz_listed`` says the Quartz window list was read in full, so
         ``blank_target_windows`` really holds every untitled poker table on
         screen. Callers that cannot vouch for that leave it False.
         """
-        # CoinPoker renders each table in its own Unity process whose window
-        # carries no useful title and no accessibility text, so the tables are
-        # indistinguishable to every macOS window API. The owning process's argv,
-        # however, contains the table id (window -> kCGWindowOwnerPID -> argv ->
-        # table id). This is deterministic, so try it before AppleScript.
-        if search_string and target_table_windows:
-            pid_match = self._match_target_window_by_pid(search_string, target_table_windows)
-            if pid_match is not None:
-                logger.debug(
-                    "DIAGNOSTIC: argv matched %s window %s (pid %s) for search %r",
-                    pid_match.process_name,
-                    pid_match.window_id,
-                    pid_match.process_id,
-                    search_string,
-                )
-                return [pid_match]
-
         # Quartz listed every on-screen window, and each poker table among them
         # carries a title that did not match: the table searched for is not
         # open. System Events reads those same windows, so its scan cannot do
@@ -371,15 +345,14 @@ class MacOSTableDetector:
 
         # Keywords are matched as substrings against both the process name and
         # the table search string, so every one of them has to be long enough to
-        # be a room and nothing else. "gg" and "coin" were not: a table named
-        # "Biggie" or "Coinflip" reads as GGPoker or CoinPoker and gets a
-        # legitimate fallback from another room rejected. The full product names
+        # be a room and nothing else. "gg" was not: a table named "Biggie"
+        # reads as GGPoker and gets a legitimate fallback from another room
+        # rejected. The full product names
         # already cover the real process names.
         process_groups: dict[str, tuple[str, ...]] = {
             "winamax": ("winamax",),
             "pokerstars": ("pokerstars", "stars"),
             "party": ("party", "pmu", "bwin"),
-            "coinpoker": ("coinpoker",),
             "full tilt": ("full tilt", "fulltilt"),
             "888": ("888", "pacific"),
             "bovada": ("bovada", "bodog"),
@@ -420,46 +393,6 @@ class MacOSTableDetector:
 
     def _looks_like_table_window(self, geometry: TableGeometry) -> bool:
         return geometry.width >= 300 and geometry.height >= 250
-
-    def _match_target_window_by_pid(
-        self,
-        search_string: str,
-        windows: list[TableInfo],
-    ) -> TableInfo | None:
-        """Return the table window whose owning process argv carries ``search_string``.
-
-        CoinPoker table windows are owned by per-table Unity processes that pass
-        the table id on their command line, so the window's ``kCGWindowOwnerPID``
-        resolves to that id without reading pixels or a window title. Matching is
-        digit/whitespace-insensitive so a table id like ``922564`` matches the
-        escaped search string. Returns ``None`` when unavailable or no match.
-        """
-        try:
-            from .macos_process import table_id_for_pid
-        except ImportError:
-            return None
-
-        target = "".join(ch for ch in search_string if ch.isalnum()).lower()
-        if not target:
-            return None
-
-        for window in windows:
-            if not window.process_id:
-                continue
-            try:
-                table_id = table_id_for_pid(window.process_id)
-            except Exception as exc:  # pragma: no cover - platform dependent
-                logger.debug("argv lookup failed for pid %s: %s", window.process_id, exc)
-                continue
-            if not table_id:
-                continue
-            resolved = "".join(ch for ch in table_id if ch.isalnum()).lower()
-            # Exact match only: both the window's argv id and the imported hand's
-            # table id are the same derivation (game hand id // 100000), so a
-            # substring match would risk cross-assigning two similar table ids.
-            if resolved and resolved == target:
-                return window
-        return None
 
     _OSASCRIPT = "/usr/bin/osascript"
     """Absolute, so the scan cannot be diverted by whatever PATH the app inherited."""
@@ -725,20 +658,6 @@ class MacOSTableDetector:
 
         except (AttributeError, OSError, TypeError, ValueError):
             return False
-
-    def is_window_displayed(self, window_id: int | str) -> bool:
-        """Check if window is actually shown on screen right now
-
-        macOS has no equivalent of DWM cloaking, and is_window_visible()
-        already queries the on-screen window list, so this mirrors it.
-
-        Args:
-            window_id: Window number
-
-        Returns:
-            True if window exists and is on screen
-        """
-        return self.is_window_visible(window_id)
 
     def get_window_title(self, window_id: int | str) -> str | None:
         """Get window title

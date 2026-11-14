@@ -56,7 +56,7 @@ def _payload(**overrides) -> dict:
         "table": "914265",
         "hand_id": "91426500343",
         "sequence": 4,
-        "record": {"username": "P1", "action": "RAISE", "roundName": "preflop", "actionAmount": "6"},
+        "record": {"type": "raises", "player": "P1", "street": "preflop", "to": "6"},
     }
     payload.update(overrides)
     return payload

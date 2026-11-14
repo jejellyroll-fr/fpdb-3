@@ -1,14 +1,12 @@
 """Live capture that reaches into a poker client runs only once its user said yes (#451).
 
-Two capture paths do more than read files a room writes:
+The SwC native capture does more than read files a room writes: it loads a tap
+into the SwC client (a DLL injected on Windows, ``DYLD_INSERT_LIBRARIES`` /
+``LD_PRELOAD`` at launch elsewhere) and reads the client's TLS traffic after
+decryption. CoinPoker had a packet capture too; it was removed when that room
+became import-only (#732), and an answer once recorded for it is ignored.
 
-- the SwC native capture loads a tap into the SwC client (a DLL injected on
-  Windows, ``DYLD_INSERT_LIBRARIES`` / ``LD_PRELOAD`` at launch elsewhere) and
-  reads the client's TLS traffic after decryption;
-- the CoinPoker capture records the network packets of the CoinPoker client,
-  with administrator rights.
-
-Both are off until the user turns them on, after reading what they do. The
+A capture is off until the user turns it on, after reading what it does. The
 answer is kept beside the configuration with the version of the mechanism it
 was given for: when a mechanism changes what it does, its version moves and the
 question is asked again.
@@ -57,18 +55,7 @@ SWC_NATIVE: Final = Mechanism(
     ),
 )
 
-COINPOKER_PACKETS: Final = Mechanism(
-    key="coinpoker_packets",
-    version=1,
-    title=N_("CoinPoker packet capture"),
-    what_happens=N_(
-        "fpdb records the network packets exchanged by the CoinPoker client, with administrator "
-        "rights (tcpdump, pkexec or a UAC prompt), and rebuilds the hands from them. It reads the "
-        "traffic only; it loads nothing into the client."
-    ),
-)
-
-MECHANISMS: Final = {mechanism.key: mechanism for mechanism in (SWC_NATIVE, COINPOKER_PACKETS)}
+MECHANISMS: Final = {mechanism.key: mechanism for mechanism in (SWC_NATIVE,)}
 
 
 class LiveCaptureNotAccepted(RuntimeError):

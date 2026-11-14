@@ -2,8 +2,8 @@
 
 The fixtures under ``regression-test-files/cash/CoinPoker`` are hands of a real
 2026 export, anonymised: fresh pseudonyms, renumbered hands and tables. Hand
-91426500343 keeps its number: it is also the live-capture fixture
-(``data/coinpoker_hand_events.json``), which is what the duplicate test needs.
+91426500343 keeps its number: it is also the hand fpdb's former live capture
+stored (``data/captured_plo_hand.json``), which is what the duplicate test needs.
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ from fpdb_3_legacy.DerivedStats import DerivedStats
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "regression-test-files" / "cash" / "CoinPoker" / "Flop"
-LIVE_EVENTS = ROOT / "tests" / "data" / "coinpoker_hand_events.json"
+LIVE_HAND = ROOT / "tests" / "data" / "captured_plo_hand.json"
 
 
 @pytest.fixture(scope="module")
@@ -284,11 +284,12 @@ def importer(tmp_path):
 
 
 def test_a_hand_already_captured_live_is_a_duplicate(importer) -> None:
-    from fpdb_3_legacy.coinpoker_hand_builder import build_hands
+    # A database written before #732 holds hands the live capture stored; the
+    # same hands arriving later in a text export must not be stored twice.
     from fpdb_3_legacy.http_capture_hand_builder import HttpCaptureHandConfig, build_fpdb_hand, import_fpdb_hand
 
-    events = [tuple(event) for event in json.loads(LIVE_EVENTS.read_text(encoding="utf-8"))]
-    live = next(hand for hand in build_hands(events, "PLO4") if hand["hand_id"] == "91426500343")
+    live = json.loads(LIVE_HAND.read_text(encoding="utf-8"))
+    assert live["hand_id"] == "91426500343"
     hand = build_fpdb_hand(live, config=HttpCaptureHandConfig(site_ids={"CoinPoker": CoinPoker.siteId}))
     import_fpdb_hand(hand, importer.database, file_id=1, doinsert=True, printtest=False, starting_hand_id=1)
     importer.database.commit()

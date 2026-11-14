@@ -724,13 +724,18 @@ class HudMain(
             log.exception("Could not route a live action to its HUD")
 
     def _live_action_from_payload(self, payload: dict[str, Any]) -> Any:
-        """The room's action record as the live-context module reads it."""
+        """The action row as the live-context module reads it.
+
+        A publisher sends the room-independent row the capture hand builders
+        produce (``{"type", "player", "street", "amount"/"to"}``). CoinPoker's
+        packet capture, which sent its own records, was removed in #732.
+        """
         from fpdb_3_legacy import hud_live_context
 
         record = payload.get("record")
         if not isinstance(record, dict):
             return None
-        return hud_live_context.coinpoker_action(
+        return hud_live_context.normalized_action(
             record,
             hand_id=str(payload.get("hand_id") or ""),
             sequence=int(payload.get("sequence") or 0),

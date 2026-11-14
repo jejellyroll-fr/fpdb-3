@@ -47,7 +47,7 @@ _NATIVE_DELETE_BOARDS_SQL = "DELETE FROM Boards WHERE handId=%s"
 #: start at 1, so importing with 0 breaks that constraint and rolls the hand back
 #: -- on SQLite, which declares no foreign keys, the same import succeeds, which
 #: is why this only bites the server backends. One row is reused for the whole
-#: capture, as the CoinPoker live path does.
+#: capture.
 NATIVE_CAPTURE_FILE_NAME = "swc-native-capture"
 
 #: Files row id per database connection. Keyed by the connection object and held

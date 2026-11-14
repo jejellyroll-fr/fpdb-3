@@ -528,14 +528,7 @@ def test_the_real_hand_reaches_player_auto_notes() -> None:
     added on top of them, so no stack ever reached exactly zero -- and zero is
     what marks an action all-in.
     """
-    import json
-
-    from fpdb_3_legacy.coinpoker_hand_builder import build_hands
-    from fpdb_3_legacy.http_capture_hand_builder import HttpCaptureHandConfig, build_fpdb_hand
-
-    raw = json.loads((Path(__file__).parent / "data" / "coinpoker_aof_hand_events.json").read_text())
-    (hand_data,) = build_hands([tuple(raw["join"]), *[tuple(e) for e in raw["hand"]]], "PLO4")
-    hand = build_fpdb_hand(hand_data, config=HttpCaptureHandConfig(site_ids={"CoinPoker": 30, "default": 30}))
+    hand = _real_aof_hand()
 
     # Everyone who shoved is all in for exactly their stack, and no further.
     assert [stack for stack in hand.stacks.values() if stack < 0] == []
@@ -577,49 +570,6 @@ def test_the_notes_can_still_be_opened_from_the_box_and_seen_in_the_popup() -> N
 
     (popup,) = [pu for pu in document.getElementsByTagName("pu") if pu.getAttribute("pu_name") == "aof_profile"]
     assert "player_note" in [s.getAttribute("pu_stat_name") for s in popup.getElementsByTagName("pu_stat")]
-
-
-def _flop_first_records(bb_player: str, bb: str, shove: str) -> list[tuple]:
-    """A capture whose first betting action is on the flop."""
-    return [
-        (
-            "game.dealer_chat_action",
-            "1",
-            {
-                "gameActionMessagesHistory": [
-                    {"username": bb_player, "action": "BB", "actionAmount": bb, "roundName": "ANTE"},
-                    {"username": bb_player, "action": "ALLIN", "actionAmount": shove, "roundName": "FLOP"},
-                ],
-            },
-        ),
-    ]
-
-
-def test_only_all_in_or_fold_carries_its_blinds_onto_the_flop() -> None:
-    """Every other game has a preflop round of its own.
-
-    A capture of one that began at the flop must not carry blinds from a round
-    that finished before the recording started: they would count as money
-    already in, and the shove total -- which includes them -- would be charged
-    twice, exactly the bug this fixed for All-in or Fold.
-    """
-    from decimal import Decimal
-
-    from fpdb_3_legacy.coinpoker_hand_builder import _explicit_betting_actions
-
-    records = _flop_first_records("hero", "0.25", "2.0")
-    common = {"sb": Decimal("0.1"), "bb": Decimal("0.25"), "sb_name": None, "bb_name": "hero"}
-
-    aof = _explicit_betting_actions(records, **common, is_aof=True)
-    ordinary = _explicit_betting_actions(records, **common, is_aof=False)
-
-    # In All-in or Fold the blind is already in, so the shove raises over it.
-    (aof_shove,) = [action for action in aof if action.get("street") == "FLOP"]
-    assert aof_shove == {"type": "raises", "player": "hero", "street": "FLOP", "to": "2.0"}
-
-    # Elsewhere the flop starts with nothing in front of anyone.
-    (plain_shove,) = [action for action in ordinary if action.get("street") == "FLOP"]
-    assert plain_shove == {"type": "bets", "player": "hero", "street": "FLOP", "amount": "2.0"}
 
 
 def test_folding_from_a_blind_is_a_decision_in_this_game() -> None:
@@ -698,13 +648,12 @@ def _sqlite_database():
 
 
 def _real_aof_hand():
+    """A real All-in or Fold Omaha hand, as the capture that recorded it built it."""
     import json
 
-    from fpdb_3_legacy.coinpoker_hand_builder import build_hands
     from fpdb_3_legacy.http_capture_hand_builder import HttpCaptureHandConfig, build_fpdb_hand
 
-    raw = json.loads((Path(__file__).parent / "data" / "coinpoker_aof_hand_events.json").read_text())
-    (hand_data,) = build_hands([tuple(raw["join"]), *[tuple(e) for e in raw["hand"]]], "PLO4")
+    hand_data = json.loads((Path(__file__).parent / "data" / "captured_aof_omaha_hand.json").read_text())
     return build_fpdb_hand(hand_data, config=HttpCaptureHandConfig(site_ids={"CoinPoker": 30, "default": 30}))
 
 
@@ -864,40 +813,6 @@ def test_a_failing_note_store_does_not_replay_an_unbounded_backlog() -> None:
     assert db.panbulk == []
 
 
-def test_an_opponents_hand_is_read_from_the_showdown_reveal() -> None:
-    """Only the hero's cards arrive dealt; everyone else's come at showdown.
-
-    Reading just ``game.hole_cards`` meant no opponent ever had a holding on
-    record. Across six hundred captured hands the hero's cards were known in
-    every one and no other player's in any, so every read that rests on what
-    someone turns up with was empty for exactly the people it describes.
-    """
-    import json
-
-    from fpdb_3_legacy.coinpoker_hand_builder import build_hands
-
-    raw = json.loads((Path(__file__).parent / "data" / "coinpoker_aof_hand_events.json").read_text())
-    (hand,) = build_hands([tuple(raw["join"]), *[tuple(e) for e in raw["hand"]]], "PLO4")
-
-    by_player = {entry["player"]: entry for entry in hand["holecards"]}
-    assert by_player["villain1"]["closed"] == ["Ks", "9s", "Td", "9d"]
-    assert by_player["villain1"]["shown"] is True
-    # The hero's own cards are not marked shown: they were dealt to us.
-    assert by_player["hero"]["shown"] is False
-
-
-def test_a_player_who_never_showed_has_no_holding_invented() -> None:
-    # villain2 folded, so nothing was revealed and nothing is recorded.
-    import json
-
-    from fpdb_3_legacy.coinpoker_hand_builder import build_hands
-
-    raw = json.loads((Path(__file__).parent / "data" / "coinpoker_aof_hand_events.json").read_text())
-    (hand,) = build_hands([tuple(raw["join"]), *[tuple(e) for e in raw["hand"]]], "PLO4")
-
-    assert "villain2" not in {entry["player"] for entry in hand["holecards"]}
-
-
 def test_the_shows_up_with_marker_reads_without_being_read() -> None:
     """The notes' facts, in a form usable while a hand is in progress.
 
@@ -987,136 +902,3 @@ def test_the_profile_offers_every_cell_to_the_renderer() -> None:
     assert {stat.stat_name for stat in profile.stats.values()} <= {
         stat.stat_name for stat in advanced.stats.values()
     } | {"aof_showdowns"}
-
-
-def test_the_deal_order_identifies_a_table_nobody_named() -> None:
-    """The last thing left when the capture saw neither join nor catalogue.
-
-    A capture that begins with the client already seated sees no lobby at all.
-    All-in or Fold deals its flop before opening the betting and no other game
-    does: measured over eighteen captured tables the two never overlap, ~98%
-    against 0-11%. It is the order of the room's own packets, not a guess
-    about how the players behaved.
-    """
-    from fpdb_3_legacy.coinpoker_hand_builder import looks_like_all_in_or_fold, note_deal_order
-
-    flop_first = [("game.dealer_cards", "1", {}), ("game.user_turn", "1", {})]
-    betting_first = [("game.user_turn", "1", {}), ("game.dealer_cards", "1", {})]
-    shape: dict = {}
-
-    for hand in range(4):
-        note_deal_order(flop_first, "124415", str(hand), shape)
-    # Four hands is not yet a table: a capture joined mid-hand looks like this.
-    assert not looks_like_all_in_or_fold("124415", shape)
-
-    note_deal_order(flop_first, "124415", "4", shape)
-    assert looks_like_all_in_or_fold("124415", shape)
-
-    for hand in range(20):
-        note_deal_order(betting_first, "982246", str(hand), shape)
-    assert not looks_like_all_in_or_fold("982246", shape)
-
-
-def test_each_hand_counts_once_however_often_it_is_rebuilt() -> None:
-    """A hand is rebuilt on every sweep until it is complete.
-
-    Counting per build weighted the long hands heavily enough to drag a real
-    All-in or Fold table from 77-against-1 down to 1007-against-378, below the
-    threshold, and it went unrecognised for seventy hands.
-    """
-    from fpdb_3_legacy.coinpoker_hand_builder import note_deal_order
-
-    flop_first = [("game.dealer_cards", "1", {}), ("game.user_turn", "1", {})]
-    shape: dict = {}
-
-    for _rebuild in range(10):
-        note_deal_order(flop_first, "124415", "same-hand", shape)
-
-    assert shape["124415"][:2] == [1, 0]
-
-
-# --- the splash, paid beside the pot ------------------------------------------
-
-
-def _splash_events(splash: float, winners: list[tuple], *, ev_cashout: bool = False) -> list[tuple]:
-    """A settlement carrying a splash, shaped as the room sends it."""
-    events: list[tuple] = [
-        (
-            "game.winnerInfo",
-            "1",
-            {
-                "winnerDataList": [
-                    {
-                        "potId": 0,
-                        "potAmountAfterRake": sum(paid for _n, paid, _m in winners),
-                        "winnerDetails": {
-                            "winnerList": [
-                                {"playerName": name, "winAmountFromPot": paid} for name, paid, _m in winners
-                            ],
-                        },
-                    },
-                ],
-            },
-        ),
-        (
-            "game.cumulativeWinnerInfo",
-            "1",
-            {
-                "splashPotAmount": splash,
-                "winnersData": [{"userName": name, "isSplashPotWinner": marked} for name, _p, marked in winners],
-            },
-        ),
-    ]
-    if ev_cashout:
-        events.insert(
-            0,
-            ("game.ev_chop_opted_action", "1", {"optedEvChopActionData": [{"optedForEVChop": True}]}),
-        )
-    return events
-
-
-def test_the_splash_is_shared_in_proportion_to_what_was_taken() -> None:
-    """Not equally, and not all to the winner of the biggest pot.
-
-    On a captured hand of 2.00 the two marked players received 1.50 and 0.50 --
-    the ratio of what they took from the settlement, 4.76 against 1.59.
-    """
-    from fpdb_3_legacy.coinpoker_hand_builder import _extract_splash_winnings
-
-    events = _splash_events(2.0, [("koko1976", 4.76, True), ("lilOmaha", 1.59, True)])
-
-    paid = {entry["player"]: entry["amount"] for entry in _extract_splash_winnings(events)}
-
-    assert paid == {"koko1976": "1.50", "lilOmaha": "0.50"}
-
-
-def test_a_lone_marked_player_takes_the_whole_splash() -> None:
-    from fpdb_3_legacy.coinpoker_hand_builder import _extract_splash_winnings
-
-    events = _splash_events(0.20, [("ajr4444", 0.65, True)])
-
-    assert _extract_splash_winnings(events) == [{"player": "ajr4444", "amount": "0.20"}]
-
-
-def test_an_unmarked_winner_receives_no_splash() -> None:
-    # Winning a pot and receiving splash money are different things; the room
-    # says which is which.
-    from fpdb_3_legacy.coinpoker_hand_builder import _extract_splash_winnings
-
-    events = _splash_events(0.40, [("winner", 1.00, False), ("marked", 1.00, True)])
-
-    assert _extract_splash_winnings(events) == [{"player": "marked", "amount": "0.40"}]
-
-
-def test_a_hand_with_an_accepted_ev_cashout_is_left_alone() -> None:
-    """The one settlement shape the room's own figures could not be reproduced from.
-
-    A player's equity is bought out instead of played, which moves money
-    outside both the pot and the splash. Crediting it on a rule that does not
-    describe it would put a number in the database that is known to be wrong.
-    """
-    from fpdb_3_legacy.coinpoker_hand_builder import _extract_splash_winnings
-
-    events = _splash_events(1.0, [("SH1976", 6.18, True)], ev_cashout=True)
-
-    assert _extract_splash_winnings(events) == []

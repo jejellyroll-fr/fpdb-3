@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 00:05+0100\n"
+"POT-Creation-Date: 2026-11-14 11:31+0100\n"
 "PO-Revision-Date: 2011-07-27 15:17+0000\n"
 "Last-Translator: pkpkpkdo <ofelipedbzgt@hotmail.com>\n"
 "Language-Team: Portuguese (Brazilian) (http://www.transifex.net/projects/p/"
@@ -114,8 +114,7 @@ msgstr ""
 msgid "Stat set"
 msgstr "Estatísticas"
 
-#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/swc_poker_console.py
 #: fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy
 msgid "Stop"
@@ -3438,72 +3437,6 @@ msgstr "Torneios"
 msgid "e.g., my_custom_theme"
 msgstr "ex.: meu_tema_personalizado"
 
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
-msgstr ""
-"Iniciar também o HUD_main (desmarque se o HUD/importação automática já "
-"estiver em execução)."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Capture failed to start — see the log above."
-msgstr "A captura não pôde iniciar — veja o registro acima."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Capture not started: it is off until you turn it on."
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Default game:"
-msgstr "Jogo padrão:"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Dry run (no DB insert)"
-msgstr "Teste (sem inserção no BD)"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Finishing previous capture…"
-msgstr "Finalizando a captura anterior…"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Idle."
-msgstr "Ocioso."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Interface:"
-msgstr "Interface:"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Launch HUD"
-msgstr "Iniciar o HUD"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Refresh interfaces"
-msgstr "Atualizar interfaces"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
-msgstr "Solicitando privilégios… aceite o aviso e depois jogue no CoinPoker."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Start capture"
-msgstr "Iniciar captura"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Stopping…"
-msgstr "Parando…"
-
 #: fpdb_3_legacy/capture/swc_poker_console.py
 msgid "<"
 msgstr ""
@@ -4209,11 +4142,6 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/live_capture_consent.py
-#, fuzzy
-msgid "CoinPoker packet capture"
-msgstr "Captura ao vivo do CoinPoker"
-
-#: fpdb_3_legacy/live_capture_consent.py
 msgid ""
 "Live capture is not part of this install. From a source install: pip install "
 "-e '.[capture]'."
@@ -4246,13 +4174,6 @@ msgid ""
 "on macOS and Linux. Inside the client, it reads the table traffic after the "
 "client has decrypted it, and writes it to a file fpdb imports. It stays "
 "loaded until the client exits."
-msgstr ""
-
-#: fpdb_3_legacy/live_capture_consent.py
-msgid ""
-"fpdb records the network packets exchanged by the CoinPoker client, with "
-"administrator rights (tcpdump, pkexec or a UAC prompt), and rebuilds the "
-"hands from them. It reads the traffic only; it loads nothing into the client."
 msgstr ""
 
 #: fpdb_3_legacy/live_capture_consent.py
@@ -4343,11 +4264,6 @@ msgstr ""
 #: fpdb_3_legacy/menu_layout.py
 msgid "Choose the blinds, seats and period that new HUD tables start with"
 msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-#, fuzzy
-msgid "CoinPoker Live Capture"
-msgstr "Captura ao vivo do CoinPoker"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -9077,6 +8993,12 @@ msgstr ""
 #~ msgid "Add player: rank: %s name: %s winnings: %s"
 #~ msgstr "addPlayer: rank:%s - nome : '%s' - Ganhos (%s)"
 
+#, fuzzy
+#~ msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
+#~ msgstr ""
+#~ "Iniciar também o HUD_main (desmarque se o HUD/importação automática já "
+#~ "estiver em execução)."
+
 #~ msgid "Analyze took %.1f seconds"
 #~ msgstr "A análise levou %.1f segundos"
 
@@ -9164,6 +9086,10 @@ msgstr ""
 #~ "Não é possível abrir a janela de Manutenção de Database porque outra "
 #~ "janela está aberta. Reinicie o FPDB para usar esta opção."
 
+#, fuzzy
+#~ msgid "Capture failed to start — see the log above."
+#~ msgstr "A captura não pôde iniciar — veja o registro acima."
+
 #~ msgid "Closed, no graph exported"
 #~ msgstr "Fechado, nenhum gráfico exportado."
 
@@ -9172,6 +9098,14 @@ msgstr ""
 
 #~ msgid "Closing this window will stop the Tournament Tracker"
 #~ msgstr "Fechar esta janela fará com que o Tournament Tracker pare"
+
+#, fuzzy
+#~ msgid "CoinPoker Live Capture"
+#~ msgstr "Captura ao vivo do CoinPoker"
+
+#, fuzzy
+#~ msgid "CoinPoker packet capture"
+#~ msgstr "Captura ao vivo do CoinPoker"
 
 #, fuzzy
 #~ msgid "Column:"
@@ -9240,6 +9174,10 @@ msgstr ""
 #~ msgid "Debug Statistics Windows"
 #~ msgstr "Debug StatWindows"
 
+#, fuzzy
+#~ msgid "Default game:"
+#~ msgstr "Jogo padrão:"
+
 #~ msgid "Detect Directories"
 #~ msgstr "Detectar Diretórios"
 
@@ -9257,6 +9195,10 @@ msgstr ""
 
 #~ msgid "Drop indexes:"
 #~ msgstr "indexes derrubadas:"
+
+#, fuzzy
+#~ msgid "Dry run (no DB insert)"
+#~ msgstr "Teste (sem inserção no BD)"
 
 #~ msgid "END TIME"
 #~ msgstr "TEMPO PARA TERMINAR"
@@ -9374,6 +9316,10 @@ msgstr ""
 
 #~ msgid "Finished recreating tables"
 #~ msgstr "Terminada recriação de mesas"
+
+#, fuzzy
+#~ msgid "Finishing previous capture…"
+#~ msgstr "Finalizando a captura anterior…"
 
 #~ msgid "For Multiple Blind Levels:"
 #~ msgstr "Para múltiplos níveis de blinds"
@@ -9538,6 +9484,10 @@ msgstr ""
 #~ msgid "IS SHOOTOUT"
 #~ msgstr "É SHOOTOUT"
 
+#, fuzzy
+#~ msgid "Idle."
+#~ msgstr "Ocioso."
+
 #~ msgid "Import through eMail/IMAP"
 #~ msgstr "Importar através de eMail/IMAP"
 
@@ -9556,6 +9506,10 @@ msgstr ""
 
 #~ msgid "Input file"
 #~ msgstr "Arquivo de input"
+
+#, fuzzy
+#~ msgid "Interface:"
+#~ msgstr "Interface:"
 
 #~ msgid ""
 #~ "It is not currently possible to select \"empty\" or anything else to that "
@@ -9584,6 +9538,10 @@ msgstr ""
 
 #~ msgid "LEVEL"
 #~ msgstr "NÍVEL"
+
+#, fuzzy
+#~ msgid "Launch HUD"
+#~ msgstr "Iniciar o HUD"
 
 #, fuzzy
 #~ msgid "Less than 2 players - Assuming hand '%s' was cancelled."
@@ -9870,11 +9828,20 @@ msgstr ""
 #~ msgstr "Rebuy"
 
 #, fuzzy
+#~ msgid "Refresh interfaces"
+#~ msgstr "Atualizar interfaces"
+
+#, fuzzy
 #~ msgid "Removing text < 50 characters & resetting index"
 #~ msgstr "Removendo textos de < 50 caracteres"
 
 #~ msgid "Reposition StatWindows"
 #~ msgstr "Reposição StatWindows"
+
+#, fuzzy
+#~ msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
+#~ msgstr ""
+#~ "Solicitando privilégios… aceite o aviso e depois jogue no CoinPoker."
 
 #, fuzzy
 #~ msgid "Restart This HUD"
@@ -9959,11 +9926,19 @@ msgstr ""
 #~ msgid "Start Minimized"
 #~ msgstr "Iniciar Minimizado"
 
+#, fuzzy
+#~ msgid "Start capture"
+#~ msgstr "Iniciar captura"
+
 #~ msgid "Starting import. Please wait."
 #~ msgstr "Iniciando Import: Por favor aguarde."
 
 #~ msgid "Stats page displayed in %4.2f seconds"
 #~ msgstr "Página de status exibida em %4.2f segundos"
+
+#, fuzzy
+#~ msgid "Stopping…"
+#~ msgstr "Parando…"
 
 #~ msgid "Stove"
 #~ msgstr "Stove"

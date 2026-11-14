@@ -42,7 +42,7 @@ program.
 | **Position panels** | The seat's position in the hand being played | Only in a room whose reviewed rules allow a positional HUD: none yet. Elsewhere every position panel shows, stacked |
 | **Winamax live context** | Winamax's own client log, and the table's accessibility tree (the request a screen reader makes) | Seats and the current street, used to place the HUD; the street is not used to pick panels while Winamax has not approved them |
 | **Session Guard** | Your imported hands | Your session's result, duration and hands, and an alert when a limit you set is reached. Informational only ([session-guard.md](session-guard.md)) |
-| **Live capture** (SwC client tap, CoinPoker packets) — off until you turn it on, and kept in its own package | The client's own traffic | Nothing at the table: it turns the traffic into hands to import ([live-capture.md](live-capture.md)) |
+| **Live capture** (SwC client tap) — off until you turn it on, and kept in its own package | The client's own traffic | Nothing at the table: it turns the traffic into hands to import ([live-capture.md](live-capture.md)) |
 
 Everything a HUD shows is a player's *history*: what they did in the hands your
 database holds. Dynamic panels choose which part of that history to show, but

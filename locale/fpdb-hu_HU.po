@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 00:05+0100\n"
+"POT-Creation-Date: 2026-11-14 11:31+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -111,8 +111,7 @@ msgstr ""
 msgid "Stat set"
 msgstr "Statisztikák"
 
-#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/Aux_Hud.py fpdb_3_legacy/capture/swc_poker_console.py
 #: fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy
 msgid "Stop"
@@ -3389,73 +3388,6 @@ msgstr "Versenyek"
 msgid "e.g., my_custom_theme"
 msgstr "pl. sajat_temam"
 
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
-msgstr ""
-"A HUD_main indítása is (vegye ki a pipát, ha a HUD/automatikus importálás "
-"már fut)."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Capture failed to start — see the log above."
-msgstr "A rögzítés nem indult el — lásd a fenti naplót."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-msgid "Capture not started: it is off until you turn it on."
-msgstr ""
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Default game:"
-msgstr "Alapértelmezett játék:"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Dry run (no DB insert)"
-msgstr "Próbafuttatás (nincs adatbázis-beszúrás)"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Finishing previous capture…"
-msgstr "Az előző rögzítés lezárása…"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Idle."
-msgstr "Tétlen."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Interface:"
-msgstr "Felület:"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Launch HUD"
-msgstr "HUD indítása"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Refresh interfaces"
-msgstr "Felületek frissítése"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
-msgstr ""
-"Jogosultságok kérése… fogadja el a kérést, majd játsszon a CoinPokeren."
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Start capture"
-msgstr "Rögzítés indítása"
-
-#: fpdb_3_legacy/capture/GuiCoinPokerCapture.py
-#, fuzzy
-msgid "Stopping…"
-msgstr "Leállítás…"
-
 #: fpdb_3_legacy/capture/swc_poker_console.py
 msgid "<"
 msgstr ""
@@ -4165,11 +4097,6 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/live_capture_consent.py
-#, fuzzy
-msgid "CoinPoker packet capture"
-msgstr "CoinPoker élő rögzítés"
-
-#: fpdb_3_legacy/live_capture_consent.py
 msgid ""
 "Live capture is not part of this install. From a source install: pip install "
 "-e '.[capture]'."
@@ -4202,13 +4129,6 @@ msgid ""
 "on macOS and Linux. Inside the client, it reads the table traffic after the "
 "client has decrypted it, and writes it to a file fpdb imports. It stays "
 "loaded until the client exits."
-msgstr ""
-
-#: fpdb_3_legacy/live_capture_consent.py
-msgid ""
-"fpdb records the network packets exchanged by the CoinPoker client, with "
-"administrator rights (tcpdump, pkexec or a UAC prompt), and rebuilds the "
-"hands from them. It reads the traffic only; it loads nothing into the client."
 msgstr ""
 
 #: fpdb_3_legacy/live_capture_consent.py
@@ -4300,11 +4220,6 @@ msgstr ""
 #: fpdb_3_legacy/menu_layout.py
 msgid "Choose the blinds, seats and period that new HUD tables start with"
 msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
-#, fuzzy
-msgid "CoinPoker Live Capture"
-msgstr "CoinPoker élő rögzítés"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -9516,6 +9431,12 @@ msgstr ""
 #~ msgid "Alias '%s' unknown"
 #~ msgstr "Ismeretlen alias: '%s'"
 
+#, fuzzy
+#~ msgid "Also start HUD_main (uncheck if HUD/Auto Import is already running)."
+#~ msgstr ""
+#~ "A HUD_main indítása is (vegye ki a pipát, ha a HUD/automatikus importálás "
+#~ "már fut)."
+
 #~ msgid "Amount Won when Show Down seen"
 #~ msgstr "nyeremény, amikor terítésig ment"
 
@@ -9697,6 +9618,10 @@ msgstr ""
 #~ msgid "Cannot read Handinfo for current hand"
 #~ msgstr "Handinfo nem olvasható az aktuális leosztásból"
 
+#, fuzzy
+#~ msgid "Capture failed to start — see the log above."
+#~ msgstr "A rögzítés nem indult el — lásd a fenti naplót."
+
 #~ msgid "Cat."
 #~ msgstr "Kat."
 
@@ -9713,6 +9638,14 @@ msgstr ""
 
 #~ msgid "Closing this window will stop the Tournament Tracker"
 #~ msgstr "Ezen ablak bezárása leállítja a Versenykövetőt"
+
+#, fuzzy
+#~ msgid "CoinPoker Live Capture"
+#~ msgstr "CoinPoker élő rögzítés"
+
+#, fuzzy
+#~ msgid "CoinPoker packet capture"
+#~ msgstr "CoinPoker élő rögzítés"
 
 #, fuzzy
 #~ msgid "Column:"
@@ -9936,6 +9869,10 @@ msgstr ""
 #~ msgstr ""
 #~ "US-ASCII az alapértelmezett karakterkódolás, CP1252 használata ehelyett."
 
+#, fuzzy
+#~ msgid "Default game:"
+#~ msgstr "Alapértelmezett játék:"
+
 #~ msgid "Default logger intialised for "
 #~ msgstr "Alapértelmezett naplózó előkészítve ehhez: "
 
@@ -10007,6 +9944,10 @@ msgstr ""
 
 #~ msgid "Dropping sqlite index "
 #~ msgstr "SQLite index eldobása: "
+
+#, fuzzy
+#~ msgid "Dry run (no DB insert)"
+#~ msgstr "Próbafuttatás (nincs adatbázis-beszúrás)"
 
 #~ msgid "END TIME"
 #~ msgstr "BEFEJEZÉS IDŐPONTJA"
@@ -10263,6 +10204,10 @@ msgstr ""
 
 #~ msgid "Finished recreating tables"
 #~ msgstr "A táblák újra létrehozása befejeződött"
+
+#, fuzzy
+#~ msgid "Finishing previous capture…"
+#~ msgstr "Az előző rögzítés lezárása…"
 
 #~ msgid "First 100 characters: %s"
 #~ msgstr "Első 100 karakter: %s"
@@ -10648,6 +10593,10 @@ msgstr ""
 #~ msgid "ITM%"
 #~ msgstr "ITM%"
 
+#, fuzzy
+#~ msgid "Idle."
+#~ msgstr "Tétlen."
+
 #~ msgid ""
 #~ "If there already are tables in the database %s on %s they will be deleted "
 #~ "and you will have to re-import your histories."
@@ -10721,6 +10670,10 @@ msgstr ""
 #~ msgid "Install gtk or edit the path manually."
 #~ msgstr "Telepítsd a GTK-t, vagy állítsd be kézzel az útvonalat"
 
+#, fuzzy
+#~ msgid "Interface:"
+#~ msgstr "Felület:"
+
 #~ msgid "Invalid config value for %s, defaulting to %s"
 #~ msgstr "Érvénytelen %s beállítás, az alapértelmezett %s használata"
 
@@ -10770,6 +10723,10 @@ msgstr ""
 
 #~ msgid "LEVEL"
 #~ msgstr "SZINT"
+
+#, fuzzy
+#~ msgid "Launch HUD"
+#~ msgstr "HUD indítása"
 
 #, fuzzy
 #~ msgid "Less than 2 players - Assuming hand '%s' was cancelled."
@@ -11433,11 +11390,20 @@ msgstr ""
 #~ msgstr "Leosztás fogadva, azonosító: %s"
 
 #, fuzzy
+#~ msgid "Refresh interfaces"
+#~ msgstr "Felületek frissítése"
+
+#, fuzzy
 #~ msgid "Removing text < 50 characters & resetting index"
 #~ msgstr "50 karakternél rövidebb szöveg eltávolítása"
 
 #~ msgid "Reposition StatWindows"
 #~ msgstr "Újrapozícionálás"
+
+#, fuzzy
+#~ msgid "Requesting privileges… accept the prompt, then play in CoinPoker."
+#~ msgstr ""
+#~ "Jogosultságok kérése… fogadja el a kérést, majd játsszon a CoinPokeren."
 
 #, fuzzy
 #~ msgid "Restart This HUD"
@@ -11570,6 +11536,10 @@ msgstr ""
 #~ msgid "Start Minimized"
 #~ msgstr "Indítás lecsukva"
 
+#, fuzzy
+#~ msgid "Start capture"
+#~ msgstr "Rögzítés indítása"
+
 #~ msgid "Started at %s -- %d files to import. indexes: %s"
 #~ msgstr "Elindítva: %s -- %d fájl importálása. Indexek: %s"
 
@@ -11587,6 +11557,10 @@ msgstr ""
 #~ msgstr ""
 #~ "Állapot: Kapcsolódva a(z) %s adatbázis-kezelő %s nevű adatbázisához a(z) "
 #~ "%s kiszolgálón"
+
+#, fuzzy
+#~ msgid "Stopping…"
+#~ msgstr "Leállítás…"
 
 #~ msgid "Stove"
 #~ msgstr "EV kalkulátor"
