@@ -34,7 +34,7 @@ So a "flop" stat is a 4th-street stat in stud and an after-the-first-draw stat i
 
 Whether a stat has data in a family is measured, not assumed: every regression hand history of the
 project is parsed and run through DerivedStats, and a stat applies to a family when all the columns
-it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring stud, 1 tour draw, 434 tour hold hands. "No data" for a family means those columns stayed empty on every test hand of it.
+it reads get a value there. The corpus: 178 ring draw, 2672 ring hold, 166 ring stud, 1 tour draw, 434 tour hold hands. "No data" for a family means those columns stayed empty on every test hand of it.
 
 ## Player
 
@@ -2887,7 +2887,7 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 - **SQL database field / logic**: cnt_r_face_4bet = SUM(HudCache.cnt_r_face_4bet); cnt_r_call_4bet = SUM(HudCache.cnt_r_call_4bet); cnt_r_raise_4bet = SUM(HudCache.cnt_r_raise_4bet)
 - **Tooltip**: % folding facing a river 4-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3106 Hold'em / Omaha test hands)
 - **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 - **Note**: The fold leg is computed as faced − called − raised: a faced spot ends in exactly one of fold, call or raise.
@@ -3124,7 +3124,7 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 - **SQL database field / logic**: cnt_r_face_4bet = SUM(HudCache.cnt_r_face_4bet); cnt_r_raise_4bet = SUM(HudCache.cnt_r_raise_4bet)
 - **Tooltip**: % raising facing a river 4-bet
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3106 Hold'em / Omaha test hands)
 - **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
@@ -3194,7 +3194,7 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 - **Tooltip**: Aggression frequency 7th street
 - **Detailed HUD text**: `a_fq_4`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3106 Hold'em / Omaha test hands)
 - **Stud / Razz**: yes, on 7th street
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
@@ -3208,7 +3208,7 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 - **Tooltip**: % continuation bet 7th street
 - **Detailed HUD text**: `cb_4`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3106 Hold'em / Omaha test hands)
 - **Stud / Razz**: yes, on 7th street
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
@@ -3222,7 +3222,7 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 - **Tooltip**: % check-raise 7th street
 - **Detailed HUD text**: `cr_4`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3106 Hold'em / Omaha test hands)
 - **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
@@ -3236,7 +3236,7 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 - **Tooltip**: % fold to continuation bet 7th street
 - **Detailed HUD text**: `f_cb_4`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3106 Hold'em / Omaha test hands)
 - **Stud / Razz**: yes, on 7th street
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
@@ -3250,7 +3250,7 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 - **Tooltip**: % fold frequency 7th street
 - **Detailed HUD text**: `ff_4`
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3106 Hold'em / Omaha test hands)
 - **Stud / Razz**: yes, on 7th street
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: no data (its columns stay empty on all 179 Draw test hands)
 
@@ -4184,7 +4184,7 @@ it reads get a value there. The corpus: 178 ring draw, 2647 ring hold, 166 ring 
 - **Formula (code)**: `metric opportunities over the decisions matching the filters`
 - **SQL database field / logic**: analytics engine over the action events (analytics_query): filters {'game_base': ['draw'], 'action_taken': ['discards', 'stands pat']}; grouped by draw_number, cards_drawn
 - **Games**: Cash games; Tournaments (MTT and SnG alike: the HUD reads one tournament game type for both)
-- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3081 Hold'em / Omaha test hands)
+- **Hold'em / Omaha (flop games)**: no data (its columns stay empty on all 3106 Hold'em / Omaha test hands)
 - **Stud / Razz**: no data (its columns stay empty on all 166 Stud / Razz test hands)
 - **Draw (2-7, A-5, Badugi, 5-card draw...)**: yes
 - **Note**: Analytics definition (metric opportunities): a HUD cell shows it only with the data_* attributes the editor writes.

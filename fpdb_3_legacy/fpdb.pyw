@@ -99,7 +99,7 @@ from fpdb_3_legacy import (
 from fpdb_3_legacy import __version__ as PACKAGE_VERSION
 from fpdb_3_legacy.ConfigInitializer import ensure_config_initialized
 from fpdb_3_legacy.ConfigurationManager import ConfigurationManager
-from fpdb_3_legacy.disabled_sites import is_site_disabled
+from fpdb_3_legacy.disabled_sites import allows_live_use
 from fpdb_3_legacy.Exceptions import FpdbError
 from fpdb_3_legacy.GuiConfigObserver import GuiConfigObserver
 from fpdb_3_legacy.hud_options_panel import HudOptionsDialog
@@ -1985,8 +1985,8 @@ class fpdb(QMainWindow):
 
     def tab_coinpoker_capture(self, widget, data=None) -> None:
         """Open the CoinPoker live packet-capture tab."""
-        if is_site_disabled("CoinPoker"):
-            log.info("CoinPoker support is disabled; not opening the live capture tab")
+        if not allows_live_use("CoinPoker"):
+            log.info("CoinPoker is import-only; not opening the live capture tab")
             return
         if self._capture_missing():
             return
