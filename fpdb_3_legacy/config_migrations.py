@@ -106,6 +106,7 @@ SITES_ADDED_IN_88 = ("Bet365.fr Poker",)  # #717
 SITES_ADDED_IN_90 = ("Unibet",)  # #729: the 2026 Relax Gaming client
 SITES_ADDED_IN_91 = ("Betclic",)  # #730: the 2025+ in-house client, apart from the iPoker skin
 SITES_ADDED_IN_94 = ("CoinPoker",)  # #732: text hand-history import, nothing live
+SITES_ADDED_IN_95 = ("BetRivers",)  # #731: text hand-history import, nothing live
 
 
 def _child_section(doc, section: str):
@@ -233,6 +234,15 @@ def _add_sites_93_to_94(doc, template) -> None:
     _add_sites(doc, template, SITES_ADDED_IN_94)
 
 
+def _add_sites_94_to_95(doc, template) -> None:
+    """Advance to v95, adding BetRivers as an import-only room (#731).
+
+    The room is new: its <site> (off, no HUD) and its <hhc> come from the
+    template. A configuration that already declares it keeps it.
+    """
+    _add_sites(doc, template, SITES_ADDED_IN_95)
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {n.getAttribute("name") for n in doc.getElementsByTagName("aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -259,6 +269,7 @@ MIGRATIONS = (
     (91, 92, _preserve_91_to_92),
     (92, 93, _zero_padding_92_to_93),
     (93, 94, _add_sites_93_to_94),
+    (94, 95, _add_sites_94_to_95),
 )
 
 

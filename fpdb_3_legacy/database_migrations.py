@@ -59,6 +59,8 @@ WIDEN_GAMETYPE_CATEGORY_SQL = "ALTER TABLE Gametypes ALTER COLUMN category TYPE 
 SITES_ADDED_LATER: tuple[tuple[int, str, str], ...] = (
     (132, "Bet365.fr Poker", "IP"),
     (142, "Betclic", "BC"),  # #730: the 2025+ in-house client
+    # 143 is held by PokerStars on Betfair (#733, draft PR #805).
+    (144, "BetRivers", "BR"),  # #731: import-only
 )
 INSERT_SITE_QMARK = "INSERT INTO Sites (id,name,code) VALUES (?,?,?)"
 INSERT_SITE_FORMAT = "INSERT INTO Sites (id,name,code) VALUES (%s,%s,%s)"

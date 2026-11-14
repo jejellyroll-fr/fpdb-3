@@ -29,6 +29,7 @@ them, are in [what fpdb does while you play](fair-play.md#rooms).
 | Unibet (the 2026 Relax Gaming client, Unibet.fr) | ✔ | — | — | — | Not reviewed: its rules do not mention HUDs, see below |
 | Any other room (GGPoker, WPN/ACR…) | ✔ | — | — | — | Not reviewed: the conservative default |
 | CoinPoker | — | — | — | — | Import-only: hand histories are imported after the session, no HUD at all |
+| BetRivers | — | — | — | — | Import-only: third-party HUDs are not permitted; hand histories are imported after the session |
 
 No room is reviewed as allowing more than the static HUD yet, so **every live
 table shows the static HUD**. A room moves to a more permissive row only once

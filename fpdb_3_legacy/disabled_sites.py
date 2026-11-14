@@ -25,6 +25,7 @@ runs while it is being played:
 
 CoinPoker is import-only (#732): its 2026 text export is supported, but given
 the room's stance on third-party tools fpdb runs nothing beside its client.
+BetRivers is import-only too (#731): it does not permit third-party HUDs.
 
 Changing a room's level is a one-line change here, not a revert.
 """
@@ -33,7 +34,7 @@ from __future__ import annotations
 
 DISABLED_SITES: frozenset[str] = frozenset()
 
-IMPORT_ONLY_SITES: frozenset[str] = frozenset({"CoinPoker"})
+IMPORT_ONLY_SITES: frozenset[str] = frozenset({"BetRivers", "CoinPoker"})
 
 
 def is_site_disabled(site_name: str) -> bool:
