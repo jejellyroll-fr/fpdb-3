@@ -83,6 +83,18 @@ def test_an_unreadable_time_is_an_error_not_2000() -> None:
         BetRivers._start_time("2026/02/30", "19:46", "EST")
 
 
+@pytest.mark.parametrize(
+    ("time", "zone", "utc"),
+    [
+        # The hour clocks fall back through happens twice; the zone says which.
+        ("01:30", "EDT", datetime.datetime(2026, 11, 1, 5, 30, tzinfo=datetime.UTC)),
+        ("01:30", "EST", datetime.datetime(2026, 11, 1, 6, 30, tzinfo=datetime.UTC)),
+    ],
+)
+def test_an_explicit_eastern_zone_is_its_offset(time, zone, utc) -> None:
+    assert BetRivers._start_time("2026/11/01", time, zone) == utc
+
+
 def test_seconds_are_read_when_present() -> None:
     start = BetRivers._start_time("2026/02/11", "19:46:07", "EST")
     assert start == datetime.datetime(2026, 2, 12, 0, 46, 7, tzinfo=datetime.UTC)

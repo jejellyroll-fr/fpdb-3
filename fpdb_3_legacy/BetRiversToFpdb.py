@@ -57,6 +57,8 @@ if TYPE_CHECKING:
 log = get_logger("betrivers_parser")
 
 _CUR = r"\$?"
+#: The US Eastern zones a header names, as fixed offsets from UTC in hours.
+_EASTERN_OFFSETS = {"EST": -5, "EDT": -4}
 _AMT = r"[\d,]+(?:\.\d+)?"
 
 
@@ -176,10 +178,13 @@ class BetRivers(HandHistoryConverter):
     def _start_time(date: str, time: str, zone: str | None) -> datetime.datetime:
         """The hand's start in UTC, from a header time that may lack seconds.
 
-        BetRivers writes US Eastern times (``EST``/``EDT``); a header with no
-        zone is read as Eastern too. A time that does not parse is an error:
-        PokerStars' converter, fed these headers, silently dated the hand
-        2000-01-01.
+        BetRivers writes US Eastern times and says which: ``EST`` is UTC-5 and
+        ``EDT`` UTC-4, whatever the date. Reading them as "US/Eastern" instead
+        misdated the hour clocks fall back through, which happens twice: a
+        01:30 EDT hand would have been taken for 01:30 EST. Only a header with
+        no zone, or another one, is left to the regional zone rules. A time that
+        does not parse is an error: PokerStars' converter, fed these headers,
+        silently dated the hand 2000-01-01.
         """
         layout = "%Y/%m/%d %H:%M:%S" if time.count(":") == 2 else "%Y/%m/%d %H:%M"
         try:
@@ -187,6 +192,8 @@ class BetRivers(HandHistoryConverter):
         except ValueError as error:
             msg = f"Unreadable BetRivers hand time: {date} {time}"
             raise FpdbParseError(msg) from error
+        if (hours := _EASTERN_OFFSETS.get(zone or "")) is not None:
+            return (start - datetime.timedelta(hours=hours)).replace(tzinfo=datetime.UTC)
         return HandHistoryConverter.changeTimezone(start, zone or "ET", "UTC")
 
     def readButton(self, hand: Hand) -> None:
@@ -339,15 +346,3 @@ class BetRivers(HandHistoryConverter):
 
     def readOther(self, hand: Hand) -> None:
         """Nothing beyond the PokerStars-like fields."""
-
-    @staticmethod
-    def getTableTitleRe(
-        game_type: Any = None,
-        table_name: Any = None,
-        tournament: Any = None,
-        table_number: Any = None,
-        tourney_name: Any = None,
-    ) -> str:
-        """No HUD runs at BetRivers tables: the title search names the table only."""
-        del game_type, tournament, table_number, tourney_name
-        return re.escape(str(table_name or "BetRivers"))
