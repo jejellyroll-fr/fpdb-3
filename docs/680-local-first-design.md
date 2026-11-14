@@ -26,8 +26,16 @@ whole client-side change. The new part is the import side and the sync worker.
    process exactly as now (same Importer, same transactions, same HudCache).
 2. **Outbox** (`fpdb_sync_outbox`, created by `LocalFirstSync`): one row per
    locally imported hand — `local_hand_id, server_hand_id, pushed, pushed_at`.
-   Written right after the import commits: a crash in between leaves a hand
-   that is local only, with no outbox row.
+   Written right after the import commits. A crash in between, or a hand
+   stored outside `Importer`, is caught by **reconciliation** (#684): when the
+   worker starts, then every 15 polls, every local hand stored since the outbox
+   began gets an outbox row. Hands at or below a floor are left out, so hands
+   stored before local-first was turned on are never pushed by surprise. The
+   floor is recorded once, when a worker first opens the local file (just below
+   the oldest outbox row, else the newest hand), and kept in `fpdb_sync_state`,
+   so a hand committed just before a crash is still above it after a restart.
+   Each worker's first pass starts at the floor; later passes start 1,000 ids
+   below the newest hand they saw, for an import that commits a lower id late.
 3. **`LocalFirstSync`** (`fpdb_3_legacy/local_first_sync.py`, POC shipped in
    this PR): daemon thread, polls the outbox every `poll_s`, pushes batches of
    `batch_size` hands in one server transaction. Idempotent: dedup on the
@@ -79,13 +87,15 @@ Not synced yet, because the outbox only carries hands:
 * A tourney re-typed locally by a later summary gets a second `Tourneys` row on
   the server if more of its hands are pushed afterwards.
 
-Hands stored outside `Importer` never reach the outbox: the HTTP capture and the
-SwC live capture write to the local file and stay there.
+Hands stored outside `Importer` (the HTTP capture, the SwC live capture) are
+queued by the reconciliation pass that follows, as long as a sync worker runs
+for that local file (an Auto Import or Bulk Import in local-first mode).
 
 ## Metrics to watch (extend latency_profile if needed)
 
 `sync_outbox_pending` (gauge), `sync_push_batch` (duration p50/p95/p99),
-`sync_push_errors` (counter), plus the existing `hud_queue_wait` should collapse
+`sync_push_errors` (counter), `sync_outbox_reconciled` (counter: hands queued
+without a mark), plus the existing `hud_queue_wait` should collapse
 to ~0 on the playing machine.
 
 ## Risks / costs

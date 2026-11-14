@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+from contextlib import AbstractContextManager, nullcontext
 from dataclasses import dataclass
 from decimal import Decimal
 from io import StringIO
@@ -682,17 +683,24 @@ def import_fpdb_hand(
     # revisits because it marks the hand imported before inserting it.
     decisions = _generate_aof_decisions(hand)
     notes = _generate_auto_notes(hand, db)
-    hand.updateSessionsCache(db, None, doinsert)
-    hand.insertHands(db, file_id, doinsert, printtest)
-    hand.updateCardsCache(db, None, doinsert)
-    hand.updatePositionsCache(db, None, doinsert)
-    hand.updateHudCache(db, doinsert)
-    hand.updateTourneyResults(db)
-    hand.insertHandsPlayers(db, doinsert, printtest)
-    hand.insertHandsActions(db, doinsert, printtest)
-    hand.insertHandsStove(db, doinsert)
-    hand.insertHandsShowdown(db, doinsert)
-    hand.insertHandsCashout(db, doinsert)
+    # One transaction for the whole hand (#684). storeHand commits its Hands
+    # row as soon as it is written unless a transaction is open, which left a
+    # window where the hand was durable with no players and no actions: a
+    # failure there stranded it, and the local-first worker's reconciliation
+    # could push it to the server half-written, for good. Inside a transaction
+    # those intermediate commits are deferred to its end.
+    with _hand_transaction(db, doinsert):
+        hand.updateSessionsCache(db, None, doinsert)
+        hand.insertHands(db, file_id, doinsert, printtest)
+        hand.updateCardsCache(db, None, doinsert)
+        hand.updatePositionsCache(db, None, doinsert)
+        hand.updateHudCache(db, doinsert)
+        hand.updateTourneyResults(db)
+        hand.insertHandsPlayers(db, doinsert, printtest)
+        hand.insertHandsActions(db, doinsert, printtest)
+        hand.insertHandsStove(db, doinsert)
+        hand.insertHandsShowdown(db, doinsert)
+        hand.insertHandsCashout(db, doinsert)
     if doinsert:
         # The hand is made durable on its own, before anything is attempted
         # for its notes. Storing them inside this transaction and letting the
@@ -700,10 +708,20 @@ def import_fpdb_hand(
         # Hands row with no players and no actions, which the pump never comes
         # back for. A PlayerAutoNotes table that is missing or briefly
         # unavailable would otherwise destroy every live hand that followed.
+        # (The transaction above already committed, unless a caller's own
+        # transaction encloses this one: then this is deferred to its end too.)
         db.commit()
     _store_auto_notes(db, notes, doinsert)
     hand.aof_decision_ids = _store_aof_decisions(db, decisions, doinsert)
     return hand
+
+
+def _hand_transaction(db: Any, doinsert: bool) -> AbstractContextManager[Any]:
+    """The database's transaction for one stored hand; nothing when it stores nothing."""
+    transaction = getattr(db, "transaction", None)
+    if doinsert and callable(transaction):
+        return transaction()
+    return nullcontext()
 
 
 def _generate_aof_decisions(hand: Any) -> list:
