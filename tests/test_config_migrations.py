@@ -255,7 +255,9 @@ def test_v89_gives_unibet_its_summary_importer():
         "Betclic": "",
         # v94 adds CoinPoker back, import-only (#732).
         "CoinPoker": "",
-        # v95 adds the PokerStars on Betfair skin (#733).
+        # v95 adds BetRivers, import-only (#731).
+        "BetRivers": "",
+        # v96 adds the PokerStars on Betfair skin (#733).
         "PokerStars on Betfair": "PokerStarsSummary",
     }
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
@@ -271,6 +273,7 @@ def test_v89_leaves_a_room_on_another_converter_alone():
         "Unibet": "",
         "Betclic": "",
         "CoinPoker": "",
+        "BetRivers": "",
         "PokerStars on Betfair": "PokerStarsSummary",
     }
 
@@ -288,8 +291,8 @@ def test_v90_adds_the_current_unibet_room():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    # v91: Betclic (#730), v94: CoinPoker (#732), v95: PokerStars on Betfair (#733)
-    assert set(sites) == {"mine", "Unibet", "Betclic", "CoinPoker", "PokerStars on Betfair"}
+    # v91: Betclic (#730), v94: CoinPoker (#732), v95: BetRivers (#731), v96: PokerStars on Betfair (#733)
+    assert set(sites) == {"mine", "Unibet", "Betclic", "CoinPoker", "BetRivers", "PokerStars on Betfair"}
     assert sites["Unibet"].getAttribute("network") == "Unibet"
     assert sites["Unibet"].getAttribute("enabled") == "False"
     assert "Unibet_default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
@@ -313,7 +316,7 @@ def test_v91_adds_the_betclic_2025_room():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    assert set(sites) == {"mine", "Betclic", "CoinPoker", "PokerStars on Betfair"}  # v94 (#732), v95 (#733)
+    assert set(sites) == {"mine", "Betclic", "CoinPoker", "BetRivers", "PokerStars on Betfair"}  # v94-v96
     assert sites["Betclic"].getAttribute("network") == "Betclic"
     assert sites["Betclic"].getAttribute("enabled") == "False"
     hhcs = {node.getAttribute("site"): node.getAttribute("converter") for node in updated.getElementsByTagName("hhc")}
@@ -321,6 +324,7 @@ def test_v91_adds_the_betclic_2025_room():
         "Betclic Poker": "iPokerToFpdb",
         "Betclic": "BetclicToFpdb",
         "CoinPoker": "CoinPokerToFpdb",
+        "BetRivers": "BetRiversToFpdb",
         "PokerStars on Betfair": "PokerStarsToFpdb",
     }
     assert not reference_errors(updated)
@@ -340,13 +344,14 @@ def test_v94_adds_coinpoker_back_as_an_import_only_room():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    assert set(sites) == {"mine", "CoinPoker", "PokerStars on Betfair"}  # v95 adds Betfair's skin (#733)
+    assert set(sites) == {"mine", "CoinPoker", "BetRivers", "PokerStars on Betfair"}  # v95 (#731), v96 (#733)
     assert sites["CoinPoker"].getAttribute("enabled") == "False"
     assert sites["CoinPoker"].getAttribute("aux_enabled") == "False"
     hhcs = {node.getAttribute("site"): node.getAttribute("converter") for node in updated.getElementsByTagName("hhc")}
     assert hhcs == {
         "mine": "PokerStarsToFpdb",
         "CoinPoker": "CoinPokerToFpdb",
+        "BetRivers": "BetRiversToFpdb",
         "PokerStars on Betfair": "PokerStarsToFpdb",
     }
     assert "default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
@@ -369,15 +374,42 @@ def test_v94_keeps_a_coinpoker_entry_the_configuration_still_has():
     assert sites["CoinPoker"].getAttribute("HH_path") == "/my/hands"
     assert [n.getAttribute("site") for n in updated.getElementsByTagName("hhc")] == [
         "CoinPoker",
+        "BetRivers",
         "PokerStars on Betfair",
     ]
 
 
-def test_v95_adds_the_pokerstars_on_betfair_skin():
+def test_v95_adds_betrivers_as_an_import_only_room():
+    # BetRivers does not permit third-party HUDs (#731): its files are imported
+    # after the session, so the room arrives off and without a HUD.
+    template = defusedxml.minidom.parse(str(ROOT / "HUD_config.xml.example"))
+    old = parse("""<FreePokerToolsConfig><general version="94"/>
+      <supported_sites><site site_name="mine"><layout_set ls="custom"/></site></supported_sites>
+      <layout_sets><ls name="custom"/></layout_sets>
+      <hhcs><hhc site="mine" converter="PokerStarsToFpdb"/></hhcs>
+      </FreePokerToolsConfig>""")
+
+    updated = upgrade_document(old, template, CONFIG_VERSION)
+
+    sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
+    assert set(sites) == {"mine", "BetRivers", "PokerStars on Betfair"}  # v96 adds Betfair's skin (#733)
+    assert sites["BetRivers"].getAttribute("enabled") == "False"
+    assert sites["BetRivers"].getAttribute("aux_enabled") == "False"
+    hhcs = {n.getAttribute("site"): n.getAttribute("converter") for n in updated.getElementsByTagName("hhc")}
+    assert hhcs == {
+        "mine": "PokerStarsToFpdb",
+        "BetRivers": "BetRiversToFpdb",
+        "PokerStars on Betfair": "PokerStarsToFpdb",
+    }
+    assert not reference_errors(updated)
+    assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
+
+
+def test_v96_adds_the_pokerstars_on_betfair_skin():
     # A new PokerStars skin (#733): its own site, off, with Betfair's client
     # folders, and an <hhc> on the PokerStars converters.
     template = defusedxml.minidom.parse(str(ROOT / "HUD_config.xml.example"))
-    old = parse("""<FreePokerToolsConfig><general version="94"/>
+    old = parse("""<FreePokerToolsConfig><general version="95"/>
       <supported_sites><site site_name="PokerStars"><layout_set ls="ps_default"/></site></supported_sites>
       <layout_sets><ls name="ps_default"/></layout_sets>
       <hhcs><hhc site="PokerStars" converter="PokerStarsToFpdb" summaryImporter="PokerStarsSummary"/></hhcs>

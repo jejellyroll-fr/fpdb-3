@@ -1,0 +1,32 @@
+BetRivers Poker Hand #10000003: Hold'em No Limit ($0.25/$0.50) - 2026/02/20 22:40 EST
+Table ID '500003' 6-Max Seat #1 is the button
+Seat 1: kim ($40.00 in chips)
+Seat 2: Hero ($51.30 in chips) [hero]
+Seat 3: leo ($38.75 in chips)
+Seat 4: mia ($60.20 in chips)
+*** HOLE CARDS ***
+STP Added: $20.00
+Dealt to Hero [Ac 5d]
+Dealt to kim [Kh Qh]
+Dealt to leo [9s 9c]
+Dealt to mia [7d 6d]
+*** FLOP *** [9h 4s 2c]
+*** TURN *** [9h 4s 2c] [Kd]
+*** RIVER *** [9h 4s 2c Kd] [Ts]
+*** SHOWDOWN ***
+Hero shows [Ac 5d] for High Card: Ace
+kim shows [Kh Qh] for One Pair: Kings
+leo shows [9s 9c] for Three of a Kind: Nines
+mia shows [7d 6d] for High Card: King
+leo collected $14.00 from pot
+Hero collected $2.00 from side pot
+kim collected $2.00 from side pot
+mia collected $2.00 from side pot
+*** SUMMARY ***
+Total pot $20.00 | Main pot $0.00 | Side pot $0.00 | STP $20.00 | Rake $0.00
+Board [9h 4s 2c Kd Ts]
+Seat 1: kim (button) showed [Kh Qh] and lost with One Pair: Kings
+Seat 2: Hero (small blind) showed [Ac 5d] and lost with High Card: Ace
+Seat 3: leo (big blind) showed [9s 9c] and won $14.00 with Three of a Kind: Nines
+Seat 4: mia showed [7d 6d] and lost with High Card: King
+

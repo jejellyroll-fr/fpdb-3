@@ -50,7 +50,8 @@ def _write_config(tmp_path, sites: str, hhcs: str) -> str:
 
 
 def test_coinpoker_is_import_only_not_disabled() -> None:
-    assert IMPORT_ONLY_SITES == frozenset({"CoinPoker"})
+    assert IMPORT_ONLY_SITES == frozenset({"BetRivers", "CoinPoker"})
+    assert is_site_import_only("BetRivers")  # #731: no third-party HUDs
     assert DISABLED_SITES == frozenset()
     assert is_site_import_only("CoinPoker")
     assert not is_site_disabled("CoinPoker")

@@ -302,9 +302,10 @@ class GGPoker(HandHistoryConverter):
         re.MULTILINE | re.VERBOSE,
     )
 
-    # Not preceded by a letter: "CoinPoker Hand #..." and "SwCPoker Hand #..."
-    # are other rooms, and IdentifySite asks GGPoker first (#732).
-    re_identify = re.compile(r"(?<![A-Za-z])Poker\sHand\s\#[A-Z]{0,2}?\d+:")
+    # At the start of a line: "CoinPoker Hand #...", "SwCPoker Hand #..." and
+    # "BetRivers Poker Hand #..." are other rooms, and IdentifySite asks GGPoker
+    # first (#732, #731). A BOM may precede the first hand.
+    re_identify = re.compile(r"^\ufeff?Poker\sHand\s\#[A-Z]{0,2}?\d+:", re.MULTILINE)
     re_split_hands = re.compile("(?:\\s?\n){2,}")
     re_tail_split_hands = re.compile("(\n\n\n+)")
     re_button = re.compile(r"Seat\s*#?\s*(?P<BUTTON>\d+)\s*is\s*the\s*button", re.MULTILINE | re.IGNORECASE)

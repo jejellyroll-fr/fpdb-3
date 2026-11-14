@@ -52,6 +52,11 @@ session; nothing runs beside its client:
   snapshots in `tests/test_live_parser_regression.py`, behaviour in
   `tests/test_coinpoker_text_import.py`. Its former packet capture and table
   detection were removed; a hand that capture stored is a duplicate on import.
+- BetRivers (#731): the PokerStars-like text export (`BetRivers Poker Hand #…`)
+  -- NLH cash games, a header time without seconds in its US zone, Splash the
+  Pot (room money in the pot, "Big Splash" with no blinds), side-pot payouts.
+  The room does not permit third-party HUDs. Fixtures are written from public
+  2026 samples, which are not committed; no tournament history has been seen.
 
 The switch is `IMPORT_ONLY_SITES` in `fpdb_3_legacy/disabled_sites.py`: the
 room keeps its `<hhc>` converter binding and can be enabled for Bulk Import,

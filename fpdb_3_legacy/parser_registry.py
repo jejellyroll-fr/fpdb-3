@@ -12,6 +12,7 @@ from fpdb_3_legacy.AbsoluteToFpdb import Absolute
 from fpdb_3_legacy.BetclicToFpdb import Betclic
 from fpdb_3_legacy.BetfairToFpdb import Betfair
 from fpdb_3_legacy.BetOnlineToFpdb import BetOnline
+from fpdb_3_legacy.BetRiversToFpdb import BetRivers
 from fpdb_3_legacy.BossToFpdb import Boss
 from fpdb_3_legacy.BovadaSummary import BovadaSummary
 from fpdb_3_legacy.BovadaToFpdb import Bovada
@@ -54,6 +55,7 @@ LEGACY_MODULE_REGISTRY: dict[str, str] = {
     "BetfairToFpdb": "fpdb_3_legacy.BetfairToFpdb",
     "BetclicToFpdb": "fpdb_3_legacy.BetclicToFpdb",
     "BetOnlineToFpdb": "fpdb_3_legacy.BetOnlineToFpdb",
+    "BetRiversToFpdb": "fpdb_3_legacy.BetRiversToFpdb",
     "BossToFpdb": "fpdb_3_legacy.BossToFpdb",
     "BovadaSummary": "fpdb_3_legacy.BovadaSummary",
     "BovadaToFpdb": "fpdb_3_legacy.BovadaToFpdb",
@@ -95,6 +97,7 @@ PARSER_CLASS_REGISTRY: dict[str, type[HandHistoryConverter]] = {
     "Absolute": Absolute,
     "Betclic": Betclic,
     "BetOnline": BetOnline,
+    "BetRivers": BetRivers,
     "Betfair": Betfair,
     "Boss": Boss,
     "Bovada": Bovada,

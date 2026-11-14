@@ -295,6 +295,14 @@
     "hand_count": 17,
     "sha256": "fd692600d80541f6827c763132ab494c1a02a6763f7af1d64573cb21426796b1"
   },
+  "regression/BetRivers/Flop/NLHE-4max-USD-0.25-0.50-202602.big.splash.synthetic.txt": {
+    "hand_count": 1,
+    "sha256": "6a06aa1f88ebdab906b71b39b3dd28bd39a9cb896248cf82bbfe065740364e27"
+  },
+  "regression/BetRivers/Flop/NLHE-6max-USD-2026.stp.showdown.synthetic.txt": {
+    "hand_count": 2,
+    "sha256": "3f19f4e565d2197dfbf6f4aa8929865095a9cf40e4883fb1c179c4c7516814b4"
+  },
   "regression/Betfair/Flop/PLO-6max-USD-0.05-0.10-200909.All.in.river.splitpot.txt": {
     "hand_count": 1,
     "sha256": "f36079214f782825a88ea777744dfe235d274c18a1e8df8ff24a2c91ffe6e515"
