@@ -29,11 +29,13 @@ whole client-side change. The new part is the import side and the sync worker.
    Written right after the import commits. A crash in between, or a hand
    stored outside `Importer`, is caught by **reconciliation** (#684): when the
    worker starts, then every 15 polls, every local hand stored since the outbox
-   began gets an outbox row. The first pass starts just below the oldest outbox
-   row (or at the newest hand when the outbox is empty), so hands stored before
-   local-first was turned on are never pushed by surprise; later passes start
-   1,000 ids below the newest hand they saw, for an import that commits a lower
-   id late.
+   began gets an outbox row. Hands at or below a floor are left out, so hands
+   stored before local-first was turned on are never pushed by surprise. The
+   floor is recorded once, when a worker first opens the local file (just below
+   the oldest outbox row, else the newest hand), and kept in `fpdb_sync_state`,
+   so a hand committed just before a crash is still above it after a restart.
+   Each worker's first pass starts at the floor; later passes start 1,000 ids
+   below the newest hand they saw, for an import that commits a lower id late.
 3. **`LocalFirstSync`** (`fpdb_3_legacy/local_first_sync.py`, POC shipped in
    this PR): daemon thread, polls the outbox every `poll_s`, pushes batches of
    `batch_size` hands in one server transaction. Idempotent: dedup on the

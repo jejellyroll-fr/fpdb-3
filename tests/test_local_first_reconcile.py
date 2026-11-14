@@ -25,15 +25,30 @@ from fpdb_3_legacy.local_first_sync import LocalFirstSync
 
 
 @pytest.fixture
-def local(tmp_path):
+def start(tmp_path):
+    """Open the local database holding ``before`` hands, then start its worker."""
     path = tmp_path / "local.sqlite3"
-    connection = sqlite3.connect(path)
-    connection.execute("CREATE TABLE Hands (id INTEGER PRIMARY KEY)")
-    connection.commit()
-    sync = LocalFirstSync(SimpleNamespace(backend=4), MagicMock(), local_db_path=str(path))
-    yield SimpleNamespace(sync=sync, connection=connection)
-    sync.stop()
-    connection.close()
+    opened: list[SimpleNamespace] = []
+
+    def _start(*before: int) -> SimpleNamespace:
+        connection = sqlite3.connect(path)
+        connection.execute("CREATE TABLE IF NOT EXISTS Hands (id INTEGER PRIMARY KEY)")
+        connection.executemany("INSERT INTO Hands (id) VALUES (?)", [(h,) for h in before])
+        connection.commit()
+        sync = LocalFirstSync(SimpleNamespace(backend=4), MagicMock(), local_db_path=str(path))
+        local = SimpleNamespace(sync=sync, connection=connection)
+        opened.append(local)
+        return local
+
+    yield _start
+    for local in opened:
+        local.sync.stop()
+        local.connection.close()
+
+
+@pytest.fixture
+def local(start):
+    return start()
 
 
 def _store(local, *hand_ids: int) -> None:
@@ -54,15 +69,15 @@ def test_a_hand_lost_to_a_crash_between_commit_and_mark_is_queued(local) -> None
     assert _outbox(local) == [1, 2, 3, 4, 5]
 
 
-def test_hands_from_before_local_first_are_not_pushed_by_surprise(local) -> None:
-    _store(local, *range(1, 11))  # a local database used on its own before
+def test_hands_from_before_local_first_are_not_pushed_by_surprise(start) -> None:
+    local = start(*range(1, 11))  # a local database used on its own before
 
     assert local.sync.reconcile() == 0
     assert _outbox(local) == []
 
 
-def test_a_capture_stored_hand_is_queued_by_the_next_pass(local) -> None:
-    _store(local, *range(1, 11))
+def test_a_capture_stored_hand_is_queued_by_the_next_pass(start) -> None:
+    local = start(*range(1, 11))
     local.sync.reconcile()
     _store(local, 11)
     local.sync.mark([11])  # imported
@@ -89,14 +104,36 @@ def test_a_late_commit_below_the_newest_hand_is_still_found(local) -> None:
     assert 30 in _outbox(local)
 
 
-def test_the_margin_never_reaches_below_the_first_floor(local, monkeypatch) -> None:
+def test_the_margin_never_reaches_below_the_first_floor(start, monkeypatch) -> None:
     monkeypatch.setattr(local_first_sync, "RECONCILE_MARGIN", 1000)
-    _store(local, *range(1, 6))  # before local-first
+    local = start(*range(1, 6))  # before local-first
     local.sync.reconcile()
     _store(local, 6)
 
     assert local.sync.reconcile() == 1
     assert _outbox(local) == [6]
+
+
+def test_a_first_hand_lost_to_a_crash_survives_a_restart(start) -> None:
+    first = start(*range(1, 6))  # before local-first, empty outbox
+    _store(first, 6)  # the first import commits, then the process dies
+    first.sync.stop()
+
+    again = start()
+
+    assert again.sync.reconcile() == 1
+    assert _outbox(again) == [6]
+
+
+def test_the_floor_is_kept_from_one_worker_to_the_next(start) -> None:
+    first = start(*range(1, 6))
+    first.sync.stop()
+    _store(first, 6, 7)  # captures write while no worker runs
+
+    again = start()
+
+    assert again.sync.reconcile() == 2
+    assert _outbox(again) == [6, 7]
 
 
 def test_a_database_without_hands_yet_is_left_alone(tmp_path) -> None:

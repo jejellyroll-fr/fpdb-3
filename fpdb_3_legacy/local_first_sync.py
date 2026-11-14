@@ -52,17 +52,30 @@ PUSH_TABLES = ("Hands", "HandsPlayers", "HandsActions")
 # commit and its mark, and covers the hands stored outside Importer (the HTTP
 # and SwC captures write to the same local database).
 #
-# The first pass starts just below the oldest outbox row, so hands stored before
-# local-first was turned on are never pushed by surprise; with no outbox row
-# yet, it starts at the newest hand. Later passes start that many ids below the
-# newest hand they saw, since an import transaction still open then may commit a
-# lower id afterwards.
+# Hands at or below a floor are never queued, so hands stored before local-first
+# was turned on are never pushed by surprise. The floor is recorded once, when
+# the worker first opens the local database, and kept in fpdb_sync_state: worked
+# out again after a restart, it would leave out a hand committed before the
+# process died and never marked. It is just below the oldest outbox row (an
+# outbox from before the floor was kept), else the newest hand.
+#
+# Each worker's first pass starts at the floor; later ones start that many ids
+# below the newest hand they saw, since an import transaction still open then
+# may commit a lower id afterwards.
 RECONCILE_MARGIN = 1000
 # Polls between two passes (about 30 s at the default poll_s).
 RECONCILE_EVERY = 15
+STATE_DDL = "CREATE TABLE IF NOT EXISTS fpdb_sync_state (name VARCHAR(64) PRIMARY KEY, value BIGINT NOT NULL)"
+STATE_FLOOR_NAME = "reconcile_floor"
+STATE_GET_SQLITE = "SELECT value FROM fpdb_sync_state WHERE name = ?"
+STATE_GET_MYSQL = "SELECT value FROM fpdb_sync_state WHERE name = %s"
+STATE_SET_SQLITE = "INSERT INTO fpdb_sync_state (name, value) VALUES (?, ?)"
+STATE_SET_MYSQL = "INSERT INTO fpdb_sync_state (name, value) VALUES (%s, %s)"
 RECONCILE_FLOOR = (
     "SELECT COALESCE((SELECT MIN(local_hand_id) FROM fpdb_sync_outbox) - 1, (SELECT MAX(id) FROM Hands), 0)"
 )
+# The floor of a local database with no Hands table yet: no hand to leave out.
+RECONCILE_FLOOR_NO_HANDS = "SELECT COALESCE(MIN(local_hand_id) - 1, 0) FROM fpdb_sync_outbox"
 RECONCILE_NEWEST = "SELECT COALESCE(MAX(id), 0) FROM Hands"
 RECONCILE_SQLITE = (
     "INSERT OR IGNORE INTO fpdb_sync_outbox (local_hand_id) SELECT h.id FROM Hands h"
@@ -114,9 +127,15 @@ class LocalFirstSync:
         self._ensure_outbox()
         self._users = 0
         self._shared_key = ""
-        # Reconciliation bounds (#684): set by the first pass.
+        # Reconciliation bounds (#684). The floor is read, or recorded, before any
+        # import of this process can commit a hand.
         self._reconcile_floor: int | None = None
         self._reconciled_up_to = 0
+        try:
+            with self._outbox_transaction() as c:
+                self._reconcile_floor = self._persisted_floor(c)
+        except Exception:  # noqa: BLE001 - a busy file: the first pass retries.
+            log.debug("Outbox reconciliation floor not read yet", exc_info=True)
 
     @classmethod
     def shared(cls, local_db: Any, server_db_factory: Callable[[], Any], local_db_path: str) -> LocalFirstSync:
@@ -180,20 +199,37 @@ class LocalFirstSync:
                 [(int(h),) for h in local_hand_ids],
             )
 
+    def _persisted_floor(self, c: Any) -> int:
+        """The reconciliation floor kept in the local database, recorded the first time."""
+        sqlite = self.local_db.backend == 4
+        c.execute(STATE_DDL)  # nosemgrep
+        c.execute(STATE_GET_SQLITE if sqlite else STATE_GET_MYSQL, (STATE_FLOOR_NAME,))
+        row = c.fetchone()
+        if row is not None:
+            return int(row[0])
+        try:
+            c.execute(RECONCILE_FLOOR)
+        except Exception:  # noqa: BLE001 - no Hands table yet
+            c.execute(RECONCILE_FLOOR_NO_HANDS)
+        floor = int(c.fetchone()[0] or 0)
+        c.execute(STATE_SET_SQLITE if sqlite else STATE_SET_MYSQL, (STATE_FLOOR_NAME, floor))
+        return floor
+
     def reconcile(self) -> int:
         """Give an outbox row to every local hand stored since the outbox began (#684).
 
-        Returns how many hands were added. The first pass searches from just
-        below the oldest outbox row; later ones from :data:`RECONCILE_MARGIN`
-        ids below the newest hand the previous pass saw, never below that
-        first floor. A local database with no Hands table yet adds nothing.
+        Returns how many hands were added. A worker's first pass searches from
+        the floor kept in ``fpdb_sync_state``; later ones from
+        :data:`RECONCILE_MARGIN` ids below the newest hand the previous pass
+        saw, never below that floor. A local database with no Hands table yet
+        adds nothing.
         """
         insert = RECONCILE_SQLITE if self.local_db.backend == 4 else RECONCILE_MYSQL
         try:
             with self._outbox_transaction() as c:
                 if self._reconcile_floor is None:
-                    c.execute(RECONCILE_FLOOR)
-                    self._reconcile_floor = int(c.fetchone()[0] or 0)
+                    self._reconcile_floor = self._persisted_floor(c)
+                if self._reconciled_up_to == 0:
                     lower = self._reconcile_floor
                 else:
                     lower = max(self._reconciled_up_to - RECONCILE_MARGIN, self._reconcile_floor)
