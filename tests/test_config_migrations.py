@@ -253,6 +253,8 @@ def test_v89_gives_unibet_its_summary_importer():
         "mine": "",
         # v91 adds the 2025+ Betclic room (#730) with the template's converter.
         "Betclic": "",
+        # v94 adds CoinPoker back, import-only (#732).
+        "CoinPoker": "",
     }
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
 
@@ -263,7 +265,7 @@ def test_v89_leaves_a_room_on_another_converter_alone():
 
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
-    assert _importers(updated) == {"Unibet": "", "Betclic": ""}
+    assert _importers(updated) == {"Unibet": "", "Betclic": "", "CoinPoker": ""}
 
 
 def test_v90_adds_the_current_unibet_room():
@@ -279,7 +281,7 @@ def test_v90_adds_the_current_unibet_room():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    assert set(sites) == {"mine", "Unibet", "Betclic"}  # v91 adds Betclic (#730)
+    assert set(sites) == {"mine", "Unibet", "Betclic", "CoinPoker"}  # v91: Betclic (#730), v94: CoinPoker (#732)
     assert sites["Unibet"].getAttribute("network") == "Unibet"
     assert sites["Unibet"].getAttribute("enabled") == "False"
     assert "Unibet_default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
@@ -303,10 +305,49 @@ def test_v91_adds_the_betclic_2025_room():
     updated = upgrade_document(old, template, CONFIG_VERSION)
 
     sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
-    assert set(sites) == {"mine", "Betclic"}
+    assert set(sites) == {"mine", "Betclic", "CoinPoker"}  # v94 adds CoinPoker (#732)
     assert sites["Betclic"].getAttribute("network") == "Betclic"
     assert sites["Betclic"].getAttribute("enabled") == "False"
     hhcs = {node.getAttribute("site"): node.getAttribute("converter") for node in updated.getElementsByTagName("hhc")}
-    assert hhcs == {"Betclic Poker": "iPokerToFpdb", "Betclic": "BetclicToFpdb"}
+    assert hhcs == {"Betclic Poker": "iPokerToFpdb", "Betclic": "BetclicToFpdb", "CoinPoker": "CoinPokerToFpdb"}
     assert not reference_errors(updated)
     assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
+
+
+def test_v94_adds_coinpoker_back_as_an_import_only_room():
+    # CoinPoker's entries were dropped when the room was switched off; its text
+    # export is importable again (#732), with no HUD.
+    template = defusedxml.minidom.parse(str(ROOT / "HUD_config.xml.example"))
+    old = parse("""<FreePokerToolsConfig><general version="93"/>
+      <supported_sites><site site_name="mine"><layout_set ls="custom"/></site></supported_sites>
+      <layout_sets><ls name="custom"/></layout_sets>
+      <hhcs><hhc site="mine" converter="PokerStarsToFpdb"/></hhcs>
+      </FreePokerToolsConfig>""")
+
+    updated = upgrade_document(old, template, CONFIG_VERSION)
+
+    sites = {node.getAttribute("site_name"): node for node in updated.getElementsByTagName("site")}
+    assert set(sites) == {"mine", "CoinPoker"}
+    assert sites["CoinPoker"].getAttribute("enabled") == "False"
+    assert sites["CoinPoker"].getAttribute("aux_enabled") == "False"
+    hhcs = {node.getAttribute("site"): node.getAttribute("converter") for node in updated.getElementsByTagName("hhc")}
+    assert hhcs == {"mine": "PokerStarsToFpdb", "CoinPoker": "CoinPokerToFpdb"}
+    assert "default" in {node.getAttribute("name") for node in updated.getElementsByTagName("ls")}
+    assert not reference_errors(updated)
+    assert upgrade_document(updated, template, CONFIG_VERSION).toxml() == updated.toxml()
+
+
+def test_v94_keeps_a_coinpoker_entry_the_configuration_still_has():
+    template = defusedxml.minidom.parse(str(ROOT / "HUD_config.xml.example"))
+    old = parse("""<FreePokerToolsConfig><general version="93"/>
+      <supported_sites><site site_name="CoinPoker" screen_name="Hero" HH_path="/my/hands">
+      <layout_set ls="custom"/></site></supported_sites>
+      <layout_sets><ls name="custom"/></layout_sets>
+      <hhcs/>
+      </FreePokerToolsConfig>""")
+
+    updated = upgrade_document(old, template, CONFIG_VERSION)
+
+    (site,) = updated.getElementsByTagName("site")
+    assert site.getAttribute("HH_path") == "/my/hands"
+    assert [n.getAttribute("site") for n in updated.getElementsByTagName("hhc")] == ["CoinPoker"]

@@ -24,7 +24,7 @@ from fpdb_3_legacy.config_common import (
     normalizePath,
     string_to_bool,
 )
-from fpdb_3_legacy.disabled_sites import is_site_disabled
+from fpdb_3_legacy.disabled_sites import is_site_disabled, is_site_import_only
 from fpdb_3_legacy.hud_profiles import HudContext, HudProfileResolver
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -59,6 +59,10 @@ class Site:
         if is_site_disabled(self.site_name):
             self.enabled = False
         self.aux_enabled = string_to_bool(node.getAttribute("aux_enabled"), default=True)
+        # An import-only room's files are imported after the session; no HUD
+        # runs at its tables, whatever the config file says.
+        if is_site_import_only(self.site_name):
+            self.aux_enabled = False
         self.hud_menu_xshift = node.getAttribute("hud_menu_xshift")
         self.hud_menu_xshift = 1 if self.hud_menu_xshift == "" else int(self.hud_menu_xshift)
         self.hud_menu_yshift = node.getAttribute("hud_menu_yshift")

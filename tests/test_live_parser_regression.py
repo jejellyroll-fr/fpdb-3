@@ -16,6 +16,7 @@ from fpdb_3_legacy.BetOnlineToFpdb import BetOnline
 from fpdb_3_legacy.BossToFpdb import Boss
 from fpdb_3_legacy.BovadaToFpdb import Bovada
 from fpdb_3_legacy.CakeToFpdb import Cake
+from fpdb_3_legacy.CoinPokerToFpdb import CoinPoker
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.EnetToFpdb import Enet
 from fpdb_3_legacy.EntractionToFpdb import Entraction
@@ -82,6 +83,7 @@ REGRESSION_SITES = {
     "Boss": Boss,
     "Bovada": Bovada,
     "Cake": Cake,
+    "CoinPoker": CoinPoker,
     "Enet": Enet,
     "Entraction": Entraction,
     "Everest": Everest,
@@ -195,6 +197,7 @@ POT_EQUATION_EXCEPTIONS = {
     "regression/BetOnline/Flop/PLO-10max-USD-0.05-0.10-201209.txt",
     # EV Cashout: like PokerStars, the pot is not credited to the player who
     # cashed out -- the cash-out is, outside the pot.
+    "regression/CoinPoker/Flop/PLO-6max-USD-0.01-0.02-202607.ev.cashout.txt",
     "regression/GGPoker/Flop/PLO-6max-USD-0.05-0.10-202611.ev.cashout.cash.drop.txt",
     "regression/GGPoker/Flop/PLO-6max-USD-0.05-0.10-202611.past.midnight.cashout.rit.txt",
     "regression/Stars/Flop/2025-NL-6max-USD-0.05-0.10.cashout.txt",

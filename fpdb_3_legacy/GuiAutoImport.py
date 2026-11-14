@@ -39,6 +39,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import Configuration, Importer, live_capture_consent
+from fpdb_3_legacy.disabled_sites import is_site_import_only
 from fpdb_3_legacy.hud_diagnostics import session_id
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.interlocks import (
@@ -1674,6 +1675,11 @@ class GuiAutoImport(QWidget):
                 log.warning("Skipping auto-import for misconfigured site %s (missing config: %s)", site, e)
                 continue
             if not params.get("enabled", False):
+                continue
+            # Auto-import feeds the HUD while the room's client runs; an
+            # import-only room's files go through Bulk Import instead (#732).
+            if is_site_import_only(site):
+                log.info("Not watching %s: its hand histories are bulk-imported only", site)
                 continue
 
             try:

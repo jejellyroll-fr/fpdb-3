@@ -22,7 +22,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import live_capture_consent
-from fpdb_3_legacy.disabled_sites import is_site_disabled
+from fpdb_3_legacy.disabled_sites import allows_live_use
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.live_capture_consent import Mechanism
 
@@ -60,7 +60,7 @@ def available_mechanisms() -> list[Mechanism]:
     return [
         mechanism
         for mechanism in live_capture_consent.MECHANISMS.values()
-        if not is_site_disabled(_ROOMS.get(mechanism.key, ""))
+        if allows_live_use(_ROOMS.get(mechanism.key, ""))
     ]
 
 

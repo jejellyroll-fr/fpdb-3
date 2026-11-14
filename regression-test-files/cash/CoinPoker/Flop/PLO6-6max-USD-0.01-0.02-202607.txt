@@ -1,0 +1,48 @@
+CoinPoker Hand #90000000008: PLO 6 (₮0.01/₮0.02) 2026/07/20 15:44:09 CEST
+Table '100005' 5-max Seat #1 is the button
+Seat 1: edfea788 (₮1.24 in chips)
+Seat 2: 1b045fd7 (₮4.08 in chips)
+Seat 3: c00a25f8 (₮2 in chips)
+Seat 4: 0f9c9064 (₮1.08 in chips)
+Seat 5: Hero (₮2.27 in chips)
+1b045fd7: posts small blind ₮0.01
+c00a25f8: posts big blind ₮0.02
+*** HOLE CARDS ***
+Dealt to edfea788
+Dealt to 1b045fd7
+Dealt to c00a25f8
+Dealt to 0f9c9064
+Dealt to Hero [Ac Tc Ad Qs 8s 7s]
+0f9c9064: folds
+Hero: calls ₮0.02
+edfea788: folds
+1b045fd7: folds
+c00a25f8: checks
+*** FLOP *** [2d 3d 8c]
+c00a25f8: checks
+Hero: bets ₮0.02
+c00a25f8: calls ₮0.02
+*** TURN *** [2d 3d 8c] [7h]
+c00a25f8: checks
+Hero: bets ₮0.04
+c00a25f8: calls ₮0.04
+*** RIVER *** [2d 3d 8c 7h] [7c]
+c00a25f8: checks
+Hero: bets ₮0.08
+c00a25f8: raises ₮0.33 to ₮0.41
+Hero: calls ₮0.33
+*** SHOWDOWN ***
+Hero: shows [Ac Tc Ad Qs 8s 7s] (Full House)
+Hero collected ₮0.94 from pot
+c00a25f8: shows [As Ks 5s 9d 7d 2c] (Full House)
+*** SUMMARY ***
+Total pot ₮0.99 | Rake ₮0.05
+Hand was run once
+Board [ 2d 3d 8c 7h 7c ]
+Game ended: 2026/07/20 15:45:12 CEST
+Seat 1: edfea788 folded before Flop (didn't bet)
+Seat 2: 1b045fd7 folded before Flop (didn't bet)
+Seat 3: c00a25f8 showed [As Ks 5s 9d 7d 2c] and lost with Full House
+Seat 4: 0f9c9064 folded before Flop (didn't bet)
+Seat 5: Hero showed [Ac Tc Ad Qs 8s 7s] and won (₮0.94) with Full House
+

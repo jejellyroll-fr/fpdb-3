@@ -105,6 +105,7 @@ def _preserve_86_to_87(doc, template) -> None:
 SITES_ADDED_IN_88 = ("Bet365.fr Poker",)  # #717
 SITES_ADDED_IN_90 = ("Unibet",)  # #729: the 2026 Relax Gaming client
 SITES_ADDED_IN_91 = ("Betclic",)  # #730: the 2025+ in-house client, apart from the iPoker skin
+SITES_ADDED_IN_94 = ("CoinPoker",)  # #732: text hand-history import, nothing live
 
 
 def _child_section(doc, section: str):
@@ -221,6 +222,17 @@ def _zero_padding_92_to_93(doc, template) -> None:
                 node.setAttribute(attr, "0")
 
 
+def _add_sites_93_to_94(doc, template) -> None:
+    """Advance to v94, adding CoinPoker back as an import-only room (#732).
+
+    Its entries were dropped when the room was switched off; its exported hand
+    histories can now be bulk-imported. The room arrives disabled, with no HUD
+    (``aux_enabled="False"``, which the code enforces anyway). A configuration
+    that still declares the room keeps its entry.
+    """
+    _add_sites(doc, template, SITES_ADDED_IN_94)
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {n.getAttribute("name") for n in doc.getElementsByTagName("aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -246,6 +258,7 @@ MIGRATIONS = (
     (90, 91, _add_sites_90_to_91),
     (91, 92, _preserve_91_to_92),
     (92, 93, _zero_padding_92_to_93),
+    (93, 94, _add_sites_93_to_94),
 )
 
 

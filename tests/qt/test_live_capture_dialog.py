@@ -83,7 +83,7 @@ def test_the_window_starts_with_everything_off(qtbot, config) -> None:
 
 
 def test_a_room_whose_support_is_off_has_no_box(qtbot, config) -> None:
-    # CoinPoker support is switched off (disabled_sites): nothing of it to turn on.
+    # CoinPoker is import-only (disabled_sites, #732): no live capture to turn on.
     window = LiveCaptureDialog(config)
     qtbot.addWidget(window)
 

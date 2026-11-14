@@ -37,6 +37,7 @@ from PySide6.QtGui import QCloseEvent, QIcon
 from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QVBoxLayout
 
 from fpdb_3_legacy import Configuration, Deck, Hud, Options, db_profile
+from fpdb_3_legacy.disabled_sites import allows_live_use
 from fpdb_3_legacy.hud_diagnostics import (
     HUD_CRASH_LOG_NAME,
     ROLE_HUD,
@@ -848,6 +849,12 @@ class HudMain(
                 new_hand_id,
                 site_name,
             )
+            return None
+
+        # An import-only room (CoinPoker, #732) gets no HUD, even when a hand
+        # of it reaches this process.
+        if not allows_live_use(str(site_name)):
+            log.info("HUD creation skipped for hand %s: %s is import-only", new_hand_id, site_name)
             return None
 
         enabled_sites = self.config.get_supported_sites()

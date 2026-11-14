@@ -12,7 +12,7 @@ hands from. Two captures do that, and they go further than reading files:
 | Capture | What it does |
 | --- | --- |
 | **SwC client tap** (Seals with Clubs) | Loads a small library of fpdb's into the SwC Poker client: injected into the running client on Windows, preloaded with `DYLD_INSERT_LIBRARIES` / `LD_PRELOAD` when fpdb launches the client on macOS and Linux. It reads the table traffic after the client has decrypted it, and stays loaded until the client exits. See [swc-native-capture.md](swc-native-capture.md). |
-| **CoinPoker packet capture** | Records the CoinPoker client's network packets with administrator rights (tcpdump, pkexec or a UAC prompt). It loads nothing into the client. CoinPoker support is switched off for now, so this one is not offered. |
+| **CoinPoker packet capture** | Records the CoinPoker client's network packets with administrator rights (tcpdump, pkexec or a UAC prompt). It loads nothing into the client. CoinPoker is import-only (its exported hand histories are bulk-imported after the session), so this one is not offered. |
 
 Anti-cheat systems look for software that loads into a poker client or reads
 its traffic. A room may treat that as a breach of its terms and restrict or
