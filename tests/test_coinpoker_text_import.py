@@ -189,10 +189,12 @@ def test_bomb_pot_double_board(hands) -> None:
     assert hand.collectees == {"78a5b943": Decimal("0.85"), "Hero": Decimal("0.86")}
 
 
-def test_bomb_pots_give_no_vpip_chance(hands) -> None:
+def test_bomb_pots_give_no_preflop_chance(hands) -> None:
     stats = _stats(hands["90000000012"])
     assert not any(player["street0VPIChance"] for player in stats.values())
     assert not any(player["street0VPI"] for player in stats.values())
+    # PFR's denominator: a bomb pot is no declined raise either.
+    assert not any(player["street0AggrChance"] for player in stats.values())
 
 
 def test_plo6_bomb_pot(hands) -> None:
@@ -347,3 +349,14 @@ def test_a_header_without_a_zone_does_not_borrow_the_next_line() -> None:
     assert match is not None
     assert match.group("TZ") is None
     assert CoinPoker.re_GameInfo.search(header.replace(":58\n", ":58 CEST\n")).group("TZ") == "CEST"
+
+
+def test_identify_site_accepts_a_bom(config) -> None:
+    # IdentifySite reads UTF-8 without stripping the BOM, before the
+    # converter's utf-8-sig decoding runs.
+    from fpdb_3_legacy.IdentifySite import IdentifySite
+
+    path = FIXTURES / "PLO6-6max-USD-0.01-0.02-202607.txt"
+    found = IdentifySite(config).idSite(str(path), "\ufeff" + path.read_text(encoding="utf-8"), "utf-8")
+
+    assert found.site.name == "CoinPoker"

@@ -66,11 +66,14 @@ class DerivedStatsPreflopMixin(DerivedStatsBase):
 
         # A bomb pot has no preflop decision: every player is forced to ante
         # and the deal goes straight to the flop. Counted as a chance, each one
-        # would read as a hand the player declined to play, pulling VPIP down
-        # by the share of bomb pots at the table (#732).
+        # would read as a hand the player declined to play -- or to raise --
+        # pulling VPIP and PFR down by the share of bomb pots at the table
+        # (#732). calc34BetStreet0 has run by now and, with no preflop action,
+        # left street0AggrChance at its initial True.
         if getattr(hand, "bombPot", 0):
             for player_stats in self.handsplayers.values():
                 player_stats["street0VPIChance"] = False
+                player_stats["street0AggrChance"] = False
             self.hands["playersVpi"] = 0
             return
 
