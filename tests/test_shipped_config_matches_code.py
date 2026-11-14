@@ -14,7 +14,7 @@ from xml.etree import ElementTree as ET
 import pytest
 
 from fpdb_3_legacy import Stats
-from fpdb_3_legacy.disabled_sites import DISABLED_SITES
+from fpdb_3_legacy.disabled_sites import DISABLED_SITES, IMPORT_ONLY_SITES
 from fpdb_3_legacy.stat_registry import get_registry
 
 TEMPLATE = Path("HUD_config.xml")
@@ -110,3 +110,14 @@ def test_the_shipped_config_declares_no_unknown_site(config_root: ET.Element) ->
     declared = {site.get("site_name") for site in config_root.findall("supported_sites/site")}
 
     assert sorted(declared - _seeded_sites()) == []
+
+
+def test_an_import_only_room_is_offered_without_a_hud(config_root: ET.Element) -> None:
+    """CoinPoker's files are imported after the session (#732): declared, off, no HUD."""
+    sites = {site.get("site_name"): site for site in config_root.findall("supported_sites/site")}
+    converters = {hhc.get("site"): hhc.get("converter") for hhc in config_root.findall("hhcs/hhc")}
+
+    for room in IMPORT_ONLY_SITES:
+        assert sites[room].get("enabled") == "False"
+        assert sites[room].get("aux_enabled") == "False"
+        assert converters[room] == f"{room}ToFpdb"

@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from fpdb_3_legacy.disabled_sites import is_site_disabled
+from fpdb_3_legacy.disabled_sites import allows_live_use
 from fpdb_3_legacy.i18n import N_
 from fpdb_3_legacy.i18n import gettext as translate
 
@@ -148,10 +148,10 @@ def menu_layout() -> tuple[Menu, ...]:
                     tip=N_("Bring your hands over from PokerTracker 4 or Holdem Manager 3"),
                 ),
                 # The capture tab exists only to feed CoinPoker; it stays out of
-                # the menu while that room's support is switched off.
+                # the menu while that room is import-only (#732).
                 *(
                     ()
-                    if is_site_disabled("CoinPoker")
+                    if not allows_live_use("CoinPoker")
                     else (MenuItem(N_("CoinPoker Live Capture"), "tab_coinpoker_capture"),)
                 ),
             ),

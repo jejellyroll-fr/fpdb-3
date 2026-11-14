@@ -499,6 +499,42 @@
     "hand_count": 1,
     "sha256": "f5f11ff23d1cbc762c5371fba4c65a856511d24f84e0af6013ff04eeec24cff9"
   },
+  "regression/CoinPoker/Flop/NLHE-6max-USD-0.01-0.02-202607.txt": {
+    "hand_count": 2,
+    "sha256": "818f702d76e6d5c90bcc0a12586dd6e296d80a22b22c0d4c8cf2992c5cd45c00"
+  },
+  "regression/CoinPoker/Flop/PLO-6max-USD-0.01-0.02-202607.autobb.straddle.txt": {
+    "hand_count": 5,
+    "sha256": "7e8bdbab1aa1264966afaa6674598a4cd1db118ef36dcc9a99f91e29466d581e"
+  },
+  "regression/CoinPoker/Flop/PLO-6max-USD-0.01-0.02-202607.bomb.pot.double.board.txt": {
+    "hand_count": 3,
+    "sha256": "3667c5d987f5a983977604f70c53f0d67a60423b34af5afad5243b5a284816fd"
+  },
+  "regression/CoinPoker/Flop/PLO-6max-USD-0.01-0.02-202607.ev.cashout.txt": {
+    "hand_count": 3,
+    "sha256": "8e965d931113af9b1a389345674bd63fca3c94501256672b30c6d0be562505a9"
+  },
+  "regression/CoinPoker/Flop/PLO-6max-USD-0.01-0.02-202607.run.twice.txt": {
+    "hand_count": 2,
+    "sha256": "7410129d8ff28d2c04ee7efb26d1e482cb006cd6c1a6fc6c7012c8a5fb0b8ca8"
+  },
+  "regression/CoinPoker/Flop/PLO-6max-USD-0.01-0.02-202607.splash.txt": {
+    "hand_count": 3,
+    "sha256": "93c091c1f93b8a9f9263a7817a382ee73fa5567538d6f4353f3cd8f71aecd8e3"
+  },
+  "regression/CoinPoker/Flop/PLO-6max-USD-0.01-0.02-202607.txt": {
+    "hand_count": 4,
+    "sha256": "9be75848720565341e15c202bfac2feb7689a944958b140e1453c09343bcc26e"
+  },
+  "regression/CoinPoker/Flop/PLO5-6max-USD-0.01-0.02-202607.txt": {
+    "hand_count": 2,
+    "sha256": "e00903b9e2009efc913ce20fab1d21edca2b994c5c63a0ca9557e3bc11b3b60a"
+  },
+  "regression/CoinPoker/Flop/PLO6-6max-USD-0.01-0.02-202607.txt": {
+    "hand_count": 1,
+    "sha256": "027d559713c5f0bfcdc006194cf8eb3c89b62c1f24dc0732f2328d3352096313"
+  },
   "regression/Enet/Flop/NLHE-6max-EUR-0.05-0.10-201210.post.dead.txt": {
     "hand_count": 1,
     "sha256": "888d30abcb1199f0c8db5dbc40589ab928c99c26d7d693b2f3c15b5352b8b312"

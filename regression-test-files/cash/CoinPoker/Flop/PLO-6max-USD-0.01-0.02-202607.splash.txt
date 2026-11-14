@@ -1,0 +1,148 @@
+CoinPoker Hand #90000000009: PLO 4 (₮0.01/₮0.02) 2026/07/17 22:52:05 CEST
+Table '100002' 6-max Seat #2 is the button
+Seat 1: f7a29f87 (₮2.06 in chips)
+Seat 2: 908e52f8 (₮4.38 in chips)
+Seat 3: Hero (₮3.01 in chips)
+Seat 4: 9b2f90e6 (₮0.91 in chips)
+Seat 5: 9018a1cf (₮6.21 in chips)
+Seat 6: b3db7d6e (₮1 in chips)
+SPLASH dropped ₮0.04
+Hero: posts small blind ₮0.01
+9b2f90e6: posts big blind ₮0.02
+*** HOLE CARDS ***
+Dealt to f7a29f87
+Dealt to 908e52f8
+Dealt to Hero [Qh 7h 7s 5d]
+Dealt to 9b2f90e6
+Dealt to 9018a1cf
+Dealt to b3db7d6e
+9018a1cf: folds
+b3db7d6e: folds
+f7a29f87: folds
+908e52f8: raises ₮0.05 to ₮0.07
+Hero: folds
+9b2f90e6: calls ₮0.05
+*** FLOP *** [Ts Js Ks]
+9b2f90e6: checks
+908e52f8: bets ₮0.15
+9b2f90e6: calls ₮0.15
+*** TURN *** [Ts Js Ks] [Kd]
+9b2f90e6: checks
+908e52f8: bets ₮0.45
+9b2f90e6: folds
+908e52f8: RETURN ₮0.45
+*** SHOWDOWN ***
+908e52f8 collected ₮0.43 from pot
+*** SUMMARY ***
+Total pot ₮0.49 | Rake ₮0.02
+Hand was run once
+Board [ Ts Js Ks Kd ]
+Game ended: 2026/07/17 22:53:12 CEST
+Seat 1: f7a29f87 folded before Flop (didn't bet)
+Seat 2: 908e52f8 won (₮0.43)
+Seat 3: Hero folded before Flop (didn't bet)
+Seat 4: 9b2f90e6 folded on the Turn
+Seat 5: 9018a1cf folded before Flop (didn't bet)
+Seat 6: b3db7d6e folded before Flop (didn't bet)
+
+CoinPoker Hand #90000000010: PLO 4 (₮0.01/₮0.02) 2026/07/18 18:53:57 CEST
+Table '100002' 6-max Seat #1 is the button
+Seat 1: f45a2378 (₮2 in chips)
+Seat 2: Hero (₮5.33 in chips)
+Seat 3: abe59b0e (₮3.10 in chips)
+Seat 4: 0803642f (₮2.07 in chips)
+Seat 6: 17c402cc (₮2 in chips)
+SPLASH dropped ₮0.04
+Hero: posts small blind ₮0.01
+abe59b0e: posts big blind ₮0.02
+*** HOLE CARDS ***
+Dealt to f45a2378
+Dealt to Hero [Ad Kd Qd 3s]
+Dealt to abe59b0e
+Dealt to 0803642f
+Dealt to 17c402cc
+0803642f: folds
+17c402cc: folds
+f45a2378: raises ₮0.05 to ₮0.07
+Hero: calls ₮0.06
+abe59b0e: folds
+*** FLOP *** [7d 2h Ts]
+Hero: checks
+f45a2378: bets ₮0.16
+Hero: calls ₮0.16
+*** TURN *** [7d 2h Ts] [9d]
+Hero: checks
+f45a2378: bets ₮0.48
+Hero: calls ₮0.48
+*** RIVER *** [7d 2h Ts 9d] [Js]
+Hero: bets ₮1.44
+f45a2378: ALLIN ₮1.29
+Hero: RETURN ₮0.15
+*** SHOWDOWN ***
+Hero: shows [Ad Kd Qd 3s] (Straight)
+Hero collected ₮3.82 from pot
+f45a2378: shows [As Ah Qh 8c] (Straight)
+*** SUMMARY ***
+Total pot ₮4.06 | Rake ₮0.20
+Hand was run once
+Board [ 7d 2h Ts 9d Js ]
+Game ended: 2026/07/18 18:54:42 CEST
+Seat 1: f45a2378 showed [As Ah Qh 8c] and lost with Straight
+Seat 2: Hero showed [Ad Kd Qd 3s] and won (₮3.82) with Straight
+Seat 3: abe59b0e folded before Flop (didn't bet)
+Seat 4: 0803642f folded before Flop (didn't bet)
+Seat 6: 17c402cc folded before Flop (didn't bet)
+
+CoinPoker Hand #90000000011: PLO 4 (₮0.01/₮0.02) 2026/07/18 18:46:35 CEST
+Table '100002' 6-max Seat #3 is the button
+Seat 1: c7115169 (₮2 in chips)
+Seat 2: Hero (₮3.01 in chips)
+Seat 3: 064717d9 (₮2.81 in chips)
+Seat 4: 2f982ad8 (₮2 in chips)
+Seat 5: f982d1bf (₮2 in chips)
+Seat 6: 8fe49f15 (₮6.24 in chips)
+MEGA SPLASH dropped ₮1
+2f982ad8: posts small blind ₮0.01
+f982d1bf: posts big blind ₮0.02
+*** HOLE CARDS ***
+Dealt to c7115169
+Dealt to Hero [Tc 4c 8h 7h]
+Dealt to 064717d9
+Dealt to 2f982ad8
+Dealt to f982d1bf
+Dealt to 8fe49f15
+8fe49f15: calls ₮0.02
+c7115169: calls ₮0.02
+Hero: calls ₮0.02
+064717d9: calls ₮0.02
+2f982ad8: calls ₮0.01
+f982d1bf: checks
+*** FLOP *** [6d Ac 6s]
+2f982ad8: bets ₮0.12
+f982d1bf: calls ₮0.12
+8fe49f15: folds
+c7115169: folds
+Hero: folds
+064717d9: calls ₮0.12
+*** TURN *** [6d Ac 6s] [8c]
+2f982ad8: bets ₮0.48
+f982d1bf: ALLIN ₮1.86
+064717d9: folds
+2f982ad8: ALLIN ₮1.38
+*** RIVER *** [6d Ac 6s 8c] [2s]
+*** SHOWDOWN ***
+f982d1bf: shows [Ad Th 6h 4h] (Full House)
+f982d1bf collected ₮4 from pot
+2f982ad8: shows [Qc 7d 6c 2d] (Full House)
+*** SUMMARY ***
+Total pot ₮5.20 | Rake ₮0.20
+Hand was run once
+Board [ 6d Ac 6s 8c 2s ]
+Game ended: 2026/07/18 18:47:46 CEST
+Seat 1: c7115169 folded on the Flop
+Seat 2: Hero folded on the Flop
+Seat 3: 064717d9 folded on the Turn
+Seat 4: 2f982ad8 showed [Qc 7d 6c 2d] and lost with Full House
+Seat 5: f982d1bf showed [Ad Th 6h 4h] and won (₮4) with Full House
+Seat 6: 8fe49f15 folded on the Flop
+
