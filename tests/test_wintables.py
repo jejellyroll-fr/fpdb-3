@@ -1,20 +1,23 @@
 """Table-window detection and HUD placement on Windows (WinTables)."""
 
+import importlib
 import sys
 from unittest.mock import Mock, patch
 
 import pytest
 
+from fpdb.infrastructure.platform import TableGeometry, TableInfo
+
 pytestmark = pytest.mark.qt
 
-# Light Qt stubs so WinTables imports without a real display.
+# Light Qt stubs so WinTables imports without a real display: they have to be in
+# place before the module is imported, hence the import by name below.
 sys.modules.setdefault("PySide6", Mock())
 sys.modules.setdefault("PySide6.QtCore", Mock())
 sys.modules.setdefault("PySide6.QtGui", Mock())
 sys.modules.setdefault("PySide6.QtWidgets", Mock())
 
-import fpdb_3_legacy.WinTables as WinTables  # noqa: E402
-from fpdb.infrastructure.platform import TableGeometry, TableInfo  # noqa: E402
+WinTables = importlib.import_module("fpdb_3_legacy.WinTables")
 
 _GEOM = TableGeometry(x=100, y=100, width=800, height=613)
 
