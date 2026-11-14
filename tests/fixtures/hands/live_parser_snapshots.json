@@ -7,6 +7,10 @@
     "hand_count": 8,
     "sha256": "1f3a36f998367251a005074f04ba65418a5ac17e3481b4d89e7abd9b48989643"
   },
+  "betclic/sko_tournament_2026.txt": {
+    "hand_count": 29,
+    "sha256": "dd03e5c348e2d4ef150b7aa996307835b9443b4e991ed9412cf0f0bda8763282"
+  },
   "betclic/spin_rush_2026.txt": {
     "hand_count": 76,
     "sha256": "23f1c621973569fc9d21b592bc3e0ccb13ea93ba37ea08adf7b61e6644051948"
