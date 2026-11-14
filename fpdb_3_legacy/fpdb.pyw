@@ -1982,6 +1982,12 @@ class fpdb(QMainWindow):
         wizard = GuiTrackerMigration(self.settings, self.config, self.sql, self)
         wizard.exec()
 
+    def dia_tracker_notes(self, widget=None, data=None) -> None:
+        """Import ▸ PokerTracker 4 Notes: add PT4 player notes to fpdb's (#618)."""
+        from fpdb_3_legacy.GuiTrackerNotes import GuiTrackerNotes
+
+        GuiTrackerNotes(self.config, self.sql, self).exec()
+
     def tab_auto_notes_workbench(self, widget, data=None) -> None:
         """Open the automatic notes workbench tab."""
         self.open_tab("Auto Notes", lambda: GuiAutoNotesWorkbench.GuiAutoNotesWorkbench(self.config, self))

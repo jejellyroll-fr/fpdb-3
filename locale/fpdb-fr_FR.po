@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 11:31+0100\n"
+"POT-Creation-Date: 2026-11-14 22:17+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -1355,7 +1355,7 @@ msgstr ""
 "C'est la seule base de données configurée, elle ne peut pas être supprimée — "
 "fpdb en a besoin d'au moins une. Ajoutez d'abord une autre base."
 
-#: fpdb_3_legacy/GuiDatabase.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiTrackerNotes.py
 msgid "User"
 msgstr "Utilisateur"
 
@@ -1809,7 +1809,8 @@ msgstr "HUD"
 msgid "Hand History Converters"
 msgstr "Convertisseurs d'historique des mains"
 
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
+#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/GuiTrackerNotes.py
+#: fpdb_3_legacy/menu_layout.py
 msgid "Import"
 msgstr "Importation"
 
@@ -2620,7 +2621,7 @@ msgstr ""
 "Le dossier n'a pas pu être lu :\n"
 "%s"
 
-#: fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/GuiTrackerNotes.py
 #, python-format
 msgid ""
 "The import stopped on an error:\n"
@@ -2657,6 +2658,56 @@ msgstr "non défini"
 msgid "… and %d more"
 msgstr "… et %d de plus"
 
+#: fpdb_3_legacy/GuiTrackerNotes.py
+#, python-format
+msgid ""
+"Could not read PokerTracker 4's database:\n"
+"%s"
+msgstr ""
+"Impossible de lire la base de données de PokerTracker 4 :\n"
+"%s"
+
+#: fpdb_3_legacy/GuiTrackerNotes.py fpdb_3_legacy/GuiVersionInfo.py
+#: fpdb_3_legacy/menu_layout.py
+msgid "Database"
+msgstr "Base de données"
+
+#: fpdb_3_legacy/GuiTrackerNotes.py
+msgid "Host"
+msgstr "Hôte"
+
+#: fpdb_3_legacy/GuiTrackerNotes.py
+msgid "Import PokerTracker 4 notes"
+msgstr "Importer les notes de PokerTracker 4"
+
+#: fpdb_3_legacy/GuiTrackerNotes.py
+msgid "Leave players who already have an fpdb note alone"
+msgstr "Ne pas toucher aux joueurs qui ont déjà une note dans fpdb"
+
+#: fpdb_3_legacy/GuiTrackerNotes.py
+msgid "Password"
+msgstr "Mot de passe"
+
+#: fpdb_3_legacy/GuiTrackerNotes.py
+msgid "Port"
+msgstr "Port"
+
+#: fpdb_3_legacy/GuiTrackerNotes.py
+msgid "Preview"
+msgstr "Aperçu"
+
+#: fpdb_3_legacy/GuiTrackerNotes.py
+msgid ""
+"fpdb reads the notes and player tags from PokerTracker 4's database, read-"
+"only. An fpdb note is never overwritten: the PT4 note is added after it. "
+"Notes on players fpdb has no hands of are listed, not imported: import the "
+"hands first."
+msgstr ""
+"fpdb lit les notes et les étiquettes de joueurs dans la base de données de "
+"PokerTracker 4, en lecture seule. Une note fpdb n'est jamais écrasée : la "
+"note PT4 est ajoutée à sa suite. Les notes sur des joueurs dont fpdb n'a "
+"aucune main sont listées, pas importées : importez d'abord les mains."
+
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Clipboard unavailable"
 msgstr "Presse-papiers indisponible"
@@ -2672,10 +2723,6 @@ msgstr "Copier le rapport"
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Copy these details to the clipboard for a bug report"
 msgstr "Copier ces informations dans le presse-papiers pour un rapport de bug"
-
-#: fpdb_3_legacy/GuiVersionInfo.py fpdb_3_legacy/menu_layout.py
-msgid "Database"
-msgstr "Base de données"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Documentation"
@@ -3759,6 +3806,14 @@ msgid "About the program"
 msgstr "À propos du programme"
 
 #: fpdb_3_legacy/menu_layout.py
+msgid ""
+"Add PokerTracker 4 player notes and tags to fpdb's notes, never overwriting "
+"one"
+msgstr ""
+"Ajouter les notes et étiquettes de joueurs de PokerTracker 4 aux notes de "
+"fpdb, sans jamais en écraser une"
+
+#: fpdb_3_legacy/menu_layout.py
 msgid "Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)"
 msgstr ""
 "Ajouter, modifier, tester et choisir la base de données (SQLite / "
@@ -3928,6 +3983,10 @@ msgstr "Outil de développement des journaux"
 #: fpdb_3_legacy/menu_layout.py
 msgid "Opponents Report"
 msgstr "Rapport sur les adversaires"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "PokerTracker 4 Notes…"
+msgstr "Notes PokerTracker 4…"
 
 #: fpdb_3_legacy/menu_layout.py
 msgid "Preferences"
@@ -7789,6 +7848,49 @@ msgstr ""
 "Sans archive, exportez les mains depuis Holdem Manager 3 vers un dossier. "
 "Vérifiez ensuite dans le bilan les fichiers que fpdb n'a pas su lire."
 
+#: fpdb_3_legacy/tracker_notes.py
+#, python-format
+msgid ""
+"%(added)d notes added, %(appended)d appended, %(already)d already in fpdb, "
+"%(skipped)d skipped, %(unmatched)d not matched."
+msgstr ""
+"%(added)d notes ajoutées, %(appended)d complétées, %(already)d déjà dans "
+"fpdb, %(skipped)d ignorées, %(unmatched)d sans correspondance."
+
+#: fpdb_3_legacy/tracker_notes.py
+#, python-format
+msgid ""
+"Preview, nothing written: %(added)d notes to add, %(appended)d to append, "
+"%(already)d already in fpdb, %(skipped)d to skip, %(unmatched)d not matched."
+msgstr ""
+"Aperçu, rien n'est écrit : %(added)d notes à ajouter, %(appended)d à "
+"compléter, %(already)d déjà dans fpdb, %(skipped)d à ignorer, %(unmatched)d "
+"sans correspondance."
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "added"
+msgstr "ajoutée"
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "already in fpdb"
+msgstr "déjà dans fpdb"
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "appended to the fpdb note"
+msgstr "ajoutée à la suite de la note fpdb"
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "not in fpdb: import the player's hands first"
+msgstr "absent de fpdb : importez d'abord les mains du joueur"
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "room unknown to fpdb"
+msgstr "salle inconnue de fpdb"
+
+#: fpdb_3_legacy/tracker_notes.py
+msgid "skipped: fpdb already has a note"
+msgstr "ignorée : fpdb a déjà une note"
+
 #: fpdb_3_legacy/update_notice.py
 #, python-format
 msgid "Download %s"
@@ -8903,9 +9005,6 @@ msgstr ""
 #~ msgid "HoldemOmaha hand initialised for %s"
 #~ msgstr "Logger par defaut initialisé pour %s"
 
-#~ msgid "Host"
-#~ msgstr "Hôte"
-
 #~ msgid "Host Computer"
 #~ msgstr "Ordinateur hôte"
 
@@ -9316,9 +9415,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "PartyPokerToFpdb: Unimplemented %s: '%s' '%s'"
 #~ msgstr "Non implémenté %s: '%s' '%s'"
-
-#~ msgid "Password"
-#~ msgstr "Mot de passe"
 
 #~ msgid "Player finishing stats unreadable : %s"
 #~ msgstr "Statistiques finales du joueur illisibles : %s"

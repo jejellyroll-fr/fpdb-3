@@ -146,6 +146,11 @@ def menu_layout() -> tuple[Menu, ...]:
                     "dia_tracker_migration",
                     tip=N_("Bring your hands over from PokerTracker 4 or Holdem Manager 3"),
                 ),
+                MenuItem(
+                    N_("PokerTracker 4 Notes…"),
+                    "dia_tracker_notes",
+                    tip=N_("Add PokerTracker 4 player notes and tags to fpdb's notes, never overwriting one"),
+                ),
             ),
         ),
         Menu(

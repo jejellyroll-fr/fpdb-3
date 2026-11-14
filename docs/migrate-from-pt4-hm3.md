@@ -10,7 +10,7 @@ files as they are, so moving over amounts to one import of the right folder.
 | Stats (`.pt4stat`) | ChipEV and the common cash stats (VPIP, PFR, 3-bet, c-bet, WTSD, W$SD, AF, steal and the folds to them); see [the coverage of PT4's stock stats](pt4-stock-stat-coverage.md) | #613 |
 | HUD layout (`.pt4hud`) | Yes: *Configure ▸ Import PT4 HUD*. Stats with no fpdb equivalent are listed; *Convert PT4 HUD to .fpdbhud* makes a shareable package | #614 |
 | Reading the tracker's database directly | Being evaluated | #615 |
-| Player notes | Not yet | #618 |
+| Player notes | PT4: yes, *Import ▸ PokerTracker 4 Notes…* (section 5). HM3: not yet | #618 |
 
 ## 1. Find the hand histories
 
@@ -82,7 +82,55 @@ database (*Database ▸ Create or Recreate Tables*) rather than importing on top
 - **Large archives**: a few hundred thousand hands take a while. Bulk import runs its equity workers
   in parallel, and PostgreSQL is faster than SQLite for very large databases.
 
+## 5. Player notes (PokerTracker 4)
+
+PT4 keeps its notes in its PostgreSQL database, not in a file. *Import ▸ PokerTracker 4 Notes…*
+reads them there, read-only, together with the player tags (*Fish*, *Regular*, your own tags…).
+Import your hands first: a note goes to a player fpdb already knows.
+
+1. Enter PT4's database connection, as PT4's *Database Management* window shows it. The
+   defaults are PT4's own: `localhost`, port `5432`, user `postgres`, database `PT4 DB`. The password
+   is the one you chose when PT4 created its database. fpdb does not save it.
+2. *Preview* lists what would change and writes nothing.
+3. *Import* adds the notes.
+
+fpdb keeps one note per player, the one the HUD shows when you double-click a player. Each PT4 note
+becomes a block in it. The block names where the note came from, its date, the player's tags and
+the colour number PT4 gave the note:
+
+```
+[PokerTracker 4 | 2024-03-01 | Fish | colour 3]
+3-bets light from the blinds.
+```
+
+- **An fpdb note is never overwritten.** The PT4 block goes after the note you already have. Tick
+  *Leave players who already have an fpdb note alone* to skip those players instead. The report
+  names every player whose note was appended to or skipped.
+- **Importing again is safe.** A block already in the note is not added a second time, so only new
+  PT4 notes come over.
+- **Players fpdb does not know are listed, not created.** Import the hands they played, then import
+  the notes again.
+- **iPoker**: PT4 files every iPoker skin under *iPoker*. A note goes to the player of that name on
+  each iPoker room configured in fpdb, since an iPoker name belongs to the whole network.
+- fpdb has no note colours, so a colour is kept as its PT4 number in the block's header: PT4's
+  database stores only that number, not the colour.
+
+From the command line, with the fpdb configuration of the current user:
+
+```
+python -m fpdb_3_legacy.tracker_notes --dry-run
+python -m fpdb_3_legacy.tracker_notes --skip-existing
+```
+
+It asks for the PT4 password, or reads it from `PT4_PASSWORD`. `--host`, `--port`, `--user` and
+`--database` default to `PT4_HOST`, `PT4_PORT`, `PT4_USER` and `PT4_DATABASE`, then to PT4's defaults.
+
+**Holdem Manager 3** exports its notes as a `.playernotes` file (*Tools ▸ Export Player Notes*).
+Its format is not documented, and fpdb cannot read it yet. If you can share an export, with the
+names anonymised if you prefer, please attach it to #618.
+
 ## Privacy
 
-The wizard reads files from the folder you choose and writes only to your fpdb database. It sends
-nothing anywhere.
+The wizard reads files from the folder you choose and writes only to your fpdb database. The notes
+import reads PT4's database without writing to it, and writes only player notes in fpdb's. Neither
+sends anything anywhere.
