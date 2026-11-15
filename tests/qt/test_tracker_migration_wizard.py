@@ -341,3 +341,175 @@ def test_going_back_forgets_the_question_of_the_previous_scan(qtbot, config, tmp
 
     assert not wizard.scan_page.room_choices
     assert not wizard.scan_page.room_question.isVisibleTo(wizard)
+
+
+# --- PokerTracker 4's database as the source (#814) ---------------------------------
+
+
+@pytest.fixture
+def own_config(tmp_path_factory):
+    """A configuration whose file sits in a folder of its own: the wizard writes its PT4 marks there."""
+    folder = tmp_path_factory.mktemp("config")
+    shutil.copy(ROOT / "HUD_config.xml", folder / "HUD_config.xml")
+    return Config(file=str(folder / "HUD_config.xml"))
+
+
+@pytest.fixture
+def fake_pt4(monkeypatch):
+    """Stands in for reading the PT4 database: writes two corpus files where the wizard asks."""
+    from fpdb_3_legacy import GuiTrackerMigration as module
+    from fpdb_3_legacy.pt4_database import DatabaseExport
+
+    calls: list[dict] = []
+
+    def export_pt4(database, password, folder, marks):
+        calls.append({"database": database, "password": password, "folder": folder, "marks": dict(marks)})
+
+        def run(thread):
+            thread.reading.emit(0, 3)
+            for room in ("Stars", "Winamax"):
+                source = next(p for p in sorted((CASH / room).rglob("*.txt")) if p.stat().st_size)
+                shutil.copy(source, Path(folder) / f"cash-{room}-00001.txt")
+            export = DatabaseExport(folder, marks={"cash": 99, "tourney": 7}, repaired=1)
+            for room, first in (("Stars", 40), ("Winamax", 60)):
+                export.first_ids[str(Path(folder) / f"cash-{room}-00001.txt")] = ("cash", first)
+            export.hands[("cash", "PokerStars")] = 2
+            export.hands[("cash", "Winamax")] = 1
+            return export
+
+        return run
+
+    monkeypatch.setattr(module, "export_pt4", export_pt4)
+    return calls
+
+
+def advance_to_database_scan(qtbot, wizard, password: str = "secret") -> None:
+    wizard.next()  # tracker (PT4) -> source
+    wizard.source_page.from_database.setChecked(True)
+    wizard.source_page.password.setText(password)
+    assert wizard.button(QWizard.WizardButton.NextButton).isEnabled()
+    wizard.next()  # source -> scan
+    qtbot.waitUntil(lambda: wizard.scan_page.scan is not None, timeout=10000)
+
+
+@pytest.mark.qt
+def test_the_database_is_offered_for_pokertracker_4_only(qtbot, config) -> None:
+    wizard = open_wizard(qtbot, config, FakeImporter(), FakeLock())
+    wizard.next()
+    page = wizard.source_page
+
+    assert page.source_choice.isVisibleTo(wizard)
+    page.from_database.setChecked(True)
+    assert page.database_box.isVisibleTo(wizard)
+    assert not page.folder_box.isVisibleTo(wizard)
+    assert page.isComplete()  # PT4's defaults; a password may be empty (trust authentication)
+    assert page.password.echoMode() == page.password.EchoMode.Password
+    page.host.clear()
+    assert not page.isComplete()
+
+    wizard.back()
+    wizard.tracker_page.group.button(1).setChecked(True)  # Holdem Manager 3
+    wizard.next()
+    assert not page.source_choice.isVisibleTo(wizard)
+    assert not page.uses_database()
+    assert page.folder_box.isVisibleTo(wizard)
+
+
+@pytest.mark.qt
+def test_the_database_is_read_scanned_and_imported_like_a_folder(qtbot, own_config, fake_pt4) -> None:
+    importer = FakeImporter()
+    wizard = open_wizard(qtbot, own_config, importer, FakeLock())
+
+    advance_to_database_scan(qtbot, wizard)
+
+    (call,) = fake_pt4
+    assert call["password"] == "secret"
+    assert call["database"].database == "PT4 DB"
+    assert call["marks"] == {}  # nothing imported from this database yet
+    status = wizard.scan_page.status.text()
+    assert "3 hands and 0 tournament summaries read from the database" in status
+    assert "wrong character set" in status
+    assert wizard.scan_page.isComplete()
+
+    wizard.next()  # scan -> import
+    qtbot.waitUntil(wizard.import_page.isComplete, timeout=10000)
+
+    assert {str(Path(path).parent) for path, _site in importer.sources} == {call["folder"]}
+    assert importer.calls["setMoveImportedFiles"] == (False,)
+    from fpdb_3_legacy import pt4_database
+
+    assert pt4_database.load_marks(own_config, call["database"]) == {"cash": 99, "tourney": 7}
+
+
+@pytest.mark.qt
+def test_a_second_import_starts_after_the_first_one(qtbot, own_config, fake_pt4) -> None:
+    from fpdb_3_legacy import pt4_database
+
+    pt4_database.save_marks(own_config, pt4_database.Pt4Database(), {"cash": 50, "tourney": 3})
+    wizard = open_wizard(qtbot, own_config, FakeImporter(), FakeLock())
+
+    advance_to_database_scan(qtbot, wizard)
+    assert fake_pt4[-1]["marks"] == {"cash": 50, "tourney": 3}
+
+    wizard.back()
+    wizard.source_page.only_new.setChecked(False)
+    wizard.next()
+    qtbot.waitUntil(lambda: wizard.scan_page.scan is not None, timeout=10000)
+    assert fake_pt4[-1]["marks"] == {}
+
+
+@pytest.mark.qt
+def test_closing_the_wizard_removes_what_it_wrote_from_the_database(qtbot, own_config, fake_pt4) -> None:
+    wizard = open_wizard(qtbot, own_config, FakeImporter(), FakeLock())
+    advance_to_database_scan(qtbot, wizard)
+    folder = Path(fake_pt4[-1]["folder"])
+    assert any(folder.iterdir())
+
+    wizard.reject()
+
+    assert not folder.exists()
+
+
+@pytest.mark.qt
+def test_a_database_that_cannot_be_read_says_why(qtbot, own_config, monkeypatch) -> None:
+    from fpdb_3_legacy import GuiTrackerMigration as module
+
+    def refused(*_args):
+        def run(_thread):
+            raise RuntimeError('password authentication failed for user "postgres"')
+
+        return run
+
+    monkeypatch.setattr(module, "export_pt4", refused)
+    wizard = open_wizard(qtbot, own_config, FakeImporter(), FakeLock())
+    wizard.next()
+    wizard.source_page.from_database.setChecked(True)
+    wizard.next()
+
+    qtbot.waitUntil(lambda: "could not be read" in wizard.scan_page.status.text(), timeout=10000)
+    assert "password authentication failed" in wizard.scan_page.status.text()
+    assert not wizard.scan_page.isComplete()
+
+
+class FailingImporter(FakeImporter):
+    """An import in which one of the database's files has hands that failed."""
+
+    def runImport(self):
+        result = super().runImport()
+        failing = next(path for path, _site in self.sources if path.endswith("cash-Winamax-00001.txt"))
+        self.file_results[failing] = FileImportResult("Winamax", stored=3, errors=2)
+        return result
+
+
+@pytest.mark.qt
+def test_hands_that_failed_are_read_again_by_the_next_import(qtbot, own_config, fake_pt4) -> None:
+    from fpdb_3_legacy import pt4_database
+
+    wizard = open_wizard(qtbot, own_config, FailingImporter(), FakeLock())
+    advance_to_database_scan(qtbot, wizard)
+
+    wizard.next()  # scan -> import
+    qtbot.waitUntil(wizard.import_page.isComplete, timeout=10000)
+
+    # Winamax's file started at id_hand 60: the next import starts there again.
+    assert pt4_database.load_marks(own_config, fake_pt4[-1]["database"]) == {"cash": 59, "tourney": 7}

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-15 08:43+0100\n"
+"POT-Creation-Date: 2026-11-14 22:36+0100\n"
 "PO-Revision-Date: 2011-11-11 20:56+0000\n"
 "Last-Translator: YoNOsoyMike <miguelruizgt@hotmail.com>\n"
 "Language-Team: Catalan (Spain) (http://www.transifex.net/projects/p/fpdb/"
@@ -1522,7 +1522,7 @@ msgstr ""
 "És l'única base de dades configurada i no es pot suprimir — fpdb en "
 "necessita almenys una. Afegiu-ne primer una altra."
 
-#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/tracker_notes_dialog.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiTrackerMigration.py
 #, fuzzy
 msgid "User"
 msgstr "Usuari"
@@ -2074,7 +2074,6 @@ msgid "Hand History Converters"
 msgstr "Convertidors d'historials"
 
 #: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
-#: fpdb_3_legacy/tracker_notes_dialog.py
 #, fuzzy
 msgid "Import"
 msgstr "Importació"
@@ -2844,6 +2843,13 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 #, python-format
+msgid ""
+"%(hands)d hands and %(summaries)d tournament summaries read from the "
+"database."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
 msgid "%(hands)d hands imported from %(rooms)d rooms."
 msgstr ""
 
@@ -2858,6 +2864,13 @@ msgid "%d files were left out: fpdb cannot read them."
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid ""
+"%d of them were stored with the wrong character set (a euro sign read as Ä); "
+"fpdb restores the room's own text."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Another import is running. Try again once it has finished."
 msgstr ""
 
@@ -2869,6 +2882,16 @@ msgstr "Tria les mans…"
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Choose the folder holding the hand histories"
 msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Connecting to the PokerTracker 4 database…"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/GuiVersionInfo.py
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Database"
+msgstr "Base de dades"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 #, fuzzy
@@ -2893,6 +2916,14 @@ msgstr "Camí dels historials de mans"
 #, fuzzy
 msgid "Folder holding the hand histories"
 msgstr "Camí dels historials de mans"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "From a folder: the tracker's archive or an export"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "From the PokerTracker 4 database"
+msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/research_labels.py
 #, fuzzy
@@ -2932,11 +2963,38 @@ msgid "No hand history fpdb can read was found in this folder."
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "No hand was added to the database since the last import."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "None of them is a hand history fpdb can read."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Nothing is imported yet."
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Only the hands added since the last import from this database"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Partial"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, fuzzy
+msgid "Password"
+msgstr "Contrasenya:"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, fuzzy
+msgid "Port"
+msgstr "Port:"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid "Reading the PokerTracker 4 database: %(done)d of %(total)d hands…"
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
@@ -2945,6 +3003,10 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Room"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Server"
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
@@ -2959,6 +3021,15 @@ msgid ""
 "Stats, the HUD and player notes are not part of this import; see the "
 "migration guide in the docs."
 msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, fuzzy, python-format
+msgid ""
+"The PokerTracker 4 database could not be read:\n"
+"%s"
+msgstr ""
+"No s'ha pogut mostrar aquesta mà:\n"
+"%s"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid ""
@@ -2976,7 +3047,7 @@ msgstr ""
 "No s'ha pogut mostrar aquesta mà:\n"
 "%s"
 
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/tracker_notes_dialog.py
+#: fpdb_3_legacy/GuiTrackerMigration.py
 #, python-format
 msgid ""
 "The import stopped on an error:\n"
@@ -2986,6 +3057,11 @@ msgstr ""
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "What came over"
 msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, fuzzy
+msgid "What the database holds"
+msgstr "Crea la base de dades"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "What the folder holds"
@@ -2998,6 +3074,14 @@ msgstr ""
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid ""
 "fpdb imports the hands it kept. Stats, HUD and notes come over separately."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid ""
+"fpdb reads the hands PokerTracker 4 keeps in its PostgreSQL database. The "
+"connection is read-only: fpdb never writes to it. PokerTracker 4 shows these "
+"settings in Database > Database Management. The password is used for this "
+"import only and is not saved."
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
@@ -3029,12 +3113,6 @@ msgstr "Copia l'informe"
 #, fuzzy
 msgid "Copy these details to the clipboard for a bug report"
 msgstr "Copia aquestes dades al porta-retalls per a un informe d'error"
-
-#: fpdb_3_legacy/GuiVersionInfo.py fpdb_3_legacy/menu_layout.py
-#: fpdb_3_legacy/tracker_notes_dialog.py
-#, fuzzy
-msgid "Database"
-msgstr "Base de dades"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 #, fuzzy
@@ -4241,12 +4319,6 @@ msgid "About the program"
 msgstr "Quant al programa"
 
 #: fpdb_3_legacy/menu_layout.py
-msgid ""
-"Add PokerTracker 4 player notes and tags to fpdb's notes, never overwriting "
-"one"
-msgstr ""
-
-#: fpdb_3_legacy/menu_layout.py
 #, fuzzy
 msgid "Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)"
 msgstr ""
@@ -4448,10 +4520,6 @@ msgstr "Eina de desenvolupament de registres"
 #, fuzzy
 msgid "Opponents Report"
 msgstr "Informe de rivals"
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "PokerTracker 4 Notes…"
-msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -8830,109 +8898,6 @@ msgstr ""
 msgid ""
 "Without the archive, export the hands from Holdem Manager 3 to a folder. "
 "Check the summary afterwards for any file fpdb could not read."
-msgstr ""
-
-#: fpdb_3_legacy/tracker_notes.py
-#, python-format
-msgid ""
-"%(added)d notes added, %(appended)d appended, %(updated)d updated, "
-"%(already)d already in fpdb, %(skipped)d skipped, %(unmatched)d not matched."
-msgstr ""
-
-#: fpdb_3_legacy/tracker_notes.py
-#, python-format
-msgid ""
-"Preview, nothing written: %(added)d notes to add, %(appended)d to append, "
-"%(updated)d to update, %(already)d already in fpdb, %(skipped)d to skip, "
-"%(unmatched)d not matched."
-msgstr ""
-
-#: fpdb_3_legacy/tracker_notes.py
-msgid "added"
-msgstr ""
-
-#: fpdb_3_legacy/tracker_notes.py
-msgid "already in fpdb"
-msgstr ""
-
-#: fpdb_3_legacy/tracker_notes.py
-msgid "appended to the fpdb note"
-msgstr ""
-
-#: fpdb_3_legacy/tracker_notes.py
-msgid "auto-notes updated"
-msgstr ""
-
-#: fpdb_3_legacy/tracker_notes.py
-msgid "not in fpdb: import the player's hands first"
-msgstr ""
-
-#: fpdb_3_legacy/tracker_notes.py
-msgid "room unknown to fpdb"
-msgstr ""
-
-#: fpdb_3_legacy/tracker_notes.py
-msgid "skipped: fpdb already has a note"
-msgstr ""
-
-#: fpdb_3_legacy/tracker_notes_dialog.py
-#, fuzzy
-msgid "Also import PT4's automatic notes"
-msgstr "Genera notes automàtiques"
-
-#: fpdb_3_legacy/tracker_notes_dialog.py
-#, fuzzy, python-format
-msgid ""
-"Could not read PokerTracker 4's database:\n"
-"%s"
-msgstr ""
-"No s'ha pogut llegir el paquet:\n"
-"%s"
-
-#: fpdb_3_legacy/tracker_notes_dialog.py
-#, fuzzy
-msgid "Host"
-msgstr "Amfitrió:"
-
-#: fpdb_3_legacy/tracker_notes_dialog.py
-#, fuzzy
-msgid "Import PokerTracker 4 notes"
-msgstr ""
-"Importa una disposició de HUD de PokerTracker 4 (estadístiques + gràfics de "
-"rang)"
-
-#: fpdb_3_legacy/tracker_notes_dialog.py
-msgid "Leave players who already have an fpdb note alone"
-msgstr ""
-
-#: fpdb_3_legacy/tracker_notes_dialog.py
-msgid ""
-"PT4 rewrites its automatic notes as it imports hands, so fpdb keeps them in "
-"a section of their own and replaces that section on each import. Your own "
-"text stays as it is."
-msgstr ""
-
-#: fpdb_3_legacy/tracker_notes_dialog.py
-#, fuzzy
-msgid "Password"
-msgstr "Contrasenya:"
-
-#: fpdb_3_legacy/tracker_notes_dialog.py
-#, fuzzy
-msgid "Port"
-msgstr "Port:"
-
-#: fpdb_3_legacy/tracker_notes_dialog.py
-#, fuzzy
-msgid "Preview"
-msgstr "Previsualització del HUD"
-
-#: fpdb_3_legacy/tracker_notes_dialog.py
-msgid ""
-"fpdb reads the notes and player tags from PokerTracker 4's database, read-"
-"only. An fpdb note is never overwritten: the PT4 note is added after it. "
-"Notes on players fpdb has no hands of are listed, not imported: import the "
-"hands first."
 msgstr ""
 
 #: fpdb_3_legacy/update_notice.py

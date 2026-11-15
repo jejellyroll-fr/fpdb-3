@@ -5,11 +5,9 @@ import struct
 import threading
 import time
 from dataclasses import replace
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
-
-UTC = timezone.utc  # datetime.UTC is 3.11+; the packaged builds embed 3.10
 
 from fpdb_3_legacy.capture.swc_client import native_client_environment, parse_args
 from fpdb_3_legacy.swc_native_capture import (

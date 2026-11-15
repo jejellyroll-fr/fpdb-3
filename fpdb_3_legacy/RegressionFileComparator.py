@@ -21,7 +21,7 @@ _SIDECAR_FACTORIES = {
 }
 _SIDECAR_CONSTANTS = {
     "pytz.utc": pytz.utc,
-    "datetime.timezone.utc": datetime.timezone.utc,
+    "datetime.timezone.utc": datetime.UTC,
 }
 
 IGNORED_HAND_KEYS = {

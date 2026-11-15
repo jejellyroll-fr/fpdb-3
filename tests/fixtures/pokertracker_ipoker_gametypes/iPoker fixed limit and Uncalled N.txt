@@ -1,0 +1,101 @@
+GAME #2855468557 Texas Hold'em L $0.10/$0.20 2011-07-22 17:31:11/GMT
+Table Info: Blinds: 0.10/0.20
+Table Gary
+Seat 1: alice ($19.75 in chips)
+Seat 2: bob ($10.00 in chips)
+Seat 3: carol ($21.64 in chips)  DEALER
+Seat 4: dave ($2.26 in chips)
+Seat 5: erin ($1.17 in chips)
+Seat 7: frank ($2.79 in chips)
+Seat 8: grace ($3.39 in chips)
+Seat 9: heidi ($9.00 in chips)
+Seat 10: ivan ($4.03 in chips)
+dave: Post SB $0.05
+erin: Post BB $0.10
+*** HOLE CARDS ***
+frank: Fold
+grace: Call $0.10
+heidi: Call $0.10
+ivan: Raise (NF) $0.20
+alice: Fold
+carol: Raise (NF) $0.30
+dave: Fold
+erin: Fold
+grace: Call $0.20
+heidi: Call $0.20
+ivan: Raise (NF) $0.40
+carol: Call $0.10
+grace: Call $0.10
+heidi: Call $0.10
+*** FLOP *** [S8 S3 D8]
+grace: Check
+heidi: Check
+ivan: Check
+carol: Bet $0.10
+grace: Call $0.10
+heidi: Call $0.10
+ivan: Call $0.10
+*** TURN *** [C8]
+grace: Check
+heidi: Check
+ivan: Bet $0.20
+carol: Raise (NF) $0.40
+grace: Call $0.40
+heidi: Fold
+ivan: Call $0.20
+*** RIVER *** [H5]
+grace: Check
+ivan: Check
+carol: Bet $0.20
+grace: Call $0.20
+ivan: Call $0.20
+*** SUMMARY ***
+Total pot $3.76 Rake $0.19
+carol: Shows [HQ DQ] Full House, Eights full of Queens
+grace: Shows [CJ CA] Three of a Kind, Eights
+ivan: Shows [HA H9] Three of a Kind, Eights
+carol: wins $3.76
+
+
+GAME #5889557317 Version:22.1.1.11 Uncalled:N Omaha PL €0.01/€0.02 2022-04-18 22:57:09/GMT
+Table Info: Blinds: 0.01/0.02
+Table Sasolburg, 560235858
+Seat 1: judy (€0.87 in chips)
+Seat 3: mallory (€1.00 in chips)
+Seat 5: niaj (€0.73 in chips)
+Seat 6: olivia (€1.35 in chips)
+Seat 8: Hero (€7.20 in chips)  DEALER
+Seat 10: peggy (€1.33 in chips)
+peggy: Post SB €0.01
+judy: Post BB €0.02
+mallory: Post BB €0.02
+*** HOLE CARDS ***
+Dealt to Hero [D9 D7 S4 H3]
+mallory: Check
+niaj: Call €0.02
+olivia: Fold
+Hero: Fold
+peggy: Call €0.01
+judy: Check
+*** FLOP *** [D6 D8 DQ]
+peggy: Check
+judy: Check
+mallory: Check
+niaj: Check
+*** TURN *** [H10]
+peggy: Check
+judy: Check
+mallory: Check
+niaj: Check
+*** RIVER *** [D2]
+peggy: Check
+judy: Bet €0.02
+mallory: Call €0.02
+niaj: Fold
+peggy: Call €0.02
+*** SUMMARY ***
+Total pot €0.14 Rake €0.00
+mallory: Shows [S5 C6 H4 S10] Two Pair, Tens and Sixes
+peggy: Shows [HQ C4 H5 C2] Two Pair, Queens and Twos
+judy: Shows [DA C9 CJ H7] Straight, Queen High
+judy: wins €0.14
