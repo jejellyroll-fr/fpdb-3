@@ -500,7 +500,7 @@ class DerivedStatsAllInMixin(DerivedStatsBase):
                 expected - committed,
             )
 
-    def getAllInEVDraw(  # noqa: PLR0913
+    def getAllInEVDraw(  # noqa: PLR0913  # pylint: disable=invalid-name  # sibling of getAllInEV
         self,
         hand: Any,
         evalgame: str,
