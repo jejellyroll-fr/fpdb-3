@@ -303,9 +303,11 @@ games = {  # base, category
         "RIVER",
         [(0, 4)],
     ),
+    # The second field is the game name handed to poker-eval, which has no
+    # "fusion": Fusion's showdown is Omaha's (exactly two of the four hole cards).
     "fusion": (
         "hold",
-        "fusion",
+        "omaha",
         "h",
         {"PREFLOP": 0, "FLOP": 1, "TURN": 2, "RIVER": 3},
         "RIVER",

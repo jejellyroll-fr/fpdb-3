@@ -6,6 +6,7 @@ from types import SimpleNamespace
 import pytest
 
 import fpdb_3_legacy.equity as equity_module
+from fpdb_3_legacy import Card
 from fpdb_3_legacy.DerivedStats import DerivedStats, _chip_increment
 from fpdb_3_legacy.equity import (
     EquityEngine,
@@ -461,3 +462,101 @@ def test_boards_dict_detects_real_all_in_and_accumulates_board() -> None:
     assert boards["FLOP"] == {"board": [["2c", "3d", "4h"]], "allin": True}
     assert boards["TURN"] == {"board": [["2c", "3d", "4h", "5s"]], "allin": False}
     assert boards["RIVER"] == {"board": [["2c", "3d", "4h", "5s", "6c"]], "allin": False}
+
+
+# The games pypoker-eval accepts, as its "not a valid value" error lists them.
+POKER_EVAL_GAMES = frozenset(
+    {
+        "holdem",
+        "holdem8",
+        "omaha",
+        "omaha8",
+        "7stud",
+        "7stud8",
+        "7studnsq",
+        "razz",
+        "5draw",
+        "5draw8",
+        "5drawnsq",
+        "lowball",
+        "lowball27",
+    },
+)
+
+
+def test_every_eval_game_is_one_poker_eval_accepts() -> None:
+    # Card.games' second field goes to poker-eval as is: "fusion" made every
+    # Fusion all-in and showdown pot raise "game fusion is not a valid value".
+    unknown = {
+        category: entry[1] for category, entry in Card.games.items() if entry[1] and entry[1] not in POKER_EVAL_GAMES
+    }
+    assert unknown == {}
+
+
+def _fusion_all_in_hand() -> SimpleNamespace:
+    return SimpleNamespace(
+        handid="fusion-all-in",
+        gametype={"base": "hold", "category": "fusion"},
+        holeStreets=["PREFLOP", "FLOP", "TURN"],
+        totalpot=Decimal("200"),
+        rake=Decimal(0),
+        pot=SimpleNamespace(
+            committed={"hero": Decimal("100"), "villain": Decimal("100")},
+            common={},
+        ),
+    )
+
+
+def _fusion_stats() -> DerivedStats:
+    stats = DerivedStats()
+    stats.handsplayers = {
+        "hero": {"sawShowdown": True, "wentAllIn": True, "allInEV": 0},
+        "villain": {"sawShowdown": True, "wentAllIn": True, "allInEV": 0},
+    }
+    return stats
+
+
+FUSION_STREETS = {"PREFLOP": 0, "FLOP": 1, "TURN": 2, "RIVER": 3}
+FUSION_HOLECARDS = {
+    "hero": {"hole": ["As", "Kd", "Qc", "Jh"]},
+    "villain": {"hole": ["Td", "Tc", "3h", "4h"]},
+}
+
+
+def test_fusion_all_in_before_the_last_hole_card_stores_no_equity(monkeypatch) -> None:
+    # On the flop the fourth hole card is not dealt yet: the final pockets would
+    # hand the engine a card nobody held at the time of the all-in.
+    backend = RecordingPokerEval()
+    monkeypatch.setattr("fpdb_3_legacy.derived_stats_allin.pokereval", backend)
+    stats = _fusion_stats()
+
+    stats.getAllInEV(
+        _fusion_all_in_hand(),
+        Card.games["fusion"][1],
+        ["hero", "villain"],
+        {"FLOP": {"allin": True, "board": [["2s", "5s", "8s"]]}},
+        FUSION_STREETS,
+        FUSION_HOLECARDS,
+    )
+
+    assert backend.calls == []
+    assert "allInEVCalculated" not in stats.handsplayers["hero"]
+
+
+@pytest.mark.skipif(equity_module.load_poker_eval() is None, reason="pypoker-eval is not installed")
+def test_fusion_all_in_on_the_turn_is_evaluated_with_omaha_rules() -> None:
+    # Four spades on board, one in the hero's hand: a flush under hold'em rules,
+    # nothing under Fusion's (exactly two hole cards), so the tens are ahead.
+    stats = _fusion_stats()
+
+    stats.getAllInEV(
+        _fusion_all_in_hand(),
+        Card.games["fusion"][1],
+        ["hero", "villain"],
+        {"TURN": {"allin": True, "board": [["2s", "5s", "8s", "9s"]]}},
+        FUSION_STREETS,
+        FUSION_HOLECARDS,
+    )
+
+    assert stats.handsplayers["hero"]["allInEV"] == -4500
+    assert stats.handsplayers["villain"]["allInEV"] == 4500

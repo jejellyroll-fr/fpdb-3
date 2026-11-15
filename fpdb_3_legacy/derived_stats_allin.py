@@ -430,9 +430,18 @@ class DerivedStatsAllInMixin(DerivedStatsBase):
             if not hasattr(self, "handsstove"):
                 self.handsstove = []
 
+            # Fusion deals a hole card on the flop and another on the turn. An
+            # all-in before the last of them leaves the engine with pocket cards
+            # that were not dealt yet, and it cannot sample future pocket cards:
+            # no exact equity exists, so none is stored.
+            last_hole_street = max((streets.get(s, 0) for s in getattr(hand, "holeStreets", ())), default=0)
+
             # Calculate equity for each all-in situation
             for street_name, street_data in boards.items():
                 if street_data.get("allin", False):
+                    if streets.get(street_name, last_hole_street) < last_hole_street:
+                        log.debug("All-in on %s precedes the last hole card: no equity", street_name)
+                        continue
                     try:
                         if pokereval:
                             player_hands = []
