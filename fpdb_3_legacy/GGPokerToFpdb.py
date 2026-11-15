@@ -272,6 +272,7 @@ class GGPoker(HandHistoryConverter):
           (?P<CURRENCY>{LS}|)?
           (ante\\s\\d+,\\s)?
           ((?P<SB>[,.0-9]+)/({LS})?(?P<BB>[,.0-9]+)|(?P<BUB>[,.0-9]+))
+          (\\((?P<ANTE>[,.0-9]+)\\))?   # ante in newer headers: Level5(100/200(20))
           (?P<CAP>\\s-\\s[{LS}]?(?P<CAPAMT>[,.0-9]+)\\sCap\\s-\\s)?        # Optional Cap part
           \\s?(?P<ISO>{LEGAL_ISO})?
           \\)                        # close paren of the stakes
