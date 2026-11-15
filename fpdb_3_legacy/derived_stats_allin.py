@@ -29,10 +29,22 @@ from fpdb_3_legacy.derived_stats_base import (
     DerivedStatsBase,
     _chip_increment,
 )
-from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity, expected_pot_share, load_poker_eval
+from fpdb_3_legacy.equity import (
+    DEFAULT_EQUITY_ITERATIONS,
+    FUSION_ALL_HOLE_CARDS_BOARD,
+    EquityUnavailableError,
+    calculate_equity,
+    expected_pot_share,
+    fusion_pockets,
+    load_poker_eval,
+)
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 pokereval = load_poker_eval()
+
+# A sampled all-in EV is seeded so the same hand stores the same EV on every
+# import, whatever was sampled before it in the process (poker-eval #301).
+ALL_IN_EV_SEED = 818
 
 log = get_logger("derived_stats")
 
@@ -430,6 +442,8 @@ class DerivedStatsAllInMixin(DerivedStatsBase):
             if not hasattr(self, "handsstove"):
                 self.handsstove = []
 
+            fusion = hand.gametype.get("category") == "fusion"
+
             # Calculate equity for each all-in situation
             for street_name, street_data in boards.items():
                 if street_data.get("allin", False):
@@ -451,12 +465,24 @@ class DerivedStatsAllInMixin(DerivedStatsBase):
 
                             if len(player_hands) >= MIN_PLAYERS_FOR_GAME:
                                 board_cards = street_data["board"][0] if street_data["board"] else []
+                                equity_game, iterations = game_type, None
+                                if fusion:
+                                    # Fusion's all-in equity deals the hole cards
+                                    # still to come (#818). Exhaustively that is
+                                    # 25 s for a three-way flop and out of reach
+                                    # preflop, so before the turn it is sampled.
+                                    equity_game = "fusion"
+                                    player_hands = fusion_pockets(player_hands, board_cards)
+                                    if len(board_cards) < FUSION_ALL_HOLE_CARDS_BOARD:
+                                        iterations = DEFAULT_EQUITY_ITERATIONS
 
                                 result = calculate_equity(
-                                    game_type,
+                                    equity_game,
                                     player_hands,
                                     board_cards,
+                                    iterations=iterations,
                                     backend=pokereval,
+                                    seed=ALL_IN_EV_SEED if iterations is not None else None,
                                 )
                                 pot = Decimal(hand.totalpot)
                                 rake = Decimal(hand.rake)

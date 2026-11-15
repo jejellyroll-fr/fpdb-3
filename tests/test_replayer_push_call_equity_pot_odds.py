@@ -124,3 +124,54 @@ def test_hero_decision_metrics_supports_stud_and_draw() -> None:
     assert metrics["call_amount"] == Decimal(20)
     assert metrics["pot_odds_pct"] == Decimal(25)  # 20 / (60 + 20) = 25%
     assert metrics["pot_odds_ratio"] == Decimal(3)  # 60 / 20 = 3:1
+
+
+def _fusion_replayer(monkeypatch) -> tuple[Any, list[tuple[str, list[list[str]], list[str]]]]:
+    replayer = cast(Any, GuiReplayer).__new__(GuiReplayer)  # pylint: disable=no-value-for-parameter
+    replayer.Heroes = "Hero"
+    replayer.currency_code = "USD"
+    hand = SimpleNamespace(gametype={"category": "fusion", "base": "hold"}, holeStreets=["PREFLOP", "FLOP", "TURN"])
+    replayer.replay_model = cast(Any, SimpleNamespace(hand=hand))
+    calls: list[tuple[str, list[list[str]], list[str]]] = []
+
+    def engine(game, pockets, board, **_kwargs):
+        calls.append((game, pockets, board))
+        return SimpleNamespace(players=[SimpleNamespace(equity=Decimal("0.30")), SimpleNamespace(equity=Decimal("0.70"))])
+
+    monkeypatch.setattr("fpdb_3_legacy.GuiReplayer.calculate_equity", engine)
+    return replayer, calls
+
+
+def _fusion_frame(*streets: str) -> Any:
+    board = {"FLOP": ["2s", "5s", "8s"], "TURN": ["9s"], "RIVER": []}
+    return cast(Any, SimpleNamespace(
+        players=[
+            # Final pockets: the replay players hold all four from the start.
+            ReplayPlayer("Hero", 1, Decimal(0), Decimal(10), "calls", False, ["As", "Kd", "Qc", "Jh"]),
+            ReplayPlayer("Villain", 2, Decimal(0), Decimal(15), "bets", False, ["Td", "Tc", "3h", "4h"]),
+        ],
+        pot=Decimal(15),
+        board={street: board[street] for street in streets},
+        render_board=set(streets),
+    ))
+
+
+def test_fusion_flop_equity_holds_only_the_cards_dealt_so_far(monkeypatch) -> None:
+    # On the flop the turn's hole card is not dealt yet: the engine gets the
+    # three cards each player holds and deals the fourth itself (#818).
+    replayer, calls = _fusion_replayer(monkeypatch)
+
+    metrics = replayer._hero_decision_metrics(_fusion_frame("FLOP"), 0)
+
+    assert calls == [("fusion", [["As", "Kd", "Qc"], ["Td", "Tc", "3h"]], ["2s", "5s", "8s"])]
+    assert metrics["pot_odds_pct"] == Decimal(25)
+    assert metrics["call_equity_pct"] == Decimal(30)
+
+
+def test_fusion_equity_from_the_turn_holds_all_four_hole_cards(monkeypatch) -> None:
+    replayer, calls = _fusion_replayer(monkeypatch)
+
+    metrics = replayer._hero_decision_metrics(_fusion_frame("FLOP", "TURN"), 0)
+
+    assert calls == [("fusion", [["As", "Kd", "Qc", "Jh"], ["Td", "Tc", "3h", "4h"]], ["2s", "5s", "8s", "9s"])]
+    assert metrics["call_equity_pct"] == Decimal(30)

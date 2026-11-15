@@ -303,9 +303,13 @@ games = {  # base, category
         "RIVER",
         [(0, 4)],
     ),
+    # The second field evaluates showdowns and ranks hands (stove, pots), where
+    # every hole card is dealt: Fusion's showdown is Omaha's, exactly two of the
+    # four hole cards. All-in equity uses poker-eval's own "fusion" game instead,
+    # which deals the hole cards still to come (#818).
     "fusion": (
         "hold",
-        "fusion",
+        "omaha",
         "h",
         {"PREFLOP": 0, "FLOP": 1, "TURN": 2, "RIVER": 3},
         "RIVER",

@@ -40,7 +40,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Hand
-from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity
+from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity, fusion_pockets
 from fpdb_3_legacy.hand_review_dialog import HandReviewDialog
 from fpdb_3_legacy.hand_share_dialog import HandShareDialog
 from fpdb_3_legacy.http_capture_ofc import OFCHand, build_ofc_hand, load_ofc_hand
@@ -106,6 +106,10 @@ def replay_hero_equity(frame, hero_name: str, game: str, *, backend=None, iterat
         if street in visible_streets:
             board.extend(card for card in (frame.board.get(street) or []) if _is_real_card(card))
     try:
+        if game == "fusion":
+            # The replay players hold their final Fusion pockets from the start;
+            # the engine deals the hole cards still to come (#818).
+            pockets = fusion_pockets(pockets, board)
         result = calculate_equity(game, pockets, board, iterations=iterations, backend=backend)
     except (EquityUnavailableError, RuntimeError, ValueError):
         return None
@@ -2330,6 +2334,10 @@ class GuiReplayer(QWidget):
         category = hand.gametype.get("category", "") if hand else ""
         game_info = Card.games.get(category)
         game = (game_info[1] if game_info else None) or category or (hand.gametype.get("base", "") if hand else "")
+        if category == "fusion":
+            # Card.games evaluates a Fusion showdown as Omaha; equity needs the
+            # engine's own Fusion game, which deals the hole cards still to come.
+            game = "fusion"
         equity = None
         if game:
             cache: dict[Any, Decimal | None] = getattr(self, "_equity_cache", None) or {}

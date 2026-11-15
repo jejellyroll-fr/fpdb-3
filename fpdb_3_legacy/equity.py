@@ -24,7 +24,14 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("equity")
 
-COMMUNITY_CARD_GAMES = frozenset({"holdem", "holdem8", "omaha", "omaha8", "omaha5", "omaha5_8", "omaha6", "shortdeck"})
+COMMUNITY_CARD_GAMES = frozenset(
+    {"holdem", "holdem8", "omaha", "omaha8", "omaha5", "omaha5_8", "omaha6", "shortdeck", "fusion"}
+)
+# Fusion holds two hole cards preflop, a third from the flop and a fourth from
+# the turn (#818), keyed here by the number of board cards. poker-eval (1.3.1+)
+# deals the missing ones itself, so a pocket must be the cards held then.
+FUSION_HOLE_CARDS = {0: 2, 3: 3, 4: 4, 5: 4}
+FUSION_ALL_HOLE_CARDS_BOARD = 4
 POCKET_CARD_COUNTS = {
     "holdem": 2,
     "holdem8": 2,
@@ -41,12 +48,30 @@ DEFAULT_RANGE_ENUMERATION_LIMIT = 10_000
 EQUITY_ENGINE_VERSION = 1
 
 
-def _seed_native_rng(seed: int) -> None:
-    """Seed the C library PRNG so the native poker-eval Monte Carlo is reproducible.
+def _backend_takes_seed(engine: PokerEvalBackend) -> bool:
+    """Whether ``poker_eval`` accepts ``seed=`` (pypoker-eval 1.3.2 and later, #301).
 
-    The native ``poker_eval`` backend calls ``rand()`` (from the C standard
-    library) internally to deal unknown cards.  This function seeds that RNG
-    via ``srand()`` so that callers see the same result for the same seed.
+    Those wheels sample from a thread-local PCG stream that ``srand()`` does
+    not reach; the seed has to go through the call. ``base_seed`` came in the
+    same release, and checking the class leaves out mocks' instance attributes.
+    """
+    return callable(getattr(type(engine), "base_seed", None))
+
+
+def _apply_seed(engine: PokerEvalBackend, arguments: dict[str, object], seed: int) -> None:
+    """Seed the next ``poker_eval`` call the way this backend can be seeded."""
+    if _backend_takes_seed(engine):
+        arguments["seed"] = seed
+    else:
+        _seed_native_rng(seed)
+
+
+def _seed_native_rng(seed: int) -> None:
+    """Seed the C library PRNG for wheels older than pypoker-eval 1.3.2.
+
+    Their native ``poker_eval`` called ``rand()`` (from the C standard
+    library) to deal unknown cards.  This function seeds that RNG via
+    ``srand()`` so that callers see the same result for the same seed.
     Best-effort: on platforms where the C library handle cannot be obtained
     the seed is silently ignored.
     """
@@ -146,6 +171,19 @@ def load_poker_eval() -> PokerEvalBackend | None:
         return None
 
 
+def fusion_pockets(pockets: Sequence[Sequence[str]], board: Sequence[str]) -> list[list[str]]:
+    """Return the Fusion hole cards each player held with this board.
+
+    A hand history lists a Fusion pocket in deal order (two preflop, the flop's,
+    the turn's), shown cards included, so the cards held are the first ones.
+    """
+    held = FUSION_HOLE_CARDS.get(len(board))
+    if held is None:
+        msg = f"A Fusion board has 0, 3, 4 or 5 cards, not {len(board)}"
+        raise ValueError(msg)
+    return [list(pocket[:held]) for pocket in pockets]
+
+
 def _validate_cards(pockets: list[list[str]], board: list[str], dead: list[str]) -> None:
     cards = [card for pocket in pockets for card in pocket] + board + dead
     known_cards = [card for card in cards if card != "__"]
@@ -199,7 +237,7 @@ def calculate_equity(
             raise ValueError(msg)
         arguments["iterations"] = iterations
     if seed is not None:
-        _seed_native_rng(seed)
+        _apply_seed(engine, arguments, seed)
     raw = engine.poker_eval(**arguments)
     samples = int(raw["info"][0])
     players = tuple(
