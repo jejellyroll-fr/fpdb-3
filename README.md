@@ -271,21 +271,17 @@ The available packagers depend on the platform:
   identity is required for reliable Screen Recording and Accessibility grants.
 - Linux ships both the PyOxidizer single-interpreter build and the PyInstaller
   directory distribution.
-- Windows ships the PyInstaller directory distribution, and builds the
-  PyOxidizer single-interpreter bundle again (`fpdb-pyoxidizer-windows-x64`,
-  restored after Issue #225). PyInstaller remains the supported Windows
-  distribution: the PyOxidizer bundle is there to be compared against it, and
-  it is not what HUD timing depends on -- how fast a Fast-Fold HUD fills in is
-  decided by whether the client's chairs can be read from the table window (see
-  `fpdb_3_legacy/winamax_ax_seats.py`), not by the packager.
+- Windows ships only the PyInstaller directory distribution. The PyOxidizer
+  bundle was dropped with the move to CPython 3.11 (#457): that Windows archive
+  cannot be embedded. HUD timing does not depend on the packager anyway -- how
+  fast a Fast-Fold HUD fills in is decided by whether the client's chairs can be
+  read from the table window (see `fpdb_3_legacy/winamax_ax_seats.py`).
 
 ## 🔧 Requirements
 
 - Source installation: Python 3.11+ (3.13 recommended).
-- PyOxidizer binaries: no system Python is required; the current PyOxidizer
-  0.24 configuration embeds CPython 3.10.14 because it cannot link CPython
-  3.11+. This is an implementation detail of the bundle, not the supported
-  source-installation minimum.
+- PyOxidizer binaries: no system Python is required; they embed CPython
+  3.11.10, the newest PyOxidizer 0.24 can link (see `pyoxidizer.bzl`).
 - OS: Linux, Windows, macOS
 - HUD: X11 (Linux), native window support (Windows/macOS)
 - A C compiler and CMake — the equity engine is a native extension built at install time (see below)

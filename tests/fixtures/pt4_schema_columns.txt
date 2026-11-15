@@ -2,6 +2,8 @@
 # Taken from the column references in PT4's own Data/Stats/StatDefinitions.pt4, plus three checked
 # on a real PT4 database (player.id_player, cash_hand_summary.id_hand, cnt_p_call). CI has no PT4
 # database, so tests/test_pt4_adapter.py holds the adapter's SQL against this list.
+# The notes, notes_auto, tags and lookup_* columns come from PT4's own Data/Schemas/schema.postgres.sql (#618);
+# tests/test_tracker_notes.py holds the notes import's SQL against them.
 cash_hand_player_statistics.amt_ante
 cash_hand_player_statistics.amt_before
 cash_hand_player_statistics.amt_bet_f
@@ -189,3 +191,38 @@ player.id_player
 player.id_site
 player.player_name
 player.player_name_search
+lookup_sites.id_site
+lookup_sites.site_abbrev
+lookup_sites.site_name
+lookup_tags.enum_type
+lookup_tags.icon
+lookup_tags.id_tag
+lookup_tags.tag
+notes.date_note
+notes.enum_type
+notes.flg_tournament
+notes.id_color
+notes.id_gametype
+notes.id_note
+notes.id_x
+notes.note
+player.flg_anonymous
+player.flg_note
+player.flg_tag
+player.id_player_alias
+tags.enum_type
+tags.flg_auto
+tags.flg_tournament
+tags.id_tag
+tags.id_x
+notes_auto.cnt_times
+notes_auto.date_added
+notes_auto.date_updated
+notes_auto.flg_tournament
+notes_auto.id_autonote
+notes_auto.id_category
+notes_auto.id_gametype
+notes_auto.id_hands
+notes_auto.id_player
+notes_auto.note
+notes_auto.uuid_name

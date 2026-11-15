@@ -109,7 +109,7 @@ def export_hands_dialog(hands: list[Any], parent: QWidget | None = None) -> Batc
     )
     if not path:
         return None
-    generated_at = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+    generated_at = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
     try:
         export = export_hands(hands, Path(path), generated_at=generated_at)
     except OSError as exc:
@@ -213,7 +213,7 @@ class HandReviewDialog(QDialog):
         review = self.current_review()
         if review is None:
             raise HandReviewError("unavailable", self.error or "")
-        generated = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+        generated = datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")
         return review_document([review], generated_at=generated)
 
     def refresh(self) -> None:

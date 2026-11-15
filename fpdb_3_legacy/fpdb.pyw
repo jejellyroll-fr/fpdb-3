@@ -14,15 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
-import datetime
 import sys
-
-# The packaged builds embed CPython 3.10.14 (PyOxidizer 0.24 cannot link 3.11+),
-# where datetime.UTC does not exist. Install the alias before importing anything
-# that reads it. fpdb_3_legacy/__init__.py does the same for every other entry
-# point; this covers the frozen executable, whose __main__ is this file.
-if not hasattr(datetime, "UTC"):
-    datetime.UTC = datetime.timezone.utc
 
 from fpdb_3_legacy.subprocess_launch import dispatch_hud_main, dispatch_multiprocessing, dispatch_run_module
 
@@ -1981,6 +1973,12 @@ class fpdb(QMainWindow):
         self.load_profile()
         wizard = GuiTrackerMigration(self.settings, self.config, self.sql, self)
         wizard.exec()
+
+    def dia_tracker_notes(self, widget=None, data=None) -> None:
+        """Import ▸ PokerTracker 4 Notes: add PT4 player notes to fpdb's (#618)."""
+        from fpdb_3_legacy.tracker_notes_dialog import GuiTrackerNotes
+
+        GuiTrackerNotes(self.config, self.sql, self).exec()
 
     def tab_auto_notes_workbench(self, widget, data=None) -> None:
         """Open the automatic notes workbench tab."""

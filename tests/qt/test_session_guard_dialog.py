@@ -32,7 +32,7 @@ pytestmark = pytest.mark.qt
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "hands" / "pokerstars"
 #: review/nl_3bet_6max.txt: 20:00 ET on 2026-09-01, so midnight UTC. Hero opens, calls a
 #: 3-bet to $8 and folds the flop: -$8.00, -8 BB at $0.50/$1.
-HAND_TIME = datetime.datetime(2026, 9, 2, tzinfo=datetime.timezone.utc).timestamp()
+HAND_TIME = datetime.datetime(2026, 9, 2, tzinfo=datetime.UTC).timestamp()
 
 
 class Defaults:

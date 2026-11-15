@@ -8,7 +8,6 @@ This package contains the legacy Python implementation of FPDB-3.
 It is maintained for parity testing with the new Rust implementation.
 """
 
-import datetime
 import importlib
 import importlib.machinery
 import importlib.util
@@ -16,9 +15,6 @@ import os
 import sys
 from pathlib import Path
 from typing import Any
-
-if not hasattr(datetime, "UTC"):
-    datetime.UTC = datetime.timezone.utc
 
 __version__ = "3.10.0"
 
@@ -41,9 +37,9 @@ def _import_fpdb_package() -> None:
     explicitly. On Windows ".pyw" is an importable source suffix, so there
     `import fpdb` resolves to the GUI script `fpdb.pyw` instead of the `fpdb`
     package beside this one: the script runs again as a module, and the first
-    `from fpdb.compat import ...` ends in a circular ImportError. Importing the
-    package once with this directory left out of the search puts the right module
-    in `sys.modules` for every later import.
+    `from fpdb.infrastructure.platform import ...` ends in a circular
+    ImportError. Importing the package once with this directory left out of
+    the search puts the right module in `sys.modules` for every later import.
     """
     if "fpdb" in sys.modules:
         return

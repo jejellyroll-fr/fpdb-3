@@ -643,13 +643,9 @@ class Hand:
 
     def _hero_absent_where_required(self) -> bool:
         """The room wants the HUD fed by the user's hands only, and none of the user's names played this one."""
-        from fpdb_3_legacy import hud_room_policy
+        from fpdb_3_legacy.hud_room_policy import kept_from_hud
 
-        site = getattr(self, "sitename", None)
-        if not hud_room_policy.hero_hands_only(site):
-            return False
-        names = hud_room_policy.user_names(getattr(self, "config", None), site)
-        return not any(player[1] in names for player in getattr(self, "players", []) or [])
+        return kept_from_hud(self, getattr(self, "config", None))
 
     def updateSessionsCache(self, db, tz, doinsert=False) -> None:
         """Function to update the Sessions."""
