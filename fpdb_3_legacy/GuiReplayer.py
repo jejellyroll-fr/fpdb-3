@@ -2338,6 +2338,10 @@ class GuiReplayer(QWidget):
             # Card.games evaluates a Fusion showdown as Omaha; equity needs the
             # engine's own Fusion game, which deals the hole cards still to come.
             game = "fusion"
+        if game_info and game_info[0] == "draw" and frame.street != game_info[4]:
+            # A draw hand shown before the last draw is not the one it will play:
+            # its equity depends on draws poker-eval does not play (#831).
+            game = None
         equity = None
         if game:
             cache: dict[Any, Decimal | None] = getattr(self, "_equity_cache", None) or {}

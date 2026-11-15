@@ -395,9 +395,13 @@ games = {  # base, category
         "RIVER",
         [(0, 2)],
     ),
+    # Five-card stud and five-card draw rank a five-card high hand. "holdem"
+    # ranked it from the first cards only, so AKQ83 tied AKQ72; poker-eval's
+    # standard-deck five-card draw ranks all five, and deals none of the
+    # joker its "5draw" can (#831).
     "5_studhi": (
         "stud",
-        "holdem",
+        "5draw_std",
         "h",
         {"SECOND": 0, "THIRD": 1, "FOURTH": 2, "FIFTH": 3},
         "FIFTH",
@@ -437,7 +441,7 @@ games = {  # base, category
     ),
     "fivedraw": (
         "draw",
-        "holdem",
+        "5draw_std",
         "h",
         {"DEAL": 0, "DRAWONE": 1},
         "DRAWONE",

@@ -175,3 +175,57 @@ def test_fusion_equity_from_the_turn_holds_all_four_hole_cards(monkeypatch) -> N
 
     assert calls == [("fusion", [["As", "Kd", "Qc", "Jh"], ["Td", "Tc", "3h", "4h"]], ["2s", "5s", "8s", "9s"])]
     assert metrics["call_equity_pct"] == Decimal(30)
+
+
+def _draw_replayer(monkeypatch) -> tuple[Any, list[tuple[str, list[list[str]], list[str]]]]:
+    replayer = cast(Any, GuiReplayer).__new__(GuiReplayer)  # pylint: disable=no-value-for-parameter
+    replayer.Heroes = "Hero"
+    replayer.currency_code = "USD"
+    replayer.replay_model = cast(
+        Any, SimpleNamespace(hand=SimpleNamespace(gametype={"category": "27_3draw", "base": "draw"}))
+    )
+    calls: list[tuple[str, list[list[str]], list[str]]] = []
+
+    def engine(game, pockets, board, **_kwargs):
+        calls.append((game, pockets, board))
+        return SimpleNamespace(players=[SimpleNamespace(equity=Decimal(1)), SimpleNamespace(equity=Decimal(0))])
+
+    monkeypatch.setattr("fpdb_3_legacy.GuiReplayer.calculate_equity", engine)
+    return replayer, calls
+
+
+def _draw_frame(street: str) -> Any:
+    return cast(
+        Any,
+        SimpleNamespace(
+            players=[
+                ReplayPlayer("Hero", 1, Decimal(0), Decimal(10), "calls", False, ["7c", "5d", "4h", "3s", "2c"]),
+                ReplayPlayer("Villain", 2, Decimal(0), Decimal(15), "bets", False, ["8c", "6d", "5h", "4s", "2d"]),
+            ],
+            pot=Decimal(15),
+            board={},
+            render_board=set(),
+            street=street,
+        ),
+    )
+
+
+def test_draw_equity_waits_for_the_last_draw(monkeypatch) -> None:
+    # Before the third draw the hands shown are not the ones that will play:
+    # their showdown is not the equity (#831).
+    replayer, calls = _draw_replayer(monkeypatch)
+
+    metrics = replayer._hero_decision_metrics(_draw_frame("DRAWTWO"), 0)
+
+    assert not calls
+    assert metrics["call_equity_pct"] is None
+    assert metrics["pot_odds_pct"] == Decimal(25)
+
+
+def test_draw_equity_after_the_last_draw_is_the_showdown(monkeypatch) -> None:
+    replayer, calls = _draw_replayer(monkeypatch)
+
+    metrics = replayer._hero_decision_metrics(_draw_frame("DRAWTHREE"), 0)
+
+    assert calls == [("lowball27", [["7c", "5d", "4h", "3s", "2c"], ["8c", "6d", "5h", "4s", "2d"]], [])]
+    assert metrics["call_equity_pct"] == Decimal(100)

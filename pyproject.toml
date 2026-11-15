@@ -35,7 +35,7 @@ dependencies = [
     # ship with the application. Left as an extra, a packaged build could only
     # ever open SQLite or MySQL.
     "psycopg[binary]>=3.1.0",
-    "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.3.2",
+    "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.3.3",
 ]
 
 [project.optional-dependencies]
@@ -420,7 +420,7 @@ requires = [
     # Likewise for PostgreSQL.
     "psycopg[binary]>=3.1.0",
     # Native equity backend used by the equity calculator and AoF tools.
-    "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.3.2",
+    "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.3.3",
     "pyqtgraph>=0.13.0",
 ]
 
