@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 11:31+0100\n"
+"POT-Creation-Date: 2026-11-14 22:36+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1211,7 +1211,7 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: fpdb_3_legacy/GuiDatabase.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiTrackerMigration.py
 msgid "User"
 msgstr ""
 
@@ -2347,7 +2347,44 @@ msgid "Find the hand histories"
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "From a folder: the tracker's archive or an export"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "From the PokerTracker 4 database"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Folder holding the hand histories"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid ""
+"fpdb reads the hands PokerTracker 4 keeps in its PostgreSQL database. The "
+"connection is read-only: fpdb never writes to it. PokerTracker 4 shows these "
+"settings in Database > Database Management. The password is used for this "
+"import only and is not saved."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Server"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Port"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/GuiVersionInfo.py
+#: fpdb_3_legacy/menu_layout.py
+msgid "Database"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Password"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Only the hands added since the last import from this database"
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
@@ -2386,6 +2423,17 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "What the database holds"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid ""
+"The PokerTracker 4 database could not be read:\n"
+"%s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Reading the folder…"
 msgstr ""
 
@@ -2397,15 +2445,46 @@ msgid ""
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Connecting to the PokerTracker 4 database…"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid "Reading the PokerTracker 4 database: %(done)d of %(total)d hands…"
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Choose a room…"
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
-msgid "not set"
+#, python-format
+msgid ""
+"%(hands)d hands and %(summaries)d tournament summaries read from the "
+"database."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid ""
+"%d of them were stored with the wrong character set (a euro sign read as Ä); "
+"fpdb restores the room's own text."
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "No hand history fpdb can read was found in this folder."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "No hand was added to the database since the last import."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "None of them is a hand history fpdb can read."
+msgstr ""
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "not set"
 msgstr ""
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
@@ -2531,10 +2610,6 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Configuration file"
-msgstr ""
-
-#: fpdb_3_legacy/GuiVersionInfo.py fpdb_3_legacy/menu_layout.py
-msgid "Database"
 msgstr ""
 
 #: fpdb_3_legacy/GuiVersionInfo.py

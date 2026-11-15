@@ -5,18 +5,26 @@ room by room, import it, read what came over. The scan and the import both run
 off the GUI thread. The tracker's own files are read, never moved: the import
 runs with the move-imported / move-failed options switched off whatever the
 Bulk Import tab is set to, so the tracker keeps a complete archive.
+
+PokerTracker 4's database is a third source (#814): its hands are written out,
+room by room, to a temporary folder that is then scanned and imported like any
+other, and removed when the wizard closes. The database is only read.
 """
 
 from __future__ import annotations
 
 import os
+import shutil
+import tempfile
 import warnings
+from collections.abc import Callable
 from contextlib import suppress
 from typing import Any
 
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import (
     QButtonGroup,
+    QCheckBox,
     QComboBox,
     QFileDialog,
     QFormLayout,
@@ -28,16 +36,19 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QPushButton,
     QRadioButton,
+    QSpinBox,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
+    QWidget,
     QWizard,
     QWizardPage,
 )
 
-from fpdb_3_legacy import ipoker_rooms, tracker_migration
+from fpdb_3_legacy import ipoker_rooms, pt4_database, tracker_migration
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.pt4_database import DatabaseExport, Pt4Database
 from fpdb_3_legacy.tracker_migration import TRACKERS, ExportScan, RoomSummary
 
 log = get_logger("tracker_migration")
@@ -49,22 +60,58 @@ _UNSUPPORTED_SHOWN = 50
 
 
 class ScanThread(QThread):
-    """Sorts a folder's files by room without blocking the window."""
+    """Sorts a folder's files by room without blocking the window.
+
+    With ``export``, the folder is first filled from the tracker's database:
+    ``export(thread)`` writes it and returns what it wrote.
+    """
 
     scanned = Signal(object)  # ExportScan
     failed = Signal(str)
+    reading = Signal(int, int)  # hands read from the database so far, of how many
 
-    def __init__(self, config: Any, folder: str) -> None:
+    def __init__(
+        self,
+        config: Any,
+        folder: str,
+        export: Callable[[ScanThread], DatabaseExport] | None = None,
+    ) -> None:
         super().__init__()
         self.config = config
         self.folder = folder
+        self.export = export
+        self.database_export: DatabaseExport | None = None
 
     def run(self) -> None:
         try:
+            if self.export is not None:
+                self.database_export = self.export(self)
+                if self.isInterruptionRequested():
+                    return
+                self.folder = self.database_export.folder
             self.scanned.emit(tracker_migration.scan_folder(self.config, self.folder))
         except Exception as exc:  # intentional broad catch: surfaced on the page instead of lost in the thread
-            log.exception("Scanning the tracker folder failed")
+            log.exception("Reading the tracker's hands failed")
             self.failed.emit(str(exc))
+
+
+def export_pt4(database: Pt4Database, password: str, folder: str, marks: dict[str, int]) -> Callable:
+    """What a scan thread runs to fill ``folder`` from PT4's database, read-only."""
+
+    def run(thread: ScanThread) -> DatabaseExport:
+        conn = database.connect(password)
+        try:
+            return pt4_database.export_database(
+                conn,
+                folder,
+                marks,
+                progress=thread.reading.emit,
+                should_stop=thread.isInterruptionRequested,
+            )
+        finally:
+            conn.close()
+
+    return run
 
 
 def _table(headers: list[str]) -> QTableWidget:
@@ -107,9 +154,34 @@ class SourcePage(QWizardPage):
         self.tracker_page = tracker_page
         self.setTitle(_("Find the hand histories"))
         layout = QVBoxLayout(self)
+
+        # PokerTracker 4 only: its database is a source too.
+        self.source_choice = QWidget()
+        choice_layout = QVBoxLayout(self.source_choice)
+        choice_layout.setContentsMargins(0, 0, 0, 0)
+        self.from_folder = QRadioButton(_("From a folder: the tracker's archive or an export"))
+        self.from_database = QRadioButton(_("From the PokerTracker 4 database"))
+        self.from_folder.setChecked(True)
+        self.source_group = QButtonGroup(self)
+        for button in (self.from_folder, self.from_database):
+            self.source_group.addButton(button)
+            choice_layout.addWidget(button)
+            button.toggled.connect(self._show_source)
+        layout.addWidget(self.source_choice)
+
+        layout.addWidget(self._folder_box())
+        layout.addWidget(self._database_box())
+        layout.addStretch(1)
+        self._show_source()
+
+    def _folder_box(self) -> QWidget:
+        """The tracker's steps to its archive, and the folder to read."""
+        self.folder_box = QWidget()
+        folder_layout = QVBoxLayout(self.folder_box)
+        folder_layout.setContentsMargins(0, 0, 0, 0)
         self.steps = QLabel()
         self.steps.setWordWrap(True)
-        layout.addWidget(self.steps)
+        folder_layout.addWidget(self.steps)
         row = QHBoxLayout()
         self.folder = QLineEdit()
         self.folder.setPlaceholderText(_("Folder holding the hand histories"))
@@ -118,19 +190,84 @@ class SourcePage(QWizardPage):
         browse.clicked.connect(self._browse)
         row.addWidget(self.folder)
         row.addWidget(browse)
-        layout.addLayout(row)
+        folder_layout.addLayout(row)
+        return self.folder_box
+
+    def _database_box(self) -> QWidget:
+        """Where PT4's database is; the password stays in this field and is never saved."""
+        self.database_box = QWidget()
+        database_layout = QVBoxLayout(self.database_box)
+        database_layout.setContentsMargins(0, 0, 0, 0)
+        explanation = QLabel(
+            _(
+                "fpdb reads the hands PokerTracker 4 keeps in its PostgreSQL database. The connection is "
+                "read-only: fpdb never writes to it. PokerTracker 4 shows these settings in "
+                "Database > Database Management. The password is used for this import only and is not saved."
+            )
+        )
+        explanation.setWordWrap(True)
+        database_layout.addWidget(explanation)
+        defaults = Pt4Database()
+        form = QFormLayout()
+        self.host = QLineEdit(defaults.host)
+        self.port = QSpinBox()
+        self.port.setRange(1, 65535)
+        self.port.setValue(defaults.port)
+        self.database_name = QLineEdit(defaults.database)
+        self.user = QLineEdit(defaults.user)
+        self.password = QLineEdit()
+        self.password.setEchoMode(QLineEdit.EchoMode.Password)
+        for label, widget in (
+            (_("Server"), self.host),
+            (_("Port"), self.port),
+            (_("Database"), self.database_name),
+            (_("User"), self.user),
+            (_("Password"), self.password),
+        ):
+            form.addRow(label, widget)
+            if isinstance(widget, QLineEdit):
+                widget.textChanged.connect(self.completeChanged)
+        database_layout.addLayout(form)
+        self.only_new = QCheckBox(_("Only the hands added since the last import from this database"))
+        self.only_new.setChecked(True)
+        database_layout.addWidget(self.only_new)
+        return self.database_box
 
     def initializePage(self) -> None:
         tracker = self.tracker_page.tracker()
         self.setSubTitle(tracker.name)
         self.steps.setText("\n\n".join(f"{n}. {_(step)}" for n, step in enumerate(tracker.steps, 1)))
+        self.source_choice.setVisible(tracker.key == "pt4")
+        if tracker.key != "pt4":
+            self.from_folder.setChecked(True)
+        self._show_source()
+
+    def _show_source(self) -> None:
+        database = self.uses_database()
+        self.folder_box.setVisible(not database)
+        self.database_box.setVisible(database)
+        self.completeChanged.emit()
 
     def _browse(self) -> None:
         folder = QFileDialog.getExistingDirectory(self, _("Choose the folder holding the hand histories"))
         if folder:
             self.folder.setText(folder)
 
+    def uses_database(self) -> bool:
+        return self.from_database.isChecked() and self.tracker_page.tracker().key == "pt4"
+
+    def database(self) -> Pt4Database:
+        return Pt4Database(
+            self.host.text().strip(),
+            self.port.value(),
+            self.database_name.text().strip(),
+            self.user.text().strip(),
+        )
+
     def isComplete(self) -> bool:
+        if self.uses_database():
+            database = self.database()
+            return bool(database.host and database.database and database.user)
         return os.path.isdir(self.folder.text().strip())
 
 
@@ -142,6 +279,9 @@ class ScanPage(QWizardPage):
         self.config = config
         self.source_page = source_page
         self.scan: ExportScan | None = None
+        self.database_export: DatabaseExport | None = None
+        # Folders written from the tracker's database; removed when the wizard closes.
+        self.export_folders: list[str] = []
         self.thread: ScanThread | None = None
         # Every scan still running, current or not: a QThread dropped while it runs
         # takes the application down, so each is kept until it has finished.
@@ -174,31 +314,62 @@ class ScanPage(QWizardPage):
 
     def initializePage(self) -> None:
         self.scan = None
+        self.database_export = None
         _fill(self.rooms, [])
         self._ask_rooms([])
         self.unsupported.clear()
         self.unsupported_label.clear()
-        self.status.setText(_("Reading the folder…"))
-        thread = ScanThread(self.config, self.source_page.folder.text().strip())
+        if self.source_page.uses_database():
+            self.setTitle(_("What the database holds"))
+            thread = self._database_scan()
+            failure = _("The PokerTracker 4 database could not be read:\n%s")
+        else:
+            self.setTitle(_("What the folder holds"))
+            self.status.setText(_("Reading the folder…"))
+            thread = ScanThread(self.config, self.source_page.folder.text().strip())
+            failure = _("The folder could not be read:\n%s")
         self.thread = thread
         self.running.append(thread)
         # A scan the user has moved past (Back, another folder, Next) may still
         # answer; only the current one gets to fill the page.
-        thread.scanned.connect(lambda scan: self.show_scan(scan) if self.thread is thread else None)
-        thread.failed.connect(
-            lambda message: (
-                self.status.setText(_("The folder could not be read:\n%s") % message) if self.thread is thread else None
-            )
+        thread.scanned.connect(
+            lambda scan: self.show_scan(scan, thread.database_export) if self.thread is thread else None
         )
+        thread.failed.connect(lambda message: self.status.setText(failure % message) if self.thread is thread else None)
+        thread.reading.connect(lambda done, total: self._show_reading(done, total) if self.thread is thread else None)
         thread.finished.connect(lambda: self.running.remove(thread) if thread in self.running else None)
         thread.start()
         self.completeChanged.emit()
 
+    def _database_scan(self) -> ScanThread:
+        """A scan that first writes the PT4 database's hands to a folder of its own."""
+        database = self.source_page.database()
+        marks = pt4_database.load_marks(self.config, database) if self.source_page.only_new.isChecked() else {}
+        folder = tempfile.mkdtemp(prefix="fpdb-pt4-")
+        self.export_folders.append(folder)
+        self.status.setText(_("Connecting to the PokerTracker 4 database…"))
+        export = export_pt4(database, self.source_page.password.text(), folder, marks)
+        return ScanThread(self.config, folder, export)
+
+    def _show_reading(self, done: int, total: int) -> None:
+        self.status.setText(
+            _("Reading the PokerTracker 4 database: %(done)d of %(total)d hands…") % {"done": done, "total": total}
+        )
+
     def cleanupPage(self) -> None:
         # Back from this page: whatever is still being read is no longer what the user will import.
+        if self.thread is not None:
+            self.thread.requestInterruption()  # a database export stops at the next hand
         self.thread = None
         self.scan = None
+        self.database_export = None
         super().cleanupPage()
+
+    def remove_exports(self) -> None:
+        """Delete the folders written from the database; the wizard is closing."""
+        for folder in self.export_folders:
+            shutil.rmtree(folder, ignore_errors=True)
+        self.export_folders = []
 
     def stop(self, wait_ms: int = 5000) -> None:
         """Let running scans finish before the wizard goes away; they only read files.
@@ -213,12 +384,13 @@ class ScanPage(QWizardPage):
 
         self.thread = None
         for thread in list(self.running):
+            thread.requestInterruption()
             if thread.wait(wait_ms):
                 continue
             # PySide warns when a signal has nothing left to disconnect; that is fine here.
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", RuntimeWarning)
-                for signal in (thread.scanned, thread.failed, thread.finished):
+                for signal in (thread.scanned, thread.failed, thread.reading, thread.finished):
                     with suppress(RuntimeError, TypeError):
                         signal.disconnect()
             self.running.remove(thread)
@@ -244,8 +416,36 @@ class ScanPage(QWizardPage):
         """The room the user chose for each iPoker hero the configuration could not place."""
         return {hero: choice.currentData() for hero, choice in self.room_choices.items() if choice.currentData()}
 
-    def show_scan(self, scan: ExportScan) -> None:
+    @staticmethod
+    def _database_text(database_export: DatabaseExport | None) -> str:
+        """What was read from the database, as the first lines of the page; nothing for a folder."""
+        if database_export is None:
+            return ""
+        read = _("%(hands)d hands and %(summaries)d tournament summaries read from the database.") % {
+            "hands": database_export.hand_count,
+            "summaries": database_export.summaries,
+        }
+        if database_export.repaired:
+            read += (
+                " "
+                + _(
+                    "%d of them were stored with the wrong character set (a euro sign read as Ä); "
+                    "fpdb restores the room's own text."
+                )
+                % database_export.repaired
+            )
+        return read + "\n"
+
+    def _nothing_to_import(self, database_export: DatabaseExport | None) -> str:
+        if database_export is None:
+            return _("No hand history fpdb can read was found in this folder.")
+        if database_export.hand_count == 0 and self.source_page.only_new.isChecked():
+            return _("No hand was added to the database since the last import.")
+        return _("None of them is a hand history fpdb can read.")
+
+    def show_scan(self, scan: ExportScan, database_export: DatabaseExport | None = None) -> None:
         self.scan = scan
+        self.database_export = database_export
         rows = []
         warnings = []
         for site in sorted(scan.rooms, key=lambda s: (-len(scan.rooms[s]), s)):
@@ -258,10 +458,11 @@ class ScanPage(QWizardPage):
                 warnings.append(site)
         _fill(self.rooms, rows)
         self._ask_rooms(sorted(scan.undecided, key=str.casefold))
+        read = self._database_text(database_export)
         if not scan.rooms:
-            self.status.setText(_("No hand history fpdb can read was found in this folder."))
+            self.status.setText(read + self._nothing_to_import(database_export))
         else:
-            text = _("%(files)d files from %(rooms)d rooms will be imported.") % {
+            text = read + _("%(files)d files from %(rooms)d rooms will be imported.") % {
                 "files": scan.file_count,
                 "rooms": len(scan.rooms),
             }
@@ -282,11 +483,7 @@ class ScanPage(QWizardPage):
         self.completeChanged.emit()
 
     def isComplete(self) -> bool:
-        return (
-            self.scan is not None
-            and self.scan.file_count > 0
-            and len(self.chosen_rooms()) == len(self.room_choices)
-        )
+        return self.scan is not None and self.scan.file_count > 0 and len(self.chosen_rooms()) == len(self.room_choices)
 
 
 class ImportPage(QWizardPage):
@@ -442,6 +639,13 @@ class GuiTrackerMigration(QWizard):
         rooms = tracker_migration.summarize(getattr(self.importer, "file_results", {}), self.config)
         scan = self.scan_page.scan
         self.summary_page.show_summary(rooms, len(scan.unsupported) if scan else 0)
+        export = self.scan_page.database_export
+        if export is not None and self.source_page.uses_database():
+            # The next import from this database starts after these hands.
+            try:
+                pt4_database.save_marks(self.config, self.source_page.database(), export.marks)
+            except OSError:
+                log.exception("Could not remember what the PT4 import brought over")
         self.import_page.finish(_("Import finished."))
         # Open stats tabs built their filters before these games, limits and currencies existed.
         main_window = self.parent()
@@ -476,3 +680,5 @@ class GuiTrackerMigration(QWizard):
         if importer is not None and not self.import_running():
             with suppress(Exception):
                 importer.close()
+        if not self.import_running():
+            self.scan_page.remove_exports()
