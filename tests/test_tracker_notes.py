@@ -428,3 +428,57 @@ def test_show_prints_the_changed_notes_as_they_will_read(fpdb) -> None:
 def test_pt4_markup_reads_as_plain_text(pt4_text: str, shown: str) -> None:
     """Measured on a real PT4 database: its auto-notes write card ranges as {cardrange:...} markup."""
     assert _auto("alice", pt4_text, times=1, when=None).line() == shown
+
+
+class TestCodexReview:
+    """PR #812's review: no note lost to a lookalike, no colour lost, no stale auto-note left."""
+
+    def test_a_note_that_starts_like_an_imported_one_is_still_added(self, fpdb) -> None:
+        _apply(fpdb, [TrackerNote("PokerStars", "alice", "Raises only aces")])
+
+        report = _apply(fpdb, [TrackerNote("PokerStars", "alice", "Raises")])
+
+        assert report.outcomes[0].status == "appended"
+        assert _comment(fpdb, "alice") == "[PokerTracker 4]\nRaises only aces\n\n[PokerTracker 4]\nRaises"
+
+    def test_a_block_is_recognised_whole_among_the_users_lines(self, fpdb) -> None:
+        own = "Mine.\n\n[PokerTracker 4]\nRaises\n\nAnd mine.\n"
+        fpdb.execute("UPDATE Players SET comment = ? WHERE name = 'alice'", (own,))
+
+        assert _apply(fpdb, [TrackerNote("PokerStars", "alice", "Raises")]).outcomes[0].status == "already"
+        assert _comment(fpdb, "alice") == own
+
+    def test_a_note_with_a_colour_and_no_text_is_kept(self) -> None:
+        conn = Pt4Connection(
+            notes=[
+                (100, "PokerStars", "alice", datetime(2024, 3, 1), 5, "  "),
+                (100, "PokerStars", "bob", None, None, ""),
+            ],
+            tags=[(100, "PokerStars", "alice", "Fish")],
+        )
+
+        notes = read_pt4_notes(conn)
+
+        assert [note.block() for note in notes] == ["[PokerTracker 4 | 2024-03-01 | Fish | colour 5]"]
+
+    def test_a_player_with_no_auto_note_left_loses_the_section(self, fpdb) -> None:
+        _apply(fpdb, [_auto("alice", "Limps"), _auto("bob", "Limps")], auto_notes=True)
+        fpdb.execute("UPDATE Players SET comment = 'Mine.\n\n' || comment WHERE name = 'alice'")
+
+        preview = _apply(fpdb, [TrackerNote("PokerStars", "bob", "Bluffs")], auto_notes=True, dry_run=True)
+        assert _comment(fpdb, "alice").endswith(AUTO_SECTION_END)
+
+        report = _apply(fpdb, [TrackerNote("PokerStars", "bob", "Bluffs")], auto_notes=True)
+
+        assert [(o.player, o.status) for o in report.outcomes] == [("bob", "appended"), ("alice", "updated")]
+        assert [(o.player, o.status) for o in preview.outcomes] == [("bob", "appended"), ("alice", "updated")]
+        assert _comment(fpdb, "alice") == "Mine."
+        assert _comment(fpdb, "bob") == "Plays every hand.\n\n[PokerTracker 4]\nBluffs"
+        assert not _apply(fpdb, [], auto_notes=True).outcomes
+
+    def test_without_reading_auto_notes_no_section_is_cleared(self, fpdb) -> None:
+        _apply(fpdb, [_auto("alice", "Limps")], auto_notes=True)
+        before = _comment(fpdb, "alice")
+
+        assert not _apply(fpdb, []).outcomes
+        assert _comment(fpdb, "alice") == before

@@ -168,7 +168,8 @@ of their own, one line per auto-note with how often it was seen and when:
 [end of PokerTracker 4 auto-notes]
 ```
 
-Each import replaces that section with what PT4 holds now, so it never piles up. Everything
+Each import replaces that section with what PT4 holds now, so it never piles up. A player PT4 no
+longer has any auto-note for loses the section, so the HUD never shows advice PT4 dropped. Everything
 outside the section, your own text and your imported PT4 notes, is left as it is. Do not edit
 inside the section: the next import replaces it. With *Leave players who already have an fpdb
 note alone*, a player with a note of their own gets no new section, but a section an earlier

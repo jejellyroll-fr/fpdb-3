@@ -138,6 +138,7 @@ class GuiTrackerNotes(QDialog):  # pylint: disable=too-many-instance-attributes
                 placeholder=db.sql.query["placeholder"],
                 on_existing="skip" if self.skip_existing.isChecked() else "append",
                 network_rooms=tracker_notes.ipoker_rooms_of(self.config),
+                auto_notes=self.auto_notes.isChecked(),
                 dry_run=dry_run,
             )
         except Exception as exc:  # noqa: BLE001 - shown, and nothing half-written is committed

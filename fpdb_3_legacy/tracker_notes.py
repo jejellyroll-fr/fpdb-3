@@ -226,14 +226,14 @@ def _pt4_manual_notes(conn: Any) -> list[TrackerNote]:
     notes: list[TrackerNote] = []
     labelled: set[tuple[str, str]] = set()
     for id_site, site_name, player, when, id_color, text in _rows(conn, PT4_PLAYER_NOTES):
-        if not player or not (text or "").strip():
-            continue
+        if not player or (not (text or "").strip() and id_color is None):
+            continue  # a note with a colour and no text still says something: kept
         key = (_pt4_site(id_site, site_name), str(player))
         note_labels = [] if key in labelled else list(labels.get(key, ()))
         labelled.add(key)
         if id_color is not None:
             note_labels.append(f"colour {id_color}")
-        notes.append(TrackerNote(key[0], key[1], str(text), tuple(note_labels), when))
+        notes.append(TrackerNote(key[0], key[1], str(text or ""), tuple(note_labels), when))
     notes.extend(
         TrackerNote(site, player, "", tuple(tags))
         for (site, player), tags in labels.items()
@@ -316,6 +316,23 @@ def _split_section(note: str) -> tuple[str, str | None, str]:
     return note[: found.start()], found.group(0), note[found.end() :]
 
 
+def _holds(note: str, block: str) -> bool:
+    """True if ``block`` is one of the note's blocks, whole: a block is set off by blank lines.
+
+    A note that only starts like a block already there (``Raises`` beside
+    ``Raises only aces``) is a different note, and is not dropped as a copy.
+    """
+    start = note.find(block)
+    while start >= 0:
+        end = start + len(block)
+        opens = not note[:start].strip() or note[:start].endswith("\n\n")
+        closes = not note[end:].strip() or note[end:].startswith("\n\n")
+        if opens and closes:
+            return True
+        start = note.find(block, start + 1)
+    return False
+
+
 def _join(*parts: str) -> str:
     return "\n\n".join(part.strip("\n") for part in parts if part.strip())
 
@@ -324,19 +341,20 @@ def _merge(existing: str, blocks: Sequence[str], section: str | None, on_existin
     """What becomes of one fpdb note: its status, its new text and how many blocks it gains.
 
     ``blocks`` are appended unless the note holds them already; ``section``
-    replaces the auto-notes section the note has, or is added. With "skip", a
+    replaces the auto-notes section the note has, or is added; an empty
+    ``section`` removes it, ``None`` leaves it as it is. With "skip", a
     note the user wrote (anything outside the section) gains nothing, but a
     section an earlier import added is still refreshed: it is the import's own.
     """
     before, old_section, after = _split_section(existing)
     written = (before + after).strip()
     keep_out = on_existing == "skip" and bool(written)
-    new_blocks = [block for block in blocks if block not in before + after]
+    new_blocks = [block for block in blocks if not _holds(before + after, block)]
     add_blocks = [] if keep_out else new_blocks
-    held_back = bool(new_blocks and keep_out) or (section is not None and old_section is None and keep_out)
+    held_back = bool(new_blocks and keep_out) or (bool(section) and old_section is None and keep_out)
     if old_section is not None:
-        merged = before + (section or old_section) + after
-    elif section is not None and not keep_out:
+        merged = _join(before, after) if section == "" else before + (section or old_section) + after
+    elif section and not keep_out:
         merged = _join(existing, section)
     else:
         merged = existing
@@ -344,7 +362,7 @@ def _merge(existing: str, blocks: Sequence[str], section: str | None, on_existin
         merged = _join(merged, *add_blocks)
     if merged == existing:
         return ("skipped" if held_back else "already"), existing, 0
-    gained = len(add_blocks) + (1 if section is not None and section != old_section else 0)
+    gained = len(add_blocks) + (1 if section is not None and section != (old_section or "") else 0)
     if not existing.strip():
         return "added", merged, gained
     if old_section is not None and not add_blocks:
@@ -356,6 +374,7 @@ def _merge(existing: str, blocks: Sequence[str], section: str | None, on_existin
 _FPDB_SITES = "SELECT id, name FROM Sites"
 _FPDB_PLAYER = "SELECT id, siteId, comment FROM Players WHERE name = %s AND siteId = %s"
 _FPDB_SET_COMMENT = "UPDATE Players SET comment = %s, commentTs = CURRENT_TIMESTAMP WHERE id = %s"
+_FPDB_WITH_SECTION = "SELECT id, siteId, name, comment FROM Players WHERE comment LIKE %s"
 
 
 def apply_notes(
@@ -365,6 +384,7 @@ def apply_notes(
     placeholder: str = "%s",
     on_existing: str = "append",
     network_rooms: Mapping[str, Sequence[str]] | None = None,
+    auto_notes: bool = False,
     dry_run: bool = False,
 ) -> NotesReport:
     """Write tracker notes into fpdb's ``Players.comment`` without overwriting any.
@@ -375,39 +395,82 @@ def apply_notes(
     existing note is appended to (``on_existing="append"``) or left alone
     (``"skip"``); blocks it already holds are never added again. Automatic
     notes replace the auto-notes section an earlier import added. With
-    ``dry_run`` nothing is written and the report says what would be.
+    ``auto_notes`` (the automatic notes were read), a player PT4 has no
+    automatic note for any more loses that section, so it never shows advice
+    PT4 dropped. With ``dry_run`` nothing is written and the report says what
+    would be.
     """
     if on_existing not in ("append", "skip"):
         msg = f"on_existing must be 'append' or 'skip', not {on_existing!r}"
         raise ValueError(msg)
-    report = NotesReport(dry_run=dry_run)
-    cursor = connection.cursor()
-    cursor.execute(_FPDB_SITES)
-    fpdb_sites = {int(site_id): str(name) for site_id, name in cursor.fetchall()}
-    select_player = _FPDB_PLAYER.replace("%s", placeholder)
-    set_comment = _FPDB_SET_COMMENT.replace("%s", placeholder)
-    candidates_by_site: dict[str, list[int]] = {}
+    writer = _NoteWriter(connection, placeholder, on_existing, dry_run=dry_run)
     for (site, player), player_notes in group_notes(notes).items():
-        candidates = candidates_by_site.setdefault(site, site_candidates(site, fpdb_sites, network_rooms))
-        rows = []
-        for site_id in candidates:
-            cursor.execute(select_player, (player, site_id))
-            rows.extend(cursor.fetchall())
+        candidates = writer.candidates(site, network_rooms)
+        rows = writer.players(player, candidates)
         if not rows:
-            report.outcomes.append(NoteOutcome(site, player, "unknown_player" if candidates else "unknown_site"))
+            writer.report.outcomes.append(
+                NoteOutcome(site, player, "unknown_player" if candidates else "unknown_site"),
+            )
             continue
         blocks = [note.block() for note in player_notes if not note.auto]
         section = auto_section([note for note in player_notes if note.auto])
-        for player_id, site_id, comment in rows:
-            status, merged, added = _merge(comment or "", blocks, section, on_existing)
-            if added and not dry_run:
-                cursor.execute(set_comment, (merged, player_id))
-            report.outcomes.append(
-                NoteOutcome(site, player, status, fpdb_sites.get(int(site_id)), added, merged if added else None),
-            )
+        if section is None and auto_notes:
+            section = ""  # read, and none left: an earlier section goes
+        for row in rows:
+            writer.record(site, player, row, blocks, section)
+    if auto_notes:
+        writer.clear_stale_sections()
     if not dry_run:
         connection.commit()
-    return report
+    return writer.report
+
+
+class _NoteWriter:
+    """fpdb's side of an import: finds the players, writes their notes, keeps the report."""
+
+    def __init__(self, connection: Any, placeholder: str, on_existing: str, *, dry_run: bool) -> None:
+        self.cursor = connection.cursor()
+        self.placeholder = placeholder
+        self.on_existing = on_existing
+        self.report = NotesReport(dry_run=dry_run)
+        self.cursor.execute(_FPDB_SITES)
+        self.sites = {int(site_id): str(name) for site_id, name in self.cursor.fetchall()}
+        self._candidates: dict[str, list[int]] = {}
+        self._visited: set[int] = set()
+
+    def _sql(self, query: str) -> str:
+        return query.replace("%s", self.placeholder)
+
+    def candidates(self, site: str, network_rooms: Mapping[str, Sequence[str]] | None) -> list[int]:
+        if site not in self._candidates:
+            self._candidates[site] = site_candidates(site, self.sites, network_rooms)
+        return self._candidates[site]
+
+    def players(self, player: str, site_ids: Sequence[int]) -> list[tuple[Any, ...]]:
+        rows: list[tuple[Any, ...]] = []
+        for site_id in site_ids:
+            self.cursor.execute(self._sql(_FPDB_PLAYER), (player, site_id))
+            rows.extend(self.cursor.fetchall())
+        return rows
+
+    def record(self, site: str, player: str, row: Sequence[Any], blocks: Sequence[str], section: str | None) -> None:
+        player_id, site_id, comment = row
+        self._visited.add(int(player_id))
+        status, merged, gained = _merge(comment or "", blocks, section, self.on_existing)
+        changed = status in ("added", "appended", "updated")
+        if changed and not self.report.dry_run:
+            self.cursor.execute(self._sql(_FPDB_SET_COMMENT), (merged, player_id))
+        fpdb_site = self.sites.get(int(site_id))
+        self.report.outcomes.append(NoteOutcome(site, player, status, fpdb_site, gained, merged if changed else None))
+
+    def clear_stale_sections(self) -> None:
+        """Remove the section of every player this import did not reach: PT4 has no auto-note for them now."""
+        self.cursor.execute(self._sql(_FPDB_WITH_SECTION), ("%" + AUTO_SECTION_START + "%",))
+        for player_id, site_id, name, comment in self.cursor.fetchall():
+            if int(player_id) in self._visited or _split_section(comment or "")[1] is None:
+                continue
+            site = self.sites.get(int(site_id), str(site_id))
+            self.record(site, str(name), (player_id, site_id, comment), [], "")
 
 
 _STATUS_TEXT = {
@@ -511,6 +574,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             placeholder=db.sql.query["placeholder"],
             on_existing="skip" if args.skip_existing else "append",
             network_rooms=ipoker_rooms_of(config),
+            auto_notes=args.auto_notes,
             dry_run=args.dry_run,
         )
     finally:
