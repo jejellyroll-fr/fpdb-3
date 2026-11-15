@@ -36,6 +36,33 @@ def plo_files() -> list[Path]:
     return sorted(PLO_DIR.glob("*.txt"))
 
 
+def _five_card_text(contents: str) -> str:
+    """One four-card hand history rewritten as its five-card twin."""
+    used = set(re.findall(r"\b[2-9TJQKA][cdhs]\b", contents))
+    holdings: dict[str, str] = {}
+
+    def add_card(match: re.Match) -> str:
+        cards = match[1]
+        if cards not in holdings:
+            extra = next(
+                f"{rank}{suit}"
+                for rank in "3456789TJQKA2" for suit in "cdhs"
+                if f"{rank}{suit}" not in used
+            )
+            used.add(extra)
+            holdings[cards] = f"{cards} {extra}"
+        return f"[{holdings[cards]}]"
+
+    lines = []
+    for line in contents.splitlines():
+        if "Dealt to " in line or ": shows [" in line or " showed [" in line:
+            line = re.sub(r"\[([^]]+)\]", add_card, line)
+        lines.append(line)
+    contents = "\n".join(lines) + "\n"
+    contents = contents.replace("#320000", "#330000").replace("  Omaha Pot Limit", "  5 Card Omaha Pot Limit")
+    return contents.replace("'PLO ", "'PLO5 ")
+
+
 def five_card_files(directory: Path) -> list[Path]:
     """The same action scenarios as real five-card hand histories for import.
 
@@ -47,32 +74,8 @@ def five_card_files(directory: Path) -> list[Path]:
     directory.mkdir(parents=True, exist_ok=True)
     paths = []
     for original in plo_files():
-        contents = original.read_text(encoding="utf-8")
-        used = set(re.findall(r"\b[2-9TJQKA][cdhs]\b", contents))
-        holdings: dict[str, str] = {}
-
-        def add_card(match: re.Match) -> str:
-            cards = match[1]
-            if cards not in holdings:
-                extra = next(
-                    f"{rank}{suit}"
-                    for rank in "3456789TJQKA2" for suit in "cdhs"
-                    if f"{rank}{suit}" not in used
-                )
-                used.add(extra)
-                holdings[cards] = f"{cards} {extra}"
-            return f"[{holdings[cards]}]"
-
-        lines = []
-        for line in contents.splitlines():
-            if "Dealt to " in line or ": shows [" in line or " showed [" in line:
-                line = re.sub(r"\[([^]]+)\]", add_card, line)
-            lines.append(line)
-        contents = "\n".join(lines) + "\n"
-        contents = contents.replace("#320000", "#330000").replace("  Omaha Pot Limit", "  5 Card Omaha Pot Limit")
-        contents = contents.replace("'PLO ", "'PLO5 ")
         path = directory / original.name.replace("_plo_", "_plo5_")
-        path.write_text(contents, encoding="utf-8")
+        path.write_text(_five_card_text(original.read_text(encoding="utf-8")), encoding="utf-8")
         paths.append(path)
     return paths
 
