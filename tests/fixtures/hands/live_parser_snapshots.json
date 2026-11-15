@@ -31,9 +31,17 @@
     "hand_count": 1,
     "sha256": "4827570a78716a49cc3c1cd0e5db5439af299a2045b135beb0d353324c41e25e"
   },
+  "ggpoker/mtt_ante_in_header.txt": {
+    "hand_count": 1,
+    "sha256": "2dacc46ef7b75848f7f1ae7a8d17f71def4b4862ae619d021f617aeeda22ee29"
+  },
   "ggpoker/nlh_cash_6max.txt": {
     "hand_count": 3,
     "sha256": "7ac5acea349db15f0f6d2df11afc86fb493cfa0c510a366e2aff8fa553228a30"
+  },
+  "ggpoker/plo5_mtt_omaha5.txt": {
+    "hand_count": 2,
+    "sha256": "778c8be0da5253209db8bd5ab3b2efdcba8b96c9289d48e36084c6a7bd70ef57"
   },
   "ggpoker/plo_cash.txt": {
     "hand_count": 13,
