@@ -54,6 +54,41 @@ HISTORY_COLUMN = "history"
 TEXT_TYPES = {"text", "character varying", "bytea"}
 _DIGITS = re.compile(r"\d")
 _HEAD_CHARS = 40
+# Fixed statements, one per table: nothing is composed into the SQL at run time.
+_STREAM = {
+    "cash": "SELECT history FROM cash_hand_histories",
+    "tourney": "SELECT history FROM tourney_hand_histories",
+}
+_ROOM_COUNTS = {
+    "cash": (
+        "SELECT s.site_name, count(*) FROM cash_hand_summary h "
+        "JOIN lookup_sites s ON s.id_site = h.id_site GROUP BY s.site_name"
+    ),
+    "tourney": (
+        "SELECT s.site_name, count(*) FROM tourney_hand_summary h "
+        "JOIN lookup_sites s ON s.id_site = h.id_site GROUP BY s.site_name"
+    ),
+}
+_ROOM_SAMPLES = {
+    "cash": (
+        "SELECT site_name, hand_no, history FROM ("
+        " SELECT s.site_name, h.hand_no, x.history,"
+        "  row_number() OVER (PARTITION BY h.id_site ORDER BY random()) AS pick"
+        " FROM cash_hand_histories x"
+        " JOIN cash_hand_summary h ON h.id_hand = x.id_hand"
+        " JOIN lookup_sites s ON s.id_site = h.id_site"
+        ") picked WHERE pick <= %s ORDER BY site_name"
+    ),
+    "tourney": (
+        "SELECT site_name, hand_no, history FROM ("
+        " SELECT s.site_name, h.hand_no, x.history,"
+        "  row_number() OVER (PARTITION BY h.id_site ORDER BY random()) AS pick"
+        " FROM tourney_hand_histories x"
+        " JOIN tourney_hand_summary h ON h.id_hand = x.id_hand"
+        " JOIN lookup_sites s ON s.id_site = h.id_site"
+        ") picked WHERE pick <= %s ORDER BY site_name"
+    ),
+}
 # A hand starts again after a blank line or two in every room's own files.
 HAND_SEPARATOR = "\n\n\n"
 
@@ -78,8 +113,8 @@ class Stream:
 
 
 @dataclass
-class RoomSample:
-    """What fpdb made of a sample of one room's stored histories."""
+class RoomSample:  # pylint: disable=too-many-instance-attributes
+    """What fpdb made of a sample of one room's stored histories: one report row."""
 
     kind: str
     room: str
@@ -161,16 +196,13 @@ def table_columns(conn: Any, table: str) -> list[Column]:
         return [Column(name, kind) for name, kind in cur.fetchall()]
 
 
-def stream_all(conn: Any, table: str, column: str) -> Stream:
-    """Read every history of ``table`` through a server-side cursor, as an importer would."""
-    from psycopg import sql
-
-    query = sql.SQL("SELECT {} FROM {}").format(sql.Identifier(column), sql.Identifier(table))
+def stream_all(conn: Any, kind: str) -> Stream:
+    """Read every history of one kind through a server-side cursor, as an importer would."""
     stream = Stream()
     start = perf_counter()
-    with conn.transaction(), conn.cursor(name=f"pt4_probe_{table}") as cur:
+    with conn.transaction(), conn.cursor(name=f"pt4_probe_{kind}") as cur:
         cur.itersize = 2000
-        cur.execute(query)
+        cur.execute(_STREAM[kind])
         for (value,) in cur:
             stream.rows += 1
             stream.chars += len(as_text(value))
@@ -178,29 +210,12 @@ def stream_all(conn: Any, table: str, column: str) -> Stream:
     return stream
 
 
-def sample_rooms(conn: Any, kind: str, column: str, per_room: int) -> tuple[dict[str, int], list[tuple]]:
+def sample_rooms(conn: Any, kind: str, per_room: int) -> tuple[dict[str, int], list[tuple]]:
     """Each room's hand count, and up to ``per_room`` random hands of each: (room, hand_no, history)."""
-    from psycopg import sql
-
-    histories = sql.Identifier(f"{kind}_hand_histories")
-    summary = sql.Identifier(f"{kind}_hand_summary")
-    counts_query = sql.SQL(
-        "SELECT s.site_name, count(*) FROM {summary} h "
-        "JOIN lookup_sites s ON s.id_site = h.id_site GROUP BY s.site_name",
-    ).format(summary=summary)
-    sample_query = sql.SQL(
-        "SELECT site_name, hand_no, history FROM ("
-        " SELECT s.site_name, h.hand_no, x.{column} AS history,"
-        "  row_number() OVER (PARTITION BY h.id_site ORDER BY random()) AS pick"
-        " FROM {histories} x"
-        " JOIN {summary} h ON h.id_hand = x.id_hand"
-        " JOIN lookup_sites s ON s.id_site = h.id_site"
-        ") picked WHERE pick <= %s ORDER BY site_name",
-    ).format(column=sql.Identifier(column), histories=histories, summary=summary)
     with conn.cursor() as cur:
-        cur.execute(counts_query)
+        cur.execute(_ROOM_COUNTS[kind])
         counts = {str(room): int(n) for room, n in cur.fetchall()}
-        cur.execute(sample_query, (per_room,))
+        cur.execute(_ROOM_SAMPLES[kind], (per_room,))
         return counts, list(cur.fetchall())
 
 
@@ -355,20 +370,22 @@ def main(argv: Sequence[str] | None = None) -> int:
             table = f"{kind}_hand_histories"
             columns[table] = table_columns(conn, table)
             column = pick_history_column(columns[table])
-            if column is None:
+            if column is None or column.name != HISTORY_COLUMN:
+                # The report's column list shows where the text is; the reads below expect ``history``.
+                print(f"{table} has no {HISTORY_COLUMN} column: not read", file=sys.stderr)
                 continue
             if not args.no_stream:
                 print(f"reading every row of {table}...", file=sys.stderr)
-                streams[table] = stream_all(conn, table, column.name)
+                streams[table] = stream_all(conn, kind)
             print(f"sampling {table}...", file=sys.stderr)
-            counts, rows = sample_rooms(conn, kind, column.name, args.per_room)
+            counts, rows = sample_rooms(conn, kind, args.per_room)
             encodings[table] = Counter(encoding_signature(value) for _r, _n, value in rows)
             by_room: dict[str, list[tuple]] = {}
             for row in rows:
                 by_room.setdefault(str(row[0]), []).append(row)
-            for room in sorted(counts, key=lambda r: -counts[r]):
+            for room, hands in sorted(counts.items(), key=lambda item: -item[1]):
                 print(f"  parsing {kind} {room}...", file=sys.stderr)
-                sample = RoomSample(kind, room, counts[room])
+                sample = RoomSample(kind, room, hands)
                 samples.append(parse_room(fpdb_config, sample, by_room.get(room, []), workdir))
     conn.close()
 

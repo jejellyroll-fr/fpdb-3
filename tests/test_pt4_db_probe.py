@@ -6,14 +6,23 @@ these check the parts a wrong report would come from.
 
 from __future__ import annotations
 
+import importlib.util
 import sys
 from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "tools"))
 
-import pt4_db_probe as probe  # noqa: E402
+
+def _load_probe():
+    spec = importlib.util.spec_from_file_location("pt4_db_probe", ROOT / "tools" / "pt4_db_probe.py")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["pt4_db_probe"] = module  # dataclasses look their module up while the class is built
+    spec.loader.exec_module(module)
+    return module
+
+
+probe = _load_probe()
 
 STARS_HAND = ROOT / "regression-test-files" / "cash" / "Stars" / "Flop" / "2025-NL-uncalled-bet.txt"
 
