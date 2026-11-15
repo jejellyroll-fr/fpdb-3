@@ -6,8 +6,8 @@ contents, so the menu bar sat over the title bar: the window buttons were not on
 the top row and the row users drag had no move handler.
 
 Building the whole ``fpdb`` window needs a profile and a database, so the test
-compiles the real ``CustomTitleBar`` class and ``_add_title_and_menu_bars``
-method out of ``fpdb.pyw`` and runs them on a bare ``QMainWindow``.
+compiles the real ``CustomTitleBar`` class and the ``fpdb`` window-chrome
+methods out of ``fpdb.pyw`` and runs them on a bare ``QMainWindow``.
 """
 
 from __future__ import annotations
@@ -15,15 +15,15 @@ from __future__ import annotations
 import ast
 import os
 from pathlib import Path
-from types import SimpleNamespace
+from types import CellType, CodeType, FunctionType, SimpleNamespace
 
 import pytest
+from PySide6 import QtCore, QtWidgets
 
 pytestmark = pytest.mark.qt
 
+# Read when the QApplication is created, not when PySide6 is imported.
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-
-from PySide6 import QtCore, QtWidgets  # noqa: E402
 
 SOURCE = Path(__file__).resolve().parents[1] / "fpdb_3_legacy" / "fpdb.pyw"
 TREE = ast.parse(SOURCE.read_text(encoding="utf-8"), filename=str(SOURCE))
@@ -47,36 +47,56 @@ def _namespace(platform: str) -> dict:
 _WINDOW_METHODS = ("_add_title_and_menu_bars", "menuBar")
 
 
-def _compile(nodes: list[ast.stmt], namespace: dict) -> None:
-    module = ast.fix_missing_locations(ast.Module(body=nodes, type_ignores=[]))
-    exec(compile(module, str(SOURCE), "exec"), namespace)
+def _class_def(name: str) -> ast.ClassDef:
+    return next(node for node in TREE.body if isinstance(node, ast.ClassDef) and node.name == name)
 
 
-def _window_class(platform: str) -> type[QtWidgets.QMainWindow]:
-    """A ``QMainWindow`` carrying the real ``CustomTitleBar`` and chrome methods.
+def _build_class(name: str, base: type, methods: list[ast.FunctionDef], namespace: dict) -> type:
+    """Make a ``base`` subclass whose methods are compiled from ``fpdb.pyw``.
 
-    The ``fpdb`` methods are compiled into a class body of their own so that
-    ``super()`` in the ``menuBar`` override resolves as it does in ``fpdb``.
+    The methods are compiled inside a class body so zero-argument ``super()``
+    gets its ``__class__`` cell, then turned into functions from their code
+    objects, without running the module or class body.
     """
-    namespace = _namespace(platform)
-    title_bar_class = next(
-        node for node in TREE.body if isinstance(node, ast.ClassDef) and node.name == "CustomTitleBar"
-    )
-    _compile([title_bar_class], namespace)
-
-    fpdb_class = next(node for node in TREE.body if isinstance(node, ast.ClassDef) and node.name == "fpdb")
-    methods = [node for node in fpdb_class.body if isinstance(node, ast.FunctionDef) and node.name in _WINDOW_METHODS]
-    assert sorted(method.name for method in methods) == sorted(_WINDOW_METHODS)
-    window_class = ast.ClassDef(
-        name="_Window",
-        bases=[ast.Name(id="QMainWindow", ctx=ast.Load())],
+    class_node = ast.ClassDef(
+        name=name,
+        bases=[],
         keywords=[],
         body=methods,
         decorator_list=[],
         type_params=[],
     )
-    _compile([window_class], namespace)
-    return namespace["_Window"]
+    module = ast.fix_missing_locations(ast.Module(body=[class_node], type_ignores=[]))
+    compiled = compile(module, str(SOURCE), "exec")
+    body_code = next(item for item in compiled.co_consts if isinstance(item, CodeType) and item.co_name == name)
+
+    class_cell = CellType()
+    nodes = {method.name: method for method in methods}
+    attributes = {}
+    for code in (item for item in body_code.co_consts if isinstance(item, CodeType)):
+        assert set(code.co_freevars) <= {"__class__"}, code.co_freevars
+        node = nodes[code.co_name]
+        defaults = tuple(ast.literal_eval(default) for default in node.args.defaults) or None
+        closure = (class_cell,) if code.co_freevars else None
+        attributes[code.co_name] = FunctionType(code, namespace, code.co_name, defaults, closure)
+    assert set(attributes) == set(nodes)
+
+    cls = type(name, (base,), attributes)
+    class_cell.cell_contents = cls
+    return cls
+
+
+def _window_class(platform: str) -> type[QtWidgets.QMainWindow]:
+    """A ``QMainWindow`` carrying the real ``CustomTitleBar`` and chrome methods."""
+    namespace = _namespace(platform)
+    title_bar_methods = [node for node in _class_def("CustomTitleBar").body if isinstance(node, ast.FunctionDef)]
+    namespace["CustomTitleBar"] = _build_class("CustomTitleBar", QtWidgets.QWidget, title_bar_methods, namespace)
+
+    window_methods = [
+        node for node in _class_def("fpdb").body if isinstance(node, ast.FunctionDef) and node.name in _WINDOW_METHODS
+    ]
+    assert sorted(method.name for method in window_methods) == sorted(_WINDOW_METHODS)
+    return _build_class("_Window", QtWidgets.QMainWindow, window_methods, namespace)
 
 
 def _build_window(platform: str) -> QtWidgets.QMainWindow:
