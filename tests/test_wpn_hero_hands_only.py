@@ -18,7 +18,11 @@ user's own hands): none is generated from another WPN hand, and the ones a
 database made before the rule are removed once.
 
 The hand in play never reaches the HUD at these tables: their statistics come
-from imported, completed hands, and the WPN policy allows no live context.
+from imported, completed hands, and the WPN policy allows no live context. The
+last section pins that down on auto-import: a hand the client is still
+writing -- the user to act, or folded at a fast-fold table -- is not stored,
+not sent to the HUD, not counted in ``HudCache`` (rebuilt or not) and not
+noted, however many cycles pass, and counts once its end is written.
 """
 
 from __future__ import annotations
@@ -410,3 +414,74 @@ def test_the_users_own_auto_notes_survive_the_drop(importer_for, monkeypatch) ->
 
     importer.database.drop_hero_hands_only_autonotes()
     assert _count(importer, "PlayerAutoNotes") == noted
+
+
+# ---------------------------------------------------------------------------
+# The hand in play (section 4.1.3: nothing from the hand in play)
+# ---------------------------------------------------------------------------
+
+BLITZ_HAND = next((ROOT / "regression-test-files/cash/Winning/Flop").glob("NLHE-6max-USD-0.05-0.10-201906.RUSHID-*"))
+
+#: A finished hand, then the next one as far as the client has written it:
+#: (history, the user, the hand id and the next one's, where the client is).
+IN_PLAY = {
+    # The user still has to act on the turn.
+    "cash": (WPN_HAND, WPN_PLAYER, ("Game ID: 1377529121", "Game ID: 1377529122"), "Player ChazDazzle bets (0.05)"),
+    # Fast-fold: the user folded and moved on; the hand plays out without them.
+    "fast-fold": (BLITZ_HAND, "Hero", ("Hand #68217077", "Hand #68217078"), "Uncalled bet"),
+}
+
+_HANDS_STORED = "SELECT id, siteHandNo FROM Hands ORDER BY id"
+_HANDS_IN_THE_HUD_CACHE = (
+    "SELECT SUM(hc.n) FROM HudCache hc INNER JOIN Players p ON (p.id = hc.playerId) WHERE p.name = ?"
+)
+_NOTED_HANDS = "SELECT DISTINCT h.siteHandNo FROM PlayerAutoNotes pan INNER JOIN Hands h ON (h.id = pan.handId)"
+
+
+def _rows(importer, query: str, params: tuple = ()) -> list:
+    cursor = importer.database.get_cursor()
+    cursor.execute(query, params)
+    return cursor.fetchall()
+
+
+@pytest.mark.usefixtures("every_hand_noted")
+@pytest.mark.parametrize("case", sorted(IN_PLAY))
+def test_the_hand_in_play_reaches_nothing_until_it_is_finished(case, importer_for, tmp_path) -> None:
+    history, user, (hand_id, next_hand_id), client_is_at = IN_PLAY[case]
+    finished = history.read_text(encoding="utf-8").strip() + "\n"
+    next_hand = finished.replace(hand_id, next_hand_id)
+    written_so_far = next_hand[: next_hand.index(client_is_at)]
+    assert "SUMMARY" not in written_so_far.upper()  # the hand has no result yet
+
+    importer = importer_for(user)
+    importer.setMode("auto")
+    importer.setCallHud(True)
+    importer.zmq_sender = MagicMock()  # what the live HUD is told
+    importer.caller = MagicMock()  # the auto-import tab, which logs each cycle
+    path = tmp_path / history.name
+    path.write_text(finished + "\n" + written_so_far, encoding="utf-8")
+    assert importer.addImportFile(str(path), "auto")
+    importer.runUpdated()  # a file seen for the first time is only registered
+
+    # More cycles while the hand is in play: the client writes nothing new,
+    # or the user left the table and it never will.
+    for _cycle in range(3):
+        path.touch()
+        importer.runUpdated()
+        stored = _rows(importer, _HANDS_STORED)
+        assert [site_hand_no for _id, site_hand_no in stored] == [int(hand_id.split()[-1].lstrip("#"))]
+        assert [call.args[0] for call in importer.zmq_sender.send_hand_id.call_args_list] == [stored[0][0]]
+        assert _rows(importer, _HANDS_IN_THE_HUD_CACHE, (user,)) == [(1,)]
+        assert _rows(importer, _NOTED_HANDS) == [(stored[0][1],)]
+    # A cache rebuild has nothing more to count either.
+    importer.database.rebuild_cache()
+    assert _rows(importer, _HANDS_IN_THE_HUD_CACHE, (user,)) == [(1,)]
+
+    # The client writes the end of the hand: now, and only now, it counts.
+    path.write_text(finished + "\n" + next_hand, encoding="utf-8")
+    importer.runUpdated()
+    stored = _rows(importer, _HANDS_STORED)
+    assert len(stored) == 2
+    assert [call.args[0] for call in importer.zmq_sender.send_hand_id.call_args_list] == [row[0] for row in stored]
+    assert _rows(importer, _HANDS_IN_THE_HUD_CACHE, (user,)) == [(2,)]
+    assert sorted(_rows(importer, _NOTED_HANDS)) == sorted((row[1],) for row in stored)
