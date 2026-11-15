@@ -241,6 +241,8 @@ class GGPoker(HandHistoryConverter):
         "PLO": ("hold", "omahahi"),
         "PLO-5": ("hold", "5_omahahi"),
         "PLO-6": ("hold", "6_omahahi"),
+        "Omaha5": ("hold", "5_omahahi"),  # "PLO-5 Bounty $3.20 Omaha5 Pot Limit"
+        "Omaha6": ("hold", "6_omahahi"),
         "OM": ("hold", "omahahi"),  # Pot Limit Omaha
     }
 
@@ -263,7 +265,7 @@ class GGPoker(HandHistoryConverter):
           (?P<TOURNAME>.+?)\\s
           )?
           # close paren of tournament info
-          (?P<GAME>Holdem|Hold\'em|ShortDeck|Omaha|PLO|Omaha\\sHi/Lo|PLO\\-(5|6)|OM)\\s
+          (?P<GAME>Holdem|Hold\'em|ShortDeck|Omaha5|Omaha6|Omaha|PLO|Omaha\\sHi/Lo|PLO\\-(5|6)|OM)\\s
           (?P<LIMIT>No\\sLimit|Fixed\\sLimit|Limit|Pot\\sLimit|\\(NL\\spostflop\\))?,?\\s*
           (-\\s)?
           (?P<SHOOTOUT>Match.*,\\s)?

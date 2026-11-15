@@ -1,0 +1,87 @@
+Poker Hand #TM106348078: Tournament #5948181, PLO-5 Bounty $3.20 Omaha5 Pot Limit - Level4(90/180) - 2020/06/23 19:21:09
+Table '1' 6-max Seat #4 is the button
+Seat 1: 442b49d7 (27,617 in chips)
+Seat 2: 2a1934a5 (6,402 in chips)
+Seat 3: Hero (10,000 in chips)
+Seat 4: bd16e59d (8,669 in chips)
+Seat 6: 7067fd75 (16,372 in chips)
+442b49d7: posts the ante 30
+7067fd75: posts the ante 30
+2a1934a5: posts the ante 30
+bd16e59d: posts the ante 30
+Hero: posts the ante 30
+7067fd75: posts small blind 90
+442b49d7: posts big blind 180
+*** HOLE CARDS ***
+Dealt to 442b49d7
+Dealt to 2a1934a5
+Dealt to Hero [Ac 8h 7c 2c Kd]
+Dealt to bd16e59d
+Dealt to 7067fd75
+2a1934a5: raises 600 to 780
+Hero: folds
+bd16e59d: folds
+7067fd75: folds
+442b49d7: folds
+Uncalled bet (600) returned to 2a1934a5
+*** SHOWDOWN ***
+2a1934a5 collected 600 from pot
+*** SUMMARY ***
+Total pot 600
+Seat 1: 442b49d7 (big blind) folded before Flop
+Seat 2: 2a1934a5 collected (600)
+Seat 3: Hero folded before Flop
+Seat 4: bd16e59d (button) folded before Flop
+Seat 6: 7067fd75 (small blind) folded before Flop
+
+Poker Hand #TM106348084: Tournament #5948181, PLO-5 Bounty $3.20 Omaha5 Pot Limit - Level4(90/180) - 2020/06/23 19:21:33
+Table '1' 6-max Seat #6 is the button
+Seat 1: 442b49d7 (27,407 in chips)
+Seat 2: 2a1934a5 (6,792 in chips)
+Seat 3: Hero (9,970 in chips)
+Seat 4: bd16e59d (8,639 in chips)
+Seat 6: 7067fd75 (16,252 in chips)
+442b49d7: posts the ante 30
+7067fd75: posts the ante 30
+2a1934a5: posts the ante 30
+bd16e59d: posts the ante 30
+Hero: posts the ante 30
+442b49d7: posts small blind 90
+2a1934a5: posts big blind 180
+*** HOLE CARDS ***
+Dealt to 442b49d7
+Dealt to 2a1934a5
+Dealt to Hero [Js Jc 5s 5h 3c]
+Dealt to bd16e59d
+Dealt to 7067fd75
+Hero: raises 216 to 396
+bd16e59d: folds
+7067fd75: folds
+442b49d7: calls 306
+2a1934a5: calls 216
+*** FLOP *** [Qh 6d 6h]
+442b49d7: checks
+2a1934a5: checks
+Hero: checks
+*** TURN *** [Qh 6d 6h] [As]
+442b49d7: checks
+2a1934a5: checks
+Hero: checks
+*** RIVER *** [Qh 6d 6h As] [Kh]
+442b49d7: checks
+2a1934a5: checks
+Hero: checks
+442b49d7: shows [5c 8s 6c 2d 7d] (Three Sixes)
+2a1934a5: shows [Td Th 9d 4d 4s] (Pair of Tens and Pair of Sixes)
+Hero: shows [Js 5h 5s Jc 3c] (Pair of Jacks and Pair of Sixes)
+*** SHOWDOWN ***
+442b49d7 collected 1,338 from pot
+*** SUMMARY ***
+Total pot 1,338
+Board [Qh 6d 6h As Kh]
+Seat 1: 442b49d7 (small blind) showed [8s 6c 5c 2d 7d] and won (1,338) with Three Sixes
+Seat 2: 2a1934a5 (big blind) showed [Th Td 9d 4d 4s] and lost with Pair of Tens and Pair of Sixes
+Seat 3: Hero showed [Js Jc 5s 5h 3c] and lost with Pair of Jacks and Pair of Sixes
+Seat 4: bd16e59d folded before Flop
+Seat 6: 7067fd75 (button) folded before Flop
+
