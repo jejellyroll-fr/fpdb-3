@@ -30,6 +30,13 @@ WINNING_V1 = (
 )
 
 
+WINNING_V1_CASH = (
+    ROOT
+    / "regression-test-files"
+    / "cash"
+    / "Winning"
+    / "PLO8-6max-USD-40-80-201610.disconnected.allin.HH00000000 G0.txt"
+)
 BOM = chr(0xFEFF)
 
 
@@ -156,6 +163,12 @@ def test_the_tournament_pt4_appends_to_a_winning_hand_is_taken_off_and_named_in_
     )
 
 
+def test_an_old_winning_cash_hand_gets_a_file_name_without_a_tournament() -> None:
+    hand = _read(WINNING_V1_CASH, "utf-8").strip()
+
+    assert pt4_database.restore_winning(hand, None, tournament=False) == (hand, "HH20161002 G0")
+
+
 def test_the_file_name_pt4_appends_to_a_winamax_summary_is_taken_off() -> None:
     original = _read(WINAMAX_SUMMARY, "utf-8")
 
@@ -212,6 +225,43 @@ def test_stopping_closes_the_server_side_cursor_and_the_open_file(tmp_path) -> N
     assert (tmp_path / "cash-PokerStars-00001.txt").read_text(encoding="utf-8").endswith("\n")
 
 
+def test_no_more_files_are_open_at_once_than_the_bound(tmp_path, monkeypatch) -> None:
+    """Old-format Winning hands get a file per tournament: thousands must not mean thousands open."""
+    monkeypatch.setattr(pt4_database, "MAX_OPEN_FILES", 2)
+    hand = _read(WINNING_V1, "utf-8").split("\n\n\n")[0].strip()
+    tournaments = [str(1000 + n) for n in range(5)]
+    rows = [(i + 1, "Yatahay Network", number, hand) for i, number in enumerate(tournaments * 2)]
+    most_open = 0
+    write = pt4_database._Writers.write
+
+    def counting(self, *args):
+        nonlocal most_open
+        write(self, *args)
+        most_open = max(most_open, sum(w.handle is not None for w in self.writers.values()))
+
+    monkeypatch.setattr(pt4_database._Writers, "write", counting)
+
+    export_database(FakeConn(tourney=rows), tmp_path)
+
+    assert most_open == 2
+    for number in tournaments:
+        text = (tmp_path / f"tourney-Yatahay_Network HH20160828 T{number}-G0.txt").read_text(encoding="utf-8")
+        assert text.split(pt4_database.HAND_SEPARATOR) == [hand, hand + "\n"]  # reopened to append, nothing lost
+
+
+def test_a_failed_file_holds_its_kind_s_mark_back_to_just_before_it(tmp_path) -> None:
+    stars = _read(STARS_CASH, "utf-8")
+    rows = [(10, "PokerStars", None, stars), (20, "GG Poker", None, stars), (30, "PokerStars", None, stars)]
+    export = export_database(FakeConn(cash=rows), tmp_path, {"cash": 5, "tourney": 7})
+    gg = str(tmp_path / "cash-GG_Poker-00001.txt")
+
+    assert export.marks_after([]) == {"cash": 30, "tourney": 7}
+    assert export.marks_after([gg]) == {"cash": 19, "tourney": 7}
+    assert export.marks_after([str(tmp_path / "cash-PokerStars-00001.txt"), gg]) == {"cash": 9, "tourney": 7}
+    # A summary, or a file the export did not write, holds nothing back.
+    assert export.marks_after([str(tmp_path / "summary-Winamax-3.txt")]) == {"cash": 30, "tourney": 7}
+
+
 def test_summaries_pt4_kept_are_written_one_per_file(tmp_path) -> None:
     conn = FakeConn(summaries=[(7, "PokerStars", "PokerStars Tournament #1, No Limit Hold'em"), (8, "Winamax", "")])
 
@@ -231,7 +281,10 @@ def pt4():
     winning = _read(WINNING_V1, "utf-8")
     hands = [hand for hand in winning.split("\n\n\n") if hand.strip()]
     return FakeConn(
-        cash=[(1, "PokerStars", None, _read(STARS_CASH, "utf-8"))],
+        cash=[
+            (1, "PokerStars", None, _read(STARS_CASH, "utf-8")),
+            (2, "Yatahay Network", None, _read(WINNING_V1_CASH, "utf-8")),
+        ],
         tourney=[(10, "RunItOnce", "145677", RIO_TOURNEY.read_bytes().decode("mac_roman"))]
         + [
             # PT4 appends the tournament to the first line, and does not always link the hand to it.
@@ -254,9 +307,11 @@ def test_what_the_database_holds_is_scanned_as_a_folder_would_be(pt4, legacy_con
         "PokerStars.COM": 1,
         "PokerStars.EU": 1,
         "Winamax": 1,
-        "Ya Poker": 1,
+        "Ya Poker": 2,  # the cash hand's day and the tournament each name a file
     }
-    assert any(" HH20160828 T5795043-G0" in path for files in scan.rooms.values() for path in files)
+    names = [Path(path).name for files in scan.rooms.values() for path in files]
+    assert "tourney-Yatahay_Network HH20160828 T5795043-G0.txt" in names
+    assert "cash-Yatahay_Network HH20161002 G0.txt" in names
 
 
 def test_every_hand_the_database_holds_is_imported(pt4, legacy_config, fresh_db, tmp_path) -> None:

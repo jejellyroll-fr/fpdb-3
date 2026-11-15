@@ -44,8 +44,9 @@ PokerTracker 4 database*, and enter where the database is. PT4's defaults are fi
   settings.
 - **Only new hands.** fpdb remembers the last hand it read from each database
   (`pt4_import_marks.json`, next to `HUD_config.xml`). The next import reads only the hands PT4
-  added since then. Untick *Only the hands added since the last import* to read them all again; hands
-  fpdb already holds are counted as duplicates.
+  added since then. If a hand failed to import, the next import starts again from the file it was
+  in, so it comes over once the cause is fixed. Untick *Only the hands added since the last import* to
+  read them all again; hands fpdb already holds are counted as duplicates.
 - **What comes over** is what an archive would give. fpdb writes the hands to a temporary folder,
   room by room, and imports it as it imports any folder: the same preview, the same iPoker question,
   the same summary. The folder is deleted when the wizard closes. A database of a million hands

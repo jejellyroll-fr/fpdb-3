@@ -641,9 +641,12 @@ class GuiTrackerMigration(QWizard):
         self.summary_page.show_summary(rooms, len(scan.unsupported) if scan else 0)
         export = self.scan_page.database_export
         if export is not None and self.source_page.uses_database():
-            # The next import from this database starts after these hands.
+            # The next import from this database starts after these hands, short of
+            # any file a hand failed in: it is read again once the cause is fixed.
+            results = getattr(self.importer, "file_results", {}) or {}
+            failed = [path for path, result in results.items() if result.errors or result.partial]
             try:
-                pt4_database.save_marks(self.config, self.source_page.database(), export.marks)
+                pt4_database.save_marks(self.config, self.source_page.database(), export.marks_after(failed))
             except OSError:
                 log.exception("Could not remember what the PT4 import brought over")
         self.import_page.finish(_("Import finished."))

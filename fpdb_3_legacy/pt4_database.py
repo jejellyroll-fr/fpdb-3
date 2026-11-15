@@ -31,8 +31,8 @@ from __future__ import annotations
 import json
 import os
 import re
-from collections import Counter
-from collections.abc import Callable, Generator
+from collections import Counter, OrderedDict
+from collections.abc import Callable, Generator, Iterable
 from contextlib import closing, suppress
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -90,7 +90,7 @@ _SUMMARIES = (
 )
 
 # A hand starts again after blank lines in every room's own files.
-HAND_SEPARATOR = "\n\n\n"
+HAND_SEPARATOR = "\n\n\n"  # what the files hold between two hands
 # Hands per file: the parsers read a file whole, so this bounds their memory.
 HANDS_PER_FILE = 5000
 _ROWS_PER_PROGRESS = 1000
@@ -136,10 +136,30 @@ class DatabaseExport:
     summaries: int = 0
     repaired: int = 0
     marks: dict[str, int] = field(default_factory=dict)  # kind -> highest id_hand written
+    # Each hand file -> (kind, first id_hand in it). Rows arrive by id_hand, so the
+    # first is the file's lowest.
+    first_ids: dict[str, tuple[str, int]] = field(default_factory=dict)
 
     @property
     def hand_count(self) -> int:
         return sum(self.hands.values())
+
+    def marks_after(self, failed_files: Iterable[str]) -> dict[str, int]:
+        """The marks to keep once the import has run: short of the first file a hand failed in.
+
+        A file with an error or a partial hand holds its kind's mark back to just
+        before that file, so the next import reads it again once the cause is fixed;
+        what fpdb already stored from it comes back as duplicates. A file no parser
+        reads at all is listed before the import and does not hold the mark back:
+        a room fpdb cannot read would otherwise stop every later import at it.
+        """
+        marks = dict(self.marks)
+        for path in failed_files:
+            entry = self.first_ids.get(os.path.normpath(path))
+            if entry is not None:
+                kind, first = entry
+                marks[kind] = min(marks.get(kind, first - 1), first - 1)
+        return marks
 
 
 def repair_mac_roman(history: str) -> tuple[str, bool]:
@@ -158,24 +178,27 @@ def repair_mac_roman(history: str) -> tuple[str, bool]:
     return repaired, True
 
 
-def restore_winning(history: str, tourney_no: Any) -> tuple[str, str | None]:
+def restore_winning(history: str, tourney_no: Any, *, tournament: bool = True) -> tuple[str, str | None]:
     """An old-format Winning hand as the room wrote it, and the file name its parser reads.
 
-    PT4 appends ``Tournament#<n>`` to the hand's first line, which the room's
-    files never had. ``WinningToFpdb`` reads the tournament from the file name
-    instead: ``HH<yyyymmdd> T<tournament>-G<n>``. The number is the one PT4
-    appended, else PT4's ``tourney_no``. Any other hand comes back unchanged,
-    with no name.
+    ``WinningToFpdb`` refuses an old-format hand whose file is not named
+    ``HH<yyyymmdd> G<n>``, and reads a tournament's number from it:
+    ``HH<yyyymmdd> T<tournament>-G<n>``. PT4 appends ``Tournament#<n>`` to a
+    tournament hand's first line, which the room's files never had; that number,
+    else PT4's ``tourney_no``, goes into the name. Any other hand comes back
+    unchanged, with no name.
     """
     match = _WINNING_V1_FIRST_LINE.match(history)
     if match is None:
         return history, None
     if match.group("appended"):
         history = match.group("head") + history[match.end() :]
+    year, month, day = (int(part) for part in match.group("date").split("/"))
+    if not tournament:
+        return history, f"HH{year}{month:02d}{day:02d} G0"
     number = match.group("tourno") or str(tourney_no or "")
     if not number.isdigit():
         return history, None
-    year, month, day = (int(part) for part in match.group("date").split("/"))
     return history, f"HH{year}{month:02d}{day:02d} T{number}-G0"
 
 
@@ -206,33 +229,77 @@ def _as_text(value: Any) -> str:
 
 
 class _Writer:
-    """Hands of one kind and room, split into files of at most ``HANDS_PER_FILE``."""
+    """Hands of one kind and room, split into files of at most ``HANDS_PER_FILE``.
+
+    Its file can be closed between two hands and is reopened to append: the
+    pool below keeps only so many open at once.
+    """
 
     def __init__(self, folder: Path, stem: str, *, single_file: bool = False) -> None:
         self.folder = folder
         self.stem = stem
         self.single_file = single_file
         self.handle: TextIO | None = None
+        self.path: Path | None = None
         self.in_file = 0
         self.files = 0
 
-    def write(self, history: str) -> None:
-        if self.handle is None or (not self.single_file and self.in_file >= HANDS_PER_FILE):
+    def write(self, history: str) -> bool:
+        """Write one hand; True when it starts a new file."""
+        path = self.path
+        new_file = path is None or (not self.single_file and self.in_file >= HANDS_PER_FILE)
+        if path is None or new_file:
             self.close()
             self.files += 1
             name = f"{self.stem}.txt" if self.single_file else f"{self.stem}-{self.files:05d}.txt"
-            self.handle = (self.folder / name).open("w", encoding="utf-8", newline="\n")
+            path = self.path = self.folder / name
             self.in_file = 0
-        elif self.in_file:
-            self.handle.write(HAND_SEPARATOR)
-        self.handle.write(history)
+        if self.handle is None:
+            self.handle = path.open("w" if new_file else "a", encoding="utf-8", newline="\n")
+        # Each hand ends its line; the next one starts after two blank lines.
+        self.handle.write(("\n\n" if self.in_file else "") + history + "\n")
         self.in_file += 1
+        return new_file
 
     def close(self) -> None:
         if self.handle is not None:
-            self.handle.write("\n")
             self.handle.close()
             self.handle = None
+
+
+# Files kept open at once while writing: one per room is enough, but old-format
+# Winning hands get a file per day or tournament, which can run into thousands.
+MAX_OPEN_FILES = 32
+
+
+class _Writers:
+    """The files of one kind, at most ``MAX_OPEN_FILES`` of them open at a time."""
+
+    def __init__(self, root: Path, kind: str, export: DatabaseExport) -> None:
+        self.root = root
+        self.kind = kind
+        self.export = export
+        self.writers: dict[tuple[bool, str], _Writer] = {}
+        self.open: OrderedDict[tuple[bool, str], _Writer] = OrderedDict()
+
+    def write(self, room: str, name: str | None, id_hand: int, history: str) -> None:
+        key = (name is not None, name or room)
+        writer = self.writers.get(key)
+        if writer is None:
+            stem = f"{self.kind}-{_slug(room)}" if name is None else f"{self.kind}-{_slug(room)} {name}"
+            writer = self.writers[key] = _Writer(self.root, stem, single_file=name is not None)
+        if writer.write(history):
+            self.export.first_ids[os.path.normpath(str(writer.path))] = (self.kind, id_hand)
+        self.open[key] = writer
+        self.open.move_to_end(key)
+        while len(self.open) > MAX_OPEN_FILES:
+            _key, oldest = self.open.popitem(last=False)
+            oldest.close()
+
+    def close(self) -> None:
+        for writer in self.writers.values():
+            writer.close()
+        self.open.clear()
 
 
 def _stream(conn: Any, query: str, params: tuple, name: str) -> Generator[tuple, None, None]:
@@ -250,21 +317,6 @@ def _count(conn: Any, kind: str, since: int) -> int:
     return int(row[0]) if row else 0
 
 
-def _writer_for(
-    root: Path, writers: dict[tuple[bool, str], _Writer], kind: str, room: str, name: str | None
-) -> _Writer:
-    """The file a hand goes to: its room's current file, or the one its rebuilt name calls for."""
-    key = (name is not None, name or room)
-    writer = writers.get(key)
-    if writer is None:
-        if name is None:
-            writer = _Writer(root, f"{kind}-{_slug(room)}")
-        else:
-            writer = _Writer(root, f"{kind}-{_slug(room)} {name}", single_file=True)
-        writers[key] = writer
-    return writer
-
-
 def _export_kind(
     conn: Any,
     root: Path,
@@ -275,7 +327,7 @@ def _export_kind(
     should_stop: Callable[[], bool] | None,
 ) -> bool:
     """Write one kind's hands after ``since``; False when ``should_stop`` cut it short."""
-    writers: dict[tuple[bool, str], _Writer] = {}
+    writers = _Writers(root, kind, export)
     rows = _stream(conn, _HISTORIES[kind], (since,), f"fpdb_{kind}")
     try:
         for id_hand, pt4_room, tourney_no, value in rows:
@@ -288,14 +340,13 @@ def _export_kind(
             history, repaired = repair_mac_roman(history)
             export.repaired += repaired
             room = str(pt4_room or "unknown")
-            history, name = restore_winning(history, tourney_no) if kind == "tourney" else (history, None)
-            _writer_for(root, writers, kind, room, name).write(history)
+            history, name = restore_winning(history, tourney_no, tournament=kind == "tourney")
+            writers.write(room, name, int(id_hand), history)
             export.hands[(kind, room)] += 1
             export.marks[kind] = max(export.marks.get(kind, 0), int(id_hand))
     finally:
         rows.close()  # ends the server-side cursor now, not at collection
-        for writer in writers.values():
-            writer.close()
+        writers.close()
     return True
 
 

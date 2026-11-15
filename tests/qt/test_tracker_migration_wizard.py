@@ -371,6 +371,8 @@ def fake_pt4(monkeypatch):
                 source = next(p for p in sorted((CASH / room).rglob("*.txt")) if p.stat().st_size)
                 shutil.copy(source, Path(folder) / f"cash-{room}-00001.txt")
             export = DatabaseExport(folder, marks={"cash": 99, "tourney": 7}, repaired=1)
+            for room, first in (("Stars", 40), ("Winamax", 60)):
+                export.first_ids[str(Path(folder) / f"cash-{room}-00001.txt")] = ("cash", first)
             export.hands[("cash", "PokerStars")] = 2
             export.hands[("cash", "Winamax")] = 1
             return export
@@ -487,3 +489,27 @@ def test_a_database_that_cannot_be_read_says_why(qtbot, own_config, monkeypatch)
     qtbot.waitUntil(lambda: "could not be read" in wizard.scan_page.status.text(), timeout=10000)
     assert "password authentication failed" in wizard.scan_page.status.text()
     assert not wizard.scan_page.isComplete()
+
+
+class FailingImporter(FakeImporter):
+    """An import in which one of the database's files has hands that failed."""
+
+    def runImport(self):
+        result = super().runImport()
+        failing = next(path for path, _site in self.sources if path.endswith("cash-Winamax-00001.txt"))
+        self.file_results[failing] = FileImportResult("Winamax", stored=3, errors=2)
+        return result
+
+
+@pytest.mark.qt
+def test_hands_that_failed_are_read_again_by_the_next_import(qtbot, own_config, fake_pt4) -> None:
+    from fpdb_3_legacy import pt4_database
+
+    wizard = open_wizard(qtbot, own_config, FailingImporter(), FakeLock())
+    advance_to_database_scan(qtbot, wizard)
+
+    wizard.next()  # scan -> import
+    qtbot.waitUntil(wizard.import_page.isComplete, timeout=10000)
+
+    # Winamax's file started at id_hand 60: the next import starts there again.
+    assert pt4_database.load_marks(own_config, fake_pt4[-1]["database"]) == {"cash": 59, "tourney": 7}
