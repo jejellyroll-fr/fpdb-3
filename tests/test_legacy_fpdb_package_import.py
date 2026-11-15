@@ -3,8 +3,8 @@
 On Windows ".pyw" is an importable source suffix. With `fpdb_3_legacy/` at the
 front of `sys.path` -- where `uv run fpdb_3_legacy`, `python fpdb.pyw` and the
 HUD script all put it -- `import fpdb` then finds the GUI script before the
-package, and the start-up died on `from fpdb.compat import toml_module` in
-`phh_import` with a circular ImportError.
+package, and the start-up died on the first `from fpdb... import` with a
+circular ImportError.
 
 These tests emulate Windows by adding ".pyw" to the source suffixes, in process:
 nothing here starts an interpreter or the GUI script.
@@ -85,14 +85,14 @@ def test_the_working_directory_entry_is_left_out_too(fresh_fpdb: None, monkeypat
     assert _same_file(sys.modules["fpdb"].__file__, PACKAGE_INIT)
 
 
-def test_fpdb_compat_resolves_after_the_guard(fresh_fpdb: None) -> None:
+def test_an_fpdb_submodule_resolves_after_the_guard(fresh_fpdb: None) -> None:
     sys.path.insert(0, str(LEGACY_DIR))
 
     fpdb_3_legacy._import_fpdb_package()
-    compat = importlib.import_module("fpdb.compat")
+    protocol = importlib.import_module("fpdb.infrastructure.platform.protocol")
 
-    assert _same_file(compat.__file__, ROOT / "fpdb" / "compat.py")
-    assert callable(compat.toml_module)
+    assert _same_file(protocol.__file__, ROOT / "fpdb" / "infrastructure" / "platform" / "protocol.py")
+    assert hasattr(protocol, "Platform")
 
 
 def test_sys_path_is_restored(fresh_fpdb: None, monkeypatch: pytest.MonkeyPatch) -> None:

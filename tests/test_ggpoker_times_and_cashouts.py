@@ -39,7 +39,7 @@ MIDNIGHT_SESSION = FLOP / "PLO-6max-USD-0.05-0.10-202611.past.midnight.cashout.r
 CASHOUT_SESSION_NAME = "GG20261106-2036 - RushAndCash3506303 - 0.05 - 0.1 - 6max.txt"
 MIDNIGHT_SESSION_NAME = "GG20261106-2249 - RushAndCash3520626 - 0.05 - 0.1 - 6max.txt"
 
-UTC = datetime.timezone.utc
+UTC = datetime.UTC
 
 
 def _parse(path: Path) -> dict[str, object]:

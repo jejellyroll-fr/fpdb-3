@@ -26,18 +26,11 @@ import functools
 import json
 import re
 import struct
+import tomllib
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
-
-try:  # Python 3.11+
-    import tomllib as _toml
-except ModuleNotFoundError:  # pragma: no cover - exercised only on <3.11
-    try:
-        import tomli as _toml  # type: ignore[no-redef]
-    except ModuleNotFoundError:  # pragma: no cover
-        _toml = None  # type: ignore[assignment]
 
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -727,10 +720,10 @@ class ImportReport:
 
 def _load_existing_descriptors(dest_file: Path) -> dict[str, dict[str, Any]]:
     """Read already-written descriptors from ``dest_file`` keyed by name (for merge)."""
-    if not dest_file.exists() or _toml is None:
+    if not dest_file.exists():
         return {}
     try:
-        doc = _toml.loads(dest_file.read_text(encoding="utf-8"))
+        doc = tomllib.loads(dest_file.read_text(encoding="utf-8"))
         stats = doc.get("stat", [])
         if isinstance(stats, dict):
             stats = [stats]
