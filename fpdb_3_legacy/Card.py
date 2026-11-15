@@ -303,10 +303,10 @@ games = {  # base, category
         "RIVER",
         [(0, 4)],
     ),
-    # The second field is the game name handed to poker-eval's Python binding,
-    # which does not accept "fusion" (the C library's game_fusion enumerator is
-    # 2-card hold'em anyway). Fusion's showdown is Omaha's: exactly two of the
-    # four hole cards, as the C library's own Fusion evaluator does.
+    # The second field evaluates showdowns and ranks hands (stove, pots), where
+    # every hole card is dealt: Fusion's showdown is Omaha's, exactly two of the
+    # four hole cards. All-in equity uses poker-eval's own "fusion" game instead,
+    # which deals the hole cards still to come (#818).
     "fusion": (
         "hold",
         "omaha",

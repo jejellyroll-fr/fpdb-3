@@ -29,7 +29,15 @@ from fpdb_3_legacy.derived_stats_base import (
     DerivedStatsBase,
     _chip_increment,
 )
-from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity, expected_pot_share, load_poker_eval
+from fpdb_3_legacy.equity import (
+    DEFAULT_EQUITY_ITERATIONS,
+    FUSION_ALL_HOLE_CARDS_BOARD,
+    EquityUnavailableError,
+    calculate_equity,
+    expected_pot_share,
+    fusion_pockets,
+    load_poker_eval,
+)
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 pokereval = load_poker_eval()
@@ -430,18 +438,11 @@ class DerivedStatsAllInMixin(DerivedStatsBase):
             if not hasattr(self, "handsstove"):
                 self.handsstove = []
 
-            # Fusion deals a hole card on the flop and another on the turn. An
-            # all-in before the last of them leaves the engine with pocket cards
-            # that were not dealt yet, and it cannot sample future pocket cards:
-            # no exact equity exists, so none is stored.
-            last_hole_street = max((streets.get(s, 0) for s in getattr(hand, "holeStreets", ())), default=0)
+            fusion = hand.gametype.get("category") == "fusion"
 
             # Calculate equity for each all-in situation
             for street_name, street_data in boards.items():
                 if street_data.get("allin", False):
-                    if streets.get(street_name, last_hole_street) < last_hole_street:
-                        log.debug("All-in on %s precedes the last hole card: no equity", street_name)
-                        continue
                     try:
                         if pokereval:
                             player_hands = []
@@ -460,11 +461,22 @@ class DerivedStatsAllInMixin(DerivedStatsBase):
 
                             if len(player_hands) >= MIN_PLAYERS_FOR_GAME:
                                 board_cards = street_data["board"][0] if street_data["board"] else []
+                                equity_game, iterations = game_type, None
+                                if fusion:
+                                    # Fusion's all-in equity deals the hole cards
+                                    # still to come (#818). Exhaustively that is
+                                    # 25 s for a three-way flop and out of reach
+                                    # preflop, so before the turn it is sampled.
+                                    equity_game = "fusion"
+                                    player_hands = fusion_pockets(player_hands, board_cards)
+                                    if len(board_cards) < FUSION_ALL_HOLE_CARDS_BOARD:
+                                        iterations = DEFAULT_EQUITY_ITERATIONS
 
                                 result = calculate_equity(
-                                    game_type,
+                                    equity_game,
                                     player_hands,
                                     board_cards,
+                                    iterations=iterations,
                                     backend=pokereval,
                                 )
                                 pot = Decimal(hand.totalpot)

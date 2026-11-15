@@ -24,7 +24,14 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("equity")
 
-COMMUNITY_CARD_GAMES = frozenset({"holdem", "holdem8", "omaha", "omaha8", "omaha5", "omaha5_8", "omaha6", "shortdeck"})
+COMMUNITY_CARD_GAMES = frozenset(
+    {"holdem", "holdem8", "omaha", "omaha8", "omaha5", "omaha5_8", "omaha6", "shortdeck", "fusion"}
+)
+# Fusion holds two hole cards preflop, a third from the flop and a fourth from
+# the turn (#818), keyed here by the number of board cards. poker-eval (1.3.1+)
+# deals the missing ones itself, so a pocket must be the cards held then.
+FUSION_HOLE_CARDS = {0: 2, 3: 3, 4: 4, 5: 4}
+FUSION_ALL_HOLE_CARDS_BOARD = 4
 POCKET_CARD_COUNTS = {
     "holdem": 2,
     "holdem8": 2,
@@ -144,6 +151,19 @@ def load_poker_eval() -> PokerEvalBackend | None:
     except (AttributeError, ImportError, OSError):
         # OSError covers a Python wrapper whose native shared library cannot load.
         return None
+
+
+def fusion_pockets(pockets: Sequence[Sequence[str]], board: Sequence[str]) -> list[list[str]]:
+    """Return the Fusion hole cards each player held with this board.
+
+    A hand history lists a Fusion pocket in deal order (two preflop, the flop's,
+    the turn's), shown cards included, so the cards held are the first ones.
+    """
+    held = FUSION_HOLE_CARDS.get(len(board))
+    if held is None:
+        msg = f"A Fusion board has 0, 3, 4 or 5 cards, not {len(board)}"
+        raise ValueError(msg)
+    return [list(pocket[:held]) for pocket in pockets]
 
 
 def _validate_cards(pockets: list[list[str]], board: list[str], dead: list[str]) -> None:

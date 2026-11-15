@@ -126,20 +126,20 @@ def test_hero_decision_metrics_supports_stud_and_draw() -> None:
     assert metrics["pot_odds_ratio"] == Decimal(3)  # 60 / 20 = 3:1
 
 
-def _fusion_replayer(monkeypatch) -> tuple[Any, list[str]]:
+def _fusion_replayer(monkeypatch) -> tuple[Any, list[tuple[str, list[list[str]], list[str]]]]:
     replayer = cast(Any, GuiReplayer).__new__(GuiReplayer)  # pylint: disable=no-value-for-parameter
     replayer.Heroes = "Hero"
     replayer.currency_code = "USD"
     hand = SimpleNamespace(gametype={"category": "fusion", "base": "hold"}, holeStreets=["PREFLOP", "FLOP", "TURN"])
     replayer.replay_model = cast(Any, SimpleNamespace(hand=hand))
-    games: list[str] = []
+    calls: list[tuple[str, list[list[str]], list[str]]] = []
 
-    def engine(game, *_args, **_kwargs):
-        games.append(game)
+    def engine(game, pockets, board, **_kwargs):
+        calls.append((game, pockets, board))
         return SimpleNamespace(players=[SimpleNamespace(equity=Decimal("0.30")), SimpleNamespace(equity=Decimal("0.70"))])
 
     monkeypatch.setattr("fpdb_3_legacy.GuiReplayer.calculate_equity", engine)
-    return replayer, games
+    return replayer, calls
 
 
 def _fusion_frame(*streets: str) -> Any:
@@ -156,23 +156,22 @@ def _fusion_frame(*streets: str) -> Any:
     ))
 
 
-def test_fusion_shows_no_equity_before_the_last_hole_card(monkeypatch) -> None:
-    # On the flop the turn's hole card is not dealt yet: the final pockets would
-    # hand the engine a card nobody held at the time (#818).
-    replayer, games = _fusion_replayer(monkeypatch)
+def test_fusion_flop_equity_holds_only_the_cards_dealt_so_far(monkeypatch) -> None:
+    # On the flop the turn's hole card is not dealt yet: the engine gets the
+    # three cards each player holds and deals the fourth itself (#818).
+    replayer, calls = _fusion_replayer(monkeypatch)
 
     metrics = replayer._hero_decision_metrics(_fusion_frame("FLOP"), 0)
 
-    assert games == []
+    assert calls == [("fusion", [["As", "Kd", "Qc"], ["Td", "Tc", "3h"]], ["2s", "5s", "8s"])]
     assert metrics["pot_odds_pct"] == Decimal(25)
-    assert metrics["call_equity_pct"] is None
-    assert metrics["call_edge_pts"] is None
+    assert metrics["call_equity_pct"] == Decimal(30)
 
 
-def test_fusion_equity_from_the_turn_uses_omaha_rules(monkeypatch) -> None:
-    replayer, games = _fusion_replayer(monkeypatch)
+def test_fusion_equity_from_the_turn_holds_all_four_hole_cards(monkeypatch) -> None:
+    replayer, calls = _fusion_replayer(monkeypatch)
 
     metrics = replayer._hero_decision_metrics(_fusion_frame("FLOP", "TURN"), 0)
 
-    assert games == ["omaha"]
+    assert calls == [("fusion", [["As", "Kd", "Qc", "Jh"], ["Td", "Tc", "3h", "4h"]], ["2s", "5s", "8s", "9s"])]
     assert metrics["call_equity_pct"] == Decimal(30)

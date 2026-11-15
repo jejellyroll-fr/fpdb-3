@@ -464,7 +464,7 @@ def test_boards_dict_detects_real_all_in_and_accumulates_board() -> None:
     assert boards["RIVER"] == {"board": [["2c", "3d", "4h", "5s", "6c"]], "allin": False}
 
 
-# The games pypoker-eval accepts, as its "not a valid value" error lists them.
+# The games pypoker-eval (1.3.1) accepts, as its "not a valid value" error lists them.
 POKER_EVAL_GAMES = frozenset(
     {
         "holdem",
@@ -480,6 +480,7 @@ POKER_EVAL_GAMES = frozenset(
         "5drawnsq",
         "lowball",
         "lowball27",
+        "fusion",
     },
 )
 
@@ -523,9 +524,10 @@ FUSION_HOLECARDS = {
 }
 
 
-def test_fusion_all_in_before_the_last_hole_card_stores_no_equity(monkeypatch) -> None:
-    # On the flop the fourth hole card is not dealt yet: the final pockets would
-    # hand the engine a card nobody held at the time of the all-in.
+def test_fusion_all_in_on_the_flop_samples_the_turn_hole_card(monkeypatch) -> None:
+    # On the flop the fourth hole card is not dealt yet: the engine gets the
+    # three cards each player held and deals the rest itself (#818). Exact
+    # enumeration is far too slow multiway, so it is sampled.
     backend = RecordingPokerEval()
     monkeypatch.setattr("fpdb_3_legacy.derived_stats_allin.pokereval", backend)
     stats = _fusion_stats()
@@ -539,12 +541,26 @@ def test_fusion_all_in_before_the_last_hole_card_stores_no_equity(monkeypatch) -
         FUSION_HOLECARDS,
     )
 
-    assert not backend.calls
-    assert "allInEVCalculated" not in stats.handsplayers["hero"]
+    (call,) = backend.calls
+    assert call["game"] == "fusion"
+    assert call["pockets"] == [["As", "Kd", "Qc"], ["Td", "Tc", "3h"]]
+    assert call["board"] == ["2s", "5s", "8s", "__", "__"]
+    assert call["iterations"] == equity_module.DEFAULT_EQUITY_ITERATIONS
+    assert stats.handsplayers["hero"]["allInEVCalculated"] is True
+
+
+def test_fusion_pockets_keep_the_cards_held_with_the_board() -> None:
+    pockets = [["As", "Kd", "Qc", "Jh"], ["Td", "Tc", "3h", "4h"]]
+
+    assert equity_module.fusion_pockets(pockets, []) == [["As", "Kd"], ["Td", "Tc"]]
+    assert equity_module.fusion_pockets(pockets, ["2s", "5s", "8s"]) == [["As", "Kd", "Qc"], ["Td", "Tc", "3h"]]
+    assert equity_module.fusion_pockets(pockets, ["2s", "5s", "8s", "9s", "2d"]) == pockets
+    with pytest.raises(ValueError, match="0, 3, 4 or 5"):
+        equity_module.fusion_pockets(pockets, ["2s"])
 
 
 @pytest.mark.skipif(equity_module.load_poker_eval() is None, reason="pypoker-eval is not installed")
-def test_fusion_all_in_on_the_turn_is_evaluated_with_omaha_rules() -> None:
+def test_fusion_all_in_on_the_turn_is_exact_under_omaha_rules() -> None:
     # Four spades on board, one in the hero's hand: a flush under hold'em rules,
     # nothing under Fusion's (exactly two hole cards), so the tens are ahead.
     stats = _fusion_stats()
