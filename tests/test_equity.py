@@ -539,7 +539,7 @@ def test_fusion_all_in_before_the_last_hole_card_stores_no_equity(monkeypatch) -
         FUSION_HOLECARDS,
     )
 
-    assert backend.calls == []
+    assert not backend.calls
     assert "allInEVCalculated" not in stats.handsplayers["hero"]
 
 

@@ -112,6 +112,23 @@ def replay_hero_equity(frame, hero_name: str, game: str, *, backend=None, iterat
     return result.players[hero_index].equity
 
 
+BOARD_STREETS = ("FLOP", "TURN", "RIVER")
+
+
+def _hole_cards_all_dealt(hand: Any, frame: Any) -> bool:
+    """Whether every hole card is dealt by this frame.
+
+    Fusion deals a hole card on the flop and another on the turn (#818). The
+    replay players hold their final pockets from the start, so a frame before
+    the turn would hand the engine cards nobody held yet: no equity exists
+    there. Games that deal every hole card at once are unaffected.
+    """
+    hole_streets = list(getattr(hand, "holeStreets", None) or ())
+    if len(hole_streets) < 2 or hole_streets[-1] not in BOARD_STREETS:
+        return True
+    return hole_streets[-1] in set(getattr(frame, "render_board", None) or ())
+
+
 def _rank_five(cards: list[str]) -> tuple:
     """Return a comparable strength tuple for exactly five cards (high hand)."""
     values = sorted((_RANK_VALUE[c[0]] for c in cards), reverse=True)
@@ -2331,7 +2348,7 @@ class GuiReplayer(QWidget):
         game_info = Card.games.get(category)
         game = (game_info[1] if game_info else None) or category or (hand.gametype.get("base", "") if hand else "")
         equity = None
-        if game:
+        if game and _hole_cards_all_dealt(hand, frame):
             cache: dict[Any, Decimal | None] = getattr(self, "_equity_cache", None) or {}
             self._equity_cache = cache
             key = (
