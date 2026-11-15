@@ -303,8 +303,10 @@ games = {  # base, category
         "RIVER",
         [(0, 4)],
     ),
-    # The second field is the game name handed to poker-eval, which has no
-    # "fusion": Fusion's showdown is Omaha's (exactly two of the four hole cards).
+    # The second field is the game name handed to poker-eval's Python binding,
+    # which does not accept "fusion" (the C library's game_fusion enumerator is
+    # 2-card hold'em anyway). Fusion's showdown is Omaha's: exactly two of the
+    # four hole cards, as the C library's own Fusion evaluator does.
     "fusion": (
         "hold",
         "omaha",
