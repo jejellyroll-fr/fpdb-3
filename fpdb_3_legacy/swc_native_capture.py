@@ -103,6 +103,8 @@ class NativeTableInfo:
     family: str
     #: The room's seat capacity, when the descriptor's trailer carried it.
     max_seats: int | None = None
+    #: The betting limit the descriptor's game signature names (``fl``/``pl``/``nl``).
+    limit_type: str | None = None
 
 
 @dataclass(frozen=True)
@@ -1580,6 +1582,11 @@ def _resolve_native_hand_game(
         # Public labels refine the broad family (e.g. Badugi vs 2-7 Single
         # Draw). The table name does not identify its betting limit reliably.
         base, category, limit_type = definition.base, definition.category, "unknown"
+    if table.limit_type is not None:
+        # The descriptor's game signature names the limit outright; the family
+        # default above is only a guess from the game (a FL Big O table is
+        # still Omaha).
+        limit_type = table.limit_type
     return family, base, category, limit_type
 
 
@@ -1847,23 +1854,73 @@ def _merge_native_collections(type_15_events: list[NativeCollectionEvent], deale
 
 
 def extract_table_info(message: NativeProtocolMessage) -> NativeTableInfo | None:
+    """The table a descriptor names, from a class-34 or a class-31 message.
+
+    Class 34 is what the room sends when a table window opens. A tournament
+    table the room seats the player at can arrive with only a class-31
+    descriptor instead (#829); without reading it the table had no entry in the
+    table map, ``extract_game_state`` kept none of its snapshots, and every hand
+    played there was dropped without a word.
+    """
     payload = message.payload
-    if len(payload) < 18 or int.from_bytes(payload[:2], "little") != 34:
+    if len(payload) < 18:
+        return None
+    message_class = int.from_bytes(payload[:2], "little")
+    if message_class == 31:
+        return _extract_tournament_table_info(payload)
+    if message_class != 34:
         return None
     name_size = int.from_bytes(payload[16:18], "little")
     if name_size == 0 or 18 + name_size > len(payload):
         return None
     name = payload[18 : 18 + name_size].decode("utf-8", "replace")
     tournament_value = int.from_bytes(payload[11:15], "little")
-    searchable = f"{name} " + " ".join(value.decode("utf-8", "replace") for value in _PRINTABLE.findall(payload))
     trailer = payload[18 + name_size : 18 + name_size + 16]
-    family = _native_table_family(name, searchable, trailer)
-    return NativeTableInfo(
+    return _native_table_info(
+        payload,
         table_id=int.from_bytes(payload[6:10], "little"),
         name=name,
         tournament_id=tournament_value or None,
-        family=family,
-        max_seats=_native_table_max_seats(trailer),
+        trailer=trailer,
+    )
+
+
+def _extract_tournament_table_info(payload: bytes) -> NativeTableInfo | None:
+    """Read the class-31 descriptor of a tournament table.
+
+    Layout, from the capture of a 7-Card Stud freeroll whose table never got a
+    class-34 descriptor: the tournament id at offset 6, four zero bytes, the
+    table id at 14, ``01``, the tournament id again at 19, one byte, the name's
+    length (u16) at 24 and the name from 26, then the same trailer a class-34
+    descriptor carries. The two copies of the tournament id have to agree, so a
+    message of this class shaped differently yields nothing.
+    """
+    if len(payload) < 26:
+        return None
+    tournament_id = int.from_bytes(payload[6:10], "little")
+    table_id = int.from_bytes(payload[14:18], "little")
+    if not tournament_id or not table_id or payload[19:23] != payload[6:10]:
+        return None
+    name_size = int.from_bytes(payload[24:26], "little")
+    if name_size == 0 or 26 + name_size > len(payload):
+        return None
+    name = payload[26 : 26 + name_size].decode("utf-8", "replace")
+    trailer = payload[26 + name_size : 26 + name_size + 16]
+    return _native_table_info(payload, table_id=table_id, name=name, tournament_id=tournament_id, trailer=trailer)
+
+
+def _native_table_info(
+    payload: bytes, *, table_id: int, name: str, tournament_id: int | None, trailer: bytes
+) -> NativeTableInfo:
+    searchable = f"{name} " + " ".join(value.decode("utf-8", "replace") for value in _PRINTABLE.findall(payload))
+    signature = _native_table_signature(trailer)
+    return NativeTableInfo(
+        table_id=table_id,
+        name=name,
+        tournament_id=tournament_id,
+        family=_native_table_family(name, searchable, trailer),
+        max_seats=signature[2] if signature else None,
+        limit_type=signature[0] if signature else None,
     )
 
 
@@ -1871,24 +1928,47 @@ def extract_table_info(message: NativeProtocolMessage) -> NativeTableInfo | None
 #: rejects anything above it, so a capacity beyond this is a misread trailer.
 _MAX_NATIVE_SEATS = 10
 
+#: First letter of a descriptor's game signature: the betting limit. Read from
+#: the lobby, which lists every table with this signature: ``F`` on Stud-8 and
+#: 2-7 Triple Draw, ``P`` on the PLO tables, ``U`` on NL Hold'em and 2-7 Single
+#: Draw.
+_NATIVE_SIGNATURE_LIMITS = {ord("F"): "fl", ord("P"): "pl", ord("U"): "nl"}
 
-def _native_table_max_seats(trailer: bytes) -> int | None:
-    """The table's seat capacity, from the fixed block that follows its name.
+#: The byte after the seat count: ``12`` on a cash (``R``ing) table, ``00`` on a
+#: ``T``ournament table.
+_NATIVE_SIGNATURE_KIND_MARKERS = {ord("R"): 18, ord("T"): 0}
 
-    The trailer is a small fixed structure: ``02 04 00``, then the two-byte game
-    signature ``_native_table_family`` already reads below (``PR`` on PLO tables,
-    ``UR`` on Hold'em), then ``03``, then this byte, then ``12 00``. Read only
-    when those neighbours are where they should be, so a descriptor shaped
-    differently yields nothing rather than a plausible-looking wrong number.
 
-    Confirmed against the room's own hand histories for every table in the
+def _native_table_signature(trailer: bytes) -> tuple[str, str, int] | None:
+    """``(limit_type, kind, max_seats)`` from the fixed block after a table's name.
+
+    The trailer is a small fixed structure: three bytes, then a two-byte game
+    signature (limit letter, then ``R`` for a cash table or ``T`` for a
+    tournament one), then ``03``, then the seat capacity, then a marker byte that
+    depends on the kind. Read only when those neighbours are where they should
+    be, so a descriptor shaped differently yields nothing rather than a
+    plausible-looking wrong number.
+
+    Confirmed against the room's own hand histories for every cash table in the
     development capture: table 24812 reads 9 and is written ``9-max``, tables
-    299657213 and 299672838 read 8 and are written ``8-max``.
+    299657213 and 299672838 read 8 and are written ``8-max``. The 7-Card Stud
+    freeroll reads ``FT`` and 6 seats, and deals at most six players.
     """
-    if len(trailer) < 8 or trailer[4:5] != b"R" or trailer[5] != 3 or trailer[7] != 18:
+    if len(trailer) < 8 or trailer[5] != 3:
+        return None
+    limit_type = _NATIVE_SIGNATURE_LIMITS.get(trailer[3])
+    if limit_type is None or _NATIVE_SIGNATURE_KIND_MARKERS.get(trailer[4]) != trailer[7]:
         return None
     seats = trailer[6]
-    return seats if 2 <= seats <= _MAX_NATIVE_SEATS else None
+    if not 2 <= seats <= _MAX_NATIVE_SEATS:
+        return None
+    return limit_type, "tour" if trailer[4] == ord("T") else "ring", seats
+
+
+def _native_table_max_seats(trailer: bytes) -> int | None:
+    """The table's seat capacity, when its game signature can be read."""
+    signature = _native_table_signature(trailer)
+    return signature[2] if signature else None
 
 
 def _native_table_max_seats_for_hand(table: NativeTableInfo, players: list[dict]) -> int:
