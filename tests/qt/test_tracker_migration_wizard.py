@@ -472,8 +472,8 @@ def test_closing_the_wizard_removes_what_it_wrote_from_the_database(qtbot, own_c
 def test_a_database_that_cannot_be_read_says_why(qtbot, own_config, monkeypatch) -> None:
     from fpdb_3_legacy import GuiTrackerMigration as module
 
-    def refused(database, password, folder, marks):
-        def run(thread):
+    def refused(*_args):
+        def run(_thread):
             raise RuntimeError('password authentication failed for user "postgres"')
 
         return run

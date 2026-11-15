@@ -225,7 +225,7 @@ def test_summaries_pt4_kept_are_written_one_per_file(tmp_path) -> None:
 
 
 @pytest.fixture
-def pt4(tmp_path):
+def pt4():
     """A PT4 database holding a Stars cash hand, a RunItOnce tournament stored as Mac Roman,
     old-format Winning tournament hands and a Winamax summary, each as PT4 stores it."""
     winning = _read(WINNING_V1, "utf-8")
@@ -248,7 +248,7 @@ def test_what_the_database_holds_is_scanned_as_a_folder_would_be(pt4, legacy_con
     scan = scan_folder(legacy_config, export.folder)
 
     assert export.repaired == 1
-    assert scan.unsupported == []
+    assert not scan.unsupported
     # The dollar cash hand and the euro tournament land where their files would: .COM and .EU.
     assert {room: len(files) for room, files in scan.rooms.items()} == {
         "PokerStars.COM": 1,
