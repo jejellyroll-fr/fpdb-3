@@ -14,8 +14,10 @@ from __future__ import annotations
 
 import ast
 import os
+from collections.abc import Callable
 from pathlib import Path
 from types import CellType, CodeType, FunctionType, SimpleNamespace
+from typing import Any
 
 import pytest
 from PySide6 import QtCore, QtWidgets
@@ -47,59 +49,74 @@ def _namespace(platform: str) -> dict:
 _WINDOW_METHODS = ("_add_title_and_menu_bars", "menuBar")
 
 
-def _class_def(name: str) -> ast.ClassDef:
-    return next(node for node in TREE.body if isinstance(node, ast.ClassDef) and node.name == name)
-
-
-def _build_class(name: str, base: type, methods: list[ast.FunctionDef], namespace: dict) -> type:
-    """Make a ``base`` subclass whose methods are compiled from ``fpdb.pyw``.
+def _compiled_methods(
+    class_name: str, namespace: dict, names: tuple[str, ...] | None = None
+) -> tuple[dict[str, FunctionType], CellType]:
+    """Compile methods of a ``fpdb.pyw`` class into plain functions.
 
     The methods are compiled inside a class body so zero-argument ``super()``
     gets its ``__class__`` cell, then turned into functions from their code
-    objects, without running the module or class body.
+    objects, without running the module or class body. The caller puts the
+    class the functions end up on into the returned cell.
     """
+    class_def = next(node for node in TREE.body if isinstance(node, ast.ClassDef) and node.name == class_name)
+    nodes = {
+        node.name: node
+        for node in class_def.body
+        if isinstance(node, ast.FunctionDef) and (names is None or node.name in names)
+    }
+    assert names is None or sorted(nodes) == sorted(names)
     class_node = ast.ClassDef(
-        name=name,
+        name=class_name,
         bases=[],
         keywords=[],
-        body=methods,
+        body=list(nodes.values()),
         decorator_list=[],
         type_params=[],
     )
     module = ast.fix_missing_locations(ast.Module(body=[class_node], type_ignores=[]))
     compiled = compile(module, str(SOURCE), "exec")
-    body_code = next(item for item in compiled.co_consts if isinstance(item, CodeType) and item.co_name == name)
+    body_code = next(item for item in compiled.co_consts if isinstance(item, CodeType) and item.co_name == class_name)
 
     class_cell = CellType()
-    nodes = {method.name: method for method in methods}
-    attributes = {}
+    functions = {}
     for code in (item for item in body_code.co_consts if isinstance(item, CodeType)):
         assert set(code.co_freevars) <= {"__class__"}, code.co_freevars
-        node = nodes[code.co_name]
-        defaults = tuple(ast.literal_eval(default) for default in node.args.defaults) or None
+        defaults = tuple(ast.literal_eval(default) for default in nodes[code.co_name].args.defaults) or None
         closure = (class_cell,) if code.co_freevars else None
-        attributes[code.co_name] = FunctionType(code, namespace, code.co_name, defaults, closure)
-    assert set(attributes) == set(nodes)
-
-    cls = type(name, (base,), attributes)
-    class_cell.cell_contents = cls
-    return cls
+        functions[code.co_name] = FunctionType(code, namespace, code.co_name, defaults, closure)
+    assert set(functions) == set(nodes)
+    return functions, class_cell
 
 
-def _window_class(platform: str) -> type[QtWidgets.QMainWindow]:
-    """A ``QMainWindow`` carrying the real ``CustomTitleBar`` and chrome methods."""
+class _Window(QtWidgets.QMainWindow):
+    """Stand-in for ``fpdb``: what its ``__init__`` sets around the chrome."""
+
+    central_widget: QtWidgets.QWidget
+    central_layout: QtWidgets.QVBoxLayout
+    custom_title_bar: Any
+    _add_title_and_menu_bars: Callable[[], None]
+
+
+def _window_class(platform: str) -> type[_Window]:
+    """A ``_Window`` carrying the real ``CustomTitleBar`` and chrome methods."""
     namespace = _namespace(platform)
-    title_bar_methods = [node for node in _class_def("CustomTitleBar").body if isinstance(node, ast.FunctionDef)]
-    namespace["CustomTitleBar"] = _build_class("CustomTitleBar", QtWidgets.QWidget, title_bar_methods, namespace)
+    title_bar_methods, title_bar_cell = _compiled_methods("CustomTitleBar", namespace)
+    title_bar_class = type("CustomTitleBar", (QtWidgets.QWidget,), title_bar_methods)
+    title_bar_cell.cell_contents = title_bar_class
+    namespace["CustomTitleBar"] = title_bar_class
 
-    window_methods = [
-        node for node in _class_def("fpdb").body if isinstance(node, ast.FunctionDef) and node.name in _WINDOW_METHODS
-    ]
-    assert sorted(method.name for method in window_methods) == sorted(_WINDOW_METHODS)
-    return _build_class("_Window", QtWidgets.QMainWindow, window_methods, namespace)
+    methods, window_cell = _compiled_methods("fpdb", namespace, _WINDOW_METHODS)
+
+    class _PlatformWindow(_Window):
+        _add_title_and_menu_bars = methods["_add_title_and_menu_bars"]
+        menuBar = methods["menuBar"]
+
+    window_cell.cell_contents = _PlatformWindow
+    return _PlatformWindow
 
 
-def _build_window(platform: str) -> QtWidgets.QMainWindow:
+def _build_window(platform: str) -> _Window:
     """Lay the window out the way ``fpdb.__init__`` does, down to the tab widget."""
     window = _window_class(platform)()
     window.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
