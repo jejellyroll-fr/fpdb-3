@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.20.905 plus git\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-15 11:32+0100\n"
+"POT-Creation-Date: 2026-11-15 20:49+0100\n"
 "PO-Revision-Date: 2011-08-23 23:08+0200\n"
 "Last-Translator: Ferenc Erki <erkiferenc@gmail.com>\n"
 "Language-Team: Hungarian <erkiferenc@gmail.com>\n"
@@ -436,7 +436,7 @@ msgstr "Csoportosítás:"
 msgid "Hero:"
 msgstr "Játékos:"
 
-#: fpdb_3_legacy/Filters.py
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
 msgid "Hold'em"
 msgstr "Hold'em"
 
@@ -493,7 +493,7 @@ msgstr "Offsuit"
 msgid "Omaha"
 msgstr "Omaha"
 
-#: fpdb_3_legacy/Filters.py
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
 msgid "Omaha Hi/Lo"
 msgstr "Omaha Hi/Lo"
 
@@ -7951,6 +7951,22 @@ msgstr "helyek"
 #, fuzzy
 msgid "street"
 msgstr "utca"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "6-card PLO"
+msgstr "6 lapos PLO"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "PLO 4c + 5c"
+msgstr "PLO 4 + 5 lapos"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "Pot-Limit Omaha 4c"
+msgstr "Pot-Limit Omaha 4 lapos"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "Pot-Limit Omaha 5c"
+msgstr "Pot-Limit Omaha 5 lapos"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 #, fuzzy

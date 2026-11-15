@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-15 11:32+0100\n"
+"POT-Creation-Date: 2026-11-15 20:49+0100\n"
 "PO-Revision-Date: 2011-04-07 08:53+0000\n"
 "Last-Translator: steffen123 <steffen@schaumburger.info>\n"
 "Language-Team: Chinese (China) <>\n"
@@ -454,7 +454,7 @@ msgstr "分组:"
 msgid "Hero:"
 msgstr "主角:"
 
-#: fpdb_3_legacy/Filters.py
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
 #, fuzzy
 msgid "Hold'em"
 msgstr "德州扑克"
@@ -518,7 +518,7 @@ msgstr "不同花"
 msgid "Omaha"
 msgstr "奥马哈"
 
-#: fpdb_3_legacy/Filters.py
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
 #, fuzzy
 msgid "Omaha Hi/Lo"
 msgstr "奥马哈高低"
@@ -7917,6 +7917,22 @@ msgstr "座位"
 #, fuzzy
 msgid "street"
 msgstr "街"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "6-card PLO"
+msgstr "6张 PLO"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "PLO 4c + 5c"
+msgstr "PLO 4张 + 5张"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "Pot-Limit Omaha 4c"
+msgstr "底池限注奥马哈 4张"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "Pot-Limit Omaha 5c"
+msgstr "底池限注奥马哈 5张"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 #, fuzzy

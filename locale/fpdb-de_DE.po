@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-15 11:32+0100\n"
+"POT-Creation-Date: 2026-11-15 20:49+0100\n"
 "PO-Revision-Date: 2011-12-04 06:20+0200\n"
 "Last-Translator: Steffen Schaumburg <steffen@schaumburger.info>\n"
 "Language-Team: Fpdb\n"
@@ -435,7 +435,7 @@ msgstr "Gruppieren:"
 msgid "Hero:"
 msgstr "Spieler:"
 
-#: fpdb_3_legacy/Filters.py
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
 msgid "Hold'em"
 msgstr "Hold'em"
 
@@ -491,7 +491,7 @@ msgstr "Offsuit"
 msgid "Omaha"
 msgstr "Omaha"
 
-#: fpdb_3_legacy/Filters.py
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
 msgid "Omaha Hi/Lo"
 msgstr "Omaha Hi/Lo"
 
@@ -7944,6 +7944,22 @@ msgstr "Sitze"
 #, fuzzy
 msgid "street"
 msgstr "Street"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "6-card PLO"
+msgstr "6-Karten-PLO"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "PLO 4c + 5c"
+msgstr "PLO 4 + 5 Karten"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "Pot-Limit Omaha 4c"
+msgstr "Pot-Limit Omaha 4 Karten"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "Pot-Limit Omaha 5c"
+msgstr "Pot-Limit Omaha 5 Karten"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 #, fuzzy

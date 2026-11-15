@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-15 11:32+0100\n"
+"POT-Creation-Date: 2026-11-15 20:49+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -447,7 +447,7 @@ msgstr "Grupavimas:"
 msgid "Hero:"
 msgstr "Herojus:"
 
-#: fpdb_3_legacy/Filters.py
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
 #, fuzzy
 msgid "Hold'em"
 msgstr "Hold'em"
@@ -507,7 +507,7 @@ msgstr "Skirtingų spalvų"
 msgid "Omaha"
 msgstr "Omaha"
 
-#: fpdb_3_legacy/Filters.py
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
 #, fuzzy
 msgid "Omaha Hi/Lo"
 msgstr "Omaha Hi/Lo"
@@ -7982,6 +7982,22 @@ msgstr "vietos"
 #, fuzzy
 msgid "street"
 msgstr "gatvė"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "6-card PLO"
+msgstr "6 kortų PLO"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "PLO 4c + 5c"
+msgstr "PLO 4 + 5 kortos"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "Pot-Limit Omaha 4c"
+msgstr "Pot-Limit Omaha 4 kortos"
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "Pot-Limit Omaha 5c"
+msgstr "Pot-Limit Omaha 5 kortos"
 
 #: fpdb_3_legacy/ring_stats/__init__.py
 #, fuzzy

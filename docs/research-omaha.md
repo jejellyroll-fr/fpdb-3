@@ -2,8 +2,8 @@
 
 The [quick start](research-quick-start.md) teaches the browser with Hold'em
 examples. This guide is the same tool read from an Omaha seat: what every group
-of options is for, which ones carry the weight in a four-card game, and the two
-that cannot work at all.
+of options is for, which ones carry the weight in four- and five-card games,
+and the two that cannot work at all.
 
 Nothing here is Omaha-only in the engine. The situations, the board features and
 the hand states are derived for every game fpdb stores — an Omaha database is a
@@ -16,9 +16,15 @@ other way in: it names the spot first, and a study then reads that one
 population through several coordinated panels. fpdb ships a Pot-Limit Omaha pack,
 so you do not have to build any of the questions below by hand.
 
-Open the Study Explorer, set **Game** to *Pot-Limit Omaha*, and the spots, the
-list and the counts are all the PLO ones — Hold'em studies are not offered,
-because a study declares the game it is about.
+Open the Study Explorer and set **Game** to *Pot-Limit Omaha 4c* or
+*Pot-Limit Omaha 5c*. Both offer the same PLO studies and narrow every panel
+and its source hands to the selected variant. Hold'em studies are not offered.
+
+Leave **Game** at *Any game* and open a PLO study to include **both 4c and 5c**.
+The dashboard labels this population **PLO 4c + 5c**. It excludes Hold'em,
+Omaha Hi/Lo and six-card Omaha. Use an explicit variant when comparing your
+play with a field that plays the same number of hole cards. Source hands show
+all five cards when recorded; unknown opponent cards remain unknown.
 
 | Spot | What the shipped studies cover |
 | --- | --- |
@@ -26,7 +32,7 @@ because a study declares the game it is about.
 | **Single-Raised Pots** | the raiser and the caller, in and out of position, flop and turn |
 | **3-bet Pots** | the aggressor in and out of position, the defender, flop and turn |
 
-Every postflop study reads the same population through the axes a four-card game
+Every postflop study reads the same population through the axes Omaha
 turns on, in this order: **SPR band**, **heads-up versus multiway**, **board suit
 and pairing**, **board connectivity**, **sizing**, **effective stack**, the
 **result**, and the **source hands** behind any of it.
@@ -44,9 +50,9 @@ the hands behind the field's are one click apart.
 ### What the PLO pack deliberately does not ship
 
 No 13x13 range grid and no hand-strength panel. Both read two hole cards, and a
-four-card hand has no honest two-card reading. A Hold'em study opened against an
-Omaha population disables those panels and says which and why, rather than
-drawing an empty one.
+four- or five-card hand has no honest two-card reading. A Hold'em study opened
+against an Omaha population disables those panels and says which and why,
+rather than drawing an empty one.
 
 ## Read the value, not the selector
 

@@ -278,6 +278,7 @@ class StudySpec:
     default_panel: str | None = None
     default_comparison: bool = False
     pack: str = ""
+    supported_games: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:  # noqa: C901 - declarative schema validation stays together.
         if not self.id.strip():
@@ -296,13 +297,8 @@ class StudySpec:
         object.__setattr__(self, "panels", panels)
         if self.game is not None and not self.game.strip():
             raise StudyValidationError(f"{self.id}.game must not be empty")
-        if self.game is not None and self.base_filters.get("game") is not None:
-            declared = self.game.strip()
-            effective = _tokens(self.base_filters["game"])
-            if declared not in effective:
-                raise StudyValidationError(
-                    f"{self.id}.game={declared!r} conflicts with base_filters.game={self.base_filters['game']!r}",
-                )
+        object.__setattr__(self, "supported_games", _as_tuple(self.supported_games, f"{self.id}.supported_games"))
+        self._validate_games()
         if self.table_size is not None and (
             not isinstance(self.table_size, int) or isinstance(self.table_size, bool) or self.table_size < 2
         ):
@@ -316,6 +312,31 @@ class StudySpec:
         self.validate()
         if self.default_panel is not None and self.default_panel not in {panel.id for panel in panels}:
             raise StudyValidationError(f"{self.id}: default panel {self.default_panel!r} is not present")
+
+    @property
+    def games(self) -> tuple[str, ...]:
+        """Supported variants, falling back to the original single-game declaration."""
+        return self.supported_games or ((self.game,) if self.game else ())
+
+    def accepts_game_filter(self, value: Any) -> bool:
+        """Whether a game filter narrows the study's current population."""
+        population = self.base_filters.get("game")
+        return population is None or _tokens(value) <= _tokens(population)
+
+    def _validate_games(self) -> None:
+        if self.supported_games:
+            if self.game is not None and self.game not in self.supported_games:
+                raise StudyValidationError(f"{self.id}.game conflicts with supported_games")
+            population = self.base_filters.get("game")
+            if population is None or not _tokens(population) <= set(self.supported_games):
+                raise StudyValidationError(f"{self.id}.base_filters.game conflicts with supported_games")
+        elif self.game is not None and self.base_filters.get("game") is not None:
+            declared = self.game.strip()
+            effective = _tokens(self.base_filters["game"])
+            if declared not in effective:
+                raise StudyValidationError(
+                    f"{self.id}.game={declared!r} conflicts with base_filters.game={self.base_filters['game']!r}",
+                )
 
     @classmethod
     def from_mapping(cls, payload: Mapping[str, Any]) -> StudySpec:
@@ -344,6 +365,7 @@ class StudySpec:
             default_panel=str(payload["default_panel"]) if payload.get("default_panel") is not None else None,
             default_comparison=bool(payload.get("default_comparison", False)),
             pack=str(payload.get("pack", "")),
+            supported_games=payload.get("supported_games", ()),
         )
 
     def validate(self) -> StudySpec:
@@ -392,7 +414,10 @@ class StudySpec:
             adapter=_adapter_for(spec.kind),
             dimension=spec.dimension,
             min_sample=spec.min_sample if spec.min_sample is not None else (self.min_sample or 0),
-            unavailable_reason=panel_unavailable_reason(spec, self.game),
+            unavailable_reason=next(
+                (reason for game in self.games if (reason := panel_unavailable_reason(spec, game))),
+                None,
+            ),
         )
 
     def panels_compiled(self) -> tuple[CompiledStudyPanel, ...]:
@@ -420,6 +445,8 @@ class StudySpec:
             out["game"] = self.game
         if self.pack:
             out["pack"] = self.pack
+        if self.supported_games:
+            out["supported_games"] = list(self.supported_games)
         return out
 
     @property

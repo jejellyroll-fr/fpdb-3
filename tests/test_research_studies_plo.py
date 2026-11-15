@@ -68,7 +68,7 @@ def test_the_pack_ships_a_plo_hierarchy_rather_than_only_holdem() -> None:
     games = {game.id: game for game in explorer.games()}
 
     assert plo.PLO_GAME in games
-    assert games[plo.PLO_GAME].label == "Pot-Limit Omaha"
+    assert games[plo.PLO_GAME].label == "Pot-Limit Omaha 4c"
     assert games[plo.PLO_GAME].study_count >= 10
     spots = {
         category.id
@@ -225,7 +225,7 @@ def test_a_plo_dashboard_drills_into_both_sides_of_its_population() -> None:
     context = dashboard.drill_context("overview")
 
     assert context.sides_agree()
-    assert context.side_query("hero").filters["game"] == plo.PLO_GAME
+    assert context.side_query("hero").filters["game"] == [plo.PLO_GAME, "5_omahahi"]
 
 
 # -- the SPR band --------------------------------------------------------------
