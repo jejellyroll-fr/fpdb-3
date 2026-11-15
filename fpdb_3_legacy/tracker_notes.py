@@ -96,6 +96,20 @@ ORDER BY p.id_player, na.id_autonote
 
 AUTO_SECTION_START = "[" + SOURCE_PT4 + " auto-notes]"
 AUTO_SECTION_END = "[end of " + SOURCE_PT4 + " auto-notes]"
+_SECTION = re.compile(
+    "^" + re.escape(AUTO_SECTION_START) + "$.*?^" + re.escape(AUTO_SECTION_END) + "$",
+    re.MULTILINE | re.DOTALL,
+)
+_MARKERS = (AUTO_SECTION_START, AUTO_SECTION_END)
+
+
+def _defuse(text: str) -> str:
+    """Imported text with no line that reads as a section marker: such a line's brackets become parentheses.
+
+    An automatic note's ``line()`` starts with ``- ``, so it can never be one.
+    """
+    return "\n".join("(" + line.strip()[1:-1] + ")" if line.strip() in _MARKERS else line for line in text.split("\n"))
+
 
 # PT4 room names whose fpdb name is not found by comparing the two (see ``_key``).
 _WPN = ("WinningPoker", "Americas Cardroom", "ACR Poker", "BlackChipPoker", "TruePoker", "Ya Poker")
@@ -152,7 +166,7 @@ class TrackerNote:
         header.extend(self.labels)
         lines = ["[" + " | ".join(header) + "]"]
         if self.text.strip():
-            lines.append(self.text.strip())
+            lines.append(_defuse(self.text.strip()))
         return "\n".join(lines)
 
 
@@ -280,13 +294,15 @@ def auto_section(notes: Sequence[TrackerNote]) -> str | None:
 
 
 def _split_section(note: str) -> tuple[str, str | None, str]:
-    """The note before the auto-notes section, the section itself (None if absent), and after it."""
-    start = note.find(AUTO_SECTION_START)
-    end = note.find(AUTO_SECTION_END, start) if start >= 0 else -1
-    if end < 0:
+    """The note before the auto-notes section, the section itself (None if absent), and after it.
+
+    A marker counts only as a whole line of its own: a note that mentions one
+    mid-sentence holds no section, so none of its text is ever replaced.
+    """
+    found = _SECTION.search(note)
+    if found is None:
         return note, None, ""
-    end += len(AUTO_SECTION_END)
-    return note[:start], note[start:end], note[end:]
+    return note[: found.start()], found.group(0), note[found.end() :]
 
 
 def _join(*parts: str) -> str:

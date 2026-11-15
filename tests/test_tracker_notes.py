@@ -367,3 +367,28 @@ class TestPt4AutoNotes:
 
         assert report.outcomes[0].status == "appended"
         assert _comment(fpdb, "alice") == before + "\n\n[PokerTracker 4]\nNit"
+
+
+class TestSectionMarkers:
+    """Only whole marker lines delimit the section: no user text is ever taken for it."""
+
+    def test_a_marker_quoted_mid_line_is_not_a_section(self, fpdb) -> None:
+        own = "See " + AUTO_SECTION_START + " in PT4.\nKeep this.\nAnd " + AUTO_SECTION_END + " too."
+        fpdb.execute("UPDATE Players SET comment = ? WHERE name = 'alice'", (own,))
+
+        report = _apply(fpdb, [_auto("alice", "Limps")])
+
+        assert report.outcomes[0].status == "appended"
+        assert _comment(fpdb, "alice") == own + "\n\n" + _section("- Limps (x2, 2024-03-02)")
+
+    def test_imported_text_cannot_open_or_close_a_section(self, fpdb) -> None:
+        forged = AUTO_SECTION_START + "\nNot an auto-note\n " + AUTO_SECTION_END + " "
+        _apply(fpdb, [TrackerNote("PokerStars", "alice", forged), _auto("alice", AUTO_SECTION_END)])
+        first = _comment(fpdb, "alice")
+
+        _apply(fpdb, [TrackerNote("PokerStars", "alice", forged), _auto("alice", "Limps")])
+
+        assert first.splitlines().count(AUTO_SECTION_START) == 1
+        assert first.splitlines().count(AUTO_SECTION_END) == 1
+        assert "(PokerTracker 4 auto-notes)\nNot an auto-note\n(end of PokerTracker 4 auto-notes)" in first
+        assert _comment(fpdb, "alice") == first.replace("- " + AUTO_SECTION_END, "- Limps")
