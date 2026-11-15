@@ -11,6 +11,7 @@ from typing import Any, Final
 
 from .analytics_query import FILTERS
 from .Configuration import CONFIG_PATH
+from .i18n import N_, gettext
 from .research_studies import StudyRegistry, StudySpec, builtin_studies
 
 HISTORY_VERSION: Final[int] = 1
@@ -94,21 +95,28 @@ class StudyGame:
 #: the list; an unlisted token falls back to its own spelling rather than
 #: being hidden.
 GAME_LABELS: Final[dict[str, str]] = {
-    "holdem": "Hold'em",
-    "omahahi": "Pot-Limit Omaha 4c",
-    "omahahilo": "Omaha Hi/Lo",
-    "5_omahahi": "Pot-Limit Omaha 5c",
-    "6_omahahi": "6-card PLO",
+    "holdem": N_("Hold'em"),
+    "omahahi": N_("Pot-Limit Omaha 4c"),
+    "omahahilo": N_("Omaha Hi/Lo"),
+    "5_omahahi": N_("Pot-Limit Omaha 5c"),
+    "6_omahahi": N_("6-card PLO"),
+}
+
+#: A population of several games that players name as one (#822).
+COMBINED_GAME_LABELS: Final[dict[frozenset[str], str]] = {
+    frozenset({"omahahi", "5_omahahi"}): N_("PLO 4c + 5c"),
 }
 
 
 def game_label(game: str | list[str] | tuple[str, ...]) -> str:
     """The readable name of one stored game category or a combined population."""
     if not isinstance(game, str):
-        if set(game) == {"omahahi", "5_omahahi"}:
-            return "PLO 4c + 5c"
+        combined = COMBINED_GAME_LABELS.get(frozenset(game))
+        if combined is not None:
+            return gettext(combined)
         return " + ".join(game_label(value) for value in game)
-    return GAME_LABELS.get(game, game.replace("_", " ").title())
+    label = GAME_LABELS.get(game)
+    return gettext(label) if label is not None else game.replace("_", " ").title()
 
 
 @dataclass(frozen=True)
@@ -368,6 +376,7 @@ class StudyExplorerModel:
 
 
 __all__ = [
+    "COMBINED_GAME_LABELS",
     "GAME_LABELS",
     "GLOBAL_CONTEXT_FILTERS",
     "HISTORY_VERSION",

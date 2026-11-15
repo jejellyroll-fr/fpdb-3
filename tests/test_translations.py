@@ -118,6 +118,21 @@ def test_menu_translate_honours_installed_catalog(tmp_path, _restore_gettext):
     assert menu_layout.translate("Graphs") == "Graphiques"
 
 
+def test_study_game_labels_honour_installed_catalog(tmp_path, _restore_gettext):
+    """The Study Explorer's PLO 4c/5c labels are translated once a catalog is installed (#822)."""
+    from fpdb_3_legacy.research_study_explorer import game_label
+
+    (tmp_path / "fpdb-fr_FR.po").write_bytes((LOCALE_DIR / "fpdb-fr_FR.po").read_bytes())
+    i18n_compile.compile_locale(tmp_path, "fr_FR")
+
+    assert game_label(["omahahi", "5_omahahi"]) == "PLO 4c + 5c"  # nothing installed yet
+    gettext.translation("fpdb", str(tmp_path), languages=["fr_FR"]).install()
+    assert game_label("omahahi") == "Pot-Limit Omaha 4 cartes"
+    assert game_label("5_omahahi") == "Pot-Limit Omaha 5 cartes"
+    assert game_label(("5_omahahi", "omahahi")) == "PLO 4 + 5 cartes"
+    assert game_label("cour_hi") == "Cour Hi"  # an unlisted token keeps its own spelling
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
 

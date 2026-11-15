@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-15 11:32+0100\n"
+"POT-Creation-Date: 2026-11-15 20:49+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -291,7 +291,7 @@ msgstr ""
 msgid "5 Card Draw"
 msgstr ""
 
-#: fpdb_3_legacy/Filters.py
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
 msgid "Hold'em"
 msgstr ""
 
@@ -311,7 +311,7 @@ msgstr ""
 msgid "Fusion"
 msgstr ""
 
-#: fpdb_3_legacy/Filters.py
+#: fpdb_3_legacy/Filters.py fpdb_3_legacy/research_study_explorer.py
 msgid "Omaha Hi/Lo"
 msgstr ""
 
@@ -6673,6 +6673,22 @@ msgstr ""
 
 #: fpdb_3_legacy/research_labels.py
 msgid "EV-adjusted result per decision"
+msgstr ""
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "Pot-Limit Omaha 4c"
+msgstr ""
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "Pot-Limit Omaha 5c"
+msgstr ""
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "6-card PLO"
+msgstr ""
+
+#: fpdb_3_legacy/research_study_explorer.py
+msgid "PLO 4c + 5c"
 msgstr ""
 
 #: fpdb_3_legacy/ring_stats/__init__.py
