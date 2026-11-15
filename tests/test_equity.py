@@ -511,34 +511,25 @@ def test_boards_dict_detects_real_all_in_and_accumulates_board() -> None:
     assert boards["RIVER"] == {"board": [["2c", "3d", "4h", "5s", "6c"]], "allin": False}
 
 
-# The games pypoker-eval (1.3.1) accepts, as its "not a valid value" error lists them.
-POKER_EVAL_GAMES = frozenset(
-    {
-        "holdem",
-        "holdem8",
-        "omaha",
-        "omaha8",
-        "7stud",
-        "7stud8",
-        "7studnsq",
-        "razz",
-        "5draw",
-        "5draw8",
-        "5drawnsq",
-        "lowball",
-        "lowball27",
-        "fusion",
-    },
-)
-
-
-def test_every_eval_game_is_one_poker_eval_accepts() -> None:
-    # Card.games' second field goes to poker-eval as is: "fusion" made every
-    # Fusion all-in and showdown pot raise "game fusion is not a valid value".
-    unknown = {
-        category: entry[1] for category, entry in Card.games.items() if entry[1] and entry[1] not in POKER_EVAL_GAMES
-    }
-    assert unknown == {}
+@pytest.mark.skipif(equity_module.load_poker_eval() is None, reason="pypoker-eval is not installed")
+def test_every_eval_game_evaluates_its_own_complete_hands() -> None:
+    # Card.games' second field goes to poker-eval as is. A name it lists but
+    # does not enumerate failed only at import time: "fusion" before #818,
+    # "5draw" (pyenum error code 1) before poker-eval 1.3.3 (#831).
+    engine = equity_module.load_poker_eval()
+    failures = {}
+    for category, (base, evalgame, _hilo, _streets, _last, hrange) in Card.games.items():
+        if not evalgame:
+            continue
+        start, end = hrange[-1]
+        deck = iter(f"{rank}{suit}" for rank in "AKQJT98765432" for suit in "shdc")
+        pockets = [[next(deck) for _ in range(end - start)] for _ in range(2)]
+        board = [next(deck) for _ in range(5)] if base == "hold" else []
+        try:
+            engine.winners(game=evalgame, pockets=pockets, board=board)
+        except RuntimeError as error:
+            failures[category] = f"{evalgame}: {error}"
+    assert failures == {}
 
 
 def _fusion_all_in_hand() -> SimpleNamespace:

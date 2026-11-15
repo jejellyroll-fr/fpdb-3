@@ -169,7 +169,7 @@ def make_exe(dist):
             [
                 "--no-deps",
                 CWD,
-                "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.3.2",
+                "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.3.3",
             ],
             # A release artifact must not inherit the runner CPU. In
             # particular, newer GitHub hosts expose AVX10 features that make
