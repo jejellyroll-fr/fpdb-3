@@ -41,7 +41,8 @@ BOM = chr(0xFEFF)
 
 
 def _read(path: Path, encoding: str) -> str:
-    return path.read_bytes().decode(encoding).lstrip(BOM)
+    """A fixture's text with ``\n`` line ends, whatever git checked it out with (CRLF on Windows)."""
+    return path.read_bytes().decode(encoding).lstrip(BOM).replace("\r\n", "\n")
 
 
 WINAMAX_SUMMARY = ROOT / "regression-test-files" / "summaries" / "Winamax" / "NLHE-EUR-Expresso-1-202604.lottery.txt"
@@ -157,6 +158,12 @@ def test_the_tournament_pt4_appends_to_a_winning_hand_is_taken_off_and_named_in_
     assert pt4_database.restore_winning(stored.replace("#5795043", "#5795043-17"), "1")[1] == "HH20160828 T5795043-G0"
     assert pt4_database.restore_winning(hand, "42") == (hand, "HH20160828 T42-G0")
     assert pt4_database.restore_winning(hand, None) == (hand, None)
+    # A history stored with Windows line ends keeps them.
+    crlf = hand.replace("\n", "\r\n")
+    assert pt4_database.restore_winning(_as_pt4_stores_winning(hand, "5795043").replace("\n", "\r\n"), None) == (
+        crlf,
+        "HH20160828 T5795043-G0",
+    )
     assert pt4_database.restore_winning("PokerStars Hand #1: Tournament #2", "2") == (
         "PokerStars Hand #1: Tournament #2",
         None,
