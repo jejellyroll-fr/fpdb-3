@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import pytest
 
 import fpdb_3_legacy.equity as equity_module
-from fpdb_3_legacy import Card
+from fpdb_3_legacy import Card, derived_stats_allin
 from fpdb_3_legacy.DerivedStats import DerivedStats, _chip_increment
 from fpdb_3_legacy.equity import (
     EquityEngine,
@@ -62,6 +62,14 @@ class RecordingPokerEval:
         }
 
 
+class SeededRecordingPokerEval(RecordingPokerEval):
+    """A pypoker-eval 1.3.2+ backend: poker_eval takes seed= (#301)."""
+
+    @staticmethod
+    def base_seed() -> int:
+        return 0
+
+
 def test_split_pot_chip_increment_stays_decimal() -> None:
     """Odd split pots must not multiply Decimal by a float during auto-import."""
     assert _chip_increment(100) == Decimal("0.01")
@@ -98,6 +106,45 @@ def test_calculate_equity_reports_missing_optional_backend(monkeypatch) -> None:
 
     with pytest.raises(EquityUnavailableError, match="not installed"):
         calculate_equity("holdem", [["As", "Ah"], ["Ks", "Kh"]])
+
+
+def test_calculate_equity_passes_the_seed_to_a_backend_that_takes_one(monkeypatch) -> None:
+    # pypoker-eval 1.3.2 samples from its own PCG stream, out of srand()'s reach.
+    monkeypatch.setattr(equity_module, "_seed_native_rng", lambda seed: pytest.fail("srand() is not used"))
+    backend = SeededRecordingPokerEval()
+
+    calculate_equity("holdem", [["As", "Ah"], ["Kd", "Kc"]], iterations=500, backend=backend, seed=7)
+
+    assert backend.calls[0]["seed"] == 7
+
+
+def test_calculate_equity_seeds_srand_for_an_older_backend(monkeypatch) -> None:
+    seeded: list[int] = []
+    monkeypatch.setattr(equity_module, "_seed_native_rng", seeded.append)
+    backend = RecordingPokerEval()
+
+    calculate_equity("holdem", [["As", "Ah"], ["Kd", "Kc"]], iterations=500, backend=backend, seed=7)
+
+    assert "seed" not in backend.calls[0]
+    assert seeded == [7]
+
+
+@pytest.mark.skipif(equity_module.load_poker_eval() is None, reason="pypoker-eval is not installed")
+def test_native_seeded_sample_does_not_depend_on_earlier_samples() -> None:
+    backend = load_poker_eval()
+    pockets = [["6d", "3h"], ["7s", "3s"]]
+
+    def sample(seed: int | None) -> tuple:
+        return calculate_equity(
+            "fusion", pockets, iterations=equity_module.DEFAULT_EQUITY_ITERATIONS, backend=backend, seed=seed
+        ).players
+
+    first = sample(818)
+    sample(None)
+    calculate_equity("holdem", [["As", "Ah"], ["Kd", "Kc"]], iterations=777, backend=backend)
+
+    assert sample(818) == first
+    assert sample(819) != first
 
 
 def test_expected_pot_share_uses_net_pot() -> None:
@@ -528,7 +575,7 @@ def test_fusion_all_in_on_the_flop_samples_the_turn_hole_card(monkeypatch) -> No
     # On the flop the fourth hole card is not dealt yet: the engine gets the
     # three cards each player held and deals the rest itself (#818). Exact
     # enumeration is far too slow multiway, so it is sampled.
-    backend = RecordingPokerEval()
+    backend = SeededRecordingPokerEval()
     monkeypatch.setattr("fpdb_3_legacy.derived_stats_allin.pokereval", backend)
     stats = _fusion_stats()
 
@@ -546,6 +593,8 @@ def test_fusion_all_in_on_the_flop_samples_the_turn_hole_card(monkeypatch) -> No
     assert call["pockets"] == [["As", "Kd", "Qc"], ["Td", "Tc", "3h"]]
     assert call["board"] == ["2s", "5s", "8s", "__", "__"]
     assert call["iterations"] == equity_module.DEFAULT_EQUITY_ITERATIONS
+    # Seeded, so a re-import stores the same EV whatever was sampled before.
+    assert call["seed"] == derived_stats_allin.ALL_IN_EV_SEED
     assert stats.handsplayers["hero"]["allInEVCalculated"] is True
 
 

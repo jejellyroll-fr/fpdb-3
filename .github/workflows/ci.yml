@@ -236,11 +236,11 @@ jobs:
           python_tag="cp${{ matrix.python-version }}"
           python_tag="${python_tag//./}"
           if [[ "$RUNNER_OS" == "macOS" ]]; then
-            wheel="pypoker_eval-1.3.1-${python_tag}-${python_tag}-macosx_11_0_arm64.whl"
+            wheel="pypoker_eval-1.3.2-${python_tag}-${python_tag}-macosx_11_0_arm64.whl"
           else
-            wheel="pypoker_eval-1.3.1-${python_tag}-${python_tag}-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+            wheel="pypoker_eval-1.3.2-${python_tag}-${python_tag}-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
           fi
-          url="https://github.com/jejellyroll-fr/poker-eval/releases/download/v1.3.1/${wheel}"
+          url="https://github.com/jejellyroll-fr/poker-eval/releases/download/v1.3.2/${wheel}"
           # GitHub's release CDN answers 503 often enough to redden a build on
           # its own, and uv's own retries span about ten seconds -- shorter
           # than such a blip tends to last. Spacing a few attempts turns it

@@ -77,7 +77,7 @@ def test_fusion_preflop_all_in_ev_uses_the_two_cards_held(tmp_path, monkeypatch)
     real = derived_stats_allin.calculate_equity
 
     def recording(game, pockets, board, **kwargs):
-        calls.append((game, pockets, list(board), kwargs.get("iterations")))
+        calls.append((game, pockets, list(board), kwargs.get("iterations"), kwargs.get("seed")))
         return real(game, pockets, board, **kwargs)
 
     monkeypatch.setattr(derived_stats_allin, "calculate_equity", recording)
@@ -85,7 +85,13 @@ def test_fusion_preflop_all_in_ev_uses_the_two_cards_held(tmp_path, monkeypatch)
     hand = _derive(tmp_path)
 
     assert calls == [
-        ("fusion", [["6d", "3h"], ["7s", "3s"]], [], equity_module.DEFAULT_EQUITY_ITERATIONS),
+        (
+            "fusion",
+            [["6d", "3h"], ["7s", "3s"]],
+            [],
+            equity_module.DEFAULT_EQUITY_ITERATIONS,
+            derived_stats_allin.ALL_IN_EV_SEED,
+        ),
     ]
     alice, bob = hand.handsplayers["Alice"], hand.handsplayers["Bob"]
     assert alice["allInEVCalculated"] is True
@@ -94,3 +100,23 @@ def test_fusion_preflop_all_in_ev_uses_the_two_cards_held(tmp_path, monkeypatch)
     # each expects about half the €2.01 net pot back for the €1.05 put in.
     assert -15 < alice["allInEV"] < 5
     assert -15 < bob["allInEV"] < 5
+
+
+def test_fusion_preflop_all_in_ev_is_the_same_on_every_import(tmp_path, monkeypatch) -> None:
+    # Sampled, but seeded: an unrelated sample in between does not move it.
+    # The stored EV is in cents and hides small moves, so compare the equity.
+    results = []
+    real = derived_stats_allin.calculate_equity
+
+    def recording(*args, **kwargs):
+        results.append(real(*args, **kwargs))
+        return results[-1]
+
+    monkeypatch.setattr(derived_stats_allin, "calculate_equity", recording)
+
+    _derive(tmp_path)
+    real("fusion", [["As", "Kd"], ["Qc", "Jh"]], iterations=1234, backend=derived_stats_allin.pokereval)
+    _derive(tmp_path)
+
+    first, second = results
+    assert second.players == first.players

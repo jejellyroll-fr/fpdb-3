@@ -48,12 +48,30 @@ DEFAULT_RANGE_ENUMERATION_LIMIT = 10_000
 EQUITY_ENGINE_VERSION = 1
 
 
-def _seed_native_rng(seed: int) -> None:
-    """Seed the C library PRNG so the native poker-eval Monte Carlo is reproducible.
+def _backend_takes_seed(engine: PokerEvalBackend) -> bool:
+    """Whether ``poker_eval`` accepts ``seed=`` (pypoker-eval 1.3.2 and later, #301).
 
-    The native ``poker_eval`` backend calls ``rand()`` (from the C standard
-    library) internally to deal unknown cards.  This function seeds that RNG
-    via ``srand()`` so that callers see the same result for the same seed.
+    Those wheels sample from a thread-local PCG stream that ``srand()`` does
+    not reach; the seed has to go through the call. ``base_seed`` came in the
+    same release, and checking the class leaves out mocks' instance attributes.
+    """
+    return callable(getattr(type(engine), "base_seed", None))
+
+
+def _apply_seed(engine: PokerEvalBackend, arguments: dict[str, object], seed: int) -> None:
+    """Seed the next ``poker_eval`` call the way this backend can be seeded."""
+    if _backend_takes_seed(engine):
+        arguments["seed"] = seed
+    else:
+        _seed_native_rng(seed)
+
+
+def _seed_native_rng(seed: int) -> None:
+    """Seed the C library PRNG for wheels older than pypoker-eval 1.3.2.
+
+    Their native ``poker_eval`` called ``rand()`` (from the C standard
+    library) to deal unknown cards.  This function seeds that RNG via
+    ``srand()`` so that callers see the same result for the same seed.
     Best-effort: on platforms where the C library handle cannot be obtained
     the seed is silently ignored.
     """
@@ -219,7 +237,7 @@ def calculate_equity(
             raise ValueError(msg)
         arguments["iterations"] = iterations
     if seed is not None:
-        _seed_native_rng(seed)
+        _apply_seed(engine, arguments, seed)
     raw = engine.poker_eval(**arguments)
     samples = int(raw["info"][0])
     players = tuple(

@@ -42,6 +42,10 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 pokereval = load_poker_eval()
 
+# A sampled all-in EV is seeded so the same hand stores the same EV on every
+# import, whatever was sampled before it in the process (poker-eval #301).
+ALL_IN_EV_SEED = 818
+
 log = get_logger("derived_stats")
 
 
@@ -478,6 +482,7 @@ class DerivedStatsAllInMixin(DerivedStatsBase):
                                     board_cards,
                                     iterations=iterations,
                                     backend=pokereval,
+                                    seed=ALL_IN_EV_SEED if iterations is not None else None,
                                 )
                                 pot = Decimal(hand.totalpot)
                                 rake = Decimal(hand.rake)
