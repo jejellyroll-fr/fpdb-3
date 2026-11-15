@@ -13,14 +13,13 @@ def make_dist():
     # 3.12 cannot come from it either: its archives still name Hacl_Hash_SHA2
     # as a library to link (fixed upstream in #312, a v8 release only).
     # PyOxidizer is unmaintained, so this pin is final for as long as we use it.
+    # No Windows target: that 3.11 archive's PYTHON.json names OpenSSL 1.1 DLLs
+    # it does not contain (astral-sh/python-build-standalone#473), and Windows
+    # ships PyInstaller, its supported build, alone.
     distributions = {
         "aarch64-apple-darwin": [
             "https://github.com/astral-sh/python-build-standalone/releases/download/20240909/cpython-3.11.10%2B20240909-aarch64-apple-darwin-pgo%2Blto-full.tar.zst",
             "d06300d9037a1db98dfd1b4d29d1e465f2436fa988771635855d875878adcd01",
-        ],
-        "x86_64-pc-windows-msvc": [
-            "https://github.com/astral-sh/python-build-standalone/releases/download/20240909/cpython-3.11.10%2B20240909-x86_64-pc-windows-msvc-shared-pgo-full.tar.zst",
-            "40a58c944ff67f754d70e5ea67ee87ff46308887751919c059b10c9fd59e42ab",
         ],
         "x86_64-unknown-linux-gnu": [
             "https://github.com/astral-sh/python-build-standalone/releases/download/20240909/cpython-3.11.10%2B20240909-x86_64-unknown-linux-gnu-pgo-full.tar.zst",
@@ -161,9 +160,6 @@ def make_exe(dist):
         packaging_policy=policy,
         config=config,
     )
-    if BUILD_TARGET_TRIPLE == "x86_64-pc-windows-msvc":
-        exe.windows_subsystem = "windows"
-        exe.windows_runtime_dlls_mode = "when-present"
     
     # Read resources from python packages and include them
     pip_resources = []
