@@ -140,7 +140,11 @@ From the command line, with the fpdb configuration of the current user:
 python -m fpdb_3_legacy.tracker_notes --dry-run
 python -m fpdb_3_legacy.tracker_notes --skip-existing
 python -m fpdb_3_legacy.tracker_notes --auto-notes
+python -m fpdb_3_legacy.tracker_notes --auto-notes --dry-run --show 5
 ```
+
+`--show N` prints the first N notes the import changes, as they will read afterwards, so a dry run
+shows the text itself and not only the counts.
 
 It asks for the PT4 password, or reads it from `PT4_PASSWORD`. `--host`, `--port`, `--user` and
 `--database` default to `PT4_HOST`, `PT4_PORT`, `PT4_USER` and `PT4_DATABASE`, then to PT4's defaults.

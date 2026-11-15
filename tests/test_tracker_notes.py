@@ -23,6 +23,7 @@ from fpdb_3_legacy.tracker_notes import (
     PT4_PLAYER_TAGS,
     TrackerNote,
     apply_notes,
+    format_notes,
     format_report,
     ipoker_rooms_of,
     read_pt4_notes,
@@ -392,3 +393,20 @@ class TestSectionMarkers:
         assert first.splitlines().count(AUTO_SECTION_END) == 1
         assert "(PokerTracker 4 auto-notes)\nNot an auto-note\n(end of PokerTracker 4 auto-notes)" in first
         assert _comment(fpdb, "alice") == first.replace("- " + AUTO_SECTION_END, "- Limps")
+
+
+def test_show_prints_the_changed_notes_as_they_will_read(fpdb) -> None:
+    report = _apply(
+        fpdb,
+        [_auto("alice", "Limps"), TrackerNote("PokerStars", "bob", "Bluffs"), TrackerNote("PokerStars", "zed", "?")],
+        dry_run=True,
+    )
+
+    assert format_notes(report, 5) == (
+        "== PokerStars / alice -> PokerStars ==\n"
+        + _section("- Limps (x2, 2024-03-02)")
+        + "\n\n== PokerStars / bob -> PokerStars ==\nPlays every hand.\n\n[PokerTracker 4]\nBluffs"
+    )
+    assert format_notes(report, 1).count("==\n") == 1
+    assert format_notes(report, 0) == ""
+    assert _comment(fpdb, "alice") is None

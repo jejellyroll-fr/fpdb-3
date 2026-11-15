@@ -57,6 +57,7 @@ __all__ = [
     "TrackerNote",
     "apply_notes",
     "auto_section",
+    "format_notes",
     "format_report",
     "group_notes",
     "ipoker_rooms_of",
@@ -270,6 +271,7 @@ class NoteOutcome:
     status: str  # added | appended | updated | already | skipped | unknown_player | unknown_site
     fpdb_site: str | None = None
     blocks: int = 0
+    note: str | None = None  # the fpdb note as it reads after the import, when it changes
 
 
 @dataclass
@@ -391,7 +393,9 @@ def apply_notes(
             status, merged, added = _merge(comment or "", blocks, section, on_existing)
             if added and not dry_run:
                 cursor.execute(set_comment, (merged, player_id))
-            report.outcomes.append(NoteOutcome(site, player, status, fpdb_sites.get(int(site_id)), added))
+            report.outcomes.append(
+                NoteOutcome(site, player, status, fpdb_sites.get(int(site_id)), added, merged if added else None),
+            )
     if not dry_run:
         connection.commit()
     return report
@@ -439,6 +443,15 @@ def format_report(report: NotesReport) -> str:
     return "\n".join(lines)
 
 
+def format_notes(report: NotesReport, limit: int) -> str:
+    """The first ``limit`` notes the import changes, as they read afterwards, to check before writing."""
+    shown = [outcome for outcome in report.outcomes if outcome.note is not None][: max(limit, 0)]
+    return "\n\n".join(
+        "== " + outcome.site + " / " + outcome.player + " -> " + str(outcome.fpdb_site) + " ==\n" + str(outcome.note)
+        for outcome in shown
+    )
+
+
 def ipoker_rooms_of(config: Any) -> dict[str, list[str]]:
     """The iPoker skins the configuration declares, as ``apply_notes`` takes them."""
     from fpdb_3_legacy import ipoker_rooms
@@ -464,6 +477,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="also import PT4's automatic notes, in a section each import refreshes",
     )
     parser.add_argument("--dry-run", action="store_true", help="report what would change, write nothing")
+    parser.add_argument(
+        "--show",
+        type=int,
+        default=0,
+        metavar="N",
+        help="also print the first N changed notes as they read after the import",
+    )
     args = parser.parse_args(argv)
 
     password = os.environ.get("PT4_PASSWORD") or getpass.getpass("PT4 database password: ")
@@ -487,6 +507,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     finally:
         db.close_connection()
     print(format_report(report))
+    if args.show:
+        print("\n" + format_notes(report, args.show))
     return 0
 
 
