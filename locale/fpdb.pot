@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fpdb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 23:46+0100\n"
+"POT-Creation-Date: 2026-11-15 08:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1211,7 +1211,7 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiTrackerNotes.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/tracker_notes_dialog.py
 msgid "User"
 msgstr ""
 
@@ -1692,8 +1692,8 @@ msgstr ""
 msgid "Databases"
 msgstr ""
 
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/GuiTrackerNotes.py
-#: fpdb_3_legacy/menu_layout.py
+#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
+#: fpdb_3_legacy/tracker_notes_dialog.py
 msgid "Import"
 msgstr ""
 
@@ -2487,65 +2487,10 @@ msgstr ""
 msgid "Import finished."
 msgstr ""
 
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/GuiTrackerNotes.py
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/tracker_notes_dialog.py
 #, python-format
 msgid ""
 "The import stopped on an error:\n"
-"%s"
-msgstr ""
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid "Import PokerTracker 4 notes"
-msgstr ""
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid ""
-"fpdb reads the notes and player tags from PokerTracker 4's database, read-"
-"only. An fpdb note is never overwritten: the PT4 note is added after it. "
-"Notes on players fpdb has no hands of are listed, not imported: import the "
-"hands first."
-msgstr ""
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid "Host"
-msgstr ""
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid "Port"
-msgstr ""
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid "Password"
-msgstr ""
-
-#: fpdb_3_legacy/GuiTrackerNotes.py fpdb_3_legacy/GuiVersionInfo.py
-#: fpdb_3_legacy/menu_layout.py
-msgid "Database"
-msgstr ""
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid "Leave players who already have an fpdb note alone"
-msgstr ""
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid "Also import PT4's automatic notes"
-msgstr ""
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid ""
-"PT4 rewrites its automatic notes as it imports hands, so fpdb keeps them in "
-"a section of their own and replaces that section on each import. Your own "
-"text stays as it is."
-msgstr ""
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid "Preview"
-msgstr ""
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-#, python-format
-msgid ""
-"Could not read PokerTracker 4's database:\n"
 "%s"
 msgstr ""
 
@@ -2587,6 +2532,11 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Configuration file"
+msgstr ""
+
+#: fpdb_3_legacy/GuiVersionInfo.py fpdb_3_legacy/menu_layout.py
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Database"
 msgstr ""
 
 #: fpdb_3_legacy/GuiVersionInfo.py
@@ -7443,6 +7393,56 @@ msgstr ""
 msgid ""
 "%(added)d notes added, %(appended)d appended, %(updated)d updated, "
 "%(already)d already in fpdb, %(skipped)d skipped, %(unmatched)d not matched."
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Import PokerTracker 4 notes"
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid ""
+"fpdb reads the notes and player tags from PokerTracker 4's database, read-"
+"only. An fpdb note is never overwritten: the PT4 note is added after it. "
+"Notes on players fpdb has no hands of are listed, not imported: import the "
+"hands first."
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Host"
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Port"
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Password"
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Leave players who already have an fpdb note alone"
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Also import PT4's automatic notes"
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid ""
+"PT4 rewrites its automatic notes as it imports hands, so fpdb keeps them in "
+"a section of their own and replaces that section on each import. Your own "
+"text stays as it is."
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Preview"
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+#, python-format
+msgid ""
+"Could not read PokerTracker 4's database:\n"
+"%s"
 msgstr ""
 
 #: fpdb_3_legacy/update_notice.py

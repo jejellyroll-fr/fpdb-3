@@ -155,7 +155,9 @@ class TestReadPt4:
             notes=[], tags=[(100, "PokerStars", "bob", "Regular"), (100, "PokerStars", "bob", "Shark")]
         )
 
-        (note,) = read_pt4_notes(conn)
+        notes = read_pt4_notes(conn)
+        assert len(notes) == 1
+        note = notes[0]
 
         assert note.block() == "[PokerTracker 4 | Regular | Shark]"
 
@@ -312,8 +314,10 @@ class TestPt4AutoNotes:
         rows = [(100, "PokerStars", "alice", datetime(2024, 3, 2), 4, "Folds to   3-bet\nout of position")]
         conn = Pt4Connection(notes=[], tags=[], auto=rows)
 
-        assert read_pt4_notes(Pt4Connection(notes=[], tags=[])) == []
-        (note,) = read_pt4_notes(conn, auto_notes=True)
+        assert not read_pt4_notes(Pt4Connection(notes=[], tags=[]))
+        notes = read_pt4_notes(conn, auto_notes=True)
+        assert len(notes) == 1
+        note = notes[0]
 
         assert note.auto
         assert note.line() == "- Folds to 3-bet out of position (x4, 2024-03-02)"
@@ -410,3 +414,17 @@ def test_show_prints_the_changed_notes_as_they_will_read(fpdb) -> None:
     assert format_notes(report, 1).count("==\n") == 1
     assert format_notes(report, 0) == ""
     assert _comment(fpdb, "alice") is None
+
+
+@pytest.mark.parametrize(
+    ("pt4_text", "shown"),
+    [
+        ("Limp and called a raise with {cardrange:K3s}", "- Limp and called a raise with K3s"),
+        ("Opened all-in from the SB with {cardrange:AJo,K5o}", "- Opened all-in from the SB with AJo, K5o"),
+        ("Folded on River with SPR <= 1", "- Folded on River with SPR <= 1"),
+        ("Odd {braces} stay", "- Odd {braces} stay"),
+    ],
+)
+def test_pt4_markup_reads_as_plain_text(pt4_text: str, shown: str) -> None:
+    """Measured on a real PT4 database: its auto-notes write card ranges as {cardrange:...} markup."""
+    assert _auto("alice", pt4_text, times=1, when=None).line() == shown

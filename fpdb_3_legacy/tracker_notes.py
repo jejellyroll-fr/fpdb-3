@@ -27,7 +27,7 @@ touched::
 Holdem Manager 3 exports its notes as a ``.playernotes`` file whose format is
 not documented; no reader exists for it yet.
 
-This module has no Qt: ``GuiTrackerNotes`` and the command line only render it.
+This module has no Qt: ``tracker_notes_dialog`` and the command line only render it.
 """
 
 from __future__ import annotations
@@ -104,6 +104,15 @@ _SECTION = re.compile(
 _MARKERS = (AUTO_SECTION_START, AUTO_SECTION_END)
 
 
+# PT4 writes card ranges in an auto-note as markup its HUD renders: ``{cardrange:AJo,K5o}``.
+_PT4_MARKUP = re.compile(r"\{[A-Za-z_]+:([^{}]*)\}")
+
+
+def _plain(text: str) -> str:
+    """An auto-note's text without PT4's markup: ``{cardrange:AJo,K5o}`` reads ``AJo, K5o``."""
+    return _PT4_MARKUP.sub(lambda found: re.sub(r",\s*", ", ", found.group(1).strip()), text)
+
+
 def _defuse(text: str) -> str:
     """Imported text with no line that reads as a section marker: such a line's brackets become parentheses.
 
@@ -137,7 +146,7 @@ def _key(name: str) -> str:
 
 
 @dataclass(frozen=True)
-class TrackerNote:
+class TrackerNote:  # pylint: disable=too-many-instance-attributes
     """One note, or one label, a tracker keeps on a player."""
 
     site: str
@@ -156,7 +165,7 @@ class TrackerNote:
             details.append(f"x{self.times}")
         if self.when is not None:
             details.append(self.when.strftime("%Y-%m-%d"))
-        text = " ".join(self.text.split())
+        text = " ".join(_plain(self.text).split())
         return "- " + text + (" (" + ", ".join(details) + ")" if details else "")
 
     def block(self) -> str:

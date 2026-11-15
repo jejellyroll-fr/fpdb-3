@@ -10,14 +10,11 @@ import sqlite3
 from types import SimpleNamespace
 
 import pytest
+from PySide6.QtWidgets import QLineEdit
 
-pytest.importorskip("PySide6.QtWidgets")
-
-from PySide6.QtWidgets import QLineEdit  # noqa: E402 - after the Qt availability probe
-
-from fpdb_3_legacy.GuiTrackerNotes import GuiTrackerNotes  # noqa: E402
-from fpdb_3_legacy.sql_schema_player import player_schema_queries  # noqa: E402
-from fpdb_3_legacy.tracker_notes import TrackerNote  # noqa: E402
+from fpdb_3_legacy.sql_schema_player import player_schema_queries
+from fpdb_3_legacy.tracker_notes import TrackerNote
+from fpdb_3_legacy.tracker_notes_dialog import GuiTrackerNotes
 
 pytestmark = pytest.mark.qt
 

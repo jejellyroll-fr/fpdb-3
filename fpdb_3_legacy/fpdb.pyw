@@ -1984,7 +1984,7 @@ class fpdb(QMainWindow):
 
     def dia_tracker_notes(self, widget=None, data=None) -> None:
         """Import ▸ PokerTracker 4 Notes: add PT4 player notes to fpdb's (#618)."""
-        from fpdb_3_legacy.GuiTrackerNotes import GuiTrackerNotes
+        from fpdb_3_legacy.tracker_notes_dialog import GuiTrackerNotes
 
         GuiTrackerNotes(self.config, self.sql, self).exec()
 

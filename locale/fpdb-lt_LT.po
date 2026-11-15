@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 23:46+0100\n"
+"POT-Creation-Date: 2026-11-15 08:43+0100\n"
 "PO-Revision-Date: 2011-07-09 14:23+0000\n"
 "Last-Translator: OvidijusSv <OvidijusSv@gmail.com>\n"
 "Language-Team: Lithuanian (Lithuania) (http://www.transifex.net/projects/p/"
@@ -1512,7 +1512,7 @@ msgstr ""
 "Tai vienintelė sukonfigūruota duomenų bazė, jos ištrinti negalima — fpdb "
 "reikia bent vienos. Pirmiausia pridėkite kitą duomenų bazę."
 
-#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiTrackerNotes.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/tracker_notes_dialog.py
 #, fuzzy
 msgid "User"
 msgstr "Naudotojas"
@@ -2061,8 +2061,8 @@ msgstr "HUD"
 msgid "Hand History Converters"
 msgstr "Rankų istorijų konverteriai"
 
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/GuiTrackerNotes.py
-#: fpdb_3_legacy/menu_layout.py
+#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
+#: fpdb_3_legacy/tracker_notes_dialog.py
 #, fuzzy
 msgid "Import"
 msgstr "Importas"
@@ -2956,7 +2956,7 @@ msgstr ""
 "Šios rankos nepavyko atvaizduoti:\n"
 "%s"
 
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/GuiTrackerNotes.py
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/tracker_notes_dialog.py
 #, python-format
 msgid ""
 "The import stopped on an error:\n"
@@ -2990,71 +2990,6 @@ msgstr "Negalima eksportuoti"
 msgid "… and %d more"
 msgstr ""
 
-#: fpdb_3_legacy/GuiTrackerNotes.py
-#, fuzzy
-msgid "Also import PT4's automatic notes"
-msgstr "Kurti automatines pastabas"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-#, fuzzy, python-format
-msgid ""
-"Could not read PokerTracker 4's database:\n"
-"%s"
-msgstr ""
-"Nepavyko perskaityti paketo:\n"
-"%s"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py fpdb_3_legacy/GuiVersionInfo.py
-#: fpdb_3_legacy/menu_layout.py
-#, fuzzy
-msgid "Database"
-msgstr "Duomenų bazė"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-#, fuzzy
-msgid "Host"
-msgstr "Serveris:"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-#, fuzzy
-msgid "Import PokerTracker 4 notes"
-msgstr ""
-"Importuoti PokerTracker 4 HUD išdėstymą (statistika + intervalų lentelės)"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid "Leave players who already have an fpdb note alone"
-msgstr ""
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid ""
-"PT4 rewrites its automatic notes as it imports hands, so fpdb keeps them in "
-"a section of their own and replaces that section on each import. Your own "
-"text stays as it is."
-msgstr ""
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-#, fuzzy
-msgid "Password"
-msgstr "Slaptažodis:"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-#, fuzzy
-msgid "Port"
-msgstr "Prievadas:"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-#, fuzzy
-msgid "Preview"
-msgstr "HUD peržiūra"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid ""
-"fpdb reads the notes and player tags from PokerTracker 4's database, read-"
-"only. An fpdb note is never overwritten: the PT4 note is added after it. "
-"Notes on players fpdb has no hands of are listed, not imported: import the "
-"hands first."
-msgstr ""
-
 #: fpdb_3_legacy/GuiVersionInfo.py
 #, fuzzy
 msgid "Clipboard unavailable"
@@ -3074,6 +3009,12 @@ msgstr "Kopijuoti ataskaitą"
 #, fuzzy
 msgid "Copy these details to the clipboard for a bug report"
 msgstr "Kopijuoti šią informaciją į iškarpinę klaidos pranešimui"
+
+#: fpdb_3_legacy/GuiVersionInfo.py fpdb_3_legacy/menu_layout.py
+#: fpdb_3_legacy/tracker_notes_dialog.py
+#, fuzzy
+msgid "Database"
+msgstr "Duomenų bazė"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 #, fuzzy
@@ -8897,6 +8838,65 @@ msgstr ""
 
 #: fpdb_3_legacy/tracker_notes.py
 msgid "skipped: fpdb already has a note"
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+#, fuzzy
+msgid "Also import PT4's automatic notes"
+msgstr "Kurti automatines pastabas"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+#, fuzzy, python-format
+msgid ""
+"Could not read PokerTracker 4's database:\n"
+"%s"
+msgstr ""
+"Nepavyko perskaityti paketo:\n"
+"%s"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+#, fuzzy
+msgid "Host"
+msgstr "Serveris:"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+#, fuzzy
+msgid "Import PokerTracker 4 notes"
+msgstr ""
+"Importuoti PokerTracker 4 HUD išdėstymą (statistika + intervalų lentelės)"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Leave players who already have an fpdb note alone"
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid ""
+"PT4 rewrites its automatic notes as it imports hands, so fpdb keeps them in "
+"a section of their own and replaces that section on each import. Your own "
+"text stays as it is."
+msgstr ""
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+#, fuzzy
+msgid "Password"
+msgstr "Slaptažodis:"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+#, fuzzy
+msgid "Port"
+msgstr "Prievadas:"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+#, fuzzy
+msgid "Preview"
+msgstr "HUD peržiūra"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid ""
+"fpdb reads the notes and player tags from PokerTracker 4's database, read-"
+"only. An fpdb note is never overwritten: the PT4 note is added after it. "
+"Notes on players fpdb has no hands of are listed, not imported: import the "
+"hands first."
 msgstr ""
 
 #: fpdb_3_legacy/update_notice.py

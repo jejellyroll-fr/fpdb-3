@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 23:46+0100\n"
+"POT-Creation-Date: 2026-11-15 08:43+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -1355,7 +1355,7 @@ msgstr ""
 "C'est la seule base de données configurée, elle ne peut pas être supprimée — "
 "fpdb en a besoin d'au moins une. Ajoutez d'abord une autre base."
 
-#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiTrackerNotes.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/tracker_notes_dialog.py
 msgid "User"
 msgstr "Utilisateur"
 
@@ -1809,8 +1809,8 @@ msgstr "HUD"
 msgid "Hand History Converters"
 msgstr "Convertisseurs d'historique des mains"
 
-#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/GuiTrackerNotes.py
-#: fpdb_3_legacy/menu_layout.py
+#: fpdb_3_legacy/GuiPrefs.py fpdb_3_legacy/menu_layout.py
+#: fpdb_3_legacy/tracker_notes_dialog.py
 msgid "Import"
 msgstr "Importation"
 
@@ -2621,7 +2621,7 @@ msgstr ""
 "Le dossier n'a pas pu être lu :\n"
 "%s"
 
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/GuiTrackerNotes.py
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/tracker_notes_dialog.py
 #, python-format
 msgid ""
 "The import stopped on an error:\n"
@@ -2658,70 +2658,6 @@ msgstr "non défini"
 msgid "… and %d more"
 msgstr "… et %d de plus"
 
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid "Also import PT4's automatic notes"
-msgstr "Importer aussi les notes automatiques de PT4"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-#, python-format
-msgid ""
-"Could not read PokerTracker 4's database:\n"
-"%s"
-msgstr ""
-"Impossible de lire la base de données de PokerTracker 4 :\n"
-"%s"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py fpdb_3_legacy/GuiVersionInfo.py
-#: fpdb_3_legacy/menu_layout.py
-msgid "Database"
-msgstr "Base de données"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid "Host"
-msgstr "Hôte"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid "Import PokerTracker 4 notes"
-msgstr "Importer les notes de PokerTracker 4"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid "Leave players who already have an fpdb note alone"
-msgstr "Ne pas toucher aux joueurs qui ont déjà une note dans fpdb"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid ""
-"PT4 rewrites its automatic notes as it imports hands, so fpdb keeps them in "
-"a section of their own and replaces that section on each import. Your own "
-"text stays as it is."
-msgstr ""
-"PT4 réécrit ses notes automatiques à mesure qu'il importe des mains : fpdb "
-"les range donc dans une section à part qu'il remplace à chaque import. Votre "
-"propre texte reste tel quel."
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid "Password"
-msgstr "Mot de passe"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid "Port"
-msgstr "Port"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid "Preview"
-msgstr "Aperçu"
-
-#: fpdb_3_legacy/GuiTrackerNotes.py
-msgid ""
-"fpdb reads the notes and player tags from PokerTracker 4's database, read-"
-"only. An fpdb note is never overwritten: the PT4 note is added after it. "
-"Notes on players fpdb has no hands of are listed, not imported: import the "
-"hands first."
-msgstr ""
-"fpdb lit les notes et les étiquettes de joueurs dans la base de données de "
-"PokerTracker 4, en lecture seule. Une note fpdb n'est jamais écrasée : la "
-"note PT4 est ajoutée à sa suite. Les notes sur des joueurs dont fpdb n'a "
-"aucune main sont listées, pas importées : importez d'abord les mains."
-
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Clipboard unavailable"
 msgstr "Presse-papiers indisponible"
@@ -2737,6 +2673,11 @@ msgstr "Copier le rapport"
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Copy these details to the clipboard for a bug report"
 msgstr "Copier ces informations dans le presse-papiers pour un rapport de bug"
+
+#: fpdb_3_legacy/GuiVersionInfo.py fpdb_3_legacy/menu_layout.py
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Database"
+msgstr "Base de données"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Documentation"
@@ -7910,6 +7851,65 @@ msgstr "salle inconnue de fpdb"
 #: fpdb_3_legacy/tracker_notes.py
 msgid "skipped: fpdb already has a note"
 msgstr "ignorée : fpdb a déjà une note"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Also import PT4's automatic notes"
+msgstr "Importer aussi les notes automatiques de PT4"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+#, python-format
+msgid ""
+"Could not read PokerTracker 4's database:\n"
+"%s"
+msgstr ""
+"Impossible de lire la base de données de PokerTracker 4 :\n"
+"%s"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Host"
+msgstr "Hôte"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Import PokerTracker 4 notes"
+msgstr "Importer les notes de PokerTracker 4"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Leave players who already have an fpdb note alone"
+msgstr "Ne pas toucher aux joueurs qui ont déjà une note dans fpdb"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid ""
+"PT4 rewrites its automatic notes as it imports hands, so fpdb keeps them in "
+"a section of their own and replaces that section on each import. Your own "
+"text stays as it is."
+msgstr ""
+"PT4 réécrit ses notes automatiques à mesure qu'il importe des mains : fpdb "
+"les range donc dans une section à part qu'il remplace à chaque import. Votre "
+"propre texte reste tel quel."
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Password"
+msgstr "Mot de passe"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Port"
+msgstr "Port"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid "Preview"
+msgstr "Aperçu"
+
+#: fpdb_3_legacy/tracker_notes_dialog.py
+msgid ""
+"fpdb reads the notes and player tags from PokerTracker 4's database, read-"
+"only. An fpdb note is never overwritten: the PT4 note is added after it. "
+"Notes on players fpdb has no hands of are listed, not imported: import the "
+"hands first."
+msgstr ""
+"fpdb lit les notes et les étiquettes de joueurs dans la base de données de "
+"PokerTracker 4, en lecture seule. Une note fpdb n'est jamais écrasée : la "
+"note PT4 est ajoutée à sa suite. Les notes sur des joueurs dont fpdb n'a "
+"aucune main sont listées, pas importées : importez d'abord les mains."
 
 #: fpdb_3_legacy/update_notice.py
 #, python-format

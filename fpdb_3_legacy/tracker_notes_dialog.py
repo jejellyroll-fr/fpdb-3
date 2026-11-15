@@ -30,7 +30,7 @@ log = get_logger("tracker_notes")
 __all__ = ["GuiTrackerNotes"]
 
 
-class GuiTrackerNotes(QDialog):
+class GuiTrackerNotes(QDialog):  # pylint: disable=too-many-instance-attributes
     """``config`` and ``sql`` are the main window's; ``read_notes`` and ``open_db`` are seams for tests."""
 
     def __init__(
