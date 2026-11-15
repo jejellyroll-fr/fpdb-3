@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Free Poker Database\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 11:31+0100\n"
+"POT-Creation-Date: 2026-11-14 22:36+0100\n"
 "PO-Revision-Date: 2011-07-11 11:13+0000\n"
 "Last-Translator: kibbitzer <thomas.joannes@gmail.com>\n"
 "Language-Team: French (France) (http://www.transifex.net/projects/p/fpdb/"
@@ -1355,7 +1355,7 @@ msgstr ""
 "C'est la seule base de données configurée, elle ne peut pas être supprimée — "
 "fpdb en a besoin d'au moins une. Ajoutez d'abord une autre base."
 
-#: fpdb_3_legacy/GuiDatabase.py
+#: fpdb_3_legacy/GuiDatabase.py fpdb_3_legacy/GuiTrackerMigration.py
 msgid "User"
 msgstr "Utilisateur"
 
@@ -2484,6 +2484,13 @@ msgstr "%(files)d fichiers de %(rooms)d rooms seront importés."
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 #, python-format
+msgid ""
+"%(hands)d hands and %(summaries)d tournament summaries read from the "
+"database."
+msgstr "%(hands)d mains et %(summaries)d résumés de tournoi lus dans la base de données."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
 msgid "%(hands)d hands imported from %(rooms)d rooms."
 msgstr "%(hands)d mains importées depuis %(rooms)d rooms."
 
@@ -2500,6 +2507,13 @@ msgid "%d files were left out: fpdb cannot read them."
 msgstr "%d fichiers ont été ignorés : fpdb ne sait pas les lire."
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid ""
+"%d of them were stored with the wrong character set (a euro sign read as Ä); "
+"fpdb restores the room's own text."
+msgstr "%d d'entre eux étaient enregistrés avec le mauvais jeu de caractères (un signe euro lu comme Ä) ; fpdb rétablit le texte d'origine de la room."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Another import is running. Try again once it has finished."
 msgstr "Un autre import est en cours. Réessayez quand il sera terminé."
 
@@ -2510,6 +2524,15 @@ msgstr "Choisir une room…"
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Choose the folder holding the hand histories"
 msgstr "Choisir le dossier contenant les historiques de mains"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Connecting to the PokerTracker 4 database…"
+msgstr "Connexion à la base de données de PokerTracker 4…"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/GuiVersionInfo.py
+#: fpdb_3_legacy/menu_layout.py
+msgid "Database"
+msgstr "Base de données"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Duplicates"
@@ -2530,6 +2553,14 @@ msgstr "Trouver les historiques de mains"
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Folder holding the hand histories"
 msgstr "Dossier contenant les historiques de mains"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "From a folder: the tracker's archive or an export"
+msgstr "Depuis un dossier : l'archive du tracker ou un export"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "From the PokerTracker 4 database"
+msgstr "Depuis la base de données de PokerTracker 4"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/research_labels.py
 msgid "Hero"
@@ -2567,12 +2598,37 @@ msgid "No hand history fpdb can read was found in this folder."
 msgstr "Aucun historique de mains lisible par fpdb dans ce dossier."
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "No hand was added to the database since the last import."
+msgstr "Aucune main n'a été ajoutée à la base depuis le dernier import."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "None of them is a hand history fpdb can read."
+msgstr "Aucun n'est un historique de mains que fpdb sait lire."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Nothing is imported yet."
 msgstr "Rien n'est encore importé."
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Only the hands added since the last import from this database"
+msgstr "Seulement les mains ajoutées depuis le dernier import de cette base"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Partial"
 msgstr "Partielles"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Password"
+msgstr "Mot de passe"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Port"
+msgstr "Port"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid "Reading the PokerTracker 4 database: %(done)d of %(total)d hands…"
+msgstr "Lecture de la base de données de PokerTracker 4 : %(done)d mains sur %(total)d…"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Reading the folder…"
@@ -2581,6 +2637,10 @@ msgstr "Lecture du dossier…"
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "Room"
 msgstr "Room"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "Server"
+msgstr "Serveur"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 #, python-format
@@ -2599,6 +2659,15 @@ msgid ""
 msgstr ""
 "Les stats, le HUD et les notes ne font pas partie de cet import ; voir le "
 "guide de migration dans la documentation."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+#, python-format
+msgid ""
+"The PokerTracker 4 database could not be read:\n"
+"%s"
+msgstr ""
+"La base de données de PokerTracker 4 n'a pas pu être lue :\n"
+"%s"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid ""
@@ -2634,6 +2703,10 @@ msgid "What came over"
 msgstr "Ce qui a été importé"
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
+msgid "What the database holds"
+msgstr "Contenu de la base de données"
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "What the folder holds"
 msgstr "Contenu du dossier"
 
@@ -2647,6 +2720,14 @@ msgid ""
 msgstr ""
 "fpdb importe les mains que le tracker a conservées. Stats, HUD et notes se "
 "migrent à part."
+
+#: fpdb_3_legacy/GuiTrackerMigration.py
+msgid ""
+"fpdb reads the hands PokerTracker 4 keeps in its PostgreSQL database. The "
+"connection is read-only: fpdb never writes to it. PokerTracker 4 shows these "
+"settings in Database > Database Management. The password is used for this "
+"import only and is not saved."
+msgstr "fpdb lit les mains que PokerTracker 4 conserve dans sa base PostgreSQL. La connexion est en lecture seule : fpdb n'y écrit jamais. PokerTracker 4 affiche ces paramètres dans Database > Database Management. Le mot de passe ne sert qu'à cet import et n'est pas enregistré."
 
 #: fpdb_3_legacy/GuiTrackerMigration.py
 msgid "not set"
@@ -2672,10 +2753,6 @@ msgstr "Copier le rapport"
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Copy these details to the clipboard for a bug report"
 msgstr "Copier ces informations dans le presse-papiers pour un rapport de bug"
-
-#: fpdb_3_legacy/GuiVersionInfo.py fpdb_3_legacy/menu_layout.py
-msgid "Database"
-msgstr "Base de données"
 
 #: fpdb_3_legacy/GuiVersionInfo.py
 msgid "Documentation"
@@ -9060,9 +9137,6 @@ msgstr ""
 #~ msgid "Mail Folder"
 #~ msgstr "Répertoire de Mail"
 
-#~ msgid "Mail Server"
-#~ msgstr "Serveur de mailing"
-
 #~ msgid "Main"
 #~ msgstr "Général"
 
@@ -9316,9 +9390,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "PartyPokerToFpdb: Unimplemented %s: '%s' '%s'"
 #~ msgstr "Non implémenté %s: '%s' '%s'"
-
-#~ msgid "Password"
-#~ msgstr "Mot de passe"
 
 #~ msgid "Player finishing stats unreadable : %s"
 #~ msgstr "Statistiques finales du joueur illisibles : %s"
