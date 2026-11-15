@@ -225,7 +225,9 @@ def _derive(tmp_path, text: str):
     path = tmp_path / "draw.txt"
     path.write_text(text, encoding="utf-8")
     parser = PokerStars(config=Config(file="HUD_config.xml"), in_path=str(path), autostart=True)
-    (hand,) = parser.getProcessedHands()
+    hands = parser.getProcessedHands()
+    assert len(hands) == 1
+    hand = hands[0]
     hand.prepInsert(_PlaceholderIds())
     hand.assembleHand()
     return hand

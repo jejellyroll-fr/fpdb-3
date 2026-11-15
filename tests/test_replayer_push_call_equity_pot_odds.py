@@ -217,7 +217,7 @@ def test_draw_equity_waits_for_the_last_draw(monkeypatch) -> None:
 
     metrics = replayer._hero_decision_metrics(_draw_frame("DRAWTWO"), 0)
 
-    assert calls == []
+    assert not calls
     assert metrics["call_equity_pct"] is None
     assert metrics["pot_odds_pct"] == Decimal(25)
 

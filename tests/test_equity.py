@@ -529,7 +529,7 @@ def test_every_eval_game_evaluates_its_own_complete_hands() -> None:
             engine.winners(game=evalgame, pockets=pockets, board=board)
         except RuntimeError as error:
             failures[category] = f"{evalgame}: {error}"
-    assert failures == {}
+    assert not failures, failures
 
 
 def _fusion_all_in_hand() -> SimpleNamespace:
