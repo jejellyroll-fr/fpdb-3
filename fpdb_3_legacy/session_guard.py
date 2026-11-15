@@ -314,7 +314,7 @@ def fetch_since(db: Any, player_ids: Iterable[int]) -> Callable[[float], list[tu
     query = db.sql.query["sessionGuardHands"]
 
     def fetch(since: float) -> list[tuple[Any, ...]]:
-        cutoff = datetime.datetime.fromtimestamp(since, tz=datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        cutoff = datetime.datetime.fromtimestamp(since, tz=datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
         cursor = db.get_cursor()
         rows: list[tuple[Any, ...]] = []
         for player_id in ids:

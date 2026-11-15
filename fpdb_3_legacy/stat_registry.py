@@ -28,19 +28,12 @@ from __future__ import annotations
 import ast
 import json
 import operator
+import tomllib
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pathlib import Path
 from typing import Any, cast
-
-try:  # Python 3.11+
-    import tomllib as _toml
-except ModuleNotFoundError:  # pragma: no cover - exercised only on <3.11
-    try:
-        import tomli as _toml  # type: ignore[no-redef]
-    except ModuleNotFoundError:  # pragma: no cover
-        _toml = None  # type: ignore[assignment]
 
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -437,9 +430,7 @@ def _load_file(path: Path) -> list[Mapping[str, Any]]:
     if path.suffix == ".json":
         doc = json.loads(text)
     elif path.suffix == ".toml":
-        if _toml is None:  # pragma: no cover
-            raise StatDescriptorError("TOML support unavailable (install tomli on Python < 3.11)")
-        doc = _toml.loads(text)
+        doc = tomllib.loads(text)
     else:  # pragma: no cover - filtered by caller
         raise StatDescriptorError(f"unsupported descriptor suffix {path.suffix!r}")
 

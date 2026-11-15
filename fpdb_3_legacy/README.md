@@ -23,9 +23,7 @@ shared platform/window infrastructure used by the legacy HUD.
 ## 🔧 Requirements
 
 - Source installation: Python 3.11+ (3.13 supported).
-- PyOxidizer binaries embed CPython 3.10.14 and do not require a system Python;
-  PyOxidizer 0.24 cannot link CPython 3.11+. This does not lower the minimum
-  for source installations.
+- PyOxidizer binaries embed CPython 3.11.10 and do not require a system Python.
 - OS: Linux, Windows, macOS
 - HUD: X11 (Linux), native window support (Windows/macOS)
 

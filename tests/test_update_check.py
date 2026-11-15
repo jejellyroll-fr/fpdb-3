@@ -37,7 +37,6 @@ ASSETS = [
         ("pyinstaller", "windows-x64"),
         ("pyoxidizer", "linux-x64"),
         ("pyoxidizer", "macos-arm64"),
-        ("pyoxidizer", "windows-x64"),
     )
 ]
 
@@ -189,7 +188,7 @@ def test_a_source_checkout_only_gets_the_release_page(monkeypatch) -> None:
     [
         ("linux", "x86_64", "PyInstaller", "fpdb-pyinstaller-linux-x64.tar.gz"),
         ("win32", "AMD64", "PyInstaller", "fpdb-pyinstaller-windows-x64.tar.gz"),
-        ("win32", "AMD64", "PyOxidizer", "fpdb-pyoxidizer-windows-x64.tar.gz"),
+        ("win32", "AMD64", "PyOxidizer", None),  # no Windows PyOxidizer build since #457
         ("darwin", "arm64", "PyOxidizer", "fpdb-pyoxidizer-macos-arm64.tar.gz"),
         ("darwin", "x86_64", "PyOxidizer", None),  # no Intel macOS build is published
         ("linux", "aarch64", "PyInstaller", None),

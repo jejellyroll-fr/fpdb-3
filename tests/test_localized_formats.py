@@ -2,7 +2,7 @@
 
 import time
 from collections.abc import Iterator
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 import pytest
 
@@ -87,4 +87,4 @@ def test_stored_utc_times_show_in_local_time_and_the_ui_languages_pattern() -> N
     assert format_utc_datetime(stored) == "07/11/2026 00:55"
     set_format_locale("en_US")
     assert format_utc_datetime(stored) == "11/7/26 12:55 AM"
-    assert format_utc_datetime(stored.replace(tzinfo=timezone.utc)) == "11/7/26 12:55 AM"
+    assert format_utc_datetime(stored.replace(tzinfo=UTC)) == "11/7/26 12:55 AM"

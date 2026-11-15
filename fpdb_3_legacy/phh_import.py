@@ -26,13 +26,12 @@ import math
 import os
 import re
 import time
+import tomllib
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from decimal import ROUND_DOWN, Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Final
-
-from fpdb.compat import toml_module
 
 #: The extensions of one hand (``.phh``) and of several (``.phhs``, numbered TOML tables).
 PHH_EXTENSIONS: Final = (".phh", ".phhs")
@@ -322,15 +321,9 @@ class PHHDocument:
 
 def _parse_toml(text: str, source: str, line: int, label: str) -> dict[str, Any]:
     try:
-        toml = toml_module()
-    except ModuleNotFoundError:
-        # Python 3.10 (the PyOxidizer builds) without the tomli backport.
-        msg = "reading PHH needs tomllib (Python 3.11+) or the tomli package"
-        raise PHHImportError(UNSUPPORTED, msg, source=f"{source}:{line}", hand=label) from None
-    try:
-        document: dict[str, Any] = toml.loads(text)
+        document: dict[str, Any] = tomllib.loads(text)
         return document
-    except toml.TOMLDecodeError as error:
+    except tomllib.TOMLDecodeError as error:
         raise PHHImportError(MALFORMED, f"not valid TOML ({error})", source=f"{source}:{line}", hand=label) from None
 
 
@@ -801,13 +794,13 @@ def _in_utc(local: datetime.datetime, data: Mapping[str, Any], fail: Any) -> dat
         # cannot be put in UTC, and stored as UTC it would be off by hours.
         raise fail(f"time_zone_abbreviation {abbreviation!r} without a time_zone cannot be converted", UNSUPPORTED)
     if local.tzinfo is not None:
-        local = local.astimezone(datetime.timezone.utc).replace(tzinfo=None)
+        local = local.astimezone(datetime.UTC).replace(tzinfo=None)
     return local
 
 
 def _round_trip(aware: datetime.datetime) -> datetime.datetime:
     """The wall time *aware* reads after a trip through UTC (naive)."""
-    return aware.astimezone(datetime.timezone.utc).astimezone(aware.tzinfo).replace(tzinfo=None)
+    return aware.astimezone(datetime.UTC).astimezone(aware.tzinfo).replace(tzinfo=None)
 
 
 def _zone(name: str, fail: Any) -> datetime.tzinfo:

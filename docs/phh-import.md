@@ -226,10 +226,7 @@ Only a hand where everyone folded to one player gets its winner without
   best hand showing on each street, which would take evaluating the upcards, so
   only the end of each betting round is checked there.
 - Hands are stored one at a time, each committed on its own.
-- PHH is TOML, read with `tomllib` (Python 3.11+) or, on the Python 3.10 the
-  PyOxidizer builds embed, its backport `tomli`, which those builds ship.
-  Without either, PHH files are refused as unsupported; nothing else is
-  affected.
+- PHH is TOML, read with the standard library's `tomllib`.
 
 ## Player identity in the database
 

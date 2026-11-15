@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from threading import RLock
 
@@ -102,7 +102,7 @@ def format_utc_datetime(value: datetime, *, long: bool = False) -> str:
     a hand played at 18:59 in Paris read 17:59 -- or the wrong day near midnight.
     The pattern (day/month order, 12 or 24 hours) still follows the UI language.
     """
-    utc = value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
+    utc = value if value.tzinfo is not None else value.replace(tzinfo=UTC)
     try:
         local = utc.astimezone()
     except (OverflowError, OSError, ValueError):
