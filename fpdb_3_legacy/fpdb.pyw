@@ -59,6 +59,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMainWindow,
+    QMenuBar,
     QMessageBox,
     QPushButton,
     QScrollArea,
@@ -1441,6 +1442,34 @@ class fpdb(QMainWindow):
         entry.setDate(calendar.selectedDate())
         win.accept()
 
+    def _add_title_and_menu_bars(self) -> None:
+        """Stack the replacement title bar and the menu bar on the central layout.
+
+        On macOS the menu bar is the native one. Everywhere else the window is
+        frameless, so the title bar must be the topmost row: it carries the
+        window buttons and the drag handler. ``QLayout.setMenuBar`` reserves a
+        strip above the layout's contents and used to put the menu bar over the
+        title bar (#823), so the menu bar is added as an ordinary second row.
+
+        That row is a menu bar of our own, not ``QMainWindow.menuBar()``: once
+        the window's menu bar is moved into another layout, ``menuBar()`` no
+        longer finds it and creates a fresh one at the top of the window, which
+        is the bar ``createMenuBar`` would then fill. ``menuBar`` is overridden
+        below to return this one.
+        """
+        self.custom_title_bar = CustomTitleBar(self)
+        self.central_layout.addWidget(self.custom_title_bar)
+        if sys.platform == "darwin":
+            self.setMenuBar(self.menuBar())
+        else:
+            self.menu_bar = QMenuBar(self.central_widget)
+            self.central_layout.addWidget(self.menu_bar)
+
+    def menuBar(self) -> QMenuBar:
+        """The menu bar in the central layout off macOS, the window's otherwise."""
+        menu_bar = getattr(self, "menu_bar", None)
+        return menu_bar if menu_bar is not None else super().menuBar()
+
     def createMenuBar(self) -> None:
         """Build the menu bar from the declarative layout in ``menu_layout``."""
         from fpdb_3_legacy import menu_layout
@@ -2409,32 +2438,13 @@ class fpdb(QMainWindow):
         defy = min(sg.height(), defy)
         self.resize(defx, defy)
 
-        if sys.platform == "darwin":
-            pass
-        else:
-            # Create custom title bar
-            self.custom_title_bar = CustomTitleBar(self)
         # Create central widget and layout
         self.central_widget = QWidget(self)
         self.central_layout = QVBoxLayout(self.central_widget)
         self.central_layout.setContentsMargins(0, 0, 0, 0)
         self.central_layout.setSpacing(0)
 
-        if sys.platform == "darwin":
-            # Add title bar and menu bar to layout
-            self.custom_title_bar = CustomTitleBar(self)
-            self.central_layout.addWidget(self.custom_title_bar)
-            self.setMenuBar(self.menuBar())
-        else:
-            # Add title bar and menu bar to layout. QLayout.setMenuBar reserves
-            # a strip above the layout's contents, so using it here put the menu
-            # bar over the title bar: the window buttons were not on the top
-            # line, and the row users tried to drag was the menu bar, which has
-            # no move handler. Add the menu bar as an ordinary second row so the
-            # replacement title bar really is the topmost one.
-            self.central_layout.addWidget(self.custom_title_bar)
-            self.menu_bar = self.menuBar()
-            self.central_layout.addWidget(self.menu_bar)
+        self._add_title_and_menu_bars()
 
         self.nb: QTabWidget = QTabWidget()
         self.nb.setTabsClosable(True)
