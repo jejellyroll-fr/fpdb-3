@@ -519,26 +519,76 @@ class DerivedStatsAllInMixin(DerivedStatsBase):
         allin_streets = {street for street, data in boards.items() if data.get("allin")}
         if allin_streets != {last}:
             return
-        start, end = hrange[-1]
-        pockets: list[list[str]] = []
-        evaluated: list[str] = []
+        pocket_of = self._showdown_draw_hands(hand, players, hrange[-1])
+        if pocket_of is None or len(pocket_of) < MIN_PLAYERS_FOR_GAME:
+            return
+        evaluated = list(pocket_of)
+        paid = self._paid_into_pot(hand)
+        pot, rake = Decimal(hand.totalpot), Decimal(hand.rake)
+        expected = dict.fromkeys(evaluated, Decimal(0))
+        try:
+            for amount, eligible in self._pot_layers(hand, evaluated, paid):
+                # The rake comes off each layer in proportion to its size.
+                net = amount - rake * amount / pot if pot else amount
+                if len(eligible) == 1:
+                    expected[eligible[0]] += net
+                    continue
+                result = calculate_equity(evalgame, [pocket_of[player] for player in eligible], backend=pokereval)
+                for player, player_result in zip(eligible, result.players, strict=True):
+                    expected[player] += player_result.equity * net
+        except (EquityUnavailableError, RuntimeError, ValueError):
+            log.exception("getAllInEVDraw: no equity for hand %s", hand.handid)
+            return
+        for player in evaluated:
+            self.handsplayers[player]["allInEV"] = int(100 * (expected[player] - paid.get(player, Decimal(0))))
+            self.handsplayers[player]["allInEVCalculated"] = True
+
+    def _showdown_draw_hands(
+        self, hand: Any, players: list[str], final_range: tuple[int, int]
+    ) -> dict[str, list[str]] | None:
+        """The final hand of each player at showdown, or None when one of them is unknown.
+
+        One unknown hand at showdown leaves the pot's split unknown.
+        """
+        start, end = final_range
+        hands: dict[str, list[str]] = {}
         for player in players:
             if not self.handsplayers[player].get("sawShowdown"):
                 continue
             cards = [str(card) for card in hand.join_holecards(player, asList=True)[start:end]]
             if len(cards) != end - start or not all(Card.encodeCard(card) for card in cards):
-                # One unknown hand at showdown leaves the pot's split unknown.
-                return
-            pockets.append(cards)
-            evaluated.append(player)
-        if len(pockets) < MIN_PLAYERS_FOR_GAME:
-            return
-        try:
-            result = calculate_equity(evalgame, pockets, backend=pokereval)
-        except (EquityUnavailableError, RuntimeError, ValueError):
-            log.exception("getAllInEVDraw: no equity for hand %s", hand.handid)
-            return
-        self._store_all_in_ev(hand, evaluated, result)
+                return None
+            hands[player] = cards
+        return hands
+
+    @staticmethod
+    def _paid_into_pot(hand: Any) -> dict[str, Decimal]:
+        """What each player put in the pot, blinds and antes included."""
+        players = set(hand.pot.committed) | set(hand.pot.common)
+        return {
+            player: Decimal(hand.pot.committed.get(player, 0)) + Decimal(hand.pot.common.get(player, 0))
+            for player in players
+        }
+
+    @staticmethod
+    def _pot_layers(hand: Any, contenders: list[str], paid: dict[str, Decimal]) -> list[tuple[Decimal, list[str]]]:
+        """Split the pot into the main pot and side pots, each with the contenders who can win it.
+
+        A short stack all-in can only win what each opponent matched of his
+        stake. The parsers that read the pots from the summary leave
+        hand.pot.pots empty, so the layers come from what each player paid:
+        one per distinct contender stake. Money no contender reaches (house
+        money, rounding) stays in the top layer.
+        """
+        layers: list[tuple[Decimal, list[str]]] = []
+        previous = Decimal(0)
+        for level in sorted({paid.get(player, Decimal(0)) for player in contenders}):
+            amount = sum((min(stake, level) - min(stake, previous) for stake in paid.values()), Decimal(0))
+            layers.append((amount, [player for player in contenders if paid.get(player, Decimal(0)) >= level]))
+            previous = level
+        top_amount, top_eligible = layers[-1]
+        layers[-1] = (top_amount + Decimal(hand.totalpot) - sum(amount for amount, _ in layers), top_eligible)
+        return layers
 
     def awardPots(self, hand: Any) -> None:  # noqa: C901, PLR0912
         """Award pots to winners."""

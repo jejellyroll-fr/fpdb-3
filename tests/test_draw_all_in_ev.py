@@ -56,6 +56,51 @@ Seat 6: Erin (small blind) folded before the Draw
 
 """
 
+# Alice, short, is all-in after the draw with the best hand: she can only win
+# the main pot. Bob and Carol play on for a side pot, which Carol's kings win.
+FIVE_CARD_DRAW_SHORT_ALL_IN_WITH_A_SIDE_POT = """PokerStars Game #35839278019:  5 Card Draw Limit ($0.10/$0.20 USD) - 2009/11/25 14:20:59 ET
+Table 'Laodica IV' 6-max Seat #5 is the button
+Seat 1: Alice ($0.37 in chips)
+Seat 2: Bob ($2.38 in chips)
+Seat 3: Carol ($2.82 in chips)
+Seat 4: Hero ($2.73 in chips)
+Seat 5: Dave ($3.85 in chips)
+Seat 6: Erin ($2.28 in chips)
+Erin: posts small blind $0.05
+Alice: posts big blind $0.10
+*** DEALING HANDS ***
+Dealt to Hero [2c 4h 9c Qs 3d]
+Bob: raises $0.10 to $0.20
+Carol: calls $0.20
+Hero: folds
+Dave: folds
+Erin: folds
+Alice: calls $0.10
+Alice: discards 2 cards
+Bob: discards 3 cards
+Carol: discards 3 cards
+Alice: bets $0.17 and is all-in
+Bob: raises $0.20 to $0.37
+Carol: calls $0.37
+*** SHOW DOWN ***
+Alice: shows [Qh Qd Qc 6c Tc] (three of a kind, Queens)
+Bob: shows [9s 7h 5d 3c 2s] (high card Nine)
+Carol: shows [Ks 7d Ad Kd 8h] (a pair of Kings)
+Carol collected $0.40 from side pot
+Alice collected $1.09 from main pot
+*** SUMMARY ***
+Total pot $1.56 Main pot $1.09. Side pot $0.40. | Rake $0.07
+Seat 1: Alice (big blind) showed [Qh Qd Qc 6c Tc] and won ($1.09) with three of a kind, Queens
+Seat 2: Bob showed [9s 7h 5d 3c 2s] and lost with high card Nine
+Seat 3: Carol showed [Ks 7d Ad Kd 8h] and won ($0.40) with a pair of Kings
+Seat 4: Hero folded before the Draw (didn't bet)
+Seat 5: Dave (button) folded before the Draw (didn't bet)
+Seat 6: Erin (small blind) folded before the Draw
+
+
+
+"""
+
 # Player4 is all-in before the draw: the hands shown are not the ones held then.
 FIVE_CARD_DRAW_ALL_IN_BEFORE_THE_DRAW = """PokerStars Game #64146221551:  5 Card Draw Limit ($0.10/$0.20 USD) - 2011/07/04 21:56:59 WET [2011/07/04 16:56:59 ET]
 Table 'Pulova' 6-max Seat #3 is the button
@@ -202,6 +247,16 @@ def test_triple_draw_all_in_after_the_last_draw_stores_the_showdown_result(tmp_p
 
     # Three put in $0.67 each of a $2.51 pot raked $0.12; Carol folded.
     assert _all_in_ev(hand) == {"Alice": 172, "Bob": -67, "Hero": -67}
+
+
+def test_a_short_all_in_wins_only_the_main_pot(tmp_path) -> None:
+    hand = _derive(tmp_path, FIVE_CARD_DRAW_SHORT_ALL_IN_WITH_A_SIDE_POT)
+
+    # Main pot $1.16 (three $0.37 stakes and Erin's $0.05), side pot $0.40 for
+    # Bob and Carol. The $0.07 rake comes off each pot in proportion: Alice
+    # expects $1.108 for her $0.37, Carol $0.382 for her $0.57. Evaluating
+    # the whole pot at once gave Alice +112 and Carol -57.
+    assert _all_in_ev(hand) == {"Alice": 73, "Bob": -57, "Carol": -18}
 
 
 def test_an_all_in_before_the_draw_stores_no_ev(tmp_path) -> None:
