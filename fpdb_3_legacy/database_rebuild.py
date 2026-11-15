@@ -29,6 +29,22 @@ REFRESH_WHERE_RING = "WHERE g.type = 'ring' AND g.siteId IN (24, 115, 116, 117, 
 HERO_HANDS_ONLY_PLAYERS = "SELECT id FROM Players WHERE siteId IN (24, 115, 116, 117, 118, 119) AND name = %s"
 REFRESH_WHERE_TOUR = "WHERE g.type = 'tour' AND g.siteId IN (24, 115, 116, 117, 118, 119)<hero_where>"
 
+# The one-time removal of the auto-notes those rooms' other hands produced
+# (#719, section 4.1.8): notes about hands none of the user's players took
+# part in. <ids> becomes the user's player ids (integers); with none, every
+# note of those rooms goes, as no hand of theirs could have produced it.
+HERO_HANDS_ONLY_AUTONOTES_DROPPED = "autonotes_hero_hands_only_v1"
+DELETE_OTHERS_AUTONOTES = (
+    "DELETE FROM PlayerAutoNotes WHERE handId IN (SELECT h.id FROM Hands h"
+    " INNER JOIN Gametypes g ON (g.id = h.gametypeId) WHERE g.siteId IN (24, 115, 116, 117, 118, 119)"
+    " AND NOT EXISTS (SELECT 1 FROM HandsPlayers own WHERE own.handId = h.id AND own.playerId IN (<ids>)))"
+)
+DELETE_ALL_HERO_HANDS_ONLY_AUTONOTES = (
+    "DELETE FROM PlayerAutoNotes WHERE handId IN (SELECT h.id FROM Hands h"
+    " INNER JOIN Gametypes g ON (g.id = h.gametypeId) WHERE g.siteId IN (24, 115, 116, 117, 118, 119))"
+)
+
+
 class DatabaseRebuildMixin:
     """Rebuild the caches from the hands they summarise."""
 
@@ -356,6 +372,33 @@ class DatabaseRebuildMixin:
         cursor.execute(self.rebuild_sql("ring", "HudCache", REFRESH_WHERE_RING))
         cursor.execute(self.rebuild_sql("tour", "HudCache", REFRESH_WHERE_TOUR))
         analytics_lifecycle._write_meta(self, {HERO_HANDS_ONLY_REFRESHED: "1"})
+        self.commit()
+
+    def drop_hero_hands_only_autonotes(self) -> None:
+        """Remove, once, the auto-notes the hero-hands-only rooms' other hands produced (#719).
+
+        ACR/WPN allow automatic notes from the user's own hands only. The
+        import no longer writes the others (``hud_room_policy.kept_from_hud``),
+        but a database imported before the rule holds some: the notes drawn
+        from a hand none of the user's configured names played are deleted.
+        The hands themselves stay; the AnalyticsMeta flag makes it a one-time
+        step.
+        """
+        from fpdb_3_legacy import analytics_lifecycle
+
+        analytics_lifecycle.ensure_analytics_meta(self)
+        if HERO_HANDS_ONLY_AUTONOTES_DROPPED in analytics_lifecycle._read_meta(self):
+            return
+        ids = self.hero_hands_only_user_ids()
+        if ids:
+            statement = DELETE_OTHERS_AUTONOTES.replace("<ids>", ", ".join(str(int(i)) for i in ids))
+        else:
+            statement = DELETE_ALL_HERO_HANDS_ONLY_AUTONOTES
+        cursor = self.get_cursor()
+        cursor.execute(statement)  # nosemgrep - constants and integers only
+        if cursor.rowcount and cursor.rowcount > 0:
+            log.info("Removed %d ACR/WPN auto-notes drawn from hands the user did not play", cursor.rowcount)
+        analytics_lifecycle._write_meta(self, {HERO_HANDS_ONLY_AUTONOTES_DROPPED: "1"})
         self.commit()
 
     def _rebuild_ring_cache(self, table: Any, h_start: Any, v_start: Any, wmid: Any, commit: bool = True) -> None:

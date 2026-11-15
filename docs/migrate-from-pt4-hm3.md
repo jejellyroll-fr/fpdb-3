@@ -9,7 +9,7 @@ files as they are, so moving over amounts to one import of the right folder.
 | Hands | Yes, with this guide | #612 |
 | Stats (`.pt4stat`) | ChipEV and the common cash stats (VPIP, PFR, 3-bet, c-bet, WTSD, W$SD, AF, steal and the folds to them); see [the coverage of PT4's stock stats](pt4-stock-stat-coverage.md) | #613 |
 | HUD layout (`.pt4hud`) | Yes: *Configure ▸ Import PT4 HUD*. Stats with no fpdb equivalent are listed; *Convert PT4 HUD to .fpdbhud* makes a shareable package | #614 |
-| Reading the tracker's database directly | PokerTracker 4: yes, see [below](#from-the-pokertracker-4-database). Holdem Manager 3: not yet | #615, #814 |
+| Reading the tracker's database directly | PokerTracker 4: yes, see [below](#from-the-pokertracker-4-database) and [the findings](pt4-database-spike.md). Holdem Manager 3: not yet | #615, #814 |
 | Player notes | PT4: yes, *Import ▸ PokerTracker 4 Notes…* (section 5). HM3: not yet | #618 |
 
 ## 1. Find the hand histories
