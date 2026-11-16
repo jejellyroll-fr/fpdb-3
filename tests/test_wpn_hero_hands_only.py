@@ -194,6 +194,19 @@ def test_with_no_configured_name_no_wpn_hand_feeds_the_hud() -> None:
     assert not db.storeHudCache.called
 
 
+def test_a_last_hand_kept_from_the_hud_still_flushes_the_batch() -> None:
+    # storeHudCache writes its buffer only on doinsert, which the importer sets
+    # on a file's last hand: an excluded last hand adds nothing but flushes.
+    db = MagicMock()
+    hand = _hand("Americas Cardroom", ["bob", "carol"], _config(**{"Americas Cardroom": "alice"}))
+    hand.handsplayers = {"bob": {"n": 1}}
+    hand.updateHudCache(db, doinsert=True)
+    db.storeHudCache.assert_called_once()
+    *_, pdata, doinsert = db.storeHudCache.call_args.args
+    assert pdata == {}
+    assert doinsert is True
+
+
 # ---------------------------------------------------------------------------
 # Rebuild: the HudCache half only
 # ---------------------------------------------------------------------------
@@ -314,6 +327,29 @@ def test_someone_elses_wpn_history_is_stored_but_feeds_no_hud(importer_for) -> N
     assert _count(importer, "HudCache") == 0
     # Session statistics read the hands directly: they apply the rule too.
     assert _session_players(importer, hand_id) == set()
+
+
+def test_a_file_ending_with_someone_elses_hand_keeps_the_users_hud_rows(importer_for, tmp_path) -> None:
+    # The user's hand, then one they did not play, as the file's last hand: the
+    # importer flushes HudCache on the last hand only, so excluding that hand
+    # must not drop what the first one buffered.
+    first = WPN_HAND.read_text(encoding="utf-8").strip()
+    second = first.replace(WPN_PLAYER, "SomeoneElse").replace("Game ID: 1377529121", "Game ID: 1377529122")
+    path = tmp_path / WPN_HAND.name
+    path.write_text(f"{first}\n\n\n{second}\n", encoding="utf-8")
+
+    importer = importer_for(WPN_PLAYER)
+    importer.addImportFile(str(path), "auto")
+    importer.runImport()
+
+    assert _count(importer, "Hands") == 2
+    rows = _rows(
+        importer,
+        "SELECT p.name, SUM(hc.n) FROM HudCache hc JOIN Players p ON p.id = hc.playerId GROUP BY p.name",
+    )
+    counted = dict(rows)
+    # Every player of the user's hand, once; nothing from the other hand.
+    assert counted == {name: 1 for name in (WPN_PLAYER, "primo4", "validraize", "WhatAcrock420")}
 
 
 def _rule_off(patch) -> None:
