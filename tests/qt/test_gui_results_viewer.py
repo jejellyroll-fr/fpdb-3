@@ -292,3 +292,33 @@ def test_the_table_sorts_money_by_money_whatever_the_unit(viewer) -> None:
     assert first == (pr.DAY, date(2026, 11, 9))
     viewer.table.sortByColumn(4, Qt.SortOrder.DescendingOrder)  # Profit (BB)
     assert viewer.proxy.index(0, 0).data(results_module.PERIOD_ROLE) == (pr.DAY, date(2026, 11, 10))
+
+
+def test_the_arrow_keys_select_like_a_click(viewer, qtbot) -> None:
+    viewer.show_results(pr.build_results(ROWS))  # three days, the latest first
+    viewer.table.setFocus()
+    viewer.select_row(viewer.proxy.index(0, 0))
+    viewer.table.setCurrentIndex(viewer.proxy.index(0, 0))
+    assert viewer.selected == (pr.DAY, date(2026, 11, 12))
+
+    qtbot.keyClick(viewer.table, Qt.Key.Key_Down)
+
+    assert viewer.selected == (pr.DAY, date(2026, 11, 9))
+    assert [hand.hand_id for hand in viewer.selected_hands()] == [1, 2]
+
+    row, column = _find_cell(viewer, (pr.DAY, date(2026, 11, 12)))
+    viewer.calendar.setCurrentCell(row, column)
+    assert viewer.selected == (pr.DAY, date(2026, 11, 12))
+    qtbot.keyClick(viewer.calendar, Qt.Key.Key_Right)
+    assert viewer.selected == (pr.DAY, date(2026, 11, 13))
+    assert not viewer.selected_hands()
+
+
+def test_a_refill_does_not_change_the_selection(viewer) -> None:
+    viewer.show_results(pr.build_results(ROWS))
+    viewer.select_period(pr.DAY, date(2026, 11, 9))
+
+    viewer.granularity_box.setCurrentIndex(viewer.granularity_box.findData(pr.WEEK))
+    viewer.move_month(-1)
+
+    assert viewer.selected == (pr.DAY, date(2026, 11, 9))

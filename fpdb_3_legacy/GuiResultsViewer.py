@@ -21,7 +21,7 @@ from time import time
 from typing import Any
 
 import pyqtgraph as pg
-from PySide6.QtCore import QSortFilterProxyModel, Qt, Signal
+from PySide6.QtCore import QSignalBlocker, QSortFilterProxyModel, Qt, Signal
 from PySide6.QtGui import QBrush, QColor, QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -380,9 +380,12 @@ class GuiResultsViewer(QSplitter):  # pylint: disable=too-many-instance-attribut
         self.unit_box.currentIndexChanged.connect(self._unit_changed)
         self.review_button.clicked.connect(self.review_hands)
         self.month_button.clicked.connect(self.select_month)
+        # The current cell or row, not just a click: the arrow keys move it too.
         self.calendar.cellClicked.connect(self.select_cell)
+        self.calendar.currentCellChanged.connect(lambda row, column, _row, _column: self.select_cell(row, column))
         self.calendar.cellDoubleClicked.connect(lambda _row, _column: self.review_hands())
         self.table.clicked.connect(self.select_row)
+        self.table.selectionModel().currentRowChanged.connect(lambda current, _previous: self.select_row(current))
         self.table.doubleClicked.connect(lambda _index: self.review_hands())
 
     # -- tab lifecycle --------------------------------------------------
@@ -574,6 +577,8 @@ class GuiResultsViewer(QSplitter):  # pylint: disable=too-many-instance-attribut
             title += "  " + value_text(pr.period_value(month_result, self.unit), self.unit)
         self.month_button.setText(title)
 
+        # Refilling moves no one's selection: the current cell's signals stay quiet meanwhile.
+        blocker = QSignalBlocker(self.calendar)
         self.calendar.clearContents()
         self.calendar.clearSelection()
         grid = pr.month_weeks(year, month)
@@ -590,8 +595,10 @@ class GuiResultsViewer(QSplitter):  # pylint: disable=too-many-instance-attribut
             font.setBold(True)
             item.setFont(font)
             self.calendar.setItem(row, 7, item)
+        blocker.unblock()
 
     def _fill_table(self) -> None:
+        blocker = QSignalBlocker(self.table.selectionModel())  # a refill is not a selection
         self.table.setSortingEnabled(False)
         self.model.removeRows(0, self.model.rowCount())
         periods = self.results.periods[self.granularity] if self.results is not None else ()
@@ -604,6 +611,7 @@ class GuiResultsViewer(QSplitter):  # pylint: disable=too-many-instance-attribut
             self.model.appendRow(row)
         self.table.setSortingEnabled(True)
         self.table.resizeColumnsToContents()
+        blocker.unblock()
 
     # -- selection ------------------------------------------------------
 
@@ -636,6 +644,8 @@ class GuiResultsViewer(QSplitter):  # pylint: disable=too-many-instance-attribut
 
     def select_row(self, index: Any) -> None:
         """Select the period of a row of the table."""
+        if not index.isValid():
+            return
         item = self.model.item(self.proxy.mapToSource(index).row(), 0)
         period = item.data(PERIOD_ROLE) if item is not None else None
         if period:
