@@ -350,3 +350,18 @@ def test_the_query_reads_every_cash_hand_of_the_hero(imported) -> None:
     viewer.filters = _filters(games=("omahahi",))
     cursor.execute(viewer.build_query([hero]))
     assert cursor.fetchall() == []
+
+
+# -- the Hand Viewer takes the hero the calendar sends --------------------------
+
+
+def test_the_hand_viewer_takes_the_hero_names_it_is_sent() -> None:
+    from fpdb_3_legacy.GuiHandViewer import GuiHandViewer
+
+    viewer = GuiHandViewer.__new__(GuiHandViewer)  # pylint: disable=no-value-for-parameter
+    hand = SimpleNamespace(players=[[1, "villain", 100], [2, "ProfileAlias", 100]])
+
+    viewer.hero_names = frozenset()
+    assert viewer._sent_hero(hand) is None  # pylint: disable=protected-access
+    viewer.hero_names = frozenset({"ProfileAlias", "OtherSite"})
+    assert viewer._sent_hero(hand) == "ProfileAlias"  # pylint: disable=protected-access

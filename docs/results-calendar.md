@@ -20,13 +20,15 @@ hands are read and summed in the background; the tab stays usable meanwhile.
 - **Period table**: every day, week or month of the filtered dates (the
   **Period** box), with the hands, the profit and the all-in EV in money (one
   amount per currency), the same in big blinds, BB/100 and EV BB/100, and the
-  showdown and non-showdown results. Columns sort; the table exports like the
-  other stat tables.
+  showdown and non-showdown results. Columns sort (the money columns by
+  amount, the BB columns by big blinds); the table exports like the other stat
+  tables.
 - **Curves**: net profit, all-in EV, showdown and non-showdown, hand by hand,
   for the period selected in the calendar or the table, or for all the hands
   when nothing is selected.
 - **Review hands** (or a double-click on a cell or a row) opens the selected
-  period's hands in the Hand Viewer.
+  period's hands in the Hand Viewer, for the hero they were loaded for, even
+  when the Hand Viewer's own filters name another hero or profile.
 
 **Unit** shows the calendar and the curves in big blinds, or in the currency
 of the hands when they were all played in one.

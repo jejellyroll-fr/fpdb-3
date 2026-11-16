@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import pytz
+from PySide6.QtCore import Qt
 
 from fpdb_3_legacy import GuiResultsViewer as results_module
 from fpdb_3_legacy import hud_day
@@ -115,7 +116,7 @@ def test_the_table_lists_the_chosen_periods(viewer) -> None:
 
 
 def test_selecting_a_day_draws_its_curves_and_reviews_its_hands(viewer) -> None:
-    viewer.show_results(pr.build_results(ROWS))
+    viewer._loaded(viewer._generation, pr.build_results(ROWS), frozenset({"Hero"}))  # pylint: disable=protected-access
     assert viewer.plot_widget is not None  # every hand of the range before a selection
     row, column = _find_cell(viewer, (pr.DAY, date(2026, 11, 9)))
 
@@ -130,14 +131,18 @@ def test_selecting_a_day_draws_its_curves_and_reviews_its_hands(viewer) -> None:
         def __init__(self) -> None:
             self.loaded: list[int] = []
 
-        def reload_hands(self, hand_ids) -> None:
+            self.heroes: frozenset[str] = frozenset()
+
+        def reload_hands(self, hand_ids, hero_names=()) -> None:
             self.loaded = list(hand_ids)
+            self.heroes = frozenset(hero_names)
 
     hand_viewer = FakeHandViewer()
     viewer.owner.threads = [hand_viewer]
     with patch.object(results_module.GuiHandViewer, "GuiHandViewer", FakeHandViewer):
         viewer.review_hands()
     assert hand_viewer.loaded == [1, 2]
+    assert hand_viewer.heroes == {"Hero"}  # the names of the loaded hands' player, not the viewer's filters
 
 
 def test_selecting_a_table_row_selects_its_period(viewer) -> None:
@@ -266,3 +271,19 @@ def test_the_month_button_selects_the_month_shown(viewer) -> None:
     assert viewer.selected == (pr.MONTH, date(2026, 10, 1))
     assert [hand.hand_id for hand in viewer.selected_hands()] == [4]
     assert "2026" in viewer.month_button.text()
+
+
+def test_the_table_sorts_money_by_money_whatever_the_unit(viewer) -> None:
+    rows = [
+        (1, datetime(2026, 11, 9, 20, 0), 10_000, 10_000, False, 1_000, "USD"),  # $100 at a $10 big blind: +10 BB
+        (2, datetime(2026, 11, 10, 20, 0), 5_000, 5_000, False, 100, "USD"),  # $50 at a $1 big blind: +50 BB
+    ]
+    viewer.show_results(pr.build_results(rows))
+    assert viewer.unit == pr.UNIT_BB
+
+    viewer.table.sortByColumn(2, Qt.SortOrder.DescendingOrder)  # Profit, in money
+
+    first = viewer.proxy.index(0, 0).data(results_module.PERIOD_ROLE)
+    assert first == (pr.DAY, date(2026, 11, 9))
+    viewer.table.sortByColumn(4, Qt.SortOrder.DescendingOrder)  # Profit (BB)
+    assert viewer.proxy.index(0, 0).data(results_module.PERIOD_ROLE) == (pr.DAY, date(2026, 11, 10))

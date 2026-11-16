@@ -144,13 +144,14 @@ def table_cell(text: str, sort_value: Any) -> QStandardItem:
     return item
 
 
-def period_row(period: pr.PeriodResult, unit: str) -> list[QStandardItem]:
+def period_row(period: pr.PeriodResult) -> list[QStandardItem]:
     """The period table's cells for one day, week or month."""
     with_bb = period.bb_hands > 0
-    if unit == pr.UNIT_BB:
-        profit_sort, ev_sort = period.profit_bb, period.all_in_ev_bb
-    else:
-        profit_sort, ev_sort = period.money(unit), period.all_in_ev_minor.get(unit, 0.0)
+    # The money columns sort by the money they show, whatever the unit of the
+    # calendar: the BB columns sort by big blinds. Amounts in several currencies
+    # are added as they are, the only order there is without exchange rates.
+    profit_sort = sum(period.profit_minor.values())
+    ev_sort = sum(period.all_in_ev_minor.values())
     row = [
         table_cell(period_label(period.granularity, period.start), period.start.toordinal()),
         table_cell(format_number(period.hands, 0), period.hands),
@@ -278,6 +279,7 @@ class GuiResultsViewer(QSplitter):  # pylint: disable=too-many-instance-attribut
         self.db = Database.Database(self.conf, sql=self.sql)
 
         self.results: pr.Results | None = None
+        self.heroes: frozenset[str] = frozenset()  # whose hands the results are
         self.selected: tuple[str, date] | None = None
         self.month: tuple[int, int] = (date.today().year, date.today().month)
         self._loader: ResultsLoader | None = None
@@ -423,17 +425,25 @@ class GuiResultsViewer(QSplitter):  # pylint: disable=too-many-instance-attribut
             return
 
         generation = self._generation
+        heroes = self._hero_names(playerids)
         loader = ResultsLoader(self.db, self.build_query(playerids), float(getattr(self.filters, "day_start", 0) or 0))
         self._loader = loader
-        loader.loaded.connect(lambda results: self._loaded(generation, results))
+        loader.loaded.connect(lambda results: self._loaded(generation, results, heroes))
         loader.error.connect(lambda message: self._failed(generation, message))
         self.status_label.setText(_("Loading…"))
         loader.start()
 
-    def _loaded(self, generation: int, results: pr.Results) -> None:
+    def _hero_names(self, playerids: list[int]) -> frozenset[str]:
+        """The screen names of the players whose hands are loaded, for the Hand Viewer."""
+        names = frozenset(filter(None, (self.db.get_player_name_by_id(pid) for pid in playerids)))
+        self.db.rollback()
+        return names
+
+    def _loaded(self, generation: int, results: pr.Results, heroes: frozenset[str] = frozenset()) -> None:
         if generation != self._generation:
             return  # superseded by a newer Refresh
         self._loader = None
+        self.heroes = heroes
         self.status_label.clear()
         if results.hands:
             self.show_results(results)
@@ -586,7 +596,7 @@ class GuiResultsViewer(QSplitter):  # pylint: disable=too-many-instance-attribut
         self.model.removeRows(0, self.model.rowCount())
         periods = self.results.periods[self.granularity] if self.results is not None else ()
         for period in periods:
-            row = period_row(period, self.unit)
+            row = period_row(period)
             brush = self._tint(pr.period_value(period, self.unit))
             if brush is not None:
                 row[2].setBackground(brush)
@@ -711,7 +721,7 @@ class GuiResultsViewer(QSplitter):  # pylint: disable=too-many-instance-attribut
             return
         viewer = self._hand_viewer()
         if viewer is not None:
-            viewer.reload_hands(hand_ids)
+            viewer.reload_hands(hand_ids, hero_names=self.heroes)
 
     def _hand_viewer(self) -> Any:
         threads = getattr(self.owner, "threads", None)
