@@ -306,6 +306,27 @@ class ConfigGuiMixin(ConfigBase):
                 general_node.removeAttribute("preflop_advisor")
         self.save()
 
+    def get_replayer_amounts_in_bb(self) -> bool:
+        """Whether the replayer shows amounts in big blinds (#824); off by default.
+
+        An optional ``replayer_amounts="bb"`` attribute on ``<general>``, absent from the
+        shipped templates, so the replayer keeps showing money or chips until asked.
+        """
+        return str(self.general.get("replayer_amounts", "")).strip().lower() == "bb"
+
+    def set_replayer_amounts_in_bb(self, enabled: bool) -> None:
+        """Remember whether the replayer shows amounts in big blinds, and save."""
+        if enabled:
+            self.general["replayer_amounts"] = "bb"
+        else:
+            self.general.pop("replayer_amounts", None)
+        for general_node in self.doc.getElementsByTagName("general"):
+            if enabled:
+                general_node.setAttribute("replayer_amounts", "bb")
+            elif general_node.hasAttribute("replayer_amounts"):
+                general_node.removeAttribute("replayer_amounts")
+        self.save()
+
     def get_check_for_updates(self) -> bool | None:
         """Whether fpdb looks for a newer release at startup (#445); None until the user has been asked.
 

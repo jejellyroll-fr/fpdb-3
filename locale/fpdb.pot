@@ -1825,6 +1825,14 @@ msgstr ""
 msgid "Current card deck preview"
 msgstr ""
 
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "History..."
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "List the hand's actions and jump to one of them (A)"
+msgstr ""
+
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
 msgid "Share..."
 msgstr ""
@@ -1847,6 +1855,10 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid "Enter or apply this tournament's payout structure, for ICM"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "This hand has no big blind to count amounts in"
 msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
@@ -1886,6 +1898,60 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
 msgid "(this table taken as the whole field)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s %(action)s %(size)s%% of the pot"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s SPR %(spr)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s to act"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s to call %(amount)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "MDF %(mdf)s%% · fold equity needed %(fe)s%% (heads-up)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "MDF / fold equity: heads-up only"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "Odds for all players"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "SPR %(spr)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid ""
+"Show SPR, bet sizing, pot odds, MDF and fold equity for every player, not "
+"only the hero"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "facing %(size)s%% of the pot"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "pot odds %(odds)s%%"
 msgstr ""
 
 #: fpdb_3_legacy/GuiResearchBrowser.py fpdb_3_legacy/GuiResearchViews.py
@@ -3479,6 +3545,10 @@ msgstr ""
 
 #: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hand_share_dialog.py
 msgid "Big blinds"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "Show stacks, bets and pots in big blinds"
 msgstr ""
 
 #: fpdb_3_legacy/hand_share_dialog.py
@@ -7690,4 +7760,12 @@ msgstr ""
 
 #: fpdb_3_legacy/update_notice.py
 msgid "GitHub could not be reached. Check your connection and try again later."
+msgstr ""
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Action history"
+msgstr ""
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Click an action, or select it and press Enter, to jump to it."
 msgstr ""

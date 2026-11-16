@@ -2263,6 +2263,10 @@ msgid "Share..."
 msgstr "Delen..."
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "Show stacks, bets and pots in big blinds"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
 msgid "Solver review..."
 msgstr "Solver-review..."
@@ -2273,8 +2277,67 @@ msgid "Start"
 msgstr "Begin"
 
 #: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+msgid "This hand has no big blind to count amounts in"
+msgstr "Dit spel heeft geen big blind om in te tellen."
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, python-format
 msgid "bounty-adjusted chip EV %(chips)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s %(action)s %(size)s%% of the pot"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s SPR %(spr)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s to act"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s to call %(amount)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "MDF %(mdf)s%% · fold equity needed %(fe)s%% (heads-up)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "MDF / fold equity: heads-up only"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "Odds for all players"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "SPR %(spr)s"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid ""
+"Show SPR, bet sizing, pot odds, MDF and fold equity for every player, not "
+"only the hero"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "facing %(size)s%% of the pot"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "pot odds %(odds)s%%"
 msgstr ""
 
 #: fpdb_3_legacy/GuiResearchBrowser.py
@@ -2796,11 +2859,6 @@ msgstr ""
 msgid "BB/100: {bb100}"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hand_share_dialog.py
-#, fuzzy
-msgid "Big blinds"
-msgstr "Big blinds"
-
 #: fpdb_3_legacy/GuiResultsViewer.py
 msgid "Click to select the whole month"
 msgstr ""
@@ -2830,13 +2888,6 @@ msgid "Months"
 msgstr ""
 
 #: fpdb_3_legacy/GuiResultsViewer.py
-#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
-#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, fuzzy
-msgid "Net profit"
-msgstr "Totale nettowinst"
-
-#: fpdb_3_legacy/GuiResultsViewer.py
 #, fuzzy
 msgid "Next month"
 msgstr "Volgende actie"
@@ -2850,10 +2901,6 @@ msgstr "Zonder showdown"
 #, fuzzy
 msgid "Open the hands of the selected period in the Hand Viewer"
 msgstr "Geen speler past bij de gekozen site en hero."
-
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hud_options_panel.py
-msgid "Period"
-msgstr ""
 
 #: fpdb_3_legacy/GuiResultsViewer.py
 msgid "Period:"
@@ -4162,6 +4209,11 @@ msgstr "Deze hand kan niet naar PreflopAdvisor worden gestuurd."
 msgid "Amounts"
 msgstr "Bedragen"
 
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Big blinds"
+msgstr "Big blinds"
+
 #: fpdb_3_legacy/hand_share_dialog.py fpdb_3_legacy/table_export.py
 #, fuzzy
 msgid "Copy"
@@ -4347,6 +4399,10 @@ msgstr ""
 msgid "Opponents"
 msgstr "Tegenstandersrapport"
 
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hud_options_panel.py
+msgid "Period"
+msgstr ""
+
 #: fpdb_3_legacy/hud_options_panel.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
@@ -4499,10 +4555,6 @@ msgstr ""
 #, fuzzy
 msgid "Cash"
 msgstr "Cash"
-
-#: fpdb_3_legacy/menu_layout.py
-msgid "Cash results per day, week and month, with their profit curves"
-msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/update_notice.py
 msgid "Check for updates"
@@ -4719,11 +4771,6 @@ msgstr "Research Browser voor Omaha"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
-msgid "Results Calendar"
-msgstr "Resultaten"
-
-#: fpdb_3_legacy/menu_layout.py
-#, fuzzy
 msgid ""
 "Save a PokerTracker 4 HUD layout as a package you can share or re-import"
 msgstr ""
@@ -4840,6 +4887,15 @@ msgstr ""
 #: fpdb_3_legacy/menu_layout.py
 msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"
 msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Cash results per day, week and month, with their profit curves"
+msgstr ""
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Results Calendar"
+msgstr "Resultaten"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 #, fuzzy
@@ -6016,8 +6072,8 @@ msgstr "Overschrijven bevestigen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
-"PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files (*.fpdbhud);;"
-"All Files (*)"
+"PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files "
+"(*.fpdbhud);;All Files (*)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -8501,6 +8557,13 @@ msgstr ""
 msgid "Hands played"
 msgstr "Handen na"
 
+#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
+msgid "Net profit"
+msgstr "Totale nettowinst"
+
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
@@ -9181,6 +9244,22 @@ msgid ""
 "check_for_updates), and check by hand with Help > Check for updates.\n"
 "\n"
 "Check for updates automatically?"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "History..."
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "List the hand's actions and jump to one of them (A)"
+msgstr ""
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Action history"
+msgstr ""
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Click an action, or select it and press Enter, to jump to it."
 msgstr ""
 
 #, fuzzy
