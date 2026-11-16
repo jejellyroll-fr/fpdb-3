@@ -8967,6 +8967,22 @@ msgid ""
 "Check for updates automatically?"
 msgstr ""
 
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "History..."
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "List the hand's actions and jump to one of them (A)"
+msgstr ""
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Action history"
+msgstr ""
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Click an action, or select it and press Enter, to jump to it."
+msgstr ""
+
 #, fuzzy
 #~ msgid ""
 #~ "\n"
