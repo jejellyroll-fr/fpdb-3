@@ -1849,6 +1849,10 @@ msgid "Enter or apply this tournament's payout structure, for ICM"
 msgstr ""
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "This hand has no big blind to count amounts in"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, python-format
 msgid "Bounty: %s"
 msgstr ""
@@ -3364,8 +3368,12 @@ msgstr ""
 msgid "Money / chips"
 msgstr ""
 
-#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
 msgid "Big blinds"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "Show stacks, bets and pots in big blinds"
 msgstr ""
 
 #: fpdb_3_legacy/hand_share_dialog.py

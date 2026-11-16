@@ -2198,6 +2198,10 @@ msgid "Share..."
 msgstr "共有..."
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "Show stacks, bets and pots in big blinds"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
 msgid "Solver review..."
 msgstr "ソルバーで分析..."
@@ -2206,6 +2210,11 @@ msgstr "ソルバーで分析..."
 #, fuzzy
 msgid "Start"
 msgstr "最初"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+msgid "This hand has no big blind to count amounts in"
+msgstr "このゲームには基準となるビッグブラインドがありません。"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, python-format
@@ -3941,7 +3950,7 @@ msgstr "このハンドは PreflopAdvisor に送信できません。"
 msgid "Amounts"
 msgstr "金額"
 
-#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
 msgid "Big blinds"
 msgstr "ビッグブラインド"

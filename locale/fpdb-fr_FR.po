@@ -1974,12 +1974,20 @@ msgid "Share..."
 msgstr "Partager..."
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "Show stacks, bets and pots in big blinds"
+msgstr "Afficher les tapis, mises et pots en grosses blindes"
+
+#: fpdb_3_legacy/GuiReplayer.py
 msgid "Solver review..."
 msgstr "Revue solver..."
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/session_guard_dialog.py
 msgid "Start"
 msgstr "Début"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "This hand has no big blind to count amounts in"
+msgstr "Cette main n'a pas de grosse blinde pour compter les montants"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, python-format
@@ -3560,7 +3568,7 @@ msgstr "Cette main ne peut pas être envoyée à PreflopAdvisor."
 msgid "Amounts"
 msgstr "Montants"
 
-#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
 msgid "Big blinds"
 msgstr "Grosses blindes"
 

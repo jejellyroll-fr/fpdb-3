@@ -2252,6 +2252,10 @@ msgid "Share..."
 msgstr "Bendrinti..."
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "Show stacks, bets and pots in big blinds"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
 msgid "Solver review..."
 msgstr "Analizė su solveriu..."
@@ -2260,6 +2264,11 @@ msgstr "Analizė su solveriu..."
 #, fuzzy
 msgid "Start"
 msgstr "Pradžia"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+msgid "This hand has no big blind to count amounts in"
+msgstr "Šis žaidimas neturi didžiojo blindo, pagal kurį skaičiuoti."
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, python-format
@@ -4002,7 +4011,7 @@ msgstr "Šios rankos negalima išsiųsti į PreflopAdvisor."
 msgid "Amounts"
 msgstr "Sumos"
 
-#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
 msgid "Big blinds"
 msgstr "Didieji blindai"

@@ -2216,6 +2216,10 @@ msgid "Share..."
 msgstr "Partajează..."
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "Show stacks, bets and pots in big blinds"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
 msgid "Solver review..."
 msgstr "Analiză cu solver..."
@@ -2224,6 +2228,11 @@ msgstr "Analiză cu solver..."
 #, fuzzy
 msgid "Start"
 msgstr "Început"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+msgid "This hand has no big blind to count amounts in"
+msgstr "Acest joc nu are big blind după care să se numere."
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, python-format
@@ -3969,7 +3978,7 @@ msgstr "Această mână nu poate fi trimisă la PreflopAdvisor."
 msgid "Amounts"
 msgstr "Sume"
 
-#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
 msgid "Big blinds"
 msgstr "Big blind-uri"

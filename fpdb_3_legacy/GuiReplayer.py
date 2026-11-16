@@ -21,7 +21,7 @@ import os
 import time
 from collections import Counter
 from dataclasses import dataclass, field
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from math import cos, hypot, pi, sin
 from typing import Any
 
@@ -42,6 +42,7 @@ from PySide6.QtWidgets import (
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Hand
 from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity, fusion_pockets
 from fpdb_3_legacy.hand_review_dialog import HandReviewDialog
+from fpdb_3_legacy.hand_share import big_blind, supports_bb_amounts
 from fpdb_3_legacy.hand_share_dialog import HandShareDialog
 from fpdb_3_legacy.http_capture_ofc import OFCHand, build_ofc_hand, load_ofc_hand
 from fpdb_3_legacy.i18n import gettext as _
@@ -76,8 +77,16 @@ def _is_real_card(card: str) -> bool:
     return bool(card) and card not in {"0", "0x"} and len(card) == 2 and card[0] in _RANK_VALUE
 
 
-def format_replay_amount(value: Decimal | int | float, currency: str) -> str:
-    """Format real money with its currency and tournament/play chips as numbers."""
+def format_replay_amount(value: Decimal | int | float, currency: str, blind: Decimal | None = None) -> str:
+    """Format real money with its currency and tournament/play chips as numbers.
+
+    With *blind*, the amount is counted in big blinds instead (#824): rounded to
+    the hundredth, without trailing zeros, as the shared hand writes it.
+    """
+    if blind:
+        ratio = (Decimal(str(value)) / blind).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP).normalize()
+        decimals = max(0, -int(ratio.as_tuple().exponent))
+        return f"{format_number(ratio, decimals)} BB"
     if currency in {"", "T$", "play"}:
         return format_number(value)
     return format_currency(value, currency)
@@ -783,6 +792,17 @@ class GuiReplayer(QWidget):
         self.showCards.setChecked(True)
         self.buttonBox2.addWidget(self.showCards)
 
+        # Amounts in big blinds rather than money or chips (#824, after thecrawler1's
+        # fork); remembered between sessions, and only offered for a hand that has one.
+        self.replay_blind: Decimal | None = None
+        self.bbAmounts = QCheckBox(_("Big blinds"))
+        self.bbAmounts.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.bbAmounts.setChecked(self._remembered_bb_amounts())
+        self.bbAmounts.setEnabled(False)
+        self.bbAmounts.setToolTip(_("Show stacks, bets and pots in big blinds"))
+        self.bbAmounts.toggled.connect(self.bb_amounts_toggled)
+        self.buttonBox2.addWidget(self.bbAmounts)
+
         self.deckLabel = QLabel(_("Deck:"))
         self.deckLabel.setStyleSheet("font-weight: 600; color: #9aa5ad; margin-left: 10px;")
         self.buttonBox2.addWidget(self.deckLabel)
@@ -858,6 +878,47 @@ class GuiReplayer(QWidget):
         self._apply_replayer_style()
         self._update_deck_preview()
         self.show()
+
+    def _remembered_bb_amounts(self) -> bool:
+        getter = getattr(self.conf, "get_replayer_amounts_in_bb", None)
+        try:
+            # Only a real "yes" turns it on: a configuration without the setting stays in money.
+            return callable(getter) and getter() is True
+        except (AttributeError, TypeError, ValueError):
+            return False
+
+    def _active_big_blind(self) -> Decimal | None:
+        """The big blind amounts are counted in, or None to show money or chips."""
+        if getattr(self, "replay_mode", "hand") != "hand":
+            return None
+        toggle = getattr(self, "bbAmounts", None)
+        if toggle is None or not toggle.isChecked():
+            return None
+        return getattr(self, "replay_blind", None)
+
+    def _amount(self, value: Decimal | int | float) -> str:
+        """An amount of the hand being replayed, in big blinds when they are shown."""
+        return format_replay_amount(value, self.currency_code, blind=self._active_big_blind())
+
+    def _sync_bb_amounts_toggle(self) -> None:
+        available = self.replay_blind is not None
+        self.bbAmounts.setEnabled(available)
+        if available:
+            self.bbAmounts.setToolTip(_("Show stacks, bets and pots in big blinds"))
+        else:
+            self.bbAmounts.setToolTip(_("This hand has no big blind to count amounts in"))
+
+    def bb_amounts_toggled(self, checked: bool) -> None:
+        setter = getattr(self.conf, "set_replayer_amounts_in_bb", None)
+        if callable(setter):
+            try:
+                setter(checked)
+            except OSError as exc:
+                # Only the preference could not be written; the replay itself is unaffected.
+                log.warning("Could not save the replayer's big-blind setting: %s", exc)
+        if getattr(self, "replay_mode", None) == "hand" and self.shared_hand is not None:
+            self.info = self._format_hand_info(self.shared_hand)
+        self.update()
 
     def _ensure_replayer_assets(self) -> None:
         self.cardwidth = CARD_WIDTH
@@ -1080,10 +1141,10 @@ class GuiReplayer(QWidget):
             f"{limit} {category} {hand.gametype['bb']}{hand.gametype['currency']} "
             f"hand n° {hand.handid} played on {hand.sitename}"
         )
-        return info + self._special_pot_suffix(hand)
+        return info + self._special_pot_suffix(hand, self._active_big_blind())
 
     @staticmethod
-    def _special_pot_suffix(hand) -> str:
+    def _special_pot_suffix(hand, blind: Decimal | None = None) -> str:
         """Header markers for bomb pots and splash pots (amounts stored in cents)."""
         currency = hand.gametype.get("currency", "")
         markers = []
@@ -1091,7 +1152,9 @@ class GuiReplayer(QWidget):
             markers.append("Bomb pot")
         splash = getattr(hand, "splashPot", 0)
         if splash:
-            markers.append(f"Splash pot: {Decimal(splash) / 100:.2f}{currency}")
+            amount = Decimal(splash) / 100
+            shown = format_replay_amount(amount, currency, blind=blind) if blind else f"{amount:.2f}{currency}"
+            markers.append(f"Splash pot: {shown}")
         return ("  ·  " + "  ·  ".join(markers)) if markers else ""
 
     _RUN_IT_STREETS = frozenset(f"{s}{n}" for s in ("FLOP", "TURN", "RIVER") for n in (1, 2, 3))
@@ -2045,11 +2108,9 @@ class GuiReplayer(QWidget):
             # Pot already collected (hand conclusion): nothing to display.
             return
         if len(pots) <= 1:
-            pot_text = f"Pot: {format_replay_amount(pot_total, self.currency_code)}"
+            pot_text = f"Pot: {self._amount(pot_total)}"
         else:
-            pot_text = "\n".join(
-                f"{label}: {format_replay_amount(amount, self.currency_code)}" for label, amount in pots
-            )
+            pot_text = "\n".join(f"{label}: {self._amount(amount)}" for label, amount in pots)
 
         pot_rect = layout.pot_rect
         if not board_cards:
@@ -2137,7 +2198,7 @@ class GuiReplayer(QWidget):
 
         painter.setPen(text)
         painter.setFont(QFont("Helvetica", name_font_size, QFont.Weight.Bold))
-        stack_text = f"{player.name}  {format_replay_amount(player.stack, self.currency_code)}"
+        stack_text = f"{player.name}  {self._amount(player.stack)}"
         name_rect = QRectF(
             seat.panel_rect.x() + 6,
             seat.panel_rect.y() + 2,
@@ -2148,16 +2209,16 @@ class GuiReplayer(QWidget):
 
         action_text = player.action or ""
         if player.justacted and player.action == "collected" and player.chips:
-            action_text = f"collected {format_replay_amount(player.chips, self.currency_code)}"
+            action_text = f"collected {self._amount(player.chips)}"
         elif player.allin and player.action not in (None, "collected", "folds"):
             action_text = f"{action_text} all-in".strip()
         if is_final_frame and player.cashout is not None:
-            action_text = f"cashout {format_replay_amount(player.cashout, self.currency_code)}"
+            action_text = f"cashout {self._amount(player.cashout)}"
         if is_final_frame and player.splash:
             # Appended rather than substituted: the seat has to show both, or
             # the amount read off the box no longer matches what the player
             # actually took off the table.
-            splash_text = f"+{format_replay_amount(player.splash, self.currency_code)} splash"
+            splash_text = f"+{self._amount(player.splash)} splash"
             action_text = f"{action_text}  {splash_text}".strip()
         painter.setPen(accent if player.justacted else QColor("#9aa5ad"))
         painter.setFont(QFont("Helvetica", action_font_size, QFont.Weight.DemiBold))
@@ -2221,7 +2282,7 @@ class GuiReplayer(QWidget):
             painter.drawText(
                 seat.bet_rect,
                 Qt.AlignmentFlag.AlignCenter,
-                format_replay_amount(player.chips, self.currency_code),
+                self._amount(player.chips),
             )
 
         if getattr(self.replay_model.hand, "buttonpos", 0) == player.seat and not self.dealer.isNull():
@@ -2245,11 +2306,9 @@ class GuiReplayer(QWidget):
                 if player.justacted and player.action:
                     allin_suffix = " (all-in)" if player.allin and player.action != "collected" else ""
                     if player.action == "collected" and player.chips:
-                        entries.append(
-                            f"{player.name}: collected {format_replay_amount(player.chips, self.currency_code)}"
-                        )
+                        entries.append(f"{player.name}: collected {self._amount(player.chips)}")
                     elif player.chips and player.action not in {"folds", "checks"}:
-                        amount = format_replay_amount(player.chips, self.currency_code)
+                        amount = self._amount(player.chips)
                         entries.append(f"{player.name}: {player.action} {amount}{allin_suffix}")
                     else:
                         entries.append(f"{player.name}: {player.action}{allin_suffix}")
@@ -2282,14 +2341,14 @@ class GuiReplayer(QWidget):
                 if combo:
                     entries.append(f"{name}: {combo}{suffix}")
             for name, amount in (getattr(hand, "cashOutAmounts", {}) or {}).items():
-                entries.append(f"{name}: cashout {format_replay_amount(amount, self.currency_code)}")
+                entries.append(f"{name}: cashout {self._amount(amount)}")
             # The splash is added by the room, not won from the other players,
             # so it is its own line rather than part of what was collected --
             # the collected figure balances against the bets and would stop
             # balancing if this were folded into it.
             for name, amount in (getattr(hand, "splashWinnings", {}) or {}).items():
                 if amount:
-                    entries.append(f"{name}: splash +{format_replay_amount(amount, self.currency_code)}")
+                    entries.append(f"{name}: splash +{self._amount(amount)}")
         return entries[-max_entries:]
 
     def _current_action_summary(self, frame: ReplayFrame) -> str:
@@ -2299,9 +2358,9 @@ class GuiReplayer(QWidget):
         player = acted[-1]
         allin_suffix = " (all-in)" if player.allin and player.action != "collected" else ""
         if player.action == "collected" and player.chips:
-            return f"{player.name} collected {format_replay_amount(player.chips, self.currency_code)}"
+            return f"{player.name} collected {self._amount(player.chips)}"
         if player.chips and player.action not in {"folds", "checks"}:
-            amount = format_replay_amount(player.chips, self.currency_code)
+            amount = self._amount(player.chips)
             return f"{player.name} {player.action} {amount}{allin_suffix}"
         return f"{player.name} {player.action}{allin_suffix}"
 
@@ -2380,7 +2439,7 @@ class GuiReplayer(QWidget):
             return ""
         parts = []
         if metrics.get("facing_call"):
-            call_amt = format_replay_amount(metrics["call_amount"], self.currency_code)
+            call_amt = self._amount(metrics["call_amount"])
             odds_pct = format_number(metrics["pot_odds_pct"], 1)
             ratio = format_number(metrics["pot_odds_ratio"], 1)
             parts.append(f"Hero call {call_amt} · pot odds {odds_pct}% ({ratio}:1)")
@@ -2560,7 +2619,7 @@ class GuiReplayer(QWidget):
         # Line 2: Pot Odds & Call Equity
         line2_parts = []
         if metrics.get("facing_call"):
-            call_amt = format_replay_amount(metrics["call_amount"], self.currency_code)
+            call_amt = self._amount(metrics["call_amount"])
             odds_pct = format_number(metrics["pot_odds_pct"], 1)
             ratio = format_number(metrics["pot_odds_ratio"], 1)
             line2_parts.append(f"Pot Odds: {odds_pct}% ({ratio}:1) [Call {call_amt}]")
@@ -2676,6 +2735,8 @@ class GuiReplayer(QWidget):
         self.hand_icm = None
         self.hand_bounty = None
         self.shared_tourney_id = None
+        self.replay_blind = None
+        self._sync_bb_amounts_toggle()
         self.shareButton.setEnabled(False)
         self.reviewButton.setEnabled(False)
         self.payoutsButton.setEnabled(False)
@@ -2696,6 +2757,7 @@ class GuiReplayer(QWidget):
             self.shared_hand_id = int(entry) if str(entry).isdigit() else None
             self.currency = hand.sym
             self.currency_code = str(hand.gametype.get("currency", "USD"))
+            self.replay_blind = big_blind(hand) if supports_bb_amounts(hand) else None
             self.Heroes = hand.hero or self._resolve_hero(hand.sitename)
             self.replay_model = self._build_replay_model(hand)
             self.hand_icm = self._price_hand_icm(hand)
@@ -2710,6 +2772,7 @@ class GuiReplayer(QWidget):
         self.shareButton.setEnabled(self.shared_hand is not None)
         self.reviewButton.setEnabled(self.shared_hand is not None)
         self.payoutsButton.setEnabled(self.shared_tourney_id is not None)
+        self._sync_bb_amounts_toggle()
 
         for idx in reversed(list(range(self.buttonBox.count()))):
             item = self.buttonBox.takeAt(idx)
