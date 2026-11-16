@@ -7,14 +7,13 @@ from __future__ import annotations
 
 from decimal import Decimal
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
 
-pytest.importorskip("PySide6.QtWidgets")
-
-from fpdb_3_legacy.GuiReplayer import GuiReplayer, format_replay_amount  # noqa: E402 - after the Qt probe
-from fpdb_3_legacy.localized_formats import format_number  # noqa: E402
+from fpdb_3_legacy.GuiReplayer import GuiReplayer, format_replay_amount
+from fpdb_3_legacy.localized_formats import format_number
 
 pytestmark = pytest.mark.qt
 
@@ -67,8 +66,8 @@ def test_amounts_are_counted_in_big_blinds_when_asked() -> None:
 def test_the_toggle_is_off_by_default(qtbot, config, importer, fresh_db, tmp_path) -> None:
     replayer = replay(qtbot, config, fresh_db, import_hand(importer, fresh_db, tmp_path, "holdem/cash_nl_6max.txt"))
 
-    assert replayer.bbAmounts.isEnabled()
-    assert not replayer.bbAmounts.isChecked()
+    assert replayer.bb_amounts_box.isEnabled()
+    assert not replayer.bb_amounts_box.isChecked()
     assert replayer._amount(Decimal(100)) == format_replay_amount(Decimal(100), "USD")
 
 
@@ -77,7 +76,7 @@ def test_a_cash_hand_shows_stacks_bets_pots_and_actions_in_big_blinds(
 ) -> None:
     replayer = replay(qtbot, config, fresh_db, import_hand(importer, fresh_db, tmp_path, "holdem/cash_nl_6max.txt"))
 
-    replayer.bbAmounts.setChecked(True)
+    replayer.bb_amounts_box.setChecked(True)
 
     assert replayer.replay_blind == Decimal("1.00")
     assert replayer._amount(Decimal(100)) == "100 BB"
@@ -114,13 +113,13 @@ def test_the_hero_decision_summary_follows_the_toggle(qtbot, config, importer, f
     frame = replayer._frame_from_state(replayer.states[0])
 
     assert "Hero call $" in replayer._hero_odds_summary(frame, 0)
-    replayer.bbAmounts.setChecked(True)
+    replayer.bb_amounts_box.setChecked(True)
     assert f"Hero call {format_number(Decimal('2.5'), 1)} BB" in replayer._hero_odds_summary(frame, 0)
 
 
 def test_a_tournament_hand_counts_chips_in_its_big_blind(qtbot, config, importer, fresh_db, tmp_path) -> None:
     replayer = replay(qtbot, config, fresh_db, import_hand(importer, fresh_db, tmp_path, "holdem/tournament_ko.txt"))
-    replayer.bbAmounts.setChecked(True)
+    replayer.bb_amounts_box.setChecked(True)
 
     assert replayer.replay_blind == Decimal(20)
     start = replayer._frame_from_state(replayer.states[0])
@@ -129,22 +128,22 @@ def test_a_tournament_hand_counts_chips_in_its_big_blind(qtbot, config, importer
     final_frame(replayer)
     assert "Player1: collected 151 BB" in replayer._timeline_entries(max_entries=50)
 
-    replayer.bbAmounts.setChecked(False)
+    replayer.bb_amounts_box.setChecked(False)
     assert "Player1: collected 151 BB" not in replayer._timeline_entries(max_entries=50)
 
 
 def test_the_toggle_is_remembered_between_sessions(qtbot, config, importer, fresh_db, tmp_path) -> None:
     hand_id = import_hand(importer, fresh_db, tmp_path, "holdem/cash_nl_6max.txt")
-    replay(qtbot, config, fresh_db, hand_id).bbAmounts.setChecked(True)
+    replay(qtbot, config, fresh_db, hand_id).bb_amounts_box.setChecked(True)
 
     assert config.get_replayer_amounts_in_bb()
     assert config.saves
     assert all(node.getAttribute("replayer_amounts") == "bb" for node in config.doc.getElementsByTagName("general"))
     reopened = replay(qtbot, config, fresh_db, hand_id)
-    assert reopened.bbAmounts.isChecked()
+    assert reopened.bb_amounts_box.isChecked()
     assert reopened._amount(Decimal(100)) == "100 BB"
 
-    reopened.bbAmounts.setChecked(False)
+    reopened.bb_amounts_box.setChecked(False)
     assert not config.get_replayer_amounts_in_bb()
     assert not any(node.hasAttribute("replayer_amounts") for node in config.doc.getElementsByTagName("general"))
 
@@ -153,17 +152,15 @@ def test_a_hand_without_a_big_blind_disables_the_toggle(qtbot, config, importer,
     config.general["replayer_amounts"] = "bb"
     replayer = replay(qtbot, config, fresh_db, import_hand(importer, fresh_db, tmp_path, "stud/7stud.txt"))
 
-    assert not replayer.bbAmounts.isEnabled()
-    assert "no big blind" in replayer.bbAmounts.toolTip()
+    assert not replayer.bb_amounts_box.isEnabled()
+    assert "no big blind" in replayer.bb_amounts_box.toolTip()
     # The remembered preference is kept, but the stud hand stays in money.
-    assert replayer.bbAmounts.isChecked()
+    assert replayer.bb_amounts_box.isChecked()
     assert replayer._active_big_blind() is None
     assert all(" BB" not in entry for entry in replayer._timeline_entries(max_entries=50))
 
 
 def test_the_splash_pot_marker_follows_the_toggle() -> None:
-    from types import SimpleNamespace
-
     hand = SimpleNamespace(gametype={"currency": "USD"}, bombPot=0, splashPot=200)
 
     assert GuiReplayer._special_pot_suffix(hand) == "  ·  Splash pot: 2.00USD"

@@ -740,6 +740,7 @@ class GuiReplayer(QWidget):
         self.handlist = handlist
         self.handidx = 0
         self.Heroes = ""
+        self.info = ""  # header line of the hand being replayed
         self.setWindowTitle(_("FPDB Hand Replayer"))
 
         self.replayBox = QVBoxLayout()
@@ -795,13 +796,13 @@ class GuiReplayer(QWidget):
         # Amounts in big blinds rather than money or chips (#824, after thecrawler1's
         # fork); remembered between sessions, and only offered for a hand that has one.
         self.replay_blind: Decimal | None = None
-        self.bbAmounts = QCheckBox(_("Big blinds"))
-        self.bbAmounts.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.bbAmounts.setChecked(self._remembered_bb_amounts())
-        self.bbAmounts.setEnabled(False)
-        self.bbAmounts.setToolTip(_("Show stacks, bets and pots in big blinds"))
-        self.bbAmounts.toggled.connect(self.bb_amounts_toggled)
-        self.buttonBox2.addWidget(self.bbAmounts)
+        self.bb_amounts_box = QCheckBox(_("Big blinds"))
+        self.bb_amounts_box.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.bb_amounts_box.setChecked(self._remembered_bb_amounts())
+        self.bb_amounts_box.setEnabled(False)
+        self.bb_amounts_box.setToolTip(_("Show stacks, bets and pots in big blinds"))
+        self.bb_amounts_box.toggled.connect(self.bb_amounts_toggled)
+        self.buttonBox2.addWidget(self.bb_amounts_box)
 
         self.deckLabel = QLabel(_("Deck:"))
         self.deckLabel.setStyleSheet("font-weight: 600; color: #9aa5ad; margin-left: 10px;")
@@ -891,7 +892,7 @@ class GuiReplayer(QWidget):
         """The big blind amounts are counted in, or None to show money or chips."""
         if getattr(self, "replay_mode", "hand") != "hand":
             return None
-        toggle = getattr(self, "bbAmounts", None)
+        toggle = getattr(self, "bb_amounts_box", None)
         if toggle is None or not toggle.isChecked():
             return None
         return getattr(self, "replay_blind", None)
@@ -902,11 +903,11 @@ class GuiReplayer(QWidget):
 
     def _sync_bb_amounts_toggle(self) -> None:
         available = self.replay_blind is not None
-        self.bbAmounts.setEnabled(available)
+        self.bb_amounts_box.setEnabled(available)
         if available:
-            self.bbAmounts.setToolTip(_("Show stacks, bets and pots in big blinds"))
+            self.bb_amounts_box.setToolTip(_("Show stacks, bets and pots in big blinds"))
         else:
-            self.bbAmounts.setToolTip(_("This hand has no big blind to count amounts in"))
+            self.bb_amounts_box.setToolTip(_("This hand has no big blind to count amounts in"))
 
     def bb_amounts_toggled(self, checked: bool) -> None:
         setter = getattr(self.conf, "set_replayer_amounts_in_bb", None)
