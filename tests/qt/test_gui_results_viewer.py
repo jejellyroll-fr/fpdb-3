@@ -116,7 +116,10 @@ def test_the_table_lists_the_chosen_periods(viewer) -> None:
 
 
 def test_selecting_a_day_draws_its_curves_and_reviews_its_hands(viewer) -> None:
-    viewer._loaded(viewer._generation, pr.build_results(ROWS), frozenset({"Hero"}))  # pylint: disable=protected-access
+    # Hero Alice on one site, hero Bob on another: hand 2 is Bob's.
+    rows = [(*row, 2 if row[0] == 2 else 1) for row in ROWS]
+    results = pr.build_results(rows)
+    viewer._loaded(viewer._generation, results, {1: "Alice", 2: "Bob"})  # pylint: disable=protected-access
     assert viewer.plot_widget is not None  # every hand of the range before a selection
     row, column = _find_cell(viewer, (pr.DAY, date(2026, 11, 9)))
 
@@ -132,19 +135,19 @@ def test_selecting_a_day_draws_its_curves_and_reviews_its_hands(viewer) -> None:
 
         def __init__(self) -> None:
             self.loaded: list[int] = []
+            self.heroes: dict[int, str] = {}
 
-            self.heroes: frozenset[str] = frozenset()
-
-        def reload_hands(self, hand_ids, hero_names=()) -> None:
+        def reload_hands(self, hand_ids, heroes=None) -> None:
             self.loaded = list(hand_ids)
-            self.heroes = frozenset(hero_names)
+            self.heroes = dict(heroes or {})
 
     hand_viewer = FakeHandViewer()
     viewer.owner.threads = [hand_viewer]
     with patch.object(results_module.GuiHandViewer, "GuiHandViewer", FakeHandViewer):
         viewer.review_hands()
     assert hand_viewer.loaded == [1, 2]
-    assert hand_viewer.heroes == {"Hero"}  # the names of the loaded hands' player, not the viewer's filters
+    # Each hand's own hero, as loaded: never a name from another site.
+    assert hand_viewer.heroes == {1: "Alice", 2: "Bob"}
 
 
 def test_selecting_a_table_row_selects_its_period(viewer) -> None:

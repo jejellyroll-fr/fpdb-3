@@ -279,7 +279,7 @@ class GuiResultsViewer(QSplitter):  # pylint: disable=too-many-instance-attribut
         self.db = Database.Database(self.conf, sql=self.sql)
 
         self.results: pr.Results | None = None
-        self.heroes: frozenset[str] = frozenset()  # whose hands the results are
+        self.player_names: dict[int, str] = {}  # the loaded hands' heroes, by player id
         self.selected: tuple[str, date] | None = None
         self.month: tuple[int, int] = (date.today().year, date.today().month)
         self._loader: ResultsLoader | None = None
@@ -425,25 +425,25 @@ class GuiResultsViewer(QSplitter):  # pylint: disable=too-many-instance-attribut
             return
 
         generation = self._generation
-        heroes = self._hero_names(playerids)
+        names = self._player_names(playerids)
         loader = ResultsLoader(self.db, self.build_query(playerids), float(getattr(self.filters, "day_start", 0) or 0))
         self._loader = loader
-        loader.loaded.connect(lambda results: self._loaded(generation, results, heroes))
+        loader.loaded.connect(lambda results: self._loaded(generation, results, names))
         loader.error.connect(lambda message: self._failed(generation, message))
         self.status_label.setText(_("Loading…"))
         loader.start()
 
-    def _hero_names(self, playerids: list[int]) -> frozenset[str]:
-        """The screen names of the players whose hands are loaded, for the Hand Viewer."""
-        names = frozenset(filter(None, (self.db.get_player_name_by_id(pid) for pid in playerids)))
+    def _player_names(self, playerids: list[int]) -> dict[int, str]:
+        """The screen name of each player whose hands are loaded, for the Hand Viewer."""
+        names = {pid: self.db.get_player_name_by_id(pid) for pid in playerids}
         self.db.rollback()
-        return names
+        return {pid: name for pid, name in names.items() if name}
 
-    def _loaded(self, generation: int, results: pr.Results, heroes: frozenset[str] = frozenset()) -> None:
+    def _loaded(self, generation: int, results: pr.Results, names: dict[int, str] | None = None) -> None:
         if generation != self._generation:
             return  # superseded by a newer Refresh
         self._loader = None
-        self.heroes = heroes
+        self.player_names = dict(names or {})
         self.status_label.clear()
         if results.hands:
             self.show_results(results)
@@ -715,13 +715,22 @@ class GuiResultsViewer(QSplitter):  # pylint: disable=too-many-instance-attribut
     # -- hand review ----------------------------------------------------
 
     def review_hands(self) -> None:
-        """Open the selected period's hands in the Hand Viewer."""
-        hand_ids = [hand.hand_id for hand in self.selected_hands()]
-        if not hand_ids:
+        """Open the selected period's hands in the Hand Viewer, each with its hero."""
+        hands = self.selected_hands()
+        if not hands:
             return
         viewer = self._hand_viewer()
         if viewer is not None:
-            viewer.reload_hands(hand_ids, hero_names=self.heroes)
+            viewer.reload_hands([hand.hand_id for hand in hands], heroes=self.hand_heroes(hands))
+
+    def hand_heroes(self, hands: list[pr.HandResult]) -> dict[int, str]:
+        """Each hand's hero by hand id: the player the hand was loaded for, on that hand's site."""
+        heroes = {}
+        for hand in hands:
+            name = self.player_names.get(hand.player_id) if hand.player_id is not None else None
+            if name:
+                heroes[hand.hand_id] = name
+        return heroes
 
     def _hand_viewer(self) -> Any:
         threads = getattr(self.owner, "threads", None)

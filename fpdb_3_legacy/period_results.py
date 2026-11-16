@@ -54,6 +54,7 @@ class HandResult:
     showdown: bool
     big_blind_minor: float
     currency: str
+    player_id: int | None = None  # the hero's player of the hand, on its own site
 
     @property
     def has_bb(self) -> bool:
@@ -120,9 +121,9 @@ def _number(value: Any) -> float:
 def parse_hands(rows: Iterable[Sequence[Any]]) -> list[HandResult]:
     """Rows of ``periodResultsHands``, ordered by start time then hand id.
 
-    ``(hand id, start time, profit, all-in EV, saw showdown, big blind, currency)``;
-    the start time is a datetime, or text on SQLite. A missing all-in EV is the
-    hand's result.
+    ``(hand id, start time, profit, all-in EV, saw showdown, big blind, currency,
+    player id)``; the start time is a datetime, or text on SQLite. A missing
+    all-in EV is the hand's result; the player id may be left out.
     """
     hands = []
     for row in rows:
@@ -139,6 +140,7 @@ def parse_hands(rows: Iterable[Sequence[Any]]) -> list[HandResult]:
                 showdown=bool(row[4]),
                 big_blind_minor=_number(row[5]),
                 currency=str(row[6] or "UNKNOWN").upper(),
+                player_id=int(row[7]) if len(row) > 7 and row[7] is not None else None,
             ),
         )
     hands.sort(key=lambda hand: (hand.start_time, hand.hand_id))

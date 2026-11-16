@@ -334,6 +334,7 @@ def test_the_query_reads_every_cash_hand_of_the_hero(imported) -> None:
     results = pr.build_results(cursor.fetchall())
 
     assert len(results.hands) == hands
+    assert {hand.player_id for hand in results.hands} == {hero}
     overall = pr.total(results.periods[pr.MONTH])
     assert overall.hands == hands
     assert overall.profit_minor == {"USD": pytest.approx(float(profit))}
@@ -355,13 +356,24 @@ def test_the_query_reads_every_cash_hand_of_the_hero(imported) -> None:
 # -- the Hand Viewer takes the hero the calendar sends --------------------------
 
 
-def test_the_hand_viewer_takes_the_hero_names_it_is_sent() -> None:
+def test_the_hand_viewer_takes_each_hands_hero_it_is_sent() -> None:
     from fpdb_3_legacy.GuiHandViewer import GuiHandViewer
 
     viewer = GuiHandViewer.__new__(GuiHandViewer)  # pylint: disable=no-value-for-parameter
-    hand = SimpleNamespace(players=[[1, "villain", 100], [2, "ProfileAlias", 100]])
+    # Alice is the hero on PokerStars, Bob on PartyPoker; a PartyPoker hand holds both.
+    party_hand = SimpleNamespace(players=[[1, "Alice", 100], [2, "Bob", 100]])
 
-    viewer.hero_names = frozenset()
-    assert viewer._sent_hero(hand) is None  # pylint: disable=protected-access
-    viewer.hero_names = frozenset({"ProfileAlias", "OtherSite"})
-    assert viewer._sent_hero(hand) == "ProfileAlias"  # pylint: disable=protected-access
+    viewer.sent_heroes = {}
+    assert viewer._sent_hero(7, party_hand) is None  # pylint: disable=protected-access
+    viewer.sent_heroes = {7: "Bob", 8: "Alice"}
+    assert viewer._sent_hero(7, party_hand) == "Bob"  # pylint: disable=protected-access
+    viewer.sent_heroes = {7: "Carol"}
+    assert viewer._sent_hero(7, party_hand) is None  # not in the hand: the viewer's own filters decide
+
+
+def test_the_player_id_is_read_when_the_row_has_it() -> None:
+    with_player = pr.parse_hands([(*_row(1, datetime(2026, 11, 9, 20, 0), 5), 42)])
+    without = pr.parse_hands([_row(1, datetime(2026, 11, 9, 20, 0), 5)])
+
+    assert with_player[0].player_id == 42
+    assert without[0].player_id is None

@@ -28,7 +28,8 @@ hands are read and summed in the background; the tab stays usable meanwhile.
   when nothing is selected.
 - **Review hands** (or a double-click on a cell or a row) opens the selected
   period's hands in the Hand Viewer, for the hero they were loaded for, even
-  when the Hand Viewer's own filters name another hero or profile.
+  when the Hand Viewer's own filters name another hero or profile: each hand
+  goes with the player it was loaded for, on its own site.
 
 **Unit** shows the calendar and the curves in big blinds, or in the currency
 of the hands when they were all played in one.

@@ -72,7 +72,7 @@ def cash_profit_queries() -> dict[str, str]:
     # returned as stored (UTC); period_results moves it to the local day.
     query["periodResultsHands"] = """
         SELECT h.id, h.startTime, hp.totalProfit, COALESCE(hp.allInEV, hp.totalProfit),
-               hp.sawShowdown, gt.bigBlind, gt.currency
+               hp.sawShowdown, gt.bigBlind, gt.currency, hp.playerId
         FROM HandsPlayers hp
         INNER JOIN Hands h         ON  (h.id  = hp.handId)
         INNER JOIN Gametypes gt    ON  (gt.id = h.gametypeId)
