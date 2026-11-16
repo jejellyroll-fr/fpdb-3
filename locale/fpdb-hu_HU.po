@@ -2198,6 +2198,10 @@ msgid "Share..."
 msgstr "Megosztás..."
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "Show stacks, bets and pots in big blinds"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
 msgid "Solver review..."
 msgstr "Solveres elemzés..."
@@ -2206,6 +2210,11 @@ msgstr "Solveres elemzés..."
 #, fuzzy
 msgid "Start"
 msgstr "Eleje"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+msgid "This hand has no big blind to count amounts in"
+msgstr "Ebben a játékban nincs nagyvak, amelyben számolni lehetne."
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, python-format
@@ -3953,7 +3962,7 @@ msgstr "Ez a leosztás nem küldhető el a PreflopAdvisornak."
 msgid "Amounts"
 msgstr "Összegek"
 
-#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
 msgid "Big blinds"
 msgstr "Nagyvakok"

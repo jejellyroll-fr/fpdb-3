@@ -46,7 +46,14 @@ def stud_replayer():
         cardwidth=70,
         cardheight=100,
     )
-    for method in ("_normalized_cards", "_frame_from_state", "_visible_cards", "_draw_cards"):
+    for method in (
+        "_normalized_cards",
+        "_frame_from_state",
+        "_visible_cards",
+        "_draw_cards",
+        "_amount",
+        "_active_big_blind",
+    ):
         setattr(replayer, method, MethodType(getattr(GuiReplayer, method), replayer))
     return replayer
 
