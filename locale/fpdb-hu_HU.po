@@ -1558,7 +1558,7 @@ msgid "FPDB 3 info"
 msgstr "FPDB 3 információ"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/GuiTrackerMigration.py
 #: fpdb_3_legacy/session_guard_dialog.py
 msgid "Hands"
 msgstr "Leosztások"
@@ -1568,11 +1568,11 @@ msgstr "Leosztások"
 msgid "Net profit excluding splash"
 msgstr "Nettó nyereség splash nélkül"
 
-#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/results_calendar.py
 msgid "Non-showdown"
 msgstr "Mutatás nélkül:"
 
-#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/results_calendar.py
 msgid "Profit"
 msgstr "Profit"
 
@@ -1581,7 +1581,7 @@ msgid "Refresh Graph"
 msgstr "Frissítés"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/capture/swc_poker_console.py
 msgid "Showdown"
 msgstr "Mutatással:"
 
@@ -1969,7 +1969,7 @@ msgid "Log Viewer"
 msgstr "Napló böngésző"
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/pack_gallery_dialog.py
 msgid "Refresh"
 msgstr "Frissítés"
 
@@ -2760,129 +2760,129 @@ msgstr ""
 msgid "{n} decisions are counted apart: their cards were never known."
 msgstr "{n} döntést külön számolunk: a lapjaik sosem voltak ismertek."
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "All hands of the filtered dates"
 msgstr "A populáció minden leosztása"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "All-in EV"
 msgstr "All-in"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "All-in EV (BB)"
 msgstr "Nyereség (BB)"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid "All-in EV: {ev}"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "BB/100"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid "BB/100: {bb100}"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Click to select the whole month"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Days"
 msgstr "Az elmúlt %s nap"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "EV BB/100"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid ""
 "Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV "
 "BB/100: {ev100} · Days played: {days} ({winning} winning)"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Loading…"
 msgstr "Leosztások"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Months"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Next month"
 msgstr "Következő lépés"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 #| msgid "Non-showdown"
 msgid "Non-showdown (BB)"
 msgstr "Mutatás nélkül:"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Open the hands of the selected period in the Hand Viewer"
 msgstr "Egyetlen játékos sem felel meg a kiválasztott teremnek és hősnek."
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Period:"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Previous month"
 msgstr "Előző lépés"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 #| msgid "Profit"
 msgid "Profit (BB)"
 msgstr "Profit"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy, python-brace-format
 msgid "Profit: {profit}"
 msgstr "Profilütközés"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Review hands"
 msgstr "Leosztás mentése"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 #| msgid "Showdown"
 msgid "Showdown (BB)"
 msgstr "Mutatással:"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Unit:"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Week"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid "Week of {date}"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Weeks"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy, python-brace-format
 msgid "{hands} hands"
 msgstr "hány leosztás"
@@ -4144,7 +4144,7 @@ msgstr "Ez a leosztás nem küldhető el a PreflopAdvisornak."
 msgid "Amounts"
 msgstr "Összegek"
 
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
 msgid "Big blinds"
 msgstr "Nagyvakok"
@@ -4337,7 +4337,7 @@ msgstr ""
 msgid "Opponents"
 msgstr "Ellenféljelentés"
 
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hud_options_panel.py
 msgid "Period"
 msgstr ""
 
@@ -8511,7 +8511,7 @@ msgstr "agresszió gyakoriság"
 msgid "Hands played"
 msgstr "Leosztások ez után"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy

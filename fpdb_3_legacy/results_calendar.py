@@ -49,7 +49,7 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.ring_stats.base import DbWorker
 from fpdb_3_legacy.table_export import install_table_export
 
-log = get_logger("gui_results_viewer")
+log = get_logger("results_calendar")
 
 #: Role holding a cell's raw value, so the period table sorts numbers as numbers.
 SORT_ROLE = Qt.ItemDataRole.UserRole + 1
@@ -267,7 +267,7 @@ FILTERS_DISPLAY = {
 }
 
 
-class GuiResultsViewer(QSplitter):  # pylint: disable=too-many-instance-attributes
+class ResultsCalendar(QSplitter):  # pylint: disable=too-many-instance-attributes
     """The Results calendar tab."""
 
     def __init__(self, config: Any, querylist: Any, owner: Any, colors: dict[str, str]) -> None:

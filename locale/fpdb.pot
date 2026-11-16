@@ -1333,11 +1333,11 @@ msgid "Export to File"
 msgstr ""
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/capture/swc_poker_console.py
 msgid "Showdown"
 msgstr ""
 
-#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/results_calendar.py
 msgid "Non-showdown"
 msgstr ""
 
@@ -1346,12 +1346,12 @@ msgid "Net profit excluding splash"
 msgstr ""
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/GuiTrackerMigration.py
 #: fpdb_3_legacy/session_guard_dialog.py
 msgid "Hands"
 msgstr ""
 
-#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/results_calendar.py
 msgid "Profit"
 msgstr ""
 
@@ -1666,7 +1666,7 @@ msgid "Filter by Module:"
 msgstr ""
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/pack_gallery_dialog.py
 msgid "Refresh"
 msgstr ""
 
@@ -2339,115 +2339,115 @@ msgid ""
 "Realized {realized} over {hands} hands; EV-adjusted {ev} ({luck} of it luck)."
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid "Week of {date}"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Period:"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Days"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Months"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Weeks"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Unit:"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Review hands"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Open the hands of the selected period in the Hand Viewer"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Previous month"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Next month"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Click to select the whole month"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Week"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "All-in EV"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Profit (BB)"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "All-in EV (BB)"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "BB/100"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "EV BB/100"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Showdown (BB)"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Non-showdown (BB)"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Loading…"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid ""
 "Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV "
 "BB/100: {ev100} · Days played: {days} ({winning} winning)"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid "{hands} hands"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid "Profit: {profit}"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid "All-in EV: {ev}"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid "BB/100: {bb100}"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "All hands of the filtered dates"
 msgstr ""
 
@@ -3543,7 +3543,7 @@ msgstr ""
 msgid "Money / chips"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hand_share_dialog.py
 msgid "Big blinds"
 msgstr ""
 
@@ -3677,7 +3677,7 @@ msgstr ""
 msgid "Blinds"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hud_options_panel.py
 msgid "Period"
 msgstr ""
 
@@ -7165,7 +7165,7 @@ msgstr ""
 msgid "Hands played"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 msgid "Net profit"

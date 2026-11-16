@@ -1596,7 +1596,7 @@ msgid "FPDB 3 info"
 msgstr "关于 FPDB 3"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/GuiTrackerMigration.py
 #: fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy
 msgid "Hands"
@@ -1607,12 +1607,12 @@ msgstr "手牌"
 msgid "Net profit excluding splash"
 msgstr "不含 splash 的净利润"
 
-#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Non-showdown"
 msgstr "非摊牌"
 
-#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Profit"
 msgstr "利润"
@@ -1623,7 +1623,7 @@ msgid "Refresh Graph"
 msgstr "刷新图表"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/capture/swc_poker_console.py
 #, fuzzy
 msgid "Showdown"
 msgstr "摊牌"
@@ -2007,7 +2007,7 @@ msgid "Log Viewer"
 msgstr "日志查看器"
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/pack_gallery_dialog.py
 #, fuzzy
 msgid "Refresh"
 msgstr "刷新"
@@ -2805,125 +2805,125 @@ msgstr "{label}: {total} 个决策中已分类 {classified} 个（覆盖 {share}
 msgid "{n} decisions are counted apart: their cards were never known."
 msgstr "{n} 个决策被单独统计: 它们的牌从未公开。"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "All hands of the filtered dates"
 msgstr "样本群体中的所有手牌"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "All-in EV"
 msgstr "全下"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "All-in EV (BB)"
 msgstr "盈利 (BB)"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid "All-in EV: {ev}"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "BB/100"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid "BB/100: {bb100}"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Click to select the whole month"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Days"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "EV BB/100"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid ""
 "Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV "
 "BB/100: {ev100} · Days played: {days} ({winning} winning)"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Loading…"
 msgstr "正在加载手牌…"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Months"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Next month"
 msgstr "下一个行动"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Non-showdown (BB)"
 msgstr "非摊牌"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Open the hands of the selected period in the Hand Viewer"
 msgstr "没有玩家匹配所选站点和主角。"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Period:"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Previous month"
 msgstr "上一个行动"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Profit (BB)"
 msgstr "利润"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy, python-brace-format
 msgid "Profit: {profit}"
 msgstr "档案冲突"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Review hands"
 msgstr "保存手牌"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Showdown (BB)"
 msgstr "摊牌"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Unit:"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Week"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid "Week of {date}"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Weeks"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy, python-brace-format
 msgid "{hands} hands"
 msgstr "手数"
@@ -4175,7 +4175,7 @@ msgstr "此手牌无法发送到 PreflopAdvisor。"
 msgid "Amounts"
 msgstr "金额"
 
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
 msgid "Big blinds"
 msgstr "大盲注"
@@ -4365,7 +4365,7 @@ msgstr ""
 msgid "Opponents"
 msgstr "对手报告"
 
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hud_options_panel.py
 msgid "Period"
 msgstr ""
 
@@ -8475,7 +8475,7 @@ msgstr ""
 msgid "Hands played"
 msgstr "此手牌之后"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy

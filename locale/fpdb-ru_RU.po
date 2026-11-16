@@ -1580,7 +1580,7 @@ msgid "FPDB 3 info"
 msgstr "О FPDB 3"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/GuiTrackerMigration.py
 #: fpdb_3_legacy/session_guard_dialog.py
 msgid "Hands"
 msgstr "Руки"
@@ -1590,12 +1590,12 @@ msgstr "Руки"
 msgid "Net profit excluding splash"
 msgstr "Чистая прибыль без splash"
 
-#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Non-showdown"
 msgstr "Без шоудауна"
 
-#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Profit"
 msgstr "Общий доход"
@@ -1605,7 +1605,7 @@ msgid "Refresh Graph"
 msgstr "Обновить График"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/capture/swc_poker_console.py
 #, fuzzy
 msgid "Showdown"
 msgstr "Шоудаун"
@@ -1994,7 +1994,7 @@ msgid "Log Viewer"
 msgstr "Просмотр лог-файла"
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/pack_gallery_dialog.py
 msgid "Refresh"
 msgstr "Обновить"
 
@@ -2797,125 +2797,125 @@ msgstr ""
 msgid "{n} decisions are counted apart: their cards were never known."
 msgstr "{n} решений учитываются отдельно: их карты так и не стали известны."
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "All hands of the filtered dates"
 msgstr "Все раздачи выборки"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "All-in EV"
 msgstr "Олл-ин"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "All-in EV (BB)"
 msgstr "Выигрыш (BB)"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid "All-in EV: {ev}"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "BB/100"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid "BB/100: {bb100}"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Click to select the whole month"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Days"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "EV BB/100"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid ""
 "Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV "
 "BB/100: {ev100} · Days played: {days} ({winning} winning)"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Loading…"
 msgstr "Руки"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Months"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Next month"
 msgstr "Следующее действие"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Non-showdown (BB)"
 msgstr "Без шоудауна"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Open the hands of the selected period in the Hand Viewer"
 msgstr "Ни один игрок не соответствует выбранному руму и герою."
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Period:"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Previous month"
 msgstr "Предыдущее действие"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Profit (BB)"
 msgstr "Общий доход"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy, python-brace-format
 msgid "Profit: {profit}"
 msgstr "Конфликт профилей"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Review hands"
 msgstr "Сохранить раздачу"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy
 msgid "Showdown (BB)"
 msgstr "Шоудаун"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Unit:"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Week"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, python-brace-format
 msgid "Week of {date}"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 msgid "Weeks"
 msgstr ""
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #, fuzzy, python-brace-format
 msgid "{hands} hands"
 msgstr "сколько раздач"
@@ -4168,7 +4168,7 @@ msgstr "Эту раздачу нельзя отправить в PreflopAdvisor.
 msgid "Amounts"
 msgstr "Суммы"
 
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
 msgid "Big blinds"
 msgstr "Большие блайнды"
@@ -4358,7 +4358,7 @@ msgstr ""
 msgid "Opponents"
 msgstr "Статы по кэш игрокам"
 
-#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hud_options_panel.py
 msgid "Period"
 msgstr ""
 
@@ -8502,7 +8502,7 @@ msgstr ""
 msgid "Hands played"
 msgstr "Раздачи после"
 
-#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/results_calendar.py
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 #, fuzzy

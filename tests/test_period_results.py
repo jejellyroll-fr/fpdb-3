@@ -273,7 +273,7 @@ def test_shift_month(year, month, step, expected) -> None:
 
 
 def _filters(games=("holdem",), currencies=("USD",), seats=None):
-    """What GuiResultsViewer.build_query reads of the filters: every date and limit, games shown."""
+    """What ResultsCalendar.build_query reads of the filters: every date and limit, games shown."""
     return SimpleNamespace(
         getDates=lambda: ("1970-01-02 00:00:00", "2100-01-01 00:00:00"),
         getLimits=lambda: [],
@@ -317,7 +317,7 @@ def fixture_imported(tmp_path):
 
 
 def test_the_query_reads_every_cash_hand_of_the_hero(imported) -> None:
-    from fpdb_3_legacy.GuiResultsViewer import GuiResultsViewer
+    from fpdb_3_legacy.results_calendar import ResultsCalendar
 
     cursor = imported.get_cursor()
     cursor.execute(
@@ -326,7 +326,7 @@ def test_the_query_reads_every_cash_hand_of_the_hero(imported) -> None:
     )
     hero, hands, profit, ev = cursor.fetchone()
 
-    viewer = GuiResultsViewer.__new__(GuiResultsViewer)  # pylint: disable=no-value-for-parameter
+    viewer = ResultsCalendar.__new__(ResultsCalendar)  # pylint: disable=no-value-for-parameter
     viewer.sql = imported.sql
     viewer.filters = _filters(seats={"from": 2, "to": 10})
     query = viewer.build_query([hero])

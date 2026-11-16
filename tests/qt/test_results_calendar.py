@@ -11,9 +11,9 @@ import pytest
 import pytz
 from PySide6.QtCore import Qt
 
-from fpdb_3_legacy import GuiResultsViewer as results_module
 from fpdb_3_legacy import hud_day
 from fpdb_3_legacy import period_results as pr
+from fpdb_3_legacy import results_calendar as results_module
 from fpdb_3_legacy.sql_queries_cash_profit import period_results_queries
 
 pytestmark = pytest.mark.qt
@@ -62,7 +62,7 @@ def fixture_viewer(qtbot):
     owner = MagicMock()
     owner.threads = []
     with patch("fpdb_3_legacy.Database.Database", return_value=db):
-        page = results_module.GuiResultsViewer(config, sql, owner, colors=COLORS)
+        page = results_module.ResultsCalendar(config, sql, owner, colors=COLORS)
     qtbot.addWidget(page)
     return page
 
