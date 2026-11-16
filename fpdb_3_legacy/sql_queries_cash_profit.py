@@ -29,7 +29,11 @@ def cash_profit_queries() -> dict[str, str]:
     # hundredths of a big blind here; totalProfit, allInEV and bigBlind already
     # use the same currency units, so the BB conversion is amount / bigBlind.
     query["getRingProfitAllHandsPlayerIdSiteInBB"] = """
-        SELECT hp.handId, ( hp.totalProfit / ( gt.bigBlind + 0.0 ) ) * 100 , hp.sawShowdown, ( COALESCE(hp.allInEV, hp.totalProfit) / ( gt.bigBlind + 0.0 ) ) * 100, ( COALESCE(hp.splashWinnings, 0) / ( gt.bigBlind + 0.0 ) ) * 100
+        SELECT hp.handId,
+               ( hp.totalProfit / ( gt.bigBlind + 0.0 ) ) * 100,
+               hp.sawShowdown,
+               ( COALESCE(hp.allInEV, hp.totalProfit) / ( gt.bigBlind + 0.0 ) ) * 100,
+               ( COALESCE(hp.splashWinnings, 0) / ( gt.bigBlind + 0.0 ) ) * 100
         FROM HandsPlayers hp
         INNER JOIN Players pl      ON  (pl.id = hp.playerId)
         INNER JOIN Hands h         ON  (h.id  = hp.handId)
@@ -46,7 +50,8 @@ def cash_profit_queries() -> dict[str, str]:
         ORDER BY h.startTime, hp.handId"""
 
     query["getRingProfitAllHandsPlayerIdSiteInDollars"] = """
-        SELECT hp.handId, hp.totalProfit, hp.sawShowdown, COALESCE(hp.allInEV, hp.totalProfit), COALESCE(hp.splashWinnings, 0)
+        SELECT hp.handId, hp.totalProfit, hp.sawShowdown, COALESCE(hp.allInEV, hp.totalProfit),
+               COALESCE(hp.splashWinnings, 0)
         FROM HandsPlayers hp
         INNER JOIN Players pl      ON  (pl.id = hp.playerId)
         INNER JOIN Hands h         ON  (h.id  = hp.handId)

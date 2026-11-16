@@ -128,6 +128,8 @@ def test_selecting_a_day_draws_its_curves_and_reviews_its_hands(viewer) -> None:
     assert viewer.review_button.isEnabled()
 
     class FakeHandViewer:
+        """Records what Review hands sends to the Hand Viewer."""
+
         def __init__(self) -> None:
             self.loaded: list[int] = []
 
