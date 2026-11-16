@@ -101,6 +101,7 @@ class ReplayHistoryDialog(QDialog):
             self.list.blockSignals(False)
 
     def current_entry(self) -> ReplayHistoryEntry | None:
+        """The entry selected in the list, if any."""
         row = self.list.currentRow()
         return self.entries[row] if 0 <= row < len(self.entries) else None
 
@@ -119,12 +120,14 @@ class ReplayHistoryDialog(QDialog):
             return True
         return False
 
-    def eventFilter(self, watched: QObject, event: QEvent) -> bool:  # noqa: N802 - Qt API
+    def eventFilter(self, watched: QObject, event: QEvent) -> bool:  # noqa: N802  # pylint: disable=invalid-name
+        """Route the list's key presses through :meth:`_handle_key` (Qt override)."""
         if watched is self.list and event.type() == QEvent.Type.KeyPress and isinstance(event, QKeyEvent):
             if self._handle_key(event):
                 return True
         return super().eventFilter(watched, event)
 
-    def keyPressEvent(self, event: QKeyEvent) -> None:  # noqa: N802 - Qt API
+    def keyPressEvent(self, event: QKeyEvent) -> None:  # noqa: N802  # pylint: disable=invalid-name
+        """Handle A and the stepping keys, then the dialog's own keys (Qt override)."""
         if not self._handle_key(event):
             super().keyPressEvent(event)

@@ -52,12 +52,14 @@ _POSTS = {
 
 @dataclass(frozen=True)
 class ReplayHistoryEntry:
-    """One line of the history and the replay state it seeks to."""
+    """One line of the history and the replay state it seeks to.
+
+    The street of an entry is the street of the state at *index*.
+    """
 
     index: int
     kind: str
     text: str
-    street: str | None = None
     player: str | None = None
     action: str | None = None
     amount: Decimal | None = None
@@ -96,21 +98,20 @@ def phase_label(street: str | None) -> str:
     return street.capitalize()
 
 
+def _is_run_board(name: str, street: str, board: dict[str, Any]) -> bool:
+    """Whether *name* is a numbered board (FLOP1, FLOP2...) of *street* with cards dealt."""
+    return name != street and name.rstrip("123") == street and bool(board.get(name))
+
+
 def _phase_cards(state: Any) -> list[list[str]]:
     """The board cards dealt by the phase *state* starts, one list per board."""
     board = getattr(state, "board", None) or {}
-    street = getattr(state, "street", None)
-    if not street:
-        return []
+    street = getattr(state, "street", None) or ""
     if board.get(street):
         return [list(board[street])]
     # A double-board bomb pot deals FLOP1 and FLOP2 together under one "FLOP" phase.
-    runs = sorted(
-        name
-        for name in (getattr(state, "renderBoard", None) or ())
-        if name.rstrip("123") == street and name != street and board.get(name)
-    )
-    return [list(board[name]) for name in runs]
+    render = getattr(state, "renderBoard", None) or ()
+    return [list(board[name]) for name in sorted(render) if _is_run_board(name, street, board)]
 
 
 def _phase_text(state: Any) -> str:
@@ -121,56 +122,91 @@ def _phase_text(state: Any) -> str:
     return f"{label}: " + " | ".join(" ".join(cards) for cards in boards)
 
 
+def _players(state: Any) -> list[Any]:
+    return list((getattr(state, "players", None) or {}).values())
+
+
 def _actor(state: Any) -> Any | None:
-    acted = [
-        player for player in (getattr(state, "players", None) or {}).values() if getattr(player, "justacted", False)
-    ]
+    acted = [player for player in _players(state) if getattr(player, "justacted", False)]
     return acted[-1] if acted else None
 
 
 def _stack_drop(previous: Any | None, player: Any) -> Decimal:
     """What left *player*'s stack between the previous state and this one."""
-    if previous is None:
-        return Decimal(0)
     before = (getattr(previous, "players", None) or {}).get(player.name)
     if before is None:
         return Decimal(0)
     return Decimal(before.stack) - Decimal(player.stack)
 
 
-def _action_entry(
-    index: int, state: Any, previous: Any | None, player: Any, money: Callable[[Decimal], str]
-) -> ReplayHistoryEntry:
+def _action_amount(verb: str, previous: Any | None, player: Any) -> Decimal | None:
+    """The amount an action is read with, or None for one without an amount."""
+    if verb == "raises":
+        # A raise is read "to" the total the player has put in on this street.
+        return Decimal(player.chips)
+    if verb in {"calls", "bets"} or verb in _POSTS:
+        # A call is the amount actually added, not the total committed.
+        return _stack_drop(previous, player)
+    return None
+
+
+def _action_text(verb: str, action: str, player: Any, amount: str | None) -> str:
+    if verb == "raises":
+        return f"{player.name}: raises to {amount}"
+    if amount is not None:
+        return f"{player.name}: {_POSTS.get(verb, verb)} {amount}"
+    cards = list(getattr(player, "discardCards", None) or []) if verb == "discards" else []
+    return f"{player.name}: {action}" + (f" [{' '.join(cards)}]" if cards else "")
+
+
+def _action_entry(index: int, previous: Any | None, player: Any, money: Callable[[Decimal], str]) -> ReplayHistoryEntry:
     action = str(player.action or "")
     verb = action.split(" ", 1)[0] if action.startswith("discards") else action
     became_allin = bool(getattr(player, "allin", False)) and verb not in {"folds", "checks", "discards", "stands pat"}
-    suffix = " (all-in)" if became_allin else ""
-    street = getattr(state, "street", None)
-    amount: Decimal | None = None
-    if verb == "raises":
-        # A raise is read "to" the total the player has put in on this street.
-        amount = Decimal(player.chips)
-        text = f"{player.name}: raises to {money(amount)}{suffix}"
-    elif verb in {"calls", "bets"} or verb in _POSTS:
-        # A call is the amount actually added, not the total committed.
-        amount = _stack_drop(previous, player)
-        label = _POSTS.get(verb, verb)
-        text = f"{player.name}: {label} {money(amount)}{suffix}"
-    elif verb == "discards":
-        cards = list(getattr(player, "discardCards", None) or [])
-        text = f"{player.name}: {action}" + (f" [{' '.join(cards)}]" if cards else "")
-    else:
-        text = f"{player.name}: {action}{suffix}"
+    amount = _action_amount(verb, previous, player)
+    text = _action_text(verb, action, player, None if amount is None else money(amount))
     return ReplayHistoryEntry(
         index=index,
         kind=ACTION,
-        text=text,
-        street=street,
+        text=text + (" (all-in)" if became_allin else ""),
         player=player.name,
         action=verb,
         amount=amount,
         allin=became_allin,
     )
+
+
+def _end_entries(index: int, state: Any, money: Callable[[Decimal], str]) -> list[ReplayHistoryEntry]:
+    """``Hand complete``, then what each winner collected, all seeking to the last state."""
+    entries = [ReplayHistoryEntry(index=index, kind=END, text="Hand complete")]
+    for player in _players(state):
+        if getattr(player, "justacted", False) and player.action == "collected" and player.chips:
+            amount = Decimal(player.chips)
+            entries.append(
+                ReplayHistoryEntry(
+                    index=index,
+                    kind=RESULT,
+                    text=f"{player.name}: collected {money(amount)}",
+                    player=player.name,
+                    action="collected",
+                    amount=amount,
+                )
+            )
+    return entries
+
+
+def _state_entries(
+    index: int, state: Any, previous: Any | None, money: Callable[[Decimal], str]
+) -> list[ReplayHistoryEntry]:
+    """The entries one replay state gives: the end of the hand, a new street, or an action."""
+    if getattr(state, "ended", False):
+        return _end_entries(index, state, money)
+    if previous is None or getattr(state, "street", None) != getattr(previous, "street", None):
+        return [ReplayHistoryEntry(index=index, kind=PHASE, text=_phase_text(state))]
+    player = _actor(state)
+    if player is None or not player.action:
+        return []
+    return [_action_entry(index, previous, player, money)]
 
 
 def replay_history_entries(
@@ -191,32 +227,8 @@ def replay_history_entries(
         return format_history_amount(value, currency, blind)
 
     entries: list[ReplayHistoryEntry] = []
-    previous: Any | None = None
     for index, state in enumerate(states):
-        street = getattr(state, "street", None)
-        if getattr(state, "ended", False):
-            entries.append(ReplayHistoryEntry(index=index, kind=END, text="Hand complete", street=street))
-            for player in (getattr(state, "players", None) or {}).values():
-                if getattr(player, "justacted", False) and player.action == "collected" and player.chips:
-                    amount = Decimal(player.chips)
-                    entries.append(
-                        ReplayHistoryEntry(
-                            index=index,
-                            kind=RESULT,
-                            text=f"{player.name}: collected {money(amount)}",
-                            street=street,
-                            player=player.name,
-                            action="collected",
-                            amount=amount,
-                        )
-                    )
-        elif previous is None or street != getattr(previous, "street", None):
-            entries.append(ReplayHistoryEntry(index=index, kind=PHASE, text=_phase_text(state), street=street))
-        else:
-            player = _actor(state)
-            if player is not None and player.action:
-                entries.append(_action_entry(index, state, previous, player, money))
-        previous = state
+        entries.extend(_state_entries(index, state, states[index - 1] if index else None, money))
     return entries
 
 

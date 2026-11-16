@@ -30,7 +30,7 @@ def replayer(qtbot, importer, fresh_db, legacy_config, tmp_path):
 
     widget = GuiReplayer(legacy_config, fresh_db.sql, MagicMock(), [hand_id], db=fresh_db)
     qtbot.addWidget(widget)
-    assert not widget.historyButton.isEnabled()
+    assert not widget.history_button.isEnabled()
     widget.play_hand(0)
     return widget
 
@@ -40,11 +40,11 @@ def rows(dialog):
 
 
 def test_a_opens_the_history_on_the_current_step(qtbot, replayer) -> None:
-    assert replayer.historyButton.isEnabled()
+    assert replayer.history_button.isEnabled()
 
     qtbot.keyClick(replayer, Qt.Key.Key_A)
 
-    dialog = replayer.historyDialog
+    dialog = replayer.history_dialog
     assert dialog is not None and dialog.isVisible()
     texts = rows(dialog)
     assert texts[0] == "Blinds and antes"
@@ -56,7 +56,7 @@ def test_a_opens_the_history_on_the_current_step(qtbot, replayer) -> None:
 
 def test_clicking_an_entry_seeks_to_it(qtbot, replayer) -> None:
     replayer.history_clicked()
-    dialog = replayer.historyDialog
+    dialog = replayer.history_dialog
     row = rows(dialog).index("Flop dealt: As Ks 2d")
 
     item = dialog.list.item(row)
@@ -69,7 +69,7 @@ def test_clicking_an_entry_seeks_to_it(qtbot, replayer) -> None:
 
 def test_enter_seeks_to_the_selected_entry(qtbot, replayer) -> None:
     replayer.history_clicked()
-    dialog = replayer.historyDialog
+    dialog = replayer.history_dialog
     row = rows(dialog).index("Player2: raises to $20.00")
     dialog.list.setCurrentRow(row)
     dialog.list.setFocus()
@@ -81,7 +81,7 @@ def test_enter_seeks_to_the_selected_entry(qtbot, replayer) -> None:
 
 def test_the_selection_follows_the_replay(qtbot, replayer) -> None:
     replayer.history_clicked()
-    dialog = replayer.historyDialog
+    dialog = replayer.history_dialog
 
     replayer.next_clicked(False)
     assert dialog.current_entry().text == "Player2: posts small blind $0.50"
@@ -98,9 +98,9 @@ def test_the_selection_follows_the_replay(qtbot, replayer) -> None:
     assert dialog.list.currentRow() == 0
 
 
-def test_a_winner_clicked_at_the_end_stays_selected(qtbot, replayer) -> None:
+def test_a_winner_clicked_at_the_end_stays_selected(replayer) -> None:
     replayer.history_clicked()
-    dialog = replayer.historyDialog
+    dialog = replayer.history_dialog
     last = dialog.list.count() - 1
 
     dialog.list.setCurrentRow(last)
@@ -112,7 +112,7 @@ def test_a_winner_clicked_at_the_end_stays_selected(qtbot, replayer) -> None:
 
 def test_a_closes_the_history_again(qtbot, replayer) -> None:
     replayer.history_clicked()
-    dialog = replayer.historyDialog
+    dialog = replayer.history_dialog
 
     qtbot.keyClick(dialog.list, Qt.Key.Key_A)
     assert not dialog.isVisible()
@@ -123,7 +123,7 @@ def test_a_closes_the_history_again(qtbot, replayer) -> None:
     assert not dialog.isVisible()
 
 
-def test_seeking_pauses_playback(qtbot, replayer) -> None:
+def test_seeking_pauses_playback(replayer) -> None:
     replayer.history_clicked()
     replayer.play_clicked(False)
     assert replayer.playing
@@ -134,14 +134,14 @@ def test_seeking_pauses_playback(qtbot, replayer) -> None:
     assert replayer.stateSlider.value() == 5
 
 
-def test_amounts_follow_the_big_blind_toggle(qtbot, replayer) -> None:
+def test_amounts_follow_the_big_blind_toggle(replayer) -> None:
     # The toggle of #824, as the replayer exposes it: a checkbox and the blind in use.
     toggle = QCheckBox()
     replayer.bbAmounts = toggle
     replayer._active_big_blind = lambda: Decimal(1) if toggle.isChecked() else None
 
     replayer.history_clicked()
-    dialog = replayer.historyDialog
+    dialog = replayer.history_dialog
     assert "Player1: raises to $3.00" in rows(dialog)
 
     toggle.setChecked(True)

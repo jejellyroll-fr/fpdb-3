@@ -185,7 +185,7 @@ def test_run_it_twice_lists_each_run(legacy_config):
     assert "Hero: bets $3.48 (all-in)" in texts(entries)
     # Each street seeks to the state that deals it.
     for entry in phases:
-        assert states[entry.index].street == entry.street
+        assert entry.text.startswith(phase_label(states[entry.index].street))
 
 
 # --- Synthetic states --------------------------------------------------------------------------
@@ -243,7 +243,7 @@ def test_an_unfinished_list_of_states_has_no_end():
     entries = replay_history_entries(states, "USD")
 
     assert [entry.kind for entry in entries] == [PHASE, ACTION]
-    assert replay_history_entries([], "USD") == []
+    assert not replay_history_entries([], "USD")
 
 
 @pytest.mark.parametrize(
