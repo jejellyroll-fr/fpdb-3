@@ -1824,6 +1824,14 @@ msgstr ""
 msgid "Current card deck preview"
 msgstr ""
 
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "History..."
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "List the hand's actions and jump to one of them (A)"
+msgstr ""
+
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
 msgid "Share..."
 msgstr ""
@@ -7576,4 +7584,12 @@ msgstr ""
 
 #: fpdb_3_legacy/update_notice.py
 msgid "GitHub could not be reached. Check your connection and try again later."
+msgstr ""
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Action history"
+msgstr ""
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Click an action, or select it and press Enter, to jump to it."
 msgstr ""

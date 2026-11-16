@@ -8069,6 +8069,22 @@ msgstr ""
 "\n"
 "Rechercher les mises à jour automatiquement ?"
 
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "History..."
+msgstr "Historique..."
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "List the hand's actions and jump to one of them (A)"
+msgstr "Lister les actions de la main et aller à l'une d'elles (A)"
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Action history"
+msgstr "Historique des actions"
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Click an action, or select it and press Enter, to jump to it."
+msgstr "Cliquez sur une action, ou sélectionnez-la et appuyez sur Entrée, pour y aller."
+
 #~ msgid ""
 #~ "\n"
 #~ "SwC Native Live HUD tailing thread started."

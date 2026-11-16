@@ -48,6 +48,8 @@ from fpdb_3_legacy.http_capture_ofc import OFCHand, build_ofc_hand, load_ofc_han
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.replay_history import replay_history_entries
+from fpdb_3_legacy.replay_history_dialog import ReplayHistoryDialog
 
 # import L10n
 # _ = L10n.get_translation()
@@ -822,6 +824,16 @@ class GuiReplayer(QWidget):
         self.deckPreview.setFixedSize(72, 38)
         self.deckPreview.setToolTip(_("Current card deck preview"))
         self.buttonBox2.addWidget(self.deckPreview)
+
+        # The hand's phases and actions, each one a click away (#825, after
+        # thecrawler1's fork); also opened and closed with A.
+        self.history_dialog: ReplayHistoryDialog | None = None
+        self.history_button = QPushButton(_("History..."))
+        self.history_button.setToolTip(_("List the hand's actions and jump to one of them (A)"))
+        self.history_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.history_button.setEnabled(False)
+        self.history_button.clicked.connect(self.history_clicked)
+        self.buttonBox2.addWidget(self.history_button)
 
         # The hand being replayed, for sharing; an OFC replay has none.
         self.shared_hand: Any = None
@@ -2807,6 +2819,12 @@ class GuiReplayer(QWidget):
         self.stateSlider.setMaximum(max(0, len(self.states) - 1))
         self.stateSlider.setValue(0)
         self._sync_replayer_controls()
+        self.history_button.setEnabled(not is_ofc)
+        if is_ofc:
+            if self.history_dialog is not None:
+                self.history_dialog.close()
+        else:
+            self._refresh_history(rebuild=True)
         self.update()
 
     def share_clicked(self) -> None:
@@ -2858,7 +2876,53 @@ class GuiReplayer(QWidget):
         if getattr(self, "states", None):
             self._sync_replayer_controls()
             self._maybe_start_fold_animation(value)
+            self._refresh_history()
         self.update()
+
+    def _history_blind(self) -> Decimal | None:
+        """The big blind the history counts amounts in, once the replayer can show them (#824)."""
+        active_big_blind = getattr(self, "_active_big_blind", lambda: None)
+        return active_big_blind()
+
+    def _history_entries(self) -> list:
+        if getattr(self, "replay_mode", "hand") != "hand" or not getattr(self, "states", None):
+            return []
+        return replay_history_entries(self.states, self.currency_code, blind=self._history_blind())
+
+    def _refresh_history(self, rebuild: bool = False) -> None:
+        """Keep an open history on the state shown, rebuilt for a new hand or amount unit."""
+        dialog = getattr(self, "history_dialog", None)
+        if dialog is None or not dialog.isVisible():
+            return
+        blind = self._history_blind()
+        if rebuild or blind != dialog.blind:
+            dialog.set_entries(self._history_entries(), self.stateSlider.value(), blind)
+        else:
+            dialog.sync(self.stateSlider.value())
+
+    def history_seek(self, index: int) -> None:
+        """Show the state an entry of the history points at."""
+        if self.playing:
+            self.play_clicked(False)
+        self.stateSlider.setValue(max(0, min(self.stateSlider.maximum(), index)))
+
+    def history_clicked(self, _checked: bool = False) -> None:
+        """Open the action history, or close it when it is already open."""
+        if getattr(self, "replay_mode", "hand") != "hand" or not getattr(self, "states", None):
+            return
+        if self.history_dialog is not None and self.history_dialog.isVisible():
+            self.history_dialog.close()
+            return
+        if self.history_dialog is None:
+            self.history_dialog = ReplayHistoryDialog(self, self.history_seek, self.keyPressEvent)
+            # Amounts follow the big-blind toggle where the replayer has one (#824).
+            toggle = getattr(self, "bbAmounts", None)
+            if toggle is not None and hasattr(toggle, "toggled"):
+                toggle.toggled.connect(lambda _checked: self._refresh_history())
+        self.history_dialog.show()
+        self._refresh_history(rebuild=True)
+        self.history_dialog.raise_()
+        self.history_dialog.activateWindow()
 
     def _maybe_start_fold_animation(self, value) -> None:
         """Trigger fold (muck) and draw (discard) animations for this frame."""
@@ -2929,6 +2993,8 @@ class GuiReplayer(QWidget):
             self.stateSlider.setValue(0)
         elif event.key() == Qt.Key.Key_End:
             self.stateSlider.setValue(self.stateSlider.maximum())
+        elif event.key() == Qt.Key.Key_A and event.modifiers() == Qt.KeyboardModifier.NoModifier:
+            self.history_clicked()
         elif event.key() == Qt.Key.Key_Up:
             if self.handidx < len(self.handlist) - 1:
                 self.play_hand(self.handidx + 1)
