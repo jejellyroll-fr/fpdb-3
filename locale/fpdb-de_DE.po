@@ -1557,7 +1557,8 @@ msgid "FPDB 3 info"
 msgstr "FPDB 3 Info"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/session_guard_dialog.py
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/session_guard_dialog.py
 msgid "Hands"
 msgstr "Hände"
 
@@ -1566,11 +1567,11 @@ msgstr "Hände"
 msgid "Net profit excluding splash"
 msgstr "Nettogewinn ohne Splash"
 
-#: fpdb_3_legacy/GuiGraphViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
 msgid "Non-showdown"
 msgstr "Ohne Showdown"
 
-#: fpdb_3_legacy/GuiGraphViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
 msgid "Profit"
 msgstr "Gewinn"
 
@@ -1579,7 +1580,7 @@ msgid "Refresh Graph"
 msgstr "Graph neu zeichnen"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/capture/swc_poker_console.py
 msgid "Showdown"
 msgstr "Showdown"
 
@@ -1966,7 +1967,7 @@ msgid "Log Viewer"
 msgstr "Log-Betrachter"
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
-#: fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/pack_gallery_dialog.py
 msgid "Refresh"
 msgstr "Aktualisieren"
 
@@ -2692,6 +2693,149 @@ msgstr ""
 msgid "{n} decisions are counted apart: their cards were never known."
 msgstr ""
 "{n} Entscheidungen werden gesondert gezählt: ihre Karten waren nie bekannt."
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "All hands of the filtered dates"
+msgstr "Alle Hände der Population"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "All-in EV"
+msgstr "All-in"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "All-in EV (BB)"
+msgstr "Gewinn (BB)"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid "All-in EV: {ev}"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "BB/100"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid "BB/100: {bb100}"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Big blinds"
+msgstr "Big Blinds"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Click to select the whole month"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Days"
+msgstr "%s Tage"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "EV BB/100"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid ""
+"Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV "
+"BB/100: {ev100} · Days played: {days} ({winning} winning)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Loading…"
+msgstr "Hände werden geladen…"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Months"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
+msgid "Net profit"
+msgstr "Gesamter Nettogewinn"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Next month"
+msgstr "Nächste Aktion"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+#| msgid "Non-showdown"
+msgid "Non-showdown (BB)"
+msgstr "Ohne Showdown"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Open the hands of the selected period in the Hand Viewer"
+msgstr "Kein Spieler passt zur gewählten Seite und zum Hero."
+
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hud_options_panel.py
+msgid "Period"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Period:"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Previous month"
+msgstr "Vorherige Aktion"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+#| msgid "Profit"
+msgid "Profit (BB)"
+msgstr "Gewinn"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy, python-brace-format
+msgid "Profit: {profit}"
+msgstr "Profilkonflikt"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Review hands"
+msgstr "Hand speichern"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+#| msgid "Showdown"
+msgid "Showdown (BB)"
+msgstr "Showdown"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Unit:"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Week"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid "Week of {date}"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Weeks"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy, python-brace-format
+msgid "{hands} hands"
+msgstr "Anzahl Hände"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
 #, fuzzy
@@ -3949,11 +4093,6 @@ msgstr "Diese Hand kann nicht an PreflopAdvisor gesendet werden."
 msgid "Amounts"
 msgstr "Beträge"
 
-#: fpdb_3_legacy/hand_share_dialog.py
-#, fuzzy
-msgid "Big blinds"
-msgstr "Big Blinds"
-
 #: fpdb_3_legacy/hand_share_dialog.py fpdb_3_legacy/table_export.py
 #, fuzzy
 msgid "Copy"
@@ -4143,10 +4282,6 @@ msgid "Opponents"
 msgstr "Gegnerbericht"
 
 #: fpdb_3_legacy/hud_options_panel.py
-msgid "Period"
-msgstr ""
-
-#: fpdb_3_legacy/hud_options_panel.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Seats"
@@ -4299,6 +4434,10 @@ msgstr ""
 #, fuzzy
 msgid "Cash"
 msgstr "Cash"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Cash results per day, week and month, with their profit curves"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/update_notice.py
 msgid "Check for updates"
@@ -4502,6 +4641,12 @@ msgstr "Research Browser"
 #, fuzzy
 msgid "Research Browser for Omaha"
 msgstr "Research Browser für Omaha"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+#| msgid "Results"
+msgid "Results Calendar"
+msgstr "Ergebnisse"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -5812,8 +5957,8 @@ msgstr "Überschreiben bestätigen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
-"PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files "
-"(*.fpdbhud);;All Files (*)"
+"PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files (*.fpdbhud);;"
+"All Files (*)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -8304,12 +8449,6 @@ msgid "Hands played"
 msgstr "Hände nach"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
-#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, fuzzy
-msgid "Net profit"
-msgstr "Gesamter Nettogewinn"
-
-#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
 msgstr "Preflop-Profil (VPIP vs PFR)"
@@ -10154,18 +10293,18 @@ msgstr ""
 #~ "in touch by emailing steffen@schaumburger.info\n"
 #~ "\n"
 #~ "Welcome to Fpdb!\n"
-#~ "To be notified of new snapshots and releases go to https://"
-#~ "lists.sourceforge.net/lists/listinfo/fpdb-announce and subscribe.\n"
-#~ "If you want to follow development more closely go to https://"
-#~ "lists.sourceforge.net/lists/listinfo/fpdb-main and subscribe.\n"
+#~ "To be notified of new snapshots and releases go to https://lists."
+#~ "sourceforge.net/lists/listinfo/fpdb-announce and subscribe.\n"
+#~ "If you want to follow development more closely go to https://lists."
+#~ "sourceforge.net/lists/listinfo/fpdb-main and subscribe.\n"
 #~ "\n"
 #~ "This program is currently in an alpha-state, so our database format is "
 #~ "still sometimes changed.\n"
 #~ "You should therefore always keep your hand history files so that you can "
 #~ "re-import after an update, if necessary.\n"
 #~ "\n"
-#~ "For documentation please visit our website/wiki at http://"
-#~ "fpdb.sourceforge.net/.\n"
+#~ "For documentation please visit our website/wiki at http://fpdb."
+#~ "sourceforge.net/.\n"
 #~ "If you need help click on Contact - Get Help on our website.\n"
 #~ "Please note that default.conf is no longer needed nor used, all "
 #~ "configuration now happens in HUD_config.xml.\n"
@@ -10174,8 +10313,8 @@ msgstr ""
 #~ "the AGPL3, and partially under GPL2 or later.\n"
 #~ "The Windows installer package includes code licensed under the MIT "
 #~ "license.\n"
-#~ "You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, "
-#~ "gpl-3.0.txt and mit.txt in the fpdb installation directory."
+#~ "You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0."
+#~ "txt and mit.txt in the fpdb installation directory."
 #~ msgstr ""
 #~ "Fpdb braucht Übersetzer!\n"
 #~ "Falls Du eine andere Sprache kannst und ein paar Minuten oder mehr übrig "
@@ -10184,19 +10323,19 @@ msgstr ""
 #~ "Willkommen zu fpdb!\n"
 #~ "Wenn Du über neue Versionen informiert werden willst abonniere https://"
 #~ "lists.sourceforge.net/lists/listinfo/fpdb-announce\n"
-#~ "Wenn Du die Entwicklung näher verfolgen möchtest abonniere https://"
-#~ "lists.sourceforge.net/lists/listinfo/fpdb-main\n"
+#~ "Wenn Du die Entwicklung näher verfolgen möchtest abonniere https://lists."
+#~ "sourceforge.net/lists/listinfo/fpdb-main\n"
 #~ "\n"
 #~ "Dieses Programm ist noch eine Alpha-Version, das Datenbankformat ändert "
 #~ "sich also noch manchmal.\n"
 #~ "Du solltest daher Deine Hand History Dateien immer aufbewahren damit sie "
 #~ "nach einem Update ggf. re-importiert werden können.\n"
 #~ "\n"
-#~ "Für Dokumentation besuche bitte unsere Webseite/Wiki unter http://"
-#~ "fpdb.sourceforge.net/ .\n"
+#~ "Für Dokumentation besuche bitte unsere Webseite/Wiki unter http://fpdb."
+#~ "sourceforge.net/ .\n"
 #~ "Wenn Du Hilfe brauchst klick auf \"Contact - Get Help\" auf unserer "
-#~ "Webseite oder eMail mir auf Deutsch oder Englisch an "
-#~ "steffen@schaumburger.info.\n"
+#~ "Webseite oder eMail mir auf Deutsch oder Englisch an steffen@schaumburger."
+#~ "info.\n"
 #~ "\n"
 #~ "Dieses Programm ist freie Software (frei wie in Freiheit) teilweise unter "
 #~ "der AGPL3-Lizenz und teilweise unter GPL2 und später.\n"
@@ -10422,8 +10561,8 @@ msgstr ""
 #~ "If you are interested in developing the code further see GuiStove.py and "
 #~ "Stove.py."
 #~ msgstr ""
-#~ "Falls Du den Code weiterentwickeln willst sieh Dir GuiStove.py oder "
-#~ "Stove.py an."
+#~ "Falls Du den Code weiterentwickeln willst sieh Dir GuiStove.py oder Stove."
+#~ "py an."
 
 #~ msgid ""
 #~ "If you had previously opened any tabs they cannot use the new settings "
@@ -10710,8 +10849,8 @@ msgstr ""
 #~ msgstr "Achtung: Fehlermeldungen werden zu %s umgeleitet."
 
 #~ msgid ""
-#~ "Note: error output is being diverted to fpdb-errors.txt and HUD-"
-#~ "errors.txt in: %s"
+#~ "Note: error output is being diverted to fpdb-errors.txt and HUD-errors."
+#~ "txt in: %s"
 #~ msgstr ""
 #~ "Achtung: Fehlermeldungen werden nach fpdb-errors.txt und HUD-errors.txt "
 #~ "in %s umgeleitet."
@@ -11401,8 +11540,8 @@ msgstr ""
 #~ msgstr "Konnte keine gültige Tournament ID finden -- Datei ignoriert"
 
 #~ msgid ""
-#~ "Unable to import PYTZ library. Please install PYTZ from http://"
-#~ "pypi.python.org/pypi/pytz/"
+#~ "Unable to import PYTZ library. Please install PYTZ from http://pypi."
+#~ "python.org/pypi/pytz/"
 #~ msgstr ""
 #~ "Konnte PyTz-Bibliothek nicht importieren. Bitte installiere PyTz von "
 #~ "http://pypi.python.org/pypi/pytz/"
@@ -11493,8 +11632,8 @@ msgstr ""
 
 #~ msgid ""
 #~ "We appear to be running in Windows, but the Windows Python Extensions are "
-#~ "not loading. Please install the PYWIN32 package from http://"
-#~ "sourceforge.net/projects/pywin32/"
+#~ "not loading. Please install the PYWIN32 package from http://sourceforge."
+#~ "net/projects/pywin32/"
 #~ msgstr ""
 #~ "Dein Betriebssystem scheint Windows zu sein, aber die Windows Python "
 #~ "Extensions konnten nicht geladen werden. Bitte installiere das PYWIN32-"
@@ -11711,10 +11850,6 @@ msgstr ""
 
 #~ msgid "missing config section raw_hands"
 #~ msgstr "Konfiguration für raw_hands fehlt"
-
-#, fuzzy
-#~ msgid "n Days"
-#~ msgstr "%s Tage"
 
 #~ msgid "not connected but no exception"
 #~ msgstr "Nicht verbunden aber keine Exception"

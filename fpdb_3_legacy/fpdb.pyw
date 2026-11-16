@@ -2134,6 +2134,15 @@ class fpdb(QMainWindow):
 
         self.open_tab("Session Stats", build, module="fpdb_3_legacy.GuiSessionViewer")
 
+    def tab_results_viewer(self, widget, data=None) -> None:
+        """Opens the Results calendar (#827)."""
+
+        def build(module):
+            colors = self.get_theme_colors()
+            return module.GuiResultsViewer(self.config, self.sql, self, self, colors=colors)
+
+        self.open_tab("Results Calendar", build, module="fpdb_3_legacy.GuiResultsViewer")
+
     def tab_hand_viewer(self, widget, data=None) -> None:
         self.open_tab("Hand Viewer", lambda: GuiHandViewer.GuiHandViewer(self.config, self.sql, self))
 

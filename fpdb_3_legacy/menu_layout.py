@@ -163,6 +163,11 @@ def menu_layout() -> tuple[Menu, ...]:
                 MenuItem(N_("Research Browser"), "tab_research_browser"),
                 MenuItem(N_("Hand Viewer"), "tab_hand_viewer"),
                 MenuItem(N_("Session Stats"), "tab_session_stats", "Ctrl+S"),
+                MenuItem(
+                    N_("Results Calendar"),
+                    "tab_results_viewer",
+                    tip=N_("Cash results per day, week and month, with their profit curves"),
+                ),
             ),
         ),
         Menu(

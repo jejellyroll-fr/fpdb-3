@@ -1596,7 +1596,8 @@ msgid "FPDB 3 info"
 msgstr "FPDB 3-info"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/session_guard_dialog.py
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/session_guard_dialog.py
 #, fuzzy
 msgid "Hands"
 msgstr "Handen"
@@ -1606,12 +1607,12 @@ msgstr "Handen"
 msgid "Net profit excluding splash"
 msgstr "Nettowinst zonder splash"
 
-#: fpdb_3_legacy/GuiGraphViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
 #, fuzzy
 msgid "Non-showdown"
 msgstr "Zonder showdown"
 
-#: fpdb_3_legacy/GuiGraphViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
 #, fuzzy
 msgid "Profit"
 msgstr "Winst"
@@ -1622,7 +1623,7 @@ msgid "Refresh Graph"
 msgstr "Grafiek vernieuwen"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/capture/swc_poker_console.py
 #, fuzzy
 msgid "Showdown"
 msgstr "Showdown"
@@ -2012,7 +2013,7 @@ msgid "Log Viewer"
 msgstr "Logweergave"
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
-#: fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/pack_gallery_dialog.py
 msgid "Refresh"
 msgstr "Ververs"
 
@@ -2765,6 +2766,145 @@ msgstr ""
 #, fuzzy, python-brace-format
 msgid "{n} decisions are counted apart: their cards were never known."
 msgstr "{n} beslissingen worden apart geteld: hun kaarten waren nooit bekend."
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "All hands of the filtered dates"
+msgstr "Alle handen van de populatie"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "All-in EV"
+msgstr "All-in"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "All-in EV (BB)"
+msgstr "Winst (BB)"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid "All-in EV: {ev}"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "BB/100"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid "BB/100: {bb100}"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Big blinds"
+msgstr "Big blinds"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Click to select the whole month"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Days"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "EV BB/100"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid ""
+"Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV "
+"BB/100: {ev100} · Days played: {days} ({winning} winning)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Loading…"
+msgstr "Handen laden…"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Months"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
+msgid "Net profit"
+msgstr "Totale nettowinst"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Next month"
+msgstr "Volgende actie"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Non-showdown (BB)"
+msgstr "Zonder showdown"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Open the hands of the selected period in the Hand Viewer"
+msgstr "Geen speler past bij de gekozen site en hero."
+
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hud_options_panel.py
+msgid "Period"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Period:"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Previous month"
+msgstr "Vorige actie"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Profit (BB)"
+msgstr "Winst"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy, python-brace-format
+msgid "Profit: {profit}"
+msgstr "Profielconflict"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Review hands"
+msgstr "Hand opslaan"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Showdown (BB)"
+msgstr "Showdown"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Unit:"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Week"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid "Week of {date}"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Weeks"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy, python-brace-format
+msgid "{hands} hands"
+msgstr "aantal handen"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
 #, fuzzy
@@ -4022,11 +4162,6 @@ msgstr "Deze hand kan niet naar PreflopAdvisor worden gestuurd."
 msgid "Amounts"
 msgstr "Bedragen"
 
-#: fpdb_3_legacy/hand_share_dialog.py
-#, fuzzy
-msgid "Big blinds"
-msgstr "Big blinds"
-
 #: fpdb_3_legacy/hand_share_dialog.py fpdb_3_legacy/table_export.py
 #, fuzzy
 msgid "Copy"
@@ -4213,10 +4348,6 @@ msgid "Opponents"
 msgstr "Tegenstandersrapport"
 
 #: fpdb_3_legacy/hud_options_panel.py
-msgid "Period"
-msgstr ""
-
-#: fpdb_3_legacy/hud_options_panel.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Seats"
@@ -4368,6 +4499,10 @@ msgstr ""
 #, fuzzy
 msgid "Cash"
 msgstr "Cash"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Cash results per day, week and month, with their profit curves"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/update_notice.py
 msgid "Check for updates"
@@ -4581,6 +4716,11 @@ msgstr "Research Browser"
 #, fuzzy
 msgid "Research Browser for Omaha"
 msgstr "Research Browser voor Omaha"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Results Calendar"
+msgstr "Resultaten"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -5876,8 +6016,8 @@ msgstr "Overschrijven bevestigen"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
-"PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files "
-"(*.fpdbhud);;All Files (*)"
+"PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files (*.fpdbhud);;"
+"All Files (*)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -8360,12 +8500,6 @@ msgstr ""
 #, fuzzy
 msgid "Hands played"
 msgstr "Handen na"
-
-#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
-#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, fuzzy
-msgid "Net profit"
-msgstr "Totale nettowinst"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #, fuzzy

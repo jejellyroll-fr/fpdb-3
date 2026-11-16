@@ -1558,7 +1558,8 @@ msgid "FPDB 3 info"
 msgstr "FPDB 3 információ"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/session_guard_dialog.py
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/session_guard_dialog.py
 msgid "Hands"
 msgstr "Leosztások"
 
@@ -1567,11 +1568,11 @@ msgstr "Leosztások"
 msgid "Net profit excluding splash"
 msgstr "Nettó nyereség splash nélkül"
 
-#: fpdb_3_legacy/GuiGraphViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
 msgid "Non-showdown"
 msgstr "Mutatás nélkül:"
 
-#: fpdb_3_legacy/GuiGraphViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
 msgid "Profit"
 msgstr "Profit"
 
@@ -1580,7 +1581,7 @@ msgid "Refresh Graph"
 msgstr "Frissítés"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/capture/swc_poker_console.py
 msgid "Showdown"
 msgstr "Mutatással:"
 
@@ -1968,7 +1969,7 @@ msgid "Log Viewer"
 msgstr "Napló böngésző"
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
-#: fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/pack_gallery_dialog.py
 msgid "Refresh"
 msgstr "Frissítés"
 
@@ -2695,6 +2696,149 @@ msgstr ""
 #, fuzzy, python-brace-format
 msgid "{n} decisions are counted apart: their cards were never known."
 msgstr "{n} döntést külön számolunk: a lapjaik sosem voltak ismertek."
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "All hands of the filtered dates"
+msgstr "A populáció minden leosztása"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "All-in EV"
+msgstr "All-in"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "All-in EV (BB)"
+msgstr "Nyereség (BB)"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid "All-in EV: {ev}"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "BB/100"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid "BB/100: {bb100}"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Big blinds"
+msgstr "Nagyvakok"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Click to select the whole month"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Days"
+msgstr "Az elmúlt %s nap"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "EV BB/100"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid ""
+"Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV "
+"BB/100: {ev100} · Days played: {days} ({winning} winning)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Loading…"
+msgstr "Leosztások"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Months"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
+msgid "Net profit"
+msgstr "Teljes nettó nyereség"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Next month"
+msgstr "Következő lépés"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+#| msgid "Non-showdown"
+msgid "Non-showdown (BB)"
+msgstr "Mutatás nélkül:"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Open the hands of the selected period in the Hand Viewer"
+msgstr "Egyetlen játékos sem felel meg a kiválasztott teremnek és hősnek."
+
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hud_options_panel.py
+msgid "Period"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Period:"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Previous month"
+msgstr "Előző lépés"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+#| msgid "Profit"
+msgid "Profit (BB)"
+msgstr "Profit"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy, python-brace-format
+msgid "Profit: {profit}"
+msgstr "Profilütközés"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Review hands"
+msgstr "Leosztás mentése"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+#| msgid "Showdown"
+msgid "Showdown (BB)"
+msgstr "Mutatással:"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Unit:"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Week"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid "Week of {date}"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Weeks"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy, python-brace-format
+msgid "{hands} hands"
+msgstr "hány leosztás"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
 #, fuzzy
@@ -3953,11 +4097,6 @@ msgstr "Ez a leosztás nem küldhető el a PreflopAdvisornak."
 msgid "Amounts"
 msgstr "Összegek"
 
-#: fpdb_3_legacy/hand_share_dialog.py
-#, fuzzy
-msgid "Big blinds"
-msgstr "Nagyvakok"
-
 #: fpdb_3_legacy/hand_share_dialog.py fpdb_3_legacy/table_export.py
 #, fuzzy
 msgid "Copy"
@@ -4147,10 +4286,6 @@ msgid "Opponents"
 msgstr "Ellenféljelentés"
 
 #: fpdb_3_legacy/hud_options_panel.py
-msgid "Period"
-msgstr ""
-
-#: fpdb_3_legacy/hud_options_panel.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Seats"
@@ -4304,6 +4439,10 @@ msgstr ""
 #, fuzzy
 msgid "Cash"
 msgstr "Cash"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Cash results per day, week and month, with their profit curves"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/update_notice.py
 msgid "Check for updates"
@@ -4509,6 +4648,12 @@ msgstr "Research Browser"
 #, fuzzy
 msgid "Research Browser for Omaha"
 msgstr "Research Browser Omahához"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+#| msgid "% went to showdown"
+msgid "Results Calendar"
+msgstr "terítésig megy %"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -5813,8 +5958,8 @@ msgstr "Felülírás megerősítése"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
-"PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files "
-"(*.fpdbhud);;All Files (*)"
+"PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files (*.fpdbhud);;"
+"All Files (*)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -8311,12 +8456,6 @@ msgid "Hands played"
 msgstr "Leosztások ez után"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
-#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, fuzzy
-msgid "Net profit"
-msgstr "Teljes nettó nyereség"
-
-#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
 msgstr "Preflop profil (VPIP vs PFR)"
@@ -9414,8 +9553,8 @@ msgstr ""
 #~ "*** Make sure your HandHistoryConverter is setting hand.startTime "
 #~ "properly!"
 #~ msgstr ""
-#~ "*** Győződj meg róla, hogy a feldolgozód helyesen állítja be a "
-#~ "hand.startTime értékét!"
+#~ "*** Győződj meg róla, hogy a feldolgozód helyesen állítja be a hand."
+#~ "startTime értékét!"
 
 #~ msgid ""
 #~ "*** Parse error reading blinds (check compilePlayerRegexs as a likely "
@@ -10197,11 +10336,11 @@ msgstr ""
 #~ "importálni."
 
 #~ msgid ""
-#~ "Error No.%s please send the hand causing this to fpdb-"
-#~ "main@lists.sourceforge.net so we can fix the problem."
+#~ "Error No.%s please send the hand causing this to fpdb-main@lists."
+#~ "sourceforge.net so we can fix the problem."
 #~ msgstr ""
-#~ "%s számú hiba. Kérlek küldd el az ezt okozó leosztást az fpdb-"
-#~ "main@lists.sourceforge.net címre, hogy ki tudjuk javítani a hibát."
+#~ "%s számú hiba. Kérlek küldd el az ezt okozó leosztást az fpdb-main@lists."
+#~ "sourceforge.net címre, hogy ki tudjuk javítani a hibát."
 
 #~ msgid "Error aquiring hero ids:"
 #~ msgstr "Hiba a játékosazonosítók meghatározása közben:"
@@ -10453,18 +10592,18 @@ msgstr ""
 #~ "in touch by emailing steffen@schaumburger.info\n"
 #~ "\n"
 #~ "Welcome to Fpdb!\n"
-#~ "To be notified of new snapshots and releases go to https://"
-#~ "lists.sourceforge.net/lists/listinfo/fpdb-announce and subscribe.\n"
-#~ "If you want to follow development more closely go to https://"
-#~ "lists.sourceforge.net/lists/listinfo/fpdb-main and subscribe.\n"
+#~ "To be notified of new snapshots and releases go to https://lists."
+#~ "sourceforge.net/lists/listinfo/fpdb-announce and subscribe.\n"
+#~ "If you want to follow development more closely go to https://lists."
+#~ "sourceforge.net/lists/listinfo/fpdb-main and subscribe.\n"
 #~ "\n"
 #~ "This program is currently in an alpha-state, so our database format is "
 #~ "still sometimes changed.\n"
 #~ "You should therefore always keep your hand history files so that you can "
 #~ "re-import after an update, if necessary.\n"
 #~ "\n"
-#~ "For documentation please visit our website/wiki at http://"
-#~ "fpdb.sourceforge.net/.\n"
+#~ "For documentation please visit our website/wiki at http://fpdb."
+#~ "sourceforge.net/.\n"
 #~ "If you need help click on Contact - Get Help on our website.\n"
 #~ "Please note that default.conf is no longer needed nor used, all "
 #~ "configuration now happens in HUD_config.xml.\n"
@@ -10473,8 +10612,8 @@ msgstr ""
 #~ "the AGPL3, and partially under GPL2 or later.\n"
 #~ "The Windows installer package includes code licensed under the MIT "
 #~ "license.\n"
-#~ "You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, "
-#~ "gpl-3.0.txt and mit.txt in the fpdb installation directory."
+#~ "You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0."
+#~ "txt and mit.txt in the fpdb installation directory."
 #~ msgstr ""
 #~ "Az fpdb fordítókat keres!\n"
 #~ "Ha beszélsz egy olyan nyelvet, amit az fpdb még nem, és van legalább pár "
@@ -10484,18 +10623,18 @@ msgstr ""
 #~ "steffen@schaumburger.info\n"
 #~ "\n"
 #~ "Üdvözöl az fpdb!\n"
-#~ "Iratkozz fel az új kiadásokról való értesítésekre a https://"
-#~ "lists.sourceforge.net/lists/listinfo/fpdb-announce oldalon.\n"
-#~ "Ha közelebbről követnéd a fejlesztést, akkor iratkozz fel a https://"
-#~ "lists.sourceforge.net/lists/listinfo/fpdb-main oldalon.\n"
+#~ "Iratkozz fel az új kiadásokról való értesítésekre a https://lists."
+#~ "sourceforge.net/lists/listinfo/fpdb-announce oldalon.\n"
+#~ "Ha közelebbről követnéd a fejlesztést, akkor iratkozz fel a https://lists."
+#~ "sourceforge.net/lists/listinfo/fpdb-main oldalon.\n"
 #~ "\n"
 #~ "Ez a szoftver jelenleg alpha állapotú, tehát a használt adatbázis "
 #~ "szerkezete még változhat.\n"
 #~ "Emiatt mindig őrizd meg a leosztástörténeteidet, hogy újra importálni "
 #~ "tudd őket egy frissítés után, ha szükséges.\n"
 #~ "\n"
-#~ "A dokumentációért nézd meg a honlapot/wikit a http://"
-#~ "fpdb.sourceforge.net/ címen.\n"
+#~ "A dokumentációért nézd meg a honlapot/wikit a http://fpdb.sourceforge."
+#~ "net/ címen.\n"
 #~ "Ha segítségre van szükséged használd a Contact - Get Help részt a "
 #~ "weboldalon.\n"
 #~ "Megjegyzendő, hogy a default.conf már nincs használatban, minden "
@@ -11185,18 +11324,18 @@ msgstr ""
 #~ msgstr "Megjegyzés: a hibakimenet ide van átirányítva: %s."
 
 #~ msgid ""
-#~ "Note: error output is being diverted to fpdb-error-log.txt and HUD-"
-#~ "error.txt. Any major error will be reported there _only_."
+#~ "Note: error output is being diverted to fpdb-error-log.txt and HUD-error."
+#~ "txt. Any major error will be reported there _only_."
 #~ msgstr ""
-#~ "Megjegyzés: a hibakimenet átirányítva az fpdb-errors.txt és HUD-"
-#~ "errors.txt fájlokba. Bármilyen nagyobb hiba _csak_oda_ kerül kiírásra."
+#~ "Megjegyzés: a hibakimenet átirányítva az fpdb-errors.txt és HUD-errors."
+#~ "txt fájlokba. Bármilyen nagyobb hiba _csak_oda_ kerül kiírásra."
 
 #~ msgid ""
-#~ "Note: error output is being diverted to fpdb-errors.txt and HUD-"
-#~ "errors.txt in: %s"
+#~ "Note: error output is being diverted to fpdb-errors.txt and HUD-errors."
+#~ "txt in: %s"
 #~ msgstr ""
-#~ "Megjegyzés: a hibakimenet átirányítva az fpdb-errors.txt és HUD-"
-#~ "errors.txt fájlokba itt: %s"
+#~ "Megjegyzés: a hibakimenet átirányítva az fpdb-errors.txt és HUD-errors."
+#~ "txt fájlokba itt: %s"
 
 #~ msgid "Note: error output is being diverted to:\n"
 #~ msgstr "Megjegyzés: a hibakimenet ide van átirányítva:\n"
@@ -12032,8 +12171,8 @@ msgstr ""
 #~ "Nem sikerült érvényes versenyazonosítót találni --- A fájl elutasítva"
 
 #~ msgid ""
-#~ "Unable to import PYTZ library. Please install PYTZ from http://"
-#~ "pypi.python.org/pypi/pytz/"
+#~ "Unable to import PYTZ library. Please install PYTZ from http://pypi."
+#~ "python.org/pypi/pytz/"
 #~ msgstr ""
 #~ "Nem sikerült a PYTZ library betöltése. Kérlek telepítsd innen: http://"
 #~ "pypi.python.org/pypi/pytz/"
@@ -12163,8 +12302,8 @@ msgstr ""
 
 #~ msgid ""
 #~ "We appear to be running in Windows, but the Windows Python Extensions are "
-#~ "not loading. Please install the PYWIN32 package from http://"
-#~ "sourceforge.net/projects/pywin32/"
+#~ "not loading. Please install the PYWIN32 package from http://sourceforge."
+#~ "net/projects/pywin32/"
 #~ msgstr ""
 #~ "Úgy tűnik, hogy Windowson történt az indítás, de a Windows Python "
 #~ "Bővítmények nem töltődnek be. Kérlek telepítsd a PYWIN32 csomagot innen: "
@@ -12249,8 +12388,8 @@ msgstr ""
 #~ msgstr "addShownCards %s játékos kézben=%s mind=%s"
 
 #~ msgid ""
-#~ "and edit it according to the install documentation at http://"
-#~ "fpdb.sourceforge.net"
+#~ "and edit it according to the install documentation at http://fpdb."
+#~ "sourceforge.net"
 #~ msgstr ""
 #~ "majd szerkeszd a http://fpdb.sourceforge.net címen található telepítési "
 #~ "útmutató szerint"
@@ -12505,10 +12644,6 @@ msgstr ""
 
 #~ msgid "missing config section raw_tourneys"
 #~ msgstr "hiányzó konfigurációs bekezdés: raw_tourneys"
-
-#, fuzzy
-#~ msgid "n Days"
-#~ msgstr "Az elmúlt %s nap"
 
 #~ msgid "not connected but no exception"
 #~ msgstr "nem kapcsolódott, de nem volt hibaüzenet"

@@ -1580,7 +1580,8 @@ msgid "FPDB 3 info"
 msgstr "О FPDB 3"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/session_guard_dialog.py
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/session_guard_dialog.py
 msgid "Hands"
 msgstr "Руки"
 
@@ -1589,12 +1590,12 @@ msgstr "Руки"
 msgid "Net profit excluding splash"
 msgstr "Чистая прибыль без splash"
 
-#: fpdb_3_legacy/GuiGraphViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
 #, fuzzy
 msgid "Non-showdown"
 msgstr "Без шоудауна"
 
-#: fpdb_3_legacy/GuiGraphViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResultsViewer.py
 #, fuzzy
 msgid "Profit"
 msgstr "Общий доход"
@@ -1604,7 +1605,7 @@ msgid "Refresh Graph"
 msgstr "Обновить График"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/capture/swc_poker_console.py
 #, fuzzy
 msgid "Showdown"
 msgstr "Шоудаун"
@@ -1993,7 +1994,7 @@ msgid "Log Viewer"
 msgstr "Просмотр лог-файла"
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
-#: fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/pack_gallery_dialog.py
 msgid "Refresh"
 msgstr "Обновить"
 
@@ -2732,6 +2733,145 @@ msgstr ""
 #, fuzzy, python-brace-format
 msgid "{n} decisions are counted apart: their cards were never known."
 msgstr "{n} решений учитываются отдельно: их карты так и не стали известны."
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "All hands of the filtered dates"
+msgstr "Все раздачи выборки"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "All-in EV"
+msgstr "Олл-ин"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "All-in EV (BB)"
+msgstr "Выигрыш (BB)"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid "All-in EV: {ev}"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "BB/100"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid "BB/100: {bb100}"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hand_share_dialog.py
+#, fuzzy
+msgid "Big blinds"
+msgstr "Большие блайнды"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Click to select the whole month"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Days"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "EV BB/100"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid ""
+"Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV "
+"BB/100: {ev100} · Days played: {days} ({winning} winning)"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Loading…"
+msgstr "Руки"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Months"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
+#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+#, fuzzy
+msgid "Net profit"
+msgstr "Итоговая чистая прибыль"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Next month"
+msgstr "Следующее действие"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Non-showdown (BB)"
+msgstr "Без шоудауна"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Open the hands of the selected period in the Hand Viewer"
+msgstr "Ни один игрок не соответствует выбранному руму и герою."
+
+#: fpdb_3_legacy/GuiResultsViewer.py fpdb_3_legacy/hud_options_panel.py
+msgid "Period"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Period:"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Previous month"
+msgstr "Предыдущее действие"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Profit (BB)"
+msgstr "Общий доход"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy, python-brace-format
+msgid "Profit: {profit}"
+msgstr "Конфликт профилей"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Review hands"
+msgstr "Сохранить раздачу"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy
+msgid "Showdown (BB)"
+msgstr "Шоудаун"
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Unit:"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Week"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, python-brace-format
+msgid "Week of {date}"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+msgid "Weeks"
+msgstr ""
+
+#: fpdb_3_legacy/GuiResultsViewer.py
+#, fuzzy, python-brace-format
+msgid "{hands} hands"
+msgstr "сколько раздач"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
 #, fuzzy
@@ -3981,11 +4121,6 @@ msgstr "Эту раздачу нельзя отправить в PreflopAdvisor.
 msgid "Amounts"
 msgstr "Суммы"
 
-#: fpdb_3_legacy/hand_share_dialog.py
-#, fuzzy
-msgid "Big blinds"
-msgstr "Большие блайнды"
-
 #: fpdb_3_legacy/hand_share_dialog.py fpdb_3_legacy/table_export.py
 #, fuzzy
 msgid "Copy"
@@ -4172,10 +4307,6 @@ msgid "Opponents"
 msgstr "Статы по кэш игрокам"
 
 #: fpdb_3_legacy/hud_options_panel.py
-msgid "Period"
-msgstr ""
-
-#: fpdb_3_legacy/hud_options_panel.py
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 #, fuzzy
 msgid "Seats"
@@ -4329,6 +4460,10 @@ msgstr ""
 #, fuzzy
 msgid "Cash"
 msgstr "Кэш"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Cash results per day, week and month, with their profit curves"
+msgstr ""
 
 #: fpdb_3_legacy/menu_layout.py fpdb_3_legacy/update_notice.py
 msgid "Check for updates"
@@ -4535,6 +4670,11 @@ msgstr "Research Browser"
 #, fuzzy
 msgid "Research Browser for Omaha"
 msgstr "Research Browser для Омахи"
+
+#: fpdb_3_legacy/menu_layout.py
+#, fuzzy
+msgid "Results Calendar"
+msgstr "Результаты"
 
 #: fpdb_3_legacy/menu_layout.py
 #, fuzzy
@@ -5833,8 +5973,8 @@ msgstr "Подтвердите перезапись"
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
 msgid ""
-"PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files "
-"(*.fpdbhud);;All Files (*)"
+"PT4 HUD Layouts (*.pt4hud);;XML Files (*.xml);;FPDB HUD Files (*.fpdbhud);;"
+"All Files (*)"
 msgstr ""
 
 #: fpdb_3_legacy/modern_hud_preferences/main_dialog.py
@@ -8307,12 +8447,6 @@ msgid "Hands played"
 msgstr "Раздачи после"
 
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
-#: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
-#, fuzzy
-msgid "Net profit"
-msgstr "Итоговая чистая прибыль"
-
-#: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #, fuzzy
 msgid "Preflop Profile (VPIP vs PFR)"
 msgstr "Префлоп-профиль (VPIP vs PFR)"
@@ -9403,18 +9537,18 @@ msgstr ""
 #~ "in touch by emailing steffen@schaumburger.info\n"
 #~ "\n"
 #~ "Welcome to Fpdb!\n"
-#~ "To be notified of new snapshots and releases go to https://"
-#~ "lists.sourceforge.net/lists/listinfo/fpdb-announce and subscribe.\n"
-#~ "If you want to follow development more closely go to https://"
-#~ "lists.sourceforge.net/lists/listinfo/fpdb-main and subscribe.\n"
+#~ "To be notified of new snapshots and releases go to https://lists."
+#~ "sourceforge.net/lists/listinfo/fpdb-announce and subscribe.\n"
+#~ "If you want to follow development more closely go to https://lists."
+#~ "sourceforge.net/lists/listinfo/fpdb-main and subscribe.\n"
 #~ "\n"
 #~ "This program is currently in an alpha-state, so our database format is "
 #~ "still sometimes changed.\n"
 #~ "You should therefore always keep your hand history files so that you can "
 #~ "re-import after an update, if necessary.\n"
 #~ "\n"
-#~ "For documentation please visit our website/wiki at http://"
-#~ "fpdb.sourceforge.net/.\n"
+#~ "For documentation please visit our website/wiki at http://fpdb."
+#~ "sourceforge.net/.\n"
 #~ "If you need help click on Contact - Get Help on our website.\n"
 #~ "Please note that default.conf is no longer needed nor used, all "
 #~ "configuration now happens in HUD_config.xml.\n"
@@ -9423,8 +9557,8 @@ msgstr ""
 #~ "the AGPL3, and partially under GPL2 or later.\n"
 #~ "The Windows installer package includes code licensed under the MIT "
 #~ "license.\n"
-#~ "You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, "
-#~ "gpl-3.0.txt and mit.txt in the fpdb installation directory."
+#~ "You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0."
+#~ "txt and mit.txt in the fpdb installation directory."
 #~ msgstr ""
 #~ "Проекту fpdb требуются переводчики!\n"
 #~ "\n"
@@ -9467,8 +9601,8 @@ msgstr ""
 #~ "\n"
 #~ "Windows инсталлятор включает код, лицензированный под MIT лицензией.\n"
 #~ "\n"
-#~ "Вы можете найти полные тексты лицензий в файлах agpl-3.0.txt, "
-#~ "gpl-2.0.txt, gpl-3.0.txt и mit.txt в каталоге установки fpdb."
+#~ "Вы можете найти полные тексты лицензий в файлах agpl-3.0.txt, gpl-2.0."
+#~ "txt, gpl-3.0.txt и mit.txt в каталоге установки fpdb."
 
 #, fuzzy
 #~ msgid "Global lock not available."
@@ -10126,8 +10260,8 @@ msgstr ""
 
 #, fuzzy
 #~ msgid ""
-#~ "Unable to import PYTZ library. Please install PYTZ from http://"
-#~ "pypi.python.org/pypi/pytz/"
+#~ "Unable to import PYTZ library. Please install PYTZ from http://pypi."
+#~ "python.org/pypi/pytz/"
 #~ msgstr ""
 #~ "ImportError: Невозможно импортировать PYTZ библиотеки. Пожалуйста, "
 #~ "установите PYTZ из http://pypi.python.org/pypi/pytz/"
