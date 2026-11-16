@@ -2265,6 +2265,10 @@ msgid "Share..."
 msgstr "Comparteix..."
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "Show stacks, bets and pots in big blinds"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
 #, fuzzy
 msgid "Solver review..."
 msgstr "Revisió amb solver..."
@@ -2273,6 +2277,11 @@ msgstr "Revisió amb solver..."
 #, fuzzy
 msgid "Start"
 msgstr "Inici"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, fuzzy
+msgid "This hand has no big blind to count amounts in"
+msgstr "Aquest joc no té cega gran amb què comptar."
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, python-format
@@ -4075,7 +4084,7 @@ msgstr "Aquesta mà no es pot enviar a PreflopAdvisor."
 msgid "Amounts"
 msgstr "Imports"
 
-#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
 #, fuzzy
 msgid "Big blinds"
 msgstr "Cegues grans"
@@ -9116,6 +9125,22 @@ msgid ""
 "check_for_updates), and check by hand with Help > Check for updates.\n"
 "\n"
 "Check for updates automatically?"
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "History..."
+msgstr ""
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "List the hand's actions and jump to one of them (A)"
+msgstr ""
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Action history"
+msgstr ""
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Click an action, or select it and press Enter, to jump to it."
 msgstr ""
 
 #, fuzzy

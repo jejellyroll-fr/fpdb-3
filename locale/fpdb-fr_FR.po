@@ -1974,12 +1974,20 @@ msgid "Share..."
 msgstr "Partager..."
 
 #: fpdb_3_legacy/GuiReplayer.py
+msgid "Show stacks, bets and pots in big blinds"
+msgstr "Afficher les tapis, mises et pots en grosses blindes"
+
+#: fpdb_3_legacy/GuiReplayer.py
 msgid "Solver review..."
 msgstr "Revue solver..."
 
 #: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/session_guard_dialog.py
 msgid "Start"
 msgstr "Début"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "This hand has no big blind to count amounts in"
+msgstr "Cette main n'a pas de grosse blinde pour compter les montants"
 
 #: fpdb_3_legacy/GuiReplayer.py
 #, python-format
@@ -3616,7 +3624,7 @@ msgstr "Cette main ne peut pas être envoyée à PreflopAdvisor."
 msgid "Amounts"
 msgstr "Montants"
 
-#: fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
 msgid "Big blinds"
 msgstr "Grosses blindes"
 
@@ -8116,6 +8124,22 @@ msgstr ""
 "des mises à jour.\n"
 "\n"
 "Rechercher les mises à jour automatiquement ?"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "History..."
+msgstr "Historique..."
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "List the hand's actions and jump to one of them (A)"
+msgstr "Lister les actions de la main et aller à l'une d'elles (A)"
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Action history"
+msgstr "Historique des actions"
+
+#: fpdb_3_legacy/replay_history_dialog.py
+msgid "Click an action, or select it and press Enter, to jump to it."
+msgstr "Cliquez sur une action, ou sélectionnez-la et appuyez sur Entrée, pour y aller."
 
 #~ msgid ""
 #~ "\n"
