@@ -14,21 +14,19 @@ from fpdb_3_legacy.GuiReplayer import GuiReplayer, ReplayPlayer, TableState, for
 D = Decimal
 
 
-class _Hand:
+def _hand(stacks: dict[str, str]) -> Any:
     """Enough of a parsed hold'em hand to build TableStates."""
-
-    def __init__(self, stacks: dict[str, str]) -> None:
-        self.board: dict[str, list[str]] = {}
-        self.maxseats = len(stacks)
-        self.gametype = {"category": "holdem", "base": "hold", "type": "ring"}
-        self.actionStreets = ["BLINDSANTES", "PREFLOP", "FLOP", "TURN", "RIVER"]
-        self.players = [[seat, name, stack] for seat, (name, stack) in enumerate(stacks.items(), start=1)]
-
-    def join_holecards(self, name, asList=False, street=None):  # noqa: N803 - Hand's own signature
-        return [] if asList else ""
+    return SimpleNamespace(
+        board={},
+        maxseats=len(stacks),
+        gametype={"category": "holdem", "base": "hold", "type": "ring"},
+        actionStreets=["BLINDSANTES", "PREFLOP", "FLOP", "TURN", "RIVER"],
+        players=[[seat, name, stack] for seat, (name, stack) in enumerate(stacks.items(), start=1)],
+        join_holecards=lambda *_args, **_kwargs: [],
+    )
 
 
-def _states(hand: _Hand, streets: list[tuple[str, list[tuple]]]) -> list[Any]:
+def _states(hand: Any, streets: list[tuple[str, list[tuple]]]) -> list[Any]:
     """The replay steps the replayer builds: a phase start, then one per action."""
     state = TableState(hand)
     states = []
@@ -43,13 +41,13 @@ def _states(hand: _Hand, streets: list[tuple[str, list[tuple]]]) -> list[Any]:
     return states
 
 
-def _replayer(hand: _Hand, states: list[Any], *, all_players: bool = False) -> Any:
+def _replayer(hand: Any, states: list[Any], *, all_players: bool = False) -> Any:
     replayer = cast(Any, GuiReplayer).__new__(GuiReplayer)  # pylint: disable=no-value-for-parameter
     replayer.Heroes = "Hero"
     replayer.currency_code = "USD"
     replayer.states = states
     replayer.replay_model = SimpleNamespace(hand=hand)
-    replayer.allDecisions = SimpleNamespace(isChecked=lambda: all_players)
+    replayer.all_decisions = SimpleNamespace(isChecked=lambda: all_players)
     return replayer
 
 
@@ -64,10 +62,10 @@ PREFLOP = (
 )
 
 
-def _heads_up() -> tuple[_Hand, list[Any]]:
+def _heads_up() -> tuple[Any, list[Any]]:
     # Index: 0-4 preflop, 5 flop, 6 hero bets 1 into 2, 7 call, 8 turn,
     # 9 hero checks, 10 villain bets 3 into 4, 11 hero calls.
-    hand = _Hand({"Hero": "100", "Villain": "100"})
+    hand = _hand({"Hero": "100", "Villain": "100"})
     return hand, _states(
         hand,
         [
@@ -114,16 +112,16 @@ def test_spr_is_hidden_preflop_and_the_result_has_no_decision() -> None:
     replayer = _replayer(hand, states)
 
     # Preflop the hero only checks: no call to price, and no SPR against the blinds.
-    assert replayer._decision_lines(3) == []
+    assert not replayer._decision_lines(3)
     assert replayer._decision_lines(5) == ["Hero to act · SPR 49.5"]
     ended = copy.deepcopy(states[-1])
     ended.endHand({"Hero": D(10)}, {})
     replayer.states = [*states, ended]
-    assert replayer._decision_lines(len(states)) == []
+    assert not replayer._decision_lines(len(states))
 
 
 def test_multiway_bet_shows_spr_per_opponent_and_no_mdf() -> None:
-    hand = _Hand({"Hero": "100", "Short": "21", "Deep": "100"})
+    hand = _hand({"Hero": "100", "Short": "21", "Deep": "100"})
     states = _states(
         hand,
         [
@@ -152,7 +150,7 @@ def test_multiway_bet_shows_spr_per_opponent_and_no_mdf() -> None:
 
 def test_hero_call_against_a_covering_bet_is_capped_at_the_hero_stack(monkeypatch) -> None:
     monkeypatch.setattr("fpdb_3_legacy.GuiReplayer.replay_hero_equity", lambda *_args, **_kwargs: None)
-    hand = _Hand({"Hero": "10", "Villain": "100"})
+    hand = _hand({"Hero": "10", "Villain": "100"})
     flop = ("FLOP", [("Hero", "checks"), ("Villain", "bets", D(50)), ("Hero", "calls", D(9))])
     states = _states(hand, [PREFLOP, flop])
     replayer = _replayer(hand, states)
@@ -182,7 +180,7 @@ def test_hero_call_against_a_covering_bet_is_capped_at_the_hero_stack(monkeypatc
 
 
 def test_tournament_antes_are_in_the_street_pot() -> None:
-    hand = _Hand({"Hero": "1000", "Villain": "1000"})
+    hand = _hand({"Hero": "1000", "Villain": "1000"})
     hand.gametype["type"] = "tour"
     states = _states(
         hand,
@@ -221,3 +219,66 @@ def test_tournament_antes_are_in_the_street_pot() -> None:
 )
 def test_format_spr(values, text) -> None:
     assert format_spr(values) == text
+
+
+def test_facing_bet_sizing_comes_from_the_bettor_not_an_earlier_seated_caller() -> None:
+    # "Caller" is listed before "Bettor" and both hold 3 when the hero acts:
+    # the sizing is still the bettor's 3 into 3 (Codex on #839).
+    hand = _hand({"Caller": "100", "Bettor": "100", "Hero": "100"})
+    states = _states(
+        hand,
+        [
+            (
+                "PREFLOP",
+                [
+                    ("Caller", "small blind", D("0.5")),
+                    ("Bettor", "big blind", D(1)),
+                    ("Hero", "calls", D(1)),
+                    ("Caller", "calls", D("0.5")),
+                    ("Bettor", "checks"),
+                ],
+            ),
+            ("FLOP", [("Bettor", "bets", D(3)), ("Caller", "calls", D(3)), ("Hero", "calls", D(3))]),
+        ],
+    )
+
+    # The step after the caller's call: the hero faces 3 into 6.
+    lines = _replayer(hand, states)._decision_lines(len(states) - 2)
+
+    assert lines == ["Hero to call $3.00 · facing 100% of the pot · SPR 33"]
+
+
+def test_hero_with_chips_behind_wins_every_ante_and_bet() -> None:
+    # Codex on #839: only Villain posts a 1 ante; a call of 1 that is not all-in
+    # wins the whole 5, so it needs 20 %, not the 25 % a side-pot cap would give.
+    hand = _hand({"Hero": "100", "Villain": "100"})
+    states = _states(
+        hand,
+        [
+            ("BLINDSANTES", [("Villain", "ante", D(1))]),
+            ("PREFLOP", [("Villain", "small blind", D(1)), ("Hero", "big blind", D(1)), ("Villain", "checks")]),
+            ("FLOP", [("Hero", "checks"), ("Villain", "bets", D(1)), ("Hero", "calls", D(1))]),
+        ],
+    )
+    replayer = _replayer(hand, states)
+
+    assert replayer._capped_hero_call(len(states) - 2) == (D(1), D(20), D(4))
+
+
+def test_all_in_call_counts_the_whole_ante_as_dead_money() -> None:
+    # Hero calls 2 all-in. Villain's betting counts up to the hero's 3, and its
+    # 1 ante (a big-blind ante) stays whole: 2 / (3 + 3 + 1).
+    hand = _hand({"Hero": "3", "Villain": "100"})
+    states = _states(
+        hand,
+        [
+            ("BLINDSANTES", [("Villain", "ante", D(1))]),
+            ("PREFLOP", [("Villain", "small blind", D(1)), ("Hero", "big blind", D(1)), ("Villain", "checks")]),
+            ("FLOP", [("Hero", "checks"), ("Villain", "bets", D(10)), ("Hero", "calls", D(2))]),
+        ],
+    )
+
+    amount, odds, _ratio = _replayer(hand, states)._capped_hero_call(len(states) - 2)
+
+    assert amount == D(2)
+    assert odds == D(2) / D(7) * 100

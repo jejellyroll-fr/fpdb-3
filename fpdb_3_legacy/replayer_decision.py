@@ -18,7 +18,7 @@ HUNDRED = Decimal(100)
 
 
 @dataclass(frozen=True)
-class HeroDecision:
+class HeroDecision:  # pylint: disable=too-many-instance-attributes  # one flat result record
     street: str = ""
     mode: str = "neutral"
     action: str = ""
@@ -48,14 +48,20 @@ def _pot(state: Any) -> Decimal:
     return max(ZERO, getattr(state, "newpot", getattr(state, "pot", ZERO)))
 
 
-def _aggression(states: list[Any], index: int, start: int, name: str) -> tuple[Any, Any] | None:
+def _aggression(states: list[Any], index: int, start: int, names: set[str]) -> tuple[str, Any, Any] | None:
+    """The latest bet or raise of the street by one of `names`: (name, state before, state after)."""
     for i in range(index, start, -1):
-        player = states[i].players.get(name)
-        if player and player.justacted and player.action in {"bets", "raises"}:
-            previous = states[i - 1]
+        previous = states[i - 1]
+        for name, player in states[i].players.items():
             # Phase copies can retain justacted; require a real investment.
-            if player.chips > previous.players[name].chips:
-                return previous, states[i]
+            if (
+                name in names
+                and player.justacted
+                and player.action in {"bets", "raises"}
+                and name in previous.players
+                and player.chips > previous.players[name].chips
+            ):
+                return name, previous, states[i]
     return None
 
 
@@ -66,56 +72,66 @@ def _sizing(previous: Any, current: Any, name: str) -> tuple[Decimal, Decimal | 
 
 
 def _call_odds(state: Any, hero: Any, amount: Decimal) -> Decimal | None:
-    if all(hasattr(p, "startStack") for p in state.players.values()):
-        cap = hero.startStack - hero.stack + amount
-        final_pot = sum((min(max(ZERO, p.startStack - p.stack), cap) for p in state.players.values()), ZERO) + amount
-    else:
+    """The share of the pot after the call that the call is, counting only what it can win.
+
+    Only an all-in call is capped: a caller with chips behind can match any
+    later money. Capped, each player's betting counts up to the caller's total,
+    while antes stay whole: they are dead money in the main pot, which the
+    caller always contests.
+    """
+    players = state.players.values()
+    if amount < hero.stack or not all(hasattr(p, "startStack") for p in players):
         final_pot = _pot(state) + amount
+    else:
+
+        def antes(player: Any) -> Decimal:
+            return getattr(player, "antes", ZERO) or ZERO
+
+        cap = hero.startStack - hero.stack - antes(hero) + amount
+        final_pot = (
+            sum((min(max(ZERO, p.startStack - p.stack - antes(p)), cap) + antes(p) for p in players), ZERO) + amount
+        )
     return amount / final_pot * HUNDRED if final_pot > 0 else None
 
 
-def hero_decision(states: list[Any], index: int, hero_name: str) -> HeroDecision:
-    """Street-start SPR, current call odds and pure HU defence/bluff thresholds.
-
-    Multiway SPR is a per-opponent range. MDF is not assigned to individual
-    opponents in multiway. A raise risks the new investment in that action,
-    measured against the pot immediately before it; uncallable excess is capped.
-    """
-    if not states or not 0 <= index < len(states):
-        return HeroDecision()
-    state = states[index]
+def _street_start(states: list[Any], index: int) -> int:
     start = index
-    while start > 0 and states[start - 1].street == state.street:
+    while start > 0 and states[start - 1].street == states[index].street:
         start -= 1
-    initial = states[start]
-    initial_hero = initial.players.get(hero_name)
-    effective = tuple(
-        (name, min(initial_hero.stack, player.stack))
+    return start
+
+
+def _effective(initial: Any, hero_name: str) -> tuple[tuple[str, Decimal], ...]:
+    """Each live opponent's effective stack against the hero at the start of the street."""
+    hero = initial.players.get(hero_name)
+    if not hero or not _live(hero):
+        return ()
+    return tuple(
+        (name, min(hero.stack, player.stack))
         for name, player in initial.players.items()
-        if initial_hero and _live(initial_hero) and name != hero_name and _live(player)
+        if name != hero_name and _live(player)
     )
-    base: dict[str, Any] = {"street": state.street or "", "street_pot": _pot(initial), "effective": effective}
-    hero = state.players.get(hero_name)
-    opponents = [p for name, p in state.players.items() if name != hero_name and _live(p)]
-    if hero is None or not _live(hero) or getattr(state, "ended", False) or not opponents:
-        return HeroDecision(**base)
-    highest = max(p.chips for p in opponents)
+
+
+def _call_decision(states: list[Any], index: int, start: int, hero_name: str, highest: Decimal) -> dict[str, Any]:
+    state = states[index]
+    hero = state.players[hero_name]
     call = min(hero.stack, max(ZERO, highest - hero.chips))
-    if call > 0:
-        aggressor = next(p for p in opponents if p.chips == highest)
-        event = _aggression(states, index, start, aggressor.name)
-        sizing = _sizing(*event, aggressor.name)[1] if event else None
-        return HeroDecision(
-            **base, mode="call", call_amount=call, pot_odds_pct=_call_odds(state, hero, call), bet_pct=sizing
-        )
-    event = (
-        _aggression(states, index, start, hero_name)
-        if hero.chips > 0 and hero.action in {"bets", "raises"} and highest <= hero.chips
-        else None
-    )
+    # The bet to call is the street's latest aggression by an opponent, not
+    # whichever opponent happens to hold as many chips (a caller may).
+    opponents = {name for name, player in state.players.items() if name != hero_name and _live(player)}
+    event = _aggression(states, index, start, opponents)
+    sizing = None
+    if event and event[2].players[event[0]].chips == highest:
+        sizing = _sizing(event[1], event[2], event[0])[1]
+    return {"mode": "call", "call_amount": call, "pot_odds_pct": _call_odds(state, hero, call), "bet_pct": sizing}
+
+
+def _bet_decision(states: list[Any], index: int, start: int, hero_name: str) -> dict[str, Any] | None:
+    event = _aggression(states, index, start, {hero_name})
     if event is None:
-        return HeroDecision(**base)
-    previous, current = event
+        return None
+    _name, previous, current = event
     amount, sizing = _sizing(previous, current, hero_name)
     prior_opponents = [p for name, p in previous.players.items() if name != hero_name and _live(p)]
     mdf = fe = None
@@ -128,14 +144,46 @@ def hero_decision(states: list[Any], index: int, hero_name: str) -> HeroDecision
         pot = _pot(previous)
         if risk > 0 and pot > 0:
             mdf, fe = pot / (pot + risk) * HUNDRED, risk / (pot + risk) * HUNDRED
-    return HeroDecision(
-        **base,
-        mode="bet",
-        action=current.players[hero_name].action,
-        bet_amount=amount,
-        bet_pct=sizing,
-        mdf_pct=mdf,
-        fold_equity_pct=fe,
+    return {
+        "mode": "bet",
+        "action": current.players[hero_name].action,
+        "bet_amount": amount,
+        "bet_pct": sizing,
+        "mdf_pct": mdf,
+        "fold_equity_pct": fe,
+    }
+
+
+def hero_decision(states: list[Any], index: int, hero_name: str) -> HeroDecision:
+    """Street-start SPR, current call odds and pure HU defence/bluff thresholds.
+
+    Multiway SPR is a per-opponent range. MDF is not assigned to individual
+    opponents in multiway. A raise risks the new investment in that action,
+    measured against the pot immediately before it; uncallable excess is capped.
+    """
+    if not states or not 0 <= index < len(states):
+        return HeroDecision()
+    state = states[index]
+    start = _street_start(states, index)
+    initial = states[start]
+    base = HeroDecision(street=state.street or "", street_pot=_pot(initial), effective=_effective(initial, hero_name))
+    hero = state.players.get(hero_name)
+    opponents = [p for name, p in state.players.items() if name != hero_name and _live(p)]
+    if hero is None or not _live(hero) or getattr(state, "ended", False) or not opponents:
+        return base
+    highest = max(p.chips for p in opponents)
+    if min(hero.stack, highest - hero.chips) > 0:
+        return replace(base, **_call_decision(states, index, start, hero_name, highest))
+    if hero.chips <= 0 or hero.action not in {"bets", "raises"} or highest > hero.chips:
+        return base
+    bet = _bet_decision(states, index, start, hero_name)
+    return replace(base, **bet) if bet else base
+
+
+def _decides(player: Any) -> bool:
+    action = player.action or ""
+    return player.justacted and (
+        action in {"checks", "calls", "bets", "raises", "folds", "stands pat"} or action.startswith("discards")
     )
 
 
@@ -147,13 +195,10 @@ def next_decision_actor(states: list[Any], index: int) -> str | None:
     for following in states[index + 1 :]:
         if following.street != current.street or getattr(following, "ended", False):
             return None
-        for name, player in following.players.items():
-            if player.justacted and (
-                player.action in {"checks", "calls", "bets", "raises", "folds", "stands pat"}
-                or (player.action or "").startswith("discards")
-            ):
-                present = current.players.get(name)
-                return name if present and _live(present) and present.stack > 0 else None
+        name = next((name for name, player in following.players.items() if _decides(player)), None)
+        if name is not None:
+            present = current.players.get(name)
+            return name if present and _live(present) and present.stack > 0 else None
     return None
 
 

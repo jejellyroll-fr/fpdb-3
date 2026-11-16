@@ -1986,6 +1986,62 @@ msgstr "Début"
 msgid "bounty-adjusted chip EV %(chips)s"
 msgstr "chip EV ajustée des primes %(chips)s"
 
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s %(action)s %(size)s%% of the pot"
+msgstr "%(name)s %(action)s %(size)s%% du pot"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s SPR %(spr)s"
+msgstr "SPR de %(name)s : %(spr)s"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s to act"
+msgstr "À %(name)s de jouer"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "%(name)s to call %(amount)s"
+msgstr "%(name)s doit payer %(amount)s"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "MDF %(mdf)s%% · fold equity needed %(fe)s%% (heads-up)"
+msgstr "MDF %(mdf)s%% · fold equity nécessaire %(fe)s%% (heads-up)"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "MDF / fold equity: heads-up only"
+msgstr "MDF / fold equity : heads-up uniquement"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid "Odds for all players"
+msgstr "Cotes de tous les joueurs"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "SPR %(spr)s"
+msgstr "SPR %(spr)s"
+
+#: fpdb_3_legacy/GuiReplayer.py
+msgid ""
+"Show SPR, bet sizing, pot odds, MDF and fold equity for every player, not "
+"only the hero"
+msgstr ""
+"Afficher le SPR, la taille des mises, les cotes du pot, le MDF et la fold "
+"equity de chaque joueur, pas seulement du héros"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "facing %(size)s%% of the pot"
+msgstr "face à une mise de %(size)s%% du pot"
+
+#: fpdb_3_legacy/GuiReplayer.py
+#, python-format
+msgid "pot odds %(odds)s%%"
+msgstr "cotes du pot %(odds)s%%"
+
 #: fpdb_3_legacy/GuiResearchBrowser.py
 msgid "-- built-in presets --"
 msgstr "-- préréglages intégrés --"
