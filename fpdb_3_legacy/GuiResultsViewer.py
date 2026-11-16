@@ -89,8 +89,9 @@ class ResultsLoader(DbWorker):
                     rows = self._fetch(connection if connection is not None else db.connection)
             else:
                 rows = self._fetch(db.connection)
-            results = pr.Results.build(rows, self.day_start)
-        except Exception as error:  # noqa: BLE001 - Qt worker boundary reports DB-driver errors through its signal.
+            results = pr.build_results(rows, self.day_start)
+        # Every DB driver raises its own errors: the worker reports any of them through its signal.
+        except Exception as error:  # noqa: BLE001  # pylint: disable=broad-exception-caught
             log.exception("Results calendar: loading the hands failed")
             self.error.emit(str(error))
             return
@@ -117,6 +118,7 @@ def money_text(amounts: dict[str, float]) -> str:
 
 
 def value_text(value: float | None, unit: str) -> str:
+    """A result in big blinds or in a currency, with its unit."""
     if value is None:
         return "—"
     if unit == pr.UNIT_BB:
@@ -124,20 +126,151 @@ def value_text(value: float | None, unit: str) -> str:
     return format_currency(value, unit, show_plus=True)
 
 
-def cell_text(value: float | None) -> str:
-    """A calendar cell's result: the unit is in the month's title, the hand count in the tooltip."""
-    return format_number(value, show_plus=True) if value is not None else "—"
-
-
 def optional_number(value: float | None) -> str:
+    """A signed number, or a dash when there is none (the calendar cells' unit is in the month's title)."""
     return format_number(value, show_plus=True) if value is not None else "—"
 
 
-class GuiResultsViewer(QSplitter):
+def quoted_list(values: list[str]) -> str:
+    """SQL text literals for an ``IN`` list, quotes doubled."""
+    return ", ".join("'" + str(value).replace("'", "''") + "'" for value in values)
+
+
+def table_cell(text: str, sort_value: Any) -> QStandardItem:
+    """A read-only cell of the period table, sorted by ``sort_value``."""
+    item = QStandardItem(text)
+    item.setData(sort_value, SORT_ROLE)
+    item.setEditable(False)
+    return item
+
+
+def period_row(period: pr.PeriodResult, unit: str) -> list[QStandardItem]:
+    """The period table's cells for one day, week or month."""
+    with_bb = period.bb_hands > 0
+    if unit == pr.UNIT_BB:
+        profit_sort, ev_sort = period.profit_bb, period.all_in_ev_bb
+    else:
+        profit_sort, ev_sort = period.money(unit), period.all_in_ev_minor.get(unit, 0.0)
+    row = [
+        table_cell(period_label(period.granularity, period.start), period.start.toordinal()),
+        table_cell(format_number(period.hands, 0), period.hands),
+        table_cell(money_text(period.profit_minor), profit_sort),
+        table_cell(money_text(period.all_in_ev_minor), ev_sort),
+        table_cell(optional_number(period.profit_bb if with_bb else None), period.profit_bb),
+        table_cell(optional_number(period.all_in_ev_bb if with_bb else None), period.all_in_ev_bb),
+        table_cell(optional_number(period.bb_per_100), period.bb_per_100 or 0.0),
+        table_cell(optional_number(period.ev_bb_per_100), period.ev_bb_per_100 or 0.0),
+        table_cell(optional_number(period.showdown_bb if with_bb else None), period.showdown_bb),
+        table_cell(optional_number(period.nonshowdown_bb if with_bb else None), period.nonshowdown_bb),
+    ]
+    row[0].setData((period.granularity, period.start), PERIOD_ROLE)
+    return row
+
+
+def period_tooltip(period: pr.PeriodResult) -> str:
+    """What a calendar cell tells on hover."""
+    return "\n".join(
+        [
+            period_label(period.granularity, period.start),
+            _("{hands} hands").format(hands=format_number(period.hands, 0)),
+            _("Profit: {profit}").format(profit=money_text(period.profit_minor)),
+            _("All-in EV: {ev}").format(ev=money_text(period.all_in_ev_minor)),
+            _("BB/100: {bb100}").format(bb100=optional_number(period.bb_per_100)),
+        ],
+    )
+
+
+def make_calendar() -> QTableWidget:
+    """A month grid: seven days and the week's result."""
+    calendar = QTableWidget(6, 8)
+    locale = _locale_copy()
+    weekdays = [locale.standaloneDayName(day, locale.FormatType.ShortFormat) for day in range(1, 8)]
+    calendar.setHorizontalHeaderLabels([*weekdays, _("Week")])
+    calendar.verticalHeader().setVisible(False)
+    calendar.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+    calendar.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+    calendar.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+    calendar.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+    return calendar
+
+
+def make_period_table(model: QStandardItemModel, proxy: QSortFilterProxyModel) -> QTableView:
+    """The sortable, exportable list of days, weeks or months."""
+    model.setHorizontalHeaderLabels(
+        [
+            _("Period"),
+            _("Hands"),
+            _("Profit"),
+            _("All-in EV"),
+            _("Profit (BB)"),
+            _("All-in EV (BB)"),
+            _("BB/100"),
+            _("EV BB/100"),
+            _("Showdown (BB)"),
+            _("Non-showdown (BB)"),
+        ],
+    )
+    proxy.setSourceModel(model)
+    proxy.setSortRole(SORT_ROLE)
+    table = QTableView()
+    table.setModel(proxy)
+    table.setSortingEnabled(True)
+    table.sortByColumn(0, Qt.SortOrder.DescendingOrder)  # the latest period first
+    table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+    table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+    table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+    table.verticalHeader().setVisible(False)
+    install_table_export(table)
+    return table
+
+
+def summary_text(days: tuple[pr.PeriodResult, ...], unit: str) -> str:
+    """The line above the calendar: every day of the load put together."""
+    overall = pr.total(days)
+    if overall is None:
+        return ""
+    with_bb = overall.bb_hands > 0
+    profit_bb = value_text(overall.profit_bb if with_bb else None, pr.UNIT_BB)
+    ev_bb = value_text(overall.all_in_ev_bb if with_bb else None, pr.UNIT_BB)
+    winning = sum(1 for day in days if (pr.period_value(day, unit) or 0) > 0)
+    return _(
+        "Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV BB/100: {ev100} · "
+        "Days played: {days} ({winning} winning)"
+    ).format(
+        hands=format_number(overall.hands, 0),
+        profit=f"{money_text(overall.profit_minor)} / {profit_bb}",
+        ev=f"{money_text(overall.all_in_ev_minor)} / {ev_bb}",
+        bb100=optional_number(overall.bb_per_100),
+        ev100=optional_number(overall.ev_bb_per_100),
+        days=format_number(len(days), 0),
+        winning=format_number(winning, 0),
+    )
+
+
+FILTERS_DISPLAY = {
+    "Heroes": True,
+    "Sites": True,
+    "Games": True,
+    "Currencies": True,
+    "Limits": True,
+    "LimitSep": True,
+    "LimitType": True,
+    "Type": True,
+    "UseType": "ring",
+    "Seats": True,
+    "SeatSep": False,
+    "Dates": True,
+    "Groups": False,
+    "Button1": True,
+    "Button2": False,
+}
+
+
+class GuiResultsViewer(QSplitter):  # pylint: disable=too-many-instance-attributes
     """The Results calendar tab."""
 
-    def __init__(self, config: Any, querylist: Any, mainwin: Any, owner: Any, colors: dict[str, str]) -> None:
-        QSplitter.__init__(self, mainwin)
+    def __init__(self, config: Any, querylist: Any, owner: Any, colors: dict[str, str]) -> None:
+        QSplitter.__init__(self)  # the main window's tab widget takes it
         self.conf = config
         self.sql = querylist
         self.owner = owner
@@ -150,36 +283,33 @@ class GuiResultsViewer(QSplitter):
         self._loader: ResultsLoader | None = None
         self._generation = 0
 
-        filters_display = {
-            "Heroes": True,
-            "Sites": True,
-            "Games": True,
-            "Currencies": True,
-            "Limits": True,
-            "LimitSep": True,
-            "LimitType": True,
-            "Type": True,
-            "UseType": "ring",
-            "Seats": True,
-            "SeatSep": False,
-            "Dates": True,
-            "Groups": False,
-            "Button1": True,
-            "Button2": False,
-        }
-        self.filters = Filters.Filters(self.db, display=filters_display)
+        self.filters = Filters.Filters(self.db, display=FILTERS_DISPLAY)
         self.filters.registerButton1Name(_("Refresh"))
         self.filters.registerButton1Callback(self.refresh)
+
+        self.granularity_box = QComboBox()
+        self.unit_box = QComboBox()
+        self.status_label = QLabel()
+        self.review_button = QPushButton(_("Review hands"))
+        self.summary_label = QLabel()
+        self.month_button = QPushButton()
+        self.calendar = make_calendar()
+        self.model = QStandardItemModel(0, 10)
+        self.proxy = QSortFilterProxyModel()
+        self.table = make_period_table(self.model, self.proxy)
+        self.graph_frame = QFrame()
+        self.graph_box = QVBoxLayout(self.graph_frame)
+        self.plot_widget: Any = None
 
         scroll = QScrollArea()
         scroll.setObjectName("filterSidebar")
         scroll.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         scroll.setWidget(self.filters)
         self.addWidget(scroll)
-
         self.addWidget(self._build_results_pane())
         self.setStretchFactor(0, 0)
         self.setStretchFactor(1, 1)
+        self._connect_signals()
         self.db.rollback()
 
     # -- layout ---------------------------------------------------------
@@ -190,28 +320,18 @@ class GuiResultsViewer(QSplitter):
 
         toolbar = QHBoxLayout()
         toolbar.addWidget(QLabel(_("Period:")))
-        self.granularity_box = QComboBox()
         for granularity, label in ((pr.DAY, _("Days")), (pr.WEEK, _("Weeks")), (pr.MONTH, _("Months"))):
             self.granularity_box.addItem(label, granularity)
-        self.granularity_box.currentIndexChanged.connect(self._granularity_changed)
         toolbar.addWidget(self.granularity_box)
-
         toolbar.addWidget(QLabel(_("Unit:")))
-        self.unit_box = QComboBox()
-        self.unit_box.currentIndexChanged.connect(self._unit_changed)
         toolbar.addWidget(self.unit_box)
-
         toolbar.addStretch(1)
-        self.status_label = QLabel()
         toolbar.addWidget(self.status_label)
-        self.review_button = QPushButton(_("Review hands"))
         self.review_button.setToolTip(_("Open the hands of the selected period in the Hand Viewer"))
         self.review_button.setEnabled(False)
-        self.review_button.clicked.connect(self.review_hands)
         toolbar.addWidget(self.review_button)
         layout.addLayout(toolbar)
 
-        self.summary_label = QLabel()
         self.summary_label.setWordWrap(True)
         self.summary_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         layout.addWidget(self.summary_label)
@@ -219,16 +339,13 @@ class GuiResultsViewer(QSplitter):
         vertical = QSplitter(Qt.Orientation.Vertical)
         horizontal = QSplitter(Qt.Orientation.Horizontal)
         horizontal.addWidget(self._build_calendar())
-        horizontal.addWidget(self._build_period_table())
+        horizontal.addWidget(self.table)
         horizontal.setStretchFactor(0, 1)
         horizontal.setStretchFactor(1, 1)
         vertical.addWidget(horizontal)
 
-        self.graph_frame = QFrame()
         self.graph_frame.setObjectName("graphSurface")
         self.graph_frame.setStyleSheet(f"background-color: {self.colors['background']}")
-        self.graph_box = QVBoxLayout(self.graph_frame)
-        self.plot_widget: Any = None
         vertical.addWidget(self.graph_frame)
         vertical.setStretchFactor(0, 1)
         vertical.setStretchFactor(1, 1)
@@ -241,66 +358,30 @@ class GuiResultsViewer(QSplitter):
         layout.setContentsMargins(0, 0, 0, 0)
 
         header = QHBoxLayout()
-        self.previous_button = QPushButton("◀")
-        self.previous_button.setToolTip(_("Previous month"))
-        self.previous_button.clicked.connect(lambda: self._move_month(-1))
-        self.next_button = QPushButton("▶")
-        self.next_button.setToolTip(_("Next month"))
-        self.next_button.clicked.connect(lambda: self._move_month(1))
-        self.month_label = QLabel()
-        self.month_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.month_label.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.month_label.setToolTip(_("Click to select the whole month"))
-        self.month_label.mousePressEvent = lambda _event: self._select_month()
-        header.addWidget(self.previous_button)
-        header.addWidget(self.month_label, 1)
-        header.addWidget(self.next_button)
+        previous_button = QPushButton("◀")
+        previous_button.setToolTip(_("Previous month"))
+        previous_button.clicked.connect(lambda: self.move_month(-1))
+        next_button = QPushButton("▶")
+        next_button.setToolTip(_("Next month"))
+        next_button.clicked.connect(lambda: self.move_month(1))
+        self.month_button.setFlat(True)
+        self.month_button.setToolTip(_("Click to select the whole month"))
+        header.addWidget(previous_button)
+        header.addWidget(self.month_button, 1)
+        header.addWidget(next_button)
         layout.addLayout(header)
-
-        self.calendar = QTableWidget(6, 8)
-        locale = _locale_copy()
-        weekdays = [locale.standaloneDayName(day, locale.FormatType.ShortFormat) for day in range(1, 8)]
-        self.calendar.setHorizontalHeaderLabels([*weekdays, _("Week")])
-        self.calendar.verticalHeader().setVisible(False)
-        self.calendar.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.calendar.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.calendar.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.calendar.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
-        self.calendar.cellClicked.connect(self._calendar_clicked)
-        self.calendar.cellDoubleClicked.connect(lambda _row, _column: self.review_hands())
         layout.addWidget(self.calendar, 1)
         return box
 
-    def _build_period_table(self) -> QTableView:
-        self.columns = [
-            _("Period"),
-            _("Hands"),
-            _("Profit"),
-            _("All-in EV"),
-            _("Profit (BB)"),
-            _("All-in EV (BB)"),
-            _("BB/100"),
-            _("EV BB/100"),
-            _("Showdown (BB)"),
-            _("Non-showdown (BB)"),
-        ]
-        self.model = QStandardItemModel(0, len(self.columns))
-        self.model.setHorizontalHeaderLabels(self.columns)
-        self.proxy = QSortFilterProxyModel()
-        self.proxy.setSourceModel(self.model)
-        self.proxy.setSortRole(SORT_ROLE)
-        self.table = QTableView()
-        self.table.setModel(self.proxy)
-        self.table.setSortingEnabled(True)
-        self.table.sortByColumn(0, Qt.SortOrder.DescendingOrder)  # the latest period first
-        self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
-        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.table.verticalHeader().setVisible(False)
-        self.table.clicked.connect(self._row_clicked)
+    def _connect_signals(self) -> None:
+        self.granularity_box.currentIndexChanged.connect(self._granularity_changed)
+        self.unit_box.currentIndexChanged.connect(self._unit_changed)
+        self.review_button.clicked.connect(self.review_hands)
+        self.month_button.clicked.connect(self.select_month)
+        self.calendar.cellClicked.connect(self.select_cell)
+        self.calendar.cellDoubleClicked.connect(lambda _row, _column: self.review_hands())
+        self.table.clicked.connect(self.select_row)
         self.table.doubleClicked.connect(lambda _index: self.review_hands())
-        install_table_export(self.table)
-        return self.table
 
     # -- tab lifecycle --------------------------------------------------
 
@@ -326,101 +407,94 @@ class GuiResultsViewer(QSplitter):
     # -- loading --------------------------------------------------------
 
     def refresh(self, _checked: Any = None) -> None:
-        sites = self.filters.getSites()
-        limits = self.filters.getLimits()
-        games = self.filters.getGames()
-        currencies = self.filters.getCurrencies()
+        """Load the hands of the filters' selection, off the GUI thread."""
         playerids = [pid for _site, pid in self.filters.get_selected_players()]
         missing = gui_empty_state.missing_filter_reason(
-            sites=sites,
+            sites=self.filters.getSites(),
             playerids=playerids,
-            limits=limits,
-            games=games,
-            currencies=currencies,
+            limits=self.filters.getLimits(),
+            games=self.filters.getGames(),
+            currencies=self.filters.getCurrencies(),
         )
+        self._invalidate_loader()
         if missing is not None:
-            self._invalidate_loader()
-            self._show_results(None)
-            gui_empty_state.show_no_data(self, missing, context="Results calendar", db=self.db)
+            self._show_nothing(missing)
             self.db.rollback()
             return
 
-        query = self.build_query(playerids, limits, games, currencies, self.filters.getSeats())
-        self._invalidate_loader()
         generation = self._generation
-        loader = ResultsLoader(self.db, query, float(getattr(self.filters, "day_start", 0.0) or 0.0))
+        loader = ResultsLoader(self.db, self.build_query(playerids), float(getattr(self.filters, "day_start", 0) or 0))
         self._loader = loader
-
-        def loaded(results: pr.Results) -> None:
-            if self._generation != generation:
-                return
-            self._loader = None
-            self.status_label.clear()
-            if not results.hands:
-                self._show_results(None)
-                gui_empty_state.show_no_data(self, context="Results calendar", db=self.db)
-                return
-            self._show_results(results)
-
-        def failed(message: str) -> None:
-            if self._generation != generation:
-                return
-            self._loader = None
-            self.status_label.clear()
-            log.error(f"Results calendar: {message}")
-            self._show_results(None)
-            gui_empty_state.show_no_data(self, context="Results calendar", db=self.db)
-
-        loader.loaded.connect(loaded)
-        loader.error.connect(failed)
+        loader.loaded.connect(lambda results: self._loaded(generation, results))
+        loader.error.connect(lambda message: self._failed(generation, message))
         self.status_label.setText(_("Loading…"))
         loader.start()
 
-    def build_query(
-        self,
-        playerids: list[int],
-        limits: Any,
-        games: list[str],
-        currencies: list[str],
-        seats: dict[str, int] | None,
-    ) -> str:
-        query = self.sql.query["periodResultsHands"]
+    def _loaded(self, generation: int, results: pr.Results) -> None:
+        if generation != self._generation:
+            return  # superseded by a newer Refresh
+        self._loader = None
+        self.status_label.clear()
+        if results.hands:
+            self.show_results(results)
+        else:
+            self._show_nothing()
+
+    def _failed(self, generation: int, message: str) -> None:
+        if generation != self._generation:
+            return
+        self._loader = None
+        self.status_label.clear()
+        log.error(f"Results calendar: {message}")
+        self._show_nothing()
+
+    def _show_nothing(self, reason: gui_empty_state.NoDataReason = gui_empty_state.NoDataReason.NO_ROWS) -> None:
+        self.show_results(None)
+        gui_empty_state.show_no_data(self, reason, context="Results calendar", db=self.db)
+
+    def build_query(self, playerids: list[int]) -> str:
+        """The ``periodResultsHands`` query for ``playerids`` and the rest of the filters' selection."""
+        games = self.filters.getGames()
+        currencies = self.filters.getCurrencies()
+        seats = self.filters.getSeats()
         start_date, end_date = self.filters.getDates()
-        players = ", ".join(str(int(pid)) for pid in playerids)
-        query = query.replace("<player_test>", f"({players})")
-        query = query.replace("<startdate_test>", start_date)
-        query = query.replace("<enddate_test>", end_date)
-        query = query.replace("<limit_test>", self.filters.get_limits_where_clause(limits))
-        if self.filters.display.get("Games"):
-            if games:
-                quoted = ", ".join("'" + str(game).replace("'", "''") + "'" for game in games)
-                query = query.replace("<game_test>", f"AND gt.category in ({quoted})")
-            else:
-                query = query.replace("<game_test>", "AND gt.category IS NULL")
+        if not self.filters.display.get("Games"):
+            game_test = ""
+        elif games:
+            game_test = f"AND gt.category in ({quoted_list(games)})"
         else:
-            query = query.replace("<game_test>", "")
-        if currencies:
-            quoted = ", ".join("'" + str(currency).replace("'", "''") + "'" for currency in currencies)
-            query = query.replace("<currency_test>", f"AND gt.currency in ({quoted})")
-        else:
-            query = query.replace("<currency_test>", "AND 1=0")
-        if seats:
-            seats_test = f"AND h.seats BETWEEN {int(seats['from'])} AND {int(seats['to'])}"
-        else:
-            seats_test = ""
-        return query.replace("<seats_test>", seats_test)
+            game_test = "AND gt.category IS NULL"
+        # An empty currency list would be "in ()", invalid SQL: match no hand instead.
+        currency_test = f"AND gt.currency in ({quoted_list(currencies)})" if currencies else "AND 1=0"
+        seats_test = f"AND h.seats BETWEEN {int(seats['from'])} AND {int(seats['to'])}" if seats else ""
+        replacements = {
+            "<player_test>": "(" + ", ".join(str(int(pid)) for pid in playerids) + ")",
+            "<startdate_test>": start_date,
+            "<enddate_test>": end_date,
+            "<limit_test>": self.filters.get_limits_where_clause(self.filters.getLimits()),
+            "<game_test>": game_test,
+            "<currency_test>": currency_test,
+            "<seats_test>": seats_test,
+        }
+        query = self.sql.query["periodResultsHands"]
+        for placeholder, value in replacements.items():
+            query = query.replace(placeholder, value)
+        return query
 
     # -- display --------------------------------------------------------
 
     @property
     def granularity(self) -> str:
+        """The periods the table lists: day, week or month."""
         return self.granularity_box.currentData() or pr.DAY
 
     @property
     def unit(self) -> str:
+        """BB, or the currency the calendar and the curves are shown in."""
         return self.unit_box.currentData() or pr.UNIT_BB
 
-    def _show_results(self, results: pr.Results | None) -> None:
+    def show_results(self, results: pr.Results | None) -> None:
+        """Show a load's results, or clear the tab with None."""
         self.results = results
         self.selected = None
         previous_unit = self.unit_box.currentData()
@@ -429,8 +503,7 @@ class GuiResultsViewer(QSplitter):
         if results is not None:
             for unit in pr.display_units(results.hands):
                 self.unit_box.addItem(_("Big blinds") if unit == pr.UNIT_BB else unit, unit)
-            index = self.unit_box.findData(previous_unit)
-            self.unit_box.setCurrentIndex(max(index, 0))
+            self.unit_box.setCurrentIndex(max(self.unit_box.findData(previous_unit), 0))
             last = results.last_day()
             if last is not None:
                 self.month = (last.year, last.month)
@@ -441,8 +514,7 @@ class GuiResultsViewer(QSplitter):
         self._fill_summary()
         self._fill_calendar()
         self._fill_table()
-        self._draw_curves()
-        self.review_button.setEnabled(self.results is not None and bool(self._selected_hands()))
+        self._selection_changed()
 
     def _granularity_changed(self, _index: int) -> None:
         # The selection keeps its meaning (a day stays a day); the table lists other periods.
@@ -452,135 +524,70 @@ class GuiResultsViewer(QSplitter):
         self._redraw()
 
     def _fill_summary(self) -> None:
-        results = self.results
-        overall = pr.total(results.periods[pr.DAY]) if results is not None else None
-        if overall is None:
+        if self.results is None:
             self.summary_label.clear()
             return
-        days = results.periods[pr.DAY]
-        winning = sum(1 for day in days if day.profit_bb > 0)
-        text = _(
-            "Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV BB/100: {ev100} · "
-            "Days played: {days} ({winning} winning)"
-        ).format(
-            hands=format_number(overall.hands, 0),
-            profit=money_text(overall.profit_minor) + " / " + optional_number(overall.profit_bb) + " BB",
-            ev=money_text(overall.all_in_ev_minor) + " / " + optional_number(overall.all_in_ev_bb) + " BB",
-            bb100=optional_number(overall.bb_per_100),
-            ev100=optional_number(overall.ev_bb_per_100),
-            days=format_number(len(days), 0),
-            winning=format_number(winning, 0),
-        )
-        self.summary_label.setText(text)
+        self.summary_label.setText(summary_text(self.results.periods[pr.DAY], self.unit))
 
     def _tint(self, value: float | None) -> QBrush | None:
-        if value is None or value == 0:
+        """A pale green for a win, a pale red for a loss, nothing for zero."""
+        if not value:
             return None
-        color = QColor(self.colors.get("line_up" if value > 0 else "line_down", "#22c55e" if value > 0 else "#f43f5e"))
+        key, fallback = ("line_up", "#22c55e") if value > 0 else ("line_down", "#f43f5e")
+        color = QColor(self.colors.get(key, fallback))
         if not color.isValid():
-            color = QColor("#22c55e" if value > 0 else "#f43f5e")
+            color = QColor(fallback)
         color.setAlpha(70)
         return QBrush(color)
 
+    def _calendar_item(self, text: str, period: pr.PeriodResult | None, key: tuple[str, date]) -> QTableWidgetItem:
+        """A calendar cell for ``key``, tinted by its result when ``period`` was played."""
+        value = pr.period_value(period, self.unit) if period is not None else None
+        item = QTableWidgetItem(text if period is None else f"{text}\n{optional_number(value)}".strip())
+        item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        item.setData(PERIOD_ROLE, key)
+        brush = self._tint(value)
+        if brush is not None:
+            item.setBackground(brush)
+        if period is not None:
+            item.setToolTip(period_tooltip(period))
+        return item
+
     def _fill_calendar(self) -> None:
         year, month = self.month
-        locale = _locale_copy()
-        title = f"{locale.standaloneMonthName(month)} {year}"
-        self.calendar.clearContents()
-        self.calendar.clearSelection()
         results = self.results
-        unit = self.unit
         days = results.by_start(pr.DAY) if results is not None else {}
         weeks = results.by_start(pr.WEEK) if results is not None else {}
-        months = results.by_start(pr.MONTH) if results is not None else {}
-        month_result = months.get(date(year, month, 1))
+        month_result = results.by_start(pr.MONTH).get(date(year, month, 1)) if results is not None else None
+        title = f"{_locale_copy().standaloneMonthName(month)} {year}"
         if month_result is not None:
-            title += "  " + value_text(pr.period_value(month_result, unit), unit)
-        self.month_label.setText(f"<b>{title}</b>")
+            title += "  " + value_text(pr.period_value(month_result, self.unit), self.unit)
+        self.month_button.setText(title)
 
+        self.calendar.clearContents()
+        self.calendar.clearSelection()
         grid = pr.month_weeks(year, month)
         self.calendar.setRowCount(len(grid))
+        outside = QBrush(QColor(self.colors.get("grid", "#888888")))
         for row, week in enumerate(grid):
             for column, day in enumerate(week):
-                period = days.get(day)
-                value = pr.period_value(period, unit) if period is not None else None
-                text = str(day.day)
-                if period is not None:
-                    text += "\n" + cell_text(value)
-                item = QTableWidgetItem(text)
-                item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                item.setData(PERIOD_ROLE, (pr.DAY, day))
+                item = self._calendar_item(str(day.day), days.get(day), (pr.DAY, day))
                 if day.month != month:
-                    item.setForeground(QBrush(QColor(self.colors.get("grid", "#888888"))))
-                brush = self._tint(value)
-                if brush is not None:
-                    item.setBackground(brush)
-                if period is not None:
-                    item.setToolTip(self._period_tooltip(period))
+                    item.setForeground(outside)
                 self.calendar.setItem(row, column, item)
-            week_start = week[0]
-            week_period = weeks.get(week_start)
-            week_value = pr.period_value(week_period, unit) if week_period is not None else None
-            item = QTableWidgetItem(cell_text(week_value) if week_period is not None else "")
-            item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            item.setData(PERIOD_ROLE, (pr.WEEK, week_start))
+            item = self._calendar_item("", weeks.get(week[0]), (pr.WEEK, week[0]))
             font = item.font()
             font.setBold(True)
             item.setFont(font)
-            brush = self._tint(week_value)
-            if brush is not None:
-                item.setBackground(brush)
-            if week_period is not None:
-                item.setToolTip(self._period_tooltip(week_period))
             self.calendar.setItem(row, 7, item)
-
-    def _period_tooltip(self, period: pr.PeriodResult) -> str:
-        return "\n".join(
-            [
-                period_label(period.granularity, period.start),
-                _("{hands} hands").format(hands=format_number(period.hands, 0)),
-                _("Profit: {profit}").format(profit=money_text(period.profit_minor)),
-                _("All-in EV: {ev}").format(ev=money_text(period.all_in_ev_minor)),
-                _("BB/100: {bb100}").format(bb100=optional_number(period.bb_per_100)),
-            ],
-        )
-
-    @staticmethod
-    def _cell(text: str, sort_value: Any) -> QStandardItem:
-        item = QStandardItem(text)
-        item.setData(sort_value, SORT_ROLE)
-        item.setEditable(False)
-        return item
 
     def _fill_table(self) -> None:
         self.table.setSortingEnabled(False)
         self.model.removeRows(0, self.model.rowCount())
-        if self.results is None:
-            self.table.setSortingEnabled(True)
-            return
-        granularity = self.granularity
-        unit = self.unit
-        for period in self.results.periods[granularity]:
-            money_currency = unit if unit != pr.UNIT_BB else None
-            profit_sort = period.money(money_currency) if money_currency else period.profit_bb
-            ev_sort = period.all_in_ev_minor.get(money_currency, 0.0) if money_currency else period.all_in_ev_bb
-            row = [
-                self._cell(period_label(granularity, period.start), period.start.toordinal()),
-                self._cell(format_number(period.hands, 0), period.hands),
-                self._cell(money_text(period.profit_minor), profit_sort),
-                self._cell(money_text(period.all_in_ev_minor), ev_sort),
-                self._cell(optional_number(period.profit_bb if period.bb_hands else None), period.profit_bb),
-                self._cell(optional_number(period.all_in_ev_bb if period.bb_hands else None), period.all_in_ev_bb),
-                self._cell(optional_number(period.bb_per_100), period.bb_per_100 or 0.0),
-                self._cell(optional_number(period.ev_bb_per_100), period.ev_bb_per_100 or 0.0),
-                self._cell(optional_number(period.showdown_bb if period.bb_hands else None), period.showdown_bb),
-                self._cell(
-                    optional_number(period.nonshowdown_bb if period.bb_hands else None),
-                    period.nonshowdown_bb,
-                ),
-            ]
-            row[0].setData((granularity, period.start), PERIOD_ROLE)
-            brush = self._tint(pr.period_value(period, unit))
+        periods = self.results.periods[self.granularity] if self.results is not None else ()
+        for period in periods:
+            row = period_row(period, self.unit)
+            brush = self._tint(pr.period_value(period, self.unit))
             if brush is not None:
                 row[2].setBackground(brush)
                 row[4].setBackground(brush)
@@ -590,45 +597,52 @@ class GuiResultsViewer(QSplitter):
 
     # -- selection ------------------------------------------------------
 
-    def _move_month(self, step: int) -> None:
+    def move_month(self, step: int) -> None:
+        """Show the month ``step`` months away in the calendar."""
         self.month = pr.shift_month(*self.month, step)
         self._fill_calendar()
 
-    def _select(self, granularity: str, start: date) -> None:
+    def select_period(self, granularity: str, start: date) -> None:
+        """Select a day, week or month: its curves are drawn and its hands can be reviewed."""
         self.selected = (granularity, start)
-        if granularity != pr.WEEK:
+        if granularity != pr.WEEK and (start.year, start.month) != self.month:
             self.month = (start.year, start.month)
             self._fill_calendar()
-        self._draw_curves()
-        self.review_button.setEnabled(bool(self._selected_hands()))
+        self._selection_changed()
 
-    def _select_month(self) -> None:
+    def select_month(self) -> None:
+        """Select the month the calendar shows."""
         year, month = self.month
-        self._select(pr.MONTH, date(year, month, 1))
+        self.select_period(pr.MONTH, date(year, month, 1))
 
-    def _calendar_clicked(self, row: int, column: int) -> None:
+    def select_cell(self, row: int, column: int) -> None:
+        """Select the day or week of a calendar cell."""
         item = self.calendar.item(row, column)
         period = item.data(PERIOD_ROLE) if item is not None else None
         if period:
             granularity, start = period
             self.selected = (granularity, start)
-            self._draw_curves()
-            self.review_button.setEnabled(bool(self._selected_hands()))
+            self._selection_changed()
 
-    def _row_clicked(self, index: Any) -> None:
-        source = self.proxy.mapToSource(index)
-        period = self.model.item(source.row(), 0).data(PERIOD_ROLE)
+    def select_row(self, index: Any) -> None:
+        """Select the period of a row of the table."""
+        item = self.model.item(self.proxy.mapToSource(index).row(), 0)
+        period = item.data(PERIOD_ROLE) if item is not None else None
         if period:
-            self._select(*period)
+            self.select_period(*period)
 
-    def _selected_hands(self) -> list[pr.HandResult]:
-        results = self.results
-        if results is None:
+    def _selection_changed(self) -> None:
+        self._draw_curves()
+        self.review_button.setEnabled(bool(self.selected_hands()))
+
+    def selected_hands(self) -> list[pr.HandResult]:
+        """The selected period's hands, or every hand when nothing is selected."""
+        if self.results is None:
             return []
         if self.selected is None:
-            return list(results.hands)
+            return list(self.results.hands)
         granularity, start = self.selected
-        return results.hands_between(start, pr.period_end(start, granularity))
+        return self.results.hands_between(start, pr.period_end(start, granularity))
 
     def _selection_title(self) -> str:
         if self.selected is None:
@@ -646,7 +660,7 @@ class GuiResultsViewer(QSplitter):
 
     def _draw_curves(self) -> None:
         self._clear_plot()
-        hands = self._selected_hands()
+        hands = self.selected_hands()
         if not hands:
             return
         unit = self.unit
@@ -692,7 +706,7 @@ class GuiResultsViewer(QSplitter):
 
     def review_hands(self) -> None:
         """Open the selected period's hands in the Hand Viewer."""
-        hand_ids = [hand.hand_id for hand in self._selected_hands()]
+        hand_ids = [hand.hand_id for hand in self.selected_hands()]
         if not hand_ids:
             return
         viewer = self._hand_viewer()

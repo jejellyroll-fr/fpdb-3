@@ -27,14 +27,18 @@ def _new_york(utc: datetime) -> timedelta:
     return pytz.utc.localize(utc).astimezone(NEW_YORK).utcoffset()
 
 
-@pytest.fixture
-def new_york(monkeypatch) -> None:
+@pytest.fixture(name="new_york")
+def fixture_new_york(monkeypatch) -> None:
     monkeypatch.setattr(hud_day, "local_offset", _new_york)
 
 
-def _row(hand_id, start, profit, ev=None, showdown=False, bb=10, currency="USD"):
-    """A periodResultsHands row: id, start (UTC), profit, all-in EV, showdown, big blind, currency."""
-    return (hand_id, start, profit, profit if ev is None else ev, showdown, bb, currency)
+def _row(hand_id, start, profit, **fields):
+    """A periodResultsHands row: id, start (UTC), profit, all-in EV, showdown, big blind, currency.
+
+    ``fields`` overrides ``ev`` (the profit by default), ``showdown``, ``bb`` (10) and ``currency`` (USD).
+    """
+    row = {"ev": profit, "showdown": False, "bb": 10, "currency": "USD", **fields}
+    return (hand_id, start, profit, row["ev"], row["showdown"], row["bb"], row["currency"])
 
 
 # -- days, weeks, months ------------------------------------------------------
@@ -91,7 +95,7 @@ def test_weeks_start_on_monday_and_months_on_the_first() -> None:
 
 @pytest.mark.usefixtures("new_york")
 def test_hands_are_summed_per_period() -> None:
-    results = pr.Results.build(
+    results = pr.build_results(
         [
             _row(3, datetime(2026, 11, 10, 20, 0), -50),  # Tuesday the 10th
             _row(1, datetime(2026, 11, 9, 20, 0), 100),  # Monday the 9th
@@ -118,7 +122,7 @@ def test_hands_are_summed_per_period() -> None:
 @pytest.mark.usefixtures("new_york")
 def test_a_hand_near_midnight_is_filed_under_its_local_day() -> None:
     # 03:00 UTC on the 1st of December is 22:00 on the 30th of November in New York.
-    results = pr.Results.build([_row(1, datetime(2026, 12, 1, 3, 0), 100)])
+    results = pr.build_results([_row(1, datetime(2026, 12, 1, 3, 0), 100)])
 
     assert results.periods[pr.DAY][0].start == date(2026, 11, 30)
     assert results.periods[pr.MONTH][0].start == date(2026, 11, 1)
@@ -129,7 +133,7 @@ def test_a_hand_near_midnight_is_filed_under_its_local_day() -> None:
 
 @pytest.mark.usefixtures("new_york")
 def test_money_is_kept_per_currency_and_big_blinds_are_summed() -> None:
-    results = pr.Results.build(
+    results = pr.build_results(
         [
             _row(1, datetime(2026, 11, 9, 20, 0), 100, bb=10, currency="USD"),
             _row(2, datetime(2026, 11, 9, 21, 0), -40, bb=20, currency="eur"),
@@ -149,7 +153,7 @@ def test_money_is_kept_per_currency_and_big_blinds_are_summed() -> None:
 
 @pytest.mark.usefixtures("new_york")
 def test_bb_per_100_uses_the_hands_with_a_blind_for_profit_and_ev() -> None:
-    results = pr.Results.build(
+    results = pr.build_results(
         [
             _row(1, datetime(2026, 11, 9, 20, 0), 200, ev=100, bb=100),
             _row(2, datetime(2026, 11, 9, 20, 1), -100, ev=-100, bb=100),
@@ -192,7 +196,7 @@ def test_display_units_offer_the_currency_when_there_is_only_one() -> None:
 
 @pytest.mark.usefixtures("new_york")
 def test_total_sums_every_period() -> None:
-    results = pr.Results.build(
+    results = pr.build_results(
         [
             _row(1, datetime(2026, 11, 9, 20, 0), 100, ev=60),
             _row(2, datetime(2026, 11, 10, 20, 0), -30, currency="EUR"),
@@ -268,18 +272,21 @@ def test_shift_month(year, month, step, expected) -> None:
 # -- the query on a real database -----------------------------------------------
 
 
-def _filters(players, currencies=("USD",)):
+def _filters(games=("holdem",), currencies=("USD",), seats=None):
+    """What GuiResultsViewer.build_query reads of the filters: every date and limit, games shown."""
     return SimpleNamespace(
         getDates=lambda: ("1970-01-02 00:00:00", "2100-01-01 00:00:00"),
+        getLimits=lambda: [],
         get_limits_where_clause=lambda _limits: "",
+        getGames=lambda: list(games),
+        getCurrencies=lambda: list(currencies),
+        getSeats=lambda: seats,
         display={"Games": True},
-        currencies=list(currencies),
-        players=players,
     )
 
 
-@pytest.fixture
-def imported(tmp_path):
+@pytest.fixture(name="imported")
+def fixture_imported(tmp_path):
     from fpdb_3_legacy.Configuration import Config
     from fpdb_3_legacy.Database import Database
     from fpdb_3_legacy.Importer import Importer
@@ -319,12 +326,12 @@ def test_the_query_reads_every_cash_hand_of_the_hero(imported) -> None:
     )
     hero, hands, profit, ev = cursor.fetchone()
 
-    viewer = GuiResultsViewer.__new__(GuiResultsViewer)
+    viewer = GuiResultsViewer.__new__(GuiResultsViewer)  # pylint: disable=no-value-for-parameter
     viewer.sql = imported.sql
-    viewer.filters = _filters([hero])
-    query = viewer.build_query([hero], [], ["holdem"], ["USD"], {"from": 2, "to": 10})
+    viewer.filters = _filters(seats={"from": 2, "to": 10})
+    query = viewer.build_query([hero])
     cursor.execute(query)
-    results = pr.Results.build(cursor.fetchall())
+    results = pr.build_results(cursor.fetchall())
 
     assert len(results.hands) == hands
     overall = pr.total(results.periods[pr.MONTH])
@@ -337,7 +344,9 @@ def test_the_query_reads_every_cash_hand_of_the_hero(imported) -> None:
     curves = pr.build_curves(results.hands, pr.UNIT_BB)
     assert curves.final("net") == pytest.approx(overall.profit_bb)
 
-    cursor.execute(viewer.build_query([hero], [], ["holdem"], [], None))
+    viewer.filters = _filters(currencies=())
+    cursor.execute(viewer.build_query([hero]))
     assert cursor.fetchall() == []  # no currency selected: no hand, and valid SQL
-    cursor.execute(viewer.build_query([hero], [], ["omahahi"], ["USD"], None))
+    viewer.filters = _filters(games=("omahahi",))
+    cursor.execute(viewer.build_query([hero]))
     assert cursor.fetchall() == []

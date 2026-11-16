@@ -31,8 +31,8 @@ COLORS = {
 }
 
 
-@pytest.fixture(autouse=True)
-def new_york(monkeypatch) -> None:
+@pytest.fixture(name="new_york", autouse=True)
+def fixture_new_york(monkeypatch) -> None:
     monkeypatch.setattr(
         hud_day,
         "local_offset",
@@ -48,8 +48,8 @@ ROWS = [
 ]
 
 
-@pytest.fixture
-def viewer(qtbot):
+@pytest.fixture(name="viewer")
+def fixture_viewer(qtbot):
     db = MagicMock()
     db.get_player_site_id.return_value = 2
     config = MagicMock()
@@ -61,19 +61,9 @@ def viewer(qtbot):
     owner = MagicMock()
     owner.threads = []
     with patch("fpdb_3_legacy.Database.Database", return_value=db):
-        page = results_module.GuiResultsViewer(config, sql, None, owner, colors=COLORS)
+        page = results_module.GuiResultsViewer(config, sql, owner, colors=COLORS)
     qtbot.addWidget(page)
     return page
-
-
-def _calendar_texts(page) -> dict[tuple[int, int], str]:
-    calendar = page.calendar
-    return {
-        (row, column): calendar.item(row, column).text()
-        for row in range(calendar.rowCount())
-        for column in range(calendar.columnCount())
-        if calendar.item(row, column) is not None
-    }
 
 
 def _find_cell(page, period: tuple[str, date]) -> tuple[int, int]:
@@ -87,7 +77,7 @@ def _find_cell(page, period: tuple[str, date]) -> tuple[int, int]:
 
 
 def test_the_calendar_opens_on_the_month_of_the_last_hand(viewer) -> None:
-    viewer._show_results(pr.Results.build(ROWS))
+    viewer.show_results(pr.build_results(ROWS))
 
     assert viewer.month == (2026, 11)
     assert [viewer.unit_box.itemData(i) for i in range(viewer.unit_box.count())] == [pr.UNIT_BB, "USD"]
@@ -96,7 +86,7 @@ def test_the_calendar_opens_on_the_month_of_the_last_hand(viewer) -> None:
     assert text.startswith("9\n")
     assert text.split("\n")[1] == "+7.00"  # +7 BB that day; the unit is in the month's title
     assert "2 hands" in viewer.calendar.item(row, column).toolTip()
-    assert "BB" in viewer.month_label.text()
+    assert "BB" in viewer.month_button.text()
     week_row, week_column = _find_cell(viewer, (pr.WEEK, date(2026, 11, 9)))
     assert week_column == 7
     assert "+12" in viewer.calendar.item(week_row, week_column).text()
@@ -104,8 +94,8 @@ def test_the_calendar_opens_on_the_month_of_the_last_hand(viewer) -> None:
 
 
 def test_moving_the_month_shows_the_other_days(viewer) -> None:
-    viewer._show_results(pr.Results.build(ROWS))
-    viewer._move_month(-1)
+    viewer.show_results(pr.build_results(ROWS))
+    viewer.move_month(-1)
 
     assert viewer.month == (2026, 10)
     row, column = _find_cell(viewer, (pr.DAY, date(2026, 10, 30)))
@@ -113,7 +103,7 @@ def test_moving_the_month_shows_the_other_days(viewer) -> None:
 
 
 def test_the_table_lists_the_chosen_periods(viewer) -> None:
-    viewer._show_results(pr.Results.build(ROWS))
+    viewer.show_results(pr.build_results(ROWS))
 
     assert viewer.model.rowCount() == 3  # three days played
     viewer.granularity_box.setCurrentIndex(viewer.granularity_box.findData(pr.WEEK))
@@ -125,14 +115,14 @@ def test_the_table_lists_the_chosen_periods(viewer) -> None:
 
 
 def test_selecting_a_day_draws_its_curves_and_reviews_its_hands(viewer) -> None:
-    viewer._show_results(pr.Results.build(ROWS))
+    viewer.show_results(pr.build_results(ROWS))
     assert viewer.plot_widget is not None  # every hand of the range before a selection
     row, column = _find_cell(viewer, (pr.DAY, date(2026, 11, 9)))
 
-    viewer._calendar_clicked(row, column)
+    viewer.select_cell(row, column)
 
     assert viewer.selected == (pr.DAY, date(2026, 11, 9))
-    assert [hand.hand_id for hand in viewer._selected_hands()] == [1, 2]
+    assert [hand.hand_id for hand in viewer.selected_hands()] == [1, 2]
     assert viewer.plot_widget is not None
     assert viewer.review_button.isEnabled()
 
@@ -151,7 +141,7 @@ def test_selecting_a_day_draws_its_curves_and_reviews_its_hands(viewer) -> None:
 
 
 def test_selecting_a_table_row_selects_its_period(viewer) -> None:
-    viewer._show_results(pr.Results.build(ROWS))
+    viewer.show_results(pr.build_results(ROWS))
     viewer.granularity_box.setCurrentIndex(viewer.granularity_box.findData(pr.MONTH))
     index = next(
         viewer.proxy.index(row, 0)
@@ -159,15 +149,15 @@ def test_selecting_a_table_row_selects_its_period(viewer) -> None:
         if viewer.proxy.index(row, 0).data(results_module.PERIOD_ROLE) == (pr.MONTH, date(2026, 10, 1))
     )
 
-    viewer._row_clicked(index)
+    viewer.select_row(index)
 
     assert viewer.selected == (pr.MONTH, date(2026, 10, 1))
     assert viewer.month == (2026, 10)
-    assert [hand.hand_id for hand in viewer._selected_hands()] == [4]
+    assert [hand.hand_id for hand in viewer.selected_hands()] == [4]
 
 
 def test_money_curves_follow_the_unit(viewer) -> None:
-    viewer._show_results(pr.Results.build(ROWS))
+    viewer.show_results(pr.build_results(ROWS))
     viewer.unit_box.setCurrentIndex(viewer.unit_box.findData("USD"))
 
     assert viewer.unit == "USD"
@@ -176,8 +166,8 @@ def test_money_curves_follow_the_unit(viewer) -> None:
 
 
 def test_no_results_clears_the_tab(viewer) -> None:
-    viewer._show_results(pr.Results.build(ROWS))
-    viewer._show_results(None)
+    viewer.show_results(pr.build_results(ROWS))
+    viewer.show_results(None)
 
     assert viewer.model.rowCount() == 0
     assert viewer.plot_widget is None
@@ -257,11 +247,22 @@ def test_a_superseded_load_does_not_touch_the_tab(viewer) -> None:
         viewer.refresh()
         second_loaded = loader_class.return_value.loaded.connect.call_args.args[0]
 
-    first_loaded(pr.Results.build(ROWS))
+    first_loaded(pr.build_results(ROWS))
     assert viewer.results is None
-    second_loaded(pr.Results.build(ROWS))
+    second_loaded(pr.build_results(ROWS))
     assert viewer.results is not None
     query = loader_class.call_args.args[1]
     assert "hp.playerId in (8)" in query
     assert "gt.category in ('holdem')" in query
     assert "gt.currency in ('USD')" in query
+
+
+def test_the_month_button_selects_the_month_shown(viewer) -> None:
+    viewer.show_results(pr.build_results(ROWS))
+    viewer.move_month(-1)
+
+    viewer.month_button.click()
+
+    assert viewer.selected == (pr.MONTH, date(2026, 10, 1))
+    assert [hand.hand_id for hand in viewer.selected_hands()] == [4]
+    assert "2026" in viewer.month_button.text()

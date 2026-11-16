@@ -2139,7 +2139,7 @@ class fpdb(QMainWindow):
 
         def build(module):
             colors = self.get_theme_colors()
-            return module.GuiResultsViewer(self.config, self.sql, self, self, colors=colors)
+            return module.GuiResultsViewer(self.config, self.sql, self, colors=colors)
 
         self.open_tab("Results Calendar", build, module="fpdb_3_legacy.GuiResultsViewer")
 
@@ -2154,6 +2154,7 @@ class fpdb(QMainWindow):
         snapshot of the running build, so a second copy would only duplicate the
         first.
         """
+
         def build(module):
             return module.GuiVersionInfo(
                 config=self.config,

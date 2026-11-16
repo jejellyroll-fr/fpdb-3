@@ -57,11 +57,12 @@ class HandResult:
 
     @property
     def has_bb(self) -> bool:
+        """Whether the hand has a big blind to count in (fixed limit stores -1)."""
         return self.big_blind_minor > 0
 
 
 @dataclass
-class PeriodResult:
+class PeriodResult:  # pylint: disable=too-many-instance-attributes
     """What one day, week or month won."""
 
     start: date
@@ -77,23 +78,22 @@ class PeriodResult:
     hand_ids: list[int] = field(default_factory=list)
 
     @property
-    def end(self) -> date:
-        """The period's last day."""
-        return period_end(self.start, self.granularity)
-
-    @property
     def currencies(self) -> list[str]:
+        """The currencies played in the period, sorted."""
         return sorted(self.profit_minor)
 
     @property
     def bb_per_100(self) -> float | None:
+        """Big blinds won per 100 hands with a big blind, None without one."""
         return self.profit_bb / self.bb_hands * 100 if self.bb_hands else None
 
     @property
     def ev_bb_per_100(self) -> float | None:
+        """All-in EV in big blinds per 100 hands, over the same hands as :attr:`bb_per_100`."""
         return self.all_in_ev_bb / self.bb_hands * 100 if self.bb_hands else None
 
     def add(self, hand: HandResult) -> None:
+        """Count ``hand`` in the period."""
         self.hands += 1
         self.hand_ids.append(hand.hand_id)
         self.profit_minor[hand.currency] = self.profit_minor.get(hand.currency, 0.0) + hand.profit_minor
@@ -255,9 +255,11 @@ class Curves:
 
     @property
     def hands(self) -> int:
+        """How many hands the curves follow."""
         return len(self.hand_ids)
 
     def final(self, name: str) -> float:
+        """Where curve ``name`` ends."""
         return getattr(self, name)[-1]
 
 
@@ -306,14 +308,8 @@ class Results:
     days: tuple[date, ...]  # each hand's local day
     periods: dict[str, tuple[PeriodResult, ...]]
 
-    @classmethod
-    def build(cls, rows: Iterable[Sequence[Any]], day_start: float = 0.0) -> Results:
-        hands = parse_hands(rows)
-        days = [local_day(hand.start_time, day_start) for hand in hands]
-        periods = {granularity: tuple(aggregate(hands, granularity, days=days)) for granularity in GRANULARITIES}
-        return cls(hands=tuple(hands), days=tuple(days), periods=periods)
-
     def by_start(self, granularity: str) -> dict[date, PeriodResult]:
+        """The periods of ``granularity`` by their first day."""
         return {period.start: period for period in self.periods[granularity]}
 
     def hands_between(self, first: date, last: date) -> list[HandResult]:
@@ -321,7 +317,16 @@ class Results:
         return [hand for hand, day in zip(self.hands, self.days, strict=True) if first <= day <= last]
 
     def last_day(self) -> date | None:
+        """The day the last hand was played on, None without hands."""
         return self.days[-1] if self.days else None
+
+
+def build_results(rows: Iterable[Sequence[Any]], day_start: float = 0.0) -> Results:
+    """Parse ``periodResultsHands`` rows and sum them per day, week and month."""
+    hands = parse_hands(rows)
+    days = [local_day(hand.start_time, day_start) for hand in hands]
+    periods = {granularity: tuple(aggregate(hands, granularity, days=days)) for granularity in GRANULARITIES}
+    return Results(hands=tuple(hands), days=tuple(days), periods=periods)
 
 
 __all__ = [
@@ -337,6 +342,7 @@ __all__ = [
     "Results",
     "aggregate",
     "build_curves",
+    "build_results",
     "display_units",
     "hand_value",
     "local_day",
