@@ -35,6 +35,17 @@ log = get_logger("hand")
 
 HAND_DECIMAL_ERRORS = (InvalidOperation, TypeError, ValueError)
 
+# Rooms whose parser puts room money into the pot with addSTP and records the
+# amount in a Hands column (in cents). HandsActions has no row for that money,
+# so Hand.select has to put it back before totalling the pot, or the rebuilt
+# pot comes out short of what the winners collected.
+# Other rooms are left out on purpose: CoinPoker credits its splash beside the
+# pot, and CoinPoker/SWC bomb pots are antes already stored as actions.
+STP_COLUMNS_BY_SITE: dict[str, tuple[str, ...]] = {
+    "Winamax": ("bombPot", "splashPot"),  # heads-up turbo pot, Escape splash
+    "BetRivers": ("splashPot",),
+}
+
 
 def canonical_datetime_utc(value):
     if not value:
@@ -848,6 +859,11 @@ class Hand:
         # created before these columns simply return nothing, keeping the 0 default.
         self.bombPot = hand_info.get("bombpot", 0) or 0
         self.splashPot = hand_info.get("splashpot", 0) or 0
+        for column in STP_COLUMNS_BY_SITE.get(self.sitename, ()):
+            cents = getattr(self, column)
+            if cents:
+                self.addSTP(str(Decimal(cents) / 100))
+                break
         # self.startTime currently unused in the replayer and commented out.
         # However a startTime is needed for a valid output by writeHand:
         if isinstance(hand_info["starttime"], datetime.datetime):
