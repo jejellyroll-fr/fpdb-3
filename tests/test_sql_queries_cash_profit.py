@@ -1,11 +1,11 @@
 """Regression tests for cash-game profit graph queries."""
 
 from fpdb_3_legacy.SQL import Sql
-from fpdb_3_legacy.sql_queries_cash_profit import cash_profit_queries
+from fpdb_3_legacy.sql_queries_cash_profit import cash_profit_queries, period_results_queries
 
 
 def test_cash_profit_queries_are_installed_exactly() -> None:
-    expected = cash_profit_queries()
+    expected = cash_profit_queries() | period_results_queries()
     assert len(expected) == 4
     for backend in ("mysql", "postgresql", "sqlite"):
         assert expected.items() <= Sql(db_server=backend).query.items()
@@ -26,9 +26,8 @@ def test_cash_profit_queries_keep_units_equity_and_filters() -> None:
     # A hand without an all-in EV plots its result as its EV (#827).
     assert "COALESCE(hp.allInEV, hp.totalProfit)" in big_blinds
     assert "COALESCE(hp.allInEV, hp.totalProfit)" in dollars
-    graphs = [query for name, query in queries.items() if name.startswith("getRingProfit")]
-    assert len(graphs) == 3
-    for query in graphs:
+    assert len(queries) == 3
+    for query in queries.values():
         assert "<player_test>" in query
         assert "<site_test>" in query
         assert "<startdate_test>" in query
@@ -37,7 +36,7 @@ def test_cash_profit_queries_keep_units_equity_and_filters() -> None:
 
 
 def test_period_results_query_reads_cash_hands_with_their_ev_and_blind() -> None:
-    query = cash_profit_queries()["periodResultsHands"]
+    query = period_results_queries()["periodResultsHands"]
 
     assert "h.startTime" in query
     assert "COALESCE(hp.allInEV, hp.totalProfit)" in query
@@ -56,4 +55,5 @@ def test_period_results_query_reads_cash_hands_with_their_ev_and_blind() -> None
         "<seats_test>",
     ):
         assert placeholder in query
+    assert "hp.playerId" in query
     assert "ORDER BY h.startTime, h.id" in query

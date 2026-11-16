@@ -44,7 +44,7 @@ UNIT_BB = "BB"
 
 
 @dataclass(frozen=True)
-class HandResult:
+class HandResult:  # pylint: disable=too-many-instance-attributes  # one field per column of the query
     """One cash hand of the hero, as read from the database."""
 
     hand_id: int

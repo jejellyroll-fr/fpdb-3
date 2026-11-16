@@ -14,7 +14,7 @@ from PySide6.QtCore import Qt
 from fpdb_3_legacy import GuiResultsViewer as results_module
 from fpdb_3_legacy import hud_day
 from fpdb_3_legacy import period_results as pr
-from fpdb_3_legacy.sql_queries_cash_profit import cash_profit_queries
+from fpdb_3_legacy.sql_queries_cash_profit import period_results_queries
 
 pytestmark = pytest.mark.qt
 
@@ -239,7 +239,7 @@ def test_a_failed_load_reports_its_error(qtbot) -> None:
 
 
 def test_a_superseded_load_does_not_touch_the_tab(viewer) -> None:
-    viewer.sql.query = cash_profit_queries()
+    viewer.sql.query = period_results_queries()
     viewer.filters = MagicMock()
     viewer.filters.getSites.return_value = {"PokerStars": True}
     viewer.filters.getLimits.return_value = ["all"]

@@ -11,7 +11,7 @@ from fpdb_3_legacy.sql_queries_aof import aof_queries
 from fpdb_3_legacy.sql_queries_cache_maintenance import cache_maintenance_queries
 from fpdb_3_legacy.sql_queries_cache_rebuild import cache_rebuild_queries
 from fpdb_3_legacy.sql_queries_cards_cache_write import cards_cache_write_queries
-from fpdb_3_legacy.sql_queries_cash_profit import cash_profit_queries
+from fpdb_3_legacy.sql_queries_cash_profit import cash_profit_queries, period_results_queries
 from fpdb_3_legacy.sql_queries_core import core_lookup_queries
 from fpdb_3_legacy.sql_queries_database_admin import database_admin_queries
 from fpdb_3_legacy.sql_queries_filters import filter_queries
@@ -119,6 +119,7 @@ class Sql:
         self.query.update(core_lookup_queries())
         self.query.update(database_admin_queries(db_server))
         self.query.update(cash_profit_queries())
+        self.query.update(period_results_queries())
         self.query.update(cache_maintenance_queries())
         self.query.update(cache_rebuild_queries(db_server))
         self.query.update(cards_cache_write_queries())

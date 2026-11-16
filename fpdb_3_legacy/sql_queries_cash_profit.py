@@ -67,10 +67,18 @@ def cash_profit_queries() -> dict[str, str]:
         GROUP BY h.startTime, hp.handId, hp.sawShowdown, hp.totalProfit, hp.allInEV, hp.splashWinnings
         ORDER BY h.startTime, hp.handId"""
 
-    # The Results calendar (#827): every cash hand of the hero with what it
-    # needs to be filed under its day and summed there. The start time is
-    # returned as stored (UTC); period_results moves it to the local day.
-    query["periodResultsHands"] = """
+    return query
+
+
+def period_results_queries() -> dict[str, str]:
+    """The Results calendar's query (#827): every cash hand of the hero, to file under its day.
+
+    The start time is returned as stored (UTC); period_results moves it to the
+    local day. hp.playerId names the hero row each hand was read for, so the
+    Hand Viewer is told which player is the hero of each hand.
+    """
+    return {
+        "periodResultsHands": """
         SELECT h.id, h.startTime, hp.totalProfit, COALESCE(hp.allInEV, hp.totalProfit),
                hp.sawShowdown, gt.bigBlind, gt.currency, hp.playerId
         FROM HandsPlayers hp
@@ -85,6 +93,5 @@ def cash_profit_queries() -> dict[str, str]:
         <game_test>
         <currency_test>
         <seats_test>
-        ORDER BY h.startTime, h.id"""
-
-    return query
+        ORDER BY h.startTime, h.id""",
+    }
