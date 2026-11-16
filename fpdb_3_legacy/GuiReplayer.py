@@ -50,6 +50,7 @@ from fpdb_3_legacy.localized_formats import format_currency, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.replay_history import replay_history_entries
 from fpdb_3_legacy.replay_history_dialog import ReplayHistoryDialog
+from fpdb_3_legacy.replayer_decision import HeroDecision, action_decision, hero_decision
 
 # import L10n
 # _ = L10n.get_translation()
@@ -73,6 +74,29 @@ CONTROL_BUTTON_MIN_WIDTH = 118
 DEALER_BUTTON_BASE_SIZE = 32
 
 _RANK_VALUE = {r: i for i, r in enumerate("23456789TJQKA", start=2)}
+
+# The first betting round of each game family: SPR there is measured against
+# the blinds, antes or bring-in only, so the replayer shows it from the next
+# street on (#826). The hand's own actionStreets take precedence.
+_FIRST_ROUND_STREETS = frozenset({"BLINDSANTES", "PREFLOP", "DEAL", "SECOND", "THIRD"})
+DECISION_LINE_COLOR = "#7dd3fc"
+
+
+def format_spr(values: tuple[Decimal, ...]) -> str:
+    """One SPR, or the range of the per-opponent SPRs of a multiway pot.
+
+    A matchup already all-in (nothing behind at the start of the street) has
+    no decision left and is left out; with none left the text is empty.
+    """
+
+    def short(value: Decimal) -> str:
+        return format_number(value, 2).rstrip("0").rstrip(".,")
+
+    values = tuple(value for value in values if value > 0)
+    if not values:
+        return ""
+    low, high = short(min(values)), short(max(values))
+    return low if low == high else f"{low}–{high}"
 
 
 def _is_real_card(card: str) -> bool:
@@ -805,6 +829,15 @@ class GuiReplayer(QWidget):
         self.bb_amounts_box.setToolTip(_("Show stacks, bets and pots in big blinds"))
         self.bb_amounts_box.toggled.connect(self.bb_amounts_toggled)
         self.buttonBox2.addWidget(self.bb_amounts_box)
+
+        # Decision metrics (#826): the hero's by default, every player's on demand.
+        self.all_decisions = QCheckBox(_("Odds for all players"))
+        self.all_decisions.setToolTip(
+            _("Show SPR, bet sizing, pot odds, MDF and fold equity for every player, not only the hero")
+        )
+        self.all_decisions.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.all_decisions.toggled.connect(self.update)
+        self.buttonBox2.addWidget(self.all_decisions)
 
         self.deckLabel = QLabel(_("Deck:"))
         self.deckLabel.setStyleSheet("font-weight: 600; color: #9aa5ad; margin-left: 10px;")
@@ -2401,6 +2434,10 @@ class GuiReplayer(QWidget):
             if pot_after_call > 0:
                 pot_odds_pct = (call_amount / pot_after_call) * Decimal(100)
                 pot_odds_ratio = frame.pot / call_amount
+        capped = self._capped_hero_call(current_index)
+        if capped is not None:
+            call_amount, pot_odds_pct, pot_odds_ratio = capped
+            facing_call = True
 
         hand = getattr(getattr(self, "replay_model", None), "hand", None)
         category = hand.gametype.get("category", "") if hand else ""
@@ -2445,6 +2482,108 @@ class GuiReplayer(QWidget):
             "is_allin": is_allin,
             "is_hero_turn": self._next_actor_name(current_index) == self.Heroes,
         }
+
+    def _replay_decision(self, current_index: int, name: str) -> HeroDecision | None:
+        """The decision metrics of `name` at a replay step, or None without replay states."""
+        states = getattr(self, "states", None)
+        if not states or not 0 <= current_index < len(states) or getattr(self, "replay_mode", "hand") == "ofc":
+            return None
+        return hero_decision(states, current_index, name)
+
+    def _capped_hero_call(self, current_index: int) -> tuple[Decimal, Decimal, Decimal] | None:
+        """The hero's call from the replay states: (amount, pot odds %, ratio), or None.
+
+        The call is capped at the hero's stack and, all-in, the pot at what that
+        call can win, side money excluded (#826).
+        """
+        decision = self._replay_decision(current_index, self.Heroes)
+        if decision is None or decision.mode != "call" or not decision.pot_odds_pct:
+            return None
+        odds = decision.pot_odds_pct
+        return decision.call_amount, odds, (Decimal(100) - odds) / odds
+
+    def _show_all_decisions(self) -> bool:
+        checkbox = getattr(self, "all_decisions", None)
+        return bool(checkbox is not None and checkbox.isChecked())
+
+    def _shows_spr(self, street: str | None) -> bool:
+        """SPR from the second betting round on: before, the pot is only blinds and antes."""
+        if not street:
+            return False
+        hand = getattr(getattr(self, "replay_model", None), "hand", None)
+        action_streets = list(getattr(hand, "actionStreets", None) or [])
+        first_round = set(action_streets[:2]) if len(action_streets) >= 2 else _FIRST_ROUND_STREETS
+        return street not in first_round
+
+    def _decision_lines(self, current_index: int) -> list[str]:
+        """SPR, bet sizing, pot odds and heads-up MDF / fold equity at a replay step (#826).
+
+        The hero's by default: the bet the hero just made, then the hero's next
+        decision (the call itself is priced on the pot-odds line). With "Odds for
+        all players" checked, the same for whoever bets or acts next.
+        """
+        states = getattr(self, "states", None)
+        if not states or not 0 <= current_index < len(states) or getattr(self, "replay_mode", "hand") == "ofc":
+            return []
+        if getattr(states[current_index], "ended", False):
+            return []
+        lines = [self._bet_line(current_index), self._actor_line(current_index)]
+        return [line for line in lines if line]
+
+    def _bet_line(self, current_index: int) -> str:
+        """The bet or raise just made: its size, and what it asks of a lone opponent."""
+        state = self.states[current_index]
+        bettor = next(
+            (
+                name
+                for name, player in state.players.items()
+                if player.justacted and player.action in {"bets", "raises"}
+            ),
+            None,
+        )
+        if not bettor or not (self._show_all_decisions() or bettor == self.Heroes):
+            return ""
+        bet = hero_decision(self.states, current_index, bettor)
+        if bet.mode != "bet" or bet.bet_pct is None:
+            return ""
+        text = _("%(name)s %(action)s %(size)s%% of the pot") % {
+            "name": bettor,
+            "action": bet.action,
+            "size": format_number(bet.bet_pct, 0),
+        }
+        if bet.mdf_pct is not None and bet.fold_equity_pct is not None:
+            text += " · " + _("MDF %(mdf)s%% · fold equity needed %(fe)s%% (heads-up)") % {
+                "mdf": format_number(bet.mdf_pct, 1),
+                "fe": format_number(bet.fold_equity_pct, 1),
+            }
+        elif len(bet.effective) > 1:
+            text += " · " + _("MDF / fold equity: heads-up only")
+        return text
+
+    def _actor_line(self, current_index: int) -> str:
+        """The player about to act: the call they face and the street's SPR."""
+        hero = self.Heroes
+        shows_spr = self._shows_spr(self.states[current_index].street)
+        actor, metrics = action_decision(self.states, current_index, hero)
+        if not actor or not (self._show_all_decisions() or actor == hero):
+            # Someone else acts: the hero's street SPR stays in view while live.
+            spr = format_spr(hero_decision(self.states, current_index, hero).spr) if shows_spr else ""
+            return _("%(name)s SPR %(spr)s") % {"name": hero, "spr": spr} if spr else ""
+        if metrics.mode == "call":
+            parts = [
+                _("%(name)s to call %(amount)s")
+                % {"name": actor, "amount": self._amount(metrics.call_amount)}
+            ]
+            if actor != hero and metrics.pot_odds_pct is not None:
+                parts.append(_("pot odds %(odds)s%%") % {"odds": format_number(metrics.pot_odds_pct, 1)})
+            if metrics.bet_pct is not None:
+                parts.append(_("facing %(size)s%% of the pot") % {"size": format_number(metrics.bet_pct, 0)})
+        else:
+            parts = [_("%(name)s to act") % {"name": actor}]
+        spr = format_spr(metrics.spr) if shows_spr else ""
+        if spr:
+            parts.append(_("SPR %(spr)s") % {"spr": spr})
+        return " · ".join(parts) if metrics.mode == "call" or len(parts) > 1 else ""
 
     def _hero_odds_summary(self, frame: ReplayFrame, current_index: int) -> str:
         metrics = self._hero_decision_metrics(frame, current_index)
@@ -2570,15 +2709,48 @@ class GuiReplayer(QWidget):
             text += " " + _("(this table taken as the whole field)")
         return text, "#4ade80" if ev >= 0 else "#ff6b6b"
 
-    def _draw_summary(self, painter: QPainter, frame: ReplayFrame, layout: ReplayLayout, current_index: int) -> None:
+    def _summary_lines(self, frame: ReplayFrame, current_index: int) -> list[tuple[str, str]]:
+        """The summary's lines under the action, as (text, colour)."""
+        lines: list[tuple[str, str]] = [(text, DECISION_LINE_COLOR) for text in self._decision_lines(current_index)]
         metrics = self._hero_decision_metrics(frame, current_index)
-        has_metrics = bool(
-            metrics.get("is_hero_turn")
-            and (metrics.get("facing_call") or metrics.get("push_equity_pct") is not None)
-        )
-        icm_line = self._icm_line(frame)
-        bounty_line = self._bounty_line(frame)
-        box_height = (78 if has_metrics else 56) + (22 if icm_line else 0) + (22 if bounty_line else 0)
+        if metrics.get("is_hero_turn"):
+            # Pot odds & call equity
+            line2_parts = []
+            if metrics.get("facing_call"):
+                call_amt = self._amount(metrics["call_amount"])
+                odds_pct = format_number(metrics["pot_odds_pct"], 1)
+                ratio = format_number(metrics["pot_odds_ratio"], 1)
+                line2_parts.append(f"Pot Odds: {odds_pct}% ({ratio}:1) [Call {call_amt}]")
+            if metrics.get("call_equity_pct") is not None:
+                eq_pct = format_number(metrics["call_equity_pct"], 1)
+                line2_parts.append(f"Call Eq: {eq_pct}%")
+                if metrics.get("call_edge_pts") is not None:
+                    edge = format_number(metrics["call_edge_pts"], 1, show_plus=True)
+                    line2_parts.append(f"Edge: {edge} pts")
+            if line2_parts:
+                edge_val = metrics.get("call_edge_pts")
+                color = "#ffe769"
+                if edge_val is not None:
+                    color = "#4ade80" if edge_val >= 0 else "#ff6b6b"
+                lines.append(("  ·  ".join(line2_parts), color))
+
+            # Push / all-in equity
+            if metrics.get("push_equity_pct") is not None:
+                push_pct = format_number(metrics["push_equity_pct"], 1)
+                label = "Push/All-in Eq" if metrics.get("is_allin") else "Push Eq"
+                lines.append((f"{label}: {push_pct}%", "#a78bfa"))
+
+        if not lines:
+            lines.append(("Use arrows/space to review decisions", "#9aa5ad"))
+        # Last: the bounty a knockout all-in can win (#447), then prize equity (#446).
+        for extra in (self._bounty_line(frame), self._icm_line(frame)):
+            if extra:
+                lines.append(extra)
+        return lines
+
+    def _draw_summary(self, painter: QPainter, frame: ReplayFrame, layout: ReplayLayout, current_index: int) -> None:
+        lines = self._summary_lines(frame, current_index)
+        box_height = 34 + 22 * len(lines)
         summary_width = min(640, max(320, layout.table_rect.width() * 0.48))
         if layout.timeline_rect.isNull():
             x = self.width() - summary_width - 28
@@ -2599,77 +2771,13 @@ class GuiReplayer(QWidget):
             self._current_action_summary(frame),
         )
 
-        if bounty_line:
-            # Above the ICM line, or last: the bounty a knockout all-in can win (#447).
-            painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
-            painter.setPen(QColor(bounty_line[1]))
+        painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
+        for row, (text, color) in enumerate(lines):
+            painter.setPen(QColor(color))
             painter.drawText(
-                QRectF(rect.x() + 12, rect.y() + box_height - (48 if icm_line else 26), rect.width() - 24, 20),
+                QRectF(rect.x() + 12, rect.y() + 28 + 22 * row, rect.width() - 24, 20),
                 Qt.AlignmentFlag.AlignLeft,
-                bounty_line[0],
-            )
-
-        if icm_line:
-            # Last line of the box: prize equity next to the chip figures (#446).
-            painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
-            painter.setPen(QColor(icm_line[1]))
-            painter.drawText(
-                QRectF(rect.x() + 12, rect.y() + box_height - 26, rect.width() - 24, 20),
-                Qt.AlignmentFlag.AlignLeft,
-                icm_line[0],
-            )
-
-        if not has_metrics:
-            painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
-            painter.setPen(QColor("#9aa5ad"))
-            painter.drawText(
-                QRectF(rect.x() + 12, rect.y() + 28, rect.width() - 24, 20),
-                Qt.AlignmentFlag.AlignLeft,
-                "Use arrows/space to review decisions",
-            )
-            return
-
-        # Line 2: Pot Odds & Call Equity
-        line2_parts = []
-        if metrics.get("facing_call"):
-            call_amt = self._amount(metrics["call_amount"])
-            odds_pct = format_number(metrics["pot_odds_pct"], 1)
-            ratio = format_number(metrics["pot_odds_ratio"], 1)
-            line2_parts.append(f"Pot Odds: {odds_pct}% ({ratio}:1) [Call {call_amt}]")
-        if metrics.get("call_equity_pct") is not None:
-            eq_pct = format_number(metrics["call_equity_pct"], 1)
-            line2_parts.append(f"Call Eq: {eq_pct}%")
-            if metrics.get("call_edge_pts") is not None:
-                edge = format_number(metrics["call_edge_pts"], 1, show_plus=True)
-                line2_parts.append(f"Edge: {edge} pts")
-
-        if line2_parts:
-            painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
-            edge_val = metrics.get("call_edge_pts")
-            color = QColor("#ffe769")
-            if edge_val is not None:
-                color = QColor("#4ade80") if edge_val >= 0 else QColor("#ff6b6b")
-            painter.setPen(color)
-            painter.drawText(
-                QRectF(rect.x() + 12, rect.y() + 28, rect.width() - 24, 20),
-                Qt.AlignmentFlag.AlignLeft,
-                "  ·  ".join(line2_parts),
-            )
-
-        # Line 3: Push / All-in Equity
-        line3_parts = []
-        if metrics.get("push_equity_pct") is not None:
-            push_pct = format_number(metrics["push_equity_pct"], 1)
-            label = "Push/All-in Eq" if metrics.get("is_allin") else "Push Eq"
-            line3_parts.append(f"{label}: {push_pct}%")
-
-        if line3_parts:
-            painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
-            painter.setPen(QColor("#a78bfa"))
-            painter.drawText(
-                QRectF(rect.x() + 12, rect.y() + 50, rect.width() - 24, 20),
-                Qt.AlignmentFlag.AlignLeft,
-                "  ·  ".join(line3_parts),
+                text,
             )
 
     def _draw_timeline(self, painter: QPainter, layout: ReplayLayout) -> None:
@@ -3121,6 +3229,8 @@ class TableState:
         elif action[1] == "ante":
             self.pot += action[2]
             player.stack -= action[2]
+            # Dead money the player always contests: pot odds keep it whole (#826).
+            player.antes += action[2]
             self.newpot += action[2]
         elif action[1] == "discards":
             player.action = (player.action or "") + " " + str(action[2])
@@ -3258,6 +3368,7 @@ class Player:
         self.stack = Decimal(stack)
         self.startStack = Decimal(stack)
         self.chips = Decimal(0)
+        self.antes = Decimal(0)
         self.seat = seat
         self.name = name
         self.action: str | None = None

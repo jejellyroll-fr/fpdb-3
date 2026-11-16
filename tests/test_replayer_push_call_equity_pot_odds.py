@@ -69,8 +69,8 @@ def test_hero_odds_summary_formatted_string(monkeypatch) -> None:
     replayer.currency_code = "USD"
     replayer.replay_model = cast(Any, SimpleNamespace(hand=SimpleNamespace(gametype={"category": "holdem"})))
     replayer.states = [
-        SimpleNamespace(players={}),
-        SimpleNamespace(players={1: SimpleNamespace(name="Hero", justacted=True, action="calls")}),
+        SimpleNamespace(street="FLOP", players={}),
+        SimpleNamespace(street="FLOP", players={1: SimpleNamespace(name="Hero", justacted=True, action="calls")}),
     ]
 
     frame = cast(Any, SimpleNamespace(
