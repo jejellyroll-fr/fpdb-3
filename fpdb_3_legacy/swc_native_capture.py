@@ -1423,6 +1423,13 @@ def native_stud_gametype_stakes(structure: dict | None, limit_type: str) -> dict
     return stakes
 
 
+def _native_hand_stakes(family: str, stud_structure: dict | None, limit_type: str, actions: list[dict]) -> dict:
+    """The gametype's ``sb``/``bb``/``ante``: from the stud structure, else from the blinds."""
+    if family == "stud":
+        return native_stud_gametype_stakes(stud_structure, limit_type)
+    return {**extract_native_blind_structure(actions), "ante": 0}
+
+
 def audit_native_hand(
     steps: list[dict],
     collections: list[dict],
@@ -3520,11 +3527,7 @@ def _normalize_native_hands_one_source(  # noqa: PLR0915 - protocol normalizatio
         native_funds_byte_conserved = family in {"holdem", "omaha"} and add_native_funds_byte_amounts_if_conserved(
             action_evidence, collections, returned
         )
-        native_blinds = (
-            native_stud_gametype_stakes(native_stud_betting_structure, limit_type)
-            if family == "stud"
-            else {**extract_native_blind_structure(action_evidence), "ante": 0}
-        )
+        native_blinds = _native_hand_stakes(family, native_stud_betting_structure, limit_type, action_evidence)
         native_stud_accounting = (
             audit_native_stud_accounting(action_evidence, native_stud_forced_bets, collections, returned)
             if family == "stud"
