@@ -8,11 +8,13 @@ street its money went in. The hands are PokerStars hands, parsed and derived.
 from __future__ import annotations
 
 from decimal import Decimal
+from types import SimpleNamespace
 
 import pytest
 
 import fpdb_3_legacy.equity as equity_module
 from fpdb_3_legacy import derived_stats_allin
+from fpdb_3_legacy.DerivedStats import DerivedStats
 from fpdb_3_legacy.import_prefetch import _PlaceholderIds
 
 pytestmark = pytest.mark.skipif(equity_module.load_poker_eval() is None, reason="pypoker-eval is not installed")
@@ -134,7 +136,9 @@ def _derive(tmp_path, text: str):
     path = tmp_path / "hand.txt"
     path.write_text(text, encoding="utf-8")
     parser = PokerStars(config=Config(file="HUD_config.xml"), in_path=str(path), autostart=True)
-    (hand,) = parser.getProcessedHands()
+    hands = parser.getProcessedHands()
+    assert len(hands) == 1
+    hand = hands[0]
     hand.prepInsert(_PlaceholderIds())
     hand.assembleHand()
     return hand
@@ -146,7 +150,7 @@ def _record_equity_calls(monkeypatch) -> list[tuple]:
 
     def recording(game, pockets, board, **kwargs):
         result = real(game, pockets, board, **kwargs)
-        calls.append((pockets, list(board), [player.equity for player in result.players]))
+        calls.append((pockets, list(board), kwargs.get("dead"), [player.equity for player in result.players]))
         return result
 
     monkeypatch.setattr(derived_stats_allin, "calculate_equity", recording)
@@ -160,8 +164,9 @@ def test_short_stack_with_the_best_hand_wins_only_the_main_pot(tmp_path, monkeyp
 
     board = ["2c", "7d", "9h", "Js", "3s"]
     assert calls == [
-        ([["As", "Ah"], ["Kd", "Kh"], ["Qc", "Qd"]], board, [1, 0, 0]),
-        ([["Kd", "Kh"], ["Qc", "Qd"]], board, [1, 0]),
+        ([["As", "Ah"], ["Kd", "Kh"], ["Qc", "Qd"]], board, [], [1, 0, 0]),
+        # Short's aces cannot win the side pot, and are no longer in the deck.
+        ([["Kd", "Kh"], ["Qc", "Qd"]], board, ["As", "Ah"], [1, 0]),
     ]
     ev = {name: hand.handsplayers[name]["allInEV"] for name in ("Short", "Bob", "Carol")}
     # The $30 main pot for $10, not the whole $210 pot; the $180 side pot for $100.
@@ -175,10 +180,16 @@ def test_side_pot_of_a_later_all_in_keeps_the_main_pot_on_the_earlier_street(tmp
 
     hand = _derive(tmp_path, SHORT_ALL_IN_ON_THE_FLOP_SIDE_POT_ON_THE_TURN)
 
-    (main_pockets, main_board, main_equity), (side_pockets, side_board, side_equity) = calls
+    assert len(calls) == 2
+    main_call, side_call = calls[0], calls[1]
     # The main pot with the flop Short went all-in on, the side pot with the turn.
-    assert (main_pockets, main_board) == ([["As", "Ah"], ["Kd", "Kh"], ["Qc", "Qd"]], ["2c", "7d", "9h"])
-    assert (side_pockets, side_board) == ([["Kd", "Kh"], ["Qc", "Qd"]], ["2c", "7d", "9h", "Js"])
+    assert main_call[:3] == ([["As", "Ah"], ["Kd", "Kh"], ["Qc", "Qd"]], ["2c", "7d", "9h"], [])
+    # Short's aces are dead for the side pot: the queens have 2 outs among 42 rivers.
+    assert side_call[:3] == ([["Kd", "Kh"], ["Qc", "Qd"]], ["2c", "7d", "9h", "Js"], ["As", "Ah"])
+    main_equity, side_equity = main_call[3], side_call[3]
+    # poker-eval's equity is in thousandths: 40/42 and 2/42 (42/44 and 2/44, 0.954
+    # and 0.045, with the aces still in the deck).
+    assert side_equity == [Decimal("0.952"), Decimal("0.047")]
     main, side = Decimal(30), Decimal(180)
     expected = {
         "Short": main_equity[0] * main - 10,
@@ -197,7 +208,48 @@ def test_single_pot_all_in_ev_is_the_equity_of_the_whole_net_pot(tmp_path, monke
 
     hand = _derive(tmp_path, HEADS_UP_FLOP_ALL_IN)
 
-    ((pockets, board, (alice_equity, bob_equity)),) = calls
-    assert (pockets, board) == ([["As", "Ah"], ["Kd", "Kh"]], ["2c", "7d", "9h"])
+    assert len(calls) == 1
+    assert calls[0][:3] == ([["As", "Ah"], ["Kd", "Kh"]], ["2c", "7d", "9h"], [])
+    alice_equity, bob_equity = calls[0][3]
     assert hand.handsplayers["Alice"]["allInEV"] == int(100 * (alice_equity * 197 - 100))
     assert hand.handsplayers["Bob"]["allInEV"] == int(100 * (bob_equity * 197 - 100))
+
+
+def test_antes_and_room_money_go_to_the_main_pot() -> None:
+    # Matched bets of $10 / $100 / $100, plus Bob's $2 big-blind ante and a $3
+    # splash: the main pot is $35, which Short's aces win on the river.
+    stats = DerivedStats()
+    stats.handsplayers = {name: {"sawShowdown": True, "wentAllIn": True} for name in ("Short", "Bob", "Carol")}
+    hand = SimpleNamespace(
+        handid="ante-side-pot",
+        gametype={"base": "hold", "category": "holdem"},
+        totalpot=Decimal(215),
+        rake=Decimal(0),
+        pot=SimpleNamespace(
+            committed={"Short": Decimal(10), "Bob": Decimal(100), "Carol": Decimal(100)},
+            common={"Short": Decimal(0), "Bob": Decimal(2), "Carol": Decimal(0)},
+            stp=Decimal(3),
+        ),
+        actions={
+            "RIVER": [
+                ("Short", "bets", Decimal(8), True),
+                ("Bob", "raises", Decimal(90), Decimal(98), Decimal(0), True),
+                ("Carol", "calls", Decimal(98), True),
+            ],
+        },
+    )
+
+    stats.getAllInEV(
+        hand,
+        "holdem",
+        ["Short", "Bob", "Carol"],
+        {"RIVER": {"allin": True, "board": [["2c", "7d", "9h", "Js", "3s"]]}},
+        {
+            "Short": {"hole": ["As", "Ah"]},
+            "Bob": {"hole": ["Kd", "Kh"]},
+            "Carol": {"hole": ["Qc", "Qd"]},
+        },
+    )
+
+    ev = {name: row["allInEV"] for name, row in stats.handsplayers.items()}
+    assert ev == {"Short": 2500, "Bob": 7800, "Carol": -10000}
