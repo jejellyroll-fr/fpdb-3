@@ -1401,6 +1401,35 @@ def derive_native_stud_betting_structure(forced_bets: dict) -> dict | None:
     }
 
 
+def native_stud_gametype_stakes(structure: dict | None, limit_type: str) -> dict:
+    """The gametype's ``sb``/``bb``/``ante`` for a stud hand, from its derived structure.
+
+    Stud has no blinds, so ``extract_native_blind_structure`` always answered
+    0/0 and the envelope said nothing about stakes the capture had worked out
+    exactly (#829). fpdb stores a fixed-limit game's stakes the way the room's
+    own text history is parsed (``SealsWithClubsToFpdb.determineGameType``): a
+    ``10/20`` table becomes ``sb`` 5 and ``bb`` 10, half the small bet and the
+    small bet. The ante is exact whatever the limit, since it is read rather than
+    derived; the bets are written only for a fixed-limit table, which is the only
+    kind the observed ratios were taken from, and only when half the small bet is
+    a whole native unit -- the bring-in rule asks the same of the ante.
+    """
+    if not structure:
+        return {"sb": 0, "bb": 0, "ante": 0}
+    stakes = {"sb": 0, "bb": 0, "ante": structure["ante"]}
+    if limit_type == "fl" and structure["small_bet"] % 2 == 0:
+        stakes["sb"] = structure["small_bet"] // 2
+        stakes["bb"] = structure["small_bet"]
+    return stakes
+
+
+def _native_hand_stakes(family: str, stud_structure: dict | None, limit_type: str, actions: list[dict]) -> dict:
+    """The gametype's ``sb``/``bb``/``ante``: from the stud structure, else from the blinds."""
+    if family == "stud":
+        return native_stud_gametype_stakes(stud_structure, limit_type)
+    return {**extract_native_blind_structure(actions), "ante": 0}
+
+
 def audit_native_hand(
     steps: list[dict],
     collections: list[dict],
@@ -3498,7 +3527,7 @@ def _normalize_native_hands_one_source(  # noqa: PLR0915 - protocol normalizatio
         native_funds_byte_conserved = family in {"holdem", "omaha"} and add_native_funds_byte_amounts_if_conserved(
             action_evidence, collections, returned
         )
-        native_blinds = extract_native_blind_structure(action_evidence)
+        native_blinds = _native_hand_stakes(family, native_stud_betting_structure, limit_type, action_evidence)
         native_stud_accounting = (
             audit_native_stud_accounting(action_evidence, native_stud_forced_bets, collections, returned)
             if family == "stud"
@@ -3584,7 +3613,7 @@ def _normalize_native_hands_one_source(  # noqa: PLR0915 - protocol normalizatio
                     "currency": "room_native",
                     "sb": native_blinds["sb"],
                     "bb": native_blinds["bb"],
-                    "ante": 0,
+                    "ante": native_blinds["ante"],
                     "mix": "none",
                     "maxSeats": native_max_seats,
                 },

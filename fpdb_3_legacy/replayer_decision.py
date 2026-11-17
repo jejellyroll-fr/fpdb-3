@@ -40,12 +40,31 @@ def _live(player: Any) -> bool:
     return not getattr(player, "folded", False) and player.action != "folds"
 
 
+def _room_money(state: Any) -> Decimal:
+    """Money the room put in the pot (a Winamax/BetRivers splash): in no player's stack."""
+    return getattr(state, "room_money", ZERO) or ZERO
+
+
 def _pot(state: Any) -> Decimal:
     # startPhase may return an unmatched bet without updating newpot. Actual
     # contributions respect that return and include all folded dead money.
+    # Room-added money is in the pot without coming out of any stack, so it is
+    # added on top: leaving it out halved the pot odds of a call into a splash.
     if all(hasattr(p, "startStack") for p in state.players.values()):
-        return sum((max(ZERO, p.startStack - p.stack) for p in state.players.values()), ZERO)
-    return max(ZERO, getattr(state, "newpot", getattr(state, "pot", ZERO)))
+        return sum((max(ZERO, p.startStack - p.stack) for p in state.players.values()), _room_money(state))
+    return max(ZERO, getattr(state, "newpot", getattr(state, "pot", ZERO))) + _room_money(state)
+
+
+def _usable(state: Any, player: Any) -> Decimal:
+    """The chips a player can still put in: on a cap table, only the unused part of the cap.
+
+    Mirrors ``action_events.cap_remaining``, which the stored action statistics
+    use: a player who reached the cap keeps chips behind but cannot bet them.
+    """
+    cap = getattr(state, "cap", ZERO) or ZERO
+    if cap <= 0 or not hasattr(player, "startStack"):
+        return player.stack
+    return max(ZERO, min(player.stack, cap - (player.startStack - player.stack)))
 
 
 def _aggression(states: list[Any], index: int, start: int, names: set[str]) -> tuple[str, Any, Any] | None:
@@ -88,8 +107,13 @@ def _call_odds(state: Any, hero: Any, amount: Decimal) -> Decimal | None:
             return getattr(player, "antes", ZERO) or ZERO
 
         cap = hero.startStack - hero.stack - antes(hero) + amount
+        # Room money, like antes, is dead money the caller always contests.
         final_pot = (
-            sum((min(max(ZERO, p.startStack - p.stack - antes(p)), cap) + antes(p) for p in players), ZERO) + amount
+            sum(
+                (min(max(ZERO, p.startStack - p.stack - antes(p)), cap) + antes(p) for p in players),
+                _room_money(state),
+            )
+            + amount
         )
     return amount / final_pot * HUNDRED if final_pot > 0 else None
 
@@ -107,7 +131,7 @@ def _effective(initial: Any, hero_name: str) -> tuple[tuple[str, Decimal], ...]:
     if not hero or not _live(hero):
         return ()
     return tuple(
-        (name, min(hero.stack, player.stack))
+        (name, min(_usable(initial, hero), _usable(initial, player)))
         for name, player in initial.players.items()
         if name != hero_name and _live(player)
     )

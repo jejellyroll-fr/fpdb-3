@@ -40,6 +40,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Hand
+from fpdb_3_legacy.action_events import cap_limit_cents, pot_seed_cents
 from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity, fusion_pockets
 from fpdb_3_legacy.hand_review_dialog import HandReviewDialog
 from fpdb_3_legacy.hand_share import big_blind, supports_bb_amounts
@@ -3137,6 +3138,16 @@ class GuiReplayer(QWidget):
                 break
 
 
+def _room_money(hand) -> Decimal:
+    """The room-funded pot seed in displayed units (``Hand.pot.stp``), 0 without one."""
+    return max(Decimal(0), Decimal(pot_seed_cents(hand)) / 100)
+
+
+def _table_cap(hand) -> Decimal:
+    """The per-hand cap of a cap table in displayed units, 0 on any other table."""
+    return max(Decimal(0), Decimal(cap_limit_cents(hand)) / 100)
+
+
 class TableState:
     def __init__(self, hand) -> None:
         self.pot = Decimal(0)
@@ -3151,6 +3162,13 @@ class TableState:
         self.allinThisStreet = False
         self.ended = False
         self.newpot = Decimal()
+        # Money the room puts in the pot (Winamax Escape/heads-up splash,
+        # BetRivers STP via Hand.addSTP): in the pot, in nobody's stack.
+        # The decision arithmetic counts it, as the room pays it out (#843).
+        self.room_money = _room_money(hand)
+        # The most one player may put into the hand on a cap table, 0 elsewhere:
+        # chips behind above it cannot be bet, so effective stacks stop there.
+        self.cap = _table_cap(hand)
 
         self.players = {}
         # print ('hand.players', hand.players)

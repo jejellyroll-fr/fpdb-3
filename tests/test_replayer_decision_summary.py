@@ -10,6 +10,7 @@ from typing import Any, cast
 import pytest
 
 from fpdb_3_legacy.GuiReplayer import GuiReplayer, ReplayPlayer, TableState, format_spr
+from fpdb_3_legacy.replayer_decision import hero_decision
 
 D = Decimal
 
@@ -282,3 +283,71 @@ def test_all_in_call_counts_the_whole_ante_as_dead_money() -> None:
 
     assert amount == D(2)
     assert odds == D(2) / D(7) * 100
+
+
+def test_room_splash_counts_in_the_pot_the_decision_is_priced_against() -> None:
+    """A Winamax/BetRivers splash is in the pot without coming out of any stack (#843).
+
+    2 from the blinds and a 20 splash, then a 5 bet: the call is 5 into 32, not
+    5 into 12 as summing the players' contributions alone made it.
+    """
+    hand = _hand({"Hero": "100", "Villain": "100"})
+    hand.pot = SimpleNamespace(stp=D(20))
+    states = _states(hand, [PREFLOP, ("FLOP", [("Hero", "checks"), ("Villain", "bets", D(5))])])
+
+    flop_start, facing = hero_decision(states, 5, "Hero"), hero_decision(states, 7, "Hero")
+
+    assert flop_start.street_pot == D(22)
+    assert facing.mode == "call"
+    assert facing.pot_odds_pct == D(5) / D(32) * 100
+    assert facing.bet_pct == D(5) / D(22) * 100
+
+
+def test_room_splash_is_dead_money_an_all_in_caller_still_contests() -> None:
+    hand = _hand({"Hero": "10", "Villain": "100"})
+    hand.pot = SimpleNamespace(stp=D(20))
+    states = _states(hand, [PREFLOP, ("FLOP", [("Hero", "checks"), ("Villain", "bets", D(50))])])
+
+    # Hero can win 9 from the villain's bet, the 2 of blinds and the 20 splash.
+    assert hero_decision(states, 7, "Hero").pot_odds_pct == D(9) / D(2 + 20 + 9 + 9) * 100
+
+
+def test_cap_table_effective_stack_stops_at_the_unused_cap() -> None:
+    """Both players reach a $30 cap preflop: chips behind cannot be bet, SPR is 0 (#843).
+
+    The stacks are those of tests/fixtures/hands/winning/plo8_cap_2026.txt.
+    """
+    hand = _hand({"Hero": "41.20", "Villain": "38.40"})
+    hand.gametype["buyinType"] = "cap"
+    hand.capAmount = D(30)
+    states = _states(
+        hand,
+        [
+            (
+                "PREFLOP",
+                [
+                    ("Villain", "small blind", D("0.5")),
+                    ("Hero", "big blind", D(1)),
+                    ("Villain", "raises", D(29)),
+                    ("Hero", "calls", D(29)),
+                ],
+            ),
+            ("FLOP", [("Hero", "checks")]),
+        ],
+    )
+
+    flop = hero_decision(states, 5, "Hero")
+
+    assert flop.street_pot == D(60)
+    assert flop.effective == (("Villain", D(0)),)
+    assert flop.spr == (D(0),)
+
+
+def test_cap_table_below_the_cap_keeps_what_is_left_of_it() -> None:
+    hand = _hand({"Hero": "41.20", "Villain": "38.40"})
+    hand.gametype["buyinType"] = "cap"
+    hand.capAmount = D(30)
+    states = _states(hand, [PREFLOP, ("FLOP", [("Hero", "checks")])])
+
+    # 1 in each, 29 of the cap left, though both have more than that behind.
+    assert hero_decision(states, 5, "Hero").effective == (("Villain", D(29)),)
