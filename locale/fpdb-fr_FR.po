@@ -1419,7 +1419,8 @@ msgid "FPDB 3 info"
 msgstr "Infos FPDB 3"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiResearchBrowser.py
-#: fpdb_3_legacy/GuiTrackerMigration.py fpdb_3_legacy/session_guard_dialog.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/GuiTrackerMigration.py
+#: fpdb_3_legacy/session_guard_dialog.py
 msgid "Hands"
 msgstr "Mains"
 
@@ -1427,11 +1428,11 @@ msgstr "Mains"
 msgid "Net profit excluding splash"
 msgstr "Profit net hors splash"
 
-#: fpdb_3_legacy/GuiGraphViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/results_calendar.py
 msgid "Non-showdown"
 msgstr "Sans-showdown"
 
-#: fpdb_3_legacy/GuiGraphViewer.py
+#: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/results_calendar.py
 msgid "Profit"
 msgstr "Profit"
 
@@ -1440,7 +1441,7 @@ msgid "Refresh Graph"
 msgstr "Rafraîchir Graphique"
 
 #: fpdb_3_legacy/GuiGraphViewer.py fpdb_3_legacy/GuiHandViewer.py
-#: fpdb_3_legacy/capture/swc_poker_console.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/capture/swc_poker_console.py
 msgid "Showdown"
 msgstr "Showdown"
 
@@ -1762,7 +1763,7 @@ msgid "Log Viewer"
 msgstr "Visionneuse de journaux"
 
 #: fpdb_3_legacy/GuiLogView.py fpdb_3_legacy/GuiOpponentsReport.py
-#: fpdb_3_legacy/pack_gallery_dialog.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/pack_gallery_dialog.py
 msgid "Refresh"
 msgstr "Rafraîchir"
 
@@ -2473,6 +2474,118 @@ msgstr ""
 msgid "{n} decisions are counted apart: their cards were never known."
 msgstr ""
 "{n} décisions sont comptées à part : leurs cartes n'ont jamais été connues."
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "All hands of the filtered dates"
+msgstr "Toutes les mains des dates filtrées"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "All-in EV"
+msgstr "EV all-in"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "All-in EV (BB)"
+msgstr "EV all-in (BB)"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "All-in EV: {ev}"
+msgstr "EV all-in : {ev}"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "BB/100"
+msgstr "BB/100"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "BB/100: {bb100}"
+msgstr "BB/100 : {bb100}"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Click to select the whole month"
+msgstr "Cliquer pour sélectionner tout le mois"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Days"
+msgstr "Jours"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "EV BB/100"
+msgstr "EV BB/100"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid ""
+"Hands: {hands} · Profit: {profit} · All-in EV: {ev} · BB/100: {bb100} · EV "
+"BB/100: {ev100} · Days played: {days} ({winning} winning)"
+msgstr "Mains : {hands} · Profit : {profit} · EV all-in : {ev} · BB/100 : {bb100} · EV BB/100 : {ev100} · Jours joués : {days} (dont {winning} gagnants)"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Loading…"
+msgstr "Chargement…"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Months"
+msgstr "Mois"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Next month"
+msgstr "Mois suivant"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Non-showdown (BB)"
+msgstr "Sans-showdown (BB)"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Open the hands of the selected period in the Hand Viewer"
+msgstr "Ouvrir les mains de la période sélectionnée dans la visionneuse de mains"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Period:"
+msgstr "Période :"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Previous month"
+msgstr "Mois précédent"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Profit (BB)"
+msgstr "Profit (BB)"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "Profit: {profit}"
+msgstr "Profit : {profit}"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Review hands"
+msgstr "Revoir les mains"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Showdown (BB)"
+msgstr "Showdown (BB)"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Unit:"
+msgstr "Unité :"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Week"
+msgstr "Semaine"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "Week of {date}"
+msgstr "Semaine du {date}"
+
+#: fpdb_3_legacy/results_calendar.py
+msgid "Weeks"
+msgstr "Semaines"
+
+#: fpdb_3_legacy/results_calendar.py
+#, python-brace-format
+msgid "{hands} hands"
+msgstr "{hands} mains"
 
 #: fpdb_3_legacy/GuiSessionViewer.py
 msgid "Cumulative result (BB)"
@@ -3624,7 +3737,7 @@ msgstr "Cette main ne peut pas être envoyée à PreflopAdvisor."
 msgid "Amounts"
 msgstr "Montants"
 
-#: fpdb_3_legacy/GuiReplayer.py fpdb_3_legacy/hand_share_dialog.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hand_share_dialog.py
 msgid "Big blinds"
 msgstr "Grosses blindes"
 
@@ -3786,7 +3899,7 @@ msgstr "n derniers jours"
 msgid "Opponents"
 msgstr "Adversaires"
 
-#: fpdb_3_legacy/hud_options_panel.py
+#: fpdb_3_legacy/results_calendar.py fpdb_3_legacy/hud_options_panel.py
 msgid "Period"
 msgstr "Période"
 
@@ -4239,6 +4352,14 @@ msgid "Write a HUD profile or a stat pack ready to submit to the pack gallery"
 msgstr ""
 "Écrire un profil de HUD ou un pack de stats prêt à proposer à la galerie de "
 "packs"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Cash results per day, week and month, with their profit curves"
+msgstr "Résultats cash par jour, semaine et mois, avec leurs courbes de profit"
+
+#: fpdb_3_legacy/menu_layout.py
+msgid "Results Calendar"
+msgstr "Calendrier des résultats"
 
 #: fpdb_3_legacy/modern_hud_preferences/design_canvas.py
 msgid "(label)"
@@ -7468,6 +7589,7 @@ msgstr "Agression (AF)"
 msgid "Hands played"
 msgstr "Mains jouées"
 
+#: fpdb_3_legacy/results_calendar.py
 #: fpdb_3_legacy/ring_stats/views/dashboard_view.py
 #: fpdb_3_legacy/ring_stats/views/starting_hands_view.py
 msgid "Net profit"

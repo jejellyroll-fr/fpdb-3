@@ -627,19 +627,28 @@ class Hand:
         (ACR/WPN, #719), a hand none of the user's configured screen names
         played -- an imported archive, someone else's history, which names its
         own hero -- is kept in the database but does not feed the HUD.
+
+        Such a hand adds no statistics, but when it is the last of its batch
+        (``doinsert``) it still flushes what the earlier hands buffered:
+        ``storeHudCache`` writes its bulk buffer only on ``doinsert``, and the
+        next ``resetBulkCache`` would otherwise drop it.
         """
-        if self.callHud and self._hero_absent_where_required():
-            log.debug("Hand %s: no hero at a %s table, kept out of the HUD cache", self.handid, self.sitename)
+        if not self.callHud:
             return
-        if self.callHud:
-            db.storeHudCache(
-                self.dbid_gt,
-                self.gametype,
-                self.playerIds,
-                self.startTime,
-                self.handsplayers,
-                doinsert,
-            )
+        handsplayers = self.handsplayers
+        if self._hero_absent_where_required():
+            log.debug("Hand %s: no hero at a %s table, kept out of the HUD cache", self.handid, self.sitename)
+            if not doinsert:
+                return
+            handsplayers = {}
+        db.storeHudCache(
+            self.dbid_gt,
+            self.gametype,
+            self.playerIds,
+            self.startTime,
+            handsplayers,
+            doinsert,
+        )
 
     def _hero_absent_where_required(self) -> bool:
         """The room wants the HUD fed by the user's hands only, and none of the user's names played this one."""

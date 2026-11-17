@@ -2134,6 +2134,15 @@ class fpdb(QMainWindow):
 
         self.open_tab("Session Stats", build, module="fpdb_3_legacy.GuiSessionViewer")
 
+    def tab_results_viewer(self, widget, data=None) -> None:
+        """Opens the Results calendar (#827)."""
+
+        def build(module):
+            colors = self.get_theme_colors()
+            return module.ResultsCalendar(self.config, self.sql, self, colors=colors)
+
+        self.open_tab("Results Calendar", build, module="fpdb_3_legacy.results_calendar")
+
     def tab_hand_viewer(self, widget, data=None) -> None:
         self.open_tab("Hand Viewer", lambda: GuiHandViewer.GuiHandViewer(self.config, self.sql, self))
 
@@ -2145,6 +2154,7 @@ class fpdb(QMainWindow):
         snapshot of the running build, so a second copy would only duplicate the
         first.
         """
+
         def build(module):
             return module.GuiVersionInfo(
                 config=self.config,

@@ -19,6 +19,7 @@ from __future__ import annotations
 # import L10n
 # _ = L10n.get_translation()
 import contextlib
+from collections.abc import Mapping
 from decimal import Decimal
 from functools import partial
 from io import StringIO
@@ -163,6 +164,8 @@ class GuiHandViewer(QSplitter):
         self.main_window = mainwin
         self.sql = querylist
         self.replayer: Any = None
+        # The hero of each hand, by hand id, when another tab sent them (#827).
+        self.sent_heroes: dict[Any, str] = {}
 
         self.db = Database.Database(self.config, sql=self.sql)
 
@@ -681,7 +684,16 @@ class GuiHandViewer(QSplitter):
             return card1 * 14 * 14 + card2 * 14 + suit1
         return 0
 
-    def reload_hands(self, handids) -> None:
+    def reload_hands(self, handids, heroes: Mapping[Any, str] | None = None) -> None:
+        """Show ``handids``; ``heroes`` names each hand's hero when another tab sends them.
+
+        The Results calendar knows whose hands it sends, which this tab's own
+        filters may not (a hero profile selected there, not here): without it,
+        a hand with no hero by these filters was left out (#827). The hero is
+        given hand by hand, never as a set of names, which on another site can
+        be an opponent's.
+        """
+        self.sent_heroes = dict(heroes or {})
         self.hands: dict[Any, Any] = {}
         self.all_handids = list(handids)
         self.page = 0
@@ -1144,11 +1156,17 @@ class GuiHandViewer(QSplitter):
     def importhand(self, handid=1):
         h = Hand.hand_factory(handid, self.config, self.db)
 
-        # Safely get the hero for this hand's sitename
-        h.hero = self.filters.get_hero_for_site(h.sitename, h)
+        # The hero named by the tab that sent the hands, else this tab's filters' hero.
+        h.hero = self._sent_hero(handid, h) or self.filters.get_hero_for_site(h.sitename, h)
         if h.hero is None:
             log.warning(f"No hero found for site {h.sitename}")
         return h
+
+    def _sent_hero(self, handid, hand) -> str | None:
+        """The hero another tab named for hand ``handid``, if it played the hand."""
+        name = self.sent_heroes.get(handid)
+        players = {player[1] for player in getattr(hand, "players", []) if len(player) > 1}
+        return name if name in players else None
 
     def render_cards(self, cardstring):
         card_width = 30
