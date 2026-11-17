@@ -1,6 +1,4 @@
 #    Copyright 2011-2012,  Ray E. Barker
-from __future__ import annotations
-
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,10 +15,14 @@ from __future__ import annotations
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 """A simple HUD display for FreePokerTools/fpdb HUD."""
 
-########################################################################
+from __future__ import annotations
 
+########################################################################
 #    Standard Library modules
 import contextlib
+import json
+import logging
+import os
 from functools import partial
 from pathlib import Path
 from typing import Any
@@ -43,6 +45,17 @@ from fpdb_3_legacy import Aux_Base, Configuration, Hud, Popup, Stats
 from fpdb_3_legacy.config_hud_layouts import grid_spacing
 from fpdb_3_legacy.hud_options_panel import COMPACT_STYLE, HudOptionsPanel, bound_combo, fit_to_content
 from fpdb_3_legacy.hud_profiles import HudPositionScope
+
+# The position vocabulary and the position-bound visibility rule live in
+# ``hud_situation`` (#298), which the dynamic panel layer also needs. They are
+# re-exported here because this is where callers have always imported them, and
+# so the two layers cannot disagree about what "B" means.
+from fpdb_3_legacy.hud_situation import (  # noqa: F401  # pylint: disable=unused-import
+    block_visible,
+    block_visible_for,
+    is_dynamic_only,
+    normalize_position,
+)
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 
@@ -52,10 +65,6 @@ log = get_logger("hud_main")
 
 BlockKey = tuple[int | str, int]
 WindowKey = str | BlockKey
-
-import json
-import logging
-import os
 
 
 class HUDLayoutPositionsStore:
@@ -139,8 +148,16 @@ class HUDLayoutPositionsStore:
         return f"{site}/{layout}/{stat_set}/{max_seats}/{seat}/{block_id}"
 
     def get_position(
-        self, site: str, layout: str, stat_set: str, max_seats: int, seat: str | int, block_id: str | int,
-        *, game: str = "all", game_type: str = "all",
+        self,
+        site: str,
+        layout: str,
+        stat_set: str,
+        max_seats: int,
+        seat: str | int,
+        block_id: str | int,
+        *,
+        game: str = "all",
+        game_type: str = "all",
     ) -> tuple[int, int] | None:
         scope = HudPositionScope(site, game, game_type, max_seats, stat_set, layout)
         positions = self.data.setdefault("positions", {})
@@ -252,18 +269,6 @@ _ALIGN = {
     "center": Qt.AlignmentFlag.AlignCenter,
     "right": Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
 }
-
-
-# The position vocabulary and the position-bound visibility rule live in
-# ``hud_situation`` (#298), which the dynamic panel layer also needs. They are
-# re-exported here because this is where callers have always imported them, and
-# so the two layers cannot disagree about what "B" means.
-from fpdb_3_legacy.hud_situation import (  # noqa: E402,F401
-    block_visible,
-    block_visible_for,
-    is_dynamic_only,
-    normalize_position,
-)
 
 
 def false_attr(value: Any) -> bool:
@@ -1414,9 +1419,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
             "drag-save", seat, block_index, (canonical_x, canonical_y), (new_abs_position.x(), new_abs_position.y())
         )
 
-    def _propagate_block_position(
-        self, seat: int | str, block_index: int, position: tuple[int, int]
-    ) -> None:
+    def _propagate_block_position(self, seat: int | str, block_index: int, position: tuple[int, int]) -> None:
         """Mirror a block drag only to open HUDs with the exact same scope."""
         parent = getattr(self.hud, "parent", None)
         source_scope = getattr(self.hud, "position_scope", None)
@@ -1663,7 +1666,9 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
                     if show_headers:
                         full_tip = blk["tips"][r][c] or ""
                         display_labels = blk.get("display_labels") or []
-                        display_label = display_labels[r][c] if r < len(display_labels) and c < len(display_labels[r]) else ""
+                        display_label = (
+                            display_labels[r][c] if r < len(display_labels) and c < len(display_labels[r]) else ""
+                        )
                         label = self.aw.aw_class_label(display_label or full_tip)
                         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
                         label.setFont(header_font)

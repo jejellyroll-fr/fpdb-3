@@ -465,7 +465,6 @@ def test_derived_stats_stores_expected_all_in_profit_x100(monkeypatch) -> None:
         "holdem",
         ["hero", "villain"],
         {"FLOP": {"allin": True, "board": [["2c", "3d", "4h"]]}},
-        {},
         {"hero": {"hole": ["As", "Ah"]}, "villain": {"hole": ["Ks", "Kh"]}},
     )
 
@@ -555,7 +554,6 @@ def _fusion_stats() -> DerivedStats:
     return stats
 
 
-FUSION_STREETS = {"PREFLOP": 0, "FLOP": 1, "TURN": 2, "RIVER": 3}
 FUSION_HOLECARDS = {
     "hero": {"hole": ["As", "Kd", "Qc", "Jh"]},
     "villain": {"hole": ["Td", "Tc", "3h", "4h"]},
@@ -575,7 +573,6 @@ def test_fusion_all_in_on_the_flop_samples_the_turn_hole_card(monkeypatch) -> No
         Card.games["fusion"][1],
         ["hero", "villain"],
         {"FLOP": {"allin": True, "board": [["2s", "5s", "8s"]]}},
-        FUSION_STREETS,
         FUSION_HOLECARDS,
     )
 
@@ -610,7 +607,6 @@ def test_fusion_all_in_on_the_turn_is_exact_under_omaha_rules() -> None:
         Card.games["fusion"][1],
         ["hero", "villain"],
         {"TURN": {"allin": True, "board": [["2s", "5s", "8s", "9s"]]}},
-        FUSION_STREETS,
         FUSION_HOLECARDS,
     )
 

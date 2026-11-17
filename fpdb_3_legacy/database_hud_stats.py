@@ -47,6 +47,29 @@ _DEFAULT_HUD_PARAMS = {
 }
 
 
+def _add_session_row(stat_dict: dict, playerid: Any, colnames: list[str], row: Any) -> None:
+    """Add one hand's row of the session query to the player's running totals."""
+    for name, val in zip(colnames, row, strict=False):
+        if playerid not in stat_dict:
+            stat_dict[playerid] = {}
+            stat_dict[playerid][name.lower()] = val
+        elif name.lower() not in stat_dict[playerid]:
+            stat_dict[playerid][name.lower()] = val
+        elif name.lower() == "currency":
+            # Text, not a count: keep it while every hand agrees,
+            # and drop the symbol once two currencies mix.
+            if stat_dict[playerid]["currency"] != val:
+                stat_dict[playerid]["currency"] = ""
+        elif name.lower() not in (
+            "hand_id",
+            "player_id",
+            "seat",
+            "screen_name",
+            "seats",
+        ):
+            stat_dict[playerid][name.lower()] += val
+
+
 class DatabaseHudStatsMixin:
     """Reads the aggregates the HUD displays.
 
@@ -893,25 +916,7 @@ class DatabaseHudStatsMixin:
                     except (ValueError, TypeError):
                         is_hero = str(playerid) == str(hero_id)
                 if (is_hero and h_stat_range == "S") or (not is_hero and stat_range == "S"):
-                    for name, val in zip(colnames, row, strict=False):
-                        if playerid not in stat_dict:
-                            stat_dict[playerid] = {}
-                            stat_dict[playerid][name.lower()] = val
-                        elif name.lower() not in stat_dict[playerid]:
-                            stat_dict[playerid][name.lower()] = val
-                        elif name.lower() == "currency":
-                            # Text, not a count: keep it while every hand agrees,
-                            # and drop the symbol once two currencies mix.
-                            if stat_dict[playerid]["currency"] != val:
-                                stat_dict[playerid]["currency"] = ""
-                        elif name.lower() not in (
-                            "hand_id",
-                            "player_id",
-                            "seat",
-                            "screen_name",
-                            "seats",
-                        ):
-                            stat_dict[playerid][name.lower()] += val
+                    _add_session_row(stat_dict, playerid, colnames, row)
             latency_profile.record("hud_python_aggregate", time() - atime)
         else:
             log.error(f"query {query} result does not have player_id as first column")

@@ -148,7 +148,7 @@ class TrackerPage(QWizardPage):
         return TRACKERS[max(self.group.checkedId(), 0)]
 
 
-class SourcePage(QWizardPage):
+class SourcePage(QWizardPage):  # pylint: disable=too-many-instance-attributes  # one per widget of the page
     def __init__(self, tracker_page: TrackerPage) -> None:
         super().__init__()
         self.tracker_page = tracker_page
