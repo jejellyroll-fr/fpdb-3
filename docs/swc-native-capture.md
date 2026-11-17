@@ -458,3 +458,10 @@ the player whose funds rise is not the one the Dealer names as the winner, and
 one name is credited with folds made from several native indexes. Until that
 pairing is proven against the room's own hand histories, importing these hands
 would credit the wrong players with actions and pots (#829).
+
+The stakes a stud hand's envelope carries do not wait for that: the gametype's
+`ante` is the ante the capture read, and on a fixed-limit table `sb`/`bb` are
+half the small bet and the small bet derived from it, the convention
+`SealsWithClubsToFpdb` uses for the room's text histories (a `10-20` table is
+`sb` 5, `bb` 10). They used to read 0/0 with no ante even when the structure
+had been derived.
