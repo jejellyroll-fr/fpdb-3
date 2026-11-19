@@ -41,6 +41,12 @@ DEFAULT_BACKEND = MINIDOM
 
 XML_DECLARATION = '<?xml version="1.0" ?>'
 
+# Prefixes ElementTree has replaced by "{uri}" in the attribute names it read, so
+# that callers can keep writing "xsi:noNamespaceSchemaLocation" on either backend.
+# Process-wide, like ElementTree's own register_namespace: a prefix the files
+# declare names the same namespace everywhere they use it.
+_PREFIX_URIS: dict[str, str] = {"xml": "http://www.w3.org/XML/1998/namespace"}
+
 Node = Any  # a minidom Document or Element, a ConfigDocument, or an ElementTree Element
 
 
@@ -119,6 +125,9 @@ def _parse_etree(data: bytes | str) -> ConfigDocument:
     parser = defusedxml.ElementTree.XMLParser(target=builder)
     parser.feed(data)
     root = parser.close()
+    for prefix, uri in builder.namespaces.items():
+        if prefix:
+            _PREFIX_URIS.setdefault(prefix, uri)
     return ConfigDocument(root, builder.before_root, builder.after_root, builder.namespaces)
 
 
@@ -245,17 +254,37 @@ def tag_of(node: Node) -> str:
 # --------------------------------------------------------------------------
 
 
+# Attribute names are written as in the file on both backends: "xsi:noNamespaceSchemaLocation",
+# never ElementTree's "{http://www.w3.org/2001/XMLSchema-instance}noNamespaceSchemaLocation".
+
+
+def _etree_name(name: str) -> str:
+    """ElementTree's key for an attribute name that may carry a known prefix."""
+    prefix, colon, local = name.partition(":")
+    uri = _PREFIX_URIS.get(prefix) if colon else None
+    return f"{{{uri}}}{local}" if uri else name
+
+
+def _file_name(key: str) -> str:
+    """An ElementTree attribute key as the file writes it."""
+    if not key.startswith("{"):
+        return key
+    uri, _, local = key[1:].partition("}")
+    prefix = next((prefix for prefix, known in _PREFIX_URIS.items() if known == uri), None)
+    return f"{prefix}:{local}" if prefix else key
+
+
 def attr(node: Node, name: str, default: str = "") -> str:
     """An attribute's value, or ``default`` when the element has none (``getAttribute`` gives "")."""
     if _is_dom(node):
         return node.getAttribute(name) if node.hasAttribute(name) else default
-    return node.get(name, default)
+    return node.get(_etree_name(name), default)
 
 
 def has_attr(node: Node, name: str) -> bool:
     if _is_dom(node):
         return node.hasAttribute(name)
-    return name in node.attrib
+    return _etree_name(name) in node.attrib
 
 
 def set_attr(node: Node, name: str, value: object) -> None:
@@ -263,7 +292,7 @@ def set_attr(node: Node, name: str, value: object) -> None:
     if _is_dom(node):
         node.setAttribute(name, str(value))
     else:
-        node.set(name, str(value))
+        node.set(_etree_name(name), str(value))
 
 
 def del_attr(node: Node, name: str) -> None:
@@ -272,14 +301,18 @@ def del_attr(node: Node, name: str) -> None:
         if node.hasAttribute(name):
             node.removeAttribute(name)
     else:
-        node.attrib.pop(name, None)
+        node.attrib.pop(_etree_name(name), None)
 
 
 def attributes(node: Node) -> dict[str, str]:
-    """All attributes, in the order the element holds them."""
+    """All attributes, in the order the element holds them, named as in the file.
+
+    minidom also lists namespace declarations (``xmlns:xsi``) as attributes;
+    ElementTree keeps them apart, on the document.
+    """
     if _is_dom(node):
         return dict(node.attributes.items())
-    return dict(node.attrib)
+    return {_file_name(key): value for key, value in node.attrib.items()}
 
 
 # --------------------------------------------------------------------------
@@ -315,7 +348,8 @@ def _set_last_whitespace(node: ET.Element, text: str | None) -> None:
 def append(doc: Node, parent: Node, child: Node, *, indent: str | None = None) -> Node:
     """Add ``child`` as the last child of ``parent``, after ``indent`` whitespace when given.
 
-    A document as ``parent`` means its root element.
+    A document as ``parent`` means its root element. A ``child`` already in the
+    tree moves: it leaves its current place, as minidom's ``appendChild`` does.
 
     On ElementTree the whitespace that closed ``parent`` keeps closing it, so an
     appended element lines up with its siblings instead of hugging the closing tag.
@@ -326,6 +360,8 @@ def append(doc: Node, parent: Node, child: Node, *, indent: str | None = None) -
             parent.appendChild(doc.createTextNode(indent))
         parent.appendChild(child)
         return child
+    if parent_of(doc, child) is not None:
+        remove(doc, child)
     if indent is not None:
         # The new element takes over the closing whitespace; the indent goes before it.
         closing = _last_whitespace(parent)

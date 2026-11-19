@@ -243,6 +243,26 @@ def test_del_attr_removes_it_and_ignores_one_that_is_not_there(doc) -> None:
     assert cx.attributes(site) == {"name": "Winamax"}
 
 
+def test_a_prefixed_attribute_is_read_and_written_by_its_file_name(doc, backend) -> None:
+    # ElementTree stores it as "{http://www.w3.org/2001/XMLSchema-instance}noNamespaceSchemaLocation".
+    config = cx.root(doc)
+    name = "xsi:noNamespaceSchemaLocation"
+
+    assert cx.attr(config, name) == "config.xsd"
+    assert cx.has_attr(config, name)
+    assert cx.attributes(config)[name] == "config.xsd"
+
+    cx.set_attr(config, name, "other.xsd")
+    text = cx.to_xml(doc)
+
+    assert text.count("noNamespaceSchemaLocation") == 1, "setting it must not add a second one"
+    assert cx.attr(cx.root(cx.parse_string(text, backend=backend)), name) == "other.xsd"
+
+    cx.del_attr(config, name)
+    assert not cx.has_attr(config, name)
+    assert "noNamespaceSchemaLocation" not in cx.to_xml(doc)
+
+
 def test_attributes_keep_their_order(doc) -> None:
     cx.set_attr(_site(doc, "PokerStars"), "screen_name", "alice")
 
@@ -289,6 +309,25 @@ def test_append_to_a_document_appends_to_its_root(doc) -> None:
     cx.append(doc, doc, cx.create_element(doc, "session_guard", {"max_loss": "5"}))
 
     assert [cx.tag_of(child) for child in cx.children(doc)] == ["general", "sites", "stats", "session_guard"]
+
+
+def test_appending_an_element_already_in_the_tree_moves_it(doc, backend) -> None:
+    # minidom's appendChild moves a node; ElementTree's append would hold it twice.
+    cx.append(doc, cx.find_first(doc, "stats"), _site(doc, "PokerStars"), indent="\n        ")
+
+    reread = cx.parse_string(cx.to_xml(doc), backend=backend)
+    assert [cx.attr(site, "name") for site in cx.find_all(reread, "site")] == ["Winamax", "PokerStars"]
+    assert [cx.attr(site, "name") for site in cx.children(cx.find_first(reread, "sites"))] == ["Winamax"]
+    assert [cx.tag_of(child) for child in cx.children(cx.find_first(reread, "stats"))] == ["ss", "site"]
+
+
+def test_appending_a_sibling_to_its_own_parent_reorders_it(doc, backend) -> None:
+    sites = cx.find_first(doc, "sites")
+
+    cx.append(doc, sites, _site(doc, "PokerStars"))
+
+    reread = cx.parse_string(cx.to_xml(doc), backend=backend)
+    assert [cx.attr(site, "name") for site in cx.find_all(reread, "site")] == ["Winamax", "PokerStars"]
 
 
 @pytest.mark.parametrize("name", ["PokerStars", "Winamax"])
