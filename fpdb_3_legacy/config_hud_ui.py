@@ -21,6 +21,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from fpdb_3_legacy import config_xml as cx
 from fpdb_3_legacy.config_common import (
     ConfigBase,
 )
@@ -32,157 +33,157 @@ log = get_logger("configuration")
 class HudUI:
     def __init__(self, node) -> None:
         self.node = node
-        self.label = node.getAttribute("label")
-        if node.hasAttribute("fast_fold_seat_wait_ms"):
-            self.fast_fold_seat_wait_ms = node.getAttribute("fast_fold_seat_wait_ms")
-        if node.hasAttribute("fast_fold_window_seats"):
-            self.fast_fold_window_seats = node.getAttribute("fast_fold_window_seats")
-        if node.hasAttribute("card_ht"):
-            self.card_ht = node.getAttribute("card_ht")
-        if node.hasAttribute("card_wd"):
-            self.card_wd = node.getAttribute("card_wd")
-        if node.hasAttribute("deck_type"):
-            self.deck_type = node.getAttribute("deck_type")
-        if node.hasAttribute("card_back"):
-            self.card_back = node.getAttribute("card_back")
-        if node.hasAttribute("hand_batch_interval_ms"):
-            self.hand_batch_interval_ms = node.getAttribute("hand_batch_interval_ms")
-        if node.hasAttribute("max_secondary_tables_per_batch"):
-            self.max_secondary_tables_per_batch = node.getAttribute("max_secondary_tables_per_batch")
-        if node.hasAttribute("stat_range"):
-            self.stat_range = node.getAttribute("stat_range")
-        if node.hasAttribute("stat_days"):
-            self.hud_days = node.getAttribute("stat_days")
-        if node.hasAttribute("aggregation_level_multiplier"):
-            self.agg_bb_mult = node.getAttribute("aggregation_level_multiplier")
-        if node.hasAttribute("seats_style"):
-            self.seats_style = node.getAttribute("seats_style")
-        if node.hasAttribute("seats_cust_nums_low"):
-            self.seats_cust_nums_low = node.getAttribute("seats_cust_nums_low")
-        if node.hasAttribute("seats_cust_nums_high"):
-            self.seats_cust_nums_high = node.getAttribute("seats_cust_nums_high")
-        if node.hasAttribute("hero_stat_range"):
-            self.h_stat_range = node.getAttribute("hero_stat_range")
-        if node.hasAttribute("hero_stat_days"):
-            self.h_hud_days = node.getAttribute("hero_stat_days")
-        if node.hasAttribute("hero_aggregation_level_multiplier"):
-            self.h_agg_bb_mult = node.getAttribute("hero_aggregation_level_multiplier")
-        if node.hasAttribute("hero_seats_style"):
-            self.h_seats_style = node.getAttribute("hero_seats_style")
-        if node.hasAttribute("hero_seats_cust_nums_low"):
-            self.h_seats_cust_nums_low = node.getAttribute("hero_seats_cust_nums_low")
-        if node.hasAttribute("hero_seats_cust_nums_high"):
-            self.h_seats_cust_nums_high = node.getAttribute("hero_seats_cust_nums_high")
+        self.label = cx.attr(node, "label")
+        if cx.has_attr(node, "fast_fold_seat_wait_ms"):
+            self.fast_fold_seat_wait_ms = cx.attr(node, "fast_fold_seat_wait_ms")
+        if cx.has_attr(node, "fast_fold_window_seats"):
+            self.fast_fold_window_seats = cx.attr(node, "fast_fold_window_seats")
+        if cx.has_attr(node, "card_ht"):
+            self.card_ht = cx.attr(node, "card_ht")
+        if cx.has_attr(node, "card_wd"):
+            self.card_wd = cx.attr(node, "card_wd")
+        if cx.has_attr(node, "deck_type"):
+            self.deck_type = cx.attr(node, "deck_type")
+        if cx.has_attr(node, "card_back"):
+            self.card_back = cx.attr(node, "card_back")
+        if cx.has_attr(node, "hand_batch_interval_ms"):
+            self.hand_batch_interval_ms = cx.attr(node, "hand_batch_interval_ms")
+        if cx.has_attr(node, "max_secondary_tables_per_batch"):
+            self.max_secondary_tables_per_batch = cx.attr(node, "max_secondary_tables_per_batch")
+        if cx.has_attr(node, "stat_range"):
+            self.stat_range = cx.attr(node, "stat_range")
+        if cx.has_attr(node, "stat_days"):
+            self.hud_days = cx.attr(node, "stat_days")
+        if cx.has_attr(node, "aggregation_level_multiplier"):
+            self.agg_bb_mult = cx.attr(node, "aggregation_level_multiplier")
+        if cx.has_attr(node, "seats_style"):
+            self.seats_style = cx.attr(node, "seats_style")
+        if cx.has_attr(node, "seats_cust_nums_low"):
+            self.seats_cust_nums_low = cx.attr(node, "seats_cust_nums_low")
+        if cx.has_attr(node, "seats_cust_nums_high"):
+            self.seats_cust_nums_high = cx.attr(node, "seats_cust_nums_high")
+        if cx.has_attr(node, "hero_stat_range"):
+            self.h_stat_range = cx.attr(node, "hero_stat_range")
+        if cx.has_attr(node, "hero_stat_days"):
+            self.h_hud_days = cx.attr(node, "hero_stat_days")
+        if cx.has_attr(node, "hero_aggregation_level_multiplier"):
+            self.h_agg_bb_mult = cx.attr(node, "hero_aggregation_level_multiplier")
+        if cx.has_attr(node, "hero_seats_style"):
+            self.h_seats_style = cx.attr(node, "hero_seats_style")
+        if cx.has_attr(node, "hero_seats_cust_nums_low"):
+            self.h_seats_cust_nums_low = cx.attr(node, "hero_seats_cust_nums_low")
+        if cx.has_attr(node, "hero_seats_cust_nums_high"):
+            self.h_seats_cust_nums_high = cx.attr(node, "hero_seats_cust_nums_high")
 
         # Additional HUD positioning attributes
-        if node.hasAttribute("xshift"):
-            self.xshift = node.getAttribute("xshift")
-        if node.hasAttribute("yshift"):
-            self.yshift = node.getAttribute("yshift")
+        if cx.has_attr(node, "xshift"):
+            self.xshift = cx.attr(node, "xshift")
+        if cx.has_attr(node, "yshift"):
+            self.yshift = cx.attr(node, "yshift")
 
         # Aggregation settings
-        if node.hasAttribute("aggregate_ring"):
-            self.aggregate_ring = node.getAttribute("aggregate_ring")
-        if node.hasAttribute("aggregate_tour"):
-            self.aggregate_tour = node.getAttribute("aggregate_tour")
-        if node.hasAttribute("hud_style"):
-            self.hud_style = node.getAttribute("hud_style")
-        if node.hasAttribute("hero_stat_aggregation"):
-            self.hero_stat_aggregation = node.getAttribute("hero_stat_aggregation")
-        if node.hasAttribute("h_hud_style"):
-            self.h_hud_style = node.getAttribute("h_hud_style")
+        if cx.has_attr(node, "aggregate_ring"):
+            self.aggregate_ring = cx.attr(node, "aggregate_ring")
+        if cx.has_attr(node, "aggregate_tour"):
+            self.aggregate_tour = cx.attr(node, "aggregate_tour")
+        if cx.has_attr(node, "hud_style"):
+            self.hud_style = cx.attr(node, "hud_style")
+        if cx.has_attr(node, "hero_stat_aggregation"):
+            self.hero_stat_aggregation = cx.attr(node, "hero_stat_aggregation")
+        if cx.has_attr(node, "h_hud_style"):
+            self.h_hud_style = cx.attr(node, "h_hud_style")
 
         # Player profiling settings
-        if node.hasAttribute("player_profiling"):
-            self.player_profiling = node.getAttribute("player_profiling")
-        if node.hasAttribute("profile_in_name"):
-            self.profile_in_name = node.getAttribute("profile_in_name")
-        if node.hasAttribute("profile_min_hands"):
-            self.profile_min_hands = node.getAttribute("profile_min_hands")
+        if cx.has_attr(node, "player_profiling"):
+            self.player_profiling = cx.attr(node, "player_profiling")
+        if cx.has_attr(node, "profile_in_name"):
+            self.profile_in_name = cx.attr(node, "profile_in_name")
+        if cx.has_attr(node, "profile_min_hands"):
+            self.profile_min_hands = cx.attr(node, "profile_min_hands")
 
         # Appearance settings
-        if node.hasAttribute("bgcolor"):
-            self.bgcolor = node.getAttribute("bgcolor")
-        if node.hasAttribute("fgcolor"):
-            self.fgcolor = node.getAttribute("fgcolor")
-        if node.hasAttribute("hudbgcolor"):
-            self.hudbgcolor = node.getAttribute("hudbgcolor")
-        if node.hasAttribute("hudfgcolor"):
-            self.hudfgcolor = node.getAttribute("hudfgcolor")
-        if node.hasAttribute("font"):
-            self.font = node.getAttribute("font")
-        if node.hasAttribute("font_size"):
-            self.font_size = node.getAttribute("font_size")
+        if cx.has_attr(node, "bgcolor"):
+            self.bgcolor = cx.attr(node, "bgcolor")
+        if cx.has_attr(node, "fgcolor"):
+            self.fgcolor = cx.attr(node, "fgcolor")
+        if cx.has_attr(node, "hudbgcolor"):
+            self.hudbgcolor = cx.attr(node, "hudbgcolor")
+        if cx.has_attr(node, "hudfgcolor"):
+            self.hudfgcolor = cx.attr(node, "hudfgcolor")
+        if cx.has_attr(node, "font"):
+            self.font = cx.attr(node, "font")
+        if cx.has_attr(node, "font_size"):
+            self.font_size = cx.attr(node, "font_size")
 
         # HUD opacity
-        if node.hasAttribute("opacity"):
-            self.opacity = node.getAttribute("opacity")
+        if cx.has_attr(node, "opacity"):
+            self.opacity = cx.attr(node, "opacity")
 
         # Popup settings
-        if node.hasAttribute("popup_style"):
-            self.popup_style = node.getAttribute("popup_style")
+        if cx.has_attr(node, "popup_style"):
+            self.popup_style = cx.attr(node, "popup_style")
 
         # Mucked cards settings
-        if node.hasAttribute("mucked_cards"):
-            self.mucked_cards = node.getAttribute("mucked_cards")
-        if node.hasAttribute("mucked_cards_size"):
-            self.mucked_cards_size = node.getAttribute("mucked_cards_size")
-        if node.hasAttribute("mucked_cards_opacity"):
-            self.mucked_cards_opacity = node.getAttribute("mucked_cards_opacity")
+        if cx.has_attr(node, "mucked_cards"):
+            self.mucked_cards = cx.attr(node, "mucked_cards")
+        if cx.has_attr(node, "mucked_cards_size"):
+            self.mucked_cards_size = cx.attr(node, "mucked_cards_size")
+        if cx.has_attr(node, "mucked_cards_opacity"):
+            self.mucked_cards_opacity = cx.attr(node, "mucked_cards_opacity")
 
         # Aux windows settings
-        if node.hasAttribute("aux_windows"):
-            self.aux_windows = node.getAttribute("aux_windows")
-        if node.hasAttribute("aux_windows_opacity"):
-            self.aux_windows_opacity = node.getAttribute("aux_windows_opacity")
+        if cx.has_attr(node, "aux_windows"):
+            self.aux_windows = cx.attr(node, "aux_windows")
+        if cx.has_attr(node, "aux_windows_opacity"):
+            self.aux_windows_opacity = cx.attr(node, "aux_windows_opacity")
 
         # HUD menu settings
-        if node.hasAttribute("hud_menu_opacity"):
-            self.hud_menu_opacity = node.getAttribute("hud_menu_opacity")
-        if node.hasAttribute("hud_menu_bgcolor"):
-            self.hud_menu_bgcolor = node.getAttribute("hud_menu_bgcolor")
-        if node.hasAttribute("hud_menu_fgcolor"):
-            self.hud_menu_fgcolor = node.getAttribute("hud_menu_fgcolor")
+        if cx.has_attr(node, "hud_menu_opacity"):
+            self.hud_menu_opacity = cx.attr(node, "hud_menu_opacity")
+        if cx.has_attr(node, "hud_menu_bgcolor"):
+            self.hud_menu_bgcolor = cx.attr(node, "hud_menu_bgcolor")
+        if cx.has_attr(node, "hud_menu_fgcolor"):
+            self.hud_menu_fgcolor = cx.attr(node, "hud_menu_fgcolor")
 
         # Stat window settings
-        if node.hasAttribute("stat_window_opacity"):
-            self.stat_window_opacity = node.getAttribute("stat_window_opacity")
-        if node.hasAttribute("stat_window_frame"):
-            self.stat_window_frame = node.getAttribute("stat_window_frame")
+        if cx.has_attr(node, "stat_window_opacity"):
+            self.stat_window_opacity = cx.attr(node, "stat_window_opacity")
+        if cx.has_attr(node, "stat_window_frame"):
+            self.stat_window_frame = cx.attr(node, "stat_window_frame")
 
         # Tooltip settings
-        if node.hasAttribute("tooltip_delay"):
-            self.tooltip_delay = node.getAttribute("tooltip_delay")
-        if node.hasAttribute("tooltip_bgcolor"):
-            self.tooltip_bgcolor = node.getAttribute("tooltip_bgcolor")
-        if node.hasAttribute("tooltip_fgcolor"):
-            self.tooltip_fgcolor = node.getAttribute("tooltip_fgcolor")
+        if cx.has_attr(node, "tooltip_delay"):
+            self.tooltip_delay = cx.attr(node, "tooltip_delay")
+        if cx.has_attr(node, "tooltip_bgcolor"):
+            self.tooltip_bgcolor = cx.attr(node, "tooltip_bgcolor")
+        if cx.has_attr(node, "tooltip_fgcolor"):
+            self.tooltip_fgcolor = cx.attr(node, "tooltip_fgcolor")
 
         # Advanced settings
-        if node.hasAttribute("update_interval"):
-            self.update_interval = node.getAttribute("update_interval")
-        if node.hasAttribute("max_seats"):
-            self.max_seats = node.getAttribute("max_seats")
-        if node.hasAttribute("debug_level"):
-            self.debug_level = node.getAttribute("debug_level")
+        if cx.has_attr(node, "update_interval"):
+            self.update_interval = cx.attr(node, "update_interval")
+        if cx.has_attr(node, "max_seats"):
+            self.max_seats = cx.attr(node, "max_seats")
+        if cx.has_attr(node, "debug_level"):
+            self.debug_level = cx.attr(node, "debug_level")
 
         # Behaviour settings. set_hud_ui_parameters has always written these
         # seven onto the node, but nothing read them back, so each one reached
         # the file and then lost to the default on the next start.
-        if node.hasAttribute("auto_close"):
-            self.auto_close = node.getAttribute("auto_close")
-        if node.hasAttribute("block_click"):
-            self.block_click = node.getAttribute("block_click")
-        if node.hasAttribute("on_click"):
-            self.on_click = node.getAttribute("on_click")
-        if node.hasAttribute("disable_hud"):
-            self.disable_hud = node.getAttribute("disable_hud")
-        if node.hasAttribute("debug_hud"):
-            self.debug_hud = node.getAttribute("debug_hud")
-        if node.hasAttribute("save_layout"):
-            self.save_layout = node.getAttribute("save_layout")
-        if node.hasAttribute("query_limit"):
-            self.query_limit = node.getAttribute("query_limit")
+        if cx.has_attr(node, "auto_close"):
+            self.auto_close = cx.attr(node, "auto_close")
+        if cx.has_attr(node, "block_click"):
+            self.block_click = cx.attr(node, "block_click")
+        if cx.has_attr(node, "on_click"):
+            self.on_click = cx.attr(node, "on_click")
+        if cx.has_attr(node, "disable_hud"):
+            self.disable_hud = cx.attr(node, "disable_hud")
+        if cx.has_attr(node, "debug_hud"):
+            self.debug_hud = cx.attr(node, "debug_hud")
+        if cx.has_attr(node, "save_layout"):
+            self.save_layout = cx.attr(node, "save_layout")
+        if cx.has_attr(node, "query_limit"):
+            self.query_limit = cx.attr(node, "query_limit")
 
     def __str__(self) -> str:
         return f"    label = {self.label}\n"
@@ -578,110 +579,109 @@ class ConfigHudUiMixin(ConfigBase):
     def set_hud_ui_parameters(self, hud_params) -> None:
         """Set HUD UI parameters from a dictionary."""
         # Get the hud_ui node
-        hud_ui_nodes = self.doc.getElementsByTagName("hud_ui")
-        if not hud_ui_nodes:
-            # Create hud_ui node if it doesn't exist
-            for config_node in self.doc.getElementsByTagName("FreePokerToolsConfig"):
-                hud_ui_node = self.doc.createElement("hud_ui")
-                config_node.appendChild(hud_ui_node)
-        else:
+        hud_ui_nodes = cx.find_all(self.doc, "hud_ui")
+        if hud_ui_nodes:
             hud_ui_node = hud_ui_nodes[0]
+        else:
+            # Create hud_ui node if it doesn't exist
+            config_node = cx.find_all(self.doc, "FreePokerToolsConfig")[-1]
+            hud_ui_node = cx.append(self.doc, config_node, cx.create_element(self.doc, "hud_ui"))
 
         # Update attributes
         if "label" in hud_params:
-            hud_ui_node.setAttribute("label", str(hud_params["label"]))
+            cx.set_attr(hud_ui_node, "label", str(hud_params["label"]))
         if "card_ht" in hud_params:
-            hud_ui_node.setAttribute("card_ht", str(hud_params["card_ht"]))
+            cx.set_attr(hud_ui_node, "card_ht", str(hud_params["card_ht"]))
         if "card_wd" in hud_params:
-            hud_ui_node.setAttribute("card_wd", str(hud_params["card_wd"]))
+            cx.set_attr(hud_ui_node, "card_wd", str(hud_params["card_wd"]))
         if "deck_type" in hud_params:
-            hud_ui_node.setAttribute("deck_type", str(hud_params["deck_type"]))
+            cx.set_attr(hud_ui_node, "deck_type", str(hud_params["deck_type"]))
         if "card_back" in hud_params:
-            hud_ui_node.setAttribute("card_back", str(hud_params["card_back"]))
+            cx.set_attr(hud_ui_node, "card_back", str(hud_params["card_back"]))
         if "stat_range" in hud_params:
-            hud_ui_node.setAttribute("stat_range", str(hud_params["stat_range"]))
+            cx.set_attr(hud_ui_node, "stat_range", str(hud_params["stat_range"]))
         if "hud_days" in hud_params:
-            hud_ui_node.setAttribute("stat_days", str(hud_params["hud_days"]))
+            cx.set_attr(hud_ui_node, "stat_days", str(hud_params["hud_days"]))
         if "agg_bb_mult" in hud_params:
-            hud_ui_node.setAttribute("aggregation_level_multiplier", str(hud_params["agg_bb_mult"]))
+            cx.set_attr(hud_ui_node, "aggregation_level_multiplier", str(hud_params["agg_bb_mult"]))
         if "seats_style" in hud_params:
-            hud_ui_node.setAttribute("seats_style", str(hud_params["seats_style"]))
+            cx.set_attr(hud_ui_node, "seats_style", str(hud_params["seats_style"]))
         if "seats_cust_nums_low" in hud_params:
-            hud_ui_node.setAttribute("seats_cust_nums_low", str(hud_params["seats_cust_nums_low"]))
+            cx.set_attr(hud_ui_node, "seats_cust_nums_low", str(hud_params["seats_cust_nums_low"]))
         if "seats_cust_nums_high" in hud_params:
-            hud_ui_node.setAttribute("seats_cust_nums_high", str(hud_params["seats_cust_nums_high"]))
+            cx.set_attr(hud_ui_node, "seats_cust_nums_high", str(hud_params["seats_cust_nums_high"]))
 
         # Hero specific
         if "h_stat_range" in hud_params:
-            hud_ui_node.setAttribute("hero_stat_range", str(hud_params["h_stat_range"]))
+            cx.set_attr(hud_ui_node, "hero_stat_range", str(hud_params["h_stat_range"]))
         if "h_hud_days" in hud_params:
-            hud_ui_node.setAttribute("hero_stat_days", str(hud_params["h_hud_days"]))
+            cx.set_attr(hud_ui_node, "hero_stat_days", str(hud_params["h_hud_days"]))
         if "h_agg_bb_mult" in hud_params:
-            hud_ui_node.setAttribute("hero_aggregation_level_multiplier", str(hud_params["h_agg_bb_mult"]))
+            cx.set_attr(hud_ui_node, "hero_aggregation_level_multiplier", str(hud_params["h_agg_bb_mult"]))
         if "h_seats_style" in hud_params:
-            hud_ui_node.setAttribute("hero_seats_style", str(hud_params["h_seats_style"]))
+            cx.set_attr(hud_ui_node, "hero_seats_style", str(hud_params["h_seats_style"]))
         if "h_seats_cust_nums_low" in hud_params:
-            hud_ui_node.setAttribute("hero_seats_cust_nums_low", str(hud_params["h_seats_cust_nums_low"]))
+            cx.set_attr(hud_ui_node, "hero_seats_cust_nums_low", str(hud_params["h_seats_cust_nums_low"]))
         if "h_seats_cust_nums_high" in hud_params:
-            hud_ui_node.setAttribute("hero_seats_cust_nums_high", str(hud_params["h_seats_cust_nums_high"]))
+            cx.set_attr(hud_ui_node, "hero_seats_cust_nums_high", str(hud_params["h_seats_cust_nums_high"]))
 
         # Additional appearance parameters
         if "bgcolor" in hud_params:
-            hud_ui_node.setAttribute("bgcolor", str(hud_params["bgcolor"]))
+            cx.set_attr(hud_ui_node, "bgcolor", str(hud_params["bgcolor"]))
         if "fgcolor" in hud_params:
-            hud_ui_node.setAttribute("fgcolor", str(hud_params["fgcolor"]))
+            cx.set_attr(hud_ui_node, "fgcolor", str(hud_params["fgcolor"]))
         if "hudbgcolor" in hud_params:
-            hud_ui_node.setAttribute("hudbgcolor", str(hud_params["hudbgcolor"]))
+            cx.set_attr(hud_ui_node, "hudbgcolor", str(hud_params["hudbgcolor"]))
         if "hudfgcolor" in hud_params:
-            hud_ui_node.setAttribute("hudfgcolor", str(hud_params["hudfgcolor"]))
+            cx.set_attr(hud_ui_node, "hudfgcolor", str(hud_params["hudfgcolor"]))
         if "font" in hud_params:
-            hud_ui_node.setAttribute("font", str(hud_params["font"]))
+            cx.set_attr(hud_ui_node, "font", str(hud_params["font"]))
         if "font_size" in hud_params:
-            hud_ui_node.setAttribute("font_size", str(hud_params["font_size"]))
+            cx.set_attr(hud_ui_node, "font_size", str(hud_params["font_size"]))
         if "opacity" in hud_params:
-            hud_ui_node.setAttribute("opacity", str(hud_params["opacity"]))
+            cx.set_attr(hud_ui_node, "opacity", str(hud_params["opacity"]))
 
         # Additional behavior parameters
         if "xshift" in hud_params:
-            hud_ui_node.setAttribute("xshift", str(hud_params["xshift"]))
+            cx.set_attr(hud_ui_node, "xshift", str(hud_params["xshift"]))
         if "yshift" in hud_params:
-            hud_ui_node.setAttribute("yshift", str(hud_params["yshift"]))
+            cx.set_attr(hud_ui_node, "yshift", str(hud_params["yshift"]))
         if "aggregate_ring" in hud_params:
-            hud_ui_node.setAttribute("aggregate_ring", str(hud_params["aggregate_ring"]))
+            cx.set_attr(hud_ui_node, "aggregate_ring", str(hud_params["aggregate_ring"]))
         if "aggregate_tour" in hud_params:
-            hud_ui_node.setAttribute("aggregate_tour", str(hud_params["aggregate_tour"]))
+            cx.set_attr(hud_ui_node, "aggregate_tour", str(hud_params["aggregate_tour"]))
         if "hud_style" in hud_params:
-            hud_ui_node.setAttribute("hud_style", str(hud_params["hud_style"]))
+            cx.set_attr(hud_ui_node, "hud_style", str(hud_params["hud_style"]))
         if "hero_stat_aggregation" in hud_params:
-            hud_ui_node.setAttribute("hero_stat_aggregation", str(hud_params["hero_stat_aggregation"]))
+            cx.set_attr(hud_ui_node, "hero_stat_aggregation", str(hud_params["hero_stat_aggregation"]))
         if "h_hud_style" in hud_params:
-            hud_ui_node.setAttribute("h_hud_style", str(hud_params["h_hud_style"]))
+            cx.set_attr(hud_ui_node, "h_hud_style", str(hud_params["h_hud_style"]))
         if "update_interval" in hud_params:
-            hud_ui_node.setAttribute("update_interval", str(hud_params["update_interval"]))
+            cx.set_attr(hud_ui_node, "update_interval", str(hud_params["update_interval"]))
         if "auto_close" in hud_params:
-            hud_ui_node.setAttribute("auto_close", str(hud_params["auto_close"]))
+            cx.set_attr(hud_ui_node, "auto_close", str(hud_params["auto_close"]))
         if "block_click" in hud_params:
-            hud_ui_node.setAttribute("block_click", str(hud_params["block_click"]))
+            cx.set_attr(hud_ui_node, "block_click", str(hud_params["block_click"]))
         if "on_click" in hud_params:
-            hud_ui_node.setAttribute("on_click", str(hud_params["on_click"]))
+            cx.set_attr(hud_ui_node, "on_click", str(hud_params["on_click"]))
         if "popup_style" in hud_params:
-            hud_ui_node.setAttribute("popup_style", str(hud_params["popup_style"]))
+            cx.set_attr(hud_ui_node, "popup_style", str(hud_params["popup_style"]))
         if "max_seats" in hud_params:
-            hud_ui_node.setAttribute("max_seats", str(hud_params["max_seats"]))
+            cx.set_attr(hud_ui_node, "max_seats", str(hud_params["max_seats"]))
         if "disable_hud" in hud_params:
-            hud_ui_node.setAttribute("disable_hud", str(hud_params["disable_hud"]))
+            cx.set_attr(hud_ui_node, "disable_hud", str(hud_params["disable_hud"]))
         if "query_limit" in hud_params:
-            hud_ui_node.setAttribute("query_limit", str(hud_params["query_limit"]))
+            cx.set_attr(hud_ui_node, "query_limit", str(hud_params["query_limit"]))
         if "debug_hud" in hud_params:
-            hud_ui_node.setAttribute("debug_hud", str(hud_params["debug_hud"]))
+            cx.set_attr(hud_ui_node, "debug_hud", str(hud_params["debug_hud"]))
         if "save_layout" in hud_params:
-            hud_ui_node.setAttribute("save_layout", str(hud_params["save_layout"]))
+            cx.set_attr(hud_ui_node, "save_layout", str(hud_params["save_layout"]))
         if "player_profiling" in hud_params:
-            hud_ui_node.setAttribute("player_profiling", str(hud_params["player_profiling"]))
+            cx.set_attr(hud_ui_node, "player_profiling", str(hud_params["player_profiling"]))
         if "profile_in_name" in hud_params:
-            hud_ui_node.setAttribute("profile_in_name", str(hud_params["profile_in_name"]))
+            cx.set_attr(hud_ui_node, "profile_in_name", str(hud_params["profile_in_name"]))
         if "profile_min_hands" in hud_params:
-            hud_ui_node.setAttribute("profile_min_hands", str(hud_params["profile_min_hands"]))
+            cx.set_attr(hud_ui_node, "profile_min_hands", str(hud_params["profile_min_hands"]))
 
         # Update the internal ui object
         if hasattr(self, "ui"):
