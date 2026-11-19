@@ -21,6 +21,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from fpdb_3_legacy import config_xml as cx
 from fpdb_3_legacy.config_common import (
     ConfigBase,
     string_to_bool,
@@ -32,19 +33,19 @@ log = get_logger("configuration")
 
 class Database:
     def __init__(self, node) -> None:
-        self.db_name = node.getAttribute("db_name")
-        self.db_desc = node.getAttribute("db_desc")
-        self.db_server = node.getAttribute("db_server").lower()
-        self.db_ip = node.getAttribute("db_ip")
-        self.db_port = node.getAttribute("db_port")
-        self.db_user = node.getAttribute("db_user")
-        self.db_pass = node.getAttribute("db_pass")
-        self.db_path = node.getAttribute("db_path")
-        self.db_selected = string_to_bool(node.getAttribute("default"), default=False)
+        self.db_name = cx.attr(node, "db_name")
+        self.db_desc = cx.attr(node, "db_desc")
+        self.db_server = cx.attr(node, "db_server").lower()
+        self.db_ip = cx.attr(node, "db_ip")
+        self.db_port = cx.attr(node, "db_port")
+        self.db_user = cx.attr(node, "db_user")
+        self.db_pass = cx.attr(node, "db_pass")
+        self.db_path = cx.attr(node, "db_path")
+        self.db_selected = string_to_bool(cx.attr(node, "default"), default=False)
         # Local-first (#680): when enabled, the HUD/import run on an embedded
         # SQLite at local_path and push asynchronously to this server database.
-        self.local_first = string_to_bool(node.getAttribute("local_first") or "0", default=False)
-        self.local_path = node.getAttribute("local_path") or "fpdb-local.sqlite3"
+        self.local_first = string_to_bool(cx.attr(node, "local_first") or "0", default=False)
+        self.local_path = cx.attr(node, "local_path") or "fpdb-local.sqlite3"
         log.debug(
             f"Database db_name:'{self.db_name}'  db_server:'{self.db_server}'  db_ip:'{self.db_ip}'  db_port:'{self.db_port}' db_user:'{self.db_user}'  db_pass (not logged)  selected:'{self.db_selected}'",
         )
@@ -65,8 +66,8 @@ class ConfigDatabasesMixin(ConfigBase):
     """Read and edit the configured databases."""
 
     def get_db_node(self, db_name):
-        for db_node in self.doc.getElementsByTagName("database"):
-            if db_node.getAttribute("db_name") == db_name:
+        for db_node in cx.find_all(self.doc, "database"):
+            if cx.attr(db_node, "db_name") == db_name:
                 return db_node
         return None
 
@@ -161,7 +162,7 @@ class ConfigDatabasesMixin(ConfigBase):
         """
         for name, value in values.items():
             if value is not None:
-                db_node.setAttribute(name, value)
+                cx.set_attr(db_node, name, value)
 
     def _write_db_cache(self, db_name: str, *, selected: bool, **values: str | None) -> None:
         """Mirror onto the loaded Database what was just written to the file."""
@@ -179,12 +180,12 @@ class ConfigDatabasesMixin(ConfigBase):
         last in the document, which is not a choice anyone made.
         """
         if wanted:
-            db_node.setAttribute("default", "True")
-            for dbn in self.doc.getElementsByTagName("database"):
-                if dbn.getAttribute("db_name") != db_name and dbn.hasAttribute("default"):
-                    dbn.removeAttribute("default")
-        elif db_node.hasAttribute("default"):
-            db_node.removeAttribute("default")
+            cx.set_attr(db_node, "default", "True")
+            for dbn in cx.find_all(self.doc, "database"):
+                if cx.attr(dbn, "db_name") != db_name:
+                    cx.del_attr(dbn, "default")
+        else:
+            cx.del_attr(db_node, "default")
 
     def set_db_parameters(
         self,
@@ -280,18 +281,11 @@ class ConfigDatabasesMixin(ConfigBase):
         section wins the moment it holds anything -- so the new node joins the
         others where they are.
         """
-        parent = None
-        for candidate in self.doc.getElementsByTagName("supported_databases"):
-            # should only be one supported_databases element, use last one if there are several
-            parent = candidate
-        if parent is None:
-            parent = self.doc.documentElement
-        parent.appendChild(self.doc.createTextNode("    "))
-        db_node = self.doc.createElement("database")
-        parent.appendChild(db_node)
-        parent.appendChild(self.doc.createTextNode("\r\n    "))
-        db_node.setAttribute("db_name", db_name)
-        return db_node
+        # There should be one <supported_databases>; with several, the last one gets it.
+        sections = cx.find_all(self.doc, "supported_databases")
+        parent = sections[-1] if sections else cx.root(self.doc)
+        db_node = cx.create_element(self.doc, "database", {"db_name": db_name})
+        return cx.append(self.doc, parent, db_node, indent="\n        ")
 
     def del_db_parameters(self, db_name="fpdb") -> None:
         """Remove a database from the config (both the XML node and the cache).
@@ -300,8 +294,8 @@ class ConfigDatabasesMixin(ConfigBase):
         database (if any) becomes the selection.
         """
         db_node = self.get_db_node(db_name)
-        if db_node is not None and db_node.parentNode is not None:
-            db_node.parentNode.removeChild(db_node)
+        if db_node is not None:
+            cx.remove(self.doc, db_node)
         self.supported_databases.pop(db_name, None)
         if self.db_selected == db_name:
             self.db_selected = next(iter(self.supported_databases), None)
