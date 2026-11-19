@@ -24,6 +24,7 @@ import copy
 # ElementTree builds and writes the trees; nothing here parses with it. Every
 # parse goes through defusedxml (parse_string, parse_file).
 import xml.etree.ElementTree as ET  # noqa: S405  # nosec B405  # nosemgrep
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -320,7 +321,7 @@ def attributes(node: Node) -> dict[str, str]:
 # --------------------------------------------------------------------------
 
 
-def create_element(doc: Node, tag: str, attrs: dict[str, object] | None = None) -> Node:
+def create_element(doc: Node, tag: str, attrs: Mapping[str, object] | None = None) -> Node:
     """A new element owned by ``doc``, not yet in the tree."""
     if _is_dom(doc):
         element = doc.createElement(tag)
@@ -369,6 +370,19 @@ def append(doc: Node, parent: Node, child: Node, *, indent: str | None = None) -
         child.tail = closing
     parent.append(child)
     return child
+
+
+def append_text(doc: Node, parent: Node, text: str) -> None:
+    """Add ``text`` after the last child of ``parent`` (minidom's ``appendChild(createTextNode(text))``).
+
+    Used for the whitespace that lays a section out: the line break and indent
+    before each child, and the one before the closing tag.
+    """
+    parent = _element(parent)
+    if _is_dom(parent):
+        parent.appendChild(doc.createTextNode(text))
+        return
+    _set_last_whitespace(parent, (_last_whitespace(parent) or "") + text)
 
 
 def parent_of(doc: Node, node: Node) -> Node | None:

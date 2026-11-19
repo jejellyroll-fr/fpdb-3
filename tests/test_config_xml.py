@@ -305,6 +305,34 @@ def test_an_element_appended_to_an_empty_parent(doc, backend) -> None:
     assert [cx.attr(stat, "cell") for stat in cx.find_all(reread, "stat")] == ["(1,1)"]
 
 
+def test_text_lays_out_a_section_the_same_on_both_backends() -> None:
+    written = []
+    for which in cx.BACKENDS:
+        document = cx.parse_string(SAMPLE, backend=which)
+        stats = cx.find_first(document, "stats")
+        cx.clear(document, stats)
+        for name in ("a", "b"):
+            cx.append_text(document, stats, "\n        ")
+            cx.append(document, stats, cx.create_element(document, "ss", {"name": name}))
+        cx.append_text(document, stats, "\n    ")
+        cx.append_text(document, document, "\n    ")
+        cx.append(document, document, cx.create_element(document, "hud_profile_rules"))
+        written.append(cx.to_xml(document).replace(" />", "/>"))
+
+    assert written[0] == written[1]
+    assert '<stats>\n        <ss name="a"/>\n        <ss name="b"/>\n    </stats>' in written[0]
+    assert "\n    <hud_profile_rules/></config>" in written[0]
+
+
+def test_text_in_an_empty_parent(doc) -> None:
+    sites = cx.find_first(doc, "sites")
+    cx.clear(doc, sites)
+
+    cx.append_text(doc, sites, "\n    ")
+
+    assert "<sites>\n    </sites>" in cx.to_xml(doc)
+
+
 def test_append_to_a_document_appends_to_its_root(doc) -> None:
     cx.append(doc, doc, cx.create_element(doc, "session_guard", {"max_loss": "5"}))
 

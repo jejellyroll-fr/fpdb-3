@@ -22,6 +22,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from fpdb_3_legacy import config_xml as cx
 from fpdb_3_legacy.config_common import (
     LAYOUT_REFERENCE_UNDERHANG,
     layout_reference_fits,
@@ -35,9 +36,9 @@ log = get_logger("configuration")
 
 class Layout:
     def __init__(self, node) -> None:
-        self.max = int(node.getAttribute("max"))
-        self.width = int(node.getAttribute("width"))
-        self.height = int(node.getAttribute("height"))
+        self.max = int(cx.attr(node, "max"))
+        self.width = int(cx.attr(node, "width"))
+        self.height = int(cx.attr(node, "height"))
 
         self.location: list[Any] = []
         self.hh_seats: list[Any] = []
@@ -48,24 +49,24 @@ class Layout:
         #   for tables smaller than 10-max.
         self.hh_seats = [None for x in range(self.max + 1)]  # fill array with max seats+1 empty entries
 
-        for location_node in node.getElementsByTagName("location"):
-            hud_seat = location_node.getAttribute("seat")
+        for location_node in cx.find_all(node, "location"):
+            hud_seat = cx.attr(location_node, "seat")
             if hud_seat != "":
                 # if hist_seat for this seat number is specified in the layout, then store it in the hh_seats list
-                hist_seat = location_node.getAttribute("hist_seat")  # XXX
+                hist_seat = cx.attr(location_node, "hist_seat")  # XXX
                 if hist_seat:
                     self.hh_seats[int(hud_seat)] = int(hist_seat)
                 else:
                     # .. otherwise just store the original seat number in the hh_seats list
                     self.hh_seats[int(hud_seat)] = int(hud_seat)
                 self.location[int(hud_seat)] = (
-                    int(location_node.getAttribute("x")),
-                    int(location_node.getAttribute("y")),
+                    int(cx.attr(location_node, "x")),
+                    int(cx.attr(location_node, "y")),
                 )
-            elif location_node.getAttribute("common") != "":
+            elif cx.attr(location_node, "common"):
                 self.common = (
-                    int(location_node.getAttribute("x")),
-                    int(location_node.getAttribute("y")),
+                    int(cx.attr(location_node, "x")),
+                    int(cx.attr(location_node, "y")),
                 )
 
         self._repair_reference_size()
@@ -163,37 +164,37 @@ class Layout:
 
 class Stat:
     def __init__(self, node) -> None:
-        rowcol = node.getAttribute("_rowcol")  # human string "(r,c)" values >0)
-        self.rows = node.getAttribute("rows")
-        self.cols = node.getAttribute("cols")
+        rowcol = cx.attr(node, "_rowcol")  # human string "(r,c)" values >0)
+        self.rows = cx.attr(node, "rows")
+        self.cols = cx.attr(node, "cols")
         self.rowcol = tuple(int(s) - 1 for s in rowcol[1:-1].split(","))  # tuple (r-1,c-1)
-        self.stat_name = node.getAttribute("_stat_name")
-        self.tip = node.getAttribute("tip")
-        self.display_label = node.getAttribute("display_label")
-        self.click = node.getAttribute("click")
-        self.popup = node.getAttribute("popup")
-        self.hudprefix = node.getAttribute("hudprefix")
-        self.hudsuffix = node.getAttribute("hudsuffix")
-        self.hudcolor = node.getAttribute("hudcolor")
-        self.hudbgcolor = node.getAttribute("hudbgcolor")
-        self.stat_loth = node.getAttribute("stat_loth")
-        self.stat_hith = node.getAttribute("stat_hith")
-        self.stat_locolor = node.getAttribute("stat_locolor")
-        self.stat_hicolor = node.getAttribute("stat_hicolor")
-        self.stat_midcolor = node.getAttribute("stat_midcolor")
+        self.stat_name = cx.attr(node, "_stat_name")
+        self.tip = cx.attr(node, "tip")
+        self.display_label = cx.attr(node, "display_label")
+        self.click = cx.attr(node, "click")
+        self.popup = cx.attr(node, "popup")
+        self.hudprefix = cx.attr(node, "hudprefix")
+        self.hudsuffix = cx.attr(node, "hudsuffix")
+        self.hudcolor = cx.attr(node, "hudcolor")
+        self.hudbgcolor = cx.attr(node, "hudbgcolor")
+        self.stat_loth = cx.attr(node, "stat_loth")
+        self.stat_hith = cx.attr(node, "stat_hith")
+        self.stat_locolor = cx.attr(node, "stat_locolor")
+        self.stat_hicolor = cx.attr(node, "stat_hicolor")
+        self.stat_midcolor = cx.attr(node, "stat_midcolor")
         # PT4-style cell layout: a stat may span several columns and align its text.
-        cs = node.getAttribute("colspan")
+        cs = cx.attr(node, "colspan")
         self.colspan = int(cs) if cs else 1
-        self.align = node.getAttribute("align") or "center"
+        self.align = cx.attr(node, "align") or "center"
         # Declarative source of the stat, when the editor bound an
         # analytics-backed definition to this cell (#309). Absent for every
         # column-backed stat of Stats.py, which is nearly all of them; kept here
         # so the binding survives a load/save round-trip instead of being
         # rewritten into an anonymous name.
-        self.data_source = node.getAttribute("data_source")
-        self.data_definition = node.getAttribute("data_definition")
-        self.data_format = node.getAttribute("data_format")
-        self.data_min_sample = node.getAttribute("data_min_sample")
+        self.data_source = cx.attr(node, "data_source")
+        self.data_definition = cx.attr(node, "data_definition")
+        self.data_format = cx.attr(node, "data_format")
+        self.data_min_sample = cx.attr(node, "data_min_sample")
 
     def __str__(self) -> str:
         temp = f"        _rowcol = {self.rowcol}, _stat_name = {self.stat_name}, \n"
@@ -234,35 +235,37 @@ class StatBlock:
     ) -> None:
         style = style or {}
         if node is not None:
-            self.label = node.getAttribute("label")
-            self.id = node.getAttribute("id") or ""
-            self.scope = node.getAttribute("scope") or "player"
-            self.audience = node.getAttribute("audience") or "everyone"
+            self.label = cx.attr(node, "label")
+            self.id = cx.attr(node, "id") or ""
+            self.scope = cx.attr(node, "scope") or "player"
+            self.audience = cx.attr(node, "audience") or "everyone"
             # Optional position binding: when set, the block is only shown for a
             # player in that position this hand (e.g. "SB"/"BB"/"BTN"); empty
             # means always shown.
-            self.position = node.getAttribute("position")
-            self.bgcolor = node.getAttribute("bgcolor")
-            self.fgcolor = node.getAttribute("fgcolor")
-            self.bordercolor = node.getAttribute("bordercolor")
-            self.title_bgcolor = node.getAttribute("title_bgcolor")
-            self.title_fgcolor = node.getAttribute("title_fgcolor")
-            self.title_font_scale = float(node.getAttribute("title_font_scale")) if node.getAttribute("title_font_scale") else 0
-            self.heading_font_scale = float(node.getAttribute("heading_font_scale")) if node.getAttribute("heading_font_scale") else 0
-            self.cell_width = int(node.getAttribute("cell_width")) if node.getAttribute("cell_width") else 0
-            self.x = int(node.getAttribute("x")) if node.getAttribute("x") else 0
-            self.y = int(node.getAttribute("y")) if node.getAttribute("y") else 0
+            self.position = cx.attr(node, "position")
+            self.bgcolor = cx.attr(node, "bgcolor")
+            self.fgcolor = cx.attr(node, "fgcolor")
+            self.bordercolor = cx.attr(node, "bordercolor")
+            self.title_bgcolor = cx.attr(node, "title_bgcolor")
+            self.title_fgcolor = cx.attr(node, "title_fgcolor")
+            self.title_font_scale = float(cx.attr(node, "title_font_scale")) if cx.attr(node, "title_font_scale") else 0
+            self.heading_font_scale = (
+                float(cx.attr(node, "heading_font_scale")) if cx.attr(node, "heading_font_scale") else 0
+            )
+            self.cell_width = int(cx.attr(node, "cell_width")) if cx.attr(node, "cell_width") else 0
+            self.x = int(cx.attr(node, "x")) if cx.attr(node, "x") else 0
+            self.y = int(cx.attr(node, "y")) if cx.attr(node, "y") else 0
             self.stats = {}
-            for stat_node in node.getElementsByTagName("stat"):
+            for stat_node in cx.find_all(node, "stat"):
                 stat = Stat(stat_node)
                 self.stats[stat.rowcol] = stat
             # Text-label items (column/row headers, section captions like
             # "POST FLOP") — PT4-style group items that are not data cells.
-            self.texts = [self._parse_text(t) for t in node.getElementsByTagName("text")]
+            self.texts = [self._parse_text(t) for t in cx.find_all(node, "text")]
             # Horizontal-line separators (PT4 "Horz Line" group items).
-            self.hlines = [self._parse_hline(h) for h in node.getElementsByTagName("hline")]
-            self.rows = int(node.getAttribute("rows")) if node.getAttribute("rows") else 0
-            self.cols = int(node.getAttribute("cols")) if node.getAttribute("cols") else 0
+            self.hlines = [self._parse_hline(h) for h in cx.find_all(node, "hline")]
+            self.rows = int(cx.attr(node, "rows")) if cx.attr(node, "rows") else 0
+            self.cols = int(cx.attr(node, "cols")) if cx.attr(node, "cols") else 0
         else:
             self.label = label
             self.id = style.get("id", "")
@@ -303,34 +306,34 @@ class StatBlock:
     @staticmethod
     def _parse_text(node) -> dict:
         """Parse a ``<text>`` label item (header/caption) within a block."""
-        rc = node.getAttribute("_rowcol")
+        rc = cx.attr(node, "_rowcol")
         try:
             rowcol = tuple(int(s) - 1 for s in rc[1:-1].split(",")) if rc else (0, 0)
         except ValueError:
             rowcol = (0, 0)
-        cs = node.getAttribute("colspan")
+        cs = cx.attr(node, "colspan")
         return {
             "rowcol": rowcol,
-            "label": node.getAttribute("label"),
+            "label": cx.attr(node, "label"),
             "colspan": int(cs) if cs else 1,
-            "align": node.getAttribute("align") or "center",
-            "fgcolor": node.getAttribute("fgcolor"),
-            "bgcolor": node.getAttribute("bgcolor"),
+            "align": cx.attr(node, "align") or "center",
+            "fgcolor": cx.attr(node, "fgcolor"),
+            "bgcolor": cx.attr(node, "bgcolor"),
         }
 
     @staticmethod
     def _parse_hline(node) -> dict:
         """Parse an ``<hline>`` separator item within a block."""
-        rc = node.getAttribute("_rowcol")
+        rc = cx.attr(node, "_rowcol")
         try:
             rowcol = tuple(int(s) - 1 for s in rc[1:-1].split(",")) if rc else (0, 0)
         except ValueError:
             rowcol = (0, 0)
-        cs = node.getAttribute("colspan")
+        cs = cx.attr(node, "colspan")
         return {
             "rowcol": rowcol,
             "colspan": int(cs) if cs else 0,  # 0 -> span the whole block width
-            "color": node.getAttribute("color"),
+            "color": cx.attr(node, "color"),
         }
 
     def __str__(self) -> str:
@@ -388,28 +391,28 @@ class Stat_sets:
     """
 
     def __init__(self, node) -> None:
-        self.name = node.getAttribute("name")
-        self.show_hero_hud = node.getAttribute("show_hero_hud")
+        self.name = cx.attr(node, "name")
+        self.show_hero_hud = cx.attr(node, "show_hero_hud")
         # Opt-in compact rich-text rendering for the permanent HUD cells.
         # This belongs to the stat-set (rather than a poker variant) so any
         # current or future game profile can reuse the presentation mode.
-        self.rich_text = node.getAttribute("rich_text")
+        self.rich_text = cx.attr(node, "rich_text")
         # Optional profile-specific font size. An empty value keeps the global
         # HUD font setting, while a profile can opt into a larger compact grid.
-        self.font_size = node.getAttribute("font_size")
-        self.title_font_scale = node.getAttribute("title_font_scale")
-        self.heading_font_scale = node.getAttribute("heading_font_scale")
+        self.font_size = cx.attr(node, "font_size")
+        self.title_font_scale = cx.attr(node, "title_font_scale")
+        self.heading_font_scale = cx.attr(node, "heading_font_scale")
         # How position-bound panels (SB/BB/BU) display in a multi-block HUD:
         #   "current" -> show only the panel matching the estimated live position
         #                (the positional HUD's expected behaviour and default);
         #   "all"     -> show every position panel at once, stacked.
-        self.positional_mode = node.getAttribute("positional_mode") or "current"
-        self.rows = int(node.getAttribute("rows"))
-        self.cols = int(node.getAttribute("cols"))
-        self.xpad = node.getAttribute("xpad")
-        self.xpad = 0 if self.xpad == "" else int(self.xpad)
-        self.ypad = node.getAttribute("ypad")
-        self.ypad = 0 if self.ypad == "" else int(self.ypad)
+        self.positional_mode = cx.attr(node, "positional_mode") or "current"
+        self.rows = int(cx.attr(node, "rows"))
+        self.cols = int(cx.attr(node, "cols"))
+        xpad = cx.attr(node, "xpad")
+        self.xpad = int(xpad) if xpad else 0
+        ypad = cx.attr(node, "ypad")
+        self.ypad = int(ypad) if ypad else 0
         self.stats = None
 
         # A stat-set may either list <stat> elements directly (a single grid, the
@@ -418,7 +421,7 @@ class Stat_sets:
         # normalised into self.blocks; self.stats keeps the flat union so legacy
         # readers keep working.
         self.blocks = []
-        block_nodes = node.getElementsByTagName("block")
+        block_nodes = cx.find_all(node, "block")
         # A single <block> is still a block layout: it can carry a title,
         # colours, text labels and lines that a flat grid has no place for.
         self.has_block_nodes = bool(block_nodes)
@@ -426,7 +429,7 @@ class Stat_sets:
             self.blocks = [StatBlock(bn) for bn in block_nodes]
         else:
             stats = {}
-            for stat_node in node.getElementsByTagName("stat"):
+            for stat_node in cx.find_all(node, "stat"):
                 stat = Stat(stat_node)
                 stats[stat.rowcol] = stat
             self.blocks = [StatBlock(label="", rows=self.rows, cols=self.cols, stats=stats)]
@@ -455,7 +458,7 @@ class Stat_sets:
 class Aux_window:
     def __init__(self, node) -> None:
         self.name = ""
-        for name, value in list(node.attributes.items()):
+        for name, value in cx.attributes(node).items():
             setattr(self, name, value)
 
     def __str__(self) -> str:
@@ -474,11 +477,11 @@ class Aux_window:
 class Layout_set:
     def __init__(self, node) -> None:
         self.name = ""
-        for name, value in list(node.attributes.items()):
+        for name, value in cx.attributes(node).items():
             setattr(self, name, value)
 
         self.layout = {}
-        for layout_node in node.getElementsByTagName("layout"):
+        for layout_node in cx.find_all(node, "layout"):
             lo = Layout(layout_node)
             self.layout[lo.max] = lo
 
@@ -503,8 +506,8 @@ class Layout_set:
 
 class Popup:
     def __init__(self, node) -> None:
-        self.name = node.getAttribute("pu_name")
-        self.pu_class = node.getAttribute("pu_class")
+        self.name = cx.attr(node, "pu_name")
+        self.pu_class = cx.attr(node, "pu_class")
         self.pu_stats = []
         self.pu_stats_submenu = []
         self.pu_stats_category = []
@@ -523,19 +526,19 @@ class Popup:
             "pu_width": "width",
             "pu_max_height": "max_height",
         }.items():
-            if node.getAttribute(xml_name):
-                self.pu_class_params[param_name] = node.getAttribute(xml_name)
+            if cx.attr(node, xml_name):
+                self.pu_class_params[param_name] = cx.attr(node, xml_name)
 
-        for stat_node in node.getElementsByTagName("pu_stat"):
-            self.pu_stats.append(stat_node.getAttribute("pu_stat_name"))
-            self.pu_stats_category.append(stat_node.getAttribute("pu_stat_category"))
-            self.pu_stats_label.append(stat_node.getAttribute("pu_stat_label"))
-            self.pu_stats_color.append(stat_node.getAttribute("pu_stat_color"))
+        for stat_node in cx.find_all(node, "pu_stat"):
+            self.pu_stats.append(cx.attr(stat_node, "pu_stat_name"))
+            self.pu_stats_category.append(cx.attr(stat_node, "pu_stat_category"))
+            self.pu_stats_label.append(cx.attr(stat_node, "pu_stat_label"))
+            self.pu_stats_color.append(cx.attr(stat_node, "pu_stat_color"))
             # if stat_node.getAttribute("pu_stat_submenu"):
             self.pu_stats_submenu.append(
                 (
-                    stat_node.getAttribute("pu_stat_name"),
-                    stat_node.getAttribute("pu_stat_submenu"),
+                    cx.attr(stat_node, "pu_stat_name"),
+                    cx.attr(stat_node, "pu_stat_submenu"),
                 ),
             )
 
@@ -554,8 +557,8 @@ def parse_hud_profile_rules(doc: Any) -> list[HudProfileRule]:
     did not re-read this section.
     """
     rules = []
-    for order, rule_node in enumerate(doc.getElementsByTagName("hud_profile_rule")):
-        values = {name: rule_node.getAttribute(name) for name in rule_node.attributes.keys()}
+    for order, rule_node in enumerate(cx.find_all(doc, "hud_profile_rule")):
+        values = cx.attributes(rule_node)
         rule = HudProfileRule.from_mapping(values, order)
         if rule.profile:
             rules.append(rule)
@@ -582,28 +585,28 @@ def parse_hud_panel_rules(doc: Any) -> tuple[list[Any], str, bool]:
     """
     from fpdb_3_legacy import hud_situation
 
-    sections = doc.getElementsByTagName("hud_panel_rules")
+    sections = cx.find_all(doc, "hud_panel_rules")
     if not sections:
         return [], "", False
     rules: list[Any] = []
     fallback = ""
     enabled = False
     for section in sections:
-        section_enabled = str(section.getAttribute("enabled") or "true").strip().lower() not in ("false", "no", "0", "off")
+        section_enabled = str(cx.attr(section, "enabled") or "true").strip().lower() not in ("false", "no", "0", "off")
         if not section_enabled:
             continue
         enabled = True
-        fallback = fallback or str(section.getAttribute("fallback") or "").strip()
+        fallback = fallback or str(cx.attr(section, "fallback") or "").strip()
         section_rules: list[Any] = []
-        source = str(section.getAttribute("source") or "").strip()
+        source = str(cx.attr(section, "source") or "").strip()
         if source:
             loaded, loaded_fallback = hud_situation.load_source(source)
             section_rules.extend(loaded)
             fallback = fallback or loaded_fallback
-        for node in section.getElementsByTagName("hud_panel_rule"):
-            values = {name: node.getAttribute(name) for name in node.attributes.keys()}
+        for node in cx.find_all(section, "hud_panel_rule"):
+            values = cx.attributes(node)
             section_rules.append(hud_situation.panel_rule_from_attributes(values, len(rules) + len(section_rules)))
-        scope = str(section.getAttribute("profile") or "").strip()
+        scope = str(cx.attr(section, "profile") or "").strip()
         if scope and scope.casefold() != "all":
             section_rules = hud_situation.scope_rules(section_rules, scope)
         rules.extend(section_rules)
@@ -615,44 +618,44 @@ class ConfigHudLayoutsMixin(ConfigSitesMixin):
 
     def getStatSetNode(self, statsetName):
         """Returns DOM game node for a given game."""
-        for statsetNode in self.doc.getElementsByTagName("ss"):
-            # print "getStatSetNode statsetNode:",statsetNode
-            if statsetNode.getAttribute("name") == statsetName:
-                return statsetNode
+        for statset_node in cx.find_all(self.doc, "ss"):
+            # print "getStatSetNode statset_node:",statset_node
+            if cx.attr(statset_node, "name") == statsetName:
+                return statset_node
         return None
 
     def get_aux_node(self, aux):
-        for aux_node in self.doc.getElementsByTagName("aw"):
-            if aux_node.getAttribute("name") == aux:
+        for aux_node in cx.find_all(self.doc, "aw"):
+            if cx.attr(aux_node, "name") == aux:
                 return aux_node
         return None
 
     def get_layout_set_node(self, ls):
-        for layout_set_node in self.doc.getElementsByTagName("ls"):
-            if layout_set_node.getAttribute("name") == ls:
+        for layout_set_node in cx.find_all(self.doc, "ls"):
+            if cx.attr(layout_set_node, "name") == ls:
                 return layout_set_node
         return None
 
     def get_layout_node(self, ls, max):
-        for layout_node in ls.getElementsByTagName("layout"):
-            if layout_node.getAttribute("max") == str(max):
+        for layout_node in cx.find_all(ls, "layout"):
+            if cx.attr(layout_node, "max") == str(max):
                 return layout_node
         return None
 
     def get_stat_set_node(self, ss):
-        for stat_set_node in self.doc.getElementsByTagName("ss"):
-            if stat_set_node.getAttribute("name") == ss:
+        for stat_set_node in cx.find_all(self.doc, "ss"):
+            if cx.attr(stat_set_node, "name") == ss:
                 return stat_set_node
         return None
 
     def get_location_node(self, layout_node, seat):
         if seat == "common":
-            for location_node in layout_node.getElementsByTagName("location"):
-                if location_node.hasAttribute("common"):
+            for location_node in cx.find_all(layout_node, "location"):
+                if cx.has_attr(location_node, "common"):
                     return location_node
             return None
-        for location_node in layout_node.getElementsByTagName("location"):
-            if int(location_node.getAttribute("seat")) == int(seat):
+        for location_node in cx.find_all(layout_node, "location"):
+            if int(cx.attr(location_node, "seat")) == int(seat):
                 return location_node
         return None
 
@@ -671,7 +674,7 @@ class ConfigHudLayoutsMixin(ConfigSitesMixin):
         seat10_dict,
     ) -> None:
         site_node = self.get_site_node(site_name)
-        site_node.setAttribute("enabled", enabled)
+        cx.set_attr(site_node, "enabled", enabled)
 
         values = {
             "2": seat2_dict,
@@ -684,7 +687,7 @@ class ConfigHudLayoutsMixin(ConfigSitesMixin):
             "9": seat9_dict,
             "10": seat10_dict,
         }
-        existing = {fav.getAttribute("max"): fav for fav in site_node.getElementsByTagName("fav")}
+        existing = {cx.attr(fav, "max"): fav for fav in cx.find_all(site_node, "fav")}
         for max_seats, value in values.items():
             fav_seat = existing.get(max_seats)
             if fav_seat is None:
@@ -692,10 +695,8 @@ class ConfigHudLayoutsMixin(ConfigSitesMixin):
                 # size (e.g. CoinPoker only had 2/6/9/10). Without this, editing a
                 # preferred seat for a missing size (a 5-max table) was silently
                 # dropped -- create the node so the choice is actually persisted.
-                fav_seat = self.doc.createElement("fav")
-                fav_seat.setAttribute("max", max_seats)
-                site_node.appendChild(fav_seat)
-            fav_seat.setAttribute("fav_seat", value)
+                fav_seat = cx.append(self.doc, site_node, cx.create_element(self.doc, "fav", {"max": max_seats}))
+            cx.set_attr(fav_seat, "fav_seat", value)
 
     # end def
 
@@ -733,21 +734,21 @@ class ConfigHudLayoutsMixin(ConfigSitesMixin):
         tip,
     ) -> None:
         """Replace given values onto self.doc (XML root node)."""
-        for statsetNode in self.doc.getElementsByTagName("ss"):
-            if statsetNode.getAttribute("name") == hud_name:
-                for fav_stat in statsetNode.getElementsByTagName("stat"):
-                    if fav_stat.getAttribute("_rowcol") == self.increment_position(position):
-                        fav_stat.setAttribute("_stat_name", stat_name)
-                        fav_stat.setAttribute("click", click)
-                        fav_stat.setAttribute("hudcolor", hudcolor)
-                        fav_stat.setAttribute("hudprefix", hudprefix)
-                        fav_stat.setAttribute("hudsuffix", hudsuffix)
-                        fav_stat.setAttribute("popup", popup)
-                        fav_stat.setAttribute("stat_hicolor", stat_hicolor)
-                        fav_stat.setAttribute("stat_hith", stat_hith)
-                        fav_stat.setAttribute("stat_locolor", stat_locolor)
-                        fav_stat.setAttribute("stat_loth", stat_loth)
-                        fav_stat.setAttribute("tip", tip)
+        for statset_node in cx.find_all(self.doc, "ss"):
+            if cx.attr(statset_node, "name") == hud_name:
+                for fav_stat in cx.find_all(statset_node, "stat"):
+                    if cx.attr(fav_stat, "_rowcol") == self.increment_position(position):
+                        cx.set_attr(fav_stat, "_stat_name", stat_name)
+                        cx.set_attr(fav_stat, "click", click)
+                        cx.set_attr(fav_stat, "hudcolor", hudcolor)
+                        cx.set_attr(fav_stat, "hudprefix", hudprefix)
+                        cx.set_attr(fav_stat, "hudsuffix", hudsuffix)
+                        cx.set_attr(fav_stat, "popup", popup)
+                        cx.set_attr(fav_stat, "stat_hicolor", stat_hicolor)
+                        cx.set_attr(fav_stat, "stat_hith", stat_hith)
+                        cx.set_attr(fav_stat, "stat_locolor", stat_locolor)
+                        cx.set_attr(fav_stat, "stat_loth", stat_loth)
+                        cx.set_attr(fav_stat, "tip", tip)
                         # fav_stat.setAttribute("stat_midcolor", stat_midcolor)  # not returned by UI
 
     # end def
@@ -773,51 +774,48 @@ class ConfigHudLayoutsMixin(ConfigSitesMixin):
 
     def editStats(self, statsetName, statArray) -> None:
         """Replaces stat selection for the given gameName with the given statArray."""
-        statsetNode = self.getStatSetNode(statsetName)
-        if statsetNode is None:
+        statset_node = self.getStatSetNode(statsetName)
+        if statset_node is None:
             # Saying so beats the AttributeError on None this used to raise:
             # replacing a whole grid must not look like a bug in the caller.
             msg = f"No stat set named {statsetName!r}"
             raise ValueError(msg)
-        statNodes = statsetNode.getElementsByTagName("stat")
+        stat_nodes = cx.find_all(statset_node, "stat")
 
         # Store existing stat attributes before removing
         existing_stats = {}
-        for node in statNodes:
-            rowcol = node.getAttribute("_rowcol")
+        for node in stat_nodes:
+            rowcol = cx.attr(node, "_rowcol")
             existing_stats[rowcol] = {
-                "click": node.getAttribute("click"),
-                "popup": node.getAttribute("popup"),
-                "tip": node.getAttribute("tip"),
-                "hudprefix": node.getAttribute("hudprefix"),
-                "hudsuffix": node.getAttribute("hudsuffix"),
-                "hudcolor": node.getAttribute("hudcolor"),
-                "stat_locolor": node.getAttribute("stat_locolor"),
-                "stat_loth": node.getAttribute("stat_loth"),
-                "stat_midcolor": node.getAttribute("stat_midcolor"),
-                "stat_hicolor": node.getAttribute("stat_hicolor"),
-                "stat_hith": node.getAttribute("stat_hith"),
+                "click": cx.attr(node, "click"),
+                "popup": cx.attr(node, "popup"),
+                "tip": cx.attr(node, "tip"),
+                "hudprefix": cx.attr(node, "hudprefix"),
+                "hudsuffix": cx.attr(node, "hudsuffix"),
+                "hudcolor": cx.attr(node, "hudcolor"),
+                "stat_locolor": cx.attr(node, "stat_locolor"),
+                "stat_loth": cx.attr(node, "stat_loth"),
+                "stat_midcolor": cx.attr(node, "stat_midcolor"),
+                "stat_hicolor": cx.attr(node, "stat_hicolor"),
+                "stat_hith": cx.attr(node, "stat_hith"),
             }
 
         # Remove all child nodes (stats and text nodes)
-        while statsetNode.firstChild:
-            statsetNode.removeChild(statsetNode.firstChild)
+        cx.clear(self.doc, statset_node)
 
-        statsetNode.setAttribute("rows", str(len(statArray)))
+        cx.set_attr(statset_node, "rows", str(len(statArray)))
         # A grid with no rows at all has no width either. Reading it off the
         # first row raised IndexError, even though the last step of this same
         # function guards for an empty grid -- so emptying a stat set worked
         # with [[]] and not with [].
-        statsetNode.setAttribute("cols", str(len(statArray[0]) if statArray else 0))
+        cx.set_attr(statset_node, "cols", str(len(statArray[0]) if statArray else 0))
 
         for _idx, (rowNumber, columnNumber) in enumerate(
             [(r, c) for r in range(len(statArray)) for c in range(len(statArray[r]))],
         ):
             # Add newline and indentation before each stat
-            indent = self.doc.createTextNode("\n            ")
-            statsetNode.appendChild(indent)
+            cx.append_text(self.doc, statset_node, "\n            ")
 
-            newStat = self.doc.createElement("stat")
             rowcol_str = f"({rowNumber + 1},{columnNumber + 1})"
 
             # Default attributes
@@ -843,17 +841,11 @@ class ConfigHudLayoutsMixin(ConfigSitesMixin):
                     if value:  # Only set non-empty values
                         attributes[attr] = value
 
-            for attr_name, attr_value in attributes.items():
-                newAttr = self.doc.createAttribute(attr_name)
-                newStat.setAttributeNode(newAttr)
-                newStat.setAttribute(attr_name, attr_value)
-
-            statsetNode.appendChild(newStat)
+            cx.append(self.doc, statset_node, cx.create_element(self.doc, "stat", attributes))
 
         # Add final newline and indentation
         if len(statArray) > 0:
-            final_indent = self.doc.createTextNode("\n        ")
-            statsetNode.appendChild(final_indent)
+            cx.append_text(self.doc, statset_node, "\n        ")
 
     def save_layout_set(self, ls, max, locations, width=None, height=None) -> None:
         # wid/height normally not specified when saving common from the mucked display
@@ -892,14 +884,14 @@ class ConfigHudLayoutsMixin(ConfigSitesMixin):
         ls_node = self.get_layout_set_node(ls.name)
         layout_node = self.get_layout_node(ls_node, max)
         if width:
-            layout_node.setAttribute("width", str(width))
+            cx.set_attr(layout_node, "width", str(width))
         if height:
-            layout_node.setAttribute("height", str(height))
+            cx.set_attr(layout_node, "height", str(height))
 
         for i, _pos in list(locations.items()):
             location_node = self.get_location_node(layout_node, i)
-            location_node.setAttribute("x", str(locations[i][0]))
-            location_node.setAttribute("y", str(locations[i][1]))
+            cx.set_attr(location_node, "x", str(locations[i][0]))
+            cx.set_attr(location_node, "y", str(locations[i][1]))
             # now refresh the live instance of the layout set with the new locations
             # this is needed because any future windows created after a save layout
             # MUST pickup the new layout
@@ -1098,34 +1090,31 @@ class ConfigHudLayoutsMixin(ConfigSitesMixin):
         if self.doc is None:
             return
 
-        sections = self.doc.getElementsByTagName("hud_panel_rules")
+        sections = cx.find_all(self.doc, "hud_panel_rules")
         if sections:
             section = sections[0]
-            section.setAttribute("enabled", "true" if enabled else "false")
-            section.setAttribute("fallback", self.hud_panel_fallback)
+            cx.set_attr(section, "enabled", "true" if enabled else "false")
+            cx.set_attr(section, "fallback", self.hud_panel_fallback)
             # These rules are already materialized; retaining the source would
             # make reload append the source rules again.
-            if section.hasAttribute("source"):
-                section.removeAttribute("source")
-            while section.firstChild:
-                section.removeChild(section.firstChild)
-            for duplicate in list(sections)[1:]:
-                duplicate.parentNode.removeChild(duplicate)
+            cx.del_attr(section, "source")
+            cx.clear(self.doc, section)
+            for duplicate in sections[1:]:
+                cx.remove(self.doc, duplicate)
         else:
-            section = self.doc.createElement("hud_panel_rules")
-            section.setAttribute("enabled", "true" if enabled else "false")
-            section.setAttribute("fallback", self.hud_panel_fallback)
-            self.doc.documentElement.appendChild(self.doc.createTextNode("\n    "))
-            self.doc.documentElement.appendChild(section)
+            section = cx.create_element(
+                self.doc,
+                "hud_panel_rules",
+                {"enabled": "true" if enabled else "false", "fallback": self.hud_panel_fallback},
+            )
+            cx.append_text(self.doc, self.doc, "\n    ")
+            cx.append(self.doc, self.doc, section)
 
         for rule in self.hud_panel_rules:
-            section.appendChild(self.doc.createTextNode("\n        "))
-            node = self.doc.createElement("hud_panel_rule")
-            for name, value in rule.as_xml_attributes().items():
-                node.setAttribute(name, value)
-            section.appendChild(node)
+            cx.append_text(self.doc, section, "\n        ")
+            cx.append(self.doc, section, cx.create_element(self.doc, "hud_panel_rule", rule.as_xml_attributes()))
         if self.hud_panel_rules:
-            section.appendChild(self.doc.createTextNode("\n    "))
+            cx.append_text(self.doc, section, "\n    ")
 
     def set_hud_profile_rules(self, rules: list[HudProfileRule]) -> None:
         """Replace profile rules in memory and in the configuration DOM."""
@@ -1137,22 +1126,18 @@ class ConfigHudLayoutsMixin(ConfigSitesMixin):
         if self.doc is None:
             return
 
-        sections = self.doc.getElementsByTagName("hud_profile_rules")
+        sections = cx.find_all(self.doc, "hud_profile_rules")
         if sections:
             section = sections[0]
-            while section.firstChild:
-                section.removeChild(section.firstChild)
+            cx.clear(self.doc, section)
         else:
-            section = self.doc.createElement("hud_profile_rules")
-            self.doc.documentElement.appendChild(self.doc.createTextNode("\n    "))
-            self.doc.documentElement.appendChild(section)
+            section = cx.create_element(self.doc, "hud_profile_rules")
+            cx.append_text(self.doc, self.doc, "\n    ")
+            cx.append(self.doc, self.doc, section)
 
         for rule in self.hud_profile_rules:
-            section.appendChild(self.doc.createTextNode("\n        "))
-            node = self.doc.createElement("hud_profile_rule")
-            for name, value in rule.as_xml_attributes().items():
-                if value or name != "id":
-                    node.setAttribute(name, value)
-            section.appendChild(node)
+            cx.append_text(self.doc, section, "\n        ")
+            attributes = {name: value for name, value in rule.as_xml_attributes().items() if value or name != "id"}
+            cx.append(self.doc, section, cx.create_element(self.doc, "hud_profile_rule", attributes))
         if self.hud_profile_rules:
-            section.appendChild(self.doc.createTextNode("\n    "))
+            cx.append_text(self.doc, section, "\n    ")
