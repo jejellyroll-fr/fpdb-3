@@ -19,6 +19,7 @@
 ########################################################################
 from __future__ import annotations
 
+from fpdb_3_legacy import config_xml as cx
 from fpdb_3_legacy.config_common import (
     ConfigBase,
     string_to_bool,
@@ -30,9 +31,9 @@ log = get_logger("configuration")
 
 class HHC:
     def __init__(self, node) -> None:
-        self.site = node.getAttribute("site")
-        self.converter = node.getAttribute("converter")
-        self.summaryImporter = node.getAttribute("summaryImporter")
+        self.site = cx.attr(node, "site")
+        self.converter = cx.attr(node, "converter")
+        self.summaryImporter = cx.attr(node, "summaryImporter")
 
     def __str__(self) -> str:
         return f"{self.site}:\tconverter: '{self.converter}' summaryImporter: '{self.summaryImporter}'"
@@ -41,22 +42,22 @@ class HHC:
 class Import:
     def __init__(self, node) -> None:
         self.node = node
-        self.interval = node.getAttribute("interval")
-        self.sessionTimeout = string_to_bool(node.getAttribute("sessionTimeout"), default=30)
-        self.ResultsDirectory = node.getAttribute("ResultsDirectory")
-        self.hhBulkPath = node.getAttribute("hhBulkPath")
-        self.saveActions = string_to_bool(node.getAttribute("saveActions"), default=False)
-        self.cacheSessions = string_to_bool(node.getAttribute("cacheSessions"), default=False)
-        self.publicDB = string_to_bool(node.getAttribute("publicDB"), default=False)
-        self.callFpdbHud = string_to_bool(node.getAttribute("callFpdbHud"), default=False)
-        self.fastStoreHudCache = string_to_bool(node.getAttribute("fastStoreHudCache"), default=False)
-        self.saveStarsHH = string_to_bool(node.getAttribute("saveStarsHH"), default=False)
-        if node.getAttribute("importFilters"):
-            self.importFilters = node.getAttribute("importFilters").split(",")
+        self.interval = cx.attr(node, "interval")
+        self.sessionTimeout = string_to_bool(cx.attr(node, "sessionTimeout"), default=30)
+        self.ResultsDirectory = cx.attr(node, "ResultsDirectory")
+        self.hhBulkPath = cx.attr(node, "hhBulkPath")
+        self.saveActions = string_to_bool(cx.attr(node, "saveActions"), default=False)
+        self.cacheSessions = string_to_bool(cx.attr(node, "cacheSessions"), default=False)
+        self.publicDB = string_to_bool(cx.attr(node, "publicDB"), default=False)
+        self.callFpdbHud = string_to_bool(cx.attr(node, "callFpdbHud"), default=False)
+        self.fastStoreHudCache = string_to_bool(cx.attr(node, "fastStoreHudCache"), default=False)
+        self.saveStarsHH = string_to_bool(cx.attr(node, "saveStarsHH"), default=False)
+        if cx.attr(node, "importFilters"):
+            self.importFilters = cx.attr(node, "importFilters").split(",")
         else:
             self.importFilters = []
-        if node.getAttribute("timezone"):
-            self.timezone = node.getAttribute("timezone")
+        if cx.attr(node, "timezone"):
+            self.timezone = cx.attr(node, "timezone")
         else:
             self.timezone = "America/New_York"
 
@@ -71,14 +72,14 @@ class RawHands:
             self.compression = "none"
             # print ("missing config section raw_hands")
         else:
-            save = node.getAttribute("save")
+            save = cx.attr(node, "save")
             if save in ("none", "error", "all"):
                 self.save = save
             else:
                 log.warning(f"Invalid raw_hands save value {save!r}, defaulting to error")
                 self.save = "error"
 
-            compression = node.getAttribute("compression")
+            compression = cx.attr(node, "compression")
             if compression in ("none", "gzip", "bzip2"):
                 self.compression = compression
             else:
@@ -101,14 +102,14 @@ class RawTourneys:
             self.compression = "none"
             # print ("missing config section raw_tourneys")
         else:
-            save = node.getAttribute("save")
+            save = cx.attr(node, "save")
             if save in ("none", "error", "all"):
                 self.save = save
             else:
                 log.warning(f"Invalid raw_tourneys save value {save!r}, defaulting to error")
                 self.save = "error"
 
-            compression = node.getAttribute("compression")
+            compression = cx.attr(node, "compression")
             if compression in ("none", "gzip", "bzip2"):
                 self.compression = compression
             else:
@@ -130,8 +131,8 @@ class ConfigImportMixin(ConfigBase):
     # end def editStats
     def editImportFilters(self, games) -> None:
         self.imp.importFilters = games
-        imp_node = self.doc.getElementsByTagName("import")[-1]
-        imp_node.setAttribute("importFilters", games)
+        imp_node = cx.find_all(self.doc, "import")[-1]
+        cx.set_attr(imp_node, "importFilters", games)
 
     def get_import_parameters(self):
         imp = {}
