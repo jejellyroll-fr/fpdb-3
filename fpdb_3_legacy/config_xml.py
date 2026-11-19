@@ -434,6 +434,13 @@ def clear(doc: Node, node: Node) -> None:
     node.text = None
 
 
+def clone_document(doc: Node) -> Node:
+    """A deep copy of a whole document, the comments around its root included."""
+    if _is_dom(doc):
+        return doc.cloneNode(True)
+    return copy.deepcopy(doc)
+
+
 def import_node(doc: Node, node: Node) -> Node:
     """A deep copy of ``node`` (from any document of the same backend) that ``doc`` can hold."""
     if _is_dom(doc):

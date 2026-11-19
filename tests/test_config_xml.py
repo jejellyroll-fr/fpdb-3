@@ -392,6 +392,17 @@ def test_parent_of(doc) -> None:
     assert cx.parent_of(doc, cx.root(doc)) is None
 
 
+def test_a_cloned_document_is_written_the_same_and_edited_apart(doc, backend) -> None:
+    clone = cx.clone_document(doc)
+
+    assert cx.backend_of(clone) == backend
+    assert cx.to_xml(clone) == cx.to_xml(doc)
+    cx.set_attr(_site(clone, "PokerStars"), "name", "Changed")
+    cx.remove(clone, _site(clone, "Winamax"))
+    assert [cx.attr(site, "name") for site in cx.find_all(doc, "site")] == ["PokerStars", "Winamax"]
+    assert COMMENT.findall(cx.to_xml(clone)) == COMMENT.findall(SAMPLE)
+
+
 def test_an_imported_node_is_a_copy(backend) -> None:
     source = cx.parse_string(SAMPLE, backend=backend)
     target = cx.new_document("package", backend=backend)
