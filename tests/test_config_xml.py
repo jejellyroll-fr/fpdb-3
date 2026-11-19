@@ -180,6 +180,15 @@ def test_find_all_from_an_element_leaves_the_element_out(doc) -> None:
     assert len(cx.find_all(sites, "alias")) == 1
 
 
+def test_the_wildcard_finds_elements_and_never_comments(doc) -> None:
+    # On ElementTree, iter("*") also yields the comments a ConfigDocument keeps.
+    expected = ["config", "general", "sites", "site", "alias", "site", "stats", "ss", "stat", "stat"]
+
+    assert [cx.tag_of(node) for node in cx.find_all(doc, "*")] == expected
+    assert [cx.tag_of(node) for node in cx.find_all(cx.find_first(doc, "sites"), "*")] == ["site", "alias", "site"]
+    assert cx.tag_of(cx.find_first(cx.root(doc), "*")) == "general"
+
+
 def test_find_first_gives_none_when_there_is_none(doc) -> None:
     assert cx.find_first(doc, "missing") is None
 

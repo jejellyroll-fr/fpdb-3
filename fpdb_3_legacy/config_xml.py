@@ -20,8 +20,10 @@ retrieval, no external resources.
 from __future__ import annotations
 
 import copy
-import xml.dom
-import xml.etree.ElementTree as ET  # noqa: S405  # nosec B405 - builds and writes trees; parsing goes through defusedxml
+
+# ElementTree builds and writes the trees; nothing here parses with it. Every
+# parse goes through defusedxml (parse_string, parse_file).
+import xml.etree.ElementTree as ET  # noqa: S405  # nosec B405  # nosemgrep
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -147,7 +149,8 @@ def backend_of(node: Node) -> str:
 
 
 def _is_dom(node: Node) -> bool:
-    return isinstance(node, xml.dom.Node)
+    # Every DOM node has a nodeType; ElementTree elements and ConfigDocument do not.
+    return hasattr(node, "nodeType")
 
 
 def _element_xml(element: ET.Element) -> str:
@@ -205,12 +208,13 @@ def find_all(node: Node, tag: str) -> list[Node]:
     """Every element named ``tag`` below ``node``, in document order (``getElementsByTagName``).
 
     For a document, the root element counts; for an element, the element itself does not.
+    ``"*"`` matches every element, and never a comment or a processing instruction.
     """
     if _is_dom(node):
         return list(node.getElementsByTagName(tag))
     if isinstance(node, ConfigDocument):
-        return list(node.root.iter(tag))
-    return [found for found in node.iter(tag) if found is not node]
+        return [found for found in node.root.iter(tag) if _is_element(found)]
+    return [found for found in node.iter(tag) if found is not node and _is_element(found)]
 
 
 def find_first(node: Node, tag: str) -> Node | None:
