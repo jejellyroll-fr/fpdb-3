@@ -42,6 +42,10 @@ DEFAULT_BACKEND = MINIDOM
 
 XML_DECLARATION = '<?xml version="1.0" ?>'
 
+# What parsing a malformed file raises on ElementTree (minidom raises
+# xml.parsers.expat.ExpatError); defusedxml's refusals are DefusedXmlException.
+ParseError = ET.ParseError
+
 # Prefixes ElementTree has replaced by "{uri}" in the attribute names it read, so
 # that callers can keep writing "xsi:noNamespaceSchemaLocation" on either backend.
 # Process-wide, like ElementTree's own register_namespace: a prefix the files
